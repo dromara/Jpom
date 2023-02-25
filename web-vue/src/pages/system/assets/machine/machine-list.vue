@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="full-content">
     <a-card :bodyStyle="{ padding: '10px' }">
       <template slot="title">
         <a-space>

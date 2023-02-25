@@ -1,27 +1,18 @@
 <template>
   <div class="full-content">
-    <!-- <div ref="filter" class="filter">
-
-    </div> -->
     <!-- 数据表格 -->
     <a-table :data-source="list" :columns="columns" size="middle" :pagination="pagination" @change="changePage" bordered rowKey="id" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
-          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="节点名称" />
-          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%host%']" placeholder="节点地址" />
-          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%user%']" placeholder="用户名" />
+          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="ssh名称" />
+          <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+            <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+          </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">新增</a-button>
-          <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
-            <a-menu slot="overlay">
-              <a-menu-item>
-                <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown>
+
+          <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
           <a-tooltip>
             <template slot="title">
               <div>
@@ -38,33 +29,14 @@
       </template>
       <a-tooltip slot="tooltip" slot-scope="text" :title="text"> {{ text }}</a-tooltip>
       <template slot="nodeId" slot-scope="text, record">
-        <!-- <a-button v-if="!record.nodeModel" type="primary" @click="install(record)" :disabled="record.installed">安装节点</a-button> -->
-        <div v-if="sshAgentInfo[record.id]">
-          <div v-if="sshAgentInfo[record.id].javaVersion">
-            <a-tooltip v-if="sshAgentInfo[record.id].nodeId" placement="topLeft" :title="`节点名称：${sshAgentInfo[record.id].nodeName}`">
-              <a-button size="small" style="width: 90px; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis" type="" @click="toNode(sshAgentInfo[record.id].nodeId)">
-                {{ sshAgentInfo[record.id].nodeName }}
-              </a-button>
-            </a-tooltip>
-            <a-tooltip v-if="sshAgentInfo[record.id].error" placement="topLeft" :title="`${sshAgentInfo[record.id].error}`">
-              {{ sshAgentInfo[record.id].error }}
-            </a-tooltip>
-            <a-tooltip
-              v-if="sshAgentInfo[record.id].ok"
-              placement="topLeft"
-              :title="`${sshAgentInfo[record.id].pid > 0 ? 'ssh 中已经运行了插件端进程ID：' + sshAgentInfo[record.id].pid : '点击快速安装插件端,java :' + sshAgentInfo[record.id].javaVersion}`"
-            >
-              <a-button size="small" type="primary" @click="install(record)" :disabled="sshAgentInfo[record.id].pid > 0">{{ sshAgentInfo[record.id].pid > 0 ? "运行中" : "安装节点" }}</a-button>
-            </a-tooltip>
-          </div>
-          <div v-else>
-            <a-tooltip v-if="sshAgentInfo[record.id].error" :title="sshAgentInfo[record.id].error">
-              <a-tag>连接异常</a-tag>
-            </a-tooltip>
-            <a-tag v-else>没有Java环境</a-tag>
-          </div>
-        </div>
-        <div v-else>-</div>
+        <template v-if="record.linkNode">
+          <a-tooltip placement="topLeft" :title="`节点名称：${record.linkNode.name}`">
+            <a-button size="small" style="width: 90px; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis" type="" @click="toNode(record.linkNode.id)">
+              {{ record.linkNode.name }}
+            </a-button>
+          </a-tooltip>
+        </template>
+        <template v-else>-</template>
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
@@ -111,119 +83,25 @@
         <a-form-model-item label="SSH 名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="SSH 名称" />
         </a-form-model-item>
-        <a-form-model-item label="Host" prop="host">
-          <a-input-group compact prop="host">
-            <a-input style="width: 70%" v-model="temp.host" placeholder="主机 Host" />
-            <a-input-number style="width: 30%" v-model="temp.port" :min="1" placeholder="端口号" />
-          </a-input-group>
+        <a-form-model-item label="分组名称" prop="group">
+          <custom-select v-model="temp.group" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder="选择分组名"> </custom-select>
         </a-form-model-item>
-        <a-form-model-item label="认证方式" prop="connectType">
-          <a-radio-group v-model="temp.connectType" :options="options" />
-        </a-form-model-item>
-        <a-form-model-item prop="user">
-          <template #label>
-            用户名
-            <a-tooltip v-if="!temp.id">
-              <template slot="title"> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-input v-model="temp.user" placeholder="用户" />
-        </a-form-model-item>
-        <!-- 新增时需要填写 -->
-        <!--				<a-form-model-item v-if="temp.type === 'add'" label="Password" prop="password">-->
-        <!--					<a-input-password v-model="temp.password" placeholder="密码"/>-->
-        <!--				</a-form-model-item>-->
-        <!-- 修改时可以不填写 -->
-        <a-form-model-item :prop="`${temp.type === 'add' && temp.connectType === 'PASS' ? 'password' : 'password-update'}`">
-          <template #label>
-            密码
-            <a-tooltip v-if="!temp.id">
-              <template slot="title"> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" />
-        </a-form-model-item>
-        <a-form-model-item v-if="temp.connectType === 'PUBKEY'" prop="privateKey">
-          <template slot="label">
-            私钥内容
-            <a-tooltip v-if="temp.type !== 'edit'" placement="topLeft">
-              <template slot="title">不填将使用默认的 $HOME/.ssh 目录中的配置,使用优先级是：id_dsa>id_rsa>identity </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-
-          <a-textarea v-model="temp.privateKey" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="私钥内容,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:/xxxx/xx" />
-        </a-form-model-item>
-
-        <a-form-model-item prop="fileDirs">
-          <template slot="label">
-            文件目录
-            <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title"> 绑定指定目录可以在线管理，同时构建 ssh 发布目录也需要在此配置 </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-textarea v-model="temp.fileDirs" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="授权可以直接访问的目录，多个回车换行即可" />
-        </a-form-model-item>
-
-        <a-form-model-item label="文件后缀" prop="suffix">
-          <a-input
-            v-model="temp.allowEditSuffix"
-            type="textarea"
-            :rows="5"
-            style="resize: none"
-            placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，多个使用换行。示例：设置编码：txt@utf-8， 不设置编码：txt"
-          />
-        </a-form-model-item>
-        <a-collapse>
-          <a-collapse-panel key="1" header="其他配置">
-            <a-form-model-item label="编码格式" prop="charset">
-              <a-input v-model="temp.charset" placeholder="编码格式" />
-            </a-form-model-item>
-            <a-form-model-item label="超时时间(s)" prop="timeout">
-              <a-input-number v-model="temp.timeout" :min="1" placeholder="单位秒,最小值 1 秒" style="width: 100%" />
-            </a-form-model-item>
-            <a-form-model-item prop="notAllowedCommand">
-              <template slot="label">
-                禁止命令
-                <a-tooltip v-show="temp.type !== 'edit'">
-                  <template slot="title">
-                    限制禁止在在线终端执行的命令
-                    <ul>
-                      <li>超级管理员没有任何限制</li>
-                      <li>其他用户可以配置权限解除限制</li>
-                    </ul>
-                  </template>
-                  <a-icon type="question-circle" theme="filled" />
-                </a-tooltip>
-              </template>
-              <a-textarea v-model="temp.notAllowedCommand" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="禁止命令是不允许在终端执行的名，多个逗号隔开。(超级管理员没有任何限制)" />
-            </a-form-model-item>
-          </a-collapse-panel>
-        </a-collapse>
       </a-form-model>
     </a-modal>
-    <!-- 安装节点 -->
-    <a-modal
+
+    <!-- 文件管理 -->
+    <a-drawer
       destroyOnClose
-      v-model="nodeVisible"
-      width="80%"
-      title="安装插件端"
-      :footer="null"
-      @cancel="
+      :title="`${this.temp.name} 文件管理`"
+      placement="right"
+      width="90vw"
+      :visible="drawerVisible"
+      @close="
         () => {
-          this.nodeVisible = false;
-          this.loadData();
+          this.drawerVisible = false;
         }
       "
-      :maskClosable="false"
     >
-      <fastInstall v-if="nodeVisible"></fastInstall>
-    </a-modal>
-    <!-- 文件管理 -->
-    <a-drawer destroyOnClose :title="drawerTitle" placement="right" width="90vw" :visible="drawerVisible" @close="onClose">
       <ssh-file v-if="drawerVisible" :ssh="temp" />
     </a-drawer>
     <!-- Terminal -->
@@ -250,58 +128,7 @@
     </a-modal>
     <!-- 操作日志 -->
     <a-modal destroyOnClose v-model="viewOperationLog" title="操作日志" width="80vw" :footer="null" :maskClosable="false">
-      <!-- <div ref="filter" class="filter"></div> -->
-      <!-- 数据表格 -->
-      <a-table
-        :data-source="viewOperationLogList"
-        :loading="viewOperationLoading"
-        :columns="viewOperationLogColumns"
-        :pagination="viewOperationLogPagination"
-        @change="changeListLog"
-        bordered
-        size="middle"
-        :rowKey="(record, index) => index"
-      >
-        <template slot="title">
-          <a-space>
-            <a-input class="search-input-item" @pressEnter="handleListLog" v-model="viewOperationLogListQuery['modifyUser']" placeholder="操作人" />
-            <a-input class="search-input-item" @pressEnter="handleListLog" v-model="viewOperationLogListQuery['name']" placeholder="ssh name" />
-            <a-input class="search-input-item" @pressEnter="handleListLog" v-model="viewOperationLogListQuery['ip']" placeholder="ip" />
-            <a-input class="search-input-item" @pressEnter="handleListLog" v-model="viewOperationLogListQuery['%commands%']" placeholder="执行命令" />
-            <a-range-picker class="filter-item search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeListLogTime" />
-            <a-button type="primary" @click="handleListLog">搜索</a-button>
-          </a-space>
-        </template>
-        <a-tooltip
-          slot="commands"
-          slot-scope="text"
-          placement="topLeft"
-          :title="text"
-          v-clipboard:copy="text"
-          v-clipboard:success="
-            () => {
-              tempVue.prototype.$notification.success({ message: '复制成功' });
-            }
-          "
-          v-clipboard:error="
-            () => {
-              tempVue.prototype.$notification.error({ message: '复制失败' });
-            }
-          "
-        >
-          <a-input disabled :value="text"><a-icon slot="suffix" type="copy" /></a-input>
-        </a-tooltip>
-        <a-tooltip slot="modifyUser" slot-scope="text, item" placement="topLeft" :title="item.modifyUser || item.userId">
-          <span>{{ item.modifyUser || item.userId }}</span>
-        </a-tooltip>
-
-        <a-tooltip slot="userAgent" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip>
-        <template slot="refuse" slot-scope="text">
-          <span>{{ text ? "成功" : "拒绝" }}</span>
-        </template>
-      </a-table>
+      <OperationLog v-if="viewOperationLog" :sshId="temp.id"></OperationLog>
     </a-modal>
     <!-- 同步到其他工作空间 -->
     <a-modal destroyOnClose v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
@@ -326,20 +153,22 @@
   </div>
 </template>
 <script>
-import { deleteSsh, editSsh, getSshCheckAgent, getSshList, getSshOperationLogList, syncToWorkspace } from "@/api/ssh";
+import { deleteSsh, editSsh, getSshList, syncToWorkspace, getSshGroupAll } from "@/api/ssh";
 import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";
-import Vue from "vue";
+
 import { mapGetters } from "vuex";
-import fastInstall from "@/pages/node/fast-install.vue";
+import OperationLog from "@/pages/system/assets/ssh/operation-log";
+import CustomSelect from "@/components/customSelect";
 
 export default {
   components: {
     SshFile,
     Terminal,
-    fastInstall,
+    OperationLog,
+    CustomSelect,
   },
   data() {
     return {
@@ -348,71 +177,28 @@ export default {
       temp: {},
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       editSshVisible: false,
-      nodeVisible: false,
+
       syncToWorkspaceVisible: false,
       tableSelections: [],
       workspaceList: [],
       tempNode: {},
-      fileList: [],
+      // fileList: [],
       sshAgentInfo: {},
       agentData: {},
       formLoading: false,
-      drawerTitle: "",
+
       drawerVisible: false,
       terminalVisible: false,
       terminalFullscreen: false,
       viewOperationLog: false,
-      viewOperationLoading: false,
-      viewOperationLogList: [],
-      viewOperationLogColumns: [
-        { title: "操作者", dataIndex: "modifyUser", width: 100, scopedSlots: { customRender: "modifyUser" } },
-        { title: "IP", dataIndex: "ip" /*width: 130*/ },
-        {
-          title: "sshName",
-          dataIndex: "sshName",
-          width: 200,
-          ellipsis: true,
-          scopedSlots: { customRender: "sshName" },
-        },
-        {
-          title: "执行命令",
-          dataIndex: "commands",
-          width: 200,
-          ellipsis: true,
-          scopedSlots: { customRender: "commands" },
-        },
-        {
-          title: "userAgent",
-          dataIndex: "userAgent",
-          /*width: 240,*/ ellipsis: true,
-          scopedSlots: { customRender: "userAgent" },
-        },
-        {
-          title: "是否成功",
-          dataIndex: "refuse",
-          width: 100,
-          ellipsis: true,
-          scopedSlots: { customRender: "refuse" },
-        },
 
-        {
-          title: "操作时间",
-          dataIndex: "createTimeMillis",
-          sorter: true,
-          customRender: (text) => {
-            return parseTime(text);
-          } /*width: 180*/,
-        },
-      ],
-
-      viewOperationLogListQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       columns: [
         { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
-        { title: "Host", dataIndex: "host", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "Port", dataIndex: "port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "用户名", dataIndex: "user", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "Host", dataIndex: "machineSsh.host", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "Port", dataIndex: "machineSsh.port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "用户名", dataIndex: "machineSsh.user", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "编码格式", dataIndex: "machineSsh.charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         {
           title: "关联节点",
           dataIndex: "nodeId",
@@ -428,49 +214,29 @@ export default {
           customRender: (text) => {
             return parseTime(text);
           },
-          width: 170,
+          width: "170px",
         },
         {
           title: "操作",
           dataIndex: "operation",
           scopedSlots: { customRender: "operation" },
-          width: 200,
+          width: "200px",
           align: "center",
           // ellipsis: true,
         },
       ],
-      options: [
-        { label: "密码", value: "PASS" },
-        { label: "证书", value: "PUBKEY" },
-      ],
+
       // 表单校验规则
       rules: {
-        id: [{ required: true, message: "Please input id", trigger: "blur" }],
-        name: [{ required: true, message: "Please input name", trigger: "blur" }],
-        host: [{ required: true, message: "Please input host", trigger: "blur" }],
-        port: [{ required: true, message: "Please input port", trigger: "blur" }],
-        protocol: [{ required: true, message: "Please input protocol", trigger: "blur" }],
-        connectType: [
-          {
-            required: true,
-            message: "Please select connet type",
-            trigger: "blur",
-          },
-        ],
-        user: [{ required: true, message: "Please input user", trigger: "blur" }],
-        password: [{ required: true, message: "Please input password", trigger: "blur" }],
-        // privateKey: [{ required: true, message: "Please input key", trigger: "blur" }],
-        url: [{ required: true, message: "Please input url", trigger: "blur" }],
-        path: [{ required: true, message: "Please input path", trigger: "blur" }],
+        name: [{ required: true, message: "请输入 SSH 名称", trigger: "blur" }],
       },
-      tempVue: null,
+
+      groupList: [],
     };
   },
   computed: {
     ...mapGetters(["getWorkspaceId"]),
-    viewOperationLogPagination() {
-      return COMPUTED_PAGINATION(this.viewOperationLogListQuery);
-    },
+
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
     },
@@ -485,6 +251,7 @@ export default {
   },
   created() {
     this.loadData();
+    this.loadGroupList();
   },
   methods: {
     // 加载数据
@@ -496,49 +263,22 @@ export default {
           this.list = res.data.result;
           this.listQuery.total = res.data.total;
           //
-          this.sshAgentInfo = {};
-          let ids = this.list
-            .map((item) => {
-              return item.id;
-            })
-            .join(",");
-          if (ids.length > 0) {
-            getSshCheckAgent({
-              ids: ids,
-            }).then((res) => {
-              this.sshAgentInfo = res.data;
-            });
-          }
         }
         this.loading = false;
       });
     },
-    // 新增 SSH
-    handleAdd() {
-      this.temp = {
-        type: "add",
-        charset: "UTF-8",
-        port: 22,
-        timeout: 5,
-        connectType: "PASS",
-      };
-      this.editSshVisible = true;
-      // @author jzy 08-04
-      this.$refs["editSshForm"] && this.$refs["editSshForm"].resetFields();
+    // 获取所有的分组
+    loadGroupList() {
+      getSshGroupAll().then((res) => {
+        if (res.data) {
+          this.groupList = res.data;
+        }
+      });
     },
     // 修改
     handleEdit(record) {
       this.temp = Object.assign({}, record);
-      // this.temp.;
-      this.temp.allowEditSuffix = record.allowEditSuffix ? JSON.parse(record.allowEditSuffix).join("\r\n") : "";
-      // this.temp.type = "edit";
-      this.temp = {
-        ...this.temp,
-        fileDirs: record.fileDirs ? JSON.parse(record.fileDirs).join("\r\n") : "",
-        type: "edit",
-        allowEditSuffix: record.allowEditSuffix ? JSON.parse(record.allowEditSuffix).join("\r\n") : "",
-        timeout: record.timeout || 5,
-      };
+
       this.editSshVisible = true;
       // @author jzy 08-04
       this.$refs["editSshForm"] && this.$refs["editSshForm"].resetFields();
@@ -557,9 +297,10 @@ export default {
               message: res.msg,
             });
             //this.$refs['editSshForm'].resetFields();
-            this.fileList = [];
+            // this.fileList = [];
             this.editSshVisible = false;
             this.loadData();
+            this.loadGroupList();
           }
         });
       });
@@ -574,45 +315,12 @@ export default {
     handleViewLog(record) {
       this.temp = Object.assign({}, record);
       this.viewOperationLog = true;
-      this.viewOperationLogList = [];
+    },
 
-      this.viewOperationLogListQuery = {
-        sshId: this.temp.id,
-        total: 0,
-        page: 1,
-      };
-      // this.viewOperationLogListQuery.total = 0;
-      //this.viewOperationLogListQuery.page = 1;
-      this.tempVue = Vue;
-      this.handleListLog();
-    },
-    handleListLog() {
-      this.viewOperationLoading = true;
-      getSshOperationLogList(this.viewOperationLogListQuery).then((res) => {
-        if (res.code === 200) {
-          this.viewOperationLogList = res.data.result;
-          this.viewOperationLogListQuery.total = res.data.total;
-        }
-        this.viewOperationLoading = false;
-      });
-    },
-    changeListLog(pagination, filters, sorter) {
-      this.viewOperationLogListQuery = CHANGE_PAGE(this.viewOperationLogListQuery, { pagination, sorter });
-
-      this.handleListLog();
-    },
-    // 选择时间
-    onchangeListLogTime(value, dateString) {
-      if (dateString[0]) {
-        this.viewOperationLogListQuery.createTimeMillis = `${dateString[0]} ~ ${dateString[1]}`;
-      } else {
-        this.viewOperationLogListQuery.createTimeMillis = "";
-      }
-    },
     // 文件管理
     handleFile(record) {
       this.temp = Object.assign({}, record);
-      this.drawerTitle = `${this.temp.name} (${this.temp.host}) 文件管理`;
+
       this.drawerVisible = true;
     },
     // 删除
@@ -645,20 +353,13 @@ export default {
         },
       });
     },
-    // 安装节点
-    install() {
-      this.nodeVisible = true;
-    },
 
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
     },
-    // 关闭抽屉层
-    onClose() {
-      this.drawerVisible = false;
-    },
+
     // 加载工作空间数据
     loadWorkSpaceListAll() {
       getWorkSpaceListAll().then((res) => {

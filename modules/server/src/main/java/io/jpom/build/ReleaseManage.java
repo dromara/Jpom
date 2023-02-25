@@ -45,6 +45,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.func.assets.model.MachineSshModel;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.EnvironmentMapBuilder;
@@ -401,14 +402,15 @@ public class ReleaseManage {
     }
 
     private void doSsh(SshModel item, SshService sshService) throws IOException {
-        Session session = SshService.getSessionByModel(item);
+        MachineSshModel machineSshModel = sshService.getMachineSshModel(item);
+        Session session = sshService.getSessionByModel(machineSshModel);
         try {
             String releasePath = this.buildExtraModule.getReleasePath();
             if (StrUtil.isEmpty(releasePath)) {
                 logRecorder.systemWarning("发布目录为空");
             } else {
                 logRecorder.system("{} {} start ftp upload", DateUtil.now(), item.getName());
-                try (Sftp sftp = new Sftp(session, item.charset(), item.timeout())) {
+                try (Sftp sftp = new Sftp(session, machineSshModel.charset(), machineSshModel.timeout())) {
                     String prefix = "";
                     if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
                         prefix = sftp.pwd();

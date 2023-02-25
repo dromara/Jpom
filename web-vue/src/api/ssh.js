@@ -10,25 +10,20 @@ export function getSshList(params) {
   });
 }
 
+// ssh group all
+export function getSshGroupAll() {
+  return axios({
+    url: "/node/ssh/list-group-all",
+    method: "get",
+  });
+}
+
 // 查询单个 ssh
 export function getItem(params) {
   return axios({
     url: "/node/ssh/get-item.json",
     method: "get",
     params: params,
-  });
-}
-
-// 检查 ssh 是否安装 插件端
-export function getSshCheckAgent(params) {
-  return axios({
-    url: "/node/ssh/check_agent.json",
-    method: "get",
-    params: params,
-    timeout: 0,
-    headers: {
-      loading: "no",
-    },
   });
 }
 
@@ -55,28 +50,11 @@ export function getSshOperationLogList(params) {
  * params.type = {'add': 表示新增, 'edit': 表示修改}
  */
 export function editSsh(params) {
-  const data = {
-    type: params.type,
-    id: params.id,
-    name: params.name,
-    host: params.host,
-    port: params.port,
-    user: params.user,
-    password: params.password,
-    connectType: params.connectType,
-    privateKey: params.privateKey,
-    charset: params.charset,
-    fileDirs: params.fileDirs,
-    notAllowedCommand: params.notAllowedCommand,
-    allowEditSuffix: params.allowEditSuffix,
-    timeout: params.timeout,
-  };
   return axios({
     url: "/node/ssh/save.json",
     method: "post",
-    // 0 表示无超时时间
-    timeout: 0,
-    data,
+
+    params,
   });
 }
 

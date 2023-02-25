@@ -43,6 +43,7 @@ const routeMenuMap = {
   workspace: "/system/workspace",
   globalEnv: "/system/global-env",
   machine_node_info: "/system/assets/machine-list",
+  machine_ssh_info: "/system/assets/ssh-list",
 };
 
 export default routeMenuMap;

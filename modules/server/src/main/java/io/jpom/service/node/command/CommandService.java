@@ -40,6 +40,7 @@ import com.jcraft.jsch.ChannelExec;
 import io.jpom.common.BaseServerController;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.ICron;
+import io.jpom.func.assets.model.MachineSshModel;
 import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.data.CommandExecLogModel;
 import io.jpom.model.data.CommandModel;
@@ -272,10 +273,11 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
             //
             EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.formatCommand(commandModel.getWorkspaceId(), commands);
             environmentMapBuilder.eachStr(s -> appendLine(outputStream, s));
+            MachineSshModel machineSshModel = sshService.getMachineSshModel(sshModel);
             //
-            Charset charset = sshModel.charset();
+            Charset charset = machineSshModel.charset();
 
-            sshService.exec(sshModel, (s, session) -> {
+            sshService.exec(machineSshModel, (s, session) -> {
                 final ChannelExec channel = (ChannelExec) JschUtil.createChannel(session, ChannelType.EXEC);
                 channel.setCommand(StrUtil.bytes(s + StrUtil.SPACE + commandParamsLine, charset));
                 channel.setInputStream(null);
@@ -284,7 +286,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
                 InputStream in = null;
 
                 try {
-                    channel.connect(sshModel.timeout());
+                    channel.connect(machineSshModel.timeout());
                     in = channel.getInputStream();
                     IoUtil.readLines(in, charset, (LineHandler) line -> this.appendLine(outputStream, line));
                     // 更新状态

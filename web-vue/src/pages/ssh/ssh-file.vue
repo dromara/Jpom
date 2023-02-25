@@ -91,21 +91,21 @@
         <a-button type="primary" :disabled="uploadFileList.length === 0" @click="startUpload">开始上传</a-button>
       </a-modal>
       <!--  新增文件 目录    -->
-      <a-modal v-model="addFileFolderVisible" width="300px" :title="addFileOrFolderType === 1 ? '新增目录' : '新建文件'" :footer="null" :maskClosable="true">
+      <a-modal v-model="addFileFolderVisible" width="300px" :title="temp.addFileOrFolderType === 1 ? '新增目录' : '新建文件'" :footer="null" :maskClosable="true">
         <a-space direction="vertical" style="width: 100%">
           <span v-if="this.nowPath">当前目录:{{ this.nowPath }}</span>
           <!-- <a-tag v-if="">目录创建成功后需要手动刷新右边树才能显示出来哟</a-tag> -->
-          <a-tooltip :title="this.addFileOrFolderType === 1 ? '目录创建成功后需要手动刷新右边树才能显示出来哟' : ''">
-            <a-input v-model="fileFolderName" placeholder="输入文件或者文件夹名" />
+          <a-tooltip :title="this.temp.addFileOrFolderType === 1 ? '目录创建成功后需要手动刷新右边树才能显示出来哟' : ''">
+            <a-input v-model="temp.fileFolderName" placeholder="输入文件或者文件夹名" />
           </a-tooltip>
           <a-row type="flex" justify="center">
-            <a-button type="primary" :disabled="fileFolderName.length === 0" @click="startAddFileFolder">确认</a-button>
+            <a-button type="primary" :disabled="!temp.fileFolderName || temp.fileFolderName.length === 0" @click="startAddFileFolder">确认</a-button>
           </a-row>
         </a-space>
       </a-modal>
       <!-- Terminal -->
       <a-modal destroyOnClose v-model="terminalVisible" width="50%" title="Terminal" :footer="null" :maskClosable="false">
-        <terminal v-if="terminalVisible" :sshId="ssh.id" :nodeId="ssh.nodeModel.id" :tail="temp.path + temp.parentDir" />
+        <terminal v-if="terminalVisible" :sshId="ssh.id" :nodeId="ssh.nodeModel.id" />
       </a-modal>
       <a-modal destroyOnClose v-model="editFileVisible" width="80vw" title="编辑文件" cancelText="关闭" :maskClosable="true" @ok="updateFileData">
         <div style="height: 60vh">
@@ -118,7 +118,7 @@
           <a-input v-model="temp.fileFolderName" placeholder="输入新名称" />
 
           <a-row type="flex" justify="center" v-if="temp.fileFolderName">
-            <a-button type="primary" :disabled="temp.fileFolderName.length === 0" @click="renameFileFolder">确认</a-button>
+            <a-button type="primary" :disabled="temp.fileFolderName.length === 0 || temp.fileFolderName === temp.oldFileFolderName" @click="renameFileFolder">确认</a-button>
           </a-row>
         </a-space>
       </a-modal>
@@ -157,11 +157,11 @@ export default {
       tableHeight: "80vh",
       replaceFields: {
         children: "children",
-        title: "title",
+        title: "name",
         key: "key",
       },
       columns: [
-        { title: "文件名称", dataIndex: "title", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "文件名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "文件类型", dataIndex: "dir", width: 100, ellipsis: true, scopedSlots: { customRender: "dir" } },
         { title: "文件大小", dataIndex: "size", width: 120, ellipsis: true, scopedSlots: { customRender: "size" } },
         { title: "修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true },
@@ -169,9 +169,6 @@ export default {
       ],
       editFileVisible: false,
       addFileFolderVisible: false,
-      // 目录1 文件2 标识
-      addFileOrFolderType: 1,
-      fileFolderName: "",
     };
   },
   mounted() {
@@ -194,10 +191,11 @@ export default {
           this.treeList = res.data.map((element) => {
             return {
               key: element.id,
-              title: element.path,
-              path: element.path,
-              parentDir: "/",
+              title: element.allowPathParent,
+              allowPathParent: element.allowPathParent,
+              nextPath: "/",
               isLeaf: false,
+              // 配置的白名单目录可能不存在
               disabled: !!element.error,
             };
           });
@@ -222,13 +220,23 @@ export default {
     },
     handleAddFolder() {
       this.addFileFolderVisible = true;
-      this.addFileOrFolderType = 1;
-      this.fileFolderName = "";
+      // 目录1 文件2 标识
+      // addFileOrFolderType: 1,
+      //       fileFolderName: "",
+      this.temp = {
+        fileFolderName: "",
+        addFileOrFolderType: 1,
+      };
     },
     handleAddFile() {
       this.addFileFolderVisible = true;
-      this.addFileOrFolderType = 2;
-      this.fileFolderName = "";
+      // 目录1 文件2 标识
+      // addFileOrFolderType: 1,
+      //       fileFolderName: "",
+      this.temp = {
+        fileFolderName: "",
+        addFileOrFolderType: 2,
+      };
     },
     // closeAddFileFolder() {
     //   this.addFileFolderVisible = false;
@@ -239,8 +247,8 @@ export default {
       const params = {
         id: this.ssh.id,
         path: this.nowPath,
-        name: this.fileFolderName,
-        unFolder: this.addFileOrFolderType !== 1,
+        name: this.temp.fileFolderName,
+        unFolder: this.temp.addFileOrFolderType !== 1,
       };
       newFileFolder(params).then((res) => {
         if (res.code === 200) {
@@ -299,8 +307,8 @@ export default {
         // 请求参数
         const params = {
           id: this.ssh.id,
-          path: node.dataRef.path,
-          children: node.dataRef.parentDir,
+          allowPathParent: node.dataRef.allowPathParent,
+          nextPath: node.dataRef.nextPath,
         };
         this.fileList = [];
         this.loading = true;
@@ -313,17 +321,18 @@ export default {
               if (element.dir) {
                 children.push({
                   key: element.id,
-                  title: element.title,
                   name: element.name,
-                  path: node.dataRef.path,
-                  parentDir: element.parentDir,
+                  allowPathParent: node.dataRef.allowPathParent,
+                  nextPath: element.absolutePath,
+                  absolutePath: element.absolutePath,
                   isLeaf: element.dir ? false : true,
+                  // 可能有错误
                   disabled: element.error ? true : false,
                 });
               } else {
                 // 设置文件表格
                 this.fileList.push({
-                  path: node.dataRef.path,
+                  // path: node.dataRef.path,
                   ...element,
                 });
               }
@@ -415,7 +424,7 @@ export default {
       const params = {
         id: this.ssh.id,
         path: record.path,
-        name: record.parentDir,
+        name: record.absolutePath,
       };
       // 请求接口拿到 blob
       window.open(downloadFile(params), "_self");
@@ -481,6 +490,7 @@ export default {
         fileFolderName: record.title,
         oldFileFolderName: record.title,
         path: record.path,
+        children: record.parentDir,
       };
     },
     // 确认修改文件 目录名称
@@ -490,6 +500,7 @@ export default {
         path: this.temp.path,
         name: this.temp.oldFileFolderName,
         newname: this.temp.fileFolderName,
+        children: this.temp.children,
       };
       renameFileFolder(params).then((res) => {
         if (res.code === 200) {

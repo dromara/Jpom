@@ -23,9 +23,10 @@
 package io.jpom.model.log;
 
 import cn.hutool.core.util.StrUtil;
-import io.jpom.common.Const;
 import io.jpom.model.BaseWorkspaceModel;
-import io.jpom.model.user.UserModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import top.jpom.h2db.TableName;
 
 /**
@@ -34,7 +35,10 @@ import top.jpom.h2db.TableName;
  * @author jiangzeyin
  * @since 2021/08/04
  */
+@EqualsAndHashCode(callSuper = true)
 @TableName(value = "SSHTERMINALEXECUTELOG", name = "ssh 终端执行日志")
+@Data
+@NoArgsConstructor
 public class SshTerminalExecuteLog extends BaseWorkspaceModel {
     /**
      * 操作ip
@@ -52,10 +56,6 @@ public class SshTerminalExecuteLog extends BaseWorkspaceModel {
      * 名称
      */
     private String sshName;
-//	/**
-//	 * 操作时间
-//	 */
-//	private long optTime;
     /**
      * 执行的命令
      */
@@ -66,84 +66,15 @@ public class SshTerminalExecuteLog extends BaseWorkspaceModel {
     private String userAgent;
 
     /**
-     * 是否拒绝执行
+     * 是否拒绝执行,true 运行执行，false 拒绝执行
      */
     private Boolean refuse;
 
-    public Boolean getRefuse() {
-        return refuse;
-    }
+    private String machineSshId;
 
-    public void setRefuse(Boolean refuse) {
-        this.refuse = refuse;
-    }
-
-    public String getUserAgent() {
-        return userAgent;
-    }
+    private String machineSshName;
 
     public void setUserAgent(String userAgent) {
         this.userAgent = StrUtil.maxLength(userAgent, 280);
-    }
-
-
-    /**
-     * 操作id
-     */
-    public SshTerminalExecuteLog() {
-    }
-
-
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        if (UserModel.SYSTEM_OCCUPY_NAME.equals(userId)) {
-            this.userId = Const.SYSTEM_ID;
-        } else {
-            this.userId = userId;
-        }
-    }
-
-//	public long getOptTime() {
-//		return optTime;
-//	}
-//
-//	public void setOptTime(long optTime) {
-//		this.optTime = optTime;
-//	}
-
-    public String getSshId() {
-        return sshId;
-    }
-
-    public void setSshId(String sshId) {
-        this.sshId = sshId;
-    }
-
-    public String getCommands() {
-        return commands;
-    }
-
-    public void setCommands(String commands) {
-        this.commands = commands;
-    }
-
-
-    public String getSshName() {
-        return sshName;
-    }
-
-    public void setSshName(String sshName) {
-        this.sshName = sshName;
     }
 }

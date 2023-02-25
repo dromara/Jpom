@@ -361,7 +361,27 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @param ids ids
      * @return list
      */
+    public List<T> listById(Collection<String> ids, boolean fill) {
+        return this.listById(ids, null, fill);
+    }
+
+    /**
+     * 多个 id 查询数据
+     *
+     * @param ids ids
+     * @return list
+     */
     public List<T> listById(Collection<String> ids, Consumer<Entity> consumer) {
+        return this.listById(ids, consumer, true);
+    }
+
+    /**
+     * 多个 id 查询数据
+     *
+     * @param ids ids
+     * @return list
+     */
+    public List<T> listById(Collection<String> ids, Consumer<Entity> consumer, boolean fill) {
         if (CollUtil.isEmpty(ids)) {
             return null;
         }
@@ -371,7 +391,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
             consumer.accept(entity);
         }
         List<Entity> entities = super.queryList(entity);
-        return this.entityToBeanList(entities);
+        return this.entityToBeanList(entities, fill);
     }
 
     /**

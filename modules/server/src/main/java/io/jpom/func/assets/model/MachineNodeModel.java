@@ -27,7 +27,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import io.jpom.model.BaseUserModifyDbModel;
+import io.jpom.model.BaseGroupNameModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import top.jpom.h2db.TableName;
@@ -44,16 +44,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "MACHINE_NODE_INFO", name = "机器节点信息")
 @Data
-public class MachineNodeModel extends BaseUserModifyDbModel implements INodeInfo {
-
-    /**
-     * 机器名称
-     */
-    private String name;
-    /**
-     * 分组名称
-     */
-    private String groupName;
+public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
     /**
      * 机器主机名
      */

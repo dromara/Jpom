@@ -28,6 +28,7 @@ import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.service.h2db.BaseNodeGroupService;
 import io.jpom.service.h2db.BaseNodeService;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Map;
 
@@ -37,7 +38,9 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2023/2/18
  */
+@Configuration
 public class DataInitEvent implements ILoadEvent {
+
     @Override
     public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         //

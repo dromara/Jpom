@@ -36,6 +36,7 @@ import com.alibaba.fastjson2.JSONValidator;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import io.jpom.func.assets.model.MachineSshModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
@@ -72,6 +73,7 @@ public class SshHandler extends BaseTerminalHandler {
     private static final ConcurrentHashMap<String, HandlerItem> HANDLER_ITEM_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
     private static SshTerminalExecuteLogService sshTerminalExecuteLogService;
     private static UserBindWorkspaceService userBindWorkspaceService;
+    private static SshService sshService;
 
     private static void init() {
         if (sshTerminalExecuteLogService == null) {
@@ -80,17 +82,33 @@ public class SshHandler extends BaseTerminalHandler {
         if (userBindWorkspaceService == null) {
             userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
         }
+        if (sshService == null) {
+            sshService = SpringUtil.getBean(SshService.class);
+        }
     }
 
     @Override
     public void afterConnectionEstablishedImpl(WebSocketSession session) throws Exception {
         super.afterConnectionEstablishedImpl(session);
+        init();
         Map<String, Object> attributes = session.getAttributes();
-        SshModel sshItem = (SshModel) attributes.get("dataItem");
+        MachineSshModel machineSshModel = (MachineSshModel) attributes.get("dataItem");
+        SshModel sshModel = (SshModel) attributes.get("sshItem");
+        //
+        UserModel userInfo = (UserModel) attributes.get("userInfo");
+        if (sshModel != null) {
+            // 判断是没有任何限制
+            String workspaceId = sshModel.getWorkspaceId();
+            boolean sshCommandNotLimited = userBindWorkspaceService.exists(userInfo, workspaceId + UserBindWorkspaceService.SSH_COMMAND_NOT_LIMITED);
+            attributes.put("sshCommandNotLimited", sshCommandNotLimited);
+        } else {
+            // 通过资产管理方式进入
+            attributes.put("sshCommandNotLimited", true);
+        }
         //
         HandlerItem handlerItem;
         try {
-            handlerItem = new HandlerItem(session, sshItem);
+            handlerItem = new HandlerItem(session, machineSshModel, sshModel);
             handlerItem.startRead();
         } catch (Exception e) {
             // 输出超时日志 @author jzy
@@ -128,13 +146,10 @@ public class SshHandler extends BaseTerminalHandler {
                 return;
             }
         }
-
-        init();
+        //
         Map<String, Object> attributes = session.getAttributes();
         UserModel userInfo = (UserModel) attributes.get("userInfo");
-        // 判断是没有任何限制
-        String workspaceId = handlerItem.sshItem.getWorkspaceId();
-        boolean sshCommandNotLimited = userBindWorkspaceService.exists(userInfo, workspaceId + UserBindWorkspaceService.SSH_COMMAND_NOT_LIMITED);
+        boolean sshCommandNotLimited = (boolean) attributes.get("sshCommandNotLimited");
         try {
             this.sendCommand(handlerItem, payload, userInfo, sshCommandNotLimited);
         } catch (Exception e) {
@@ -175,9 +190,10 @@ public class SshHandler extends BaseTerminalHandler {
         UserModel userInfo = (UserModel) attributes.get("userInfo");
         String ip = (String) attributes.get("ip");
         String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);
-        SshModel sshItem = (SshModel) attributes.get("dataItem");
+        MachineSshModel machineSshModel = (MachineSshModel) attributes.get("dataItem");
+        SshModel sshItem = (SshModel) attributes.get("sshItem");
         //
-        sshTerminalExecuteLogService.batch(userInfo, sshItem, ip, userAgent, refuse, split);
+        sshTerminalExecuteLogService.batch(userInfo, machineSshModel, sshItem, ip, userAgent, refuse, split);
     }
 
     private class HandlerItem implements Runnable, AutoCloseable {
@@ -187,19 +203,21 @@ public class SshHandler extends BaseTerminalHandler {
         private final Session openSession;
         private final ChannelShell channel;
         private final SshModel sshItem;
+        private final MachineSshModel machineSshModel;
         private final StringBuilder nowLineInput = new StringBuilder();
 
-        HandlerItem(WebSocketSession session, SshModel sshItem) throws IOException {
+        HandlerItem(WebSocketSession session, MachineSshModel machineSshModel, SshModel sshModel) throws IOException {
             this.session = session;
-            this.sshItem = sshItem;
-            this.openSession = SshService.getSessionByModel(sshItem);
+            this.sshItem = sshModel;
+            this.machineSshModel = machineSshModel;
+            this.openSession = sshService.getSessionByModel(machineSshModel);
             this.channel = (ChannelShell) JschUtil.createChannel(openSession, ChannelType.SHELL);
             this.inputStream = channel.getInputStream();
             this.outputStream = channel.getOutputStream();
         }
 
         void startRead() throws JSchException {
-            this.channel.connect(sshItem.timeout());
+            this.channel.connect(machineSshModel.timeout());
             ThreadUtil.execute(this);
         }
 
@@ -254,10 +272,11 @@ public class SshHandler extends BaseTerminalHandler {
                 if (StrUtil.equals(msg, StrUtil.CR)) {
                     nowLineInput.setLength(0);
                 }
-                refuse = SshModel.checkInputItem(sshItem, join);
+                // sshItem 可能为空
+                refuse = sshItem == null || SshModel.checkInputItem(sshItem, join);
             } else {
                 // 复制输出
-                refuse = SshModel.checkInputItem(sshItem, msg);
+                refuse = sshItem == null || SshModel.checkInputItem(sshItem, msg);
             }
             // 执行命令行记录
             logCommands(session, allCommand, refuse);
@@ -272,7 +291,7 @@ public class SshHandler extends BaseTerminalHandler {
                 int i;
                 //如果没有数据来，线程会一直阻塞在这个地方等待数据。
                 while ((i = inputStream.read(buffer)) != NioUtil.EOF) {
-                    sendBinary(session, new String(Arrays.copyOfRange(buffer, 0, i), sshItem.charset()));
+                    sendBinary(session, new String(Arrays.copyOfRange(buffer, 0, i), machineSshModel.charset()));
                 }
             } catch (Exception e) {
                 if (!this.openSession.isConnected()) {

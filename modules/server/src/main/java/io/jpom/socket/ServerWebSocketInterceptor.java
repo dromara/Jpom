@@ -23,6 +23,9 @@
 package io.jpom.socket;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.lang.Opt;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -37,6 +40,7 @@ import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
+import io.jpom.service.h2db.BaseDbService;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.user.UserBindWorkspaceService;
@@ -137,13 +141,22 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 
                 attributes.put("tomcatId", tomcatId);
                 break;
-            case dockerLog:
-            case ssh: {
+            case dockerLog: {
                 Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
                 if (dataItem == null) {
                     return false;
                 }
                 attributes.put("dataItem", dataItem);
+                break;
+            }
+            case ssh: {
+                Tuple dataItem = this.checkAssetsData(handlerType, userModel, httpServletRequest);
+                if (dataItem == null) {
+                    return false;
+                }
+                attributes.put("dataItem", dataItem.get(0));
+                attributes.put("isAssetsManager", dataItem.get(1));
+                attributes.put("sshItem", dataItem.get(2));
                 break;
             }
             case docker:
@@ -221,6 +234,11 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
         if (userInfo.isDemoUser()) {
             return PermissionInterceptor.DEMO_TIP;
         }
+        boolean isAssetsManager = Convert.toBool(attributes.get("isAssetsManager"), false);
+        if (isAssetsManager && !userInfo.isSystemUser()) {
+            // 判断资产权限
+            return "您没有资产管理权限";
+        }
         if (handlerType == HandlerType.nodeUpdate) {
             return "您没有对应功能【" + ClassFeature.NODE_UPGRADE.getName() + "】管理权限";
         }
@@ -245,6 +263,32 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
         String id = httpServletRequest.getParameter("id");
         BaseWorkspaceService<?> workspaceService = SpringUtil.getBean(handlerType.getServiceClass());
         return workspaceService.getByKey(id, userModel);
+    }
+
+    /**
+     * 解析参数，获取对应的数据
+     *
+     * @param handlerType        操作类型
+     * @param userModel          用户
+     * @param httpServletRequest 请求信息
+     * @return 数据
+     */
+    private Tuple checkAssetsData(HandlerType handlerType, UserModel userModel, HttpServletRequest httpServletRequest) {
+        String id = httpServletRequest.getParameter("id");
+        return Opt.ofBlankAble(id).map(s -> {
+            BaseWorkspaceService<?> workspaceService = SpringUtil.getBean(handlerType.getServiceClass());
+            BaseWorkspaceModel workspaceModel = workspaceService.getByKey(s, userModel);
+            String assetsLinkDataId = BeanUtil.getProperty(workspaceModel, handlerType.getAssetsLinkDataId());
+            BaseDbService<?> assetsServiceClass = SpringUtil.getBean(handlerType.getAssetsServiceClass());
+            return new Tuple(assetsServiceClass.getByKey(assetsLinkDataId, false), false, workspaceModel);
+        }).orElseGet(() -> {
+            String assetsLinkDataId = httpServletRequest.getParameter(handlerType.getAssetsLinkDataId());
+            if (StrUtil.isEmpty(assetsLinkDataId)) {
+                return null;
+            }
+            BaseDbService<?> assetsServiceClass = SpringUtil.getBean(handlerType.getAssetsServiceClass());
+            return new Tuple(assetsServiceClass.getByKey(assetsLinkDataId, false), true, null);
+        });
     }
 
     @Override
