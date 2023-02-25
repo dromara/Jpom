@@ -22,18 +22,22 @@
  */
 package io.jpom.socket;
 
+import io.jpom.func.assets.server.MachineSshServer;
 import io.jpom.service.docker.DockerInfoService;
+import io.jpom.service.h2db.BaseDbService;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.script.ScriptServer;
 import io.jpom.socket.handler.*;
+import lombok.Getter;
 
 /**
  * @author bwcx_jzy
  * @since 2019/8/9
  */
+@Getter
 public enum HandlerType {
     /**
      * 脚本模板
@@ -50,7 +54,7 @@ public enum HandlerType {
     /**
      * ssh
      */
-    ssh(SshHandler.class, SshService.class),
+    ssh(SshHandler.class, SshService.class, MachineSshServer.class, "machineSshId"),
     /**
      * 节点升级
      */
@@ -71,17 +75,27 @@ public enum HandlerType {
     final Class<?> handlerClass;
 
     final Class<? extends BaseWorkspaceService<?>> serviceClass;
+    final Class<? extends BaseDbService<?>> assetsServiceClass;
+    /**
+     * 资产关联字段
+     */
+    final String assetsLinkDataId;
 
-    HandlerType(Class<?> handlerClass, Class<? extends BaseWorkspaceService<?>> serviceClass) {
+    HandlerType(Class<?> handlerClass,
+                Class<? extends BaseWorkspaceService<?>> serviceClass) {
         this.handlerClass = handlerClass;
         this.serviceClass = serviceClass;
+        this.assetsServiceClass = null;
+        this.assetsLinkDataId = null;
     }
 
-    public Class<?> getHandlerClass() {
-        return handlerClass;
-    }
-
-    public Class<? extends BaseWorkspaceService<?>> getServiceClass() {
-        return serviceClass;
+    HandlerType(Class<?> handlerClass,
+                Class<? extends BaseWorkspaceService<?>> serviceClass,
+                Class<? extends BaseDbService<?>> assetsServiceClass,
+                String assetsLinkDataId) {
+        this.handlerClass = handlerClass;
+        this.serviceClass = serviceClass;
+        this.assetsServiceClass = assetsServiceClass;
+        this.assetsLinkDataId = assetsLinkDataId;
     }
 }

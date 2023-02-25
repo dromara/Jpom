@@ -25,6 +25,7 @@ package io.jpom.service.dblog;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.func.assets.model.MachineSshModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.log.SshTerminalExecuteLog;
 import io.jpom.model.user.UserModel;
@@ -52,34 +53,41 @@ public class SshTerminalExecuteLogService extends BaseWorkspaceService<SshTermin
     /**
      * 批量记录日志
      *
-     * @param userInfo  操作的用户
-     * @param sshItem   ssh 对象
-     * @param ip        操作人的ip
-     * @param userAgent 浏览器标识
-     * @param commands  命令行
-     * @param refuse    是否拒绝执行
+     * @param userInfo        操作的用户
+     * @param sshItem         ssh 对象
+     * @param machineSshModel 资产
+     * @param ip              操作人的ip
+     * @param userAgent       浏览器标识
+     * @param commands        命令行
+     * @param refuse          是否拒绝执行
      */
-    public void batch(UserModel userInfo, SshModel sshItem, String ip, String userAgent, boolean refuse, List<String> commands) {
-        if (sshItem == null) {
+    public void batch(UserModel userInfo, MachineSshModel machineSshModel, SshModel sshItem, String ip, String userAgent, boolean refuse, List<String> commands) {
+        if (machineSshModel == null) {
+            // 资产信息不能为空
             return;
         }
         long optTime = SystemClock.now();
         try {
             BaseServerController.resetInfo(userInfo);
-            List<SshTerminalExecuteLog> executeLogs = commands.stream().filter(StrUtil::isNotEmpty).map(s -> {
-                SshTerminalExecuteLog sshTerminalExecuteLog = new SshTerminalExecuteLog();
-                //sshTerminalExecuteLog.setId(IdUtil.fastSimpleUUID());
-                sshTerminalExecuteLog.setSshId(sshItem.getId());
-                sshTerminalExecuteLog.setSshName(sshItem.getName());
-                sshTerminalExecuteLog.setWorkspaceId(sshItem.getWorkspaceId());
-                sshTerminalExecuteLog.setCommands(s);
-                sshTerminalExecuteLog.setRefuse(refuse);
-                sshTerminalExecuteLog.setCreateTimeMillis(optTime);
-                sshTerminalExecuteLog.setIp(ip);
-                sshTerminalExecuteLog.setUserAgent(userAgent);
-                //sshTerminalExecuteLog.setUserId(UserModel.getOptUserName(userInfo));
-                return sshTerminalExecuteLog;
-            }).collect(Collectors.toList());
+            List<SshTerminalExecuteLog> executeLogs = commands.stream()
+                .filter(StrUtil::isNotEmpty)
+                .map(s -> {
+                    SshTerminalExecuteLog sshTerminalExecuteLog = new SshTerminalExecuteLog();
+                    if (sshItem != null) {
+                        sshTerminalExecuteLog.setSshId(sshItem.getId());
+                        sshTerminalExecuteLog.setSshName(sshItem.getName());
+                        sshTerminalExecuteLog.setWorkspaceId(sshItem.getWorkspaceId());
+                    }
+                    sshTerminalExecuteLog.setMachineSshId(machineSshModel.getId());
+                    sshTerminalExecuteLog.setMachineSshName(machineSshModel.getName());
+                    sshTerminalExecuteLog.setCommands(s);
+                    sshTerminalExecuteLog.setRefuse(refuse);
+                    sshTerminalExecuteLog.setCreateTimeMillis(optTime);
+                    sshTerminalExecuteLog.setIp(ip);
+                    sshTerminalExecuteLog.setUserAgent(userAgent);
+                    //sshTerminalExecuteLog.setUserId(UserModel.getOptUserName(userInfo));
+                    return sshTerminalExecuteLog;
+                }).collect(Collectors.toList());
             super.insert(executeLogs);
         } finally {
             BaseServerController.removeAll();

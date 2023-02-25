@@ -47,6 +47,7 @@ import io.jpom.service.node.NodeService;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
 import io.jpom.system.ServerConfig;
+import io.jpom.system.db.InitDb;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -94,6 +95,12 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         machineNodeModel.setTransportMode(0);
     }
 
+    /**
+     * 同步数据，兼容低版本数据
+     *
+     * @param applicationContext 应用上下文
+     * @throws Exception 异常
+     */
     @Override
     public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         long count = this.count();
@@ -128,10 +135,17 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             entity.set("machineId", value.getId());
             Entity where = Entity.create();
             where.set("url", value.getJpomUrl());
-            nodeService.update(entity, where);
+            int update = nodeService.update(entity, where);
+            Assert.state(update > 0, "更新节点表机器 id 失败：" + value.getName());
         }
     }
 
+    /**
+     * 保证在数据库启动成功之后
+     *
+     * @return 想要比数据库晚加载
+     * @see InitDb#getOrder()
+     */
     @Override
     public int getOrder() {
         return HIGHEST_PRECEDENCE + 1;

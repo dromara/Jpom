@@ -22,21 +22,22 @@
  */
 package io.jpom.model.data;
 
+import cn.hutool.core.annotation.PropIgnore;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
-import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.func.assets.controller.BaseSshController;
+import io.jpom.func.assets.model.MachineSshModel;
+import io.jpom.model.BaseGroupModel;
 import io.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import top.jpom.h2db.TableName;
 
-import java.nio.charset.Charset;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * ssh 信息
@@ -48,35 +49,38 @@ import java.util.concurrent.TimeUnit;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class SshModel extends BaseWorkspaceModel {
+public class SshModel extends BaseGroupModel implements BaseSshController.ItemConfig {
 
     private String name;
+    @Deprecated
     private String host;
+    @Deprecated
     private Integer port;
+    @Deprecated
     private String user;
+    @Deprecated
     private String password;
     /**
      * 编码格式
      */
+    @Deprecated
     private String charset;
-
-    /**
-     * 文件目录
-     */
-    private String fileDirs;
 
     /**
      * ssh 私钥
      */
+    @Deprecated
     private String privateKey;
-
+    @Deprecated
     private String connectType;
-
+    /**
+     * 文件目录
+     */
+    private String fileDirs;
     /**
      * 不允许执行的命令
      */
     private String notAllowedCommand;
-
     /**
      * 允许编辑的后缀文件
      */
@@ -84,23 +88,36 @@ public class SshModel extends BaseWorkspaceModel {
     /**
      * 节点超时时间
      */
+    @Deprecated
     private Integer timeout;
+
+    /**
+     * ssh id
+     */
+    private String machineSshId;
+
+    @PropIgnore
+    private MachineSshModel machineSsh;
+
+    @PropIgnore
+    private NodeModel linkNode;
+
+    @PropIgnore
+    private WorkspaceModel workspace;
 
     public SshModel(String id) {
         this.setId(id);
     }
 
-    public SshModel(String id, String workspaceId) {
-        this.setId(id);
-        this.setWorkspaceId(workspaceId);
-    }
 
-    public ConnectType connectType() {
-        return EnumUtil.fromString(ConnectType.class, this.connectType, ConnectType.PASS);
-    }
-
+    @Override
     public List<String> fileDirs() {
-        return StringUtil.jsonConvertArray(this.fileDirs, String.class);
+        List<String> strings = StringUtil.jsonConvertArray(this.fileDirs, String.class);
+        return Optional.ofNullable(strings)
+            .map(strings1 -> strings1.stream()
+                .map(s -> FileUtil.normalize(StrUtil.SLASH + s + StrUtil.SLASH))
+                .collect(Collectors.toList()))
+            .orElse(null);
     }
 
     public void fileDirs(List<String> fileDirs) {
@@ -115,22 +132,8 @@ public class SshModel extends BaseWorkspaceModel {
         }
     }
 
-    /**
-     * 超时时间
-     *
-     * @return 最小值 1 分钟
-     */
-    public int timeout() {
-        if (this.timeout == null) {
-            return (int) TimeUnit.SECONDS.toMillis(5);
-        }
-        return (int) TimeUnit.SECONDS.toMillis(Math.max(1, this.timeout));
-    }
 
-    public Charset charset() {
-        return CharsetUtil.parse(this.getCharset(), CharsetUtil.CHARSET_UTF_8);
-    }
-
+    @Override
     public List<String> allowEditSuffix() {
         return StringUtil.jsonConvertArray(this.allowEditSuffix, String.class);
     }
@@ -173,16 +176,5 @@ public class SshModel extends BaseWorkspaceModel {
             }
         }
         return true;
-    }
-
-    public enum ConnectType {
-        /**
-         * 账号密码
-         */
-        PASS,
-        /**
-         * 密钥
-         */
-        PUBKEY
     }
 }

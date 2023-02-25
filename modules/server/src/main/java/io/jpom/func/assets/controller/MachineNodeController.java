@@ -23,14 +23,14 @@
 package io.jpom.func.assets.controller;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Entity;
 import com.alibaba.fastjson2.JSONObject;
-import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.validator.ValidatorItem;
+import io.jpom.func.BaseGroupNameController;
 import io.jpom.func.assets.model.MachineNodeModel;
+import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.permission.ClassFeature;
@@ -46,9 +46,7 @@ import top.jpom.model.PageResultDto;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * 机器节点
@@ -60,11 +58,13 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/system/assets/machine")
 @Feature(cls = ClassFeature.SYSTEM_ASSETS_MACHINE)
 @SystemPermission
-public class MachineNodeController extends BaseServerController {
+public class MachineNodeController extends BaseGroupNameController {
 
     private final WorkspaceService workspaceService;
 
-    public MachineNodeController(WorkspaceService workspaceService) {
+    public MachineNodeController(WorkspaceService workspaceService,
+                                 MachineNodeServer machineNodeServer) {
+        super(machineNodeServer);
         this.workspaceService = workspaceService;
     }
 
@@ -73,23 +73,6 @@ public class MachineNodeController extends BaseServerController {
     public JsonMessage<PageResultDto<MachineNodeModel>> listJson(HttpServletRequest request) {
         PageResultDto<MachineNodeModel> pageResultDto = machineNodeServer.listPage(request);
         return JsonMessage.success("", pageResultDto);
-    }
-
-    @GetMapping(value = "list-group", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<String>> listGroup() {
-        String sql = "select `groupName` from " + machineNodeServer.getTableName() + " group by `groupName`";
-        List<Entity> list = machineNodeServer.query(sql);
-        // 筛选字段
-        List<String> collect = list.stream()
-            .map(entity -> {
-                Object obj = entity.get("groupName");
-                return StrUtil.toStringOrNull(obj);
-            })
-            .filter(Objects::nonNull)
-            .distinct()
-            .collect(Collectors.toList());
-        return JsonMessage.success("", collect);
     }
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)

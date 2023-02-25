@@ -115,12 +115,13 @@ public class AgentWhitelist extends BaseJsonModel {
             return null;
         }
         return list.stream()
-            .peek(s -> {
+            .map(s -> {
                 String val = String.format("/%s/", s);
                 val = FileUtil.normalize(val);
                 FileUtils.checkSlip(val);
                 // 判断是否保护jpom 路径
                 Assert.state(!StrUtil.startWith(ExtConfigBean.getPath(), val), errorMsg);
+                return val;
             })
             .distinct()
             .collect(Collectors.toList());
