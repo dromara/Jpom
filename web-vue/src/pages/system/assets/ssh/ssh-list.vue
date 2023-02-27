@@ -1,0 +1,535 @@
+<template>
+  <div class="full-content">
+    <!-- 数据表格 -->
+    <a-table :data-source="list" :columns="columns" size="middle" :pagination="pagination" @change="changePage" bordered rowKey="id">
+      <template slot="title">
+        <a-space>
+          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="ssh名称" />
+          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%host%']" placeholder="host" />
+          <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+            <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+          </a-select>
+          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          </a-tooltip>
+          <a-button type="primary" @click="handleAdd">新增</a-button>
+
+          <a-tooltip>
+            <template slot="title">
+              <div>
+                <ul>
+                  <li>节点状态是异步获取有一定时间延迟</li>
+                  <li>节点状态会自动识别服务器中是否存在 java 环境,如果没有 Java 环境不能快速安装节点</li>
+                  <li>关联节点如果服务器存在 java 环境,但是插件端未运行则会显示快速安装按钮</li>
+                </ul>
+              </div>
+            </template>
+            <a-icon type="question-circle" theme="filled" />
+          </a-tooltip>
+        </a-space>
+      </template>
+      <a-tooltip slot="tooltip" slot-scope="text" :title="text"> {{ text }}</a-tooltip>
+      <template slot="nodeId" slot-scope="text, record">
+        <template v-if="sshAgentInfo[record.id]">
+          <a-tooltip v-if="sshAgentInfo[record.id].error" :title="sshAgentInfo[record.id].error">
+            <a-tag>连接异常</a-tag>
+          </a-tooltip>
+          <template v-else>
+            <div v-if="sshAgentInfo[record.id].javaVersion">
+              <a-tooltip
+                v-if="sshAgentInfo[record.id].pid > 0"
+                placement="topLeft"
+                :title="` ssh 中已经运行了插件端进程ID：${sshAgentInfo[record.id].pid},java :  ${sshAgentInfo[record.id].javaVersion}`"
+              >
+                <a-tag> {{ sshAgentInfo[record.id].pid }}</a-tag>
+              </a-tooltip>
+              <a-button v-else size="small" type="primary" @click="install(record)">安装节点</a-button>
+            </div>
+
+            <a-tag v-else>没有Java环境</a-tag>
+          </template>
+        </template>
+        <div v-else>- {{ sshAgentInfo[record.id] }}</div>
+      </template>
+      <template slot="operation" slot-scope="text, record">
+        <a-space>
+          <a-dropdown>
+            <a-button size="small" type="primary" @click="handleTerminal(record, false)">终端<a-icon type="down" /></a-button>
+            <a-menu slot="overlay">
+              <a-menu-item key="1">
+                <a-button size="small" type="primary" icon="fullscreen" @click="handleTerminal(record, true)">全屏终端</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+
+          <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
+          <a-button size="small" type="primary" @click="handleViewWorkspaceSsh(record)">关联</a-button>
+
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              更多
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="primary" @click="handleViewLog(record)">终端日志</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+        </a-space>
+      </template>
+    </a-table>
+    <!-- 编辑区 -->
+    <a-modal destroyOnClose v-model="editSshVisible" width="600px" title="编辑 SSH" @ok="handleEditSshOk" :maskClosable="false">
+      <a-form-model ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+        <a-form-model-item label="SSH 名称" prop="name">
+          <a-input v-model="temp.name" :maxLength="50" placeholder="SSH 名称" />
+        </a-form-model-item>
+        <a-form-model-item label="分组名称" prop="group">
+          <custom-select v-model="temp.groupName" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder="选择分组名"> </custom-select>
+        </a-form-model-item>
+        <a-form-model-item label="Host" prop="host">
+          <a-input-group compact prop="host">
+            <a-input style="width: 70%" v-model="temp.host" placeholder="主机 Host" />
+            <a-input-number style="width: 30%" v-model="temp.port" :min="1" placeholder="端口号" />
+          </a-input-group>
+        </a-form-model-item>
+        <a-form-model-item label="认证方式" prop="connectType">
+          <a-radio-group v-model="temp.connectType" :options="options" />
+        </a-form-model-item>
+        <a-form-model-item prop="user">
+          <template #label>
+            用户名
+            <a-tooltip v-if="!temp.id">
+              <template slot="title"> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input v-model="temp.user" placeholder="用户" />
+        </a-form-model-item>
+        <!-- 新增时需要填写 -->
+        <!--				<a-form-model-item v-if="temp.type === 'add'" label="Password" prop="password">-->
+        <!--					<a-input-password v-model="temp.password" placeholder="密码"/>-->
+        <!--				</a-form-model-item>-->
+        <!-- 修改时可以不填写 -->
+        <a-form-model-item :prop="`${temp.type === 'add' && temp.connectType === 'PASS' ? 'password' : 'password-update'}`">
+          <template #label>
+            密码
+            <a-tooltip v-if="!temp.id">
+              <template slot="title"> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" />
+        </a-form-model-item>
+        <a-form-model-item v-if="temp.connectType === 'PUBKEY'" prop="privateKey">
+          <template slot="label">
+            私钥内容
+            <a-tooltip v-if="temp.type !== 'edit'" placement="topLeft">
+              <template slot="title">不填将使用默认的 $HOME/.ssh 目录中的配置,使用优先级是：id_dsa>id_rsa>identity </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+
+          <a-textarea v-model="temp.privateKey" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="私钥内容,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:/xxxx/xx" />
+        </a-form-model-item>
+
+        <a-collapse>
+          <a-collapse-panel key="1" header="其他配置">
+            <a-form-model-item label="编码格式" prop="charset">
+              <a-input v-model="temp.charset" placeholder="编码格式" />
+            </a-form-model-item>
+            <a-form-model-item label="超时时间(s)" prop="timeout">
+              <a-input-number v-model="temp.timeout" :min="1" placeholder="单位秒,最小值 1 秒" style="width: 100%" />
+            </a-form-model-item>
+          </a-collapse-panel>
+        </a-collapse>
+      </a-form-model>
+    </a-modal>
+    <!-- 安装节点 -->
+    <a-modal
+      destroyOnClose
+      v-model="nodeVisible"
+      width="80%"
+      title="安装插件端"
+      :footer="null"
+      @cancel="
+        () => {
+          this.nodeVisible = false;
+          this.loadData();
+        }
+      "
+      :maskClosable="false"
+    >
+      <fastInstall v-if="nodeVisible"></fastInstall>
+    </a-modal>
+    <!-- 文件管理 -->
+    <a-drawer
+      destroyOnClose
+      :title="`${this.temp.name} 文件管理`"
+      placement="right"
+      width="90vw"
+      :visible="drawerVisible"
+      @close="
+        () => {
+          this.drawerVisible = false;
+        }
+      "
+    >
+      <ssh-file v-if="drawerVisible" :ssh="temp" />
+    </a-drawer>
+    <!-- Terminal -->
+    <a-modal
+      destroyOnClose
+      :dialogStyle="{
+        maxWidth: '100vw',
+        top: this.terminalFullscreen ? 0 : false,
+        paddingBottom: 0,
+      }"
+      :width="this.terminalFullscreen ? '100vw' : '80vw'"
+      :bodyStyle="{
+        padding: '0px 10px',
+        paddingTop: '10px',
+        marginRight: '10px',
+        height: `${this.terminalFullscreen ? 'calc(100vh - 56px)' : '70vh'}`,
+      }"
+      v-model="terminalVisible"
+      :title="temp.name"
+      :footer="null"
+      :maskClosable="false"
+    >
+      <terminal v-if="terminalVisible" :machineSshId="temp.id" />
+    </a-modal>
+    <!-- 操作日志 -->
+    <a-modal destroyOnClose v-model="viewOperationLog" title="操作日志" width="80vw" :footer="null" :maskClosable="false">
+      <OperationLog v-if="viewOperationLog" :machineSshId="temp.id"></OperationLog>
+    </a-modal>
+    <!-- 查看 ssh 关联工作空间的信息 -->
+    <a-modal destroyOnClose v-model="viewWorkspaceSsh" width="50%" title="关联工作空间ssh" :footer="null" :maskClosable="false">
+      <a-list bordered :data-source="workspaceSshList">
+        <a-list-item slot="renderItem" slot-scope="item" style="display: block">
+          <a-row>
+            <a-col :span="10">SSH名称：{{ item.name }}</a-col>
+            <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
+            <a-col :span="4"> <a-button size="small" type="primary" @click="configWorkspaceSsh(item)">配置 </a-button></a-col>
+          </a-row>
+        </a-list-item>
+      </a-list>
+    </a-modal>
+    <a-modal destroyOnClose v-model="configWorkspaceSshVisible" width="50%" title="配置ssh" @ok="handleConfigWorkspaceSshOk" :maskClosable="false">
+      <a-form-model ref="editConfigWorkspaceSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+        <a-form-model-item label="SSH 名称">
+          <a-input v-model="temp.name" :disabled="true" :maxLength="50" placeholder="SSH 名称" />
+        </a-form-model-item>
+
+        <a-form-model-item prop="fileDirs">
+          <template slot="label">
+            文件目录
+            <a-tooltip>
+              <template slot="title"> 绑定指定目录可以在线管理，同时构建 ssh 发布目录也需要在此配置 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-textarea v-model="temp.fileDirs" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="授权可以直接访问的目录，多个回车换行即可" />
+        </a-form-model-item>
+
+        <a-form-model-item label="文件后缀" prop="suffix">
+          <a-input
+            v-model="temp.allowEditSuffix"
+            type="textarea"
+            :rows="5"
+            style="resize: none"
+            placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，多个使用换行。示例：设置编码：txt@utf-8， 不设置编码：txt"
+          />
+        </a-form-model-item>
+        <a-form-model-item prop="notAllowedCommand">
+          <template slot="label">
+            禁止命令
+            <a-tooltip>
+              <template slot="title">
+                限制禁止在在线终端执行的命令
+                <ul>
+                  <li>超级管理员没有任何限制</li>
+                  <li>其他用户可以配置权限解除限制</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-textarea v-model="temp.notAllowedCommand" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="禁止命令是不允许在终端执行的名，多个逗号隔开。(超级管理员没有任何限制)" />
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
+  </div>
+</template>
+<script>
+import { machineSshListData, machineSshListGroup, machineSshEdit, machineSshCheckAgent, machineSshDelete, machineListGroupWorkspaceSsh } from "@/api/system/assets-ssh";
+import { COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, CHANGE_PAGE } from "@/utils/const";
+import fastInstall from "@/pages/node/fast-install.vue";
+import CustomSelect from "@/components/customSelect";
+import SshFile from "@/pages/ssh/ssh-file";
+import Terminal from "@/pages/ssh/terminal";
+import OperationLog from "@/pages/system/assets/ssh/operation-log";
+
+export default {
+  components: { fastInstall, CustomSelect, Terminal, SshFile, OperationLog },
+  computed: {
+    pagination() {
+      return COMPUTED_PAGINATION(this.listQuery);
+    },
+  },
+  data() {
+    return {
+      loading: true,
+      groupList: [],
+      list: [],
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
+      editSshVisible: false,
+      temp: {},
+      options: [
+        { label: "密码", value: "PASS" },
+        { label: "证书", value: "PUBKEY" },
+      ],
+      columns: [
+        { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+
+        { title: "Host", dataIndex: "host", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "Port", dataIndex: "port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "用户名", dataIndex: "user", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        {
+          title: "节点状态",
+          dataIndex: "nodeId",
+          scopedSlots: { customRender: "nodeId" },
+          width: "120px",
+          ellipsis: true,
+        },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          sorter: true,
+          ellipsis: true,
+          customRender: (text) => {
+            return parseTime(text);
+          },
+          width: "170px",
+        },
+        {
+          title: "操作",
+          dataIndex: "operation",
+          scopedSlots: { customRender: "operation" },
+          width: "240px",
+          align: "center",
+          // ellipsis: true,
+        },
+      ],
+      // 表单校验规则
+      rules: {
+        name: [{ required: true, message: "请输入名称", trigger: "blur" }],
+        host: [{ required: true, message: "请输入主机地址", trigger: "blur" }],
+        port: [{ required: true, message: "请输入端口号", trigger: "blur" }],
+        connectType: [
+          {
+            required: true,
+            message: "请选择连接方式",
+            trigger: "blur",
+          },
+        ],
+        user: [{ required: true, message: "请输入账号名", trigger: "blur" }],
+        password: [{ required: true, message: "请输入登录密码", trigger: "blur" }],
+      },
+      nodeVisible: false,
+      sshAgentInfo: {},
+      terminalVisible: false,
+      terminalFullscreen: false,
+      viewOperationLog: false,
+      drawerVisible: false,
+      workspaceSshList: [],
+      viewWorkspaceSsh: false,
+      configWorkspaceSshVisible: false,
+    };
+  },
+  created() {
+    this.loadData();
+    this.loadGroupList();
+  },
+  methods: {
+    // 加载数据
+    loadData(pointerEvent) {
+      this.loading = true;
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
+      machineSshListData(this.listQuery).then((res) => {
+        if (res.code === 200) {
+          this.list = res.data.result;
+          this.listQuery.total = res.data.total;
+          //
+
+          let ids = this.list
+            .map((item) => {
+              return item.id;
+            })
+            .join(",");
+          if (ids.length > 0) {
+            machineSshCheckAgent({
+              ids: ids,
+            }).then((res) => {
+              this.sshAgentInfo = { ...res.data };
+            });
+          }
+        }
+        this.loading = false;
+      });
+    },
+    // 获取所有的分组
+    loadGroupList() {
+      machineSshListGroup().then((res) => {
+        if (res.data) {
+          this.groupList = res.data;
+        }
+      });
+    },
+    // 新增 SSH
+    handleAdd() {
+      this.temp = {
+        charset: "UTF-8",
+        port: 22,
+        timeout: 5,
+        connectType: "PASS",
+      };
+      this.editSshVisible = true;
+      // @author jzy 08-04
+      this.$refs["editSshForm"] && this.$refs["editSshForm"].resetFields();
+    },
+    // 修改
+    handleEdit(record) {
+      this.temp = Object.assign({}, record);
+
+      this.temp = {
+        ...this.temp,
+
+        timeout: record.timeout || 5,
+      };
+      this.editSshVisible = true;
+      // @author jzy 08-04
+      this.$refs["editSshForm"] && this.$refs["editSshForm"].resetFields();
+      this.loadGroupList();
+    },
+    // 提交 SSH 数据
+    handleEditSshOk() {
+      // 检验表单
+      this.$refs["editSshForm"].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        // 提交数据
+        machineSshEdit(this.temp).then((res) => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg,
+            });
+            this.editSshVisible = false;
+            this.loadData();
+            this.loadGroupList();
+          }
+        });
+      });
+    },
+    // 分页、排序、筛选变化时触发
+    changePage(pagination, filters, sorter) {
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
+      this.loadData();
+    },
+    // 安装节点
+    install() {
+      this.nodeVisible = true;
+    },
+    // 进入终端
+    handleTerminal(record, terminalFullscreen) {
+      this.temp = Object.assign({}, record);
+      this.terminalVisible = true;
+      this.terminalFullscreen = terminalFullscreen;
+    },
+    // 删除
+    handleDelete(record) {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要删除机器 SSH 么？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          machineSshDelete(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.loadData();
+            }
+          });
+        },
+      });
+    },
+    // 操作日志
+    handleViewLog(record) {
+      this.temp = Object.assign({}, record);
+      this.viewOperationLog = true;
+    },
+    // 查看工作空间的 ssh
+    handleViewWorkspaceSsh(item) {
+      machineListGroupWorkspaceSsh({
+        id: item.id,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.temp = {
+            machineSshId: item.id,
+          };
+          this.viewWorkspaceSsh = true;
+          this.workspaceSshList = res.data;
+        }
+      });
+    },
+    // 配置 ssh
+    configWorkspaceSsh(item) {
+      this.temp = {
+        ...this.temp,
+        id: item.id,
+        name: item.name,
+        fileDirs: item.fileDirs ? JSON.parse(item.fileDirs).join("\r\n") : "",
+        allowEditSuffix: item.allowEditSuffix ? JSON.parse(item.allowEditSuffix).join("\r\n") : "",
+      };
+      this.configWorkspaceSshVisible = true;
+    },
+    // 提交 SSH 配置 数据
+    handleConfigWorkspaceSshOk() {
+      // 检验表单
+      this.$refs["editConfigWorkspaceSshForm"].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        // 提交数据
+        machineSshEdit(this.temp).then((res) => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg,
+            });
+            this.editSshVisible = false;
+            machineListGroupWorkspaceSsh({
+              id: this.temp.machineSshId,
+            }).then((res) => {
+              if (res.code === 200) {
+                this.workspaceSshList = res.data;
+              }
+            });
+          }
+        });
+      });
+    },
+  },
+};
+</script>
