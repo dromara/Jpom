@@ -26,7 +26,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.func.assets.controller.BaseSshController;
+import io.jpom.func.assets.controller.BaseSshFileController;
 import io.jpom.func.assets.model.MachineSshModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.permission.ClassFeature;
@@ -50,7 +50,7 @@ import java.util.function.BiFunction;
 @RequestMapping("node/ssh")
 @Feature(cls = ClassFeature.SSH_FILE)
 @Slf4j
-public class SshFileController extends BaseSshController {
+public class SshFileController extends BaseSshFileController {
 
 
     @Override

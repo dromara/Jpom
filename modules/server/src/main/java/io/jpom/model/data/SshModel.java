@@ -26,7 +26,7 @@ import cn.hutool.core.annotation.PropIgnore;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
-import io.jpom.func.assets.controller.BaseSshController;
+import io.jpom.func.assets.controller.BaseSshFileController;
 import io.jpom.func.assets.model.MachineSshModel;
 import io.jpom.model.BaseGroupModel;
 import io.jpom.util.StringUtil;
@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class SshModel extends BaseGroupModel implements BaseSshController.ItemConfig {
+public class SshModel extends BaseGroupModel implements BaseSshFileController.ItemConfig {
 
     private String name;
     @Deprecated

@@ -182,7 +182,7 @@
         }
       "
     >
-      <ssh-file v-if="drawerVisible" :ssh="temp" />
+      <ssh-file v-if="drawerVisible" :machineSshId="temp.id" />
     </a-drawer>
     <!-- Terminal -->
     <a-modal
@@ -269,7 +269,7 @@
   </div>
 </template>
 <script>
-import { machineSshListData, machineSshListGroup, machineSshEdit, machineSshCheckAgent, machineSshDelete, machineListGroupWorkspaceSsh } from "@/api/system/assets-ssh";
+import { machineSshListData, machineSshListGroup, machineSshEdit, machineSshCheckAgent, machineSshDelete, machineListGroupWorkspaceSsh, machineSshSaveWorkspaceConfig } from "@/api/system/assets-ssh";
 import { COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, CHANGE_PAGE } from "@/utils/const";
 import fastInstall from "@/pages/node/fast-install.vue";
 import CustomSelect from "@/components/customSelect";
@@ -513,12 +513,12 @@ export default {
           return false;
         }
         // 提交数据
-        machineSshEdit(this.temp).then((res) => {
+        machineSshSaveWorkspaceConfig(this.temp).then((res) => {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
             });
-            this.editSshVisible = false;
+            this.configWorkspaceSshVisible = false;
             machineListGroupWorkspaceSsh({
               id: this.temp.machineSshId,
             }).then((res) => {
@@ -529,6 +529,12 @@ export default {
           }
         });
       });
+    },
+    // 文件管理
+    handleFile(record) {
+      this.temp = Object.assign({}, record);
+
+      this.drawerVisible = true;
     },
   },
 };

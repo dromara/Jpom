@@ -36,7 +36,6 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.cron.CronUtils;
 import io.jpom.model.data.NodeModel;
 import io.jpom.script.BaseRunScript;
-import io.jpom.service.IStatusRecover;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
@@ -46,7 +45,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 检查监控数据状态
@@ -86,14 +84,6 @@ public class ServerCheckMonitor implements ILoadEvent, ISystemTask {
      */
     private void asyncLoad() {
         ThreadUtil.execute(() -> {
-            // 状态恢复的数据
-            Map<String, IStatusRecover> statusRecoverMap = SpringUtil.getApplicationContext().getBeansOfType(IStatusRecover.class);
-            statusRecoverMap.forEach((name, iCron) -> {
-                int count = iCron.statusRecover();
-                if (count > 0) {
-                    log.info("{} 恢复 {} 条异常数据", name, count);
-                }
-            });
             //
             BuildUtil.reloadCacheSize();
             JpomApplication.getInstance().dataSize();
