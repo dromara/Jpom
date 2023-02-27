@@ -57,10 +57,19 @@ export function getMachineSshOperationLogList(params) {
   });
 }
 
+// ssh 关联工作空间的数据
 export function machineListGroupWorkspaceSsh(params) {
   return axios({
     url: "/system/assets/ssh/list-workspace-ssh",
     method: "get",
+    params: params,
+  });
+}
+
+export function machineSshSaveWorkspaceConfig(params) {
+  return axios({
+    url: "/system/assets/ssh/save-workspace-config",
+    method: "post",
     params: params,
   });
 }

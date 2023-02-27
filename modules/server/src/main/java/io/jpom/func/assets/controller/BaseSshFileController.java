@@ -29,7 +29,6 @@ import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.ServerConfig;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.CompressionFileUtil;
-import io.jpom.util.FileUtils;
 import io.jpom.util.StringUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +54,7 @@ import java.util.function.BiFunction;
  * @since 2023/2/25
  */
 @Slf4j
-public abstract class BaseSshController extends BaseServerController {
+public abstract class BaseSshFileController extends BaseServerController {
 
     @Resource
     protected SshService sshService;
@@ -106,15 +105,16 @@ public abstract class BaseSshController extends BaseServerController {
     @Feature(method = MethodFeature.DOWNLOAD)
     public void download(@ValidatorItem String id,
                          @ValidatorItem String allowPathParent,
-                         @ValidatorItem String nextFilePath,
+                         @ValidatorItem String nextPath,
+                         @ValidatorItem String name,
                          HttpServletResponse response) throws IOException {
-        MachineSshModel machineSshModel = this.checkConfigPathChildren(id, allowPathParent, nextFilePath, (machineSshModel1, itemConfig) -> machineSshModel1);
+        MachineSshModel machineSshModel = this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel1, itemConfig) -> machineSshModel1);
         if (machineSshModel == null) {
             ServletUtil.write(response, "ssh error 或者 没有配置此文件夹", MediaType.TEXT_HTML_VALUE);
             return;
         }
         try {
-            this.downloadFile(machineSshModel, allowPathParent, nextFilePath, response);
+            this.downloadFile(machineSshModel, allowPathParent, nextPath, name, response);
         } catch (SftpException e) {
             log.error("下载失败", e);
             ServletUtil.write(response, "download error", MediaType.TEXT_HTML_VALUE);
@@ -142,7 +142,9 @@ public abstract class BaseSshController extends BaseServerController {
 
     @RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONArray> listData(@ValidatorItem String id, @ValidatorItem String allowPathParent, String nextPath) {
+    public JsonMessage<JSONArray> listData(@ValidatorItem String id,
+                                           @ValidatorItem String allowPathParent,
+                                           @ValidatorItem String nextPath) {
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             try {
                 JSONArray listDir = listDir(machineSshModel, allowPathParent, nextPath, itemConfig);
@@ -155,31 +157,38 @@ public abstract class BaseSshController extends BaseServerController {
 
     @RequestMapping(value = "read_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<String> readFileData(String id, String path, String children) {
-        return this.checkConfigPathChildren(id, path, children, (machineSshModel, itemConfig) -> {
+    public JsonMessage<String> readFileData(@ValidatorItem String id,
+                                            @ValidatorItem String allowPathParent,
+                                            @ValidatorItem String nextPath,
+                                            @ValidatorItem String name) {
+        return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             //
             List<String> allowEditSuffix = itemConfig.allowEditSuffix();
-            Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, children);
+            Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, name);
             //
-            String content = this.readFile(machineSshModel, path, children, charset);
+            String content = this.readFile(machineSshModel, allowPathParent, nextPath, name, charset);
             return JsonMessage.success("ok", content);
         });
     }
 
     @RequestMapping(value = "update_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> updateFileData(String id, String path, String children, String content) {
-        return this.checkConfigPathChildren(id, path, children, (machineSshModel, itemConfig) -> {
+    public JsonMessage<String> updateFileData(@ValidatorItem String id,
+                                              @ValidatorItem String allowPathParent,
+                                              @ValidatorItem String nextPath,
+                                              @ValidatorItem String name,
+                                              @ValidatorItem String content) {
+        return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             List<String> allowEditSuffix = itemConfig.allowEditSuffix();
-            Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, children);
+            Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, name);
             // 缓存到本地
-            File file = FileUtil.file(serverConfig.getUserTempPath(), machineSshModel.getId(), children);
+            File file = FileUtil.file(serverConfig.getUserTempPath(), machineSshModel.getId(), allowPathParent, nextPath, name);
             try {
                 FileUtil.writeString(content, file, charset);
                 // 上传
-                this.syncFile(machineSshModel, path, children, file);
+                this.syncFile(machineSshModel, allowPathParent, nextPath, name, file);
             } finally {
                 //
                 FileUtil.del(file);
@@ -193,16 +202,17 @@ public abstract class BaseSshController extends BaseServerController {
      * 读取文件
      *
      * @param machineSshModel ssh
-     * @param path            路径
+     * @param allowPathParent 路径
+     * @param nextPath        二级路径
      * @param name            文件
      * @param charset         编码格式
      */
-    private String readFile(MachineSshModel machineSshModel, String path, String name, Charset charset) {
+    private String readFile(MachineSshModel machineSshModel, String allowPathParent, String nextPath, String name, Charset charset) {
         Sftp sftp = null;
         try {
             Session session = sshService.getSessionByModel(machineSshModel);
             sftp = new Sftp(session, machineSshModel.charset(), machineSshModel.timeout());
-            String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
+            String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             sftp.download(normalize, byteArrayOutputStream);
             byte[] bytes = byteArrayOutputStream.toByteArray();
@@ -216,16 +226,21 @@ public abstract class BaseSshController extends BaseServerController {
      * 上传文件
      *
      * @param machineSshModel ssh
-     * @param path            路径
+     * @param allowPathParent 路径
+     * @param nextPath        二级路径
      * @param name            文件
      * @param file            同步上传文件
      */
-    private void syncFile(MachineSshModel machineSshModel, String path, String name, File file) {
+    private void syncFile(MachineSshModel machineSshModel,
+                          String allowPathParent,
+                          String nextPath,
+                          String name,
+                          File file) {
         Sftp sftp = null;
         try {
             Session session = sshService.getSessionByModel(machineSshModel);
             sftp = new Sftp(session, machineSshModel.charset(), machineSshModel.timeout());
-            String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
+            String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
             sftp.upload(normalize, file);
         } finally {
             IoUtil.close(sftp);
@@ -237,14 +252,14 @@ public abstract class BaseSshController extends BaseServerController {
      *
      * @param machineSshModel ssh
      * @param allowPathParent 路径
-     * @param nextFilePath    文件
+     * @param name            文件
      * @param response        响应
      * @throws IOException   io
      * @throws SftpException sftp
      */
-    private void downloadFile(MachineSshModel machineSshModel, String allowPathParent, String nextFilePath, HttpServletResponse response) throws IOException, SftpException {
+    private void downloadFile(MachineSshModel machineSshModel, String allowPathParent, String nextPath, String name, HttpServletResponse response) throws IOException, SftpException {
         final String charset = ObjectUtil.defaultIfNull(response.getCharacterEncoding(), CharsetUtil.UTF_8);
-        String fileName = FileUtil.getName(nextFilePath);
+        String fileName = FileUtil.getName(name);
         response.setHeader("Content-Disposition", StrUtil.format("attachment;filename={}", URLUtil.encode(fileName, Charset.forName(charset))));
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
         Session session = null;
@@ -252,7 +267,7 @@ public abstract class BaseSshController extends BaseServerController {
         try {
             session = sshService.getSessionByModel(machineSshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-            String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextFilePath);
+            String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
             channel.get(normalize, response.getOutputStream());
         } finally {
             JschUtil.close(channel);
@@ -297,17 +312,21 @@ public abstract class BaseSshController extends BaseServerController {
                 jsonObject.put("modifyTime", format);
                 if (attrs.isDir()) {
                     jsonObject.put("dir", true);
-
                 } else {
-                   
                     long fileSize = attrs.getSize();
-                    jsonObject.put("size", FileUtil.readableFileSize(fileSize));
+                    jsonObject.put("size", fileSize);
                     // 允许编辑
                     jsonObject.put("textFileEdit", AgentWhitelist.checkSilentFileSuffix(allowEditSuffix, filename));
                 }
+                String longname = lsEntry.getLongname();
+                jsonObject.put("longname", longname);
+                jsonObject.put("link", attrs.isLink());
+                jsonObject.put("extended", attrs.getExtended());
+                jsonObject.put("permissions", attrs.getPermissionsString());
+                jsonObject.put("allowPathParent", allowPathParent);
                 //
                 jsonObject.put("nextPath", FileUtil.normalize(children2));
-                jsonObject.put("absolutePath", FileUtil.normalize(StrUtil.format("{}/{}", nextPath, filename)));
+//                jsonObject.put("absolutePath", FileUtil.normalize(StrUtil.format("{}/{}", nextPath, filename)));
                 jsonArray.add(jsonObject);
             }
             return jsonArray;
@@ -333,6 +352,7 @@ public abstract class BaseSshController extends BaseServerController {
             JSONArray jsonArray = new JSONArray();
             for (String allowPathParent : list) {
                 JSONObject jsonObject = new JSONObject();
+                jsonObject.put("id", SecureUtil.sha1(allowPathParent));
                 jsonObject.put("allowPathParent", allowPathParent);
                 try {
                     channel.ls(allowPathParent);
@@ -352,23 +372,27 @@ public abstract class BaseSshController extends BaseServerController {
 
     @RequestMapping(value = "delete.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> delete(@ValidatorItem String id, String path, String name) {
-        Assert.hasText(name, "name error");
-        String name2 = FileUtil.normalize(name);
+    public JsonMessage<String> delete(@ValidatorItem String id,
+                                      @ValidatorItem String allowPathParent,
+                                      @ValidatorItem String nextPath,
+                                      String name) {
+        // name 可能为空，为空情况是删除目录
+        String name2 = StrUtil.emptyToDefault(name, StrUtil.EMPTY);
         Assert.state(!StrUtil.equals(name2, StrUtil.SLASH), "不能删除根目录");
-        return this.checkConfigPathChildren(id, path, name2, (machineSshModel, itemConfig) -> {
+        return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             Session session = null;
             Sftp sftp = null;
             try {
                 //
-                String normalize = FileUtil.normalize(path + StrUtil.SLASH + name2);
+                String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name2);
+                Assert.state(!StrUtil.equals(normalize, StrUtil.SLASH), "不能删除根目录");
                 session = sshService.getSessionByModel(machineSshModel);
                 sftp = new Sftp(session, machineSshModel.charset(), machineSshModel.timeout());
                 // 尝试删除
                 boolean dirOrFile = this.tryDelDirOrFile(sftp, normalize);
                 if (dirOrFile) {
-                    String parent = FileUtil.getParent(name, 1);
+                    String parent = FileUtil.getParent(normalize, 1);
                     return JsonMessage.success("删除成功", parent);
                 }
                 return JsonMessage.success("删除成功");
@@ -386,12 +410,13 @@ public abstract class BaseSshController extends BaseServerController {
 
     @RequestMapping(value = "rename.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> rename(@ValidatorItem String id, String path, @ValidatorItem String children, @ValidatorItem String name, @ValidatorItem String newname) {
-        Assert.hasText(name, "name error");
-        Assert.hasText(newname, "newname error");
-        String name2 = FileUtil.normalize(name);
-        FileUtils.checkSlip(newname);
-        return this.checkConfigPathChildren(id, path, children, (machineSshModel, itemConfig) -> {
+    public JsonMessage<String> rename(@ValidatorItem String id,
+                                      @ValidatorItem String allowPathParent,
+                                      @ValidatorItem String nextPath,
+                                      @ValidatorItem String name,
+                                      @ValidatorItem String newname) {
+
+        return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             Session session = null;
             ChannelSftp channel = null;
@@ -399,7 +424,9 @@ public abstract class BaseSshController extends BaseServerController {
             try {
                 session = sshService.getSessionByModel(machineSshModel);
                 channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-                channel.rename(FileUtil.normalize(path + StrUtil.SLASH + children + StrUtil.SLASH + name), FileUtil.normalize(path + StrUtil.SLASH + children + StrUtil.SLASH + newname));
+                String oldPath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
+                String newPath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + newname);
+                channel.rename(oldPath, newPath);
             } catch (Exception e) {
                 log.error("ssh重命名失败异常", e);
                 return new JsonMessage<>(400, "重命名失败:" + e.getMessage());
@@ -433,10 +460,14 @@ public abstract class BaseSshController extends BaseServerController {
 
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<String> upload(String id, String path, String name, String unzip, MultipartFile file) {
-        return this.checkConfigPathChildren(id, path, name, (machineSshModel, itemConfig) -> {
+    public JsonMessage<String> upload(@ValidatorItem String id,
+                                      @ValidatorItem String allowPathParent,
+                                      @ValidatorItem String nextPath,
+                                      String unzip,
+                                      MultipartFile file) {
+        return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
-            String remotePath = FileUtil.normalize(path + StrUtil.SLASH + name);
+            String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath);
             Session session = null;
             ChannelSftp channel = null;
 
@@ -497,13 +528,15 @@ public abstract class BaseSshController extends BaseServerController {
      * @apiSuccess {JSON}  data
      */
     @RequestMapping(value = "new_file_folder.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> newFileFolder(String id, @ValidatorItem String path, @ValidatorItem String name, String unFolder) {
-        String normalize = FileUtil.normalize(name);
-        Assert.state(!StrUtil.contains(normalize, StrUtil.SLASH), "文件名不能包含/");
-        return this.checkConfigPathChildren(id, path, name, (machineSshModel, itemConfig) -> {
+    public JsonMessage<String> newFileFolder(String id,
+                                             @ValidatorItem String allowPathParent,
+                                             @ValidatorItem String nextPath,
+                                             @ValidatorItem String name, String unFolder) {
+        Assert.state(!StrUtil.contains(name, StrUtil.SLASH), "文件名不能包含/");
+        return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             Session session = sshService.getSessionByModel(machineSshModel);
-            String remotePath = FileUtil.normalize(path + StrUtil.SLASH + name);
+            String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
             try (Sftp sftp = new Sftp(session, machineSshModel.charset(), machineSshModel.timeout())) {
                 if (sftp.exist(remotePath)) {
                     return new JsonMessage<>(400, "文件夹或者文件已存在");

@@ -25,6 +25,7 @@ package io.jpom.service.dblog;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.ServerConst;
 import io.jpom.func.assets.model.MachineSshModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.log.SshTerminalExecuteLog;
@@ -77,6 +78,8 @@ public class SshTerminalExecuteLogService extends BaseWorkspaceService<SshTermin
                         sshTerminalExecuteLog.setSshId(sshItem.getId());
                         sshTerminalExecuteLog.setSshName(sshItem.getName());
                         sshTerminalExecuteLog.setWorkspaceId(sshItem.getWorkspaceId());
+                    } else {
+                        sshTerminalExecuteLog.setWorkspaceId(ServerConst.WORKSPACE_GLOBAL);
                     }
                     sshTerminalExecuteLog.setMachineSshId(machineSshModel.getId());
                     sshTerminalExecuteLog.setMachineSshName(machineSshModel.getName());

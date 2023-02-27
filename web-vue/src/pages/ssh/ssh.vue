@@ -92,17 +92,17 @@
     <!-- 文件管理 -->
     <a-drawer
       destroyOnClose
-      :title="`${this.temp.name} 文件管理`"
-      placement="right"
-      width="90vw"
       :visible="drawerVisible"
       @close="
         () => {
           this.drawerVisible = false;
         }
       "
+      :title="`${this.temp.name} 文件管理`"
+      placement="right"
+      width="90vw"
     >
-      <ssh-file v-if="drawerVisible" :ssh="temp" />
+      <ssh-file v-if="drawerVisible" :sshId="temp.id" />
     </a-drawer>
     <!-- Terminal -->
     <a-modal
