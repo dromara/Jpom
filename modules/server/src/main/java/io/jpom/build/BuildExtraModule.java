@@ -73,9 +73,13 @@ public class BuildExtraModule extends BaseModel {
      */
     private String resultDirFile;
     /**
-     * 发布命令  ssh 才能用上
+     * 发布后命令  ssh 才能用上
      */
     private String releaseCommand;
+    /**
+     * 发布前命令  ssh 才能用上
+     */
+    private String releaseBeforeCommand;
     /**
      * 发布到ssh中的目录
      */

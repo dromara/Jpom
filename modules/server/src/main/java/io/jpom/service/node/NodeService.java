@@ -134,7 +134,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
         where.setWorkspaceId(workspaceId);
         where.setMachineId(machineId);
         NodeModel nodeModel = this.queryByBean(where);
-        Assert.isNull(nodeModel, () -> "对应工作空间已经存在改节点啦:" + nodeModel.getName());
+        Assert.isNull(nodeModel, () -> "对应工作空间已经存在该节点啦:" + nodeModel.getName());
     }
 
     public boolean existsNode2(String workspaceId, String machineId) {

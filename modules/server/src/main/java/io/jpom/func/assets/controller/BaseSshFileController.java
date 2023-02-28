@@ -548,6 +548,7 @@ public abstract class BaseSshFileController extends BaseServerController {
      * @apiSuccess {JSON}  data
      */
     @RequestMapping(value = "new_file_folder.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.UPLOAD)
     public JsonMessage<String> newFileFolder(String id,
                                              @ValidatorItem String allowPathParent,
                                              @ValidatorItem String nextPath,

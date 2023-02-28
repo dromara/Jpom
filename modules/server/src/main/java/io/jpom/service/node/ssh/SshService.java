@@ -383,4 +383,22 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
         nodeModel.setMachineSshId(machineSshId);
         return this.count(nodeModel);
     }
+
+    public void existsSsh(String workspaceId, String machineSshId) {
+        //
+        SshModel where = new SshModel();
+        where.setWorkspaceId(workspaceId);
+        where.setMachineSshId(machineSshId);
+        SshModel data = this.queryByBean(where);
+        Assert.isNull(data, () -> "对应工作空间已经存在该 ssh 啦:" + data.getName());
+    }
+
+    public void insert(MachineSshModel machineSshModel, String workspaceId) {
+        SshModel data = new SshModel();
+        data.setWorkspaceId(workspaceId);
+        data.setName(machineSshModel.getName());
+        data.setGroup(machineSshModel.getGroupName());
+        data.setMachineSshId(machineSshModel.getId());
+        this.insert(data);
+    }
 }

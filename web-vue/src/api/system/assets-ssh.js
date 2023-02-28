@@ -48,6 +48,15 @@ export function machineSshDelete(params) {
   });
 }
 
+// 分配 ssh
+export function machineSshDistribute(params) {
+  return axios({
+    url: "/system/assets/ssh/distribute",
+    method: "post",
+    params: params,
+  });
+}
+
 // ssh 操作日志列表
 export function getMachineSshOperationLogList(params) {
   return axios({
