@@ -277,7 +277,7 @@ export default {
     },
     // 修改
     handleEdit(record) {
-      this.temp = Object.assign({}, record);
+      this.temp = Object.assign({}, { id: record.id, group: record.group, name: record.name });
 
       this.editSshVisible = true;
       // @author jzy 08-04
@@ -319,7 +319,7 @@ export default {
 
     // 文件管理
     handleFile(record) {
-      this.temp = Object.assign({}, record);
+      this.temp = Object.assign({}, { id: record.id, group: record.group, name: record.name });
 
       this.drawerVisible = true;
     },

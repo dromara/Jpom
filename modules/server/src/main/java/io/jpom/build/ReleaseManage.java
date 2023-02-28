@@ -402,8 +402,23 @@ public class ReleaseManage {
     }
 
     private void doSsh(SshModel item, SshService sshService) throws IOException {
+        Map<String, String> envFileMap = buildEnv.environment();
         MachineSshModel machineSshModel = sshService.getMachineSshModel(item);
         Session session = sshService.getSessionByModel(machineSshModel);
+        {
+            // 执行发布前命令
+            String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseBeforeCommand(), StrUtil.LF);
+            if (ArrayUtil.isNotEmpty(commands)) {
+                // 替换变量
+                for (int i = 0; i < commands.length; i++) {
+                    commands[i] = StringUtil.formatStrByMap(commands[i], envFileMap);
+                }
+                //
+                logRecorder.system("开始执行 {} 发布前命令", item.getName());
+                String s = sshService.exec(item, commands);
+                logRecorder.info(s);
+            }
+        }
         try {
             String releasePath = this.buildExtraModule.getReleasePath();
             if (StrUtil.isEmpty(releasePath)) {
@@ -434,23 +449,23 @@ public class ReleaseManage {
         } finally {
             JschUtil.close(session);
         }
-        // 执行命令
-        String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseCommand(), StrUtil.LF);
-        if (ArrayUtil.isEmpty(commands)) {
-            logRecorder.systemWarning("没有需要执行的ssh命令");
-            return;
+        {
+            // 执行发布后命令
+            String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseCommand(), StrUtil.LF);
+            if (ArrayUtil.isEmpty(commands)) {
+                logRecorder.systemWarning("没有需要执行的ssh命令");
+                return;
+            }
+            // 替换变量
+            //
+            for (int i = 0; i < commands.length; i++) {
+                commands[i] = StringUtil.formatStrByMap(commands[i], envFileMap);
+            }
+            //
+            logRecorder.system("开始执行 {} 发布后命令", item.getName());
+            String s = sshService.exec(item, commands);
+            logRecorder.info(s);
         }
-        // 替换变量
-        //this.formatCommand(commands);
-        Map<String, String> envFileMap = buildEnv.environment();
-        //
-        for (int i = 0; i < commands.length; i++) {
-            commands[i] = StringUtil.formatStrByMap(commands[i], envFileMap);
-        }
-        //
-        logRecorder.system("开始执行 {} ssh 命令", item.getName());
-        String s = sshService.exec(item, commands);
-        logRecorder.info(s);
     }
 
     /**

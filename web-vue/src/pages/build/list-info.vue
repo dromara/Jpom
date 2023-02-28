@@ -411,13 +411,38 @@
                   </a-input-group>
                 </a-form-model-item>
               </template>
+
+              <a-form-model-item v-if="temp.releaseMethod === 3" prop="releaseBeforeCommand">
+                <!-- sshCommand -->
+                <template slot="label">
+                  发布前命令
+                  <a-tooltip v-show="!temp.id">
+                    <template slot="title">
+                      发布前执行的命令(非阻塞命令),一般是关闭项目命令
+                      <ul>
+                        <li>支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}</li>
+                        <li>可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称</li>
+                      </ul>
+                    </template>
+                    <a-icon type="question-circle" theme="filled" />
+                  </a-tooltip>
+                </template>
+                <a-input
+                  v-model="tempExtraData.releaseBeforeCommand"
+                  allow-clear
+                  :auto-size="{ minRows: 2, maxRows: 10 }"
+                  type="textarea"
+                  :rows="3"
+                  placeholder="发布前执行的命令(非阻塞命令),一般是关闭项目命令 ,支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}"
+                />
+              </a-form-model-item>
               <a-form-model-item v-if="temp.releaseMethod === 3 || temp.releaseMethod === 4" prop="releaseCommand">
                 <!-- sshCommand LocalCommand -->
                 <template slot="label">
-                  发布命令
+                  发布后命令
                   <a-tooltip v-show="!temp.id">
                     <template slot="title">
-                      发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java
+                      发布后执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java
                       <ul>
                         <li>支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}</li>
                         <li>可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称</li>
@@ -432,7 +457,7 @@
                   :auto-size="{ minRows: 2, maxRows: 10 }"
                   type="textarea"
                   :rows="3"
-                  placeholder="发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java,支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}"
+                  placeholder="发布后执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java,支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}"
                 />
               </a-form-model-item>
 

@@ -99,7 +99,7 @@ public class MachineNodeController extends BaseGroupNameController {
      * @return json
      */
     @PostMapping(value = "distribute", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.DEL)
+    @Feature(method = MethodFeature.EDIT)
     public JsonMessage<String> distribute(@ValidatorItem String id, @ValidatorItem String workspaceId) {
         MachineNodeModel machineNodeModel = machineNodeServer.getByKey(id);
         Assert.notNull(machineNodeModel, "没有对应的机器");

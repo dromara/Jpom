@@ -43,6 +43,7 @@ import io.jpom.func.assets.model.MachineSshModel;
 import io.jpom.func.assets.server.MachineSshServer;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.model.data.SshModel;
+import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.log.SshTerminalExecuteLog;
 import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
@@ -298,6 +299,27 @@ public class MachineSshController extends BaseGroupNameController {
         List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
         sshModel.allowEditSuffix(allowEditSuffixList);
         sshService.update(sshModel);
+        return JsonMessage.success("操作成功");
+    }
+
+    /**
+     * 将机器分配到指定工作空间
+     *
+     * @param id          机器id
+     * @param workspaceId 工作空间id
+     * @return json
+     */
+    @PostMapping(value = "distribute", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<String> distribute(@ValidatorItem String id, @ValidatorItem String workspaceId) {
+        MachineSshModel machineSshModel = machineSshServer.getByKey(id);
+        Assert.notNull(machineSshModel, "没有对应的ssh");
+        boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
+        Assert.state(exists, "不存在对应的工作空间");
+        //
+        sshService.existsSsh(workspaceId, id);
+        //
+        sshService.insert(machineSshModel, workspaceId);
         return JsonMessage.success("操作成功");
     }
 }

@@ -63,7 +63,7 @@
                   </a-menu-item>
                 </a-menu>
               </a-dropdown>
-
+              <a-button size="small" type="primary" @click="syncToWorkspaceShow(record)">分配</a-button>
               <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
               <a-button size="small" type="primary" @click="handleViewWorkspaceSsh(record)">关联</a-button>
 
@@ -275,13 +275,33 @@
             </a-form-model-item>
           </a-form-model>
         </a-modal>
+        <!-- 分配到其他工作空间 -->
+        <a-modal destroyOnClose v-model="syncToWorkspaceVisible" title="分配到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
+          <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+            <a-form-model-item> </a-form-model-item>
+            <a-form-model-item label="选择工作空间" prop="workspaceId">
+              <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
+                <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
+              </a-select>
+            </a-form-model-item>
+          </a-form-model>
+        </a-modal>
       </a-tab-pane>
       <a-tab-pane key="2" tab="命令日志"> <OperationLog type="machinessh"></OperationLog></a-tab-pane>
     </a-tabs>
   </div>
 </template>
 <script>
-import { machineSshListData, machineSshListGroup, machineSshEdit, machineSshCheckAgent, machineSshDelete, machineListGroupWorkspaceSsh, machineSshSaveWorkspaceConfig } from "@/api/system/assets-ssh";
+import {
+  machineSshListData,
+  machineSshListGroup,
+  machineSshEdit,
+  machineSshCheckAgent,
+  machineSshDelete,
+  machineListGroupWorkspaceSsh,
+  machineSshSaveWorkspaceConfig,
+  machineSshDistribute,
+} from "@/api/system/assets-ssh";
 import { COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, CHANGE_PAGE } from "@/utils/const";
 import fastInstall from "@/pages/node/fast-install.vue";
 import CustomSelect from "@/components/customSelect";
@@ -289,6 +309,7 @@ import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
 import OperationLog from "@/pages/system/assets/ssh/operation-log";
 import { deleteForeSsh } from "@/api/ssh";
+import { getWorkSpaceListAll } from "@/api/workspace";
 
 export default {
   components: { fastInstall, CustomSelect, Terminal, SshFile, OperationLog },
@@ -337,7 +358,7 @@ export default {
           title: "操作",
           dataIndex: "operation",
           scopedSlots: { customRender: "operation" },
-          width: "240px",
+          width: "300px",
           align: "center",
           // ellipsis: true,
         },
@@ -366,6 +387,8 @@ export default {
       workspaceSshList: [],
       viewWorkspaceSsh: false,
       configWorkspaceSshVisible: false,
+      syncToWorkspaceVisible: false,
+      workspaceList: [],
     };
   },
   created() {
@@ -577,6 +600,41 @@ export default {
       this.temp = Object.assign({}, record);
 
       this.drawerVisible = true;
+    },
+    // 加载工作空间数据
+    loadWorkSpaceListAll() {
+      getWorkSpaceListAll().then((res) => {
+        if (res.code === 200) {
+          this.workspaceList = res.data;
+        }
+      });
+    },
+    // 同步到其他工作情况
+    syncToWorkspaceShow(item) {
+      this.syncToWorkspaceVisible = true;
+      this.loadWorkSpaceListAll();
+      this.temp = {
+        id: item.id,
+      };
+    },
+    handleSyncToWorkspace() {
+      if (!this.temp.workspaceId) {
+        this.$notification.warn({
+          message: "请选择工作空间",
+        });
+        return false;
+      }
+      // 同步
+      machineSshDistribute(this.temp).then((res) => {
+        if (res.code == 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+
+          this.syncToWorkspaceVisible = false;
+          return false;
+        }
+      });
     },
   },
 };
