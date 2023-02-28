@@ -39,7 +39,8 @@
           }
         "
       >
-        <a-input disabled :value="text"><a-icon slot="suffix" type="copy" /></a-input>
+        <a-button type="link" icon="copy" size="small"> {{ text }} </a-button>
+        <!-- <a-input disabled :value="text"><a-icon slot="suffix" type="copy" /></a-input> -->
       </a-tooltip>
       <a-tooltip slot="modifyUser" slot-scope="text, item" placement="topLeft" :title="item.modifyUser || item.userId">
         <span>{{ item.modifyUser || item.userId }}</span>

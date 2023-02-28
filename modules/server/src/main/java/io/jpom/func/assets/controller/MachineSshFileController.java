@@ -8,6 +8,7 @@ import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.util.FileUtils;
+import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +34,7 @@ public class MachineSshFileController extends BaseSshFileController {
         return function.apply(machineSshModel, new ItemConfig() {
             @Override
             public List<String> allowEditSuffix() {
-                return null;
+                return StringUtil.jsonConvertArray(machineSshModel.getAllowEditSuffix(), String.class);
             }
 
             @Override
@@ -52,7 +53,7 @@ public class MachineSshFileController extends BaseSshFileController {
         return function.apply(machineSshModel, new ItemConfig() {
             @Override
             public List<String> allowEditSuffix() {
-                return null;
+                return StringUtil.jsonConvertArray(machineSshModel.getAllowEditSuffix(), String.class);
             }
 
             @Override
