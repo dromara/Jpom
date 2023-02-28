@@ -1,271 +1,279 @@
 <template>
   <div class="full-content">
-    <!-- 数据表格 -->
-    <a-table :data-source="list" :columns="columns" size="middle" :pagination="pagination" @change="changePage" bordered rowKey="id">
-      <template slot="title">
-        <a-space>
-          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="ssh名称" />
-          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%host%']" placeholder="host" />
-          <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
-            <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
-          </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-          </a-tooltip>
-          <a-button type="primary" @click="handleAdd">新增</a-button>
-
-          <a-tooltip>
-            <template slot="title">
-              <div>
-                <ul>
-                  <li>节点状态是异步获取有一定时间延迟</li>
-                  <li>节点状态会自动识别服务器中是否存在 java 环境,如果没有 Java 环境不能快速安装节点</li>
-                  <li>关联节点如果服务器存在 java 环境,但是插件端未运行则会显示快速安装按钮</li>
-                </ul>
-              </div>
-            </template>
-            <a-icon type="question-circle" theme="filled" />
-          </a-tooltip>
-        </a-space>
-      </template>
-      <a-tooltip slot="tooltip" slot-scope="text" :title="text"> {{ text }}</a-tooltip>
-      <template slot="nodeId" slot-scope="text, record">
-        <template v-if="sshAgentInfo[record.id]">
-          <a-tooltip v-if="sshAgentInfo[record.id].error" :title="sshAgentInfo[record.id].error">
-            <a-tag>连接异常</a-tag>
-          </a-tooltip>
-          <template v-else>
-            <div v-if="sshAgentInfo[record.id].javaVersion">
-              <a-tooltip
-                v-if="sshAgentInfo[record.id].pid > 0"
-                placement="topLeft"
-                :title="` ssh 中已经运行了插件端进程ID：${sshAgentInfo[record.id].pid},java :  ${sshAgentInfo[record.id].javaVersion}`"
-              >
-                <a-tag> {{ sshAgentInfo[record.id].pid }}</a-tag>
+    <a-tabs default-active-key="1">
+      <a-tab-pane key="1" tab="管理">
+        <!-- 数据表格 -->
+        <a-table :data-source="list" :columns="columns" size="middle" :pagination="pagination" @change="changePage" bordered rowKey="id">
+          <template slot="title">
+            <a-space>
+              <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="ssh名称" />
+              <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%host%']" placeholder="host" />
+              <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+                <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+              </a-select>
+              <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
+                <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
               </a-tooltip>
-              <a-button v-else size="small" type="primary" @click="install(record)">安装节点</a-button>
-            </div>
+              <a-button type="primary" @click="handleAdd">新增</a-button>
 
-            <a-tag v-else>没有Java环境</a-tag>
+              <a-tooltip>
+                <template slot="title">
+                  <div>
+                    <ul>
+                      <li>节点状态是异步获取有一定时间延迟</li>
+                      <li>节点状态会自动识别服务器中是否存在 java 环境,如果没有 Java 环境不能快速安装节点</li>
+                      <li>关联节点如果服务器存在 java 环境,但是插件端未运行则会显示快速安装按钮</li>
+                    </ul>
+                  </div>
+                </template>
+                <a-icon type="question-circle" theme="filled" />
+              </a-tooltip>
+            </a-space>
           </template>
-        </template>
-        <div v-else>- {{ sshAgentInfo[record.id] }}</div>
-      </template>
-      <template slot="operation" slot-scope="text, record">
-        <a-space>
-          <a-dropdown>
-            <a-button size="small" type="primary" @click="handleTerminal(record, false)">终端<a-icon type="down" /></a-button>
-            <a-menu slot="overlay">
-              <a-menu-item key="1">
-                <a-button size="small" type="primary" icon="fullscreen" @click="handleTerminal(record, true)">全屏终端</a-button>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown>
+          <a-tooltip slot="tooltip" slot-scope="text" :title="text"> {{ text }}</a-tooltip>
+          <template slot="nodeId" slot-scope="text, record">
+            <template v-if="sshAgentInfo[record.id]">
+              <a-tooltip v-if="sshAgentInfo[record.id].error" :title="sshAgentInfo[record.id].error">
+                <a-tag>连接异常</a-tag>
+              </a-tooltip>
+              <template v-else>
+                <div v-if="sshAgentInfo[record.id].javaVersion">
+                  <a-tooltip
+                    v-if="sshAgentInfo[record.id].pid > 0"
+                    placement="topLeft"
+                    :title="` ssh 中已经运行了插件端进程ID：${sshAgentInfo[record.id].pid},java :  ${sshAgentInfo[record.id].javaVersion}`"
+                  >
+                    <a-tag> {{ sshAgentInfo[record.id].pid }}</a-tag>
+                  </a-tooltip>
+                  <a-button v-else size="small" type="primary" @click="install(record)">安装节点</a-button>
+                </div>
 
-          <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
-          <a-button size="small" type="primary" @click="handleViewWorkspaceSsh(record)">关联</a-button>
-
-          <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-              更多
-              <a-icon type="down" />
-            </a>
-            <a-menu slot="overlay">
-              <a-menu-item>
-                <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="primary" @click="handleViewLog(record)">终端日志</a-button>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown>
-        </a-space>
-      </template>
-    </a-table>
-    <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editSshVisible" width="600px" title="编辑 SSH" @ok="handleEditSshOk" :maskClosable="false">
-      <a-form-model ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item label="SSH 名称" prop="name">
-          <a-input v-model="temp.name" :maxLength="50" placeholder="SSH 名称" />
-        </a-form-model-item>
-        <a-form-model-item label="分组名称" prop="group">
-          <custom-select v-model="temp.groupName" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder="选择分组名"> </custom-select>
-        </a-form-model-item>
-        <a-form-model-item label="Host" prop="host">
-          <a-input-group compact prop="host">
-            <a-input style="width: 70%" v-model="temp.host" placeholder="主机 Host" />
-            <a-input-number style="width: 30%" v-model="temp.port" :min="1" placeholder="端口号" />
-          </a-input-group>
-        </a-form-model-item>
-        <a-form-model-item label="认证方式" prop="connectType">
-          <a-radio-group v-model="temp.connectType" :options="options" />
-        </a-form-model-item>
-        <a-form-model-item prop="user">
-          <template #label>
-            用户名
-            <a-tooltip v-if="!temp.id">
-              <template slot="title"> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-input v-model="temp.user" placeholder="用户" />
-        </a-form-model-item>
-        <!-- 新增时需要填写 -->
-        <!--				<a-form-model-item v-if="temp.type === 'add'" label="Password" prop="password">-->
-        <!--					<a-input-password v-model="temp.password" placeholder="密码"/>-->
-        <!--				</a-form-model-item>-->
-        <!-- 修改时可以不填写 -->
-        <a-form-model-item :prop="`${temp.type === 'add' && temp.connectType === 'PASS' ? 'password' : 'password-update'}`">
-          <template #label>
-            密码
-            <a-tooltip v-if="!temp.id">
-              <template slot="title"> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" />
-        </a-form-model-item>
-        <a-form-model-item v-if="temp.connectType === 'PUBKEY'" prop="privateKey">
-          <template slot="label">
-            私钥内容
-            <a-tooltip v-if="temp.type !== 'edit'" placement="topLeft">
-              <template slot="title">不填将使用默认的 $HOME/.ssh 目录中的配置,使用优先级是：id_dsa>id_rsa>identity </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-
-          <a-textarea v-model="temp.privateKey" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="私钥内容,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:/xxxx/xx" />
-        </a-form-model-item>
-
-        <a-collapse>
-          <a-collapse-panel key="1" header="其他配置">
-            <a-form-model-item label="编码格式" prop="charset">
-              <a-input v-model="temp.charset" placeholder="编码格式" />
-            </a-form-model-item>
-            <a-form-model-item label="超时时间(s)" prop="timeout">
-              <a-input-number v-model="temp.timeout" :min="1" placeholder="单位秒,最小值 1 秒" style="width: 100%" />
-            </a-form-model-item>
-          </a-collapse-panel>
-        </a-collapse>
-      </a-form-model>
-    </a-modal>
-    <!-- 安装节点 -->
-    <a-modal
-      destroyOnClose
-      v-model="nodeVisible"
-      width="80%"
-      title="安装插件端"
-      :footer="null"
-      @cancel="
-        () => {
-          this.nodeVisible = false;
-          this.loadData();
-        }
-      "
-      :maskClosable="false"
-    >
-      <fastInstall v-if="nodeVisible"></fastInstall>
-    </a-modal>
-    <!-- 文件管理 -->
-    <a-drawer
-      destroyOnClose
-      :title="`${this.temp.name} 文件管理`"
-      placement="right"
-      width="90vw"
-      :visible="drawerVisible"
-      @close="
-        () => {
-          this.drawerVisible = false;
-        }
-      "
-    >
-      <ssh-file v-if="drawerVisible" :machineSshId="temp.id" />
-    </a-drawer>
-    <!-- Terminal -->
-    <a-modal
-      destroyOnClose
-      :dialogStyle="{
-        maxWidth: '100vw',
-        top: this.terminalFullscreen ? 0 : false,
-        paddingBottom: 0,
-      }"
-      :width="this.terminalFullscreen ? '100vw' : '80vw'"
-      :bodyStyle="{
-        padding: '0px 10px',
-        paddingTop: '10px',
-        marginRight: '10px',
-        height: `${this.terminalFullscreen ? 'calc(100vh - 56px)' : '70vh'}`,
-      }"
-      v-model="terminalVisible"
-      :title="temp.name"
-      :footer="null"
-      :maskClosable="false"
-    >
-      <terminal v-if="terminalVisible" :machineSshId="temp.id" />
-    </a-modal>
-    <!-- 操作日志 -->
-    <a-modal destroyOnClose v-model="viewOperationLog" title="操作日志" width="80vw" :footer="null" :maskClosable="false">
-      <OperationLog v-if="viewOperationLog" :machineSshId="temp.id"></OperationLog>
-    </a-modal>
-    <!-- 查看 ssh 关联工作空间的信息 -->
-    <a-modal destroyOnClose v-model="viewWorkspaceSsh" width="50%" title="关联工作空间ssh" :footer="null" :maskClosable="false">
-      <a-list bordered :data-source="workspaceSshList">
-        <a-list-item slot="renderItem" slot-scope="item" style="display: block">
-          <a-row>
-            <a-col :span="10">SSH名称：{{ item.name }}</a-col>
-            <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
-            <a-col :span="4"> <a-button size="small" type="primary" @click="configWorkspaceSsh(item)">配置 </a-button></a-col>
-          </a-row>
-        </a-list-item>
-      </a-list>
-    </a-modal>
-    <a-modal destroyOnClose v-model="configWorkspaceSshVisible" width="50%" title="配置ssh" @ok="handleConfigWorkspaceSshOk" :maskClosable="false">
-      <a-form-model ref="editConfigWorkspaceSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item label="SSH 名称">
-          <a-input v-model="temp.name" :disabled="true" :maxLength="50" placeholder="SSH 名称" />
-        </a-form-model-item>
-
-        <a-form-model-item prop="fileDirs">
-          <template slot="label">
-            文件目录
-            <a-tooltip>
-              <template slot="title"> 绑定指定目录可以在线管理，同时构建 ssh 发布目录也需要在此配置 </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-textarea v-model="temp.fileDirs" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="授权可以直接访问的目录，多个回车换行即可" />
-        </a-form-model-item>
-
-        <a-form-model-item label="文件后缀" prop="suffix">
-          <a-input
-            v-model="temp.allowEditSuffix"
-            type="textarea"
-            :rows="5"
-            style="resize: none"
-            placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，多个使用换行。示例：设置编码：txt@utf-8， 不设置编码：txt"
-          />
-        </a-form-model-item>
-        <a-form-model-item prop="notAllowedCommand">
-          <template slot="label">
-            禁止命令
-            <a-tooltip>
-              <template slot="title">
-                限制禁止在在线终端执行的命令
-                <ul>
-                  <li>超级管理员没有任何限制</li>
-                  <li>其他用户可以配置权限解除限制</li>
-                </ul>
+                <a-tag v-else>没有Java环境</a-tag>
               </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
+            </template>
+            <div v-else>- {{ sshAgentInfo[record.id] }}</div>
           </template>
-          <a-textarea v-model="temp.notAllowedCommand" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="禁止命令是不允许在终端执行的名，多个逗号隔开。(超级管理员没有任何限制)" />
-        </a-form-model-item>
-      </a-form-model>
-    </a-modal>
+          <template slot="operation" slot-scope="text, record">
+            <a-space>
+              <a-dropdown>
+                <a-button size="small" type="primary" @click="handleTerminal(record, false)">终端<a-icon type="down" /></a-button>
+                <a-menu slot="overlay">
+                  <a-menu-item key="1">
+                    <a-button size="small" type="primary" icon="fullscreen" @click="handleTerminal(record, true)">全屏终端</a-button>
+                  </a-menu-item>
+                </a-menu>
+              </a-dropdown>
+
+              <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
+              <a-button size="small" type="primary" @click="handleViewWorkspaceSsh(record)">关联</a-button>
+
+              <a-dropdown>
+                <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+                  更多
+                  <a-icon type="down" />
+                </a>
+                <a-menu slot="overlay">
+                  <a-menu-item>
+                    <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" type="primary" @click="handleViewLog(record)">终端日志</a-button>
+                  </a-menu-item>
+                </a-menu>
+              </a-dropdown>
+            </a-space>
+          </template>
+        </a-table>
+        <!-- 编辑区 -->
+        <a-modal destroyOnClose v-model="editSshVisible" width="600px" title="编辑 SSH" @ok="handleEditSshOk" :maskClosable="false">
+          <a-form-model ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+            <a-form-model-item label="SSH 名称" prop="name">
+              <a-input v-model="temp.name" :maxLength="50" placeholder="SSH 名称" />
+            </a-form-model-item>
+            <a-form-model-item label="分组名称" prop="group">
+              <custom-select v-model="temp.groupName" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder="选择分组名"> </custom-select>
+            </a-form-model-item>
+            <a-form-model-item label="Host" prop="host">
+              <a-input-group compact prop="host">
+                <a-input style="width: 70%" v-model="temp.host" placeholder="主机 Host" />
+                <a-input-number style="width: 30%" v-model="temp.port" :min="1" placeholder="端口号" />
+              </a-input-group>
+            </a-form-model-item>
+            <a-form-model-item label="认证方式" prop="connectType">
+              <a-radio-group v-model="temp.connectType" :options="options" />
+            </a-form-model-item>
+            <a-form-model-item prop="user">
+              <template #label>
+                用户名
+                <a-tooltip v-if="!temp.id">
+                  <template slot="title"> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+              </template>
+              <a-input v-model="temp.user" placeholder="用户" />
+            </a-form-model-item>
+            <!-- 新增时需要填写 -->
+            <!--				<a-form-model-item v-if="temp.type === 'add'" label="Password" prop="password">-->
+            <!--					<a-input-password v-model="temp.password" placeholder="密码"/>-->
+            <!--				</a-form-model-item>-->
+            <!-- 修改时可以不填写 -->
+            <a-form-model-item :prop="`${temp.type === 'add' && temp.connectType === 'PASS' ? 'password' : 'password-update'}`">
+              <template #label>
+                密码
+                <a-tooltip v-if="!temp.id">
+                  <template slot="title"> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+              </template>
+              <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" />
+            </a-form-model-item>
+            <a-form-model-item v-if="temp.connectType === 'PUBKEY'" prop="privateKey">
+              <template slot="label">
+                私钥内容
+                <a-tooltip v-if="temp.type !== 'edit'" placement="topLeft">
+                  <template slot="title">不填将使用默认的 $HOME/.ssh 目录中的配置,使用优先级是：id_dsa>id_rsa>identity </template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+              </template>
+
+              <a-textarea v-model="temp.privateKey" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="私钥内容,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:/xxxx/xx" />
+            </a-form-model-item>
+
+            <a-collapse>
+              <a-collapse-panel key="1" header="其他配置">
+                <a-form-model-item label="编码格式" prop="charset">
+                  <a-input v-model="temp.charset" placeholder="编码格式" />
+                </a-form-model-item>
+                <a-form-model-item label="超时时间(s)" prop="timeout">
+                  <a-input-number v-model="temp.timeout" :min="1" placeholder="单位秒,最小值 1 秒" style="width: 100%" />
+                </a-form-model-item>
+              </a-collapse-panel>
+            </a-collapse>
+          </a-form-model>
+        </a-modal>
+        <!-- 安装节点 -->
+        <a-modal
+          destroyOnClose
+          v-model="nodeVisible"
+          width="80%"
+          title="安装插件端"
+          :footer="null"
+          @cancel="
+            () => {
+              this.nodeVisible = false;
+              this.loadData();
+            }
+          "
+          :maskClosable="false"
+        >
+          <fastInstall v-if="nodeVisible"></fastInstall>
+        </a-modal>
+        <!-- 文件管理 -->
+        <a-drawer
+          destroyOnClose
+          :title="`${this.temp.name} 文件管理`"
+          placement="right"
+          width="90vw"
+          :visible="drawerVisible"
+          @close="
+            () => {
+              this.drawerVisible = false;
+            }
+          "
+        >
+          <ssh-file v-if="drawerVisible" :machineSshId="temp.id" />
+        </a-drawer>
+        <!-- Terminal -->
+        <a-modal
+          destroyOnClose
+          :dialogStyle="{
+            maxWidth: '100vw',
+            top: this.terminalFullscreen ? 0 : false,
+            paddingBottom: 0,
+          }"
+          :width="this.terminalFullscreen ? '100vw' : '80vw'"
+          :bodyStyle="{
+            padding: '0px 10px',
+            paddingTop: '10px',
+            marginRight: '10px',
+            height: `${this.terminalFullscreen ? 'calc(100vh - 56px)' : '70vh'}`,
+          }"
+          v-model="terminalVisible"
+          :title="temp.name"
+          :footer="null"
+          :maskClosable="false"
+        >
+          <terminal v-if="terminalVisible" :machineSshId="temp.id" />
+        </a-modal>
+        <!-- 操作日志 -->
+        <a-modal destroyOnClose v-model="viewOperationLog" title="操作日志" width="80vw" :footer="null" :maskClosable="false">
+          <OperationLog v-if="viewOperationLog" :machineSshId="temp.id"></OperationLog>
+        </a-modal>
+        <!-- 查看 ssh 关联工作空间的信息 -->
+        <a-modal destroyOnClose v-model="viewWorkspaceSsh" width="50%" title="关联工作空间ssh" :footer="null" :maskClosable="false">
+          <a-list bordered :data-source="workspaceSshList">
+            <a-list-item slot="renderItem" slot-scope="item" style="display: block">
+              <a-row>
+                <a-col :span="10">SSH名称：{{ item.name }}</a-col>
+                <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
+                <a-col :span="4">
+                  <a-button v-if="item.workspace" size="small" type="primary" @click="configWorkspaceSsh(item)">配置 </a-button>
+                  <a-button v-else size="small" type="danger" @click="handleDeleteWorkspaceItem(item)">删除 </a-button>
+                </a-col>
+              </a-row>
+            </a-list-item>
+          </a-list>
+        </a-modal>
+        <a-modal destroyOnClose v-model="configWorkspaceSshVisible" width="50%" title="配置ssh" @ok="handleConfigWorkspaceSshOk" :maskClosable="false">
+          <a-form-model ref="editConfigWorkspaceSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+            <a-form-model-item label="SSH 名称">
+              <a-input v-model="temp.name" :disabled="true" :maxLength="50" placeholder="SSH 名称" />
+            </a-form-model-item>
+
+            <a-form-model-item prop="fileDirs">
+              <template slot="label">
+                文件目录
+                <a-tooltip>
+                  <template slot="title"> 绑定指定目录可以在线管理，同时构建 ssh 发布目录也需要在此配置 </template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+              </template>
+              <a-textarea v-model="temp.fileDirs" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="授权可以直接访问的目录，多个回车换行即可" />
+            </a-form-model-item>
+
+            <a-form-model-item label="文件后缀" prop="suffix">
+              <a-input
+                v-model="temp.allowEditSuffix"
+                type="textarea"
+                :rows="5"
+                style="resize: none"
+                placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，多个使用换行。示例：设置编码：txt@utf-8， 不设置编码：txt"
+              />
+            </a-form-model-item>
+            <a-form-model-item prop="notAllowedCommand">
+              <template slot="label">
+                禁止命令
+                <a-tooltip>
+                  <template slot="title">
+                    限制禁止在在线终端执行的命令
+                    <ul>
+                      <li>超级管理员没有任何限制</li>
+                      <li>其他用户可以配置权限解除限制</li>
+                    </ul>
+                  </template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+              </template>
+              <a-textarea v-model="temp.notAllowedCommand" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="禁止命令是不允许在终端执行的名，多个逗号隔开。(超级管理员没有任何限制)" />
+            </a-form-model-item>
+          </a-form-model>
+        </a-modal>
+      </a-tab-pane>
+      <a-tab-pane key="2" tab="命令日志"> <OperationLog type="machinessh"></OperationLog></a-tab-pane>
+    </a-tabs>
   </div>
 </template>
 <script>
@@ -276,6 +284,7 @@ import CustomSelect from "@/components/customSelect";
 import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
 import OperationLog from "@/pages/system/assets/ssh/operation-log";
+import { deleteForeSsh } from "@/api/ssh";
 
 export default {
   components: { fastInstall, CustomSelect, Terminal, SshFile, OperationLog },
@@ -475,6 +484,7 @@ export default {
         },
       });
     },
+
     // 操作日志
     handleViewLog(record) {
       this.temp = Object.assign({}, record);
@@ -528,6 +538,32 @@ export default {
             });
           }
         });
+      });
+    },
+    // 删除工作空间的数据
+    handleDeleteWorkspaceItem(record) {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要删除对应工作空间的 SSH 么？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          deleteForeSsh(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              machineListGroupWorkspaceSsh({
+                id: this.temp.machineSshId,
+              }).then((res) => {
+                if (res.code === 200) {
+                  this.workspaceSshList = res.data;
+                }
+              });
+            }
+          });
+        },
       });
     },
     // 文件管理

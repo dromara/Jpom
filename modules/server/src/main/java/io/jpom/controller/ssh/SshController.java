@@ -155,6 +155,22 @@ public class SshController extends BaseServerController {
         return JsonMessage.success("操作成功");
     }
 
+    @PostMapping(value = "del-fore", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    @SystemPermission
+    public JsonMessage<Object> delFore(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
+        boolean checkSsh = buildInfoService.checkReleaseMethodByLike(id, BuildReleaseMethod.Ssh);
+        Assert.state(!checkSsh, "当前ssh存在构建项，不能删除");
+        // 判断是否绑定节点
+        List<NodeModel> nodeBySshId = nodeService.getNodeBySshId(id);
+        Assert.state(CollUtil.isEmpty(nodeBySshId), "当前ssh被节点绑定，不能删除");
+
+        sshService.delByKey(id);
+        //
+        int logCount = sshTerminalExecuteLogService.delByKey(null, entity -> entity.set("sshId", id));
+        return JsonMessage.success("操作成功");
+    }
+
     /**
      * 执行记录
      *
