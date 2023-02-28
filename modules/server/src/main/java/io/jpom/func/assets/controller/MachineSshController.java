@@ -1,6 +1,7 @@
 package io.jpom.func.assets.controller;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -105,7 +106,8 @@ public class MachineSshController extends BaseGroupNameController {
                                     @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "port错误") int port,
                                     String charset,
                                     String id,
-                                    Integer timeout) {
+                                    Integer timeout,
+                                    String allowEditSuffix) {
         boolean add = StrUtil.isEmpty(id);
         if (add) {
             // 优先判断参数 如果是 password 在修改时可以不填写
@@ -129,10 +131,11 @@ public class MachineSshController extends BaseGroupNameController {
             String rsaPath = StrUtil.removePrefix(privateKey, URLUtil.FILE_URL_PREFIX);
             Assert.state(FileUtil.isFile(rsaPath), "配置的私钥文件不存在");
         }
-        if (StrUtil.isNotEmpty(privateKey)) {
-            sshModel.setPrivateKey(privateKey);
-        }
+        Opt.ofNullable(privateKey).ifPresent(sshModel::setPrivateKey);
 
+        // 获取允许编辑的后缀
+        List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
+        sshModel.allowEditSuffix(allowEditSuffixList);
         sshModel.setPort(port);
         sshModel.setUser(user);
         sshModel.setName(name);
@@ -165,7 +168,6 @@ public class MachineSshController extends BaseGroupNameController {
         if (add) {
             machineSshServer.insert(sshModel);
         } else {
-
             machineSshServer.update(sshModel);
         }
         return JsonMessage.success("操作成功");

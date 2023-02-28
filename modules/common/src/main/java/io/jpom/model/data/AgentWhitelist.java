@@ -240,6 +240,11 @@ public class AgentWhitelist extends BaseJsonModel {
                 return CharsetUtil.defaultCharset();
             }
         });
+        // 可能配置 所有
+        Charset charset = map.get("*");
+        if (charset != null) {
+            return charset;
+        }
         Set<Map.Entry<String, Charset>> entries = map.entrySet();
         for (Map.Entry<String, Charset> entry : entries) {
             if (StrUtil.endWithIgnoreCase(filename, StrUtil.DOT + entry.getKey())) {

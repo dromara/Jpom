@@ -2,6 +2,7 @@ package io.jpom.func.assets.model;
 
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.EnumUtil;
+import com.alibaba.fastjson2.JSONArray;
 import io.jpom.model.BaseGroupNameModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 import top.jpom.h2db.TableName;
 
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -63,8 +65,18 @@ public class MachineSshModel extends BaseGroupNameModel {
      */
     private String statusMsg;
 
+    private String allowEditSuffix;
+
     public MachineSshModel(String id) {
         setId(id);
+    }
+
+    public void allowEditSuffix(List<String> allowEditSuffix) {
+        if (allowEditSuffix == null) {
+            this.allowEditSuffix = null;
+        } else {
+            this.allowEditSuffix = JSONArray.toJSONString(allowEditSuffix);
+        }
     }
 
     public MachineSshModel.ConnectType connectType() {
