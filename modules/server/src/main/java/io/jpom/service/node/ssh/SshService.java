@@ -86,6 +86,14 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
         data.setPrivateKey(null);
     }
 
+    @Override
+    protected void fillInsert(SshModel sshModel) {
+        super.fillInsert(sshModel);
+        sshModel.setHost(StrUtil.EMPTY);
+        sshModel.setUser(StrUtil.EMPTY);
+        sshModel.setPort(0);
+    }
+
     /**
      * 获取 ssh 回话
      *

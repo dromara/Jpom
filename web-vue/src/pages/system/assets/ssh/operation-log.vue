@@ -70,6 +70,10 @@ export default {
       type: String,
       default: "",
     },
+    type: {
+      type: String,
+      default: "",
+    },
   },
   computed: {
     viewOperationLogPagination() {
@@ -115,7 +119,7 @@ export default {
         {
           title: "是否成功",
           dataIndex: "refuse",
-          width: 100,
+          width: "100px",
           ellipsis: true,
           scopedSlots: { customRender: "refuse" },
         },
@@ -141,7 +145,14 @@ export default {
   methods: {
     handleListLog() {
       this.viewOperationLoading = true;
-      const api = this.machineSshId ? getMachineSshOperationLogList : getSshOperationLogList;
+      let api;
+      if (this.type == "machinessh") {
+        // 查看所有日志
+        api = getMachineSshOperationLogList;
+      } else {
+        api = this.machineSshId ? getMachineSshOperationLogList : getSshOperationLogList;
+      }
+
       api(this.viewOperationLogListQuery).then((res) => {
         if (res.code === 200) {
           this.viewOperationLogList = res.data.result;

@@ -66,6 +66,15 @@ export function deleteSsh(id) {
   });
 }
 
+// 删除 SSH
+export function deleteForeSsh(id) {
+  return axios({
+    url: "/node/ssh/del-fore",
+    method: "post",
+    data: { id },
+  });
+}
+
 export function syncToWorkspace(params) {
   return axios({
     url: "/node/ssh/sync-to-workspace",

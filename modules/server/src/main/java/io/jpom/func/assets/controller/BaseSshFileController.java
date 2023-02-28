@@ -404,8 +404,6 @@ public abstract class BaseSshFileController extends BaseServerController {
                 JschUtil.close(session);
             }
         });
-
-
     }
 
     @RequestMapping(value = "rename.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
