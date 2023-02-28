@@ -309,6 +309,11 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         machineNodeModel.setId(machineNode.getId());
         machineNodeModel.setStatus(status);
         machineNodeModel.setStatusMsg(msg);
+        // 将信息置空，避免影响排序
+        machineNodeModel.setNetworkDelay(-9999_999);
+        machineNodeModel.setOsOccupyCpu(-99D);
+        machineNodeModel.setOsOccupyMemory(-99D);
+        machineNodeModel.setOsOccupyDisk(-99D);
         this.updateById(machineNodeModel);
     }
 

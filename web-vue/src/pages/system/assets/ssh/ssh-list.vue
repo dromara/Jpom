@@ -30,6 +30,9 @@
               </a-tooltip>
             </a-space>
           </template>
+          <a-tooltip slot="name" slot-scope="text, item" :title="text">
+            <a-button style="padding: 0" type="link" size="small" @click="handleEdit(item)"> {{ text }}</a-button>
+          </a-tooltip>
           <a-tooltip slot="tooltip" slot-scope="text" :title="text"> {{ text }}</a-tooltip>
           <template slot="nodeId" slot-scope="text, record">
             <template v-if="sshAgentInfo[record.id]">
@@ -113,7 +116,11 @@
                   <a-icon type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
-              <a-input v-model="temp.user" placeholder="用户" />
+              <a-input v-model="temp.user" placeholder="用户">
+                <a-tooltip v-if="temp.id" slot="suffix" title=" 密码字段和密钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我">
+                  <a-button size="small" type="danger" @click="handerRestHideField(temp)">清除</a-button>
+                </a-tooltip>
+              </a-input>
             </a-form-model-item>
             <!-- 新增时需要填写 -->
             <!--				<a-form-model-item v-if="temp.type === 'add'" label="Password" prop="password">-->
@@ -301,6 +308,7 @@ import {
   machineListGroupWorkspaceSsh,
   machineSshSaveWorkspaceConfig,
   machineSshDistribute,
+  restHideField,
 } from "@/api/system/assets-ssh";
 import { COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, CHANGE_PAGE } from "@/utils/const";
 import fastInstall from "@/pages/node/fast-install.vue";
@@ -331,7 +339,7 @@ export default {
         { label: "证书", value: "PUBKEY" },
       ],
       columns: [
-        { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
 
         { title: "Host", dataIndex: "host", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "Port", dataIndex: "port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
@@ -502,7 +510,9 @@ export default {
         cancelText: "取消",
         onOk: () => {
           // 删除
-          machineSshDelete(record.id).then((res) => {
+          machineSshDelete({
+            id: record.id,
+          }).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
@@ -634,6 +644,26 @@ export default {
           this.syncToWorkspaceVisible = false;
           return false;
         }
+      });
+    },
+    // 清除隐藏字段
+    handerRestHideField(record) {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要清除 SSH 隐藏字段信息么？（密码，私钥）",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 恢复
+          restHideField(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.loadData();
+            }
+          });
+        },
       });
     },
   },

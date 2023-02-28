@@ -322,4 +322,21 @@ public class MachineSshController extends BaseGroupNameController {
         sshService.insert(machineSshModel, workspaceId);
         return JsonMessage.success("操作成功");
     }
+
+    /**
+     * edit
+     *
+     * @param id ssh id
+     * @return json
+     */
+    @PostMapping(value = "rest-hide-field")
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<String> restHideField(@ValidatorItem String id) {
+        MachineSshModel machineSshModel = new MachineSshModel();
+        machineSshModel.setId(id);
+        machineSshModel.setPassword(StrUtil.EMPTY);
+        machineSshModel.setPrivateKey(StrUtil.EMPTY);
+        machineSshServer.updateById(machineSshModel);
+        return new JsonMessage<>(200, "操作成功");
+    }
 }

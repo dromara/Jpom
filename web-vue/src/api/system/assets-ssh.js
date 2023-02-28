@@ -82,3 +82,16 @@ export function machineSshSaveWorkspaceConfig(params) {
     params: params,
   });
 }
+
+/**
+ * restHideField by id
+ * @param {String} id
+ * @returns
+ */
+export function restHideField(id) {
+  return axios({
+    url: "/system/assets/ssh/rest-hide-field",
+    method: "post",
+    data: { id },
+  });
+}
