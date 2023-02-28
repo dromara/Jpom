@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service --max-old-space-size=900 serve  --mode dev",
     "build": "vue-cli-service build --mode production",
+    "local": "vue-cli-service serve --mode local",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

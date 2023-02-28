@@ -1,5 +1,6 @@
 // vue.config.js
-const HOST = "127.0.0.1:2122";
+const HOST = process.env.proxy_host;
+console.log(process.env);
 const Timestamp = new Date().getTime();
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 module.exports = {
