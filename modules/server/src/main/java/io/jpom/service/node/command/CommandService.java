@@ -62,6 +62,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -268,10 +269,13 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
                 this.appendLine(outputStream, "ssh 不存在");
                 return;
             }
-            String command = commandModel.getCommand();
-            String[] commands = StrUtil.splitToArray(command, StrUtil.LF);
             //
-            EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.formatCommand(commandModel.getWorkspaceId(), commands);
+            EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.getEnv(commandModel.getWorkspaceId());
+            Map<String, String> environment = environmentMapBuilder.environment();
+            String[] commands = StrUtil.splitToArray(commandModel.getCommand(), StrUtil.LF);
+            for (int i = 0; i < commands.length; i++) {
+                commands[i] = StringUtil.formatStrByMap(commands[i], environment);
+            }
             environmentMapBuilder.eachStr(s -> appendLine(outputStream, s));
             MachineSshModel machineSshModel = sshService.getMachineSshModel(sshModel);
             //

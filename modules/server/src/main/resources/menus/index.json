@@ -1,131 +1,136 @@
 [
-    {
-        "title": "节点管理",
-        "icon_v3": "block",
-        "id": "nodeManager",
-        "childs": [
-            {
-                "title": "逻辑节点",
-                "id": "nodeList"
-            },
-            {
-                "title": "节点统计",
-                "id": "nodeStat"
-            }
-        ]
-    },
-    {
-        "title": "项目管理",
-        "icon_v3": "apartment",
-        "id": "outgiving",
-        "childs": [
-            {
-                "title": "项目列表",
-                "id": "projectSearch"
-            },
-            {
-                "id": "outgivingList",
-                "title": "分发列表"
-            },
-            {
-                "id": "outgivingLog",
-                "title": "分发日志"
-            },
-            {
-                "id": "logRead",
-                "title": "日志阅读"
-            }
-        ]
-    },
-    {
-        "title": "在线构建",
-        "icon_v3": "build",
-        "id": "build",
-        "childs": [
-            {
-                "id": "repository",
-                "title": "仓库信息"
-            },
-            {
-                "id": "buildList",
-                "title": "构建列表"
-            },
-            {
-                "id": "buildHistory",
-                "title": "构建历史"
-            }
-        ]
-    },
-    {
-        "title": "SSH管理",
-        "icon_v3": "code",
-        "id": "sshManager",
-        "childs": [
-            {
-                "title": "SSH列表",
-                "id": "sshList"
-            },
-            {
-                "title": "命令管理",
-                "id": "commandList"
-            },
-            {
-                "title": "命令执行记录",
-                "id": "commandLogList"
-            }
-        ]
-    },
-    {
-        "title": "脚本管理",
-        "icon_v3": "file-text",
-        "id": "scriptManager",
-        "childs": [
-            {
-                "title": "节点脚本列表",
-                "id": "scriptAllList"
-            },
-            {
-                "title": "脚本列表",
-                "id": "serverScriptList"
-            },
-            {
-                "title": "脚本执行记录",
-                "id": "serverScriptLogList"
-            }
-        ]
-    },
-    {
-        "title": "Docker管理",
-        "icon_v3": "cloud-server",
-        "id": "dockerManager",
-        "childs": [
-            {
-                "title": "Docker列表",
-                "id": "dockerList"
-            },
-            {
-                "title": "集群列表",
-                "id": "dockerSwarm"
-            }
-        ]
-    },
-    {
-        "title": "监控管理",
-        "icon_v3": "monitor",
-        "id": "monitor",
-        "childs": [
-            {
-                "id": "monitorList",
-                "title": "监控列表"
-            },
-            {
-                "id": "monitorLog",
-                "title": "监控日志"
-            },
-            {
-                "id": "userOptLog",
-                "title": "操作监控"
-            }
-        ]
-    }
+  {
+    "title": "节点管理",
+    "icon_v3": "block",
+    "id": "nodeManager",
+    "childs": [
+      {
+        "title": "逻辑节点",
+        "id": "nodeList"
+      },
+      {
+        "title": "节点统计",
+        "id": "nodeStat"
+      }
+    ]
+  },
+  {
+    "title": "项目管理",
+    "icon_v3": "apartment",
+    "id": "outgiving",
+    "childs": [
+      {
+        "title": "项目列表",
+        "id": "projectSearch"
+      },
+      {
+        "id": "outgivingList",
+        "title": "分发列表"
+      },
+      {
+        "id": "outgivingLog",
+        "title": "分发日志"
+      },
+      {
+        "id": "outgivingWhitelistDirectory",
+        "title": "分发白名单",
+        "role": "system"
+      },
+      {
+        "id": "logRead",
+        "title": "日志阅读"
+      }
+    ]
+  },
+  {
+    "title": "在线构建",
+    "icon_v3": "build",
+    "id": "build",
+    "childs": [
+      {
+        "id": "repository",
+        "title": "仓库信息"
+      },
+      {
+        "id": "buildList",
+        "title": "构建列表"
+      },
+      {
+        "id": "buildHistory",
+        "title": "构建历史"
+      }
+    ]
+  },
+  {
+    "title": "SSH管理",
+    "icon_v3": "code",
+    "id": "sshManager",
+    "childs": [
+      {
+        "title": "SSH列表",
+        "id": "sshList"
+      },
+      {
+        "title": "命令管理",
+        "id": "commandList"
+      },
+      {
+        "title": "命令执行记录",
+        "id": "commandLogList"
+      }
+    ]
+  },
+  {
+    "title": "脚本管理",
+    "icon_v3": "file-text",
+    "id": "scriptManager",
+    "childs": [
+      {
+        "title": "节点脚本列表",
+        "id": "scriptAllList"
+      },
+      {
+        "title": "脚本列表",
+        "id": "serverScriptList"
+      },
+      {
+        "title": "脚本执行记录",
+        "id": "serverScriptLogList"
+      }
+    ]
+  },
+  {
+    "title": "Docker管理",
+    "icon_v3": "cloud-server",
+    "id": "dockerManager",
+    "childs": [
+      {
+        "title": "Docker列表",
+        "id": "dockerList"
+      },
+      {
+        "title": "集群列表",
+        "id": "dockerSwarm"
+      }
+    ]
+  },
+  {
+    "title": "监控管理",
+    "icon_v3": "monitor",
+    "id": "monitor",
+    "childs": [
+      {
+        "id": "monitorList",
+        "title": "监控列表"
+      },
+      {
+        "id": "monitorLog",
+        "title": "监控日志"
+      },
+      {
+        "id": "userOptLog",
+        "title": "操作监控"
+      }
+    ]
+  }
 ]

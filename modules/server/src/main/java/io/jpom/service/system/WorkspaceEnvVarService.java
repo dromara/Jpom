@@ -30,7 +30,6 @@ import io.jpom.common.ServerConst;
 import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.data.WorkspaceEnvVarModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
-import io.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -82,16 +81,5 @@ public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVar
             return value;
         }
         return workspaceEnvVarModel.getValue();
-    }
-
-    public EnvironmentMapBuilder formatCommand(String workspaceId, String[] commands) {
-        WorkspaceEnvVarModel workspaceEnvVarModel = new WorkspaceEnvVarModel();
-        workspaceEnvVarModel.setWorkspaceId(workspaceId);
-        EnvironmentMapBuilder mapBuilder = this.getEnv(workspaceId);
-        Map<String, String> evn = mapBuilder.environment();
-        for (int i = 0; i < commands.length; i++) {
-            commands[i] = StringUtil.formatStrByMap(commands[i], evn);
-        }
-        return mapBuilder;
     }
 }
