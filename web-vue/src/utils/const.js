@@ -63,15 +63,16 @@ export const PAGE_DEFAULT_LIST_QUERY = { page: 1, limit: isNaN(cachePageLimit) ?
 export function COMPUTED_PAGINATION(queryParam, pageSizeOptions) {
   // console.log(queryParam);
   const limit = queryParam.limit || PAGE_DEFAULT_LIST_QUERY.limit;
+  const total = queryParam.total || 0;
   return {
-    total: queryParam.total || 0,
+    total: total,
     current: queryParam.page || 1,
     pageSize: limit,
     pageSizeOptions: pageSizeOptions || PAGE_DEFAULT_SIZW_OPTIONS,
     showSizeChanger: true,
     showQuickJumper: true,
     showLessItems: true,
-    hideOnSinglePage: limit <= 20,
+    hideOnSinglePage: true,
     showTotal: (total) => {
       return PAGE_DEFAULT_SHOW_TOTAL(total);
     },
