@@ -89,9 +89,5 @@ public class CommandModel extends BaseWorkspaceModel {
          * 参数值
          */
         private String value;
-        /**
-         * 描述
-         */
-        private String desc;
     }
 }
