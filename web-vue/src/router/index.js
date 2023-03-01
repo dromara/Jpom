@@ -119,6 +119,11 @@ const children = [
     name: "build-history",
     component: () => import("../pages/build/history"),
   },
+  {
+    path: "/dispatch/white-list",
+    name: "dispatch-white-list",
+    component: () => import("../pages/dispatch/white-list"),
+  },
 ];
 
 const management = [
@@ -147,11 +152,7 @@ const management = [
     name: "operation-log",
     component: () => import("../pages/user/operation-log"),
   },
-  {
-    path: "/dispatch/white-list",
-    name: "dispatch-white-list",
-    component: () => import("../pages/dispatch/white-list"),
-  },
+
   // 工作空间
   {
     path: "/system/workspace",

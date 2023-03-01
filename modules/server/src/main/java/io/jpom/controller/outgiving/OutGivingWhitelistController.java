@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
@@ -101,11 +102,13 @@ public class OutGivingWhitelistController extends BaseServerController {
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> whitelistDirectorySubmit(String outGiving, String allowRemoteDownloadHost) {
+    public JsonMessage<String> whitelistDirectorySubmit(String outGiving,
+                                                        String allowRemoteDownloadHost,
+                                                        HttpServletRequest request) {
         List<String> list = AgentWhitelist.parseToList(outGiving, true, "项目路径白名单不能为空");
         list = AgentWhitelist.covertToArray(list, "项目路径白名单不能位于Jpom目录下");
 
-        ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(getRequest());
+        ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(request);
         serverWhitelist.setOutGiving(list);
         //
         List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "运行远程下载的 host 不能配置为空");
@@ -117,7 +120,7 @@ public class OutGivingWhitelistController extends BaseServerController {
         }
         serverWhitelist.setAllowRemoteDownloadHost(allowRemoteDownloadHostList == null ? null : CollUtil.newHashSet(allowRemoteDownloadHostList));
         //
-        String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
+        String workspaceId = nodeService.getCheckUserWorkspace(request);
         String id = ServerWhitelist.workspaceId(workspaceId);
         systemParametersServer.upsert(id, serverWhitelist, id);
 

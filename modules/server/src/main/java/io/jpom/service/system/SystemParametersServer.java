@@ -49,7 +49,7 @@ public class SystemParametersServer extends BaseDbService<SystemParametersModel>
     public void upsert(String name, BaseJsonModel jsonModel, String desc) {
         SystemParametersModel systemParametersModel = new SystemParametersModel();
         systemParametersModel.setId(name);
-        systemParametersModel.setValue(jsonModel.toString());
+        systemParametersModel.setValue(jsonModel.toJson().toString());
         systemParametersModel.setDescription(desc);
         super.upsert(systemParametersModel);
     }
