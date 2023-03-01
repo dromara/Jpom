@@ -27,6 +27,7 @@ import com.alibaba.fastjson2.JSONObject;
 import io.jpom.model.BaseJsonModel;
 import io.jpom.model.data.SystemParametersModel;
 import io.jpom.service.h2db.BaseDbService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.function.Function;
@@ -36,6 +37,7 @@ import java.util.function.Function;
  * @since 2021/12/2
  */
 @Service
+@Slf4j
 public class SystemParametersServer extends BaseDbService<SystemParametersModel> {
 
 
@@ -111,7 +113,13 @@ public class SystemParametersServer extends BaseDbService<SystemParametersModel>
      * @return data
      */
     public <T> T getConfigDefNewInstance(String name, Class<T> cls) {
-        T config = this.getConfig(name, cls);
+        T config;
+        try {
+            config = this.getConfig(name, cls);
+        } catch (Exception e) {
+            log.error("读取系统测试异常", e);
+            return ReflectUtil.newInstance(cls);
+        }
         return config == null ? ReflectUtil.newInstance(cls) : config;
     }
 }
