@@ -27,6 +27,7 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.TypeReference;
 import io.jpom.build.*;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
@@ -51,7 +52,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -157,10 +160,12 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/reRelease", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<Object> reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
-        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, getRequest());
+    public JsonMessage<Object> reRelease(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId,
+                                         HttpServletRequest request) {
+        String workspaceId = dbBuildHistoryLogService.getCheckUserWorkspace(request);
+        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, false, entity -> entity.set("workspaceId", workspaceId));
         Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
-        BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
+        BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId(), request);
         Objects.requireNonNull(item, "没有对应数据");
         String e = buildExecuteService.checkStatus(item);
         Assert.isNull(e, () -> e);
@@ -169,8 +174,9 @@ public class BuildInfoManageController extends BaseServerController {
         //
         String buildEnvCache = buildHistoryLog.getBuildEnvCache();
         JSONObject jsonObject = Opt.ofBlankAble(buildEnvCache).map(JSONObject::parseObject).orElse(new JSONObject());
-        EnvironmentMapBuilder environmentMapBuilder = new EnvironmentMapBuilder(jsonObject.size());
-        environmentMapBuilder.putObject(jsonObject);
+        Map<String, EnvironmentMapBuilder.Item> map = jsonObject.to(new TypeReference<Map<String, EnvironmentMapBuilder.Item>>() {
+        });
+        EnvironmentMapBuilder environmentMapBuilder = EnvironmentMapBuilder.builder(map);
         //
         ReleaseManage manage = ReleaseManage.builder()
             .buildExtraModule(buildExtraModule)

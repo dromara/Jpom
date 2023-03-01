@@ -121,6 +121,15 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
      * 构建环境变量缓存
      */
     private String buildEnvCache;
+    /**
+     * 产物文件大小
+     */
+    private Long resultFileSize;
+
+    /**
+     * 构建日志文件大小
+     */
+    private Long buildLogFileSize;
 
     public void setBuildRemark(String buildRemark) {
         this.buildRemark = StrUtil.maxLength(buildRemark, 240);

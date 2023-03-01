@@ -175,10 +175,8 @@ public class BuildUtil {
         // 保存目录存放值 history 路径
         File packageFile = BuildUtil.getHistoryPackageZipFile(id, buildNumberId);
         File zipFile = FileUtil.file(packageFile, name + ".zip");
-        if (!zipFile.exists()) {
-            // 不存在则打包
-            ZipUtil.zip(file.getAbsolutePath(), zipFile.getAbsolutePath());
-        }
+        // 不存在则打包
+        ZipUtil.zip(file.getAbsolutePath(), zipFile.getAbsolutePath());
         return zipFile;
     }
 

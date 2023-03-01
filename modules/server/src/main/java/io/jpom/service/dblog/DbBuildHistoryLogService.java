@@ -54,26 +54,6 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
         this.buildExtConfig = buildExtConfig;
     }
 
-//	/**
-//	 * 更新状态
-//	 *
-//	 * @param logId  记录id
-//	 * @param status 状态
-//	 */
-//	public void updateLog(String logId, BuildStatus status) {
-//		if (logId == null) {
-//			return;
-//		}
-//		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
-//		buildHistoryLog.setId(logId);
-//		buildHistoryLog.setStatus(status.getCode());
-//		if (status != BuildStatus.PubIng) {
-//			// 结束
-//			buildHistoryLog.setEndTime(SystemClock.now());
-//		}
-//		this.update(buildHistoryLog);
-//	}
-
     /**
      * 更新状态
      *
@@ -91,16 +71,6 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
         this.update(buildHistoryLog);
     }
 
-    /**
-     * 清理文件并删除记录
-     *
-     * @param logId 记录id
-     * @return json
-     */
-    public JsonMessage<String> deleteLogAndFile(String logId) {
-        BuildHistoryLog buildHistoryLog = getByKey(logId);
-        return this.deleteLogAndFile(buildHistoryLog);
-    }
 
     /**
      * 清理文件并删除记录
@@ -127,6 +97,13 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
         }
         int count = this.delByKey(buildHistoryLog.getId());
         return new JsonMessage<>(200, "删除成功", count + "");
+    }
+
+    @Override
+    protected void fillSelectResult(BuildHistoryLog data) {
+        super.fillSelectResult(data);
+        // 不能返回环境变量的信息（存在隐私字段）
+        data.setBuildEnvCache(null);
     }
 
     @Override

@@ -77,10 +77,7 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -115,40 +112,6 @@ public class ReleaseManage {
         }
     }
 
-//	/**
-//	 * new ReleaseManage constructor
-//	 *
-//	 * @param buildModel 构建信息
-//	 * @param userModel  用户信息
-//	 * @param baseBuild  基础构建
-//	 * @param buildId    构建序号ID
-//	 */
-//	ReleaseManage(BuildExtraModule buildModel, UserModel userModel, int buildId) {
-//
-//
-//		this.buildExtraModule = buildModel;
-//		this.buildId = buildId;
-//		this.userModel = userModel;
-//
-//	}
-
-//	/**
-//	 * 重新发布
-//	 *
-//	 * @param buildHistoryLog 构建历史
-//	 * @param userModel       用户
-//	 */
-//	public ReleaseManage(BuildHistoryLog buildHistoryLog, UserModel userModel) {
-//		super(BuildUtil.getLogFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId()),
-//				buildHistoryLog.getBuildDataId());
-//		this.buildExtraModule = new BuildExtraModule();
-//		this.buildExtraModule.updateValue(buildHistoryLog);
-//
-//		this.buildId = buildHistoryLog.getBuildNumberId();
-//		this.userModel = userModel;
-//		this.resultFile = BuildUtil.getHistoryPackageFile(this.buildModelId, this.buildId, buildHistoryLog.getResultDirFile());
-//	}
-
 
     public void updateStatus(BuildStatus status) {
         buildExecuteService.updateStatus(this.buildExtraModule.getId(), this.logId, this.buildNumberId, status);
@@ -157,18 +120,20 @@ public class ReleaseManage {
     /**
      * 不修改为发布中状态
      */
-    public boolean start() throws Exception {
+    public boolean start(Consumer<Long> consumer) throws Exception {
         this.init();
         this.resultFile = buildExtraModule.resultDirFile(this.buildNumberId);
         this.buildEnv.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
         this.buildExtConfig = SpringUtil.getBean(BuildExtConfig.class);
         //
         this.updateStatus(BuildStatus.PubIng);
-        logRecorder.system("开始执行发布,需要发布的文件大小：{}", FileUtil.readableFileSize(FileUtil.size(this.resultFile)));
         if (FileUtil.isEmpty(this.resultFile)) {
             logRecorder.systemError("发布的文件或者文件夹为空,不能继续发布");
             return false;
         }
+        long resultFileSize = FileUtil.size(this.resultFile);
+        logRecorder.system("开始执行发布,需要发布的文件大小：{}", FileUtil.readableFileSize(resultFileSize));
+        Optional.ofNullable(consumer).ifPresent(consumer1 -> consumer1.accept(resultFileSize));
         int releaseMethod = this.buildExtraModule.getReleaseMethod();
         logRecorder.system("发布的方式：{}", BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
 
@@ -191,17 +156,6 @@ public class ReleaseManage {
         }
         return true;
     }
-
-//
-//    /**
-//     * 格式化命令模版
-//     *
-//     * @param commands 命令
-//     */
-//    private Map<String, String> formatCommand(String[] commands) {
-//
-//        return envFileMap;
-//    }
 
     /**
      * 版本号递增
@@ -630,7 +584,7 @@ public class ReleaseManage {
             this.init();
             logRecorder.system("开始回滚:{}", DateTime.now());
             //
-            boolean start = this.start();
+            boolean start = this.start(null);
             logRecorder.system("执行回滚结束：{}", start);
             if (start) {
                 this.updateStatus(BuildStatus.PubSuccess);
