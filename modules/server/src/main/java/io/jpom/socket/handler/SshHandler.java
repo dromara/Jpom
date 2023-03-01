@@ -92,8 +92,8 @@ public class SshHandler extends BaseTerminalHandler {
         super.afterConnectionEstablishedImpl(session);
         init();
         Map<String, Object> attributes = session.getAttributes();
-        MachineSshModel machineSshModel = (MachineSshModel) attributes.get("dataItem");
-        SshModel sshModel = (SshModel) attributes.get("sshItem");
+        MachineSshModel machineSshModel = (MachineSshModel) attributes.get("machineSsh");
+        SshModel sshModel = (SshModel) attributes.get("dataItem");
         //
         UserModel userInfo = (UserModel) attributes.get("userInfo");
         if (sshModel != null) {
@@ -190,8 +190,8 @@ public class SshHandler extends BaseTerminalHandler {
         UserModel userInfo = (UserModel) attributes.get("userInfo");
         String ip = (String) attributes.get("ip");
         String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);
-        MachineSshModel machineSshModel = (MachineSshModel) attributes.get("dataItem");
-        SshModel sshItem = (SshModel) attributes.get("sshItem");
+        MachineSshModel machineSshModel = (MachineSshModel) attributes.get("machineSsh");
+        SshModel sshItem = (SshModel) attributes.get("dataItem");
         //
         sshTerminalExecuteLogService.batch(userInfo, machineSshModel, sshItem, ip, userAgent, refuse, split);
     }

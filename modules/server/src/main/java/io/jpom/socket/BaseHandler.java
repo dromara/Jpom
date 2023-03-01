@@ -23,6 +23,7 @@
 package io.jpom.socket;
 
 import cn.hutool.core.bean.BeanPath;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
@@ -41,6 +42,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author bwcx_jzy
@@ -58,6 +60,7 @@ public abstract class BaseHandler extends TextWebSocketHandler {
         String permissionMsg = (String) attributes.get("permissionMsg");
         if (StrUtil.isNotEmpty(permissionMsg)) {
             this.sendMsg(session, permissionMsg);
+            ThreadUtil.sleep(2, TimeUnit.SECONDS);
             this.destroy(session);
             return;
         }

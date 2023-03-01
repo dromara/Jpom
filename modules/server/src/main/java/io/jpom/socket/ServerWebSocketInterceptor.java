@@ -154,9 +154,9 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 if (dataItem == null) {
                     return false;
                 }
-                attributes.put("dataItem", dataItem.get(0));
+                attributes.put("dataItem", dataItem.get(2));
                 attributes.put("isAssetsManager", dataItem.get(1));
-                attributes.put("sshItem", dataItem.get(2));
+                attributes.put("machineSsh", dataItem.get(0));
                 break;
             }
             case docker:
