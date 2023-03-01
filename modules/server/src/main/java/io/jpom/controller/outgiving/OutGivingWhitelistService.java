@@ -36,24 +36,24 @@ import javax.servlet.http.HttpServletRequest;
 @Service
 public class OutGivingWhitelistService {
 
-	private final SystemParametersServer systemParametersServer;
-	private final NodeService nodeService;
+    private final SystemParametersServer systemParametersServer;
+    private final NodeService nodeService;
 
-	public OutGivingWhitelistService(SystemParametersServer systemParametersServer,
-									 NodeService nodeService) {
-		this.systemParametersServer = systemParametersServer;
-		this.nodeService = nodeService;
-	}
+    public OutGivingWhitelistService(SystemParametersServer systemParametersServer,
+                                     NodeService nodeService) {
+        this.systemParametersServer = systemParametersServer;
+        this.nodeService = nodeService;
+    }
 
 
-	public ServerWhitelist getServerWhitelistData(HttpServletRequest request) {
-		String workspaceId = nodeService.getCheckUserWorkspace(request);
-		String id = ServerWhitelist.workspaceId(workspaceId);
-		ServerWhitelist serverWhitelist = systemParametersServer.getConfig(id, ServerWhitelist.class);
-		if (serverWhitelist == null) {
-			// 兼容旧数据
-			serverWhitelist = systemParametersServer.getConfigDefNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
-		}
-		return serverWhitelist;
-	}
+    public ServerWhitelist getServerWhitelistData(HttpServletRequest request) {
+        String workspaceId = nodeService.getCheckUserWorkspace(request);
+        String id = ServerWhitelist.workspaceId(workspaceId);
+        ServerWhitelist serverWhitelist = systemParametersServer.getConfigDefNewInstance(id, ServerWhitelist.class);
+        if (serverWhitelist == null) {
+            // 兼容旧数据
+            serverWhitelist = systemParametersServer.getConfigDefNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
+        }
+        return serverWhitelist;
+    }
 }
