@@ -8,6 +8,8 @@
 2. 【server】优化 替换环境变量，支持 $xxx ${xxx} （感谢@大锅饭集团）
 3. 【server】修复 配置节点分发白名单报错 （感谢@酱总）
 4. 【server】优化 节点分发配置【配置管理-白名单配置】菜单移动到功能管理中【项目管理-分发白名单】
+5. 【server】修复 非管理员无法使用 SSH 终端问题
+   （感谢 [@lilinLue](https://gitee.com/ljlToTlj) [Gitee issues I6IRJV](https://gitee.com/dromara/Jpom/issues/I6IRJV) ）
 
 ### ⚠️ 注意
 
