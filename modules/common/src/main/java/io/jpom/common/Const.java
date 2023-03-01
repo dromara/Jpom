@@ -95,4 +95,8 @@ public class Const {
 
     public static final String SOCKET_MSG_TAG = "JPOM_MSG";
 
+    /**
+     * 第一次服务端安装信息
+     */
+    public static final String INSTALL = "INSTALL.json";
 }

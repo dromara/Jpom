@@ -25,10 +25,12 @@ package io.jpom.common;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.comparator.CompareUtil;
 import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
@@ -58,6 +60,7 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -114,11 +117,36 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
             file = FileUtil.createTempFile("jpom", ".temp", file, true);
         } catch (Exception e) {
             log.error(StrUtil.format("Jpom Failed to create data directory, directory location：{}," +
-                "Please check whether the current user has permission to this directory or modify the configuration file：{} jpom.path in is the path where the directory can be created", path, extConfigPath), e);
+                    "Please check whether the current user has permission to this directory or modify the configuration file：{} jpom.path in is the path where the directory can be created", path, extConfigPath), e);
             asyncExit(-1);
         }
         FileUtil.del(file);
         log.info("Jpom[{}] Current data path：{} External configuration file path：{}", JpomManifest.getInstance().getVersion(), path, extConfigPath);
+    }
+
+    private void install() {
+        String installId;
+        File file = FileUtil.file(configBean.getDataPath(), Const.INSTALL);
+        if (file.exists()) {
+            JSONObject jsonObject;
+            try {
+                jsonObject = JsonFileUtil.readJson(file);
+            } catch (FileNotFoundException e) {
+                throw Lombok.sneakyThrow(e);
+            }
+            installId = jsonObject.getString("installId");
+            Assert.hasText(installId, "数据错误,安装 ID 不存在");
+            log.info("本机安装 ID 为：{}", installId);
+        } else {
+            JSONObject jsonObject = new JSONObject();
+            installId = IdUtil.fastSimpleUUID();
+            jsonObject.put("installId", installId);
+            jsonObject.put("installTime", DateTime.now().toString());
+            jsonObject.put("desc", "请勿删除此文件,删除后关联 id 将失效");
+            JsonFileUtil.saveJson(file.getAbsolutePath(), jsonObject);
+            log.info("安装成功,本机安装 ID 为：{}", installId);
+        }
+        JpomManifest.getInstance().setInstallId(installId);
     }
 
     /**
@@ -307,20 +335,21 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         // 检查目录权限
         this.checkPath();
+        this.install();
         // 清空临时目录
         this.clearTemp();
         // 开始加载子模块
         Map<String, ILoadEvent> loadEventMap = applicationContext.getBeansOfType(ILoadEvent.class);
         loadEventMap.values()
-            .stream()
-            .sorted((o1, o2) -> CompareUtil.compare(o1.getOrder(), o2.getOrder()))
-            .forEach(iLoadEvent -> {
-                try {
-                    iLoadEvent.afterPropertiesSet(applicationContext);
-                } catch (Exception e) {
-                    throw Lombok.sneakyThrow(e);
-                }
-            });
+                .stream()
+                .sorted((o1, o2) -> CompareUtil.compare(o1.getOrder(), o2.getOrder()))
+                .forEach(iLoadEvent -> {
+                    try {
+                        iLoadEvent.afterPropertiesSet(applicationContext);
+                    } catch (Exception e) {
+                        throw Lombok.sneakyThrow(e);
+                    }
+                });
         // 检查更新文件
         this.checkUpdate();
         // 开始异常加载

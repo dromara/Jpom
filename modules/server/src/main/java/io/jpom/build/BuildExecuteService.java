@@ -701,7 +701,7 @@ public class BuildExecuteService {
                     }
                     taskData.repositoryLastCommitId = result[0];
                 } else {
-                    logRecorder.systemError("不支持的类型：" + repoType);
+                    logRecorder.systemError("不支持的类型：{}", repoType.getDesc());
                     return false;
                 }
                 taskData.environmentMapBuilder.put("BUILD_COMMIT_ID", taskData.repositoryLastCommitId);
