@@ -22,7 +22,6 @@
  */
 package io.jpom.socket;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -45,21 +44,8 @@ import java.util.Set;
  * @since 2019/4/19
  */
 @Configuration
-public class AgentWebSocketConfig extends WebApplicationObjectSupport implements InitializingBean, SmartInitializingSingleton {
+public class AgentWebSocketConfig extends WebApplicationObjectSupport implements SmartInitializingSingleton {
 
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        //Assert.state(this.serverContainer != null, "javax.websocket.server.ServerContainer not available");
-    }
-
-
-//    @Override
-//    protected void initServletContext(ServletContext servletContext) {
-//        if (this.serverContainer == null) {
-//            this.serverContainer = (ServerContainer) servletContext.getAttribute("javax.websocket.server.ServerContainer");
-//        }
-//    }
 
     private ServerContainer getServerContainer() {
         return (ServerContainer) Objects.requireNonNull(getServletContext()).getAttribute("javax.websocket.server.ServerContainer");
@@ -101,10 +87,10 @@ public class AgentWebSocketConfig extends WebApplicationObjectSupport implements
     private void registerEndpoint(Class<?> endpointClass) {
         ServerContainer serverContainer = getServerContainer();
         Assert.state(serverContainer != null,
-            "No ServerContainer set. Most likely the server's own WebSocket ServletContainerInitializer " +
-                "has not run yet. Was the Spring ApplicationContext refreshed through a " +
-                "org.springframework.web.context.ContextLoaderListener, " +
-                "i.e. after the ServletContext has been fully initialized?");
+                "No ServerContainer set. Most likely the server's own WebSocket ServletContainerInitializer " +
+                        "has not run yet. Was the Spring ApplicationContext refreshed through a " +
+                        "org.springframework.web.context.ContextLoaderListener, " +
+                        "i.e. after the ServletContext has been fully initialized?");
         try {
             if (logger.isDebugEnabled()) {
                 logger.debug("Registering @ServerEndpoint class: " + endpointClass);
@@ -127,9 +113,4 @@ public class AgentWebSocketConfig extends WebApplicationObjectSupport implements
             throw new IllegalStateException("Failed to register ServerEndpointConfig: " + endpointConfig, ex);
         }
     }
-
-//	@Bean
-//	public ServerEndpointExporter serverEndpointExporter() {
-//		return new ServerEndpointExporter();
-//	}
 }

@@ -109,6 +109,10 @@ public class JpomManifest {
      * 系统名称
      */
     private final String osName = SystemUtil.getOsInfo().getName();
+    /**
+     * 安装id
+     */
+    private String installId;
 
     private static void init() {
         if (JPOM_MANIFEST == null) {
@@ -137,10 +141,10 @@ public class JpomManifest {
         OsInfo osInfo = SystemUtil.getOsInfo();
         JavaInfo javaInfo = SystemUtil.getJavaInfo();
         return StrUtil.format("{} {}; {}; {}",
-            Opt.ofBlankAble(osInfo.getName()).orElse(UserAgentInfo.NameUnknown),
-            Opt.ofBlankAble(osInfo.getVersion()).orElse("0"),
-            Opt.ofBlankAble(osInfo.getArch()).orElse(UserAgentInfo.NameUnknown),
-            Opt.ofBlankAble(javaInfo.getVersion()).orElse(UserAgentInfo.NameUnknown)
+                Opt.ofBlankAble(osInfo.getName()).orElse(UserAgentInfo.NameUnknown),
+                Opt.ofBlankAble(osInfo.getVersion()).orElse("0"),
+                Opt.ofBlankAble(osInfo.getArch()).orElse(UserAgentInfo.NameUnknown),
+                Opt.ofBlankAble(javaInfo.getVersion()).orElse(UserAgentInfo.NameUnknown)
         );
     }
 
@@ -289,6 +293,14 @@ public class JpomManifest {
         return osName;
     }
 
+    public String getInstallId() {
+        return installId;
+    }
+
+    public void setInstallId(String installId) {
+        this.installId = installId;
+    }
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
@@ -380,7 +392,7 @@ public class JpomManifest {
             }
             String applicationClass = type.getApplicationClass();
             ZipEntry entry = jarFile1.getEntry(StrUtil.format("BOOT-INF/classes/{}.class",
-                StrUtil.replace(applicationClass, ".", StrUtil.SLASH)));
+                    StrUtil.replace(applicationClass, ".", StrUtil.SLASH)));
             if (entry == null) {
                 return new JsonMessage<>(405, "此包不是Jpom【" + type.name() + "】包");
             }
@@ -394,7 +406,7 @@ public class JpomManifest {
                 //
                 JpomManifest jpomManifest = JpomManifest.getInstance();
                 if (StrUtil.equals(version, jpomManifest.getVersion()) &&
-                    StrUtil.equals(timeStamp, jpomManifest.getTimeStamp())) {
+                        StrUtil.equals(timeStamp, jpomManifest.getTimeStamp())) {
                     return new JsonMessage<>(405, "新包和正在运行的包一致");
                 }
                 if (StrUtil.compareVersion(jpomManifest.getVersion(), minVersion) < 0) {

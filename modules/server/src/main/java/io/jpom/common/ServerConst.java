@@ -72,14 +72,6 @@ public class ServerConst extends Const {
      * 分发包存储路径
      */
     public static final String OUTGIVING_FILE = "outgiving";
-
-
-    /**
-     * 第一次服务端安装信息
-     */
-    public static final String INSTALL = "INSTALL.json";
-
-
     /**
      * token自动续签状态码
      */

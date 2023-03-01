@@ -49,14 +49,13 @@ public class JsonFileUtil {
     /**
      * 读取json 文件，同步
      *
-     * @param path 路径
+     * @param file 路径
      * @return JSON
      * @throws FileNotFoundException 文件异常
      */
-    public static JSONObject readJson(String path) throws FileNotFoundException {
-        File file = new File(path);
+    public static JSONObject readJson(File file) throws FileNotFoundException {
         if (!file.exists()) {
-            throw new FileNotFoundException("没有找到对应配置文件：" + path);
+            throw new FileNotFoundException("没有找到对应配置文件：" + file.getAbsolutePath());
         }
         READ_LOCK.lock();
         // 防止多线程操作文件异常
@@ -68,11 +67,23 @@ public class JsonFileUtil {
             try {
                 return JSONObject.parseObject(json);
             } catch (Exception e) {
-                throw new JpomRuntimeException("数据文件内容错误，请检查文件是否被非法修改：" + path, e);
+                throw new JpomRuntimeException("数据文件内容错误，请检查文件是否被非法修改：" + file.getAbsolutePath(), e);
             }
         } finally {
             READ_LOCK.unlock();
         }
+    }
+
+    /**
+     * 读取json 文件，同步
+     *
+     * @param path 路径
+     * @return JSON
+     * @throws FileNotFoundException 文件异常
+     */
+    public static JSONObject readJson(String path) throws FileNotFoundException {
+        File file = new File(path);
+        return readJson(file);
     }
 
     /**
