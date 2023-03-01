@@ -45,90 +45,92 @@
       </template>
       <!-- 卡片视图 -->
       <template v-if="this.layoutType === 'card'">
-        <a-row :gutter="[16, 16]">
-          <template v-if="list && list.length">
-            <a-col v-for="item in list" :key="item.id" :span="6">
-              <template>
-                <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
-                  <template slot="title">
-                    <a-row :gutter="[4, 0]">
-                      <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
-                        <a-tooltip>
-                          <template slot="title">
-                            <div>节点名称：{{ item.name }}</div>
-                            <div>节点地址：{{ item.jpomUrl }}</div>
-                          </template>
-                          <span @click="showMachineInfo(item)" style="cursor: pointer">
-                            {{ item.name }}
-                          </span>
-                        </a-tooltip>
-                      </a-col>
-                      <a-col :span="7" style="text-align: right" class="text-overflow-hidden">
-                        <a-tooltip :title="`当前状态：${statusMap[item.status]} ${item.statusMsg ? '状态消息：' + item.statusMsg : ''} `">
-                          <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0px"> {{ statusMap[item.status] }}</a-tag>
-                        </a-tooltip>
-                      </a-col>
-                    </a-row>
-                  </template>
-
-                  <a-tooltip :title="item.osName">
-                    <a-row class="item-info">
-                      <a-col :span="6" class="title text-overflow-hidden">系统名称:</a-col>
-                      <a-col :span="18" class="content text-overflow-hidden">
-                        <span style="color: #40a9ff; cursor: pointer" @click="showMachineInfo(item)">
-                          {{ item.osName }}
-                        </span>
-                      </a-col>
-                    </a-row>
-                  </a-tooltip>
-                  <a-tooltip :title="item.osVersion">
-                    <a-row class="item-info">
-                      <a-col :span="6" class="title text-overflow-hidden">系统版本:</a-col>
-                      <a-col :span="18" class="content text-overflow-hidden">
-                        {{ item.osVersion }}
-                      </a-col>
-                    </a-row>
-                  </a-tooltip>
-                  <a-tooltip :title="item.osLoadAverage">
-                    <a-row class="item-info">
-                      <a-col :span="6" class="title text-overflow-hidden">系统负载:</a-col>
-                      <a-col :span="18" class="content text-overflow-hidden">
-                        {{ item.osLoadAverage }}
-                      </a-col>
-                    </a-row>
-                  </a-tooltip>
-                  <a-tooltip :title="item.jpomVersion">
-                    <a-row class="item-info">
-                      <a-col :span="6" class="title text-overflow-hidden">插件版本:</a-col>
-                      <a-col :span="18" class="content text-overflow-hidden">
-                        <span v-if="item.jpomVersion" type="link" size="small" @click="showMachineUpgrade(item)" style="color: #40a9ff; cursor: pointer">
-                          {{ item.jpomVersion || "-" }}
-                        </span>
-                      </a-col>
-                    </a-row>
-                  </a-tooltip>
-                  <a-row type="flex" align="middle" justify="center" style="margin-top: 10px">
-                    <a-button-group>
-                      <a-button @click="handleEdit(item)" type="primary" size="small"> 编辑 </a-button>
-                      <a-button @click="showMachineInfo(item)" type="primary" size="small">详情</a-button>
-                      <a-button @click="syncToWorkspaceShow(item)" type="primary" size="small">分配</a-button>
-                      <a-button @click="viewMachineNode(item)" type="primary" size="small">节点</a-button>
-                      <a-button @click="deleteMachineInfo(item)" size="small">删除</a-button>
-                    </a-button-group>
-                  </a-row>
-                </a-card>
-              </template>
-            </a-col>
-          </template>
-          <a-col v-else :span="24">
-            <a-empty description="没有任何节点" />
-          </a-col>
-        </a-row>
         <a-row>
+          <a-row :gutter="[16, 16]">
+            <template v-if="list && list.length">
+              <a-col v-for="item in list" :key="item.id" :span="6">
+                <template>
+                  <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
+                    <template slot="title">
+                      <a-row :gutter="[4, 0]">
+                        <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+                          <a-tooltip>
+                            <template slot="title">
+                              <div>节点名称：{{ item.name }}</div>
+                              <div>节点地址：{{ item.jpomUrl }}</div>
+                            </template>
+                            <span @click="showMachineInfo(item)" style="cursor: pointer">
+                              {{ item.name }}
+                            </span>
+                          </a-tooltip>
+                        </a-col>
+                        <a-col :span="7" style="text-align: right" class="text-overflow-hidden">
+                          <a-tooltip :title="`当前状态：${statusMap[item.status]} ${item.statusMsg ? '状态消息：' + item.statusMsg : ''} `">
+                            <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0px"> {{ statusMap[item.status] }}</a-tag>
+                          </a-tooltip>
+                        </a-col>
+                      </a-row>
+                    </template>
+
+                    <a-tooltip :title="item.osName">
+                      <a-row class="item-info">
+                        <a-col :span="6" class="title text-overflow-hidden">系统名称:</a-col>
+                        <a-col :span="18" class="content text-overflow-hidden">
+                          <span style="color: #40a9ff; cursor: pointer" @click="showMachineInfo(item)">
+                            {{ item.osName }}
+                          </span>
+                        </a-col>
+                      </a-row>
+                    </a-tooltip>
+                    <a-tooltip :title="item.osVersion">
+                      <a-row class="item-info">
+                        <a-col :span="6" class="title text-overflow-hidden">系统版本:</a-col>
+                        <a-col :span="18" class="content text-overflow-hidden">
+                          {{ item.osVersion }}
+                        </a-col>
+                      </a-row>
+                    </a-tooltip>
+                    <a-tooltip :title="item.osLoadAverage">
+                      <a-row class="item-info">
+                        <a-col :span="6" class="title text-overflow-hidden">系统负载:</a-col>
+                        <a-col :span="18" class="content text-overflow-hidden">
+                          {{ item.osLoadAverage }}
+                        </a-col>
+                      </a-row>
+                    </a-tooltip>
+                    <a-tooltip :title="item.jpomVersion">
+                      <a-row class="item-info">
+                        <a-col :span="6" class="title text-overflow-hidden">插件版本:</a-col>
+                        <a-col :span="18" class="content text-overflow-hidden">
+                          <span v-if="item.jpomVersion" type="link" size="small" @click="showMachineUpgrade(item)" style="color: #40a9ff; cursor: pointer">
+                            {{ item.jpomVersion || "-" }}
+                          </span>
+                        </a-col>
+                      </a-row>
+                    </a-tooltip>
+                    <a-row type="flex" align="middle" justify="center" style="margin-top: 10px">
+                      <a-button-group>
+                        <a-button @click="handleEdit(item)" type="primary" size="small"> 编辑 </a-button>
+                        <a-button @click="showMachineInfo(item)" type="primary" size="small">详情</a-button>
+                        <a-button @click="syncToWorkspaceShow(item)" type="primary" size="small">分配</a-button>
+                        <a-button @click="viewMachineNode(item)" type="primary" size="small">节点</a-button>
+                        <a-button @click="deleteMachineInfo(item)" size="small">删除</a-button>
+                      </a-button-group>
+                    </a-row>
+                  </a-card>
+                </template>
+              </a-col>
+            </template>
+            <a-col v-else :span="24">
+              <a-empty description="没有任何节点" />
+            </a-col>
+          </a-row>
+        </a-row>
+        <a-row type="flex" justify="center">
+          <a-divider v-if="listQuery.total / listQuery.limit > 1" dashed />
           <a-col>
             <a-pagination
               v-model="listQuery.page"
-              v-if="listQuery.total / listQuery.limit > 1"
               :showTotal="
                 (total) => {
                   return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery);
@@ -138,6 +140,7 @@
               :pageSizeOptions="sizeOptions"
               :pageSize="listQuery.limit"
               :total="listQuery.total"
+              :hideOnSinglePage="true"
               @showSizeChange="
                 (current, size) => {
                   this.listQuery.limit = size;

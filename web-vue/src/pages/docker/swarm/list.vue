@@ -1,6 +1,6 @@
 <template>
   <div class="full-content">
-    <a-table :data-source="list" :columns="columns" @change="changePage" :pagination="listQuery.total / listQuery.limit > 1 ? pagination : false" bordered :rowKey="(record, index) => index">
+    <a-table size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />

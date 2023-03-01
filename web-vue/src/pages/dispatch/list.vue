@@ -1,7 +1,7 @@
 <template>
   <div class="full-content">
     <!-- 表格 :scroll="{x: 740, y: tableHeight - 60}" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
-    <a-table :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="pagination" @change="changePage">
+    <a-table :columns="columns" size="middle" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="pagination" @change="changePage">
       <template slot="title">
         <a-space>
           <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%id%']" placeholder="分发id" />
