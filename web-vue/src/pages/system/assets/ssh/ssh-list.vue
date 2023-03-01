@@ -240,8 +240,14 @@
         </a-modal>
         <a-modal destroyOnClose v-model="configWorkspaceSshVisible" width="50%" title="配置ssh" @ok="handleConfigWorkspaceSshOk" :maskClosable="false">
           <a-form-model ref="editConfigWorkspaceSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+            <a-form-model-item label="" :label-col="{ span: 0 }" :wrapper-col="{ span: 24 }">
+              <a-alert message="当前配置仅对选择的工作空间生效,其他工作空间需要另行配置" banner />
+            </a-form-model-item>
             <a-form-model-item label="SSH 名称">
               <a-input v-model="temp.name" :disabled="true" :maxLength="50" placeholder="SSH 名称" />
+            </a-form-model-item>
+            <a-form-model-item label="工作空间名称">
+              <a-input v-model="temp.workspaceName" :disabled="true" :maxLength="50" placeholder="工作空间名称" />
             </a-form-model-item>
 
             <a-form-model-item prop="fileDirs">
@@ -551,6 +557,7 @@ export default {
         name: item.name,
         fileDirs: item.fileDirs ? JSON.parse(item.fileDirs).join("\r\n") : "",
         allowEditSuffix: item.allowEditSuffix ? JSON.parse(item.allowEditSuffix).join("\r\n") : "",
+        workspaceName: item.workspace?.name,
       };
       this.configWorkspaceSshVisible = true;
     },

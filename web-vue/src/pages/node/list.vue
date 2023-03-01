@@ -44,20 +44,11 @@
           </a-tooltip>
         </template>
         <template v-else>
-          <template v-if="showOptVisible[record.id]">
-            <a-tooltip title="我在这里" :visible="showOptVisible[record.id]" @click="handleNode(record)">
-              <a-button type="link" style="padding: 0px" size="small">
-                <a-icon type="fullscreen" /><span>{{ text }}</span>
-              </a-button>
-            </a-tooltip>
-          </template>
-          <template v-else>
-            <a-tooltip :title="`${text} 点击进入节点管理`" @click="handleNode(record)">
-              <a-button type="link" style="padding: 0px" size="small">
-                <a-icon type="fullscreen" /><span>{{ text }}</span>
-              </a-button>
-            </a-tooltip>
-          </template>
+          <a-tooltip :title="`${text} 点击进入节点管理`" @click="handleNode(record)">
+            <a-button type="link" style="padding: 0px" size="small">
+              <a-icon type="fullscreen" /><span>{{ text }}</span>
+            </a-button>
+          </a-tooltip>
         </template>
       </template>
       <a-tooltip
@@ -114,51 +105,49 @@
       </template>
 
       <template slot="operation" slot-scope="text, record, index">
-        <a-tooltip title="我在这里" :visible="showOptVisible[record.id]">
-          <a-space>
-            <a-tooltip title="如果按钮不可用则表示当前节点已经关闭啦,需要去编辑中启用">
-              <a-button size="small" class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"><a-icon type="apartment" />管理</a-button>
-            </a-tooltip>
-            <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
-              <a-button size="small" type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"><a-icon type="code" />终端</a-button>
-            </a-tooltip>
+        <a-space>
+          <a-tooltip title="如果按钮不可用则表示当前节点已经关闭啦,需要去编辑中启用">
+            <a-button size="small" class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"><a-icon type="apartment" />管理</a-button>
+          </a-tooltip>
+          <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
+            <a-button size="small" type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"><a-icon type="code" />终端</a-button>
+          </a-tooltip>
 
-            <a-dropdown>
-              <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-                更多
-                <a-icon type="down" />
-              </a>
-              <a-menu slot="overlay">
-                <a-menu-item>
-                  <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-                </a-menu-item>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              更多
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+              </a-menu-item>
 
-                <a-menu-item>
-                  <a-tooltip placement="leftBottom" title="删除会检查数据关联性,并且节点不存在项目或者脚本">
-                    <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-                  </a-tooltip>
-                </a-menu-item>
-                <a-menu-item>
-                  <a-tooltip placement="leftBottom" title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用">
-                    <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
-                  </a-tooltip>
-                </a-menu-item>
-                <a-menu-divider />
-                <a-menu-item>
-                  <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'top')">置顶</a-button>
-                </a-menu-item>
-                <a-menu-item>
-                  <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'up')">上移</a-button>
-                </a-menu-item>
-                <a-menu-item>
-                  <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total" @click="sortItemHander(record, index, 'down')">
-                    下移
-                  </a-button>
-                </a-menu-item>
-              </a-menu>
-            </a-dropdown>
-          </a-space>
-        </a-tooltip>
+              <a-menu-item>
+                <a-tooltip placement="leftBottom" title="删除会检查数据关联性,并且节点不存在项目或者脚本">
+                  <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                </a-tooltip>
+              </a-menu-item>
+              <a-menu-item>
+                <a-tooltip placement="leftBottom" title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用">
+                  <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
+                </a-tooltip>
+              </a-menu-item>
+              <a-menu-divider />
+              <a-menu-item>
+                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'top')">置顶</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'up')">上移</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total" @click="sortItemHander(record, index, 'down')">
+                  下移
+                </a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+        </a-space>
       </template>
     </a-table>
 
@@ -284,7 +273,7 @@ export default {
       list: [],
 
       groupList: [],
-      showOptVisible: {},
+
       temp: {},
 
       editNodeVisible: false,
@@ -332,36 +321,20 @@ export default {
       };
     },
   },
-  watch: {
-    $route() {
-      this.findTipNode();
-    },
-  },
+  watch: {},
   created() {
-    this.loadData().then(() => {
-      this.findTipNode();
-    });
+    const searchNodeName = this.$route.query.searchNodeName;
+    if (searchNodeName) {
+      this.listQuery = { ...this.listQuery, "%name%": searchNodeName };
+    }
+    this.loadData();
     this.loadGroupList();
   },
 
   methods: {
     formatDuration,
     renderSize,
-    findTipNode() {
-      if (this.$route.query.tipNodeId) {
-        this.showOptVisible[this.$route.query.tipNodeId] = true;
-        this.showOptVisible = { ...this.showOptVisible };
-        setTimeout(() => {
-          this.showOptVisible[this.$route.query.tipNodeId] = false;
-          this.showOptVisible = { ...this.showOptVisible };
-          let query = Object.assign({}, this.$route.query);
-          delete query.tipNodeId;
-          this.$router.replace({
-            query: query,
-          });
-        }, 10000);
-      }
-    },
+
     // 页面引导
     introGuide() {
       this.$store.dispatch("tryOpenGuide", {

@@ -7,6 +7,7 @@
    2. ~~SSH 管理~~
    3. dokcer 管理
    4. docker 集群
+   5. ssh 监控
 2. **资产管理**
 3. scp 发布实践案例
 4. netty-agent

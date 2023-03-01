@@ -31,7 +31,7 @@
       <template slot="nodeId" slot-scope="text, record">
         <template v-if="record.linkNode">
           <a-tooltip placement="topLeft" :title="`节点名称：${record.linkNode.name}`">
-            <a-button size="small" style="width: 90px; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis" type="" @click="toNode(record.linkNode.id)">
+            <a-button size="small" style="width: 90px; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis" type="" @click="toNode(record.linkNode)">
               {{ record.linkNode.name }}
             </a-button>
           </a-tooltip>
@@ -344,14 +344,28 @@ export default {
       });
     },
     // 前往节点
-    toNode(nodeId) {
-      this.$router.push({
+    toNode(node) {
+      const newpage = this.$router.resolve({
+        name: "node_" + node.id,
         path: "/node/list",
         query: {
           ...this.$route.query,
-          tipNodeId: nodeId,
+          nodeId: node.id,
+          pId: "manage",
+          id: "manageList",
+          wid: node.workspaceId,
+          searchNodeName: node.name,
         },
       });
+      window.open(newpage.href, "_blank");
+
+      // this.$router.push({
+      //   path: "/node/list",
+      //   query: {
+      //     ...this.$route.query,
+      //     tipNodeId: nodeId,
+      //   },
+      // });
     },
 
     // 分页、排序、筛选变化时触发
