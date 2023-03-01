@@ -117,7 +117,7 @@ public class SystemParametersServer extends BaseDbService<SystemParametersModel>
         try {
             config = this.getConfig(name, cls);
         } catch (Exception e) {
-            log.error("读取系统测试异常", e);
+            log.error("读取系统参数异常", e);
             return ReflectUtil.newInstance(cls);
         }
         return config == null ? ReflectUtil.newInstance(cls) : config;
