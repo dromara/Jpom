@@ -37,6 +37,7 @@ import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.InvocationBuilder;
 import io.jpom.plugin.PluginConfig;
+import io.jpom.util.StringUtil;
 import lombok.Lombok;
 import lombok.SneakyThrows;
 import org.springframework.util.Assert;
@@ -349,6 +350,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         Object pull = parameter.get("pull");
         Object noCache = parameter.get("noCache");
         String labels = (String) parameter.get("labels");
+        Map<String, String> env = (Map<String, String>) parameter.get("env");
 
         try {
             AuthConfigurations authConfigurations = new AuthConfigurations();
@@ -363,11 +365,19 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
             // 添加构建参数
             UrlQuery query = UrlQuery.of(buildArgs, CharsetUtil.CHARSET_UTF_8);
             query.getQueryMap()
-                .forEach((key, value) -> buildImageCmd.withBuildArg(StrUtil.toString(key), StrUtil.toString(value)));
+                .forEach((key, value) -> {
+                    String valueStr = StrUtil.toString(value);
+                    valueStr = StringUtil.formatStrByMap(valueStr, env);
+                    buildImageCmd.withBuildArg(StrUtil.toString(key), valueStr);
+                });
             // 标签
             UrlQuery labelsQuery = UrlQuery.of(labels, CharsetUtil.CHARSET_UTF_8);
             HashMap<String, String> labelMap = MapUtil.newHashMap();
-            labelsQuery.getQueryMap().forEach((key, value) -> labelMap.put(StrUtil.toString(key), StrUtil.toString(value)));
+            labelsQuery.getQueryMap().forEach((key, value) -> {
+                String valueStr = StrUtil.toString(value);
+                valueStr = StringUtil.formatStrByMap(valueStr, env);
+                labelMap.put(StrUtil.toString(key), valueStr);
+            });
             buildImageCmd.withLabels(labelMap);
             //
             Optional.ofNullable(pull).map(Convert::toBool).ifPresent(buildImageCmd::withPull);
