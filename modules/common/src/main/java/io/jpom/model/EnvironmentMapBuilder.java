@@ -24,7 +24,9 @@ package io.jpom.model;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.JSONObject;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -67,15 +69,6 @@ public class EnvironmentMapBuilder {
         Optional.ofNullable(map).ifPresent(stringMap -> {
             for (Map.Entry<String, String> entry : stringMap.entrySet()) {
                 put(entry.getKey(), entry.getValue());
-            }
-        });
-        return this;
-    }
-
-    public EnvironmentMapBuilder putObject(Map<String, Object> map) {
-        Optional.ofNullable(map).ifPresent(stringMap -> {
-            for (Map.Entry<String, Object> entry : stringMap.entrySet()) {
-                put(entry.getKey(), StrUtil.toString(entry.getValue()));
             }
         });
         return this;
@@ -153,7 +146,12 @@ public class EnvironmentMapBuilder {
         return null;
     }
 
+    public String toDataJsonStr() {
+        return JSONObject.toJSONString(map);
+    }
+
     @AllArgsConstructor
+    @Data
     public static class Item {
         /**
          * 值

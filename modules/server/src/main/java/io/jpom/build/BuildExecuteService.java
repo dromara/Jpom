@@ -37,7 +37,6 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
@@ -344,13 +343,27 @@ public class BuildExecuteService {
     /**
      * 更新构建历史的环境变量
      *
-     * @param buildId 构建ID
-     * @param map     环境变量
+     * @param logId 构建记录ID
+     * @param json  环境变量
      */
-    private void updateBuildEnv(String buildId, Map<String, String> map) {
+    private void updateBuildEnv(String logId, String json) {
         BuildHistoryLog buildInfoModel = new BuildHistoryLog();
-        buildInfoModel.setId(buildId);
-        buildInfoModel.setBuildEnvCache(JSONObject.toJSONString(map));
+        buildInfoModel.setId(logId);
+        buildInfoModel.setBuildEnvCache(json);
+        dbBuildHistoryLogService.update(buildInfoModel);
+    }
+
+    /**
+     * 更新构建历史的环境变量
+     *
+     * @param logId          构建ID
+     * @param resultFileSize 产物文件大小
+     */
+    private void updateBuildResultFileSize(String logId, long resultFileSize, long logSize) {
+        BuildHistoryLog buildInfoModel = new BuildHistoryLog();
+        buildInfoModel.setId(logId);
+        buildInfoModel.setResultFileSize(resultFileSize);
+        buildInfoModel.setBuildLogFileSize(logSize);
         dbBuildHistoryLogService.update(buildInfoModel);
     }
 
@@ -388,6 +401,10 @@ public class BuildExecuteService {
          * 是否差异构建
          */
         private Boolean checkRepositoryDiff;
+        /**
+         * 产物文件大小
+         */
+        private Long resultFileSize;
     }
 
 
@@ -594,8 +611,7 @@ public class BuildExecuteService {
         private boolean pullAndCacheBuildEnv() {
             boolean pull = this.pull();
             if (pull) {
-                BuildInfoModel buildInfoModel1 = taskData.buildInfoModel;
-                buildExecuteService.updateBuildEnv(buildInfoModel1.getId(), taskData.environmentMapBuilder.environment());
+                buildExecuteService.updateBuildEnv(logId, taskData.environmentMapBuilder.toDataJsonStr());
             }
             return pull;
         }
@@ -821,7 +837,7 @@ public class BuildExecuteService {
                 .buildExecuteService(buildExecuteService)
                 .logRecorder(logRecorder).build();
             try {
-                return releaseManage.start();
+                return releaseManage.start(resultFileSize -> taskData.resultFileSize = resultFileSize);
             } catch (Exception e) {
                 throw Lombok.sneakyThrow(e);
             }
@@ -844,9 +860,6 @@ public class BuildExecuteService {
                 // 删除 产物文件夹
                 File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), buildInfoModel1.getBuildId(), StrUtil.SLASH);
                 CommandUtil.systemFastDel(historyPackageFile);
-                //
-                File historyPackageZipFile = BuildUtil.getHistoryPackageZipFile(buildExtraModule.getId(), buildInfoModel1.getBuildId());
-                CommandUtil.systemFastDel(historyPackageZipFile);
             }
             return true;
         }
@@ -923,6 +936,17 @@ public class BuildExecuteService {
             return suppliers;
         }
 
+        private void clearResources() {
+            //
+            BuildInfoModel buildInfoModel1 = taskData.buildInfoModel;
+            File historyPackageZipFile = BuildUtil.getHistoryPackageZipFile(buildExtraModule.getId(), buildInfoModel1.getBuildId());
+            CommandUtil.systemFastDel(historyPackageZipFile);
+            // 计算文件占用大小
+            File file = logRecorder.getFile();
+            long size = FileUtil.size(file);
+            buildExecuteService.updateBuildResultFileSize(logId, taskData.resultFileSize, size);
+        }
+
         @Override
         public void run() {
             currentThread = Thread.currentThread();
@@ -974,6 +998,7 @@ public class BuildExecuteService {
                 logRecorder.error("构建失败:" + processName, e);
                 this.asyncWebHooks(processName, "error", e.getMessage());
             } finally {
+                this.clearResources();
                 logRecorder.system("构建结束 累计耗时:{}", DateUtil.formatBetween(SystemClock.now() - startTime));
                 this.asyncWebHooks("done");
                 BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
@@ -1069,7 +1094,10 @@ public class BuildExecuteService {
                 int waitFor = JpomApplication.getInstance().execScript(scriptModel.getContext(), file -> {
                     try {
                         // 输出环境变量
-                        taskData.environmentMapBuilder.eachStr(s -> logRecorder.system(s), map);
+                        taskData.environmentMapBuilder.eachStr(s -> {
+                            logRecorder.system(s);
+                            scriptLog.info(s);
+                        }, map);
                         //
                         return CommandUtil.execWaitFor(file, null, environment, null, (s, process) -> {
                             logRecorder.info(s);
