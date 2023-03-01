@@ -172,15 +172,14 @@ public class StringUtil {
     /**
      * 根据 map 替换 字符串变量
      *
-     * @param command 字符串
-     * @param evn     map
+     * @param str 字符串
+     * @param evn map
      * @return 替换后
      */
-    public static String formatStrByMap(String command, Map<String, String> evn) {
-        String replace = command;
+    public static String formatStrByMap(String str, Map<String, String> evn) {
+        String replace = str;
         Set<Map.Entry<String, String>> entries = evn.entrySet();
         for (Map.Entry<String, String> entry : entries) {
-            //replace = StrUtil.replace(replace, StrUtil.format("#{{}}", entry.getKey()), entry.getValue());
             replace = StrUtil.replace(replace, StrUtil.format("${{}}", entry.getKey()), entry.getValue());
         }
         return replace;
