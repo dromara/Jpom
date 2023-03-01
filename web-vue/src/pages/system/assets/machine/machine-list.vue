@@ -301,7 +301,7 @@
           <a-row>
             <a-col :span="10">节点名称：{{ item.name }}</a-col>
             <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
-            <a-col :span="4"> <a-button type="link" icon="login" @click="toNode(item.id, item.workspace && item.workspace.id)"> </a-button></a-col>
+            <a-col :span="4"> <a-button type="link" icon="login" @click="toNode(item.id, item.name, item.workspace && item.workspace.id)"> </a-button></a-col>
           </a-row>
         </a-list-item>
       </a-list>
@@ -605,7 +605,7 @@ export default {
         }
       });
     },
-    toNode(nodeId, wid) {
+    toNode(nodeId, name, wid) {
       const newpage = this.$router.resolve({
         name: "node_" + nodeId,
         path: "/node/list",
@@ -615,6 +615,7 @@ export default {
           pId: "manage",
           id: "manageList",
           wid: wid,
+          searchNodeName: name,
         },
       });
       window.open(newpage.href, "_blank");
