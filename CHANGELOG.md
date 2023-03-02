@@ -13,6 +13,11 @@
 2. 【server】修复 更新构建历史环境变量失败
 3. 【server】取消 SSH 脚本命令参数描述（避免误导用户）
    （感谢 [@大灰灰大](https://gitee.com/linjianhui) [Gitee issues I6IPDY](https://gitee.com/dromara/Jpom/issues/I6IPDY) ）
+4. 【server】优化 编辑项目文件回显错乱问题
+
+### ❌ 不兼容功能
+
+1. 【server】删除 弃用表 NODE_STAT 
 
 ------
 

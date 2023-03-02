@@ -184,13 +184,12 @@
           </a-space>
         </a-modal>
 
-        <a-modal destroyOnClose v-model="editFileVisible" width="80vw" :title="`编辑文件 ${filename}`" :maskClosable="true">
+        <a-modal destroyOnClose v-model="editFileVisible" width="80vw" :title="`编辑文件 ${filename}`" :maskClosable="true" @cancel="handleCloseModal">
           <div style="height: 60vh">
-            <code-editor showTool v-model="fileContent" :fileSuffix="filename"></code-editor>
+            <code-editor showTool v-if="editFileVisible" v-model="fileContent" :fileSuffix="filename"></code-editor>
           </div>
 
           <template slot="footer">
-            <!-- @ok="updateFileData" @cancel="handleCloseModal" -->
             <a-button @click="handleCloseModal"> 关闭 </a-button>
             <a-button type="primary" @click="updateFileData"> 保存 </a-button>
             <a-button
@@ -390,17 +389,7 @@ export default {
     renderSize,
     uploadPieces,
     formatDuration,
-    handleEditFile(record) {
-      this.editFileVisible = true;
-      this.loadFileData(record.filename);
-      this.filename = record.filename;
-    },
 
-    // 关闭编辑器弹窗
-    handleCloseModal() {
-      this.fileContent = "";
-      this.editFileVisible = false;
-    },
     onTreeData(treeNode) {
       return new Promise((resolve) => {
         if (treeNode.dataRef.children || !treeNode.dataRef.isDirectory) {
@@ -472,23 +461,28 @@ export default {
         resolve();
       }
     },
-
-    // 读取文件数据
-    loadFileData(filename) {
+    handleEditFile(record) {
       const params = {
         nodeId: this.nodeId,
         id: this.projectId,
         filePath: this.uploadPath,
-        filename,
+        filename: record.filename,
       };
-
+      // 读取文件数据
       readFile(params).then((res) => {
         if (res.code === 200) {
+          this.editFileVisible = true;
+          this.filename = record.filename;
           setTimeout(() => {
             this.fileContent = res.data;
           }, 300);
         }
       });
+    },
+    // 关闭编辑器弹窗
+    handleCloseModal() {
+      this.fileContent = "";
+      this.editFileVisible = false;
     },
 
     updateFileData() {

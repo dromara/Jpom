@@ -860,6 +860,8 @@ public class BuildExecuteService {
                 // 删除 产物文件夹
                 File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), buildInfoModel1.getBuildId(), StrUtil.SLASH);
                 CommandUtil.systemFastDel(historyPackageFile);
+                // 被删除后
+                this.taskData.resultFileSize = 0L;
             }
             return true;
         }
