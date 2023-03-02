@@ -1,14 +1,5 @@
 <template>
   <div>
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-input v-model="envVarListQuery['%name%']" placeholder="名称" @pressEnter="loadDataEnvVar" allowClear class="search-input-item" />
-        <a-input v-model="envVarListQuery['%value%']" placeholder="值" @pressEnter="loadDataEnvVar" allowClear class="search-input-item" />
-        <a-input v-model="envVarListQuery['%description%']" placeholder="描述" @pressEnter="loadDataEnvVar" allowClear class="search-input-item" />
-        <a-button type="primary" @click="loadDataEnvVar">搜索</a-button>
-        <a-button type="primary" @click="addEnvVar">新增</a-button>
-      </a-space>
-    </div>
     <!-- 数据表格 -->
     <a-table
       :data-source="envVarList"
@@ -20,6 +11,15 @@
       bordered
       :rowKey="(record, index) => index"
     >
+      <template #title>
+        <a-space>
+          <a-input v-model="envVarListQuery['%name%']" placeholder="名称" @pressEnter="loadDataEnvVar" allowClear class="search-input-item" />
+          <a-input v-model="envVarListQuery['%value%']" placeholder="值" @pressEnter="loadDataEnvVar" allowClear class="search-input-item" />
+          <a-input v-model="envVarListQuery['%description%']" placeholder="描述" @pressEnter="loadDataEnvVar" allowClear class="search-input-item" />
+          <a-button type="primary" @click="loadDataEnvVar">搜索</a-button>
+          <a-button type="primary" @click="addEnvVar">新增</a-button>
+        </a-space>
+      </template>
       <a-tooltip slot="value" slot-scope="text, item" placement="topLeft" :title="item.privacy === 1 ? '隐私字段' : text">
         <a-icon v-if="item.privacy === 1" type="eye-invisible" />
         <span v-else>{{ text }}</span>

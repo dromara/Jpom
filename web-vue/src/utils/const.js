@@ -72,7 +72,8 @@ export function COMPUTED_PAGINATION(queryParam, pageSizeOptions) {
     showSizeChanger: true,
     showQuickJumper: true,
     showLessItems: true,
-    hideOnSinglePage: true,
+    // 只有在分页条数在 小于 2 的时候隐藏，避免设置太大无法切回
+    hideOnSinglePage: limit <= 20,
     showTotal: (total) => {
       return PAGE_DEFAULT_SHOW_TOTAL(total);
     },

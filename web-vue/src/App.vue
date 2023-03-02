@@ -82,6 +82,7 @@ export default {
 
 .full-content {
   min-height calc(100vh - 120px);
+  padding-bottom: 20px;
 }
 
 .node-full-content {

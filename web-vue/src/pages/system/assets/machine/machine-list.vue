@@ -162,9 +162,9 @@
           <a-tooltip slot="tooltip" slot-scope="text" :title="text">
             <span>{{ text }}</span>
           </a-tooltip>
-          <template slot="status" slot-scope="text, item">
+          <a-tooltip slot="status" slot-scope="text, item" :title="`当前状态：${statusMap[item.status]} ${item.statusMsg ? '状态消息：' + item.statusMsg : ''} `">
             <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0px"> {{ statusMap[item.status] }}</a-tag>
-          </template>
+          </a-tooltip>
           <a-tooltip slot="duration" slot-scope="text" placement="topLeft" :title="formatDuration(text)">
             <span>{{ formatDuration(text, "", 2) }}</span>
           </a-tooltip>
@@ -426,16 +426,17 @@ export default {
         { title: "主机名", dataIndex: "hostName", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "节点地址", dataIndex: "jpomUrl", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "分组名", dataIndex: "groupName", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
-        { title: "状态", dataIndex: "status", width: "130px", ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "状态", dataIndex: "status", align: "center", width: "100px", ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "开机时间", sorter: true, dataIndex: "osSystemUptime", ellipsis: true, scopedSlots: { customRender: "duration2" } },
-        { title: "CPU占用", sorter: true, dataIndex: "osOccupyCpu", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
-        { title: "内存占用", sorter: true, dataIndex: "osOccupyMemory", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
-        { title: "硬盘占用", sorter: true, dataIndex: "osOccupyDisk", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
+        { title: "CPU占用", sorter: true, align: "center", dataIndex: "osOccupyCpu", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
+        { title: "内存占用", sorter: true, align: "center", dataIndex: "osOccupyMemory", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
+        { title: "硬盘占用", sorter: true, align: "center", dataIndex: "osOccupyDisk", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
         { title: "插件版本号", dataIndex: "jpomVersion", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         {
           title: "模板节点",
           dataIndex: "templateNode",
-          width: "100px",
+          width: "90px",
+          align: "center",
           ellipsis: true,
           customRender: (text) => {
             return text ? "是" : "否";
