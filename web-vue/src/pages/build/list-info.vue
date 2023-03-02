@@ -395,10 +395,16 @@
                       <a-icon type="question-circle" theme="filled" />
                     </a-tooltip>
                   </template>
-                  <a-select show-search option-filter-prop="children" mode="multiple" v-model="tempExtraData.releaseMethodDataId_3" placeholder="请选择SSH">
-                    <a-select-option v-for="ssh in sshList" :disabled="!ssh.fileDirs" :key="ssh.id">{{ ssh.name }}</a-select-option>
-                    <a-icon slot="suffixIcon" type="reload" @click="loadSshList" />
-                  </a-select>
+                  <a-row>
+                    <a-col :span="22">
+                      <a-select show-search option-filter-prop="children" mode="multiple" v-model="tempExtraData.releaseMethodDataId_3" placeholder="请选择SSH">
+                        <a-select-option v-for="ssh in sshList" :disabled="!ssh.fileDirs" :key="ssh.id">{{ ssh.name }}</a-select-option>
+                      </a-select>
+                    </a-col>
+                    <a-col :span="1" style="margin-left: 10px">
+                      <a-icon type="reload" @click="loadSshList" />
+                    </a-col>
+                  </a-row>
                 </a-form-model-item>
                 <a-form-model-item label="发布目录" prop="releaseMethodDataId">
                   <a-input-group compact>
