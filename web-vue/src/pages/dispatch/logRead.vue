@@ -25,12 +25,12 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editVisible" width="60%" title="编辑日志阅读" @ok="handleEditOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editVisible" width="60%" title="编辑日志搜索" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="日志名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="日志项目名称" />
         </a-form-model-item>
-        <a-form-model-item label="分发节点" required>
+        <a-form-model-item label="绑定节点" required>
           <a-row v-for="(item, index) in temp.projectList" :key="index">
             <a-col :span="11">
               <span>节点: </span>
@@ -271,7 +271,7 @@ export default {
     handleDelete(record) {
       this.$confirm({
         title: "系统提示",
-        content: "真的要删除日志阅读么？",
+        content: "真的要删除日志搜索么？",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {

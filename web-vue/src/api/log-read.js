@@ -1,6 +1,6 @@
 import axios from "./config";
 
-// 日志阅读列表
+// 日志搜索列表
 export function getLogReadList(params) {
   return axios({
     url: "/log-read/list",
@@ -10,7 +10,7 @@ export function getLogReadList(params) {
 }
 
 /**
- * 编辑日志阅读
+ * 编辑日志搜索
  * @param {
  *  id: 监控 ID
  *  name: 监控名称
@@ -41,7 +41,7 @@ export function updateCache(params) {
 }
 
 /**
- * 删除日志阅读
+ * 删除日志搜索
  * @param {*} id
  */
 export function deleteLogRead(id) {
