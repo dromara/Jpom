@@ -121,7 +121,7 @@ server:
     uri-encoding: UTF-8
 spring:
   profiles:
-    active: mysql-1
+    active: mysql
   web:
     resources:
       static-locations: classpath:/dist/

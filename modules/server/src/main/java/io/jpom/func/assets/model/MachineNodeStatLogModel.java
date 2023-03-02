@@ -22,7 +22,6 @@
  */
 package io.jpom.func.assets.model;
 
-import io.jpom.model.log.SystemMonitorLog;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import top.jpom.h2db.TableName;
@@ -30,7 +29,6 @@ import top.jpom.model.BaseDbModel;
 
 /**
  * @author bwcx_jzy
- * @see SystemMonitorLog
  * @see io.jpom.model.data.NodeModel
  * @since 2023/02/18
  */
