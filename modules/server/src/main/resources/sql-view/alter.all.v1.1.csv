@@ -17,3 +17,4 @@ ADD,MACHINE_SSH_INFO,allowEditSuffix,TEXT,,,允许编辑的后缀文件
 ADD,BUILDHISTORYLOG,resultFileSize,Long,,,产物文件大小
 ADD,BUILDHISTORYLOG,buildLogFileSize,Long,,,构建日志文件大小
 DROP-TABLE,NODE_STAT,
+DROP-TABLE,SYSTEMMONITORLOG,

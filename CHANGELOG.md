@@ -18,6 +18,7 @@
 ### ❌ 不兼容功能
 
 1. 【server】删除 弃用表 NODE_STAT 
+2. 【server】删除 弃用表 SYSTEMMONITORLOG
 
 ------
 
