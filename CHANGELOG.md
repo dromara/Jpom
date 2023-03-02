@@ -14,6 +14,7 @@
 3. 【server】取消 SSH 脚本命令参数描述（避免误导用户）
    （感谢 [@大灰灰大](https://gitee.com/linjianhui) [Gitee issues I6IPDY](https://gitee.com/dromara/Jpom/issues/I6IPDY) ）
 4. 【server】优化 编辑项目文件回显错乱问题
+5. 【server】优化 日志阅读菜单更名日志搜索
 
 ### ❌ 不兼容功能
 

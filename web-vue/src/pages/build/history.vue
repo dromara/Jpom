@@ -132,8 +132,8 @@ export default {
         { title: "构建 ID", dataIndex: "buildNumberId", width: 90, align: "center", ellipsis: true, scopedSlots: { customRender: "buildNumberId" } },
         { title: "备注", dataIndex: "buildRemark", /*width: 120,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
-        { title: "状态", dataIndex: "status", width: 120, ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "触发类型", dataIndex: "triggerBuildType", width: "100px", ellipsis: true, scopedSlots: { customRender: "triggerBuildType" } },
+        { title: "状态", dataIndex: "status", width: "100px", align: "center", ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "触发类型", dataIndex: "triggerBuildType", align: "center", width: "100px", ellipsis: true, scopedSlots: { customRender: "triggerBuildType" } },
         { title: "占用空间", dataIndex: "resultFileSize", width: "100px", sorter: true, ellipsis: true, scopedSlots: { customRender: "resultFileSize" } },
         {
           title: "开始时间",
