@@ -46,7 +46,7 @@
         <dependency>
             <groupId>io.jpom.storage-module</groupId>
             <artifactId>storage-module-common</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
