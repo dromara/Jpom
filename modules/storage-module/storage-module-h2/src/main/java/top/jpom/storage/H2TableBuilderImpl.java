@@ -79,6 +79,9 @@ public class H2TableBuilderImpl implements IStorageSqlBuilderService {
                     stringBuilder.append("ALTER TABLE ").append(viewAlterData.getTableName()).append(" ADD IF NOT EXISTS ");
                     stringBuilder.append(this.generateColumnSql(viewAlterData));
                     break;
+                case "DROP-TABLE":
+                    stringBuilder.append("drop table if exists ").append(viewAlterData.getTableName());
+                    break;
                 default:
                     throw new IllegalArgumentException("不支持的类型：" + alterType);
             }

@@ -22,7 +22,6 @@
  */
 package io.jpom.common;
 
-import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
@@ -141,10 +140,10 @@ public class JpomManifest {
         OsInfo osInfo = SystemUtil.getOsInfo();
         JavaInfo javaInfo = SystemUtil.getJavaInfo();
         return StrUtil.format("{} {}; {}; {}",
-                Opt.ofBlankAble(osInfo.getName()).orElse(UserAgentInfo.NameUnknown),
-                Opt.ofBlankAble(osInfo.getVersion()).orElse("0"),
-                Opt.ofBlankAble(osInfo.getArch()).orElse(UserAgentInfo.NameUnknown),
-                Opt.ofBlankAble(javaInfo.getVersion()).orElse(UserAgentInfo.NameUnknown)
+            Opt.ofBlankAble(osInfo.getName()).orElse(UserAgentInfo.NameUnknown),
+            Opt.ofBlankAble(osInfo.getVersion()).orElse("0"),
+            Opt.ofBlankAble(osInfo.getArch()).orElse(UserAgentInfo.NameUnknown),
+            Opt.ofBlankAble(javaInfo.getVersion()).orElse(UserAgentInfo.NameUnknown)
         );
     }
 
@@ -280,11 +279,6 @@ public class JpomManifest {
         this.dataPath = dataPath;
     }
 
-    public String getUpTimeStr() {
-        long uptime = SystemUtil.getRuntimeMXBean().getUptime();
-        return DateUtil.formatBetween(uptime, BetweenFormatter.Level.SECOND);
-    }
-
     public long getUpTime() {
         return SystemUtil.getRuntimeMXBean().getUptime();
     }
@@ -392,7 +386,7 @@ public class JpomManifest {
             }
             String applicationClass = type.getApplicationClass();
             ZipEntry entry = jarFile1.getEntry(StrUtil.format("BOOT-INF/classes/{}.class",
-                    StrUtil.replace(applicationClass, ".", StrUtil.SLASH)));
+                StrUtil.replace(applicationClass, ".", StrUtil.SLASH)));
             if (entry == null) {
                 return new JsonMessage<>(405, "此包不是Jpom【" + type.name() + "】包");
             }
@@ -406,7 +400,7 @@ public class JpomManifest {
                 //
                 JpomManifest jpomManifest = JpomManifest.getInstance();
                 if (StrUtil.equals(version, jpomManifest.getVersion()) &&
-                        StrUtil.equals(timeStamp, jpomManifest.getTimeStamp())) {
+                    StrUtil.equals(timeStamp, jpomManifest.getTimeStamp())) {
                     return new JsonMessage<>(405, "新包和正在运行的包一致");
                 }
                 if (StrUtil.compareVersion(jpomManifest.getVersion(), minVersion) < 0) {

@@ -42,6 +42,9 @@
           <template slot="version" slot-scope="text">
             {{ text | version }}
           </template>
+          <a-tooltip slot="upTime" slot-scope="text" placement="topLeft" :title="formatDuration(text)">
+            <span>{{ formatDuration(text, "", 2) }}</span>
+          </a-tooltip>
           <template slot="status" slot-scope="text">
             <a-tag :color="text === 1 ? 'green' : 'pink'" style="margin-right: 0px">
               {{ statusMap[text] || "未知" }}
@@ -72,7 +75,7 @@ import upgrade from "@/components/upgrade";
 import { checkVersion, downloadRemote, uploadAgentFile, uploadAgentFileMerge } from "@/api/node";
 import { machineListData, machineListGroup, statusMap } from "@/api/system/assets-machine";
 import { mapGetters } from "vuex";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, getWebSocketUrl, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, getWebSocketUrl, PAGE_DEFAULT_LIST_QUERY, formatDuration } from "@/utils/const";
 import { uploadPieces } from "@/utils/upload-pieces";
 
 export default {
@@ -105,7 +108,7 @@ export default {
         { title: "缓存版本号", dataIndex: "jpomVersion", width: "100px", ellipsis: true, scopedSlots: { customRender: "version" } },
         { title: "实时版本号", dataIndex: "version", width: "100px", ellipsis: true, scopedSlots: { customRender: "version" } },
         { title: "打包时间", dataIndex: "timeStamp", width: "170px", ellipsis: true, scopedSlots: { customRender: "timeStamp" } },
-        { title: "运行时间", dataIndex: "upTimeStr", width: "120px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "运行时间", dataIndex: "upTime", width: "110px", ellipsis: true, scopedSlots: { customRender: "upTime" } },
 
         { title: "更新状态", dataIndex: "updateStatus", ellipsis: true, scopedSlots: { customRender: "updateStatus" } },
         // {title: '自动更新', dataIndex: 'autoUpdate', ellipsis: true, scopedSlots: {customRender: 'autoUpdate'}},
@@ -145,6 +148,7 @@ export default {
     this.socket = null;
   },
   methods: {
+    formatDuration,
     updateList() {
       this.list = this.list.map((item) => {
         let itemData = this.nodeVersion[item.id];
@@ -153,7 +157,7 @@ export default {
             itemData = JSON.parse(itemData);
             item.version = itemData.version;
             item.timeStamp = itemData.timeStamp;
-            item.upTimeStr = itemData.upTimeStr;
+            item.upTime = itemData.upTime;
           } catch (e) {
             item.version = itemData;
           }
@@ -161,7 +165,7 @@ export default {
         // item.nextTIme = Date.now();
         item.updateStatus = this.nodeStatus[item.id];
         // data.push(item);
-        return item;
+        return { ...item };
       });
     },
     // 获取所有的分组

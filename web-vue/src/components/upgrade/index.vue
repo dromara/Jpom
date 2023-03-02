@@ -17,7 +17,7 @@
         </template>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">已经运行时间：{{ temp.upTimeStr }}</span>
+        <span class="layui-elem-quote">已经运行时间：{{ formatDuration(temp.upTime) }}</span>
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote"
@@ -69,7 +69,7 @@ import { systemInfo, uploadUpgradeFile, changelog, checkVersion, remoteUpgrade, 
 import Vue from "vue";
 import MarkdownItVue from "markdown-it-vue";
 import "markdown-it-vue/dist/markdown-it-vue.css";
-import { RESTART_UPGRADE_WAIT_TIME_COUNT, parseTime, compareVersion, pageBuildInfo } from "@/utils/const";
+import { RESTART_UPGRADE_WAIT_TIME_COUNT, parseTime, compareVersion, pageBuildInfo, formatDuration } from "@/utils/const";
 import { uploadPieces } from "@/utils/upload-pieces";
 import { executionRequest } from "@/api/external";
 
@@ -115,6 +115,7 @@ export default {
   beforeDestroy() {},
   methods: {
     uploadPieces,
+    formatDuration,
     // 加载数据
     loadData() {
       systemInfo({

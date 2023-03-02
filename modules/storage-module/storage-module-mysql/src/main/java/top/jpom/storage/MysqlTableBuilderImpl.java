@@ -85,6 +85,9 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
                     columnSql = StrUtil.replace(columnSql, "'", "\\'");
                     stringBuilder.append("CALL add_column_if_not_exists('").append(viewAlterData.getTableName()).append("','").append(viewAlterData.getName()).append("','").append(columnSql).append("')");
                     break;
+                case "DROP-TABLE":
+                    stringBuilder.append("drop table if exists ").append(viewAlterData.getTableName());
+                    break;
                 default:
                     throw new IllegalArgumentException("不支持的类型：" + alterType);
             }
