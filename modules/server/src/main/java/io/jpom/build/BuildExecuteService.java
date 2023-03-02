@@ -263,7 +263,16 @@ public class BuildExecuteService {
         //BuildInfoManage manage = new BuildInfoManage(taskData);
         BUILD_MANAGE_MAP.put(buildInfoModel.getId(), build);
         // 输出提交任务日志, 提交到线程池中
-        threadPoolExecutor.execute(build.submitTask());
+        threadPoolExecutor.execute(() -> {
+            try {
+                BuildInfoManage buildInfoManage = build.submitTask();
+                buildInfoManage.run();
+            } catch (Exception e) {
+                log.error("构建发生未知错误", e);
+            } finally {
+                BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
+            }
+        });
     }
 
     /**
@@ -359,7 +368,7 @@ public class BuildExecuteService {
      * @param logId          构建ID
      * @param resultFileSize 产物文件大小
      */
-    private void updateBuildResultFileSize(String logId, long resultFileSize, long logSize) {
+    private void updateBuildResultFileSize(String logId, Long resultFileSize, Long logSize) {
         BuildHistoryLog buildInfoModel = new BuildHistoryLog();
         buildInfoModel.setId(logId);
         buildInfoModel.setResultFileSize(resultFileSize);
@@ -459,7 +468,7 @@ public class BuildExecuteService {
             Optional.ofNullable(currentThread).ifPresent(Thread::interrupt);
 
             String buildId = taskData.buildInfoModel.getId();
-            buildExecuteService.updateStatus(buildId, logId, taskData.buildInfoModel.getBuildId(), BuildStatus.Cancel);
+            buildExecuteService.updateStatus(buildId, logId, taskData.buildInfoModel.getBuildId(), io.jpom.model.enums.BuildStatus.Cancel);
             BUILD_MANAGE_MAP.remove(buildId);
         }
 
@@ -679,7 +688,7 @@ public class BuildExecuteService {
                         if (StrUtil.equals(repositoryLastCommitId, result[0])) {
                             // 如果一致，则不构建
                             logRecorder.systemError("仓库代码没有任何变动终止本次构建：{} {}", result[0], msg);
-                            return false;
+                            throw new InterruptException();
                         }
                     }
                     taskData.repositoryLastCommitId = result[0];
@@ -696,7 +705,7 @@ public class BuildExecuteService {
                         if (StrUtil.equals(repositoryLastCommitId, result[0])) {
                             // 如果一致，则不构建
                             logRecorder.systemError("仓库代码没有任何变动终止本次构建：{}", result[0]);
-                            return false;
+                            throw new InterruptException();
                         }
                     }
                     taskData.repositoryLastCommitId = result[0];
@@ -707,7 +716,7 @@ public class BuildExecuteService {
                 taskData.environmentMapBuilder.put("BUILD_COMMIT_ID", taskData.repositoryLastCommitId);
                 logRecorder.system(msg);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw Lombok.sneakyThrow(e);
             }
             // env file
             String attachEnv = this.buildExtraModule.getAttachEnv();
@@ -990,11 +999,9 @@ public class BuildExecuteService {
                     logRecorder.system("执行结束 {}流程,耗时：{}", processItem.name(), DateUtil.formatBetween(SystemClock.now() - processItemStartTime));
                 }
                 this.asyncWebHooks("success");
-            } catch (RuntimeException runtimeException) {
-                buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error);
-                Throwable cause = runtimeException.getCause();
-                logRecorder.error("构建失败:" + processName, cause == null ? runtimeException : cause);
-                this.asyncWebHooks(processName, "error", runtimeException.getMessage());
+            } catch (InterruptException interruptException) {
+                this.asyncWebHooks("stop", "process", processName);
+                buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Interrupt);
             } catch (Exception e) {
                 buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error);
                 logRecorder.error("构建失败:" + processName, e);
@@ -1003,15 +1010,9 @@ public class BuildExecuteService {
                 this.clearResources();
                 logRecorder.system("构建结束 累计耗时:{}", DateUtil.formatBetween(SystemClock.now() - startTime));
                 this.asyncWebHooks("done");
-                BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
                 BaseServerController.removeAll();
             }
-//            return false;
         }
-
-//		private void log(String title, Throwable throwable) {
-//			log(title, throwable, BuildStatus.Error);
-//		}
 
         /**
          * 执行 webhooks 通知

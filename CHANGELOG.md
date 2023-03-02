@@ -15,6 +15,7 @@
    （感谢 [@大灰灰大](https://gitee.com/linjianhui) [Gitee issues I6IPDY](https://gitee.com/dromara/Jpom/issues/I6IPDY) ）
 4. 【server】优化 编辑项目文件回显错乱问题
 5. 【server】优化 日志阅读菜单更名日志搜索
+6. 【server】优化 差异构建时，触发取消构建标记构建状态为`构建中断` （感谢@张飞鸿）
 
 ### ❌ 不兼容功能
 
