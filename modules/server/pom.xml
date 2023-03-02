@@ -121,13 +121,13 @@
         <dependency>
             <groupId>io.jpom.storage-module</groupId>
             <artifactId>storage-module-h2</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.jpom.storage-module</groupId>
             <artifactId>storage-module-mysql</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
     <build>

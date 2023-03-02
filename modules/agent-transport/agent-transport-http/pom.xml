@@ -46,7 +46,7 @@
         <dependency>
             <groupId>io.jpom.agent-transport</groupId>
             <artifactId>agent-transport-common</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
