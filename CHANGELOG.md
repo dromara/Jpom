@@ -21,6 +21,7 @@
 
 1. 【server】删除 弃用表 NODE_STAT 
 2. 【server】删除 弃用表 SYSTEMMONITORLOG
+3. 【server】删除 相关表中的 strike 字段
 
 ------
 

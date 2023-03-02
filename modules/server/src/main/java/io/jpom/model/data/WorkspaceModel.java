@@ -22,7 +22,10 @@
  */
 package io.jpom.model.data;
 
-import io.jpom.model.BaseStrikeDbModel;
+import io.jpom.model.BaseUserModifyDbModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import top.jpom.h2db.TableName;
 
 /**
@@ -31,8 +34,11 @@ import top.jpom.h2db.TableName;
  * @author bwcx_jzy
  * @since 2021/12/3
  */
+@EqualsAndHashCode(callSuper = true)
 @TableName(value = "WORKSPACE", name = "工作空间")
-public class WorkspaceModel extends BaseStrikeDbModel {
+@Data
+@NoArgsConstructor
+public class WorkspaceModel extends BaseUserModifyDbModel {
 
     /**
      * 名称
@@ -44,26 +50,7 @@ public class WorkspaceModel extends BaseStrikeDbModel {
      */
     private String description;
 
-    public WorkspaceModel() {
-    }
-
     public WorkspaceModel(String id) {
         this.setId(id);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 }

@@ -33,7 +33,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public abstract class BaseWorkspaceModel extends BaseStrikeDbModel {
+public abstract class BaseWorkspaceModel extends BaseUserModifyDbModel {
 
     /**
      * 工作空间ID
