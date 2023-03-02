@@ -295,7 +295,7 @@ export default {
         { title: "项目数", dataIndex: "count", key: "count", width: "90px", scopedSlots: { customRender: "projectCount" } },
         { title: "脚本数", dataIndex: "scriptCount", key: "scriptCount", width: "90px", scopedSlots: { customRender: "scriptCount" } },
 
-        { title: "已运行时间", dataIndex: "runTime", key: "runTime", ellipsis: true, scopedSlots: { customRender: "runTime" } },
+        { title: "插件运行", dataIndex: "runTime", width: "100px", key: "runTime", ellipsis: true, scopedSlots: { customRender: "runTime" } },
 
         { title: "操作", dataIndex: "operation", key: "operation", width: "210px", scopedSlots: { customRender: "operation" }, align: "center" },
       ],
