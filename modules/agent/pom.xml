@@ -147,6 +147,12 @@
                             <mainClass>${start-class}</mainClass>
                             <jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>
                             <!--	<excludeGroupIds>io.jpom.plugins</excludeGroupIds>-->
+                            <excludes>
+                                <exclude>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                </exclude>
+                            </excludes>
                         </configuration>
                         <executions>
                             <execution>
