@@ -22,7 +22,7 @@
  */
 package io.jpom.model.data;
 
-import io.jpom.model.BaseStrikeDbModel;
+import io.jpom.model.BaseUserModifyDbModel;
 import io.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -37,7 +37,7 @@ import top.jpom.h2db.TableName;
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "SYSTEM_PARAMETERS", name = "系统参数")
 @Data
-public class SystemParametersModel extends BaseStrikeDbModel {
+public class SystemParametersModel extends BaseUserModifyDbModel {
 
     /**
      * 参数值

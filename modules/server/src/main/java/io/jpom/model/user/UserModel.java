@@ -25,7 +25,7 @@ package io.jpom.model.user;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.model.BaseStrikeDbModel;
+import io.jpom.model.BaseUserModifyDbModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 @TableName(value = "USER_INFO", name = "用户账号")
 @Data
 @NoArgsConstructor
-public class UserModel extends BaseStrikeDbModel {
+public class UserModel extends BaseUserModifyDbModel {
     /**
      * 系统管理员
      */
