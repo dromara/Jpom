@@ -224,7 +224,9 @@
           </template>
           <a-input-group compact>
             <a-select style="width: 50%" v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
-              <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
+              <a-select-option v-for="access in accessList" :key="access">
+                <a-tooltip :title="access">{{ access }}</a-tooltip>
+              </a-select-option>
             </a-select>
             <a-input style="width: 50%" v-model="temp.lib" placeholder="项目存储的文件夹" />
           </a-input-group>

@@ -398,7 +398,9 @@
                   <a-row>
                     <a-col :span="22">
                       <a-select show-search option-filter-prop="children" mode="multiple" v-model="tempExtraData.releaseMethodDataId_3" placeholder="请选择SSH">
-                        <a-select-option v-for="ssh in sshList" :disabled="!ssh.fileDirs" :key="ssh.id">{{ ssh.name }}</a-select-option>
+                        <a-select-option v-for="ssh in sshList" :disabled="!ssh.fileDirs" :key="ssh.id">
+                          <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
+                        </a-select-option>
                       </a-select>
                     </a-col>
                     <a-col :span="1" style="margin-left: 10px">
@@ -410,7 +412,9 @@
                   <a-input-group compact>
                     <a-tooltip title="如果多选 ssh 下面目录只显示选项中的第一项，但是授权目录需要保证每项都配置对应目录">
                       <a-select show-search allowClear style="width: 30%" v-model="tempExtraData.releaseSshDir" placeholder="请选择SSH">
-                        <a-select-option v-for="item in selectSshDirs" :key="item">{{ item }}</a-select-option>
+                        <a-select-option v-for="item in selectSshDirs" :key="item">
+                          <a-tooltip :title="item">{{ item }}</a-tooltip>
+                        </a-select-option>
                       </a-select>
                     </a-tooltip>
                     <a-input style="width: 70%" v-model="tempExtraData.releasePath2" placeholder="发布目录,构建产物上传到对应目录" />
