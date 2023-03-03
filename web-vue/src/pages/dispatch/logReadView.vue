@@ -101,7 +101,11 @@
 
         <a-tabs v-if="temp.cacheData" v-model="activeTagKey" :tabBarStyle="{ marginBottom: 0 }">
           <template v-for="item in temp.projectList">
-            <a-tab-pane forceRender v-if="nodeName[item.nodeId]" :key="`${item.nodeId},${item.projectId}`" :tab="nodeName[item.nodeId] && nodeName[item.nodeId].name">
+            <a-tab-pane forceRender v-if="nodeName[item.nodeId]" :key="`${item.nodeId},${item.projectId}`">
+              <template slot="tab">
+                【{{ nodeName[item.nodeId] && nodeName[item.nodeId].name }}】
+                {{ nodeProjectList[item.nodeId] && nodeProjectList[item.nodeId].projects && nodeProjectList[item.nodeId].projects.filter((item1) => item1.projectId === item.projectId)[0].name }}
+              </template>
               <viewPre
                 :ref="`pre-dom-${item.nodeId},${item.projectId}`"
                 :id="`pre-dom-${item.nodeId},${item.projectId}`"
@@ -145,7 +149,7 @@ export default {
       treeList: [],
       activeTagKey: "",
 
-      nodeProjectList: [],
+      nodeProjectList: {},
       nodeList: [],
       nodeName: {},
       temp: {},
