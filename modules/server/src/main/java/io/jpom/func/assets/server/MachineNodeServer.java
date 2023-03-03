@@ -293,6 +293,8 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             machineNodeModel.setOsCpuIdentifierName(jsonObject.getString("osCpuIdentifierName"));
             machineNodeModel.setOsCpuCores(jsonObject.getInteger("osCpuCores"));
             machineNodeModel.setOsMoneyTotal(jsonObject.getLong("osMoneyTotal"));
+            machineNodeModel.setOsSwapTotal(jsonObject.getLong("osSwapTotal"));
+            machineNodeModel.setOsVirtualMax(jsonObject.getLong("osVirtualMax"));
             machineNodeModel.setOsLoadAverage(CollUtil.join(jsonObject.getList("osLoadAverage", Double.class), StrUtil.COMMA));
             machineNodeModel.setOsFileStoreTotal(jsonObject.getLong("osFileStoreTotal"));
         });

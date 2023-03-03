@@ -49,6 +49,8 @@
               </a-descriptions-item>
               <a-descriptions-item label="CPU数">{{ machineInfo && machineInfo.osCpuCores }} </a-descriptions-item>
               <a-descriptions-item label="内存">{{ renderSize(machineInfo && machineInfo.osMoneyTotal) }} </a-descriptions-item>
+              <a-descriptions-item label="虚拟内存">{{ renderSize(machineInfo && machineInfo.osVirtualMax) }} </a-descriptions-item>
+              <a-descriptions-item label="交互内存">{{ renderSize(machineInfo && machineInfo.osSwapTotal) }} </a-descriptions-item>
               <a-descriptions-item label="硬盘">{{ renderSize(machineInfo && machineInfo.osFileStoreTotal) }} </a-descriptions-item>
 
               <a-descriptions-item label="负载">{{ machineInfo && machineInfo.osLoadAverage }} </a-descriptions-item>
@@ -63,8 +65,7 @@
               <a-descriptions-item label="项目数">{{ machineInfo && machineInfo.jpomProjectCount }} </a-descriptions-item>
               <a-descriptions-item label="脚本数">{{ machineInfo && machineInfo.jpomScriptCount }} </a-descriptions-item>
               <a-descriptions-item label="网络延迟">{{ formatDuration(machineInfo && machineInfo.networkDelay) }} </a-descriptions-item>
-              <a-descriptions-item></a-descriptions-item>
-              <a-descriptions-item></a-descriptions-item>
+
               <a-descriptions-item label="硬盘占用" :span="4">
                 <a-progress
                   :stroke-color="{
