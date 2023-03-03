@@ -277,6 +277,8 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             machineNodeStatLogModel.setOccupyCpu(machineNodeModel.getOsOccupyCpu());
             machineNodeStatLogModel.setOccupyMemory(machineNodeModel.getOsOccupyMemory());
             machineNodeStatLogModel.setOccupyDisk(machineNodeModel.getOsOccupyDisk());
+            machineNodeStatLogModel.setOccupySwapMemory(jsonObject.getDouble("swapMemory"));
+            machineNodeStatLogModel.setOccupyVirtualMemory(jsonObject.getDouble("virtualMemory"));
             machineNodeStatLogModel.setNetTxBytes(jsonObject.getLong("netTxBytes"));
             machineNodeStatLogModel.setNetRxBytes(jsonObject.getLong("netRxBytes"));
             machineNodeStatLogModel.setMonitorTime(jsonObject.getLongValue("time"));

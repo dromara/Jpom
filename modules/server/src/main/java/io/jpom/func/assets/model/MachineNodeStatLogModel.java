@@ -49,6 +49,14 @@ public class MachineNodeStatLogModel extends BaseDbModel {
      */
     private Double occupyMemory;
     /**
+     * 交互内存
+     */
+    private Double occupySwapMemory;
+    /**
+     * 虚拟内存
+     */
+    private Double occupyVirtualMemory;
+    /**
      * 占用磁盘
      */
     private Double occupyDisk;
