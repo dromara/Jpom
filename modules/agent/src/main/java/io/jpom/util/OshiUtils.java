@@ -92,6 +92,9 @@ public class OshiUtils {
         jsonObject.put("osCpuCores", processor.getLogicalProcessorCount());
         GlobalMemory globalMemory = OshiUtil.getMemory();
         jsonObject.put("osMoneyTotal", globalMemory.getTotal());
+        VirtualMemory virtualMemory = globalMemory.getVirtualMemory();
+        jsonObject.put("osSwapTotal", virtualMemory.getSwapTotal());
+        jsonObject.put("osVirtualMax", virtualMemory.getVirtualMax());
         double[] systemLoadAverage = processor.getSystemLoadAverage(3);
         jsonObject.put("osLoadAverage", systemLoadAverage);
         FileSystem fileSystem = os.getFileSystem();
@@ -116,8 +119,14 @@ public class OshiUtils {
         GlobalMemory globalMemory = OshiUtil.getMemory();
         jsonObject.put("memory", NumberUtil.div(globalMemory.getTotal() - globalMemory.getAvailable(), globalMemory.getTotal(), 2) * 100);
         VirtualMemory virtualMemory = globalMemory.getVirtualMemory();
-        jsonObject.put("swapMemory", NumberUtil.div(virtualMemory.getSwapUsed(), virtualMemory.getSwapTotal(), 2) * 100);
-        jsonObject.put("virtualMemory", NumberUtil.div(virtualMemory.getVirtualInUse(), virtualMemory.getVirtualMax(), 2) * 100);
+        long swapTotal = virtualMemory.getSwapTotal();
+        if (swapTotal > 0) {
+            jsonObject.put("swapMemory", NumberUtil.div(virtualMemory.getSwapUsed(), swapTotal, 2) * 100);
+        }
+        long virtualMax = virtualMemory.getVirtualMax();
+        if (virtualMax > 0) {
+            jsonObject.put("virtualMemory", NumberUtil.div(virtualMemory.getVirtualInUse(), virtualMax, 2) * 100);
+        }
         //
         FileSystem fileSystem = OshiUtil.getOs().getFileSystem();
         List<OSFileStore> fileStores = fileSystem.getFileStores();

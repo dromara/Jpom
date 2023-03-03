@@ -121,8 +121,8 @@ export function generateNodeTopChart(data) {
     cpuItem.data.push(parseFloat(item.occupyCpu));
     diskItem.data.push(parseFloat(item.occupyDisk));
     memoryItem.data.push(parseFloat(item.occupyMemory));
-    swapMemory.data.push(parseFloat(item.occupySwapMemory || -1));
-    virtualMemory.data.push(parseFloat(item.occupyVirtualMemory || -1));
+    swapMemory.data.push(parseFloat(item.occupySwapMemory || -0.1));
+    virtualMemory.data.push(parseFloat(item.occupyVirtualMemory || -0.1));
 
     scales.push(parseTime(item.monitorTime));
   }

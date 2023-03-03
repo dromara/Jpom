@@ -20,3 +20,5 @@ DROP-TABLE,SYSTEMMONITORLOG,
 ADD,MACHINE_NODE_INFO,installId,String,50,,机器安装 id
 ADD,MACHINE_NODE_STAT_LOG,occupySwapMemory,Double,,,交互内存
 ADD,MACHINE_NODE_STAT_LOG,occupyVirtualMemory,Double,,,虚拟内存
+ADD,MACHINE_NODE_INFO,osSwapTotal,Long,,,虚拟总内存
+ADD,MACHINE_NODE_INFO,osVirtualMax,Long,,,交互总内存

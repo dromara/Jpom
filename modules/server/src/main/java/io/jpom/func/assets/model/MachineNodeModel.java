@@ -83,6 +83,14 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
      */
     private Long osMoneyTotal;
     /**
+     * 交互总内存
+     */
+    private Long osSwapTotal;
+    /**
+     * 虚拟总内存
+     */
+    private Long osVirtualMax;
+    /**
      * 硬盘总大小
      */
     private Long osFileStoreTotal;
