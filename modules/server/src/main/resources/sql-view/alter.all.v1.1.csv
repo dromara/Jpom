@@ -8,7 +8,6 @@ DROP,NODE_INFO,unLockType
 ADD,NODE_INFO,machineId,String,50,,机器id
 ADD,MACHINE_NODE_INFO,templateNode,TINYINT,,,模板节点 ，1 模板节点 0 非模板节点
 ADD,REPOSITORY,timeout,Integer,,,仓库超时连接
-DROP,MACHINE_NODE_INFO,strike
 ADD,SSH_INFO,group,String,50,,分组
 ADD,SSH_INFO,machineSshId,String,50,,机器sshid
 ADD,SSHTERMINALEXECUTELOG,machineSshId,String,50,,机器sshid
@@ -18,3 +17,4 @@ ADD,BUILDHISTORYLOG,resultFileSize,Long,,,产物文件大小
 ADD,BUILDHISTORYLOG,buildLogFileSize,Long,,,构建日志文件大小
 DROP-TABLE,NODE_STAT,
 DROP-TABLE,SYSTEMMONITORLOG,
+ADD,MACHINE_NODE_INFO,installId,String,50,,机器安装 id

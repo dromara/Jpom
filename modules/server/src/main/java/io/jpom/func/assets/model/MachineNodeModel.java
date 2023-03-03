@@ -184,6 +184,10 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
      * 模板节点 ，1 模板节点 0 非模板节点
      */
     private Boolean templateNode;
+    /**
+     * 安装 id
+     */
+    private String installId;
 
     @Override
     public String name() {

@@ -256,6 +256,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
                     machineNodeModel.setJpomBuildTime(jsonObject1.getString("timeStamp"));
                     machineNodeModel.setOsName(jsonObject1.getString("osName"));
                     machineNodeModel.setJpomUptime(jsonObject1.getLong("upTime"));
+                    machineNodeModel.setInstallId(jsonObject1.getString("installId"));
                 });
             machineNodeModel.setJpomProjectCount(jsonObject.getIntValue("projectCount"));
             machineNodeModel.setJpomScriptCount(jsonObject.getIntValue("scriptCount"));
