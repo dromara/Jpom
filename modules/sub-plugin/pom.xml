@@ -37,7 +37,6 @@
         <module>webhook</module>
         <module>email</module>
         <module>svn-clone</module>
-        <module>maven-plugin</module>
         <module>docker-cli</module>
         <module>git-clone</module>
     </modules>
