@@ -115,6 +115,9 @@ public class OshiUtils {
         //
         GlobalMemory globalMemory = OshiUtil.getMemory();
         jsonObject.put("memory", NumberUtil.div(globalMemory.getTotal() - globalMemory.getAvailable(), globalMemory.getTotal(), 2) * 100);
+        VirtualMemory virtualMemory = globalMemory.getVirtualMemory();
+        jsonObject.put("swapMemory", NumberUtil.div(virtualMemory.getSwapUsed(), virtualMemory.getSwapTotal(), 2) * 100);
+        jsonObject.put("virtualMemory", NumberUtil.div(virtualMemory.getVirtualInUse(), virtualMemory.getVirtualMax(), 2) * 100);
         //
         FileSystem fileSystem = OshiUtil.getOs().getFileSystem();
         List<OSFileStore> fileStores = fileSystem.getFileStores();

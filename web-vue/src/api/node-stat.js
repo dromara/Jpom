@@ -101,17 +101,33 @@ export function generateNodeTopChart(data) {
     showSymbol: false,
     smooth: true,
   };
+  const virtualMemory = {
+    name: "虚拟内存占用",
+    type: "line",
+    data: [],
+    showSymbol: false,
+    smooth: true,
+  };
+  const swapMemory = {
+    name: "交互内存占用",
+    type: "line",
+    data: [],
+    showSymbol: false,
+    smooth: true,
+  };
   const scales = [];
   for (var i = data.length - 1; i >= 0; i--) {
     const item = data[i];
     cpuItem.data.push(parseFloat(item.occupyCpu));
     diskItem.data.push(parseFloat(item.occupyDisk));
     memoryItem.data.push(parseFloat(item.occupyMemory));
+    swapMemory.data.push(parseFloat(item.occupySwapMemory || -1));
+    virtualMemory.data.push(parseFloat(item.occupyVirtualMemory || -1));
 
     scales.push(parseTime(item.monitorTime));
   }
 
-  const series = [cpuItem, memoryItem, diskItem];
+  const series = [cpuItem, memoryItem, diskItem, swapMemory, virtualMemory];
 
   const legends = series.map((data) => {
     return data.name;

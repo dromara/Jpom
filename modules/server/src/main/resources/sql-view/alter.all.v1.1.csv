@@ -18,3 +18,5 @@ ADD,BUILDHISTORYLOG,buildLogFileSize,Long,,,构建日志文件大小
 DROP-TABLE,NODE_STAT,
 DROP-TABLE,SYSTEMMONITORLOG,
 ADD,MACHINE_NODE_INFO,installId,String,50,,机器安装 id
+ADD,MACHINE_NODE_STAT_LOG,occupySwapMemory,Double,,,交互内存
+ADD,MACHINE_NODE_STAT_LOG,occupyVirtualMemory,Double,,,虚拟内存
