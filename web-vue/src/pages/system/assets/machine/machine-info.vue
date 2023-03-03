@@ -603,7 +603,7 @@ export default {
 </script>
 <style scoped>
 .chart {
-  height: 30vh;
+  height: 35vh;
 }
 
 .search-input-item {
