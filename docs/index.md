@@ -112,8 +112,8 @@ notices: # 可选的
 ```yaml
 - name: Eoapi
   desc: 开源 API 管理工具，接口文档、接口测试、Mock...
-  avatar: /images/friends/ad/eoapi.jpg
-  link: https://postcat.com/?utm_source=sponsor&utm_campaign=s-jpom
+  avatar: /images/friends/ad/postcat.png
+  link: https://datayi.cn/w/nPN4JJe9
   bgColor: '#00785A'
   textColor: '#FFFFFF'
 - name: MaxKey
