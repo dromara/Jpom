@@ -83,6 +83,7 @@ function updateDocUrlItem() {
 - [agent-$1-release.zip](https://download.jpom.top/release/$1/agent-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.zip.sha1)
 
 --------
+
 EOF
 		#		插入第 12 行
 		sed -i.bak "12r ${pwd}/temp-docs.log" "${mdPath}"
