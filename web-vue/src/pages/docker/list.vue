@@ -223,7 +223,7 @@ export default {
       let dockerId = this.$route.query.dockerId;
       if (dockerId !== record.id) {
         this.$router.push({
-          query: { ...this.$route.query, dockerId: record.id },
+          query: { ...this.$route.query, dockerId: record.id, type: "docker" },
         });
       }
     },
@@ -232,6 +232,7 @@ export default {
       this.consoleVisible = false;
       const query = Object.assign({}, this.$route.query);
       delete query.dockerId;
+      delete query.type;
       this.$router.replace({
         query: query,
       });

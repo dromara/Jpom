@@ -380,9 +380,12 @@ export default {
           this.listQuery.total = res.data.total;
           //
           const dockerId = this.$route.query.dockerId;
+          const type = this.$route.query.type;
           this.list.map((item) => {
-            if (dockerId === item.id) {
+            if (dockerId === item.id && type === "docker") {
               this.handleConsole(item);
+            } else if (dockerId === item.id && type === "swarm") {
+              this.handleSwarmConsole(item);
             }
           });
         }
@@ -404,7 +407,7 @@ export default {
       let dockerId = this.$route.query.dockerId;
       if (dockerId !== record.id) {
         this.$router.push({
-          query: { ...this.$route.query, dockerId: record.id },
+          query: { ...this.$route.query, dockerId: record.id, type: "docker" },
         });
       }
     },
@@ -415,7 +418,7 @@ export default {
       let dockerId = this.$route.query.dockerId;
       if (dockerId !== record.id) {
         this.$router.push({
-          query: { ...this.$route.query, dockerId: record.id },
+          query: { ...this.$route.query, dockerId: record.id, type: "swarm" },
         });
       }
     },
@@ -424,6 +427,7 @@ export default {
       this.consoleVisible = false;
       const query = Object.assign({}, this.$route.query);
       delete query.dockerId;
+      delete query.type;
       this.$router.replace({
         query: query,
       });
@@ -432,6 +436,7 @@ export default {
       this.swarmConsoleVisible = false;
       const query = Object.assign({}, this.$route.query);
       delete query.dockerId;
+      delete query.type;
       this.$router.replace({
         query: query,
       });
