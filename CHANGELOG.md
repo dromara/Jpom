@@ -8,7 +8,7 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】升级 springboot 版本
+1. 【all】升级 springboot 版本
 2. 【server】优化 系统自动同步 docker 已经安装的集群信息 
 
 ### ⚠️ 注意
