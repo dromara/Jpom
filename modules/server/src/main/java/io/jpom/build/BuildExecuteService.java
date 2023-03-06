@@ -519,7 +519,7 @@ public class BuildExecuteService {
                             List<String> list = StrUtil.splitTrim(path, StrUtil.SLASH);
                             int notMathIndex;
                             int pathItemSize = list.size();
-                            if (StrUtil.isEmpty(antSubMatch)) {
+                            if (StrUtil.isEmpty(antSubMatch) || StrUtil.equals(antSubMatch, StrUtil.SLASH)) {
                                 notMathIndex = 0;
                             } else {
                                 notMathIndex = ArrayUtil.INDEX_NOT_FOUND;

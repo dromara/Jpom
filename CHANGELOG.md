@@ -11,6 +11,7 @@
 1. 【all】升级 springboot 版本
 2. 【server】优化 系统自动同步 docker 已经安装的集群信息 
 3. 【server】更新 mysql maven 坐标：`mysql-connector-j`
+4. 【server】修复 构建产物模糊匹配二级剔除配置 `/` 无效
 
 ### ⚠️ 注意
 
