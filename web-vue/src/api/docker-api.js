@@ -24,18 +24,6 @@ export function apiVersions() {
   });
 }
 
-export function editDockerByFile(formData) {
-  return axios({
-    url: "/docker/edit",
-    headers: {
-      "Content-Type": "multipart/form-data;charset=UTF-8",
-    },
-    method: "post",
-    timeout: 0,
-    data: formData,
-  });
-}
-
 export function editDocker(data) {
   return axios({
     url: "/docker/edit",
@@ -59,26 +47,12 @@ export function deleteDcoker(params) {
 }
 
 /**
- * 强制退出集群
- * @param {
- *  id: docker ID
- * } params
- */
-export function dcokerSwarmLeaveForce(params) {
-  return axios({
-    url: "/docker/swarm-leave-force",
-    method: "get",
-    params,
-  });
-}
-
-/**
  * 容器中的列表
  * @param {JSON} params
  */
-export function dockerContainerList(params) {
+export function dockerContainerList(urlPrefix, params) {
   return axios({
-    url: "/docker/container/list",
+    url: urlPrefix + "/container/list",
     method: "post",
     data: params,
     headers: {
@@ -91,9 +65,9 @@ export function dockerContainerList(params) {
  * 查看 docker info
  * @param {JSON} params
  */
-export function dockerInfo(params) {
+export function dockerInfo(urlPrefix, params) {
   return axios({
-    url: "/docker/info",
+    url: urlPrefix + "/container/info",
     method: "get",
     params: params,
   });
@@ -103,9 +77,9 @@ export function dockerInfo(params) {
  * 修剪 docker
  * @param {JSON} params
  */
-export function dockerPrune(params) {
+export function dockerPrune(urlPrefix, params) {
   return axios({
-    url: "/docker/prune",
+    url: urlPrefix + "/container/prune",
     method: "post",
     data: params,
     timeout: 0,
@@ -116,9 +90,9 @@ export function dockerPrune(params) {
  * 删除容器
  * @param {JSON} params
  */
-export function dockerContainerRemove(params) {
+export function dockerContainerRemove(urlPrefix, params) {
   return axios({
-    url: "/docker/container/remove",
+    url: urlPrefix + "/container/remove",
     method: "get",
     params: params,
   });
@@ -128,9 +102,9 @@ export function dockerContainerRemove(params) {
  * 重启容器
  * @param {JSON} params
  */
-export function dockerContainerRestart(params) {
+export function dockerContainerRestart(urlPrefix, params) {
   return axios({
-    url: "/docker/container/restart",
+    url: urlPrefix + "/container/restart",
     method: "get",
     params: params,
   });
@@ -140,9 +114,9 @@ export function dockerContainerRestart(params) {
  * 启动容器
  * @param {JSON} params
  */
-export function dockerContainerStart(params) {
+export function dockerContainerStart(urlPrefix, params) {
   return axios({
-    url: "/docker/container/start",
+    url: urlPrefix + "/container/start",
     method: "get",
     params: params,
   });
@@ -152,9 +126,9 @@ export function dockerContainerStart(params) {
  * 停止容器
  * @param {JSON} params
  */
-export function dockerContainerStop(params) {
+export function dockerContainerStop(urlPrefix, params) {
   return axios({
-    url: "/docker/container/stop",
+    url: urlPrefix + "/container/stop",
     method: "get",
     params: params,
   });
@@ -164,9 +138,9 @@ export function dockerContainerStop(params) {
  * 获取容器统计信息
  * @param {JSON} params
  */
-export function dockerContainerStats(params) {
+export function dockerContainerStats(urlPrefix, params) {
   return axios({
-    url: "/docker/container/stats",
+    url: urlPrefix + "/container/stats",
     method: "get",
     params: params,
     headers: {
@@ -180,9 +154,9 @@ export function dockerContainerStats(params) {
  * 获取容器信息
  * @param {JSON} params
  */
-export function dockerInspectContainer(params) {
+export function dockerInspectContainer(urlPrefix, params) {
   return axios({
-    url: "/docker/container/inspect-container",
+    url: urlPrefix + "/container/inspect-container",
     method: "get",
     params: params,
   });
@@ -193,9 +167,9 @@ export function dockerInspectContainer(params) {
  * @param {JSON} params
  * @returns
  */
-export function dockerUpdateContainer(params) {
+export function dockerUpdateContainer(urlPrefix, params) {
   return axios({
-    url: "/docker/container/update-container",
+    url: urlPrefix + "/container/update-container",
     method: "post",
     headers: {
       "Content-Type": "application/json",
@@ -208,9 +182,9 @@ export function dockerUpdateContainer(params) {
  * 容器中的镜像列表
  * @param {JSON} params
  */
-export function dockerImagesList(params) {
+export function dockerImagesList(urlPrefix, params) {
   return axios({
-    url: "/docker/images/list",
+    url: urlPrefix + "/images/list",
     method: "post",
     data: params,
   });
@@ -220,9 +194,9 @@ export function dockerImagesList(params) {
  * 删除镜像
  * @param {JSON} params
  */
-export function dockerImageRemove(params) {
+export function dockerImageRemove(urlPrefix, params) {
   return axios({
-    url: "/docker/images/remove",
+    url: urlPrefix + "/images/remove",
     method: "get",
     params: params,
   });
@@ -232,9 +206,9 @@ export function dockerImageRemove(params) {
  * inspect 镜像
  * @param {JSON} params
  */
-export function dockerImageInspect(params) {
+export function dockerImageInspect(urlPrefix, params) {
   return axios({
-    url: "/docker/images/inspect",
+    url: urlPrefix + "/images/inspect",
     method: "get",
     params: params,
   });
@@ -244,9 +218,9 @@ export function dockerImageInspect(params) {
  * 镜像 创建容器
  * @param {JSON} params
  */
-export function dockerImageCreateContainer(params) {
+export function dockerImageCreateContainer(urlPrefix, params) {
   return axios({
-    url: "/docker/images/create-container",
+    url: urlPrefix + "/images/create-container",
     method: "post",
     headers: {
       "Content-Type": "application/json",
@@ -259,9 +233,9 @@ export function dockerImageCreateContainer(params) {
  * 拉取镜像
  * @param {JSON} params
  */
-export function dockerImagePullImage(params) {
+export function dockerImagePullImage(urlPrefix, params) {
   return axios({
-    url: "/docker/images/pull-image",
+    url: urlPrefix + "/images/pull-image",
     method: "get",
     params: params,
   });
@@ -271,9 +245,9 @@ export function dockerImagePullImage(params) {
  * 拉取镜像日志
  * @param {JSON} params
  */
-export function dockerImagePullImageLog(params) {
+export function dockerImagePullImageLog(urlPrefix, params) {
   return axios({
-    url: "/docker/images/pull-image-log",
+    url: urlPrefix + "/images/pull-image-log",
     method: "get",
     params: params,
     headers: {
@@ -287,9 +261,9 @@ export function dockerImagePullImageLog(params) {
  * 卷
  * @param {JSON} params
  */
-export function dockerVolumesList(params) {
+export function dockerVolumesList(urlPrefix, params) {
   return axios({
-    url: "/docker/volumes/list",
+    url: urlPrefix + "/volumes/list",
     method: "post",
     data: params,
   });
@@ -299,9 +273,9 @@ export function dockerVolumesList(params) {
  * 删除卷
  * @param {JSON} params
  */
-export function dockerVolumesRemove(params) {
+export function dockerVolumesRemove(urlPrefix, params) {
   return axios({
-    url: "/docker/volumes/remove",
+    url: urlPrefix + "/volumes/remove",
     method: "get",
     params: params,
   });
@@ -311,25 +285,11 @@ export function dockerVolumesRemove(params) {
  * 网络
  * @param {JSON} params
  */
-export function dockerNetworksList(params) {
+export function dockerNetworksList(urlPrefix, params) {
   return axios({
-    url: "/docker/networks/list",
+    url: urlPrefix + "/networks/list",
     method: "post",
     data: params,
-  });
-}
-
-/**
- * 自动探测 docker
- * @param {
- *
- * } params
- */
-export function tryLocalDocker(params) {
-  return axios({
-    url: "/docker/try-local-docker",
-    method: "get",
-    params,
   });
 }
 

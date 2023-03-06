@@ -20,6 +20,9 @@ export default {
     type: {
       type: String,
     },
+    urlPrefix: {
+      type: String,
+    },
   },
   data() {
     return {
@@ -37,7 +40,7 @@ export default {
   },
   methods: {
     init() {
-      dockerSwarmServicesStartLog({
+      dockerSwarmServicesStartLog(this.urlPrefix, {
         type: this.type,
         dataId: this.dataId,
         id: this.id,
@@ -63,15 +66,11 @@ export default {
         id: this.logId,
         line: this.line,
       };
-      dockerSwarmServicesPullLog(params).then((res) => {
+      dockerSwarmServicesPullLog(this.urlPrefix, params).then((res) => {
         let next = true;
         if (res.code === 200) {
           // 停止请求
           const dataLines = res.data.dataLines;
-          if (dataLines && dataLines[dataLines.length - 1] === "pull end") {
-            this.logTimer && clearTimeout(this.logTimer);
-            next = false;
-          }
 
           this.$refs.logView.appendLine(dataLines);
           this.line = res.data.line;

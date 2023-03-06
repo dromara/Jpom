@@ -138,6 +138,11 @@ const management = [
     component: () => import("../pages/system/assets/ssh/ssh-list"),
   },
   {
+    path: "/system/assets/docker-list",
+    name: "system-machine-docker-list",
+    component: () => import("../pages/system/assets/docker/list"),
+  },
+  {
     path: "/user/permission-group",
     name: "permission-group",
     component: () => import("../pages/user/permission-group"),

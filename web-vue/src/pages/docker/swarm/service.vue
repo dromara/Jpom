@@ -410,6 +410,9 @@ export default {
       type: Boolean,
       default: false,
     },
+    urlPrefix: {
+      type: String,
+    },
   },
   data() {
     return {
@@ -465,7 +468,7 @@ export default {
       }
       this.loading = true;
       this.listQuery.id = this.id;
-      dockerSwarmServicesList(this.listQuery).then((res) => {
+      dockerSwarmServicesList(this.urlPrefix, this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data;
         }
@@ -631,7 +634,7 @@ export default {
         temp.exposedPorts = (this.temp.exposedPorts || []).filter((item) => {
           return item.publishedPort && item.targetPort;
         });
-        dockerSwarmServicesEdit(temp).then((res) => {
+        dockerSwarmServicesEdit(this.urlPrefix, temp).then((res) => {
           if (res.code === 200) {
             // 成功
             this.$notification.success({
@@ -656,7 +659,7 @@ export default {
             serviceId: record.id,
             id: this.id,
           };
-          dockerSwarmServicesDel(params).then((res) => {
+          dockerSwarmServicesDel(this.urlPrefix, params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,

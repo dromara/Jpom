@@ -13,7 +13,7 @@
           </a-timeline-item>
           <a-timeline-item>
             <span class="layui-elem-quote"
-              >资源： <a-tag>cpu:{{ temp.nCPU }}</a-tag> <a-tag>内存:{{ renderSize(temp.memTotal) }}</a-tag>
+              >资源： <a-tag>cpu:{{ temp.nCPU || temp.NCPU }}</a-tag> <a-tag>内存:{{ renderSize(temp.memTotal) }}</a-tag>
 
               <a-tag>容器数：{{ temp.containers }}</a-tag>
               <a-tag>镜像数：{{ temp.images }}</a-tag>
@@ -114,6 +114,14 @@ export default {
   props: {
     id: {
       type: String,
+      default: "",
+    },
+    urlPrefix: {
+      type: String,
+    },
+    machineDockerId: {
+      type: String,
+      default: "",
     },
   },
   data() {
@@ -159,6 +167,11 @@ export default {
       rules: {},
     };
   },
+  computed: {
+    reqDataId() {
+      return this.id || this.machineDockerId;
+    },
+  },
   mounted() {
     this.loadData();
     // console.log(Comparator);
@@ -167,8 +180,8 @@ export default {
     renderSize,
     // load data
     loadData() {
-      dockerInfo({
-        id: this.id,
+      dockerInfo(this.urlPrefix, {
+        id: this.reqDataId,
       }).then((res) => {
         if (res.code === 200) {
           this.temp = res.data;
@@ -188,14 +201,14 @@ export default {
           cancelText: "取消",
           onOk: () => {
             // 组装参数
-            const params = { id: this.id, pruneType: this.pruneForm.pruneType };
+            const params = { id: this.reqDataId, pruneType: this.pruneForm.pruneType };
 
             this.pruneTypes[params.pruneType] &&
               this.pruneTypes[params.pruneType].filters.forEach((element) => {
                 params[element] = this.pruneForm[element];
               });
 
-            dockerPrune(params).then((res) => {
+            dockerPrune(this.urlPrefix, params).then((res) => {
               if (res.code === 200) {
                 this.$notification.success({
                   message: res.msg,

@@ -23,21 +23,11 @@
 package io.jpom.model.docker;
 
 import cn.hutool.core.annotation.PropIgnore;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
-import io.jpom.JpomApplication;
+import io.jpom.func.assets.model.MachineDockerModel;
 import io.jpom.model.BaseWorkspaceModel;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.experimental.Tolerate;
-import org.springframework.util.Assert;
 import top.jpom.h2db.TableName;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author bwcx_jzy
@@ -46,7 +36,6 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @TableName(value = "DOCKER_INFO", name = "docker 信息")
-@Builder
 public class DockerInfoModel extends BaseWorkspaceModel {
     /**
      * 名称
@@ -55,14 +44,12 @@ public class DockerInfoModel extends BaseWorkspaceModel {
     /**
      * 地址
      */
+    @Deprecated
     private String host;
-    /**
-     * 接口版本
-     */
-    private String apiVersion;
     /**
      * 开启 tls 验证
      */
+    @Deprecated
     private Boolean tlsVerify;
     /**
      * 证书路径
@@ -72,26 +59,27 @@ public class DockerInfoModel extends BaseWorkspaceModel {
     /**
      * 状态 0 , 异常离线 1 正常
      */
+    @Deprecated
     private Integer status;
     /**
      * 错误消息
      */
+    @Deprecated
     private String failureMsg;
-    /**
-     * docker 版本
-     */
-    private String dockerVersion;
     /**
      * 集群节点ID
      */
+    @Deprecated
     private String swarmNodeId;
     /**
      * 最后心跳时间
      */
+    @Deprecated
     private Long lastHeartbeatTime;
     /**
      * 超时时间，单位 秒
      */
+    @Deprecated
     private Integer heartbeatTimeout;
     /**
      * 标签
@@ -100,68 +88,38 @@ public class DockerInfoModel extends BaseWorkspaceModel {
     /**
      * 集群ID
      */
+    @Deprecated
     private String swarmId;
 
     /**
      * 仓库账号
      */
+    @Deprecated
     private String registryUsername;
 
     /**
      * 仓库密码
      */
+    @Deprecated
     private String registryPassword;
 
     /**
      * 仓库邮箱
      */
+    @Deprecated
     private String registryEmail;
 
     /**
      * 仓库地址
      */
+    @Deprecated
     private String registryUrl;
 
-    public void setFailureMsg(String failureMsg) {
-        this.failureMsg = StrUtil.maxLength(failureMsg, 240);
-    }
-
-    @Tolerate
-    public DockerInfoModel() {
-    }
-
     /**
-     * 生成证书路径
-     *
-     * @return path
+     * 机器 docker id
      */
-    public String generateCertPath() {
-        String dataPath = JpomApplication.getInstance().getDataPath();
-        String host = this.getHost();
-        Assert.hasText(host, "host empty");
-        host = SecureUtil.sha1(host);
-        File docker = FileUtil.file(dataPath, "docker", "tls-cert", host);
-        return FileUtil.getAbsolutePath(docker);
-    }
+    private String machineDockerId;
 
-    /**
-     * 插件 插件参数 map
-     *
-     * @return 插件需要使用到到参数
-     */
-    public Map<String, Object> toParameter() {
-        Map<String, Object> parameter = new HashMap<>(10);
-        parameter.put("dockerHost", this.getHost());
-        parameter.put("apiVersion", this.getApiVersion());
-        parameter.put("registryUsername", this.getRegistryUsername());
-        parameter.put("registryPassword", this.getRegistryPassword());
-        parameter.put("registryEmail", this.getRegistryEmail());
-        parameter.put("registryUrl", this.getRegistryUrl());
-        parameter.put("timeout", this.getHeartbeatTimeout());
-        if (this.getTlsVerify()) {
-            parameter.put("dockerCertPath", this.generateCertPath());
-        }
-        return parameter;
-    }
+    private MachineDockerModel machineDocker;
 
 }

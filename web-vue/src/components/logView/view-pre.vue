@@ -71,7 +71,7 @@ export default {
         setTimeout(() => {
           // 延迟触发滚动
           this.$nextTick(() => {
-            this.$refs.codemirror.scrollToBottom();
+            this.$refs?.codemirror?.scrollToBottom();
           });
         }, 500);
       }

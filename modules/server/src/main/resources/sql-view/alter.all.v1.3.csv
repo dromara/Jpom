@@ -1,0 +1,12 @@
+alterType,tableName,name,type,len,defaultValue,comment,notNull
+ADD,MACHINE_DOCKER_INFO,swarmCreatedAt,Long,,,集群的创建时间
+ADD,MACHINE_DOCKER_INFO,swarmUpdatedAt,Long,,,集群的更新时间
+ADD,MACHINE_DOCKER_INFO,swarmNodeAddr,String,50,,节点 地址
+DROP,DOCKER_INFO,apiVersion
+DROP,DOCKER_INFO,dockerVersion
+DROP,DOCKER_SWARM_INFO,dockerId,
+DROP,DOCKER_SWARM_INFO,swarmCreatedAt,
+DROP,DOCKER_SWARM_INFO,swarmUpdatedAt,
+DROP,DOCKER_SWARM_INFO,nodeAddr,
+DROP,DOCKER_SWARM_INFO,status,
+DROP,DOCKER_SWARM_INFO,failureMsg,

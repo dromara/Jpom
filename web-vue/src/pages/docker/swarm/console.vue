@@ -16,9 +16,9 @@
 
     <a-layout class="layout-content drawer-layout-content">
       <a-layout-content>
-        <swarm-node v-if="menuKey === 'node'" :id="this.id" :visible="this.visible" />
-        <swarm-service v-if="menuKey === 'server'" :id="this.id" :visible="this.visible" />
-        <swarm-task v-if="menuKey === 'task'" :id="this.id" :visible="this.visible" />
+        <swarm-node v-if="menuKey === 'node'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+        <swarm-service v-if="menuKey === 'server'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+        <swarm-task v-if="menuKey === 'task'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
       </a-layout-content>
     </a-layout>
   </a-layout>
@@ -39,6 +39,9 @@ export default {
     visible: {
       type: Boolean,
       default: false,
+    },
+    urlPrefix: {
+      type: String,
     },
   },
   components: {

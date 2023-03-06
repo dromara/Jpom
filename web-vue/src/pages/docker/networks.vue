@@ -67,6 +67,14 @@ export default {
   props: {
     id: {
       type: String,
+      default: "",
+    },
+    urlPrefix: {
+      type: String,
+    },
+    machineDockerId: {
+      type: String,
+      default: "",
     },
   },
   data() {
@@ -104,6 +112,11 @@ export default {
       },
     };
   },
+  computed: {
+    reqDataId() {
+      return this.id || this.machineDockerId;
+    },
+  },
   mounted() {
     this.loadData();
   },
@@ -113,8 +126,8 @@ export default {
     loadData() {
       this.loading = true;
       //this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
-      this.listQuery.id = this.id;
-      dockerNetworksList(this.listQuery).then((res) => {
+      this.listQuery.id = this.reqDataId;
+      dockerNetworksList(this.urlPrefix, this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data;
         }
@@ -134,10 +147,10 @@ export default {
         onOk: () => {
           // 组装参数
           const params = {
-            id: this.id,
+            id: this.reqDataId,
             volumeName: record.name,
           };
-          action.api(params).then((res) => {
+          action.api(this.urlPrefix, params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,

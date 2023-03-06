@@ -20,14 +20,15 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.controller.docker;
+package io.jpom.func.assets.controller.docker;
 
-import io.jpom.controller.docker.base.BaseDockerSwarmServiceController;
+import io.jpom.controller.docker.base.BaseDockerImagesController;
+import io.jpom.func.assets.model.MachineDockerModel;
 import io.jpom.func.assets.server.MachineDockerServer;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.system.ServerConfig;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,25 +36,25 @@ import java.util.Map;
 
 /**
  * @author bwcx_jzy
- * @since 2022/2/14
+ * @since 2022/2/7
  */
 @RestController
-@Feature(cls = ClassFeature.DOCKER_SWARM)
-@RequestMapping(value = "/docker/swarm-service")
-@Slf4j
-public class DockerSwarmServiceController extends BaseDockerSwarmServiceController {
+@Feature(cls = ClassFeature.SYSTEM_ASSETS_MACHINE_DOCKER)
+@RequestMapping(value = "/system/assets/docker/images")
+public class AssetsDockerImagesController extends BaseDockerImagesController {
 
     private final MachineDockerServer machineDockerServer;
 
-    public DockerSwarmServiceController(ServerConfig serverConfig,
+    public AssetsDockerImagesController(ServerConfig serverConfig,
                                         MachineDockerServer machineDockerServer) {
         super(serverConfig);
         this.machineDockerServer = machineDockerServer;
     }
 
-
     @Override
     protected Map<String, Object> toDockerParameter(String id) {
-        return machineDockerServer.dockerParameter(id);
+        MachineDockerModel machineDockerModel = machineDockerServer.getByKey(id);
+        Assert.notNull(machineDockerModel, "没有对应的 docker 资产");
+        return machineDockerModel.toParameter();
     }
 }

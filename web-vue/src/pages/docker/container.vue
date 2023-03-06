@@ -211,7 +211,7 @@
     </a-table>
     <!-- 日志 -->
     <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
-      <log-view v-if="logVisible" :id="this.id" :containerId="temp.id" />
+      <log-view v-if="logVisible" :id="this.id" :machineDockerId="this.machineDockerId" :containerId="temp.id" />
     </a-modal>
     <!-- Terminal -->
     <a-modal
@@ -227,7 +227,7 @@
       :footer="null"
       :maskClosable="false"
     >
-      <terminal v-if="terminalVisible" :id="this.id" :containerId="temp.id" />
+      <terminal v-if="terminalVisible" :id="this.id" :machineDockerId="this.machineDockerId" :containerId="temp.id" />
     </a-modal>
     <!-- 编辑容器配置 -->
     <a-modal destroyOnClose v-model="editVisible" title="配置容器" @ok="handleEditOk" :maskClosable="false">
@@ -350,10 +350,18 @@ export default {
   props: {
     id: {
       type: String,
+      default: "",
     },
     visible: {
       type: Boolean,
       default: false,
+    },
+    urlPrefix: {
+      type: String,
+    },
+    machineDockerId: {
+      type: String,
+      default: "",
     },
   },
   data() {
@@ -427,6 +435,11 @@ export default {
   beforeDestroy() {
     this.autoUpdateTime && clearTimeout(this.autoUpdateTime);
   },
+  computed: {
+    reqDataId() {
+      return this.id || this.machineDockerId;
+    },
+  },
   mounted() {
     this.loadData();
   },
@@ -439,8 +452,8 @@ export default {
       }
       this.loading = true;
       //this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
-      this.listQuery.id = this.id;
-      dockerContainerList(this.listQuery).then((res) => {
+      this.listQuery.id = this.reqDataId;
+      dockerContainerList(this.urlPrefix, this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data;
         }
@@ -465,10 +478,10 @@ export default {
         onOk: () => {
           // 组装参数
           const params = {
-            id: this.id,
+            id: this.reqDataId,
             containerId: record.id,
           };
-          action.api(params).then((res) => {
+          action.api(this.urlPrefix, params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
@@ -505,8 +518,8 @@ export default {
       if (!this.expandedRowKeys.length) {
         return;
       }
-      dockerContainerStats({
-        id: this.id,
+      dockerContainerStats(this.urlPrefix, {
+        id: this.reqDataId,
         containerId: this.expandedRowKeys.join(","),
       }).then((res) => {
         if (res.code === 200) {
@@ -519,8 +532,8 @@ export default {
     },
     // 编辑容器
     editContainer(record) {
-      dockerInspectContainer({
-        id: this.id,
+      dockerInspectContainer(this.urlPrefix, {
+        id: this.reqDataId,
         containerId: record.id,
       }).then((res) => {
         if (res.code === 200) {
@@ -551,8 +564,8 @@ export default {
         if (!valid) {
           return false;
         }
-        const temp = Object.assign({}, this.temp, { id: this.id });
-        dockerUpdateContainer(temp).then((res) => {
+        const temp = Object.assign({}, this.temp, { id: this.reqDataId });
+        dockerUpdateContainer(this.urlPrefix, temp).then((res) => {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,

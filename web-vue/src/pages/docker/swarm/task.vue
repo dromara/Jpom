@@ -87,13 +87,13 @@
     </a-modal>
     <!-- 查看日志 -->
     <a-modal destroyOnClose v-model="logVisible" title="查看日志" width="80vw" :footer="null" :maskClosable="false">
-      <pull-log v-if="logVisible" :id="this.id" :dataId="this.temp.id" type="taks" />
+      <pull-log v-if="logVisible" :id="this.id" :dataId="this.temp.id" type="taks" :urlPrefix="this.urlPrefix" />
     </a-modal>
   </div>
 </template>
 
 <script>
-import { dockerSwarmNodeLeave, dockerSwarmNodeUpdate, dockerSwarmServicesTaskList, TASK_STATE } from "@/api/docker-swarm";
+import { dockerSwarmNodeUpdate, dockerSwarmServicesTaskList, TASK_STATE } from "@/api/docker-swarm";
 import { parseTime } from "@/utils/const";
 import PullLog from "./pull-log";
 
@@ -110,6 +110,9 @@ export default {
     visible: {
       type: Boolean,
       default: false,
+    },
+    urlPrefix: {
+      type: String,
     },
   },
   data() {
@@ -182,7 +185,7 @@ export default {
         this.listQuery.serviceId = this.serviceId;
       }
       this.listQuery.id = this.id;
-      dockerSwarmServicesTaskList(this.listQuery).then((res) => {
+      dockerSwarmServicesTaskList(this.urlPrefix, this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data;
         }
@@ -212,7 +215,7 @@ export default {
           return false;
         }
         this.temp.id = this.id;
-        dockerSwarmNodeUpdate(this.temp).then((res) => {
+        dockerSwarmNodeUpdate(this.urlPrefix, this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
             this.$notification.success({
@@ -222,30 +225,6 @@ export default {
             this.loadData();
           }
         });
-      });
-    },
-    //
-    handleLeava(record) {
-      this.$confirm({
-        title: "系统提示",
-        content: "真的要在该集群剔除此节点么？",
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          // 组装参数
-          const params = {
-            nodeId: record.id,
-            id: this.id,
-          };
-          dockerSwarmNodeLeave(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.loadData();
-            }
-          });
-        },
       });
     },
   },

@@ -20,49 +20,40 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.func;
+package io.jpom.controller.docker.base;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Entity;
-import io.jpom.common.BaseServerController;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.JsonMessage;
-import io.jpom.model.BaseGroupNameModel;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
-import io.jpom.service.h2db.BaseDbService;
+import io.jpom.plugin.IPlugin;
+import io.jpom.plugin.PluginFactory;
+import io.jpom.service.docker.DockerInfoService;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 /**
  * @author bwcx_jzy
- * @since 2023/2/25
+ * @since 2022/2/15
  */
-public abstract class BaseGroupNameController extends BaseServerController {
+public abstract class BaseDockerNetworkController extends BaseDockerController {
 
-    protected final BaseDbService<? extends BaseGroupNameModel> dbService;
-
-    protected BaseGroupNameController(BaseDbService<? extends BaseGroupNameModel> dbService) {
-        this.dbService = dbService;
-    }
-
-    @GetMapping(value = "list-group", produces = MediaType.APPLICATION_JSON_VALUE)
+    /**
+     * @return json
+     */
+    @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<String>> listGroup() {
-        String sql = "select `groupName` from " + dbService.getTableName() + " group by `groupName`";
-        List<Entity> list = dbService.query(sql);
-        // 筛选字段
-        List<String> collect = list.stream()
-            .map(entity -> {
-                Object obj = entity.get("groupName");
-                return StrUtil.toStringOrNull(obj);
-            })
-            .filter(Objects::nonNull)
-            .distinct()
-            .collect(Collectors.toList());
-        return JsonMessage.success("", collect);
+    public JsonMessage<List<JSONObject>> list(@ValidatorItem String id, String name, String networkId) throws Exception {
+
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = this.toDockerParameter(id);
+        parameter.put("name", name);
+        parameter.put("id", networkId);
+        List<JSONObject> listContainer = (List<JSONObject>) plugin.execute("listNetworks", parameter);
+        return JsonMessage.success("", listContainer);
     }
 }

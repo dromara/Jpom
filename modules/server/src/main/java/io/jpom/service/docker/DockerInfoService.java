@@ -22,34 +22,15 @@
  */
 package io.jpom.service.docker;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.SystemClock;
-import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.cron.task.Task;
-import cn.hutool.db.Entity;
 import cn.hutool.db.sql.Condition;
-import com.alibaba.fastjson2.JSONObject;
-import io.jpom.cron.CronUtils;
-import io.jpom.cron.IAsyncLoad;
 import io.jpom.model.docker.DockerInfoModel;
-import io.jpom.model.docker.DockerSwarmInfoMode;
-import io.jpom.plugin.IPlugin;
-import io.jpom.plugin.PluginFactory;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.servlet.http.HttpServletRequest;
-import java.nio.file.NoSuchFileException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 
 /**
@@ -58,19 +39,12 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> implements IAsyncLoad, Task {
+public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> {
 
-    private static final String CRON_ID = "docker-monitor";
 
     public static final String DOCKER_CHECK_PLUGIN_NAME = "docker-cli:check";
 
     public static final String DOCKER_PLUGIN_NAME = "docker-cli";
-
-    private final DockerSwarmInfoService dockerSwarmInfoService;
-
-    public DockerInfoService(DockerSwarmInfoService dockerSwarmInfoService) {
-        this.dockerSwarmInfoService = dockerSwarmInfoService;
-    }
 
     @Override
     protected void fillSelectResult(DockerInfoModel data) {
@@ -78,92 +52,8 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
     }
 
     @Override
-    public void startLoad() {
-        CronUtils.add(CRON_ID, "0 0/1 * * * ?", () -> DockerInfoService.this);
-    }
-
-    @Override
-    public void execute() {
-        List<DockerInfoModel> list = this.list();
-        if (CollUtil.isEmpty(list)) {
-            return;
-        }
-        this.checkList(list);
-    }
-
-    private void checkList(List<DockerInfoModel> monitorModels) {
-        monitorModels.forEach(monitorModel -> ThreadUtil.execute(() -> DockerInfoService.this.updateMonitor(monitorModel)));
-    }
-
-    /**
-     * 监控 容器
-     *
-     * @param dockerInfoModel docker
-     */
-    public boolean updateMonitor(DockerInfoModel dockerInfoModel) {
-        try {
-            IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
-            Map<String, Object> parameter = dockerInfoModel.toParameter();
-            //
-            JSONObject info = plugin.execute("info", parameter, JSONObject.class);
-            //
-            DockerInfoModel update = new DockerInfoModel();
-            update.setId(dockerInfoModel.getId());
-            update.setStatus(1);
-            update.setLastHeartbeatTime(SystemClock.now());
-            //
-            update.setDockerVersion(info.getString("serverVersion"));
-            JSONObject swarm = info.getJSONObject("swarm");
-            if (swarm != null) {
-                String nodeId = swarm.getString("nodeID");
-                update.setSwarmNodeId(nodeId);
-                if (StrUtil.isEmpty(nodeId)) {
-                    // 集群退出
-                    update.setSwarmId(StrUtil.EMPTY);
-                }
-            } else {
-                update.setSwarmNodeId(StrUtil.EMPTY);
-                update.setSwarmId(StrUtil.EMPTY);
-            }
-            update.setFailureMsg(StrUtil.EMPTY);
-            super.update(update);
-            //
-            this.updateSwarmStatus(dockerInfoModel.getId(), update.getStatus(), update.getFailureMsg());
-            return true;
-        } catch (Exception e) {
-            if (ExceptionUtil.isCausedBy(e, NoSuchFileException.class)) {
-                log.error("监控 docker[{}] 异常 {}", dockerInfoModel.getName(), e.getMessage());
-            } else {
-                log.error("监控 docker[{}] 异常", dockerInfoModel.getName(), e);
-            }
-            this.updateStatus(dockerInfoModel.getId(), 0, e.getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * 更新 容器状态
-     *
-     * @param id     ID
-     * @param status 状态值
-     * @param msg    错误消息
-     */
-    private void updateStatus(String id, int status, String msg) {
-        DockerInfoModel dockerInfoModel = new DockerInfoModel();
-        dockerInfoModel.setId(id);
-        dockerInfoModel.setStatus(status);
-        dockerInfoModel.setFailureMsg(msg);
-        super.update(dockerInfoModel);
-        //
-        this.updateSwarmStatus(id, status, msg);
-    }
-
-    private void updateSwarmStatus(String id, int status, String msg) {
-        //
-        DockerSwarmInfoMode dockerSwarmInfoMode = new DockerSwarmInfoMode();
-        dockerSwarmInfoMode.setStatus(status);
-        dockerSwarmInfoMode.setFailureMsg(msg);
-        dockerSwarmInfoService.update(dockerSwarmInfoService.dataBeanToEntity(dockerSwarmInfoMode), Entity.create().set("dockerId", id));
+    protected void fillInsert(DockerInfoModel dockerInfoModel) {
+        super.fillInsert(dockerInfoModel);
     }
 
     /**
@@ -200,101 +90,6 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
     }
 
     /**
-     * docker 绑定集群
-     *
-     * @param joinSwarmDocker docker
-     * @param tag             标签
-     * @param swarm           集群信息
-     * @param swarmId         集群ID
-     */
-    public void bindDockerSwarm(DockerInfoModel joinSwarmDocker, String tag, JSONObject swarm, String swarmId) {
-        DockerInfoModel dockerInfoModel = new DockerInfoModel();
-        dockerInfoModel.setSwarmId(swarmId);
-        //
-        if (swarm != null) {
-            String swarmNodeId = swarm.getString("nodeID");
-            dockerInfoModel.setSwarmNodeId(swarmNodeId);
-        }
-        dockerInfoModel.setId(joinSwarmDocker.getId());
-        this.update(dockerInfoModel);
-    }
-
-    /**
-     * 更新集群 标签
-     *
-     * @param swarmId 集群ID
-     * @param tag     新增标签
-     * @param delTag  删除标签
-     */
-    public void updateDockerSwarmTag(String swarmId, String tag, String delTag) {
-        DockerInfoModel queryWhere = new DockerInfoModel();
-        queryWhere.setSwarmId(swarmId);
-        List<DockerInfoModel> dockerInfoModels = this.listByBean(queryWhere);
-        for (DockerInfoModel dockerInfoModel : dockerInfoModels) {
-            // 处理标签
-            Collection<String> allTag = StrUtil.splitTrim(dockerInfoModel.getTags(), StrUtil.COLON);
-            allTag = ObjectUtil.defaultIfNull(allTag, new ArrayList<>());
-            if (StrUtil.isNotEmpty(delTag)) {
-                allTag.remove(delTag);
-            }
-            if (!allTag.contains(tag)) {
-                allTag.add(tag);
-            }
-            allTag = allTag.stream().filter(StrUtil::isNotEmpty).collect(Collectors.toSet());
-            String newTags = CollUtil.join(allTag, StrUtil.COLON, StrUtil.COLON, StrUtil.COLON);
-            //
-            Entity where = Entity.create().set("id", dockerInfoModel.getId());
-            Entity update = Entity.create().set("tags", newTags);
-            this.update(update, where);
-        }
-
-    }
-
-    /**
-     * 解绑集群信息
-     *
-     * @param id docker id
-     */
-    public void unbind(String id) {
-        DockerInfoModel update = new DockerInfoModel();
-        update.setId(id);
-        update.setSwarmId(StrUtil.EMPTY);
-        update.setSwarmNodeId(StrUtil.EMPTY);
-        this.update(update);
-    }
-
-    /**
-     * 获取集群 docker 信息
-     *
-     * @param id      集群ID
-     * @param request 请求对象
-     * @return map
-     */
-    public Map<String, Object> getBySwarmPluginMap(String id, HttpServletRequest request) {
-        DockerSwarmInfoMode swarmInfoMode1 = dockerSwarmInfoService.getByKey(id, request);
-        Assert.notNull(swarmInfoMode1, "没有对应的集群");
-        //
-        DockerInfoModel managerSwarmDocker = this.getByKey(swarmInfoMode1.getDockerId(), request);
-        Assert.notNull(managerSwarmDocker, "对应的 docker 不存在");
-        return managerSwarmDocker.toParameter();
-    }
-
-    /**
-     * 获取集群 docker 信息
-     *
-     * @param id 集群ID
-     * @return map
-     */
-    public Map<String, Object> getBySwarmPluginMap(String id) {
-        DockerSwarmInfoMode swarmInfoMode1 = dockerSwarmInfoService.getByKey(id);
-        Assert.notNull(swarmInfoMode1, "没有对应的集群");
-        //
-        DockerInfoModel managerSwarmDocker = this.getByKey(swarmInfoMode1.getDockerId());
-        Assert.notNull(managerSwarmDocker, "对应的 docker 不存在");
-        return managerSwarmDocker.toParameter();
-    }
-
-    /**
      * 将节点信息同步到其他工作空间
      *
      * @param ids            多给节点ID
@@ -308,30 +103,19 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
             //
             DockerInfoModel where = new DockerInfoModel();
             where.setWorkspaceId(workspaceId);
-            where.setHost(data.getHost());
+            where.setMachineDockerId(data.getMachineDockerId());
             DockerInfoModel exits = super.queryByBean(where);
-            if (exits == null) {
-                // 不存在则添加节点
-                data.setId(null);
-                data.setWorkspaceId(workspaceId);
-                data.setCreateTimeMillis(null);
-                data.setModifyTimeMillis(null);
-                data.setModifyUser(null);
-                // 集群 不同步
-                data.setSwarmId(null);
-                data.setSwarmNodeId(null);
-                this.insert(data);
-            } else {
-                // 修改信息
-                DockerInfoModel update = DockerInfoModel.builder().build();
-                update.setId(exits.getId());
-                update.setTlsVerify(data.getTlsVerify());
-                update.setRegistryEmail(data.getRegistryEmail());
-                update.setRegistryUrl(data.getRegistryUrl());
-                update.setRegistryUsername(data.getRegistryUsername());
-                update.setRegistryPassword(data.getRegistryPassword());
-                this.updateById(update);
-            }
+            Assert.isNull(exits, "对应工作空间已经存在对应的 docker 啦");
+            // 不存在则添加节点
+            data.setId(null);
+            data.setWorkspaceId(workspaceId);
+            data.setCreateTimeMillis(null);
+            data.setModifyTimeMillis(null);
+            data.setModifyUser(null);
+            // 集群 不同步
+            data.setSwarmId(null);
+            data.setSwarmNodeId(null);
+            this.insert(data);
         });
     }
 }

@@ -22,10 +22,11 @@
  */
 package io.jpom.socket.handler;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
-import io.jpom.model.docker.DockerInfoModel;
+import io.jpom.func.assets.model.MachineDockerModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -57,8 +58,11 @@ public class DockerLogHandler extends BaseProxyHandler {
     protected void init(WebSocketSession session, Map<String, Object> attributes) throws Exception {
         super.init(session, attributes);
         //
-        DockerInfoModel dockerInfoModel = (DockerInfoModel) attributes.get("dataItem");
-        this.sendMsg(session, "连接成功：" + dockerInfoModel.getName() + StrUtil.CRLF);
+        Object data = attributes.get("dataItem");
+        Object machineData = attributes.get("machineDocker");
+        String dataName = BeanUtil.getProperty(data, "name");
+        String machineDataName = BeanUtil.getProperty(machineData, "name");
+        this.sendMsg(session, "连接成功：" + StrUtil.emptyToDefault(dataName, machineDataName) + StrUtil.CRLF);
     }
 
     public DockerLogHandler() {
@@ -72,7 +76,7 @@ public class DockerLogHandler extends BaseProxyHandler {
 
     @Override
     protected String handleTextMessage(Map<String, Object> attributes, WebSocketSession session, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
-        DockerInfoModel dockerInfoModel = (DockerInfoModel) attributes.get("dataItem");
+        MachineDockerModel dockerInfoModel = (MachineDockerModel) attributes.get("machineDocker");
         if (consoleCommandOp == ConsoleCommandOp.heart) {
             return null;
         }

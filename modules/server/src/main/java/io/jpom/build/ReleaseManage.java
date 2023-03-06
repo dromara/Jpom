@@ -245,7 +245,8 @@ public class ReleaseManage {
                 List<String> repositoryList = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
                 for (String repositoryItem : repositoryList) {
                     logRecorder.system("start push to repository in({}),{} {}", dockerInfoModel.getName(), StrUtil.emptyToDefault(dockerInfoModel.getRegistryUrl(), StrUtil.EMPTY), repositoryItem);
-                    Map<String, Object> map = dockerInfoModel.toParameter();
+                    Map<String, Object> map = buildExecuteService.machineDockerServer.dockerParameter(dockerInfoModel);
+                    //dockerInfoModel.toParameter();
                     //
                     map.put("repository", repositoryItem);
                     Consumer<String> logConsumer = s -> logRecorder.info(s);
@@ -272,7 +273,7 @@ public class ReleaseManage {
         List<String> splitTrim = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
         String first = CollUtil.getFirst(splitTrim);
         logRecorder.system("start update swarm service: {} use image {}", serviceName, first);
-        Map<String, Object> pluginMap = buildExecuteService.dockerInfoService.getBySwarmPluginMap(swarmId);
+        Map<String, Object> pluginMap = buildExecuteService.machineDockerServer.dockerParameter(swarmId);
         pluginMap.put("serviceId", serviceName);
         pluginMap.put("image", first);
         try {
@@ -286,7 +287,8 @@ public class ReleaseManage {
 
     private void doDockerImage(DockerInfoModel dockerInfoModel, Map<String, String> envMap, File dockerfile, File baseDir, String dockerTag, BuildExtraModule extraModule) {
         logRecorder.system("{} start build image {}", dockerInfoModel.getName(), dockerTag);
-        Map<String, Object> map = dockerInfoModel.toParameter();
+        Map<String, Object> map = buildExecuteService.machineDockerServer.dockerParameter(dockerInfoModel);
+        //.toParameter();
         map.put("Dockerfile", dockerfile);
         map.put("baseDirectory", baseDir);
         //

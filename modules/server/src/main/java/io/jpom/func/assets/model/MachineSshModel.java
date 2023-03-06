@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author bwcx_jzy
+ * @see io.jpom.model.data.SshModel
  * @since 2023/2/25
  */
 @EqualsAndHashCode(callSuper = true)

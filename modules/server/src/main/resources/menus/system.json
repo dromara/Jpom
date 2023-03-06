@@ -13,7 +13,12 @@
         "id": "machine_ssh_info",
         "title": "SSH管理",
         "role": "system"
-      }
+      },
+        {
+            "id": "machine_docker_info",
+            "title": "Docker管理",
+            "role": "system"
+        }
     ]
   },
   {

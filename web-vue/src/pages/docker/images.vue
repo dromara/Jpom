@@ -298,7 +298,7 @@
     </a-modal>
     <!-- 日志 -->
     <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="pull日志" :footer="null" :maskClosable="false">
-      <pull-image-Log v-if="logVisible" :id="temp.id" />
+      <pull-image-Log v-if="logVisible" :id="temp.id" :machineDockerId="this.machineDockerId" :urlPrefix="this.urlPrefix" />
     </a-modal>
   </div>
 </template>
@@ -314,6 +314,14 @@ export default {
   props: {
     id: {
       type: String,
+      default: "",
+    },
+    urlPrefix: {
+      type: String,
+    },
+    machineDockerId: {
+      type: String,
+      default: "",
     },
   },
   data() {
@@ -363,6 +371,11 @@ export default {
       buildVisible: false,
     };
   },
+  computed: {
+    reqDataId() {
+      return this.id || this.machineDockerId;
+    },
+  },
   mounted() {
     this.loadData();
   },
@@ -371,8 +384,8 @@ export default {
     loadData() {
       this.loading = true;
       //this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
-      this.listQuery.id = this.id;
-      dockerImagesList(this.listQuery).then((res) => {
+      this.listQuery.id = this.reqDataId;
+      dockerImagesList(this.urlPrefix, this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data;
         }
@@ -392,10 +405,10 @@ export default {
         onOk: () => {
           // 组装参数
           const params = {
-            id: this.id,
+            id: this.reqDataId,
             imageId: record.id,
           };
-          action.api(params).then((res) => {
+          action.api(this.urlPrefix, params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
@@ -419,8 +432,8 @@ export default {
     },
     // 构建镜像
     createContainer(record) {
-      dockerImageInspect({
-        id: this.id,
+      dockerImageInspect(this.urlPrefix, {
+        id: this.reqDataId,
         imageId: record.id,
       }).then((res) => {
         this.buildVisible = true;
@@ -450,7 +463,7 @@ export default {
           return false;
         }
         const temp = {
-          id: this.id,
+          id: this.reqDataId,
           autorun: this.temp.autorun,
           imageId: this.temp.imageId,
           name: this.temp.name,
@@ -488,7 +501,7 @@ export default {
         temp.commands = (this.temp.commands || []).map((item) => {
           return item.value || "";
         });
-        dockerImageCreateContainer(temp).then((res) => {
+        dockerImageCreateContainer(this.urlPrefix, temp).then((res) => {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
@@ -506,8 +519,8 @@ export default {
         });
         return;
       }
-      dockerImagePullImage({
-        id: this.id,
+      dockerImagePullImage(this.urlPrefix, {
+        id: this.reqDataId,
         repository: this.pullImageName,
       }).then((res) => {
         if (res.code === 200) {
