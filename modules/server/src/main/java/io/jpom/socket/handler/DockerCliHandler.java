@@ -28,7 +28,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONValidator;
-import io.jpom.model.docker.DockerInfoModel;
+import io.jpom.func.assets.model.MachineDockerModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -64,7 +64,7 @@ public class DockerCliHandler extends BaseTerminalHandler {
     public void afterConnectionEstablishedImpl(WebSocketSession session) throws Exception {
         super.afterConnectionEstablishedImpl(session);
         Map<String, Object> attributes = session.getAttributes();
-        DockerInfoModel dockerInfoModel = (DockerInfoModel) attributes.get("dataItem");
+        MachineDockerModel dockerInfoModel = (MachineDockerModel) attributes.get("machineDocker");
         String containerId = (String) attributes.get("containerId");
         //
         HandlerItem handlerItem;
@@ -122,12 +122,12 @@ public class DockerCliHandler extends BaseTerminalHandler {
 
     private class HandlerItem implements Runnable {
         private final WebSocketSession session;
-        private final DockerInfoModel dockerInfoModel;
+        private final MachineDockerModel dockerInfoModel;
         private final PipedInputStream inputStream = new PipedInputStream();
         private final PipedOutputStream outputStream = new PipedOutputStream(inputStream);
         private final String containerId;
 
-        HandlerItem(WebSocketSession session, DockerInfoModel dockerInfoModel, String containerId) throws IOException {
+        HandlerItem(WebSocketSession session, MachineDockerModel dockerInfoModel, String containerId) throws IOException {
             this.session = session;
             this.dockerInfoModel = dockerInfoModel;
             this.containerId = containerId;

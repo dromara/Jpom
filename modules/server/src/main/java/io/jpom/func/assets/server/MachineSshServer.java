@@ -116,8 +116,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
         }
         this.insert(machineSshModels);
         log.info("成功修复 {} 条机器 SSH 数据", machineSshModels.size());
-        // 更新节点的机器id
-
+        // 更新 ssh 的机器id
         for (MachineSshModel value : machineSshModels) {
             Entity entity = Entity.create();
             entity.set("machineSshId", value.getId());

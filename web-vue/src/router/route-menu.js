@@ -44,6 +44,7 @@ const routeMenuMap = {
   globalEnv: "/system/global-env",
   machine_node_info: "/system/assets/machine-list",
   machine_ssh_info: "/system/assets/ssh-list",
+  machine_docker_info: "/system/assets/docker-list",
 };
 
 export default routeMenuMap;

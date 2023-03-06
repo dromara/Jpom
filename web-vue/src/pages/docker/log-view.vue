@@ -27,8 +27,13 @@ export default {
   props: {
     id: {
       type: String,
+      default: "",
     },
     containerId: { type: String },
+    machineDockerId: {
+      type: String,
+      default: "",
+    },
   },
   data() {
     return {
@@ -39,7 +44,7 @@ export default {
   computed: {
     ...mapGetters(["getLongTermToken"]),
     socketUrl() {
-      return getWebSocketUrl("/socket/docker_log", `userId=${this.getLongTermToken}&id=${this.id}&type=dockerLog&nodeId=system`);
+      return getWebSocketUrl("/socket/docker_log", `userId=${this.getLongTermToken}&id=${this.id}&machineDockerId=${this.machineDockerId}&type=dockerLog&nodeId=system`);
     },
   },
   mounted() {
@@ -84,19 +89,19 @@ export default {
         clearInterval(this.heart);
       };
       this.socket.onmessage = (msg) => {
-        if (msg.data.indexOf("code") > -1 && msg.data.indexOf("msg") > -1) {
-          const res = JSON.parse(msg.data);
-          if (res.code === 200) {
-            this.$notification.success({
-              message: res.msg,
-            });
-          } else {
-            this.$notification.error({
-              message: res.msg,
-            });
-          }
-          return;
-        }
+        // if (msg.data.indexOf("code") > -1 && msg.data.indexOf("msg") > -1) {
+        //   const res = JSON.parse(msg.data);
+        //   if (res.code === 200) {
+        //     this.$notification.success({
+        //       message: res.msg,
+        //     });
+        //   } else {
+        //     this.$notification.error({
+        //       message: res.msg,
+        //     });
+        //   }
+        //   return;
+        // }
         this.$refs.logView.appendLine(msg.data);
         clearInterval(this.heart);
         // 创建心跳，防止掉线

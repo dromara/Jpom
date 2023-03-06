@@ -20,40 +20,63 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.controller.docker;
+package io.jpom.func.assets.controller.docker;
 
-import io.jpom.controller.docker.base.BaseDockerSwarmServiceController;
+import io.jpom.common.JsonMessage;
+import io.jpom.controller.docker.base.BaseDockerSwarmInfoController;
+import io.jpom.func.assets.model.MachineDockerModel;
 import io.jpom.func.assets.server.MachineDockerServer;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
-import io.jpom.system.ServerConfig;
+import io.jpom.permission.MethodFeature;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author bwcx_jzy
- * @since 2022/2/14
+ * @since 2022/2/13
  */
 @RestController
-@Feature(cls = ClassFeature.DOCKER_SWARM)
-@RequestMapping(value = "/docker/swarm-service")
+@Feature(cls = ClassFeature.SYSTEM_ASSETS_MACHINE_DOCKER)
+@RequestMapping(value = "/system/assets/docker/swarm")
 @Slf4j
-public class DockerSwarmServiceController extends BaseDockerSwarmServiceController {
+public class AssetsDockerSwarmInfoController extends BaseDockerSwarmInfoController {
 
     private final MachineDockerServer machineDockerServer;
 
-    public DockerSwarmServiceController(ServerConfig serverConfig,
-                                        MachineDockerServer machineDockerServer) {
-        super(serverConfig);
+    public AssetsDockerSwarmInfoController(MachineDockerServer machineDockerServer) {
         this.machineDockerServer = machineDockerServer;
     }
 
-
     @Override
     protected Map<String, Object> toDockerParameter(String id) {
-        return machineDockerServer.dockerParameter(id);
+        MachineDockerModel machineDockerModel = machineDockerServer.getByKey(id, false);
+        Assert.notNull(machineDockerModel, "没有对应的 docker 信息");
+        if (machineDockerModel.isControlAvailable()) {
+            // 管理节点
+            return machineDockerModel.toParameter();
+        }
+        // 非管理节点
+        return machineDockerServer.getMachineDockerBySwarmId(machineDockerModel.getSwarmId()).toParameter();
+    }
+
+    /**
+     * @return json
+     */
+    @GetMapping(value = "list-all", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<List<MachineDockerModel>> listAll() {
+        MachineDockerModel machineDockerModel = new MachineDockerModel();
+        machineDockerModel.setSwarmControlAvailable(true);
+        // load list with all
+        List<MachineDockerModel> swarmInfoModes = machineDockerServer.listByBean(machineDockerModel);
+        return JsonMessage.success("", swarmInfoModes);
     }
 }

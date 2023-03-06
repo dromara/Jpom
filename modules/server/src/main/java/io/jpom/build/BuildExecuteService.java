@@ -40,6 +40,7 @@ import cn.hutool.core.util.StrUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
+import io.jpom.func.assets.server.MachineDockerServer;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.data.BuildInfoModel;
@@ -100,6 +101,7 @@ public class BuildExecuteService {
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
     private final RepositoryService repositoryService;
     protected final DockerInfoService dockerInfoService;
+    protected final MachineDockerServer machineDockerServer;
     private final WorkspaceEnvVarService workspaceEnvVarService;
     private final ScriptServer scriptServer;
     private final ScriptExecuteLogServer scriptExecuteLogServer;
@@ -112,7 +114,8 @@ public class BuildExecuteService {
                                WorkspaceEnvVarService workspaceEnvVarService,
                                ScriptServer scriptServer,
                                ScriptExecuteLogServer scriptExecuteLogServer,
-                               BuildExtConfig buildExtConfig) {
+                               BuildExtConfig buildExtConfig,
+                               MachineDockerServer machineDockerServer) {
         this.buildService = buildService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.repositoryService = repositoryService;
@@ -121,6 +124,7 @@ public class BuildExecuteService {
         this.scriptServer = scriptServer;
         this.scriptExecuteLogServer = scriptExecuteLogServer;
         this.buildExtConfig = buildExtConfig;
+        this.machineDockerServer = machineDockerServer;
     }
 
     /**
@@ -743,7 +747,7 @@ public class BuildExecuteService {
             Assert.notNull(dockerInfoModel, "没有可用的 docker server");
             logRecorder.system("use docker {}", dockerInfoModel.getName());
             String workingDir = "/home/jpom/";
-            Map<String, Object> map = dockerInfoModel.toParameter();
+            Map<String, Object> map = buildExecuteService.machineDockerServer.dockerParameter(dockerInfoModel);
             map.put("runsOn", dockerYmlDsl.getRunsOn());
             map.put("workingDir", workingDir);
             map.put("tempDir", JpomApplication.getInstance().getTempPath());

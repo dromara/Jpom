@@ -20,35 +20,38 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.model.docker;
+package io.jpom.func.assets.controller.docker;
 
+import io.jpom.controller.docker.base.BaseDockerNetworkController;
 import io.jpom.func.assets.model.MachineDockerModel;
-import io.jpom.model.BaseWorkspaceModel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import top.jpom.h2db.TableName;
+import io.jpom.func.assets.server.MachineDockerServer;
+import io.jpom.permission.ClassFeature;
+import io.jpom.permission.Feature;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 /**
  * @author bwcx_jzy
- * @since 2022/2/13
+ * @since 2022/2/15
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
-@TableName(value = "DOCKER_SWARM_INFO", name = "docker 集群信息")
-public class DockerSwarmInfoMode extends BaseWorkspaceModel {
-    /**
-     * 集群名称
-     */
-    private String name;
-    /**
-     * 集群ID
-     */
-    private String swarmId;
+@RestController
+@Feature(cls = ClassFeature.SYSTEM_ASSETS_MACHINE_DOCKER)
+@RequestMapping(value = "/system/assets/docker/networks")
+public class AssetsDockerNetworkController extends BaseDockerNetworkController {
 
-    /**
-     * 集群容器标签
-     */
-    private String tag;
+    private final MachineDockerServer machineDockerServer;
 
-    private MachineDockerModel machineDocker;
+    public AssetsDockerNetworkController(MachineDockerServer machineDockerServer) {
+        this.machineDockerServer = machineDockerServer;
+    }
+
+    @Override
+    protected Map<String, Object> toDockerParameter(String id) {
+        MachineDockerModel machineDockerModel = machineDockerServer.getByKey(id);
+        Assert.notNull(machineDockerModel, "没有对应的 docker 资产");
+        return machineDockerModel.toParameter();
+    }
 }

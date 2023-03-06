@@ -22,3 +22,10 @@ ADD,MACHINE_NODE_STAT_LOG,occupySwapMemory,Double,,,交互内存
 ADD,MACHINE_NODE_STAT_LOG,occupyVirtualMemory,Double,,,虚拟内存
 ADD,MACHINE_NODE_INFO,osSwapTotal,Long,,,虚拟总内存
 ADD,MACHINE_NODE_INFO,osVirtualMax,Long,,,交互总内存
+ADD,DOCKER_INFO,machineDockerId,String,50,,机器id
+DROP,DOCKER_SWARM_INFO,machineDockerId,
+DROP,DOCKER_SWARM_INFO,status,
+DROP,DOCKER_SWARM_INFO,failureMsg,
+DROP,DOCKER_SWARM_INFO,dockerId,
+DROP,DOCKER_SWARM_INFO,dockerId,
+ADD,MACHINE_DOCKER_INFO,swarmControlAvailable,TINYINT,,,集群管理员

@@ -14,6 +14,18 @@ export default {
     id: {
       type: String,
     },
+    machineDockerId: {
+      type: String,
+      default: "",
+    },
+    urlPrefix: {
+      type: String,
+    },
+  },
+  computed: {
+    reqDataId() {
+      return this.id || this.machineDockerId;
+    },
   },
   data() {
     return {
@@ -39,7 +51,7 @@ export default {
     // 加载日志内容
     pullLog() {
       const params = {
-        id: this.id,
+        id: this.reqDataId,
         line: this.line,
       };
       dockerImagePullImageLog(params).then((res) => {

@@ -14,28 +14,31 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="status" slot-scope="text, record">
-        <a-tooltip :title="`${parseInt(record.status) === 1 ? '运行中' : record.failureMsg || ''}`">
-          <a-switch size="small" :checked="parseInt(record.status) === 1" :disabled="true">
-            <a-icon slot="checkedChildren" type="check-circle" />
-            <a-icon slot="unCheckedChildren" type="warning" />
-          </a-switch>
+        <template v-if="record.machineDocker">
+          <a-tag color="green" v-if="record.machineDocker.status === 1">正常</a-tag>
+          <a-tooltip v-else :title="record.machineDocker.failureMsg">
+            <a-tag>无法连接</a-tag>
+          </a-tooltip>
+        </template>
+
+        <a-tooltip v-else title="集群关联的 docker 信息丢失,不能继续使用管理功能">
+          <a-tag color="red">信息丢失</a-tag>
         </a-tooltip>
       </template>
 
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button size="small" :disabled="parseInt(record.status) !== 1" type="primary" @click="handleConsole(record, 'server')">服务</a-button>
-          <a-button size="small" :disabled="parseInt(record.status) !== 1" type="primary" @click="handleConsole(record, 'node')">节点</a-button>
+          <template v-if="record.machineDocker">
+            <a-button size="small" :disabled="record.machineDocker.status !== 1" type="primary" @click="handleConsole(record, 'server')">服务</a-button>
+            <a-button size="small" :disabled="record.machineDocker.status !== 1" type="primary" @click="handleConsole(record, 'node')">节点</a-button>
+          </template>
+          <template v-else>
+            <a-button size="small" :disabled="true" type="primary">服务</a-button>
+            <a-button size="small" :disabled="true" type="primary">节点</a-button>
+          </template>
 
-          <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
-            <a-menu slot="overlay">
-              <a-menu-item> <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button> </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown>
+          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
@@ -63,14 +66,14 @@
         }
       "
     >
-      <console v-if="consoleVisible" :id="temp.id" :visible="consoleVisible" :initMenu="temp.menuKey"></console>
+      <console v-if="consoleVisible" :id="temp.id" :visible="consoleVisible" :initMenu="temp.menuKey" urlPrefix=""></console>
     </a-drawer>
   </div>
 </template>
 
 <script>
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
-import { dockerSwarmList, editDockerSwarm, unbindSwarm } from "@/api/docker-swarm";
+import { dockerSwarmList, editDockerSwarm, delSwarm } from "@/api/docker-swarm";
 import { mapGetters } from "vuex";
 import Console from "./console";
 
@@ -89,10 +92,10 @@ export default {
       consoleVisible: false,
       columns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "节点地址", dataIndex: "nodeAddr", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+
         { title: "集群ID", dataIndex: "swarmId", ellipsis: true, align: "center", scopedSlots: { customRender: "tooltip" } },
         { title: "容器标签", dataIndex: "tag", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "状态", dataIndex: "status", ellipsis: true, align: "center", width: 80, scopedSlots: { customRender: "status" } },
+        { title: "状态", dataIndex: "status", ellipsis: true, align: "center", width: "100px", scopedSlots: { customRender: "status" } },
         { title: "最后修改人", dataIndex: "modifyUser", width: 120, ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
         {
           title: "修改时间",
@@ -105,25 +108,31 @@ export default {
           width: 170,
         },
         {
-          title: "集群修改时间",
-          dataIndex: "swarmUpdatedAt",
+          title: "集群创建时间",
+          dataIndex: "machineDocker.swarmCreatedAt",
           sorter: true,
           ellipsis: true,
           customRender: (text) => {
             return parseTime(text);
           },
-          width: 170,
+          width: "170px",
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 180 },
+        {
+          title: "集群修改时间",
+          dataIndex: "machineDocker.swarmUpdatedAt",
+          sorter: true,
+          ellipsis: true,
+          customRender: (text) => {
+            return parseTime(text);
+          },
+          width: "170px",
+        },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "220px" },
       ],
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
-        name: [{ required: true, message: "请填写容器名称", trigger: "blur" }],
-        host: [{ required: true, message: "请填写容器地址", trigger: "blur" }],
-        tagInput: [
-          // { required: true, message: "Please input ID", trigger: "blur" },
-          { pattern: /^\w{1,10}$/, message: "标签限制为字母数字且长度 1-10" },
-        ],
+        name: [{ required: true, message: "请填写集群名称", trigger: "blur" }],
+
         tag: [
           { required: true, message: "请填写关联容器标签", trigger: "blur" },
           { pattern: /^\w{1,10}$/, message: "标签限制为字母数字且长度 1-10" },
@@ -187,21 +196,44 @@ export default {
         });
       });
     },
-    // 解绑
-    handleUnbind(record) {
-      const html =
-        "<b style='font-size: 20px;'>真的要解绑该集群么？</b>" +
-        "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
-        "<li>解绑只删除在本系统的关联数据,不会删除容器里面数据</b></li>" +
-        " </ul>";
+    // // 解绑
+    // handleUnbind(record) {
+    //   const html =
+    //     "<b style='font-size: 20px;'>真的要解绑该集群么？</b>" +
+    //     "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
+    //     "<li>解绑只删除在本系统的关联数据,不会删除容器里面数据</b></li>" +
+    //     " </ul>";
 
-      const h = this.$createElement;
-      //
+    //   const h = this.$createElement;
+    //   //
+    //   this.$confirm({
+    //     title: "危险操作！！！",
+    //     content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
+    //     okButtonProps: { props: { type: "danger", size: "small" } },
+    //     cancelButtonProps: { props: { type: "primary" } },
+    //     okText: "确认",
+    //     cancelText: "取消",
+    //     onOk: () => {
+    //       // 组装参数
+    //       const params = {
+    //         id: record.id,
+    //       };
+    //       unbindSwarm(params).then((res) => {
+    //         if (res.code === 200) {
+    //           this.$notification.success({
+    //             message: res.msg,
+    //           });
+    //           this.loadData();
+    //         }
+    //       });
+    //     },
+    //   });
+    // },
+    // 删除
+    handleDelete(record) {
       this.$confirm({
-        title: "危险操作！！！",
-        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
-        okButtonProps: { props: { type: "danger", size: "small" } },
-        cancelButtonProps: { props: { type: "primary" } },
+        title: "系统提示",
+        content: "真的要删除该记录么？删除后构建关联的容器标签将无法使用",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
@@ -209,7 +241,7 @@ export default {
           const params = {
             id: record.id,
           };
-          unbindSwarm(params).then((res) => {
+          delSwarm(params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
@@ -220,6 +252,7 @@ export default {
         },
       });
     },
+
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });

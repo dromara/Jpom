@@ -24,11 +24,11 @@
       <!-- <a-layout-header :style="{ background: '#fff', padding: 0 }" /> -->
       <!-- :style="{ margin: '24px 16px 0' }" -->
       <a-layout-content>
-        <container v-if="menuKey === 'containers'" :id="this.id" :visible="this.visible" />
-        <images v-if="menuKey === 'images'" :id="this.id" :visible="this.visible" />
-        <volumes v-if="menuKey === 'volumes'" :id="this.id" :visible="this.visible" />
-        <info v-if="menuKey === 'info'" :id="this.id" :visible="this.visible" />
-        <networks v-if="menuKey === 'networks'" :id="this.id" :visible="this.visible" />
+        <container v-if="menuKey === 'containers'" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+        <images v-if="menuKey === 'images'" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+        <volumes v-if="menuKey === 'volumes'" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+        <info v-if="menuKey === 'info'" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+        <networks v-if="menuKey === 'networks'" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
       </a-layout-content>
     </a-layout>
   </a-layout>
@@ -47,6 +47,12 @@ export default {
     visible: {
       type: Boolean,
       default: false,
+    },
+    machineDockerId: {
+      type: String,
+    },
+    urlPrefix: {
+      type: String,
     },
   },
   components: {

@@ -142,11 +142,13 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 attributes.put("tomcatId", tomcatId);
                 break;
             case dockerLog: {
-                Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
+                Tuple dataItem = this.checkAssetsData(handlerType, userModel, httpServletRequest);
                 if (dataItem == null) {
                     return false;
                 }
-                attributes.put("dataItem", dataItem);
+                attributes.put("dataItem", dataItem.get(2));
+                attributes.put("isAssetsManager", dataItem.get(1));
+                attributes.put("machineDocker", dataItem.get(0));
                 break;
             }
             case ssh: {
@@ -160,12 +162,14 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 break;
             }
             case docker:
-                Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
+                Tuple dataItem = this.checkAssetsData(handlerType, userModel, httpServletRequest);
                 if (dataItem == null) {
                     return false;
                 }
+                attributes.put("dataItem", dataItem.get(2));
+                attributes.put("isAssetsManager", dataItem.get(1));
+                attributes.put("machineDocker", dataItem.get(0));
                 attributes.put("containerId", httpServletRequest.getParameter("containerId"));
-                attributes.put("dataItem", dataItem);
                 break;
             case nodeUpdate:
                 break;

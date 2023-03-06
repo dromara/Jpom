@@ -1,0 +1,286 @@
+package io.jpom.func.assets.server;
+
+import cn.hutool.core.collection.CollStreamUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.comparator.CompareUtil;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.cron.task.Task;
+import cn.hutool.db.Entity;
+import com.alibaba.fastjson2.JSONObject;
+import io.jpom.common.Const;
+import io.jpom.common.ILoadEvent;
+import io.jpom.cron.CronUtils;
+import io.jpom.cron.IAsyncLoad;
+import io.jpom.func.assets.model.MachineDockerModel;
+import io.jpom.model.docker.DockerInfoModel;
+import io.jpom.model.docker.DockerSwarmInfoMode;
+import io.jpom.plugin.IPlugin;
+import io.jpom.plugin.PluginFactory;
+import io.jpom.service.docker.DockerInfoService;
+import io.jpom.service.docker.DockerSwarmInfoService;
+import io.jpom.service.h2db.BaseDbService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
+import java.nio.file.NoSuchFileException;
+import java.util.*;
+
+/**
+ * @author bwcx_jzy
+ * @since 2023/3/3
+ */
+@Service
+@Slf4j
+public class MachineDockerServer extends BaseDbService<MachineDockerModel> implements ILoadEvent, IAsyncLoad, Task {
+    private static final String CRON_ID = "docker-monitor";
+    private final DockerInfoService dockerInfoService;
+    private final DockerSwarmInfoService dockerSwarmInfoService;
+
+    public MachineDockerServer(DockerInfoService dockerInfoService,
+                               DockerSwarmInfoService dockerSwarmInfoService) {
+        this.dockerInfoService = dockerInfoService;
+        this.dockerSwarmInfoService = dockerSwarmInfoService;
+    }
+
+    @Override
+    protected void fillInsert(MachineDockerModel machineDockerModel) {
+        super.fillInsert(machineDockerModel);
+        machineDockerModel.setGroupName(StrUtil.emptyToDefault(machineDockerModel.getGroupName(), Const.DEFAULT_GROUP_NAME));
+        machineDockerModel.setStatus(ObjectUtil.defaultIfNull(machineDockerModel.getStatus(), 0));
+    }
+
+    @Override
+    public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
+        long count = this.count();
+        if (count != 0) {
+            log.debug("机器 DOCKER 表已经存在 {} 条数据，不需要修复机器 DOCKER 数据", count);
+            return;
+        }
+        List<DockerInfoModel> list = dockerInfoService.list(false);
+        if (CollUtil.isEmpty(list)) {
+            log.debug("没有任何 DOCKER 信息,不需要修复机器 DOCKER 数据");
+            return;
+        }
+        Map<String, List<DockerInfoModel>> map = CollStreamUtil.groupByKey(list, DockerInfoModel::getHost);
+        List<MachineDockerModel> models = new ArrayList<>(map.size());
+        for (Map.Entry<String, List<DockerInfoModel>> entry : map.entrySet()) {
+            List<DockerInfoModel> value = entry.getValue();
+            // 排序，最近更新过优先
+            value.sort((o1, o2) -> CompareUtil.compare(o2.getModifyTimeMillis(), o1.getModifyTimeMillis()));
+            DockerInfoModel first = CollUtil.getFirst(value);
+            if (value.size() > 1) {
+                log.warn("DOCKER 地址 {} 存在多个数据，将自动合并使用 {} DOCKER 的配置信息", entry.getKey(), first.getName());
+            }
+            models.add(this.dockerInfoToMachineDocker(first));
+        }
+        this.insert(models);
+        log.info("成功修复 {} 条机器 DOCKER 数据", models.size());
+        // 更新 docker 的机器id
+        for (MachineDockerModel value : models) {
+            Entity entity = Entity.create();
+            entity.set("machineDockerId", value.getId());
+            {
+                //
+                Entity where = Entity.create();
+                where.set("host", value.getHost());
+                int update = dockerInfoService.update(entity, where);
+                Assert.state(update > 0, "更新 DOCKER 表机器id 失败：" + value.getName());
+            }
+        }
+    }
+
+
+    private MachineDockerModel dockerInfoToMachineDocker(DockerInfoModel dockerInfoModel) {
+        MachineDockerModel machineDockerModel = new MachineDockerModel();
+        machineDockerModel.setName(dockerInfoModel.getName());
+        machineDockerModel.setHost(dockerInfoModel.getHost());
+        machineDockerModel.setTlsVerify(dockerInfoModel.getTlsVerify());
+        machineDockerModel.setStatus(dockerInfoModel.getStatus());
+        machineDockerModel.setHeartbeatTimeout(dockerInfoModel.getHeartbeatTimeout());
+        machineDockerModel.setFailureMsg(dockerInfoModel.getFailureMsg());
+        //
+        machineDockerModel.setSwarmNodeId(dockerInfoModel.getSwarmNodeId());
+        machineDockerModel.setSwarmId(dockerInfoModel.getSwarmId());
+        //
+        machineDockerModel.setRegistryEmail(dockerInfoModel.getRegistryEmail());
+        machineDockerModel.setRegistryUrl(dockerInfoModel.getRegistryUrl());
+        machineDockerModel.setRegistryUsername(dockerInfoModel.getRegistryUsername());
+        machineDockerModel.setRegistryPassword(dockerInfoModel.getRegistryPassword());
+        return machineDockerModel;
+    }
+
+    @Override
+    public void startLoad() {
+        CronUtils.add(CRON_ID, "0 0/1 * * * ?", () -> MachineDockerServer.this);
+    }
+
+    @Override
+    public void execute() {
+        List<MachineDockerModel> list = this.list(false);
+        if (CollUtil.isEmpty(list)) {
+            return;
+        }
+        this.checkList(list);
+    }
+
+    private void checkList(List<MachineDockerModel> monitorModels) {
+        monitorModels.forEach(monitorModel -> ThreadUtil.execute(() -> this.updateMonitor(monitorModel)));
+    }
+
+    /**
+     * 监控 容器
+     *
+     * @param dockerInfoModel docker
+     */
+    public boolean updateMonitor(MachineDockerModel dockerInfoModel) {
+        try {
+            IPlugin pluginCheck = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
+            Map<String, Object> parameter = dockerInfoModel.toParameter();
+            //
+            JSONObject info = pluginCheck.execute("info", parameter, JSONObject.class);
+            //
+            MachineDockerModel update = new MachineDockerModel();
+            update.setId(dockerInfoModel.getId());
+            update.setStatus(1);
+            update.setLastHeartbeatTime(SystemClock.now());
+            //
+            update.setDockerVersion(info.getString("serverVersion"));
+            JSONObject swarm = info.getJSONObject("swarm");
+            //
+            IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
+            JSONObject swarmData = null;
+            try {
+                if (dockerInfoModel.isControlAvailable()) {
+                    swarmData = plugin.execute("inSpectSwarm", dockerInfoModel.toParameter(), JSONObject.class);
+                } else {
+                    // 找到管理节点
+                    MachineDockerModel managerDocker = this.getMachineDockerBySwarmId(dockerInfoModel.getSwarmId());
+                    swarmData = plugin.execute("inSpectSwarm", managerDocker.toParameter(), JSONObject.class);
+                }
+            } catch (Exception e) {
+                log.debug("获取 {} docker 集群失败 {}", dockerInfoModel.getName(), e.getMessage());
+            }
+            Optional.ofNullable(swarmData).ifPresent(jsonObject -> {
+                String swarmId = jsonObject.getString("id");
+                update.setSwarmCreatedAt(DateUtil.parse(jsonObject.getString("createdAt")).getTime());
+                update.setSwarmUpdatedAt(DateUtil.parse(jsonObject.getString("updatedAt")).getTime());
+                update.setSwarmId(swarmId);
+            });
+            Optional.ofNullable(swarm).ifPresent(jsonObject -> {
+                String nodeId = jsonObject.getString("nodeID");
+                String nodeAddr = jsonObject.getString("nodeAddr");
+                boolean controlAvailable = jsonObject.getBooleanValue("controlAvailable");
+                update.setSwarmControlAvailable(controlAvailable);
+                update.setSwarmNodeAddr(nodeAddr);
+                update.setSwarmNodeId(nodeId);
+            });
+            if (StrUtil.isEmpty(update.getSwarmNodeId())) {
+                // 集群退出
+                update.restSwarm();
+            }
+            update.setFailureMsg(StrUtil.EMPTY);
+            update.setCertExist(FileUtil.isNotEmpty(FileUtil.file(dockerInfoModel.generateCertPath())));
+            super.update(update);
+            //
+            return true;
+        } catch (Exception e) {
+            if (ExceptionUtil.isCausedBy(e, NoSuchFileException.class)) {
+                log.error("监控 docker[{}] 异常 {}", dockerInfoModel.getName(), e.getMessage());
+            } else {
+                log.error("监控 docker[{}] 异常", dockerInfoModel.getName(), e);
+            }
+            this.updateStatus(dockerInfoModel.getId(), 0, e.getMessage());
+            return false;
+        }
+    }
+
+    public void updateSwarmInfo(String id, JSONObject swarmData, JSONObject info) {
+        //
+        JSONObject swarm = info.getJSONObject("swarm");
+        Assert.notNull(swarm, "集群信息不完整,不能操作");
+        String nodeAddr = swarm.getString("nodeAddr");
+        String nodeId = swarm.getString("nodeID");
+        Assert.hasText(nodeAddr, "没有节点地址,不能继续操作");
+        //
+        Date createdAt = swarmData.getDate("createdAt");
+        Date updatedAt = swarmData.getDate("updatedAt");
+        String swarmId = swarmData.getString("id");
+        //
+        MachineDockerModel machineDockerModel = new MachineDockerModel();
+        machineDockerModel.setSwarmUpdatedAt(createdAt.getTime());
+        machineDockerModel.setSwarmUpdatedAt(updatedAt.getTime());
+        machineDockerModel.setSwarmId(swarmId);
+        machineDockerModel.setSwarmNodeAddr(nodeAddr);
+        machineDockerModel.setSwarmNodeId(nodeId);
+        boolean controlAvailable = swarm.getBooleanValue("controlAvailable");
+        machineDockerModel.setSwarmControlAvailable(controlAvailable);
+        machineDockerModel.setId(id);
+        this.updateById(machineDockerModel);
+    }
+
+    /**
+     * 更新 容器状态
+     *
+     * @param id     ID
+     * @param status 状态值
+     * @param msg    错误消息
+     */
+    private void updateStatus(String id, int status, String msg) {
+        MachineDockerModel dockerInfoModel = new MachineDockerModel();
+        dockerInfoModel.setId(id);
+        dockerInfoModel.setStatus(status);
+        dockerInfoModel.setFailureMsg(msg);
+        super.update(dockerInfoModel);
+    }
+
+    public Map<String, Object> dockerParameter(DockerInfoModel dockerInfoModel) {
+        String machineDockerId = dockerInfoModel.getMachineDockerId();
+        MachineDockerModel machineDockerModel = this.getByKey(machineDockerId, false);
+        Assert.notNull(machineDockerModel, "没有找到对应的 docker 信息");
+        return machineDockerModel.toParameter();
+    }
+
+    /**
+     * 通过集群 id 获取 docker 管理参数
+     *
+     * @param workspaceSwarmId 集群id
+     * @return map
+     */
+    public Map<String, Object> dockerParameter(String workspaceSwarmId) {
+        MachineDockerModel first = this.getMachineDocker(workspaceSwarmId);
+        Assert.notNull(first, "没有找到集群管理节点");
+        return first.toParameter();
+    }
+
+    private MachineDockerModel getMachineDocker(String workspaceSwarmId) {
+        DockerSwarmInfoMode swarmInfoMode = dockerSwarmInfoService.getByKey(workspaceSwarmId);
+        Assert.notNull(swarmInfoMode, "没有找到对应的集群信息");
+        String modeSwarmId = swarmInfoMode.getSwarmId();
+        //
+        return this.getMachineDockerBySwarmId(modeSwarmId);
+    }
+
+    public MachineDockerModel getMachineDockerBySwarmId(String swarmId) {
+        //
+        MachineDockerModel dockerInfoModel = this.tryMachineDockerBySwarmId(swarmId);
+        Assert.notNull(dockerInfoModel, "当前集群未找到任何管理节点");
+        return dockerInfoModel;
+    }
+
+    public MachineDockerModel tryMachineDockerBySwarmId(String swarmId) {
+        //
+        MachineDockerModel dockerInfoModel = new MachineDockerModel();
+        dockerInfoModel.setSwarmId(swarmId);
+        dockerInfoModel.setSwarmControlAvailable(true);
+        List<MachineDockerModel> machineDockerModels = this.listByBean(dockerInfoModel, false);
+        return CollUtil.getFirst(machineDockerModels);
+    }
+}

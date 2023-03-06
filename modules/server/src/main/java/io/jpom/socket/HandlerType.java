@@ -22,6 +22,7 @@
  */
 package io.jpom.socket;
 
+import io.jpom.func.assets.server.MachineDockerServer;
 import io.jpom.func.assets.server.MachineSshServer;
 import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.h2db.BaseDbService;
@@ -66,11 +67,11 @@ public enum HandlerType {
     /**
      * 容器 log
      */
-    dockerLog(DockerLogHandler.class, DockerInfoService.class),
+    dockerLog(DockerLogHandler.class, DockerInfoService.class, MachineDockerServer.class, "machineDockerId"),
     /**
      * 容器 终端
      */
-    docker(DockerCliHandler.class, DockerInfoService.class),
+    docker(DockerCliHandler.class, DockerInfoService.class, MachineDockerServer.class, "machineDockerId"),
     ;
     final Class<?> handlerClass;
 

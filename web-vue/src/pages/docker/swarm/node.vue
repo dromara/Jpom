@@ -58,8 +58,7 @@
           {{ text }}
         </a-tag>
       </a-tooltip>
-      <a-tooltip slot="address" slot-scope="text, item" placement="topLeft" :title="text">
-        <a-icon v-if="item.managerStatus && item.managerStatus.leader" type="cloud-server" />
+      <a-tooltip slot="address" slot-scope="text" placement="topLeft" :title="text">
         {{ text }}
       </a-tooltip>
 
@@ -70,7 +69,7 @@
       </a-tooltip>
       <a-tooltip slot="updatedAt" slot-scope="text, item" placement="topLeft" :title="`修改时间：${text} 创建时间：${item.createdAt}`">
         <span>
-          <a-tag>{{ text }}</a-tag>
+          {{ text }}
         </span>
       </a-tooltip>
 
@@ -124,7 +123,8 @@
 </template>
 
 <script>
-import { dockerSwarmNodeLeave, dockerSwarmNodeList, dockerSwarmNodeUpdate } from "@/api/docker-swarm";
+import { dockerSwarmNodeList, dockerSwarmNodeUpdate } from "@/api/docker-swarm";
+import { dockerSwarmNodeLeave } from "@/api/system/assets-docker";
 
 export default {
   components: {},
@@ -135,6 +135,9 @@ export default {
     visible: {
       type: Boolean,
       default: false,
+    },
+    urlPrefix: {
+      type: String,
     },
   },
   data() {
@@ -172,9 +175,9 @@ export default {
 
           ellipsis: true,
           scopedSlots: { customRender: "updatedAt" },
-          width: 170,
+          width: "170px",
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 120 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "120px" },
       ],
     };
   },
@@ -194,7 +197,7 @@ export default {
       this.loading = true;
 
       this.listQuery.id = this.id;
-      dockerSwarmNodeList(this.listQuery).then((res) => {
+      dockerSwarmNodeList(this.urlPrefix, this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data;
         }
@@ -220,7 +223,7 @@ export default {
           return false;
         }
         this.temp.id = this.id;
-        dockerSwarmNodeUpdate(this.temp).then((res) => {
+        dockerSwarmNodeUpdate(this.urlPrefix, this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
             this.$notification.success({
