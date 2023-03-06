@@ -17,7 +17,7 @@
         <template v-if="record.machineDocker">
           <a-tag color="green" v-if="record.machineDocker.status === 1">正常</a-tag>
           <a-tooltip v-else :title="record.machineDocker.failureMsg">
-            <a-tag>无法连接</a-tag>
+            <a-tag color="red">无法连接</a-tag>
           </a-tooltip>
         </template>
 
