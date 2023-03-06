@@ -48,14 +48,15 @@ public class YamlUtil {
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         dumperOptions.setProcessComments(true);
 
-        CustomRepresenter customRepresenter = new CustomRepresenter();
+        CustomRepresenter customRepresenter = new CustomRepresenter(dumperOptions);
         return new Yaml(customRepresenter, dumperOptions);
     }
 
     @SuppressWarnings("deprecation")
     static class CustomRepresenter extends Representer {
 
-        public CustomRepresenter() {
+        public CustomRepresenter(DumperOptions dumperOptions) {
+            super(dumperOptions);
             super.nullRepresenter = new RepresentNull();
         }
 
@@ -91,34 +92,36 @@ public class YamlUtil {
 //    }
 
     /**
-     *获取字段名下的key对应的值
+     * 获取字段名下的key对应的值
+     *
      * @param section 字段名
-     * @param key 键
+     * @param key     键
      * @return
      */
     public Object getValueByKey(String section, String key) {
-        System.out.println("properties的值为："+properties);
+        System.out.println("properties的值为：" + properties);
         Map<String, Object> rootproperty = properties.get(section);
-        System.out.println("rootproperty的值为："+rootproperty);
-        return rootproperty.getOrDefault(key,"");
+        System.out.println("rootproperty的值为：" + rootproperty);
+        return rootproperty.getOrDefault(key, "");
     }
 
     /**
      * yaml文件修改
+     *
      * @param section
      * @param key
      * @param value
      * @return
      */
-    public boolean updateYaml(String section,String key, Object value ){
+    public boolean updateYaml(String section, String key, Object value) {
         Yaml yaml = new Yaml();
         Map<String, Object> before_property = properties.get(section);
         before_property.remove(key);
         before_property.put(key, value);
         try {
-            yaml.dump(properties,new FileWriter(f));
+            yaml.dump(properties, new FileWriter(f));
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
         return false;
@@ -126,16 +129,17 @@ public class YamlUtil {
 
     /**
      * yaml文件新增
+     *
      * @param section
      * @param key
      * @param value
      * @throws IOException
      */
-    public void write(String section ,String key,String value) throws IOException {
-        Map<String,Map<String, Object>> map = new HashMap<String,Map<String, Object>>();
-        Map<String, Object> mapchild =  new HashMap<String,Object>();
+    public void write(String section, String key, String value) throws IOException {
+        Map<String, Map<String, Object>> map = new HashMap<String, Map<String, Object>>();
+        Map<String, Object> mapchild = new HashMap<String, Object>();
         mapchild.put(key, value);
-        map.put(section,mapchild);
+        map.put(section, mapchild);
         Yaml yml = new Yaml();
         FileWriter writer = new FileWriter("F:\\autoInterface\\src\\resources\\application.yaml", true);
         BufferedWriter buffer = new BufferedWriter(writer);
@@ -147,7 +151,7 @@ public class YamlUtil {
 
     public static void main(String[] args) throws IOException {
         YamlUtil yamlUtil = new YamlUtil();
-        yamlUtil.updateYaml("login2","token2","value1");
+        yamlUtil.updateYaml("login2", "token2", "value1");
     }
 
 }
