@@ -8,6 +8,7 @@
 
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           <a-button type="primary" @click="handleAdd">创建</a-button>
+          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="loadData" />
         </a-space>
       </template>
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
@@ -427,7 +428,7 @@ export default {
       initSwarmVisible: false,
       taskVisible: false,
       logVisible: false,
-      autoUpdateTime: null,
+
       rules: {
         name: [{ required: true, message: "服务名称必填", trigger: "blur" }],
         mode: [{ required: true, message: "运行模式必填", trigger: "blur" }],
@@ -451,12 +452,11 @@ export default {
         },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 120 },
       ],
+      countdownTime: Date.now(),
     };
   },
   computed: {},
-  beforeDestroy() {
-    this.autoUpdateTime && clearTimeout(this.autoUpdateTime);
-  },
+  beforeDestroy() {},
   mounted() {
     this.loadData();
   },
@@ -473,10 +473,7 @@ export default {
           this.list = res.data;
         }
         this.loading = false;
-        clearTimeout(this.autoUpdateTime);
-        this.autoUpdateTime = setTimeout(() => {
-          this.loadData();
-        }, 3000);
+        this.countdownTime = Date.now() + 5 * 1000;
       });
     },
     //  任务
@@ -673,3 +670,13 @@ export default {
   },
 };
 </script>
+<style scoped>
+/deep/ .ant-statistic div {
+  display: inline-block;
+}
+
+/deep/ .ant-statistic-content-value,
+/deep/ .ant-statistic-content {
+  font-size: 16px;
+}
+</style>

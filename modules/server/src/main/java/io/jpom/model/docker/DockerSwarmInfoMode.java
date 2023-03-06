@@ -22,8 +22,10 @@
  */
 package io.jpom.model.docker;
 
+import cn.hutool.core.annotation.PropIgnore;
 import io.jpom.func.assets.model.MachineDockerModel;
 import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.model.data.WorkspaceModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import top.jpom.h2db.TableName;
@@ -50,5 +52,9 @@ public class DockerSwarmInfoMode extends BaseWorkspaceModel {
      */
     private String tag;
 
+    @PropIgnore
     private MachineDockerModel machineDocker;
+
+    @PropIgnore
+    private WorkspaceModel workspace;
 }

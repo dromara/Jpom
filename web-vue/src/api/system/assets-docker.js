@@ -117,3 +117,11 @@ export function machineDockerDistribute(params) {
     params: params,
   });
 }
+
+export function dockerListWorkspace(params) {
+  return axios({
+    url: "/system/assets/docker/list-workspace-docker",
+    method: "get",
+    params: params,
+  });
+}

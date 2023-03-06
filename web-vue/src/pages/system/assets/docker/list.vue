@@ -17,6 +17,9 @@
           </a-tooltip>
         </a-space>
       </template>
+      <a-tooltip slot="name" slot-scope="text, item" :title="text">
+        <a-button style="padding: 0" type="link" size="small" @click="handleEdit(item)"> {{ text }}</a-button>
+      </a-tooltip>
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -72,6 +75,7 @@
             <a-button size="small" icon="select" @click="handleSwarmConsole(record)" :disabled="parseInt(record.status) !== 1" type="primary">集群</a-button>
           </template>
           <a-button size="small" @click="syncToWorkspaceShow(record)" type="primary">分配</a-button>
+          <a-button size="small" @click="viewWorkspaceDataHander(record)" type="primary">关联</a-button>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
             <a-menu slot="overlay">
@@ -237,6 +241,33 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 查看 docker 关联工作空间的信息 -->
+    <a-modal destroyOnClose v-model="viewWorkspaceDocker" width="50%" title="关联工作空间 docker" :footer="null" :maskClosable="false">
+      <a-tabs>
+        <a-tab-pane key="1" tab="docker">
+          <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.dockerList">
+            <a-list-item slot="renderItem" slot-scope="item" style="display: block">
+              <a-row>
+                <a-col :span="10">Docker 名称：{{ item.name }}</a-col>
+                <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
+                <a-col :span="4"> </a-col>
+              </a-row>
+            </a-list-item>
+          </a-list>
+        </a-tab-pane>
+        <a-tab-pane key="2" tab="集群">
+          <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.swarmList">
+            <a-list-item slot="renderItem" slot-scope="item" style="display: block">
+              <a-row>
+                <a-col :span="10">集群名称：{{ item.name }}</a-col>
+                <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
+                <a-col :span="4"> </a-col>
+              </a-row>
+            </a-list-item>
+          </a-list>
+        </a-tab-pane>
+      </a-tabs>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -251,6 +282,7 @@ import {
   dockerSwarmListAll,
   dcokerSwarmLeaveForce,
   machineDockerDistribute,
+  dockerListWorkspace,
 } from "@/api/system/assets-docker";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";
@@ -280,7 +312,7 @@ export default {
       joinSwarmVisible: false,
       swarmList: [],
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "host", dataIndex: "host", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "docker版本", dataIndex: "dockerVersion", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
 
@@ -299,7 +331,7 @@ export default {
           },
           width: "170px",
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "240px" },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "300px" },
       ],
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
@@ -318,6 +350,11 @@ export default {
       },
       syncToWorkspaceVisible: false,
       workspaceList: [],
+      viewWorkspaceDocker: false,
+      workspaceDockerData: {
+        dockerList: [],
+        swarmList: [],
+      },
     };
   },
   computed: {
@@ -633,6 +670,18 @@ export default {
 
           this.syncToWorkspaceVisible = false;
           return false;
+        }
+      });
+    },
+    // 查看工作空间的 docker 信息
+    viewWorkspaceDataHander(item) {
+      this.workspaceDockerData = {};
+      dockerListWorkspace({
+        id: item.id,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.viewWorkspaceDocker = true;
+          this.workspaceDockerData = res.data;
         }
       });
     },

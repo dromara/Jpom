@@ -54,12 +54,12 @@ export default {
         id: this.reqDataId,
         line: this.line,
       };
-      dockerImagePullImageLog(params).then((res) => {
+      dockerImagePullImageLog(this.urlPrefix, params).then((res) => {
         let next = true;
         if (res.code === 200) {
           // 停止请求
           const dataLines = res.data.dataLines;
-          if (dataLines && dataLines[dataLines.length - 1] === "pull end") {
+          if (dataLines && dataLines.length && dataLines[dataLines.length - 1].indexOf("pull end") > -1) {
             this.logTimer && clearTimeout(this.logTimer);
             next = false;
           }

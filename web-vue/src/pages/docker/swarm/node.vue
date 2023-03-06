@@ -11,6 +11,7 @@
           </a-select>
 
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="loadData" />
         </a-space>
       </template>
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
@@ -152,7 +153,7 @@ export default {
         role: [{ required: true, message: "请选择节点角色", trigger: "blur" }],
         availability: [{ required: true, message: "请选择节点状态", trigger: "blur" }],
       },
-      autoUpdateTime: null,
+
       columns: [
         { title: "序号", width: 80, ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
         // { title: "节点Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
@@ -179,12 +180,11 @@ export default {
         },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "120px" },
       ],
+      countdownTime: Date.now(),
     };
   },
   computed: {},
-  beforeDestroy() {
-    this.autoUpdateTime && clearTimeout(this.autoUpdateTime);
-  },
+  beforeDestroy() {},
   mounted() {
     this.loadData();
   },
@@ -202,10 +202,7 @@ export default {
           this.list = res.data;
         }
         this.loading = false;
-        clearTimeout(this.autoUpdateTime);
-        this.autoUpdateTime = setTimeout(() => {
-          this.loadData();
-        }, 3000);
+        this.countdownTime = Date.now() + 5 * 1000;
       });
     },
     handleEdit(record) {
@@ -262,3 +259,13 @@ export default {
   },
 };
 </script>
+<style scoped>
+/deep/ .ant-statistic div {
+  display: inline-block;
+}
+
+/deep/ .ant-statistic-content-value,
+/deep/ .ant-statistic-content {
+  font-size: 16px;
+}
+</style>
