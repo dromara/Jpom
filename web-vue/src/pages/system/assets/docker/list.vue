@@ -56,7 +56,7 @@
       <template slot="status" slot-scope="text, record">
         <a-tag color="green" v-if="record.status === 1">正常</a-tag>
         <a-tooltip v-else :title="record.failureMsg">
-          <a-tag>无法连接</a-tag>
+          <a-tag color="red">无法连接</a-tag>
         </a-tooltip>
       </template>
       <template slot="operation" slot-scope="text, record">
