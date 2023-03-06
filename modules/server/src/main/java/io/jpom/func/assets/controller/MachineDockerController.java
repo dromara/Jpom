@@ -60,9 +60,7 @@ import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author bwcx_jzy
@@ -307,9 +305,9 @@ public class MachineDockerController extends BaseGroupNameController {
 
 
     /**
-     * 将机器分配到指定工作空间
+     * 将 docker 分配到指定工作空间
      *
-     * @param id          机器id
+     * @param id          docker id
      * @param workspaceId 工作空间id
      * @return json
      */
@@ -345,6 +343,38 @@ public class MachineDockerController extends BaseGroupNameController {
             throw new IllegalArgumentException("未知参数");
         }
         return JsonMessage.success("操作成功");
+    }
+
+    @GetMapping(value = "list-workspace-docker", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<JSONObject> listWorkspaceSsh(@ValidatorItem String id) {
+        MachineDockerModel machineDockerModel = machineDockerServer.getByKey(id);
+        Assert.notNull(machineDockerModel, "没有对应的 docker");
+        JSONObject jsonObject = new JSONObject();
+        {
+            DockerInfoModel dockerInfoModel = new DockerInfoModel();
+            dockerInfoModel.setMachineDockerId(id);
+            List<DockerInfoModel> modelList = dockerInfoService.listByBean(dockerInfoModel);
+            modelList = Optional.ofNullable(modelList).orElseGet(ArrayList::new);
+            for (DockerInfoModel model : modelList) {
+                model.setWorkspace(workspaceService.getByKey(model.getWorkspaceId()));
+            }
+            jsonObject.put("dockerList", modelList);
+        }
+        {
+            String swarmId = machineDockerModel.getSwarmId();
+            if (StrUtil.isNotEmpty(swarmId)) {
+                DockerSwarmInfoMode dockerInfoModel = new DockerSwarmInfoMode();
+                dockerInfoModel.setSwarmId(swarmId);
+                List<DockerSwarmInfoMode> modelList = dockerSwarmInfoService.listByBean(dockerInfoModel);
+                modelList = Optional.ofNullable(modelList).orElseGet(ArrayList::new);
+                for (DockerSwarmInfoMode model : modelList) {
+                    model.setWorkspace(workspaceService.getByKey(model.getWorkspaceId()));
+                }
+                jsonObject.put("swarmList", modelList);
+            }
+        }
+        return JsonMessage.success("", jsonObject);
     }
 
 }

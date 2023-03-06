@@ -11,6 +11,7 @@
             <a-switch checked-children="是" un-checked-children="否" v-model="listQuery['showAll']" />
           </div>
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="autoUpdate" />
         </a-space>
       </template>
 
@@ -374,7 +375,7 @@ export default {
       terminalVisible: false,
       logVisible: false,
       temp: {},
-      autoUpdateTime: null,
+
       columns: [
         { title: "序号", width: 80, ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
         { title: "名称", dataIndex: "names", ellipsis: true, scopedSlots: { customRender: "names" } },
@@ -430,21 +431,24 @@ export default {
         },
       },
       editVisible: false,
+      countdownTime: Date.now(),
     };
   },
-  beforeDestroy() {
-    this.autoUpdateTime && clearTimeout(this.autoUpdateTime);
-  },
+  beforeDestroy() {},
   computed: {
     reqDataId() {
       return this.id || this.machineDockerId;
     },
   },
   mounted() {
-    this.loadData();
+    this.autoUpdate();
   },
   methods: {
     renderSize,
+    autoUpdate() {
+      this.loadData();
+      this.pullStats();
+    },
     // 加载数据
     loadData() {
       if (!this.visible) {
@@ -458,11 +462,7 @@ export default {
           this.list = res.data;
         }
         this.loading = false;
-        clearTimeout(this.autoUpdateTime);
-        this.autoUpdateTime = setTimeout(() => {
-          this.loadData();
-          this.pullStats();
-        }, 3000);
+        this.countdownTime = Date.now() + 5 * 1000;
       });
     },
     doAction(record, actionKey) {
@@ -578,3 +578,13 @@ export default {
   },
 };
 </script>
+<style scoped>
+/deep/ .ant-statistic div {
+  display: inline-block;
+}
+
+/deep/ .ant-statistic-content-value,
+/deep/ .ant-statistic-content {
+  font-size: 16px;
+}
+</style>

@@ -15,6 +15,7 @@
             </a-select>
           </a-tooltip>
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="loadData" />
         </a-space>
       </template>
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
@@ -163,12 +164,11 @@ export default {
         },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 80 },
       ],
+      countdownTime: Date.now(),
     };
   },
   computed: {},
-  beforeDestroy() {
-    this.autoUpdateTime && clearTimeout(this.autoUpdateTime);
-  },
+  beforeDestroy() {},
   mounted() {
     this.listQuery.taskState = this.taskState;
     this.loadData();
@@ -190,10 +190,7 @@ export default {
           this.list = res.data;
         }
         this.loading = false;
-        clearTimeout(this.autoUpdateTime);
-        this.autoUpdateTime = setTimeout(() => {
-          this.loadData();
-        }, 3000);
+        this.countdownTime = Date.now() + 5 * 1000;
       });
     },
     // 日志
@@ -230,3 +227,13 @@ export default {
   },
 };
 </script>
+<style scoped>
+/deep/ .ant-statistic div {
+  display: inline-block;
+}
+
+/deep/ .ant-statistic-content-value,
+/deep/ .ant-statistic-content {
+  font-size: 16px;
+}
+</style>

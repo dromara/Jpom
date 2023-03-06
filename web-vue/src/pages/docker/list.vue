@@ -28,6 +28,9 @@
           <a-tag color="red">信息丢失</a-tag>
         </a-tooltip>
       </template>
+      <template slot="tags" slot-scope="tags">
+        <a-tag v-for="item in (tags || '').split(':').filter((item) => item)" :key="item"> {{ item }}</a-tag>
+      </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" :disabled="!record.machineDocker || record.machineDocker.status !== 1" @click="handleConsole(record)">控制台</a-button>
@@ -133,7 +136,8 @@ export default {
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "host", dataIndex: "machineDocker.host", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "状态", dataIndex: "machineDocker.status", ellipsis: true, align: "center", width: "100px", scopedSlots: { customRender: "status" } },
-        { title: "docker版本", dataIndex: "machineDocker.dockerVersion", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "docker版本", dataIndex: "machineDocker.dockerVersion", ellipsis: true, width: "120px", scopedSlots: { customRender: "tooltip" } },
+        { title: "标签", dataIndex: "tags", ellipsis: true, scopedSlots: { customRender: "tags" } },
         { title: "最后修改人", dataIndex: "modifyUser", width: "120px", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
         {
           title: "修改时间",
