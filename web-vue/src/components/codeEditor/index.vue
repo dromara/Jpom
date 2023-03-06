@@ -6,13 +6,14 @@
       <a-space class="tool-bar-end">
         <div>
           皮肤：
-          <a-select v-model="cmOptions.theme" @select="handleSelectTheme" show-search option-filter-prop="children" :filter-option="filterOption" placeholder="请选择" style="width: 150px">
+          <a-select v-model="cmOptions.theme" @select="handleSelectTheme" show-search option-filter-prop="children" :filter-option="filterOption" placeholder="请选择皮肤" style="width: 150px">
             <a-select-option v-for="item in cmThemeOptions" :key="item">{{ item }}</a-select-option>
           </a-select>
         </div>
         <div>
           语言：
-          <a-select v-model="cmOptions.mode" @select="handleSelectMode" show-search option-filter-prop="children" :filter-option="filterOption" placeholder="请选择" style="width: 150px">
+          <a-select v-model="cmOptions.mode" @select="handleSelectMode" show-search option-filter-prop="children" :filter-option="filterOption" placeholder="请选择语言模式" style="width: 150px">
+            <a-select-option value="">请选择语言模式</a-select-option>
             <a-select-option v-for="item in cmEditorModeOptions" :key="item">{{ item }}</a-select-option>
           </a-select>
         </div>
@@ -129,6 +130,9 @@ const fileSuffixToModeMap = {
   php: "php",
   md: "markdown",
   dockerfile: "dockerfile",
+  properties: "properties",
+  lua: "lua",
+  go: "go",
 };
 
 export default {
@@ -174,7 +178,7 @@ export default {
       cmEditorModeOptions: modeList,
       cmOptions: {
         theme: localStorage.getItem("editorTheme") || "idea",
-        mode: "json",
+        mode: "",
         // // 是否应滚动或换行以显示长行
         lineWrapping: true,
         lineNumbers: true,
