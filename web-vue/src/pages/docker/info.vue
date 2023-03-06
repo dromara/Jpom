@@ -37,6 +37,7 @@
                     <div v-if="temp.swarm.remoteManagers">
                       管理列表： <a-tag v-for="(item, index) in temp.swarm.remoteManagers" :key="index">{{ item.addr }}</a-tag>
                     </div>
+                    <div>管理节点：{{ temp.swarm.controlAvailable ? "是" : "否" }}</div>
                   </a-space>
                 </div>
               </div>

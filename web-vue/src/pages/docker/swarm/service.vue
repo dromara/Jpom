@@ -46,9 +46,7 @@
         </span>
       </a-tooltip>
       <a-tooltip slot="updatedAt" slot-scope="text, item" placement="topLeft" :title="`修改时间：${text} 创建时间：${item.createdAt}`">
-        <span>
-          <a-tag>{{ text }}</a-tag>
-        </span>
+        {{ text }}
       </a-tooltip>
 
       <a-tooltip slot="replicas" slot-scope="text, record" placement="topLeft" :title="`点击数字查看运行中的任务,点击图标查看关联的所有任务`">
@@ -386,7 +384,7 @@
     </a-modal>
     <!-- 查看任务 -->
     <a-modal destroyOnClose v-model="taskVisible" title="查看任务" width="80vw" :footer="null" :maskClosable="false">
-      <swarm-task v-if="taskVisible" :visible="taskVisible" :taskState="this.temp.state" :id="this.id" :serviceId="this.temp.id" />
+      <swarm-task v-if="taskVisible" :visible="taskVisible" :taskState="this.temp.state" :id="this.id" :serviceId="this.temp.id" :urlPrefix="this.urlPrefix" />
     </a-modal>
     <!-- 查看日志 -->
     <a-modal destroyOnClose v-model="logVisible" title="查看日志" width="80vw" :footer="null" :maskClosable="false">
@@ -448,7 +446,7 @@ export default {
 
           ellipsis: true,
           scopedSlots: { customRender: "updatedAt" },
-          width: 170,
+          width: "170px",
         },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 120 },
       ],

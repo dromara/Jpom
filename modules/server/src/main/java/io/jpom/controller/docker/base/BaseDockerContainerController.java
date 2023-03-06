@@ -175,6 +175,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
 
     /**
      * 修改容器配置
+     * NanoCpus：以 10-9 (十億分之一) 個 CPU 為單位的 CPU 配額。 例如，250000000 nanocpus = 0.25 CPU。
      *
      * @return json
      */

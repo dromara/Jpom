@@ -132,7 +132,7 @@ export default {
         availability: [{ required: true, message: "请选择节点状态", trigger: "blur" }],
       },
       columns: [
-        { title: "序号", width: 80, ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
+        { title: "序号", width: "80px", ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
         { title: "任务Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "节点Id", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "服务ID", dataIndex: "serviceId", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
@@ -141,7 +141,8 @@ export default {
         // { title: "端点", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
         // { title: "节点地址", width: 150, dataIndex: "status.address", ellipsis: true, scopedSlots: { customRender: "address" } },
         { title: "状态", width: 140, dataIndex: "desiredState", ellipsis: true, scopedSlots: { customRender: "desiredState" } },
-        { title: "slot", width: 50, dataIndex: "slot", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "错误信息", width: 150, dataIndex: "status.err", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "slot", width: "80px", dataIndex: "slot", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
         // { title: "系统类型", width: 140, align: "center", dataIndex: "description.platform.os", ellipsis: true, scopedSlots: { customRender: "os" } },
         // {
@@ -160,9 +161,9 @@ export default {
           sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
           sortDirections: ["descend", "ascend"],
           defaultSortOrder: "descend",
-          width: 180,
+          width: "180px",
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 80 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "80px" },
       ],
       countdownTime: Date.now(),
     };
