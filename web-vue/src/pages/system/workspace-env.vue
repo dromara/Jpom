@@ -30,6 +30,10 @@
       <a-tooltip slot="description" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <template slot="workspaceId" slot-scope="text">
+        <span>{{ text === "GLOBAL" ? "全局" : "当前工作空间" }}</span>
+      </template>
+
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleEnvEdit(record)">编辑</a-button>
@@ -99,6 +103,10 @@ export default {
       type: String,
       default: "",
     },
+    global: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -111,8 +119,10 @@ export default {
       envVarColumns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "值", dataIndex: "value", ellipsis: true, scopedSlots: { customRender: "value" } },
+
         { title: "描述", dataIndex: "description", ellipsis: true, scopedSlots: { customRender: "description" } },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
+        { title: "作用域", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "workspaceId" }, width: "120px" },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
@@ -123,7 +133,7 @@ export default {
             return parseTime(text);
           },
           sorter: true,
-          width: 180,
+          width: "180px",
         },
         { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 120 },
       ],
@@ -147,7 +157,7 @@ export default {
     loadDataEnvVar(pointerEvent) {
       this.envVarLoading = true;
 
-      this.envVarListQuery.workspaceId = this.workspaceId;
+      this.envVarListQuery.workspaceId = this.workspaceId + (this.global ? ",GLOBAL" : "");
       this.envVarListQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.envVarListQuery.page;
       getWorkspaceEnvList(this.envVarListQuery).then((res) => {
         if (res.code === 200) {

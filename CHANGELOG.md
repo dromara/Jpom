@@ -14,6 +14,7 @@
    （感谢 [@失落的世界](https://gitee.com/marmotgo) [Gitee issues I6KTLQ](https://gitee.com/dromara/Jpom/issues/I6KTLQ) ）
 2. 【server】优化 项目文件列表支持前端排序（文件大小、修改时间）
 3. 【server】优化 关闭程序时依次关闭线程池
+4. 【server】优化 工作空间环境变量开放给普通用户编辑
 
 ### ⚠️ 注意
 

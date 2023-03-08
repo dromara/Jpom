@@ -124,6 +124,11 @@ const children = [
     name: "dispatch-white-list",
     component: () => import("../pages/dispatch/white-list"),
   },
+  {
+    path: "/script/env-list",
+    name: "script-env-list",
+    component: () => import("../pages/script/env"),
+  },
 ];
 
 const management = [
