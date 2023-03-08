@@ -23,7 +23,6 @@
 package io.jpom.util;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
@@ -54,17 +53,12 @@ public class FileUtils {
 
     private static JSONObject fileToJson(File file) {
         JSONObject jsonObject = new JSONObject(6);
+        jsonObject.put("isDirectory", file.isDirectory());
         long sizeFile = FileUtil.size(file);
-        if (file.isDirectory()) {
-            jsonObject.put("isDirectory", true);
-            jsonObject.put("fileSize", FileUtil.readableFileSize(sizeFile));
-        } else {
-            jsonObject.put("fileSize", FileUtil.readableFileSize(sizeFile));
-        }
+        jsonObject.put("fileSizeLong", sizeFile);
         jsonObject.put("filename", file.getName());
         long mTime = file.lastModified();
         jsonObject.put("modifyTimeLong", mTime);
-        jsonObject.put("modifyTime", DateUtil.date(mTime).toString());
         return jsonObject;
     }
 

@@ -78,8 +78,14 @@
           <template slot="isDirectory" slot-scope="text">
             <span>{{ text ? "目录" : "文件" }}</span>
           </template>
-          <a-tooltip slot="fileSize" slot-scope="text" placement="topLeft" :title="text">
-            <span>{{ text }}</span>
+          <a-tooltip slot="fileSizeLong" slot-scope="text, item" placement="topLeft" :title="`${text ? renderSize(text) : item.fileSize}`">
+            <template v-if="text">
+              {{ renderSize(text) }}
+            </template>
+            <span v-else>{{ item.fileSize }}</span>
+          </a-tooltip>
+          <a-tooltip slot="modifyTimeLong" slot-scope="text, record" :title="`${parseTime(record.modifyTimeLong)}}`">
+            <span>{{ parseTime(record.modifyTimeLong) }}</span>
           </a-tooltip>
           <template slot="operation" slot-scope="text, record">
             <a-space>
@@ -277,11 +283,10 @@ import {
   uploadProjectFile,
   shardingMerge,
 } from "@/api/node-project";
-import { ZIP_ACCEPT, renderSize, formatDuration } from "@/utils/const";
+import { ZIP_ACCEPT, renderSize, formatDuration, concurrentExecution, parseTime } from "@/utils/const";
 import codeEditor from "@/components/codeEditor";
 import projectFileBackup from "./project-file-backup.vue";
 import { uploadPieces } from "@/utils/upload-pieces";
-import { concurrentExecution } from "@/utils/const";
 
 export default {
   components: {
@@ -328,9 +333,7 @@ export default {
         title: "filename",
         isLeaf: "isDirectory",
       },
-      cmOptions: {
-        mode: "application/json",
-      },
+
       // 是否是上传状态
       uploading: false,
       percentage: 0,
@@ -351,10 +354,10 @@ export default {
       },
       columns: [
         { title: "文件名称", dataIndex: "filename", ellipsis: true, scopedSlots: { customRender: "filename" } },
-        { title: "文件类型", dataIndex: "isDirectory", width: 100, ellipsis: true, scopedSlots: { customRender: "isDirectory" } },
-        { title: "文件大小", dataIndex: "fileSize", width: 120, ellipsis: true, scopedSlots: { customRender: "fileSize" } },
-        { title: "修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true },
-        { title: "操作", dataIndex: "operation", width: 180, align: "center", scopedSlots: { customRender: "operation" } },
+        { title: "文件类型", dataIndex: "isDirectory", width: "100px", ellipsis: true, scopedSlots: { customRender: "isDirectory" } },
+        { title: "文件大小", dataIndex: "fileSizeLong", width: 120, ellipsis: true, scopedSlots: { customRender: "fileSizeLong" }, sorter: (a, b) => a.fileSizeLong - b.fileSizeLong },
+        { title: "修改时间", dataIndex: "modifyTimeLong", width: "180px", ellipsis: true, scopedSlots: { customRender: "modifyTimeLong" }, sorter: (a, b) => a.modifyTimeLong - b.modifyTimeLong },
+        { title: "操作", dataIndex: "operation", width: "180px", align: "center", scopedSlots: { customRender: "operation" } },
       ],
       rules: {
         url: [{ required: true, message: "远程下载Url不为空", trigger: "change" }],
@@ -389,7 +392,7 @@ export default {
     renderSize,
     uploadPieces,
     formatDuration,
-
+    parseTime,
     onTreeData(treeNode) {
       return new Promise((resolve) => {
         if (treeNode.dataRef.children || !treeNode.dataRef.isDirectory) {
