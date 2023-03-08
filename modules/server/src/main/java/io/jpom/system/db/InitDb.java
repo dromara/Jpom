@@ -32,6 +32,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.ds.DSFactory;
+import io.jpom.JpomApplication;
 import io.jpom.common.ILoadEvent;
 import io.jpom.common.JpomApplicationEvent;
 import io.jpom.model.data.BackupInfoModel;
@@ -233,6 +234,9 @@ public class InitDb implements DisposableBean, ILoadEvent {
 
     @Override
     public void destroy() throws Exception {
+        // 需要优先关闭线程池，避免异常更新数据的逻辑没有释放
+        JpomApplication.shutdownGlobalThreadPool();
+        // 关闭数据库
         IoUtil.close(StorageServiceFactory.get());
     }
 

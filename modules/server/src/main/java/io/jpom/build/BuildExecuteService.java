@@ -128,6 +128,15 @@ public class BuildExecuteService {
     }
 
     /**
+     * 正在构建的数量
+     *
+     * @return 构建数量
+     */
+    public static int buildCount() {
+        return BUILD_MANAGE_MAP.size();
+    }
+
+    /**
      * 创建构建线程池
      */
     private synchronized void initPool() {
@@ -151,6 +160,7 @@ public class BuildExecuteService {
             }
         });
         threadPoolExecutor = executorBuilder.build();
+        JpomApplication.register("build", threadPoolExecutor);
     }
 
     /**

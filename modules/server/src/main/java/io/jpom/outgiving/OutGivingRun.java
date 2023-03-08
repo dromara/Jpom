@@ -100,6 +100,10 @@ public class OutGivingRun {
     private String projectSecondaryDirectory;
     private LogRecorder logRecorder;
 
+    public static int outGivingCount() {
+        return SYNC_FINISHER_MAP.size();
+    }
+
     /**
      * 取消分发
      *

@@ -24,6 +24,7 @@ package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
 import io.jpom.JpomApplication;
+import io.jpom.build.BuildExecuteService;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
@@ -34,6 +35,7 @@ import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.controller.LoginControl;
 import io.jpom.cron.CronUtils;
+import io.jpom.outgiving.OutGivingRun;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -92,6 +94,8 @@ public class CacheManageController extends BaseServerController {
         map.put("taskList", CronUtils.list());
         map.put("pluginSize", PluginFactory.size());
         map.put("shardingSize", BaseServerController.SHARDING_IDS.size());
+        map.put("buildCount", BuildExecuteService.buildCount());
+        map.put("outGivingCount", OutGivingRun.outGivingCount());
         //
         return JsonMessage.success("ok", map);
     }

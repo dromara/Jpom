@@ -13,6 +13,7 @@
 1. 【server】修复 新增 docker 无法使用在线构建功能
    （感谢 [@失落的世界](https://gitee.com/marmotgo) [Gitee issues I6KTLQ](https://gitee.com/dromara/Jpom/issues/I6KTLQ) ）
 2. 【server】优化 项目文件列表支持前端排序（文件大小、修改时间）
+3. 【server】优化 关闭程序时依次关闭线程池
 
 ### ⚠️ 注意
 
