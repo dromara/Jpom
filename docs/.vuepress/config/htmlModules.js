@@ -43,6 +43,10 @@ module.exports = {
     <a href="https://www.xiaonuo.vip" target="_blank">
       <img class="no-zoom" height="60" width="224" src="/images/friends/ad/snowy-banner.jpg">
     </a>
+    <div>
+    <span style='color: gray;font-size: smaller;'></span>
+            <span style='color: #E01E5A;font-size: smaller;font-weight: bolder;float: right'>❤️<a href='/pages/589c8e/'>成为赞助商</a></span>
+            </div>
   `,
   // 万维广告
   pageT: `
