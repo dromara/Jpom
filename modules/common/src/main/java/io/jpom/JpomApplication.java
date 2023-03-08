@@ -39,6 +39,7 @@ import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +47,8 @@ import org.springframework.context.annotation.Configuration;
 import java.io.File;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -57,7 +60,7 @@ import java.util.function.Function;
  */
 @Slf4j
 @Configuration
-public class JpomApplication implements DisposableBean {
+public class JpomApplication implements DisposableBean, InitializingBean {
     /**
      * 程序端口
      */
@@ -74,6 +77,8 @@ public class JpomApplication implements DisposableBean {
     }
 
     private static volatile JpomApplication jpomApplication;
+
+    private static final Map<String, ExecutorService> LINK_EXECUTOR_SERVICE = new ConcurrentHashMap<>();
 
     /**
      * 单利模式
@@ -224,11 +229,37 @@ public class JpomApplication implements DisposableBean {
         });
     }
 
+    /**
+     * 注册线程池
+     *
+     * @param name            线程池名
+     * @param executorService 线程池
+     */
+    public static void register(String name, ExecutorService executorService) {
+        LINK_EXECUTOR_SERVICE.put(name, executorService);
+    }
+
+    /**
+     * 关闭全局线程池
+     */
+    public static void shutdownGlobalThreadPool() {
+        LINK_EXECUTOR_SERVICE.forEach((s, executorService) -> {
+            if (!executorService.isShutdown()) {
+                log.debug("shutdown {} ThreadPool", s);
+                executorService.shutdownNow();
+            }
+        });
+    }
+
     @Override
     public void destroy() throws Exception {
         Type appType = getAppType();
-        log.debug(" Jpom {} shutdown Global ThreadPool", appType);
-        GlobalThreadPool.shutdown(true);
         log.info("Jpom {} disposable", appType);
+        shutdownGlobalThreadPool();
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        register("Global", GlobalThreadPool.getExecutor());
     }
 }

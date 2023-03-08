@@ -58,6 +58,12 @@
           <a-timeline-item>
             <span class="layui-elem-quote">分片操作数：{{ temp.shardingSize }}</span>
           </a-timeline-item>
+          <a-timeline-item>
+            <span class="layui-elem-quote">正在构建数：{{ temp.buildCount }}</span>
+          </a-timeline-item>
+          <a-timeline-item>
+            <span class="layui-elem-quote">正在分发数：{{ temp.outGivingCount }}</span>
+          </a-timeline-item>
         </a-timeline>
       </a-tab-pane>
       <a-tab-pane key="2" tab="运行中的定时任务" force-render> <task-stat :taskList="taskList" @refresh="loadData" /></a-tab-pane>
