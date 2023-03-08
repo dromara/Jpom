@@ -36,19 +36,19 @@ import java.util.List;
  */
 public class DockerInfoTest extends ApplicationStartTest {
 
-	@Resource
-	private DockerInfoService dockerInfoService;
+    @Resource
+    private DockerInfoService dockerInfoService;
 
-	@Test
-	public void testQueryTag() {
-		int sdfsd = dockerInfoService.countByTag(Const.WORKSPACE_DEFAULT_ID, "sdfsd");
+    @Test
+    public void testQueryTag() {
+        int sdfsd = dockerInfoService.countByTag(Const.WORKSPACE_DEFAULT_ID, "sdfsd");
 
-		System.out.println(sdfsd);
-	}
+        System.out.println(sdfsd);
+    }
 
-	@Test
-	public void testQueryTag2() {
-		List<DockerInfoModel> models = dockerInfoService.queryByTag(Const.WORKSPACE_DEFAULT_ID, 1, "sdfsd");
-		System.out.println(models);
-	}
+    @Test
+    public void testQueryTag2() {
+        List<DockerInfoModel> models = dockerInfoService.queryByTag(Const.WORKSPACE_DEFAULT_ID, "sdfsd");
+        System.out.println(models);
+    }
 }

@@ -125,9 +125,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
         machineDockerModel.setName(dockerInfoModel.getName());
         machineDockerModel.setHost(dockerInfoModel.getHost());
         machineDockerModel.setTlsVerify(dockerInfoModel.getTlsVerify());
-        machineDockerModel.setStatus(dockerInfoModel.getStatus());
         machineDockerModel.setHeartbeatTimeout(dockerInfoModel.getHeartbeatTimeout());
-        machineDockerModel.setFailureMsg(dockerInfoModel.getFailureMsg());
         //
         machineDockerModel.setSwarmNodeId(dockerInfoModel.getSwarmNodeId());
         machineDockerModel.setSwarmId(dockerInfoModel.getSwarmId());
@@ -267,6 +265,8 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
         String machineDockerId = dockerInfoModel.getMachineDockerId();
         MachineDockerModel machineDockerModel = this.getByKey(machineDockerId, false);
         Assert.notNull(machineDockerModel, "没有找到对应的 docker 信息");
+        Integer status = machineDockerModel.getStatus();
+        Assert.state(status != null && status == 1, "当前 " + machineDockerModel.getName() + " docker 不在线");
         return machineDockerModel.toParameter();
     }
 
@@ -279,6 +279,8 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     public Map<String, Object> dockerParameter(String workspaceSwarmId) {
         MachineDockerModel first = this.getMachineDocker(workspaceSwarmId);
         Assert.notNull(first, "没有找到集群管理节点");
+        Integer status = first.getStatus();
+        Assert.state(status != null && status == 1, "当前 " + first.getName() + " docker 集群没有管理节点在线");
         return first.toParameter();
     }
 
@@ -303,6 +305,11 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
         dockerInfoModel.setSwarmId(swarmId);
         dockerInfoModel.setSwarmControlAvailable(true);
         List<MachineDockerModel> machineDockerModels = this.listByBean(dockerInfoModel, false);
+        if (machineDockerModels == null) {
+            return null;
+        }
+        // 跟进在线情况排序
+        machineDockerModels.sort((o1, o2) -> CompareUtil.compare(o2.getStatus(), o1.getStatus()));
         return CollUtil.getFirst(machineDockerModels);
     }
 }

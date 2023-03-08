@@ -229,7 +229,7 @@ public class ReleaseManage {
             // 根据 tag 查询
             List<DockerInfoModel> dockerInfoModels = buildExecuteService
                 .dockerInfoService
-                .queryByTag(this.buildExtraModule.getWorkspaceId(), 1, fromTag);
+                .queryByTag(this.buildExtraModule.getWorkspaceId(), fromTag);
             DockerInfoModel dockerInfoModel = CollUtil.getFirst(dockerInfoModels);
             if (dockerInfoModel == null) {
                 logRecorder.systemError("没有可用的 docker server");
