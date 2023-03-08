@@ -30,6 +30,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.core.lang.JarClassLoader;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.StrPool;
 import cn.hutool.core.text.StrSplitter;
@@ -328,13 +329,17 @@ public abstract class AbstractProjectCommander {
     public void asyncWebHooks(NodeProjectInfoModel nodeProjectInfoModel,
                               NodeProjectInfoModel.JavaCopyItem javaCopyItem,
                               String type, Object... other) {
-        ThreadUtil.execute(() -> {
-            try {
-                this.webHooks(nodeProjectInfoModel, javaCopyItem, type, other);
-            } catch (Exception e) {
-                log.error("project webhook", e);
-            }
-        });
+        String token = nodeProjectInfoModel.getToken();
+        Opt.ofBlankAble(token)
+            .ifPresent(s ->
+                ThreadUtil.execute(() -> {
+                    try {
+                        this.webHooks(nodeProjectInfoModel, javaCopyItem, type, other);
+                    } catch (Exception e) {
+                        log.error("project webhook", e);
+                    }
+                })
+            );
     }
 
     /**
