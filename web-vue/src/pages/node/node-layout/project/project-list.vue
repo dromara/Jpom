@@ -520,7 +520,7 @@ export default {
         { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "进程 ID", dataIndex: "pid", width: 100, ellipsis: true, scopedSlots: { customRender: "pid" } },
         { title: "端口号", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "最后修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
+        { title: "最后修改时间", dataIndex: "modifyTime", width: "180px", ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: "120px" },
       ],
       rules: {
