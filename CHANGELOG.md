@@ -2,6 +2,11 @@
 
 ## 2.10.28
 
+### 🐣 新增功能
+
+1. 【agent】新增 项目触发器新增 fileChange 事件（文件变动对应触发点：上传、删除、远程下载、编辑、新增目录或者文件、重命名）
+   （感谢 [@胡明](https://gitee.com/pig_home) [Gitee issues I6KKEK](https://gitee.com/dromara/Jpom/issues/I6KKEK) ）
+
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 新增 docker 无法使用在线构建功能

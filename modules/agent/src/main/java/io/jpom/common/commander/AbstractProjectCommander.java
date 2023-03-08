@@ -325,9 +325,9 @@ public abstract class AbstractProjectCommander {
      * @param type                 类型
      * @param other                其他参数
      */
-    private void asyncWebHooks(NodeProjectInfoModel nodeProjectInfoModel,
-                               NodeProjectInfoModel.JavaCopyItem javaCopyItem,
-                               String type, Object... other) {
+    public void asyncWebHooks(NodeProjectInfoModel nodeProjectInfoModel,
+                              NodeProjectInfoModel.JavaCopyItem javaCopyItem,
+                              String type, Object... other) {
         ThreadUtil.execute(() -> {
             try {
                 this.webHooks(nodeProjectInfoModel, javaCopyItem, type, other);
