@@ -40,7 +40,6 @@ import io.jpom.model.data.WorkspaceEnvVarModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
-import io.jpom.permission.SystemPermission;
 import io.jpom.service.system.WorkspaceEnvVarService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -50,6 +49,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import top.jpom.model.PageResultDto;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
 
@@ -61,7 +61,6 @@ import java.util.List;
 @RestController
 @Feature(cls = ClassFeature.SYSTEM_WORKSPACE)
 @RequestMapping(value = "/system/workspace_env/")
-@SystemPermission
 public class WorkspaceEnvVarController extends BaseServerController {
 
     private final WorkspaceEnvVarService workspaceEnvVarService;
@@ -77,8 +76,8 @@ public class WorkspaceEnvVarController extends BaseServerController {
      */
     @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<WorkspaceEnvVarModel>> list() {
-        PageResultDto<WorkspaceEnvVarModel> listPage = workspaceEnvVarService.listPage(getRequest());
+    public JsonMessage<PageResultDto<WorkspaceEnvVarModel>> list(HttpServletRequest request) {
+        PageResultDto<WorkspaceEnvVarModel> listPage = workspaceEnvVarService.listPage(request);
         listPage.each(workspaceEnvVarModel -> {
             Integer privacy = workspaceEnvVarModel.getPrivacy();
             if (privacy != null && privacy == 1) {
@@ -106,6 +105,10 @@ public class WorkspaceEnvVarController extends BaseServerController {
                                     @ValidatorItem String description,
                                     String privacy,
                                     String nodeIds) {
+        if (!getUser().isSystemUser()) {
+            Assert.state(!StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL), "全局工作空间变量请到系统管理修改");
+        }
+
         workspaceEnvVarService.checkUserWorkspace(workspaceId);
 
         this.checkInfo(id, name, workspaceId);
@@ -137,7 +140,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
         } else {
             WorkspaceEnvVarModel byKey = workspaceEnvVarService.getByKey(id);
             Assert.notNull(byKey, "没有对应的数据");
-            Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), "选择工作空间错误");
+            Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), "工作空间错误,或者没有权限编辑此数据");
             oldNodeIds = byKey.getNodeIds();
             workspaceModel.setId(id);
             // 不能修改
@@ -212,6 +215,9 @@ public class WorkspaceEnvVarController extends BaseServerController {
     @Feature(method = MethodFeature.DEL)
     public JsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id,
                                       @ValidatorItem String workspaceId) {
+        if (!getUser().isSystemUser()) {
+            Assert.state(!StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL), "全局工作空间变量请到系统管理修改");
+        }
         workspaceEnvVarService.checkUserWorkspace(workspaceId);
         WorkspaceEnvVarModel byKey = workspaceEnvVarService.getByKey(id);
         Assert.notNull(byKey, "没有对应的数据");

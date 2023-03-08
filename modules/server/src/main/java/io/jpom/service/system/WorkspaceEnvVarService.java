@@ -26,12 +26,15 @@ import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.common.ServerConst;
 import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.data.WorkspaceEnvVarModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
+import top.jpom.model.PageResultDto;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +44,27 @@ import java.util.Map;
  */
 @Service
 public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVarModel> {
+
+
+    /**
+     * 获取我所有的空间
+     *
+     * @param request 请求对象
+     * @return page
+     */
+    @Override
+    public PageResultDto<WorkspaceEnvVarModel> listPage(HttpServletRequest request) {
+        // 验证工作空间权限
+        Map<String, String> paramMap = ServletUtil.getParamMap(request);
+        String workspaceIds = BaseWorkspaceService.getWorkspaceId(request);
+        List<String> split = StrUtil.split(workspaceIds, StrUtil.COMMA);
+        for (String workspaceId : split) {
+            checkUserWorkspace(workspaceId);
+        }
+        paramMap.remove("workspaceId");
+        paramMap.put("workspaceId:in", workspaceIds);
+        return super.listPage(paramMap);
+    }
 
     /**
      * 获取工作空间下面的所有环境变量
