@@ -246,6 +246,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         Object privileged = parameter.get("privileged");
         String restartPolicy = (String) parameter.get("restartPolicy");
         Map<String, String> env = (Map<String, String>) parameter.get("env");
+        Map<String, String> storageOpt = (Map<String, String>) parameter.get("storageOpt");
         String labels = (String) parameter.get("labels");
         //
         CreateContainerCmd containerCmd = dockerClient.createContainerCmd(imageId);
@@ -290,6 +291,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
                 .collect(Collectors.toList());
             containerCmd.withEnv(envList);
         }
+        Optional.ofNullable(storageOpt).ifPresent(hostConfig::withStorageOpt);
         // 命令
         List<String> commands = (List<String>) parameter.get("commands");
         if (CollUtil.isNotEmpty(commands)) {

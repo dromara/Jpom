@@ -59,12 +59,18 @@
     </a-table>
     <a-modal destroyOnClose v-model="buildVisible" width="60vw" title="构建容器" @ok="handleBuildOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
-        <a-form-model-item label="基础镜像" prop="image">
-          <a-input v-model="temp.image" disabled placeholder="" />
+        <a-form-model-item label="基础镜像" prop="name">
+          <a-row>
+            <a-col :span="10">
+              <a-input v-model="temp.image" disabled placeholder="" />
+            </a-col>
+            <a-col :span="4" style="text-align: right">容器名称：</a-col>
+            <a-col :span="10">
+              <a-input v-model="temp.name" placeholder="容器名称" />
+            </a-col>
+          </a-row>
         </a-form-model-item>
-        <a-form-model-item label="容器名称" prop="name">
-          <a-input v-model="temp.name" placeholder="容器名称" />
-        </a-form-model-item>
+
         <a-form-model-item label="端口">
           <a-row v-for="(item, index) in temp.exposedPorts" :key="index">
             <a-col :span="21">
@@ -269,6 +275,38 @@
             </template>
           </a-auto-complete>
         </a-form-model-item>
+        <a-form-model-item label="存储选项">
+          <a-row v-for="(item, index) in temp.storageOpt" :key="index">
+            <a-col :span="10">
+              <a-input v-model="item.key" placeholder="配置名 （如：size）" />
+            </a-col>
+            <a-col :span="10" :offset="1">
+              <a-input v-model="item.value" placeholder="配置值 （如：5g）" />
+            </a-col>
+            <a-col :span="2" :offset="1">
+              <a-space>
+                <a-icon
+                  type="minus-circle"
+                  v-if="temp.storageOpt && temp.storageOpt.length > 1"
+                  @click="
+                    () => {
+                      temp.storageOpt.splice(index, 1);
+                    }
+                  "
+                />
+
+                <a-icon
+                  type="plus-square"
+                  @click="
+                    () => {
+                      temp.storageOpt.push({});
+                    }
+                  "
+                />
+              </a-space>
+            </a-col>
+          </a-row>
+        </a-form-model-item>
         <a-form-model-item label="容器标签"> <a-input v-model="temp.labels" placeholder="容器标签,如：key1=values1&keyvalue2" /> </a-form-model-item>
         <a-form-model-item label="自动启动">
           <a-row>
@@ -452,8 +490,10 @@ export default {
           autorun: true,
           imageId: record.id,
           env: [{}],
+          storageOpt: [{}],
           commands: [{}],
         };
+        this.$refs["editForm"]?.resetFields();
       });
     },
     // 创建容器
@@ -473,6 +513,7 @@ export default {
           privileged: this.temp.privileged,
           restartPolicy: this.temp.restartPolicy,
           labels: this.temp.labels,
+          storageOpt: {},
         };
         temp.volumes = (this.temp.volumes || [])
           .filter((item) => {
@@ -495,6 +536,11 @@ export default {
         this.temp.env.forEach((item) => {
           if (item.key && item.key) {
             temp.env[item.key] = item.value;
+          }
+        });
+        this.temp.storageOpt.forEach((item) => {
+          if (item.key && item.key) {
+            temp.storageOpt[item.key] = item.value;
           }
         });
         //
