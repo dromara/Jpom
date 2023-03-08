@@ -29,7 +29,6 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
@@ -212,7 +211,7 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
         Session session = null;
         Sftp sftp = null;
         try {
-            String tempId = SecureUtil.sha1(machineSshModel.getId() + ArrayUtil.join(command, StrUtil.COMMA));
+            String tempId = IdUtil.fastSimpleUUID();
             File buildSsh = FileUtil.file(jpomApplication.getTempPath(), "ssh_temp", tempId + ".sh");
             InputStream sshExecTemplateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template.sh");
             String sshExecTemplate = IoUtil.readUtf8(sshExecTemplateInputStream);
@@ -228,7 +227,7 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
             // 上传文件
             sftp = new Sftp(session, charset, machineSshModel.timeout());
             String path = StrUtil.format("{}/.jpom/", sftp.home());
-            String destFile = StrUtil.format("{}{}.sh", path, IdUtil.fastSimpleUUID());
+            String destFile = StrUtil.format("{}{}.sh", path, tempId);
             sftp.mkDirs(path);
             sftp.upload(destFile, buildSsh);
             // 执行命令
