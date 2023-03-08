@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
@@ -30,6 +31,7 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.Session;
+import org.junit.Test;
 
 import java.io.*;
 
@@ -117,5 +119,10 @@ public class TestSSh {
         System.out.println(exitStatus);
         channel.disconnect();
         session.disconnect();
+    }
+
+    @Test
+    public void test2() {
+
     }
 }

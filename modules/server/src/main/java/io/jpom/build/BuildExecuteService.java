@@ -742,7 +742,7 @@ public class BuildExecuteService {
             // 根据 tag 查询
             List<DockerInfoModel> dockerInfoModels = buildExecuteService
                 .dockerInfoService
-                .queryByTag(buildInfoModel.getWorkspaceId(), 1, fromTag);
+                .queryByTag(buildInfoModel.getWorkspaceId(), fromTag);
             DockerInfoModel dockerInfoModel = CollUtil.getFirst(dockerInfoModels);
             Assert.notNull(dockerInfoModel, "没有可用的 docker server");
             logRecorder.system("use docker {}", dockerInfoModel.getName());

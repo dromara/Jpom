@@ -58,16 +58,6 @@ public class DockerInfoModel extends BaseWorkspaceModel {
     @PropIgnore
     private Boolean certExist;
     /**
-     * 状态 0 , 异常离线 1 正常
-     */
-    @Deprecated
-    private Integer status;
-    /**
-     * 错误消息
-     */
-    @Deprecated
-    private String failureMsg;
-    /**
      * 集群节点ID
      */
     @Deprecated
