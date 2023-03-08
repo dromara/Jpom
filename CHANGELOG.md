@@ -14,6 +14,10 @@
    （感谢 [@失落的世界](https://gitee.com/marmotgo) [Gitee issues I6KTLQ](https://gitee.com/dromara/Jpom/issues/I6KTLQ) ）
 2. 【server】优化 项目文件列表支持前端排序（文件大小、修改时间）
 
+### ⚠️ 注意
+
+插件端需要同步升级，否则项目文件列表排序无法正常使用
+
 ------
 
 ## 2.10.27 (2023-03-06)
