@@ -60,19 +60,6 @@ public class ProjectFileControl extends BaseServerController {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_GetFileList).toString();
     }
 
-
-    /**
-     * 上传文件
-     *
-     * @return json
-     */
-    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.UPLOAD)
-    public JsonMessage<String> upload() {
-        return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Manage_File_Upload);
-    }
-
-
     /**
      * 上传文件
      *

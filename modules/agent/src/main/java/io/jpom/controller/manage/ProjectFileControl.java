@@ -39,7 +39,6 @@ import io.jpom.common.BaseAgentController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.common.commander.CommandOpResult;
-import io.jpom.common.multipart.MultipartFileBuilder;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.controller.manage.vo.DiffFileVo;
 import io.jpom.model.AfterOpt;
@@ -250,7 +249,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @return 结果
      * @throws Exception 异常
      */
-    public JsonMessage<CommandOpResult> upload(File file, String type, String levelName, Integer stripComponents, String after) throws Exception {
+    private JsonMessage<CommandOpResult> upload(File file, String type, String levelName, Integer stripComponents, String after) throws Exception {
         NodeProjectInfoModel pim = getProjectInfoModel();
         File lib = StrUtil.isEmpty(levelName) ? new File(pim.allLib()) : FileUtil.file(pim.allLib(), levelName);
         // 备份文件
@@ -273,6 +272,8 @@ public class ProjectFileControl extends BaseAgentController {
                 FileUtil.mkdir(lib);
                 FileUtil.move(file, lib, true);
             }
+            AbstractProjectCommander.getInstance().asyncWebHooks(pim, null, "fileChange",
+                "changeEvent", "upload", "levelName", levelName, "fileType", type, "fileName", file.getName());
             //
             JsonMessage<CommandOpResult> resultJsonMessage = this.saveProjectFileAfter(after, pim);
             if (resultJsonMessage != null) {
@@ -282,27 +283,6 @@ public class ProjectFileControl extends BaseAgentController {
             ProjectFileBackupUtil.checkDiff(pim, backupId);
         }
         return JsonMessage.success("上传成功");
-    }
-
-    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<CommandOpResult> upload(String type, String levelName, Integer stripComponents, String after) throws Exception {
-        MultipartFileBuilder multipartFileBuilder = createMultipart()
-            .addFieldName("file")
-            .setUseOriginalFilename(true);
-
-        String tempPathName = agentConfig.getTempPathName();
-        String successPath;
-        if ("unzip".equals(type)) {
-            multipartFileBuilder.setFileExt(StringUtil.PACKAGE_EXT);
-            multipartFileBuilder.setSavePath(tempPathName);
-            successPath = multipartFileBuilder.save();
-        } else {
-            // 先存储至临时文件夹
-            multipartFileBuilder.setSavePath(tempPathName);
-            // 保存
-            successPath = multipartFileBuilder.save();
-        }
-        return this.upload(FileUtil.file(successPath), type, levelName, stripComponents, after);
     }
 
     private JsonMessage<CommandOpResult> saveProjectFileAfter(String after, NodeProjectInfoModel pim) throws Exception {
@@ -367,17 +347,14 @@ public class ProjectFileControl extends BaseAgentController {
     public JsonMessage<String> deleteFile(String filename, String type, String levelName) {
         NodeProjectInfoModel pim = getProjectInfoModel();
         File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, StrUtil.SLASH));
-//        if (StrUtil.isEmpty(levelName)) {
-//            file = FileUtil.file(pim.allLib());
-//        } else {
-//            file = FileUtil.file(pim.allLib(), levelName);
-//        }
         // 备份文件
         String backupId = ProjectFileBackupUtil.backup(pim);
         try {
             if ("clear".equalsIgnoreCase(type)) {
                 // 清空文件
                 if (FileUtil.clean(file)) {
+                    AbstractProjectCommander.getInstance().asyncWebHooks(pim, null, "fileChange",
+                        "changeEvent", "delete", "levelName", levelName, "deleteType", type, "fileName", filename);
                     return JsonMessage.success("清除成功");
                 }
                 boolean run = AbstractProjectCommander.getInstance().isRun(pim, null);
@@ -387,13 +364,10 @@ public class ProjectFileControl extends BaseAgentController {
                 // 删除文件
                 Assert.hasText(filename, "请选择要删除的文件");
                 file = FileUtil.file(file, filename);
-
-                if (file.exists()) {
-                    if (FileUtil.del(file)) {
-                        return JsonMessage.success("删除成功");
-                    }
-                } else {
-                    return new JsonMessage<>(404, "文件不存在");
+                if (FileUtil.del(file)) {
+                    AbstractProjectCommander.getInstance().asyncWebHooks(pim, null, "fileChange",
+                        "changeEvent", "delete", "levelName", levelName, "deleteType", type, "fileName", filename);
+                    return JsonMessage.success("删除成功");
                 }
                 return new JsonMessage<>(500, "删除失败");
             }
@@ -468,6 +442,8 @@ public class ProjectFileControl extends BaseAgentController {
         String backupId = ProjectFileBackupUtil.backup(pim);
         try {
             FileUtil.writeString(fileText, FileUtil.file(pim.allLib(), filePath, filename), charset);
+            AbstractProjectCommander.getInstance().asyncWebHooks(pim, null, "fileChange",
+                "changeEvent", "edit", "levelName", filePath, "fileName", filename);
             return JsonMessage.success("文件写入成功");
         } finally {
             ProjectFileBackupUtil.checkDiff(pim, backupId);
@@ -546,6 +522,8 @@ public class ProjectFileControl extends BaseAgentController {
                 // 移动文件到对应目录
                 FileUtil.move(downloadFile, file, true);
             }
+            AbstractProjectCommander.getInstance().asyncWebHooks(pim, null, "fileChange",
+                "changeEvent", "remoteDownload", "levelName", levelName, "fileName", file.getName(), "url", url);
             return JsonMessage.success("下载成功文件大小：" + fileSize);
         } catch (Exception e) {
             log.error("下载远程文件异常", e);
@@ -561,7 +539,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @param id        项目ID
      * @param levelName 二级文件夹名
      * @param filename  文件名
-     * @param unFolder  true/1 为文件夹，false/0 为文件
+     * @param unFolder  true/1 为文件夹，false/2 为文件
      * @return json
      */
     @PostMapping(value = "new_file_folder.json", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -571,11 +549,14 @@ public class ProjectFileControl extends BaseAgentController {
         File file = FileUtil.file(projectInfoModel.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
         //
         Assert.state(!FileUtil.exist(file), "文件夹或者文件已存在");
-        if (Convert.toBool(unFolder, false)) {
-            FileUtil.touch(file);
-        } else {
+        boolean folder = !Convert.toBool(unFolder, false);
+        if (folder) {
             FileUtil.mkdir(file);
+        } else {
+            FileUtil.touch(file);
         }
+        AbstractProjectCommander.getInstance().asyncWebHooks(projectInfoModel, null, "fileChange",
+            "changeEvent", "newFileOrFolder", "levelName", levelName, "fileName", filename, "folder", folder);
         return JsonMessage.success("操作成功");
     }
 
@@ -598,7 +579,8 @@ public class ProjectFileControl extends BaseAgentController {
         Assert.state(!FileUtil.exist(newFile), "文件名已经存在拉");
 
         FileUtil.rename(file, newname, false);
-
+        AbstractProjectCommander.getInstance().asyncWebHooks(projectInfoModel, null, "fileChange",
+            "changeEvent", "rename", "levelName", levelName, "fileName", filename, "newname", newname);
         return JsonMessage.success("操作成功");
     }
 

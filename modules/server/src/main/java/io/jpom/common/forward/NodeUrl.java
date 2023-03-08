@@ -107,10 +107,6 @@ public enum NodeUrl {
     MANAGE_FILE_BACKUP_DOWNLOAD("/manage/file/backup-download", true),
     MANAGE_FILE_BACKUP_DELETE("/manage/file/backup-delete"),
     MANAGE_FILE_BACKUP_RECOVER("/manage/file/backup-recover"),
-    /**
-     * jzy add  timeout
-     */
-    Manage_File_Upload("/manage/file/upload", true),
     Manage_File_Upload_Sharding("/manage/file/upload-sharding", true),
     Manage_File_Sharding_Merge("/manage/file/sharding-merge", true),
 
