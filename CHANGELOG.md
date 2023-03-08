@@ -6,6 +6,7 @@
 
 1. 【agent】新增 项目触发器新增 fileChange 事件（文件变动对应触发点：上传、删除、远程下载、编辑、新增目录或者文件、重命名）
    （感谢 [@胡明](https://gitee.com/pig_home) [Gitee issues I6KKEK](https://gitee.com/dromara/Jpom/issues/I6KKEK) ）
+2. 【server】新增 镜像创建容器支持配置存储选项（感谢@topsuder、@章强）
 
 ### 🐞 解决BUG、优化功能
 
