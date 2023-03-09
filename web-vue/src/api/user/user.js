@@ -238,3 +238,19 @@ export function demoInfo() {
     params: {},
   });
 }
+
+export function listLoginLog(params) {
+  return axios({
+    url: "/user/list-login-log-data",
+    method: "post",
+    data: params,
+  });
+}
+
+export function listOperaterLog(params) {
+  return axios({
+    url: "/user/list-operate-log-data",
+    method: "post",
+    data: params,
+  });
+}

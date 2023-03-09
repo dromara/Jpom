@@ -33,10 +33,16 @@ import io.jpom.common.JsonMessage;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
+import io.jpom.func.user.model.UserLoginLogModel;
+import io.jpom.func.user.server.UserLoginLogServer;
 import io.jpom.model.data.MailAccountModel;
 import io.jpom.model.data.WorkspaceModel;
+import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.model.user.UserModel;
 import io.jpom.monitor.EmailUtil;
+import io.jpom.permission.Feature;
+import io.jpom.permission.MethodFeature;
+import io.jpom.service.dblog.DbUserOperateLogService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
@@ -49,7 +55,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import top.jpom.model.PageResultDto;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,15 +79,21 @@ public class UserBasicInfoController extends BaseServerController {
     private final UserBindWorkspaceService userBindWorkspaceService;
     private final UserService userService;
     private final ServerConfig.UserConfig userConfig;
+    private final UserLoginLogServer userLoginLogServer;
+    private final DbUserOperateLogService dbUserOperateLogService;
 
     public UserBasicInfoController(SystemParametersServer systemParametersServer,
                                    UserBindWorkspaceService userBindWorkspaceService,
                                    UserService userService,
-                                   ServerConfig serverConfig) {
+                                   ServerConfig serverConfig,
+                                   UserLoginLogServer userLoginLogServer,
+                                   DbUserOperateLogService dbUserOperateLogService) {
         this.systemParametersServer = systemParametersServer;
         this.userBindWorkspaceService = userBindWorkspaceService;
         this.userService = userService;
         this.userConfig = serverConfig.getUser();
+        this.userLoginLogServer = userLoginLogServer;
+        this.dbUserOperateLogService = dbUserOperateLogService;
     }
 
 
@@ -220,5 +234,31 @@ public class UserBasicInfoController extends BaseServerController {
         Assert.state(tfaCode, " mfa 验证码不正确");
         userService.bindMfa(user.getId(), mfa);
         return JsonMessage.success("绑定成功");
+    }
+
+    /**
+     * 登录日志列表
+     *
+     * @return json
+     */
+    @RequestMapping(value = "list-login-log-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<PageResultDto<UserLoginLogModel>> listLoginLogData(HttpServletRequest request) {
+        UserModel user = getUser();
+        PageResultDto<UserLoginLogModel> pageResult = userLoginLogServer.listPageByUserId(request, user.getId());
+        return JsonMessage.success("", pageResult);
+    }
+
+    /**
+     * 操作日志
+     *
+     * @return json
+     */
+    @RequestMapping(value = "list-operate-log-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<PageResultDto<UserOperateLogV1>> listOperateLogData(HttpServletRequest request) {
+        UserModel user = getUser();
+        PageResultDto<UserOperateLogV1> pageResult = dbUserOperateLogService.listPageByUserId(request, user.getId());
+        return JsonMessage.success("", pageResult);
     }
 }

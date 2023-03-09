@@ -50,13 +50,6 @@ public @interface Feature {
     MethodFeature method() default MethodFeature.NULL;
 
     /**
-     * 只记录哪些 状态码
-     *
-     * @return code
-     */
-    int[] resultCode() default {};
-
-    /**
      * 是否记录响应 日志
      *
      * @return 默认 记录

@@ -36,6 +36,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import top.jpom.model.PageResultDto;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 用户操作日志
  *
@@ -61,8 +63,8 @@ public class UserOptLogController extends BaseServerController {
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<UserOperateLogV1>> listData() {
-        PageResultDto<UserOperateLogV1> pageResult = dbUserOperateLogService.listPage(getRequest());
-        return JsonMessage.success("获取成功", pageResult);
+    public JsonMessage<PageResultDto<UserOperateLogV1>> listData(HttpServletRequest request) {
+        PageResultDto<UserOperateLogV1> pageResult = dbUserOperateLogService.listPage(request);
+        return JsonMessage.success("", pageResult);
     }
 }

@@ -62,12 +62,6 @@ public class UserOperateLogV1 extends BaseWorkspaceModel {
      */
     private String resultMsg;
     /**
-     * 操作id
-     * 用于socket 回话回调更新
-     */
-    @Deprecated
-    private String reqId;
-    /**
      * 请求参数
      */
     private String reqData;
@@ -86,10 +80,10 @@ public class UserOperateLogV1 extends BaseWorkspaceModel {
 
     private String classFeature;
     private String methodFeature;
+    /**
+     * 工作空间名称
+     */
+    private String workspaceName;
 
-    @Override
-    public void setId(String id) {
-        super.setId(id);
-        this.setReqId(id);
-    }
+    private String username;
 }

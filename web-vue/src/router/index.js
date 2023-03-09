@@ -162,7 +162,11 @@ const management = [
     name: "operation-log",
     component: () => import("../pages/user/operation-log"),
   },
-
+  {
+    path: "/user/login-log",
+    name: "user-login-log",
+    component: () => import("../pages/user/user-login-log"),
+  },
   // 工作空间
   {
     path: "/system/workspace",

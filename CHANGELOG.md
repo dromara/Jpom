@@ -6,6 +6,7 @@
 
 1. 【server】新增 导入仓库支持 `gitea` 系统
    （感谢 [@Smith](https://gitee.com/autools) [Gitee pr 173](https://gitee.com/dromara/Jpom/pulls/173) ）
+2. 【server】新增 用户登录日志（取消用户登录生成操作日志的执行日志）
 
 ### 🐞 解决BUG、优化功能
 
@@ -14,6 +15,8 @@
 3. 【agent】优化 节点分发配置白名单到插件端需要验证合法性
 4. 【server】优化 docker 创建容器忽略未配置存储选项参数（感谢@D¹⁹⁹¹）
 5. 【server】优化 docker 管理裁剪功能独立菜单
+6. 【server】修复 资产管理未记录操作日志的问题
+7. 【server】优化 操作日志存储用户名、工作空间名字段
 
 ------
 

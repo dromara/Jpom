@@ -43,12 +43,12 @@ import io.jpom.common.interceptor.NotLogin;
 import io.jpom.common.validator.ValidatorConfig;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
+import io.jpom.func.user.server.UserLoginLogServer;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.dto.UserLoginDto;
 import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
-import io.jpom.permission.MethodFeature;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ServerConfig;
@@ -89,14 +89,17 @@ public class LoginControl extends BaseServerController {
     private final UserBindWorkspaceService userBindWorkspaceService;
     private final ServerConfig.UserConfig userConfig;
     private final ServerConfig.WebConfig webConfig;
+    private final UserLoginLogServer userLoginLogServer;
 
     public LoginControl(UserService userService,
                         UserBindWorkspaceService userBindWorkspaceService,
-                        ServerConfig serverConfig) {
+                        ServerConfig serverConfig,
+                        UserLoginLogServer userLoginLogServer) {
         this.userService = userService;
         this.userBindWorkspaceService = userBindWorkspaceService;
         this.userConfig = serverConfig.getUser();
         this.webConfig = serverConfig.getWeb();
+        this.userLoginLogServer = userLoginLogServer;
     }
 
     /**
@@ -155,30 +158,33 @@ public class LoginControl extends BaseServerController {
     /**
      * 登录接口
      *
-     * @param userName 登录名
-     * @param userPwd  登录密码
-     * @param code     验证码
+     * @param loginName 登录名
+     * @param userPwd   登录密码
+     * @param code      验证码
      * @return json
      */
     @PostMapping(value = "userLogin", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    @Feature(method = MethodFeature.EXECUTE, resultCode = {200, 201}, logResponse = false)
     public JsonMessage<Object> userLogin(
         @ValidatorConfig(value = {
             @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息")
-        }) String userName,
+        }) String loginName,
         @ValidatorConfig(value = {
             @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息")
         }) String userPwd,
-        String code) {
+        String code, HttpServletRequest request) {
         if (this.ipLock()) {
             return new JsonMessage<>(400, "尝试次数太多，请稍后再来");
         }
-        synchronized (userName.intern()) {
-            UserModel userModel = userService.getByKey(userName);
+        synchronized (loginName.intern()) {
+            UserModel userModel = userService.getByKey(loginName);
             if (userModel == null) {
                 this.ipError();
                 return new JsonMessage<>(400, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
+            }
+            if (userModel.getStatus() != null && userModel.getStatus() == 0) {
+                userLoginLogServer.fail(userModel, 4, false, request);
+                return new JsonMessage<>(ServerConst.ACCOUNT_LOCKED, ServerConst.ACCOUNT_LOCKED_TIP);
             }
             if (!webConfig.isDisabledGuide()) {
                 // 获取验证码
@@ -193,27 +199,31 @@ public class LoginControl extends BaseServerController {
                     String msg = DateUtil.formatBetween(lockTime * 1000, BetweenFormatter.Level.SECOND);
                     updateModel = userModel.errorLock(userConfig.getAlwaysLoginError());
                     this.ipError();
+                    userLoginLogServer.fail(userModel, 2, false, request);
                     return new JsonMessage<>(400, "该账户登录失败次数过多，已被锁定" + msg + ",请不要再次尝试");
                 }
                 // 验证
-                if (userService.simpleLogin(userName, userPwd) != null) {
-                    updateModel = UserModel.unLock(userName);
+                if (userService.simpleLogin(loginName, userPwd) != null) {
+                    updateModel = UserModel.unLock(loginName);
                     this.ipSuccess();
                     // 判断是否开启 两步验证
-                    boolean bindMfa = userService.hasBindMfa(userName);
+                    boolean bindMfa = userService.hasBindMfa(loginName);
                     if (bindMfa) {
                         //
                         JSONObject jsonObject = new JSONObject();
                         String uuid = IdUtil.fastSimpleUUID();
-                        MFA_TOKEN.put(uuid, userName);
+                        MFA_TOKEN.put(uuid, loginName);
                         jsonObject.put("tempToken", uuid);
+                        userLoginLogServer.success(userModel, 5, true, request);
                         return new JsonMessage<>(201, "请输入两步验证码", jsonObject);
                     }
                     UserLoginDto userLoginDto = this.createToken(userModel);
+                    userLoginLogServer.success(userModel, false, request);
                     return new JsonMessage<>(200, "登录成功", userLoginDto);
                 } else {
                     updateModel = userModel.errorLock(userConfig.getAlwaysLoginError());
                     this.ipError();
+                    userLoginLogServer.fail(userModel, 1, false, request);
                     return new JsonMessage<>(501, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
                 }
             } finally {
@@ -240,7 +250,7 @@ public class LoginControl extends BaseServerController {
 
     @GetMapping(value = "mfa_verify", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<UserLoginDto> mfaVerify(String token, String code) {
+    public JsonMessage<UserLoginDto> mfaVerify(String token, String code, HttpServletRequest request) {
         String userId = MFA_TOKEN.get(token);
         if (StrUtil.isEmpty(userId)) {
             return new JsonMessage<>(201, "登录信息已经过期请重新登录");
@@ -251,6 +261,7 @@ public class LoginControl extends BaseServerController {
         //
         UserLoginDto userLoginDto = this.createToken(userModel);
         MFA_TOKEN.remove(token);
+        userLoginLogServer.success(userModel, true, request);
         return JsonMessage.success("登录成功", userLoginDto);
     }
 
@@ -290,6 +301,7 @@ public class LoginControl extends BaseServerController {
             return new JsonMessage<>(ServerConst.AUTHORIZE_TIME_OUT_CODE, "没有对应的用户");
         }
         UserLoginDto userLoginDto = userService.getUserJwtId(userModel);
+        userLoginLogServer.success(userModel, 3, true, request);
         return JsonMessage.success("", userLoginDto);
     }
 

@@ -24,7 +24,6 @@ package io.jpom.system.init;
 
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
@@ -109,10 +108,8 @@ public class OperateLogController implements AopLogInterface {
         cacheInfo.setClassFeature(classFeature);
         cacheInfo.setMethodFeature(methodFeature);
         cacheInfo.setOptTime(SystemClock.now());
-        cacheInfo.setResultCode(feature.resultCode());
         cacheInfo.setLogResponse(feature.logResponse());
         //
-
         return cacheInfo;
     }
 
@@ -235,11 +232,6 @@ public class OperateLogController implements AopLogInterface {
                 try {
                     JsonMessage<?> jsonMessage = JSONObject.parseObject(json, JsonMessage.class);
                     int code = jsonMessage.getCode();
-                    int[] resultCode = cacheInfo.getResultCode();
-                    if (ArrayUtil.isNotEmpty(resultCode) && !ArrayUtil.contains(resultCode, code)) {
-                        // 忽略
-                        return;
-                    }
                     userOperateLogV1.setOptStatus(code);
                 } catch (Exception ignored) {
                 }
@@ -301,7 +293,6 @@ public class OperateLogController implements AopLogInterface {
         private String dataId;
         private String userAgent;
         private String reqData;
-        private int[] resultCode;
         private Boolean logResponse;
         /**
          * 操作到数据到名称相关 map
