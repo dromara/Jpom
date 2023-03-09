@@ -34,6 +34,11 @@
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+
+      <a-tooltip slot="username" slot-scope="text, item" placement="topLeft" :title="text">
+        <span>{{ text || item.userId }}</span>
+      </a-tooltip>
+
       <a-tooltip slot="optStatus" slot-scope="text" placement="topLeft" :title="`默认状态码为 200 表示执行成功,部分操作状态码可能为 0,状态码为 0 的操作大部分为没有操作结果或者异步执行`">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -84,11 +89,12 @@ export default {
       detailVisible: false,
       detailData: [],
       columns: [
-        { title: "操作者", dataIndex: "userId" },
+        { title: "操作者", dataIndex: "username", ellipsis: true, scopedSlots: { customRender: "username" } },
         { title: "IP", dataIndex: "ip" /*width: 130*/ },
         { title: "节点", dataIndex: "nodeId", width: 120, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         { title: "数据名称", dataIndex: "dataName", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "工作空间名", dataIndex: "workspaceName", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        // { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "操作功能", dataIndex: "classFeature", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "classFeature" } },
         { title: "操作方法", dataIndex: "methodFeature", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "methodFeature" } },
         { title: "状态码", dataIndex: "optStatus", width: 90, scopedSlots: { customRender: "optStatus" } },
@@ -99,7 +105,7 @@ export default {
           customRender: (text, item) => {
             return parseTime(text || item.optTime);
           },
-          width: 160,
+          width: "170px",
         },
         { title: "操作", align: "center", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
       ],
@@ -183,6 +189,7 @@ export default {
       } catch (e) {
         console.error(e);
       }
+      this.detailData.push({ title: "数据Id", description: this.temp.dataId });
       this.detailData.push({ title: "浏览器标识", description: this.temp.userAgent });
       this.detailData.push({ title: "请求参数", json: true, value: this.temp.reqData });
       this.detailData.push({ title: "响应结果", json: true, value: this.temp.resultMsg });

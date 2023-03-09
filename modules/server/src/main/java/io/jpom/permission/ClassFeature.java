@@ -22,6 +22,10 @@
  */
 package io.jpom.permission;
 
+import io.jpom.func.assets.server.MachineDockerServer;
+import io.jpom.func.assets.server.MachineNodeServer;
+import io.jpom.func.assets.server.MachineSshServer;
+import io.jpom.func.user.server.UserLoginLogServer;
 import io.jpom.service.dblog.*;
 import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.docker.DockerSwarmInfoService;
@@ -84,14 +88,15 @@ public enum ClassFeature {
     BUILD_REPOSITORY("仓库信息", RepositoryService.class),
     USER("用户管理", UserService.class),
     USER_LOG("操作日志", DbUserOperateLogService.class),
+    USER_LOGIN_LOG("登录日志", UserLoginLogServer.class),
     USER_PERMISSION_GROUP("权限分组", UserPermissionGroupServer.class),
     SYSTEM_EMAIL("邮箱配置"),
     SYSTEM_CACHE("系统缓存"),
     SYSTEM_LOG("系统日志"),
     SYSTEM_UPGRADE("在线升级"),
-    SYSTEM_ASSETS_MACHINE("机器资产管理"),
-    SYSTEM_ASSETS_MACHINE_SSH("SSH资产管理"),
-    SYSTEM_ASSETS_MACHINE_DOCKER("DOCKER资产管理"),
+    SYSTEM_ASSETS_MACHINE("机器资产管理", MachineNodeServer.class),
+    SYSTEM_ASSETS_MACHINE_SSH("SSH资产管理", MachineSshServer.class),
+    SYSTEM_ASSETS_MACHINE_DOCKER("DOCKER资产管理", MachineDockerServer.class),
     SYSTEM_CONFIG("服务端系统配置"),
     SYSTEM_EXT_CONFIG("系统配置目录"),
     SYSTEM_CONFIG_IP("系统配置IP白名单"),

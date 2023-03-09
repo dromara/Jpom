@@ -31,6 +31,7 @@ const routeMenuMap = {
   userList: "/user/list",
   permission_group: "/user/permission-group",
   user_log: "/operation/log",
+  user_login_log: "/user/login-log",
   monitorConfigEmail: "/system/mail",
   cacheManage: "/system/cache",
   logManage: "/system/log",

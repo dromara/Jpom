@@ -81,6 +81,19 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
     }
 
     /**
+     * 查询指定用户的操作日志
+     *
+     * @param request 请求信息
+     * @param userId  用户id
+     * @return page
+     */
+    public PageResultDto<UserOperateLogV1> listPageByUserId(HttpServletRequest request, String userId) {
+        Map<String, String> paramMap = ServletUtil.getParamMap(request);
+        paramMap.put("userId", userId);
+        return super.listPage(paramMap);
+    }
+
+    /**
      * 根据 数据ID 和 节点ID 查询相关数据名称
      *
      * @param classFeature     功能
@@ -247,6 +260,19 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
     public void insert(UserOperateLogV1 userOperateLogV1, OperateLogController.CacheInfo cacheInfo) {
         super.insert(userOperateLogV1);
         ThreadUtil.execute(() -> {
+            // 更新用户名和工作空间名
+            try {
+                UserOperateLogV1 update = new UserOperateLogV1();
+                update.setId(userOperateLogV1.getId());
+                UserModel userModel = userService.getByKey(userOperateLogV1.getUserId());
+                Optional.ofNullable(userModel).ifPresent(userModel1 -> update.setUsername(userModel1.getName()));
+                WorkspaceModel workspaceModel = workspaceService.getByKey(userOperateLogV1.getWorkspaceId());
+                Optional.ofNullable(workspaceModel).ifPresent(workspaceModel1 -> update.setWorkspaceName(workspaceModel1.getName()));
+                this.update(update);
+            } catch (Exception e) {
+                log.error("更新操作日志失败", e);
+            }
+            // 检查操作监控
             try {
                 Map<String, Object> monitor = this.checkMonitor(userOperateLogV1, cacheInfo);
                 if (monitor != null) {
