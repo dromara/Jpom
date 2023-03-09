@@ -198,6 +198,7 @@
               <a-select-option value="gitee"> gitee </a-select-option>
               <a-select-option value="github"> github </a-select-option>
               <a-select-option value="gitlab"> gitlab </a-select-option>
+              <a-select-option value="gitea"> gitea </a-select-option>
             </a-select>
             <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder}`">
               <a-input-search style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.token" @search="handleGiteeImportFormOk" :placeholder="importTypePlaceholder" />
@@ -211,6 +212,11 @@
           <a-input-group compact style="width: 105%" v-if="giteeImportForm.type === 'gitlab'">
             <a-tooltip title="请输入 GitLab 的地址，支持自建 GitLab，不需要输入协议，如：gitlab.com、gitlab.jpom.io、10.1.2.3、10.1.2.3:8888 等">
               <a-input style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.gitlabAddress" placeholder="gitlab.com" />
+            </a-tooltip>
+          </a-input-group>
+          <a-input-group compact style="width: 105%" v-if="giteeImportForm.type === 'gitea'">
+            <a-tooltip title="请输入 gitea 的地址，不需要输入协议，如：10.1.2.3、10.1.2.3:3000 等">
+              <a-input style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.giteaAddress" placeholder="10.1.2.3:3000" />
             </a-tooltip>
           </a-input-group>
         </a-form-model-item>
