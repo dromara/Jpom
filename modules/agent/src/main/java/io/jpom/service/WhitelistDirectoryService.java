@@ -22,6 +22,7 @@
  */
 package io.jpom.service;
 
+import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.AgentConst;
 import io.jpom.model.data.AgentWhitelist;
@@ -29,8 +30,8 @@ import io.jpom.util.JsonFileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 白名单服务
@@ -66,12 +67,12 @@ public class WhitelistDirectoryService extends BaseDataService {
      * @param item 白名单
      */
     public void addProjectWhiteList(String item) {
+        List<String> checkOk = AgentWhitelist.covertToArray(CollUtil.newArrayList(item), "项目路径白名单不能位于Jpom目录下");
+
         AgentWhitelist agentWhitelist = getWhitelist();
         List<String> project = agentWhitelist.getProject();
-        if (project == null) {
-            project = new ArrayList<>();
-        }
-        project.add(item);
+        project = CollUtil.addAll(project, checkOk).stream().distinct().collect(Collectors.toList());
+        agentWhitelist.setProject(project);
         saveWhitelistDirectory(agentWhitelist);
     }
 
