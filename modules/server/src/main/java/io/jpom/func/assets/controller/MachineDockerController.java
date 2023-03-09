@@ -233,8 +233,8 @@ public class MachineDockerController extends BaseGroupNameController {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoModel.toParameter();
         parameter.put("closeBefore", true);
-        boolean ok = (boolean) plugin.execute("ping", parameter);
-        Assert.state(ok, "无法连接 docker 请检查 host 或者 TLS 证书");
+        String errorReason = (String) plugin.execute("ping", parameter);
+        Assert.isNull(errorReason, () -> "无法连接 docker 请检查 host 或者 TLS 证书 以及仓库信息配置是否正确。" + errorReason);
         // 检查授权
         String registryUrl = dockerInfoModel.getRegistryUrl();
         if (StrUtil.isNotEmpty(registryUrl)) {

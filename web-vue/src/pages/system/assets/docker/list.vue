@@ -121,6 +121,9 @@
         </a-form-model-item>
 
         <a-form-model-item label="TLS 认证" prop="tlsVerify">
+          <template slot="help">
+            <span v-if="temp.certExist">已经存在证书文件,可以不用上传</span>
+          </template>
           <a-row>
             <a-col :span="5">
               <a-switch v-model="temp.tlsVerify" checked-children="开" un-checked-children="关" />
