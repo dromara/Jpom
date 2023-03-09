@@ -22,7 +22,6 @@
  */
 package io.jpom.controller.build;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.lang.Tuple;
@@ -32,10 +31,7 @@ import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.http.Header;
 import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpUtil;
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.build.BuildUtil;
@@ -43,6 +39,10 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerConst;
 import io.jpom.common.validator.ValidatorItem;
+import io.jpom.controller.build.repository.GitHubUtil;
+import io.jpom.controller.build.repository.GitLabUtil;
+import io.jpom.controller.build.repository.GiteaUtil;
+import io.jpom.controller.build.repository.GiteeUtil;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.permission.ClassFeature;
@@ -53,7 +53,6 @@ import io.jpom.plugin.PluginFactory;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.RepositoryService;
 import io.jpom.system.JpomRuntimeException;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -65,10 +64,8 @@ import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -213,7 +210,7 @@ public class RepositoryController extends BaseServerController {
                 pageResultDto = this.gitlabRepos(token, page, condition, gitlabAddress, request);
                 break;
             case "gitea":
-                pageResultDto = this.giteaRepos( token, page, condition, giteaAddress, request);
+                pageResultDto = this.giteaRepos(token, page, condition, giteaAddress, request);
                 break;
             default:
                 throw new IllegalArgumentException("不支持的类型");
@@ -355,6 +352,7 @@ public class RepositoryController extends BaseServerController {
         pageResultDto.setResult(objects);
         return pageResultDto;
     }
+
     /**
      * gitea仓库
      *
@@ -362,10 +360,10 @@ public class RepositoryController extends BaseServerController {
      * @param page  分页
      * @return page
      */
-    private PageResultDto<JSONObject> giteaRepos(String token, Page page, String condition,String giteaAddress, HttpServletRequest request) {
-        String giteaUsername = GiteaUtil.getGiteaUsername(giteaAddress,token);
+    private PageResultDto<JSONObject> giteaRepos(String token, Page page, String condition, String giteaAddress, HttpServletRequest request) {
+        String giteaUsername = GiteaUtil.getGiteaUsername(giteaAddress, token);
 
-        Map<String, Object> giteaReposMap = GiteaUtil.getGiteaRepos(giteaAddress,token, page, condition);
+        Map<String, Object> giteaReposMap = GiteaUtil.getGiteaRepos(giteaAddress, token, page, condition);
         JSONArray jsonArray = (JSONArray) giteaReposMap.get("jsonArray");
         int totalCount = (int) giteaReposMap.get("totalCount");
 
@@ -533,418 +531,6 @@ public class RepositoryController extends BaseServerController {
             return new JsonMessage<>(400, "不支持的方式" + method);
         }
         return new JsonMessage<>(200, "操作成功");
-    }
-
-    /**
-     * Gitee 工具
-     */
-    private static class GiteeUtil {
-
-        /**
-         * Gitee API 前缀
-         */
-        private static final String GITEE_API_PREFIX = "https://gitee.com/api";
-
-        /**
-         * Gitee API 版本号
-         */
-        private static final String API_VERSION = "v5";
-
-        /**
-         * Gitee API 地址前缀
-         */
-        private static final String GITEE_API_URL_PREFIX = GITEE_API_PREFIX + "/" + API_VERSION;
-
-        /**
-         * 用户授权码
-         */
-        private static final String ACCESS_TOKEN = "access_token";
-
-        /**
-         * 排序方式: 创建时间(created)，更新时间(updated)，最后推送时间(pushed)，仓库所属与名称(full_name)。默认: full_name
-         */
-        private static final String SORT = "sort";
-
-        /**
-         * 当前的页码
-         */
-        private static final String PAGE = "page";
-
-        /**
-         * 每页的数量，最大为 100
-         */
-        private static final String PER_PAGE = "per_page";
-
-        /**
-         * 获取 Gitee 用户名
-         *
-         * @param token 用户授权码
-         * @return Gitee 用户名
-         */
-        private static String getGiteeUsername(String token) {
-            // 参考：https://gitee.com/api/v5/swagger#/getV5User
-            HttpResponse userResponse = HttpUtil.createGet(GITEE_API_URL_PREFIX + "/user", true)
-                .form(ACCESS_TOKEN, token)
-                .execute();
-            Assert.state(userResponse.isOk(), "令牌不正确：" + userResponse.body());
-            JSONObject userBody = JSONObject.parseObject(userResponse.body());
-            return userBody.getString("login");
-        }
-
-        /**
-         * 获取 Gitee 用户仓库信息
-         *
-         * @param token 用户授权码
-         * @param page  分页参数
-         * @return
-         */
-        private static Map<String, Object> getGiteeRepos(String token, Page page, String condition) {
-            // 参考：https://gitee.com/api/v5/swagger#/getV5UserRepos
-            HttpResponse reposResponse = HttpUtil.createGet(GITEE_API_URL_PREFIX + "/user/repos", true)
-                .form(ACCESS_TOKEN, token)
-                .form(SORT, "pushed")
-                .form(PAGE, page.getPageNumber())
-                .form(PER_PAGE, page.getPageSize())
-                // 搜索关键字
-                .form("q", condition)
-                .execute();
-            String body = reposResponse.body();
-            Assert.state(reposResponse.isOk(), "获取仓库信息错误：" + body);
-
-            // 所有仓库总数，包括公开的和私有的
-            String totalCountStr = reposResponse.header("total_count");
-            int totalCount = Convert.toInt(totalCountStr, 0);
-            //String totalPage = reposResponse.header("total_page");
-
-            Map<String, Object> map = new HashMap<>(2);
-            map.put("jsonArray", JSONArray.parseArray(body));
-            // 仓库总数
-            map.put("totalCount", totalCount);
-            return map;
-        }
-    }
-
-    /**
-     * GitHub 工具
-     */
-    private static class GitHubUtil {
-
-        /**
-         * GitHub 用户信息实体类
-         * <p>
-         * 参考：https://docs.github.com/en/rest/users/users#about-the-users-api
-         */
-        @Data
-        private static class GitHubUserInfo {
-            // 只列出目前需要用到的字段
-
-            /**
-             * 用户名，如：octocat
-             */
-            private String login;
-
-            /**
-             * 公开仓库数量，如：2
-             */
-            private int public_repos;
-
-            /**
-             * 私有的仓库总数，如：100
-             */
-            private int total_private_repos;
-
-            /**
-             * 拥有的私有仓库，如：100
-             */
-            private int owned_private_repos;
-        }
-
-        /**
-         * GitHub 头部
-         */
-        private static final String GITHUB_HEADER_ACCEPT = "application/vnd.github.v3+json";
-
-        /**
-         * GitHub 用户 token 前缀
-         */
-        private static final String GITHUB_TOKEN = "token ";
-
-        /**
-         * GitHub API 前缀
-         */
-        private static final String GITHUB_API_PREFIX = "https://api.github.com";
-
-        /**
-         * 获取 GitHub 用户信息
-         *
-         * @param token 用户 token
-         * @return GitHub 用户信息
-         */
-        private static GitHubUserInfo getGitHubUserInfo(String token) {
-            // 参考：https://docs.github.com/en/rest/users/users#about-the-users-api
-            HttpResponse response = HttpUtil
-                .createGet(GITHUB_API_PREFIX + "/user")
-                .header(Header.ACCEPT, GITHUB_HEADER_ACCEPT)
-                .header(Header.AUTHORIZATION, GITHUB_TOKEN + token)
-                .execute();
-            String body = response.body();
-            Assert.state(response.isOk(), "令牌信息错误：" + body);
-            return JSONObject.parseObject(body, GitHubUserInfo.class);
-        }
-
-        /**
-         * 获取 GitHub 仓库信息
-         *
-         * @param token
-         */
-        private static JSONArray getGitHubUserRepos(String token, Page page) {
-            // 参考：https://docs.github.com/en/rest/repos/repos#list-repositories-for-the-authenticated-user
-            HttpResponse response = HttpUtil
-                .createGet(GITHUB_API_PREFIX + "/user/repos")
-                .header(Header.ACCEPT, GITHUB_HEADER_ACCEPT)
-                .header(Header.AUTHORIZATION, GITHUB_TOKEN + token)
-                .form("access_token", token)
-                .form("sort", "pushed")
-                .form("page", page.getPageNumber())
-                .form("per_page", page.getPageSize())
-                .execute();
-            String body = response.body();
-            Assert.state(response.isOk(), "拉取仓库信息错误：" + body);
-            return JSONArray.parseArray(body);
-        }
-    }
-    /**
-     * Gitea 工具
-     */
-    private static class GiteaUtil {
-
-
-        /**
-         * Gitea API 版本号
-         */
-        private static final String API_VERSION = "v1";
-
-        /**
-         * 用户授权码
-         */
-        private static final String ACCESS_TOKEN = "access_token";
-
-        /**
-         * 排序方式: 创建时间(created)，更新时间(updated)，最后推送时间(pushed)，仓库所属与名称(full_name)。默认: full_name
-         */
-        private static final String SORT = "sort";
-
-        /**
-         * 当前的页码
-         */
-        private static final String PAGE = "page";
-
-        /**
-         * 每页的数量，最大为 100
-         */
-        private static final String PER_PAGE = "per_page";
-
-        /**
-         * 获取 Gitea 用户名
-         *
-         * @param token 用户授权码
-         * @return Gitea 用户名
-         */
-        private static String getGiteaUsername(String giteaAddress, String token) {
-            HttpResponse userResponse = HttpUtil.createGet(giteaAddress + "/api/v1/user", true)
-                .form(ACCESS_TOKEN, token)
-                .execute();
-            Assert.state(userResponse.isOk(), "令牌不正确：" + userResponse.body());
-            JSONObject userBody = JSONObject.parseObject(userResponse.body());
-            return userBody.getString("login");
-        }
-
-        /**
-         * 获取 Gitea 用户仓库信息
-         *
-         * @param giteaAddress Gitea 地址
-         * @param token 用户授权码
-         * @param page  分页参数
-         * @return
-         */
-        private static Map<String, Object> getGiteaRepos(String giteaAddress, String token, Page page, String condition) {
-            HttpResponse reposResponse = HttpUtil.createGet(giteaAddress + "/api/v1/user/repos", true)
-                .form(ACCESS_TOKEN, token)
-                .form(SORT, "pushed")
-                .form(PAGE, page.getPageNumber())
-                .form(PER_PAGE, page.getPageSize())
-                // 搜索关键字
-                .form("q", condition)
-                .execute();
-            String body = reposResponse.body();
-            Assert.state(reposResponse.isOk(), "获取仓库信息错误：" + body);
-
-            // 所有仓库总数，包括公开的和私有的
-            String totalCountStr = reposResponse.header("total_count");
-            int totalCount = Convert.toInt(totalCountStr, 0);
-            //String totalPage = reposResponse.header("total_page");
-
-            Map<String, Object> map = new HashMap<>(2);
-            map.put("jsonArray", JSONArray.parseArray(body));
-            // 仓库总数
-            map.put("totalCount", totalCount);
-            return map;
-        }
-    }
-
-    /**
-     * GitLab 工具
-     */
-    private static class GitLabUtil {
-
-        /**
-         * GitLab 版本号信息，参考：https://docs.gitlab.com/ee/api/version.html
-         */
-        @Data
-        private static class GitLabVersionInfo {
-
-            /**
-             * 版本号，如：8.13.0-pre
-             */
-            private String version;
-
-            /**
-             * 修订号，如：4e963fe
-             */
-            private String revision;
-
-            /**
-             * API 版本号，如：v4
-             */
-            private String apiVersion;
-        }
-
-        /**
-         * GitLab 版本信息容器，key：GitLab 地址，value：GitLabVersionInfo
-         */
-        private static final Map<String, GitLabVersionInfo> gitlabVersionMap = new ConcurrentHashMap<>();
-
-        /**
-         * 获取 GitLab 版本
-         *
-         * @param gitlabAddress GitLab 地址
-         * @param token         用户 token
-         * @return 请求结果
-         */
-        private static HttpResponse getGitLabVersion(String gitlabAddress, String token, String apiVersion) {
-            // 参考：https://docs.gitlab.com/ee/api/version.html
-            return HttpUtil.createGet(StrUtil.format("{}/api/{}/version", gitlabAddress, apiVersion), true)
-                .header("PRIVATE-TOKEN", token)
-                .execute();
-        }
-
-        /**
-         * 获取 GitLab 版本信息
-         *
-         * @param url   GitLab 地址
-         * @param token 用户 token
-         */
-        private static GitLabVersionInfo getGitLabVersionInfo(String url, String token) {
-            // 缓存中有的话，从缓存读取
-            GitLabVersionInfo gitLabVersionInfo = gitlabVersionMap.get(url);
-            if (gitLabVersionInfo != null) {
-                return gitLabVersionInfo;
-            }
-
-            // 获取 GitLab 版本号信息
-            GitLabVersionInfo glvi = null;
-            String apiVersion = "v4";
-            HttpResponse v4 = getGitLabVersion(url, token, apiVersion);
-            if (v4 != null) {
-                glvi = JSON.parseObject(v4.body(), GitLabVersionInfo.class);
-            } else {
-                apiVersion = "v3";
-                HttpResponse v3 = getGitLabVersion(url, token, apiVersion);
-                if (v3 != null) {
-                    glvi = JSON.parseObject(v3.body(), GitLabVersionInfo.class);
-                }
-            }
-
-            Assert.state(glvi != null, "获取 GitLab 版本号失败，请检查 GitLab 地址和 token 是否正确");
-
-            // 添加到缓存中
-            glvi.setApiVersion(apiVersion);
-            gitlabVersionMap.put(url, glvi);
-
-            return glvi;
-        }
-
-        /**
-         * 获取 GitLab API 版本号
-         *
-         * @param url   GitLab 地址
-         * @param token 用户 token
-         * @return GitLab API 版本号，如：v4
-         */
-        private static String getGitLabApiVersion(String url, String token) {
-            return getGitLabVersionInfo(url, token).getApiVersion();
-        }
-
-        /**
-         * 获取 GitLab 用户信息
-         *
-         * @param gitlabAddress GitLab 地址
-         * @param token         用户 token
-         * @return 请求结果
-         */
-        private static HttpResponse getGitLabUserInfo(String gitlabAddress, String token) {
-            // 参考：https://docs.gitlab.com/ee/api/users.html
-            return HttpUtil.createGet(
-                    StrUtil.format(
-                        "{}/api/{}/user",
-                        gitlabAddress,
-                        getGitLabApiVersion(gitlabAddress, token)
-                    ), true
-                )
-                .form("access_token", token)
-                .timeout(5000)
-                .execute();
-        }
-
-        /**
-         * 获取 GitLab 仓库信息
-         *
-         * @param gitlabAddress GitLab 地址
-         * @param token         用户 token
-         * @return 响应结果
-         */
-        private static Map<String, Object> getGitLabRepos(String gitlabAddress, String token, Page page, String condition) {
-            // 参考：https://docs.gitlab.com/ee/api/projects.html
-            HttpResponse reposResponse = HttpUtil.createGet(
-                    StrUtil.format(
-                        "{}/api/{}/projects",
-                        gitlabAddress,
-                        getGitLabApiVersion(gitlabAddress, token)
-                    ), true
-                )
-                .form("private_token", token)
-                .form("membership", true)
-                // 当 simple=true 时，不返回项目的 visibility，无法判断是私有仓库、公开仓库还是内部仓库
-//                .form("simple", true)
-                .form("order_by", "updated_at")
-                .form("page", page.getPageNumber())
-                .form("per_page", page.getPageSize())
-                .form("search", condition)
-                .execute();
-
-            String body = reposResponse.body();
-            Assert.state(reposResponse.isOk(), "拉取仓库信息错误：" + body);
-
-            String totalCountStr = reposResponse.header("X-Total");
-            int totalCount = Convert.toInt(totalCountStr, 0);
-            //String totalPage = reposResponse.header("total_page");
-
-            Map<String, Object> map = new HashMap<>(2);
-            map.put("body", body);
-            map.put("total", totalCount);
-
-            return map;
-        }
     }
 
 }
