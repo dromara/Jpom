@@ -17,6 +17,9 @@
         <a-menu-item key="info">
           <span class="nav-text">信息</span>
         </a-menu-item>
+        <a-menu-item key="prune">
+          <span class="nav-text">裁剪</span>
+        </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <!-- style="{ background: '#fff', padding: '10px' }"  -->
@@ -29,6 +32,7 @@
         <volumes v-if="menuKey === 'volumes'" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
         <info v-if="menuKey === 'info'" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
         <networks v-if="menuKey === 'networks'" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+        <prune v-if="menuKey === 'prune'" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
       </a-layout-content>
     </a-layout>
   </a-layout>
@@ -39,6 +43,7 @@ import Images from "./images";
 import Volumes from "./volumes";
 import Info from "./info";
 import Networks from "./networks";
+import Prune from "./prune";
 export default {
   props: {
     id: {
@@ -61,6 +66,7 @@ export default {
     Volumes,
     Info,
     Networks,
+    Prune,
   },
   data() {
     return {
