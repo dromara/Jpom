@@ -291,7 +291,13 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
                 .collect(Collectors.toList());
             containerCmd.withEnv(envList);
         }
-        Optional.ofNullable(storageOpt).ifPresent(hostConfig::withStorageOpt);
+        Optional.ofNullable(storageOpt).map(map -> {
+            if (MapUtil.isEmpty(map)) {
+                // 空参数不能传入，避免低版本不支持
+                return null;
+            }
+            return map;
+        }).ifPresent(hostConfig::withStorageOpt);
         // 命令
         List<String> commands = (List<String>) parameter.get("commands");
         if (CollUtil.isNotEmpty(commands)) {
