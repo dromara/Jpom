@@ -186,14 +186,14 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
      * @param parameter 参数
      * @return true 可以通讯
      */
-    private boolean checkPing(Map<String, Object> parameter) {
+    private String checkPing(Map<String, Object> parameter) {
         try {
             DockerClient dockerClient = DockerUtil.get(parameter);
             dockerClient.pingCmd().exec();
-            return true;
+            return null;
         } catch (Exception e) {
             log.warn("检查 docker url 异常 {}", e.getMessage());
-            return false;
+            return e.getMessage();
         }
     }
 
