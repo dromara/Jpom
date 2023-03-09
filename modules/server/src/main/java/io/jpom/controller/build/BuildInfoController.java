@@ -284,7 +284,7 @@ public class BuildInfoController extends BaseServerController {
             //
             String workspaceId = dockerInfoService.getCheckUserWorkspace(request);
             int count = dockerInfoService.countByTag(workspaceId, fromTag);
-            Assert.state(count > 0, "docker tag 填写不正确,没有找到任何docker");
+            Assert.state(count > 0, fromTag + " 没有找到任何 docker。可能docker tag 填写不正确，需要为 docker 配置标签");
         }
     }
 
