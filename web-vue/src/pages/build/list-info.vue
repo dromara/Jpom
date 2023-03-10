@@ -1168,16 +1168,17 @@ export default {
       afterOptListSimple,
       buildConfirmVisible: false,
       columns: [
-        { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "名称", dataIndex: "name", sorter: true, width: 200, ellipsis: true, scopedSlots: { customRender: "name" } },
 
         {
           title: "分支/标签",
           dataIndex: "branchName",
           ellipsis: true,
+          width: 100,
           scopedSlots: { customRender: "branchName" },
         },
         { title: "产物", dataIndex: "resultDirFile", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "方式", dataIndex: "buildMode", align: "center", width: "80px", ellipsis: true, scopedSlots: { customRender: "buildMode" } },
+        { title: "方式", dataIndex: "buildMode", align: "center", width: "80px", sorter: true, ellipsis: true, scopedSlots: { customRender: "buildMode" } },
         { title: "状态", dataIndex: "status", align: "center", width: "100px", ellipsis: true, scopedSlots: { customRender: "status" } },
         {
           title: "构建 ID",
@@ -1200,28 +1201,18 @@ export default {
           dataIndex: "modifyTimeMillis",
           sorter: true,
           customRender: (text) => {
-            if (!text) {
-              return "";
-            }
             return parseTime(text);
           },
-          width: 170,
+          width: "170px",
         },
         {
-          title: "其他信息",
+          title: "发布方式",
           dataIndex: "releaseMethod",
-          width: 100,
+          width: "100px",
           ellipsis: true,
           scopedSlots: { customRender: "releaseMethod" },
         },
-        // {
-        //   title: "产物目录",
-        //   dataIndex: "resultDirFile",
-        //   ellipsis: true,
-        //   width: 100,
-        //   scopedSlots: { customRender: "resultDirFile" },
-        // },
-        // { title: "构建命令", width: 100, dataIndex: "script", ellipsis: true, scopedSlots: { customRender: "script" } },
+
         {
           title: "操作",
           dataIndex: "operation",

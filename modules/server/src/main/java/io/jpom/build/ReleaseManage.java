@@ -232,7 +232,7 @@ public class ReleaseManage {
                 .queryByTag(this.buildExtraModule.getWorkspaceId(), fromTag);
             Map<String, Object> map = buildExecuteService.machineDockerServer.dockerParameter(dockerInfoModels);
             if (map == null) {
-                logRecorder.systemError("没有可用的 docker server");
+                logRecorder.systemError("{} 没有可用的 docker server", fromTag);
                 return false;
             }
             //String dockerBuildArgs = this.buildExtraModule.getDockerBuildArgs();

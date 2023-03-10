@@ -754,7 +754,7 @@ public class BuildExecuteService {
                 .dockerInfoService
                 .queryByTag(buildInfoModel.getWorkspaceId(), fromTag);
             Map<String, Object> map = buildExecuteService.machineDockerServer.dockerParameter(dockerInfoModels);
-            Assert.notNull(map, "没有可用的 docker server");
+            Assert.notNull(map, fromTag + " 没有可用的 docker server");
             logRecorder.system("use docker {}", map.get("name"));
             String workingDir = "/home/jpom/";
 
