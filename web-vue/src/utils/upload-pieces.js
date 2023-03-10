@@ -108,9 +108,11 @@ export const uploadPieces = ({ file, uploadCallback, success, process, error }) 
    **/
   const concurrentUpload = () => {
     const startTime = new Date().getTime();
+    // 设置初始化进度（避免第一份分片卡顿）
+    process(0.01, 1, total, new Date().getTime() - startTime);
     concurrentExecution(chunkList, uploadFileConcurrent, (curItem) => {
       return new Promise((resolve, reject) => {
-        const { chunk, end } = getChunkInfo(file, curItem, chunkSize);
+        const { chunk } = getChunkInfo(file, curItem, chunkSize);
         const chunkInfo = {
           chunk,
           currentChunk: curItem,
@@ -125,7 +127,7 @@ export const uploadPieces = ({ file, uploadCallback, success, process, error }) 
             uploaded.push(chunkInfo.currentChunk + 1);
             const sd = parseInt((uploaded.length / chunkInfo.chunkCount) * 100);
             // console.log(chunk);
-            process(sd, end, total, new Date().getTime() - startTime);
+            process(sd, Math.min(uploaded.length * chunkSize, total), total, new Date().getTime() - startTime);
             //
             /***
              * 创建文件上传参数
