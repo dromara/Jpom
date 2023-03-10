@@ -21,6 +21,7 @@
 8. 【server】优化 容器构建查询可用标签容器相关提示
 9. 【server】优化 构建历史列表页面在小屏幕数据显示不全
    （感谢 [@一只羊](https://gitee.com/hjdyzy) [Gitee issues I6LLA0](https://gitee.com/dromara/Jpom/issues/I6LLA0) ）
+10. 【server】修复 在线构建发布到集群无法正常选择集群服务（感谢@心光）
 
 ------
 
