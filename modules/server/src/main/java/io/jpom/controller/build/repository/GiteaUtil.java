@@ -64,7 +64,7 @@ public class GiteaUtil {
     /**
      * 每页的数量，最大为 100
      */
-    private static final String PER_PAGE = "per_page";
+    private static final String LIMIT = "limit";
 
     /**
      * 获取 Gitea 用户名
@@ -92,19 +92,19 @@ public class GiteaUtil {
     public static Map<String, Object> getGiteaRepos(String giteaAddress, String token, Page page, String condition) {
         HttpResponse reposResponse = HttpUtil.createGet(giteaAddress + "/api/v1/user/repos", true)
             .form(ACCESS_TOKEN, token)
-            .form(SORT, "pushed")
+            //.form(SORT, "newest")
             .form(PAGE, page.getPageNumber())
-            .form(PER_PAGE, page.getPageSize())
+            .form(LIMIT, page.getPageSize())
             // 搜索关键字
-            .form("q", condition)
+            //.form("q", condition)
             .execute();
         String body = reposResponse.body();
         Assert.state(reposResponse.isOk(), "获取仓库信息错误：" + body);
 
         // 所有仓库总数，包括公开的和私有的
-        String totalCountStr = reposResponse.header("total_count");
+        String totalCountStr = reposResponse.header("x-total-count");
         int totalCount = Convert.toInt(totalCountStr, 0);
-        //String totalPage = reposResponse.header("total_page");
+        String totalPage = reposResponse.header("total_page");
 
         Map<String, Object> map = new HashMap<>(2);
         map.put("jsonArray", JSONArray.parseArray(body));
