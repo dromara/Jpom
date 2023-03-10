@@ -41,9 +41,9 @@ features: # 可选的
 # 文章列表显示方式: detailed 默认，显示详细版文章列表（包括作者、分类、标签、摘要、分页等）| simple => 显示简约版文章列表（仅标题和日期）| none 不显示文章列表
 postList: none
 notices: # 可选的
-  - id: jpom-2.10.26
-    title: 📢 Jpom v2.10.16 发布！
-    content: '<div><p>2023-02-16</p><ul><li>上线机器资产管理</li><li>上线 SSH 资产管理</li></ul></div><p style="text-align: right;"><a href="/pages/changelog/new/">查看详情</a>&nbsp;&nbsp;<a href="/pages/all-downloads/">下载安装包</a></p>'
+  - id: jpom-2.10.29
+    title: 📢 Jpom v2.10.29 发布！
+    content: '<div><p>2023-03-10</p><ul><li>导入仓库支持 gitea 系统</li><li>新增用户登录日志</li><li>新增在线工具验证 cron 表达式</li></ul></div><p style="text-align: right;"><a href="/pages/changelog/new/">查看详情</a>&nbsp;&nbsp;<a href="/pages/all-downloads/">下载安装包</a></p>'
     isHtmlContent: true
 ---
 
