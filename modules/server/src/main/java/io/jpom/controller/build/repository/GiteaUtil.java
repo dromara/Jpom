@@ -26,9 +26,11 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.db.Page;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -90,26 +92,62 @@ public class GiteaUtil {
      * @return
      */
     public static Map<String, Object> getGiteaRepos(String giteaAddress, String token, Page page, String condition) {
-        HttpResponse reposResponse = HttpUtil.createGet(giteaAddress + "/api/v1/user/repos", true)
+        if(condition == null ){
+            HttpResponse reposResponse = HttpUtil.createGet(giteaAddress + "/api/v1/user/repos", true)
+                .form(ACCESS_TOKEN, token)
+                //.form(SORT, "newest")
+                .form(PAGE, page.getPageNumber())
+                .form(LIMIT, page.getPageSize())
+                // 搜索关键字
+                //.form("q", condition)
+                .execute();
+            String body = reposResponse.body();
+            Assert.state(reposResponse.isOk(), "获取仓库信息错误：" + body);
+            // 所有仓库总数，包括公开的和私有的
+            String totalCountStr = reposResponse.header("x-total-count");
+            int totalCount = Convert.toInt(totalCountStr, 0);
+            //String totalPage = reposResponse.header("total_page");
+
+            Map<String, Object> map = new HashMap<>(2);
+            map.put("jsonArray", JSONArray.parseArray(body));
+            // 仓库总数
+            map.put("totalCount", totalCount);
+            return map;
+        }else{
+            return getGiteaReposSearch(giteaAddress,token,page,condition);
+        }
+    }
+    /**
+     * 获取 Gitea 用户仓库信息搜索
+     *
+     * @param giteaAddress Gitea 地址
+     * @param token        用户授权码
+     * @param page         分页参数
+     * @return
+     */
+    public static Map<String, Object> getGiteaReposSearch( String giteaAddress, String token, Page page, String condition) {
+        HttpResponse reposResponse = HttpUtil.createGet(giteaAddress + "/api/v1/repos/search", true)
             .form(ACCESS_TOKEN, token)
-            //.form(SORT, "newest")
+            .form(SORT, "created")
             .form(PAGE, page.getPageNumber())
             .form(LIMIT, page.getPageSize())
             // 搜索关键字
-            //.form("q", condition)
+            .form("q", condition)
             .execute();
         String body = reposResponse.body();
-        Assert.state(reposResponse.isOk(), "获取仓库信息错误：" + body);
-
+        JSONObject jsonObject = JSON.parseObject(body);
+        JSONArray data = jsonObject.getJSONArray("data");
+        Assert.state(reposResponse.isOk(), "获取仓库信息错误：" + data.toString());
         // 所有仓库总数，包括公开的和私有的
         String totalCountStr = reposResponse.header("x-total-count");
         int totalCount = Convert.toInt(totalCountStr, 0);
-        String totalPage = reposResponse.header("total_page");
 
         Map<String, Object> map = new HashMap<>(2);
-        map.put("jsonArray", JSONArray.parseArray(body));
+        map.put("jsonArray", JSONArray.parseArray(data.toString()));
         // 仓库总数
         map.put("totalCount", totalCount);
         return map;
+
     }
+
 }
