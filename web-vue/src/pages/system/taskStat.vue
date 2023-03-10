@@ -10,6 +10,10 @@
       <a-tooltip slot="time" slot-scope="text" placement="topLeft" :title="parseTime(text)">
         <span>{{ parseTime(text) }}</span>
       </a-tooltip>
+      <a-tooltip slot="cron" slot-scope="text" placement="topLeft" :title="text">
+        <!-- <a-icon type="unordered-list" /> -->
+        <a-button type="link" style="padding: 0px" size="small" @click="toCronTaskList(text)"> {{ text }} <a-icon type="unordered-list" /> </a-button>
+      </a-tooltip>
     </a-table>
   </div>
 </template>
@@ -58,6 +62,7 @@ export default {
         {
           title: "cron",
           dataIndex: "cron",
+          scopedSlots: { customRender: "cron" },
           // sorter: (a, b) => (a && b ? a.localeCompare(b, "zh-CN") : 0),
           // sortDirections: ["descend", "ascend"],
         },
@@ -99,6 +104,20 @@ export default {
     parseTime: parseTime,
     refresh() {
       this.$emit("refresh");
+    },
+    // 前往 cron 详情
+    toCronTaskList(cron) {
+      const newpage = this.$router.resolve({
+        name: "cron-task-list",
+        path: "/tools/cron",
+        query: {
+          ...this.$route.query,
+          sPid: "tools",
+          sId: "cronTools",
+          cron: cron,
+        },
+      });
+      window.open(newpage.href, "_blank");
     },
   },
 };
