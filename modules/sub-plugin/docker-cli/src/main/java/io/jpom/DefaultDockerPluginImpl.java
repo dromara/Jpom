@@ -40,6 +40,7 @@ import io.jpom.plugin.PluginConfig;
 import io.jpom.util.StringUtil;
 import lombok.Lombok;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -301,7 +302,12 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         // 命令
         List<String> commands = (List<String>) parameter.get("commands");
         if (CollUtil.isNotEmpty(commands)) {
-            containerCmd.withCmd(commands);
+
+            commands.removeIf(StringUtils::isBlank);
+
+            if (CollUtil.isNotEmpty(commands)){
+                containerCmd.withCmd(commands);
+            }
         }
         containerCmd.withHostConfig(hostConfig).withExposedPorts(exposedPortList);
         CreateContainerResponse containerResponse = containerCmd.exec();
