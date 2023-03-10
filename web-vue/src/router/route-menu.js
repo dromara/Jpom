@@ -47,6 +47,7 @@ const routeMenuMap = {
   machine_ssh_info: "/system/assets/ssh-list",
   machine_docker_info: "/system/assets/docker-list",
   configWorkspaceEnv: "/script/env-list",
+  cronTools: "/tools/cron",
 };
 
 export default routeMenuMap;

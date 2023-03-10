@@ -129,6 +129,11 @@ const children = [
     name: "script-env-list",
     component: () => import("../pages/script/env"),
   },
+  {
+    path: "/tools/cron",
+    name: "cron-tools",
+    component: () => import("../pages/tools/cron"),
+  },
 ];
 
 const management = [

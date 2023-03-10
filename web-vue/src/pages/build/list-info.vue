@@ -1169,7 +1169,7 @@ export default {
       buildConfirmVisible: false,
       columns: [
         { title: "名称", dataIndex: "name", sorter: true, width: 200, ellipsis: true, scopedSlots: { customRender: "name" } },
-
+        { title: "分组", dataIndex: "group", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         {
           title: "分支/标签",
           dataIndex: "branchName",
@@ -1177,7 +1177,7 @@ export default {
           width: 100,
           scopedSlots: { customRender: "branchName" },
         },
-        { title: "产物", dataIndex: "resultDirFile", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "产物", dataIndex: "resultDirFile", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "方式", dataIndex: "buildMode", align: "center", width: "80px", sorter: true, ellipsis: true, scopedSlots: { customRender: "buildMode" } },
         { title: "状态", dataIndex: "status", align: "center", width: "100px", ellipsis: true, scopedSlots: { customRender: "status" } },
         {
@@ -1212,7 +1212,13 @@ export default {
           ellipsis: true,
           scopedSlots: { customRender: "releaseMethod" },
         },
-
+        {
+          title: "定时构建",
+          dataIndex: "autoBuildCron",
+          width: 100,
+          ellipsis: true,
+          scopedSlots: { customRender: "tooltip" },
+        },
         {
           title: "操作",
           dataIndex: "operation",
