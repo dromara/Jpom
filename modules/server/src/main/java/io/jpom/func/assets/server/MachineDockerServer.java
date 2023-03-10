@@ -283,7 +283,10 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
             if (machineDockerModel != null) {
                 Integer status = machineDockerModel.getStatus();
                 if (status != null && status == 1) {
-                    return machineDockerModel.toParameter();
+                    Map<String, Object> parameter = machineDockerModel.toParameter();
+                    // 更新名称
+                    parameter.put("name", dockerInfoModel.getName());
+                    return parameter;
                 }
             }
         }
