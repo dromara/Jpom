@@ -299,6 +299,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
             }
             return map;
         }).ifPresent(hostConfig::withStorageOpt);
+
         // 命令
         List<String> commands = (List<String>) parameter.get("commands");
         if (CollUtil.isNotEmpty(commands)) {
