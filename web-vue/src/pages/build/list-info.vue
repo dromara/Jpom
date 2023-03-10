@@ -1801,9 +1801,10 @@ export default {
     // 选择发布集群时 渲染服务名称 数据
     selectSwarm() {
       this.swarmServiceListOptions = [];
+      this.tempExtraData = { ...this.tempExtraData, dockerSwarmServiceName: undefined };
       if (this.tempExtraData.dockerSwarmId) {
         // 选中时才处理
-        dockerSwarmServicesList({
+        dockerSwarmServicesList("", {
           id: this.tempExtraData.dockerSwarmId,
         }).then((res) => {
           if (res.code === 200) {
