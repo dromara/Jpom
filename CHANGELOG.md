@@ -6,6 +6,9 @@
 
 1. 【server】修复 导入 gitea 仓库搜索、分页无法正常使用问题
    （感谢 [@Smith](https://gitee.com/autools) [Gitee pr 175](https://gitee.com/dromara/Jpom/pulls/175) [Gitee pr 174](https://gitee.com/dromara/Jpom/pulls/174) ）
+2. 【server】优化 镜像启动容器不填写运行命令行导致容器启动失败（部分低版本）
+   （感谢 [@失落的世界](https://gitee.com/marmotgo) [Gitee pr 176](https://gitee.com/dromara/Jpom/pulls/176) ）
+3. 【server】修复 节点分发 webhook 输入框的错别字（感谢 @大灰灰 ）
 
 ------
 
