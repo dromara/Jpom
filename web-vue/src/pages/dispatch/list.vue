@@ -343,7 +343,7 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-input v-model="temp.webhook" placeholder="构建过程请求,非必填，GET请求" />
+          <a-input v-model="temp.webhook" placeholder="分发过程请求,非必填，GET请求" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -653,7 +653,7 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-input v-model="temp.webhook" placeholder="构建过程请求,非必填，GET请求" />
+          <a-input v-model="temp.webhook" placeholder="分发过程请求,非必填，GET请求" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
