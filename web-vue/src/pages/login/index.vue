@@ -30,8 +30,8 @@
       <br />
       <template v-if="this.action === 'login'">
         <a-form-model ref="loginForm" :label-col="{ span: 0 }" :model="loginForm" :rules="rules" @submit="handleLogin">
-          <a-form-model-item :wrapper-col="{ span: 24 }" prop="userName">
-            <a-input v-model="loginForm.userName" placeholder="用户名" />
+          <a-form-model-item :wrapper-col="{ span: 24 }" prop="loginName">
+            <a-input v-model="loginForm.loginName" placeholder="用户名" />
           </a-form-model-item>
           <a-form-model-item :wrapper-col="{ span: 24 }" prop="userPwd">
             <a-input-password v-model="loginForm.userPwd" placeholder="密码" />
@@ -73,7 +73,7 @@ export default {
   data() {
     return {
       loginForm: {
-        userName: "",
+        loginName: "",
         userPwd: "",
         code: "",
       },
@@ -83,7 +83,7 @@ export default {
       dynamicBg: localStorage.getItem("dynamicBg") === "true",
       loginTitle: "登录JPOM",
       rules: {
-        userName: [{ required: true, message: "请输入用户名" }],
+        loginName: [{ required: true, message: "请输入用户名" }],
         userPwd: [{ required: true, message: "请输入密码" }],
         code: [{ required: true, message: "请输入验证码" }],
         mfaCode: [
@@ -147,7 +147,7 @@ export default {
             message: "温馨提示",
             description: h("div", null, [h("p", { domProps: { innerHTML: res.msg } }, null)]),
           });
-          this.loginForm.userName = res.data.user;
+          this.loginForm.loginName = res.data.user;
         }
       });
     },

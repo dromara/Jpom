@@ -271,6 +271,29 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     }
 
     /**
+     * 跟进 docker 列表找到一个可用的 docker 信息
+     *
+     * @param dockerInfoModels docker 列表
+     * @return map
+     */
+    public Map<String, Object> dockerParameter(List<DockerInfoModel> dockerInfoModels) {
+        for (DockerInfoModel dockerInfoModel : dockerInfoModels) {
+            String machineDockerId = dockerInfoModel.getMachineDockerId();
+            MachineDockerModel machineDockerModel = this.getByKey(machineDockerId, false);
+            if (machineDockerModel != null) {
+                Integer status = machineDockerModel.getStatus();
+                if (status != null && status == 1) {
+                    Map<String, Object> parameter = machineDockerModel.toParameter();
+                    // 更新名称
+                    parameter.put("name", dockerInfoModel.getName());
+                    return parameter;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * 通过集群 id 获取 docker 管理参数
      *
      * @param workspaceSwarmId 集群id
@@ -300,6 +323,9 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     }
 
     public MachineDockerModel tryMachineDockerBySwarmId(String swarmId) {
+        if (StrUtil.isEmpty(swarmId)) {
+            return null;
+        }
         //
         MachineDockerModel dockerInfoModel = new MachineDockerModel();
         dockerInfoModel.setSwarmId(swarmId);

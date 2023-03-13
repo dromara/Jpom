@@ -20,7 +20,17 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.cron.CronUtil;
+import cn.hutool.cron.pattern.CronPattern;
+import cn.hutool.cron.pattern.CronPatternUtil;
+import org.junit.Test;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by jiangzeyin on 2019/3/4.
@@ -35,5 +45,26 @@ public class TestCron {
         });
         CronUtil.restart();
 //        System.out.println(JpomApplicationEvent.getPid());
+    }
+
+    @Test
+    public void test() {
+        String cron = "0 0 23 ? * 5 ";
+
+        CronPattern cronPattern = CronPattern.of(cron);
+
+//        Date date = CronPatternUtil.nextDateAfter(cronPattern, DateUtil.offsetDay(DateTime.now(), -1), false);
+
+        List<Date> dateList = CronPatternUtil.matchedDates(cron, DateUtil.offsetDay(DateTime.now(), -1), 10, true);
+        for (Date date1 : dateList) {
+            System.out.println(DateUtil.format(date1, DatePattern.NORM_DATETIME_FORMAT));
+        }
+
+    }
+
+    @Test
+    public void test2() {
+        Calendar calendar = DateTime.now().toCalendar();
+        System.out.println(calendar.get(Calendar.DAY_OF_WEEK) - 1);
     }
 }

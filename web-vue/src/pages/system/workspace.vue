@@ -56,6 +56,7 @@
     <a-modal destroyOnClose v-model="configMenuVisible" :title="`${temp.name} 工作空间菜单`" @ok="onSubmitMenus" :maskClosable="false">
       <a-form-model ref="editWhiteForm" :model="menusConfigData">
         <a-row type="flex" justify="center">
+          <a-alert :message="`菜单配置只对非超级管理员生效`" style="margin-top: 10px; margin-bottom: 20px" banner />
           <a-col :span="12">
             <a-card title="服务端菜单" :bordered="false">
               <a-tree show-icon v-if="menusConfigData.serverMenus" checkable :tree-data="menusConfigData.serverMenus" :replaceFields="replaceFields" v-model="menusConfigData.serverMenuKeys">

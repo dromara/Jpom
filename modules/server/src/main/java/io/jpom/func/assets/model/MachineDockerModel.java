@@ -156,7 +156,7 @@ public class MachineDockerModel extends BaseGroupNameModel {
     public Map<String, Object> toParameter() {
         Map<String, Object> parameter = new HashMap<>(10);
         parameter.put("dockerHost", this.getHost());
-//        parameter.put("apiVersion", this.getApiVersion());
+        parameter.put("name", this.getName());
         parameter.put("registryUsername", this.getRegistryUsername());
         parameter.put("registryPassword", this.getRegistryPassword());
         parameter.put("registryEmail", this.getRegistryEmail());

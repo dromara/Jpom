@@ -20,70 +20,58 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.model.log;
+package io.jpom.func.user.model;
 
-import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.model.BaseUserModifyDbModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import top.jpom.h2db.TableName;
 
 /**
- * 用户操作日志
- *
- * @author jiangzeyin
- * @since 2019/4/19
+ * @author bwcx_jzy
+ * @since 2023/3/9
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "USEROPERATELOGV1", name = "用户操作日志")
+@TableName(value = "USER_LOGIN_LOG", name = "用户登录日志")
 @Data
-public class UserOperateLogV1 extends BaseWorkspaceModel {
+@NoArgsConstructor
+public class UserLoginLogModel extends BaseUserModifyDbModel {
+
     /**
      * 操作ip
      */
     private String ip;
+
     /**
-     * 用户ip
+     * 用户名称
      */
-    private String userId;
-    /**
-     * 节点id
-     */
-    private String nodeId;
-    /**
-     * 操作时间
-     */
-    private Long optTime;
-    /**
-     * 操作状态,业务状态码
-     */
-    private Integer optStatus;
-    /**
-     * 完整消息
-     */
-    private String resultMsg;
-    /**
-     * 请求参数
-     */
-    private String reqData;
-    /**
-     * 数据id
-     */
-    private String dataId;
-    /**
-     * 数据名称
-     */
-    private String dataName;
+    private String username;
+
     /**
      * 浏览器标识
      */
     private String userAgent;
 
-    private String classFeature;
-    private String methodFeature;
     /**
-     * 工作空间名称
+     * 是否使用 mfa
      */
-    private String workspaceName;
+    private Boolean useMfa;
 
-    private String username;
+    /**
+     * 是否成功
+     */
+    private Boolean success;
+
+    /**
+     * 错误原因
+     * <p>
+     * 0 正常登录
+     * 1 密码错误
+     * 2 被锁定
+     * 3 续期
+     * 4 账号被禁用
+     * 5 登录成功，但是需要 mfa 验证
+     */
+    private Integer operateCode;
 }

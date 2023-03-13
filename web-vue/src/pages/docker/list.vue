@@ -46,7 +46,7 @@
           <a-input v-model="temp.name" placeholder="容器名称" />
         </a-form-model-item>
 
-        <a-form-model-item label="标签" prop="tagInput">
+        <a-form-model-item label="标签" prop="tagInput" help="标签用于容器构建选择容器功能（fromTag）">
           <template>
             <div>
               <a-tooltip :key="index" :title="tag" v-for="(tag, index) in temp.tagsArray">

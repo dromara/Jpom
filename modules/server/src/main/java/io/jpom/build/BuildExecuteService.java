@@ -753,11 +753,11 @@ public class BuildExecuteService {
             List<DockerInfoModel> dockerInfoModels = buildExecuteService
                 .dockerInfoService
                 .queryByTag(buildInfoModel.getWorkspaceId(), fromTag);
-            DockerInfoModel dockerInfoModel = CollUtil.getFirst(dockerInfoModels);
-            Assert.notNull(dockerInfoModel, "没有可用的 docker server");
-            logRecorder.system("use docker {}", dockerInfoModel.getName());
+            Map<String, Object> map = buildExecuteService.machineDockerServer.dockerParameter(dockerInfoModels);
+            Assert.notNull(map, fromTag + " 没有可用的 docker server");
+            logRecorder.system("use docker {}", map.get("name"));
             String workingDir = "/home/jpom/";
-            Map<String, Object> map = buildExecuteService.machineDockerServer.dockerParameter(dockerInfoModel);
+
             map.put("runsOn", dockerYmlDsl.getRunsOn());
             map.put("workingDir", workingDir);
             map.put("tempDir", JpomApplication.getInstance().getTempPath());
