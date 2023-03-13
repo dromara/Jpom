@@ -44,6 +44,7 @@ import io.jpom.service.outgiving.LogReadServer;
 import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.service.script.ScriptExecuteLogServer;
 import io.jpom.service.script.ScriptServer;
+import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.service.system.WorkspaceService;
 import io.jpom.service.user.UserPermissionGroupServer;
 import io.jpom.service.user.UserService;
@@ -104,6 +105,7 @@ public enum ClassFeature {
     SYSTEM_NODE_WHITELIST("节点白名单分发"),
     SYSTEM_BACKUP("数据库备份", BackupInfoService.class),
     SYSTEM_WORKSPACE("工作空间", WorkspaceService.class),
+    SYSTEM_WORKSPACE_ENV("环境变量", WorkspaceEnvVarService.class),
 
     SCRIPT("脚本模板", ScriptServer.class),
     SCRIPT_LOG("脚本模板日志", ScriptExecuteLogServer.class),

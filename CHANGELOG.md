@@ -9,6 +9,7 @@
 2. 【server】优化 镜像启动容器不填写运行命令行导致容器启动失败（部分低版本）
    （感谢 [@失落的世界](https://gitee.com/marmotgo) [Gitee pr 176](https://gitee.com/dromara/Jpom/pulls/176) ）
 3. 【server】修复 节点分发 webhook 输入框的错别字（感谢 @大灰灰 ）
+4. 【server】修复 工作空间环境变量操作日志记录错误问题
 
 ------
 
