@@ -247,6 +247,14 @@
                 </a-select>
               </a-input>
             </a-form-model-item>
+
+            <a-form-model-item label="编码方式" prop="transportEncryption">
+              <a-select show-search default-value=0 v-model="temp.transportEncryption" placeholder="请选择编码方式">
+                <a-select-option :value=0>不编码</a-select-option>
+                <a-select-option :value=1>BASE64</a-select-option>
+                <a-select-option :value=2>AES</a-select-option>
+              </a-select>
+            </a-form-model-item>
           </a-collapse-panel>
         </a-collapse>
       </a-form-model>

@@ -27,12 +27,13 @@ import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.*;
 import com.alibaba.fastjson2.JSONObject;
+import io.jpom.encrypt.EncryptFactory;
+import io.jpom.encrypt.Encryptor;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import top.jpom.transform.TransformServerFactory;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -53,6 +54,8 @@ public class HttpTransportServer implements TransportServer {
 
         Optional.ofNullable(urlItem.timeout()).ifPresent(integer -> httpRequest.timeout(integer * 1000));
 
+        httpRequest.header(TransportServer.TRANSPORT_ENCRYPTION, nodeInfo.transportEncryption().toString());
+
         httpRequest.header(TransportServer.JPOM_AGENT_AUTHORIZE, nodeInfo.authorize());
         //
         httpRequest.header(TransportServer.WORKSPACE_ID_REQ_HEADER, urlItem.workspaceId());
@@ -65,20 +68,34 @@ public class HttpTransportServer implements TransportServer {
     }
 
     @SuppressWarnings("unchecked")
-    private void appendRequestData(HttpRequest httpRequest, IUrlItem urlItem, Object data) {
+    private void appendRequestData(HttpRequest httpRequest, IUrlItem urlItem, Object data,INodeInfo nodeInfo) {
         DataContentType dataContentType = urlItem.contentType();
         Optional.ofNullable(data).ifPresent(o -> {
-            if (dataContentType == DataContentType.FORM_URLENCODED) {
-                if (o instanceof Map) {
-                    httpRequest.form((Map<String, Object>) o);
+            Encryptor encryptor;
+            try {
+                encryptor = EncryptFactory.createEncryptor(nodeInfo.transportEncryption());
+                if (dataContentType == DataContentType.FORM_URLENCODED) {
+                    if (o instanceof Map) {
+                        Map<String, Object> map=(Map<String, Object>) o;
+                        Map<String, Object> encryptedMap = new HashMap<>();
+                        for (Map.Entry<String, Object> entry : map.entrySet()) {
+                            String encryptedKey =  encryptor.encrypt(String.valueOf(entry.getKey()));
+                            String encryptedValue = encryptor.encrypt(String.valueOf(entry.getValue()));
+                            encryptedMap.put(encryptedKey, encryptedValue);
+                        }
+                        httpRequest.form(encryptedMap);
+                    } else {
+                        throw new IllegalArgumentException("不支持的类型:" + o.getClass());
+                    }
+                } else if (dataContentType == DataContentType.JSON) {
+                    httpRequest.body(encryptor.encrypt(JSONObject.toJSONString(o)), cn.hutool.http.ContentType.JSON.getValue());
                 } else {
-                    throw new IllegalArgumentException("不支持的类型:" + o.getClass());
+                    throw new IllegalArgumentException("不支持的 contentType");
                 }
-            } else if (dataContentType == DataContentType.JSON) {
-                httpRequest.body(JSONObject.toJSONString(o), cn.hutool.http.ContentType.JSON.getValue());
-            } else {
-                throw new IllegalArgumentException("不支持的 contentType");
+            }catch (Exception e) {
+                throw Lombok.sneakyThrow(TransformServerFactory.get().transformException(e,nodeInfo));
             }
+
         });
     }
 
@@ -102,7 +119,7 @@ public class HttpTransportServer implements TransportServer {
     @Override
     public String execute(INodeInfo nodeInfo, IUrlItem urlItem, Object data) {
         HttpRequest httpRequest = this.createRequest(nodeInfo, urlItem);
-        this.appendRequestData(httpRequest, urlItem, data);
+        this.appendRequestData(httpRequest, urlItem, data,nodeInfo);
         try {
             return this.executeRequest(httpRequest, nodeInfo, urlItem);
         } catch (Exception e) {
@@ -115,7 +132,7 @@ public class HttpTransportServer implements TransportServer {
     public void download(INodeInfo nodeInfo, IUrlItem urlItem, Object data, Consumer<DownloadCallback> consumer) {
         HttpRequest httpRequest = this.createRequest(nodeInfo, urlItem, Method.GET);
         httpRequest.setFollowRedirects(true);
-        this.appendRequestData(httpRequest, urlItem, data);
+        this.appendRequestData(httpRequest, urlItem, data,nodeInfo);
         try (HttpResponse response1 = httpRequest.execute()) {
             String contentDisposition = response1.header(Header.CONTENT_DISPOSITION);
             String contentType = response1.header(Header.CONTENT_TYPE);

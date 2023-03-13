@@ -45,6 +45,12 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>io.jpom.plugins</groupId>
+            <artifactId>plugin-encrypt</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.jpom</groupId>
             <artifactId>common</artifactId>
             <version>${project.version}</version>
@@ -78,6 +84,12 @@
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
             <version>${oshi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jpom.plugins</groupId>
+            <artifactId>plugin-encrypt</artifactId>
+            <version>2.10.28</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>
