@@ -307,7 +307,6 @@ OUT_GIVING,status,Integer,,0,false,false,状态{0: 未分发; 1: 分发中; 2: �
 OUT_GIVING,secondaryDirectory,String,200,,false,false,二级目录,
 OUT_GIVING,uploadCloseFirst,TINYINT,,0,false,false,是否清空旧包发布,
 USEROPERATELOGV1,id,String,50,,true,true,id,操作日志
-USEROPERATELOGV1,reqId,String,50,,false,false,请求ID,
 USEROPERATELOGV1,ip,String,80,,false,false,客户端IP地址,
 USEROPERATELOGV1,userId,String,30,,false,false,操作的用户ID,
 USEROPERATELOGV1,resultMsg,TEXT,,,false,false,操作的结果信息,

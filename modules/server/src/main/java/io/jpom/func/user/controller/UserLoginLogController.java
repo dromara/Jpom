@@ -20,16 +20,16 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.controller.user;
+package io.jpom.func.user.controller;
 
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
-import io.jpom.model.log.UserOperateLogV1;
+import io.jpom.func.user.model.UserLoginLogModel;
+import io.jpom.func.user.server.UserLoginLogServer;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
-import io.jpom.service.dblog.DbUserOperateLogService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,32 +39,30 @@ import top.jpom.model.PageResultDto;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * 用户操作日志
- *
- * @author jiangzeyin
- * @since 2019/4/19
+ * @author bwcx_jzy
+ * @since 2023/3/9
  */
 @RestController
-@RequestMapping(value = "/user/log")
-@Feature(cls = ClassFeature.USER_LOG)
+@RequestMapping(value = "/user/login-log")
+@Feature(cls = ClassFeature.USER_LOGIN_LOG)
 @SystemPermission
-public class UserOptLogController extends BaseServerController {
+public class UserLoginLogController extends BaseServerController {
 
-    private final DbUserOperateLogService dbUserOperateLogService;
+    private final UserLoginLogServer userLoginLogServer;
 
-    public UserOptLogController(DbUserOperateLogService dbUserOperateLogService) {
-        this.dbUserOperateLogService = dbUserOperateLogService;
+    public UserLoginLogController(UserLoginLogServer userLoginLogServer) {
+        this.userLoginLogServer = userLoginLogServer;
     }
 
     /**
-     * 展示用户列表
+     * 登录日志列表
      *
      * @return json
      */
-    @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "list-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<UserOperateLogV1>> listData(HttpServletRequest request) {
-        PageResultDto<UserOperateLogV1> pageResult = dbUserOperateLogService.listPage(request);
+    public JsonMessage<PageResultDto<UserLoginLogModel>> listData(HttpServletRequest request) {
+        PageResultDto<UserLoginLogModel> pageResult = userLoginLogServer.listPage(request);
         return JsonMessage.success("", pageResult);
     }
 }

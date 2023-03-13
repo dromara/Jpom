@@ -129,6 +129,11 @@ const children = [
     name: "script-env-list",
     component: () => import("../pages/script/env"),
   },
+  {
+    path: "/tools/cron",
+    name: "cron-tools",
+    component: () => import("../pages/tools/cron"),
+  },
 ];
 
 const management = [
@@ -162,7 +167,11 @@ const management = [
     name: "operation-log",
     component: () => import("../pages/user/operation-log"),
   },
-
+  {
+    path: "/user/login-log",
+    name: "user-login-log",
+    component: () => import("../pages/user/user-login-log"),
+  },
   // 工作空间
   {
     path: "/system/workspace",

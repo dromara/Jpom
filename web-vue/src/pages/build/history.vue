@@ -128,9 +128,9 @@ export default {
       buildLogVisible: false,
       tableSelections: [],
       columns: [
-        { title: "构建名称", dataIndex: "buildName", /*width: 120,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "构建 ID", dataIndex: "buildNumberId", width: 90, align: "center", ellipsis: true, scopedSlots: { customRender: "buildNumberId" } },
-        { title: "备注", dataIndex: "buildRemark", /*width: 120,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "构建名称", dataIndex: "buildName", width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "构建 ID", dataIndex: "buildNumberId", width: "90px", align: "center", ellipsis: true, scopedSlots: { customRender: "buildNumberId" } },
+        { title: "备注", dataIndex: "buildRemark", width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
         { title: "状态", dataIndex: "status", width: "100px", align: "center", ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "触发类型", dataIndex: "triggerBuildType", align: "center", width: "100px", ellipsis: true, scopedSlots: { customRender: "triggerBuildType" } },
@@ -151,7 +151,7 @@ export default {
         },
         { title: "发布方式", dataIndex: "releaseMethod", width: "100px", ellipsis: true, scopedSlots: { customRender: "releaseMethod" } },
         { title: "构建人", dataIndex: "modifyUser", width: "130px", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: "200px", align: "center" },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: "200px", align: "center", fixed: "right" },
       ],
     };
   },

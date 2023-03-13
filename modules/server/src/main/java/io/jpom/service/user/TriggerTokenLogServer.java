@@ -132,7 +132,7 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> im
      * @param userId 用户ID
      * @return token
      */
-    public String createToken(String type, String dataId, String userId) {
+    private String createToken(String type, String dataId, String userId) {
         TriggerTokenLogBean trigger = new TriggerTokenLogBean();
         String uuid = IdUtil.fastSimpleUUID();
         trigger.setId(uuid);

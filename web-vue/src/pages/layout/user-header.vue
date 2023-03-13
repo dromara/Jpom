@@ -31,21 +31,19 @@
           </a-sub-menu>
           <a-menu-divider />
           <a-menu-item @click="handleUpdatePwd">
-            <a-button type="link">
-              <a-space><a-icon type="lock" />安全管理</a-space>
-            </a-button>
+            <a-button type="link" icon="lock"> 安全管理 </a-button>
           </a-menu-item>
           <a-menu-divider />
           <a-menu-item @click="handleUpdateUser">
-            <a-button type="link">
-              <a-space><a-icon type="profile" />用户资料</a-space>
-            </a-button>
+            <a-button type="link" icon="profile"> 用户资料 </a-button>
           </a-menu-item>
           <a-menu-divider />
-          <a-menu-item>
-            <a-button @click="customize" type="link">
-              <a-space><a-icon type="skin" /> 个性配置</a-space>
-            </a-button>
+          <a-menu-item @click="handleUserlog">
+            <a-button type="link" icon="bars"> 操作日志 </a-button>
+          </a-menu-item>
+          <a-menu-divider />
+          <a-menu-item @click="customize">
+            <a-button type="link" icon="skin"> 个性配置 </a-button>
           </a-menu-item>
           <a-menu-divider />
           <a-menu-item @click="logOut">
@@ -277,6 +275,10 @@
         </a-row>
       </a-space>
     </a-modal>
+    <!-- 查看操作日志 -->
+    <a-modal destroyOnClose v-model="viewLogVisible" :width="'90vw'" title="操作日志" :footer="null" :maskClosable="false">
+      <user-log v-if="viewLogVisible"></user-log>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -286,8 +288,12 @@ import QRCode from "qrcodejs2";
 import sha1 from "js-sha1";
 import Vue from "vue";
 import { MFA_APP_TIP_ARRAY } from "@/utils/const";
+import UserLog from "./user-log.vue";
 
 export default {
+  components: {
+    UserLog,
+  },
   props: {
     mode: {
       type: String,
@@ -336,6 +342,7 @@ export default {
       },
       MFA_APP_TIP_ARRAY,
       bindMfaTip: false,
+      viewLogVisible: false,
     };
   },
   computed: {
@@ -692,6 +699,9 @@ export default {
           }
         });
       });
+    },
+    handleUserlog() {
+      this.viewLogVisible = true;
     },
   },
 };

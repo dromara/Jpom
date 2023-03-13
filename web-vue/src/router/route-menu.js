@@ -31,6 +31,7 @@ const routeMenuMap = {
   userList: "/user/list",
   permission_group: "/user/permission-group",
   user_log: "/operation/log",
+  user_login_log: "/user/login-log",
   monitorConfigEmail: "/system/mail",
   cacheManage: "/system/cache",
   logManage: "/system/log",
@@ -46,6 +47,7 @@ const routeMenuMap = {
   machine_ssh_info: "/system/assets/ssh-list",
   machine_docker_info: "/system/assets/docker-list",
   configWorkspaceEnv: "/script/env-list",
+  cronTools: "/tools/cron",
 };
 
 export default routeMenuMap;

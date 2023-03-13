@@ -147,7 +147,7 @@ public class ReleaseManage {
         } else if (releaseMethod == BuildReleaseMethod.LocalCommand.getCode()) {
             return this.localCommand();
         } else if (releaseMethod == BuildReleaseMethod.DockerImage.getCode()) {
-            this.doDockerImage();
+            return this.doDockerImage();
         } else if (releaseMethod == BuildReleaseMethod.No.getCode()) {
             return true;
         } else {
@@ -199,7 +199,7 @@ public class ReleaseManage {
         }).collect(Collectors.joining(StrUtil.COMMA));
     }
 
-    private void doDockerImage() {
+    private boolean doDockerImage() {
         // 生成临时目录
         File tempPath = FileUtil.file(JpomApplication.getInstance().getTempPath(), "build_temp", "docker_image", this.buildExtraModule.getId() + StrUtil.DASHED + this.buildNumberId);
         try {
@@ -221,7 +221,7 @@ public class ReleaseManage {
             File dockerfile = FileUtil.file(tempPath, dockerFile);
             if (!FileUtil.isFile(dockerfile)) {
                 logRecorder.systemError("仓库目录下没有找到 Dockerfile 文件: {}", dockerFile);
-                return;
+                return false;
             }
             File baseDir = FileUtil.file(tempPath, list.size() == 1 ? StrUtil.SLASH : CollUtil.get(list, 0));
             //
@@ -230,10 +230,10 @@ public class ReleaseManage {
             List<DockerInfoModel> dockerInfoModels = buildExecuteService
                 .dockerInfoService
                 .queryByTag(this.buildExtraModule.getWorkspaceId(), fromTag);
-            DockerInfoModel dockerInfoModel = CollUtil.getFirst(dockerInfoModels);
-            if (dockerInfoModel == null) {
-                logRecorder.systemError("没有可用的 docker server");
-                return;
+            Map<String, Object> map = buildExecuteService.machineDockerServer.dockerParameter(dockerInfoModels);
+            if (map == null) {
+                logRecorder.systemError("{} 没有可用的 docker server", fromTag);
+                return false;
             }
             //String dockerBuildArgs = this.buildExtraModule.getDockerBuildArgs();
             for (DockerInfoModel infoModel : dockerInfoModels) {
@@ -244,9 +244,7 @@ public class ReleaseManage {
             if (pushToRepository != null && pushToRepository) {
                 List<String> repositoryList = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
                 for (String repositoryItem : repositoryList) {
-                    logRecorder.system("start push to repository in({}),{} {}", dockerInfoModel.getName(), StrUtil.emptyToDefault(dockerInfoModel.getRegistryUrl(), StrUtil.EMPTY), repositoryItem);
-                    Map<String, Object> map = buildExecuteService.machineDockerServer.dockerParameter(dockerInfoModel);
-                    //dockerInfoModel.toParameter();
+                    logRecorder.system("start push to repository in({}),{} {}", map.get("name"), StrUtil.emptyToDefault((String) map.get("registryUrl"), StrUtil.EMPTY), repositoryItem);
                     //
                     map.put("repository", repositoryItem);
                     Consumer<String> logConsumer = s -> logRecorder.info(s);
@@ -264,6 +262,7 @@ public class ReleaseManage {
         } finally {
             CommandUtil.systemFastDel(tempPath);
         }
+        return true;
     }
 
     private void updateSwarmService(String dockerTag, String swarmId, String serviceName) {

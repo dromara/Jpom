@@ -1,11 +1,13 @@
 # 🚀 版本日志
 
-## 2.10.29
+## 2.10.29 (2023-03-10)
 
 ### 🐣 新增功能
 
 1. 【server】新增 导入仓库支持 `gitea` 系统
    （感谢 [@Smith](https://gitee.com/autools) [Gitee pr 173](https://gitee.com/dromara/Jpom/pulls/173) ）
+2. 【server】新增 用户登录日志（取消用户登录生成操作日志的执行日志）
+3. 【server】新增 在线工具验证 cron 表达式 （感谢@奇奇）
 
 ### 🐞 解决BUG、优化功能
 
@@ -14,6 +16,12 @@
 3. 【agent】优化 节点分发配置白名单到插件端需要验证合法性
 4. 【server】优化 docker 创建容器忽略未配置存储选项参数（感谢@D¹⁹⁹¹）
 5. 【server】优化 docker 管理裁剪功能独立菜单
+6. 【server】修复 资产管理未记录操作日志的问题
+7. 【server】优化 操作日志存储用户名、工作空间名字段
+8. 【server】优化 容器构建查询可用标签容器相关提示
+9. 【server】优化 构建历史列表页面在小屏幕数据显示不全
+   （感谢 [@一只羊](https://gitee.com/hjdyzy) [Gitee issues I6LLA0](https://gitee.com/dromara/Jpom/issues/I6LLA0) ）
+10. 【server】修复 在线构建发布到集群无法正常选择集群服务（感谢@心光）
 
 ------
 
