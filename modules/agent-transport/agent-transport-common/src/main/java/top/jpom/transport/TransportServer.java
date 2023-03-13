@@ -42,6 +42,8 @@ public interface TransportServer {
 
     String JPOM_AGENT_AUTHORIZE = "Jpom-Agent-Authorize";
 
+    String TRANSPORT_ENCRYPTION = "transport-encryption";
+
     /**
      * 执行请求
      *
