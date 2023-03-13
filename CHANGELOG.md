@@ -11,6 +11,16 @@
 3. 【server】修复 节点分发 webhook 输入框的错别字（感谢 @大灰灰 ）
 4. 【server】修复 工作空间环境变量操作日志记录错误问题
 5. 【all】更新 fastjson2 版本
+6. 【all】优化 SSH 命令脚本、服务端脚本、插件端脚本执行参数优化
+   （感谢 [@大灰灰大](https://gitee.com/linjianhui) [Gitee issues I6IPDY](https://gitee.com/dromara/Jpom/issues/I6IPDY) ）
+
+### ❌ 不兼容功能
+
+1. 【server】删除 COMMAND_INFO 表 type 字段
+
+### ⚠️ 注意
+
+SSH 命令脚本、服务端脚本、插件端脚本默认参数规则变化：参数描述将必填，默认参数在手动执行时无法删除并且可以查看对应参数描述
 
 ------
 

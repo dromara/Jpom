@@ -113,20 +113,17 @@ export default {
           customRender: (text) => {
             return parseTime(text);
           },
-          width: 170,
+          width: "170px",
         },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
 
           customRender: (text) => {
-            if (!text) {
-              return "";
-            }
             return parseTime(text);
           },
           sorter: true,
-          width: 180,
+          width: "170px",
         },
         { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "220px" },
       ],

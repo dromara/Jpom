@@ -83,16 +83,24 @@
         </a-form-model-item>
 
         <a-form-model-item label="默认参数">
-          <div class="params-item" v-for="(item, index) in commandParams" :key="item.key">
-            <div class="item-info">
-              <a-input addon-before="参数值" v-model="item.value" placeholder="参数值" />
-            </div>
-            <div class="item-icon" @click="handleDeleteParam(index)">
-              <a-icon type="minus-circle" style="color: #ff0000" />
-            </div>
+          <div v-for="(item, index) in commandParams" :key="item.key">
+            <a-row type="flex" justify="center" align="middle">
+              <a-col :span="22">
+                <a-input :addon-before="`参数${index + 1}描述`" v-model="item.desc" placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义" />
+                <a-input :addon-before="`参数${index + 1}值`" v-model="item.value" placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值" />
+              </a-col>
+              <a-col :span="2">
+                <a-row type="flex" justify="center" align="middle">
+                  <a-col>
+                    <a-icon @click="() => commandParams.splice(index, 1)" type="minus-circle" style="color: #ff0000" />
+                  </a-col>
+                </a-row>
+              </a-col>
+            </a-row>
+            <a-divider style="margin: 5px 0" />
           </div>
 
-          <a-button type="primary" @click="handleAddParam">添加参数</a-button>
+          <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
         </a-form-model-item>
         <a-form-model-item label="自动执行" prop="autoExecCron">
           <a-auto-complete v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
@@ -126,16 +134,27 @@
           </a-select>
         </a-form-model-item>
 
-        <a-form-model-item label="命令参数">
-          <div v-for="item in commandParams" :key="item.key">
-            <div class="item-info">
-              <a-input addon-before="参数值" v-model="item.value" placeholder="参数值" />
-            </div>
-            <div class="item-icon" @click="handleDeleteParam(index)">
-              <a-icon type="minus-circle" style="color: #ff0000" />
-            </div>
-          </div>
-          <a-button type="primary" @click="handleAddParam">添加参数</a-button>
+        <a-form-model-item label="命令参数" :help="`${commandParams.length ? '所有参数将拼接成字符串以空格分隔形式执行脚本,需要注意参数顺序和未填写值的参数将自动忽略' : ''}`">
+          <a-row v-for="(item, index) in commandParams" :key="item.key">
+            <a-col :span="22">
+              <a-input :addon-before="`参数${index + 1}值`" v-model="item.value" :placeholder="`参数值 ${item.desc ? ',' + item.desc : ''}`">
+                <template slot="suffix">
+                  <a-tooltip v-if="item.desc" :title="item.desc">
+                    <a-icon type="info-circle" style="color: rgba(0, 0, 0, 0.45)" />
+                  </a-tooltip>
+                </template>
+              </a-input>
+            </a-col>
+
+            <a-col v-if="!item.desc" :span="2">
+              <a-row type="flex" justify="center" align="middle">
+                <a-col>
+                  <a-icon type="minus-circle" style="color: #ff0000" @click="() => commandParams.splice(index, 1)" />
+                </a-col>
+              </a-row>
+            </a-col>
+          </a-row>
+          <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -327,6 +346,14 @@ export default {
         }
         this.formLoading = true;
         if (this.commandParams && this.commandParams.length > 0) {
+          for (let i = 0; i < this.commandParams.length; i++) {
+            if (!this.commandParams[i].desc) {
+              this.$notification.error({
+                message: "请填写第" + (i + 1) + "个参数的描述",
+              });
+              return false;
+            }
+          }
           this.temp.defParams = JSON.stringify(this.commandParams);
         } else {
           this.temp.defParams = "";
@@ -423,19 +450,7 @@ export default {
         this.sshList = res.data || [];
       });
     },
-    // 添加命令参数
-    handleAddParam() {
-      this.commandParams.push({});
-    },
-    // 删除命令参数
-    handleDeleteParam(index) {
-      this.commandParams.splice(index, 1);
-    },
-    handleParamChange(check) {
-      if (!check) {
-        this.commandParams = [];
-      }
-    },
+
     handleExecuteCommandOk() {
       if (!this.chooseSsh || this.chooseSsh.length <= 0) {
         this.$notification.error({
@@ -541,23 +556,5 @@ export default {
 .config-editor {
   overflow-y: scroll;
   max-height: 300px;
-}
-
-.params-item {
-  display: flex;
-  align-items: center;
-  border-bottom: 1px #e2e2e2 solid;
-  padding-bottom: 5px;
-}
-
-.item-info {
-  display: inline-block;
-  width: 90%;
-}
-
-.item-icon {
-  display: inline-block;
-  width: 10%;
-  text-align: center;
 }
 </style>

@@ -22,14 +22,10 @@
  */
 package io.jpom.model.data;
 
-import io.jpom.model.BaseJsonModel;
 import io.jpom.model.BaseWorkspaceModel;
-import io.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import top.jpom.h2db.TableName;
-
-import java.util.List;
 
 /**
  * 指令信息
@@ -54,10 +50,6 @@ public class CommandModel extends BaseWorkspaceModel {
      */
     private String command;
     /**
-     * 命令类型，0-shell，1-powershell
-     */
-    private Integer type;
-    /**
      * 命令默认参数
      */
     private String defParams;
@@ -73,21 +65,4 @@ public class CommandModel extends BaseWorkspaceModel {
      * 触发器 token
      */
     private String triggerToken;
-
-    public List<CommandParam> params() {
-        return params(getDefParams());
-    }
-
-    public static List<CommandParam> params(String defParams) {
-        return StringUtil.jsonConvertArray(defParams, CommandParam.class);
-    }
-
-    @Data
-    @EqualsAndHashCode(callSuper = true)
-    public static class CommandParam extends BaseJsonModel {
-        /**
-         * 参数值
-         */
-        private String value;
-    }
 }

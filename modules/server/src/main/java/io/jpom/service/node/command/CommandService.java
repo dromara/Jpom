@@ -35,7 +35,6 @@ import cn.hutool.db.Entity;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.system.SystemUtil;
-import com.alibaba.fastjson2.JSONObject;
 import com.jcraft.jsch.ChannelExec;
 import io.jpom.common.BaseServerController;
 import io.jpom.cron.CronUtils;
@@ -46,6 +45,7 @@ import io.jpom.model.data.CommandExecLogModel;
 import io.jpom.model.data.CommandModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.user.UserModel;
+import io.jpom.script.CommandParam;
 import io.jpom.service.ITriggerToken;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.ssh.SshService;
@@ -63,7 +63,6 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 命令管理
@@ -199,12 +198,11 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
      */
     public String executeBatch(CommandModel commandModel, String params, String nodes, int triggerExecType) {
         Assert.notNull(commandModel, "没有对应对命令");
-        List<CommandModel.CommandParam> commandParams = CommandModel.params(params);
         List<String> sshIds = StrUtil.split(nodes, StrUtil.COMMA, true, true);
         Assert.notEmpty(sshIds, "请选择 ssh 节点");
         String batchId = IdUtil.fastSimpleUUID();
         for (String sshId : sshIds) {
-            this.executeItem(commandModel, commandParams, sshId, batchId, triggerExecType);
+            this.executeItem(commandModel, params, sshId, batchId, triggerExecType);
         }
         return batchId;
     }
@@ -217,7 +215,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
      * @param sshId         ssh id
      * @param batchId       批次ID
      */
-    private void executeItem(CommandModel commandModel, List<CommandModel.CommandParam> commandParams, String sshId, String batchId, int triggerExecType) {
+    private void executeItem(CommandModel commandModel, String commandParams, String sshId, String batchId, int triggerExecType) {
         SshModel sshModel = sshService.getByKey(sshId, false);
 
         CommandExecLogModel commandExecLogModel = new CommandExecLogModel();
@@ -232,13 +230,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
         }
         commandExecLogModel.setStatus(CommandExecLogModel.Status.ING.getCode());
         // 拼接参数
-        String commandParamsLine;
-        if (commandParams != null) {
-            commandExecLogModel.setParams(JSONObject.toJSONString(commandParams));
-            commandParamsLine = commandParams.stream().map(CommandModel.CommandParam::getValue).collect(Collectors.joining(StrUtil.SPACE));
-        } else {
-            commandParamsLine = StrUtil.EMPTY;
-        }
+        String commandParamsLine = CommandParam.toCommandLine(commandParams);
         commandExecLogService.insert(commandExecLogModel);
 
         ThreadUtil.execute(() -> {
@@ -372,7 +364,6 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
                     update.setId(exits.getId());
                     update.setCommand(data.getCommand());
                     update.setDesc(data.getDesc());
-                    update.setType(data.getType());
                     update.setDefParams(data.getDefParams());
                     update.setAutoExecCron(data.getAutoExecCron());
                     super.updateById(update);
