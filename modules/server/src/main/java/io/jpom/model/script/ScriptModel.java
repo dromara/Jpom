@@ -28,6 +28,7 @@ import cn.hutool.core.util.StrUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.Const;
 import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.script.CommandParam;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
@@ -76,6 +77,9 @@ public class ScriptModel extends BaseWorkspaceModel {
      */
     private String triggerToken;
 
+    public void setDefArgs(String defArgs) {
+        this.defArgs = CommandParam.convertToParam(defArgs);
+    }
 
     public File scriptPath() {
         return scriptPath(getId());

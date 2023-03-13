@@ -53,8 +53,28 @@
             <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
           </div>
         </a-form-model-item>
-        <a-form-model-item label="默认参数" prop="defArgs">
+        <!-- <a-form-model-item label="默认参数" prop="defArgs">
           <a-input v-model="temp.defArgs" placeholder="默认参数" />
+        </a-form-model-item> -->
+        <a-form-model-item label="默认参数">
+          <div v-for="(item, index) in commandParams" :key="item.key">
+            <a-row type="flex" justify="center" align="middle">
+              <a-col :span="22">
+                <a-input :addon-before="`参数${index + 1}描述`" v-model="item.desc" placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义" />
+                <a-input :addon-before="`参数${index + 1}值`" v-model="item.value" placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值" />
+              </a-col>
+              <a-col :span="2">
+                <a-row type="flex" justify="center" align="middle">
+                  <a-col>
+                    <a-icon @click="() => commandParams.splice(index, 1)" type="minus-circle" style="color: #ff0000" />
+                  </a-col>
+                </a-row>
+              </a-col>
+            </a-row>
+            <a-divider style="margin: 5px 0" />
+          </div>
+
+          <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
         </a-form-model-item>
         <a-form-model-item label="定时执行" prop="autoExecCron">
           <a-auto-complete v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
@@ -118,6 +138,7 @@ export default {
         name: [{ required: true, message: "Please input Script name", trigger: "blur" }],
         context: [{ required: true, message: "Please input Script context", trigger: "blur" }],
       },
+      commandParams: [],
     };
   },
   computed: {
@@ -144,14 +165,13 @@ export default {
         this.loading = false;
       });
     },
-    parseTime(v) {
-      return parseTime(v);
-    },
+    parseTime,
     // 添加
     handleAdd() {
       this.temp = {
         type: "add",
       };
+      this.commandParams = [];
       this.editScriptVisible = true;
     },
     // 修改
@@ -161,6 +181,7 @@ export default {
         nodeId: this.node.id,
       }).then((res) => {
         this.temp = Object.assign({}, res.data);
+        this.commandParams = this.temp.defArgs ? JSON.parse(this.temp.defArgs) : [];
         //
         this.editScriptVisible = true;
       });
@@ -172,6 +193,19 @@ export default {
           message: "服务端同步的脚本不能在此修改",
         });
         return;
+      }
+      if (this.commandParams && this.commandParams.length > 0) {
+        for (let i = 0; i < this.commandParams.length; i++) {
+          if (!this.commandParams[i].desc) {
+            this.$notification.error({
+              message: "请填写第" + (i + 1) + "个参数的描述",
+            });
+            return false;
+          }
+        }
+        this.temp.defArgs = JSON.stringify(this.commandParams);
+      } else {
+        this.temp.defArgs = "";
       }
       // 检验表单
       this.$refs["editScriptForm"].validate((valid) => {
