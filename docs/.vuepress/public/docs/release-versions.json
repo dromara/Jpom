@@ -1,9 +1,9 @@
 {
   "url": "https://jpom.top/docs/versions.json",
-  "tag_name": "v2.10.31",
-  "tagName": "v2.10.31",
-  "agentUrl": "https://download.jpom.top/release/2.10.31/agent-2.10.31-release.zip",
-  "serverUrl": "https://download.jpom.top/release/2.10.31/server-2.10.31-release.zip",
+  "tag_name": "v2.10.32",
+  "tagName": "v2.10.32",
+  "agentUrl": "https://download.jpom.top/release/2.10.32/agent-2.10.32-release.zip",
+  "serverUrl": "https://download.jpom.top/release/2.10.32/server-2.10.32-release.zip",
   "changelogUrl": "https://gitee.com/dromara/Jpom/raw/master/CHANGELOG.md",
   "downloadUrl": "https://jpom.top/pages/all-downloads/"
 }
