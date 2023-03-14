@@ -23,6 +23,7 @@
 package io.jpom.common.interceptor;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
 import io.jpom.encrypt.EncryptFactory;
@@ -64,11 +65,11 @@ public class DecryptionFilter implements Filter {
         }
         log.debug("当前请求需要解密：{}", encryptor.name());
         String contentType = request.getContentType();
-        if (ContentType.isFormUrlEncode(contentType)) {
+        if (ContentType.isDefault(contentType)) {
             // 普通表单
             HttpServletRequestWrapper wrapper = new ParameterRequestWrapper(request, encryptor);
             chain.doFilter(wrapper, response);
-        } else if (contentType.contains(MediaType.APPLICATION_JSON_VALUE)) {
+        } else if (StrUtil.startWithIgnoreCase(contentType, MediaType.APPLICATION_JSON_VALUE)) {
             String body = ServletUtil.getBody(request);
             String temp;
             try {
@@ -84,6 +85,7 @@ public class DecryptionFilter implements Filter {
             HttpServletRequestWrapper wrapper = new MultipartRequestWrapper(request, encryptor);
             chain.doFilter(wrapper, response);
         } else {
+            log.warn("当前请求类型不支持加密：{}", contentType);
             chain.doFilter(servletRequest, response);
         }
     }

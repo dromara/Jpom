@@ -740,7 +740,12 @@ public abstract class AbstractProjectCommander {
         if (parsePid > 0) {
             PID_JPOM_NAME.put(parsePid, nodeProjectInfoModel.getName());
         } else {
-            Assert.state(JvmUtil.jpsNormal, JvmUtil.JPS_ERROR_MSG);
+            //
+            RunMode runMode = nodeProjectInfoModel.getRunMode();
+            if (runMode != RunMode.Dsl && runMode != RunMode.File) {
+                // 只有 java 项目才判断 jps
+                Assert.state(JvmUtil.jpsNormal, JvmUtil.JPS_ERROR_MSG);
+            }
         }
         return parsePid;
     }
