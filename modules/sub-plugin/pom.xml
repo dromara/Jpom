@@ -39,6 +39,7 @@
         <module>svn-clone</module>
         <module>docker-cli</module>
         <module>git-clone</module>
+        <module>encrypt</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
     <version>2.10.29</version>

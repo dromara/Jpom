@@ -20,65 +20,16 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package top.jpom.transport;
-
-import java.net.Proxy;
+package io.jpom.encrypt;
 
 /**
- * 节点通讯的 接口
- *
- * @author bwcx_jzy
- * @since 2022/12/23
+ * @author loyal.f
+ * @date 2023/3/9
  */
-public interface INodeInfo {
+public abstract class Encryptor {
 
-    /**
-     * 节点名称
-     *
-     * @return 名称
-     */
-    String name();
+public abstract String encrypt(String input) throws Exception;
 
-    /**
-     * 节点 url
-     * <p>
-     * HOST:PORT
-     *
-     * @return 节点 url
-     */
-    String url();
+public abstract String decrypt(String input) throws Exception;
 
-    /**
-     * 协议
-     *
-     * @return http
-     */
-    String scheme();
-
-    /**
-     * 节点 授权信息
-     * sha1(user@pwd)
-     *
-     * @return 用户
-     */
-    String authorize();
-
-    /**
-     * 节点通讯代理
-     *
-     * @return proxy
-     */
-    Proxy proxy();
-
-    /**
-     * 超时时间
-     *
-     * @return 超时时间 单位秒
-     */
-    Integer timeout();
-
-    /**
-     * 传输加密方式
-     */
-    Integer transportEncryption();
 }

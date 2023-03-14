@@ -15,4 +15,6 @@ DROP,DOCKER_INFO,failureMsg
 DROP,USEROPERATELOGV1,reqId
 ADD,USEROPERATELOGV1,workspaceName,String,50,,工作空间名
 ADD,USEROPERATELOGV1,username,String,50,,用户名
+ADD,MACHINE_NODE_INFO,transportEncryption,TINYINT,,,传输加密方式 0 不加密 1 BASE64 2 AES
 DROP,COMMAND_INFO,type,
+

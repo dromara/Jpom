@@ -20,65 +20,48 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package top.jpom.transport;
+package io.jpom.common.interceptor;
 
-import java.net.Proxy;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Map;
 
 /**
- * 节点通讯的 接口
- *
- * @author bwcx_jzy
- * @since 2022/12/23
+ * @author loyal.f
+ * @date 2023/3/13
  */
-public interface INodeInfo {
+public class ParameterRequestWrapper extends HttpServletRequestWrapper {
 
-    /**
-     * 节点名称
-     *
-     * @return 名称
-     */
-    String name();
+    private Map<String, String[]> parameterMap;
 
-    /**
-     * 节点 url
-     * <p>
-     * HOST:PORT
-     *
-     * @return 节点 url
-     */
-    String url();
+    public ParameterRequestWrapper(HttpServletRequest request, Map<String, String[]> parameterMap) {
+        super(request);
+        this.parameterMap = parameterMap;
+    }
 
-    /**
-     * 协议
-     *
-     * @return http
-     */
-    String scheme();
+    @Override
+    public Map<String, String[]> getParameterMap() {
+        return parameterMap;
+    }
 
-    /**
-     * 节点 授权信息
-     * sha1(user@pwd)
-     *
-     * @return 用户
-     */
-    String authorize();
+    @Override
+    public String getParameter(String name) {
+        String[] values = parameterMap.get(name);
+        if (values != null && values.length > 0) {
+            return values[0];
+        }
+        return null;
+    }
 
-    /**
-     * 节点通讯代理
-     *
-     * @return proxy
-     */
-    Proxy proxy();
+    @Override
+    public Enumeration<String> getParameterNames() {
+        return Collections.enumeration(parameterMap.keySet());
+    }
 
-    /**
-     * 超时时间
-     *
-     * @return 超时时间 单位秒
-     */
-    Integer timeout();
-
-    /**
-     * 传输加密方式
-     */
-    Integer transportEncryption();
+    @Override
+    public String[] getParameterValues(String name) {
+        return parameterMap.get(name);
+    }
 }
