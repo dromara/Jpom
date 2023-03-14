@@ -22,6 +22,7 @@
  */
 package io.jpom.controller.system;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import io.jpom.JpomApplication;
 import io.jpom.build.BuildExecuteService;
@@ -53,6 +54,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * 缓存管理
@@ -96,6 +98,8 @@ public class CacheManageController extends BaseServerController {
         map.put("shardingSize", BaseServerController.SHARDING_IDS.size());
         map.put("buildCount", BuildExecuteService.buildCount());
         map.put("outGivingCount", OutGivingRun.outGivingCount());
+        map.put("dateTime", DateTime.now().toString());
+        map.put("timeZoneId", TimeZone.getDefault().getID());
         //
         return JsonMessage.success("ok", map);
     }

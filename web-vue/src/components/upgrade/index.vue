@@ -2,7 +2,11 @@
   <div>
     <a-timeline>
       <a-timeline-item>
-        <span class="layui-elem-quote">当前程序打包时间：{{ temp.timeStamp }}</span>
+        <span class="layui-elem-quote">
+          当前程序打包时间：{{ temp.timeStamp }}
+          <a-tag v-if="this.nodeId || this.machineId">agent</a-tag>
+          <a-tag v-else>server</a-tag>
+        </span>
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote">当前前端打包时间：{{ temp.vueTimeStamp }}</span>

@@ -22,6 +22,7 @@
  */
 package io.jpom.encrypt;
 
+import cn.hutool.core.util.SystemPropsUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.symmetric.AES;
 
@@ -33,12 +34,13 @@ import cn.hutool.crypto.symmetric.AES;
  */
 public class AESEncryptor implements Encryptor {
 
-    private static final String KEY = "aesEncryptionKey";
+    private final byte[] keyByte;
 
     private static volatile AESEncryptor singleton;
 
-    private AESEncryptor() {
+    private AESEncryptor(String key) {
         //构造器私有化，防止new，导致多个实例
+        this.keyByte = key.getBytes();
     }
 
     public static Encryptor getInstance() {
@@ -49,7 +51,8 @@ public class AESEncryptor implements Encryptor {
             synchronized (AESEncryptor.class) {
                 //第二层检查
                 if (singleton == null) {
-                    singleton = new AESEncryptor();
+                    String aesKey = SystemPropsUtil.get("JPOM_ENCRYPT_AES_KEY", "Djnn3runZBzdv9Nv");
+                    singleton = new AESEncryptor(aesKey);
                 }
             }
         }
@@ -64,13 +67,13 @@ public class AESEncryptor implements Encryptor {
 
     @Override
     public String encrypt(String input) throws Exception {
-        AES aes = SecureUtil.aes(KEY.getBytes());
+        AES aes = SecureUtil.aes(keyByte);
         return aes.encryptHex(input);
     }
 
     @Override
     public String decrypt(String input) throws Exception {
-        AES aes = SecureUtil.aes(KEY.getBytes());
+        AES aes = SecureUtil.aes(keyByte);
         return aes.decryptStr(input);
     }
 

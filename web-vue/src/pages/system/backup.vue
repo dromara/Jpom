@@ -19,9 +19,9 @@
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="backupType" slot-scope="text" placement="topleft" :title="text">
+      <a-tooltip slot="backupType" slot-scope="text" placement="topleft" :title="text">
         <span>{{ backupTypeMap[text] }}</span>
-      </template>
+      </a-tooltip>
       <template slot="baleTimeStamp" slot-scope="text">
         <a-tooltip placement="topLeft" :title="`${parseTime(text)}`"> {{ parseTime(text) }} </a-tooltip>
       </template>
@@ -58,9 +58,9 @@
       </a-tooltip> -->
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button size="small" type="primary" @click="handleDownload(record)">下载</a-button>
-          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button size="small" type="primary" :disabled="record.status !== 1" @click="handleDownload(record)">下载</a-button>
           <a-button size="small" type="danger" :disabled="record.status !== 1" @click="handleRestore(record)">还原</a-button>
+          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
@@ -165,20 +165,17 @@ export default {
           dataIndex: "createTimeMillis",
           sorter: true,
           customRender: (text) => {
-            if (!text) {
-              return "";
-            }
             return parseTime(text);
           },
-          width: 170,
+          width: "170px",
         },
         {
           title: "操作",
           dataIndex: "operation",
-          width: 180,
+          width: "180px",
           scopedSlots: { customRender: "operation" },
           align: "center",
-          // fixed: "right",
+          fixed: "right",
         },
       ],
       rules: {

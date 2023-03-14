@@ -4,6 +4,11 @@
       <a-tab-pane key="1" tab="缓存信息">
         <a-alert message="请勿手动删除数据目录下面文件,如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除" style="margin-top: 10px; margin-bottom: 40px" banner />
         <a-timeline>
+          <a-timeline-item v-if="temp.dateTime">
+            <span class="layui-elem-quote">
+              服务端时间：{{ temp.dateTime }} <a-tag>{{ temp.timeZoneId }}</a-tag>
+            </span>
+          </a-timeline-item>
           <a-timeline-item>
             <span class="layui-elem-quote">数据目录占用空间：{{ temp.dataSize }}</span>
           </a-timeline-item>
