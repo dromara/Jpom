@@ -301,7 +301,7 @@ public class LoginControl extends BaseServerController {
             return new JsonMessage<>(ServerConst.AUTHORIZE_TIME_OUT_CODE, "没有对应的用户");
         }
         UserLoginDto userLoginDto = userService.getUserJwtId(userModel);
-        userLoginLogServer.success(userModel, 3, true, request);
+        userLoginLogServer.success(userModel, 3, false, request);
         return JsonMessage.success("", userLoginDto);
     }
 
