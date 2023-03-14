@@ -22,20 +22,20 @@
  */
 package io.jpom.updater.utils;
 
-import freemarker.core.Configurable;
-import freemarker.template.*;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
  * xxx测试类
  *
  * @author hjk
- * @date 12/19/2022
+ * @since 12/19/2022
  */
 public class FreeMarkerTest {
 

@@ -36,7 +36,7 @@ import java.util.Scanner;
  * Jpom 更新器主启动类
  *
  * @author hjk
- * @date 12/18/2022
+ * @since 12/18/2022
  */
 public class Updater {
 

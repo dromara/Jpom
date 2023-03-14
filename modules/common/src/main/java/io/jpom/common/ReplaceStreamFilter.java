@@ -29,6 +29,8 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import javax.servlet.*;
@@ -43,6 +45,7 @@ import java.io.IOException;
  */
 @Configuration
 @Slf4j
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class ReplaceStreamFilter implements Filter {
 
 

@@ -22,62 +22,69 @@
  */
 package io.jpom.common.interceptor;
 
-import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.http.ContentType;
 import io.jpom.encrypt.EncryptFactory;
 import io.jpom.encrypt.Encryptor;
-import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
+import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * @author loyal.f
- * @date 2023/3/13
+ * @since 2023/3/13
  */
+@Configuration
+@Slf4j
+@Order(1)
 public class DecryptionFilter implements Filter {
 
-
-    @SneakyThrows
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
-        String transportEncryption =request.getHeader("transport-encryption");
-        Encryptor encryptor= EncryptFactory.createEncryptor(Integer.valueOf(transportEncryption));
-
-        if(request.getContentType().contains(MediaType.APPLICATION_FORM_URLENCODED_VALUE)){
-            Map<String, String[]> parameterMap = new HashMap<>(request.getParameterMap());
-            if(parameterMap.size()>0){
-                Map<String, String[]> decryptMap = new HashMap<>();
-                for(Map.Entry<String, String[]> entry : parameterMap.entrySet()){
-                    if (ObjectUtil.isNotEmpty(entry.getKey())|| ObjectUtil.isNotEmpty(entry.getValue())) {
-                        decryptMap.put(encryptor.decrypt(entry.getKey()),new String[]{encryptor.decrypt(entry.getValue()[0])});
-                    }
-                }
-                ParameterRequestWrapper requestWrapper = new ParameterRequestWrapper(request, decryptMap);
-                chain.doFilter(requestWrapper, response);
+        String transportEncryption = request.getHeader("transport-encryption");
+        // 兼容没有没有传入
+        Encryptor encryptor;
+        try {
+            encryptor = EncryptFactory.createEncryptor(Convert.toInt(transportEncryption, 0));
+        } catch (NoSuchAlgorithmException e) {
+            log.error("获取解密分发失败", e);
+            chain.doFilter(servletRequest, response);
+            return;
+        }
+        log.debug("当前请求需要解密：{}", encryptor.name());
+        String contentType = request.getContentType();
+        if (ContentType.isFormUrlEncode(contentType)) {
+            // 普通表单
+            HttpServletRequestWrapper wrapper = new ParameterRequestWrapper(request, encryptor);
+            chain.doFilter(wrapper, response);
+        } else if (contentType.contains(MediaType.APPLICATION_JSON_VALUE)) {
+            String body = ServletUtil.getBody(request);
+            String temp;
+            try {
+                temp = encryptor.decrypt(body);
+            } catch (Exception e) {
+                log.error("解密失败", e);
+                temp = body;
             }
-        }else if(request.getContentType().contains(MediaType.APPLICATION_JSON_VALUE)){
-            StringBuilder stringBuilder = new StringBuilder();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8));
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                stringBuilder.append(line);
-            }
-            String temp=encryptor.decrypt(stringBuilder.toString());
-            BodyRewritingRequestWrapper requestWrapper = new BodyRewritingRequestWrapper(request, temp.getBytes("UTF-8"));
+            BodyRewritingRequestWrapper requestWrapper = new BodyRewritingRequestWrapper(request, temp.getBytes(StandardCharsets.UTF_8));
             chain.doFilter(requestWrapper, response);
-        }else{
+        } else if (ServletFileUpload.isMultipartContent(request)) {
+            // 文件上传
+            HttpServletRequestWrapper wrapper = new MultipartRequestWrapper(request, encryptor);
+            chain.doFilter(wrapper, response);
+        } else {
             chain.doFilter(servletRequest, response);
         }
-
     }
-
-
 }

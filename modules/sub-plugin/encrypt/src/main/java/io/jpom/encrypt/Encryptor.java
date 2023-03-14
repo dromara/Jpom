@@ -24,12 +24,34 @@ package io.jpom.encrypt;
 
 /**
  * @author loyal.f
- * @date 2023/3/9
+ * @since 2023/3/9
  */
-public abstract class Encryptor {
+public interface Encryptor {
 
-public abstract String encrypt(String input) throws Exception;
 
-public abstract String decrypt(String input) throws Exception;
+    /**
+     * 加密方法
+     *
+     * @return 名称
+     */
+    String name();
+
+    /**
+     * 加密
+     *
+     * @param input 传入的测试
+     * @return 加密后的字符串
+     * @throws Exception 异常
+     */
+    String encrypt(String input) throws Exception;
+
+    /**
+     * 解密
+     *
+     * @param input 要解密的密文
+     * @return 解密后的明文
+     * @throws Exception 异常
+     */
+    String decrypt(String input) throws Exception;
 
 }

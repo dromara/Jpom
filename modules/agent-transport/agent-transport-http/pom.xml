@@ -45,7 +45,7 @@
     <dependencies>
         <dependency>
             <groupId>io.jpom.plugins</groupId>
-            <artifactId>plugin-encrypt</artifactId>
+            <artifactId>encrypt</artifactId>
             <version>${project.version}</version>
         </dependency>
 

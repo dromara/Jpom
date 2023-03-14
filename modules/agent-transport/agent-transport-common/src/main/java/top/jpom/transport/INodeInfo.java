@@ -79,6 +79,8 @@ public interface INodeInfo {
 
     /**
      * 传输加密方式
+     *
+     * @return 传输加密方式 0 不加密 1 BASE64 2 AES
      */
     Integer transportEncryption();
 }

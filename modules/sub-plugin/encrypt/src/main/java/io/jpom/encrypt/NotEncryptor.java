@@ -22,13 +22,37 @@
  */
 package io.jpom.encrypt;
 
-import io.jpom.encrypt.Encryptor;
-
 /**
  * @author loyal.f
- * @date 2023/3/9
+ * @since 2023/3/9
  */
-public class NotEncryptor extends Encryptor {
+public class NotEncryptor implements Encryptor {
+
+    private static volatile NotEncryptor singleton;
+
+    private NotEncryptor() {
+        //构造器私有化，防止new，导致多个实例
+    }
+
+    public static Encryptor getInstance() {
+        //向外暴露一个静态的公共方法  getInstance
+        //第一层检查
+        if (singleton == null) {
+            //同步代码块
+            synchronized (NotEncryptor.class) {
+                //第二层检查
+                if (singleton == null) {
+                    singleton = new NotEncryptor();
+                }
+            }
+        }
+        return singleton;
+    }
+
+    @Override
+    public String name() {
+        return "no";
+    }
 
     @Override
     public String encrypt(String input) {

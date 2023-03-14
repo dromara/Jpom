@@ -21,21 +21,51 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package io.jpom.encrypt;
-import java.util.Base64;
+
+import cn.hutool.core.codec.Base64;
+import cn.hutool.core.util.CharsetUtil;
 
 /**
+ * base64
+ *
  * @author loyal.f
- * @date 2023/3/9
+ * @since 2023/3/9
  */
-public class BASE64Encryptor extends Encryptor {
+public class BASE64Encryptor implements Encryptor {
+
+    private static volatile BASE64Encryptor singleton;
+
+    private BASE64Encryptor() {
+        //构造器私有化，防止new，导致多个实例
+    }
+
+    public static Encryptor getInstance() {
+        //向外暴露一个静态的公共方法  getInstance
+        //第一层检查
+        if (singleton == null) {
+            //同步代码块
+            synchronized (BASE64Encryptor.class) {
+                //第二层检查
+                if (singleton == null) {
+                    singleton = new BASE64Encryptor();
+                }
+            }
+        }
+        return singleton;
+    }
+
+    @Override
+    public String name() {
+        return "base64";
+    }
 
     @Override
     public String encrypt(String input) {
-        return Base64.getEncoder().encodeToString(input.getBytes());
+        return Base64.encode(input, CharsetUtil.CHARSET_UTF_8);
     }
 
     @Override
     public String decrypt(String input) {
-        return new String(Base64.getDecoder().decode(input));
+        return Base64.decodeStr(input);
     }
 }
