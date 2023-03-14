@@ -1,5 +1,30 @@
 # 🚀 版本日志
 
+## 2.10.30
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 导入 gitea 仓库搜索、分页无法正常使用问题
+   （感谢 [@Smith](https://gitee.com/autools) [Gitee pr 175](https://gitee.com/dromara/Jpom/pulls/175) [Gitee pr 174](https://gitee.com/dromara/Jpom/pulls/174) ）
+2. 【server】优化 镜像启动容器不填写运行命令行导致容器启动失败（部分低版本）
+   （感谢 [@失落的世界](https://gitee.com/marmotgo) [Gitee pr 176](https://gitee.com/dromara/Jpom/pulls/176) ）
+3. 【server】修复 节点分发 webhook 输入框的错别字（感谢 @大灰灰 ）
+4. 【server】修复 工作空间环境变量操作日志记录错误问题
+5. 【all】更新 fastjson2 版本
+6. 【all】优化 SSH 命令脚本、服务端脚本、插件端脚本执行参数优化
+   （感谢 [@大灰灰大](https://gitee.com/linjianhui) [Gitee issues I6IPDY](https://gitee.com/dromara/Jpom/issues/I6IPDY) ）
+7. 【server】优化 导入仓库页面提示信息错乱（感谢@零壹）
+
+### ❌ 不兼容功能
+
+1. 【server】删除 COMMAND_INFO 表 type 字段
+
+### ⚠️ 注意
+
+SSH 命令脚本、服务端脚本、插件端脚本默认参数规则变化：参数描述将必填，默认参数在手动执行时无法删除并且可以查看对应参数描述
+
+------
+
 ## 2.10.29 (2023-03-10)
 
 ### 🐣 新增功能
@@ -56,13 +81,14 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【all】升级 springboot 版本
-2. 【server】优化 系统自动同步 docker 已经安装的集群信息 
+2. 【server】优化 系统自动同步 docker 已经安装的集群信息
 3. 【server】更新 mysql maven 坐标：`mysql-connector-j`
 4. 【server】修复 构建产物模糊匹配二级剔除配置 `/` 无效
 
 ### ⚠️ 注意
 
-新增 docker 资产管理,系统会自动将已经存在的 docker 信息根据 host 去重同步到资产管理中（如果 host 存在多个工作空间将根据最后更新时间排序使用最新的一条数据）
+新增 docker 资产管理,系统会自动将已经存在的 docker 信息根据 host 去重同步到资产管理中（如果 host
+存在多个工作空间将根据最后更新时间排序使用最新的一条数据）
 
 更新后 docker、集群列表中状态如果出现：`信息丢失` 表示关联数据存在异常不能正常使用，需要删除对应数据重新关联
 
@@ -98,7 +124,7 @@
 
 ### ❌ 不兼容功能
 
-1. 【server】删除 弃用表 NODE_STAT 
+1. 【server】删除 弃用表 NODE_STAT
 2. 【server】删除 弃用表 SYSTEMMONITORLOG
 3. 【server】删除 相关表中的 strike 字段
 
@@ -142,7 +168,7 @@
 ### ⚠️ 注意
 
 由于新增 SSH 资产管理，之前ssh 配置如果引用的工作空间变量的配置信息可能将失效（作用域不同）.
-如果仍需要变量信息还需要将对应的信息迁移到全局变量中才可以正常使用 
+如果仍需要变量信息还需要将对应的信息迁移到全局变量中才可以正常使用
 
 ------
 

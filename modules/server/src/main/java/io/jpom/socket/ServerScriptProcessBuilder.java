@@ -36,6 +36,7 @@ import io.jpom.common.JsonMessage;
 import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.script.BaseRunScript;
+import io.jpom.script.CommandParam;
 import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
@@ -79,7 +80,7 @@ public class ServerScriptProcessBuilder extends BaseRunScript implements Runnabl
         //
         String script = FileUtil.getAbsolutePath(scriptFile);
         processBuilder = new ProcessBuilder();
-        List<String> command = StrUtil.splitTrim(args, StrUtil.SPACE);
+        List<String> command = CommandParam.toCommandList(args);
         command.add(0, script);
         CommandUtil.paddingPrefix(command);
         log.debug(CollUtil.join(command, StrUtil.SPACE));

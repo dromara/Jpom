@@ -30,7 +30,6 @@ import io.jpom.common.*;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.validator.ValidatorItem;
-import top.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.model.user.UserModel;
@@ -38,6 +37,7 @@ import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
+import io.jpom.script.CommandParam;
 import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.service.script.ScriptExecuteLogServer;
 import io.jpom.service.script.ScriptServer;
@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -118,7 +119,7 @@ public class ScriptController extends BaseServerController {
         scriptModel.setName(name);
         scriptModel.setNodeIds(nodeIds);
         scriptModel.setDescription(description);
-        scriptModel.setDefArgs(defArgs);
+        scriptModel.setDefArgs(CommandParam.checkStr(defArgs));
 
         Assert.hasText(scriptModel.getContext(), "内容为空");
         //

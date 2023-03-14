@@ -23,6 +23,7 @@
 package io.jpom.model.node;
 
 import io.jpom.model.BaseNodeModel;
+import io.jpom.script.CommandParam;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import top.jpom.h2db.TableName;
@@ -78,5 +79,9 @@ public class ScriptCacheModel extends BaseNodeModel {
     @Override
     public void dataId(String id) {
         setScriptId(id);
+    }
+
+    public void setDefArgs(String defArgs) {
+        this.defArgs = CommandParam.convertToParam(defArgs);
     }
 }

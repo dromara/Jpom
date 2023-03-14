@@ -25,6 +25,7 @@ package io.jpom.model.data;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.JpomApplication;
+import io.jpom.script.CommandParam;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -67,6 +68,10 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 
     public String getLastRunUser() {
         return StrUtil.emptyToDefault(lastRunUser, StrUtil.DASHED);
+    }
+
+    public void setDefArgs(String defArgs) {
+        this.defArgs = CommandParam.convertToParam(defArgs);
     }
 
     public File scriptPath() {

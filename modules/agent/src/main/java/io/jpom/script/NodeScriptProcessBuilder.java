@@ -81,7 +81,7 @@ public class NodeScriptProcessBuilder extends BaseRunScript implements Runnable 
         //
         String script = FileUtil.getAbsolutePath(scriptFile);
         processBuilder = new ProcessBuilder();
-        List<String> command = StrUtil.splitTrim(args, StrUtil.SPACE);
+        List<String> command = CommandParam.toCommandList(args);
         command.add(0, script);
         CommandUtil.paddingPrefix(command);
         log.debug(CollUtil.join(command, StrUtil.SPACE));

@@ -35,6 +35,7 @@ import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
+import io.jpom.script.CommandParam;
 import io.jpom.service.node.command.CommandExecLogService;
 import io.jpom.service.node.command.CommandService;
 import io.jpom.service.user.TriggerTokenLogServer;
@@ -48,7 +49,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -104,7 +104,7 @@ public class CommandInfoController extends BaseServerController {
      */
     @RequestMapping(value = "edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> edit(@RequestBody JSONObject data) {
+    public JsonMessage<Object> edit(@RequestBody JSONObject data, HttpServletRequest request) {
         String name = data.getString("name");
         String command = data.getString("command");
         String desc = data.getString("desc");
@@ -121,22 +121,13 @@ public class CommandInfoController extends BaseServerController {
         commandModel.setSshIds(data.getString("sshIds"));
         commandModel.setAutoExecCron(autoExecCron);
         //
-        if (StrUtil.isNotEmpty(defParams)) {
-            List<CommandModel.CommandParam> params = CommandModel.params(defParams);
-            if (params == null) {
-                commandModel.setDefParams(StrUtil.EMPTY);
-            } else {
-                commandModel.setDefParams(JSONObject.toJSONString(params));
-            }
-        } else {
-            commandModel.setDefParams(StrUtil.EMPTY);
-        }
+        commandModel.setDefParams(CommandParam.checkStr(defParams));
 
         if (StrUtil.isEmpty(id)) {
             commandService.insert(commandModel);
         } else {
             commandModel.setId(id);
-            commandService.updateById(commandModel, getRequest());
+            commandService.updateById(commandModel, request);
         }
         return JsonMessage.success("操作成功");
     }

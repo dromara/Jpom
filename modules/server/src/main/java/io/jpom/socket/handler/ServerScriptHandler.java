@@ -27,6 +27,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
+import io.jpom.common.JsonMessage;
 import io.jpom.model.script.ScriptExecuteLogModel;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.model.user.UserModel;
@@ -88,7 +89,10 @@ public class ServerScriptHandler extends BaseProxyHandler {
                     json.put(Const.SOCKET_MSG_TAG, Const.SOCKET_MSG_TAG);
                     json.put("executeId", executeId);
                     ServerScriptProcessBuilder.addWatcher(scriptModel, executeId, args, session);
-                    this.sendMsg(session, json.toString());
+                    JsonMessage<String> jsonMessage = new JsonMessage<>(200, "开始执行");
+                    JSONObject jsonObject = jsonMessage.toJson();
+                    jsonObject.putAll(json);
+                    this.sendMsg(session, jsonObject.toString());
                     break;
                 }
                 case stop: {
