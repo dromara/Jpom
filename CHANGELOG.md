@@ -20,6 +20,8 @@
    （感谢 [@大灰灰大](https://gitee.com/linjianhui) [Gitee issues I6IPDY](https://gitee.com/dromara/Jpom/issues/I6IPDY) ）
 7. 【server】优化 导入仓库页面提示信息错乱（感谢@零壹）
 8. 【agent】修复 项目修改路径为子目录时 mv 文件触发死循环（感谢@D¹⁹⁹¹）
+9. 【server】修复 查询构建日志可能出现 NPE 问题
+   （感谢 [@Tom Xin](https://gitee.com/meiMingle) [Gitee issues I6MX9G](https://gitee.com/dromara/Jpom/issues/I6MX9G) ）
 
 ### ❌ 不兼容功能
 

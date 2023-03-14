@@ -71,6 +71,13 @@ public abstract class BaseExceptionHandler {
         }
     }
 
+    @ExceptionHandler({NullPointerException.class})
+    @ResponseBody
+    public JsonMessage<String> defNullPointerExceptionHandler(HttpServletRequest request, Exception e) {
+        log.error("global NullPointerException: {}", request.getRequestURI(), e);
+        return new JsonMessage<>(500, "程序错误,空指针");
+    }
+
     /**
      * 声明要捕获的异常 (参数或者状态异常)
      *
