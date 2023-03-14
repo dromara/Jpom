@@ -29,6 +29,7 @@ import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.NioUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Lombok;
@@ -100,66 +101,7 @@ public class FileUtils {
             }
             return jsonObject1.getString("filename").compareTo(jsonObject2.getString("filename"));
         }).collect(Collectors.toList());
-//        final int[] i = {0};
-//        arrayFile.forEach(o -> {
-//            JSONObject jsonObject = (JSONObject) o;
-//            jsonObject.put("index", ++i[0]);
-//        });
-//        return arrayFile;
     }
-
-//    /**
-//     * 判断路径是否满足jdk 条件
-//     *
-//     * @param path 路径
-//     * @return 判断存在java文件
-//     */
-//    public static boolean isJdkPath(String path) {
-//        String fileName = getJdkJavaPath(path, false);
-//        File newPath = new File(fileName);
-//        return newPath.exists() && newPath.isFile();
-//    }
-
-//    /**
-//     * 获取java 文件路径
-//     *
-//     * @param path path
-//     * @param w    是否使用javaw
-//     * @return 完整路径
-//     */
-//    public static String getJdkJavaPath(String path, boolean w) {
-//        String fileName;
-//        if (SystemUtil.getOsInfo().isWindows()) {
-//            fileName = w ? "javaw.exe" : "java.exe";
-//        } else {
-//            fileName = w ? "javaw" : "java";
-//        }
-//        File newPath = FileUtil.file(path, "bin", fileName);
-//        return FileUtil.getAbsolutePath(newPath);
-//    }
-
-//    /**
-//     * 获取jdk 版本
-//     *
-//     * @param path jdk 路径
-//     * @return 获取成功返回版本号
-//     */
-//    public static String getJdkVersion(String path) {
-//        String newPath = getJdkJavaPath(path, false);
-//        if (path.contains(StrUtil.SPACE)) {
-//            newPath = String.format("\"%s\"", newPath);
-//        }
-//        String command = CommandUtil.execSystemCommand(newPath + "  -version");
-//        String[] split = StrUtil.splitToArray(command, StrUtil.LF);
-//        if (split == null || split.length <= 0) {
-//            return null;
-//        }
-//        String[] strings = StrUtil.splitToArray(split[0], "\"");
-//        if (strings == null || strings.length <= 1) {
-//            return null;
-//        }
-//        return strings[1];
-//    }
 
     /**
      * 读取 日志文件
@@ -268,5 +210,32 @@ public class FileUtils {
         // 替换换行符
         String replace = StrUtil.replace(context, StrUtil.LF, FileUtil.getLineSeparator());
         FileUtil.writeString(replace, scriptFile, charset);
+    }
+
+    /**
+     * 安全的方式 move 文件夹内容
+     *
+     * @param src    源文件夹
+     * @param target 目标文件夹
+     */
+    public static void tempMoveContent(File src, File target) {
+        if (FileUtil.isSub(src, target)) {
+            // 子目录
+            // 将文件内容先复制到临时目录，避免递归出现自己 mv 自己的情况
+            File tmpDir = FileUtil.getTmpDir();
+            File tempMv = FileUtil.file(tmpDir, "mv", IdUtil.fastSimpleUUID());
+            FileUtil.mkdir(tempMv);
+            FileUtil.moveContent(src, tempMv, true);
+            // 再将临时目录下的文件移动到目标路径
+            FileUtil.mkdir(target);
+            FileUtil.moveContent(tempMv, target, true);
+            //
+            FileUtil.del(tempMv);
+            // 子目录不需要删除
+        } else {
+            FileUtil.moveContent(src, target, true);
+            // 删除文件夹
+            FileUtil.del(src);
+        }
     }
 }

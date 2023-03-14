@@ -280,10 +280,7 @@ public class ManageEditProjectController extends BaseAgentController {
                 // 正在运行的项目不能修改路径
                 this.projectMustNotRun(old, "正在运行的项目不能修改路径");
                 if (oldLib.exists()) {
-                    FileUtil.mkdir(newLib);
-                    FileUtil.moveContent(oldLib, newLib, true);
-                    // 删除文件夹
-                    FileUtil.del(oldLib);
+                    FileUtils.tempMoveContent(oldLib, newLib);
                 }
             }
         }
@@ -302,10 +299,7 @@ public class ManageEditProjectController extends BaseAgentController {
                 File oldLogBack = old.getLogBack();
                 if (oldLogBack.exists()) {
                     File logBack = news.getLogBack();
-                    FileUtil.mkdir(logBack);
-                    FileUtil.moveContent(oldLogBack, logBack, true);
-                    // 删除文件夹
-                    FileUtil.del(oldLogBack);
+                    FileUtils.tempMoveContent(oldLogBack, logBack);
                 }
             }
         }
