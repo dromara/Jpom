@@ -67,7 +67,7 @@ DROP PROCEDURE IF EXISTS add_column_if_not_exists;
 CREATE PROCEDURE add_column_if_not_exists(
     tname VARCHAR(64),
     cname VARCHAR(64),
-    columninfo VARCHAR(64)
+    columninfo VARCHAR(200)
 )
 BEGIN
     IF column_exists(tname, cname)

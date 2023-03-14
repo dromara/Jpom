@@ -83,6 +83,8 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
                     //  ALTER TABLE PROJECT_INFO ADD IF NOT EXISTS triggerToken VARCHAR (100) comment '触发器token';
                     String columnSql = this.generateColumnSql(viewAlterData);
                     columnSql = StrUtil.replace(columnSql, "'", "\\'");
+                    int length = StrUtil.length(columnSql);
+                    Assert.state(length <= 180, "sql 语句太长啦");
                     stringBuilder.append("CALL add_column_if_not_exists('").append(viewAlterData.getTableName()).append("','").append(viewAlterData.getName()).append("','").append(columnSql).append("')");
                     break;
                 case "DROP-TABLE":
