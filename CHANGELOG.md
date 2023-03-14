@@ -25,6 +25,8 @@
 10. 【server】优化 系统缓存页面显示当前服务器时间、时区信息
 11. 【server】修复 还原数据后备份状态错误问题
     （感谢 [@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues I6MVL7](https://gitee.com/dromara/Jpom/issues/I6MVL7) ）
+12. 【agent】修复 DSL 项目状态不判断 jps 命令是否正常（感谢@大灰灰）
+13. 【agent】修复 未配置节点白名单时直接创建分发项目报错（感谢@波比）
 
 ### ❌ 不兼容功能
 

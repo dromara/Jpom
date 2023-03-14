@@ -20,6 +20,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.lang.RegexPool;
@@ -91,5 +93,10 @@ public class TestStr {
     @Test
     public void testTimeZone() {
         System.out.println(TimeZone.getDefault().getID());
+    }
+
+    @Test
+    public void testList() {
+        System.out.println(CollUtil.addAll(null, CollUtil.newArrayList("")));
     }
 }
