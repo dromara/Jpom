@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.lang.RegexPool;
@@ -31,6 +32,7 @@ import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSONObject;
 import org.junit.Test;
 
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 /**
@@ -85,5 +87,10 @@ public class TestStr {
     public void testNum() {
         System.out.println(Convert.toInt("122+"));
         System.out.println(NumberUtil.parseInt("1122+"));
+    }
+
+    @Test
+    public void testTimeZone() {
+        System.out.println(TimeZone.getDefault().getID());
     }
 }

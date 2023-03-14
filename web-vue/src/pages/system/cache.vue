@@ -6,6 +6,11 @@
         <a-timeline>
           <a-timeline-item>
             <span class="layui-elem-quote">
+              服务端时间：{{ temp.dateTime }} <a-tag>{{ temp.timeZoneId }}</a-tag>
+            </span>
+          </a-timeline-item>
+          <a-timeline-item>
+            <span class="layui-elem-quote">
               数据目录占用空间：{{ temp.dataSize }} (10分钟刷新一次)
               <a-tooltip>
                 <template slot="title">

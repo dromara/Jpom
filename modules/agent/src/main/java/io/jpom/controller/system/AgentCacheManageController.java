@@ -22,6 +22,7 @@
  */
 package io.jpom.controller.system;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
@@ -46,6 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * 缓存管理
@@ -97,6 +99,8 @@ public class AgentCacheManageController extends BaseAgentController {
                 jsonObject.put("envVarKeys", varData.keySet());
             }
         }
+        jsonObject.put("dateTime", DateTime.now().toString());
+        jsonObject.put("timeZoneId", TimeZone.getDefault().getID());
         //
         return JsonMessage.success("ok", jsonObject);
     }
