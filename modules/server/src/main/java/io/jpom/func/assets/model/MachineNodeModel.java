@@ -197,6 +197,11 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
      */
     private String installId;
 
+    /**
+     * 传输加密方式 0 不加密 1 BASE64 2 AES
+     */
+    private Integer transportEncryption;
+
     @Override
     public String name() {
         return this.getName();
@@ -244,5 +249,10 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
     @Override
     public Integer timeout() {
         return this.getJpomTimeout();
+    }
+
+    @Override
+    public Integer transportEncryption() {
+        return this.getTransportEncryption();
     }
 }
