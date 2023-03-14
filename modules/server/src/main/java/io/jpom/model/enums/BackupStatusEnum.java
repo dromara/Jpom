@@ -31,30 +31,30 @@ import io.jpom.model.BaseEnum;
  * @since 2021-11-27
  */
 public enum BackupStatusEnum implements BaseEnum {
-	/**
-	 * 状态{0: 默认; 1: 成功; 2: 失败}
-	 */
-	DEFAULT(0, "默认"),
-	SUCCESS(1, "备份成功"),
-	FAILED(2, "备份失败"),
-	;
+    /**
+     * 状态{0: 处理中; 1: 成功; 2: 失败}
+     */
+    DEFAULT(0, "处理中"),
+    SUCCESS(1, "备份成功"),
+    FAILED(2, "备份失败"),
+    ;
 
-	BackupStatusEnum(int code, String desc) {
-		this.code = code;
-		this.desc = desc;
-	}
+    BackupStatusEnum(int code, String desc) {
+        this.code = code;
+        this.desc = desc;
+    }
 
-	final int code;
-	final String desc;
+    final int code;
+    final String desc;
 
-	@Override
-	public int getCode() {
-		return code;
-	}
+    @Override
+    public int getCode() {
+        return code;
+    }
 
-	@Override
-	public String getDesc() {
-		return desc;
-	}
+    @Override
+    public String getDesc() {
+        return desc;
+    }
 
 }

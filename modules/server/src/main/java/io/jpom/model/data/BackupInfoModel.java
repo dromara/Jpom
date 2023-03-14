@@ -22,7 +22,10 @@
  */
 package io.jpom.model.data;
 
+import cn.hutool.core.annotation.PropIgnore;
 import io.jpom.model.BaseUserModifyDbModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import top.jpom.db.DbExtConfig;
 import top.jpom.h2db.TableName;
 
@@ -31,7 +34,9 @@ import top.jpom.h2db.TableName;
  * @since 2021-11-18
  * Backup info with H2 database
  */
+@EqualsAndHashCode(callSuper = true)
 @TableName(value = "BACKUP_INFO", name = "数据备份", modes = DbExtConfig.Mode.H2)
+@Data
 public class BackupInfoModel extends BaseUserModifyDbModel {
 
     /**
@@ -39,7 +44,7 @@ public class BackupInfoModel extends BaseUserModifyDbModel {
      */
     private String name;
     /**
-     * 文件地址
+     * 文件地址，绝对路径
      */
     private String filePath;
     /**
@@ -69,68 +74,10 @@ public class BackupInfoModel extends BaseUserModifyDbModel {
      * 打包时间
      */
     private Long baleTimeStamp;
+    /**
+     * 文件是否存在
+     */
+    @PropIgnore
+    private Boolean fileExist;
 
-    public Long getBaleTimeStamp() {
-        return baleTimeStamp;
-    }
-
-    public void setBaleTimeStamp(Long baleTimeStamp) {
-        this.baleTimeStamp = baleTimeStamp;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
-    public Integer getBackupType() {
-        return backupType;
-    }
-
-    public void setBackupType(Integer backupType) {
-        this.backupType = backupType;
-    }
-
-    public Long getFileSize() {
-        return fileSize;
-    }
-
-    public void setFileSize(Long fileSize) {
-        this.fileSize = fileSize;
-    }
-
-    public String getSha1Sum() {
-        return sha1Sum;
-    }
-
-    public void setSha1Sum(String sha1Sum) {
-        this.sha1Sum = sha1Sum;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
 }
