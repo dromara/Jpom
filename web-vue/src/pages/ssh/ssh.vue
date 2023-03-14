@@ -54,7 +54,7 @@
             </a-menu>
           </a-dropdown>
 
-          <a-tooltip placement="topLeft" title="如果按钮不可用,请去 ssh 编辑中添加允许管理的授权文件夹">
+          <a-tooltip placement="topLeft" title="如果按钮不可用,请去资产管理 ssh 列表的关联中添加当前工作空间允许管理的授权文件夹">
             <a-button size="small" type="primary" :disabled="!record.fileDirs" @click="handleFile(record)">文件</a-button>
           </a-tooltip>
           <a-dropdown>

@@ -298,11 +298,18 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
             }
             return map;
         }).ifPresent(hostConfig::withStorageOpt);
+
         // 命令
         List<String> commands = (List<String>) parameter.get("commands");
-        if (CollUtil.isNotEmpty(commands)) {
-            containerCmd.withCmd(commands);
-        }
+        Optional.ofNullable(commands).ifPresent(strings -> {
+            List<String> list = strings.stream()
+                .filter(StrUtil::isNotEmpty)
+                .collect(Collectors.toList());
+            if (CollUtil.isNotEmpty(list)) {
+                containerCmd.withCmd(list);
+            }
+        });
+
         containerCmd.withHostConfig(hostConfig).withExposedPorts(exposedPortList);
         CreateContainerResponse containerResponse = containerCmd.exec();
         //

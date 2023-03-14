@@ -436,7 +436,8 @@ export default {
         { title: "序号", width: 80, ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
         { title: "服务Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "名称", dataIndex: "spec.name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "模式", dataIndex: "spec.mode.mode", ellipsis: true, width: 120, scopedSlots: { customRender: "tooltip" } },
+        { title: "运行模式", dataIndex: "spec.mode.mode", ellipsis: true, width: 120, scopedSlots: { customRender: "tooltip" } },
+        { title: "网络模式", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 120, scopedSlots: { customRender: "tooltip" } },
         { title: "副本数", dataIndex: "spec.mode.replicated.replicas", align: "center", width: 90, ellipsis: true, scopedSlots: { customRender: "replicas" } },
         { title: "解析模式", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
 

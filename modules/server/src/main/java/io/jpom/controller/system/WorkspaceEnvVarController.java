@@ -59,7 +59,7 @@ import java.util.List;
  */
 
 @RestController
-@Feature(cls = ClassFeature.SYSTEM_WORKSPACE)
+@Feature(cls = ClassFeature.SYSTEM_WORKSPACE_ENV)
 @RequestMapping(value = "/system/workspace_env/")
 public class WorkspaceEnvVarController extends BaseServerController {
 
