@@ -45,6 +45,7 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.dblog.BackupInfoService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -74,6 +75,7 @@ import java.util.stream.Collectors;
 @Feature(cls = ClassFeature.SYSTEM_BACKUP)
 @SystemPermission
 @ConditionalOnProperty(prefix = "jpom.db", name = "mode", havingValue = "H2", matchIfMissing = true)
+@Slf4j
 public class BackupInfoController extends BaseServerController {
 
     /**
@@ -97,7 +99,7 @@ public class BackupInfoController extends BaseServerController {
     public Object loadBackupList(HttpServletRequest request) {
         // 查询数据库
         PageResultDto<BackupInfoModel> pageResult = backupInfoService.listPage(request);
-
+        pageResult.each(backupInfoModel -> backupInfoModel.setFileExist(FileUtil.exist(backupInfoModel.getFilePath())));
         return JsonMessage.success("获取成功", pageResult);
     }
 
@@ -131,23 +133,51 @@ public class BackupInfoController extends BaseServerController {
         Objects.requireNonNull(backupInfoModel, "备份数据不存在");
 
         // 检查备份文件是否存在
-        File file = new File(backupInfoModel.getFilePath());
+        String filePath = backupInfoModel.getFilePath();
+        File file = new File(filePath);
         if (!FileUtil.exist(file)) {
             return new JsonMessage<>(400, "备份文件不存在");
         }
         // 清空 sql 加载记录
         StorageServiceFactory.clearExecuteSqlLog();
         // 还原备份文件
-        boolean flag = backupInfoService.restoreWithSql(backupInfoModel.getFilePath());
+        boolean flag = backupInfoService.restoreWithSql(filePath);
         if (flag) {
             // 还原备份数据成功之后需要修改当前备份信息的状态（因为备份的时候该备份信息状态是备份中）
-            backupInfoModel.setFileSize(FileUtil.size(file));
-            backupInfoModel.setSha1Sum(SecureUtil.sha1(file));
-            backupInfoModel.setStatus(BackupStatusEnum.SUCCESS.getCode());
-            backupInfoService.update(backupInfoModel);
+            this.fuzzyUpdate(SecureUtil.sha1(file));
             return new JsonMessage<>(200, "还原备份数据成功");
         }
         return new JsonMessage<>(400, "还原备份数据失败");
+    }
+
+    /**
+     * 模糊更新
+     *
+     * @param sha1 文件签名
+     */
+    private void fuzzyUpdate(String sha1) {
+        BackupInfoModel where = new BackupInfoModel();
+        where.setStatus(BackupStatusEnum.DEFAULT.getCode());
+        List<BackupInfoModel> list = backupInfoService.listByBean(where);
+        Optional.ofNullable(list).ifPresent(backupInfoModels -> {
+            for (BackupInfoModel backupInfoModel : backupInfoModels) {
+                String filePath = backupInfoModel.getFilePath();
+                if (!FileUtil.exist(filePath)) {
+                    continue;
+                }
+                File file = FileUtil.file(filePath);
+                if (StrUtil.equals(SecureUtil.sha1(file), sha1)) {
+                    // 是同一个文件
+                    BackupInfoModel update = new BackupInfoModel();
+                    update.setId(backupInfoModel.getId());
+                    update.setFileSize(FileUtil.size(file));
+                    update.setStatus(BackupStatusEnum.SUCCESS.getCode());
+                    update.setSha1Sum(sha1);
+                    int updateCount = backupInfoService.update(update);
+                    log.debug("更新还原数据：{}", updateCount);
+                }
+            }
+        });
     }
 
     /**

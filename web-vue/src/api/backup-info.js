@@ -119,7 +119,7 @@ export const arrayToMap = (arra) => {
 export const backupTypeMap = arrayToMap(backupTypeArray);
 
 export const backupStatusMap = {
-  0: "备份中",
-  1: "备份成功",
-  2: "备份失败",
+  0: "处理中",
+  1: "处理成功",
+  2: "处理失败",
 };
