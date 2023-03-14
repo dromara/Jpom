@@ -25,6 +25,7 @@ package io.jpom.func.assets.model;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import io.jpom.model.BaseGroupNameModel;
@@ -253,6 +254,7 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
 
     @Override
     public Integer transportEncryption() {
-        return this.getTransportEncryption();
+        // 需要兼容旧数据
+        return ObjectUtil.defaultIfNull(this.getTransportEncryption(), 0);
     }
 }

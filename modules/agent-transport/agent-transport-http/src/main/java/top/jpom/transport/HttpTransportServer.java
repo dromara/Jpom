@@ -23,6 +23,7 @@
 package top.jpom.transport;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.io.resource.Resource;
 import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.*;
@@ -33,7 +34,9 @@ import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import top.jpom.transform.TransformServerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -54,7 +57,7 @@ public class HttpTransportServer implements TransportServer {
 
         Optional.ofNullable(urlItem.timeout()).ifPresent(integer -> httpRequest.timeout(integer * 1000));
 
-        httpRequest.header(TransportServer.TRANSPORT_ENCRYPTION, nodeInfo.transportEncryption().toString());
+        httpRequest.header(TransportServer.TRANSPORT_ENCRYPTION, nodeInfo.transportEncryption() + "");
 
         httpRequest.header(TransportServer.JPOM_AGENT_AUTHORIZE, nodeInfo.authorize());
         //
@@ -68,7 +71,7 @@ public class HttpTransportServer implements TransportServer {
     }
 
     @SuppressWarnings("unchecked")
-    private void appendRequestData(HttpRequest httpRequest, IUrlItem urlItem, Object data,INodeInfo nodeInfo) {
+    private void appendRequestData(HttpRequest httpRequest, IUrlItem urlItem, Object data, INodeInfo nodeInfo) {
         DataContentType dataContentType = urlItem.contentType();
         Optional.ofNullable(data).ifPresent(o -> {
             Encryptor encryptor;
@@ -76,12 +79,24 @@ public class HttpTransportServer implements TransportServer {
                 encryptor = EncryptFactory.createEncryptor(nodeInfo.transportEncryption());
                 if (dataContentType == DataContentType.FORM_URLENCODED) {
                     if (o instanceof Map) {
-                        Map<String, Object> map=(Map<String, Object>) o;
+                        Map<String, Object> map = (Map<String, Object>) o;
                         Map<String, Object> encryptedMap = new HashMap<>();
                         for (Map.Entry<String, Object> entry : map.entrySet()) {
-                            String encryptedKey =  encryptor.encrypt(String.valueOf(entry.getKey()));
-                            String encryptedValue = encryptor.encrypt(String.valueOf(entry.getValue()));
-                            encryptedMap.put(encryptedKey, encryptedValue);
+                            String encryptedKey = encryptor.encrypt(entry.getKey());
+                            Object value = entry.getValue();
+                            Object newValue;
+                            if (value instanceof String[]) {
+                                String[] valueStr = (String[]) value;
+                                for (int i = 0; i < valueStr.length; i++) {
+                                    valueStr[i] = encryptor.encrypt(valueStr[i]);
+                                }
+                                newValue = valueStr;
+                            } else if (value instanceof Resource) {
+                                newValue = value;
+                            } else {
+                                newValue = encryptor.encrypt(StrUtil.toStringOrNull(entry.getValue()));
+                            }
+                            encryptedMap.put(encryptedKey, newValue);
                         }
                         httpRequest.form(encryptedMap);
                     } else {
@@ -92,8 +107,8 @@ public class HttpTransportServer implements TransportServer {
                 } else {
                     throw new IllegalArgumentException("不支持的 contentType");
                 }
-            }catch (Exception e) {
-                throw Lombok.sneakyThrow(TransformServerFactory.get().transformException(e,nodeInfo));
+            } catch (Exception e) {
+                throw Lombok.sneakyThrow(TransformServerFactory.get().transformException(e, nodeInfo));
             }
 
         });
@@ -119,7 +134,7 @@ public class HttpTransportServer implements TransportServer {
     @Override
     public String execute(INodeInfo nodeInfo, IUrlItem urlItem, Object data) {
         HttpRequest httpRequest = this.createRequest(nodeInfo, urlItem);
-        this.appendRequestData(httpRequest, urlItem, data,nodeInfo);
+        this.appendRequestData(httpRequest, urlItem, data, nodeInfo);
         try {
             return this.executeRequest(httpRequest, nodeInfo, urlItem);
         } catch (Exception e) {
@@ -132,7 +147,7 @@ public class HttpTransportServer implements TransportServer {
     public void download(INodeInfo nodeInfo, IUrlItem urlItem, Object data, Consumer<DownloadCallback> consumer) {
         HttpRequest httpRequest = this.createRequest(nodeInfo, urlItem, Method.GET);
         httpRequest.setFollowRedirects(true);
-        this.appendRequestData(httpRequest, urlItem, data,nodeInfo);
+        this.appendRequestData(httpRequest, urlItem, data, nodeInfo);
         try (HttpResponse response1 = httpRequest.execute()) {
             String contentDisposition = response1.header(Header.CONTENT_DISPOSITION);
             String contentType = response1.header(Header.CONTENT_TYPE);

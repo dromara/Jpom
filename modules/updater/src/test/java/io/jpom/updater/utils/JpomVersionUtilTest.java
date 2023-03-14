@@ -24,13 +24,11 @@ package io.jpom.updater.utils;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 /**
  * xxx测试类
  *
  * @author hjk
- * @date 12/19/2022
+ * @since 12/19/2022
  */
 public class JpomVersionUtilTest {
 

@@ -26,7 +26,7 @@ package io.jpom.updater.enums;
  * Jpom Type Enum
  *
  * @author hjk
- * @date 12/19/2022
+ * @since 12/19/2022
  */
 public enum JpomTypeEnum {
 

@@ -26,18 +26,18 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * @author loyal.f
- * @date 2023/3/9
+ * @since 2023/3/9
  */
 public class EncryptFactory {
 
     public static Encryptor createEncryptor(Integer type) throws NoSuchAlgorithmException {
         switch (type) {
             case 0:
-                return new NotEncryptor();
+                return NotEncryptor.getInstance();
             case 1:
-                return new BASE64Encryptor();
+                return BASE64Encryptor.getInstance();
             case 2:
-                return new AESEncryptor();
+                return AESEncryptor.getInstance();
             default:
                 throw new NoSuchAlgorithmException("Unsupported encrypt type");
         }

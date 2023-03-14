@@ -25,9 +25,12 @@ package io.jpom.common.interceptor;
 import cn.hutool.core.util.ArrayUtil;
 import io.jpom.encrypt.Encryptor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -38,13 +41,13 @@ import java.util.Map;
  * @since 2023/3/13
  */
 @Slf4j
-public class ParameterRequestWrapper extends HttpServletRequestWrapper {
+public class MultipartRequestWrapper extends StandardMultipartHttpServletRequest {
 
     private final Map<String, String[]> parameterMap;
 
-    public ParameterRequestWrapper(HttpServletRequest request, Encryptor encryptor) {
+    public MultipartRequestWrapper(HttpServletRequest request, Encryptor encryptor) {
         super(request);
-        Map<String, String[]> parameterMap = request.getParameterMap();
+        Map<String, String[]> parameterMap = super.getParameterMap();
         Map<String, String[]> decryptMap = new HashMap<>();
         try {
             for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
@@ -59,7 +62,19 @@ public class ParameterRequestWrapper extends HttpServletRequestWrapper {
             log.error("解密失败", e);
         }
         this.parameterMap = decryptMap;
+        // 处理文件名
+        MultiValueMap<String, MultipartFile> multipartFiles = super.getMultipartFiles();
+        try {
+            MultiValueMap<String, MultipartFile> files = new LinkedMultiValueMap<>(multipartFiles.size());
+            for (String key : multipartFiles.keySet()) {
+                files.put(encryptor.decrypt(key), multipartFiles.remove(key));
+            }
+            setMultipartFiles(files);
+        } catch (Exception e) {
+            log.error("解密失败", e);
+        }
     }
+
 
     @Override
     public Map<String, String[]> getParameterMap() {

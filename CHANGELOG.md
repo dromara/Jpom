@@ -2,6 +2,11 @@
 
 ## 2.10.30
 
+### 🐣 新增功能
+
+1. 【all】新增 插件端支持配置发送请求消息编码方式（编码、混淆明文、规避防火墙）
+   （感谢 [@Mr_loyal](https://gitee.com/Mr_loyal) [Gitee pr 179](https://gitee.com/dromara/Jpom/pulls/179) ）
+
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 导入 gitea 仓库搜索、分页无法正常使用问题

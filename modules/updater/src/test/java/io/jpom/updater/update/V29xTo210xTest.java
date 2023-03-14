@@ -26,13 +26,11 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static org.junit.Assert.*;
-
 /**
  * xxx测试类
  *
  * @author hjk
- * @date 12/19/2022
+ * @since 12/19/2022
  */
 public class V29xTo210xTest {
 

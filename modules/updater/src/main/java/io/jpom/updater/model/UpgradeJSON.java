@@ -27,14 +27,11 @@ import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 /**
  * upgrade.json 数据文件模型
  *
  * @author hjk
- * @date 12/19/2022
+ * @since 12/19/2022
  */
 @Accessors(chain = true)
 @Data
