@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.util.Optional;
 
 /**
  * 构建历史db
@@ -102,8 +103,11 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
     @Override
     protected void fillSelectResult(BuildHistoryLog data) {
         super.fillSelectResult(data);
-        // 不能返回环境变量的信息（存在隐私字段）
-        data.setBuildEnvCache(null);
+        Optional.ofNullable(data).ifPresent(buildHistoryLog -> {
+            // 不能返回环境变量的信息（存在隐私字段）
+            buildHistoryLog.setBuildEnvCache(null);
+        });
+
     }
 
     @Override
