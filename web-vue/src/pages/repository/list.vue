@@ -181,44 +181,25 @@
     </a-modal>
     <a-modal destroyOnClose v-model="giteeImportVisible" title="通过私人令牌导入仓库" width="80%" :footer="null" :maskClosable="false">
       <a-form-model :label-col="{ span: 4 }" :rules="giteeImportFormRules" :model="giteeImportForm" ref="giteeImportForm" :wrapper-col="{ span: 20 }">
-        <a-form-model-item prop="token">
-          <template slot="label">
-            私人令牌
-            <a-tooltip>
-              <template slot="title">
-                <ul>
-                  <li>使用私人令牌，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。</li>
-                </ul>
-              </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-input-group compact>
-            <a-select v-model="giteeImportForm.type" @change="importTypeChange">
-              <a-select-option value="gitee"> gitee </a-select-option>
-              <a-select-option value="github"> github </a-select-option>
-              <a-select-option value="gitlab"> gitlab </a-select-option>
-              <a-select-option value="gitea"> gitea </a-select-option>
-            </a-select>
-            <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder}`">
-              <a-input-search style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.token" @search="handleGiteeImportFormOk" :placeholder="importTypePlaceholder" />
-            </a-tooltip>
-          </a-input-group>
-          <a-input-group compact style="width: 105%">
-            <a-tooltip title="输入仓库名称或者仓库路径进行搜索">
-              <a-input style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.condition" placeholder="输入仓库名称或者仓库路径进行搜索" />
-            </a-tooltip>
-          </a-input-group>
-          <a-input-group compact style="width: 105%" v-if="giteeImportForm.type === 'gitlab'">
-            <a-tooltip title="请输入 GitLab 的地址，支持自建 GitLab，不需要输入协议，如：gitlab.com、gitlab.jpom.io、10.1.2.3、10.1.2.3:8888 等">
-              <a-input style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.gitlabAddress" placeholder="gitlab.com" />
-            </a-tooltip>
-          </a-input-group>
-          <a-input-group compact style="width: 105%" v-if="giteeImportForm.type === 'gitea'">
-            <a-tooltip title="请输入 gitea 的地址，不需要输入协议，如：10.1.2.3、10.1.2.3:3000 等">
-              <a-input style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.giteaAddress" placeholder="10.1.2.3:3000" />
-            </a-tooltip>
-          </a-input-group>
+        <a-form-model-item prop="token" label="私人令牌" help="使用私人令牌，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。">
+          <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder[giteeImportForm.type]}`">
+            <a-input v-model="giteeImportForm.token" :placeholder="importTypePlaceholder[giteeImportForm.type]">
+              <a-select slot="addonBefore" v-model="giteeImportForm.type" @change="importTypeChange">
+                <a-select-option value="gitee"> gitee </a-select-option>
+                <a-select-option value="github"> github </a-select-option>
+                <a-select-option value="gitlab"> gitlab </a-select-option>
+                <a-select-option value="gitea"> gitea </a-select-option>
+              </a-select>
+
+              <a-button slot="addonAfter" size="small" type="primary" icon="search" @click="handleGiteeImportFormOk"> </a-button>
+            </a-input>
+          </a-tooltip>
+        </a-form-model-item>
+        <a-form-model-item prop="address" label="地址" :help="importTypeAddressHelp[giteeImportForm.type]" v-if="giteeImportForm.type === 'gitlab' || giteeImportForm.type === 'gitea'">
+          <a-input v-model="giteeImportForm.address" placeholder="请填写平台地址" />
+        </a-form-model-item>
+        <a-form-model-item prop="condition" label="搜索" help="输入仓库名称或者仓库路径进行搜索">
+          <a-input v-model="giteeImportForm.condition" placeholder="输入仓库名称或者仓库路径进行搜索" />
         </a-form-model-item>
       </a-form-model>
       <a-table :loading="loading" :columns="reposColumns" :data-source="repos" bordered rowKey="full_name" @change="reposChange" :pagination="reposPagination">
@@ -264,7 +245,7 @@ export default {
       giteeImportVisible: false,
       repos: [],
       username: null,
-      importTypePlaceholder: "",
+
       columns: [
         { title: "仓库名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
         {
@@ -335,10 +316,22 @@ export default {
       giteeImportForm: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, { limit: 15, type: "gitee" }),
       giteeImportFormRules: {
         token: [{ required: true, message: "请输入私人令牌", trigger: "blur" }],
+        // address: [{ required: true, message: "请填写平台地址", trigger: "blur" }],
       },
       rules: {
         name: [{ required: true, message: "请填写仓库名称", trigger: "blur" }],
         gitUrl: [{ required: true, message: "请填写仓库地址", trigger: "blur" }],
+      },
+      importTypePlaceholder: {
+        gitee: "在 设置-->安全设置-->私人令牌 中获取",
+        github: "在 Settings-->Developer settings-->Personal access tokens 中获取",
+        gitlab: "在 preferences-->Access Tokens 中获取",
+        gitea: "在 设置 --> 应用 --> 生成令牌",
+        other: "请输入私人令牌",
+      },
+      importTypeAddressHelp: {
+        gitlab: "请输入 GitLab 的地址，支持自建 GitLab，不需要输入协议，如：gitlab.com、gitlab.jpom.io、10.1.2.3、10.1.2.3:8888 等",
+        gitea: "请输入 gitea 的地址，不需要输入协议，如：10.1.2.3、10.1.2.3:3000 等",
       },
     };
   },
@@ -503,18 +496,7 @@ export default {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
     },
-    // 在导入仓库时，选择不同的 git 平台显示不同的提示语
-    importTypeChange(val) {
-      if (val === "gitee") {
-        this.importTypePlaceholder = "在 设置-->安全设置-->私人令牌 中获取";
-      } else if (val === "github") {
-        this.importTypePlaceholder = "在 Settings-->Developer settings-->Personal access tokens 中获取";
-      } else if (val === "gitlab") {
-        this.importTypePlaceholder = "在 preferences-->Access Tokens 中获取";
-      } else {
-        this.importTypePlaceholder = "请输入私人令牌";
-      }
-    },
+
     // 排序
     sortItemHander(record, index, method) {
       const msgData = {

@@ -185,18 +185,19 @@ public class RepositoryController extends BaseServerController {
 
     @GetMapping(value = "/build/repository/authorize_repos")
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<JSONObject>> authorizeRepos(HttpServletRequest request) {
+    public JsonMessage<PageResultDto<JSONObject>> authorizeRepos(HttpServletRequest request,
+                                                                 @ValidatorItem String token,
+                                                                 String address,
+                                                                 @ValidatorItem String type,
+                                                                 String condition) {
         // 获取分页信息
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
         Page page = repositoryService.parsePage(paramMap);
-        String token = paramMap.get("token");
         Assert.hasText(token, "请填写个人令牌");
-        String gitlabAddress = StrUtil.blankToDefault(paramMap.get("gitlabAddress"), "https://gitlab.com");
-        String giteaAddress = paramMap.get("giteaAddress");
+        //String gitlabAddress = StrUtil.blankToDefault(paramMap.get("gitlabAddress"), "https://gitlab.com");
+        //String giteaAddress = paramMap.get("giteaAddress");
         // 搜索条件
-        String condition = paramMap.get("condition");
         // 远程仓库
-        String type = paramMap.get("type");
         PageResultDto<JSONObject> pageResultDto;
         switch (type) {
             case "gitee":
@@ -207,21 +208,21 @@ public class RepositoryController extends BaseServerController {
                 pageResultDto = this.githubRepos(token, page, request);
                 break;
             case "gitlab":
-                pageResultDto = this.gitlabRepos(token, page, condition, gitlabAddress, request);
+                pageResultDto = this.gitlabRepos(token, page, condition, address, request);
                 break;
             case "gitea":
-                pageResultDto = this.giteaRepos(token, page, condition, giteaAddress, request);
+                pageResultDto = this.giteaRepos(token, page, condition, address, request);
                 break;
             default:
                 throw new IllegalArgumentException("不支持的类型");
         }
-        return new JsonMessage<>(HttpStatus.OK.value(), HttpStatus.OK.name(), pageResultDto);
+        return JsonMessage.success(HttpStatus.OK.name(), pageResultDto);
     }
 
     /**
      * gitlab 仓库
      * <p>
-     * https://docs.gitlab.com/ee/api/projects.html#list-all-projects
+     * <a href="https://docs.gitlab.com/ee/api/projects.html#list-all-projects">https://docs.gitlab.com/ee/api/projects.html#list-all-projects</a>
      *
      * @param token         个人令牌
      * @param page          分页
@@ -229,6 +230,7 @@ public class RepositoryController extends BaseServerController {
      * @return page
      */
     private PageResultDto<JSONObject> gitlabRepos(String token, Page page, String condition, String gitlabAddress, HttpServletRequest request) {
+        gitlabAddress = StrUtil.blankToDefault(gitlabAddress, "https://gitlab.com");
         // 删除最后的 /
         if (gitlabAddress.endsWith("/")) {
             gitlabAddress = gitlabAddress.substring(0, gitlabAddress.length() - 1);
@@ -361,6 +363,7 @@ public class RepositoryController extends BaseServerController {
      * @return page
      */
     private PageResultDto<JSONObject> giteaRepos(String token, Page page, String condition, String giteaAddress, HttpServletRequest request) {
+        Assert.hasText(giteaAddress, "请填写 gitea 地址");
         String giteaUsername = GiteaUtil.getGiteaUsername(giteaAddress, token);
 
         Map<String, Object> giteaReposMap = GiteaUtil.getGiteaRepos(giteaAddress, token, page, condition);
