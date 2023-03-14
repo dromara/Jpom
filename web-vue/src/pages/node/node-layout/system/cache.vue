@@ -6,7 +6,7 @@
         <a-timeline>
           <a-timeline-item v-if="temp.dateTime">
             <span class="layui-elem-quote">
-              服务端时间：{{ temp.dateTime }} <a-tag>{{ temp.timeZoneId }}</a-tag>
+              插件端时间：{{ temp.dateTime }} <a-tag>{{ temp.timeZoneId }}</a-tag>
             </span>
           </a-timeline-item>
           <a-timeline-item>
