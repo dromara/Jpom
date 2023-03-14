@@ -19,6 +19,7 @@
 6. 【all】优化 SSH 命令脚本、服务端脚本、插件端脚本执行参数优化
    （感谢 [@大灰灰大](https://gitee.com/linjianhui) [Gitee issues I6IPDY](https://gitee.com/dromara/Jpom/issues/I6IPDY) ）
 7. 【server】优化 导入仓库页面提示信息错乱（感谢@零壹）
+8. 【agent】修复 项目修改路径为子目录时 mv 文件触发死循环（感谢@D¹⁹⁹¹）
 
 ### ❌ 不兼容功能
 
