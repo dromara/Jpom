@@ -329,7 +329,6 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         Assert.hasText(machineNodeModel.getJpomUrl(), "请填写 节点地址");
         Assert.hasText(machineNodeModel.getJpomUsername(), "请填写节点密码");
         Assert.hasText(machineNodeModel.getJpomProtocol(), "请选择协议");
-        Assert.hasText(machineNodeModel.getTransportEncryption().toString(), "请选择编码方式");
         //
         MachineNodeModel update = new MachineNodeModel();
         update.setId(machineNodeModel.getId());
