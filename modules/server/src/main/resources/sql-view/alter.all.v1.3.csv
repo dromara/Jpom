@@ -17,4 +17,18 @@ ADD,USEROPERATELOGV1,workspaceName,String,50,,工作空间名
 ADD,USEROPERATELOGV1,username,String,50,,用户名
 ADD,MACHINE_NODE_INFO,transportEncryption,TINYINT,,,传输加密方式 0 不加密 1 BASE64 2 AES
 DROP,COMMAND_INFO,type,
-
+ADD,MACHINE_SSH_INFO,osName,String,50,,系统名称,false
+ADD,MACHINE_SSH_INFO,hostName,String,255,,机器主机名,false
+ADD,MACHINE_SSH_INFO,osLoadAverage,String,100,,系统负载,false
+ADD,MACHINE_SSH_INFO,osSystemUptime,Long,,,系统运行时间（自启动以来的时间）,false
+ADD,MACHINE_SSH_INFO,osVersion,String,255,,系统版本,false
+ADD,MACHINE_SSH_INFO,osCpuCores,Integer,,,CPU数,false
+ADD,MACHINE_SSH_INFO,osMoneyTotal,Long,,,总内存,false
+ADD,MACHINE_SSH_INFO,osFileStoreTotal,Long,,,硬盘大小,false
+ADD,MACHINE_SSH_INFO,osCpuIdentifierName,String,255,,CPU 型号,false
+ADD,MACHINE_SSH_INFO,osOccupyCpu,Double,,,占用cpu,false
+ADD,MACHINE_SSH_INFO,osOccupyMemory,Double,,,占用内存,false
+ADD,MACHINE_SSH_INFO,osMaxOccupyDisk,Double,,,占用磁盘,false
+ADD,MACHINE_SSH_INFO,osMaxOccupyDiskName,String,255,,占用磁盘 分区名,false
+ADD,MACHINE_SSH_INFO,javaVersion,String,255,,java版本,false
+ADD,MACHINE_SSH_INFO,jpomAgentPid,Integer,,,jpom agent进程号

@@ -25,16 +25,13 @@ package io.jpom.func.assets.controller;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.text.StrSplitter;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.JschUtil;
-import com.alibaba.fastjson2.JSONObject;
 import com.jcraft.jsch.Session;
 import io.jpom.common.JsonMessage;
-import io.jpom.common.Type;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
@@ -196,35 +193,6 @@ public class MachineSshController extends BaseGroupNameController {
         return JsonMessage.success("操作成功");
     }
 
-    /**
-     * 检查 ssh 是否安装插件端
-     *
-     * @param ids ids
-     * @return json
-     */
-    @GetMapping(value = "check-agent", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> checkAgent(String ids) {
-        List<MachineSshModel> sshModels = machineSshServer.listById(StrUtil.split(ids, StrUtil.COMMA), false);
-        Assert.notEmpty(sshModels, "没有任何节点信息");
-
-        JSONObject result = new JSONObject();
-        for (MachineSshModel sshModel : sshModels) {
-            JSONObject data = new JSONObject();
-            try {
-                Integer pid = sshService.checkSshRunPid(sshModel, Type.Agent.getTag());
-                data.put("pid", ObjectUtil.defaultIfNull(pid, 0));
-                //
-                String javaVersion = sshService.checkCommand(sshModel, "java");
-                data.put("javaVersion", javaVersion);
-            } catch (Exception e) {
-                log.error("检查运行状态异常:{}", e.getMessage());
-                data.put("error", e.getMessage());
-            }
-            result.put(sshModel.getId(), data);
-        }
-        return JsonMessage.success("", result);
-    }
 
     @PostMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)

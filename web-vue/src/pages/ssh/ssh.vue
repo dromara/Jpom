@@ -28,6 +28,39 @@
         </a-space>
       </template>
       <a-tooltip slot="tooltip" slot-scope="text" :title="text"> {{ text }}</a-tooltip>
+      <a-tooltip slot="host" slot-scope="text, record" :title="`${record.machineSsh && record.machineSsh.host}:${record.machineSsh && record.machineSsh.port}`">
+        {{ record.machineSsh && record.machineSsh.host }}:{{ record.machineSsh && record.machineSsh.port }}
+      </a-tooltip>
+      <template slot="status" slot-scope="text, record">
+        <a-tooltip :title="record.machineSsh && record.machineSsh.statusMsg">
+          <a-tag :color="record.machineSsh && record.machineSsh.status === 1 ? 'green' : 'red'">{{ record.machineSsh && record.machineSsh.status === 1 ? "正常" : "无法连接" }}</a-tag>
+        </a-tooltip>
+      </template>
+      <a-popover title="系统信息" slot="osName" slot-scope="text, record">
+        <template slot="content">
+          <p>系统名：{{ record.machineSsh && record.machineSsh.osName }}</p>
+          <p>系统版本：{{ record.machineSsh && record.machineSsh.osVersion }}</p>
+          <p>CPU型号：{{ record.machineSsh && record.machineSsh.osCpuIdentifierName }}</p>
+          <p>开机时间：{{ formatDuration(record.machineSsh && record.machineSsh.osSystemUptime) }}</p>
+        </template>
+        {{ text || "未知" }}
+      </a-popover>
+      <a-tooltip
+        slot="osOccupyMemory"
+        slot-scope="text, record"
+        placement="topLeft"
+        :title="`内存使用率：${record.machineSsh && record.machineSsh.osOccupyMemory},总内存：${renderSize(record.machineSsh && record.machineSsh.osMoneyTotal)}`"
+      >
+        <span>{{ formatPercent2Number(record.machineSsh && record.machineSsh.osOccupyMemory) + "%" }}/{{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</span>
+      </a-tooltip>
+      <a-tooltip
+        slot="osMaxOccupyDisk"
+        slot-scope="text, record"
+        placement="topLeft"
+        :title="`最大的硬盘使用率：${record.machineSsh && record.machineSsh.osMaxOccupyDisk},硬盘总量：${renderSize(record.machineSsh && record.machineSsh.osMoneyTotal)}`"
+      >
+        <span>{{ formatPercent2Number(record.machineSsh && record.machineSsh.osMaxOccupyDisk) + "%" }} / {{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</span>
+      </a-tooltip>
       <template slot="nodeId" slot-scope="text, record">
         <template v-if="record.linkNode">
           <a-tooltip placement="topLeft" :title="`节点名称：${record.linkNode.name}`">
@@ -156,7 +189,7 @@
 import { deleteSsh, editSsh, getSshList, syncToWorkspace, getSshGroupAll } from "@/api/ssh";
 import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, formatPercent2Number, renderSize, formatDuration } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";
 
 import { mapGetters } from "vuex";
@@ -195,15 +228,23 @@ export default {
       columns: [
         { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
-        { title: "Host", dataIndex: "machineSsh.host", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "Port", dataIndex: "machineSsh.port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "用户名", dataIndex: "machineSsh.user", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "编码格式", dataIndex: "machineSsh.charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "Host", dataIndex: "machineSsh.host", sorter: true, ellipsis: true, scopedSlots: { customRender: "host" } },
+        // { title: "Port", dataIndex: "machineSsh.port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "用户名", dataIndex: "machineSsh.user", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+
+        { title: "系统名", dataIndex: "machineSsh.osName", sorter: true, ellipsis: true, scopedSlots: { customRender: "osName" } },
+        // { title: "系统版本", dataIndex: "machineSsh.osVersion", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "CPU数", dataIndex: "machineSsh.osCpuCores", sorter: true, width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "内存", dataIndex: "machineSsh.osOccupyMemory", sorter: true, ellipsis: true, scopedSlots: { customRender: "osOccupyMemory" } },
+        { title: "硬盘", dataIndex: "machineSsh.osMaxOccupyDisk", sorter: true, ellipsis: true, scopedSlots: { customRender: "osMaxOccupyDisk" } },
+        // { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "连接状态", dataIndex: "machineSsh.status", ellipsis: true, align: "center", width: "100px", scopedSlots: { customRender: "status" } },
+        // { title: "编码格式", dataIndex: "machineSsh.charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         {
           title: "关联节点",
           dataIndex: "nodeId",
           scopedSlots: { customRender: "nodeId" },
-          width: 120,
+          width: "120px",
           ellipsis: true,
         },
         {
@@ -254,6 +295,9 @@ export default {
     this.loadGroupList();
   },
   methods: {
+    formatPercent2Number,
+    renderSize,
+    formatDuration,
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true;
