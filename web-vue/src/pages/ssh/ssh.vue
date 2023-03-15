@@ -50,18 +50,29 @@
         slot="osOccupyMemory"
         slot-scope="text, record"
         placement="topLeft"
-        :title="`内存使用率：${record.machineSsh && record.machineSsh.osOccupyMemory},总内存：${renderSize(record.machineSsh && record.machineSsh.osMoneyTotal)}`"
+        :title="`内存使用率：${formatPercent(record.machineSsh && record.machineSsh.osOccupyMemory)},总内存：${renderSize(record.machineSsh && record.machineSsh.osMoneyTotal)}`"
       >
-        <span>{{ formatPercent2Number(record.machineSsh && record.machineSsh.osOccupyMemory) + "%" }}/{{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</span>
+        <span>{{ formatPercent(record.machineSsh && record.machineSsh.osOccupyMemory) }}/{{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</span>
       </a-tooltip>
+
       <a-tooltip
-        slot="osMaxOccupyDisk"
+        slot="osOccupyCpu"
         slot-scope="text, record"
         placement="topLeft"
-        :title="`最大的硬盘使用率：${record.machineSsh && record.machineSsh.osMaxOccupyDisk},硬盘总量：${renderSize(record.machineSsh && record.machineSsh.osMoneyTotal)}`"
+        :title="`CPU使用率：${formatPercent2Number(record.machineSsh && record.machineSsh.osOccupyCpu)}%,CPU数：${record.machineSsh && record.machineSsh.osCpuCores}`"
       >
-        <span>{{ formatPercent2Number(record.machineSsh && record.machineSsh.osMaxOccupyDisk) + "%" }} / {{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</span>
+        <span>{{ (formatPercent2Number(record.machineSsh && record.machineSsh.osOccupyCpu) || "-") + "%" }} / {{ record.machineSsh && record.machineSsh.osCpuCores }}</span>
       </a-tooltip>
+
+      <a-popover title="硬盘信息" slot="osMaxOccupyDisk" slot-scope="text, record">
+        <template slot="content">
+          <p>硬盘总量：{{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</p>
+          <p>硬盘最大的使用率：{{ formatPercent(record.machineSsh && record.machineSsh.osMaxOccupyDisk) }}</p>
+          <p>使用率最大的分区：{{ record.machineSsh && record.machineSsh.osMaxOccupyDiskName }}</p>
+        </template>
+        <span>{{ formatPercent(record.machineSsh && record.machineSsh.osMaxOccupyDisk) }} / {{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</span>
+      </a-popover>
+
       <template slot="nodeId" slot-scope="text, record">
         <template v-if="record.linkNode">
           <a-tooltip placement="topLeft" :title="`节点名称：${record.linkNode.name}`">
@@ -190,7 +201,7 @@
 import { deleteSsh, editSsh, getSshList, syncToWorkspace, getSshGroupAll } from "@/api/ssh";
 import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, formatPercent2Number, renderSize, formatDuration } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, formatPercent2Number, renderSize, formatDuration, formatPercent } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";
 
 import { mapGetters } from "vuex";
@@ -235,7 +246,7 @@ export default {
 
         { title: "系统名", dataIndex: "machineSsh.osName", sorter: true, ellipsis: true, scopedSlots: { customRender: "osName" } },
         // { title: "系统版本", dataIndex: "machineSsh.osVersion", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "CPU数", dataIndex: "machineSsh.osCpuCores", sorter: true, width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "CPU", dataIndex: "machineSsh.osOccupyCpu", sorter: true, ellipsis: true, scopedSlots: { customRender: "osOccupyCpu" } },
         { title: "内存", dataIndex: "machineSsh.osOccupyMemory", sorter: true, ellipsis: true, scopedSlots: { customRender: "osOccupyMemory" } },
         { title: "硬盘", dataIndex: "machineSsh.osMaxOccupyDisk", sorter: true, ellipsis: true, scopedSlots: { customRender: "osMaxOccupyDisk" } },
         // { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
@@ -298,6 +309,7 @@ export default {
   methods: {
     formatPercent2Number,
     renderSize,
+    formatPercent,
     formatDuration,
     // 加载数据
     loadData(pointerEvent) {

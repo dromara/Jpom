@@ -473,13 +473,16 @@ export function formatDuration(ms, seg, levelCount) {
 
 //小数转换为分数(小数先转换成number类型，再乘以100，并且保留2位小数)
 export function formatPercent(point, keep = 2) {
+  if (!point) {
+    return "-";
+  }
   return formatPercent2(Number(point) * 100, keep);
 }
 
 //小数转换为分数(小数先转换成number类型，并且保留2位小数)
 export function formatPercent2(point, keep = 2) {
   if (null == point) {
-    return "--";
+    return "-";
   }
   var percent = Number(point).toFixed(keep);
   percent += "%";
