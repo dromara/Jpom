@@ -387,7 +387,7 @@
               </template>
               <!-- SSH -->
               <template v-if="temp.releaseMethod === 3">
-                <a-form-model-item prop="releaseMethodDataId">
+                <a-form-model-item prop="releaseMethodDataId" help="如果 ssh 没有配置授权目录是不能选择的哟">
                   <template slot="label">
                     <a-tooltip>
                       发布的SSH
@@ -408,7 +408,7 @@
                     </a-col>
                   </a-row>
                 </a-form-model-item>
-                <a-form-model-item prop="releaseMethodDataId">
+                <a-form-model-item prop="releaseMethodDataId" help="如果多选 ssh 下面目录只显示选项中的第一项，但是授权目录需要保证每项都配置对应目录">
                   <template #label>
                     <a-tooltip title="如果多选 ssh 下面目录只显示选项中的第一项，但是授权目录需要保证每项都配置对应目录">
                       发布目录
