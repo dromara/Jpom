@@ -103,14 +103,14 @@ public class HttpTransportServer implements TransportServer {
                         throw new IllegalArgumentException("不支持的类型:" + o.getClass());
                     }
                 } else if (dataContentType == DataContentType.JSON) {
-                    httpRequest.body(encryptor.encrypt(JSONObject.toJSONString(o)), cn.hutool.http.ContentType.JSON.getValue());
+                    httpRequest.body(encryptor.encrypt(JSONObject.toJSONString(o)), ContentType.JSON.getValue());
                 } else {
                     throw new IllegalArgumentException("不支持的 contentType");
                 }
             } catch (Exception e) {
-                throw Lombok.sneakyThrow(TransformServerFactory.get().transformException(e, nodeInfo));
+                log.error("编码异常", e);
+                throw new AgentException("节点传输信息编码异常:" + e.getMessage());
             }
-
         });
     }
 

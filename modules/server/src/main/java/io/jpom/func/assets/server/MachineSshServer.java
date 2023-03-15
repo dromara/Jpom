@@ -25,17 +25,28 @@ package io.jpom.func.assets.server;
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.comparator.CompareUtil;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.map.CaseInsensitiveMap;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
+import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.ssh.JschRuntimeException;
 import cn.hutool.extra.ssh.JschUtil;
+import cn.hutool.extra.ssh.Sftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import io.jpom.JpomApplication;
 import io.jpom.common.Const;
 import io.jpom.common.ILoadEvent;
 import io.jpom.common.ServerConst;
+import io.jpom.common.Type;
+import io.jpom.cron.CronUtils;
 import io.jpom.cron.IAsyncLoad;
 import io.jpom.func.assets.model.MachineSshModel;
 import io.jpom.model.data.SshModel;
@@ -43,7 +54,9 @@ import io.jpom.plugin.IWorkspaceEnvPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.h2db.BaseDbService;
 import io.jpom.service.node.ssh.SshService;
+import io.jpom.system.ExtConfigBean;
 import io.jpom.util.JschUtils;
+import io.jpom.util.StringUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
@@ -52,11 +65,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.*;
 
 /**
  * @author bwcx_jzy
@@ -64,11 +77,17 @@ import java.util.Optional;
  */
 @Service
 @Slf4j
-public class MachineSshServer extends BaseDbService<MachineSshModel> implements ILoadEvent, IAsyncLoad, Runnable {
-
+public class MachineSshServer extends BaseDbService<MachineSshModel> implements ILoadEvent, IAsyncLoad, Task {
+    private static final String CRON_ID = "ssh-monitor";
     @Resource
     @Lazy
     private SshService sshService;
+
+    private final JpomApplication jpomApplication;
+
+    public MachineSshServer(JpomApplication jpomApplication) {
+        this.jpomApplication = jpomApplication;
+    }
 
     @Override
     protected void fillInsert(MachineSshModel machineSshModel) {
@@ -156,12 +175,163 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
 
     @Override
     public void startLoad() {
-
+        CronUtils.add(CRON_ID, "0 0/1 * * * ?", () -> MachineSshServer.this);
     }
 
     @Override
-    public void run() {
+    public void execute() {
+        List<MachineSshModel> list = this.list(false);
+        if (CollUtil.isEmpty(list)) {
+            return;
+        }
+        this.checkList(list);
+    }
 
+    private void checkList(List<MachineSshModel> monitorModels) {
+        monitorModels.forEach(monitorModel -> ThreadUtil.execute(() -> this.updateMonitor(monitorModel)));
+    }
+
+    private void updateMonitor(MachineSshModel machineSshModel) {
+        File tempCommand;
+        try {
+            String tempId = IdUtil.fastSimpleUUID();
+            tempCommand = FileUtil.file(jpomApplication.getTempPath(), "ssh_temp", tempId + ".sh");
+            InputStream sshExecTemplateInputStream = ExtConfigBean.getConfigResourceInputStream("/ssh/monitor-script.sh");
+            String sshExecTemplate = IoUtil.readUtf8(sshExecTemplateInputStream);
+            Map<String, String> map = new HashMap<>(10);
+            map.put("JPOM_AGENT_PID_TAG", Type.Agent.getTag());
+            sshExecTemplate = StringUtil.formatStrByMap(sshExecTemplate, map);
+            Charset charset = machineSshModel.charset();
+            FileUtil.writeString(sshExecTemplate, tempCommand, charset);
+            //
+            Session session = this.getSessionByModelNoFill(machineSshModel);
+            try (Sftp sftp = new Sftp(session, charset, machineSshModel.timeout())) {
+                String path = StrUtil.format("{}/.jpom/", sftp.home());
+                String destFile = StrUtil.format("{}{}.sh", path, tempId);
+                sftp.mkDirs(path);
+                sftp.upload(destFile, tempCommand);
+                // 执行命令
+                try (ByteArrayOutputStream errStream = new ByteArrayOutputStream()) {
+                    String commandSh = "bash " + destFile;
+                    String exec = JschUtil.exec(session, commandSh, charset, errStream);
+                    String error = new String(errStream.toByteArray(), charset);
+                    if (StrUtil.isNotEmpty(error)) {
+                        log.error("{} ssh 监控执行存在异常信息：{}", machineSshModel.getName(), error);
+                    }
+                    log.debug("{} ssh 监控信息结果：{} {}", machineSshModel.getName(), exec, error);
+                    this.updateMonitorInfo(machineSshModel, exec, error);
+                }
+                try {
+                    // 删除 ssh 中临时文件
+                    sftp.delFile(destFile);
+                } catch (Exception e) {
+                    log.warn("删除 ssh 临时文件失败", e);
+                }
+            }
+        } catch (Exception e) {
+            String message = e.getMessage();
+            if (StrUtil.containsIgnoreCase(message, "timeout")) {
+                log.error("监控 ssh[{}] 超时 {}", machineSshModel.getName(), message);
+            } else {
+                log.error("监控 ssh[{}] 异常", machineSshModel.getName(), e);
+            }
+            this.updateStatus(machineSshModel.getId(), 0, message);
+        }
+    }
+
+    private void updateMonitorInfo(MachineSshModel machineSshModel, String result, String error) {
+        error = StrUtil.emptyToDefault(error, StrUtil.EMPTY);
+        if (StrUtil.isEmpty(result)) {
+            this.updateStatus(machineSshModel.getId(), 1, "执行结果为空," + error);
+            return;
+        }
+
+        List<String> listStr = StrUtil.splitTrim(result, StrUtil.LF);
+        Map<String, List<String>> map = new CaseInsensitiveMap<>(listStr.size());
+        for (String strItem : listStr) {
+            String key = StrUtil.subBefore(strItem, StrUtil.COLON, false);
+            List<String> list = map.computeIfAbsent(key, s2 -> new ArrayList<>());
+            list.add(StrUtil.subAfter(strItem, StrUtil.COLON, false));
+        }
+        MachineSshModel update = new MachineSshModel();
+        update.setId(machineSshModel.getId());
+        update.setStatus(1);
+        update.setOsName(this.getFirstValue(map, "os name"));
+        update.setOsVersion(this.getFirstValue(map, "os version"));
+        update.setOsLoadAverage(CollUtil.join(map.get("load average"), StrUtil.COMMA));
+        String uptime = this.getFirstValue(map, "uptime");
+        if (StrUtil.isNotEmpty(uptime)) {
+            try {
+                // 可能有时区问题
+                DateTime dateTime = DateUtil.parse(uptime);
+                update.setOsSystemUptime((SystemClock.now() - dateTime.getTime()));
+            } catch (Exception e) {
+                error = error + " 解析系统启动时间错误：" + e.getMessage();
+                update.setOsSystemUptime(0L);
+            }
+        }
+        update.setOsCpuCores(Convert.toInt(this.getFirstValue(map, "cpu core"), 0));
+        update.setHostName(this.getFirstValue(map, "hostname"));
+        update.setOsCpuIdentifierName(this.getFirstValue(map, "model name"));
+        // kb
+        Long memoryTotal = Convert.toLong(this.getFirstValue(map, "memory total"), 0L);
+        Long memoryAvailable = Convert.toLong(this.getFirstValue(map, "memory available"), 0L);
+        update.setOsMoneyTotal(memoryTotal * 1024);
+        update.setStatusMsg("执行成功,错误信息：" + error);
+        update.setOsOccupyCpu(Convert.toDouble(this.getFirstValue(map, "cpu usage"), -0D));
+        if (memoryTotal > 0) {
+            update.setOsOccupyMemory(NumberUtil.div(memoryAvailable, memoryTotal, 2).doubleValue());
+        } else {
+            update.setOsOccupyMemory(-0D);
+        }
+        List<String> list = map.get("disk info");
+        update.setOsMaxOccupyDisk(-0D);
+        update.setOsMaxOccupyDiskName(StrUtil.EMPTY);
+        if (CollUtil.isNotEmpty(list)) {
+            long total = 0;
+            for (String s : list) {
+                List<String> trim = StrUtil.splitTrim(s, StrUtil.COLON);
+                long total1 = Convert.toLong(CollUtil.get(trim, 1), 0L);
+                total += total1;
+                long available1 = Convert.toLong(CollUtil.get(trim, 2), 0L);
+                // 计算最大的硬盘占用
+                if (total1 > 0) {
+                    Double osMaxOccupyDisk = update.getOsMaxOccupyDisk();
+                    osMaxOccupyDisk = ObjectUtil.defaultIfNull(osMaxOccupyDisk, 0D);
+                    double occupyDisk = NumberUtil.div(available1, total1, 2);
+                    if (occupyDisk > osMaxOccupyDisk) {
+                        update.setOsMaxOccupyDisk(occupyDisk);
+                        update.setOsMaxOccupyDiskName(CollUtil.getFirst(trim));
+                    }
+                }
+            }
+            update.setOsFileStoreTotal(total * 1024);
+        }
+        update.setJavaVersion(this.getFirstValue(map, "java version"));
+        update.setJpomAgentPid(Convert.toInt(this.getFirstValue(map, "jpom agent pid")));
+        this.updateById(update);
+    }
+
+    private String getFirstValue(Map<String, List<String>> map, String name) {
+        List<String> list = map.get(name);
+        String first = CollUtil.getFirst(list);
+        // 内存获取可能最后存在 ：
+        return StrUtil.removeSuffix(first, StrUtil.COLON);
+    }
+
+    /**
+     * 更新 容器状态
+     *
+     * @param id     ID
+     * @param status 状态值
+     * @param msg    错误消息
+     */
+    private void updateStatus(String id, int status, String msg) {
+        MachineSshModel machineSshModel = new MachineSshModel();
+        machineSshModel.setId(id);
+        machineSshModel.setStatus(status);
+        machineSshModel.setStatusMsg(msg);
+        super.update(machineSshModel);
     }
 
     /**

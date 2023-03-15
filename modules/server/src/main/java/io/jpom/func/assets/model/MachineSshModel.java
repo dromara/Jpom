@@ -89,6 +89,67 @@ public class MachineSshModel extends BaseGroupNameModel {
     private String statusMsg;
 
     private String allowEditSuffix;
+    /**
+     * 系统名称
+     */
+    private String osName;
+    /**
+     * 机器主机名
+     */
+    private String hostName;
+    /**
+     * 系统版本
+     */
+    private String osVersion;
+    /**
+     * 总内存
+     */
+    private Long osMoneyTotal;
+    /**
+     * 硬盘总大小
+     */
+    private Long osFileStoreTotal;
+    /**
+     * CPU 型号
+     */
+    private String osCpuIdentifierName;
+    /**
+     * CPU数
+     */
+    private Integer osCpuCores;
+    /**
+     * 占用cpu
+     */
+    private Double osOccupyCpu;
+    /**
+     * 占用内存 （总共）
+     */
+    private Double osOccupyMemory;
+    /**
+     * 占用磁盘
+     */
+    private Double osMaxOccupyDisk;
+    /**
+     * 占用磁盘 分区名
+     */
+    private String osMaxOccupyDiskName;
+    /**
+     * 负载
+     */
+    private String osLoadAverage;
+    /**
+     * 系统运行时间（自启动以来的时间）。
+     * 自启动以来的毫秒数。
+     */
+    private Long osSystemUptime;
+    /**
+     * jpom 查询进程号
+     */
+    private Integer jpomAgentPid;
+    /**
+     * java 版本
+     */
+    private String javaVersion;
 
     public MachineSshModel(String id) {
         setId(id);

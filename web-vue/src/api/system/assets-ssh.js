@@ -26,19 +26,6 @@ export function machineSshEdit(params) {
   });
 }
 
-// 检查 agent
-export function machineSshCheckAgent(params) {
-  return axios({
-    url: "/system/assets/ssh/check-agent",
-    method: "get",
-    params: params,
-    timeout: 0,
-    headers: {
-      loading: "no",
-    },
-  });
-}
-
 // 删除 ssh
 export function machineSshDelete(params) {
   return axios({

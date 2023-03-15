@@ -263,6 +263,8 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
             }
             //
             EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.getEnv(commandModel.getWorkspaceId());
+            environmentMapBuilder.put("JPOM_SSH_ID", sshModel.getId());
+            environmentMapBuilder.put("JPOM_COMMAND_ID", commandModel.getId());
             Map<String, String> environment = environmentMapBuilder.environment();
             String[] commands = StrUtil.splitToArray(commandModel.getCommand(), StrUtil.LF);
             for (int i = 0; i < commands.length; i++) {

@@ -212,12 +212,15 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
             //
             return true;
         } catch (Exception e) {
+            String message = e.getMessage();
             if (ExceptionUtil.isCausedBy(e, NoSuchFileException.class)) {
-                log.error("监控 docker[{}] 异常 {}", dockerInfoModel.getName(), e.getMessage());
+                log.error("监控 docker[{}] 异常 {}", dockerInfoModel.getName(), message);
+            } else if (StrUtil.containsIgnoreCase(message, "Connection timed out")) {
+                log.error("监控 docker[{}] 超时 {}", dockerInfoModel.getName(), message);
             } else {
                 log.error("监控 docker[{}] 异常", dockerInfoModel.getName(), e);
             }
-            this.updateStatus(dockerInfoModel.getId(), 0, e.getMessage());
+            this.updateStatus(dockerInfoModel.getId(), 0, message);
             return false;
         }
     }

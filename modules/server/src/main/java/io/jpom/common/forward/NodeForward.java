@@ -495,6 +495,10 @@ public class NodeForward {
      * @param nodeModel 插件端
      */
     public static AgentException responseException(Exception exception, INodeInfo nodeModel) {
+        if (exception instanceof NullPointerException) {
+            log.error("{}节点,程序空指针异常", nodeModel.name(), exception);
+            return new AgentException(nodeModel.name() + "节点异常,空指针");
+        }
         String message = exception.getMessage();
         Throwable cause = exception.getCause();
         log.error("node [{}] connect failed...message: [{}]", nodeModel.name(), message);

@@ -22,8 +22,6 @@
  */
 package io.jpom.service.node.ssh;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ArrayUtil;
@@ -50,8 +48,6 @@ import javax.annotation.Resource;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.List;
-import java.util.Objects;
 import java.util.function.BiFunction;
 
 /**
@@ -123,38 +119,6 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
      */
     public MachineSshModel getMachineSshModel(SshModel sshModel) {
         return machineSshServer.getByKey(sshModel.getMachineSshId(), false);
-    }
-
-    /**
-     * 获取 ssh 中的 环境 版本
-     *
-     * @param sshModel ssh
-     * @return 返回
-     * @throws IOException IO
-     */
-    public String checkCommand(MachineSshModel sshModel, String command) throws IOException {
-        // 检查  环境
-        return this.exec(sshModel, "command -v " + command);
-//		return CollUtil.join(commandResult, StrUtil.COMMA);
-    }
-
-    /**
-     * 检查是否存在正在运行的进程
-     *
-     * @param sshModel ssh
-     * @param tag      标识
-     * @return true 存在运行中的
-     * @throws IOException IO
-     */
-    public Integer checkSshRunPid(MachineSshModel sshModel, String tag) throws IOException {
-        String ps = StrUtil.format("ps -ef | grep -v 'grep' | egrep {}", tag);
-        // 运行中
-        String exec = this.exec(sshModel, ps);
-        List<String> result = StrUtil.splitTrim(exec, StrUtil.LF);
-        return result.stream().map(s -> {
-            List<String> split = StrUtil.splitTrim(s, StrUtil.SPACE);
-            return Convert.toInt(CollUtil.get(split, 1));
-        }).filter(Objects::nonNull).findAny().orElse(null);
     }
 
     /**
@@ -238,7 +202,8 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
                 try {
                     // 删除 ssh 中临时文件
                     sftp.delFile(destFile);
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    log.warn("删除 ssh 临时文件失败", e);
                 }
                 // 删除临时文件
                 FileUtil.del(buildSsh);
