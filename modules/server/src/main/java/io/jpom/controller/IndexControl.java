@@ -46,6 +46,7 @@ import io.jpom.common.UrlRedirectUtil;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.user.UserModel;
+import io.jpom.permission.SystemPermission;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserBindWorkspaceService;
@@ -322,6 +323,7 @@ public class IndexControl extends BaseServerController {
      * @apiSuccess {JSON}  data 菜单相关字段
      */
     @RequestMapping(value = "system_menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @SystemPermission
     public JsonMessage<List<Object>> systemMenusData(HttpServletRequest request) {
         UserModel userModel = getUserModel();
         // 菜单

@@ -48,6 +48,7 @@ const routeMenuMap = {
   machine_docker_info: "/system/assets/docker-list",
   configWorkspaceEnv: "/script/env-list",
   cronTools: "/tools/cron",
+  myWorkspaceList: "/my-workspace",
 };
 
 export default routeMenuMap;

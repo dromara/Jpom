@@ -29,7 +29,8 @@
     "vuex": "^3.5.1",
     "xterm": "^4.13.0",
     "xterm-addon-attach": "^0.6.0",
-    "xterm-addon-fit": "^0.5.0"
+    "xterm-addon-fit": "^0.5.0",
+    "vuedraggable": "^2.24.3"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.13",

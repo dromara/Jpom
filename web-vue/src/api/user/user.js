@@ -220,9 +220,25 @@ export function workspaceList(userId) {
  */
 export function myWorkspace() {
   return axios({
-    url: "/user/my_workspace",
+    url: "/user/my-workspace",
     method: "get",
     params: {},
+  });
+}
+
+/**
+ * 保存我的工作空间
+ *
+ * @returns
+ */
+export function saveWorkspace(data) {
+  return axios({
+    url: "/user/save-workspace",
+    method: "post",
+    data,
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 }
 
