@@ -36,7 +36,6 @@ import io.jpom.service.manage.ConsoleService;
 import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.system.AgentConfig;
 import io.jpom.util.FileSearchUtil;
-import io.jpom.util.ProjectCommanderUtil;
 import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -188,8 +187,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 case status: {
                     // 获取项目状态
                     strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel, copyItem);
-                    int parsePid = ProjectCommanderUtil.parsePid(strResult.msgStr());
-                    if (parsePid > 0) {
+                    if (strResult.isSuccess()) {
                         resultData = new JsonMessage<>(200, "运行中", strResult);
                     } else {
                         resultData = new JsonMessage<>(404, "未运行", strResult);

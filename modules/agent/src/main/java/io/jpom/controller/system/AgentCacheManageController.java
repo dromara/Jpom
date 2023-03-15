@@ -83,8 +83,6 @@ public class AgentCacheManageController extends BaseAgentController {
         jsonObject.put("dataSize", FileUtil.readableFileSize(configBean.dataSize()));
         File oldJarsPath = JpomManifest.getOldJarsPath();
         jsonObject.put("oldJarsSize", FileUtil.readableFileSize(FileUtil.size(oldJarsPath)));
-        //
-        jsonObject.put("pidName", AbstractProjectCommander.PID_JPOM_NAME.size());
         jsonObject.put("pidPort", AbstractProjectCommander.PID_PORT.size());
 
         int oneLineCount = AgentFileTailWatcher.getOneLineCount();
@@ -116,9 +114,6 @@ public class AgentCacheManageController extends BaseAgentController {
         switch (type) {
             case "pidPort":
                 AbstractProjectCommander.PID_PORT.clear();
-                break;
-            case "pidName":
-                AbstractProjectCommander.PID_JPOM_NAME.clear();
                 break;
             case "oldJarsSize": {
                 File oldJarsPath = JpomManifest.getOldJarsPath();

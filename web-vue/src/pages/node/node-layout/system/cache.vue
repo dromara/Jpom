@@ -24,12 +24,7 @@
               <a-button size="small" type="primary" v-if="temp.oldJarsSize !== '0'" class="btn" @click="clear('oldJarsSize')">清空</a-button>
             </a-space>
           </a-timeline-item>
-          <a-timeline-item>
-            <a-space>
-              <span class="layui-elem-quote">进程名缓存：{{ temp.pidName }}</span>
-              <a-button size="small" type="primary" v-if="temp.pidName" class="btn" @click="clear('pidName')">清空</a-button>
-            </a-space>
-          </a-timeline-item>
+
           <a-timeline-item>
             <a-space>
               <span class="layui-elem-quote">进程端口缓存：{{ temp.pidPort }}</span>

@@ -23,7 +23,9 @@
 package io.jpom.common.commander;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +36,7 @@ import java.util.List;
  * @author bwcx_jzy
  * @since 2022/11/30
  */
+@Getter
 public class CommandOpResult {
 
     /**
@@ -41,9 +44,32 @@ public class CommandOpResult {
      */
     private boolean success;
     /**
+     * 进程id
+     */
+    private int pid;
+    /**
+     * 端口
+     */
+    private String ports;
+    /**
      * 执行结果
      */
     private final List<String> msgs = new ArrayList<>();
+
+    public static CommandOpResult of(String msg) {
+        int pid = 0;
+        String ports = null;
+        if (StrUtil.startWith(msg, AbstractProjectCommander.RUNNING_TAG)) {
+            List<String> list = StrUtil.splitTrim(msg, StrUtil.COLON);
+            pid = Convert.toInt(CollUtil.get(list, 1), 0);
+            //
+            ports = CollUtil.get(list, 2);
+        }
+        CommandOpResult result = of(pid > 0, msg);
+        result.pid = pid;
+        result.ports = ports;
+        return result;
+    }
 
     public static CommandOpResult of(boolean success) {
         return of(success, null);
@@ -76,18 +102,6 @@ public class CommandOpResult {
             this.appendMsg(msg);
         }
         return this;
-    }
-
-    public List<String> getMsgs() {
-        return msgs;
-    }
-
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
     }
 
     public String msgStr() {
