@@ -1,7 +1,14 @@
 <template>
   <div class="full-content">
+    <template v-if="this.getUserInfo && this.getUserInfo.systemUser && !this.loading && this.listQuery.total <= 0">
+      <a-result title="当前工作空间还没有 Docker" sub-title="请到【系统管理】-> 【资产管理】-> 【Docker管理】添加Docker，或者将已添加的Docker授权关联到此工作空间">
+        <template #extra>
+          <router-link to="/system/assets/docker-list"> <a-button key="console" type="primary">现在就去</a-button></router-link>
+        </template>
+      </a-result>
+    </template>
     <!-- 数据表格 -->
-    <a-table size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id" :row-selection="rowSelection">
+    <a-table v-else size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
@@ -122,7 +129,7 @@ export default {
   props: {},
   data() {
     return {
-      loading: false,
+      loading: true,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
 
       list: [],
@@ -171,7 +178,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getCollapsed", "getWorkspaceId"]),
+    ...mapGetters(["getCollapsed", "getWorkspaceId", "getUserInfo"]),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
     },

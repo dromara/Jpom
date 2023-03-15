@@ -1,7 +1,14 @@
 <template>
   <div class="full-content">
+    <template v-if="this.getUserInfo && this.getUserInfo.systemUser && !this.loading && this.listQuery.total <= 0">
+      <a-result title="当前工作空间还没有SSH" sub-title="请到【系统管理】-> 【资产管理】-> 【SSH管理】添加SSH，或者将已添加的SSH授权关联到此工作空间">
+        <template #extra>
+          <router-link to="/system/assets/ssh-list"> <a-button key="console" type="primary">现在就去</a-button></router-link>
+        </template>
+      </a-result>
+    </template>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :columns="columns" size="middle" :pagination="pagination" @change="changePage" bordered rowKey="id" :row-selection="rowSelection">
+    <a-table v-else :data-source="list" :columns="columns" size="middle" :pagination="pagination" @change="changePage" bordered rowKey="id" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
           <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="ssh名称" />
@@ -288,7 +295,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getWorkspaceId"]),
+    ...mapGetters(["getWorkspaceId", "getUserInfo"]),
 
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);

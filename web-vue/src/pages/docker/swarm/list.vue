@@ -1,6 +1,13 @@
 <template>
   <div class="full-content">
-    <a-table size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered :rowKey="(record, index) => index">
+    <template v-if="this.getUserInfo && this.getUserInfo.systemUser && !this.loading && this.listQuery.total <= 0">
+      <a-result title="当前工作空间还没有 Docker 集群" sub-title="请到【系统管理】-> 【资产管理】-> 【Docker管理】添加Docker并创建集群，或者将已存在的的 Docker 集群授权关联到此工作空间">
+        <template #extra>
+          <router-link to="/system/assets/docker-list"> <a-button key="console" type="primary">现在就去</a-button></router-link>
+        </template>
+      </a-result>
+    </template>
+    <a-table v-else size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
@@ -84,7 +91,7 @@ export default {
   props: {},
   data() {
     return {
-      loading: false,
+      loading: true,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       temp: {},
@@ -105,7 +112,7 @@ export default {
           customRender: (text) => {
             return parseTime(text);
           },
-          width: 170,
+          width: "170px",
         },
         {
           title: "集群创建时间",
@@ -141,7 +148,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getCollapsed"]),
+    ...mapGetters(["getCollapsed", "getUserInfo"]),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
     },

@@ -184,7 +184,7 @@
         <a-form-model-item prop="token" label="私人令牌" help="使用私人令牌，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。">
           <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder[giteeImportForm.type]}`">
             <a-input v-model="giteeImportForm.token" :placeholder="importTypePlaceholder[giteeImportForm.type]">
-              <a-select slot="addonBefore" v-model="giteeImportForm.type" @change="importTypeChange">
+              <a-select slot="addonBefore" v-model="giteeImportForm.type">
                 <a-select-option value="gitee"> gitee </a-select-option>
                 <a-select-option value="github"> github </a-select-option>
                 <a-select-option value="gitlab"> gitlab </a-select-option>
@@ -375,7 +375,6 @@ export default {
     },
     handleAddGitee() {
       this.giteeImportVisible = true;
-      this.importTypeChange(this.giteeImportForm.type);
     },
     handleGiteeImportFormOk() {
       this.$refs["giteeImportForm"].validate((valid) => {
