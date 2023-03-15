@@ -1,7 +1,14 @@
 <template>
   <div class="full-content">
     <div>
-      <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
+      <template v-if="this.getUserInfo && this.getUserInfo.systemUser && !this.loading && this.listQuery.total <= 0">
+        <a-result title="当前工作空间还没有节点" sub-title="请到【系统管理】-> 【资产管理】-> 【机器管理】添加节点，或者将已添加的节点授权关联到此工作空间">
+          <template #extra>
+            <router-link to="/system/assets/machine-list"> <a-button key="console" type="primary">现在就去</a-button></router-link>
+          </template>
+        </a-result>
+      </template>
+      <a-card v-else :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
         <template slot="title">
           <a-row>
             <a-space>
@@ -204,7 +211,7 @@
   </div>
 </template>
 <script>
-// import { getStatist, status, statusStat } from "@/api/node-stat";
+import { mapGetters } from "vuex";
 import {} from "@/api/node";
 import { PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime, formatPercent2Number } from "@/utils/const";
 import NodeTop from "@/pages/node/node-layout/node-top";
@@ -215,7 +222,7 @@ export default {
   components: { NodeTop },
   data() {
     return {
-      loading: false,
+      loading: true,
       statusMap,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, {
         limit: 8,
@@ -230,7 +237,10 @@ export default {
       refreshInterval: 5,
     };
   },
-  computed: {},
+  computed: {
+    ...mapGetters(["getUserInfo"]),
+  },
+
   watch: {},
   created() {
     this.loadData();
