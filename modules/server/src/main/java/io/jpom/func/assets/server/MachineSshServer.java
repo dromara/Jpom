@@ -275,12 +275,12 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
         update.setOsCpuIdentifierName(this.getFirstValue(map, "model name"));
         // kb
         Long memoryTotal = Convert.toLong(this.getFirstValue(map, "memory total"), 0L);
-        Long memoryAvailable = Convert.toLong(this.getFirstValue(map, "memory available"), 0L);
+        Long memoryUsed = Convert.toLong(this.getFirstValue(map, "memory used"), 0L);
         update.setOsMoneyTotal(memoryTotal * 1024);
         update.setStatusMsg("执行成功,错误信息：" + error);
         update.setOsOccupyCpu(Convert.toDouble(this.getFirstValue(map, "cpu usage"), -0D));
         if (memoryTotal > 0) {
-            update.setOsOccupyMemory(NumberUtil.div(memoryAvailable, memoryTotal, 2).doubleValue());
+            update.setOsOccupyMemory(NumberUtil.div(memoryUsed, memoryTotal, 2).doubleValue());
         } else {
             update.setOsOccupyMemory(-0D);
         }
@@ -293,12 +293,12 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
                 List<String> trim = StrUtil.splitTrim(s, StrUtil.COLON);
                 long total1 = Convert.toLong(CollUtil.get(trim, 1), 0L);
                 total += total1;
-                long available1 = Convert.toLong(CollUtil.get(trim, 2), 0L);
+                long used = Convert.toLong(CollUtil.get(trim, 2), 0L);
                 // 计算最大的硬盘占用
                 if (total1 > 0) {
                     Double osMaxOccupyDisk = update.getOsMaxOccupyDisk();
                     osMaxOccupyDisk = ObjectUtil.defaultIfNull(osMaxOccupyDisk, 0D);
-                    double occupyDisk = NumberUtil.div(available1, total1, 2);
+                    double occupyDisk = NumberUtil.div(used, total1, 2);
                     if (occupyDisk > osMaxOccupyDisk) {
                         update.setOsMaxOccupyDisk(occupyDisk);
                         update.setOsMaxOccupyDiskName(CollUtil.getFirst(trim));
