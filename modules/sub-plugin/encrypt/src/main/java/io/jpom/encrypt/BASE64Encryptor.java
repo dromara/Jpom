@@ -61,11 +61,17 @@ public class BASE64Encryptor implements Encryptor {
 
     @Override
     public String encrypt(String input) {
+        if (input == null) {
+            return null;
+        }
         return Base64.encode(input, CharsetUtil.CHARSET_UTF_8);
     }
 
     @Override
     public String decrypt(String input) {
+        if (input == null) {
+            return null;
+        }
         return Base64.decodeStr(input);
     }
 }
