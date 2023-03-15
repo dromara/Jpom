@@ -1,7 +1,9 @@
 <template>
   <div class="full-content">
-    <!-- <div ref="filter" class="filter"></div> -->
-    <a-table :data-source="projList" :columns="columns" size="middle" bordered :pagination="pagination" @change="changePage" :row-selection="rowSelection" :rowKey="(record, index) => index">
+    <template v-if="this.getUserInfo && this.getUserInfo.systemUser && !this.loading && this.listQuery.total <= 0">
+      <a-result title="当前工作空间还没有项目" sub-title="可以创建节点分发或者到节点管理创建项目"> </a-result>
+    </template>
+    <a-table v-else :data-source="projList" :columns="columns" size="middle" bordered :pagination="pagination" @change="changePage" :row-selection="rowSelection" :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
           <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
@@ -217,6 +219,7 @@ import Console from "../node/node-layout/project/project-console";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, concurrentExecution, itemGroupBy, parseTime } from "@/utils/const";
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
 import Vue from "vue";
+import { mapGetters } from "vuex";
 
 export default {
   components: {
@@ -283,6 +286,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(["getUserInfo"]),
     filePath() {
       return (this.temp.whitelistDirectory || "") + (this.temp.lib || "");
     },

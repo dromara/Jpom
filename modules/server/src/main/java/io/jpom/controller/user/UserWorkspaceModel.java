@@ -20,41 +20,32 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.model.data;
+package io.jpom.controller.user;
 
-import io.jpom.model.BaseUserModifyDbModel;
-import io.jpom.util.StringUtil;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import top.jpom.h2db.TableName;
-
-import java.util.List;
 
 /**
- * 系统参数
+ * 用户工作空间配置
  *
  * @author bwcx_jzy
- * @since 2021/12/2
+ * @since 2023/3/15
  */
-@EqualsAndHashCode(callSuper = true)
-@TableName(value = "SYSTEM_PARAMETERS", name = "系统参数")
 @Data
-public class SystemParametersModel extends BaseUserModifyDbModel {
+public class UserWorkspaceModel {
+
+    private String id;
 
     /**
-     * 参数值
+     * 用户自定义名
      */
-    private String value;
+    private String name;
     /**
-     * 参数描述
+     * 原始
      */
-    private String description;
+    private String originalName;
 
-    public <T> T jsonToBean(Class<T> cls) {
-        return StringUtil.jsonConvert(this.getValue(), cls);
-    }
-
-    public <T> List<T> jsonToBeanList(Class<T> cls) {
-        return StringUtil.jsonConvertArray(this.getValue(), cls);
-    }
+    /**
+     * 自定义排序规则
+     */
+    private Integer sort;
 }

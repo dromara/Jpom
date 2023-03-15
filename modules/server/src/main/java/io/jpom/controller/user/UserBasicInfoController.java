@@ -23,8 +23,11 @@
 package io.jpom.controller.user;
 
 import cn.hutool.cache.impl.TimedCache;
+import cn.hutool.core.collection.CollStreamUtil;
+import cn.hutool.core.comparator.CompareUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
@@ -51,10 +54,7 @@ import io.jpom.util.TwoFactorAuthUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -180,12 +181,54 @@ public class UserBasicInfoController extends BaseServerController {
      *
      * @return msg
      */
-    @GetMapping(value = "my_workspace", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<WorkspaceModel>> myWorkspace() {
+    @GetMapping(value = "my-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<List<UserWorkspaceModel>> myWorkspace() {
         UserModel user = getUser();
         List<WorkspaceModel> models = userBindWorkspaceService.listUserWorkspaceInfo(user);
         Assert.notEmpty(models, "当前账号没有绑定任何工作空间，请联系管理员处理");
-        return JsonMessage.success("", models);
+        JSONObject parametersServerConfig = systemParametersServer.getConfig("user-my-workspace-" + user.getId(), JSONObject.class);
+        List<UserWorkspaceModel> userWorkspaceModels = models.stream()
+            .map(workspaceModel -> {
+                UserWorkspaceModel userWorkspaceModel = new UserWorkspaceModel();
+                userWorkspaceModel.setId(workspaceModel.getId());
+                userWorkspaceModel.setName(workspaceModel.getName());
+                userWorkspaceModel.setOriginalName(workspaceModel.getName());
+                Long createTimeMillis = workspaceModel.getCreateTimeMillis();
+                userWorkspaceModel.setSort((int) (ObjectUtil.defaultIfNull(createTimeMillis, 0L) / 1000L));
+                return userWorkspaceModel;
+            })
+            .peek(userWorkspaceModel -> {
+                if (parametersServerConfig == null) {
+                    return;
+                }
+                UserWorkspaceModel userConfig = parametersServerConfig.getObject(userWorkspaceModel.getId(), UserWorkspaceModel.class);
+                if (userConfig == null) {
+                    return;
+                }
+                userWorkspaceModel.setName(StrUtil.emptyToDefault(userConfig.getName(), userWorkspaceModel.getName()));
+                userWorkspaceModel.setSort(ObjectUtil.defaultIfNull(userConfig.getSort(), userWorkspaceModel.getSort()));
+            })
+            .sorted((o1, o2) -> CompareUtil.compare(o1.getSort(), o2.getSort()))
+            .collect(Collectors.toList());
+        return JsonMessage.success("", userWorkspaceModels);
+    }
+
+    /**
+     * 保存用户自己的工作空间
+     *
+     * @return msg
+     */
+    @PostMapping(value = "save-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<String> saveWorkspace(@RequestBody List<UserWorkspaceModel> workspaceModels) {
+        Assert.notEmpty(workspaceModels, "没有选择任何工作空间");
+        List<UserWorkspaceModel> collect = workspaceModels.stream()
+            .filter(workspaceModel -> StrUtil.isNotEmpty(workspaceModel.getId()))
+            .peek(userWorkspaceModel -> userWorkspaceModel.setOriginalName(null))
+            .collect(Collectors.toList());
+        UserModel user = getUser();
+        Map<String, UserWorkspaceModel> map = CollStreamUtil.toMap(collect, UserWorkspaceModel::getId, workspaceModel -> workspaceModel);
+        systemParametersServer.upsert("user-my-workspace-" + user.getId(), map, "用户自定义工作空间");
+        return JsonMessage.success("保存成功");
     }
 
     /**

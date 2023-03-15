@@ -16,20 +16,22 @@
       <a-dropdown>
         <a-button type="primary" class="jpom-user-operation btn-group-item" icon="down"> </a-button>
         <a-menu slot="overlay">
-          <a-sub-menu>
-            <template #title>
-              <a-button type="link" icon="swap">切换工作空间</a-button>
-            </template>
-            <template v-for="(item, index) in myWorkspaceList">
-              <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace" @click="handleWorkspaceChange(item.id)" :key="index">
-                <a-button type="link" :disabled="item.id === selectWorkspace">
-                  {{ item.name }}
-                </a-button>
-              </a-menu-item>
-              <a-menu-divider v-if="index != -1" :key="`${item.id}-divider`" />
-            </template>
-          </a-sub-menu>
-          <a-menu-divider />
+          <template v-if="this.mode === 'normal'">
+            <a-sub-menu>
+              <template #title>
+                <a-button type="link" icon="swap">切换工作空间</a-button>
+              </template>
+              <template v-for="(item, index) in myWorkspaceList">
+                <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace" @click="handleWorkspaceChange(item.id)" :key="index">
+                  <a-button type="link" :disabled="item.id === selectWorkspace">
+                    {{ item.name }}
+                  </a-button>
+                </a-menu-item>
+                <a-menu-divider v-if="index != -1" :key="`${item.id}-divider`" />
+              </template>
+            </a-sub-menu>
+            <a-menu-divider />
+          </template>
           <a-menu-item @click="handleUpdatePwd">
             <a-button type="link" icon="lock"> 安全管理 </a-button>
           </a-menu-item>
@@ -384,23 +386,25 @@ export default {
       });
     },
     init() {
-      myWorkspace().then((res) => {
-        if (res.code == 200 && res.data) {
-          this.myWorkspaceList = res.data;
-          let wid = this.$route.query.wid;
-          wid = wid ? wid : this.getWorkspaceId;
-          const existWorkspace = this.myWorkspaceList.filter((item) => item.id === wid);
-          if (existWorkspace.length) {
-            this.$router.push({
-              query: { ...this.$route.query, wid: wid },
-            });
-            this.selectWorkspace = wid;
-          } else {
-            this.handleWorkspaceChange(res.data[0]?.id);
+      if (this.mode === "normal") {
+        myWorkspace().then((res) => {
+          if (res.code == 200 && res.data) {
+            this.myWorkspaceList = res.data;
+            let wid = this.$route.query.wid;
+            wid = wid ? wid : this.getWorkspaceId;
+            const existWorkspace = this.myWorkspaceList.filter((item) => item.id === wid);
+            if (existWorkspace.length) {
+              this.$router.push({
+                query: { ...this.$route.query, wid: wid },
+              });
+              this.selectWorkspace = wid;
+            } else {
+              this.handleWorkspaceChange(res.data[0]?.id);
+            }
           }
-          this.checkMfa();
-        }
-      });
+        });
+      }
+      this.checkMfa();
     },
     checkMfa() {
       if (!this.getUserInfo) {
