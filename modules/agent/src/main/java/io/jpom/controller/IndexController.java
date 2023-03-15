@@ -49,7 +49,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -141,12 +140,6 @@ public class IndexController extends BaseAgentController {
                 String port = AbstractProjectCommander.getInstance().getMainPort(processId);
                 jsonObject.put("port", port);
                 //
-                try {
-                    String jpomName = AbstractProjectCommander.getInstance().getJpomNameByPid(processId);
-                    jsonObject.put("jpomName", jpomName);
-                } catch (IOException e) {
-                    log.error("解析进程失败", e);
-                }
             })
             .collect(Collectors.toList());
         return JsonMessage.success("ok", processes);

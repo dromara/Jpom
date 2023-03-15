@@ -49,22 +49,18 @@ import io.jpom.model.system.NetstatModel;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.script.DslScriptBuilder;
-import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.socket.AgentFileTailWatcher;
 import io.jpom.system.AgentConfig;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JvmUtil;
-import io.jpom.util.ProjectCommanderUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.jar.Attributes;
@@ -85,11 +81,6 @@ public abstract class AbstractProjectCommander {
     private static final long BACK_LOG_MIN_SIZE = DataSizeUtil.parse("100KB");
 
     private static AbstractProjectCommander abstractProjectCommander = null;
-
-    /**
-     * 进程id 对应Jpom 名称
-     */
-    public static final ConcurrentHashMap<Integer, String> PID_JPOM_NAME = new ConcurrentHashMap<>();
     /**
      * 进程Id 获取端口号
      */
@@ -256,10 +247,10 @@ public abstract class AbstractProjectCommander {
             return CommandOpResult.of(true, "file 类型项目没有 stop");
         }
         Tuple tuple = this.stopBefore(nodeProjectInfoModel, javaCopyItem);
-        String result = tuple.get(1);
+        CommandOpResult status = tuple.get(1);
         String webHook = tuple.get(0);
-        int pid = ProjectCommanderUtil.parsePid(result);
-        if (pid > 0) {
+        if (status.isSuccess()) {
+            // 运行中
             if (runMode == RunMode.Dsl) {
                 //
                 this.runDsl(nodeProjectInfoModel, "stop", (process, action) -> {
@@ -273,15 +264,14 @@ public abstract class AbstractProjectCommander {
                 });
                 boolean checkRun = this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, false);
                 return CommandOpResult.of(checkRun, checkRun ? "stop done" : "stop done,but unsuccessful")
-                    .appendMsg(result)
+                    .appendMsg(status.getMsgs())
                     .appendMsg(webHook);
-//                result = StrUtil.emptyToDefault(startDsl, checkRun ? "stop done,but unsuccessful" : "stop done");
             } else {
                 //
-                return this.stopJava(nodeProjectInfoModel, javaCopyItem, pid).appendMsg(result, webHook);
+                return this.stopJava(nodeProjectInfoModel, javaCopyItem, status.getPid()).appendMsg(status.getMsgs()).appendMsg(webHook);
             }
         }
-        return CommandOpResult.of(true).appendMsg(result, webHook);
+        return CommandOpResult.of(true).appendMsg(status.getMsgs()).appendMsg(webHook);
     }
 
     /**
@@ -306,16 +296,12 @@ public abstract class AbstractProjectCommander {
         String beforeStop = this.webHooks(nodeProjectInfoModel, javaCopyItem, "beforeStop");
         // 再次查看进程信息
         CommandOpResult result = this.status(nodeProjectInfoModel, javaCopyItem);
-        //
-        int pid = ProjectCommanderUtil.parsePid(result.msgStr());
-        if (pid > 0) {
-            // 清空名称缓存
-            PID_JPOM_NAME.remove(pid);
+        if (result.isSuccess()) {
             // 端口号缓存
-            PID_PORT.remove(pid);
+            PID_PORT.remove(result.getPid());
         }
         this.asyncWebHooks(nodeProjectInfoModel, javaCopyItem, "stop", "result", result);
-        return new Tuple(StrUtil.emptyToDefault(beforeStop, StrUtil.EMPTY), result.msgStr());
+        return new Tuple(StrUtil.emptyToDefault(beforeStop, StrUtil.EMPTY), result);
     }
 
     /**
@@ -423,9 +409,9 @@ public abstract class AbstractProjectCommander {
      * @throws Exception 异常
      */
     private String checkStart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
-        int pid = this.getPid(nodeProjectInfoModel, javaCopyItem);
-        if (pid > 0) {
-            return "当前程序正在运行中，不能重复启动,PID:" + pid;
+        CommandOpResult status = this.status(nodeProjectInfoModel, javaCopyItem);
+        if (status.isSuccess()) {
+            return "当前程序正在运行中，不能重复启动,PID:" + status.getPid();
         }
         String lib = nodeProjectInfoModel.allLib();
         File fileLib = new File(lib);
@@ -569,16 +555,17 @@ public abstract class AbstractProjectCommander {
                 // 此流程特意处理 系统日志标准格式 StrUtil.format("{} [{}] - {}", DateUtil.now(), this.action, line);
                 .map(s -> StrUtil.splitTrim(s, StrPool.DASHED))
                 .map(CollUtil::getLast)
-                .map(s -> {
-                    int pid = ProjectCommanderUtil.parsePid(s);
-                    return CommandOpResult.of(pid > 0, s);
-                }).orElseGet(() -> CommandOpResult.of(false, STOP_TAG));
-
+                .map(CommandOpResult::of)
+                .orElseGet(() -> CommandOpResult.of(false, STOP_TAG));
         } else {
             String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
             String statusResult = this.status(tag);
-            int pid = ProjectCommanderUtil.parsePid(statusResult);
-            return CommandOpResult.of(pid > 0, statusResult);
+            CommandOpResult of = CommandOpResult.of(statusResult);
+            if (!of.isSuccess()) {
+                // 只有 java 项目才判断 jps
+                Assert.state(JvmUtil.jpsNormal, JvmUtil.JPS_ERROR_MSG);
+            }
+            return of;
         }
     }
 
@@ -697,84 +684,14 @@ public abstract class AbstractProjectCommander {
 
 
     /**
-     * 根据指定进程id获取Jpom 名称
-     *
-     * @param pid 进程id
-     * @return false 不是来自Jpom
-     * @throws IOException 异常
-     */
-    public String getJpomNameByPid(int pid) throws IOException {
-        String name = PID_JPOM_NAME.get(pid);
-        if (name != null) {
-            return name;
-        }
-        String virtualMachine = JvmUtil.getPidJpsInfoInfo(pid);
-        if (virtualMachine == null) {
-            return StrUtil.DASHED;
-        }
-        String tag = JvmUtil.parseCommandJpomTag(virtualMachine);
-        log.debug("getJpomNameByPid pid: {} {} {}", pid, tag, virtualMachine);
-        ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-        NodeProjectInfoModel item = projectInfoService.getItem(tag);
-        if (item == null) {
-            return StrUtil.DASHED;
-        }
-        name = item.getName();
-        if (name != null) {
-            PID_JPOM_NAME.put(pid, name);
-            return name;
-        }
-        return StrUtil.DASHED;
-    }
-
-    /**
-     * 获取进程id
-     *
-     * @param nodeProjectInfoModel 项目
-     * @param javaCopyItem         副本
-     * @return 未运行 返回 0
-     */
-    public int getPid(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
-        CommandOpResult result = this.status(nodeProjectInfoModel, javaCopyItem);
-        int parsePid = ProjectCommanderUtil.parsePid(result.msgStr());
-        if (parsePid > 0) {
-            PID_JPOM_NAME.put(parsePid, nodeProjectInfoModel.getName());
-        } else {
-            //
-            RunMode runMode = nodeProjectInfoModel.getRunMode();
-            if (runMode != RunMode.Dsl && runMode != RunMode.File) {
-                // 只有 java 项目才判断 jps
-                Assert.state(JvmUtil.jpsNormal, JvmUtil.JPS_ERROR_MSG);
-            }
-        }
-        return parsePid;
-    }
-
-    /**
-     * 获取进程id
-     *
-     * @param tag 项目Id
-     * @return 未运行 返回 0
-     */
-    public int getPid(String tag) {
-        String result = this.status(tag);
-        return ProjectCommanderUtil.parsePid(result);
-    }
-
-    /**
      * 是否正在运行
      *
      * @param nodeProjectInfoModel 项目
      * @return true 正在运行
      */
     public boolean isRun(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
-        //String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
         CommandOpResult result = this.status(nodeProjectInfoModel, javaCopyItem);
-        int parsePid = ProjectCommanderUtil.parsePid(result.msgStr());
-        if (parsePid > 0) {
-            PID_JPOM_NAME.put(parsePid, nodeProjectInfoModel.getName());
-        }
-        return parsePid > 0;
+        return result.isSuccess();
     }
 
     /***

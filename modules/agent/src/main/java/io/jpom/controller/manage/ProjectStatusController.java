@@ -76,7 +76,8 @@ public class ProjectStatusController extends BaseAgentController {
             CommandUtil.openCache();
             int pid = 0;
             try {
-                pid = AbstractProjectCommander.getInstance().getPid(nodeProjectInfoModel, null);
+                CommandOpResult status = AbstractProjectCommander.getInstance().status(nodeProjectInfoModel, null);
+                pid = status.getPid();
             } catch (Exception e) {
                 log.error("获取项目pid 失败", e);
             }
@@ -117,19 +118,24 @@ public class ProjectStatusController extends BaseAgentController {
             CommandUtil.openCache();
             for (Object object : jsonArray) {
                 String item = object.toString();
-                int pid = 0;
                 JSONObject itemObj = new JSONObject();
                 try {
                     NodeProjectInfoModel projectInfoServiceItem = projectInfoService.getItem(item);
                     itemObj.put("name", projectInfoServiceItem.getName());
-                    pid = AbstractProjectCommander.getInstance().getPid(projectInfoServiceItem, null);
+                    CommandOpResult commandOpResult = AbstractProjectCommander.getInstance().status(projectInfoServiceItem, null);
+                    int pid = commandOpResult.getPid();
+                    //
+                    itemObj.put("pid", pid);
+                    if (StrUtil.isNotEmpty(commandOpResult.getPorts())) {
+                        itemObj.put("port", commandOpResult.getPorts());
+                    } else {
+                        String port = AbstractProjectCommander.getInstance().getMainPort(pid);
+                        itemObj.put("port", port);
+                    }
                 } catch (Exception e) {
                     log.error("获取端口错误", e);
                     itemObj.put("error", e.getMessage());
                 }
-                String port = AbstractProjectCommander.getInstance().getMainPort(pid);
-                itemObj.put("port", port);
-                itemObj.put("pid", pid);
                 jsonObject.put(item, itemObj);
             }
         } finally {
@@ -161,18 +167,22 @@ public class ProjectStatusController extends BaseAgentController {
             for (Object object : jsonArray) {
                 String item = object.toString();
                 NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(item);
-                int pid = 0;
                 JSONObject itemObj = new JSONObject();
-                try {
-                    pid = AbstractProjectCommander.getInstance().getPid(nodeProjectInfoModel, copyItem);
-                } catch (Exception e) {
-                    log.error("获取端口错误", e);
-                    itemObj.put("error", e.getMessage());
+                if (copyItem != null) {
+                    int pid = 0;
+                    try {
+                        CommandOpResult status = AbstractProjectCommander.getInstance().status(nodeProjectInfoModel, copyItem);
+                        pid = status.getPid();
+                    } catch (Exception e) {
+                        log.error("获取端口错误", e);
+                        itemObj.put("error", e.getMessage());
+                    }
+                    String port = AbstractProjectCommander.getInstance().getMainPort(pid);
+                    itemObj.put("port", port);
+                    itemObj.put("pid", pid);
+                } else {
+                    itemObj.put("error", "对应的副本不存在");
                 }
-                String port = AbstractProjectCommander.getInstance().getMainPort(pid);
-                itemObj.put("port", port);
-                itemObj.put("pid", pid);
-
                 jsonObject.put(item, itemObj);
             }
         } finally {

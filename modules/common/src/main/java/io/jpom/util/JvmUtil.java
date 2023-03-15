@@ -64,7 +64,6 @@ public class JvmUtil {
      * 检查 jps 命令是否正常
      */
     public static void checkJpsNormal() {
-        //        JvmUtil.setJpsNormal(exist);
         JvmUtil.jpsNormal = JvmUtil.exist(JpomManifest.getInstance().getPid());
     }
 
@@ -107,22 +106,6 @@ public class JvmUtil {
     }
 
     /**
-     * 根据pid 获取jvm
-     *
-     * @param pid 进程id
-     * @return command line info
-     */
-    public static String getPidJpsInfoInfo(int pid) {
-        String execSystemCommand = CommandUtil.execSystemCommand("jps -mv");
-        List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
-        Optional<String> any = list.stream().filter(s -> {
-            List<String> split = StrSplitter.splitTrim(s, StrUtil.SPACE, true);
-            return StrUtil.equals(pid + "", CollUtil.getFirst(split));
-        }).findAny();
-        return any.orElse(null);
-    }
-
-    /**
      * 工具Jpom运行项目的id 获取进程ID
      *
      * @param tag 项目id
@@ -160,29 +143,5 @@ public class JvmUtil {
             }
         }
         return false;
-    }
-
-    /**
-     * 解析命令行的 tag 信息
-     *
-     * @param commandLine 命令行
-     * @return tag         标识
-     */
-    public static String parseCommandJpomTag(String commandLine) {
-        if (StrUtil.isEmpty(commandLine)) {
-            return null;
-        }
-        String[] split = StrUtil.splitToArray(commandLine, StrUtil.SPACE);
-        String[] tags = Arrays.stream(JPOM_PID_TAG)
-            .map(s -> String.format("-%s=", s))
-            .collect(Collectors.toList())
-            .toArray(new String[]{});
-        for (String item : split) {
-            if (StrUtil.startWithAny(item, tags)) {
-                List<String> split1 = StrUtil.split(item, "=");
-                return CollUtil.get(split1, 1);
-            }
-        }
-        return null;
     }
 }
