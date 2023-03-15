@@ -41,6 +41,7 @@
               <p>系统名：{{ record.osName }}</p>
               <p>系统版本：{{ record.osVersion }}</p>
               <p>CPU型号：{{ record.osCpuIdentifierName }}</p>
+              <p>主机名：{{ record.hostName }}</p>
               <p>开机时间：{{ formatDuration(record.osSystemUptime) }}</p>
             </template>
             {{ text || "未知" }}

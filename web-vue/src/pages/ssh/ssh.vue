@@ -41,6 +41,7 @@
           <p>系统名：{{ record.machineSsh && record.machineSsh.osName }}</p>
           <p>系统版本：{{ record.machineSsh && record.machineSsh.osVersion }}</p>
           <p>CPU型号：{{ record.machineSsh && record.machineSsh.osCpuIdentifierName }}</p>
+          <p>主机名：{{ record.machineSsh && record.machineSsh.hostName }}</p>
           <p>开机时间：{{ formatDuration(record.machineSsh && record.machineSsh.osSystemUptime) }}</p>
         </template>
         {{ text || "未知" }}

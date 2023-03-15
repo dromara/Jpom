@@ -65,8 +65,12 @@ function getPid() {
     fi
     echo "$JAVA_PID"
 }
+if [ ! -f "/usr/bin/lsb_release" ]; then
+    echo "os name:$(cat /etc/redhat-release)"
+else
+    echo "os name:$(/usr/bin/lsb_release -a | grep Description | awk -F : '{print $2}' | sed 's/^[ \t]*//g')"
+fi
 
-echo "os name:$(/usr/bin/lsb_release -a | grep Description | awk -F : '{print $2}' | sed 's/^[ \t]*//g')"
 echo "os version:$(uname -r)"
 echo "hostname:$(hostname)"
 # 启动时间
