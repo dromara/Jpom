@@ -41,6 +41,7 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.system.ServerConfig;
+import lombok.Lombok;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -182,13 +183,13 @@ public class SystemUpdateController extends BaseServerController {
      * @see RemoteVersion
      */
     @PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<RemoteVersion> checkVersion() {
-        NodeModel nodeModel = tryGetNode();
-        if (nodeModel != null) {
-            return NodeForward.request(getNode(), getRequest(), NodeUrl.CHECK_VERSION);
-        }
-        RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
-        return JsonMessage.success("", remoteVersion);
+    public JsonMessage<RemoteVersion> checkVersion(HttpServletRequest request,
+                                                   String machineId) {
+        JsonMessage<RemoteVersion> message = this.tryRequestNode(machineId, request, NodeUrl.CHECK_VERSION);
+        return Optional.ofNullable(message).orElseGet(() -> {
+            RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
+            return JsonMessage.success("", remoteVersion);
+        });
     }
 
     /**
@@ -199,12 +200,17 @@ public class SystemUpdateController extends BaseServerController {
      */
     @GetMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DOWNLOAD)
-    public JsonMessage<String> upgrade() throws IOException {
-        NodeModel nodeModel = tryGetNode();
-        if (nodeModel != null) {
-            return NodeForward.request(getNode(), getRequest(), NodeUrl.REMOTE_UPGRADE);
-        }
-        RemoteVersion.upgrade(JpomApplication.getInstance().getTempPath().getAbsolutePath(), objects -> backupInfoService.autoBackup());
-        return JsonMessage.success(Const.UPGRADE_MSG);
+    public JsonMessage<String> upgrade(HttpServletRequest request,
+                                       String machineId) throws IOException {
+
+        JsonMessage<String> message = this.tryRequestNode(machineId, request, NodeUrl.REMOTE_UPGRADE);
+        return Optional.ofNullable(message).orElseGet(() -> {
+            try {
+                RemoteVersion.upgrade(JpomApplication.getInstance().getTempPath().getAbsolutePath(), objects -> backupInfoService.autoBackup());
+            } catch (IOException e) {
+                throw Lombok.sneakyThrow(e);
+            }
+            return JsonMessage.success(Const.UPGRADE_MSG);
+        });
     }
 }
