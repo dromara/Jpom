@@ -67,12 +67,18 @@ public class AESEncryptor implements Encryptor {
 
     @Override
     public String encrypt(String input) throws Exception {
+        if (input == null) {
+            return null;
+        }
         AES aes = SecureUtil.aes(keyByte);
         return aes.encryptHex(input);
     }
 
     @Override
     public String decrypt(String input) throws Exception {
+        if (input == null) {
+            return null;
+        }
         AES aes = SecureUtil.aes(keyByte);
         return aes.decryptStr(input);
     }
