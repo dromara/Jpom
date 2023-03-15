@@ -1,7 +1,7 @@
 <template>
   <div class="full-content">
     <template v-if="this.getUserInfo && this.getUserInfo.systemUser && !this.loading && this.listQuery.total <= 0">
-      <a-result title="当前工作空间还没有SSH" sub-title="请到【系统管理】-> 【资产管理】-> 【SSH管理】添加SSH，或者将已添加的SSH授权关联到此工作空间">
+      <a-result title="当前工作空间还没有SSH" sub-title="请到【系统管理】-> 【资产管理】-> 【SSH管理】添加SSH，或者将已添加的SSH授权关联、分配到此工作空间">
         <template #extra>
           <router-link to="/system/assets/ssh-list"> <a-button key="console" type="primary">现在就去</a-button></router-link>
         </template>
