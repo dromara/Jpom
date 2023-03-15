@@ -32,37 +32,37 @@ import lombok.EqualsAndHashCode;
 @Data
 public class AgentFileModel extends BaseModel {
 
-	/**
-	 * 保存Agent文件
-	 */
-	public static final String ID = "AGENT_FILE";
-	/**
-	 * 最新插件端包的文件名
-	 */
-	public static final String ZIP_NAME = "agent.zip";
-	/**
-	 * 默认空版本信息
-	 */
-	public static final AgentFileModel EMPTY = new AgentFileModel();
-	/**
-	 * 文件大小
-	 */
-	private Long size = 0L;
-	/**
-	 * 保存路径
-	 */
-	private String savePath;
-	/**
-	 * 版本号
-	 */
-	private String version;
-	/**
-	 * jar 打包时间
-	 */
-	private String timeStamp;
+    /**
+     * 保存Agent文件
+     */
+    public static final String ID = "AGENT_FILE";
+    /**
+     * 最新插件端包的文件名
+     */
+    public static final String ZIP_NAME = "agent.zip";
+    /**
+     * 默认空版本信息
+     */
+    public static final AgentFileModel EMPTY = new AgentFileModel();
+    /**
+     * 文件大小
+     */
+    private Long size;
+    /**
+     * 保存路径
+     */
+    private String savePath;
+    /**
+     * 版本号
+     */
+    private String version;
+    /**
+     * jar 打包时间
+     */
+    private String timeStamp;
 
-	@Override
-	public String toString() {
-		return super.toString();
-	}
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

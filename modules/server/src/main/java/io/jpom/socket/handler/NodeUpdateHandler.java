@@ -384,6 +384,6 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             }
             return agentFileModel1;
         });
-        return JSONObject.toJSONString(agentFileModel);
+        return agentFileModel == null ? null : JSONObject.toJSONString(agentFileModel);
     }
 }

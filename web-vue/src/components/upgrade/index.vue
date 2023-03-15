@@ -14,7 +14,7 @@
       <a-timeline-item>
         <span class="layui-elem-quote">当前版本号：{{ temp.version }} </span>
         <template v-if="temp.upgrade !== undefined">
-          <a-tag v-if="temp.upgrade" color="pink" @click="upgrageVerion">新版本：{{ temp.newVersion }} </a-tag>
+          <a-tag v-if="temp.upgrade" color="pink" @click="upgrageVerion">新版本：{{ temp.newVersion }} <a-icon type="download" /></a-tag>
           <a-tag v-else color="orange" @click="checkVersion">
             <a-icon type="rocket" />
           </a-tag>
