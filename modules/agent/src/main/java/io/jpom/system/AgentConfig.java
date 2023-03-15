@@ -96,7 +96,7 @@ public class AgentConfig extends BaseExtConfig {
     }
 
     /**
-     * 获取当前登录用户的临时文件存储路径，如果没有登录则抛出异常
+     * 获取临时文件存储路径，并添加一个随机字符串
      *
      * @return 文件夹
      */
@@ -107,7 +107,7 @@ public class AgentConfig extends BaseExtConfig {
     }
 
     /**
-     * 获取当前登录用户的临时文件存储路径，如果没有登录则抛出异常
+     * 获取临时文件存储路径
      *
      * @return 文件夹
      */
@@ -118,7 +118,7 @@ public class AgentConfig extends BaseExtConfig {
 
 
     /**
-     * 获取当前登录用户的临时文件存储路径，如果没有登录则抛出异常
+     * 获取临时文件存储路径
      *
      * @return file
      */
