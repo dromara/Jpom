@@ -144,6 +144,14 @@ export function deleteProject(params) {
   });
 }
 
+export function releaseOutgiving(params) {
+  return axios({
+    url: "/node/manage/release-outgiving",
+    method: "post",
+    data: params,
+  });
+}
+
 /**
  * 项目文件列表
  * @param {

@@ -71,7 +71,7 @@ public class ProjectInfoCacheModel extends BaseNodeGroupModel {
     /**
      * 节点分发项目，不允许在项目管理中编辑
      */
-    private Integer outGivingProject;
+    private Boolean outGivingProject;
     /**
      * -Djava.ext.dirs=lib -cp conf:run.jar
      * 填写【lib:conf】

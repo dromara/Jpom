@@ -217,6 +217,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
      * 同步节点的项目
      *
      * @param nodeModel 节点
+     * @param id        项目id
      */
     public void syncNode(final NodeModel nodeModel, String id) {
         String nodeModelName = nodeModel.getName();

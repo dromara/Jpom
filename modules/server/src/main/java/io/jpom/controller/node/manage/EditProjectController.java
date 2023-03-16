@@ -91,10 +91,9 @@ public class EditProjectController extends BaseServerController {
      */
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> saveProject(String id) {
+    public JsonMessage<String> saveProject(String id, HttpServletRequest httpServletRequest) {
         NodeModel node = getNode();
 
-        HttpServletRequest httpServletRequest = getRequest();
         //
         JsonMessage<String> request = NodeForward.request(node, httpServletRequest, NodeUrl.Manage_SaveProject, "outGivingProject");
         if (request.success()) {
@@ -104,13 +103,19 @@ public class EditProjectController extends BaseServerController {
     }
 
 
-//    /**
-//     * 验证lib 暂时用情况
-//     *
-//     * @return json
-//     */
-//    @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-//    public String saveProject() {
-//        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Jude_Lib).toString();
-//    }
+    /**
+     * 释放分发
+     *
+     * @return json
+     */
+    @RequestMapping(value = "release-outgiving", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<String> releaseOutgiving(String id, HttpServletRequest request) {
+        NodeModel node = getNode();
+
+        JsonMessage<String> jsonMessage = NodeForward.request(getNode(), request, NodeUrl.Manage_ReleaseOutGiving);
+        if (jsonMessage.success()) {
+            projectInfoCacheService.syncNode(node, id);
+        }
+        return jsonMessage;
+    }
 }
