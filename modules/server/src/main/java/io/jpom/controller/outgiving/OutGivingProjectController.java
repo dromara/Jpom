@@ -59,9 +59,7 @@ import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -104,12 +102,6 @@ public class OutGivingProjectController extends BaseServerController {
         this.projectInfoCacheService = projectInfoCacheService;
     }
 
-//    @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-//    public JsonMessage<Object> getProjectStatus() {
-//        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectStatus);
-//    }
-
-
     @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<List<JSONObject>> getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id,
                                                      HttpServletRequest request) {
@@ -132,7 +124,8 @@ public class OutGivingProjectController extends BaseServerController {
             .map(outGivingNodeProject -> {
                 NodeModel nodeModel = nodeMap.get(outGivingNodeProject.getNodeId());
                 JSONObject jsonObject = new JSONObject();
-
+                jsonObject.put("sortValue", outGivingNodeProject.getSortValue());
+                jsonObject.put("disabled", outGivingNodeProject.getDisabled());
                 jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
                 jsonObject.put("projectId", outGivingNodeProject.getProjectId());
                 jsonObject.put("nodeName", nodeModel.getName());
@@ -264,7 +257,7 @@ public class OutGivingProjectController extends BaseServerController {
      * @param afterOpt 之后的操作
      * @return json
      */
-    @RequestMapping(value = "remote_download", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
     public JsonMessage<String> remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip,
                                               String secondaryDirectory,
@@ -304,12 +297,37 @@ public class OutGivingProjectController extends BaseServerController {
         return JsonMessage.success("下载成功,开始分发!");
     }
 
-    @RequestMapping(value = "cancel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "cancel", produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<String> cancel(String id) {
         OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status == OutGivingModel.Status.ING, "当前状态不是分发中"));
         OutGivingRun.cancel(outGivingModel.getId());
         //
         return JsonMessage.success("取消成功");
+    }
+
+    @PostMapping(value = "config-project", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<String> configProject(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
+        Assert.notNull(jsonObject, "没有任何信息");
+        String id = jsonObject.getString("id");
+        List<OutGivingNodeProject> list = jsonObject.getList("data", OutGivingNodeProject.class);
+        Assert.notEmpty(list, "没有配置任何项目");
+        OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
+        Assert.notNull(outGivingModel, "没有找到对应的分发项目");
+        // 更新信息
+        List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.outGivingNodeProjectList();
+        Assert.notEmpty(outGivingNodeProjects, "分发信息错误,没有任何项目");
+        for (OutGivingNodeProject outGivingNodeProject : list) {
+            OutGivingNodeProject nodeProject = OutGivingModel.getNodeProject(outGivingNodeProjects, outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId());
+            Assert.notNull(nodeProject, "没有找到对应的项目信息");
+            nodeProject.setDisabled(outGivingNodeProject.getDisabled());
+            nodeProject.setSortValue(outGivingNodeProject.getSortValue());
+        }
+        // 更新
+        OutGivingModel update = new OutGivingModel();
+        update.setId(outGivingModel.getId());
+        update.outGivingNodeProjectList(outGivingNodeProjects);
+        outGivingServer.update(update);
+        return JsonMessage.success("更新成功");
     }
 
 }

@@ -114,6 +114,9 @@
               <a-menu-item>
                 <a-button type="danger" size="small" @click="handleUnbind(record)">解绑</a-button>
               </a-menu-item>
+              <a-menu-item>
+                <a-button type="primary" size="small" @click="handleViewDispatchManager(record)">配置</a-button>
+              </a-menu-item>
             </a-menu>
           </a-dropdown>
         </a-space>
@@ -136,9 +139,16 @@
             <a-icon type="fullscreen" />
           </a-button>
         </a-tooltip>
-        <a-tooltip slot="projectName" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip>
+        <template slot="projectName" slot-scope="text, item">
+          <template v-if="item.disabled">
+            <a-tooltip title="当前项目被禁用">
+              <a-icon type="eye-invisible" />
+            </a-tooltip>
+          </template>
+          <a-tooltip slot="projectName" placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
         <template slot="outGivingStatus" slot-scope="text">
           <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || "未知" }}</a-tag>
           <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{ dispatchStatusMap[text] || "未知" }}</a-tag>
@@ -751,6 +761,45 @@
     <a-drawer destroyOnClose :title="drawerTitle" placement="right" width="85vw" :visible="drawerReadFileVisible" @close="onReadFileClose">
       <file-read v-if="drawerReadFileVisible" :nodeId="temp.nodeId" :readFilePath="temp.readFilePath" :id="temp.id" :projectId="temp.projectId" @goFile="goFile" />
     </a-drawer>
+    <a-modal destroyOnClose v-model="viewDispatchManager" width="50%" :title="`配置分发`" @ok="viewDispatchManagerOk" :maskClosable="false">
+      <draggable v-model="temp.dispatchManagerList" :group="`sortValue`" handle=".move" chosenClass="box-shadow">
+        <a-row v-for="item in temp.dispatchManagerList" :key="item.id" class="item-row">
+          <a-col :span="18">
+            <span> 节点名： {{ item.nodeName }} </span>
+            <span> 项目名： {{ item.cacheProjectName }} </span>
+          </a-col>
+          <a-col :span="2">
+            <a-switch
+              checked-children="启用"
+              un-checked-children="禁用"
+              :checked="item.disabled ? false : true"
+              @change="
+                (checked) => {
+                  temp.dispatchManagerList = temp.dispatchManagerList.map((item2) => {
+                    if (item.id === item2.id) {
+                      item2.disabled = !checked;
+                    }
+                    return { ...item2 };
+                  });
+                }
+              "
+            />
+          </a-col>
+          <a-col :span="2">
+            <a-space>
+              <a-tooltip placement="left" :title="`长按可以拖动排序`" class="move"> <a-icon type="menu" /> </a-tooltip>
+            </a-space>
+          </a-col>
+        </a-row>
+        <!-- <a-list-item slot="renderItem" slot-scope="item">
+                
+                <template>
+                
+                </template>
+              </a-list-item>
+            </a-list> -->
+      </draggable>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -773,6 +822,7 @@ import {
   dispatchStatusMap,
   cancelOutgiving,
   uploadDispatchFileMerge,
+  saveDispatchProjectConfig,
 } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, javaModes, noFileModes, runModeList, getRuningProjectInfo, getProjectGroupAll } from "@/api/node-project";
@@ -792,6 +842,7 @@ import {
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
 import { uploadPieces } from "@/utils/upload-pieces";
 import CustomSelect from "@/components/customSelect";
+import draggable from "vuedraggable";
 
 export default {
   components: {
@@ -800,6 +851,7 @@ export default {
     codeEditor,
     FileRead,
     CustomSelect,
+    draggable,
   },
   data() {
     return {
@@ -876,7 +928,7 @@ export default {
             return parseTime(text);
           },
         },
-        { title: "操作", dataIndex: "child-operation", scopedSlots: { customRender: "child-operation" }, width: 120, align: "center" },
+        { title: "操作", dataIndex: "child-operation", scopedSlots: { customRender: "child-operation" }, width: "120px", align: "center" },
       ],
       rules: {
         id: [{ required: true, message: "请输入项目ID", trigger: "blur" }],
@@ -895,6 +947,8 @@ export default {
       percentageInfo: {},
       uploading: false,
       itemProjectList: [],
+      viewDispatchManager: false,
+      dispatchManagerList: [],
     };
   },
   computed: {
@@ -933,7 +987,6 @@ export default {
         },
       });
     },
-
     // 加载数据
     loadData(pointerEvent) {
       return new Promise((resolve) => {
@@ -1745,6 +1798,41 @@ export default {
         },
       });
     },
+    //分发管理
+    handleViewDispatchManager(record) {
+      getDispatchProject(record.id, true).then((res) => {
+        if (res.code === 200) {
+          this.dispatchManagerList = res.data;
+          this.temp = {
+            dispatchManagerList: res.data,
+            id: record.id,
+          };
+          this.viewDispatchManager = true;
+        }
+      });
+    },
+    viewDispatchManagerOk() {
+      // console.log(this.temp);
+      const temp = {
+        data: this.temp.dispatchManagerList.map((item, index) => {
+          return {
+            nodeId: item.nodeId,
+            projectId: item.projectId,
+            sortValue: index,
+            disabled: item.disabled,
+          };
+        }),
+        id: this.temp.id,
+      };
+      saveDispatchProjectConfig(temp).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.viewDispatchManager = false;
+        }
+      });
+    },
   },
 };
 </script>
@@ -1767,5 +1855,17 @@ export default {
 /deep/ .ant-statistic-content-value,
 /deep/ .ant-statistic-content {
   font-size: 16px;
+}
+
+.box-shadow {
+  box-shadow: 0px 0px 10px 5px rgba(223, 222, 222, 0.5);
+  border-radius: 5px;
+}
+
+.item-row {
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid #e8e8e8;
+  border-radius: 2px;
 }
 </style>

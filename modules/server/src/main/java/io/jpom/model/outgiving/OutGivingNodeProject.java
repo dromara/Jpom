@@ -22,6 +22,7 @@
  */
 package io.jpom.model.outgiving;
 
+import cn.hutool.core.util.ObjectUtil;
 import io.jpom.model.BaseEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -41,6 +42,15 @@ public class OutGivingNodeProject extends BaseNodeProject {
      * 排序值
      */
     private Integer sortValue;
+
+    /**
+     * 是否禁用
+     */
+    private Boolean disabled;
+
+    public Boolean getDisabled() {
+        return ObjectUtil.defaultIfNull(disabled, false);
+    }
 
     /**
      * 状态
