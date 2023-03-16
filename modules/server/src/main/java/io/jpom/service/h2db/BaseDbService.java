@@ -37,7 +37,6 @@ import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.ServerConst;
 import io.jpom.model.BaseUserModifyDbModel;
 import io.jpom.model.user.UserModel;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +45,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.util.Assert;
 import top.jpom.db.DbExtConfig;
 import top.jpom.h2db.BaseDbCommonService;
-import top.jpom.h2db.TableName;
 import top.jpom.model.BaseDbModel;
 import top.jpom.model.PageResultDto;
 
@@ -80,21 +78,9 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         new Order("modifyTimeMillis", Direction.DESC)
     };
 
-    public BaseDbService() {
-        super(ServerConst.ID_STR);
-    }
-
-    @Override
-    protected String covetTableName(Class<T> tClass) {
-        TableName annotation = tClass.getAnnotation(TableName.class);
-        Assert.notNull(annotation, "请配置 table Name");
-        return annotation.value();
-    }
-
-    @Override
     public void insert(T t) {
         this.fillInsert(t);
-        super.insert(t);
+        super.insertDb(t);
         this.executeClear();
     }
 
@@ -110,11 +96,10 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         }
     }
 
-    @Override
     public void insert(Collection<T> t) {
         // def create time
         t.forEach(this::fillInsert);
-        super.insert(t);
+        super.insertDb(t);
         this.executeClear();
     }
 
@@ -167,17 +152,48 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         //
         Entity entity = this.dataBeanToEntity(info);
         //
-        entity.remove(StrUtil.format("`{}`", ServerConst.ID_STR));
+        entity.remove(StrUtil.format("`{}`", ID_STR));
         //
         Entity where = new Entity();
-        where.set(ServerConst.ID_STR, id);
+        where.set(ID_STR, id);
         if (whereConsumer != null) {
             whereConsumer.accept(where);
         }
-        int update = super.update(entity, where);
+        int update = super.updateDb(entity, where);
         // backtrack
         info.setCreateTimeMillis(createTimeMillis);
         return update;
+    }
+
+
+    /**
+     * 根据主键查询实体
+     *
+     * @param keyValue 主键值
+     * @return 数据
+     */
+    public T getByKey(String keyValue) {
+        return this.getByKey(keyValue, true);
+    }
+
+    /**
+     * 根据主键查询实体
+     *
+     * @param keyValue 主键值
+     * @return 数据
+     */
+    public List<T> getByKey(Collection<String> keyValue) {
+        return this.getByKey(keyValue, true, null);
+    }
+
+    /**
+     * 根据主键查询实体
+     *
+     * @param keyValue 主键值
+     * @return 数据
+     */
+    public T getByKey(String keyValue, boolean fill) {
+        return this.getByKey(keyValue, fill, null);
     }
 
     /**
@@ -190,10 +206,168 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         return this.updateById(info, null);
     }
 
-    @Override
     public int update(Entity entity, Entity where) {
         entity.remove("createUser");
-        return super.update(entity, where);
+        return super.updateDb(entity, where);
+    }
+
+    /**
+     * 根据主键生成
+     *
+     * @param keyValue 主键值
+     * @return 影响行数
+     */
+    public int delByKey(String keyValue) {
+        return this.delByKey(keyValue, null);
+    }
+
+    /**
+     * 根据主键生成
+     *
+     * @param keyValue 主键值
+     * @param consumer 回调
+     * @return 影响行数
+     */
+    public int delByKey(Object keyValue, Consumer<Entity> consumer) {
+        Entity where = new Entity(tableName);
+        if (keyValue != null) {
+            where.set(ID_STR, keyValue);
+        }
+        if (consumer != null) {
+            consumer.accept(where);
+        }
+        Assert.state(where.size() > 0, "没有添加任何参数:-1");
+        return del(where);
+    }
+
+    /**
+     * 判断是否存在
+     *
+     * @param data 实体
+     * @return true 存在
+     */
+    public boolean exists(T data) {
+        Entity entity = this.dataBeanToEntity(data);
+        return this.exists(entity);
+    }
+
+    /**
+     * 判断是否存在
+     *
+     * @param where 条件
+     * @return true 存在
+     */
+    public boolean exists(Entity where) {
+        long count = this.count(where);
+        return count > 0;
+    }
+
+    /**
+     * 查询一个
+     *
+     * @param where 条件
+     * @return Entity
+     */
+    public Entity query(Entity where) {
+        List<Entity> entities = this.queryList(where);
+        return CollUtil.getFirst(entities);
+    }
+
+    /**
+     * 查询 list
+     *
+     * @param where 条件
+     * @return data
+     */
+    public List<T> listByEntity(Entity where) {
+        List<Entity> entity = this.queryList(where);
+        return this.entityToBeanList(entity);
+    }
+
+    /**
+     * 查询列表
+     *
+     * @param data   数据
+     * @param count  查询数量
+     * @param orders 排序
+     * @return List
+     */
+    public List<T> queryList(T data, int count, Order... orders) {
+        Entity where = this.dataBeanToEntity(data);
+        Page page = new Page(1, count);
+        page.addOrder(orders);
+        PageResultDto<T> tPageResultDto = this.listPage(where, page);
+        return tPageResultDto.getResult();
+    }
+
+
+    /**
+     * 分页查询
+     *
+     * @param where 条件
+     * @param page  分页
+     * @return 结果
+     */
+    public PageResultDto<T> listPage(Entity where, Page page) {
+        return this.listPage(where, page, true);
+    }
+
+    /**
+     * 分页查询
+     *
+     * @param where 条件
+     * @param page  分页
+     * @return 结果
+     */
+    public List<T> listPageOnlyResult(Entity where, Page page) {
+        PageResultDto<T> pageResultDto = this.listPage(where, page);
+        return pageResultDto.getResult();
+    }
+
+    /**
+     * sql 查询 list
+     *
+     * @param sql    sql 语句
+     * @param params 参数
+     * @return list
+     */
+    public List<T> queryList(String sql, Object... params) {
+        List<Entity> query = this.query(sql, params);
+        return this.entityToBeanList(query);
+    }
+
+    /**
+     * 查询实体对象
+     *
+     * @param data 实体
+     * @return data
+     */
+    public List<T> listByBean(T data) {
+        return this.listByBean(data, true);
+    }
+
+    /**
+     * 查询实体对象
+     *
+     * @param data 实体
+     * @return data
+     */
+    public List<T> listByBean(T data, boolean fill) {
+        Entity where = this.dataBeanToEntity(data);
+        List<Entity> entitys = this.queryList(where);
+        return this.entityToBeanList(entitys, fill);
+    }
+
+    /**
+     * 查询实体对象
+     *
+     * @param data 实体
+     * @return data
+     */
+    public T queryByBean(T data) {
+        Entity where = this.dataBeanToEntity(data);
+        Entity entity = this.query(where);
+        return this.entityToBean(entity, true);
     }
 
     public List<T> list() {
@@ -397,7 +571,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
             return null;
         }
         Entity entity = Entity.create();
-        entity.set(ServerConst.ID_STR, ids);
+        entity.set(ID_STR, ids);
         if (consumer != null) {
             consumer.accept(entity);
         }
@@ -482,7 +656,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         page.addOrder(new Order(timeColumn, Direction.DESC));
         PageResultDto<T> pageResult;
         try {
-            pageResult = super.listPage(entity, page);
+            pageResult = this.listPage(entity, page);
         } catch (java.lang.IllegalStateException illegalStateException) {
             return 0L;
         } catch (Exception e) {
@@ -522,13 +696,13 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
             while (true) {
                 Page page = new Page(1, 50);
                 page.addOrder(new Order(timeClo, Direction.DESC));
-                PageResultDto<T> pageResult = super.listPage(entity, page);
+                PageResultDto<T> pageResult = this.listPage(entity, page);
                 if (pageResult.isEmpty()) {
                     return;
                 }
 //                pageResult.each(consumer);
                 List<String> ids = pageResult.getResult().stream().filter(predicate).map(BaseDbModel::getId).collect(Collectors.toList());
-                super.delByKey(ids, null);
+                this.delByKey(ids, null);
             }
         });
     }
@@ -541,6 +715,6 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return data
      */
     public T getData(String nodeId, String dataId) {
-        return super.getByKey(dataId);
+        return this.getByKey(dataId);
     }
 }

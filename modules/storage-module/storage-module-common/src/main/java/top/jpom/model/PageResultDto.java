@@ -68,13 +68,6 @@ public class PageResultDto<T> implements Serializable {
         this.setTotal(pageResult.getTotal());
     }
 
-    public PageResultDto(PageResultDto<?> pageResult) {
-        this.setPage(pageResult.getPage());
-        this.setPageSize(pageResult.getPageSize());
-        this.setTotalPage(pageResult.getTotalPage());
-        this.setTotal(pageResult.getTotal());
-    }
-
     public PageResultDto(int page, int pageSize, int total) {
         this.setPage(page);
         this.setPageSize(pageSize);

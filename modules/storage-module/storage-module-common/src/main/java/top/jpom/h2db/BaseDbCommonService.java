@@ -34,7 +34,6 @@ import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.sql.Condition;
-import cn.hutool.db.sql.Order;
 import io.jpom.system.JpomRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
@@ -64,37 +63,27 @@ public abstract class BaseDbCommonService<T> {
     }
 
     /**
+     * String const
+     */
+    public static final String ID_STR = "id";
+
+    /**
      * 表名
      */
     protected final String tableName;
     protected final Class<T> tClass;
-    /**
-     * 主键
-     */
-    protected final String key;
 
 
     @SuppressWarnings("unchecked")
-    public BaseDbCommonService(String key) {
+    public BaseDbCommonService() {
         this.tClass = (Class<T>) TypeUtil.getTypeArgument(this.getClass());
-        this.tableName = this.covetTableName(this.tClass);
-        this.key = key;
+        TableName annotation = tClass.getAnnotation(TableName.class);
+        Assert.notNull(annotation, "请配置 table Name");
+        this.tableName = annotation.value();
     }
-
-    /**
-     * 转换表名
-     *
-     * @param tClass 类
-     * @return 转换后的表名
-     */
-    protected abstract String covetTableName(Class<T> tClass);
 
     public String getTableName() {
         return tableName;
-    }
-
-    protected String getKey() {
-        return key;
     }
 
     private DataSource getDataSource() {
@@ -107,7 +96,7 @@ public abstract class BaseDbCommonService<T> {
      *
      * @param t 数据
      */
-    public void insert(T t) {
+    protected void insertDb(T t) {
         Db db = Db.use(this.getDataSource());
         try {
             Entity entity = this.dataBeanToEntity(t);
@@ -122,7 +111,7 @@ public abstract class BaseDbCommonService<T> {
      *
      * @param t 数据
      */
-    public void insert(Collection<T> t) {
+    protected void insertDb(Collection<T> t) {
         if (CollUtil.isEmpty(t)) {
             return;
         }
@@ -157,7 +146,7 @@ public abstract class BaseDbCommonService<T> {
      * @param where  条件
      * @return 影响行数
      */
-    public int update(Entity entity, Entity where) {
+    protected int updateDb(Entity entity, Entity where) {
         Db db = Db.use(this.getDataSource());
         if (where.isEmpty()) {
             throw new JpomRuntimeException("没有更新条件");
@@ -175,36 +164,6 @@ public abstract class BaseDbCommonService<T> {
      * 根据主键查询实体
      *
      * @param keyValue 主键值
-     * @return 数据
-     */
-    public T getByKey(String keyValue) {
-        return this.getByKey(keyValue, true);
-    }
-
-    /**
-     * 根据主键查询实体
-     *
-     * @param keyValue 主键值
-     * @return 数据
-     */
-    public List<T> getByKey(Collection<String> keyValue) {
-        return this.getByKey(keyValue, true, null);
-    }
-
-    /**
-     * 根据主键查询实体
-     *
-     * @param keyValue 主键值
-     * @return 数据
-     */
-    public T getByKey(String keyValue, boolean fill) {
-        return this.getByKey(keyValue, fill, null);
-    }
-
-    /**
-     * 根据主键查询实体
-     *
-     * @param keyValue 主键值
      * @param fill     是否执行填充逻辑
      * @param consumer 参数回调
      * @return 数据
@@ -214,7 +173,7 @@ public abstract class BaseDbCommonService<T> {
             return null;
         }
         Entity where = new Entity(tableName);
-        where.set(key, keyValue);
+        where.set(ID_STR, keyValue);
         Entity entity;
         try {
             Db db = Db.use(this.getDataSource());
@@ -225,11 +184,7 @@ public abstract class BaseDbCommonService<T> {
         } catch (Exception e) {
             throw warpException(e);
         }
-        T entityToBean = this.entityToBean(entity, this.tClass);
-        if (fill) {
-            this.fillSelectResult(entityToBean);
-        }
-        return entityToBean;
+        return this.entityToBean(entity, fill);
     }
 
     /**
@@ -245,7 +200,7 @@ public abstract class BaseDbCommonService<T> {
             return null;
         }
         Entity where = new Entity(tableName);
-        where.set(key, keyValue);
+        where.set(ID_STR, keyValue);
         List<Entity> entities;
         try {
             Db db = Db.use(this.getDataSource());
@@ -256,82 +211,7 @@ public abstract class BaseDbCommonService<T> {
         } catch (Exception e) {
             throw warpException(e);
         }
-        return entities.stream().map(entity -> {
-            //
-            T toBean = this.entityToBean(entity, this.tClass);
-            if (fill) {
-                this.fillSelectResult(toBean);
-            }
-            return toBean;
-        }).collect(Collectors.toList());
-    }
-
-    /**
-     * entity 转 实体
-     *
-     * @param entity Entity
-     * @param rClass 实体类
-     * @param <R>    乏型
-     * @return data
-     */
-    protected <R> R entityToBean(Entity entity, Class<R> rClass) {
-        if (entity == null) {
-            return null;
-        }
-        CopyOptions copyOptions = new CopyOptions();
-        copyOptions.setIgnoreError(true);
-        copyOptions.setIgnoreCase(true);
-        return BeanUtil.toBean(entity, rClass, copyOptions);
-    }
-
-    /**
-     * entity 转 实体
-     *
-     * @param entity Entity
-     * @return data
-     */
-    public T entityToBean(Entity entity) {
-        if (entity == null) {
-            return null;
-        }
-        CopyOptions copyOptions = new CopyOptions();
-        copyOptions.setIgnoreError(true);
-        copyOptions.setIgnoreCase(true);
-        T toBean = BeanUtil.toBean(entity, this.tClass, copyOptions);
-        this.fillSelectResult(toBean);
-        return toBean;
-    }
-
-    /**
-     * 根据主键生成
-     *
-     * @param keyValue 主键值
-     * @return 影响行数
-     */
-    public int delByKey(String keyValue) {
-        return this.delByKey(keyValue, null);
-    }
-
-    /**
-     * 根据主键生成
-     *
-     * @param keyValue 主键值
-     * @param consumer 回调
-     * @return 影响行数
-     */
-    public int delByKey(Object keyValue, Consumer<Entity> consumer) {
-        //		if (ObjectUtil.isEmpty(keyValue)) {
-        //			return 0;
-        //		}
-        Entity where = new Entity(tableName);
-        if (keyValue != null) {
-            where.set(key, keyValue);
-        }
-        if (consumer != null) {
-            consumer.accept(where);
-        }
-        Assert.state(where.size() > 0, "没有添加任何参数:-1");
-        return del(where);
+        return this.entityToBeanList(entities, fill);
     }
 
     /**
@@ -351,28 +231,6 @@ public abstract class BaseDbCommonService<T> {
         } catch (Exception e) {
             throw warpException(e);
         }
-    }
-
-    /**
-     * 判断是否存在
-     *
-     * @param data 实体
-     * @return true 存在
-     */
-    public boolean exists(T data) {
-        Entity entity = this.dataBeanToEntity(data);
-        return this.exists(entity);
-    }
-
-    /**
-     * 判断是否存在
-     *
-     * @param where 条件
-     * @return true 存在
-     */
-    public boolean exists(Entity where) {
-        long count = this.count(where);
-        return count > 0;
     }
 
     /**
@@ -405,27 +263,6 @@ public abstract class BaseDbCommonService<T> {
         }
     }
 
-    /**
-     * 查询一个
-     *
-     * @param where 条件
-     * @return Entity
-     */
-    public Entity query(Entity where) {
-        List<Entity> entities = this.queryList(where);
-        return CollUtil.getFirst(entities);
-    }
-
-    /**
-     * 查询 list
-     *
-     * @param where 条件
-     * @return data
-     */
-    public List<T> listByEntity(Entity where) {
-        List<Entity> entity = this.queryList(where);
-        return this.entityToBeanList(entity);
-    }
 
     /**
      * 查询列表
@@ -460,30 +297,37 @@ public abstract class BaseDbCommonService<T> {
     }
 
     /**
-     * 查询列表
+     * entity 转 实体
      *
-     * @param data   数据
-     * @param count  查询数量
-     * @param orders 排序
-     * @return List
+     * @param entity Entity
+     * @param fill   是否填充
+     * @return data
      */
-    public List<T> queryList(T data, int count, Order... orders) {
-        Entity where = this.dataBeanToEntity(data);
-        Page page = new Page(1, count);
-        page.addOrder(orders);
-        PageResultDto<T> tPageResultDto = this.listPage(where, page);
-        return tPageResultDto.getResult();
+    protected T entityToBean(Entity entity, boolean fill) {
+        if (entity == null) {
+            return null;
+        }
+        CopyOptions copyOptions = new CopyOptions();
+        copyOptions.setIgnoreError(true);
+        copyOptions.setIgnoreCase(true);
+        T toBean = BeanUtil.toBean(entity, this.tClass, copyOptions);
+        if (fill) {
+            this.fillSelectResult(toBean);
+        }
+        return toBean;
     }
 
-    /**
-     * 分页查询
-     *
-     * @param where 条件
-     * @param page  分页
-     * @return 结果
-     */
-    public PageResultDto<T> listPage(Entity where, Page page) {
-        return this.listPage(where, page, true);
+    public List<T> entityToBeanList(List<Entity> entitys) {
+        return this.entityToBeanList(entitys, true);
+    }
+
+    public List<T> entityToBeanList(List<Entity> entitys, boolean fill) {
+        if (entitys == null) {
+            return null;
+        }
+        return entitys.stream()
+            .map((entity -> this.entityToBean(entity, fill)))
+            .collect(Collectors.toList());
     }
 
     /**
@@ -505,13 +349,7 @@ public abstract class BaseDbCommonService<T> {
             throw warpException(e);
         }
         //
-        List<T> list = pageResult.stream().map(entity -> {
-            T entityToBean = this.entityToBean(entity, this.tClass);
-            if (fill) {
-                this.fillSelectResult(entityToBean);
-            }
-            return entityToBean;
-        }).collect(Collectors.toList());
+        List<T> list = this.entityToBeanList(pageResult, fill);
         PageResultDto<T> pageResultDto = new PageResultDto(pageResult);
         pageResultDto.setResult(list);
         if (pageResultDto.isEmpty() && pageResultDto.getPage() > 1) {
@@ -520,17 +358,6 @@ public abstract class BaseDbCommonService<T> {
         return pageResultDto;
     }
 
-    /**
-     * 分页查询
-     *
-     * @param where 条件
-     * @param page  分页
-     * @return 结果
-     */
-    public List<T> listPageOnlyResult(Entity where, Page page) {
-        PageResultDto<T> pageResultDto = this.listPage(where, page);
-        return pageResultDto.getResult();
-    }
 
     /**
      * sql 查询
@@ -560,80 +387,6 @@ public abstract class BaseDbCommonService<T> {
         } catch (Exception e) {
             throw warpException(e);
         }
-    }
-
-
-    /**
-     * sql 查询 list
-     *
-     * @param sql    sql 语句
-     * @param params 参数
-     * @return list
-     */
-    public List<T> queryList(String sql, Object... params) {
-        List<Entity> query = this.query(sql, params);
-        return this.entityToBeanList(query);
-        //		if (query != null) {
-        //			return query.stream().map((entity -> {
-        //				T entityToBean = this.entityToBean(entity, this.tClass);
-        //				this.fillSelectResult(entityToBean);
-        //				return entityToBean;
-        //			})).collect(Collectors.toList());
-        //		}
-        //		return null;
-    }
-
-    /**
-     * 查询实体对象
-     *
-     * @param data 实体
-     * @return data
-     */
-    public List<T> listByBean(T data) {
-        return this.listByBean(data, true);
-    }
-
-    /**
-     * 查询实体对象
-     *
-     * @param data 实体
-     * @return data
-     */
-    public List<T> listByBean(T data, boolean fill) {
-        Entity where = this.dataBeanToEntity(data);
-        List<Entity> entitys = this.queryList(where);
-        return this.entityToBeanList(entitys, fill);
-    }
-
-    public List<T> entityToBeanList(List<Entity> entitys) {
-        return this.entityToBeanList(entitys, true);
-    }
-
-    public List<T> entityToBeanList(List<Entity> entitys, boolean fill) {
-        if (entitys == null) {
-            return null;
-        }
-        return entitys.stream().map((entity -> {
-            T entityToBean = this.entityToBean(entity, this.tClass);
-            if (fill) {
-                this.fillSelectResult(entityToBean);
-            }
-            return entityToBean;
-        })).collect(Collectors.toList());
-    }
-
-    /**
-     * 查询实体对象
-     *
-     * @param data 实体
-     * @return data
-     */
-    public T queryByBean(T data) {
-        Entity where = this.dataBeanToEntity(data);
-        Entity entity = this.query(where);
-        T entityToBean = this.entityToBean(entity, this.tClass);
-        this.fillSelectResult(entityToBean);
-        return entityToBean;
     }
 
     /**
