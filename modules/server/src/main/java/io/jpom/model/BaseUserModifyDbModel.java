@@ -39,9 +39,28 @@ public abstract class BaseUserModifyDbModel extends BaseDbModel {
      * 修改人
      */
     private String modifyUser;
+    /**
+     * 创建人
+     */
+    private String createUser;
 
     @Override
     public String toString() {
         return super.toString();
+    }
+
+    public void setCreateUser(String createUser) {
+        if (this.hasCreateUser()) {
+            this.createUser = createUser;
+        }
+    }
+
+    /**
+     * 是否开启创建人字段
+     *
+     * @return true 开启
+     */
+    protected boolean hasCreateUser() {
+        return false;
     }
 }

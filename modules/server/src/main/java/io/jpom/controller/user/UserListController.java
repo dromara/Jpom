@@ -132,7 +132,7 @@ public class UserListController extends BaseServerController {
             if (StrUtil.equals(model.getId(), optUser.getId())) {
                 Assert.state(optUser.isSuperSystemUser(), "不能修改自己的信息");
             }
-            userService.update(userModel);
+            userService.updateById(userModel);
             // 删除旧数据
             userBindWorkspaceService.deleteByUserId(userModel.getId());
         }
@@ -227,7 +227,7 @@ public class UserListController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     public JsonMessage<Object> unlock(@ValidatorItem String id) {
         UserModel update = UserModel.unLock(id);
-        userService.update(update);
+        userService.updateById(update);
         return JsonMessage.success("解锁成功");
     }
 
@@ -243,7 +243,7 @@ public class UserListController extends BaseServerController {
     public JsonMessage<Object> closeMfa(@ValidatorItem String id) {
         UserModel update = new UserModel(id);
         update.setTwoFactorAuthKey(StrUtil.EMPTY);
-        userService.update(update);
+        userService.updateById(update);
         return JsonMessage.success("关闭成功");
     }
 

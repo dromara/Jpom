@@ -140,7 +140,7 @@ public class UserService extends BaseDbService<UserModel> {
         //		userModel.setId(id);
         userModel.setSalt(salt);
         userModel.setPassword(SecureUtil.sha1(newPwd + salt));
-        super.update(userModel);
+        super.updateById(userModel);
     }
 
     /**
@@ -227,7 +227,7 @@ public class UserService extends BaseDbService<UserModel> {
         UserModel byKey = new UserModel();
         byKey.setId(useId);
         byKey.setTwoFactorAuthKey(mfa);
-        super.update(byKey);
+        super.updateById(byKey);
     }
 
     /**

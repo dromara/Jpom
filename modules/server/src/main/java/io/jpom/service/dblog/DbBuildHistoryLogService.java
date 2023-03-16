@@ -69,7 +69,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
         BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
         buildHistoryLog.setId(logId);
         buildHistoryLog.setResultDirFile(resultDirFile);
-        this.update(buildHistoryLog);
+        this.updateById(buildHistoryLog);
     }
 
 

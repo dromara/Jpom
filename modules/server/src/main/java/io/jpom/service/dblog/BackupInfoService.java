@@ -205,13 +205,13 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> implements
                 backupInfo.setFileSize(FileUtil.size(file));
                 backupInfo.setSha1Sum(SecureUtil.sha1(file));
                 backupInfo.setStatus(BackupStatusEnum.SUCCESS.getCode());
-                this.update(backupInfo);
+                this.updateById(backupInfo);
                 log.debug("start a new Thread to execute H2 Database backup...success");
             } catch (Exception e) {
                 // 记录错误日志信息，修改备份任务执行失败
                 log.error("start a new Thread to execute H2 Database backup...catch exception...", e);
                 backupInfo.setStatus(BackupStatusEnum.FAILED.getCode());
-                this.update(backupInfo);
+                this.updateById(backupInfo);
             }
             return backupInfo;
         });

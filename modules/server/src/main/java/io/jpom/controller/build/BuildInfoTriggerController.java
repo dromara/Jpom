@@ -76,7 +76,7 @@ public class BuildInfoTriggerController extends BaseServerController {
             updateInfo.setId(id);
             updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), buildInfoService.typeName(),
                 item.getId(), user.getId()));
-            buildInfoService.update(updateInfo);
+            buildInfoService.updateById(updateInfo);
         } else {
             updateInfo = item;
         }

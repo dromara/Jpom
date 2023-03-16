@@ -17,7 +17,7 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-          <a-button type="primary" @click="handleAddGitee">导入</a-button>
+          <a-button type="primary" @click="handleAddGitee">令牌导入</a-button>
         </a-space>
       </template>
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">

@@ -99,7 +99,7 @@ public class NodeScriptHandler extends BaseProxyHandler {
             ScriptCacheModel scriptCacheModel = new ScriptCacheModel();
             scriptCacheModel.setId(dataItem.getId());
             scriptCacheModel.setLastRunUser(userModel.getId());
-            nodeScriptServer.update(scriptCacheModel);
+            nodeScriptServer.updateById(scriptCacheModel);
             //
             ScriptExecuteLogCacheModel scriptExecuteLogCacheModel = new ScriptExecuteLogCacheModel();
             scriptExecuteLogCacheModel.setScriptId(dataItem.getScriptId());

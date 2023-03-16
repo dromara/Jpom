@@ -120,7 +120,7 @@ public class BuildInfoManageController extends BaseServerController {
         // 会存在清空的情况
         update.setBuildEnvParameter(Optional.ofNullable(buildEnvParameter).orElse(StrUtil.EMPTY));
         update.setId(id);
-        buildInfoService.update(update);
+        buildInfoService.updateById(update);
         // userModel
         UserModel userModel = getUser();
         Object[] parametersEnv = StrUtil.isNotEmpty(dispatchSelectProject) ? new Object[]{"dispatchSelectProject", dispatchSelectProject} : new Object[]{};

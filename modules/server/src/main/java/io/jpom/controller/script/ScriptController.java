@@ -246,7 +246,7 @@ public class ScriptController extends BaseServerController {
             updateInfo.setId(id);
             updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), scriptServer.typeName(),
                 item.getId(), user.getId()));
-            scriptServer.update(updateInfo);
+            scriptServer.updateById(updateInfo);
         } else {
             updateInfo = item;
         }

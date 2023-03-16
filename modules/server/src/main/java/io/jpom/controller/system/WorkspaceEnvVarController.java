@@ -145,7 +145,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
             workspaceModel.setId(id);
             // 不能修改
             workspaceModel.setPrivacy(null);
-            workspaceEnvVarService.update(workspaceModel);
+            workspaceEnvVarService.updateById(workspaceModel);
         }
         this.syncNodeEnvVar(workspaceModel, oldNodeIds);
         return JsonMessage.success("操作成功");

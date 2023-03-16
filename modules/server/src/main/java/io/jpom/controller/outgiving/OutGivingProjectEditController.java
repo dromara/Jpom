@@ -167,7 +167,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         Assert.notNull(outGivingModel, "没有找到对应的分发id");
         List<Tuple> tuples = doData(outGivingModel, true);
 
-        outGivingServer.update(outGivingModel);
+        outGivingServer.updateById(outGivingModel);
         JsonMessage<String> error = saveNodeData(outGivingModel, tuples, true);
         return Optional.ofNullable(error).orElseGet(() -> JsonMessage.success("修改成功"));
     }

@@ -208,7 +208,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
             }
             update.setFailureMsg(StrUtil.EMPTY);
             update.setCertExist(FileUtil.isNotEmpty(FileUtil.file(dockerInfoModel.generateCertPath())));
-            super.update(update);
+            super.updateById(update);
             //
             return true;
         } catch (Exception e) {
@@ -261,7 +261,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
         dockerInfoModel.setId(id);
         dockerInfoModel.setStatus(status);
         dockerInfoModel.setFailureMsg(msg);
-        super.update(dockerInfoModel);
+        super.updateById(dockerInfoModel);
     }
 
     public Map<String, Object> dockerParameter(DockerInfoModel dockerInfoModel) {

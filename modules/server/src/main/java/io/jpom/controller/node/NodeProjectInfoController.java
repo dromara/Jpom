@@ -188,7 +188,7 @@ public class NodeProjectInfoController extends BaseServerController {
             updateItem.setId(id);
             updateItem.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), projectInfoCacheService.typeName(),
                 item.getId(), user.getId()));
-            projectInfoCacheService.update(updateItem);
+            projectInfoCacheService.updateById(updateItem);
         } else {
             updateItem = item;
         }

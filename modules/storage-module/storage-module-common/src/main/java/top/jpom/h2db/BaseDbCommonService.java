@@ -149,31 +149,6 @@ public abstract class BaseDbCommonService<T> {
         return entity;
     }
 
-    /**
-     * 插入数据
-     *
-     * @param entity 要修改的数据
-     * @return 影响行数
-     */
-    public int insert(Entity entity) {
-        Db db = Db.use(this.getDataSource());
-        entity.setTableName(tableName);
-        try {
-            return db.insert(entity);
-        } catch (Exception e) {
-            throw warpException(e);
-        }
-    }
-
-    /**
-     * 修改数据，需要自行实现
-     *
-     * @param t 数据
-     * @return 影响行数
-     */
-    public int update(T t) {
-        return 0;
-    }
 
     /**
      * 修改数据

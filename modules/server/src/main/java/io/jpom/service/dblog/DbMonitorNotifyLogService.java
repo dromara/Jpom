@@ -67,7 +67,7 @@ public class DbMonitorNotifyLogService extends BaseWorkspaceService<MonitorNotif
         monitorNotifyLog.setId(logId);
         monitorNotifyLog.setNotifyStatus(status);
         monitorNotifyLog.setNotifyError(errorMsg);
-        super.update(monitorNotifyLog);
+        super.updateById(monitorNotifyLog);
 //		Entity entity = new Entity();
 //		entity.set("notifyStatus", status);
 //		if (errorMsg != null) {

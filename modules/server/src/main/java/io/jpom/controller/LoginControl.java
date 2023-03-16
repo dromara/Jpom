@@ -228,7 +228,7 @@ public class LoginControl extends BaseServerController {
                 }
             } finally {
                 if (updateModel != null) {
-                    userService.update(updateModel);
+                    userService.updateById(updateModel);
                 }
                 // 用于记录登录日志
                 BaseServerController.resetInfo(userModel);

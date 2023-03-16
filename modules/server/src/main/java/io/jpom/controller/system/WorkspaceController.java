@@ -98,7 +98,7 @@ public class WorkspaceController extends BaseServerController {
             workspaceService.insert(workspaceModel);
         } else {
             workspaceModel.setId(id);
-            workspaceService.update(workspaceModel);
+            workspaceService.updateById(workspaceModel);
         }
         return JsonMessage.success("操作成功");
     }

@@ -199,7 +199,7 @@ public class MachineSshController extends BaseGroupNameController {
         if (add) {
             machineSshServer.insert(sshModel);
         } else {
-            machineSshServer.update(sshModel);
+            machineSshServer.updateById(sshModel);
         }
         return JsonMessage.success("操作成功");
     }
@@ -277,7 +277,7 @@ public class MachineSshController extends BaseGroupNameController {
         // 获取允许编辑的后缀
         List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
         sshModel.allowEditSuffix(allowEditSuffixList);
-        sshService.update(sshModel);
+        sshService.updateById(sshModel);
         return JsonMessage.success("操作成功");
     }
 
@@ -457,7 +457,7 @@ public class MachineSshController extends BaseGroupNameController {
                 update.setPrivateKey(privateKey);
                 update.setTimeout(timeout);
                 update.setCharset(charset);
-                machineSshServer.update(update);
+                machineSshServer.updateById(update);
                 updateCount++;
             }
         }

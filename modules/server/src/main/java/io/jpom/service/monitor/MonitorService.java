@@ -106,7 +106,7 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> implement
         MonitorModel monitorModel = new MonitorModel();
         monitorModel.setId(id);
         monitorModel.setAlarm(alarm);
-        super.update(monitorModel);
+        super.updateById(monitorModel);
     }
 
     /**

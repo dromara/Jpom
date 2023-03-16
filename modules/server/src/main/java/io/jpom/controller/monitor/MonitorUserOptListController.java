@@ -195,7 +195,7 @@ public class MonitorUserOptListController extends BaseServerController {
             monitorUserOptService.insert(monitorModel);
             return JsonMessage.success("添加成功");
         }
-        monitorUserOptService.update(monitorModel);
+        monitorUserOptService.updateById(monitorModel);
         return JsonMessage.success("修改成功");
     }
 
@@ -215,7 +215,7 @@ public class MonitorUserOptListController extends BaseServerController {
 
         boolean bStatus = Convert.toBool(status, false);
         monitorModel.setStatus(bStatus);
-        monitorUserOptService.update(monitorModel);
+        monitorUserOptService.updateById(monitorModel);
         return JsonMessage.success("修改成功");
     }
 

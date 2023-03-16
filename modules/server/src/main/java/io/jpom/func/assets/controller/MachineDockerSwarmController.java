@@ -194,7 +194,7 @@ public class MachineDockerSwarmController extends BaseServerController {
         MachineDockerModel update = new MachineDockerModel();
         update.setId(dockerInfoModel.getId());
         update.restSwarm();
-        machineDockerServer.update(update);
+        machineDockerServer.updateById(update);
         return new JsonMessage<>(200, "强制解绑成功");
     }
 
@@ -243,7 +243,7 @@ public class MachineDockerSwarmController extends BaseServerController {
         MachineDockerModel update = new MachineDockerModel();
         update.setId(first.getId());
         update.restSwarm();
-        machineDockerServer.update(update);
+        machineDockerServer.updateById(update);
         return new JsonMessage<>(200, "剔除成功");
     }
 }

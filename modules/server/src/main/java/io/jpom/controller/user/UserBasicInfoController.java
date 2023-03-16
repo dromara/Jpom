@@ -151,7 +151,7 @@ public class UserBasicInfoController extends BaseServerController {
             Validator.validateMatchRegex(RegexPool.URL_HTTP, workWx, "请输入正确企业微信地址");
         }
         updateModel.setWorkWx(workWx);
-        userService.update(updateModel);
+        userService.updateById(updateModel);
         return JsonMessage.success("修改成功");
     }
 
@@ -243,7 +243,7 @@ public class UserBasicInfoController extends BaseServerController {
         Assert.state(mfaCode, "验证码不正确");
         UserModel userModel = new UserModel(user.getId());
         userModel.setTwoFactorAuthKey(StrUtil.EMPTY);
-        userService.update(userModel);
+        userService.updateById(userModel);
         return JsonMessage.success("关闭成功");
     }
 
