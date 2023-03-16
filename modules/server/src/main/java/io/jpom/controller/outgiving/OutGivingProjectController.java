@@ -298,7 +298,8 @@ public class OutGivingProjectController extends BaseServerController {
     }
 
     @PostMapping(value = "cancel", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> cancel(String id) {
+    @Feature(method = MethodFeature.EXECUTE)
+    public JsonMessage<String> cancel(@ValidatorItem String id) {
         OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status == OutGivingModel.Status.ING, "当前状态不是分发中"));
         OutGivingRun.cancel(outGivingModel.getId());
         //
@@ -306,6 +307,7 @@ public class OutGivingProjectController extends BaseServerController {
     }
 
     @PostMapping(value = "config-project", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public JsonMessage<String> configProject(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
         Assert.notNull(jsonObject, "没有任何信息");
         String id = jsonObject.getString("id");
@@ -330,4 +332,26 @@ public class OutGivingProjectController extends BaseServerController {
         return JsonMessage.success("更新成功");
     }
 
+    @GetMapping(value = "remove-project", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public JsonMessage<String> removeProject(@ValidatorItem String id,
+                                             @ValidatorItem String nodeId,
+                                             @ValidatorItem String projectId,
+                                             HttpServletRequest request) {
+        OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
+        Assert.notNull(outGivingModel, "没有找到对应的分发项目");
+        List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.outGivingNodeProjectList();
+        Assert.notEmpty(outGivingNodeProjects, "分发信息错误,没有任何项目");
+        //
+        Assert.state(outGivingNodeProjects.size() > 1, "当前分发只有一个项目啦,删除整个分发即可");
+        outGivingNodeProjects = outGivingNodeProjects.stream()
+            .filter(nodeProject -> !StrUtil.equals(nodeProject.getProjectId(), projectId) || !StrUtil.equals(nodeProject.getNodeId(), nodeId))
+            .collect(Collectors.toList());
+        // 更新
+        OutGivingModel update = new OutGivingModel();
+        update.setId(outGivingModel.getId());
+        update.outGivingNodeProjectList(outGivingNodeProjects);
+        outGivingServer.update(update);
+        return JsonMessage.success("删除成功");
+    }
 }

@@ -224,6 +224,14 @@ export function cancelOutgiving(data) {
   });
 }
 
+export function removeProject(params) {
+  return axios({
+    url: "/outgiving/remove-project",
+    method: "get",
+    params: params,
+  });
+}
+
 export function saveDispatchProjectConfig(data) {
   return axios({
     url: "/outgiving/config-project",

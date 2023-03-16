@@ -1149,9 +1149,20 @@ export default {
     },
     // 释放分发
     handleReleaseOutgiving(project) {
+      const html =
+        "<b style='font-size: 20px;'>确定要释放当前项目的分发功能吗？</b>" +
+        "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
+        "<li>请慎重操作，否则会产生冗余数据。</b></li>" +
+        "<li>一般用于误操作后将本删除转为普通项目再删除项目</li>" +
+        "<li>如果关联的分发还存在再重新编辑对应分发后当前项目会再次切换为分发项目！！！</li>" +
+        " </ul>";
+
+      const h = this.$createElement;
       this.$confirm({
-        title: "系统提示",
-        content: "确定要释放当前项目的分发功能吗？请慎重操作，否则会产生冗余数据。如果关联的分发还存在再重新编辑对应分发后当前项目可能再次切换为分发项目",
+        title: "危险操作！！！",
+        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
+        okButtonProps: { props: { type: "danger", size: "small" } },
+        cancelButtonProps: { props: { type: "primary" } },
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
