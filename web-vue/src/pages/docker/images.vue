@@ -345,7 +345,7 @@
             </a-col>
           </a-row>
         </a-form-model-item>
-        <div style="padding: 60px"></div>
+        <div style="padding: 40px"></div>
         <div
           :style="{
             position: 'absolute',

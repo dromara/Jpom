@@ -141,7 +141,19 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editBuildVisible" title="编辑构建" @ok="handleEditBuildOk" width="60vw" :maskClosable="false">
+    <a-drawer
+      destroyOnClose
+      :visible="editBuildVisible"
+      @close="
+        () => {
+          this.editBuildVisible = false;
+        }
+      "
+      width="60vw"
+      title="编辑构建"
+      :maskClosable="false"
+    >
+      <!-- <a-modal destroyOnClose v-model="editBuildVisible" title="编辑构建" @ok="handleEditBuildOk" width="60vw" :maskClosable="false"> -->
       <a-form-model ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="名称" prop="name">
           <a-row>
@@ -764,7 +776,23 @@
           </a-collapse-panel>
         </a-collapse>
       </a-form-model>
-    </a-modal>
+      <div style="padding: 40px"></div>
+      <div
+        :style="{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          borderTop: '1px solid #e9e9e9',
+          padding: '10px 16px',
+          background: '#fff',
+          textAlign: 'right',
+          zIndex: 1,
+        }"
+      >
+        <a-button type="primary" @click="handleEditBuildOk"> 保存 </a-button>
+      </div>
+    </a-drawer>
     <!-- 触发器 -->
     <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
       <a-form-model ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
