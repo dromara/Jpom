@@ -24,7 +24,6 @@ package io.jpom.common.forward;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.io.resource.BytesResource;
 import cn.hutool.core.io.unit.DataSize;
 import cn.hutool.core.lang.Opt;
@@ -486,37 +485,6 @@ public class NodeForward {
         return createUrlItem(nodeModel, nodeUrl, DataContentType.JSON,
             (nodeInfo, urlItem) -> TransportServerFactory.get().executeToType(nodeInfo, urlItem, jsonData, tTypeReference));
 
-    }
-
-    /**
-     * 插件端 异常类型判断
-     *
-     * @param exception 异常
-     * @param nodeModel 插件端
-     */
-    public static AgentException responseException(Exception exception, INodeInfo nodeModel) {
-        if (exception instanceof NullPointerException) {
-            log.error("{}节点,程序空指针异常", nodeModel.name(), exception);
-            return new AgentException(nodeModel.name() + "节点异常,空指针");
-        }
-        String message = exception.getMessage();
-        Throwable cause = exception.getCause();
-        log.error("node [{}] connect failed...message: [{}]", nodeModel.name(), message);
-        if (exception instanceof IORuntimeException) {
-            if (cause instanceof java.net.ConnectException || cause instanceof java.net.SocketTimeoutException) {
-                return new AgentException(nodeModel.name() + "节点网络连接异常或超时,请优先检查插件端运行状态再检查 IP 地址、" +
-                    "端口号是否配置正确,防火墙规则," +
-                    "云服务器的安全组配置等网络相关问题排查定位。" + message);
-            }
-        } else if (exception instanceof cn.hutool.http.HttpException) {
-            if (cause instanceof java.net.SocketTimeoutException) {
-                return new AgentException(nodeModel.name() + "节点网络连接超时,请优先检查插件端运行状态再检查节点超时时间配置是否合理,上传文件超时时间配置是否合理。" + message);
-            }
-            if (cause instanceof IOException && StrUtil.containsIgnoreCase(message, "Error writing to server")) {
-                return new AgentException(nodeModel.name() + "节点上传失败,请优先检查限制上传大小配置是否合理。" + message);
-            }
-        }
-        return new AgentException(nodeModel.name() + "节点异常：" + message);
     }
 
     /**
