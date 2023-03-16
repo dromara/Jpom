@@ -424,7 +424,7 @@ public class ManageEditProjectController extends BaseAgentController {
             nodeProjectInfoModel.setOutGivingProject(false);
             projectInfoService.updateItem(nodeProjectInfoModel);
         }
-        return JsonMessage.success("ok");
+        return JsonMessage.success("释放成功");
     }
 
 //    /**

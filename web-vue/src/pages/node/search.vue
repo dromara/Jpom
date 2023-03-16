@@ -56,7 +56,7 @@
         </a-space>
       </template>
       <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="text">
-        <a-icon v-if="record.outGivingProject === 1" type="apartment" />
+        <a-icon v-if="record.outGivingProject" type="apartment" />
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">

@@ -62,9 +62,9 @@
         </template>
       </template>
       <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="`名称：${text}`" @click="handleEdit(record)">
-        <a-button type="link" style="padding: 0px" size="small"><a-icon v-if="record.outGivingProject === 1" type="apartment" />{{ text }} </a-button>
+        <a-button type="link" style="padding: 0px" size="small"><a-icon v-if="record.outGivingProject" type="apartment" />{{ text }} </a-button>
       </a-tooltip>
-      <template slot="time" slot-scope="text, record" placement="topLeft">
+      <template slot="time" slot-scope="text, record">
         <a-tooltip :title="`创建时间：${parseTime(record.createTimeMillis)}，${record.modifyTimeMillis ? '修改时间：' + parseTime(record.modifyTimeMillis) : ''}`">
           <span>{{ parseTime(record.modifyTimeMillis) }}</span>
           <!-- <br /> -->
@@ -135,18 +135,29 @@
               <!-- <a-menu-item>
                 <a-button size="small" type="primary" @click="handleReplica(record)" v-if="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
               </a-menu-item> -->
-              <a-menu-item>
-                <a-tooltip v-if="record.outGivingProject" title="节点分发项目需要到节点分发中去删除">
-                  <a-button size="small" type="danger" :disabled="record.outGivingProject === 1">删除</a-button>
-                </a-tooltip>
-                <a-button v-else size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-tooltip v-if="record.outGivingProject" title="节点分发项目需要到节点分发中去删除">
-                  <a-button size="small" type="danger" :disabled="record.outGivingProject === 1">彻底删除</a-button>
-                </a-tooltip>
-                <a-button v-else size="small" type="danger" @click="handleDelete(record, 'thorough')">彻底删除</a-button>
-              </a-menu-item>
+              <template v-if="record.outGivingProject">
+                <a-menu-item>
+                  <a-tooltip title="节点分发项目需要到节点分发中去删除">
+                    <a-button size="small" type="danger" :disabled="true">删除</a-button>
+                  </a-tooltip>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-tooltip title="节点分发项目需要到节点分发中去删除">
+                    <a-button size="small" type="danger" :disabled="true">彻底删除</a-button>
+                  </a-tooltip>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button size="small" type="danger" @click="handleReleaseOutgiving(record)">释放分发</a-button>
+                </a-menu-item>
+              </template>
+              <template v-else>
+                <a-menu-item>
+                  <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button size="small" type="danger" @click="handleDelete(record, 'thorough')">彻底删除</a-button>
+                </a-menu-item>
+              </template>
             </a-menu>
           </a-dropdown>
         </a-space>
@@ -446,6 +457,7 @@ import {
   startProject,
   stopProject,
   getProjectGroupAll,
+  releaseOutgiving,
 } from "@/api/node-project";
 
 export default {
@@ -1130,6 +1142,30 @@ export default {
                 return { ...item, javaCopyItemList: javaCopyItemList };
               });
               // this.loadData();
+            }
+          });
+        },
+      });
+    },
+    // 释放分发
+    handleReleaseOutgiving(project) {
+      this.$confirm({
+        title: "系统提示",
+        content: "确定要释放当前项目的分发功能吗？请慎重操作，否则会产生冗余数据。如果关联的分发还存在再重新编辑对应分发后当前项目可能再次切换为分发项目",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          const params = {
+            nodeId: this.node.id,
+            id: project.projectId,
+          };
+          releaseOutgiving(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+
+              this.loadData();
             }
           });
         },
