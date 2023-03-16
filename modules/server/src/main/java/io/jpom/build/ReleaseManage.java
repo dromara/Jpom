@@ -36,7 +36,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.extra.ssh.JschUtil;
-import cn.hutool.extra.ssh.Sftp;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.jcraft.jsch.Session;
@@ -68,6 +67,7 @@ import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.extconf.BuildExtConfig;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.LogRecorder;
+import io.jpom.util.MySftp;
 import io.jpom.util.StringUtil;
 import lombok.Builder;
 import lombok.Lombok;
@@ -381,7 +381,27 @@ public class ReleaseManage {
                 logRecorder.systemWarning("发布目录为空");
             } else {
                 logRecorder.system("{} {} start ftp upload", DateUtil.now(), item.getName());
-                try (Sftp sftp = new Sftp(session, machineSshModel.charset(), machineSshModel.timeout())) {
+                Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
+                MySftp.ProgressMonitor sftpProgressMonitor = new MySftp.ProgressMonitor() {
+                    @Override
+                    public void rest() {
+                        progressRangeList.clear();
+                    }
+
+                    @Override
+                    public void progress(String desc, long max, long now) {
+                        double progressPercentage = Math.floor(((float) now / max) * 100);
+                        int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
+                        if (progressRangeList.add(progressRange)) {
+                            //  total, progressSize
+                            logRecorder.system("上传文件进度:{} {}/{} {} ", desc,
+                                FileUtil.readableFileSize(now), FileUtil.readableFileSize(max),
+                                NumberUtil.formatPercent(((float) now / max), 0)
+                            );
+                        }
+                    }
+                };
+                try (MySftp sftp = new MySftp(session, machineSshModel.charset(), machineSshModel.timeout(), sftpProgressMonitor)) {
                     String prefix = "";
                     if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
                         prefix = sftp.pwd();
