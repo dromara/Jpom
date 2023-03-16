@@ -268,7 +268,7 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
                 Optional.ofNullable(userModel).ifPresent(userModel1 -> update.setUsername(userModel1.getName()));
                 WorkspaceModel workspaceModel = workspaceService.getByKey(userOperateLogV1.getWorkspaceId());
                 Optional.ofNullable(workspaceModel).ifPresent(workspaceModel1 -> update.setWorkspaceName(workspaceModel1.getName()));
-                this.update(update);
+                this.updateById(update);
             } catch (Exception e) {
                 log.error("更新操作日志失败", e);
             }

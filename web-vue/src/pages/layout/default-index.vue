@@ -146,7 +146,7 @@ export default {
       });
       // 控制台输出版本号信息
       const buildInfo = pageBuildInfo();
-      executionRequest("https://jpom.top/docs/versions.show", { ...buildInfo }).then((data) => {
+      executionRequest("https://jpom.top/docs/versions.show", { ...buildInfo, p: this.$route.path }).then((data) => {
         console.log(
           "\n %c " + parseTime(buildInfo.t) + " %c vs %c " + buildInfo.v + " %c vs %c " + data,
           "color: #ffffff; background: #f1404b; padding:5px 0;",

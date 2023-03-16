@@ -173,7 +173,7 @@ public class BackupInfoController extends BaseServerController {
                     update.setFileSize(FileUtil.size(file));
                     update.setStatus(BackupStatusEnum.SUCCESS.getCode());
                     update.setSha1Sum(sha1);
-                    int updateCount = backupInfoService.update(update);
+                    int updateCount = backupInfoService.updateById(update);
                     log.debug("更新还原数据：{}", updateCount);
                 }
             }

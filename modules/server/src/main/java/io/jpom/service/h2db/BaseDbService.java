@@ -104,23 +104,11 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @param t 数据
      */
     public void upsert(T t) {
-        int update = this.update(t);
+        int update = this.updateById(t);
         if (update <= 0) {
             this.insert(t);
         }
     }
-
-//    /**
-//     * 不填充 插入
-//     *
-//     * @param t 数据
-//     */
-//    public void insertNotFill(T t) {
-//        // def create time
-//        t.setCreateTimeMillis(ObjectUtil.defaultIfNull(t.getCreateTimeMillis(), SystemClock.now()));
-//        t.setId(ObjectUtil.defaultIfNull(t.getId(), IdUtil.fastSimpleUUID()));
-//        super.insert(t);
-//    }
 
     @Override
     public void insert(Collection<T> t) {
@@ -140,14 +128,13 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         t.setCreateTimeMillis(ObjectUtil.defaultIfNull(t.getCreateTimeMillis(), SystemClock.now()));
         t.setId(StrUtil.emptyToDefault(t.getId(), IdUtil.fastSimpleUUID()));
         if (t instanceof BaseUserModifyDbModel) {
+            UserModel userModel = BaseServerController.getUserModel();
+            userModel = userModel == null ? BaseServerController.getUserByThreadLocal() : userModel;
             // 获取数据修改人
             BaseUserModifyDbModel modifyDbModel = (BaseUserModifyDbModel) t;
-            if (StrUtil.isEmpty(modifyDbModel.getModifyUser())) {
-                UserModel userModel = BaseServerController.getUserModel();
-                userModel = userModel == null ? BaseServerController.getUserByThreadLocal() : userModel;
-                if (userModel != null) {
-                    modifyDbModel.setModifyUser(ObjectUtil.defaultIfNull(modifyDbModel.getModifyUser(), userModel.getId()));
-                }
+            if (userModel != null) {
+                modifyDbModel.setModifyUser(ObjectUtil.defaultIfNull(modifyDbModel.getModifyUser(), userModel.getId()));
+                modifyDbModel.setCreateUser(ObjectUtil.defaultIfNull(modifyDbModel.getCreateUser(), userModel.getId()));
             }
         }
     }
@@ -175,6 +162,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
             if (userModel != null) {
                 modifyDbModel.setModifyUser(ObjectUtil.defaultIfNull(modifyDbModel.getModifyUser(), userModel.getId()));
             }
+            modifyDbModel.setCreateUser(null);
         }
         //
         Entity entity = this.dataBeanToEntity(info);
@@ -203,8 +191,9 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     }
 
     @Override
-    public int update(T t) {
-        return this.updateById(t);
+    public int update(Entity entity, Entity where) {
+        entity.remove("createUser");
+        return super.update(entity, where);
     }
 
     public List<T> list() {

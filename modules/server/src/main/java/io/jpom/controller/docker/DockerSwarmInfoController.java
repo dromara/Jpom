@@ -117,7 +117,7 @@ public class DockerSwarmInfoController extends BaseDockerSwarmInfoController {
         dockerSwarmInfoMode.setId(id);
         dockerSwarmInfoMode.setName(name);
         dockerSwarmInfoMode.setTag(tag);
-        dockerSwarmInfoService.update(dockerSwarmInfoMode);
+        dockerSwarmInfoService.updateById(dockerSwarmInfoMode);
         // 更新集群关联的 docker 工作空间的 tag
         MachineDockerModel dockerModel = new MachineDockerModel();
         dockerModel.setSwarmId(dockerSwarmInfoMode1.getSwarmId());

@@ -315,7 +315,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
         CommandExecLogModel commandExecLogModel = new CommandExecLogModel();
         commandExecLogModel.setId(id);
         commandExecLogModel.setStatus(status.getCode());
-        commandExecLogService.update(commandExecLogModel);
+        commandExecLogService.updateById(commandExecLogModel);
     }
 
     /**

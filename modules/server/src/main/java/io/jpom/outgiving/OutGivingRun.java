@@ -121,7 +121,7 @@ public class OutGivingRun {
                 outGivingLog.setId(logId);
                 outGivingLog.setStatus(OutGivingNodeProject.Status.ArtificialCancel.getCode());
                 outGivingLog.setResult("手动取消分发");
-                dbOutGivingLogService.update(outGivingLog);
+                dbOutGivingLogService.updateById(outGivingLog);
             }
             if (!map1.isEmpty()) {
                 // 更新分发数据
@@ -165,7 +165,7 @@ public class OutGivingRun {
             outGivingLog.setId(logId);
             outGivingLog.setStatus(OutGivingNodeProject.Status.Cancel.getCode());
             outGivingLog.setResult("前一个节点分发失败，取消分发");
-            dbOutGivingLogService.update(outGivingLog);
+            dbOutGivingLogService.updateById(outGivingLog);
         }
     }
 
@@ -336,7 +336,7 @@ public class OutGivingRun {
         outGivingModel1.setId(outGivingId);
         outGivingModel1.setStatus(status.getCode());
         outGivingModel1.setStatusMsg(msg);
-        outGivingServer.update(outGivingModel1);
+        outGivingServer.updateById(outGivingModel1);
         //
         OutGivingModel outGivingModel = outGivingServer.getByKey(outGivingId);
         Opt.ofNullable(outGivingModel)

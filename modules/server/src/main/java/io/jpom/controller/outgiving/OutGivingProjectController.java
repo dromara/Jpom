@@ -226,7 +226,7 @@ public class OutGivingProjectController extends BaseServerController {
         outGivingModel.setAfterOpt(afterOpt1.getCode());
         outGivingModel.setSecondaryDirectory(secondaryDirectory);
 
-        outGivingServer.update(outGivingModel);
+        outGivingServer.updateById(outGivingModel);
         int stripComponentsValue = Convert.toInt(stripComponents, 0);
         // 开启
         OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
@@ -277,7 +277,7 @@ public class OutGivingProjectController extends BaseServerController {
         outGivingModel.setClearOld(Convert.toBool(clearOld, false));
         outGivingModel.setAfterOpt(afterOpt1.getCode());
         outGivingModel.setSecondaryDirectory(secondaryDirectory);
-        outGivingServer.update(outGivingModel);
+        outGivingServer.updateById(outGivingModel);
         //下载
         File file = FileUtil.file(serverConfig.getUserTempPath(), ServerConst.OUTGIVING_FILE, id);
         FileUtil.mkdir(file);
@@ -328,7 +328,7 @@ public class OutGivingProjectController extends BaseServerController {
         OutGivingModel update = new OutGivingModel();
         update.setId(outGivingModel.getId());
         update.outGivingNodeProjectList(outGivingNodeProjects);
-        outGivingServer.update(update);
+        outGivingServer.updateById(update);
         return JsonMessage.success("更新成功");
     }
 
@@ -351,7 +351,7 @@ public class OutGivingProjectController extends BaseServerController {
         OutGivingModel update = new OutGivingModel();
         update.setId(outGivingModel.getId());
         update.outGivingNodeProjectList(outGivingNodeProjects);
-        outGivingServer.update(update);
+        outGivingServer.updateById(update);
         return JsonMessage.success("删除成功");
     }
 }

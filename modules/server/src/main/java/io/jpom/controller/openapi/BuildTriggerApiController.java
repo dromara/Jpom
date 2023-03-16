@@ -235,7 +235,7 @@ public class BuildTriggerApiController extends BaseJpomController {
         }
         if (ObjectUtil.isNotEmpty(item)) {
             item.setId(id);
-            buildInfoService.update(item);
+            buildInfoService.updateById(item);
         }
         return null;
     }

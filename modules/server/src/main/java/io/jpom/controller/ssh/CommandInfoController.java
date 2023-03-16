@@ -213,7 +213,7 @@ public class CommandInfoController extends BaseServerController {
             updateInfo.setId(id);
             updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), commandService.typeName(),
                 item.getId(), user.getId()));
-            commandService.update(updateInfo);
+            commandService.updateById(updateInfo);
         } else {
             updateInfo = item;
         }

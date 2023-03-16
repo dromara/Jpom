@@ -122,7 +122,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
      */
     public void update(HttpServletRequest request) {
         NodeModel nodeModel = this.resolveNode(request);
-        this.update(nodeModel);
+        this.updateById(nodeModel);
         // 同步项目
         projectInfoCacheService.syncNode(nodeModel);
     }

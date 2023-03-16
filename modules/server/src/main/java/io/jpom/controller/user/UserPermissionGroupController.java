@@ -122,7 +122,7 @@ public class UserPermissionGroupController extends BaseServerController {
             UserPermissionGroupBean permissionGroupBean = userPermissionGroupServer.getByKey(id);
             Assert.notNull(permissionGroupBean, "数据不存在");
             userPermissionGroupBean.setId(id);
-            userPermissionGroupServer.update(userPermissionGroupBean);
+            userPermissionGroupServer.updateById(userPermissionGroupBean);
         }
         //
         JSONArray jsonArray = JSONArray.parseArray(workspace);

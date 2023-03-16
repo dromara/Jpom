@@ -229,7 +229,7 @@ public class BuildExecuteService {
                 buildInfoModel1.setBuildId(buildId + 1);
                 buildInfoModel1.setId(buildInfoId);
                 buildInfoModel.setBuildId(buildInfoModel1.getBuildId());
-                buildService.update(buildInfoModel1);
+                buildService.updateById(buildInfoModel1);
             }
             // load repository
             RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId(), false);
@@ -346,7 +346,7 @@ public class BuildExecuteService {
             // 结束
             buildHistoryLog.setEndTime(SystemClock.now());
         }
-        dbBuildHistoryLogService.update(buildHistoryLog);
+        dbBuildHistoryLogService.updateById(buildHistoryLog);
         buildService.updateStatus(buildId, buildNumberId, buildStatus);
     }
 
@@ -360,7 +360,7 @@ public class BuildExecuteService {
         BuildInfoModel buildInfoModel = new BuildInfoModel();
         buildInfoModel.setId(buildId);
         buildInfoModel.setRepositoryLastCommitId(lastCommitId);
-        buildService.update(buildInfoModel);
+        buildService.updateById(buildInfoModel);
     }
 
     /**
@@ -373,7 +373,7 @@ public class BuildExecuteService {
         BuildHistoryLog buildInfoModel = new BuildHistoryLog();
         buildInfoModel.setId(logId);
         buildInfoModel.setBuildEnvCache(json);
-        dbBuildHistoryLogService.update(buildInfoModel);
+        dbBuildHistoryLogService.updateById(buildInfoModel);
     }
 
     /**
@@ -387,7 +387,7 @@ public class BuildExecuteService {
         buildInfoModel.setId(logId);
         buildInfoModel.setResultFileSize(resultFileSize);
         buildInfoModel.setBuildLogFileSize(logSize);
-        dbBuildHistoryLogService.update(buildInfoModel);
+        dbBuildHistoryLogService.updateById(buildInfoModel);
     }
 
     @Builder

@@ -148,7 +148,7 @@ public class OutGivingController extends BaseServerController {
         Assert.notNull(outGivingModel, "没有找到对应的分发id");
         doData(outGivingModel, request);
 
-        outGivingServer.update(outGivingModel);
+        outGivingServer.updateById(outGivingModel);
         return JsonMessage.success("修改成功");
     }
 

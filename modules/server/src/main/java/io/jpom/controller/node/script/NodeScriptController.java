@@ -178,7 +178,7 @@ public class NodeScriptController extends BaseServerController {
             updateInfo.setId(id);
             updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), nodeScriptServer.typeName(),
                 item.getId(), user.getId()));
-            nodeScriptServer.update(updateInfo);
+            nodeScriptServer.updateById(updateInfo);
         } else {
             updateInfo = item;
         }

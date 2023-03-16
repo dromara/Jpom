@@ -64,7 +64,7 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
         BuildInfoModel buildInfoModel = new BuildInfoModel();
         buildInfoModel.setId(id);
         buildInfoModel.setStatus(buildStatus.getCode());
-        this.update(buildInfoModel);
+        this.updateById(buildInfoModel);
     }
 
     /**

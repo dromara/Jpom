@@ -111,7 +111,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                     outGivingLog.setProgressSize(progressSize);
                     //
                     DbOutGivingLogService dbOutGivingLogService = SpringUtil.getBean(DbOutGivingLogService.class);
-                    dbOutGivingLogService.update(outGivingLog);
+                    dbOutGivingLogService.updateById(outGivingLog);
                 });
             result = jsonMessage.success() ? OutGivingNodeProject.Status.Ok : OutGivingNodeProject.Status.Fail;
 
@@ -147,6 +147,6 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
             outGivingLog.setEndTime(SystemClock.now());
         }
         DbOutGivingLogService dbOutGivingLogService = SpringUtil.getBean(DbOutGivingLogService.class);
-        dbOutGivingLogService.update(outGivingLog);
+        dbOutGivingLogService.updateById(outGivingLog);
     }
 }

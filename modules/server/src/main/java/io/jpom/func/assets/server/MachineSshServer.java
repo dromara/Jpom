@@ -331,7 +331,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
         machineSshModel.setId(id);
         machineSshModel.setStatus(status);
         machineSshModel.setStatusMsg(msg);
-        super.update(machineSshModel);
+        super.updateById(machineSshModel);
     }
 
     /**
