@@ -89,6 +89,11 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
         long time = SystemClock.now();
         String fileSize = FileUtil.readableFileSize(file);
         try {
+            if (this.outGivingNodeProject.getDisabled() != null && this.outGivingNodeProject.getDisabled()) {
+                // 禁用
+                this.updateStatus(this.outGivingId, OutGivingNodeProject.Status.Cancel, "当前项目被禁用");
+                return OutGivingNodeProject.Status.Cancel;
+            }
             this.updateStatus(this.outGivingId, OutGivingNodeProject.Status.Ing, "开始分发");
             //
             JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, this.secondaryDirectory,

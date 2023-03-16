@@ -192,7 +192,7 @@ public class OutGivingModel extends BaseGroupModel {
      * @param projectId             项目id
      * @return 实体
      */
-    private OutGivingNodeProject getNodeProject(List<OutGivingNodeProject> outGivingNodeProjects, String nodeId, String projectId) {
+    public static OutGivingNodeProject getNodeProject(List<OutGivingNodeProject> outGivingNodeProjects, String nodeId, String projectId) {
         if (outGivingNodeProjects == null) {
             return null;
         }

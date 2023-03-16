@@ -367,6 +367,7 @@ public class OutGivingProjectEditController extends BaseServerController {
                 outGivingNodeProject = new OutGivingNodeProject();
             }
             outGivingNodeProject.setNodeId(nodeModel.getId());
+            // 分发id为项目id
             outGivingNodeProject.setProjectId(outGivingModel.getId());
             outGivingNodeProjects.add(outGivingNodeProject);
             // 检查数据

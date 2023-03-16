@@ -224,6 +224,17 @@ export function cancelOutgiving(data) {
   });
 }
 
+export function saveDispatchProjectConfig(data) {
+  return axios({
+    url: "/outgiving/config-project",
+    method: "post",
+    data,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
 export const afterOptList = [
   { title: "不做任何操作", value: 0 },
   { title: "并发执行", value: 1 },
