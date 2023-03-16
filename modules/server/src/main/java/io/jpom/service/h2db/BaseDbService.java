@@ -232,8 +232,20 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return page
      */
     public PageResultDto<T> listPage(HttpServletRequest request) {
+        return this.listPage(request, true);
+    }
+
+    /**
+     * 通用的分页查询, 使用该方法查询，数据库表字段不能包含 "page", "limit", "order_field", "order", "total"
+     * <p>
+     * page=1&limit=10&order=ascend&order_field=name
+     *
+     * @param request 请求对象
+     * @return page
+     */
+    public PageResultDto<T> listPage(HttpServletRequest request, boolean fill) {
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
-        return this.listPage(paramMap);
+        return this.listPage(paramMap, fill);
     }
 
     /**
@@ -262,6 +274,18 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return page
      */
     public PageResultDto<T> listPage(Map<String, String> paramMap) {
+        return this.listPage(paramMap, true);
+    }
+
+    /**
+     * 通用的分页查询, 使用该方法查询，数据库表字段不能包含 "page", "limit", "order_field", "order", "total"
+     * <p>
+     * page=1&limit=10&order=ascend&order_field=name
+     *
+     * @param paramMap 请求参数
+     * @return page
+     */
+    public PageResultDto<T> listPage(Map<String, String> paramMap, boolean fill) {
         String orderField = paramMap.get("order_field");
         String order = paramMap.get("order");
         //
@@ -328,17 +352,15 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
             orderField = StrUtil.removeAll(orderField, "%");
             pageReq.addOrder(new Order(StrUtil.format("`{}`", orderField), StrUtil.equalsIgnoreCase(order, "ascend") ? Direction.ASC : Direction.DESC));
         }
-        return this.listPage(where, pageReq);
+        return this.listPage(where, pageReq, fill);
     }
 
     @Override
-    public PageResultDto<T> listPage(Entity where, Page page) {
+    public PageResultDto<T> listPage(Entity where, Page page, boolean fill) {
         if (ArrayUtil.isEmpty(page.getOrders())) {
-            //page.addOrder(new Order("createTimeMillis", Direction.DESC));
-            //page.addOrder(new Order("modifyTimeMillis", Direction.DESC));
             page.addOrder(this.defaultOrders());
         }
-        return super.listPage(where, page);
+        return super.listPage(where, page, fill);
     }
 
     protected Order[] defaultOrders() {

@@ -11,11 +11,22 @@
               <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
                 <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
               </a-select>
-              <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-                <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-              </a-tooltip>
-              <a-button type="primary" @click="handleAdd">新增</a-button>
 
+              <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
+                <a-button type="primary" :loading="loading" @click="loadData">搜索 </a-button>
+              </a-tooltip>
+
+              <a-button type="primary" @click="handleAdd">新增</a-button>
+              <a-button icon="download" type="primary" @click="handlerExportData()">导出</a-button>
+              <a-dropdown>
+                <a-menu slot="overlay">
+                  <a-menu-item key="1"> <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button> </a-menu-item>
+                </a-menu>
+
+                <a-upload name="file" accept=".csv" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
+                  <a-button type="primary" icon="upload"> 导入 <a-icon type="down" /> </a-button>
+                </a-upload>
+              </a-dropdown>
               <a-tooltip>
                 <template slot="title">
                   <div>
@@ -34,7 +45,7 @@
             <a-button style="padding: 0" type="link" size="small" @click="handleEdit(item)"> {{ text }}</a-button>
           </a-tooltip>
           <a-tooltip slot="tooltip" slot-scope="text" :title="text"> {{ text }}</a-tooltip>
-          <a-tooltip slot="host" slot-scope="text, record" :title="text"> {{ text }}:{{ record.port }}</a-tooltip>
+          <a-tooltip slot="host" slot-scope="text, record" :title="`${text}:${record.port}`"> {{ text }}:{{ record.port }}</a-tooltip>
 
           <a-popover title="系统信息" slot="osName" slot-scope="text, record">
             <template slot="content">
@@ -339,6 +350,9 @@ import {
   machineSshSaveWorkspaceConfig,
   machineSshDistribute,
   restHideField,
+  importTemplate,
+  exportData,
+  importData,
 } from "@/api/system/assets-ssh";
 import { COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, CHANGE_PAGE, renderSize, formatPercent, formatDuration, formatPercent2Number } from "@/utils/const";
 import fastInstall from "@/pages/node/fast-install.vue";
@@ -692,6 +706,25 @@ export default {
             }
           });
         },
+      });
+    },
+    // 下载导入模板
+    handlerImportTemplate() {
+      window.open(importTemplate(), "_self");
+    },
+    handlerExportData() {
+      window.open(exportData({ ...this.listQuery }), "_self");
+    },
+    beforeUpload(file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      importData(formData).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.loadData();
+        }
       });
     },
   },

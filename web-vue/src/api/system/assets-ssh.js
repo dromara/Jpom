@@ -1,4 +1,5 @@
 import axios from "@/api/config";
+import { loadRouterBase } from "@/api/config";
 
 // ssh 列表
 export function machineSshListData(params) {
@@ -80,5 +81,32 @@ export function restHideField(id) {
     url: "/system/assets/ssh/rest-hide-field",
     method: "post",
     data: { id },
+  });
+}
+/*
+ * 下载导入模板
+ *
+ */
+export function importTemplate(data) {
+  return loadRouterBase("/system/assets/ssh/import-template", data);
+}
+
+/*
+ * 导出数据
+ *
+ */
+export function exportData(data) {
+  return loadRouterBase("/system/assets/ssh/export-data", data);
+}
+export function importData(formData) {
+  return axios({
+    url: "/system/assets/ssh/import-data",
+    headers: {
+      "Content-Type": "multipart/form-data;charset=UTF-8",
+    },
+    method: "post",
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData,
   });
 }
