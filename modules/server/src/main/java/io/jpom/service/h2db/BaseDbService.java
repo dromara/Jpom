@@ -518,12 +518,11 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         return this.listPage(where, pageReq, fill);
     }
 
-    @Override
     public PageResultDto<T> listPage(Entity where, Page page, boolean fill) {
         if (ArrayUtil.isEmpty(page.getOrders())) {
             page.addOrder(this.defaultOrders());
         }
-        return super.listPage(where, page, fill);
+        return this.listPageDb(where, page, fill);
     }
 
     protected Order[] defaultOrders() {

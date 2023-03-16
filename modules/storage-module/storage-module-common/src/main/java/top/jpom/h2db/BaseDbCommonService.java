@@ -96,7 +96,7 @@ public abstract class BaseDbCommonService<T> {
      *
      * @param t 数据
      */
-    protected void insertDb(T t) {
+    protected final void insertDb(T t) {
         Db db = Db.use(this.getDataSource());
         try {
             Entity entity = this.dataBeanToEntity(t);
@@ -111,7 +111,7 @@ public abstract class BaseDbCommonService<T> {
      *
      * @param t 数据
      */
-    protected void insertDb(Collection<T> t) {
+    protected final void insertDb(Collection<T> t) {
         if (CollUtil.isEmpty(t)) {
             return;
         }
@@ -146,7 +146,7 @@ public abstract class BaseDbCommonService<T> {
      * @param where  条件
      * @return 影响行数
      */
-    protected int updateDb(Entity entity, Entity where) {
+    protected final int updateDb(Entity entity, Entity where) {
         Db db = Db.use(this.getDataSource());
         if (where.isEmpty()) {
             throw new JpomRuntimeException("没有更新条件");
@@ -168,7 +168,7 @@ public abstract class BaseDbCommonService<T> {
      * @param consumer 参数回调
      * @return 数据
      */
-    public T getByKey(String keyValue, boolean fill, Consumer<Entity> consumer) {
+    public final T getByKey(String keyValue, boolean fill, Consumer<Entity> consumer) {
         if (StrUtil.isEmpty(keyValue)) {
             return null;
         }
@@ -195,7 +195,7 @@ public abstract class BaseDbCommonService<T> {
      * @param consumer 参数回调
      * @return 数据
      */
-    public List<T> getByKey(Collection<String> keyValue, boolean fill, Consumer<Entity> consumer) {
+    public final List<T> getByKey(Collection<String> keyValue, boolean fill, Consumer<Entity> consumer) {
         if (CollUtil.isEmpty(keyValue)) {
             return null;
         }
@@ -220,7 +220,7 @@ public abstract class BaseDbCommonService<T> {
      * @param where 条件
      * @return 影响行数
      */
-    public int del(Entity where) {
+    public final int del(Entity where) {
         where.setTableName(tableName);
         if (where.isEmpty()) {
             throw new JpomRuntimeException("没有删除条件");
@@ -239,7 +239,7 @@ public abstract class BaseDbCommonService<T> {
      * @param where 条件
      * @return count
      */
-    public long count(Entity where) {
+    public final long count(Entity where) {
         where.setTableName(getTableName());
         Db db = Db.use(this.getDataSource());
         try {
@@ -255,7 +255,7 @@ public abstract class BaseDbCommonService<T> {
      * @param sql sql
      * @return count
      */
-    public long count(String sql, Object... params) {
+    public final long count(String sql, Object... params) {
         try {
             return Db.use(this.getDataSource()).count(sql, params);
         } catch (Exception e) {
@@ -270,7 +270,7 @@ public abstract class BaseDbCommonService<T> {
      * @param where 条件
      * @return List
      */
-    public List<Entity> queryList(Entity where) {
+    public final List<Entity> queryList(Entity where) {
         where.setTableName(getTableName());
         Db db = Db.use(this.getDataSource());
         try {
@@ -286,7 +286,7 @@ public abstract class BaseDbCommonService<T> {
      * @param wheres 条件
      * @return List
      */
-    public List<T> findByCondition(Condition... wheres) {
+    public final List<T> findByCondition(Condition... wheres) {
         Db db = Db.use(this.getDataSource());
         try {
             List<Entity> entities = db.findBy(getTableName(), wheres);
@@ -339,7 +339,7 @@ public abstract class BaseDbCommonService<T> {
      * @return 结果
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public PageResultDto<T> listPage(Entity where, Page page, boolean fill) {
+    public final PageResultDto<T> listPageDb(Entity where, Page page, boolean fill) {
         where.setTableName(getTableName());
         PageResult<Entity> pageResult;
         Db db = Db.use(this.getDataSource());
@@ -366,7 +366,7 @@ public abstract class BaseDbCommonService<T> {
      * @param params 参数
      * @return list
      */
-    public List<Entity> query(String sql, Object... params) {
+    public final List<Entity> query(String sql, Object... params) {
         try {
             return Db.use(this.getDataSource()).query(sql, params);
         } catch (Exception e) {
@@ -381,7 +381,7 @@ public abstract class BaseDbCommonService<T> {
      * @param params 参数
      * @return list
      */
-    public int execute(String sql, Object... params) {
+    public final int execute(String sql, Object... params) {
         try {
             return Db.use(this.getDataSource()).execute(sql, params);
         } catch (Exception e) {
@@ -402,7 +402,7 @@ public abstract class BaseDbCommonService<T> {
      *
      * @param e 异常
      */
-    protected JpomRuntimeException warpException(Exception e) {
+    private JpomRuntimeException warpException(Exception e) {
         return StorageServiceFactory.get().warpException(e);
     }
 }
