@@ -28,11 +28,6 @@ package io.jpom.common;
  */
 public class ServerConst extends Const {
 
-    /**
-     * String const
-     */
-    public static final String ID_STR = "id";
-
     public static final String GROUP_STR = "group";
 
     /**

@@ -25,7 +25,6 @@ package io.jpom.controller.docker;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Entity;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.controller.docker.base.BaseDockerSwarmInfoController;
@@ -138,9 +137,10 @@ public class DockerSwarmInfoController extends BaseDockerSwarmInfoController {
                 allTag = allTag.stream().filter(StrUtil::isNotEmpty).collect(Collectors.toSet());
                 String newTags = CollUtil.join(allTag, StrUtil.COLON, StrUtil.COLON, StrUtil.COLON);
                 //
-                Entity where = Entity.create().set("id", dockerInfoModel.getId());
-                Entity update = Entity.create().set("tags", newTags);
-                dockerInfoService.update(update, where);
+                DockerInfoModel update = new DockerInfoModel();
+                update.setId(dockerInfoModel.getId());
+                update.setTags(newTags);
+                dockerInfoService.updateById(update);
             }
         }
         //
