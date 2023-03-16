@@ -109,6 +109,7 @@ public class EditProjectController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "release-outgiving", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public JsonMessage<String> releaseOutgiving(String id, HttpServletRequest request) {
         NodeModel node = getNode();
 

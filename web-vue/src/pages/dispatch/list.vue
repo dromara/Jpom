@@ -786,6 +786,9 @@
             />
           </a-col>
           <a-col :span="2">
+            <a-button type="danger" size="small" @click="handleRemoveProject(item)" :disabled="!temp || !temp.dispatchManagerList || temp.dispatchManagerList.length <= 1"> 解绑 </a-button>
+          </a-col>
+          <a-col :span="2">
             <a-space>
               <a-tooltip placement="left" :title="`长按可以拖动排序`" class="move"> <a-icon type="menu" /> </a-tooltip>
             </a-space>
@@ -823,6 +826,7 @@ import {
   cancelOutgiving,
   uploadDispatchFileMerge,
   saveDispatchProjectConfig,
+  removeProject,
 } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, javaModes, noFileModes, runModeList, getRuningProjectInfo, getProjectGroupAll } from "@/api/node-project";
@@ -1800,12 +1804,15 @@ export default {
     },
     //分发管理
     handleViewDispatchManager(record) {
-      getDispatchProject(record.id, true).then((res) => {
+      this.handleViewDispatchManagerById(record.id);
+    },
+    handleViewDispatchManagerById(id) {
+      getDispatchProject(id, true).then((res) => {
         if (res.code === 200) {
           this.dispatchManagerList = res.data;
           this.temp = {
             dispatchManagerList: res.data,
-            id: record.id,
+            id: id,
           };
           this.viewDispatchManager = true;
         }
@@ -1831,6 +1838,40 @@ export default {
           });
           this.viewDispatchManager = false;
         }
+      });
+    },
+    // 删除项目
+    handleRemoveProject(item) {
+      const html =
+        "<b style='font-size: 20px;'>真的要释放(删除)当前项目么？</b>" +
+        "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
+        "<li>不会真实请求节点删除项目信息</b></li>" +
+        "<li>一般用于服务器无法连接且已经确定不再使用</li>" +
+        "<li>如果误操作会产生冗余数据！！！</li>" +
+        " </ul>";
+
+      const h = this.$createElement;
+      this.$confirm({
+        title: "危险操作！！！",
+        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
+        okButtonProps: { props: { type: "danger", size: "small" } },
+        cancelButtonProps: { props: { type: "primary" } },
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          removeProject({
+            nodeId: item.nodeId,
+            projectId: item.projectId,
+            id: this.temp.id,
+          }).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.handleViewDispatchManagerById(this.temp.id);
+            }
+          });
+        },
       });
     },
   },
