@@ -57,7 +57,19 @@
         </a-space>
       </template>
     </a-table>
-    <a-modal destroyOnClose v-model="buildVisible" width="60vw" title="构建容器" @ok="handleBuildOk" :maskClosable="false">
+
+    <a-drawer
+      destroyOnClose
+      :visible="buildVisible"
+      @close="
+        () => {
+          this.buildVisible = false;
+        }
+      "
+      width="60vw"
+      title="构建容器"
+      :maskClosable="false"
+    >
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="基础镜像" prop="name">
           <a-row>
@@ -307,6 +319,7 @@
             </a-col>
           </a-row>
         </a-form-model-item>
+        <a-form-model-item label="runtime"> <a-input v-model="temp.runtime" placeholder="容器 runtime" /> </a-form-model-item>
         <a-form-model-item label="容器标签"> <a-input v-model="temp.labels" placeholder="容器标签,如：key1=values1&keyvalue2" /> </a-form-model-item>
         <a-form-model-item label="自动启动">
           <a-row>
@@ -332,8 +345,24 @@
             </a-col>
           </a-row>
         </a-form-model-item>
+        <div style="padding: 60px"></div>
+        <div
+          :style="{
+            position: 'absolute',
+            right: 0,
+            bottom: 0,
+            width: '100%',
+            borderTop: '1px solid #e9e9e9',
+            padding: '10px 16px',
+            background: '#fff',
+            textAlign: 'right',
+            zIndex: 1,
+          }"
+        >
+          <a-button type="primary" @click="handleBuildOk"> 确认 </a-button>
+        </div>
       </a-form-model>
-    </a-modal>
+    </a-drawer>
     <!-- 日志 -->
     <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="pull日志" :footer="null" :maskClosable="false">
       <pull-image-Log v-if="logVisible" :id="temp.id" :machineDockerId="this.machineDockerId" :urlPrefix="this.urlPrefix" />
@@ -513,6 +542,7 @@ export default {
           privileged: this.temp.privileged,
           restartPolicy: this.temp.restartPolicy,
           labels: this.temp.labels,
+          runtime: this.temp.runtime,
           storageOpt: {},
         };
         temp.volumes = (this.temp.volumes || [])
