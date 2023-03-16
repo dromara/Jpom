@@ -22,6 +22,7 @@
  */
 package io.jpom.common;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONObject;
@@ -126,7 +127,11 @@ public class JsonMessage<T> implements Serializable {
     }
 
     public static <T> JsonMessage<T> success(String msg) {
-        return success(msg, null);
+        return success(msg, (T) null);
+    }
+
+    public static <T> JsonMessage<T> success(String template, Object... args) {
+        return success(StrUtil.format(template, args), (T) null);
     }
 
     public static <T> JsonMessage<T> success(String msg, T data) {

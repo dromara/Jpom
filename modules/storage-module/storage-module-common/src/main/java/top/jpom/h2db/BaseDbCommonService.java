@@ -507,8 +507,20 @@ public abstract class BaseDbCommonService<T> {
      * @param page  分页
      * @return 结果
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public PageResultDto<T> listPage(Entity where, Page page) {
+        return this.listPage(where, page, true);
+    }
+
+    /**
+     * 分页查询
+     *
+     * @param where 条件
+     * @param page  分页
+     * @param fill  是否填充
+     * @return 结果
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public PageResultDto<T> listPage(Entity where, Page page, boolean fill) {
         where.setTableName(getTableName());
         PageResult<Entity> pageResult;
         Db db = Db.use(this.getDataSource());
@@ -520,7 +532,9 @@ public abstract class BaseDbCommonService<T> {
         //
         List<T> list = pageResult.stream().map(entity -> {
             T entityToBean = this.entityToBean(entity, this.tClass);
-            this.fillSelectResult(entityToBean);
+            if (fill) {
+                this.fillSelectResult(entityToBean);
+            }
             return entityToBean;
         }).collect(Collectors.toList());
         PageResultDto<T> pageResultDto = new PageResultDto(pageResult);

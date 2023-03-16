@@ -22,11 +22,18 @@
  */
 package io.jpom.func.assets.controller;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.io.BomReader;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.text.StrSplitter;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
+import cn.hutool.core.text.csv.*;
+import cn.hutool.core.util.*;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.JschUtil;
@@ -57,14 +64,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * @author bwcx_jzy
@@ -297,7 +308,7 @@ public class MachineSshController extends BaseGroupNameController {
      * @param id ssh id
      * @return json
      */
-    @PostMapping(value = "rest-hide-field")
+    @PostMapping(value = "rest-hide-field", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public JsonMessage<String> restHideField(@ValidatorItem String id) {
         MachineSshModel machineSshModel = new MachineSshModel();
@@ -306,5 +317,150 @@ public class MachineSshController extends BaseGroupNameController {
         machineSshModel.setPrivateKey(StrUtil.EMPTY);
         machineSshServer.updateById(machineSshModel);
         return new JsonMessage<>(200, "操作成功");
+    }
+
+    /**
+     * 下载导入模板
+     */
+    @GetMapping(value = "import-template", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public void importTemplate(HttpServletResponse response) throws IOException {
+        String fileName = "ssh导入模板.csv";
+        this.setHeader(response, fileName);
+        //
+        CsvWriter writer = CsvUtil.getWriter(response.getWriter());
+        writer.writeLine("name", "groupName", "host", "port", "user", "password", "charset", "connectType", "privateKey", "timeout");
+        writer.flush();
+    }
+
+    private void setHeader(HttpServletResponse response, String fileName) {
+        String contentType = ObjectUtil.defaultIfNull(FileUtil.getMimeType(fileName), "application/octet-stream");
+        response.setHeader("Content-Disposition", StrUtil.format("attachment;filename=\"{}\"",
+            URLUtil.encode(fileName, CharsetUtil.CHARSET_UTF_8)));
+        response.setContentType(contentType);
+    }
+
+
+    /**
+     * 导出数据
+     */
+    @GetMapping(value = "export-data", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DOWNLOAD)
+    public void exportData(HttpServletResponse response, HttpServletRequest request) throws IOException {
+        String fileName = "导出的 ssh 数据 " + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
+        this.setHeader(response, fileName);
+        //
+        CsvWriter writer = CsvUtil.getWriter(response.getWriter());
+        int pageInt = 0;
+        writer.writeLine("name", "groupName", "host", "port", "user", "password", "charset", "connectType", "privateKey", "timeout");
+        while (true) {
+            Map<String, String> paramMap = ServletUtil.getParamMap(request);
+            paramMap.remove("workspaceId");
+            // 下一页
+            paramMap.put("page", String.valueOf(++pageInt));
+            PageResultDto<MachineSshModel> listPage = machineSshServer.listPage(paramMap, false);
+            if (listPage.isEmpty()) {
+                break;
+            }
+            listPage.getResult()
+                .stream()
+                .map((Function<MachineSshModel, List<Object>>) machineSshModel -> CollUtil.newArrayList(
+                    machineSshModel.getName(),
+                    machineSshModel.getGroupName(),
+                    machineSshModel.getHost(),
+                    machineSshModel.getPort(),
+                    machineSshModel.getUser(),
+                    machineSshModel.getPassword(),
+                    machineSshModel.getCharset(),
+                    machineSshModel.getConnectType(),
+                    machineSshModel.getPrivateKey(),
+                    machineSshModel.getTimeout()
+                ))
+                .map(objects -> objects.stream().map(StrUtil::toStringOrNull).toArray(String[]::new))
+                .forEach(writer::writeLine);
+            if (ObjectUtil.equal(listPage.getPage(), listPage.getTotalPage())) {
+                // 最后一页
+                break;
+            }
+        }
+        writer.flush();
+    }
+
+    /**
+     * 导入数据
+     *
+     * @return json
+     */
+    @PostMapping(value = "import-data", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<String> importData(MultipartFile file) throws IOException {
+        Assert.notNull(file, "没有上传文件");
+        String originalFilename = file.getOriginalFilename();
+        String extName = FileUtil.extName(originalFilename);
+        Assert.state(StrUtil.endWithIgnoreCase(extName, "csv"), "不允许的文件格式");
+        BomReader bomReader = IoUtil.getBomReader(file.getInputStream());
+        CsvReadConfig csvReadConfig = CsvReadConfig.defaultConfig();
+        csvReadConfig.setHeaderLineNo(0);
+        CsvReader reader = CsvUtil.getReader(bomReader, csvReadConfig);
+        CsvData csvData;
+        try {
+            csvData = reader.read();
+        } catch (Exception e) {
+            log.error("解析 csv 异常", e);
+            return new JsonMessage<>(405, "解析文件异常," + e.getMessage());
+        }
+        List<CsvRow> rows = csvData.getRows();
+        Assert.notEmpty(rows, "没有任何数据");
+        int addCount = 0, updateCount = 0;
+        for (int i = 0; i < rows.size(); i++) {
+            CsvRow csvRow = rows.get(i);
+            String name = csvRow.getByName("name");
+            int finalI = i;
+            Assert.hasText(name, () -> StrUtil.format("第 {} 行 name 字段不能位空", finalI + 1));
+            String groupName = csvRow.getByName("groupName");
+            String host = csvRow.getByName("host");
+            Assert.hasText(host, () -> StrUtil.format("第 {} 行 host 字段不能位空", finalI + 1));
+            Integer port = Convert.toInt(csvRow.getByName("port"));
+            Assert.state(port != null && NetUtil.isValidPort(port), () -> StrUtil.format("第 {} 行 port 字段不能位空或者不正确", finalI + 1));
+            String user = csvRow.getByName("user");
+            Assert.hasText(host, () -> StrUtil.format("第 {} 行 user 字段不能位空", finalI + 1));
+            String password = csvRow.getByName("password");
+            String charset = csvRow.getByName("charset");
+            //
+            String type = csvRow.getByName("connectType");
+            type = StrUtil.emptyToDefault(type, "").toUpperCase();
+            MachineSshModel.ConnectType connectType = EnumUtil.fromString(MachineSshModel.ConnectType.class, type, MachineSshModel.ConnectType.PASS);
+            String privateKey = csvRow.getByName("privateKey");
+            Integer timeout = Convert.toInt(csvRow.getByName("timeout"));
+            //
+            MachineSshModel where = new MachineSshModel();
+            where.setHost(host);
+            where.setUser(user);
+            where.setPort(port);
+            where.setConnectType(connectType.name());
+            MachineSshModel machineSshModel = machineSshServer.queryByBean(where);
+            if (machineSshModel == null) {
+                // 添加
+                where.setName(name);
+                where.setGroupName(groupName);
+                where.setPassword(password);
+                where.setPrivateKey(privateKey);
+                where.setTimeout(timeout);
+                where.setCharset(charset);
+                machineSshServer.insert(where);
+                addCount++;
+            } else {
+                MachineSshModel update = new MachineSshModel();
+                update.setId(machineSshModel.getId());
+                update.setName(name);
+                update.setGroupName(groupName);
+                update.setPassword(password);
+                update.setPrivateKey(privateKey);
+                update.setTimeout(timeout);
+                update.setCharset(charset);
+                machineSshServer.update(update);
+                updateCount++;
+            }
+        }
+        return JsonMessage.success("导入成功,添加 {} 条数据,修改 {} 条数据", addCount, updateCount);
     }
 }
