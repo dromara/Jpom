@@ -42,6 +42,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.func.assets.server.MachineDockerServer;
 import io.jpom.model.BaseEnum;
+import io.jpom.model.BaseIdModel;
 import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
@@ -1052,6 +1053,8 @@ public class BuildExecuteService {
             map.put("type", type);
             map.put("triggerBuildType", taskData.triggerBuildType);
             map.put("triggerTime", SystemClock.now());
+            String triggerUser = Optional.ofNullable(taskData.userModel).map(BaseIdModel::getId).orElse(UserModel.SYSTEM_ADMIN);
+            map.put("triggerUser", triggerUser);
             String resultDirFile = buildExtraModule.getResultDirFile();
             map.put("buildResultDirFile", resultDirFile);
             map.put("buildResultFile", BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), this.taskData.buildInfoModel.getBuildId(), resultDirFile));
