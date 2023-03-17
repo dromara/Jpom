@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.controller.openapi;
+package io.jpom.func.openapi.controller;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -31,10 +31,13 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
-import io.jpom.model.data.CommandModel;
+import io.jpom.model.script.ScriptExecuteLogModel;
+import io.jpom.model.script.ScriptModel;
 import io.jpom.model.user.UserModel;
-import io.jpom.service.node.command.CommandService;
+import io.jpom.service.script.ScriptExecuteLogServer;
+import io.jpom.service.script.ScriptServer;
 import io.jpom.service.user.TriggerTokenLogServer;
+import io.jpom.socket.ServerScriptProcessBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -43,11 +46,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * ssh 脚本触发器
+ * 服务端脚本触发器
  *
  * @author bwcx_jzy
  * @since 2022/7/25
@@ -55,14 +60,17 @@ import java.util.stream.Collectors;
 @RestController
 @NotLogin
 @Slf4j
-public class SshCommandTriggerApiController extends BaseJpomController {
+public class ServerScriptTriggerApiController extends BaseJpomController {
 
-    private final CommandService commandService;
+    private final ScriptServer scriptServer;
+    private final ScriptExecuteLogServer scriptExecuteLogServer;
     private final TriggerTokenLogServer triggerTokenLogServer;
 
-    public SshCommandTriggerApiController(CommandService commandService,
-                                          TriggerTokenLogServer triggerTokenLogServer) {
-        this.commandService = commandService;
+    public ServerScriptTriggerApiController(ScriptServer scriptServer,
+                                            ScriptExecuteLogServer scriptExecuteLogServer,
+                                            TriggerTokenLogServer triggerTokenLogServer) {
+        this.scriptServer = scriptServer;
+        this.scriptExecuteLogServer = scriptExecuteLogServer;
         this.triggerTokenLogServer = triggerTokenLogServer;
     }
 
@@ -73,28 +81,38 @@ public class SshCommandTriggerApiController extends BaseJpomController {
      * @param token 构建的token
      * @return json
      */
-    @RequestMapping(value = ServerOpenApi.SSH_COMMAND_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = ServerOpenApi.SERVER_SCRIPT_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token) {
-        CommandModel item = commandService.getByKey(id);
+        ScriptModel item = scriptServer.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
         //
-        Assert.hasText(item.getSshIds(), "当前脚本未绑定 SSH 节点，不能使用触发器执行");
-        UserModel userModel = triggerTokenLogServer.getUserByToken(token, commandService.typeName());
+        UserModel userModel = triggerTokenLogServer.getUserByToken(token, scriptServer.typeName());
         //
         Assert.notNull(userModel, "触发token错误,或者已经失效:-1");
 
-        String batchId;
         try {
             BaseServerController.resetInfo(userModel);
-            batchId = commandService.executeBatch(item, item.getDefParams(), item.getSshIds(), 2);
+            // 解析参数
+            Map<String, String> paramMap = ServletUtil.getParamMap(getRequest());
+            Map<String, String> newParamMap = new HashMap<>(10);
+            for (Map.Entry<String, String> entry : paramMap.entrySet()) {
+                String key = StrUtil.format("trigger_{}", entry.getKey());
+                key = StrUtil.toUnderlineCase(key);
+                newParamMap.put(key, entry.getValue());
+            }
+            // 创建记录
+            ScriptExecuteLogModel nodeScriptExecLogModel = scriptExecuteLogServer.create(item, 2);
+            // 执行
+            ServerScriptProcessBuilder.create(item, nodeScriptExecLogModel.getId(), item.getDefArgs(), newParamMap);
+            //
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("logId", nodeScriptExecLogModel.getId());
+            return JsonMessage.success("开始执行", jsonObject);
         } catch (Exception e) {
-            log.error("触发自动执行SSH命令模版异常", e);
+            log.error("触发自动执行服务器脚本异常", e);
             return new JsonMessage<>(500, "执行异常：" + e.getMessage());
         }
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("batchId", batchId);
-        return JsonMessage.success("开始执行", jsonObject);
     }
 
 
@@ -112,14 +130,14 @@ public class SshCommandTriggerApiController extends BaseJpomController {
      * {
      * "id":"1",
      * "token":"a",
-     * "batchId":"1",
+     * "logId":"1",
      * "msg":"没有对应数据",
      * }
      * ]</code>
      *
      * @return json
      */
-    @PostMapping(value = ServerOpenApi.SSH_COMMAND_TRIGGER_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = ServerOpenApi.SERVER_SCRIPT_TRIGGER_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<List<Object>> triggerBatch() {
         try {
             String body = ServletUtil.getBody(getRequest());
@@ -128,12 +146,12 @@ public class SshCommandTriggerApiController extends BaseJpomController {
                 JSONObject jsonObject = (JSONObject) o;
                 String id = jsonObject.getString("id");
                 String token = jsonObject.getString("token");
-                CommandModel item = commandService.getByKey(id);
+                ScriptModel item = scriptServer.getByKey(id);
                 if (item == null) {
                     jsonObject.put("msg", "没有对应数据");
                     return;
                 }
-                UserModel userModel = triggerTokenLogServer.getUserByToken(token, commandService.typeName());
+                UserModel userModel = triggerTokenLogServer.getUserByToken(token, scriptServer.typeName());
                 if (userModel == null) {
                     jsonObject.put("msg", "对应的用户不存在,触发器已失效");
                     return;
@@ -144,19 +162,21 @@ public class SshCommandTriggerApiController extends BaseJpomController {
                     return;
                 }
                 BaseServerController.resetInfo(userModel);
-                String batchId = null;
                 try {
-                    batchId = commandService.executeBatch(item, item.getDefParams(), item.getSshIds(), 2);
+                    // 创建记录
+                    ScriptExecuteLogModel nodeScriptExecLogModel = scriptExecuteLogServer.create(item, 2);
+                    // 执行
+                    ServerScriptProcessBuilder.create(item, nodeScriptExecLogModel.getId(), item.getDefArgs());
+                    jsonObject.put("logId", nodeScriptExecLogModel.getId());
                 } catch (Exception e) {
                     log.error("触发自动执行命令模版异常", e);
                     jsonObject.put("msg", "执行异常：" + e.getMessage());
                 }
-                jsonObject.put("batchId", batchId);
                 //
             }).collect(Collectors.toList());
             return JsonMessage.success("触发成功", collect);
         } catch (Exception e) {
-            log.error("SSH 脚本批量触发异常", e);
+            log.error("服务端脚本批量触发异常", e);
             return new JsonMessage<>(500, "触发异常" + e.getMessage());
         }
     }

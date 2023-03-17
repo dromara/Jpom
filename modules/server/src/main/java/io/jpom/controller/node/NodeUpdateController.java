@@ -31,7 +31,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.*;
 import io.jpom.common.validator.ValidatorItem;
-import io.jpom.controller.openapi.NodeInfoController;
+import io.jpom.func.openapi.controller.NodeInfoController;
 import io.jpom.func.assets.model.MachineNodeModel;
 import io.jpom.model.AgentFileModel;
 import io.jpom.permission.ClassFeature;

@@ -87,8 +87,7 @@ public class FileStorageApiController extends BaseJpomController {
         File fileStorageFile = FileUtil.file(storageSavePath, storageModel.getPath());
         Assert.state(FileUtil.isFile(fileStorageFile), "文件已经不存在啦");
         long fileSize = FileUtil.size(fileStorageFile);
-        //
-
+        // 需要考虑文件名中存在非法字符
         String name = ReUtil.replaceAll(storageModel.getName(), "[\\s\\\\/:\\*\\?\\\"<>\\|]", "");
         if (StrUtil.isEmpty(name)) {
             name = fileStorageFile.getName();
@@ -96,9 +95,9 @@ public class FileStorageApiController extends BaseJpomController {
             name += "." + storageModel.getExtName();
         }
         String contentType = ObjectUtil.defaultIfNull(FileUtil.getMimeType(name), "application/octet-stream");
-        final String charset = ObjectUtil.defaultIfNull(response.getCharacterEncoding(), CharsetUtil.UTF_8);
+        String charset = ObjectUtil.defaultIfNull(response.getCharacterEncoding(), CharsetUtil.UTF_8);
         response.setHeader("Content-Disposition", StrUtil.format("attachment;filename=\"{}\"",
-                URLUtil.encode(name, CharsetUtil.charset(charset))));
+            URLUtil.encode(name, CharsetUtil.charset(charset))));
         response.setContentType(contentType);
         //
         // 解析断点续传相关信息
@@ -122,11 +121,9 @@ public class FileStorageApiController extends BaseJpomController {
         }
         response.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(downloadSize));
         // Copy the stream to the response's output stream.
-        RandomAccessFile in = null;
         OutputStream out = null;
-        try {
+        try (RandomAccessFile in = new RandomAccessFile(fileStorageFile, "r")) {
             out = response.getOutputStream();
-            in = new RandomAccessFile(fileStorageFile, "r");
             // 设置下载起始位置
             if (fromPos > 0) {
                 in.seek(fromPos);
@@ -154,7 +151,6 @@ public class FileStorageApiController extends BaseJpomController {
             log.error("数据下载失败", e);
         } finally {
             IoUtil.close(out);
-            IoUtil.close(in);
         }
     }
 }
