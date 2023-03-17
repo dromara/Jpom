@@ -327,4 +327,28 @@ public class ServerConfig extends BaseExtConfig {
             ServiceFileTailWatcher.setCharset(getLogCharset());
         }
     }
+
+    private FileStorageConfig fileStorage;
+
+    /**
+     * 获取文件中心存储目录
+     *
+     * @return path
+     */
+    public File fileStorageSavePath() {
+        if (fileStorage == null) {
+            fileStorage = new FileStorageConfig();
+        }
+        String savePah = fileStorage.getSavePah();
+        if (StrUtil.isEmpty(savePah)) {
+            String dataPath = configBean.getDataPath();
+            fileStorage.setSavePah(FileUtil.getAbsolutePath(FileUtil.file(dataPath, "file-storage")));
+        }
+        return FileUtil.file(fileStorage.getSavePah());
+    }
+
+    @Data
+    public static class FileStorageConfig {
+        private String savePah;
+    }
 }

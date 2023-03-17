@@ -74,4 +74,10 @@ public class TestFile {
 
     }
 
+    @Test
+    public void testFileExt() {
+        String extName = FileUtil.extName("canal.deployer-1.1.7-SNAPSHOT.tar.gz");
+        System.out.println(extName);
+    }
+
 }

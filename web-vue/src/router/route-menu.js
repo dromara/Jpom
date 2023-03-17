@@ -49,6 +49,7 @@ const routeMenuMap = {
   configWorkspaceEnv: "/script/env-list",
   cronTools: "/tools/cron",
   myWorkspaceList: "/my-workspace",
+  fileStorage: "/tools/file-storage",
 };
 
 export default routeMenuMap;

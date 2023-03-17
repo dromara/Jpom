@@ -674,6 +674,7 @@
       :closable="!uploading"
       :footer="uploading ? null : undefined"
       width="50%"
+      :keyboard="false"
       :title="'分发项目-' + temp.name"
       @ok="handleDispatchOk"
       :maskClosable="false"
