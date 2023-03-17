@@ -56,6 +56,11 @@ public class ServerOpenApi {
      * 触发构建 批量触发
      */
     public static final String BUILD_TRIGGER_BUILD_BATCH = API + "build_batch";
+
+    /**
+     * 文件下载
+     */
+    public static final String FILE_STORAGE_DOWNLOAD = API + "file-storage/download/{id}/{token}";
     /**
      * 获取当前构建状态
      */

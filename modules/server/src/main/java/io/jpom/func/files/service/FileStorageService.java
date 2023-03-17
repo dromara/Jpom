@@ -42,6 +42,7 @@ import io.jpom.common.ISystemTask;
 import io.jpom.common.ServerConst;
 import io.jpom.func.files.model.FileStorageModel;
 import io.jpom.service.IStatusRecover;
+import io.jpom.service.ITriggerToken;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.ServerConfig;
 import io.jpom.system.extconf.BuildExtConfig;
@@ -63,7 +64,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Service
 @Slf4j
-public class FileStorageService extends BaseWorkspaceService<FileStorageModel> implements ISystemTask, IStatusRecover {
+public class FileStorageService extends BaseWorkspaceService<FileStorageModel> implements ISystemTask, IStatusRecover, ITriggerToken {
 
     private final ServerConfig serverConfig;
     private final JpomApplication configBean;
@@ -293,5 +294,16 @@ public class FileStorageService extends BaseWorkspaceService<FileStorageModel> i
             .set("source", 2)
             .set("status", 0);
         return this.update(updateEntity, where);
+    }
+
+    @Override
+    public String typeName() {
+        return getTableName();
+    }
+
+    @Override
+    public List<Entity> allEntityTokens() {
+        String sql = "select id,triggerToken from " + getTableName() + " where triggerToken is not null";
+        return super.query(sql);
     }
 }
