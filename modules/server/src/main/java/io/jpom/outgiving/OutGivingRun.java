@@ -109,7 +109,7 @@ public class OutGivingRun {
      *
      * @param id 分发id
      */
-    public static void cancel(String id) {
+    public static void cancel(String id, UserModel userModel) {
         StrictSyncFinisher syncFinisher = SYNC_FINISHER_MAP.remove(id);
         Optional.ofNullable(syncFinisher).ifPresent(StrictSyncFinisher::stopNow);
         //
@@ -125,7 +125,7 @@ public class OutGivingRun {
             }
             if (!map1.isEmpty()) {
                 // 更新分发数据
-                updateStatus(id, OutGivingModel.Status.CANCEL, null);
+                updateStatus(id, OutGivingModel.Status.CANCEL, null, userModel);
             }
         });
 
@@ -279,10 +279,10 @@ public class OutGivingRun {
                     }
                 }
                 Optional.ofNullable(logRecorder).ifPresent(logRecorder -> logRecorder.system(msg));
-                updateStatus(id, status, msg);
+                updateStatus(id, status, msg, userModel);
             } catch (Exception e) {
                 log.error("分发线程异常", e);
-                updateStatus(id, OutGivingModel.Status.FAIL, e.getMessage());
+                updateStatus(id, OutGivingModel.Status.FAIL, e.getMessage(), userModel);
             } finally {
                 if (doneDeleteFile) {
                     // 删除分发的文件
@@ -327,10 +327,18 @@ public class OutGivingRun {
         OutGivingRun.LOG_CACHE_MAP.put(outGivingId, logIdMap);
 
         // 更新分发数据
-        updateStatus(outGivingId, OutGivingModel.Status.ING, null);
+        updateStatus(outGivingId, OutGivingModel.Status.ING, null, userModel);
     }
 
-    private static void updateStatus(String outGivingId, OutGivingModel.Status status, String msg) {
+    /**
+     * 更新方法状态
+     *
+     * @param outGivingId 分发id
+     * @param status      状态
+     * @param msg         消息
+     * @param userModel   操作人
+     */
+    private static void updateStatus(String outGivingId, OutGivingModel.Status status, String msg, UserModel userModel) {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel outGivingModel1 = new OutGivingModel();
         outGivingModel1.setId(outGivingId);
@@ -351,6 +359,9 @@ public class OutGivingRun {
                     map.put("outGivingName", outGivingModel.getName());
                     map.put("status", status.getCode());
                     map.put("statusMsg", msg);
+                    // 操作人
+                    String triggerUser = Optional.ofNullable(userModel).map(BaseIdModel::getId).orElse(UserModel.SYSTEM_ADMIN);
+                    map.put("triggerUser", triggerUser);
                     map.put("executeTime", SystemClock.now());
                     try {
                         IPlugin plugin = PluginFactory.getPlugin("webhook");

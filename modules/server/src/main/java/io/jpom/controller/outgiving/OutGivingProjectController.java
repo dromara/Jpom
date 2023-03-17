@@ -298,7 +298,7 @@ public class OutGivingProjectController extends BaseServerController {
     @Feature(method = MethodFeature.EXECUTE)
     public JsonMessage<String> cancel(@ValidatorItem String id) {
         OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status == OutGivingModel.Status.ING, "当前状态不是分发中"));
-        OutGivingRun.cancel(outGivingModel.getId());
+        OutGivingRun.cancel(outGivingModel.getId(), getUser());
         //
         return JsonMessage.success("取消成功");
     }
