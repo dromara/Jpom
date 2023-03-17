@@ -65,6 +65,7 @@
         <template slot="operation" slot-scope="text, record">
           <a-space>
             <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
+            <a-button size="small" :disabled="!record.exists" type="primary" @click="handleTrigger(record)">触发器</a-button>
             <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
           </a-space>
         </template>
@@ -155,15 +156,51 @@
           </a-form-model-item>
         </a-form-model>
       </a-modal>
+      <!-- 断点下载 -->
+      <a-modal destroyOnClose v-model="triggerVisible" title="断点下载" width="50%" :footer="null" :maskClosable="false">
+        <a-form-model ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+          <a-tabs default-active-key="1">
+            <template slot="tabBarExtraContent">
+              <a-tooltip title="重置下载 token 信息,重置后之前的下载 token 将失效">
+                <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
+              </a-tooltip>
+            </template>
+            <a-tab-pane key="1" tab="断点下载">
+              <a-space style="display: block" direction="vertical" align="baseline">
+                <a-alert
+                  v-clipboard:copy="`${temp.triggerDownloadUrl}`"
+                  v-clipboard:success="
+                    () => {
+                      tempVue.prototype.$notification.success({ message: '复制成功' });
+                    }
+                  "
+                  v-clipboard:error="
+                    () => {
+                      tempVue.prototype.$notification.error({ message: '复制失败' });
+                    }
+                  "
+                  type="info"
+                  :message="`下载地址(点击可以复制)`"
+                >
+                  <template slot="description">
+                    <a-tag>GET</a-tag> <span>{{ `${temp.triggerDownloadUrl}` }} </span>
+                    <a-icon type="copy" />
+                  </template>
+                </a-alert>
+              </a-space>
+            </a-tab-pane>
+          </a-tabs>
+        </a-form-model>
+      </a-modal>
     </div>
   </div>
 </template>
 
 <script>
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, renderSize, formatDuration } from "@/utils/const";
-import { fileStorageList, uploadFile, uploadFileMerge, fileEdit, hasFile, delFile, sourceMap, remoteDownload, statusMap } from "@/api/tools/file-storage";
+import { fileStorageList, uploadFile, uploadFileMerge, fileEdit, hasFile, delFile, sourceMap, remoteDownload, statusMap, triggerUrl } from "@/api/tools/file-storage";
 import { uploadPieces } from "@/utils/upload-pieces";
-
+import Vue from "vue";
 export default {
   data() {
     return {
@@ -206,7 +243,7 @@ export default {
           scopedSlots: { customRender: "time" },
           width: "100px",
         },
-        { title: "操作", dataIndex: "operation", ellipsis: true, scopedSlots: { customRender: "operation" }, fixed: "right", width: "120px" },
+        { title: "操作", dataIndex: "operation", ellipsis: true, scopedSlots: { customRender: "operation" }, fixed: "right", width: "200px" },
       ],
       rules: {
         name: [{ required: true, message: "请输入文件名称", trigger: "blur" }],
@@ -222,6 +259,8 @@ export default {
       uploadVisible: false,
       editVisible: false,
       uploadRemoteFileVisible: false,
+      tempVue: null,
+      triggerVisible: false,
     };
   },
   computed: {
@@ -421,6 +460,36 @@ export default {
           }
         });
       });
+    },
+    // 触发器
+    handleTrigger(record) {
+      this.temp = Object.assign({}, record);
+      this.tempVue = Vue;
+      triggerUrl({
+        id: record.id,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.fillTriggerResult(res);
+          this.triggerVisible = true;
+        }
+      });
+    },
+    // 重置触发器
+    resetTrigger() {
+      triggerUrl({
+        id: this.temp.id,
+        rest: "rest",
+      }).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.fillTriggerResult(res);
+        }
+      });
+    },
+    fillTriggerResult(res) {
+      this.temp = { ...this.temp, triggerDownloadUrl: `${location.protocol}//${location.host}${res.data.triggerDownloadUrl}` };
     },
   },
 };

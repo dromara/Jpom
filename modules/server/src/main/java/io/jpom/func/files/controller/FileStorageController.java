@@ -26,9 +26,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.common.BaseServerController;
-import io.jpom.common.JsonMessage;
-import io.jpom.common.ServerConst;
+import io.jpom.common.*;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.controller.outgiving.OutGivingWhitelistService;
 import io.jpom.func.files.model.FileStorageModel;
@@ -38,6 +36,7 @@ import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
+import io.jpom.service.user.TriggerTokenLogServer;
 import io.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -51,6 +50,8 @@ import top.jpom.model.PageResultDto;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author bwcx_jzy
@@ -63,13 +64,16 @@ public class FileStorageController extends BaseServerController {
     private final ServerConfig serverConfig;
     private final FileStorageService fileStorageService;
     private final OutGivingWhitelistService outGivingWhitelistService;
+    private final TriggerTokenLogServer triggerTokenLogServer;
 
     public FileStorageController(ServerConfig serverConfig,
                                  FileStorageService fileStorageService,
-                                 OutGivingWhitelistService outGivingWhitelistService) {
+                                 OutGivingWhitelistService outGivingWhitelistService,
+                                 TriggerTokenLogServer triggerTokenLogServer) {
         this.serverConfig = serverConfig;
         this.fileStorageService = fileStorageService;
         this.outGivingWhitelistService = outGivingWhitelistService;
+        this.triggerTokenLogServer = triggerTokenLogServer;
     }
 
     /**
@@ -234,19 +238,68 @@ public class FileStorageController extends BaseServerController {
         return JsonMessage.success("删除成功");
     }
 
-    @PostMapping(value = "download", produces = MediaType.APPLICATION_JSON_VALUE)
+    /**
+     * 远程下载
+     *
+     * @param url         远程 url
+     * @param keepDay     保留天数
+     * @param description 描述
+     * @param global      是否全局共享
+     * @param request     请求
+     * @return json
+     * @throws IOException io
+     */
+    @PostMapping(value = "remote-download", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
     public JsonMessage<String> download(
-        @ValidatorItem String url,
-        Integer keepDay,
-        String description,
-        Boolean global,
-        HttpServletRequest request) throws IOException {
+            @ValidatorItem String url,
+            Integer keepDay,
+            String description,
+            Boolean global,
+            HttpServletRequest request) throws IOException {
         // 验证远程 地址
         ServerWhitelist whitelist = outGivingWhitelistService.getServerWhitelistData(request);
         whitelist.checkAllowRemoteDownloadHost(url);
         String workspace = fileStorageService.getCheckUserWorkspace(request);
         fileStorageService.download(url, global, workspace, keepDay, description);
         return JsonMessage.success("开始异步下载");
+    }
+
+    /**
+     * get a trigger url
+     *
+     * @param id id
+     * @return json
+     */
+    @GetMapping(value = "trigger-url", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<Map<String, String>> getTriggerUrl(@ValidatorItem String id, String rest, HttpServletRequest request) {
+        FileStorageModel item = fileStorageService.getByKey(id, request);
+        UserModel user = getUser();
+        FileStorageModel updateInfo;
+        if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
+            updateInfo = new FileStorageModel();
+            updateInfo.setId(id);
+            updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), fileStorageService.typeName(),
+                    item.getId(), user.getId()));
+            fileStorageService.updateById(updateInfo);
+        } else {
+            updateInfo = item;
+        }
+        Map<String, String> map = this.getBuildToken(updateInfo);
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+    }
+
+    private Map<String, String> getBuildToken(FileStorageModel item) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
+        String url = ServerOpenApi.FILE_STORAGE_DOWNLOAD.
+                replace("{id}", item.getId()).
+                replace("{token}", item.getTriggerToken());
+        String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
+        Map<String, String> map = new HashMap<>(10);
+        map.put("triggerDownloadUrl", FileUtil.normalize(triggerBuildUrl));
+        map.put("id", item.getId());
+        map.put("token", item.getTriggerToken());
+        return map;
     }
 }

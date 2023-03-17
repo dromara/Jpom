@@ -93,6 +93,10 @@ public class FileStorageModel extends BaseWorkspaceModel {
      */
     @PropIgnore
     private Boolean exists;
+    /**
+     * 触发器 token
+     */
+    private String triggerToken;
 
     /**
      * 设置保留天数的过期时间

@@ -45,7 +45,7 @@ export function fileEdit(params) {
 // 下载远程文件
 export function remoteDownload(params) {
   return axios({
-    url: "/file-storage/download",
+    url: "/file-storage/remote-download",
     method: "post",
     data: params,
   });
@@ -64,6 +64,15 @@ export function hasFile(params) {
 export function delFile(params) {
   return axios({
     url: "/file-storage/del",
+    method: "get",
+    params: params,
+  });
+}
+
+// 触发器
+export function triggerUrl(params) {
+  return axios({
+    url: "/file-storage/trigger-url",
     method: "get",
     params: params,
   });
