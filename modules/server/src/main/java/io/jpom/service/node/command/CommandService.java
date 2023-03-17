@@ -31,7 +31,6 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
-import cn.hutool.db.Entity;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.system.SystemUtil;
@@ -145,12 +144,6 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
     @Override
     public String typeName() {
         return getTableName();
-    }
-
-    @Override
-    public List<Entity> allEntityTokens() {
-        String sql = "select id,triggerToken from " + getTableName() + " where triggerToken is not null";
-        return super.query(sql);
     }
 
     private class CronTask implements Task {

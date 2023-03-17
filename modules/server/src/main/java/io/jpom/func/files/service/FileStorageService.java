@@ -300,10 +300,4 @@ public class FileStorageService extends BaseWorkspaceService<FileStorageModel> i
     public String typeName() {
         return getTableName();
     }
-
-    @Override
-    public List<Entity> allEntityTokens() {
-        String sql = "select id,triggerToken from " + getTableName() + " where triggerToken is not null";
-        return super.query(sql);
-    }
 }

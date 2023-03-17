@@ -24,7 +24,6 @@ package io.jpom.service.script;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
-import cn.hutool.db.Entity;
 import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.cron.CronUtils;
@@ -145,12 +144,6 @@ public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements I
     @Override
     public String typeName() {
         return getTableName();
-    }
-
-    @Override
-    public List<Entity> allEntityTokens() {
-        String sql = "select id,triggerToken from " + getTableName() + " where triggerToken is not null";
-        return super.query(sql);
     }
 
     private static class CronTask implements Task {

@@ -153,12 +153,6 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
         return getTableName();
     }
 
-    @Override
-    public List<Entity> allEntityTokens() {
-        String sql = "select id,triggerToken from " + getTableName() + " where triggerToken is not null";
-        return super.query(sql);
-    }
-
     private static class CronTask implements Task {
 
         private final String buildId;
