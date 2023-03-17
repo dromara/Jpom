@@ -30,8 +30,10 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerConst;
 import io.jpom.common.validator.ValidatorItem;
+import io.jpom.controller.outgiving.OutGivingWhitelistService;
 import io.jpom.func.files.model.FileStorageModel;
 import io.jpom.func.files.service.FileStorageService;
+import io.jpom.model.data.ServerWhitelist;
 import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -60,11 +62,14 @@ import java.io.IOException;
 public class FileStorageController extends BaseServerController {
     private final ServerConfig serverConfig;
     private final FileStorageService fileStorageService;
+    private final OutGivingWhitelistService outGivingWhitelistService;
 
     public FileStorageController(ServerConfig serverConfig,
-                                 FileStorageService fileStorageService) {
+                                 FileStorageService fileStorageService,
+                                 OutGivingWhitelistService outGivingWhitelistService) {
         this.serverConfig = serverConfig;
         this.fileStorageService = fileStorageService;
+        this.outGivingWhitelistService = outGivingWhitelistService;
     }
 
     /**
@@ -227,5 +232,21 @@ public class FileStorageController extends BaseServerController {
         //
         fileStorageService.delByKey(id);
         return JsonMessage.success("删除成功");
+    }
+
+    @PostMapping(value = "download", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
+    public JsonMessage<String> download(
+        @ValidatorItem String url,
+        Integer keepDay,
+        String description,
+        Boolean global,
+        HttpServletRequest request) throws IOException {
+        // 验证远程 地址
+        ServerWhitelist whitelist = outGivingWhitelistService.getServerWhitelistData(request);
+        whitelist.checkAllowRemoteDownloadHost(url);
+        String workspace = fileStorageService.getCheckUserWorkspace(request);
+        fileStorageService.download(url, global, workspace, keepDay, description);
+        return JsonMessage.success("开始异步下载");
     }
 }

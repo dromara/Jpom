@@ -63,7 +63,7 @@ public class FileStorageModel extends BaseWorkspaceModel {
      */
     private String description;
     /**
-     * 文件来源 0 上传
+     * 文件来源 0 上传 1 构建 2 下载
      */
     private Integer source;
     /**
@@ -78,6 +78,16 @@ public class FileStorageModel extends BaseWorkspaceModel {
      * 文件扩展名
      */
     private String extName;
+    /**
+     * 只有下载的时候才使用本字段
+     * <p>
+     * 0 下载中 1 下载完成 2 下载异常
+     */
+    private Integer status;
+    /**
+     * 进度描述
+     */
+    private String progressDesc;
     /**
      * 文件是否存在
      */

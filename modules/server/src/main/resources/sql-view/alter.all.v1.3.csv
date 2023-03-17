@@ -32,3 +32,5 @@ ADD,MACHINE_SSH_INFO,osMaxOccupyDisk,Double,,,占用磁盘,false
 ADD,MACHINE_SSH_INFO,osMaxOccupyDiskName,String,255,,占用磁盘 分区名,false
 ADD,MACHINE_SSH_INFO,javaVersion,String,255,,java版本,false
 ADD,MACHINE_SSH_INFO,jpomAgentPid,Integer,,,jpom agent进程号
+ADD,FILE_STORAGE,status,TINYINT,,,true,false,0 下载中 1 下载完成 3 下载异常,
+ADD,FILE_STORAGE,progressDesc,String,255,,true,false,进度描述,
