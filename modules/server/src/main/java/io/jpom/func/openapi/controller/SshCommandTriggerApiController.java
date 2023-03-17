@@ -20,23 +20,20 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.controller.openapi;
+package io.jpom.func.openapi.controller;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseJpomController;
+import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
-import io.jpom.common.forward.NodeForward;
-import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.NotLogin;
-import io.jpom.model.data.NodeModel;
-import io.jpom.model.node.ScriptCacheModel;
+import io.jpom.model.data.CommandModel;
 import io.jpom.model.user.UserModel;
-import io.jpom.service.node.NodeService;
-import io.jpom.service.node.script.NodeScriptServer;
+import io.jpom.service.node.command.CommandService;
 import io.jpom.service.user.TriggerTokenLogServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -50,7 +47,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 节点脚本触发器
+ * ssh 脚本触发器
  *
  * @author bwcx_jzy
  * @since 2022/7/25
@@ -58,17 +55,14 @@ import java.util.stream.Collectors;
 @RestController
 @NotLogin
 @Slf4j
-public class NodeScriptTriggerApiController extends BaseJpomController {
+public class SshCommandTriggerApiController extends BaseJpomController {
 
-    private final NodeScriptServer nodeScriptServer;
-    private final NodeService nodeService;
+    private final CommandService commandService;
     private final TriggerTokenLogServer triggerTokenLogServer;
 
-    public NodeScriptTriggerApiController(NodeScriptServer nodeScriptServer,
-                                          NodeService nodeService,
+    public SshCommandTriggerApiController(CommandService commandService,
                                           TriggerTokenLogServer triggerTokenLogServer) {
-        this.nodeScriptServer = nodeScriptServer;
-        this.nodeService = nodeService;
+        this.commandService = commandService;
         this.triggerTokenLogServer = triggerTokenLogServer;
     }
 
@@ -79,34 +73,28 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
      * @param token 构建的token
      * @return json
      */
-    @RequestMapping(value = ServerOpenApi.NODE_SCRIPT_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = ServerOpenApi.SSH_COMMAND_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token) {
-        ScriptCacheModel item = nodeScriptServer.getByKey(id);
+        CommandModel item = commandService.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
         //
-        UserModel userModel = triggerTokenLogServer.getUserByToken(token, nodeScriptServer.typeName());
+        Assert.hasText(item.getSshIds(), "当前脚本未绑定 SSH 节点，不能使用触发器执行");
+        UserModel userModel = triggerTokenLogServer.getUserByToken(token, commandService.typeName());
         //
         Assert.notNull(userModel, "触发token错误,或者已经失效:-1");
 
+        String batchId;
         try {
-            NodeModel nodeModel = nodeService.getByKey(item.getNodeId());
-            JSONObject reqData = new JSONObject();
-            reqData.put("id", item.getScriptId());
-            reqData.put("params", JSONObject.toJSONString(ServletUtil.getParamMap(getRequest())));
-            JsonMessage<String> jsonMessage = NodeForward.request(nodeModel, NodeUrl.SCRIPT_EXEC, reqData);
-            //
-            JSONObject jsonObject = new JSONObject();
-            if (jsonMessage.getCode() == 200) {
-                jsonObject.put("logId", jsonMessage.getData());
-            } else {
-                jsonObject.put("msg", jsonMessage.getMsg());
-            }
-            return JsonMessage.success("开始执行", jsonObject);
+            BaseServerController.resetInfo(userModel);
+            batchId = commandService.executeBatch(item, item.getDefParams(), item.getSshIds(), 2);
         } catch (Exception e) {
-            log.error("触发自动执行服务器脚本异常", e);
+            log.error("触发自动执行SSH命令模版异常", e);
             return new JsonMessage<>(500, "执行异常：" + e.getMessage());
         }
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("batchId", batchId);
+        return JsonMessage.success("开始执行", jsonObject);
     }
 
 
@@ -124,14 +112,14 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
      * {
      * "id":"1",
      * "token":"a",
-     * "logId":"1",
+     * "batchId":"1",
      * "msg":"没有对应数据",
      * }
      * ]</code>
      *
      * @return json
      */
-    @PostMapping(value = ServerOpenApi.NODE_SCRIPT_TRIGGER_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = ServerOpenApi.SSH_COMMAND_TRIGGER_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<List<Object>> triggerBatch() {
         try {
             String body = ServletUtil.getBody(getRequest());
@@ -140,12 +128,12 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
                 JSONObject jsonObject = (JSONObject) o;
                 String id = jsonObject.getString("id");
                 String token = jsonObject.getString("token");
-                ScriptCacheModel item = nodeScriptServer.getByKey(id);
+                CommandModel item = commandService.getByKey(id);
                 if (item == null) {
                     jsonObject.put("msg", "没有对应数据");
                     return;
                 }
-                UserModel userModel = triggerTokenLogServer.getUserByToken(token, nodeScriptServer.typeName());
+                UserModel userModel = triggerTokenLogServer.getUserByToken(token, commandService.typeName());
                 if (userModel == null) {
                     jsonObject.put("msg", "对应的用户不存在,触发器已失效");
                     return;
@@ -155,20 +143,20 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
                     jsonObject.put("msg", "触发token错误,或者已经失效");
                     return;
                 }
-                NodeModel nodeModel = nodeService.getByKey(item.getNodeId());
-                JSONObject reqData = new JSONObject();
-                reqData.put("id", item.getScriptId());
-                JsonMessage<String> jsonMessage = NodeForward.request(nodeModel, NodeUrl.SCRIPT_EXEC, reqData);
-                //
-                if (jsonMessage.getCode() == 200) {
-                    jsonObject.put("logId", jsonMessage.getData());
-                } else {
-                    jsonObject.put("msg", jsonMessage.getMsg());
+                BaseServerController.resetInfo(userModel);
+                String batchId = null;
+                try {
+                    batchId = commandService.executeBatch(item, item.getDefParams(), item.getSshIds(), 2);
+                } catch (Exception e) {
+                    log.error("触发自动执行命令模版异常", e);
+                    jsonObject.put("msg", "执行异常：" + e.getMessage());
                 }
+                jsonObject.put("batchId", batchId);
+                //
             }).collect(Collectors.toList());
             return JsonMessage.success("触发成功", collect);
         } catch (Exception e) {
-            log.error("服务端脚本批量触发异常", e);
+            log.error("SSH 脚本批量触发异常", e);
             return new JsonMessage<>(500, "触发异常" + e.getMessage());
         }
     }
