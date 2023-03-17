@@ -23,7 +23,6 @@
 package io.jpom.controller.outgiving;
 
 import cn.hutool.core.collection.CollStreamUtil;
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.BooleanUtil;
@@ -262,16 +261,14 @@ public class OutGivingProjectController extends BaseServerController {
     public JsonMessage<String> remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip,
                                               String secondaryDirectory,
                                               String stripComponents,
-                                              String selectProject) {
+                                              String selectProject,
+                                              HttpServletRequest request) {
         OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
         // 验证远程 地址
-        ServerWhitelist whitelist = outGivingWhitelistService.getServerWhitelistData(getRequest());
-        Set<String> allowRemoteDownloadHost = whitelist.getAllowRemoteDownloadHost();
-        Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), "还没有配置运行的远程地址");
-        List<String> collect = allowRemoteDownloadHost.stream().filter(s -> StrUtil.startWith(url, s)).collect(Collectors.toList());
-        Assert.state(CollUtil.isNotEmpty(collect), "不允许下载当前地址的文件");
+        ServerWhitelist whitelist = outGivingWhitelistService.getServerWhitelistData(request);
+        whitelist.checkAllowRemoteDownloadHost(url);
 
         //outGivingModel = outGivingServer.getItem(id);
         outGivingModel.setClearOld(Convert.toBool(clearOld, false));

@@ -42,6 +42,15 @@ export function fileEdit(params) {
   });
 }
 
+// 下载远程文件
+export function remoteDownload(params) {
+  return axios({
+    url: "/file-storage/download",
+    method: "post",
+    data: params,
+  });
+}
+
 // 判断文件是否存在
 export function hasFile(params) {
   return axios({
@@ -63,4 +72,11 @@ export function delFile(params) {
 export const sourceMap = {
   0: "上传",
   1: "构建",
+  2: "下载",
+};
+
+export const statusMap = {
+  0: "下载中",
+  1: "下载成功",
+  2: "下载异常",
 };

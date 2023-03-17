@@ -24,15 +24,22 @@
               <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
             </a-tooltip>
             <a-button type="primary" @click="handleUpload">上传文件</a-button>
+            <a-button type="primary" @click="handleDownload">远程下载</a-button>
           </a-space>
         </template>
         <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
+        <a-tooltip slot="id" slot-scope="text, item" placement="topLeft" :title="text">
+          <span v-if="item.status === 0 || item.status === 2">-</span>
+          <span v-else>{{ text }}</span>
+        </a-tooltip>
         <a-popover slot="name" slot-scope="text, item" title="文件信息">
           <template slot="content">
             <p>文件名：{{ text }}</p>
             <p>文件描述：{{ item.description }}</p>
+            <p v-if="item.status !== undefined">下载状态：{{ statusMap[item.status] || "未知" }}</p>
+            <p v-if="item.progressDesc">状态描述：{{ item.progressDesc }}</p>
           </template>
           {{ text }}
         </a-popover>
@@ -48,8 +55,8 @@
         </a-tooltip>
 
         <template slot="exists" slot-scope="text">
-          <a-tag v-if="text">存在</a-tag>
-          <a-tag v-else>丢失</a-tag>
+          <a-tag v-if="text" color="green">存在</a-tag>
+          <a-tag v-else color="red">丢失</a-tag>
         </template>
         <template slot="global" slot-scope="text">
           <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
@@ -63,17 +70,7 @@
         </template>
       </a-table>
       <!-- 上传文件 -->
-      <a-modal
-        destroyOnClose
-        v-model="uploadVisible"
-        :closable="!uploading"
-        :footer="uploading ? null : undefined"
-        :keyboard="false"
-        width="50%"
-        :title="`上传文件`"
-        @ok="handleUploadOk"
-        :maskClosable="false"
-      >
+      <a-modal destroyOnClose v-model="uploadVisible" :closable="!uploading" :footer="uploading ? null : undefined" :keyboard="false" :title="`上传文件`" @ok="handleUploadOk" :maskClosable="false">
         <a-form-model ref="form" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <a-form-model-item label="选择文件" prop="file">
             <a-progress v-if="percentage" :percent="percentage">
@@ -119,10 +116,30 @@
         </a-form-model>
       </a-modal>
       <!-- 编辑文件 -->
-      <a-modal destroyOnClose v-model="editVisible" width="50%" :title="`修改文件`" @ok="handleEditOk" :maskClosable="false">
+      <a-modal destroyOnClose v-model="editVisible" :title="`修改文件`" @ok="handleEditOk" :maskClosable="false">
         <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <a-form-model-item label="文件名">
             <a-input placeholder="文件名" v-model="temp.name" />
+          </a-form-model-item>
+          <a-form-model-item label="保留天数">
+            <a-input-number v-model="temp.keepDay" :min="1" style="width: 100%" placeholder="文件保存天数,默认 3650 天" />
+          </a-form-model-item>
+          <a-form-model-item label="文件共享">
+            <a-radio-group v-model="temp.global">
+              <a-radio :value="true"> 全局 </a-radio>
+              <a-radio :value="false"> 当前工作空间 </a-radio>
+            </a-radio-group>
+          </a-form-model-item>
+          <a-form-model-item label="文件描述">
+            <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
+          </a-form-model-item>
+        </a-form-model>
+      </a-modal>
+      <!--远程下载  -->
+      <a-modal destroyOnClose v-model="uploadRemoteFileVisible" title="远程下载文件" @ok="handleRemoteUpload" :maskClosable="false">
+        <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }" :rules="rules" ref="remoteForm">
+          <a-form-model-item label="远程下载URL" prop="url">
+            <a-input v-model="temp.url" placeholder="远程下载地址" />
           </a-form-model-item>
           <a-form-model-item label="保留天数">
             <a-input-number v-model="temp.keepDay" :min="1" style="width: 100%" placeholder="文件保存天数,默认 3650 天" />
@@ -144,7 +161,7 @@
 
 <script>
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, renderSize, formatDuration } from "@/utils/const";
-import { fileStorageList, uploadFile, uploadFileMerge, fileEdit, hasFile, delFile, sourceMap } from "@/api/tools/file-storage";
+import { fileStorageList, uploadFile, uploadFileMerge, fileEdit, hasFile, delFile, sourceMap, remoteDownload, statusMap } from "@/api/tools/file-storage";
 import { uploadPieces } from "@/utils/upload-pieces";
 
 export default {
@@ -154,9 +171,9 @@ export default {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       columns: [
-        { title: "文件MD5", dataIndex: "id", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
+        { title: "文件MD5", dataIndex: "id", ellipsis: true, width: "100px", scopedSlots: { customRender: "id" } },
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "大小", dataIndex: "size", sorter: true, ellipsis: true, scopedSlots: { customRender: "renderSize" }, width: "80px" },
+        { title: "大小", dataIndex: "size", sorter: true, ellipsis: true, scopedSlots: { customRender: "renderSize" }, width: "100px" },
         { title: "后缀", dataIndex: "extName", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "80px" },
         { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
         { title: "来源", dataIndex: "source", ellipsis: true, scopedSlots: { customRender: "source" }, width: "80px" },
@@ -189,19 +206,22 @@ export default {
           scopedSlots: { customRender: "time" },
           width: "100px",
         },
-        { title: "操作", dataIndex: "operation", ellipsis: true, scopedSlots: { customRender: "operation" }, width: 120 },
+        { title: "操作", dataIndex: "operation", ellipsis: true, scopedSlots: { customRender: "operation" }, fixed: "right", width: "120px" },
       ],
       rules: {
         name: [{ required: true, message: "请输入文件名称", trigger: "blur" }],
+        url: [{ required: true, message: "请输入远程地址", trigger: "blur" }],
       },
       temp: {},
       sourceMap,
+      statusMap,
       fileList: [],
       percentage: 0,
       percentageInfo: {},
       uploading: false,
       uploadVisible: false,
       editVisible: false,
+      uploadRemoteFileVisible: false,
     };
   },
   computed: {
@@ -372,6 +392,34 @@ export default {
             }
           });
         },
+      });
+    },
+    // 远程下载
+    handleDownload() {
+      this.uploadRemoteFileVisible = true;
+      this.temp = {
+        global: false,
+      };
+      this.$refs["remoteForm"]?.resetFields();
+    },
+    // 开始远程下载
+    handleRemoteUpload() {
+      //
+      this.$refs["remoteForm"].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        remoteDownload(this.temp).then((res) => {
+          if (res.code === 200) {
+            // 成功
+            this.$notification.success({
+              message: res.msg,
+            });
+
+            this.uploadRemoteFileVisible = false;
+            this.loadData();
+          }
+        });
       });
     },
   },

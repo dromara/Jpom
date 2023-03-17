@@ -22,13 +22,16 @@
  */
 package io.jpom.model.data;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseJsonModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 节点分发白名单
@@ -64,5 +67,12 @@ public class ServerWhitelist extends BaseJsonModel {
 
     public List<String> outGiving() {
         return AgentWhitelist.useConvert(outGiving);
+    }
+
+    public void checkAllowRemoteDownloadHost(String url) {
+        Set<String> allowRemoteDownloadHost = this.getAllowRemoteDownloadHost();
+        Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), "还没有配置运行的远程地址");
+        List<String> collect = allowRemoteDownloadHost.stream().filter(s -> StrUtil.startWith(url, s)).collect(Collectors.toList());
+        Assert.state(CollUtil.isNotEmpty(collect), "不允许下载当前地址的文件");
     }
 }

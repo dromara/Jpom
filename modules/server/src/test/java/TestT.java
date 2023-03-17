@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DatePattern;
@@ -148,5 +149,10 @@ public class TestT {
     public void testFile() {
         FileUtils.checkSlip("/../../../xxx/xx//aaa/../");
         FileUtils.checkSlip("/../../../xxx/xx?/&&{#}:/aaa/../");
+    }
+
+    @Test
+    public void testDownload() {
+//        HttpUtil.download()
     }
 }
