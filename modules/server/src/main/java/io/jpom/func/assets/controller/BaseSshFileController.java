@@ -25,6 +25,7 @@ package io.jpom.func.assets.controller;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.*;
@@ -318,8 +319,18 @@ public abstract class BaseSshFileController extends BaseServerController {
             String children2 = StrUtil.emptyToDefault(nextPath, StrUtil.SLASH);
             String allPath = StrUtil.format("{}/{}", allowPathParent, children2);
             allPath = FileUtil.normalize(allPath);
-            Vector<ChannelSftp.LsEntry> vector = channel.ls(allPath);
             JSONArray jsonArray = new JSONArray();
+            Vector<ChannelSftp.LsEntry> vector;
+            try {
+                vector = channel.ls(allPath);
+            } catch (Exception e) {
+                log.warn("获取文件夹失败", e);
+                Throwable causedBy = ExceptionUtil.getCausedBy(e, SftpException.class);
+                if (causedBy != null) {
+                    throw new IllegalStateException("查询文件夹 SFTP 失败," + causedBy.getMessage());
+                }
+                throw new IllegalStateException("查询文件夹失败," + e.getMessage());
+            }
             for (ChannelSftp.LsEntry lsEntry : vector) {
                 String filename = lsEntry.getFilename();
                 if (StrUtil.DOT.equals(filename) || StrUtil.DOUBLE_DOT.equals(filename)) {

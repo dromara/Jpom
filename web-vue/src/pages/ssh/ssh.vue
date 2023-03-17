@@ -105,10 +105,15 @@
               </a-menu-item>
             </a-menu>
           </a-dropdown>
+          <template v-if="record.fileDirs">
+            <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
+          </template>
+          <template v-else>
+            <a-tooltip placement="topLeft" title="如果按钮不可用,请去资产管理 ssh 列表的关联中添加当前工作空间允许管理的授权文件夹">
+              <a-button size="small" type="primary" :disabled="true">文件</a-button>
+            </a-tooltip>
+          </template>
 
-          <a-tooltip placement="topLeft" title="如果按钮不可用,请去资产管理 ssh 列表的关联中添加当前工作空间允许管理的授权文件夹">
-            <a-button size="small" type="primary" :disabled="!record.fileDirs" @click="handleFile(record)">文件</a-button>
-          </a-tooltip>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多

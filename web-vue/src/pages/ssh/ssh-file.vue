@@ -7,7 +7,7 @@
         <a-button size="small" type="primary" @click="loadData()">刷新</a-button>
       </a-row>
       <a-empty v-if="treeList.length === 0" />
-      <a-directory-tree :treeData="treeList" :replaceFields="replaceFields" @select="onSelect"></a-directory-tree>
+      <a-directory-tree :treeData="treeList" :replaceFields="replaceFields" @select="onSelect"> </a-directory-tree>
     </a-layout-sider>
     <!-- 表格 -->
     <a-layout-content class="file-content">
@@ -45,6 +45,10 @@
             </a-dropdown>
             <a-button size="small" :disabled="!this.tempNode.nextPath" type="primary" @click="loadFileList()">刷新</a-button>
             <a-button size="small" :disabled="!this.tempNode.nextPath" type="danger" @click="handleDeletePath()">删除</a-button>
+            <div>
+              文件夹：
+              <a-switch :disabled="!this.tempNode.nextPath" @change="changeListShowDir" checked-children="显示" un-checked-children="隐藏" v-model="listShowDir" />
+            </div>
             <span v-if="this.nowPath">当前目录:{{ this.nowPath }}</span>
             <!-- <span v-if="this.nowPath">{{ this.tempNode.parentDir }}</span> -->
           </a-space>
@@ -61,7 +65,7 @@
 
           <!-- <span>{{ text }}</span> -->
         </a-tooltip>
-        <a-tooltip slot="dir" slot-scope="text, record" placement="topLeft" :title="text">
+        <a-tooltip slot="dir" slot-scope="text, record" placement="topLeft" :title="`${record.link ? '链接' : text ? '目录' : '文件'}`">
           <span>{{ record.link ? "链接" : text ? "目录" : "文件" }}</span>
         </a-tooltip>
         <a-tooltip slot="size" slot-scope="text" placement="topLeft" :title="renderSize(text)">
@@ -76,7 +80,7 @@
               <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">编辑</a-button>
             </a-tooltip>
 
-            <a-button size="small" type="primary" @click="handleDownload(record)">下载</a-button>
+            <a-button size="small" type="primary" :disabled="record.dir" @click="handleDownload(record)">下载</a-button>
             <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
           </a-space>
         </template>
@@ -157,7 +161,7 @@ export default {
       uploadFileZip: false,
       ZIP_ACCEPT: ZIP_ACCEPT,
       renameFileFolderVisible: false,
-
+      listShowDir: false,
       tableHeight: "80vh",
       replaceFields: {
         children: "children",
@@ -177,6 +181,7 @@ export default {
     };
   },
   mounted() {
+    this.listShowDir = Boolean(localStorage.getItem("ssh-list-show-dir"));
     this.loadData();
   },
   computed: {
@@ -245,14 +250,20 @@ export default {
             // 区分目录和文件
             res.data.forEach((element) => {
               if (element.dir) {
+                if (this.listShowDir) {
+                  this.fileList.push({
+                    // path: node.dataRef.path,
+                    ...element,
+                  });
+                }
                 children.push({
                   key: element.id,
                   name: element.name,
                   allowPathParent: node.dataRef.allowPathParent,
                   nextPath: (element.nextPath + "/" + element.name).replace(new RegExp("//+", "gm"), "/"),
-                  isLeaf: element.dir ? false : true,
+                  isLeaf: !element.dir,
                   // 可能有错误
-                  disabled: element.error ? true : false,
+                  disabled: !!element.error,
                 });
               } else {
                 // 设置文件表格
@@ -270,6 +281,10 @@ export default {
         });
         resolve();
       });
+    },
+    changeListShowDir() {
+      this.loadFileList();
+      localStorage.setItem("ssh-list-show-dir", this.listShowDir);
     },
     // 加载文件列表
     loadFileList() {
@@ -293,6 +308,9 @@ export default {
           // 区分目录和文件
           this.fileList = res.data
             .filter((element) => {
+              if (this.listShowDir) {
+                return true;
+              }
               return !element.dir;
             })
             .map((element) => {
