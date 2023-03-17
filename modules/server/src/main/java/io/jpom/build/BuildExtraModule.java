@@ -170,6 +170,10 @@ public class BuildExtraModule extends BaseModel {
      * 是否为严格执行脚本，严格执行脚本执行结果返回状态码必须是 0
      */
     private Boolean strictlyEnforce;
+    /**
+     * 是否同步到文件管理中心
+     */
+    private Boolean syncFileStorage;
 
     public boolean strictlyEnforce() {
         return strictlyEnforce != null && strictlyEnforce;

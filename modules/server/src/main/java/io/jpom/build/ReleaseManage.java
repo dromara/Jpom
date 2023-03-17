@@ -45,9 +45,11 @@ import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.func.assets.model.MachineSshModel;
+import io.jpom.func.files.service.FileStorageService;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.EnvironmentMapBuilder;
+import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.docker.DockerInfoModel;
@@ -100,7 +102,7 @@ public class ReleaseManage {
     private final String logId;
     private final BuildExecuteService buildExecuteService;
     private EnvironmentMapBuilder buildEnv;
-
+    private FileStorageService fileStorageService;
     private LogRecorder logRecorder;
     private File resultFile;
     private BuildExtConfig buildExtConfig;
@@ -110,6 +112,7 @@ public class ReleaseManage {
             File logFile = BuildUtil.getLogFile(buildExtraModule.getId(), buildNumberId);
             this.logRecorder = LogRecorder.builder().file(logFile).build();
         }
+        fileStorageService = SpringUtil.getBean(FileStorageService.class);
     }
 
 
@@ -120,7 +123,7 @@ public class ReleaseManage {
     /**
      * 不修改为发布中状态
      */
-    public boolean start(Consumer<Long> consumer) throws Exception {
+    public boolean start(Consumer<Long> consumer, BuildInfoModel buildInfoModel) throws Exception {
         this.init();
         this.resultFile = buildExtraModule.resultDirFile(this.buildNumberId);
         this.buildEnv.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
@@ -134,6 +137,19 @@ public class ReleaseManage {
         long resultFileSize = FileUtil.size(this.resultFile);
         logRecorder.system("开始执行发布,需要发布的文件大小：{}", FileUtil.readableFileSize(resultFileSize));
         Optional.ofNullable(consumer).ifPresent(consumer1 -> consumer1.accept(resultFileSize));
+        // 先同步到文件管理中心
+        Boolean syncFileStorage = this.buildExtraModule.getSyncFileStorage();
+        if (syncFileStorage != null && syncFileStorage) {
+            logRecorder.system("开始同步到文件管理中心");
+            File dirPackage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.buildNumberId, this.resultFile, (unZip, file) -> file);
+            boolean success = fileStorageService.addFile(dirPackage, 1, buildInfoModel.getWorkspaceId(), buildInfoModel.getName());
+            if (success) {
+                logRecorder.system("构建产物文件成功同步到文件管理中心");
+            } else {
+                logRecorder.systemWarning("构建产物文件同步到文件管理中心失败,当前文件已经存文件管理中心存在啦");
+            }
+        }
+        //
         int releaseMethod = this.buildExtraModule.getReleaseMethod();
         logRecorder.system("发布的方式：{}", BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
 
@@ -598,14 +614,16 @@ public class ReleaseManage {
 
     /**
      * 回滚
+     *
+     * @param item 构建对象
      */
-    public void rollback() {
+    public void rollback(BuildInfoModel item) {
         try {
             BaseServerController.resetInfo(userModel);
             this.init();
             logRecorder.system("开始回滚:{}", DateTime.now());
             //
-            boolean start = this.start(null);
+            boolean start = this.start(null, item);
             logRecorder.system("执行回滚结束：{}", start);
             if (start) {
                 this.updateStatus(BuildStatus.PubSuccess);
