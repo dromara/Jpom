@@ -15,7 +15,7 @@ const uploadFileConcurrent = window.uploadFileConcurrent === "<uploadFileConcurr
  * @params success {Function} 成功回调函数
  * @params error {Function} 失败回调函数
  */
-export const uploadPieces = ({ file, uploadCallback, success, process, error }) => {
+export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success, process, error }) => {
   // 如果文件传入为空直接 return 返回
   if (!file || file.length < 1) {
     return error("文件不能为空");
@@ -61,19 +61,31 @@ export const uploadPieces = ({ file, uploadCallback, success, process, error }) 
         fileMd5 = spark.end();
         // 释放缓存
         spark.destroy();
-        for (let i = 0; i < chunkCount; i++) {
-          chunkList.push(Number(i));
-        }
         Vue.prototype.$setLoading("closeAll");
-        //生成分片 id
-        generateShardingId().then((res) => {
-          if (res.code === 200) {
-            sliceId = res.data;
-            concurrentUpload();
-          } else {
-            error("文件上传id生成失败：" + res.msg);
+        // 判断是否需要继续
+        if (uploadBeforeAbrot) {
+          uploadBeforeAbrot(fileMd5).then(() => {
+            start();
+          });
+        } else {
+          start();
+        }
+
+        const start = () => {
+          for (let i = 0; i < chunkCount; i++) {
+            chunkList.push(Number(i));
           }
-        });
+
+          //生成分片 id
+          generateShardingId().then((res) => {
+            if (res.code === 200) {
+              sliceId = res.data;
+              concurrentUpload();
+            } else {
+              error("文件上传id生成失败：" + res.msg);
+            }
+          });
+        };
       }
     };
     reader.onload = function (event) {

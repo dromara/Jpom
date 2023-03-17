@@ -134,6 +134,11 @@ const children = [
     name: "cron-tools",
     component: () => import("../pages/tools/cron"),
   },
+  {
+    path: "/tools/file-storage",
+    name: "cron-tools",
+    component: () => import("../pages/tools/fileStorage/list"),
+  },
 ];
 
 const management = [

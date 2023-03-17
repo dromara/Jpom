@@ -143,6 +143,10 @@
         "id": "tools",
         "childs": [
             {
+                "id": "fileStorage",
+                "title": "文件管理中心"
+            },
+            {
                 "id": "myWorkspaceList",
                 "title": "我的工作空间"
             },

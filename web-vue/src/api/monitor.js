@@ -129,8 +129,8 @@ export function deleteMonitorOperate(id) {
 }
 
 export const notifyStyle = {
-  0:'钉钉',
-  1:'邮箱',
-  2:'企业微信',
-  3:'webhook',
+  0: "钉钉",
+  1: "邮箱",
+  2: "企业微信",
+  3: "webhook",
 };

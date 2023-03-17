@@ -25,6 +25,7 @@ package io.jpom.permission;
 import io.jpom.func.assets.server.MachineDockerServer;
 import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.func.assets.server.MachineSshServer;
+import io.jpom.func.files.service.FileStorageService;
 import io.jpom.func.user.server.UserLoginLogServer;
 import io.jpom.service.dblog.*;
 import io.jpom.service.docker.DockerInfoService;
@@ -90,6 +91,7 @@ public enum ClassFeature {
     USER("用户管理", UserService.class),
     USER_LOG("操作日志", DbUserOperateLogService.class),
     USER_LOGIN_LOG("登录日志", UserLoginLogServer.class),
+    FILE_STORAGE("文件存储中心", FileStorageService.class),
     USER_PERMISSION_GROUP("权限分组", UserPermissionGroupServer.class),
     SYSTEM_EMAIL("邮箱配置"),
     SYSTEM_CACHE("系统缓存"),
