@@ -136,7 +136,7 @@ const children = [
   },
   {
     path: "/tools/file-storage",
-    name: "cron-tools",
+    name: "file-storage",
     component: () => import("../pages/tools/fileStorage/list"),
   },
 ];
