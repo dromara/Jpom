@@ -860,7 +860,7 @@ public class BuildExecuteService {
                 .buildExecuteService(buildExecuteService)
                 .logRecorder(logRecorder).build();
             try {
-                return releaseManage.start(resultFileSize -> taskData.resultFileSize = resultFileSize);
+                return releaseManage.start(resultFileSize -> taskData.resultFileSize = resultFileSize, buildInfoModel);
             } catch (Exception e) {
                 throw Lombok.sneakyThrow(e);
             }
@@ -961,6 +961,9 @@ public class BuildExecuteService {
             return suppliers;
         }
 
+        /**
+         * 清理构建资源
+         */
         private void clearResources() {
             //
             BuildInfoModel buildInfoModel1 = taskData.buildInfoModel;

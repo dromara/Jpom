@@ -22,16 +22,23 @@
  */
 package io.jpom.func.files.service;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.common.ISystemTask;
 import io.jpom.common.ServerConst;
 import io.jpom.func.files.model.FileStorageModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.system.ServerConfig;
 import org.springframework.stereotype.Service;
 import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
 /**
@@ -40,6 +47,13 @@ import java.util.Map;
  */
 @Service
 public class FileStorageService extends BaseWorkspaceService<FileStorageModel> implements ISystemTask {
+
+    private final ServerConfig serverConfig;
+
+    public FileStorageService(ServerConfig serverConfig) {
+        this.serverConfig = serverConfig;
+    }
+
     /**
      * 获取我所有的空间
      *
@@ -53,6 +67,41 @@ public class FileStorageService extends BaseWorkspaceService<FileStorageModel> i
         String workspaceId = this.getCheckUserWorkspace(request);
         paramMap.put("workspaceId:in", workspaceId + StrUtil.COMMA + ServerConst.WORKSPACE_GLOBAL);
         return super.listPage(paramMap);
+    }
+
+    /**
+     * 添加文件
+     *
+     * @param source 文件来源
+     * @param file   要文件的文件
+     * @return 是否添加成功
+     */
+    public boolean addFile(File file, int source, String workspaceId, String description) {
+        String md5 = SecureUtil.md5(file);
+        File storageSavePath = serverConfig.fileStorageSavePath();
+        String extName = FileUtil.extName(file);
+        String path = StrUtil.format("/{}/{}.{}", DateTime.now().toString(DatePattern.PURE_DATE_FORMAT), md5, extName);
+        FileStorageModel storageModel = this.getByKey(md5);
+        if (storageModel != null) {
+            return false;
+        }
+        // 保存
+        FileStorageModel fileStorageModel = new FileStorageModel();
+        fileStorageModel.setId(md5);
+        fileStorageModel.setName(file.getName());
+        fileStorageModel.setDescription("构建来源," + description);
+        fileStorageModel.setExtName(extName);
+        fileStorageModel.setPath(path);
+        fileStorageModel.setSize(FileUtil.size(file));
+        fileStorageModel.setSource(source);
+        fileStorageModel.setWorkspaceId(workspaceId);
+        fileStorageModel.validUntil(null, null);
+        this.insert(fileStorageModel);
+        //
+        File fileStorageFile = FileUtil.file(storageSavePath, path);
+        FileUtil.mkParentDirs(fileStorageFile);
+        FileUtil.copyFile(file, fileStorageFile, StandardCopyOption.REPLACE_EXISTING);
+        return true;
     }
 
     @Override

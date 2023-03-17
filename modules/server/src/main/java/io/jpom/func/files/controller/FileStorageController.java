@@ -25,7 +25,6 @@ package io.jpom.func.files.controller;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
@@ -151,11 +150,11 @@ public class FileStorageController extends BaseServerController {
         // 合并文件
         File userTempPath = serverConfig.getUserTempPath();
         File successFile = this.shardingTryMerge(userTempPath.getAbsolutePath(), sliceId, totalSlice, fileSumMd5);
-        String uuid = IdUtil.fastSimpleUUID();
         String extName = FileUtil.extName(successFile);
-        String path = StrUtil.format("/{}/{}.{}", DateTime.now().toString(DatePattern.PURE_DATE_FORMAT), uuid, extName);
+        String path = StrUtil.format("/{}/{}.{}", DateTime.now().toString(DatePattern.PURE_DATE_FORMAT), fileSumMd5, extName);
 
         File fileStorageFile = FileUtil.file(storageSavePath, path);
+        FileUtil.mkParentDirs(fileStorageFile);
         FileUtil.move(successFile, fileStorageFile, true);
         // 保存
         FileStorageModel fileStorageModel = new FileStorageModel();

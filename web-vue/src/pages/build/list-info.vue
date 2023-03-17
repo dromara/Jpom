@@ -584,7 +584,7 @@
                 </a-form-model-item>
                 <a-form-model-item prop="pushToRepository" :label="` `" :colon="false">
                   <a-row>
-                    <a-col :span="5" style="text-align: right">
+                    <a-col :span="6" style="text-align: right">
                       <a-space>
                         <a-tooltip>
                           推送到仓库
@@ -595,7 +595,7 @@
                         <a-switch v-model="tempExtraData.pushToRepository" checked-children="是" un-checked-children="否" />
                       </a-space>
                     </a-col>
-                    <a-col :span="5" style="text-align: right">
+                    <a-col :span="6" style="text-align: right">
                       <a-space>
                         <a-tooltip>
                           版本递增
@@ -609,7 +609,7 @@
                         <a-switch v-model="tempExtraData.dockerTagIncrement" checked-children="是" un-checked-children="否" />
                       </a-space>
                     </a-col>
-                    <a-col :span="5" style="text-align: right">
+                    <a-col :span="6" style="text-align: right">
                       <a-space>
                         <a-tooltip>
                           no-cache
@@ -620,7 +620,7 @@
                         <a-switch v-model="tempExtraData.dockerNoCache" checked-children="是" un-checked-children="否" />
                       </a-space>
                     </a-col>
-                    <a-col :span="5" style="text-align: right">
+                    <a-col :span="6" style="text-align: right">
                       <a-space>
                         <a-tooltip>
                           更新镜像
@@ -773,6 +773,17 @@
               </template>
               <a-input v-model="tempExtraData.attachEnv" placeholder="附加环境变量  .env 添加多个使用逗号分隔" />
             </a-form-model-item>
+            <a-form-model-item prop="cacheBuild">
+              <template slot="label">
+                <a-tooltip>
+                  文件管理中心
+                  <template slot="title"> 如果开启同步到文件管理中心，在构建发布流程将自动执行同步到文件管理中心的操作。</template>
+                  <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
+                </a-tooltip>
+              </template>
+
+              <a-switch v-model="tempExtraData.syncFileStorage" checked-children="同步" un-checked-children="不同步" />
+            </a-form-model-item>
           </a-collapse-panel>
         </a-collapse>
       </a-form-model>
@@ -790,7 +801,18 @@
           zIndex: 1,
         }"
       >
-        <a-button type="primary" @click="handleEditBuildOk"> 保存 </a-button>
+        <a-space>
+          <a-button
+            @click="
+              () => {
+                this.editBuildVisible = false;
+              }
+            "
+          >
+            取消
+          </a-button>
+          <a-button type="primary" @click="handleEditBuildOk"> 保存 </a-button>
+        </a-space>
       </div>
     </a-drawer>
     <!-- 触发器 -->

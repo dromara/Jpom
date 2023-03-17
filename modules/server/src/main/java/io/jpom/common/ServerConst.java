@@ -41,12 +41,6 @@ public class ServerConst extends Const {
      */
     public static final String TABLE_NAME = "TABLE_NAME";
 
-
-    /**
-     * String get
-     */
-    public static final String GET_STR = "get";
-
     /**
      * id_rsa
      */

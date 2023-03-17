@@ -29,6 +29,14 @@
         <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
+        <a-popover slot="name" slot-scope="text, item" title="文件信息">
+          <template slot="content">
+            <p>文件名：{{ text }}</p>
+            <p>文件描述：{{ item.description }}</p>
+          </template>
+          {{ text }}
+        </a-popover>
+
         <a-tooltip slot="renderSize" slot-scope="text" placement="topLeft" :title="renderSize(text)">
           <span>{{ renderSize(text) }}</span>
         </a-tooltip>
@@ -146,9 +154,9 @@ export default {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       columns: [
-        { title: "文件MD5", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "大小", dataIndex: "size", ellipsis: true, scopedSlots: { customRender: "renderSize" }, width: "80px" },
+        { title: "文件MD5", dataIndex: "id", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "大小", dataIndex: "size", sorter: true, ellipsis: true, scopedSlots: { customRender: "renderSize" }, width: "80px" },
         { title: "后缀", dataIndex: "extName", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "80px" },
         { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
         { title: "来源", dataIndex: "source", ellipsis: true, scopedSlots: { customRender: "source" }, width: "80px" },
@@ -165,8 +173,8 @@ export default {
           width: "100px",
         },
         { title: "文件状态", dataIndex: "exists", ellipsis: true, scopedSlots: { customRender: "exists" }, width: "80px" },
-        { title: "创建人", dataIndex: "createUser", ellipsis: true, align: "center", scopedSlots: { customRender: "modifyUser" }, width: "120px" },
-        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, align: "center", scopedSlots: { customRender: "modifyUser" }, width: "120px" },
+        { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: "120px" },
+        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: "120px" },
         {
           title: "创建时间",
           dataIndex: "createTimeMillis",
