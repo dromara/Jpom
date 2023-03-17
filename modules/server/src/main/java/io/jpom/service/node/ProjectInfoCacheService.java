@@ -22,7 +22,6 @@
  */
 package io.jpom.service.node;
 
-import cn.hutool.db.Entity;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.JsonMessage;
@@ -34,8 +33,6 @@ import io.jpom.service.ITriggerToken;
 import io.jpom.service.h2db.BaseNodeGroupService;
 import io.jpom.service.system.WorkspaceService;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * @author bwcx_jzy
@@ -94,11 +91,5 @@ public class ProjectInfoCacheService extends BaseNodeGroupService<ProjectInfoCac
     @Override
     public String typeName() {
         return getTableName();
-    }
-
-    @Override
-    public List<Entity> allEntityTokens() {
-        String sql = "select id,triggerToken from " + getTableName() + " where triggerToken is not null";
-        return super.query(sql);
     }
 }
