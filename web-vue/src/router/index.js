@@ -33,11 +33,6 @@ const children = [
   },
 
   {
-    path: "/node/stat",
-    name: "node-stat",
-    component: () => import("../pages/node/stat"),
-  },
-  {
     path: "/node/search",
     name: "node-search",
     component: () => import("../pages/node/search"),
