@@ -252,11 +252,11 @@ public class FileStorageController extends BaseServerController {
     @PostMapping(value = "remote-download", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
     public JsonMessage<String> download(
-            @ValidatorItem String url,
-            Integer keepDay,
-            String description,
-            Boolean global,
-            HttpServletRequest request) throws IOException {
+        @ValidatorItem String url,
+        Integer keepDay,
+        String description,
+        Boolean global,
+        HttpServletRequest request) throws IOException {
         // 验证远程 地址
         ServerWhitelist whitelist = outGivingWhitelistService.getServerWhitelistData(request);
         whitelist.checkAllowRemoteDownloadHost(url);
@@ -274,27 +274,40 @@ public class FileStorageController extends BaseServerController {
     @GetMapping(value = "trigger-url", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public JsonMessage<Map<String, String>> getTriggerUrl(@ValidatorItem String id, String rest, HttpServletRequest request) {
-        FileStorageModel item = fileStorageService.getByKey(id, request);
         UserModel user = getUser();
+        // 查询当前工作空间
+        FileStorageModel item = fileStorageService.getByKey(id, request);
+        //
+        if (item == null) {
+            // 查询所有数据
+            item = fileStorageService.getByKey(id);
+            Assert.notNull(item, "没有对应的文件信息");
+            if (!user.isSystemUser()) {
+                // 判断创建人
+                // 不是管理员，需要验证是自己上传的文件
+                Assert.state(StrUtil.equals(item.getCreateUser(), user.getId()), "当前文件创建人不是您,不能创建下载地址");
+            }
+        }
+
         FileStorageModel updateInfo;
         if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
             updateInfo = new FileStorageModel();
             updateInfo.setId(id);
             updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), fileStorageService.typeName(),
-                    item.getId(), user.getId()));
+                item.getId(), user.getId()));
             fileStorageService.updateById(updateInfo);
         } else {
             updateInfo = item;
         }
-        Map<String, String> map = this.getBuildToken(updateInfo);
+        Map<String, String> map = this.getBuildToken(updateInfo, request);
         return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
-    private Map<String, String> getBuildToken(FileStorageModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
+    private Map<String, String> getBuildToken(FileStorageModel item, HttpServletRequest request) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
         String url = ServerOpenApi.FILE_STORAGE_DOWNLOAD.
-                replace("{id}", item.getId()).
-                replace("{token}", item.getTriggerToken());
+            replace("{id}", item.getId()).
+            replace("{token}", item.getTriggerToken());
         String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
         Map<String, String> map = new HashMap<>(10);
         map.put("triggerDownloadUrl", FileUtil.normalize(triggerBuildUrl));

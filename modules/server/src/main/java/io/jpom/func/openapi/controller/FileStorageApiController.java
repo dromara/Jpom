@@ -23,8 +23,11 @@
 package io.jpom.func.openapi.controller;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.NioUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.common.BaseJpomController;
@@ -36,6 +39,7 @@ import io.jpom.model.user.UserModel;
 import io.jpom.service.user.TriggerTokenLogServer;
 import io.jpom.system.ServerConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -43,11 +47,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.OutputStream;
+import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.List;
 
 /**
@@ -71,10 +78,54 @@ public class FileStorageApiController extends BaseJpomController {
         this.serverConfig = serverConfig;
     }
 
+    private long[] resolveRange(HttpServletRequest request, long fileSize, String id, String name, HttpServletResponse response) {
+        String range = ServletUtil.getHeader(request, HttpHeaders.RANGE, CharsetUtil.CHARSET_UTF_8);
+        log.debug("下载文件 {} {} {}", id, name, range);
+        long fromPos = 0, toPos, downloadSize;
+        if (StrUtil.isEmpty(range)) {
+            downloadSize = fileSize;
+        } else {
+            response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+            List<String> list = StrUtil.splitTrim(range, "=");
+            String rangeByte = CollUtil.getLast(list);
+            //  Range: bytes=0-499 表示第 0-499 字节范围的内容
+            //  Range: bytes=500-999 表示第 500-999 字节范围的内容
+            //  Range: bytes=-500 表示最后 500 字节的内容
+            //  Range: bytes=500- 表示从第 500 字节开始到文件结束部分的内容
+            //  Range: bytes=0-0,-1 表示第一个和最后一个字节
+            //  Range: bytes=500-600,601-999 同时指定几个范围
+            Assert.state(!StrUtil.contains(rangeByte, StrUtil.COMMA), "不支持分片多端下载");
+            // TODO 解析更多格式的 RANGE 请求头
+            long[] split = StrUtil.splitToLong(rangeByte, StrUtil.DASHED);
+            Assert.state(split != null, "range 传入的信息不正确");
+            if (split.length == 2) {
+                // Range: bytes=0-499 表示第 0-499 字节范围的内容
+                toPos = split[1];
+                fromPos = split[0];
+            } else if (split.length == 1) {
+                if (StrUtil.startWith(rangeByte, StrUtil.DASHED)) {
+                    // Range: bytes=-500 表示最后 500 字节的内容
+                    fromPos = Math.max(fileSize - split[0], 0);
+                    toPos = fileSize;
+                } else if (StrUtil.endWith(rangeByte, StrUtil.DASHED)) {
+                    // Range: bytes=500- 表示从第 500 字节开始到文件结束部分的内容
+                    fromPos = split[0];
+                    toPos = fileSize;
+                } else {
+                    throw new IllegalArgumentException("不支持的 range 格式 " + rangeByte);
+                }
+            } else {
+                throw new IllegalArgumentException("不支持的 range 格式 " + rangeByte);
+            }
+            downloadSize = toPos > fromPos ? (toPos - fromPos) : (fileSize - fromPos);
+        }
+        return new long[]{fromPos, downloadSize};
+    }
+
     @GetMapping(value = ServerOpenApi.FILE_STORAGE_DOWNLOAD, produces = MediaType.APPLICATION_JSON_VALUE)
     public void download(@PathVariable String id, @PathVariable String token,
                          HttpServletRequest request,
-                         HttpServletResponse response) {
+                         HttpServletResponse response) throws IOException {
         FileStorageModel storageModel = fileStorageService.getByKey(id);
         Assert.notNull(storageModel, "没有对应数据");
         Assert.state(StrUtil.equals(token, storageModel.getTriggerToken()), "token错误,或者已经失效");
@@ -91,64 +142,61 @@ public class FileStorageApiController extends BaseJpomController {
         String name = ReUtil.replaceAll(storageModel.getName(), "[\\s\\\\/:\\*\\?\\\"<>\\|]", "");
         if (StrUtil.isEmpty(name)) {
             name = fileStorageFile.getName();
-        } else {
-            name += "." + storageModel.getExtName();
+        } else if (!StrUtil.endWith(name, StrUtil.DOT + storageModel.getExtName())) {
+            name += StrUtil.DOT + storageModel.getExtName();
         }
         String contentType = ObjectUtil.defaultIfNull(FileUtil.getMimeType(name), "application/octet-stream");
         String charset = ObjectUtil.defaultIfNull(response.getCharacterEncoding(), CharsetUtil.UTF_8);
         response.setHeader("Content-Disposition", StrUtil.format("attachment;filename=\"{}\"",
             URLUtil.encode(name, CharsetUtil.charset(charset))));
         response.setContentType(contentType);
+        //    解析断点续传相关信息
+        long[] resolveRange = this.resolveRange(request, fileSize, storageModel.getId(), storageModel.getName(), response);
+        long fromPos = resolveRange[0];
+        long downloadSize = resolveRange[1];
         //
-        // 解析断点续传相关信息
+        response.setHeader(HttpHeaders.LAST_MODIFIED, DateTime.of(fileStorageFile.lastModified()).toString(DatePattern.HTTP_DATETIME_FORMAT));
         response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
-        String range = ServletUtil.getHeader(request, HttpHeaders.RANGE, CharsetUtil.CHARSET_UTF_8);
-        log.debug("下载文件 {} {} {}", storageModel.getId(), name, range);
-        long fromPos = 0, toPos = 0, downloadSize;
-        if (StrUtil.isEmpty(range)) {
-            downloadSize = fileSize;
-        } else {
-            response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-            List<String> list = StrUtil.splitTrim(range, "=");
-            String rangeByte = CollUtil.getLast(list);
-            long[] split = StrUtil.splitToLong(rangeByte, "-");
-            Assert.state(split != null, "range 传入的信息不正确");
-            fromPos = split[0];
-            if (split.length == 2) {
-                toPos = split[1];
-            }
-            downloadSize = toPos > fromPos ? (int) (toPos - fromPos) : (int) (fileSize - fromPos);
-        }
+        //  Content-Range: bytes (unit first byte pos) - [last byte pos]/[entity legth]
+        response.setHeader(HttpHeaders.CONTENT_RANGE, StrUtil.format("bytes {}-{}/{}", fromPos, downloadSize, fileSize));
         response.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(downloadSize));
         // Copy the stream to the response's output stream.
-        OutputStream out = null;
-        try (RandomAccessFile in = new RandomAccessFile(fileStorageFile, "r")) {
+        ServletOutputStream out = null;
+        try (RandomAccessFile in = new RandomAccessFile(fileStorageFile, "r"); FileChannel channel = in.getChannel()) {
             out = response.getOutputStream();
             // 设置下载起始位置
             if (fromPos > 0) {
-                in.seek(fromPos);
+                channel.position(fromPos);
             }
             // 缓冲区大小
             int bufLen = (int) Math.min(downloadSize, IoUtil.DEFAULT_BUFFER_SIZE);
-            byte[] buffer = new byte[bufLen];
+            ByteBuffer buffer = ByteBuffer.allocate(bufLen);
             int num;
-            int count = 0;
+            long count = 0;
             // 当前写到客户端的大小
-            while ((num = in.read(buffer)) != -1) {
-                out.write(buffer, 0, num);
+            while ((num = channel.read(buffer)) != NioUtil.EOF) {
+                buffer.flip();
+                out.write(buffer.array(), 0, num);
+                buffer.clear();
                 count += num;
                 //处理最后一段，计算不满缓冲区的大小
-                if (downloadSize - count < bufLen) {
-                    bufLen = (int) (downloadSize - count);
-                    if (bufLen == 0) {
-                        break;
-                    }
-                    buffer = new byte[bufLen];
+                long last = (downloadSize - count);
+                if (last == 0) {
+                    break;
+                }
+                if (last < bufLen) {
+                    bufLen = (int) last;
+                    buffer = ByteBuffer.allocate(bufLen);
                 }
             }
             response.flushBuffer();
+        } catch (ClientAbortException clientAbortException) {
+            log.warn("客户端终止连接：{}", clientAbortException.getMessage());
         } catch (Exception e) {
             log.error("数据下载失败", e);
+            if (out != null) {
+                out.write(StrUtil.bytes("error:" + e.getMessage()));
+            }
         } finally {
             IoUtil.close(out);
         }

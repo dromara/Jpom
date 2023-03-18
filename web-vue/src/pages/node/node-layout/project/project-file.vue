@@ -129,7 +129,8 @@
               multiple
               :disabled="!!percentage"
             >
-              <a-icon type="loading" v-if="percentage" />
+              <template v-if="percentage"> <a-icon type="loading" v-if="this.uploadFileList.length" /><span v-else>-</span> </template>
+
               <a-button v-else icon="upload">选择文件</a-button>
             </a-upload>
 

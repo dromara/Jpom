@@ -119,6 +119,7 @@ server:
     min-response-size: 2048
   tomcat:
     uri-encoding: UTF-8
+    connection-timeout: 10M
 spring:
   profiles:
     active: mysql-1

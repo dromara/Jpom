@@ -79,6 +79,11 @@ public class H2TableBuilderImpl implements IStorageSqlBuilderService {
                     stringBuilder.append("ALTER TABLE ").append(viewAlterData.getTableName()).append(" ADD IF NOT EXISTS ");
                     stringBuilder.append(this.generateColumnSql(viewAlterData));
                     break;
+                case "ALTER":
+                    // alter  table table1 modify  column column1  decimal(10,1) DEFAULT NULL COMMENT '注释';
+                    stringBuilder.append("ALTER TABLE ").append(viewAlterData.getTableName()).append(" modify  column ");
+                    stringBuilder.append(this.generateColumnSql(viewAlterData));
+                    break;
                 case "DROP-TABLE":
                     stringBuilder.append("drop table if exists ").append(viewAlterData.getTableName());
                     break;

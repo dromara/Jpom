@@ -28,6 +28,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseWorkspaceModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -54,6 +55,11 @@ public class FileStorageModel extends BaseWorkspaceModel {
      * 文件名
      */
     private String name;
+
+    public void setName(String name) {
+        this.name = StrUtil.maxLength(name, 240);
+    }
+
     /**
      * 文件大小
      */

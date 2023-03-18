@@ -82,10 +82,12 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
                 case "ADD":
                     //  ALTER TABLE PROJECT_INFO ADD IF NOT EXISTS triggerToken VARCHAR (100) comment '触发器token';
                     String columnSql = this.generateColumnSql(viewAlterData);
-                    columnSql = StrUtil.replace(columnSql, "'", "\\'");
-                    int length = StrUtil.length(columnSql);
-                    Assert.state(length <= 180, "sql 语句太长啦");
                     stringBuilder.append("CALL add_column_if_not_exists('").append(viewAlterData.getTableName()).append("','").append(viewAlterData.getName()).append("','").append(columnSql).append("')");
+                    break;
+                case "ALTER":
+                    // alter  table table1 modify  column column1  decimal(10,1) DEFAULT NULL COMMENT '注释';
+                    stringBuilder.append("ALTER TABLE ").append(viewAlterData.getTableName()).append(" modify  column ");
+                    stringBuilder.append(this.generateColumnSql(viewAlterData));
                     break;
                 case "DROP-TABLE":
                     stringBuilder.append("drop table if exists ").append(viewAlterData.getTableName());
@@ -177,7 +179,11 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
             stringBuilder.append("default '").append(defaultValue).append("'").append(StrUtil.SPACE);
         }
         stringBuilder.append("comment '").append(tableViewRowData.getComment()).append("'");
-        return stringBuilder.toString();
+        //
+        String columnSql = StrUtil.replace(stringBuilder.toString(), "'", "\\'");
+        int length = StrUtil.length(columnSql);
+        Assert.state(length <= 180, "sql 语句太长啦");
+        return columnSql;
     }
 
     @Override

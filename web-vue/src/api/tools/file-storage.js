@@ -69,7 +69,7 @@ export function delFile(params) {
   });
 }
 
-// 触发器
+// 下载 url
 export function triggerUrl(params) {
   return axios({
     url: "/file-storage/trigger-url",

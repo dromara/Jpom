@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.PatternPool;
@@ -176,5 +177,10 @@ public class TestString {
     public void testArrayList() {
         ArrayList<Integer> integers = CollUtil.newArrayList(1, 2);
         System.out.println(CollUtil.sub(integers, 0 + 1, integers.size()));
+    }
+
+    @Test
+    public void testLong() {
+        System.out.println(4045003435L - 5476659199L);
     }
 }
