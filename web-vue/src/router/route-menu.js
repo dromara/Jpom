@@ -5,7 +5,7 @@
  */
 const routeMenuMap = {
   nodeList: "/node/list",
-  nodeStat: "/node/stat",
+
   dockerList: "/docker/list",
   dockerSwarm: "/docker/swarm",
   sshList: "/ssh",

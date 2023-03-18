@@ -7,156 +7,348 @@
         </template>
       </a-result>
     </template>
-    <a-table v-else :columns="columns" :data-source="list" bordered size="middle" rowKey="id" :pagination="pagination" @change="changePage" :row-selection="rowSelection">
-      <template slot="title">
-        <a-space>
-          <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="节点名称" />
+    <template v-else>
+      <a-card :bodyStyle="{ padding: '10px' }">
+        <template slot="title">
+          <a-space>
+            <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="节点名称" />
 
-          <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
-            <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
-          </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
-          </a-tooltip>
-          <a-button
-            type="primary"
-            @click="
-              () => {
-                this.fastInstallNode = true;
-              }
-            "
-            >快速安装
-          </a-button>
-          <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
-
-          <!-- <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
-            <a-menu slot="overlay">
-              <a-menu-item> </a-menu-item>
-              <a-menu-item> </a-menu-item>
-            </a-menu>
-          </a-dropdown> -->
-        </a-space>
-      </template>
-      <a-tooltip slot="url" slot-scope="text, record" placement="topLeft" :title="text">
-        <template v-if="record.machineNodeData">
-          <span>{{ record.machineNodeData.jpomProtocol }}://{{ record.machineNodeData.jpomUrl }}</span>
-        </template>
-        <span v-else> - </span>
-      </a-tooltip>
-      <template slot="name" slot-scope="text, record">
-        <template v-if="record.openStatus !== 1">
-          <a-tooltip :title="`${text}`">
-            <span>{{ text }}</span>
-          </a-tooltip>
-        </template>
-        <template v-else>
-          <a-tooltip :title="`${text} 点击进入节点管理`" @click="handleNode(record)">
-            <a-button type="link" style="padding: 0px" size="small">
-              <a-icon type="fullscreen" /><span>{{ text }}</span>
+            <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+              <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+            </a-select>
+            <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
+              <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
+            </a-tooltip>
+            <a-button
+              type="primary"
+              @click="
+                () => {
+                  this.fastInstallNode = true;
+                }
+              "
+              >快速安装
             </a-button>
+            <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
+
+            <a-button type="primary" @click="changeLayout" :icon="this.layoutType === 'card' ? 'layout' : 'table'"> {{ this.layoutType === "card" ? "卡片" : "表格" }} </a-button>
+            <a-tooltip placement="bottom">
+              <template slot="title">
+                <div>
+                  <ul>
+                    <li>监控数据目前采用原生命令获取,和真实情况有一定差异可以当做参考依据</li>
+                    <li>监控频率可以到服务端配置文件中修改</li>
+                    <li>悬停到仪表盘上显示具体含义</li>
+                    <li>点击仪表盘查看监控历史数据</li>
+                    <li>点击延迟可以查看对应节点网络延迟历史数据</li>
+                    <li>为了避免部分节点不能及时响应造成监控阻塞,节点统计超时时间不受节点超时配置影响将采用默认超时时间(10秒)</li>
+                  </ul>
+                </div>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+            <a-statistic-countdown format="s 秒" title="刷新倒计时 " :value="deadline" @finish="onFinish" />
+          </a-space>
+        </template>
+        <a-table
+          v-if="this.layoutType === 'table'"
+          :columns="columns"
+          :data-source="list"
+          bordered
+          size="middle"
+          rowKey="id"
+          :pagination="pagination"
+          @change="changePage"
+          :row-selection="rowSelection"
+        >
+          <a-tooltip slot="url" slot-scope="text, record" placement="topLeft" :title="text">
+            <template v-if="record.machineNodeData">
+              <span>{{ record.machineNodeData.jpomProtocol }}://{{ record.machineNodeData.jpomUrl }}</span>
+            </template>
+            <span v-else> - </span>
           </a-tooltip>
-        </template>
-      </template>
-      <a-tooltip
-        slot="status"
-        slot-scope="text, item"
-        placement="topLeft"
-        :title="`${statusMap[item.machineNodeData && item.machineNodeData.status] || '未知'} ${item.machineNodeData && item.machineNodeData.statusMsg}`"
-      >
-        <template v-if="item.openStatus === 1">
-          <a-tag :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
-            {{ statusMap[item.machineNodeData && item.machineNodeData.status] || "未知" }}
-          </a-tag>
-        </template>
-        <a-tag v-else>未启用</a-tag>
-      </a-tooltip>
-      <a-tooltip slot="osName" slot-scope="text, item" placement="topLeft" :title="text">
-        <span>{{ item.machineNodeData && item.machineNodeData.osName }}</span>
-      </a-tooltip>
-      <a-tooltip slot="javaVersion" slot-scope="text, item" placement="topLeft" :title="text">
-        <span>{{ item.machineNodeData && item.machineNodeData.javaVersion }}</span>
-      </a-tooltip>
-      <a-tooltip
-        slot="jvmInfo"
-        slot-scope="text, item"
-        placement="topLeft"
-        :title="`剩余内存：${renderSize(item.machineNodeData && item.machineNodeData.jvmFreeMemory)} 总内存：${renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory)}`"
-      >
-        <span>{{ renderSize(item.machineNodeData && item.machineNodeData.jvmFreeMemory) }} / {{ renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory) }}</span>
-      </a-tooltip>
-      <!-- <a-tooltip slot="freeMemory" slot-scope="text" placement="topLeft" :title="renderSize(text)">
+          <template slot="name" slot-scope="text, record">
+            <template v-if="record.openStatus !== 1">
+              <a-tooltip :title="`${text}`">
+                <span>{{ text }}</span>
+              </a-tooltip>
+            </template>
+            <template v-else>
+              <a-tooltip :title="`${text} 点击进入节点管理`" @click="handleNode(record)">
+                <a-button type="link" style="padding: 0px" size="small">
+                  <a-icon type="fullscreen" /><span>{{ text }}</span>
+                </a-button>
+              </a-tooltip>
+            </template>
+          </template>
+          <a-tooltip
+            slot="status"
+            slot-scope="text, item"
+            placement="topLeft"
+            :title="`${statusMap[item.machineNodeData && item.machineNodeData.status] || '未知'} ${item.machineNodeData && item.machineNodeData.statusMsg}`"
+          >
+            <template v-if="item.openStatus === 1">
+              <a-tag :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
+                {{ statusMap[item.machineNodeData && item.machineNodeData.status] || "未知" }}
+              </a-tag>
+            </template>
+            <a-tag v-else>未启用</a-tag>
+          </a-tooltip>
+          <a-tooltip slot="osName" slot-scope="text, item" placement="topLeft" :title="text">
+            <span>{{ item.machineNodeData && item.machineNodeData.osName }}</span>
+          </a-tooltip>
+          <a-tooltip slot="javaVersion" slot-scope="text, item" placement="topLeft" :title="text">
+            <span>{{ item.machineNodeData && item.machineNodeData.javaVersion }}</span>
+          </a-tooltip>
+          <a-tooltip
+            slot="jvmInfo"
+            slot-scope="text, item"
+            placement="topLeft"
+            :title="`剩余内存：${renderSize(item.machineNodeData && item.machineNodeData.jvmFreeMemory)} 总内存：${renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory)}`"
+          >
+            <span>{{ renderSize(item.machineNodeData && item.machineNodeData.jvmFreeMemory) }} / {{ renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory) }}</span>
+          </a-tooltip>
+          <!-- <a-tooltip slot="freeMemory" slot-scope="text" placement="topLeft" :title="renderSize(text)">
         <span>{{ renderSize(text) }}</span>
       </a-tooltip> -->
 
-      <a-tooltip slot="runTime" slot-scope="text, item" placement="topLeft" :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime)">
-        <span>{{ formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, "", 2) }}</span>
-      </a-tooltip>
-      <template slot="projectCount" slot-scope="text, item">
-        <div v-if="item.machineNodeData && item.machineNodeData.status === 1" @click="syncNode(item)">
-          <a-tooltip placement="topLeft" title="节点中的所有项目数量,点击重新同步节点项目信息">
-            <a-tag>{{ item.machineNodeData.jpomProjectCount }} </a-tag>
-            <a-icon type="sync" />
+          <a-tooltip slot="runTime" slot-scope="text, item" placement="topLeft" :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime)">
+            <span>{{ formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, "", 2) }}</span>
           </a-tooltip>
-        </div>
-        <span v-else>-</span>
-      </template>
-      <template slot="scriptCount" slot-scope="text, item">
-        <div v-if="item.machineNodeData && item.machineNodeData.status === 1" @click="syncNodeScript(item)">
-          <a-tooltip placement="topLeft" title="节点中的所有脚本模版数量,点击重新同步脚本模版信息">
-            <a-tag>{{ item.machineNodeData.jpomScriptCount }} </a-tag>
-            <a-icon type="sync" />
-          </a-tooltip>
-        </div>
-        <span v-else>-</span>
-      </template>
+          <template slot="projectCount" slot-scope="text, item">
+            <div v-if="item.machineNodeData && item.machineNodeData.status === 1" @click="syncNode(item)">
+              <a-tooltip placement="topLeft" title="节点中的所有项目数量,点击重新同步节点项目信息">
+                <a-tag>{{ item.machineNodeData.jpomProjectCount }} </a-tag>
+                <a-icon type="sync" />
+              </a-tooltip>
+            </div>
+            <span v-else>-</span>
+          </template>
+          <template slot="scriptCount" slot-scope="text, item">
+            <div v-if="item.machineNodeData && item.machineNodeData.status === 1" @click="syncNodeScript(item)">
+              <a-tooltip placement="topLeft" title="节点中的所有脚本模版数量,点击重新同步脚本模版信息">
+                <a-tag>{{ item.machineNodeData.jpomScriptCount }} </a-tag>
+                <a-icon type="sync" />
+              </a-tooltip>
+            </div>
+            <span v-else>-</span>
+          </template>
 
-      <template slot="operation" slot-scope="text, record, index">
-        <a-space>
-          <a-tooltip title="如果按钮不可用则表示当前节点已经关闭啦,需要去编辑中启用">
-            <a-button size="small" class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"><a-icon type="apartment" />管理</a-button>
-          </a-tooltip>
-          <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
-            <a-button size="small" type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"><a-icon type="code" />终端</a-button>
-          </a-tooltip>
+          <template slot="operation" slot-scope="text, record, index">
+            <a-space>
+              <a-tooltip title="如果按钮不可用则表示当前节点已经关闭啦,需要去编辑中启用">
+                <a-button size="small" class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"><a-icon type="apartment" />管理</a-button>
+              </a-tooltip>
+              <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
+                <a-button size="small" type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"><a-icon type="code" />终端</a-button>
+              </a-tooltip>
 
-          <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-              更多
-              <a-icon type="down" />
-            </a>
-            <a-menu slot="overlay">
-              <a-menu-item>
-                <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-              </a-menu-item>
+              <a-dropdown>
+                <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+                  更多
+                  <a-icon type="down" />
+                </a>
+                <a-menu slot="overlay">
+                  <a-menu-item>
+                    <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+                  </a-menu-item>
 
-              <a-menu-item>
-                <a-tooltip placement="leftBottom" title="删除会检查数据关联性,并且节点不存在项目或者脚本">
-                  <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-                </a-tooltip>
-              </a-menu-item>
-              <a-menu-item>
-                <a-tooltip placement="leftBottom" title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用">
-                  <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
-                </a-tooltip>
-              </a-menu-item>
-              <a-menu-divider />
-              <a-menu-item>
-                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'top')">置顶</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'up')">上移</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total" @click="sortItemHander(record, index, 'down')">
-                  下移
-                </a-button>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown>
-        </a-space>
-      </template>
-    </a-table>
+                  <a-menu-item>
+                    <a-tooltip placement="leftBottom" title="删除会检查数据关联性,并且节点不存在项目或者脚本">
+                      <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                    </a-tooltip>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-tooltip placement="leftBottom" title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用">
+                      <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
+                    </a-tooltip>
+                  </a-menu-item>
+                  <a-menu-divider />
+                  <a-menu-item>
+                    <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'top')">置顶</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'up')">上移</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total" @click="sortItemHander(record, index, 'down')">
+                      下移
+                    </a-button>
+                  </a-menu-item>
+                </a-menu>
+              </a-dropdown>
+            </a-space>
+          </template>
+        </a-table>
+        <template v-else-if="this.layoutType === 'card'">
+          <a-row>
+            <a-row :gutter="[16, 16]">
+              <template v-if="list && list.length">
+                <a-col v-for="item in list" :key="item.id" :span="6">
+                  <template>
+                    <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
+                      <template slot="title">
+                        <a-row :gutter="[4, 0]">
+                          <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+                            <a-tooltip>
+                              <template slot="title">
+                                点击进入节点管理
+                                <div>节点名称：{{ item.name }}</div>
+                                <div>节点地址：{{ item.url }}</div>
+                              </template>
+
+                              <a-button type="link" style="padding: 0px" size="small" @click="handleNode(item)">
+                                <span> {{ item.name }}</span>
+                              </a-button>
+                            </a-tooltip>
+                          </a-col>
+                          <a-col :span="7" style="text-align: right">
+                            <a-tooltip>
+                              <template slot="title">
+                                <div>当前状态：{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}</div>
+                                <div>状态描述：{{ (item.machineNodeData && item.machineNodeData.statusMsg) || "" }}</div>
+                              </template>
+                              <a-tag :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
+                                {{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
+                              </a-tag>
+                            </a-tooltip>
+                          </a-col>
+                        </a-row>
+                      </template>
+
+                      <a-row :gutter="[8, 8]">
+                        <a-col :span="8" style="text-align: center">
+                          <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`CPU 占用率：${item.occupyCpu}%`">
+                            <a-progress
+                              type="circle"
+                              :width="80"
+                              :stroke-color="{
+                                '0%': '#87d068',
+                                '30%': '#87d068',
+                                '100%': '#108ee9',
+                              }"
+                              size="small"
+                              status="active"
+                              :percent="item.occupyCpu"
+                            />
+                          </a-tooltip>
+                        </a-col>
+                        <a-col :span="8" style="text-align: center">
+                          <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`硬盘占用率：${item.occupyDisk}%`">
+                            <a-progress
+                              type="circle"
+                              :width="80"
+                              :stroke-color="{
+                                '0%': '#87d068',
+                                '30%': '#87d068',
+                                '100%': '#108ee9',
+                              }"
+                              size="small"
+                              status="active"
+                              :percent="item.occupyDisk"
+                            />
+                          </a-tooltip>
+                        </a-col>
+                        <a-col :span="8" style="text-align: center">
+                          <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`内存占用率：${item.occupyMemory}%`">
+                            <a-progress
+                              :width="80"
+                              type="circle"
+                              :stroke-color="{
+                                '0%': '#87d068',
+                                '30%': '#87d068',
+                                '100%': '#108ee9',
+                              }"
+                              size="small"
+                              status="active"
+                              :percent="item.occupyMemory"
+                            />
+                          </a-tooltip>
+                        </a-col>
+                      </a-row>
+
+                      <a-row :gutter="[8, 8]" style="text-align: center">
+                        <a-col :span="8">
+                          <a-tooltip
+                            @click="handleHistory(item, 'networkDelay')"
+                            :title="`${'延迟' + (formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-') + ' 点击查看历史趋势'}`"
+                          >
+                            <a-statistic
+                              title="延迟"
+                              :value="item.machineNodeData && item.machineNodeData.networkDelay"
+                              valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
+                              :formatter="
+                                (v) => {
+                                  return formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-';
+                                }
+                              "
+                            />
+                          </a-tooltip>
+                        </a-col>
+                        <a-col :span="8">
+                          <a-tooltip :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 1) || '-'">
+                            <a-statistic
+                              title="运行时间"
+                              valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
+                              :formatter="
+                                (v) => {
+                                  return formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 2) || '-';
+                                }
+                              "
+                            />
+                          </a-tooltip>
+                        </a-col>
+                        <a-col :span="8">
+                          <a-tooltip :title="`${parseTime(item.machineNodeData && item.machineNodeData.modifyTimeMillis)}`">
+                            <a-statistic
+                              title="更新时间"
+                              valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
+                              :formatter="
+                                (v) => {
+                                  return parseTime(item.machineNodeData && item.machineNodeData.modifyTimeMillis, '{h}:{i}:{s}');
+                                }
+                              "
+                            />
+                          </a-tooltip>
+                        </a-col>
+                      </a-row>
+                    </a-card>
+                  </template>
+                </a-col>
+              </template>
+              <a-col v-else :span="24">
+                <a-empty description="没有任何节点" />
+              </a-col>
+            </a-row>
+          </a-row>
+          <a-row type="flex" justify="center">
+            <a-divider v-if="listQuery.total / listQuery.limit > 1" dashed />
+            <a-col>
+              <a-pagination
+                v-model="listQuery.page"
+                :showTotal="
+                  (total) => {
+                    return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery);
+                  }
+                "
+                :showSizeChanger="true"
+                :pageSizeOptions="sizeOptions"
+                :pageSize="listQuery.limit"
+                :total="listQuery.total"
+                :hideOnSinglePage="true"
+                @showSizeChange="
+                  (current, size) => {
+                    this.listQuery.limit = size;
+                    this.loadData();
+                  }
+                "
+                @change="this.loadData"
+                show-less-items
+              />
+            </a-col>
+          </a-row>
+        </template>
+      </a-card>
+    </template>
 
     <!-- 编辑区 -->
     <a-modal destroyOnClose v-model="editNodeVisible" width="50%" title="编辑节点" @ok="handleEditNodeOk" :maskClosable="false">
@@ -248,6 +440,10 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 历史监控 -->
+    <a-modal destroyOnClose v-model="monitorVisible" width="75%" :title="`${this.temp.name}历史监控图表`" :footer="null" :maskClosable="false">
+      <node-top v-if="monitorVisible" :type="this.temp.type" :nodeId="this.temp.id"></node-top>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -257,11 +453,12 @@ import { getSshListAll } from "@/api/ssh";
 import { syncScript } from "@/api/node-other";
 import NodeLayout from "./node-layout";
 import Terminal from "@/pages/ssh/terminal";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, formatDuration, renderSize } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, formatDuration, renderSize, formatPercent2Number, parseTime, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";
 import CustomSelect from "@/components/customSelect";
 import fastInstall from "./fast-install.vue";
 import { statusMap } from "@/api/system/assets-machine";
+import NodeTop from "@/pages/node/node-layout/node-top";
 
 export default {
   components: {
@@ -269,6 +466,7 @@ export default {
     Terminal,
     CustomSelect,
     fastInstall,
+    NodeTop,
   },
   data() {
     return {
@@ -278,11 +476,13 @@ export default {
       statusMap,
       sshList: [],
       list: [],
-
+      sizeOptions: ["8", "12", "16", "20", "24"],
       groupList: [],
-
+      refreshInterval: 5,
+      deadline: 0,
       temp: {},
-
+      monitorVisible: false,
+      layoutType: "card",
       editNodeVisible: false,
       drawerVisible: false,
       terminalVisible: false,
@@ -334,6 +534,8 @@ export default {
     if (searchNodeName) {
       this.listQuery = { ...this.listQuery, "%name%": searchNodeName };
     }
+    const layoutType = localStorage.getItem("tableLayout");
+    this.layoutType = layoutType === "table" ? "table" : "card";
     this.loadData();
     this.loadGroupList();
   },
@@ -341,6 +543,8 @@ export default {
   methods: {
     formatDuration,
     renderSize,
+    PAGE_DEFAULT_SHOW_TOTAL,
+    parseTime,
 
     // 页面引导
     introGuide() {
@@ -398,7 +602,16 @@ export default {
         this.loading = true;
         getNodeList(this.listQuery).then((res) => {
           if (res.code === 200) {
-            this.list = res.data.result;
+            this.list =
+              res.data.result &&
+              res.data.result.map((item) => {
+                // console.log(item);
+                item.occupyCpu = formatPercent2Number(item.machineNodeData?.osOccupyCpu);
+
+                item.occupyDisk = formatPercent2Number(item.machineNodeData?.osOccupyDisk);
+                item.occupyMemory = formatPercent2Number(item.machineNodeData?.osOccupyMemory);
+                return item;
+              });
             this.listQuery.total = res.data.total;
             let nodeId = this.$route.query.nodeId;
             this.list.map((item) => {
@@ -412,6 +625,8 @@ export default {
               });
             }
             resolve();
+            this.refreshInterval = 30;
+            this.deadline = Date.now() + this.refreshInterval * 1000;
           }
           this.loading = false;
         });
@@ -626,6 +841,25 @@ export default {
         },
       });
     },
+    // 切换视图
+    changeLayout() {
+      this.layoutType = this.layoutType === "card" ? "table" : "card";
+      localStorage.setItem("tableLayout", this.layoutType);
+    },
+    onFinish() {
+      if (this.$attrs.routerUrl !== this.$route.path) {
+        // 重新计算倒计时
+        this.deadline = Date.now() + this.refreshInterval * 1000;
+        return;
+      }
+      this.loadData();
+    },
+    // 历史图表
+    handleHistory(record, type) {
+      this.monitorVisible = true;
+      this.temp = record;
+      this.temp = { ...this.temp, type };
+    },
   },
 };
 </script>
@@ -643,4 +877,12 @@ export default {
   margin-left: 10px;
   margin-right: 0;
 } */
+/deep/ .ant-statistic div {
+  display: inline-block;
+}
+
+/deep/ .ant-statistic-content-value,
+/deep/ .ant-statistic-content {
+  font-size: 16px;
+}
 </style>

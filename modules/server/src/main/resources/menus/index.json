@@ -1,24 +1,13 @@
 [
   {
-    "title": "节点管理",
-    "icon_v3": "block",
-    "id": "nodeManager",
+    "title": "节点&项目",
+    "icon_v3": "apartment",
+    "id": "outgiving",
     "childs": [
       {
         "title": "逻辑节点",
         "id": "nodeList"
       },
-      {
-        "title": "节点统计",
-        "id": "nodeStat"
-      }
-    ]
-  },
-  {
-    "title": "项目管理",
-    "icon_v3": "apartment",
-    "id": "outgiving",
-    "childs": [
       {
         "title": "项目列表",
         "id": "projectSearch"
