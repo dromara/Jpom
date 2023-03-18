@@ -24,7 +24,7 @@
               <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
             </a-tooltip>
             <a-button type="primary" @click="handleUpload">上传文件</a-button>
-            <a-button type="primary" @click="handleDownload">远程下载</a-button>
+            <a-button type="primary" @click="handleRemoteDownload">远程下载</a-button>
           </a-space>
         </template>
         <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
@@ -65,7 +65,7 @@
         <template slot="operation" slot-scope="text, record">
           <a-space>
             <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
-            <a-button size="small" :disabled="!record.exists" type="primary" @click="handleTrigger(record)">触发器</a-button>
+            <a-button size="small" :disabled="!record.exists" type="primary" @click="handleDownloadUrl(record)">下载</a-button>
             <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
           </a-space>
         </template>
@@ -434,7 +434,7 @@ export default {
       });
     },
     // 远程下载
-    handleDownload() {
+    handleRemoteDownload() {
       this.uploadRemoteFileVisible = true;
       this.temp = {
         global: false,
@@ -461,15 +461,15 @@ export default {
         });
       });
     },
-    // 触发器
-    handleTrigger(record) {
+    // 下载地址
+    handleDownloadUrl(record) {
       this.temp = Object.assign({}, record);
       this.tempVue = Vue;
       triggerUrl({
         id: record.id,
       }).then((res) => {
         if (res.code === 200) {
-          this.fillTriggerResult(res);
+          this.fillDownloadUrlResult(res);
           this.triggerVisible = true;
         }
       });
@@ -484,11 +484,11 @@ export default {
           this.$notification.success({
             message: res.msg,
           });
-          this.fillTriggerResult(res);
+          this.fillDownloadUrlResult(res);
         }
       });
     },
-    fillTriggerResult(res) {
+    fillDownloadUrlResult(res) {
       this.temp = { ...this.temp, triggerDownloadUrl: `${location.protocol}//${location.host}${res.data.triggerDownloadUrl}` };
     },
   },

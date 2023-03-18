@@ -20,7 +20,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.crypto.SecureUtil;
 import io.jpom.util.CommandUtil;
 import org.junit.Test;
 
@@ -78,6 +80,16 @@ public class TestFile {
     public void testFileExt() {
         String extName = FileUtil.extName("canal.deployer-1.1.7-SNAPSHOT.tar.gz");
         System.out.println(extName);
+    }
+
+    @Test
+    public void testMd5() {
+        File file = FileUtil.file("D:\\迅雷下载\\zh-cn_windows_11_business_editions_version_22h2_updated_sep_2022_x64_dvd_515a832b.iso");
+        File file1 = FileUtil.file("D:\\迅雷下载\\zh-cn_windows_11_business_editions_version_22h2_updated_sep_2022_x64_dvd_515a832b (1).iso");
+        File file2 = FileUtil.file("D:\\迅雷下载\\zh-cn_windows_11_business_editions_version_22h2_updated_sep_2022_x64_dvd_515a832b (2).iso");
+        System.out.println(SecureUtil.md5(file));
+        System.out.println(SecureUtil.md5(file1));
+        System.out.println(SecureUtil.md5(file2));
     }
 
 }
