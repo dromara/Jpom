@@ -58,7 +58,7 @@
           <a-input v-model="temp.name" :maxLength="100" placeholder="命令名称" />
         </a-form-model-item>
 
-        <a-form-model-item prop="command">
+        <a-form-model-item prop="command" help="脚本存放路径：${user.home}/.jpom/xxxx.sh，执行脚本路径：${user.home}，执行脚本方式：bash ${user.home}/.jpom/xxxx.sh par1 par2">
           <template slot="label">
             命令内容
             <a-tooltip v-show="!temp.id">
@@ -395,6 +395,7 @@ export default {
       this.editCommandVisible = true;
       this.getAllSSHList();
       this.chooseSsh = [];
+      this.commandParams = [];
       this.temp = {};
       this.$refs["editCommandForm"] && this.$refs["editCommandForm"].resetFields();
     },

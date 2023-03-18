@@ -94,7 +94,7 @@ USER_LOGIN_LOG,useMfa,TINYINT,,,false,false,是否使用 mfa,
 USER_LOGIN_LOG,success,TINYINT,,,false,false,是否登录成功,
 USER_LOGIN_LOG,operateCode,TINYINT,,,false,false,操作状态码（备注码）,
 USER_LOGIN_LOG,username,String,50,,false,false,昵称,
-FILE_STORAGE,id,String,50,,true,true,id,节点脚本模版
+FILE_STORAGE,id,String,50,,true,true,id,文件管理中心
 FILE_STORAGE,createTimeMillis,Long,,,true,false,数据创建时间,
 FILE_STORAGE,modifyTimeMillis,Long,,,false,false,数据修改时间,
 FILE_STORAGE,modifyUser,String,50,,false,false,修改人,
