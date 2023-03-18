@@ -24,6 +24,7 @@ package io.jpom.func.assets.model;
 
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
 import io.jpom.model.BaseGroupNameModel;
 import lombok.Data;
@@ -93,10 +94,20 @@ public class MachineSshModel extends BaseGroupNameModel {
      * 系统名称
      */
     private String osName;
+
+    public void setOsName(String osName) {
+        this.osName = StrUtil.maxLength(osName, 45);
+    }
+
     /**
      * 机器主机名
      */
     private String hostName;
+
+    public void setHostName(String hostName) {
+        this.osName = StrUtil.maxLength(hostName, 240);
+    }
+
     /**
      * 系统版本
      */

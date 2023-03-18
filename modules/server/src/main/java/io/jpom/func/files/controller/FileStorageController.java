@@ -89,7 +89,7 @@ public class FileStorageController extends BaseServerController {
         PageResultDto<FileStorageModel> listPage = fileStorageService.listPage(request);
         listPage.each(fileStorageModel -> {
             File file = FileUtil.file(storageSavePath, fileStorageModel.getPath());
-            fileStorageModel.setExists(FileUtil.exist(file));
+            fileStorageModel.setExists(FileUtil.isFile(file));
         });
         return JsonMessage.success("", listPage);
     }
@@ -277,18 +277,8 @@ public class FileStorageController extends BaseServerController {
         UserModel user = getUser();
         // 查询当前工作空间
         FileStorageModel item = fileStorageService.getByKey(id, request);
+        Assert.notNull(item, "没有对应的文件信息");
         //
-        if (item == null) {
-            // 查询所有数据
-            item = fileStorageService.getByKey(id);
-            Assert.notNull(item, "没有对应的文件信息");
-            if (!user.isSystemUser()) {
-                // 判断创建人
-                // 不是管理员，需要验证是自己上传的文件
-                Assert.state(StrUtil.equals(item.getCreateUser(), user.getId()), "当前文件创建人不是您,不能创建下载地址");
-            }
-        }
-
         FileStorageModel updateInfo;
         if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
             updateInfo = new FileStorageModel();

@@ -26,6 +26,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
@@ -38,6 +39,10 @@ import io.jpom.func.assets.server.MachineSshServer;
 import io.jpom.model.data.SshModel;
 import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.system.ExtConfigBean;
+import io.jpom.system.extconf.BuildExtConfig;
+import io.jpom.util.LogRecorder;
+import io.jpom.util.MySftp;
+import io.jpom.util.StringUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -48,6 +53,9 @@ import javax.annotation.Resource;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
 /**
@@ -62,9 +70,12 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
     @Resource
     @Lazy
     private MachineSshServer machineSshServer;
+    private final BuildExtConfig buildExtConfig;
 
-    public SshService(JpomApplication jpomApplication) {
+    public SshService(JpomApplication jpomApplication,
+                      BuildExtConfig buildExtConfig) {
         this.jpomApplication = jpomApplication;
+        this.buildExtConfig = buildExtConfig;
         JSch.setLogger(this);
     }
 
@@ -129,7 +140,9 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
      * @return 执行结果
      * @throws IOException io
      */
-    public String exec(SshModel sshModel, String... command) throws IOException {
+    public String exec(SshModel sshModel, String command, Map<String, String> env) throws IOException {
+        // 替换变量
+        command = StringUtil.formatStrByMap(command, env);
         MachineSshModel machineSshModel = this.getMachineSshModel(sshModel);
         return this.exec(machineSshModel, command);
     }
@@ -364,5 +377,34 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
         data.setGroup(machineSshModel.getGroupName());
         data.setMachineSshId(machineSshModel.getId());
         this.insert(data);
+    }
+
+    /**
+     * 创建文件上传 进度
+     *
+     * @param logRecorder 日志记录器
+     * @return 进度监听
+     */
+    public MySftp.ProgressMonitor createProgressMonitor(LogRecorder logRecorder) {
+        Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
+        return new MySftp.ProgressMonitor() {
+            @Override
+            public void rest() {
+                progressRangeList.clear();
+            }
+
+            @Override
+            public void progress(String desc, long max, long now) {
+                double progressPercentage = Math.floor(((float) now / max) * 100);
+                int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
+                if (progressRangeList.add(progressRange)) {
+                    //  total, progressSize
+                    logRecorder.system("上传文件进度:{} {}/{} {} ", desc,
+                        FileUtil.readableFileSize(now), FileUtil.readableFileSize(max),
+                        NumberUtil.formatPercent(((float) now / max), 0)
+                    );
+                }
+            }
+        };
     }
 }

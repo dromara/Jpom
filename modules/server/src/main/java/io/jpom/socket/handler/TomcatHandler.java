@@ -48,7 +48,7 @@ import java.util.Map;
  * @author jiangzeyin
  * @since 2019/4/24
  */
-@Feature(cls = ClassFeature.TOMCAT, method = MethodFeature.EXECUTE)
+@Feature(cls = ClassFeature.AGENT_LOG, method = MethodFeature.EXECUTE)
 @Slf4j
 public class TomcatHandler extends BaseProxyHandler {
 

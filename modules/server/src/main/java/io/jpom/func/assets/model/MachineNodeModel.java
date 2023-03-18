@@ -50,6 +50,11 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
      * 机器主机名
      */
     private String hostName;
+
+    public void setHostName(String hostName) {
+        this.hostName = StrUtil.maxLength(hostName, 240);
+    }
+
     /**
      * 机器的 IP （多个）
      */
@@ -67,6 +72,11 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
      * 系统名称
      */
     private String osName;
+
+    public void setOsName(String osName) {
+        this.osName = StrUtil.maxLength(osName, 40);
+    }
+
     /**
      * 系统版本
      */

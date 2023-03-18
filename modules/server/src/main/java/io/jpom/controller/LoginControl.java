@@ -40,7 +40,6 @@ import io.jpom.common.ServerConst;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
-import io.jpom.common.validator.ValidatorConfig;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.func.user.server.UserLoginLogServer;
@@ -165,14 +164,10 @@ public class LoginControl extends BaseServerController {
      */
     @PostMapping(value = "userLogin", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<Object> userLogin(
-        @ValidatorConfig(value = {
-            @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息")
-        }) String loginName,
-        @ValidatorConfig(value = {
-            @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息")
-        }) String userPwd,
-        String code, HttpServletRequest request) {
+    public JsonMessage<Object> userLogin(@ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息") String loginName,
+                                         @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息") String userPwd,
+                                         String code,
+                                         HttpServletRequest request) {
         if (this.ipLock()) {
             return new JsonMessage<>(400, "尝试次数太多，请稍后再来");
         }
@@ -230,8 +225,6 @@ public class LoginControl extends BaseServerController {
                 if (updateModel != null) {
                     userService.updateById(updateModel);
                 }
-                // 用于记录登录日志
-                BaseServerController.resetInfo(userModel);
             }
         }
     }

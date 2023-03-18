@@ -379,15 +379,10 @@ public class ReleaseManage {
         Session session = sshService.getSessionByModel(machineSshModel);
         {
             // 执行发布前命令
-            String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseBeforeCommand(), StrUtil.LF);
-            if (ArrayUtil.isNotEmpty(commands)) {
-                // 替换变量
-                for (int i = 0; i < commands.length; i++) {
-                    commands[i] = StringUtil.formatStrByMap(commands[i], envFileMap);
-                }
+            if (StrUtil.isNotEmpty(this.buildExtraModule.getReleaseBeforeCommand())) {
                 //
                 logRecorder.system("开始执行 {} 发布前命令", item.getName());
-                String s = sshService.exec(item, commands);
+                String s = sshService.exec(item, this.buildExtraModule.getReleaseBeforeCommand(), envFileMap);
                 logRecorder.info(s);
             }
         }
@@ -397,26 +392,7 @@ public class ReleaseManage {
                 logRecorder.systemWarning("发布目录为空");
             } else {
                 logRecorder.system("{} {} start ftp upload", DateUtil.now(), item.getName());
-                Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
-                MySftp.ProgressMonitor sftpProgressMonitor = new MySftp.ProgressMonitor() {
-                    @Override
-                    public void rest() {
-                        progressRangeList.clear();
-                    }
-
-                    @Override
-                    public void progress(String desc, long max, long now) {
-                        double progressPercentage = Math.floor(((float) now / max) * 100);
-                        int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
-                        if (progressRangeList.add(progressRange)) {
-                            //  total, progressSize
-                            logRecorder.system("上传文件进度:{} {}/{} {} ", desc,
-                                FileUtil.readableFileSize(now), FileUtil.readableFileSize(max),
-                                NumberUtil.formatPercent(((float) now / max), 0)
-                            );
-                        }
-                    }
-                };
+                MySftp.ProgressMonitor sftpProgressMonitor = sshService.createProgressMonitor(logRecorder);
                 try (MySftp sftp = new MySftp(session, machineSshModel.charset(), machineSshModel.timeout(), sftpProgressMonitor)) {
                     String prefix = "";
                     if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
@@ -441,23 +417,16 @@ public class ReleaseManage {
         } finally {
             JschUtil.close(session);
         }
-        {
-            // 执行发布后命令
-            String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseCommand(), StrUtil.LF);
-            if (ArrayUtil.isEmpty(commands)) {
-                logRecorder.systemWarning("没有需要执行的ssh命令");
-                return;
-            }
-            // 替换变量
-            //
-            for (int i = 0; i < commands.length; i++) {
-                commands[i] = StringUtil.formatStrByMap(commands[i], envFileMap);
-            }
-            //
-            logRecorder.system("开始执行 {} 发布后命令", item.getName());
-            String s = sshService.exec(item, commands);
-            logRecorder.info(s);
+        // 执行发布后命令
+        if (StrUtil.isEmpty(this.buildExtraModule.getReleaseCommand())) {
+            logRecorder.systemWarning("没有需要执行的ssh命令");
+            return;
         }
+        //
+        logRecorder.system("开始执行 {} 发布后命令", item.getName());
+        String s = sshService.exec(item, this.buildExtraModule.getReleaseCommand(), envFileMap);
+        logRecorder.info(s);
+
     }
 
     /**
