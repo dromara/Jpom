@@ -78,8 +78,14 @@ public class FileStorageService extends BaseWorkspaceService<FileStorageModel> i
         this.buildExtConfig = buildExtConfig;
     }
 
+    @Override
+    public FileStorageModel getByKey(String keyValue, HttpServletRequest request) {
+        String workspace = this.getCheckUserWorkspace(request);
+        return super.getByKey(keyValue, true, entity -> entity.set("workspaceId", CollUtil.newArrayList(workspace, ServerConst.WORKSPACE_GLOBAL)));
+    }
+
     /**
-     * 获取我所有的空间
+     * 获取文件列表
      *
      * @param request 请求对象
      * @return page
@@ -134,39 +140,8 @@ public class FileStorageService extends BaseWorkspaceService<FileStorageModel> i
                 File tempPath = configBean.getTempPath();
                 File file = FileUtil.file(tempPath, "file-storage-download", uuid);
                 FileUtil.mkdir(file);
-                int logReduceProgressRatio = buildExtConfig.getLogReduceProgressRatio();
-                Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / logReduceProgressRatio));
-                long bytes = DataSize.ofMegabytes(1).toBytes();
-                File fileFromUrl = HttpUtil.downloadFileFromUrl(url, file, -1, new StreamProgress() {
-                    @Override
-                    public void start() {
-
-                    }
-
-                    @Override
-                    public void progress(long total, long progressSize) {
-                        if (total > 0) {
-                            double progressPercentage = Math.floor(((float) progressSize / total) * 100);
-                            String percent = NumberUtil.formatPercent((float) progressSize / total, 0);
-                            int progressRange = (int) Math.floor(progressPercentage / logReduceProgressRatio);
-                            // 存在文件总大小
-                            if (progressRangeList.add(progressRange)) {
-                                //  total, progressSize
-                                updateProgress(uuid, percent, total, progressSize);
-                            }
-                        } else {
-                            // 不存在文件总大小
-                            if (progressSize % bytes == 0) {
-                                updateProgress(uuid, null, total, progressSize);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void finish() {
-
-                    }
-                });
+                StreamProgress streamProgress = this.createStreamProgress(uuid);
+                File fileFromUrl = HttpUtil.downloadFileFromUrl(url, file, -1, streamProgress);
                 String md5 = SecureUtil.md5(fileFromUrl);
                 FileStorageModel storageModel = this.getByKey(md5);
                 if (storageModel != null) {
@@ -199,6 +174,42 @@ public class FileStorageService extends BaseWorkspaceService<FileStorageModel> i
                 this.updateError(uuid, e.getMessage());
             }
         });
+    }
+
+    private StreamProgress createStreamProgress(String uuid) {
+        int logReduceProgressRatio = buildExtConfig.getLogReduceProgressRatio();
+        Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / logReduceProgressRatio));
+        long bytes = DataSize.ofMegabytes(1).toBytes();
+        return new StreamProgress() {
+            @Override
+            public void start() {
+
+            }
+
+            @Override
+            public void progress(long total, long progressSize) {
+                if (total > 0) {
+                    double progressPercentage = Math.floor(((float) progressSize / total) * 100);
+                    String percent = NumberUtil.formatPercent((float) progressSize / total, 0);
+                    int progressRange = (int) Math.floor(progressPercentage / logReduceProgressRatio);
+                    // 存在文件总大小
+                    if (progressRangeList.add(progressRange)) {
+                        //  total, progressSize
+                        updateProgress(uuid, percent, total, progressSize);
+                    }
+                } else {
+                    // 不存在文件总大小
+                    if (progressSize % bytes == 0) {
+                        updateProgress(uuid, null, total, progressSize);
+                    }
+                }
+            }
+
+            @Override
+            public void finish() {
+
+            }
+        };
     }
 
     private void updateProgress(String id, String desc, long total, long progressSize) {

@@ -41,7 +41,8 @@
             <p v-if="item.status !== undefined">下载状态：{{ statusMap[item.status] || "未知" }}</p>
             <p v-if="item.progressDesc">状态描述：{{ item.progressDesc }}</p>
           </template>
-          {{ text }}
+          <!-- {{ text }} -->
+          <a-button type="link" style="padding: 0px" @click="handleEdit(item)" size="small">{{ text }}</a-button>
         </a-popover>
 
         <a-tooltip slot="renderSize" slot-scope="text" placement="topLeft" :title="renderSize(text)">
@@ -64,8 +65,9 @@
         </template>
         <template slot="operation" slot-scope="text, record">
           <a-space>
-            <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
+            <!-- <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button> -->
             <a-button size="small" :disabled="!record.exists" type="primary" @click="handleDownloadUrl(record)">下载</a-button>
+            <a-button size="small" :disabled="!record.exists" type="primary" @click="handleReleaseFile(record)">发布</a-button>
             <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
           </a-space>
         </template>
@@ -102,16 +104,16 @@
               <a-button v-else type="primary" icon="upload">选择文件</a-button>
             </a-upload>
           </a-form-model-item>
-          <a-form-model-item label="保留天数">
+          <a-form-model-item label="保留天数" prop="keepDay">
             <a-input-number v-model="temp.keepDay" :min="1" style="width: 100%" placeholder="文件保存天数,默认 3650 天" />
           </a-form-model-item>
-          <a-form-model-item label="文件共享">
+          <a-form-model-item label="文件共享" prop="global">
             <a-radio-group v-model="temp.global">
               <a-radio :value="true"> 全局 </a-radio>
               <a-radio :value="false"> 当前工作空间 </a-radio>
             </a-radio-group>
           </a-form-model-item>
-          <a-form-model-item label="文件描述">
+          <a-form-model-item label="文件描述" prop="description">
             <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
           </a-form-model-item>
         </a-form-model>
@@ -119,19 +121,19 @@
       <!-- 编辑文件 -->
       <a-modal destroyOnClose v-model="editVisible" :title="`修改文件`" @ok="handleEditOk" :maskClosable="false">
         <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-          <a-form-model-item label="文件名">
+          <a-form-model-item label="文件名" prop="name">
             <a-input placeholder="文件名" v-model="temp.name" />
           </a-form-model-item>
-          <a-form-model-item label="保留天数">
+          <a-form-model-item label="保留天数" prop="keepDay">
             <a-input-number v-model="temp.keepDay" :min="1" style="width: 100%" placeholder="文件保存天数,默认 3650 天" />
           </a-form-model-item>
-          <a-form-model-item label="文件共享">
+          <a-form-model-item label="文件共享" prop="global">
             <a-radio-group v-model="temp.global">
               <a-radio :value="true"> 全局 </a-radio>
               <a-radio :value="false"> 当前工作空间 </a-radio>
             </a-radio-group>
           </a-form-model-item>
-          <a-form-model-item label="文件描述">
+          <a-form-model-item label="文件描述" prop="description">
             <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
           </a-form-model-item>
         </a-form-model>
@@ -142,22 +144,22 @@
           <a-form-model-item label="远程下载URL" prop="url">
             <a-input v-model="temp.url" placeholder="远程下载地址" />
           </a-form-model-item>
-          <a-form-model-item label="保留天数">
+          <a-form-model-item label="保留天数" prop="keepDay">
             <a-input-number v-model="temp.keepDay" :min="1" style="width: 100%" placeholder="文件保存天数,默认 3650 天" />
           </a-form-model-item>
-          <a-form-model-item label="文件共享">
+          <a-form-model-item label="文件共享" prop="global">
             <a-radio-group v-model="temp.global">
               <a-radio :value="true"> 全局 </a-radio>
               <a-radio :value="false"> 当前工作空间 </a-radio>
             </a-radio-group>
           </a-form-model-item>
-          <a-form-model-item label="文件描述">
+          <a-form-model-item label="文件描述" prop="description">
             <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
           </a-form-model-item>
         </a-form-model>
       </a-modal>
       <!-- 断点下载 -->
-      <a-modal destroyOnClose v-model="triggerVisible" title="断点下载" width="50%" :footer="null" :maskClosable="false">
+      <a-modal destroyOnClose v-model="triggerVisible" title="断点/分片下载" width="50%" :footer="null" :maskClosable="false">
         <a-form-model ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-tabs default-active-key="1">
             <template slot="tabBarExtraContent">
@@ -165,31 +167,88 @@
                 <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
               </a-tooltip>
             </template>
-            <a-tab-pane key="1" tab="断点下载">
-              <a-space style="display: block" direction="vertical" align="baseline">
-                <a-alert
-                  v-clipboard:copy="`${temp.triggerDownloadUrl}`"
-                  v-clipboard:success="
-                    () => {
-                      tempVue.prototype.$notification.success({ message: '复制成功' });
-                    }
-                  "
-                  v-clipboard:error="
-                    () => {
-                      tempVue.prototype.$notification.error({ message: '复制失败' });
-                    }
-                  "
-                  type="info"
-                  :message="`下载地址(点击可以复制)`"
-                >
-                  <template slot="description">
-                    <a-tag>GET</a-tag> <span>{{ `${temp.triggerDownloadUrl}` }} </span>
-                    <a-icon type="copy" />
-                  </template>
-                </a-alert>
-              </a-space>
+            <a-tab-pane key="1" tab="断点/分片下载">
+              <a-alert
+                v-clipboard:copy="`${temp.triggerDownloadUrl}`"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`下载地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>GET</a-tag> <span>{{ `${temp.triggerDownloadUrl}` }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
             </a-tab-pane>
           </a-tabs>
+        </a-form-model>
+      </a-modal>
+      <a-modal destroyOnClose v-model="releaseFileVisible" title="发布文件" width="50%" :maskClosable="false" @ok="handleCrateTask">
+        <a-form-model ref="releaseFileForm" :rules="releaseFileRules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+          <a-form-model-item label="任务名" prop="name">
+            <a-input placeholder="请输入任务名" :maxLength="50" v-model="temp.name" />
+          </a-form-model-item>
+
+          <a-form-model-item label="发布方式" prop="taskType">
+            <a-radio-group v-model="temp.taskType" @change="taskTypeChange">
+              <a-radio :value="0"> SSH </a-radio>
+              <a-radio :value="1" :disabled="true"> 节点 </a-radio>
+            </a-radio-group>
+          </a-form-model-item>
+
+          <a-form-model-item prop="taskDataIds" label="发布的SSH" v-if="temp.taskType === 0">
+            <a-row>
+              <a-col :span="22">
+                <a-select show-search option-filter-prop="children" mode="multiple" v-model="temp.taskDataIds" placeholder="请选择SSH">
+                  <a-select-option v-for="ssh in sshList" :key="ssh.id">
+                    <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
+                  </a-select-option>
+                </a-select>
+              </a-col>
+              <a-col :span="1" style="margin-left: 10px">
+                <a-icon type="reload" @click="loadSshList" />
+              </a-col>
+            </a-row>
+          </a-form-model-item>
+
+          <a-form-model-item prop="releasePathParent" label="发布目录">
+            <a-input-group compact>
+              <a-select show-search allowClear style="width: 30%" v-model="temp.releasePathParent" placeholder="请选择发布的一级目录">
+                <a-select-option v-for="item in accessList" :key="item">
+                  <a-tooltip :title="item">{{ item }}</a-tooltip>
+                </a-select-option>
+                <a-icon slot="suffixIcon" type="reload" @click="loadAccesList" />
+              </a-select>
+
+              <a-input style="width: 70%" v-model="temp.releasePathSecondary" placeholder="请填写发布的二级目录" />
+            </a-input-group>
+          </a-form-model-item>
+
+          <a-form-model-item label="执行脚本" prop="releaseBeforeCommand">
+            <a-tabs tabPosition="right">
+              <a-tab-pane key="before" tab="上传前">
+                <div style="height: 40vh; overflow-y: scroll">
+                  <code-editor v-model="temp.beforeScript" :options="{ mode: temp.taskType === 0 ? 'shell' : '', tabSize: 2, theme: 'abcdef' }"></code-editor>
+                </div>
+                <div style="margin-top: 10px">文件上传前需要执行的脚本(非阻塞命令)</div>
+              </a-tab-pane>
+              <a-tab-pane key="after" tab="上传后">
+                <div style="height: 40vh; overflow-y: scroll">
+                  <code-editor v-model="temp.afterScript" :options="{ mode: temp.taskType === 0 ? 'shell' : '', tabSize: 2, theme: 'abcdef' }"></code-editor>
+                </div>
+                <div style="margin-top: 10px">文件上传成功后需要执行的脚本(非阻塞命令)</div>
+              </a-tab-pane>
+            </a-tabs>
+          </a-form-model-item>
         </a-form-model>
       </a-modal>
     </div>
@@ -201,7 +260,15 @@ import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, r
 import { fileStorageList, uploadFile, uploadFileMerge, fileEdit, hasFile, delFile, sourceMap, remoteDownload, statusMap, triggerUrl } from "@/api/file-manager/file-storage";
 import { uploadPieces } from "@/utils/upload-pieces";
 import Vue from "vue";
+import { getSshListAll } from "@/api/ssh";
+import { getDispatchWhiteList } from "@/api/dispatch";
+import codeEditor from "@/components/codeEditor";
+import { addReleaseTask } from "@/api/file-manager/release-task-log";
+
 export default {
+  components: {
+    codeEditor,
+  },
   data() {
     return {
       loading: false,
@@ -243,11 +310,17 @@ export default {
           scopedSlots: { customRender: "time" },
           width: "100px",
         },
-        { title: "操作", dataIndex: "operation", ellipsis: true, scopedSlots: { customRender: "operation" }, fixed: "right", width: "200px" },
+        { title: "操作", dataIndex: "operation", align: "center", ellipsis: true, scopedSlots: { customRender: "operation" }, fixed: "right", width: "170px" },
       ],
       rules: {
         name: [{ required: true, message: "请输入文件名称", trigger: "blur" }],
         url: [{ required: true, message: "请输入远程地址", trigger: "blur" }],
+      },
+      releaseFileRules: {
+        name: [{ required: true, message: "请输入文件任务名", trigger: "blur" }],
+        taskType: [{ required: true, message: "请选择发布方式", trigger: "blur" }],
+        releasePath: [{ required: true, message: "请选择发布的一级目录和填写二级目录", trigger: "blur" }],
+        taskDataIds: [{ required: true, message: "请选择发布的SSH", trigger: "blur" }],
       },
       temp: {},
       sourceMap,
@@ -261,6 +334,9 @@ export default {
       uploadRemoteFileVisible: false,
       tempVue: null,
       triggerVisible: false,
+      releaseFileVisible: false,
+      sshList: [],
+      accessList: [],
     };
   },
   computed: {
@@ -490,6 +566,58 @@ export default {
     },
     fillDownloadUrlResult(res) {
       this.temp = { ...this.temp, triggerDownloadUrl: `${location.protocol}//${location.host}${res.data.triggerDownloadUrl}` };
+    },
+    // 发布文件
+    handleReleaseFile(record) {
+      this.releaseFileVisible = true;
+      this.temp = { fileId: record.id, taskType: 0, stepsCurrent: 0 };
+      this.taskTypeChange(0);
+      this.loadAccesList();
+    },
+    taskTypeChange(value) {
+      this.temp = { ...this.temp, taskDataIds: undefined };
+      if (value === 0) {
+        this.loadSshList();
+      }
+    },
+    // 创建任务
+    handleCrateTask() {
+      this.$refs["releaseFileForm"].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        addReleaseTask({ ...this.temp, taskDataIds: this.temp.taskDataIds?.join(",") }).then((res) => {
+          if (res.code === 200) {
+            // 成功
+            this.$notification.success({
+              message: res.msg,
+            });
+
+            this.releaseFileVisible = false;
+            this.loadData();
+          }
+        });
+      });
+    },
+    // 加载项目白名单列表
+    loadAccesList() {
+      getDispatchWhiteList().then((res) => {
+        if (res.code === 200) {
+          this.accessList = res.data.outGivingArray || [];
+        }
+      });
+    },
+    // 加载 SSH 列表
+    loadSshList() {
+      return new Promise((resolve) => {
+        this.sshList = [];
+        getSshListAll().then((res) => {
+          if (res.code === 200) {
+            this.sshList = res.data;
+            resolve();
+          }
+        });
+      });
     },
   },
 };

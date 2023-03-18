@@ -134,6 +134,11 @@ const children = [
     name: "file-storage",
     component: () => import("../pages/file-manager/fileStorage/list"),
   },
+  {
+    path: "/file-manager/release-task",
+    name: "file-storage-release-task",
+    component: () => import("../pages/file-manager/release-task/list"),
+  },
 ];
 
 const management = [

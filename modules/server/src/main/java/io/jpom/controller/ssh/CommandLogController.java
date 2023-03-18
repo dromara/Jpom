@@ -33,7 +33,7 @@ import io.jpom.model.data.CommandExecLogModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
-import io.jpom.service.node.command.CommandExecLogService;
+import io.jpom.service.node.ssh.CommandExecLogService;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
 import org.springframework.http.MediaType;

@@ -25,6 +25,7 @@ package io.jpom.permission;
 import io.jpom.func.assets.server.MachineDockerServer;
 import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.func.assets.server.MachineSshServer;
+import io.jpom.func.files.service.FileReleaseTaskService;
 import io.jpom.func.files.service.FileStorageService;
 import io.jpom.func.user.server.UserLoginLogServer;
 import io.jpom.service.dblog.*;
@@ -35,10 +36,10 @@ import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.monitor.MonitorUserOptService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ProjectInfoCacheService;
-import io.jpom.service.node.command.CommandExecLogService;
-import io.jpom.service.node.command.CommandService;
 import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
+import io.jpom.service.node.ssh.CommandExecLogService;
+import io.jpom.service.node.ssh.CommandService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.outgiving.DbOutGivingLogService;
 import io.jpom.service.outgiving.LogReadServer;
@@ -92,6 +93,7 @@ public enum ClassFeature {
     USER_LOG("操作日志", DbUserOperateLogService.class),
     USER_LOGIN_LOG("登录日志", UserLoginLogServer.class),
     FILE_STORAGE("文件存储中心", FileStorageService.class),
+    FILE_STORAGE_RELEASE("文件发布", FileReleaseTaskService.class),
     USER_PERMISSION_GROUP("权限分组", UserPermissionGroupServer.class),
     SYSTEM_EMAIL("邮箱配置"),
     SYSTEM_CACHE("系统缓存"),
@@ -120,7 +122,7 @@ public enum ClassFeature {
     //    JDK_LIST("JDK管理", ClassFeature.NODE),
     NODE_SCRIPT("节点脚本模板", ClassFeature.NODE, NodeScriptServer.class),
     NODE_SCRIPT_LOG("节点脚本模板日志", ClassFeature.NODE, NodeScriptExecuteLogServer.class),
-    TOMCAT("Tomcat", ClassFeature.NODE),
+    AGENT_LOG("插件端系统日志", ClassFeature.NODE),
 //    TOMCAT_FILE("Tomcat file", ClassFeature.NODE),
 //    TOMCAT_LOG("Tomcat log", ClassFeature.NODE),
 

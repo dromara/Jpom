@@ -15,6 +15,10 @@ import top.jpom.h2db.TableName;
 @Data
 @NoArgsConstructor
 public class FileReleaseTaskLogModel extends BaseWorkspaceModel {
+    /**
+     * 父级任务id
+     */
+    public static final String TASK_ROOT_ID = "task-root";
 
     /**
      * 任务名
@@ -22,9 +26,10 @@ public class FileReleaseTaskLogModel extends BaseWorkspaceModel {
     private String name;
     /**
      * 任务id
+     *
+     * @see FileReleaseTaskLogModel#TASK_ROOT_ID
      */
     private String taskId;
-
     /**
      * 文件 id
      *
@@ -44,7 +49,7 @@ public class FileReleaseTaskLogModel extends BaseWorkspaceModel {
      */
     private String taskDataId;
     /**
-     * 任务状态， 0 等待开始 1 进行中 2 成功 3 失败
+     * 任务状态， 0 等待开始 1 进行中 2 任务结束 3 失败 4 取消任务
      */
     private Integer status;
     /**
