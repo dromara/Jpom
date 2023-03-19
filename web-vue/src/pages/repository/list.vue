@@ -189,13 +189,14 @@
                 <a-select-option value="github"> github </a-select-option>
                 <a-select-option value="gitlab"> gitlab </a-select-option>
                 <a-select-option value="gitea"> gitea </a-select-option>
+                <a-select-option value="gogs"> gogs </a-select-option>
               </a-select>
 
               <a-button slot="addonAfter" size="small" type="primary" icon="search" @click="handleGiteeImportFormOk"> </a-button>
             </a-input>
           </a-tooltip>
         </a-form-model-item>
-        <a-form-model-item prop="address" label="地址" :help="importTypeAddressHelp[giteeImportForm.type]" v-if="giteeImportForm.type === 'gitlab' || giteeImportForm.type === 'gitea'">
+        <a-form-model-item prop="address" label="地址" :help="importTypeAddressHelp[giteeImportForm.type]" v-if="importTypeAddressHelp[giteeImportForm.type]">
           <a-input v-model="giteeImportForm.address" placeholder="请填写平台地址" />
         </a-form-model-item>
         <a-form-model-item prop="condition" label="搜索" help="输入仓库名称或者仓库路径进行搜索">
@@ -277,12 +278,9 @@ export default {
           dataIndex: "modifyTimeMillis",
           sorter: true,
           customRender: (text) => {
-            if (!text) {
-              return "";
-            }
             return parseTime(text);
           },
-          width: 180,
+          width: "180px",
         },
         {
           title: "操作",
@@ -327,11 +325,13 @@ export default {
         github: "在 Settings-->Developer settings-->Personal access tokens 中获取",
         gitlab: "在 preferences-->Access Tokens 中获取",
         gitea: "在 设置 --> 应用 --> 生成令牌",
+        gogs: "在 设置 --> 应用 --> 生成令牌",
         other: "请输入私人令牌",
       },
       importTypeAddressHelp: {
         gitlab: "请输入 GitLab 的地址，支持自建 GitLab，不需要输入协议，如：gitlab.com、gitlab.jpom.io、10.1.2.3、10.1.2.3:8888 等",
         gitea: "请输入 gitea 的地址，不需要输入协议，如：10.1.2.3、10.1.2.3:3000 等",
+        gogs: "请输入 gogs 的地址，不需要输入协议，如：10.1.2.3、10.1.2.3:3000 等",
       },
     };
   },

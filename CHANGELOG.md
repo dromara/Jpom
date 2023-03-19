@@ -6,6 +6,8 @@
 
 1. 【server】新增 资产管理 SSH 管理支持导入导出数据（感谢@吃葫芦娃的土拨鼠）
 2. 【server】新增 文件管理中心（用于统一存储管理公共文件）
+3. 【server】新增 仓库令牌导入支持 gogs （gogs 和 gitea 标准一致）
+   （感谢 [@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I6CRPS](https://gitee.com/dromara/Jpom/issues/I6CRPS) ）
 
 ### 🐞 解决BUG、优化功能
 

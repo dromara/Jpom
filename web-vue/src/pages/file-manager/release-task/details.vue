@@ -214,15 +214,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-/* .console {
-    padding: 5px;
-    color: #fff;
-    font-size: 14px;
-    background-color: black;
-    width: 100%;
-    overflow-y: auto;
-    border: 1px solid #e2e2e2;
-    border-radius: 5px 5px;
-  } */
-</style>
+<style scoped></style>
