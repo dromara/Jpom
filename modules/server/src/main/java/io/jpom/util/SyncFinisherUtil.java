@@ -93,9 +93,10 @@ public final class SyncFinisherUtil {
      *
      * @param name 任务名
      */
-    public static void cancel(String name) {
+    public static boolean cancel(String name) {
         StrictSyncFinisher syncFinisher = SYNC_FINISHER_MAP.remove(name);
         Optional.ofNullable(syncFinisher).ifPresent(StrictSyncFinisher::stopNow);
+        return syncFinisher != null;
     }
 
     /**

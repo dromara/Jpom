@@ -18,10 +18,28 @@ export function addReleaseTask(params) {
   });
 }
 
+// 重新发布任务
+export function reReleaseTask(params) {
+  return axios({
+    url: "/file-storage/release-task/re-task",
+    method: "post",
+    data: params,
+  });
+}
+
 // 取消任务
 export function cancelReleaseTask(params) {
   return axios({
     url: "/file-storage/release-task/cancel-task",
+    method: "get",
+    params: params,
+  });
+}
+
+// 删除任务
+export function deleteReleaseTask(params) {
+  return axios({
+    url: "/file-storage/release-task/delete",
     method: "get",
     params: params,
   });
@@ -41,6 +59,9 @@ export function taskLogInfoList(params) {
     url: "/file-storage/release-task/log-list",
     method: "get",
     params: params,
+    headers: {
+      loading: "no",
+    },
   });
 }
 

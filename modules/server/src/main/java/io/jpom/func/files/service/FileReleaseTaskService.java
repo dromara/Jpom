@@ -23,6 +23,7 @@
 package io.jpom.func.files.service;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.stream.CollectorUtil;
@@ -40,6 +41,7 @@ import io.jpom.func.assets.model.MachineSshModel;
 import io.jpom.func.files.model.FileReleaseTaskLogModel;
 import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.data.SshModel;
+import io.jpom.service.IStatusRecover;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
@@ -64,7 +66,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTaskLogModel> {
+public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTaskLogModel> implements IStatusRecover {
 
     private final SshService sshService;
     private final JpomApplication jpomApplication;
@@ -117,7 +119,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         StrictSyncFinisher strictSyncFinisher = SyncFinisherUtil.create(syncFinisherId, logModels.size());
         Integer taskType = taskRoot.getTaskType();
         if (taskType == 0) {
-            crateTaskSshWork(logModels, strictSyncFinisher, taskId, environmentMapBuilder, storageSaveFile);
+            crateTaskSshWork(logModels, strictSyncFinisher, taskRoot, environmentMapBuilder, storageSaveFile);
         } else {
             throw new IllegalArgumentException("不支持的方式");
         }
@@ -158,16 +160,19 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
      *
      * @param values                需要发布的任务列表
      * @param strictSyncFinisher    线程同步器
-     * @param taskId                任务ID
+     * @param taskRoot              任务
      * @param environmentMapBuilder 环境变量
      * @param storageSaveFile       文件
      */
     private void crateTaskSshWork(Collection<FileReleaseTaskLogModel> values,
                                   StrictSyncFinisher strictSyncFinisher,
-                                  String taskId,
+                                  FileReleaseTaskLogModel taskRoot,
                                   EnvironmentMapBuilder environmentMapBuilder,
                                   File storageSaveFile) {
+        String taskId = taskRoot.getId();
         for (FileReleaseTaskLogModel model : values) {
+            model.setAfterScript(taskRoot.getAfterScript());
+            model.setBeforeScript(taskRoot.getBeforeScript());
             strictSyncFinisher.addWorker(() -> {
                 String modelId = model.getId();
                 Session session = null;
@@ -198,12 +203,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     MySftp sftp = new MySftp(session, charset, timeout, sftpProgressMonitor);
                     channelSftp = sftp.getClient();
                     String releasePath = model.getReleasePath();
-                    String prefix = "";
-                    if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
-                        prefix = sftp.pwd();
-                    }
-                    String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + releasePath);
-                    sftp.syncUpload(storageSaveFile, normalizePath);
+                    sftp.syncUpload(storageSaveFile, releasePath);
                     logRecorder.system("{} ftp upload done", item.getName());
 
                     if (StrUtil.isNotEmpty(model.getAfterScript())) {
@@ -291,5 +291,22 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                 model.getTaskId(),
                 model.getId() + ".log"
         );
+    }
+
+    public File logTaskDir(FileReleaseTaskLogModel model) {
+        return FileUtil.file(jpomApplication.getDataPath(), "file-release-log", model.getId());
+    }
+
+    @Override
+    public int statusRecover() {
+        FileReleaseTaskLogModel update = new FileReleaseTaskLogModel();
+        update.setModifyTimeMillis(SystemClock.now());
+        update.setStatus(4);
+        update.setStatusMsg("系统取消");
+        Entity updateEntity = this.dataBeanToEntity(update);
+        //
+        Entity where = Entity.create()
+                .set("status", CollUtil.newArrayList(0, 1));
+        return this.update(updateEntity, where);
     }
 }
