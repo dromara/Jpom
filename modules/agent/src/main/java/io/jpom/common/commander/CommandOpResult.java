@@ -23,7 +23,8 @@
 package io.jpom.common.commander;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
 
@@ -48,6 +49,10 @@ public class CommandOpResult {
      */
     private int pid;
     /**
+     * 多个进程 id
+     */
+    private Integer[] pids;
+    /**
      * 端口
      */
     private String ports;
@@ -57,16 +62,22 @@ public class CommandOpResult {
     private final List<String> msgs = new ArrayList<>();
 
     public static CommandOpResult of(String msg) {
-        int pid = 0;
+        int[] pidsArray = null;
         String ports = null;
         if (StrUtil.startWith(msg, AbstractProjectCommander.RUNNING_TAG)) {
             List<String> list = StrUtil.splitTrim(msg, StrUtil.COLON);
-            pid = Convert.toInt(CollUtil.get(list, 1), 0);
+            String pids = CollUtil.get(list, 1);
+            pidsArray = StrUtil.splitToInt(pids, StrUtil.COMMA);
             //
             ports = CollUtil.get(list, 2);
         }
-        CommandOpResult result = of(pid > 0, msg);
-        result.pid = pid;
+        int mainPid = ObjectUtil.defaultIfNull(ArrayUtil.get(pidsArray, 0), 0);
+        CommandOpResult result = of(mainPid > 0, msg);
+        if (ArrayUtil.length(pidsArray) > 1) {
+            // 仅有多个进程号，才返回 pids
+            result.pids = ArrayUtil.wrap(pidsArray);
+        }
+        result.pid = mainPid;
         result.ports = ports;
         return result;
     }

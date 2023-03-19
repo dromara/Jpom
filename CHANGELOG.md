@@ -16,6 +16,7 @@
 3. 【server】优化 节点分发、在线构建 webhook 添加 `triggerUser` 参数（感谢@酱总）
 4. 【server】优化 SSH 文件夹管理支持重命名文件夹（感谢@零壹）
 5. 【server】优化 机器名称和 hostname、SSH 机器名称和 hostname 限制字段长度
+6. 【server】优化 DSL 项目支持解析多 PID ：`running:109,205:8080,8082`（感谢@酱总）
 
 ### ⚠️ 注意
 

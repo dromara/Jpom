@@ -176,6 +176,10 @@
           <a-switch v-else :checked="text" :disabled="true" size="small" checked-children="运行中" un-checked-children="未运行" />
         </template>
 
+        <a-tooltip slot="projectPid" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.projectPid} / 端口号：${record.projectPort}`">
+          <span v-if="record.projectPid">{{ record.projectPid }}/{{ record.projectPort }}</span>
+        </a-tooltip>
+
         <template slot="child-operation" slot-scope="text, record">
           <a-space>
             <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleFile(record)">文件</a-button>
@@ -918,7 +922,7 @@ export default {
         { title: "节点名称", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         { title: "项目名称", dataIndex: "projectName", ellipsis: true, scopedSlots: { customRender: "projectName" } },
         { title: "项目状态", dataIndex: "projectStatus", width: 120, ellipsis: true, scopedSlots: { customRender: "projectStatus" } },
-        { title: "项目进程", dataIndex: "projectPid", width: "120px", ellipsis: true, scopedSlots: { customRender: "projectPid" } },
+        { title: "进程/端口", dataIndex: "projectPid", width: "120px", ellipsis: true, scopedSlots: { customRender: "projectPid" } },
         { title: "分发状态", dataIndex: "outGivingStatus", width: "120px", scopedSlots: { customRender: "outGivingStatus" } },
         { title: "分发结果", dataIndex: "outGivingResultMsg", ellipsis: true, scopedSlots: { customRender: "outGivingResultMsg" } },
         { title: "分发状态消息", dataIndex: "outGivingResultMsgData", ellipsis: true, scopedSlots: { customRender: "outGivingResultMsgData" } },
@@ -1406,7 +1410,8 @@ export default {
                       return {
                         ...element,
                         projectStatus: res2.data[element.projectId].pid > 0,
-                        projectPid: res2.data[element.projectId].pid || "-",
+                        projectPid: (res2.data[element.projectId]?.pids || [res2.data[element.projectId]?.pid || "-"]).join(","),
+                        projectPort: res2.data[element.projectId]?.port || "-",
                         errorMsg: res2.data[element.projectId].error,
                         projectName: res2.data[element.projectId].name,
                       };
