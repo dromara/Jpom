@@ -38,7 +38,6 @@ import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.ssh.JschRuntimeException;
 import cn.hutool.extra.ssh.JschUtil;
-import cn.hutool.extra.ssh.Sftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import io.jpom.JpomApplication;
@@ -65,7 +64,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -192,42 +190,22 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
     }
 
     private void updateMonitor(MachineSshModel machineSshModel) {
-        File tempCommand;
+
+        Session session = null;
         try {
-            String tempId = IdUtil.fastSimpleUUID();
-            tempCommand = FileUtil.file(jpomApplication.getTempPath(), "ssh_temp", tempId + ".sh");
             InputStream sshExecTemplateInputStream = ExtConfigBean.getConfigResourceInputStream("/ssh/monitor-script.sh");
             String sshExecTemplate = IoUtil.readUtf8(sshExecTemplateInputStream);
             Map<String, String> map = new HashMap<>(10);
             map.put("JPOM_AGENT_PID_TAG", Type.Agent.getTag());
             sshExecTemplate = StringUtil.formatStrByMap(sshExecTemplate, map);
             Charset charset = machineSshModel.charset();
-            FileUtil.writeString(sshExecTemplate, tempCommand, charset);
             //
-            Session session = this.getSessionByModelNoFill(machineSshModel);
-            try (Sftp sftp = new Sftp(session, charset, machineSshModel.timeout())) {
-                String path = StrUtil.format("{}/.jpom/", sftp.home());
-                String destFile = StrUtil.format("{}{}.sh", path, tempId);
-                sftp.mkDirs(path);
-                sftp.upload(destFile, tempCommand);
-                // 执行命令
-                try (ByteArrayOutputStream errStream = new ByteArrayOutputStream()) {
-                    String commandSh = "bash " + destFile;
-                    String exec = JschUtil.exec(session, commandSh, charset, errStream);
-                    String error = new String(errStream.toByteArray(), charset);
-                    if (StrUtil.isNotEmpty(error)) {
-                        log.error("{} ssh 监控执行存在异常信息：{}", machineSshModel.getName(), error);
-                    }
-                    log.debug("{} ssh 监控信息结果：{} {}", machineSshModel.getName(), exec, error);
-                    this.updateMonitorInfo(machineSshModel, exec, error);
-                }
-                try {
-                    // 删除 ssh 中临时文件
-                    sftp.delFile(destFile);
-                } catch (Exception e) {
-                    log.warn("删除 ssh 临时文件失败", e);
-                }
-            }
+            session = this.getSessionByModelNoFill(machineSshModel);
+            int timeout = machineSshModel.timeout();
+            List<String> listStr = new ArrayList<>();
+            List<String> error = new ArrayList<>();
+            JschUtils.execCallbackLine(session, charset, timeout, sshExecTemplate, StrUtil.EMPTY, listStr::add, error::add);
+            this.updateMonitorInfo(machineSshModel, listStr, error);
         } catch (Exception e) {
             String message = e.getMessage();
             if (StrUtil.containsIgnoreCase(message, "timeout")) {
@@ -236,17 +214,23 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
                 log.error("监控 ssh[{}] 异常", machineSshModel.getName(), e);
             }
             this.updateStatus(machineSshModel.getId(), 0, message);
+        } finally {
+            JschUtil.close(session);
         }
     }
 
-    private void updateMonitorInfo(MachineSshModel machineSshModel, String result, String error) {
-        error = StrUtil.emptyToDefault(error, StrUtil.EMPTY);
-        if (StrUtil.isEmpty(result)) {
+    private void updateMonitorInfo(MachineSshModel machineSshModel, List<String> listStr, List<String> errorList) {
+        String error = CollUtil.join(errorList, StrUtil.LF);
+        if (StrUtil.isNotEmpty(error)) {
+            log.error("{} ssh 监控执行存在异常信息：{}", machineSshModel.getName(), error);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("{} ssh 监控信息结果：{} {}", machineSshModel.getName(), CollUtil.join(listStr, StrUtil.LF), error);
+        }
+        if (CollUtil.isEmpty(listStr)) {
             this.updateStatus(machineSshModel.getId(), 1, "执行结果为空," + error);
             return;
         }
-
-        List<String> listStr = StrUtil.splitTrim(result, StrUtil.LF);
         Map<String, List<String>> map = new CaseInsensitiveMap<>(listStr.size());
         for (String strItem : listStr) {
             String key = StrUtil.subBefore(strItem, StrUtil.COLON, false);
@@ -358,6 +342,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
      * @return session
      */
     public Session getSessionByModelNoFill(MachineSshModel sshModel) {
+        Assert.notNull(sshModel, "没有对应 SSH 信息");
         Session session = null;
         int timeout = sshModel.timeout();
         MachineSshModel.ConnectType connectType = sshModel.connectType();
@@ -385,10 +370,10 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
             } else if (StrUtil.startWith(privateKey, JschUtils.HEADER)) {
                 // 直接采用 private key content 登录，无需写入文件
                 session = JschUtils.createSession(sshModel.getHost(),
-                    sshModel.getPort(),
-                    user,
-                    StrUtil.trim(privateKey),
-                    passwordByte);
+                        sshModel.getPort(),
+                        user,
+                        StrUtil.trim(privateKey),
+                        passwordByte);
             } else if (StrUtil.isEmpty(privateKey)) {
                 File home = FileUtil.getUserHomeDir();
                 Assert.notNull(home, "用户目录没有找到");
@@ -411,7 +396,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
                 // 简要私钥文件是否存在
                 Assert.state(FileUtil.isFile(rsaFile), "私钥文件不存在：" + FileUtil.getAbsolutePath(rsaFile));
                 session = JschUtil.createSession(sshModel.getHost(),
-                    sshModel.getPort(), user, FileUtil.getAbsolutePath(rsaFile), passwordByte);
+                        sshModel.getPort(), user, FileUtil.getAbsolutePath(rsaFile), passwordByte);
             }
             try {
                 session.setServerAliveInterval(timeout);

@@ -24,39 +24,32 @@ package io.jpom.service.node.ssh;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
 import com.jcraft.jsch.*;
-import io.jpom.JpomApplication;
 import io.jpom.common.ServerConst;
 import io.jpom.func.assets.model.MachineSshModel;
 import io.jpom.func.assets.server.MachineSshServer;
 import io.jpom.model.data.SshModel;
 import io.jpom.service.h2db.BaseGroupService;
-import io.jpom.system.ExtConfigBean;
 import io.jpom.system.extconf.BuildExtConfig;
 import io.jpom.util.LogRecorder;
 import io.jpom.util.MySftp;
-import io.jpom.util.StringUtil;
-import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
-import java.io.*;
-import java.nio.charset.Charset;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiFunction;
 
 /**
  * @author bwcx_jzy
@@ -66,15 +59,12 @@ import java.util.function.BiFunction;
 @Slf4j
 public class SshService extends BaseGroupService<SshModel> implements Logger {
 
-    private final JpomApplication jpomApplication;
     @Resource
     @Lazy
     private MachineSshServer machineSshServer;
     private final BuildExtConfig buildExtConfig;
 
-    public SshService(JpomApplication jpomApplication,
-                      BuildExtConfig buildExtConfig) {
-        this.jpomApplication = jpomApplication;
+    public SshService(BuildExtConfig buildExtConfig) {
         this.buildExtConfig = buildExtConfig;
         JSch.setLogger(this);
     }
@@ -129,103 +119,11 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
      * @return session
      */
     public MachineSshModel getMachineSshModel(SshModel sshModel) {
-        return machineSshServer.getByKey(sshModel.getMachineSshId(), false);
+        MachineSshModel sshModel1 = machineSshServer.getByKey(sshModel.getMachineSshId(), false);
+        Assert.notNull(sshModel1, "不存在对应的资产SSH");
+        return sshModel1;
     }
 
-    /**
-     * ssh 执行模版命令
-     *
-     * @param sshModel ssh
-     * @param command  命令
-     * @return 执行结果
-     * @throws IOException io
-     */
-    public String exec(SshModel sshModel, String command, Map<String, String> env) throws IOException {
-        // 替换变量
-        command = StringUtil.formatStrByMap(command, env);
-        MachineSshModel machineSshModel = this.getMachineSshModel(sshModel);
-        return this.exec(machineSshModel, command);
-    }
-
-    /**
-     * ssh 执行模版命令
-     *
-     * @param machineSshModel ssh
-     * @param command         命令
-     * @return 执行结果
-     * @throws IOException io
-     */
-    public String exec(MachineSshModel machineSshModel, String... command) throws IOException {
-        Charset charset = machineSshModel.charset();
-        return this.exec(machineSshModel, (s, session) -> {
-            // 执行命令
-            String exec, error;
-            try (ByteArrayOutputStream errStream = new ByteArrayOutputStream()) {
-                exec = JschUtil.exec(session, s, charset, errStream);
-                error = new String(errStream.toByteArray(), charset);
-                if (StrUtil.isNotEmpty(error)) {
-                    error = " 错误：" + error;
-                }
-            } catch (IOException e) {
-                throw Lombok.sneakyThrow(e);
-            }
-            return exec + error;
-        }, command);
-    }
-
-    /**
-     * ssh 执行模版命令
-     *
-     * @param machineSshModel ssh
-     * @param command         命令
-     * @return 执行结果
-     * @throws IOException io
-     */
-    public String exec(MachineSshModel machineSshModel, BiFunction<String, Session, String> function, String... command) throws IOException {
-        if (ArrayUtil.isEmpty(command)) {
-            return "没有任何命令";
-        }
-        Session session = null;
-        Sftp sftp = null;
-        try {
-            String tempId = IdUtil.fastSimpleUUID();
-            File buildSsh = FileUtil.file(jpomApplication.getTempPath(), "ssh_temp", tempId + ".sh");
-            InputStream sshExecTemplateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template.sh");
-            String sshExecTemplate = IoUtil.readUtf8(sshExecTemplateInputStream);
-
-            StringBuilder stringBuilder = new StringBuilder(sshExecTemplate);
-            for (String s : command) {
-                stringBuilder.append(s).append(StrUtil.LF);
-            }
-            Charset charset = machineSshModel.charset();
-            FileUtil.writeString(stringBuilder.toString(), buildSsh, charset);
-            //
-            session = this.getSessionByModel(machineSshModel);
-            // 上传文件
-            sftp = new Sftp(session, charset, machineSshModel.timeout());
-            String path = StrUtil.format("{}/.jpom/", sftp.home());
-            String destFile = StrUtil.format("{}{}.sh", path, tempId);
-            sftp.mkDirs(path);
-            sftp.upload(destFile, buildSsh);
-            // 执行命令
-            try {
-                String commandSh = "bash " + destFile;
-                return function.apply(commandSh, session);
-            } finally {
-                try {
-                    // 删除 ssh 中临时文件
-                    sftp.delFile(destFile);
-                } catch (Exception e) {
-                    log.warn("删除 ssh 临时文件失败", e);
-                }
-                // 删除临时文件
-                FileUtil.del(buildSsh);
-            }
-        } finally {
-            IoUtil.close(sftp);
-            JschUtil.close(session);
-        }
-    }
 
     /**
      * 上传文件
@@ -285,31 +183,31 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
      */
     public void syncToWorkspace(String ids, String nowWorkspaceId, String workspaceId) {
         StrUtil.splitTrim(ids, StrUtil.COMMA)
-            .forEach(id -> {
-                SshModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
-                Assert.notNull(data, "没有对应的ssh信息");
-                //
-                SshModel where = new SshModel();
-                where.setWorkspaceId(workspaceId);
-                where.setMachineSsh(data.getMachineSsh());
-                SshModel sshModel = super.queryByBean(where);
-                Assert.isNull(sshModel, "对应的工作空间已经存在当前 SSH 啦");
-                // 不存在则添加 信息
-                data.setId(null);
-                data.setWorkspaceId(workspaceId);
-                data.setCreateTimeMillis(null);
-                data.setModifyTimeMillis(null);
-                data.setModifyUser(null);
-                data.setHost(null);
-                data.setUser(null);
-                data.setPassword(null);
-                data.setPort(null);
-                data.setConnectType(null);
-                data.setCharset(null);
-                data.setPrivateKey(null);
-                data.setTimeout(null);
-                super.insert(data);
-            });
+                .forEach(id -> {
+                    SshModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
+                    Assert.notNull(data, "没有对应的ssh信息");
+                    //
+                    SshModel where = new SshModel();
+                    where.setWorkspaceId(workspaceId);
+                    where.setMachineSsh(data.getMachineSsh());
+                    SshModel sshModel = super.queryByBean(where);
+                    Assert.isNull(sshModel, "对应的工作空间已经存在当前 SSH 啦");
+                    // 不存在则添加 信息
+                    data.setId(null);
+                    data.setWorkspaceId(workspaceId);
+                    data.setCreateTimeMillis(null);
+                    data.setModifyTimeMillis(null);
+                    data.setModifyUser(null);
+                    data.setHost(null);
+                    data.setUser(null);
+                    data.setPassword(null);
+                    data.setPort(null);
+                    data.setConnectType(null);
+                    data.setCharset(null);
+                    data.setPrivateKey(null);
+                    data.setTimeout(null);
+                    super.insert(data);
+                });
     }
 
     @Override
@@ -400,8 +298,8 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
                 if (progressRangeList.add(progressRange)) {
                     //  total, progressSize
                     logRecorder.system("上传文件进度:{} {}/{} {} ", desc,
-                        FileUtil.readableFileSize(now), FileUtil.readableFileSize(max),
-                        NumberUtil.formatPercent(((float) now / max), 0)
+                            FileUtil.readableFileSize(now), FileUtil.readableFileSize(max),
+                            NumberUtil.formatPercent(((float) now / max), 0)
                     );
                 }
             }
