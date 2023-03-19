@@ -96,16 +96,31 @@ public class FileReleaseTaskController extends BaseServerController {
                                        String beforeScript,
                                        String afterScript,
                                        HttpServletRequest request) {
-        FileStorageModel storageModel = fileStorageService.getByKey(fileId, request);
-        Assert.notNull(storageModel, "不存在对应的文件");
-        File storageSavePath = serverConfig.fileStorageSavePath();
-        File file = FileUtil.file(storageSavePath, storageModel.getPath());
-        Assert.state(FileUtil.isFile(file), "当前文件丢失不能执行发布任务");
+
         // 判断参数
         ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(request);
         List<String> whitelistServerOutGiving = configDeNewInstance.outGiving();
         Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, releasePathParent), "请选择正确的项目路径,或者还没有配置白名单");
         Assert.hasText(releasePathSecondary, "请填写发布文件的二级目录");
+
+        String releasePath = FileUtil.normalize(releasePathParent + StrUtil.SLASH + releasePathSecondary);
+
+        return this.addTask(fileId, name, taskType, taskDataIds, releasePath, beforeScript, afterScript, request);
+    }
+
+    private JsonMessage<String> addTask(String fileId,
+                                        String name,
+                                        int taskType,
+                                        String taskDataIds,
+                                        String releasePath,
+                                        String beforeScript,
+                                        String afterScript,
+                                        HttpServletRequest request) {
+        FileStorageModel storageModel = fileStorageService.getByKey(fileId, request);
+        Assert.notNull(storageModel, "不存在对应的文件");
+        File storageSavePath = serverConfig.fileStorageSavePath();
+        File file = FileUtil.file(storageSavePath, storageModel.getPath());
+        Assert.state(FileUtil.isFile(file), "当前文件丢失不能执行发布任务");
         //
         List<String> list;
         if (taskType == 0) {
@@ -124,7 +139,7 @@ public class FileReleaseTaskController extends BaseServerController {
         taskRoot.setFileId(fileId);
         taskRoot.setStatus(0);
         taskRoot.setTaskType(taskType);
-        taskRoot.setReleasePath(FileUtil.normalize(releasePathParent + StrUtil.SLASH + releasePathSecondary));
+        taskRoot.setReleasePath(releasePath);
         taskRoot.setAfterScript(afterScript);
         taskRoot.setBeforeScript(beforeScript);
         fileReleaseTaskService.insert(taskRoot);
@@ -141,7 +156,22 @@ public class FileReleaseTaskController extends BaseServerController {
             fileReleaseTaskService.insert(releaseTaskLogModel);
         }
         fileReleaseTaskService.startTask(taskRoot.getId(), file);
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success("创建成功");
+    }
+
+    @PostMapping(value = "re-task", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<String> reTask(@ValidatorItem String fileId,
+                                      @ValidatorItem String name,
+                                      @ValidatorItem(value = ValidatorRule.NUMBERS) int taskType,
+                                      @ValidatorItem String taskDataIds,
+                                      @ValidatorItem String parentTaskId,
+                                      String beforeScript,
+                                      String afterScript,
+                                      HttpServletRequest request) {
+        FileReleaseTaskLogModel parentTask = fileReleaseTaskService.getByKey(parentTaskId, request);
+        Assert.notNull(parentTask, "父任务不存在");
+        return addTask(fileId, name, taskType, taskDataIds, parentTask.getReleasePath(), beforeScript, afterScript, request);
     }
 
     /**
@@ -168,7 +198,7 @@ public class FileReleaseTaskController extends BaseServerController {
     public JsonMessage<String> hasFile(@ValidatorItem String id, HttpServletRequest request) {
         FileReleaseTaskLogModel taskLogModel = fileReleaseTaskService.getByKey(id, request);
         Assert.notNull(taskLogModel, "不存在对应的任务");
-        fileReleaseTaskService.cancelTask(taskLogModel.getTaskId());
+        fileReleaseTaskService.cancelTask(taskLogModel.getId());
         return JsonMessage.success("取消成功");
     }
 
@@ -193,6 +223,38 @@ public class FileReleaseTaskController extends BaseServerController {
     }
 
     /**
+     * 删除任务
+     *
+     * @param id 任务id
+     * @return json
+     */
+    @GetMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<JSONObject> delete(@ValidatorItem String id, HttpServletRequest request) {
+        FileReleaseTaskLogModel taskLogModel = fileReleaseTaskService.getByKey(id, request);
+        Assert.notNull(taskLogModel, "不存在对应的任务");
+
+        FileReleaseTaskLogModel fileReleaseTaskLogModel = new FileReleaseTaskLogModel();
+        fileReleaseTaskLogModel.setTaskId(taskLogModel.getId());
+        List<FileReleaseTaskLogModel> logModels = fileReleaseTaskService.listByBean(fileReleaseTaskLogModel);
+        if (logModels != null) {
+            List<String> ids = logModels.stream()
+                    .map(logModel -> {
+                        File file = fileReleaseTaskService.logFile(logModel);
+                        FileUtil.del(file);
+                        return logModel.getId();
+                    })
+                    .collect(Collectors.toList());
+            fileReleaseTaskService.delByKey(ids, null);
+        }
+        File taskDir = fileReleaseTaskService.logTaskDir(taskLogModel);
+        FileUtil.del(taskDir);
+        //
+        fileReleaseTaskService.delByKey(taskLogModel.getId());
+        return JsonMessage.success("删除成功");
+    }
+
+    /**
      * 获取日志
      *
      * @param id   id
@@ -208,7 +270,7 @@ public class FileReleaseTaskController extends BaseServerController {
         Assert.notNull(item, "没有对应数据");
         File file = fileReleaseTaskService.logFile(item);
         if (!FileUtil.isFile(file)) {
-            return JsonMessage.success("还没有日志信息或者日志文件错误");
+            return new JsonMessage<>(405, "还没有日志信息或者日志文件错误");
         }
 
         JSONObject data = FileUtils.readLogFile(file, line);

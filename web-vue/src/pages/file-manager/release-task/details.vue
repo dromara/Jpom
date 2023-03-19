@@ -37,7 +37,7 @@
       <a-form-model-item label="执行日志">
         <a-tabs :activeKey="activeKey" @change="tabCallback">
           <a-tab-pane v-for="item in temp.taskList" :key="item.id">
-            <span slot="tab">
+            <template slot="tab">
               <a-icon v-if="!logMap[item.id] || logMap[item.id].run" type="loading" />
               {{
                 sshList.filter((sshItem) => {
@@ -47,7 +47,10 @@
                   return sshItem.id === item.taskDataId;
                 })[0].name
               }}
-            </span>
+              <template>
+                <a-tooltip v-if="item.statusMsg" :title="item.statusMsg"><a-icon type="info-circle" /></a-tooltip>
+              </template>
+            </template>
             <log-view :ref="`logView-${item.id}`" height="60vh" />
           </a-tab-pane>
         </a-tabs>
