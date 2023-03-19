@@ -5,12 +5,12 @@
         <a-alert message="请勿手动删除数据目录下面文件,如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除" style="margin-top: 10px; margin-bottom: 40px" banner />
         <a-timeline>
           <a-timeline-item>
-            <span class="layui-elem-quote">
+            <span>
               服务端时间：{{ temp.dateTime }} <a-tag>{{ temp.timeZoneId }}</a-tag>
             </span>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">
+            <span>
               数据目录占用空间：{{ temp.dataSize }} (10分钟刷新一次)
               <a-tooltip>
                 <template slot="title">
@@ -25,12 +25,12 @@
           </a-timeline-item>
           <a-timeline-item v-if="temp.cacheFileSize">
             <a-space>
-              <span class="layui-elem-quote">临时文件占用空间：{{ temp.cacheFileSize }} (10分钟刷新一次)</span>
+              <span>临时文件占用空间：{{ temp.cacheFileSize }} (10分钟刷新一次)</span>
               <a-button size="small" type="primary" v-if="temp.cacheFileSize !== '0'" class="btn" @click="clear('serviceCacheFileSize')">清空</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">
+            <span>
               在线构建文件占用空间：{{ temp.cacheBuildFileSize }} (10分钟刷新一次)
               <a-tooltip>
                 <template slot="title">
@@ -44,30 +44,46 @@
           </a-timeline-item>
           <a-timeline-item v-if="temp.oldJarsSize">
             <a-space>
-              <span class="layui-elem-quote">旧版程序包占有空间：{{ temp.oldJarsSize }}</span>
+              <span>旧版程序包占有空间：{{ temp.oldJarsSize }}</span>
               <a-button size="small" v-if="temp.oldJarsSize !== '0'" type="primary" class="btn" @click="clear('serviceOldJarsSize')">清空</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item>
             <a-space>
-              <span class="layui-elem-quote">黑名单 IP 数量：{{ temp.ipSize }}</span>
+              <span>黑名单 IP 数量：{{ temp.ipSize }}</span>
               <a-button size="small" type="primary" v-if="temp.ipSize" class="btn" @click="clear('serviceIpSize')">清空</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">在读取的日志文件数：{{ temp.readFileOnLineCount }}</span>
+            <span>在读取的日志文件数：{{ temp.readFileOnLineCount }}</span>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">插件数：{{ temp.pluginSize || 0 }}</span>
+            <span>插件数：{{ temp.pluginSize || 0 }}</span>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">分片操作数：{{ temp.shardingSize }}</span>
+            <span>分片操作数：{{ temp.shardingSize }}</span>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">正在构建数：{{ temp.buildCount }}</span>
+            <a-popover title="正在构建">
+              <template slot="content">
+                <p v-for="item in temp.buildKeys || []" :key="item">{{ item }}</p>
+              </template>
+              <a-space>
+                <span>正在构建数：{{ (temp.buildKeys || []).length }}</span>
+                <a-icon type="unordered-list" />
+              </a-space>
+            </a-popover>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">正在分发数：{{ temp.outGivingCount }}</span>
+            <a-popover title="正在运行的线程同步器">
+              <template slot="content">
+                <p v-for="item in temp.syncFinisKeys || []" :key="item">{{ item }}</p>
+              </template>
+              <a-space>
+                <span>线程同步器：{{ (temp.syncFinisKeys || []).length }}</span>
+                <a-icon type="unordered-list" />
+              </a-space>
+            </a-popover>
           </a-timeline-item>
         </a-timeline>
       </a-tab-pane>

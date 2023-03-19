@@ -36,7 +36,6 @@ import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.controller.LoginControl;
 import io.jpom.cron.CronUtils;
-import io.jpom.outgiving.OutGivingRun;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -44,6 +43,7 @@ import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.socket.ServiceFileTailWatcher;
 import io.jpom.util.CommandUtil;
+import io.jpom.util.SyncFinisherUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -96,8 +96,8 @@ public class CacheManageController extends BaseServerController {
         map.put("taskList", CronUtils.list());
         map.put("pluginSize", PluginFactory.size());
         map.put("shardingSize", BaseServerController.SHARDING_IDS.size());
-        map.put("buildCount", BuildExecuteService.buildCount());
-        map.put("outGivingCount", OutGivingRun.outGivingCount());
+        map.put("buildKeys", BuildExecuteService.buildKeys());
+        map.put("syncFinisKeys", SyncFinisherUtil.keys());
         map.put("dateTime", DateTime.now().toString());
         map.put("timeZoneId", TimeZone.getDefault().getID());
         //
