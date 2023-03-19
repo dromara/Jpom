@@ -30,7 +30,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -74,7 +73,7 @@ public class GiteaUtil {
      * @param token 用户授权码
      * @return Gitea 用户名
      */
-    public static String getGiteaUsername(String giteaAddress, String token) {
+    public static String getUsername(String giteaAddress, String token) {
         HttpResponse userResponse = HttpUtil.createGet(giteaAddress + "/api/v1/user", true)
             .form(ACCESS_TOKEN, token)
             .execute();
@@ -89,10 +88,10 @@ public class GiteaUtil {
      * @param giteaAddress Gitea 地址
      * @param token        用户授权码
      * @param page         分页参数
-     * @return
+     * @return map
      */
-    public static Map<String, Object> getGiteaRepos(String giteaAddress, String token, Page page, String condition) {
-        if(condition == null ){
+    public static Map<String, Object> getRepos(String giteaAddress, String token, Page page, String condition) {
+        if (condition == null) {
             HttpResponse reposResponse = HttpUtil.createGet(giteaAddress + "/api/v1/user/repos", true)
                 .form(ACCESS_TOKEN, token)
                 //.form(SORT, "newest")
@@ -113,10 +112,11 @@ public class GiteaUtil {
             // 仓库总数
             map.put("totalCount", totalCount);
             return map;
-        }else{
-            return getGiteaReposSearch(giteaAddress,token,page,condition);
+        } else {
+            return getGiteaReposSearch(giteaAddress, token, page, condition);
         }
     }
+
     /**
      * 获取 Gitea 用户仓库信息搜索
      *
@@ -125,7 +125,7 @@ public class GiteaUtil {
      * @param page         分页参数
      * @return
      */
-    public static Map<String, Object> getGiteaReposSearch( String giteaAddress, String token, Page page, String condition) {
+    public static Map<String, Object> getGiteaReposSearch(String giteaAddress, String token, Page page, String condition) {
         HttpResponse reposResponse = HttpUtil.createGet(giteaAddress + "/api/v1/repos/search", true)
             .form(ACCESS_TOKEN, token)
             .form(SORT, "created")

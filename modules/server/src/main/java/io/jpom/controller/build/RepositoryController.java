@@ -39,10 +39,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerConst;
 import io.jpom.common.validator.ValidatorItem;
-import io.jpom.controller.build.repository.GitHubUtil;
-import io.jpom.controller.build.repository.GitLabUtil;
-import io.jpom.controller.build.repository.GiteaUtil;
-import io.jpom.controller.build.repository.GiteeUtil;
+import io.jpom.controller.build.repository.*;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.permission.ClassFeature;
@@ -213,6 +210,9 @@ public class RepositoryController extends BaseServerController {
             case "gitea":
                 pageResultDto = this.giteaRepos(token, page, condition, address, request);
                 break;
+            case "gogs":
+                pageResultDto = this.gogsRepos(token, page, condition, address, request);
+                break;
             default:
                 throw new IllegalArgumentException("不支持的类型");
         }
@@ -356,6 +356,50 @@ public class RepositoryController extends BaseServerController {
     }
 
     /**
+     * gogo仓库
+     *
+     * @param token 个人令牌
+     * @param page  分页
+     * @return page
+     */
+    private PageResultDto<JSONObject> gogsRepos(String token, Page page, String condition, String giteaAddress, HttpServletRequest request) {
+        Assert.hasText(giteaAddress, "请填写 gogs 地址");
+        String gogsUsername = GogsUtil.getUsername(giteaAddress, token);
+
+        Map<String, Object> giteaReposMap = GiteaUtil.getRepos(giteaAddress, token, page, condition);
+        JSONArray jsonArray = (JSONArray) giteaReposMap.get("jsonArray");
+        int totalCount = (int) giteaReposMap.get("totalCount");
+
+        List<JSONObject> objects = jsonArray.stream().map(o -> {
+            JSONObject repo = (JSONObject) o;
+            JSONObject jsonObject = new JSONObject();
+            // 项目名称，如：Jpom
+            jsonObject.put("name", repo.getString("name"));
+
+            // 项目地址，如：https://10.0.0.1:3000/dromara/Jpom.git
+            String htmlUrl = repo.getString("html_url");
+            jsonObject.put("url", htmlUrl);
+
+            // 所属者/项目名，如：dromara/Jpom
+            jsonObject.put("full_name", repo.getString("full_name"));
+
+            // 是否为私有仓库，是私有仓库为 true，非私有仓库为 false
+            jsonObject.put("private", repo.getBooleanValue("private"));
+
+            // 项目描述，如：简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件
+            jsonObject.put("description", repo.getString("description"));
+
+            jsonObject.put("username", gogsUsername);
+            jsonObject.put("exists", this.checkRepositoryUrl(htmlUrl, request));
+            return jsonObject;
+        }).collect(Collectors.toList());
+
+        PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), totalCount);
+        pageResultDto.setResult(objects);
+        return pageResultDto;
+    }
+
+    /**
      * gitea仓库
      *
      * @param token 个人令牌
@@ -364,9 +408,9 @@ public class RepositoryController extends BaseServerController {
      */
     private PageResultDto<JSONObject> giteaRepos(String token, Page page, String condition, String giteaAddress, HttpServletRequest request) {
         Assert.hasText(giteaAddress, "请填写 gitea 地址");
-        String giteaUsername = GiteaUtil.getGiteaUsername(giteaAddress, token);
+        String giteaUsername = GiteaUtil.getUsername(giteaAddress, token);
 
-        Map<String, Object> giteaReposMap = GiteaUtil.getGiteaRepos(giteaAddress, token, page, condition);
+        Map<String, Object> giteaReposMap = GiteaUtil.getRepos(giteaAddress, token, page, condition);
         JSONArray jsonArray = (JSONArray) giteaReposMap.get("jsonArray");
         int totalCount = (int) giteaReposMap.get("totalCount");
 
