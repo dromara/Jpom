@@ -133,8 +133,8 @@ public class BuildExecuteService {
      *
      * @return 构建数量
      */
-    public static int buildCount() {
-        return BUILD_MANAGE_MAP.size();
+    public static Set<String> buildKeys() {
+        return BUILD_MANAGE_MAP.keySet();
     }
 
     /**

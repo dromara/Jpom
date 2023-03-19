@@ -57,7 +57,7 @@ public final class SyncFinisherUtil {
      * @param queueCapacity 任务队列数
      * @return 线程同步器
      */
-    public static StrictSyncFinisher create(int core, int queueCapacity) {
+    private static StrictSyncFinisher create(int core, int queueCapacity) {
         int threadSize = Math.min(core, RuntimeUtil.getProcessorCount());
         return new StrictSyncFinisher(threadSize, queueCapacity);
     }

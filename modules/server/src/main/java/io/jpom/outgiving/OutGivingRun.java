@@ -26,12 +26,10 @@ import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
@@ -52,6 +50,7 @@ import io.jpom.service.outgiving.DbOutGivingLogService;
 import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.util.LogRecorder;
 import io.jpom.util.StrictSyncFinisher;
+import io.jpom.util.SyncFinisherUtil;
 import lombok.Builder;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +76,6 @@ import java.util.stream.Collectors;
 @Builder
 public class OutGivingRun {
 
-    private static final Map<String, StrictSyncFinisher> SYNC_FINISHER_MAP = new ConcurrentHashMap<>();
     private static final Map<String, Map<String, String>> LOG_CACHE_MAP = new ConcurrentHashMap<>();
 
 //      * @param id              分发id
@@ -100,18 +98,13 @@ public class OutGivingRun {
     private String projectSecondaryDirectory;
     private LogRecorder logRecorder;
 
-    public static int outGivingCount() {
-        return SYNC_FINISHER_MAP.size();
-    }
-
     /**
      * 取消分发
      *
      * @param id 分发id
      */
     public static void cancel(String id, UserModel userModel) {
-        StrictSyncFinisher syncFinisher = SYNC_FINISHER_MAP.remove(id);
-        Optional.ofNullable(syncFinisher).ifPresent(StrictSyncFinisher::stopNow);
+        SyncFinisherUtil.cancel("outgiving:" + id);
         //
         Map<String, String> map = LOG_CACHE_MAP.remove(id);
         Optional.ofNullable(map).ifPresent(map1 -> {
@@ -191,7 +184,8 @@ public class OutGivingRun {
         final List<OutGivingNodeProject.Status> statusList = new ArrayList<>(projectSize);
         // 开启线程
         if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
-            syncFinisher = new StrictSyncFinisher(1, 1);
+            syncFinisher = SyncFinisherUtil.create("outgiving:" + id, 1);
+            //new StrictSyncFinisher(1, 1);
             syncFinisher.addWorker(() -> {
                 try {
                     // 截取睡眠时间
@@ -223,9 +217,7 @@ public class OutGivingRun {
                 }
             });
         } else if (afterOpt == AfterOpt.Restart || afterOpt == AfterOpt.No) {
-            // 判断最大值
-            int threadSize = Math.min(projectSize, RuntimeUtil.getProcessorCount());
-            syncFinisher = new StrictSyncFinisher(threadSize, projectSize);
+            syncFinisher = SyncFinisherUtil.create("outgiving:" + id, projectSize);
 
             for (final OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
                 final OutGivingItemRun outGivingItemRun = new OutGivingItemRun(item, outGivingNodeProject, file, unzip, null);
@@ -247,8 +239,6 @@ public class OutGivingRun {
         String userId = Optional.ofNullable(userModel).map(BaseIdModel::getId).orElse(Const.SYSTEM_ID);
         // 更新维准备中
         allPrepare(userId, item, outGivingNodeProjects);
-        // 开启线程
-        SYNC_FINISHER_MAP.put(id, syncFinisher);
         // 异步执行
         Callable<OutGivingModel.Status> callable = createRunnable(syncFinisher, statusList, projectSize);
         return ThreadUtil.execAsync(callable);
@@ -289,7 +279,7 @@ public class OutGivingRun {
                     FileUtil.del(file);
                 }
                 //
-                IoUtil.close(SYNC_FINISHER_MAP.remove(id));
+                SyncFinisherUtil.close("outgiving:" + id);
                 LOG_CACHE_MAP.remove(id);
             }
             return status;
