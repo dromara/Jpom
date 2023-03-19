@@ -74,14 +74,13 @@ public class ProjectStatusController extends BaseAgentController {
         JSONObject jsonObject = new JSONObject();
         try {
             CommandUtil.openCache();
-            int pid = 0;
             try {
                 CommandOpResult status = AbstractProjectCommander.getInstance().status(nodeProjectInfoModel, null);
-                pid = status.getPid();
+                jsonObject.put("pId", status.getPid());
+                jsonObject.put("pIds", status.getPids());
             } catch (Exception e) {
                 log.error("获取项目pid 失败", e);
             }
-            jsonObject.put("pId", pid);
             //
             if (StrUtil.isNotEmpty(getCopy)) {
                 List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
@@ -126,6 +125,7 @@ public class ProjectStatusController extends BaseAgentController {
                     int pid = commandOpResult.getPid();
                     //
                     itemObj.put("pid", pid);
+                    itemObj.put("pids", commandOpResult.getPids());
                     if (StrUtil.isNotEmpty(commandOpResult.getPorts())) {
                         itemObj.put("port", commandOpResult.getPorts());
                     } else {
@@ -169,17 +169,17 @@ public class ProjectStatusController extends BaseAgentController {
                 NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(item);
                 JSONObject itemObj = new JSONObject();
                 if (copyItem != null) {
-                    int pid = 0;
                     try {
                         CommandOpResult status = AbstractProjectCommander.getInstance().status(nodeProjectInfoModel, copyItem);
-                        pid = status.getPid();
+                        int pid = status.getPid();
+                        String port = AbstractProjectCommander.getInstance().getMainPort(pid);
+                        itemObj.put("port", port);
+                        itemObj.put("pid", pid);
+                        itemObj.put("pids", status.getPids());
                     } catch (Exception e) {
                         log.error("获取端口错误", e);
                         itemObj.put("error", e.getMessage());
                     }
-                    String port = AbstractProjectCommander.getInstance().getMainPort(pid);
-                    itemObj.put("port", port);
-                    itemObj.put("pid", pid);
                 } else {
                     itemObj.put("error", "对应的副本不存在");
                 }

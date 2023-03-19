@@ -83,8 +83,8 @@
         </template>
       </template>
 
-      <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.pid},  端口号：${record.port}`">
-        <span v-if="record.pid">{{ record.port }}/{{ record.pid }}</span>
+      <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${(record.pids || [record.pid || '-']).join(',')} / 端口号：${record.port}`">
+        <span v-if="record.pid">{{ record.port }}/{{ (record.pids || [record.pid || "-"]).join(",") }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record, index">
         <a-space>
