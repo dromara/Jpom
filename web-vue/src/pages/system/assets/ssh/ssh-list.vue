@@ -3,7 +3,7 @@
     <a-tabs default-active-key="1">
       <a-tab-pane key="1" tab="管理">
         <!-- 数据表格 -->
-        <a-table :data-source="list" :columns="columns" size="middle" :pagination="pagination" @change="changePage" bordered rowKey="id">
+        <a-table :data-source="list" :columns="columns" size="middle" :pagination="pagination" @change="changePage" bordered rowKey="id" :row-selection="rowSelection">
           <template slot="title">
             <a-space>
               <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="ssh名称" />
@@ -17,6 +17,7 @@
               </a-tooltip>
 
               <a-button type="primary" @click="handleAdd">新增</a-button>
+              <a-button :disabled="!this.tableSelections.length" @click="syncToWorkspaceShow" type="primary"> 批量分配</a-button>
               <a-button icon="download" type="primary" @click="handlerExportData()">导出</a-button>
               <a-dropdown>
                 <a-menu slot="overlay">
@@ -369,6 +370,14 @@ export default {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
     },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
+      };
+    },
   },
   data() {
     return {
@@ -447,6 +456,7 @@ export default {
       configWorkspaceSshVisible: false,
       syncToWorkspaceVisible: false,
       workspaceList: [],
+      tableSelections: [],
     };
   },
   created() {
@@ -665,9 +675,11 @@ export default {
     syncToWorkspaceShow(item) {
       this.syncToWorkspaceVisible = true;
       this.loadWorkSpaceListAll();
-      this.temp = {
-        id: item.id,
-      };
+      if (item) {
+        this.temp = {
+          ids: item.id,
+        };
+      }
     },
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
@@ -675,6 +687,10 @@ export default {
           message: "请选择工作空间",
         });
         return false;
+      }
+      if (!this.temp.ids) {
+        this.temp = { ...this.temp, ids: this.tableSelections.join(",") };
+        this.tableSelections = [];
       }
       // 同步
       machineSshDistribute(this.temp).then((res) => {

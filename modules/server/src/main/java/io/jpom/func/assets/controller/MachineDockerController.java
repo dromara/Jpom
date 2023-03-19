@@ -307,41 +307,46 @@ public class MachineDockerController extends BaseGroupNameController {
     /**
      * 将 docker 分配到指定工作空间
      *
-     * @param id          docker id
+     * @param ids         docker id
      * @param workspaceId 工作空间id
      * @return json
      */
     @PostMapping(value = "distribute", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> distribute(@ValidatorItem String id, @ValidatorItem String workspaceId, String type) {
-        MachineDockerModel machineDockerModel = machineDockerServer.getByKey(id);
-        Assert.notNull(machineDockerModel, "没有对应的 docker");
-        boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
-        Assert.state(exists, "不存在对应的工作空间");
-        if (StrUtil.equals(type, "docker")) {
-            DockerInfoModel dockerInfoModel = new DockerInfoModel();
-            dockerInfoModel.setMachineDockerId(id);
-            dockerInfoModel.setWorkspaceId(workspaceId);
-            //
-            exists = dockerInfoService.exists(dockerInfoModel);
-            Assert.state(!exists, "对应工作空间已经存在此 docker 啦");
-            //
-            dockerInfoModel.setName(machineDockerModel.getName());
-            dockerInfoService.insert(dockerInfoModel);
-        } else if (StrUtil.equals(type, "swarm")) {
-            Assert.hasText(machineDockerModel.getSwarmId(), "当前 docker 不在集群中");
-            DockerSwarmInfoMode dockerInfoModel = new DockerSwarmInfoMode();
-            dockerInfoModel.setSwarmId(machineDockerModel.getSwarmId());
-            dockerInfoModel.setWorkspaceId(workspaceId);
-            //
-            exists = dockerSwarmInfoService.exists(dockerInfoModel);
-            Assert.state(!exists, "对应工作空间已经存在此 docker 集群啦");
-            //
-            dockerInfoModel.setName(machineDockerModel.getName());
-            dockerSwarmInfoService.insert(dockerInfoModel);
-        } else {
-            throw new IllegalArgumentException("未知参数");
+    public JsonMessage<String> distribute(@ValidatorItem String ids, @ValidatorItem String workspaceId, String type) {
+        List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
+        for (String id : list) {
+            MachineDockerModel machineDockerModel = machineDockerServer.getByKey(id);
+            Assert.notNull(machineDockerModel, "没有对应的 docker");
+            boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
+            Assert.state(exists, "不存在对应的工作空间");
+            if (StrUtil.equals(type, "docker")) {
+                DockerInfoModel dockerInfoModel = new DockerInfoModel();
+                dockerInfoModel.setMachineDockerId(id);
+                dockerInfoModel.setWorkspaceId(workspaceId);
+                //
+                exists = dockerInfoService.exists(dockerInfoModel);
+                if (!exists) {
+                    //
+                    dockerInfoModel.setName(machineDockerModel.getName());
+                    dockerInfoService.insert(dockerInfoModel);
+                }
+            } else if (StrUtil.equals(type, "swarm")) {
+                Assert.hasText(machineDockerModel.getSwarmId(), () -> "当前 docker " + machineDockerModel.getName() + " 不在集群中");
+                DockerSwarmInfoMode dockerInfoModel = new DockerSwarmInfoMode();
+                dockerInfoModel.setSwarmId(machineDockerModel.getSwarmId());
+                dockerInfoModel.setWorkspaceId(workspaceId);
+                //
+                if (!dockerSwarmInfoService.exists(dockerInfoModel)) {
+                    //
+                    dockerInfoModel.setName(machineDockerModel.getName());
+                    dockerSwarmInfoService.insert(dockerInfoModel);
+                }
+            } else {
+                throw new IllegalArgumentException("未知参数");
+            }
         }
+
         return JsonMessage.success("操作成功");
     }
 

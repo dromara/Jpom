@@ -7,11 +7,11 @@
             <a-row v-for="item in myWorkspaceList" :key="item.id" class="item-row">
               <a-col :span="18">
                 <template v-if="item.edit">
-                  <a-input-search placeholder="请输入工作空间备注" enter-button="确定" v-model="item.name" @search="editOk(item)" />
+                  <a-input-search placeholder="请输入工作空间备注,留空使用默认的名称" enter-button="确定" v-model="item.name" @search="editOk(item)" />
                 </template>
                 <template v-else>
                   <a-tooltip :title="`原始名：${item.originalName}`">
-                    {{ item.name }}
+                    {{ item.name || item.originalName }}
                   </a-tooltip>
                 </template>
               </a-col>
@@ -23,16 +23,23 @@
                 </a-space>
               </a-col>
             </a-row>
-            <!-- <a-list-item slot="renderItem" slot-scope="item">
-                
-                <template>
-                
-                </template>
-              </a-list-item>
-            </a-list> -->
           </draggable>
           <a-col style="margin-top: 10px">
-            <a-button type="primary" @click="save"> 保存 </a-button>
+            <a-space>
+              <a-button type="primary" @click="save"> 保存 </a-button>
+              <a-button
+                type="primary"
+                @click="
+                  () => {
+                    myWorkspaceList = myWorkspaceList.map((item) => {
+                      return { ...item, name: '' };
+                    });
+                  }
+                "
+              >
+                恢复默认名称
+              </a-button>
+            </a-space>
           </a-col>
         </a-card>
       </a-col>

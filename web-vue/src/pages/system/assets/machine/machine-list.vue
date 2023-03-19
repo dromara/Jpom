@@ -22,13 +22,14 @@
 
           <a-dropdown v-if="this.layoutType === 'table'">
             <a-menu slot="overlay">
+              <a-menu-item key="1" @click="syncToWorkspaceShow"> 分配节点 </a-menu-item>
               <a-menu-item key="1" @click="syncNodeWhiteConfig"> 同步白名单 </a-menu-item>
               <a-menu-item key="2" @click="syncNodeConfig"> 同步系统配置 </a-menu-item>
             </a-menu>
-            <a-button type="primary"> 同步配置 <a-icon type="down" /> </a-button>
+            <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
           </a-dropdown>
           <a-tooltip v-else title="表格视图才能使用同步配置功能">
-            <a-button :disabled="true" type="primary"> 同步配置 <a-icon type="down" /> </a-button>
+            <a-button :disabled="true" type="primary"> 批量操作 <a-icon type="down" /> </a-button>
           </a-tooltip>
           <a-button type="primary" @click="changeLayout" :icon="this.layoutType === 'card' ? 'layout' : 'table'"> {{ this.layoutType === "card" ? "卡片" : "表格" }} </a-button>
           <a-tooltip>
@@ -249,10 +250,10 @@
             </a-form-model-item>
 
             <a-form-model-item label="编码方式" prop="transportEncryption">
-              <a-select show-search default-value=0 v-model="temp.transportEncryption" placeholder="请选择编码方式">
-                <a-select-option :value=0>不编码</a-select-option>
-                <a-select-option :value=1>BASE64</a-select-option>
-                <a-select-option :value=2>AES</a-select-option>
+              <a-select show-search default-value="0" v-model="temp.transportEncryption" placeholder="请选择编码方式">
+                <a-select-option :value="0">不编码</a-select-option>
+                <a-select-option :value="1">BASE64</a-select-option>
+                <a-select-option :value="2">AES</a-select-option>
               </a-select>
             </a-form-model-item>
           </a-collapse-panel>
@@ -578,9 +579,11 @@ export default {
     syncToWorkspaceShow(item) {
       this.syncToWorkspaceVisible = true;
       this.loadWorkSpaceListAll();
-      this.temp = {
-        id: item.id,
-      };
+      if (item) {
+        this.temp = {
+          ids: item.id,
+        };
+      }
     },
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
@@ -588,6 +591,10 @@ export default {
           message: "请选择工作空间",
         });
         return false;
+      }
+      if (!this.temp.ids) {
+        this.temp = { ...this.temp, ids: this.tableSelections.join(",") };
+        this.tableSelections = [];
       }
       // 同步
       machineDistribute(this.temp).then((res) => {
