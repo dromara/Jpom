@@ -1,7 +1,7 @@
 <template>
   <div class="full-content">
     <!-- 数据表格 -->
-    <a-table size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
+    <a-table size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
@@ -12,6 +12,7 @@
             <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">添加</a-button>
+          <a-button :disabled="!this.tableSelections.length" @click="syncToWorkspaceShow()" type="primary"> 批量分配</a-button>
           <a-tooltip title="自动检测服务端所在服务器中是否存在 docker，如果存在将自动添加到列表中">
             <a-button type="dashed" @click="handleTryLocalDocker"> <a-icon type="question-circle" theme="filled" />自动探测 </a-button>
           </a-tooltip>
@@ -234,7 +235,7 @@
         <a-form-model-item label="分配类型" prop="type">
           <a-radio-group v-model="temp.type">
             <a-radio value="docker"> docker </a-radio>
-            <a-radio value="swarm" :disabled="!temp.swarmId"> 集群 </a-radio>
+            <a-radio value="swarm" :disabled="temp.swarmId === true ? false : true"> 集群 </a-radio>
           </a-radio-group>
         </a-form-model-item>
         <a-form-model-item label="选择工作空间" prop="workspaceId">
@@ -358,12 +359,21 @@ export default {
         dockerList: [],
         swarmList: [],
       },
+      tableSelections: [],
     };
   },
   computed: {
     ...mapGetters(["getCollapsed"]),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
+      };
     },
   },
   mounted() {
@@ -651,10 +661,16 @@ export default {
     syncToWorkspaceShow(item) {
       this.syncToWorkspaceVisible = true;
       this.loadWorkSpaceListAll();
-      this.temp = {
-        id: item.id,
-        swarmId: item.swarmId,
-      };
+      if (item) {
+        this.temp = {
+          ids: item.id,
+          swarmId: item.swarmId ? true : false,
+        };
+      } else {
+        this.temp = {
+          swarmId: true,
+        };
+      }
     },
     handleSyncToWorkspace() {
       if (!this.temp.type) {
@@ -668,6 +684,10 @@ export default {
           message: "请选择工作空间",
         });
         return false;
+      }
+      if (!this.temp.ids) {
+        this.temp = { ...this.temp, ids: this.tableSelections.join(",") };
+        this.tableSelections = [];
       }
       // 同步
       machineDockerDistribute(this.temp).then((res) => {

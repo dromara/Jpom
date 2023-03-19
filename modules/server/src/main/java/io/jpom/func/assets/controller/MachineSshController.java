@@ -253,10 +253,10 @@ public class MachineSshController extends BaseGroupNameController {
     @PostMapping(value = "save-workspace-config", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public JsonMessage<String> saveWorkspaceConfig(
-        String fileDirs,
-        @ValidatorItem String id,
-        String notAllowedCommand,
-        String allowEditSuffix) {
+            String fileDirs,
+            @ValidatorItem String id,
+            String notAllowedCommand,
+            String allowEditSuffix) {
         SshModel sshModel = new SshModel(id);
         // 目录
         if (StrUtil.isEmpty(fileDirs)) {
@@ -282,23 +282,28 @@ public class MachineSshController extends BaseGroupNameController {
     }
 
     /**
-     * 将机器分配到指定工作空间
+     * 将 ssh 分配到指定工作空间
      *
-     * @param id          机器id
+     * @param ids         ssh id
      * @param workspaceId 工作空间id
      * @return json
      */
     @PostMapping(value = "distribute", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> distribute(@ValidatorItem String id, @ValidatorItem String workspaceId) {
-        MachineSshModel machineSshModel = machineSshServer.getByKey(id);
-        Assert.notNull(machineSshModel, "没有对应的ssh");
-        boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
-        Assert.state(exists, "不存在对应的工作空间");
-        //
-        sshService.existsSsh(workspaceId, id);
-        //
-        sshService.insert(machineSshModel, workspaceId);
+    public JsonMessage<String> distribute(@ValidatorItem String ids, @ValidatorItem String workspaceId) {
+        List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
+        for (String id : list) {
+            MachineSshModel machineSshModel = machineSshServer.getByKey(id);
+            Assert.notNull(machineSshModel, "没有对应的ssh");
+            boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
+            Assert.state(exists, "不存在对应的工作空间");
+            //
+            if (!sshService.existsSsh2(workspaceId, id)) {
+                //
+                sshService.insert(machineSshModel, workspaceId);
+            }
+        }
+
         return JsonMessage.success("操作成功");
     }
 
@@ -336,7 +341,7 @@ public class MachineSshController extends BaseGroupNameController {
     private void setHeader(HttpServletResponse response, String fileName) {
         String contentType = ObjectUtil.defaultIfNull(FileUtil.getMimeType(fileName), "application/octet-stream");
         response.setHeader("Content-Disposition", StrUtil.format("attachment;filename=\"{}\"",
-            URLUtil.encode(fileName, CharsetUtil.CHARSET_UTF_8)));
+                URLUtil.encode(fileName, CharsetUtil.CHARSET_UTF_8)));
         response.setContentType(contentType);
     }
 
@@ -363,21 +368,21 @@ public class MachineSshController extends BaseGroupNameController {
                 break;
             }
             listPage.getResult()
-                .stream()
-                .map((Function<MachineSshModel, List<Object>>) machineSshModel -> CollUtil.newArrayList(
-                    machineSshModel.getName(),
-                    machineSshModel.getGroupName(),
-                    machineSshModel.getHost(),
-                    machineSshModel.getPort(),
-                    machineSshModel.getUser(),
-                    machineSshModel.getPassword(),
-                    machineSshModel.getCharset(),
-                    machineSshModel.getConnectType(),
-                    machineSshModel.getPrivateKey(),
-                    machineSshModel.getTimeout()
-                ))
-                .map(objects -> objects.stream().map(StrUtil::toStringOrNull).toArray(String[]::new))
-                .forEach(writer::writeLine);
+                    .stream()
+                    .map((Function<MachineSshModel, List<Object>>) machineSshModel -> CollUtil.newArrayList(
+                            machineSshModel.getName(),
+                            machineSshModel.getGroupName(),
+                            machineSshModel.getHost(),
+                            machineSshModel.getPort(),
+                            machineSshModel.getUser(),
+                            machineSshModel.getPassword(),
+                            machineSshModel.getCharset(),
+                            machineSshModel.getConnectType(),
+                            machineSshModel.getPrivateKey(),
+                            machineSshModel.getTimeout()
+                    ))
+                    .map(objects -> objects.stream().map(StrUtil::toStringOrNull).toArray(String[]::new))
+                    .forEach(writer::writeLine);
             if (ObjectUtil.equal(listPage.getPage(), listPage.getTotalPage())) {
                 // 最后一页
                 break;

@@ -268,6 +268,14 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
         Assert.isNull(data, () -> "对应工作空间已经存在该 ssh 啦:" + data.getName());
     }
 
+    public boolean existsSsh2(String workspaceId, String machineSshId) {
+        //
+        SshModel where = new SshModel();
+        where.setWorkspaceId(workspaceId);
+        where.setMachineSshId(machineSshId);
+        return this.exists(where);
+    }
+
     public void insert(MachineSshModel machineSshModel, String workspaceId) {
         SshModel data = new SshModel();
         data.setWorkspaceId(workspaceId);

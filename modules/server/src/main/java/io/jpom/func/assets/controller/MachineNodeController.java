@@ -94,22 +94,27 @@ public class MachineNodeController extends BaseGroupNameController {
     /**
      * 将机器分配到指定工作空间
      *
-     * @param id          机器id
+     * @param ids         机器id
      * @param workspaceId 工作空间id
      * @return json
      */
     @PostMapping(value = "distribute", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> distribute(@ValidatorItem String id, @ValidatorItem String workspaceId) {
-        MachineNodeModel machineNodeModel = machineNodeServer.getByKey(id);
-        Assert.notNull(machineNodeModel, "没有对应的机器");
-        WorkspaceModel workspaceModel = new WorkspaceModel(workspaceId);
-        boolean exists = workspaceService.exists(workspaceModel);
-        Assert.state(exists, "不存在对应的工作空间");
-        //
-        nodeService.existsNode(workspaceId, id);
-        //
-        machineNodeServer.insertNode(machineNodeModel, workspaceId);
+    public JsonMessage<String> distribute(@ValidatorItem String ids, @ValidatorItem String workspaceId) {
+        List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
+        for (String id : list) {
+            MachineNodeModel machineNodeModel = machineNodeServer.getByKey(id);
+            Assert.notNull(machineNodeModel, "没有对应的机器");
+            WorkspaceModel workspaceModel = new WorkspaceModel(workspaceId);
+            boolean exists = workspaceService.exists(workspaceModel);
+            Assert.state(exists, "不存在对应的工作空间");
+            //
+            if (!nodeService.existsNode2(workspaceId, id)) {
+                //
+                machineNodeServer.insertNode(machineNodeModel, workspaceId);
+            }
+        }
+
         return JsonMessage.success("操作成功");
     }
 
