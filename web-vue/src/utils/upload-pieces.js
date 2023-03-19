@@ -65,28 +65,27 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
         // 判断是否需要继续
         if (uploadBeforeAbrot) {
           uploadBeforeAbrot(fileMd5).then(() => {
-            start();
+            startUpload();
           });
         } else {
-          start();
+          startUpload();
         }
-
-        const start = () => {
-          for (let i = 0; i < chunkCount; i++) {
-            chunkList.push(Number(i));
-          }
-
-          //生成分片 id
-          generateShardingId().then((res) => {
-            if (res.code === 200) {
-              sliceId = res.data;
-              concurrentUpload();
-            } else {
-              error("文件上传id生成失败：" + res.msg);
-            }
-          });
-        };
       }
+    };
+    const startUpload = () => {
+      for (let i = 0; i < chunkCount; i++) {
+        chunkList.push(Number(i));
+      }
+
+      //生成分片 id
+      generateShardingId().then((res) => {
+        if (res.code === 200) {
+          sliceId = res.data;
+          concurrentUpload();
+        } else {
+          error("文件上传id生成失败：" + res.msg);
+        }
+      });
     };
     reader.onload = function (event) {
       try {
@@ -94,9 +93,6 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
         asyncUpdate();
       } catch (e) {
         Vue.prototype.$setLoading("closeAll");
-        this.$notification.error({
-          message: "解析文件失败：" + e,
-        });
         error("解析文件失败：" + e);
       }
     };
