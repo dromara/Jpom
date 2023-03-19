@@ -32,6 +32,8 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.extra.ssh.JschUtil;
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.Session;
 import io.jpom.JpomApplication;
 import io.jpom.func.assets.model.MachineSshModel;
@@ -41,10 +43,7 @@ import io.jpom.model.data.SshModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
-import io.jpom.util.LogRecorder;
-import io.jpom.util.MySftp;
-import io.jpom.util.StrictSyncFinisher;
-import io.jpom.util.SyncFinisherUtil;
+import io.jpom.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -52,6 +51,7 @@ import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -112,13 +112,12 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.getEnv(taskRoot.getWorkspaceId());
         environmentMapBuilder.put("TASK_ID", taskRoot.getTaskId());
         environmentMapBuilder.put("FILE_ID", taskRoot.getFileId());
-        Map<String, String> environment = environmentMapBuilder.environment();
         //
         String syncFinisherId = "file-release:" + taskId;
         StrictSyncFinisher strictSyncFinisher = SyncFinisherUtil.create(syncFinisherId, logModels.size());
         Integer taskType = taskRoot.getTaskType();
         if (taskType == 0) {
-            crateTaskSshWork(logModels, strictSyncFinisher, taskId, environment, storageSaveFile);
+            crateTaskSshWork(logModels, strictSyncFinisher, taskId, environmentMapBuilder, storageSaveFile);
         } else {
             throw new IllegalArgumentException("不支持的方式");
         }
@@ -157,20 +156,22 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     /**
      * 创建 ssh 发布任务
      *
-     * @param values             需要发布的任务列表
-     * @param strictSyncFinisher 线程同步器
-     * @param taskId             任务ID
-     * @param environment        环境变量
-     * @param storageSaveFile    文件
+     * @param values                需要发布的任务列表
+     * @param strictSyncFinisher    线程同步器
+     * @param taskId                任务ID
+     * @param environmentMapBuilder 环境变量
+     * @param storageSaveFile       文件
      */
     private void crateTaskSshWork(Collection<FileReleaseTaskLogModel> values,
                                   StrictSyncFinisher strictSyncFinisher,
                                   String taskId,
-                                  Map<String, String> environment,
+                                  EnvironmentMapBuilder environmentMapBuilder,
                                   File storageSaveFile) {
         for (FileReleaseTaskLogModel model : values) {
             strictSyncFinisher.addWorker(() -> {
                 String modelId = model.getId();
+                Session session = null;
+                ChannelSftp channelSftp = null;
                 try {
                     this.updateStatus(taskId, modelId, 1, "开始发布文件");
                     File file = logFile(model);
@@ -181,34 +182,41 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                         this.updateStatus(taskId, modelId, 3, StrUtil.format("没有找到对应的ssh项：{}", model.getTaskDataId()));
                         return;
                     }
+                    MachineSshModel machineSshModel = sshService.getMachineSshModel(item);
+                    Charset charset = machineSshModel.charset();
+                    int timeout = machineSshModel.timeout();
+                    session = sshService.getSessionByModel(machineSshModel);
+                    Map<String, String> environment = environmentMapBuilder.environment();
+                    environmentMapBuilder.eachStr(logRecorder::system);
                     if (StrUtil.isNotEmpty(model.getBeforeScript())) {
                         logRecorder.system("开始执行上传前命令");
-                        String s = sshService.exec(item, model.getBeforeScript(), environment);
-                        logRecorder.info(s);
+                        JschUtils.execCallbackLine(session, charset, timeout, model.getBeforeScript(), StrUtil.EMPTY, environment, logRecorder::info);
                     }
                     logRecorder.system("{} start ftp upload", item.getName());
-                    MachineSshModel machineSshModel = sshService.getMachineSshModel(item);
-                    Session session = sshService.getSessionByModel(machineSshModel);
+
                     MySftp.ProgressMonitor sftpProgressMonitor = sshService.createProgressMonitor(logRecorder);
-                    try (MySftp sftp = new MySftp(session, machineSshModel.charset(), machineSshModel.timeout(), sftpProgressMonitor)) {
-                        String releasePath = model.getReleasePath();
-                        String prefix = "";
-                        if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
-                            prefix = sftp.pwd();
-                        }
-                        String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + releasePath);
-                        sftp.syncUpload(storageSaveFile, normalizePath);
-                        logRecorder.system("{} ftp upload done", item.getName());
+                    MySftp sftp = new MySftp(session, charset, timeout, sftpProgressMonitor);
+                    channelSftp = sftp.getClient();
+                    String releasePath = model.getReleasePath();
+                    String prefix = "";
+                    if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
+                        prefix = sftp.pwd();
                     }
+                    String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + releasePath);
+                    sftp.syncUpload(storageSaveFile, normalizePath);
+                    logRecorder.system("{} ftp upload done", item.getName());
+
                     if (StrUtil.isNotEmpty(model.getAfterScript())) {
                         logRecorder.system("开始执行上传后命令");
-                        String s = sshService.exec(item, model.getAfterScript(), environment);
-                        logRecorder.info(s);
+                        JschUtils.execCallbackLine(session, charset, timeout, model.getAfterScript(), StrUtil.EMPTY, environment, logRecorder::info);
                     }
                     this.updateStatus(taskId, modelId, 2, "发布成功");
                 } catch (Exception e) {
                     log.error("执行发布任务异常", e);
                     updateStatus(taskId, modelId, 3, e.getMessage());
+                } finally {
+                    JschUtil.close(channelSftp);
+                    JschUtil.close(session);
                 }
             });
         }
@@ -226,7 +234,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         fileReleaseTaskLogModel.setTaskId(taskId);
         List<FileReleaseTaskLogModel> logModels = this.listByBean(fileReleaseTaskLogModel);
         Map<Integer, List<FileReleaseTaskLogModel>> map = logModels.stream()
-            .collect(CollectorUtil.groupingBy(logModel -> ObjectUtil.defaultIfNull(logModel.getStatus(), 0), Collectors.toList()));
+                .collect(CollectorUtil.groupingBy(logModel -> ObjectUtil.defaultIfNull(logModel.getStatus(), 0), Collectors.toList()));
         StringBuilder stringBuilder = new StringBuilder();
         //
         Opt.ofBlankAble(statusMsg).ifPresent(s -> stringBuilder.append(s).append(StrUtil.SPACE));
@@ -280,8 +288,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
 
     public File logFile(FileReleaseTaskLogModel model) {
         return FileUtil.file(jpomApplication.getDataPath(), "file-release-log",
-            model.getTaskId(),
-            model.getId() + ".log"
+                model.getTaskId(),
+                model.getId() + ".log"
         );
     }
 }

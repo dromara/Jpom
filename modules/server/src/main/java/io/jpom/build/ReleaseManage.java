@@ -38,6 +38,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.extra.ssh.JschUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.Session;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
@@ -67,10 +68,7 @@ import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.extconf.BuildExtConfig;
-import io.jpom.util.CommandUtil;
-import io.jpom.util.LogRecorder;
-import io.jpom.util.MySftp;
-import io.jpom.util.StringUtil;
+import io.jpom.util.*;
 import lombok.Builder;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
@@ -79,6 +77,7 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -244,8 +243,8 @@ public class ReleaseManage {
             String fromTag = this.buildExtraModule.getFromTag();
             // 根据 tag 查询
             List<DockerInfoModel> dockerInfoModels = buildExecuteService
-                .dockerInfoService
-                .queryByTag(this.buildExtraModule.getWorkspaceId(), fromTag);
+                    .dockerInfoService
+                    .queryByTag(this.buildExtraModule.getWorkspaceId(), fromTag);
             Map<String, Object> map = buildExecuteService.machineDockerServer.dockerParameter(dockerInfoModels);
             if (map == null) {
                 logRecorder.systemError("{} 没有可用的 docker server", fromTag);
@@ -341,13 +340,13 @@ public class ReleaseManage {
         InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
         String s1 = IoUtil.readUtf8(templateInputStream);
         int waitFor = JpomApplication.getInstance()
-            .execScript(s1 + releaseCommand, file -> {
-                try {
-                    return CommandUtil.execWaitFor(file, sourceFile, envFileMap, StrUtil.EMPTY, (s, process) -> logRecorder.info(s));
-                } catch (IOException | InterruptedException e) {
-                    throw Lombok.sneakyThrow(e);
-                }
-            });
+                .execScript(s1 + releaseCommand, file -> {
+                    try {
+                        return CommandUtil.execWaitFor(file, sourceFile, envFileMap, StrUtil.EMPTY, (s, process) -> logRecorder.info(s));
+                    } catch (IOException | InterruptedException e) {
+                        throw Lombok.sneakyThrow(e);
+                    }
+                });
         logRecorder.system("执行发布脚本的退出码是：{}", waitFor);
         // 判断是否为严格执行
         if (buildExtraModule.strictlyEnforce()) {
@@ -376,57 +375,58 @@ public class ReleaseManage {
     private void doSsh(SshModel item, SshService sshService) throws IOException {
         Map<String, String> envFileMap = buildEnv.environment();
         MachineSshModel machineSshModel = sshService.getMachineSshModel(item);
-        Session session = sshService.getSessionByModel(machineSshModel);
-        {
+        Session session = null;
+        ChannelSftp channelSftp = null;
+        try {
+            session = sshService.getSessionByModel(machineSshModel);
+            Charset charset = machineSshModel.charset();
+            int timeout = machineSshModel.timeout();
             // 执行发布前命令
             if (StrUtil.isNotEmpty(this.buildExtraModule.getReleaseBeforeCommand())) {
                 //
                 logRecorder.system("开始执行 {} 发布前命令", item.getName());
-                String s = sshService.exec(item, this.buildExtraModule.getReleaseBeforeCommand(), envFileMap);
-                logRecorder.info(s);
+                JschUtils.execCallbackLine(session, charset, timeout, this.buildExtraModule.getReleaseBeforeCommand(), StrUtil.EMPTY, envFileMap, logRecorder::info);
             }
-        }
-        try {
+
             String releasePath = this.buildExtraModule.getReleasePath();
             if (StrUtil.isEmpty(releasePath)) {
                 logRecorder.systemWarning("发布目录为空");
             } else {
                 logRecorder.system("{} {} start ftp upload", DateUtil.now(), item.getName());
                 MySftp.ProgressMonitor sftpProgressMonitor = sshService.createProgressMonitor(logRecorder);
-                try (MySftp sftp = new MySftp(session, machineSshModel.charset(), machineSshModel.timeout(), sftpProgressMonitor)) {
-                    String prefix = "";
-                    if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
-                        prefix = sftp.pwd();
-                    }
-                    String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + releasePath);
-                    if (this.buildExtraModule.isClearOld()) {
-                        try {
-                            if (sftp.exist(normalizePath)) {
-                                sftp.delDir(normalizePath);
-                            }
-                        } catch (Exception e) {
-                            if (!StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")) {
-                                logRecorder.error("清除构建产物失败", e);
-                            }
+                MySftp sftp = new MySftp(session, charset, timeout, sftpProgressMonitor);
+                channelSftp = sftp.getClient();
+                String prefix = "";
+                if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
+                    prefix = sftp.pwd();
+                }
+                String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + releasePath);
+                if (this.buildExtraModule.isClearOld()) {
+                    try {
+                        if (sftp.exist(normalizePath)) {
+                            sftp.delDir(normalizePath);
+                        }
+                    } catch (Exception e) {
+                        if (!StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")) {
+                            logRecorder.error("清除构建产物失败", e);
                         }
                     }
-                    sftp.syncUpload(this.resultFile, normalizePath);
-                    logRecorder.system("{} ftp upload done", item.getName());
                 }
+                sftp.syncUpload(this.resultFile, normalizePath);
+                logRecorder.system("{} ftp upload done", item.getName());
             }
+            // 执行发布后命令
+            if (StrUtil.isEmpty(this.buildExtraModule.getReleaseCommand())) {
+                logRecorder.systemWarning("没有需要执行的ssh命令");
+                return;
+            }
+            //
+            logRecorder.system("开始执行 {} 发布后命令", item.getName());
+            JschUtils.execCallbackLine(session, charset, timeout, this.buildExtraModule.getReleaseCommand(), StrUtil.EMPTY, envFileMap, logRecorder::info);
         } finally {
+            JschUtil.close(channelSftp);
             JschUtil.close(session);
         }
-        // 执行发布后命令
-        if (StrUtil.isEmpty(this.buildExtraModule.getReleaseCommand())) {
-            logRecorder.systemWarning("没有需要执行的ssh命令");
-            return;
-        }
-        //
-        logRecorder.system("开始执行 {} 发布后命令", item.getName());
-        String s = sshService.exec(item, this.buildExtraModule.getReleaseCommand(), envFileMap);
-        logRecorder.info(s);
-
     }
 
     /**
@@ -439,7 +439,7 @@ public class ReleaseManage {
     private void diffSyncProject(NodeModel nodeModel, String projectId, AfterOpt afterOpt, boolean clearOld) {
         File resultFile = this.resultFile;
         String resultFileParent = resultFile.isFile() ?
-            FileUtil.getAbsolutePath(resultFile.getParent()) : FileUtil.getAbsolutePath(this.resultFile);
+                FileUtil.getAbsolutePath(resultFile.getParent()) : FileUtil.getAbsolutePath(this.resultFile);
         //
         List<File> files = FileUtil.loopFiles(resultFile);
         List<JSONObject> collect = files.stream().map(file -> {
@@ -487,19 +487,19 @@ public class ReleaseManage {
             Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
             int finalI = i;
             JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, startPath,
-                projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, false,
-                this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
-                    double progressPercentage = Math.floor(((float) progressSize / total) * 100);
-                    int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
-                    if (progressRangeList.add(progressRange)) {
-                        //  total, progressSize
-                        logRecorder.system("上传文件进度:{}[{}/{}] {}/{} {} ", file.getName(),
-                            (finalI + 1), diffSize,
-                            FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
-                            NumberUtil.formatPercent(((float) progressSize / total), 0)
-                        );
-                    }
-                });
+                    projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, false,
+                    this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
+                        double progressPercentage = Math.floor(((float) progressSize / total) * 100);
+                        int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
+                        if (progressRangeList.add(progressRange)) {
+                            //  total, progressSize
+                            logRecorder.system("上传文件进度:{}[{}/{}] {}/{} {} ", file.getName(),
+                                    (finalI + 1), diffSize,
+                                    FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
+                                    NumberUtil.formatPercent(((float) progressSize / total), 0)
+                            );
+                        }
+                    });
             Assert.state(jsonMessage.success(), "同步项目文件失败：" + jsonMessage);
             if (last) {
                 // 最后一个
@@ -533,19 +533,19 @@ public class ReleaseManage {
             String name = zipFile.getName();
             Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
             return OutGivingRun.fileUpload(zipFile,
-                this.buildExtraModule.getProjectSecondaryDirectory(),
-                projectId,
-                unZip,
-                afterOpt,
-                nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
-                    double progressPercentage = Math.floor(((float) progressSize / total) * 100);
-                    int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
-                    if (progressRangeList.add(progressRange)) {
-                        logRecorder.system("上传文件进度:{} {}/{} {}", name,
-                            FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
-                            NumberUtil.formatPercent(((float) progressSize / total), 0));
-                    }
-                });
+                    this.buildExtraModule.getProjectSecondaryDirectory(),
+                    projectId,
+                    unZip,
+                    afterOpt,
+                    nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
+                        double progressPercentage = Math.floor(((float) progressSize / total) * 100);
+                        int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
+                        if (progressRangeList.add(progressRange)) {
+                            logRecorder.system("上传文件进度:{} {}/{} {}", name,
+                                    FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
+                                    NumberUtil.formatPercent(((float) progressSize / total), 0));
+                        }
+                    });
         });
         if (jsonMessage.success()) {
             logRecorder.system("发布项目包成功：{}", jsonMessage);
@@ -564,15 +564,15 @@ public class ReleaseManage {
         String selectProject = buildEnv.get("dispatchSelectProject");
         Future<OutGivingModel.Status> statusFuture = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.buildNumberId, this.resultFile, (unZip, zipFile) -> {
             OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
-                .id(releaseMethodDataId)
-                .file(zipFile)
-                .logRecorder(logRecorder)
-                .userModel(userModel)
-                .unzip(unZip)
-                // 由构建配置决定是否删除
-                .doneDeleteFile(false)
-                .projectSecondaryDirectory(projectSecondaryDirectory)
-                .stripComponents(0);
+                    .id(releaseMethodDataId)
+                    .file(zipFile)
+                    .logRecorder(logRecorder)
+                    .userModel(userModel)
+                    .unzip(unZip)
+                    // 由构建配置决定是否删除
+                    .doneDeleteFile(false)
+                    .projectSecondaryDirectory(projectSecondaryDirectory)
+                    .stripComponents(0);
             return outGivingRunBuilder.build().startRun(selectProject);
         });
         //OutGivingRun.startRun(releaseMethodDataId, zipFile, userModel, unZip, 0);

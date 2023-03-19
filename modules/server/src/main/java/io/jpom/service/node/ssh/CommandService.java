@@ -23,18 +23,14 @@
 package io.jpom.service.node.ssh;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
-import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.system.SystemUtil;
-import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.Session;
 import io.jpom.common.BaseServerController;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.ICron;
@@ -48,18 +44,14 @@ import io.jpom.script.CommandParam;
 import io.jpom.service.ITriggerToken;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.system.WorkspaceEnvVarService;
-import io.jpom.util.StrictSyncFinisher;
-import io.jpom.util.StringUtil;
-import io.jpom.util.SyncFinisherUtil;
+import io.jpom.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -261,52 +253,38 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
      */
     private void execute(CommandModel commandModel, CommandExecLogModel commandExecLogModel, SshModel sshModel, String commandParamsLine) throws IOException {
         File file = commandExecLogModel.logFile();
-        try (BufferedOutputStream outputStream = FileUtil.getOutputStream(file)) {
-            if (sshModel == null) {
-                this.appendLine(outputStream, "ssh 不存在");
-                return;
-            }
-            //
-            EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.getEnv(commandModel.getWorkspaceId());
-            environmentMapBuilder.put("JPOM_SSH_ID", sshModel.getId());
-            environmentMapBuilder.put("JPOM_COMMAND_ID", commandModel.getId());
-            Map<String, String> environment = environmentMapBuilder.environment();
-            String[] commands = StrUtil.splitToArray(commandModel.getCommand(), StrUtil.LF);
-            for (int i = 0; i < commands.length; i++) {
-                commands[i] = StringUtil.formatStrByMap(commands[i], environment);
-            }
-            environmentMapBuilder.eachStr(s -> appendLine(outputStream, s));
-            MachineSshModel machineSshModel = sshService.getMachineSshModel(sshModel);
-            //
+        LogRecorder logRecorder = LogRecorder.builder().file(file).charset(CharsetUtil.CHARSET_UTF_8).build();
+        if (sshModel == null) {
+            logRecorder.systemError("ssh 不存在");
+            return;
+        }
+        EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.getEnv(commandModel.getWorkspaceId());
+        environmentMapBuilder.put("JPOM_SSH_ID", sshModel.getId());
+        environmentMapBuilder.put("JPOM_COMMAND_ID", commandModel.getId());
+        environmentMapBuilder.eachStr(logRecorder::system);
+        Map<String, String> environment = environmentMapBuilder.environment();
+        String commands = StringUtil.formatStrByMap(commandModel.getCommand(), environment);
+
+        MachineSshModel machineSshModel = sshService.getMachineSshModel(sshModel);
+        //
+        Session session = null;
+        try {
             Charset charset = machineSshModel.charset();
-
-            sshService.exec(machineSshModel, (s, session) -> {
-                final ChannelExec channel = (ChannelExec) JschUtil.createChannel(session, ChannelType.EXEC);
-                channel.setCommand(StrUtil.bytes(s + StrUtil.SPACE + commandParamsLine, charset));
-                channel.setInputStream(null);
-
-                channel.setErrStream(outputStream, true);
-                InputStream in = null;
-
-                try {
-                    channel.connect(machineSshModel.timeout());
-                    in = channel.getInputStream();
-                    IoUtil.readLines(in, charset, (LineHandler) line -> this.appendLine(outputStream, line));
-                    // 更新状态
-                    this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.DONE);
-                } catch (Exception e) {
-                    log.error("执行命令错误", e);
-                    // 更新状态
-                    this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.ERROR);
-                    // 记录错误日志
-                    String stacktraceToString = ExceptionUtil.stacktraceToString(e);
-                    this.appendLine(outputStream, stacktraceToString);
-                } finally {
-                    IoUtil.close(in);
-                    JschUtil.close(channel);
-                }
-                return null;
-            }, commands);
+            int timeout = machineSshModel.timeout();
+            //
+            session = sshService.getSessionByModel(machineSshModel);
+            JschUtils.execCallbackLine(session, charset, timeout, commands, commandParamsLine, logRecorder::info);
+            // 更新状态
+            this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.DONE);
+        } catch (Exception e) {
+            log.error("执行命令错误", e);
+            // 更新状态
+            this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.ERROR);
+            // 记录错误日志
+            String stacktraceToString = ExceptionUtil.stacktraceToString(e);
+            logRecorder.systemError(stacktraceToString);
+        } finally {
+            JschUtil.close(session);
         }
     }
 
@@ -321,22 +299,6 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
         commandExecLogModel.setId(id);
         commandExecLogModel.setStatus(status.getCode());
         commandExecLogService.updateById(commandExecLogModel);
-    }
-
-    /**
-     * 记录日志
-     *
-     * @param outputStream 文件输出流
-     * @param line         消息
-     */
-    private void appendLine(BufferedOutputStream outputStream, String line) {
-        try {
-            outputStream.write(line.getBytes(CharsetUtil.CHARSET_UTF_8));
-            outputStream.write(LINE_BYTES);
-            outputStream.flush();
-        } catch (IOException e) {
-            log.error("command log append line", e);
-        }
     }
 
     /**

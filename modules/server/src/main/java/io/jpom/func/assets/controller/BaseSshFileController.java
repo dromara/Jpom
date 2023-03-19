@@ -22,6 +22,7 @@
  */
 package io.jpom.func.assets.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
@@ -52,6 +53,7 @@ import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.ServerConfig;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.CompressionFileUtil;
+import io.jpom.util.JschUtils;
 import io.jpom.util.StringUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +70,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import java.util.function.BiFunction;
@@ -567,33 +570,42 @@ public abstract class BaseSshFileController extends BaseServerController {
         Assert.state(!StrUtil.contains(name, StrUtil.SLASH), "文件名不能包含/");
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
-            Session session = sshService.getSessionByModel(machineSshModel);
-            String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
-            try (Sftp sftp = new Sftp(session, machineSshModel.charset(), machineSshModel.timeout())) {
-                if (sftp.exist(remotePath)) {
-                    return new JsonMessage<>(400, "文件夹或者文件已存在");
-                }
-                StringBuilder command = new StringBuilder();
-                if (Convert.toBool(unFolder, false)) {
-                    // 文件
-                    command.append("touch ").append(remotePath);
-                } else {
-                    // 目录
-                    command.append("mkdir ").append(remotePath);
-                    try {
-                        if (sftp.mkdir(remotePath)) {
-                            // 创建成功
-                            return JsonMessage.success("操作成功");
-                        }
-                    } catch (Exception e) {
-                        log.error("ssh创建文件夹异常", e);
-                        return new JsonMessage<>(500, "创建文件夹失败（文件夹名可能已经存在啦）:" + e.getMessage());
+            Session session = null;
+            try {
+                session = sshService.getSessionByModel(machineSshModel);
+                String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
+                Charset charset = machineSshModel.charset();
+                int timeout = machineSshModel.timeout();
+                try (Sftp sftp = new Sftp(session, charset, timeout)) {
+                    if (sftp.exist(remotePath)) {
+                        return new JsonMessage<>(400, "文件夹或者文件已存在");
                     }
+                    StringBuilder command = new StringBuilder();
+                    if (Convert.toBool(unFolder, false)) {
+                        // 文件
+                        command.append("touch ").append(remotePath);
+                    } else {
+                        // 目录
+                        command.append("mkdir ").append(remotePath);
+                        try {
+                            if (sftp.mkdir(remotePath)) {
+                                // 创建成功
+                                return JsonMessage.success("操作成功");
+                            }
+                        } catch (Exception e) {
+                            log.error("ssh创建文件夹异常", e);
+                            return new JsonMessage<>(500, "创建文件夹失败（文件夹名可能已经存在啦）:" + e.getMessage());
+                        }
+                    }
+                    List<String> result = new ArrayList<>();
+                    JschUtils.execCallbackLine(session, charset, timeout, command.toString(), StrUtil.EMPTY, result::add);
+
+                    return JsonMessage.success("操作成功 " + CollUtil.join(result, StrUtil.LF));
+                } catch (IOException e) {
+                    throw Lombok.sneakyThrow(e);
                 }
-                String result = sshService.exec(machineSshModel, String.valueOf(command));
-                return JsonMessage.success("操作成功 " + result);
-            } catch (IOException e) {
-                throw Lombok.sneakyThrow(e);
+            } finally {
+                JschUtil.close(session);
             }
         });
     }
