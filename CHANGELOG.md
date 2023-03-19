@@ -18,6 +18,7 @@
 5. 【server】优化 机器名称和 hostname、SSH 机器名称和 hostname 限制字段长度
 6. 【server】优化 DSL 项目支持解析多 PID ：`running:109,205:8080,8082`（感谢@酱总）
 7. 【server】优化 缓存管理页面支持查看运行中的线程同步器、正在构建的ID
+8. 【server】优化 SSH 脚本批量执行采用线程同步器执行（避免线程数大于 CPU 核心数）
 
 ### ⚠️ 注意
 
@@ -648,8 +649,8 @@ curl -LfsSo Service.sh https://gitee.com/dromara/Jpom/raw/master/modules/agent/s
 1. 插件端需要同步升级，否则节点分发项目无法显示项目名称
 2. 插件端需要同步升级，否则会出现部分接口 404 或者参数不正确的情况
 3. 建议升级验证上传项目文件无问题后，将插件端上传文件大小限制配置属性大改小
-	1. spring.servlet.multipart.max-file-size=5MB
-	2. spring.servlet.multipart.max-request-size=20MB
+    1. spring.servlet.multipart.max-file-size=5MB
+    2. spring.servlet.multipart.max-request-size=20MB
 
 **如果需要使用 mysql 存储，则需要修改配置**
 

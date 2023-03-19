@@ -48,7 +48,9 @@ import io.jpom.script.CommandParam;
 import io.jpom.service.ITriggerToken;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.system.WorkspaceEnvVarService;
+import io.jpom.util.StrictSyncFinisher;
 import io.jpom.util.StringUtil;
+import io.jpom.util.SyncFinisherUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -193,21 +195,33 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
         List<String> sshIds = StrUtil.split(nodes, StrUtil.COMMA, true, true);
         Assert.notEmpty(sshIds, "请选择 ssh 节点");
         String batchId = IdUtil.fastSimpleUUID();
+        String name = "ssh-command-batch:" + batchId;
+        StrictSyncFinisher syncFinisher = SyncFinisherUtil.create(name, sshIds.size());
         for (String sshId : sshIds) {
-            this.executeItem(commandModel, params, sshId, batchId, triggerExecType);
+            this.executeItem(syncFinisher, commandModel, params, sshId, batchId, triggerExecType);
         }
+        ThreadUtil.execute(() -> {
+            try {
+                syncFinisher.start();
+            } catch (Exception e) {
+                log.error("ssh 批量执行命令异常", e);
+            } finally {
+                SyncFinisherUtil.close(name);
+            }
+        });
         return batchId;
     }
 
     /**
      * 准备执行 某一个
      *
+     * @param syncFinisher  线程同步器
      * @param commandModel  命令模版
      * @param commandParams 参数
      * @param sshId         ssh id
      * @param batchId       批次ID
      */
-    private void executeItem(CommandModel commandModel, String commandParams, String sshId, String batchId, int triggerExecType) {
+    private void executeItem(StrictSyncFinisher syncFinisher, CommandModel commandModel, String commandParams, String sshId, String batchId, int triggerExecType) {
         SshModel sshModel = sshService.getByKey(sshId, false);
 
         CommandExecLogModel commandExecLogModel = new CommandExecLogModel();
@@ -225,7 +239,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
         String commandParamsLine = CommandParam.toCommandLine(commandParams);
         commandExecLogService.insert(commandExecLogModel);
 
-        ThreadUtil.execute(() -> {
+        syncFinisher.addWorker(() -> {
             try {
                 this.execute(commandModel, commandExecLogModel, sshModel, commandParamsLine);
             } catch (Exception e) {
@@ -233,7 +247,6 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
                 this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.SESSION_ERROR);
             }
         });
-
     }
 
 
@@ -335,34 +348,34 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
      */
     public void syncToWorkspace(String ids, String nowWorkspaceId, String workspaceId) {
         StrUtil.splitTrim(ids, StrUtil.COMMA)
-            .forEach(id -> {
-                CommandModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
-                Assert.notNull(data, "没有对应的ssh脚本信息");
-                //
-                CommandModel where = new CommandModel();
-                where.setWorkspaceId(workspaceId);
-                where.setName(data.getName());
-                CommandModel exits = super.queryByBean(where);
-                if (exits == null) {
-                    // 不存在则添加 信息
-                    data.setId(null);
-                    data.setWorkspaceId(workspaceId);
-                    data.setCreateTimeMillis(null);
-                    data.setModifyTimeMillis(null);
-                    data.setSshIds(null);
-                    data.setModifyUser(null);
-                    super.insert(data);
-                } else {
-                    // 修改信息
-                    CommandModel update = new CommandModel();
-                    update.setId(exits.getId());
-                    update.setCommand(data.getCommand());
-                    update.setDesc(data.getDesc());
-                    update.setDefParams(data.getDefParams());
-                    update.setAutoExecCron(data.getAutoExecCron());
-                    super.updateById(update);
-                }
-            });
+                .forEach(id -> {
+                    CommandModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
+                    Assert.notNull(data, "没有对应的ssh脚本信息");
+                    //
+                    CommandModel where = new CommandModel();
+                    where.setWorkspaceId(workspaceId);
+                    where.setName(data.getName());
+                    CommandModel exits = super.queryByBean(where);
+                    if (exits == null) {
+                        // 不存在则添加 信息
+                        data.setId(null);
+                        data.setWorkspaceId(workspaceId);
+                        data.setCreateTimeMillis(null);
+                        data.setModifyTimeMillis(null);
+                        data.setSshIds(null);
+                        data.setModifyUser(null);
+                        super.insert(data);
+                    } else {
+                        // 修改信息
+                        CommandModel update = new CommandModel();
+                        update.setId(exits.getId());
+                        update.setCommand(data.getCommand());
+                        update.setDesc(data.getDesc());
+                        update.setDefParams(data.getDefParams());
+                        update.setAutoExecCron(data.getAutoExecCron());
+                        super.updateById(update);
+                    }
+                });
     }
 
 }
