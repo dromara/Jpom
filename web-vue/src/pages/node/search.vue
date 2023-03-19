@@ -84,7 +84,7 @@
       </template>
 
       <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${(record.pids || [record.pid || '-']).join(',')} / 端口号：${record.port}`">
-        <span v-if="record.pid">{{ record.port }}/{{ (record.pids || [record.pid || "-"]).join(",") }}</span>
+        <span>{{ record.port || "-" }}/{{ (record.pids || [record.pid || "-"]).join(",") }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record, index">
         <a-space>
@@ -371,6 +371,7 @@ export default {
                     if (res2.data[element.projectId] && element.nodeId === data.type) {
                       element.port = res2.data[element.projectId].port;
                       element.pid = res2.data[element.projectId].pid;
+                      element.pids = res2.data[element.projectId].pids;
                       element.status = element.pid > 0;
                       element.error = res2.data[element.projectId].error;
                     }

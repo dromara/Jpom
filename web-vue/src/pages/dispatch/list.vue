@@ -177,7 +177,7 @@
         </template>
 
         <a-tooltip slot="projectPid" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.projectPid} / 端口号：${record.projectPort}`">
-          <span v-if="record.projectPid">{{ record.projectPid }}/{{ record.projectPort }}</span>
+          <span>{{ record.projectPid }}/{{ record.projectPort }}</span>
         </a-tooltip>
 
         <template slot="child-operation" slot-scope="text, record">
