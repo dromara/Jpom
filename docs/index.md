@@ -9,6 +9,9 @@ actions:
   - actionText: 🧩容器安装
     actionLink: /pages/c846d3/
     actionClass: action-button-diy 
+  - actionText: ⚡️赞赏 Jpom
+    actionLink: /pages/praise/
+    actionClass: action-button-diy
 bannerBg: none # auto => 网格纹背景(有bodyBgImg时无背景)，默认 | none => 无 | '大图地址' | background: 自定义背景样式       提示：如发现文本颜色不适应你的背景时可以到palette.styl修改$bannerTextColor变量
 
 features: # 可选的
