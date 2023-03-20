@@ -21,54 +21,34 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-user="$(id -un 2>/dev/null || true)"
-
-if [ "$user" == 'root' ]; then
-    rootProfiles=("/etc/profile" "/etc/bashrc")
-    for element in "${rootProfiles[@]}"; do
-        if [ -f "$element" ]; then
-            # shellcheck disable=SC1090
-            source "$element"
-        fi
-    done
-fi
-
-userProfiles=("$HOME/.bash_profile" "$HOME/.bashrc" "$HOME/.bash_login")
-for element in "${userProfiles[@]}"; do
-    if [ -f "$element" ]; then
-        # shellcheck disable=SC1090
-        source "$element"
-    fi
-done
-
 function getPid() {
-    cygwin=false
-    linux=false
-    case "$(uname)" in
-    CYGWIN*)
-        cygwin=true
-        ;;
-    Linux*)
-        linux=true
-        ;;
-    esac
-    if $cygwin; then
-        JAVA_CMD="$JAVA_HOME\bin\java"
-        JAVA_CMD=$(cygpath --path --unix "$JAVA_CMD")
-        JAVA_PID=$(ps | grep "$JAVA_CMD" | awk '{print $1}')
+  cygwin=false
+  linux=false
+  case "$(uname)" in
+  CYGWIN*)
+    cygwin=true
+    ;;
+  Linux*)
+    linux=true
+    ;;
+  esac
+  if $cygwin; then
+    JAVA_CMD="$JAVA_HOME\bin\java"
+    JAVA_CMD=$(cygpath --path --unix "$JAVA_CMD")
+    JAVA_PID=$(ps | grep "$JAVA_CMD" | awk '{print $1}')
+  else
+    if $linux; then
+      JAVA_PID=$(ps -C java -f --width 1000 | grep "$1" | grep -v grep | awk '{print $2}')
     else
-        if $linux; then
-            JAVA_PID=$(ps -C java -f --width 1000 | grep "$1" | grep -v grep | awk '{print $2}')
-        else
-            JAVA_PID=$(ps aux | grep "$1" | grep -v grep | awk '{print $2}')
-        fi
+      JAVA_PID=$(ps aux | grep "$1" | grep -v grep | awk '{print $2}')
     fi
-    echo "$JAVA_PID"
+  fi
+  echo "$JAVA_PID"
 }
 if [ ! -f "/usr/bin/lsb_release" ]; then
-    echo "os name:$(cat /etc/redhat-release)"
+  echo "os name:$(cat /etc/redhat-release)"
 else
-    echo "os name:$(/usr/bin/lsb_release -a | grep Description | awk -F : '{print $2}' | sed 's/^[ \t]*//g')"
+  echo "os name:$(/usr/bin/lsb_release -a | grep Description | awk -F : '{print $2}' | sed 's/^[ \t]*//g')"
 fi
 
 echo "os version:$(uname -r)"

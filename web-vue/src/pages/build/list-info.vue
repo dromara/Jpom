@@ -2,7 +2,21 @@
   <div class="full-content">
     <!-- <div ref="filter" class="filter"></div> -->
     <!-- 表格 -->
-    <a-table size="middle" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage" :row-selection="rowSelection">
+    <a-table
+      size="middle"
+      :columns="columns"
+      :data-source="list"
+      bordered
+      rowKey="id"
+      :pagination="pagination"
+      @change="
+        (pagination, filters, sorter) => {
+          this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
+          this.loadData();
+        }
+      "
+      :row-selection="rowSelection"
+    >
       <template slot="title">
         <a-space>
           <a-input allowClear class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="构建名称" />
@@ -1390,6 +1404,7 @@ export default {
     this.countdownTime = Date.now() + this.refreshInterval * 1000;
   },
   methods: {
+    CHANGE_PAGE,
     //
     loadDockerSwarmListAll() {
       dockerSwarmListAll().then((res) => {
@@ -1843,11 +1858,7 @@ export default {
     closeBuildLogModel() {
       this.loadData();
     },
-    // 分页、排序、筛选变化时触发
-    changePage(pagination, filters, sorter) {
-      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
-      this.loadData();
-    },
+
     // 选择发布集群时 渲染服务名称 数据
     selectSwarm() {
       this.swarmServiceListOptions = [];

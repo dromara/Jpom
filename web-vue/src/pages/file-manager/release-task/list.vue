@@ -32,9 +32,11 @@
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <template slot="status" slot-scope="text">
-        <!-- <span>{{ statusMap[text] || "未知" }}</span> -->
+      <template slot="fileId" slot-scope="text, item">
+        <a-button type="link" style="padding: 0px" @click="handleViewFile(item)" size="small">{{ text }}</a-button>
+      </template>
 
+      <template slot="status" slot-scope="text">
         <a-tag v-if="text === 2" color="green">{{ statusMap[text] || "未知" }}</a-tag>
         <a-tag v-else-if="text === 0 || text === 1" color="orange">{{ statusMap[text] || "未知" }}</a-tag>
         <a-tag v-else-if="text === 4" color="blue"> {{ statusMap[text] || "未知" }} </a-tag>
@@ -124,15 +126,39 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 查看文件 -->
+    <a-modal destroyOnClose v-model="viewFileVisible" :title="`查看文件`" :footer="null" :maskClosable="false">
+      <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+        <a-form-model-item label="文件名" prop="name">
+          {{ temp.name }}
+        </a-form-model-item>
+        <a-form-model-item label="文件ID" prop="name">
+          {{ temp.id }}
+        </a-form-model-item>
+        <a-form-model-item label="文件大小" prop="size">
+          {{ renderSize(temp.size) }}
+        </a-form-model-item>
+        <a-form-model-item label="过期时间" prop="keepDay">
+          {{ parseTime(temp.validUntil) }}
+        </a-form-model-item>
+        <a-form-model-item label="文件共享" prop="global">
+          {{ temp.workspaceId === "GLOBAL" ? "全局" : "工作空间" }}
+        </a-form-model-item>
+        <a-form-model-item label="文件描述" prop="description">
+          {{ temp.description }}
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 
 <script>
 import { fileReleaseTaskLog, statusMap, taskTypeMap, taskDetails, reReleaseTask, cancelReleaseTask, deleteReleaseTask } from "@/api/file-manager/release-task-log";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, renderSize } from "@/utils/const";
 import taskDetailsPage from "./details.vue";
 import { getSshListAll } from "@/api/ssh";
 import codeEditor from "@/components/codeEditor";
+import { hasFile } from "@/api/file-manager/file-storage";
 
 export default {
   components: {
@@ -154,7 +180,7 @@ export default {
         { title: "状态", dataIndex: "status", width: "100px", ellipsis: true, scopedSlots: { customRender: "status" } },
 
         { title: "状态描述", dataIndex: "statusMsg", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "文件ID", dataIndex: "fileId", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "文件ID", dataIndex: "fileId", ellipsis: true, scopedSlots: { customRender: "fileId" } },
         { title: "发布目录", dataIndex: "releasePath", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
         {
@@ -193,6 +219,7 @@ export default {
 
         taskDataIds: [{ required: true, message: "请选择发布的SSH", trigger: "blur" }],
       },
+      viewFileVisible: false,
     };
   },
   computed: {
@@ -205,6 +232,8 @@ export default {
   },
   methods: {
     CHANGE_PAGE,
+    renderSize,
+    parseTime,
     handleView(row) {
       this.temp = { ...row };
       this.detailsVisible = true;
@@ -319,6 +348,23 @@ export default {
             }
           });
         },
+      });
+    },
+    // 查看文件
+    handleViewFile(record) {
+      hasFile({
+        fileSumMd5: record.fileId,
+      }).then((res) => {
+        if (res.code === 200) {
+          if (res.data) {
+            this.temp = res.data;
+            this.viewFileVisible = true;
+          } else {
+            this.$notification.warning({
+              message: "文件不存在啦",
+            });
+          }
+        }
       });
     },
   },
