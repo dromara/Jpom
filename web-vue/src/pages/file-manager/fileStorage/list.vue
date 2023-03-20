@@ -19,7 +19,7 @@
         <template slot="title">
           <a-space>
             <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="文件名称" class="search-input-item" />
-            <a-input v-model="listQuery['id']" @pressEnter="loadData" placeholder="文件id" class="search-input-item" />
+            <a-input v-model="listQuery['id']" @pressEnter="loadData" placeholder="文件id,精准搜索" class="search-input-item" />
             <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
               <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
             </a-tooltip>

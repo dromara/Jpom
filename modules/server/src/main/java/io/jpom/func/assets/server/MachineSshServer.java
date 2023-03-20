@@ -31,6 +31,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.CaseInsensitiveMap;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
@@ -261,7 +262,8 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
         Long memoryTotal = Convert.toLong(this.getFirstValue(map, "memory total"), 0L);
         Long memoryUsed = Convert.toLong(this.getFirstValue(map, "memory used"), 0L);
         update.setOsMoneyTotal(memoryTotal * 1024);
-        update.setStatusMsg("执行成功,错误信息：" + error);
+        error = Opt.ofBlankAble(error).map(s -> ",错误信息：" + s).orElse(StrUtil.EMPTY);
+        update.setStatusMsg("执行成功" + error);
         update.setOsOccupyCpu(Convert.toDouble(this.getFirstValue(map, "cpu usage"), -0D));
         if (memoryTotal > 0) {
             update.setOsOccupyMemory(NumberUtil.div(memoryUsed, memoryTotal, 2).doubleValue());

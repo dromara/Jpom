@@ -58,6 +58,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -71,6 +72,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     private final SshService sshService;
     private final JpomApplication jpomApplication;
     private final WorkspaceEnvVarService workspaceEnvVarService;
+
+    private Map<String, String> cancelTag = new ConcurrentHashMap<>();
 
     public FileReleaseTaskService(SshService sshService,
                                   JpomApplication jpomApplication,
@@ -126,12 +129,18 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         ThreadUtil.execute(() -> {
             try {
                 strictSyncFinisher.start();
-                updateRootStatus(taskId, 2, "正常结束");
+                if (cancelTag.containsKey(taskId)) {
+                    // 任务来源被取消
+                    this.cancelTaskUpdate(taskId);
+                } else {
+                    this.updateRootStatus(taskId, 2, "正常结束");
+                }
             } catch (Exception e) {
                 log.error("执行发布任务失败", e);
                 updateRootStatus(taskId, 3, e.getMessage());
             } finally {
                 SyncFinisherUtil.close(syncFinisherId);
+                cancelTag.remove(taskId);
             }
         });
     }
@@ -144,6 +153,11 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     public void cancelTask(String taskId) {
         String syncFinisherId = "file-release:" + taskId;
         SyncFinisherUtil.cancel(syncFinisherId);
+        // 异步线程无法标记 ,同步监听线程去操作
+        cancelTag.put(taskId, taskId);
+    }
+
+    private void cancelTaskUpdate(String taskId) {
         // 将未完成的任务标记为取消
         FileReleaseTaskLogModel update = new FileReleaseTaskLogModel();
         update.setStatus(4);
