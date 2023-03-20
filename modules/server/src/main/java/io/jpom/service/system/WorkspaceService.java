@@ -22,7 +22,6 @@
  */
 package io.jpom.service.system;
 
-import cn.hutool.core.util.ClassUtil;
 import io.jpom.common.Const;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.WorkspaceModel;
@@ -59,15 +58,14 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> implements I
             log.info("init created default workspace");
         }
 
-
-        Set<Class<?>> classes = ClassUtil.scanPackage("io.jpom.model", BaseWorkspaceModel.class::isAssignableFrom);
+        Set<Class<?>> classes = BaseWorkspaceModel.allClass();
         int total = 0;
         for (Class<?> aClass : classes) {
             TableName tableName = aClass.getAnnotation(TableName.class);
             if (tableName == null) {
                 continue;
             }
-            String sql = "update " + tableName.value() + " set workspaceId=? where workspaceId is null";
+            String sql = "update " + tableName.value() + " set workspaceId=? where (workspaceId is null or workspaceId='' or workspaceId='null')";
             int execute = nodeService.execute(sql, Const.WORKSPACE_DEFAULT_ID);
             if (execute > 0) {
                 log.info("convertNullWorkspaceId {} {}", tableName.value(), execute);

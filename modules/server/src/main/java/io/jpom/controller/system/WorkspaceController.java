@@ -26,7 +26,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import com.alibaba.fastjson2.JSONArray;
@@ -150,7 +149,7 @@ public class WorkspaceController extends BaseServerController {
         //
         Assert.state(!StrUtil.equals(id, Const.WORKSPACE_DEFAULT_ID), "不能删除默认工作空间");
         // 判断是否存在关联数据
-        Set<Class<?>> classes = ClassUtil.scanPackage("io.jpom.model", BaseWorkspaceModel.class::isAssignableFrom);
+        Set<Class<?>> classes = BaseWorkspaceModel.allClass();
         StringBuilder autoDelete = new StringBuilder(StrUtil.EMPTY);
         for (Class<?> aClass : classes) {
             TableName tableName = aClass.getAnnotation(TableName.class);
@@ -162,7 +161,7 @@ public class WorkspaceController extends BaseServerController {
                 String sql = "delete from " + tableName.value() + " where workspaceId=?";
                 int execute = workspaceService.execute(sql, id);
                 if (execute > 0) {
-                    autoDelete.append(StrUtil.format(" 自动删除 {} 表中数据 {} 条数据", execute));
+                    autoDelete.append(StrUtil.format(" 自动删除 {} 表中数据 {} 条数据", tableName.value(), execute));
                 }
                 continue;
             }
@@ -170,7 +169,7 @@ public class WorkspaceController extends BaseServerController {
             List<Entity> query = workspaceService.query(sql, id);
             Entity first = CollUtil.getFirst(query);
             if (first != null) {
-                Assert.notEmpty(first, "没有对应的用户信息");
+                Assert.notEmpty(first, "没有对应的信息");
                 Integer cnt = first.getInt("cnt");
                 Assert.state(cnt == null || cnt <= 0, "当前工作空间下还存在关联数据：" + tableName.name());
             }

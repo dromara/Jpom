@@ -23,7 +23,6 @@
 package io.jpom.system.db;
 
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.ClassUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.ILoadEvent;
@@ -83,7 +82,7 @@ public class DataInitEvent implements ILoadEvent {
             try {
                 checkErrorWorkspace();
             } catch (Exception e) {
-                log.error("建议错误的工作空间失败", e);
+                log.error("查询错误的工作空间失败", e);
             }
         });
     }
@@ -99,13 +98,13 @@ public class DataInitEvent implements ILoadEvent {
         WorkspaceService workspaceService = SpringUtil.getBean(WorkspaceService.class);
         List<WorkspaceModel> list = workspaceService.list();
         Set<String> workspaceIds = Optional.ofNullable(list)
-            .map(workspaceModels -> workspaceModels.stream()
-                .map(BaseIdModel::getId)
-                .collect(Collectors.toSet()))
-            .orElse(new HashSet<>());
+                .map(workspaceModels -> workspaceModels.stream()
+                        .map(BaseIdModel::getId)
+                        .collect(Collectors.toSet()))
+                .orElse(new HashSet<>());
         // 添加默认的全局工作空间 id
         workspaceIds.add(ServerConst.WORKSPACE_GLOBAL);
-        Set<Class<?>> classes = ClassUtil.scanPackage("io.jpom.model", BaseWorkspaceModel.class::isAssignableFrom);
+        Set<Class<?>> classes = BaseWorkspaceModel.allClass();
         for (Class<?> aClass : classes) {
             TableName tableName = aClass.getAnnotation(TableName.class);
             if (tableName == null) {
