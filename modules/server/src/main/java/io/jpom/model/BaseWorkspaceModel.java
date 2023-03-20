@@ -22,8 +22,12 @@
  */
 package io.jpom.model;
 
+import cn.hutool.core.util.ClassUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 工作空间 数据
@@ -46,6 +50,19 @@ public abstract class BaseWorkspaceModel extends BaseUserModifyDbModel {
     @Override
     public String toString() {
         return super.toString();
+    }
+
+    /**
+     * 所有实现过的 class
+     *
+     * @return set
+     */
+    public static Set<Class<?>> allClass() {
+        Set<Class<?>> classes1 = ClassUtil.scanPackageBySuper("io.jpom", BaseWorkspaceModel.class);
+        Set<Class<?>> classes2 = ClassUtil.scanPackageBySuper("top.jpom", BaseWorkspaceModel.class);
+        HashSet<Class<?>> collection = new HashSet<>(classes2);
+        collection.addAll(classes1);
+        return collection;
     }
 
 }
