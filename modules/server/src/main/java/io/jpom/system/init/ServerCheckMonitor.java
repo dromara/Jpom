@@ -25,8 +25,6 @@ package io.jpom.system.init;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
-import io.jpom.JpomApplication;
-import io.jpom.build.BuildUtil;
 import io.jpom.common.ILoadEvent;
 import io.jpom.common.ISystemTask;
 import io.jpom.common.JsonMessage;
@@ -79,27 +77,9 @@ public class ServerCheckMonitor implements ILoadEvent, ISystemTask {
         }
     }
 
-    /**
-     * 异步初始化
-     */
-    private void asyncLoad() {
-        ThreadUtil.execute(() -> {
-            //
-            BuildUtil.reloadCacheSize();
-            JpomApplication.getInstance().dataSize();
-        });
-    }
 
     @Override
     public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
-        // 缓存检测调度
-        CronUtils.upsert("cache_manger_schedule", "0 0/10 * * * ?", () -> {
-            BuildUtil.reloadCacheSize();
-            JpomApplication.getInstance().dataSize();
-            // 定时刷新代理配置
-            ProxySelectorConfig selectorConfig = SpringUtil.getBean(ProxySelectorConfig.class);
-            selectorConfig.refresh();
-        });
         // 拉取 脚本模版日志
         CronUtils.upsert("pull_script_log", "0 0/1 * * * ?", () -> {
             NodeService nodeService = SpringUtil.getBean(NodeService.class);
@@ -116,8 +96,6 @@ public class ServerCheckMonitor implements ILoadEvent, ISystemTask {
                 ThreadUtil.execute(() -> this.pullScriptLogItem(nodeModel));
             }
         });
-        // 异步加载
-        this.asyncLoad();
     }
 
     @Override

@@ -72,6 +72,20 @@ export function clearCache(params) {
 }
 
 /**
+ * 清理错误工作空间的数据
+ *
+ */
+export function clearErrorWorkspace(params) {
+  return axios({
+    url: "/system/clear-error-workspace",
+    method: "get",
+
+    headers: {},
+    params,
+  });
+}
+
+/**
  * 加载配置数据
  * @param {String} nodeId 节点 ID，若为空表示加载 Server 端配置
  */

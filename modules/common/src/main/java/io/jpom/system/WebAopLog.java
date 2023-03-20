@@ -63,7 +63,11 @@ public class WebAopLog {
         // 接收到请求，记录请求内容
         Object proceed;
         Object logResult = null;
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (requestAttributes == null) {
+            // 可能其他方式执行
+            return joinPoint.proceed();
+        }
         String requestUri = requestAttributes.getRequest().getRequestURI();
         try {
             aopLogInterface.forEach(aopLogInterface -> aopLogInterface.before(joinPoint));

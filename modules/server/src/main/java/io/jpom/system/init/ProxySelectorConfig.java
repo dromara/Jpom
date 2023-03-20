@@ -25,6 +25,7 @@ package io.jpom.system.init;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
+import io.jpom.common.ICacheTask;
 import io.jpom.common.ILoadEvent;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.service.system.SystemParametersServer;
@@ -52,7 +53,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Configuration
-public class ProxySelectorConfig extends ProxySelector implements ILoadEvent {
+public class ProxySelectorConfig extends ProxySelector implements ILoadEvent, ICacheTask {
 
     public static final String KEY = "global_proxy";
 
@@ -68,44 +69,45 @@ public class ProxySelectorConfig extends ProxySelector implements ILoadEvent {
     public List<Proxy> select(URI uri) {
         String url = uri.toString();
         return Optional.ofNullable(proxyConfigItems)
-            .flatMap(proxyConfigItems -> proxyConfigItems.stream()
-                .filter(proxyConfigItem -> {
-                    if (StrUtil.equals(proxyConfigItem.getPattern(), "*")) {
-                        return true;
-                    }
-                    if (ReUtil.isMatch(proxyConfigItem.getPattern(), url)) {
-                        // 满足正则条件
-                        return true;
-                    }
-                    return StrUtil.containsIgnoreCase(url, proxyConfigItem.getPattern());
-                })
-                .map(proxyConfigItem -> NodeForward.crateProxy(proxyConfigItem.getProxyType(), proxyConfigItem.getProxyAddress()))
-                .filter(Objects::nonNull)
-                .findFirst()
-                .map(Collections::singletonList)
-            ).orElseGet(() -> {
-                // revert to the default behaviour
-                return defaultProxySelector == null ? Collections.singletonList(Proxy.NO_PROXY) : defaultProxySelector.select(uri);
-            });
+                .flatMap(proxyConfigItems -> proxyConfigItems.stream()
+                        .filter(proxyConfigItem -> {
+                            if (StrUtil.equals(proxyConfigItem.getPattern(), "*")) {
+                                return true;
+                            }
+                            if (ReUtil.isMatch(proxyConfigItem.getPattern(), url)) {
+                                // 满足正则条件
+                                return true;
+                            }
+                            return StrUtil.containsIgnoreCase(url, proxyConfigItem.getPattern());
+                        })
+                        .map(proxyConfigItem -> NodeForward.crateProxy(proxyConfigItem.getProxyType(), proxyConfigItem.getProxyAddress()))
+                        .filter(Objects::nonNull)
+                        .findFirst()
+                        .map(Collections::singletonList)
+                ).orElseGet(() -> {
+                    // revert to the default behaviour
+                    return defaultProxySelector == null ? Collections.singletonList(Proxy.NO_PROXY) : defaultProxySelector.select(uri);
+                });
     }
 
     @Override
     public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
         if (uri == null || sa == null || ioe == null) {
             throw new IllegalArgumentException(
-                "Arguments can't be null.");
+                    "Arguments can't be null.");
         }
     }
 
     /**
      * 刷新
      */
+    @Override
     public void refresh() {
         JSONArray array = systemParametersServer.getConfigDefNewInstance(ProxySelectorConfig.KEY, JSONArray.class);
         proxyConfigItems = array.toJavaList(ProxyConfigItem.class)
-            .stream()
-            .filter(proxyConfigItem -> StrUtil.isAllNotEmpty(proxyConfigItem.pattern, proxyConfigItem.proxyAddress, proxyConfigItem.proxyType))
-            .collect(Collectors.toList());
+                .stream()
+                .filter(proxyConfigItem -> StrUtil.isAllNotEmpty(proxyConfigItem.pattern, proxyConfigItem.proxyAddress, proxyConfigItem.proxyType))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -45,7 +45,6 @@ import java.util.function.BiFunction;
 public class BuildUtil {
 
     public static Long buildCacheSize = 0L;
-    public static long tempFileCacheSize = 0L;
 
     /**
      * 刷新存储文件大小
@@ -54,8 +53,6 @@ public class BuildUtil {
         File buildDataDir = BuildUtil.getBuildDataDir();
         BuildUtil.buildCacheSize = FileUtil.size(buildDataDir);
         //
-        File file = JpomApplication.getInstance().getTempPath();
-        tempFileCacheSize = FileUtil.size(file);
     }
 
     public static File getBuildDataFile(String id) {
@@ -135,9 +132,9 @@ public class BuildUtil {
      */
     public static File getHistoryPackageZipFile(String buildModelId, int buildId) {
         return FileUtil.file(getBuildDataFile(buildModelId),
-            "history",
-            BuildInfoModel.getBuildIdStr(buildId),
-            "zip");
+                "history",
+                BuildInfoModel.getBuildIdStr(buildId),
+                "zip");
     }
 
     /**
@@ -152,9 +149,9 @@ public class BuildUtil {
             return null;
         }
         return FileUtil.file(getBuildDataFile(buildModelId),
-            "history",
-            BuildInfoModel.getBuildIdStr(buildId),
-            "info.log");
+                "history",
+                BuildInfoModel.getBuildIdStr(buildId),
+                "info.log");
     }
 
     /**
