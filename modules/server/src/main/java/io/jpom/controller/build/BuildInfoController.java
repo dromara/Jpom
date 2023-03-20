@@ -22,6 +22,7 @@
  */
 package io.jpom.controller.build;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
@@ -38,7 +39,6 @@ import io.jpom.build.DockerYmlDsl;
 import io.jpom.build.ResultDirFileAction;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
-import io.jpom.common.validator.ValidatorConfig;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.AfterOpt;
@@ -418,8 +418,8 @@ public class BuildInfoController extends BaseServerController {
      */
     @RequestMapping(value = "/build/branch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<Object[]> branchList(
-        @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空")) String repositoryId) throws Exception {
+    public JsonMessage<JSONObject> branchList(
+            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空") String repositoryId) throws Exception {
         // 根据 repositoryId 查询仓库信息
         RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, false);
         Assert.notNull(repositoryModel, "无效的仓库信息");
@@ -429,8 +429,11 @@ public class BuildInfoController extends BaseServerController {
         Map<String, Object> map = repositoryModel.toMap();
         Tuple branchAndTagList = (Tuple) plugin.execute("branchAndTagList", map);
         Assert.notNull(branchAndTagList, "没有任何分支");
-        Object[] members = branchAndTagList.getMembers();
-        return JsonMessage.success("ok", members);
+        JSONObject jsonObject = new JSONObject();
+        List<Object> collection = branchAndTagList.toList();
+        jsonObject.put("branch", CollUtil.get(collection, 0));
+        jsonObject.put("tags", CollUtil.get(collection, 1));
+        return JsonMessage.success("ok", jsonObject);
     }
 
 

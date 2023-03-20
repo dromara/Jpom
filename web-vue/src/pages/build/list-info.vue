@@ -1633,8 +1633,8 @@ export default {
       };
       getBranchList(params).then((res) => {
         if (res.code === 200) {
-          this.branchList = res.data[0];
-          this.branchTagList = res.data[1];
+          this.branchList = res.data?.branch || [];
+          this.branchTagList = res.data?.tags || [];
         }
       });
     },
