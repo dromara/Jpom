@@ -81,7 +81,7 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
                     break;
                 case "ADD":
                     //  ALTER TABLE PROJECT_INFO ADD IF NOT EXISTS triggerToken VARCHAR (100) comment '触发器token';
-                    String columnSql = this.generateColumnSql(viewAlterData);
+                    String columnSql = this.generateColumnSql(viewAlterData, true);
                     stringBuilder.append("CALL add_column_if_not_exists('").append(viewAlterData.getTableName()).append("','").append(viewAlterData.getName()).append("','").append(columnSql).append("')");
                     break;
                 case "ALTER":
@@ -126,9 +126,9 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
         }
         // 主键
         List<String> primaryKeys = row.stream()
-            .filter(tableViewData -> tableViewData.getPrimaryKey() != null && tableViewData.getPrimaryKey())
-            .map(TableViewRowData::getName)
-            .collect(Collectors.toList());
+                .filter(tableViewData -> tableViewData.getPrimaryKey() != null && tableViewData.getPrimaryKey())
+                .map(TableViewRowData::getName)
+                .collect(Collectors.toList());
         Assert.notEmpty(primaryKeys, "表没有主键");
         stringBuilder.append(StrUtil.TAB).append("PRIMARY KEY (").append(CollUtil.join(primaryKeys, StrUtil.COMMA)).append(")").append(StrUtil.LF);
         stringBuilder.append(") ").append("COMMENT=").append("'").append(desc).append("';");
@@ -137,6 +137,10 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
 
     @Override
     public String generateColumnSql(TableViewRowData tableViewRowData) {
+        return generateColumnSql(tableViewRowData, false);
+    }
+
+    private String generateColumnSql(TableViewRowData tableViewRowData, boolean encode) {
         //        id VARCHAR(50) not null default '' comment 'id'
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("`").append(tableViewRowData.getName()).append("`").append(StrUtil.SPACE);
@@ -180,7 +184,10 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
         }
         stringBuilder.append("comment '").append(tableViewRowData.getComment()).append("'");
         //
-        String columnSql = StrUtil.replace(stringBuilder.toString(), "'", "\\'");
+        String columnSql = stringBuilder.toString();
+        if (encode) {
+            columnSql = StrUtil.replace(columnSql, "'", "\\'");
+        }
         int length = StrUtil.length(columnSql);
         Assert.state(length <= 180, "sql 语句太长啦");
         return columnSql;
