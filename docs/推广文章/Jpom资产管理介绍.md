@@ -9,6 +9,8 @@ tags:
   - 
 ---
 
+![banner](/images/tutorial/2.10.x-article/banner.png)
+
 ## Jpom 介绍 📢
 
 Jpom 是一款简而轻的低侵入式在线构建、自动部署、日常运维、项目运维监控软件
@@ -26,6 +28,18 @@ Jpom 从 `18 年`初正式开源至今已经迭代了 `120+ 个`小版本，`2 �
 ![聊天截图3](/images/tutorial/2.10.x-article/img_2.png)
 
 ![聊天截图4](/images/tutorial/2.10.x-article/img_3.png)
+
+### Jpom 的主要功能
+
+- 资产管理 + 工作空间管理
+- 在线 SSH 终端、SFTP 管理
+- Docker + Swarm集群管理
+- 多种形式的脚本管理
+- 代码仓库 + 在线构建管理
+- 文件中心管理
+- 方便快捷的在线升级
+
+更多实用的功能等您来挖掘
 
 ## 前言 🧩
 
@@ -49,6 +63,8 @@ Jpom 2.10.x 次要版本主要是解决一下遗留问题、优化部分不易�
 12. 系统默认模板、docker 模板支持自定义配置
 13. 用户自定义工作空间排序、备注别名
 14. 更多优化、小变动更新期待您来发现
+
+完整的更新日志：[https://jpom.top/pages/changelog/new/](https://jpom.top/pages/changelog/new/)
 
 ### 致谢 🤝
 
