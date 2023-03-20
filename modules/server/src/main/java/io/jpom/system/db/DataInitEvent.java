@@ -22,9 +22,10 @@
  */
 package io.jpom.system.db;
 
-import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.spring.SpringUtil;
+import io.jpom.common.ICacheTask;
 import io.jpom.common.ILoadEvent;
 import io.jpom.common.ServerConst;
 import io.jpom.model.BaseIdModel;
@@ -38,6 +39,7 @@ import io.jpom.service.system.WorkspaceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.Assert;
 import top.jpom.h2db.TableName;
 
 import java.util.*;
@@ -51,7 +53,18 @@ import java.util.stream.Collectors;
  */
 @Configuration
 @Slf4j
-public class DataInitEvent implements ILoadEvent {
+public class DataInitEvent implements ILoadEvent, ICacheTask {
+
+    private final WorkspaceService workspaceService;
+    private final Map<String, List<String>> errorWorkspaceTable = new HashMap<>();
+
+    public DataInitEvent(WorkspaceService workspaceService) {
+        this.workspaceService = workspaceService;
+    }
+
+    public Map<String, List<String>> getErrorWorkspaceTable() {
+        return errorWorkspaceTable;
+    }
 
     @Override
     public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
@@ -78,13 +91,6 @@ public class DataInitEvent implements ILoadEvent {
         for (BaseNodeService<?> value : beansOfType.values()) {
             value.syncAllNode();
         }
-        ThreadUtil.execute(() -> {
-            try {
-                checkErrorWorkspace();
-            } catch (Exception e) {
-                log.error("查询错误的工作空间失败", e);
-            }
-        });
     }
 
     @Override
@@ -94,16 +100,9 @@ public class DataInitEvent implements ILoadEvent {
 
 
     private void checkErrorWorkspace() {
+        errorWorkspaceTable.clear();
         // 判断是否存在关联数据
-        WorkspaceService workspaceService = SpringUtil.getBean(WorkspaceService.class);
-        List<WorkspaceModel> list = workspaceService.list();
-        Set<String> workspaceIds = Optional.ofNullable(list)
-                .map(workspaceModels -> workspaceModels.stream()
-                        .map(BaseIdModel::getId)
-                        .collect(Collectors.toSet()))
-                .orElse(new HashSet<>());
-        // 添加默认的全局工作空间 id
-        workspaceIds.add(ServerConst.WORKSPACE_GLOBAL);
+        Set<String> workspaceIds = this.allowWorkspaceIds();
         Set<Class<?>> classes = BaseWorkspaceModel.allClass();
         for (Class<?> aClass : classes) {
             TableName tableName = aClass.getAnnotation(TableName.class);
@@ -118,8 +117,50 @@ public class DataInitEvent implements ILoadEvent {
                 if (workspaceIds.contains(workspaceId)) {
                     continue;
                 }
-                log.error("表 {}[{}] 存在 {} 条错误工作空间数据 -> {}", tableName.name(), tableName.value(), allCount, workspaceId);
+                String format = StrUtil.format("表 {}[{}] 存在 {} 条错误工作空间数据 -> {}", tableName.name(), tableName.value(), allCount, workspaceId);
+                log.error(format);
+                List<String> stringList = errorWorkspaceTable.computeIfAbsent(tableName.value(), s -> new ArrayList<>());
+                stringList.add(format);
             }
+        }
+    }
+
+    public Set<String> allowWorkspaceIds() {
+        // 判断是否存在关联数据
+        List<WorkspaceModel> list = workspaceService.list();
+        Set<String> workspaceIds = Optional.ofNullable(list)
+                .map(workspaceModels -> workspaceModels.stream()
+                        .map(BaseIdModel::getId)
+                        .collect(Collectors.toSet()))
+                .orElse(new HashSet<>());
+        // 添加默认的全局工作空间 id
+        workspaceIds.add(ServerConst.WORKSPACE_GLOBAL);
+        return workspaceIds;
+    }
+
+    public void clearErrorWorkspace(String tableName) {
+        Assert.state(errorWorkspaceTable.containsKey(tableName), "当前表没有错误数据");
+        Set<String> workspaceIds = this.allowWorkspaceIds();
+        String sql = "select `workspaceId`,count(1) as allCount from " + tableName + " group by `workspaceId`";
+        List<Entity> query = workspaceService.query(sql);
+        for (Entity entity : query) {
+            String workspaceId = (String) entity.get("workspaceId");
+            if (workspaceIds.contains(workspaceId)) {
+                continue;
+            }
+            String deleteSql = "delete from " + tableName + " where `workspaceId`=?";
+            int execute = workspaceService.execute(deleteSql, workspaceId);
+            log.info("删除表 {} 中 {} 条工作空间id为：{} 的数据", tableName, execute, workspaceId);
+        }
+        this.checkErrorWorkspace();
+    }
+
+    @Override
+    public void refresh() {
+        try {
+            checkErrorWorkspace();
+        } catch (Exception e) {
+            log.error("查询错误的工作空间失败", e);
         }
     }
 }

@@ -27,6 +27,7 @@ import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseAgentController;
+import io.jpom.common.ICacheTask;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.commander.AbstractProjectCommander;
@@ -57,10 +58,14 @@ import java.util.TimeZone;
  */
 @RestController
 @RequestMapping(value = "system")
-public class AgentCacheManageController extends BaseAgentController {
+public class AgentCacheManageController extends BaseAgentController implements ICacheTask {
 
     private final AgentWorkspaceEnvVarService agentWorkspaceEnvVarService;
     private final JpomApplication configBean;
+
+    private long dataSize;
+    private long oldJarsSize;
+    private long tempFileSize;
 
     public AgentCacheManageController(AgentWorkspaceEnvVarService agentWorkspaceEnvVarService,
                                       JpomApplication configBean) {
@@ -77,12 +82,9 @@ public class AgentCacheManageController extends BaseAgentController {
     public JsonMessage<JSONObject> cache() {
         JSONObject jsonObject = new JSONObject();
         //
-        File file = configBean.getTempPath();
-        String fileSize = FileUtil.readableFileSize(FileUtil.size(file));
-        jsonObject.put("fileSize", fileSize);
-        jsonObject.put("dataSize", FileUtil.readableFileSize(configBean.dataSize()));
-        File oldJarsPath = JpomManifest.getOldJarsPath();
-        jsonObject.put("oldJarsSize", FileUtil.readableFileSize(FileUtil.size(oldJarsPath)));
+        jsonObject.put("fileSize", this.tempFileSize);
+        jsonObject.put("dataSize", this.dataSize);
+        jsonObject.put("oldJarsSize", this.oldJarsSize);
         jsonObject.put("pidPort", AbstractProjectCommander.PID_PORT.size());
 
         int oneLineCount = AgentFileTailWatcher.getOneLineCount();
@@ -132,5 +134,14 @@ public class AgentCacheManageController extends BaseAgentController {
 
         }
         return JsonMessage.success("清空成功");
+    }
+
+    @Override
+    public void refresh() {
+        File file = configBean.getTempPath();
+        this.tempFileSize = FileUtil.size(file);
+        this.dataSize = configBean.dataSize();
+        File oldJarsPath = JpomManifest.getOldJarsPath();
+        this.oldJarsSize = FileUtil.size(oldJarsPath);
     }
 }

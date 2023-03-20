@@ -10,18 +10,18 @@
             </span>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">数据目录占用空间：{{ temp.dataSize }}</span>
+            <span class="layui-elem-quote">数据目录占用空间：{{ renderSize(temp.dataSize) }}</span>
           </a-timeline-item>
           <a-timeline-item v-if="temp.fileSize">
             <a-space>
-              <span class="layui-elem-quote">临时文件占用空间：{{ temp.fileSize }}</span>
-              <a-button size="small" type="primary" v-if="temp.fileSize !== '0'" class="btn" @click="clear('fileSize')">清空</a-button>
+              <span class="layui-elem-quote">临时文件占用空间：{{ renderSize(temp.fileSize) }}</span>
+              <a-button size="small" type="primary" class="btn" @click="clear('fileSize')">清空</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item v-if="temp.oldJarsSize">
             <a-space>
-              <span class="layui-elem-quote">旧版程序包占有空间：{{ temp.oldJarsSize }}</span>
-              <a-button size="small" type="primary" v-if="temp.oldJarsSize !== '0'" class="btn" @click="clear('oldJarsSize')">清空</a-button>
+              <span class="layui-elem-quote">旧版程序包占有空间：{{ renderSize(temp.oldJarsSize) }}</span>
+              <a-button size="small" type="primary" class="btn" @click="clear('oldJarsSize')">清空</a-button>
             </a-space>
           </a-timeline-item>
 
@@ -60,7 +60,7 @@
 <script>
 import { getNodeCache, clearCache } from "@/api/system";
 import TaskStat from "@/pages/system/taskStat";
-import { parseTime } from "@/utils/const";
+import { renderSize } from "@/utils/const";
 export default {
   components: {
     TaskStat,
@@ -80,7 +80,8 @@ export default {
     this.loadData();
   },
   methods: {
-    parseTime: parseTime,
+    // parseTime,
+    renderSize,
     // load data
     loadData() {
       getNodeCache(this.node.id).then((res) => {

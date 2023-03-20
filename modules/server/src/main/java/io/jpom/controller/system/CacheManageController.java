@@ -28,6 +28,7 @@ import io.jpom.JpomApplication;
 import io.jpom.build.BuildExecuteService;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.ICacheTask;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
@@ -42,14 +43,12 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.socket.ServiceFileTailWatcher;
+import io.jpom.system.db.DataInitEvent;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.SyncFinisherUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.util.HashMap;
@@ -66,7 +65,20 @@ import java.util.TimeZone;
 @RequestMapping(value = "system")
 @Feature(cls = ClassFeature.SYSTEM_CACHE)
 @SystemPermission
-public class CacheManageController extends BaseServerController {
+public class CacheManageController extends BaseServerController implements ICacheTask {
+
+    private long dataSize;
+    private long oldJarsSize;
+    private long tempFileSize;
+
+    private final JpomApplication jpomApplication;
+    private final DataInitEvent dataInitEvent;
+
+    public CacheManageController(JpomApplication jpomApplication,
+                                 DataInitEvent dataInitEvent) {
+        this.jpomApplication = jpomApplication;
+        this.dataInitEvent = dataInitEvent;
+    }
 
     /**
      * get server's cache data
@@ -79,19 +91,15 @@ public class CacheManageController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<Map<String, Object>> serverCache() {
         Map<String, Object> map = new HashMap<>(10);
-        String fileSize = FileUtil.readableFileSize(BuildUtil.tempFileCacheSize);
-        map.put("cacheFileSize", fileSize);
-        map.put("dataSize", FileUtil.readableFileSize(JpomApplication.getInstance().getDataSizeCache()));
+        map.put("cacheFileSize", this.tempFileSize);
+        map.put("dataSize", this.dataSize);
         int size = LoginControl.LFU_CACHE.size();
-        File oldJarsPath = JpomManifest.getOldJarsPath();
-        map.put("oldJarsSize", FileUtil.readableFileSize(FileUtil.size(oldJarsPath)));
+        map.put("oldJarsSize", this.oldJarsSize);
         map.put("ipSize", size);
         int oneLineCount = ServiceFileTailWatcher.getOneLineCount();
         map.put("readFileOnLineCount", oneLineCount);
 
-
-        fileSize = FileUtil.readableFileSize(BuildUtil.buildCacheSize);
-        map.put("cacheBuildFileSize", fileSize);
+        map.put("cacheBuildFileSize", BuildUtil.buildCacheSize);
 
         map.put("taskList", CronUtils.list());
         map.put("pluginSize", PluginFactory.size());
@@ -100,6 +108,7 @@ public class CacheManageController extends BaseServerController {
         map.put("syncFinisKeys", SyncFinisherUtil.keys());
         map.put("dateTime", DateTime.now().toString());
         map.put("timeZoneId", TimeZone.getDefault().getID());
+        map.put("errorWorkspace", dataInitEvent.getErrorWorkspaceTable());
         //
         return JsonMessage.success("ok", map);
     }
@@ -145,5 +154,28 @@ public class CacheManageController extends BaseServerController {
 
         }
         return JsonMessage.success("清空成功");
+    }
+
+    /**
+     * 清理错误的工作空间数据
+     *
+     * @param tableName 类型
+     * @return json
+     */
+    @GetMapping(value = "clear-error-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public JsonMessage<String> clearErrorWorkspace(@ValidatorItem String tableName) {
+        dataInitEvent.clearErrorWorkspace(tableName);
+        return JsonMessage.success("清理成功");
+    }
+
+    @Override
+    public void refresh() {
+        File file = jpomApplication.getTempPath();
+        this.tempFileSize = FileUtil.size(file);
+        this.dataSize = jpomApplication.dataSize();
+        File oldJarsPath = JpomManifest.getOldJarsPath();
+        this.oldJarsSize = FileUtil.size(oldJarsPath);
+        BuildUtil.reloadCacheSize();
     }
 }

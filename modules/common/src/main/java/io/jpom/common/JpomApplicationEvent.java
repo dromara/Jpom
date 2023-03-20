@@ -117,7 +117,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
             file = FileUtil.createTempFile("jpom", ".temp", file, true);
         } catch (Exception e) {
             log.error(StrUtil.format("Jpom Failed to create data directory, directory location：{}," +
-                "Please check whether the current user has permission to this directory or modify the configuration file：{} jpom.path in is the path where the directory can be created", path, extConfigPath), e);
+                    "Please check whether the current user has permission to this directory or modify the configuration file：{} jpom.path in is the path where the directory can be created", path, extConfigPath), e);
             asyncExit(-1);
         }
         FileUtil.del(file);
@@ -341,15 +341,15 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         // 开始加载子模块
         Map<String, ILoadEvent> loadEventMap = applicationContext.getBeansOfType(ILoadEvent.class);
         loadEventMap.values()
-            .stream()
-            .sorted((o1, o2) -> CompareUtil.compare(o1.getOrder(), o2.getOrder()))
-            .forEach(iLoadEvent -> {
-                try {
-                    iLoadEvent.afterPropertiesSet(applicationContext);
-                } catch (Exception e) {
-                    throw Lombok.sneakyThrow(e);
-                }
-            });
+                .stream()
+                .sorted((o1, o2) -> CompareUtil.compare(o1.getOrder(), o2.getOrder()))
+                .forEach(iLoadEvent -> {
+                    try {
+                        iLoadEvent.afterPropertiesSet(applicationContext);
+                    } catch (Exception e) {
+                        throw Lombok.sneakyThrow(e);
+                    }
+                });
         // 检查更新文件
         this.checkUpdate();
         // 开始异常加载
@@ -364,10 +364,12 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         @Override
         public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
             CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", this::executeTask);
+            CronUtils.upsert("system_cache", "0 0/10 * * * ?", this::refresh);
             // 启动执行一次
             ThreadUtil.execute(() -> {
                 try {
                     this.executeTask();
+                    this.refresh();
                 } catch (Exception e) {
                     log.error("执行系统任务异常", e);
                 }
@@ -377,6 +379,11 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         private void executeTask() {
             Map<String, ISystemTask> taskMap = SpringUtil.getBeansOfType(ISystemTask.class);
             Optional.ofNullable(taskMap).ifPresent(map -> map.values().forEach(ISystemTask::executeTask));
+        }
+
+        private void refresh() {
+            Map<String, ICacheTask> taskMap = SpringUtil.getBeansOfType(ICacheTask.class);
+            Optional.ofNullable(taskMap).ifPresent(map -> map.values().forEach(ICacheTask::refresh));
         }
     }
 }
