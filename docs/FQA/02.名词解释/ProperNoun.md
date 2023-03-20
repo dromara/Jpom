@@ -1,5 +1,5 @@
 ---
-title: ProperNoun
+title: 名词解释目录
 date: 2022-10-20 10:22:41
 permalink: /pages/FQA/proper-noun/
 categories:
@@ -9,6 +9,8 @@ categories:
 tags:
   - 
 ---
+
+> 选择分类查看详情奥
 
 
 [[toc]]

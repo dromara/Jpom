@@ -44,10 +44,16 @@ features: # 可选的
 # 文章列表显示方式: detailed 默认，显示详细版文章列表（包括作者、分类、标签、摘要、分页等）| simple => 显示简约版文章列表（仅标题和日期）| none 不显示文章列表
 postList: none
 notices: # 可选的
-  - id: jpom-2.10.30
-    title: 📢 Jpom v2.10.30 发布！
-    content: '<div><p>2023-03-14</p><ul><li>支持配置插件端消息编码方式</li><li>修复项目修改路径为子目录时 mv 文件触发死循环</li><li>系统缓存页面显示当前服务器时间、时区信息</li></ul></div><p style="text-align: right;"><a href="/pages/changelog/new/">查看详情</a>&nbsp;&nbsp;<a href="/pages/all-downloads/">下载安装包</a></p>'
+  - id: jpom-2.10.36
+    title: 📢 Jpom v2.10.36 发布！
+    content: '<div><p>2023-03-20</p><ul><li>资产管理 SSH 管理支持导入导出数据</li><li>文件管理中心（用于统一存储管理公共文件）</li><li>仓库令牌导入支持 gogs （gogs 和 gitea 标准一致） </li></ul></div><p style="text-align: right;"><a href="/pages/changelog/new/">查看详情</a>&nbsp;&nbsp;<a href="/pages/all-downloads/">下载安装包</a></p>'
     isHtmlContent: true
+    position: top-right
+  - id: jpom-2.10.x
+    title: 🎁 Jpom v2.10.x 资产管理了解一下?
+    content: '<div><ul><li>资产管理怎么用？</li><li>2.10.x有哪些新特性？</li><li>想使用 mysql 数据库该怎么办？</li></ul></div><p style="text-align: right;"><a href="/pages/7f1127/">查看详情</a></p>'
+    isHtmlContent: true
+    position: top-left
 ---
 
 <Notice :data="$frontmatter.notices"/>
@@ -56,6 +62,8 @@ notices: # 可选的
 
 <p align="center">
   <a class="become-sponsor" href="/pages/practice/">实践案例</a>
+  <a class="become-sponsor" href="/pages/FQA/more/">常见问题</a>
+  <a class="become-sponsor" href="/pages/FQA/proper-noun/">名词解释</a>
   <a class="become-sponsor" href="/pages/praise/">支持这个项目</a>
 </p>
 
