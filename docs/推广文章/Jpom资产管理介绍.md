@@ -19,13 +19,13 @@ Jpom 从 `18 年`初正式开源至今已经迭代了 `120+ 个`小版本，`2 �
 
 📢 业界内已经有使用 **Jpom** 来代替 ~~Jenkins~~ 的传言了 🤩
 
-![img.png](/images/tutorial/2.10.x-article/img.png)
+![聊天截图1](/images/tutorial/2.10.x-article/img.png)
 
-![img_1.png](/images/tutorial/2.10.x-article/img_1.png)
+![聊天截图2](/images/tutorial/2.10.x-article/img_1.png)
 
-![img_2.png](/images/tutorial/2.10.x-article/img_2.png)
+![聊天截图3](/images/tutorial/2.10.x-article/img_2.png)
 
-![img_3.png](/images/tutorial/2.10.x-article/img_3.png)
+![聊天截图4](/images/tutorial/2.10.x-article/img_3.png)
 
 ## 前言 🧩
 
@@ -52,7 +52,7 @@ Jpom 2.10.x 次要版本主要是解决一下遗留问题、优化部分不易�
 
 ### 致谢 🤝
 
-> 在 2.10.x 版本中我们要特别感谢几个大佬积极的为 Jpom 反馈问题，提供问题解决思路
+**在 2.10.x 版本中我们要特别感谢几个大佬积极的为 Jpom 反馈问题，提供问题解决思路**
 
 - [@张飞鸿](https://gitee.com/zhangfeihong_597)
 - [@酱总](https://gitee.com/autools/)
@@ -65,20 +65,16 @@ Jpom 2.10.x 次要版本主要是解决一下遗留问题、优化部分不易�
 
 ## 整体预览图 💻
 
-> 我们先来几张新版本的整体菜单截图
-
-工作空间中的功能预览图
-
-![img_4.png](/images/tutorial/2.10.x-article/img_4.png)
+我们先来几张新版本的整体菜单截图
 
 
-系统管理功能预览图
+![工作空间中的功能预览图](/images/tutorial/2.10.x-article/img_4.png)
 
-![img_5.png](/images/tutorial/2.10.x-article/img_5.png)
 
-节点管理功能预览图
+![系统管理功能预览图](/images/tutorial/2.10.x-article/img_5.png)
 
-![img_10.png](/images/tutorial/2.10.x-article/img_10.png)
+
+![节点管理功能预览图](/images/tutorial/2.10.x-article/img_10.png)
 
 ### 总结 🗒
 
@@ -124,26 +120,26 @@ Jpom 2.10.x 次要版本主要是解决一下遗留问题、优化部分不易�
 
 服务器的 CPU、内存、硬盘、网络流量、文件系统、硬盘、网卡都支持实时查看
 
-![img_6.png](/images/tutorial/2.10.x-article/img_6.png)
+![查看机器信息](/images/tutorial/2.10.x-article/img_6.png)
 
-![img_7.png](/images/tutorial/2.10.x-article/img_7.png)
+![查看机器统计](/images/tutorial/2.10.x-article/img_7.png)
 
 
-> 注意：添加节点已经变更为添加机器啦（资产管理中添加机器）
+**注意：**添加节点已经变更为添加机器啦（资产管理中添加机器）
 
 ### SSH 资产列表
 
 SSH 这里在新版本中我们支持对 SSH 的连接状态和 SSH 服务端的基础信息监控
 
-![img_8.png](/images/tutorial/2.10.x-article/img_8.png)
+![SSH管理列表](/images/tutorial/2.10.x-article/img_8.png)
 
-![img_11.png](/images/tutorial/2.10.x-article/img_11.png)
+![SSH机器信息](/images/tutorial/2.10.x-article/img_11.png)
 
 ### Docker 资产列表
 
 新版本中使用 docker 资产来统一管理 docker + docker 集群
 
-![img_9.png](/images/tutorial/2.10.x-article/img_9.png)
+![docker管理列表](/images/tutorial/2.10.x-article/img_9.png)
 
 
 ## 数据库使用 mysql 💾
