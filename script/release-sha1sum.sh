@@ -24,7 +24,8 @@
 
 
 # 版本
-jpom_version=2.10.37
+jpom_version=$1
+jpom_tag=$2
 
 #Mirror_Host=download.fastgit.org
 #Mirror_Host=hub.fastgit.xyz
@@ -34,13 +35,13 @@ function checkItem()
 {
 rm -f $1-${jpom_version}-release.$2.sha1 $1-${jpom_version}-release.$2
 
-curl -LfsSo $1-${jpom_version}-release.$2.sha1 https://download.jpom.top/release/${jpom_version}/$1-${jpom_version}-release.$2.sha1
+curl -LfsSo $1-${jpom_version}-release.$2.sha1 https://download.jpom.top/${jpom_tag}/${jpom_version}/$1-${jpom_version}-release.$2.sha1
 
 ESUM=`cat $1-${jpom_version}-release.$2.sha1`
 
 echo "$1-${jpom_version}-release.$2 => ${ESUM}"
 
-curl -LfsSo $1-${jpom_version}-release.$2 https://download.jpom.top/release/${jpom_version}/$1-${jpom_version}-release.$2
+curl -LfsSo $1-${jpom_version}-release.$2 https://download.jpom.top/${jpom_tag}/${jpom_version}/$1-${jpom_version}-release.$2
 
 echo "${ESUM} $1-${jpom_version}-release.$2" | sha1sum -c -;
 
