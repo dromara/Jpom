@@ -5,6 +5,9 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】优化 容器构建 maven 插件版本错误提示可用版本号，如果构建容器已经存在则忽略远程版本（感谢@大灰灰）
+2. 【server】优化 脚本列表显示脚本 ID，方便快速查看复制
+   （感谢 [@大灰灰大](https://gitee.com/linjianhui) [Gitee issues I6OUDT](https://gitee.com/dromara/Jpom/issues/I6OUDT) ）
+3. 【server】优化 文件管理列表显示，小屏幕部分字段被隐藏（感谢@tinsang）
 
 ------
 

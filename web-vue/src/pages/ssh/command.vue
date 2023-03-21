@@ -281,9 +281,9 @@ export default {
         command: [{ required: true, message: "Please input command", trigger: "blur" }],
       },
       columns: [
-        { title: "命令名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "命令描述", dataIndex: "desc", ellipsis: true, scopedSlots: { customRender: "desc" } },
-        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, scopedSlots: { customRender: "autoExecCron" } },
+        { title: "命令名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "name" } },
+        { title: "命令描述", dataIndex: "desc", ellipsis: true, width: 250, scopedSlots: { customRender: "desc" } },
+        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, width: 120, scopedSlots: { customRender: "autoExecCron" } },
         {
           title: "创建时间",
           dataIndex: "createTimeMillis",
@@ -292,12 +292,12 @@ export default {
           customRender: (text) => {
             return parseTime(text);
           },
-          width: 170,
+          width: "170px",
         },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
-          width: 170,
+          width: "170px",
           ellipsis: true,
           sorter: true,
           customRender: (text) => {
@@ -311,7 +311,7 @@ export default {
           ellipsis: true,
           scopedSlots: { customRender: "modifyUser" },
         },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "240px" },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "240px" },
       ],
       tableSelections: [],
       syncToWorkspaceVisible: false,

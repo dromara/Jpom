@@ -33,7 +33,7 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="`${nodeMap[text]} 节点ID： ${text}`">
@@ -52,13 +52,6 @@
         </a-tooltip>
       </template>
 
-      <a-tooltip
-        slot="modifyTimeMillis"
-        slot-scope="text, record"
-        :title="`创建时间：${parseTime(record.createTimeMillis)} ${record.modifyTimeMillis ? '修改时间：' + parseTime(record.modifyTimeMillis) : ''}`"
-      >
-        <span>{{ parseTime(record.modifyTimeMillis) }}</span>
-      </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
@@ -237,14 +230,34 @@ export default {
       drawerConsoleVisible: false,
       drawerLogVisible: false,
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "节点名称", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
+        { title: "id", dataIndex: "id", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "name" } },
+        { title: "节点名称", dataIndex: "nodeId", ellipsis: true, width: 150, scopedSlots: { customRender: "nodeId" } },
         { title: "类型", dataIndex: "scriptType", width: 70, align: "center", ellipsis: true, scopedSlots: { customRender: "scriptType" } },
         { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, width: 120, scopedSlots: { customRender: "autoExecCron" } },
-        { title: "修改时间", dataIndex: "modifyTimeMillis", width: 170, sorter: true, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          sorter: true,
+          width: "170px",
+          ellipsis: true,
+          customRender: (text) => {
+            return parseTime(text);
+          },
+        },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          sorter: true,
+          width: "170px",
+          ellipsis: true,
+          customRender: (text) => {
+            return parseTime(text);
+          },
+        },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
-        { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "220px" },
+        { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" }, width: 120 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "220px" },
       ],
       rules: {
         name: [{ required: true, message: "Please input Script name", trigger: "blur" }],
