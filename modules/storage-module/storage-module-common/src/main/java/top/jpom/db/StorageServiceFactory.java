@@ -111,16 +111,16 @@ public class StorageServiceFactory {
             log.info("成功连接 {} {}", dbExtConfig.getMode(), dbExtConfig.getUrl());
             Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("io.jpom", TableName.class);
             classes = classes.stream()
-                .filter(aClass -> {
-                    TableName tableName = aClass.getAnnotation(TableName.class);
-                    DbExtConfig.Mode[] modes = tableName.modes();
-                    if (ArrayUtil.isEmpty(modes)) {
-                        return true;
-                    }
-                    return ArrayUtil.contains(modes, dbExtConfig.getMode());
-                })
-                .sorted((o1, o2) -> StrUtil.compare(o1.getSimpleName(), o2.getSimpleName(), false))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+                    .filter(aClass -> {
+                        TableName tableName = aClass.getAnnotation(TableName.class);
+                        DbExtConfig.Mode[] modes = tableName.modes();
+                        if (ArrayUtil.isEmpty(modes)) {
+                            return true;
+                        }
+                        return ArrayUtil.contains(modes, dbExtConfig.getMode());
+                    })
+                    .sorted((o1, o2) -> StrUtil.compare(o1.getSimpleName(), o2.getSimpleName(), false))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
             log.info("准备迁移数据");
             int total = 0;
             for (Class<?> aClass : classes) {
@@ -153,12 +153,12 @@ public class StorageServiceFactory {
             }
             // 过滤需要忽略迁移的数据
             List<Entity> newResult = pageResult.stream()
-                .map(entity -> entity.toBeanIgnoreCase(aClass))
-                .map(o -> {
-                    // 兼容大小写
-                    Entity entity = Entity.create(tableName.value());
-                    return entity.parseBean(o);
-                }).collect(Collectors.toList());
+                    .map(entity -> entity.toBeanIgnoreCase(aClass))
+                    .map(o -> {
+                        // 兼容大小写
+                        Entity entity = Entity.create(tableName.value());
+                        return entity.parseBean(o, false, true);
+                    }).collect(Collectors.toList());
             if (newResult.isEmpty()) {
                 if (pageResult.isLast()) {
                     // 最后一页
