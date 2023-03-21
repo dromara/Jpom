@@ -82,9 +82,6 @@ sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/common/src/main/res
 # vue version
 sed -i.bak "s/${old_version}/${new_version}/g" $base/web-vue/package.json
 
-# release-sha1sum.sh
-sed -i.bak "s/${old_version}/${new_version}/g" $base/script/release-sha1sum.sh
-
 # gitee go
 sed -i.bak "s/${old_version}/${new_version}/g" $base/.workflow/MasterPipeline.yml
 
