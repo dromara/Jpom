@@ -229,7 +229,9 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         String tag = size > 1 ? CollUtil.getLast(split) : null;
         tag = StrUtil.emptyToDefault(tag, "latest");
         logConsumer.accept(StrUtil.format("start pull {}:{}", repository, tag));
-        PullImageCmd pullImageCmd = dockerClient.pullImageCmd(repository).withTag(tag);
+        PullImageCmd pullImageCmd = dockerClient.pullImageCmd(repository)
+                .withTag(tag)
+                .withAuthConfig(dockerClient.authConfig());
         pullImageCmd.exec(new InvocationBuilder.AsyncResultCallback<PullResponseItem>() {
             @Override
             public void onNext(PullResponseItem object) {
