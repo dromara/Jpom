@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.PatternPool;
@@ -170,6 +171,9 @@ public class TestString {
     @Test
     public void testVersion() {
         System.out.println(StrUtil.compareVersion("2.10.10", "2.10.9"));
+        System.out.println(StrUtil.compareVersion("2.10.37", "2.10.38"));
+        System.out.println(StrUtil.compareVersion("2.10.37", "2.10.37.1"));
+        System.out.println(StrUtil.compareVersion("2.10.38", "2.10.37.9"));
     }
 
     @Test

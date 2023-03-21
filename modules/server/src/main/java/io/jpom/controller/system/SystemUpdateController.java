@@ -26,6 +26,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import com.alibaba.fastjson2.JSONObject;
@@ -40,8 +41,11 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.dblog.BackupInfoService;
+import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ServerConfig;
 import lombok.Lombok;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,15 +73,21 @@ import java.util.Optional;
 @RequestMapping(value = "system")
 @Feature(cls = ClassFeature.SYSTEM_UPGRADE)
 @SystemPermission(superUser = true)
-public class SystemUpdateController extends BaseServerController {
+@Slf4j
+public class SystemUpdateController extends BaseServerController implements ILoadEvent {
+
+    private static final String JOIN_JPOM_BETA_RELEASE = "JOIN_JPOM_BETA_RELEASE";
 
     private final BackupInfoService backupInfoService;
     private final ServerConfig serverConfig;
+    private final SystemParametersServer systemParametersServer;
 
     public SystemUpdateController(BackupInfoService backupInfoService,
-                                  ServerConfig serverConfig) {
+                                  ServerConfig serverConfig,
+                                  SystemParametersServer systemParametersServer) {
         this.backupInfoService = backupInfoService;
         this.serverConfig = serverConfig;
+        this.systemParametersServer = systemParametersServer;
     }
 
     @PostMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -91,8 +101,24 @@ public class SystemUpdateController extends BaseServerController {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("manifest", instance);
             jsonObject.put("remoteVersion", remoteVersion);
+            jsonObject.put("joinBetaRelease", RemoteVersion.betaRelease());
             return JsonMessage.success("", jsonObject);
         });
+    }
+
+    @GetMapping(value = "change-beta-release", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<String> changeBetaRelease(String beta) {
+        boolean betaBool = this.changeBetaRelease2(beta);
+        RemoteVersion.loadRemoteInfo();
+        return JsonMessage.success(betaBool ? "成功加入 beta 计划" : "关闭 beta 计划成功");
+    }
+
+    private boolean changeBetaRelease2(String beta) {
+        boolean betaBool = BooleanUtil.toBoolean(beta);
+        systemParametersServer.upsert(JOIN_JPOM_BETA_RELEASE, String.valueOf(betaBool), "是否加入 beta 计划");
+        RemoteVersion.changeBetaRelease(String.valueOf(betaBool));
+        return betaBool;
     }
 
     /**
@@ -212,5 +238,12 @@ public class SystemUpdateController extends BaseServerController {
             }
             return JsonMessage.success(Const.UPGRADE_MSG);
         });
+    }
+
+    @Override
+    public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
+        String config = systemParametersServer.getConfig(JOIN_JPOM_BETA_RELEASE, String.class);
+        boolean release2 = this.changeBetaRelease2(config);
+        log.debug("beta plan:{}", release2);
     }
 }

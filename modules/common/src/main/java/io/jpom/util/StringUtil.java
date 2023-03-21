@@ -24,9 +24,11 @@ package io.jpom.util;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
@@ -142,6 +144,9 @@ public class StringUtil {
         if (StrUtil.isEmpty(jsonStr)) {
             return null;
         }
+        if (ClassUtil.isPrimitiveWrapper(cls)) {
+            return Convert.convert(cls, jsonStr);
+        }
         try {
             return JSON.parseObject(jsonStr, cls);
         } catch (Exception e) {
@@ -251,15 +256,15 @@ public class StringUtil {
             return MapUtil.newHashMap();
         }
         List<Tuple> collect = envStrList.stream()
-            .map(StrUtil::trim)
-            .filter(s -> !StrUtil.isEmpty(s) && !StrUtil.startWith(s, "#"))
-            .map(s -> {
-                List<String> list1 = StrUtil.splitTrim(s, "=");
-                if (CollUtil.size(list1) != 2) {
-                    return null;
-                }
-                return new Tuple(list1.get(0), list1.get(1));
-            }).filter(Objects::nonNull).collect(Collectors.toList());
+                .map(StrUtil::trim)
+                .filter(s -> !StrUtil.isEmpty(s) && !StrUtil.startWith(s, "#"))
+                .map(s -> {
+                    List<String> list1 = StrUtil.splitTrim(s, "=");
+                    if (CollUtil.size(list1) != 2) {
+                        return null;
+                    }
+                    return new Tuple(list1.get(0), list1.get(1));
+                }).filter(Objects::nonNull).collect(Collectors.toList());
         return CollStreamUtil.toMap(collect, objects -> objects.get(0), objects -> objects.get(1));
     }
 }

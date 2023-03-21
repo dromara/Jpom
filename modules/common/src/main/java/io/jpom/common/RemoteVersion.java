@@ -22,12 +22,14 @@
  */
 package io.jpom.common;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.SystemPropsUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
@@ -70,6 +72,7 @@ public class RemoteVersion extends BaseJsonModel {
      * 1. <a href="https://jpom.top/docs/release-versions.json">https://jpom.top/docs/release-versions.json</a>
      */
     private static final String DEFAULT_URL = "https://jpom.top/docs/release-versions.json";
+    private static final String BETA_URL = "https://jpom.top/docs/beta-versions.json";
     private static String remoteVersionUrl;
     /**
      * 检查间隔时间
@@ -105,6 +108,10 @@ public class RemoteVersion extends BaseJsonModel {
      * 是否有新版本
      */
     private Boolean upgrade;
+    /**
+     * 是否为 beta 版本
+     */
+    private Boolean beta;
 
     @Override
     public String toString() {
@@ -116,6 +123,30 @@ public class RemoteVersion extends BaseJsonModel {
     }
 
     /**
+     * 获取 版本检查的 url
+     *
+     * @return 远程地址
+     */
+    private static String loadDefaultUrl() {
+        boolean beta = betaRelease();
+        return beta ? BETA_URL : DEFAULT_URL;
+    }
+
+    /**
+     * 判断当前是否加入 beta 计划
+     *
+     * @return true 已经加入 false 未加入
+     */
+    public static boolean betaRelease() {
+        String betaRelease = SystemPropsUtil.get("JOIN_JPOM_BETA_RELEASE", StrUtil.EMPTY);
+        return Convert.toBool(betaRelease, false);
+    }
+
+    public static void changeBetaRelease(String beta) {
+        SystemPropsUtil.set("JOIN_JPOM_BETA_RELEASE", beta);
+    }
+
+    /**
      * 获取远程最新版本
      *
      * @return 版本信息
@@ -123,8 +154,8 @@ public class RemoteVersion extends BaseJsonModel {
     public static RemoteVersion loadRemoteInfo() {
         String body = StrUtil.EMPTY;
         try {
-            String remoteVersionUrl = StrUtil.emptyToDefault(RemoteVersion.remoteVersionUrl, DEFAULT_URL);
-            remoteVersionUrl = Validator.isUrl(remoteVersionUrl) ? remoteVersionUrl : DEFAULT_URL;
+            String remoteVersionUrl = StrUtil.emptyToDefault(RemoteVersion.remoteVersionUrl, loadDefaultUrl());
+            remoteVersionUrl = Validator.isUrl(remoteVersionUrl) ? remoteVersionUrl : loadDefaultUrl();
             // 获取缓存中到信息
             RemoteVersion remoteVersion = RemoteVersion.loadTransitUrl(remoteVersionUrl);
             if (remoteVersion == null || StrUtil.isEmpty(remoteVersion.getTagName())) {

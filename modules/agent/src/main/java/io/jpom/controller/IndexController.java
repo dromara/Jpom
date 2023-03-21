@@ -87,6 +87,7 @@ public class IndexController extends BaseAgentController {
         jsonObject.put("manifest", instance);
         jsonObject.put("remoteVersion", remoteVersion);
         jsonObject.put("pluginSize", PluginFactory.size());
+        jsonObject.put("joinBetaRelease", RemoteVersion.betaRelease());
         return JsonMessage.success("", jsonObject);
     }
 
@@ -135,13 +136,13 @@ public class IndexController extends BaseAgentController {
         processName = StrUtil.emptyToDefault(processName, "java");
         List<JSONObject> processes = OshiUtils.getProcesses(processName, Convert.toInt(count, 20));
         processes = processes.stream()
-            .peek(jsonObject -> {
-                int processId = jsonObject.getIntValue("processId");
-                String port = AbstractProjectCommander.getInstance().getMainPort(processId);
-                jsonObject.put("port", port);
-                //
-            })
-            .collect(Collectors.toList());
+                .peek(jsonObject -> {
+                    int processId = jsonObject.getIntValue("processId");
+                    String port = AbstractProjectCommander.getInstance().getMainPort(processId);
+                    jsonObject.put("port", port);
+                    //
+                })
+                .collect(Collectors.toList());
         return JsonMessage.success("ok", processes);
     }
 

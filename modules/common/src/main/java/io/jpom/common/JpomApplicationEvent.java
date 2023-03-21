@@ -362,6 +362,11 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
     public static class SystemEvent implements ILoadEvent {
 
         @Override
+        public int getOrder() {
+            return LOWEST_PRECEDENCE;
+        }
+
+        @Override
         public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
             CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", this::executeTask);
             CronUtils.upsert("system_cache", "0 0/10 * * * ?", this::refresh);
