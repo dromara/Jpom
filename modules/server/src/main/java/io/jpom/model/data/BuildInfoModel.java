@@ -128,6 +128,10 @@ public class BuildInfoModel extends BaseGroupModel {
      * 构建环境变量
      */
     private String buildEnvParameter;
+    /**
+     * 别名码
+     */
+    private String aliasCode;
 
     @Tolerate
     public BuildInfoModel() {

@@ -359,7 +359,18 @@
             zIndex: 1,
           }"
         >
-          <a-button type="primary" @click="handleBuildOk"> 确认 </a-button>
+          <a-space>
+            <a-button
+              @click="
+                () => {
+                  this.buildVisible = false;
+                }
+              "
+            >
+              取消
+            </a-button>
+            <a-button type="primary" @click="handleBuildOk"> 确认 </a-button>
+          </a-space>
         </div>
       </a-form-model>
     </a-drawer>

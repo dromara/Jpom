@@ -25,6 +25,8 @@ package io.jpom.func.files.controller;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Opt;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.*;
 import io.jpom.common.validator.ValidatorItem;
@@ -146,8 +148,10 @@ public class FileStorageController extends BaseServerController {
                                            String fileSumMd5,
                                            Integer keepDay,
                                            String description,
+                                           String aliasCode,
                                            Boolean global,
                                            HttpServletRequest request) throws IOException {
+        Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, "别名码只能是英文、数字"));
         File storageSavePath = serverConfig.fileStorageSavePath();
         // 验证文件
         FileStorageModel fileStorageModel1 = fileStorageService.getByKey(fileSumMd5);
@@ -170,6 +174,7 @@ public class FileStorageController extends BaseServerController {
         fileStorageModel.setId(fileSumMd5);
         fileStorageModel.setName(successFile.getName());
         fileStorageModel.setDescription(description);
+        fileStorageModel.setAliasCode(aliasCode);
         fileStorageModel.setExtName(extName);
         fileStorageModel.setPath(path);
         fileStorageModel.setSize(FileUtil.size(fileStorageFile));
@@ -197,8 +202,10 @@ public class FileStorageController extends BaseServerController {
                                     @ValidatorItem String name,
                                     Integer keepDay,
                                     String description,
+                                    String aliasCode,
                                     Boolean global,
                                     HttpServletRequest request) throws IOException {
+        Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, "别名码只能是英文、数字"));
         FileStorageModel storageModel = fileStorageService.getByKey(id);
         Assert.notNull(storageModel, "不存在对应的文件");
         UserModel user = getUser();
@@ -210,6 +217,7 @@ public class FileStorageController extends BaseServerController {
         FileStorageModel fileStorageModel = new FileStorageModel();
         fileStorageModel.setId(id);
         fileStorageModel.setName(name);
+        fileStorageModel.setAliasCode(aliasCode);
         fileStorageModel.setDescription(description);
         //
         this.updateGlobal(fileStorageModel, request, global);
@@ -252,16 +260,18 @@ public class FileStorageController extends BaseServerController {
     @PostMapping(value = "remote-download", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
     public JsonMessage<String> download(
-        @ValidatorItem String url,
-        Integer keepDay,
-        String description,
-        Boolean global,
-        HttpServletRequest request) throws IOException {
+            @ValidatorItem String url,
+            Integer keepDay,
+            String description,
+            String aliasCode,
+            Boolean global,
+            HttpServletRequest request) throws IOException {
+        Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, "别名码只能是英文、数字"));
         // 验证远程 地址
         ServerWhitelist whitelist = outGivingWhitelistService.getServerWhitelistData(request);
         whitelist.checkAllowRemoteDownloadHost(url);
         String workspace = fileStorageService.getCheckUserWorkspace(request);
-        fileStorageService.download(url, global, workspace, keepDay, description);
+        fileStorageService.download(url, global, workspace, keepDay, description, aliasCode);
         return JsonMessage.success("开始异步下载");
     }
 
@@ -284,7 +294,7 @@ public class FileStorageController extends BaseServerController {
             updateInfo = new FileStorageModel();
             updateInfo.setId(id);
             updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), fileStorageService.typeName(),
-                item.getId(), user.getId()));
+                    item.getId(), user.getId()));
             fileStorageService.updateById(updateInfo);
         } else {
             updateInfo = item;
@@ -295,12 +305,21 @@ public class FileStorageController extends BaseServerController {
 
     private Map<String, String> getBuildToken(FileStorageModel item, HttpServletRequest request) {
         String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
-        String url = ServerOpenApi.FILE_STORAGE_DOWNLOAD.
-            replace("{id}", item.getId()).
-            replace("{token}", item.getTriggerToken());
-        String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
         Map<String, String> map = new HashMap<>(10);
-        map.put("triggerDownloadUrl", FileUtil.normalize(triggerBuildUrl));
+        {
+            String url = ServerOpenApi.FILE_STORAGE_DOWNLOAD.
+                    replace("{id}", item.getId()).
+                    replace("{token}", item.getTriggerToken());
+            String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
+            map.put("triggerDownloadUrl", FileUtil.normalize(triggerBuildUrl));
+        }
+        if (StrUtil.isNotEmpty(item.getAliasCode())) {
+            String url = ServerOpenApi.FILE_STORAGE_DOWNLOAD.
+                    replace("{id}", item.getAliasCode()).
+                    replace("{token}", item.getTriggerToken());
+            String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
+            map.put("triggerAliasDownloadUrl", FileUtil.normalize(triggerBuildUrl));
+        }
         map.put("id", item.getId());
         map.put("token", item.getTriggerToken());
         return map;

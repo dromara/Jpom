@@ -105,6 +105,11 @@ public class FileStorageModel extends BaseWorkspaceModel {
     private String triggerToken;
 
     /**
+     * 别名码
+     */
+    private String aliasCode;
+
+    /**
      * 设置保留天数的过期时间
      *
      * @param keepDay   保留天数

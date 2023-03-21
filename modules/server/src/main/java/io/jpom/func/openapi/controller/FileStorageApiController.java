@@ -28,7 +28,10 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.NioUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.*;
+import cn.hutool.db.sql.Direction;
+import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.common.BaseJpomController;
 import io.jpom.common.ServerOpenApi;
@@ -55,7 +58,10 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -122,13 +128,65 @@ public class FileStorageApiController extends BaseJpomController {
         return new long[]{fromPos, downloadSize};
     }
 
+    /**
+     * 解析别名参数
+     *
+     * @param id      别名
+     * @param token   token
+     * @param sort    排序
+     * @param request 请求
+     * @return 数据
+     */
+    private FileStorageModel queryByAliasCode(String id, String token, String sort, HttpServletRequest request) {
+        // 先验证 token 和 id 是否都存在
+        {
+            FileStorageModel data = new FileStorageModel();
+            data.setAliasCode(id);
+            data.setTriggerToken(token);
+            Assert.state(fileStorageService.exists(data), "别名或者token错误,或者已经失效");
+        }
+        List<Order> orders = Opt.ofBlankAble(sort)
+                .map(s -> StrUtil.splitTrim(s, StrUtil.COMMA))
+                .map(strings ->
+                        strings.stream()
+                                .map(s -> {
+                                    List<String> list = StrUtil.splitTrim(s, StrUtil.COLON);
+                                    Order order = new Order();
+                                    order.setField(CollUtil.getFirst(list));
+                                    String s1 = CollUtil.get(list, 1);
+                                    order.setDirection(ObjectUtil.defaultIfNull(Direction.fromString(s1), Direction.DESC));
+                                    return order;
+                                })
+                                .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
+        Map<String, String> paramMap = ServletUtil.getParamMap(request);
+        FileStorageModel where = new FileStorageModel();
+        for (Map.Entry<String, String> entry : paramMap.entrySet()) {
+            String key = entry.getKey();
+            if (StrUtil.startWith(key, "filter_")) {
+                key = StrUtil.removePrefix(key, "filter_");
+                ReflectUtil.setFieldValue(where, key, entry.getValue());
+            }
+        }
+        where.setAliasCode(id);
+        List<FileStorageModel> fileStorageModels = fileStorageService.queryList(where, 1, orders.toArray(new Order[]{}));
+        return CollUtil.getFirst(fileStorageModels);
+    }
+
     @GetMapping(value = ServerOpenApi.FILE_STORAGE_DOWNLOAD, produces = MediaType.APPLICATION_JSON_VALUE)
-    public void download(@PathVariable String id, @PathVariable String token,
+    public void download(@PathVariable String id,
+                         @PathVariable String token,
+                         String sort,
                          HttpServletRequest request,
                          HttpServletResponse response) throws IOException {
         FileStorageModel storageModel = fileStorageService.getByKey(id);
-        Assert.notNull(storageModel, "没有对应数据");
-        Assert.state(StrUtil.equals(token, storageModel.getTriggerToken()), "token错误,或者已经失效");
+        if (storageModel == null) {
+            // 根据别名查询
+            storageModel = this.queryByAliasCode(id, token, sort, request);
+            Assert.notNull(storageModel, "没有对应数据");
+        } else {
+            Assert.state(StrUtil.equals(token, storageModel.getTriggerToken()), "token错误,或者已经失效");
+        }
         //
         UserModel userModel = triggerTokenLogServer.getUserByToken(token, fileStorageService.typeName());
         //
@@ -148,7 +206,7 @@ public class FileStorageApiController extends BaseJpomController {
         String contentType = ObjectUtil.defaultIfNull(FileUtil.getMimeType(name), "application/octet-stream");
         String charset = ObjectUtil.defaultIfNull(response.getCharacterEncoding(), CharsetUtil.UTF_8);
         response.setHeader("Content-Disposition", StrUtil.format("attachment;filename=\"{}\"",
-            URLUtil.encode(name, CharsetUtil.charset(charset))));
+                URLUtil.encode(name, CharsetUtil.charset(charset))));
         response.setContentType(contentType);
         //    解析断点续传相关信息
         long[] resolveRange = this.resolveRange(request, fileSize, storageModel.getId(), storageModel.getName(), response);

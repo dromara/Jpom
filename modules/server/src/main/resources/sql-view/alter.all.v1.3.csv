@@ -36,3 +36,5 @@ ADD,FILE_STORAGE,status,TINYINT,,,0 下载中 1 下载完成 3 下载异常,fals
 ADD,FILE_STORAGE,progressDesc,String,255,,进度描述,false
 ADD,FILE_STORAGE,triggerToken,String,200,,触发器token,false
 ALTER,FILE_STORAGE,name,String,255,,名称,true
+ADD,BUILD_INFO,aliasCode,String,50,,别名码,false
+ADD,FILE_STORAGE,aliasCode,String,50,,别名码,false
