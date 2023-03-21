@@ -466,6 +466,35 @@ public class DockerBuild implements AutoCloseable {
     }
 
     /**
+     * 依赖插件检查，判断是否存在对应的 依赖插件
+     *
+     * @param parameter 参数
+     * @return mount
+     */
+    public static boolean hasDependPlugin(Map<String, Object> parameter) {
+        DockerClient dockerClient = DockerUtil.get(parameter);
+        String pluginName = (String) parameter.get("pluginName");
+        String version = (String) parameter.get("version");
+        return hasDependPlugin(dockerClient, pluginName, version);
+    }
+
+    /**
+     * 依赖插件检查，判断是否存在对应的 依赖插件
+     *
+     * @param dockerClient docker 客户端连接
+     * @return mount
+     */
+    public static boolean hasDependPlugin(DockerClient dockerClient, String pluginName, String version) {
+        String name = String.format("jpom_%s_%s", pluginName, version);
+        try {
+            dockerClient.inspectVolumeCmd(name).exec();
+            return true;
+        } catch (NotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
      * 依赖插件检查
      *
      * @param dockerClient docker 客户端连接
@@ -480,12 +509,10 @@ public class DockerBuild implements AutoCloseable {
         String pluginName = (String) usesMap.get("uses");
         String version = String.valueOf(usesMap.get("version"));
         String name = String.format("jpom_%s_%s", pluginName, version);
-        HashMap<String, String> labels = MapUtil.of("jpom_build_" + buildId, buildId);
-        labels.put("jpom_build_cache", "true");
-        try {
-            dockerClient.inspectVolumeCmd(name).exec();
-        } catch (NotFoundException e) {
-
+        if (!DockerBuild.hasDependPlugin(dockerClient, pluginName, version)) {
+            HashMap<String, String> labels = MapUtil.of("jpom_build_" + buildId, buildId);
+            labels.put("jpom_build_cache", "true");
+            //
             dockerClient.createVolumeCmd()
                 .withName(name)
                 .withLabels(labels)
