@@ -833,6 +833,10 @@ export default {
       localStorage.setItem("tableLayout", this.layoutType);
     },
     onFinish() {
+      if (this.drawerVisible) {
+        // 打开节点 不刷新
+        return;
+      }
       if (this.$attrs.routerUrl !== this.$route.path) {
         // 重新计算倒计时
         this.deadline = Date.now() + this.refreshInterval * 1000;
