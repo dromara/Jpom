@@ -15,6 +15,8 @@
 3. 【server】优化 文件管理列表显示，小屏幕部分字段被隐藏（感谢@tinsang）
 4. 【server】优化 docker 拉取镜像自动解析 tag，避免拉取所有镜像，如果没有配置 tag 默认使用 latest（感谢@Again...                       .）
 5. 【server】修复 数据库迁移到 mysql 报错（字段不存在）（感谢@轩辕豆豆）
+6. 【server】修复 节点统计页面错乱问题
+  （感谢 [@轩辕豆豆](https://gitee.com/xuanyuandoudou) [Gitee issues I6OYSU](https://gitee.com/dromara/Jpom/issues/I6OYSU) ）
 
 ------
 

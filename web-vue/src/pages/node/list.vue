@@ -46,7 +46,9 @@
               </template>
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
-            <a-statistic-countdown format="s 秒" title="刷新倒计时 " :value="deadline" @finish="onFinish" />
+            <div class="header-statistic">
+              <a-statistic-countdown format="s 秒" title="刷新倒计时 " :value="deadline" @finish="onFinish" />
+            </div>
           </a-space>
         </template>
         <a-table
@@ -861,12 +863,13 @@ export default {
   margin-left: 10px;
   margin-right: 0;
 } */
-/deep/ .ant-statistic div {
+
+.header-statistic /deep/ .ant-statistic div {
   display: inline-block;
 }
 
-/deep/ .ant-statistic-content-value,
-/deep/ .ant-statistic-content {
+.header-statistic /deep/ .ant-statistic-content-value,
+.header-statistic /deep/ .ant-statistic-content {
   font-size: 16px;
 }
 </style>
