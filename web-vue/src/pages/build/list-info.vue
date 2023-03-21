@@ -798,6 +798,22 @@
 
               <a-switch v-model="tempExtraData.syncFileStorage" checked-children="同步" un-checked-children="不同步" />
             </a-form-model-item>
+            <a-form-model-item label="别名码" prop="aliasCode" help="如果产物同步到文件中心,当前值会共享">
+              <a-input-search
+                :maxLength="50"
+                v-model="temp.aliasCode"
+                placeholder="请输入别名码"
+                @search="
+                  () => {
+                    this.temp = { ...this.temp, aliasCode: randomStr(6) };
+                  }
+                "
+              >
+                <template slot="enterButton">
+                  <a-button type="primary"> 随机生成 </a-button>
+                </template>
+              </a-input-search>
+            </a-form-model-item>
           </a-collapse-panel>
         </a-collapse>
       </a-form-model>
@@ -1124,7 +1140,7 @@ import { afterOptList, afterOptListSimple, getDishPatchListAll, getDispatchProje
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import codeEditor from "@/components/codeEditor";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, itemGroupBy, parseTime } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, itemGroupBy, parseTime, randomStr } from "@/utils/const";
 import Vue from "vue";
 import { dockerSwarmListAll, dockerSwarmServicesList } from "@/api/docker-swarm";
 import { getScriptListAll } from "@/api/server-script";
@@ -1405,6 +1421,7 @@ export default {
   },
   methods: {
     CHANGE_PAGE,
+    randomStr,
     //
     loadDockerSwarmListAll() {
       dockerSwarmListAll().then((res) => {

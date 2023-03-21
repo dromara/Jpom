@@ -113,6 +113,22 @@
               <a-radio :value="false"> 当前工作空间 </a-radio>
             </a-radio-group>
           </a-form-model-item>
+          <a-form-model-item label="别名码" prop="aliasCode" help="用于区别文件是否为同一类型,可以针对同类型进行下载管理">
+            <a-input-search
+              :maxLength="50"
+              v-model="temp.aliasCode"
+              placeholder="请输入别名码"
+              @search="
+                () => {
+                  this.temp = { ...this.temp, aliasCode: randomStr(6) };
+                }
+              "
+            >
+              <template slot="enterButton">
+                <a-button type="primary"> 随机生成 </a-button>
+              </template>
+            </a-input-search>
+          </a-form-model-item>
           <a-form-model-item label="文件描述" prop="description">
             <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
           </a-form-model-item>
@@ -132,6 +148,22 @@
               <a-radio :value="true"> 全局 </a-radio>
               <a-radio :value="false"> 当前工作空间 </a-radio>
             </a-radio-group>
+          </a-form-model-item>
+          <a-form-model-item label="别名码" prop="aliasCode" help="用于区别文件是否为同一类型,可以针对同类型进行下载管理">
+            <a-input-search
+              :maxLength="50"
+              v-model="temp.aliasCode"
+              placeholder="请输入别名码"
+              @search="
+                () => {
+                  this.temp = { ...this.temp, aliasCode: randomStr(6) };
+                }
+              "
+            >
+              <template slot="enterButton">
+                <a-button type="primary"> 随机生成 </a-button>
+              </template>
+            </a-input-search>
           </a-form-model-item>
           <a-form-model-item label="文件描述" prop="description">
             <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
@@ -153,6 +185,22 @@
               <a-radio :value="false"> 当前工作空间 </a-radio>
             </a-radio-group>
           </a-form-model-item>
+          <a-form-model-item label="别名码" prop="aliasCode" help="用于区别文件是否为同一类型,可以针对同类型进行下载管理">
+            <a-input-search
+              :maxLength="50"
+              v-model="temp.aliasCode"
+              placeholder="请输入别名码"
+              @search="
+                () => {
+                  this.temp = { ...this.temp, aliasCode: randomStr(6) };
+                }
+              "
+            >
+              <template slot="enterButton">
+                <a-button type="primary"> 随机生成 </a-button>
+              </template>
+            </a-input-search>
+          </a-form-model-item>
           <a-form-model-item label="文件描述" prop="description">
             <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
           </a-form-model-item>
@@ -167,7 +215,7 @@
                 <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
               </a-tooltip>
             </template>
-            <a-tab-pane key="1" tab="断点/分片下载">
+            <a-tab-pane key="1" tab="断点/分片单文件下载">
               <a-alert
                 v-clipboard:copy="`${temp.triggerDownloadUrl}`"
                 v-clipboard:success="
@@ -188,6 +236,43 @@
                   <a-icon type="copy" />
                 </template>
               </a-alert>
+            </a-tab-pane>
+            <a-tab-pane key="2" tab="断点/分片别名下载" v-if="temp.triggerAliasDownloadUrl">
+              <a-space style="display: block" direction="vertical" align="baseline">
+                <a-alert message="温馨提示" type="warning">
+                  <template slot="description">
+                    <ul>
+                      <li>
+                        支持自定义排序字段：sort=createTimeMillis:desc
+
+                        <p>描述根据创建时间升序第一个</p>
+                      </li>
+                      <li>支持的字段可以通过接口返回的查看</li>
+                      <li>通用的字段有：createTimeMillis、modifyTimeMillis</li>
+                    </ul>
+                  </template>
+                </a-alert>
+                <a-alert
+                  v-clipboard:copy="`${temp.triggerAliasDownloadUrl}`"
+                  v-clipboard:success="
+                    () => {
+                      tempVue.prototype.$notification.success({ message: '复制成功' });
+                    }
+                  "
+                  v-clipboard:error="
+                    () => {
+                      tempVue.prototype.$notification.error({ message: '复制失败' });
+                    }
+                  "
+                  type="info"
+                  :message="`下载地址(点击可以复制)`"
+                >
+                  <template slot="description">
+                    <a-tag>GET</a-tag> <span>{{ `${temp.triggerAliasDownloadUrl}` }} </span>
+                    <a-icon type="copy" />
+                  </template>
+                </a-alert>
+              </a-space>
             </a-tab-pane>
           </a-tabs>
         </a-form-model>
@@ -256,7 +341,7 @@
 </template>
 
 <script>
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, renderSize, formatDuration } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, renderSize, formatDuration, randomStr } from "@/utils/const";
 import { fileStorageList, uploadFile, uploadFileMerge, fileEdit, hasFile, delFile, sourceMap, remoteDownload, statusMap, triggerUrl } from "@/api/file-manager/file-storage";
 import { uploadPieces } from "@/utils/upload-pieces";
 import Vue from "vue";
@@ -276,7 +361,8 @@ export default {
       list: [],
       columns: [
         { title: "文件MD5", dataIndex: "id", ellipsis: true, width: 100, scopedSlots: { customRender: "id" } },
-        { title: "名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "name" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, width: 150, scopedSlots: { customRender: "name" } },
+        { title: "别名码", dataIndex: "aliasCode", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
         { title: "大小", dataIndex: "size", sorter: true, ellipsis: true, scopedSlots: { customRender: "renderSize" }, width: "100px" },
         { title: "后缀", dataIndex: "extName", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "80px" },
         { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
@@ -301,14 +387,14 @@ export default {
           dataIndex: "createTimeMillis",
           sorter: true,
           scopedSlots: { customRender: "time" },
-          width: 150,
+          width: "170px",
         },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
           sorter: true,
           scopedSlots: { customRender: "time" },
-          width: 150,
+          width: "170px",
         },
         { title: "操作", dataIndex: "operation", align: "center", ellipsis: true, scopedSlots: { customRender: "operation" }, fixed: "right", width: "170px" },
       ],
@@ -348,6 +434,7 @@ export default {
     this.loadData();
   },
   methods: {
+    randomStr,
     CHANGE_PAGE,
     renderSize,
     formatDuration,
@@ -565,7 +652,11 @@ export default {
       });
     },
     fillDownloadUrlResult(res) {
-      this.temp = { ...this.temp, triggerDownloadUrl: `${location.protocol}//${location.host}${res.data.triggerDownloadUrl}` };
+      this.temp = {
+        ...this.temp,
+        triggerDownloadUrl: `${location.protocol}//${location.host}${res.data.triggerDownloadUrl}`,
+        triggerAliasDownloadUrl: res.data?.triggerAliasDownloadUrl ? `${location.protocol}//${location.host}${res.data.triggerAliasDownloadUrl}?sort=createTimeMillis:desc` : "",
+      };
     },
     // 发布文件
     handleReleaseFile(record) {

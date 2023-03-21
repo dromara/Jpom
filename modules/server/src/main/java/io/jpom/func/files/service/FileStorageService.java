@@ -108,7 +108,7 @@ public class FileStorageService extends BaseWorkspaceService<FileStorageModel> i
      * @param global      是否为全局共享
      * @param keepDay     保留天数
      */
-    public void download(String url, Boolean global, String workspaceId, Integer keepDay, String description) {
+    public void download(String url, Boolean global, String workspaceId, Integer keepDay, String description, String aliasCode) {
         FileStorageModel fileStorageModel = new FileStorageModel();
         // 临时使用 uuid，代替
         String uuid = IdUtil.fastSimpleUUID();
@@ -123,6 +123,7 @@ public class FileStorageService extends BaseWorkspaceService<FileStorageModel> i
             String path = StrUtil.format("/{}/{}.{}", DateTime.now().toString(DatePattern.PURE_DATE_FORMAT), uuid, extName);
             fileStorageModel.setExtName("download");
             fileStorageModel.setPath(path);
+            fileStorageModel.setAliasCode(aliasCode);
             fileStorageModel.setSize(0L);
             fileStorageModel.setStatus(0);
             fileStorageModel.setSource(2);
@@ -243,11 +244,14 @@ public class FileStorageService extends BaseWorkspaceService<FileStorageModel> i
     /**
      * 添加文件
      *
-     * @param source 文件来源
-     * @param file   要文件的文件
+     * @param source      文件来源
+     * @param file        要文件的文件
+     * @param description 描述
+     * @param workspaceId 工作空间id
+     * @param aliasCode   别名码
      * @return 是否添加成功
      */
-    public boolean addFile(File file, int source, String workspaceId, String description) {
+    public boolean addFile(File file, int source, String workspaceId, String description, String aliasCode) {
         String md5 = SecureUtil.md5(file);
         File storageSavePath = serverConfig.fileStorageSavePath();
         String extName = FileUtil.extName(file);
@@ -259,6 +263,7 @@ public class FileStorageService extends BaseWorkspaceService<FileStorageModel> i
         // 保存
         FileStorageModel fileStorageModel = new FileStorageModel();
         fileStorageModel.setId(md5);
+        fileStorageModel.setAliasCode(aliasCode);
         fileStorageModel.setName(file.getName());
         fileStorageModel.setDescription("构建来源," + description);
         fileStorageModel.setExtName(extName);
@@ -302,8 +307,8 @@ public class FileStorageService extends BaseWorkspaceService<FileStorageModel> i
         Entity updateEntity = this.dataBeanToEntity(update);
         //
         Entity where = Entity.create()
-            .set("source", 2)
-            .set("status", 0);
+                .set("source", 2)
+                .set("status", 0);
         return this.update(updateEntity, where);
     }
 

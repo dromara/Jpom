@@ -91,6 +91,7 @@ export function editBuild(params) {
     webhook: params.webhook,
     autoBuildCron: params.autoBuildCron,
     buildMode: params.buildMode,
+    aliasCode: params.aliasCode,
   };
   return axios({
     url: "/build/edit",

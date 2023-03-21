@@ -2,6 +2,11 @@
 
 ## 2.10.37
 
+### 🐣 新增功能
+
+1. 【server】新增 文件中心添加别名码来为文件进行分类下载，构建添加别名码可以同步到文件中心
+   （感谢 [@大灰灰大](https://gitee.com/linjianhui) [Gitee issues I6OUC8](https://gitee.com/dromara/Jpom/issues/I6OUC8) ）
+
 ### 🐞 解决BUG、优化功能
 
 1. 【server】优化 容器构建 maven 插件版本错误提示可用版本号，如果构建容器已经存在则忽略远程版本（感谢@大灰灰）

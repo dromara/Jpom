@@ -74,8 +74,8 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * 默认排序规则
      */
     private static final Order[] DEFAULT_ORDERS = new Order[]{
-        new Order("createTimeMillis", Direction.DESC),
-        new Order("modifyTimeMillis", Direction.DESC)
+            new Order("createTimeMillis", Direction.DESC),
+            new Order("modifyTimeMillis", Direction.DESC)
     };
 
     public void insert(T t) {
@@ -294,6 +294,18 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      */
     public List<T> queryList(T data, int count, Order... orders) {
         Entity where = this.dataBeanToEntity(data);
+        return this.queryList(where, count, orders);
+    }
+
+    /**
+     * 查询列表
+     *
+     * @param where  条件
+     * @param count  查询数量
+     * @param orders 排序
+     * @return List
+     */
+    public List<T> queryList(Entity where, int count, Order... orders) {
         Page page = new Page(1, count);
         page.addOrder(orders);
         PageResultDto<T> tPageResultDto = this.listPage(where, page);

@@ -141,7 +141,11 @@ public class ReleaseManage {
         if (syncFileStorage != null && syncFileStorage) {
             logRecorder.system("开始同步到文件管理中心");
             File dirPackage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.buildNumberId, this.resultFile, (unZip, file) -> file);
-            boolean success = fileStorageService.addFile(dirPackage, 1, buildInfoModel.getWorkspaceId(), buildInfoModel.getName());
+            boolean success = fileStorageService.addFile(dirPackage, 1,
+                    buildInfoModel.getWorkspaceId(),
+                    buildInfoModel.getName(),
+                    // 默认的别名码为构建id
+                    StrUtil.emptyToDefault(buildInfoModel.getAliasCode(), buildInfoModel.getId()));
             if (success) {
                 logRecorder.system("构建产物文件成功同步到文件管理中心");
             } else {
