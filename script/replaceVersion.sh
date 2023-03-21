@@ -31,32 +31,33 @@ set -o errexit
 current_path=$(pwd)
 case "$(uname)" in
 Linux)
-	bin_abs_path=$(readlink -f $(dirname $0))
-	;;
+  bin_abs_path=$(readlink -f "$(dirname "$0")")
+  ;;
 *)
-	bin_abs_path=$(
-		cd $(dirname $0)
-		pwd
-	)
-	;;
+  bin_abs_path=$(
+    cd "$(dirname "$0")"
+    pwd
+  )
+  ;;
 esac
 base=${bin_abs_path}/../
 
 echo "当前路径：${current_path} 脚本路径：${bin_abs_path}"
+tag="$2"
 
 if [ -n "$1" ]; then
-	new_version="$1"
-	old_version=$(cat ${base}/docs/version.txt)
-	echo "$old_version 替换为新版本 $new_version"
+  new_version="$1"
+  old_version=$(cat "${base}/script/tag.$tag.txt")
+  echo "$old_version 替换为新版本 $new_version"
 else
-	# 参数错误，退出
-	echo "ERROR: 请指定新版本！"
-	exit
+  # 参数错误，退出
+  echo "ERROR: 请指定新版本！"
+  exit
 fi
 
 if [ ! -n "$old_version" ]; then
-	echo "ERROR: 旧版本不存在，请确认 /docs/version.txt 中信息正确"
-	exit
+  echo "ERROR: 旧版本不存在，请确认 /script/tag.$tag.txt 中信息正确"
+  exit
 fi
 
 # 替换所有模块pom.xml中的版本
@@ -65,8 +66,8 @@ cd ${base} && mvn versions:set -DnewVersion=$1
 echo "替换配置文件版本号 $new_version"
 
 if [ -f "$base/.env" ]; then
-	# 替换 docker 中的版本
-	sed -i.bak "s/${old_version}/${new_version}/g" $base/.env
+  # 替换 docker 中的版本
+  sed -i.bak "s/${old_version}/${new_version}/g" $base/.env
 fi
 
 # 替换 Dockerfile 中的版本
@@ -88,6 +89,6 @@ sed -i.bak "s/${old_version}/${new_version}/g" $base/script/release-sha1sum.sh
 sed -i.bak "s/${old_version}/${new_version}/g" $base/.workflow/MasterPipeline.yml
 
 # 保留新版本号
-echo "$new_version" >$base/docs/version.txt
+echo "$new_version" >"${base}/script/tag.$tag.txt"
 
 echo "版本号替换成功 $new_version"
