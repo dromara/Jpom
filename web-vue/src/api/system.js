@@ -234,6 +234,15 @@ export function changelog(data) {
   });
 }
 
+export function changBetaRelease(params) {
+  return axios({
+    url: "/system/change-beta-release",
+    method: "get",
+    headers: {},
+    params,
+  });
+}
+
 /**
  * 检查新版本
  *@param {String} nodeId 节点 ID
