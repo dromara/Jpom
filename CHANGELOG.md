@@ -13,6 +13,7 @@
 2. 【server】优化 脚本列表显示脚本 ID，方便快速查看复制
    （感谢 [@大灰灰大](https://gitee.com/linjianhui) [Gitee issues I6OUDT](https://gitee.com/dromara/Jpom/issues/I6OUDT) ）
 3. 【server】优化 文件管理列表显示，小屏幕部分字段被隐藏（感谢@tinsang）
+4. 【server】优化 docker 拉取镜像自动解析 tag，避免拉取所有镜像，如果没有配置 tag 默认使用 latest（感谢@Again...                       .）
 
 ------
 
