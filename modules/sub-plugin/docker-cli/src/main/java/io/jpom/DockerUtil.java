@@ -62,16 +62,7 @@ public class DockerUtil {
     }
 
     private static final Map<String, DockerClient> DOCKER_CLIENT_MAP = new ConcurrentHashMap<>();
-
-
-    /**
-     * 容器构建存放 dockerfile 目录
-     */
-    public static final String RUNS_FOLDER = "runs";
-    /**
-     * 默认镜像
-     */
-    public static final String DEFAULT_RUNS = "ubuntu-latest";
+    
     /**
      * dockerfile 文件名称
      */
@@ -156,58 +147,6 @@ public class DockerUtil {
     public static File createTemp(String name, File tempDir) {
         return FileUtil.file(tempDir, name);
     }
-
-//    /**
-//     * 转化文件
-//     *
-//     * @param name    资源名称
-//     * @param tempDir 临时路径
-//     * @return file 无法读取或者写入返回 null
-//     */
-//    public static File getResourceToFile(String name, File tempDir) {
-//        try {
-//            for (String filePath : FILE_PATHS) {
-//                File file;
-//                try {
-//                    file = ResourceUtils.getFile(filePath + name);
-//                    if (!file.exists()) {
-//                        log.debug("{} not found", filePath + name);
-//                        continue;
-//                    }
-//                } catch (FileNotFoundException e) {
-//                    log.debug("{} not found", filePath + name);
-//                    continue;
-//                }
-//                log.debug("found file:{}", file.getAbsolutePath());
-//                File tempFile = DockerUtil.createTemp(name, tempDir);
-//                Files.copy(file.toPath(), tempFile.toPath());
-//                return tempFile;
-//            }
-//            Resource resourceObj = ResourceUtil.getResourceObj(name);
-//            InputStream stream = resourceObj.getStream();
-//            File tempFile = DockerUtil.createTemp(name, tempDir);
-//            FileUtil.writeFromStream(stream, tempFile);
-//            return tempFile;
-//        } catch (Exception e) {
-//            log.error("获取 dockerfile 相关问题异常 {}", name, e);
-//        }
-//        return null;
-//    }
-
-//    /**
-//     * 转化文件
-//     *
-//     * @param name    资源名称
-//     * @param tempDir 临时路径
-//     * @return path 无法读取或者写入返回 null
-//     */
-//    public static String getResourceToFilePath(String name, File tempDir) {
-//        File resourceToFile = getResourceToFile(name, tempDir);
-//        if (resourceToFile == null) {
-//            return null;
-//        }
-//        return resourceToFile.getAbsolutePath();
-//    }
 
     /**
      * 获取进度信息

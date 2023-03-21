@@ -41,6 +41,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
+import io.jpom.func.assets.server.MachineDockerServer;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
@@ -92,6 +93,7 @@ public class BuildInfoController extends BaseServerController {
     private final DockerInfoService dockerInfoService;
     private final ScriptServer scriptServer;
     private final BuildExtConfig buildExtConfig;
+    protected final MachineDockerServer machineDockerServer;
 
     public BuildInfoController(DbBuildHistoryLogService dbBuildHistoryLogService,
                                SshService sshService,
@@ -100,7 +102,8 @@ public class BuildInfoController extends BaseServerController {
                                BuildExecuteService buildExecuteService,
                                DockerInfoService dockerInfoService,
                                ScriptServer scriptServer,
-                               BuildExtConfig buildExtConfig) {
+                               BuildExtConfig buildExtConfig,
+                               MachineDockerServer machineDockerServer) {
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.sshService = sshService;
         this.buildInfoService = buildInfoService;
@@ -109,6 +112,7 @@ public class BuildInfoController extends BaseServerController {
         this.dockerInfoService = dockerInfoService;
         this.scriptServer = scriptServer;
         this.buildExtConfig = buildExtConfig;
+        this.machineDockerServer = machineDockerServer;
     }
 
     /**
@@ -276,13 +280,13 @@ public class BuildInfoController extends BaseServerController {
     }
 
     private void checkDocker(String script, HttpServletRequest request) {
+        String workspaceId = buildInfoService.getCheckUserWorkspace(request);
         DockerYmlDsl build = DockerYmlDsl.build(script);
-        build.check();
+        build.check(dockerInfoService, machineDockerServer, workspaceId);
         //
         String fromTag = build.getFromTag();
         if (StrUtil.isNotEmpty(fromTag)) {
             //
-            String workspaceId = dockerInfoService.getCheckUserWorkspace(request);
             int count = dockerInfoService.countByTag(workspaceId, fromTag);
             Assert.state(count > 0, fromTag + " 没有找到任何 docker。可能docker tag 填写不正确，需要为 docker 配置标签");
         }
@@ -419,7 +423,7 @@ public class BuildInfoController extends BaseServerController {
     @RequestMapping(value = "/build/branch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<JSONObject> branchList(
-            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空") String repositoryId) throws Exception {
+        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空") String repositoryId) throws Exception {
         // 根据 repositoryId 查询仓库信息
         RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, false);
         Assert.notNull(repositoryModel, "无效的仓库信息");

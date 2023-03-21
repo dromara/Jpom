@@ -83,6 +83,8 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
                 return this.testLocal();
             case "testAuth":
                 return this.auth(parameter);
+            case "hasDependPlugin":
+                return DockerBuild.hasDependPlugin(parameter);
             default:
                 break;
         }

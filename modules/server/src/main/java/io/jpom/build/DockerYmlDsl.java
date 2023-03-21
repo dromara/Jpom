@@ -24,22 +24,28 @@ package io.jpom.build;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.*;
 import cn.hutool.setting.yaml.YamlUtil;
+import io.jpom.func.assets.server.MachineDockerServer;
 import io.jpom.model.BaseJsonModel;
+import io.jpom.model.docker.DockerInfoModel;
+import io.jpom.plugin.IPlugin;
+import io.jpom.plugin.PluginFactory;
+import io.jpom.service.docker.DockerInfoService;
 import io.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * docker 构建 配置
@@ -51,6 +57,7 @@ import java.util.Set;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@Slf4j
 public class DockerYmlDsl extends BaseJsonModel {
 
     /**
@@ -89,17 +96,17 @@ public class DockerYmlDsl extends BaseJsonModel {
      */
     private Map<String, String> env;
 
-    public void check() {
+    public void check(DockerInfoService dockerInfoService, MachineDockerServer machineDockerServer, String workspaceId) {
         Assert.hasText(runsOn, "请填写runsOn。");
         Validator.validateMatchRegex(StringUtil.GENERAL_STR, runsOn, "runsOn 镜像名称不合法");
         Assert.state(CollUtil.isNotEmpty(steps), "请填写 steps");
-        stepsCheck();
+        stepsCheck(dockerInfoService, machineDockerServer, workspaceId);
     }
 
     /**
      * 检查 steps
      */
-    public void stepsCheck() {
+    private void stepsCheck(DockerInfoService dockerInfoService, MachineDockerServer machineDockerServer, String workspaceId) {
         Set<String> usesSet = new HashSet<>();
         boolean containsRun = false;
         for (Map<String, Object> step : steps) {
@@ -119,7 +126,7 @@ public class DockerYmlDsl extends BaseJsonModel {
                 } else if ("java".equals(uses)) {
                     javaPluginCheck(step);
                 } else if ("maven".equals(uses)) {
-                    mavenPluginCheck(step);
+                    mavenPluginCheck(step, dockerInfoService, machineDockerServer, workspaceId);
                 } else if ("cache".equals(uses)) {
                     cachePluginCheck(step);
                 } else if ("go".equals(uses)) {
@@ -145,15 +152,54 @@ public class DockerYmlDsl extends BaseJsonModel {
      *
      * @param step 参数
      */
-    private void mavenPluginCheck(Map<String, Object> step) {
+    private void mavenPluginCheck(Map<String, Object> step, DockerInfoService dockerInfoService, MachineDockerServer machineDockerServer, String workspaceId) {
         Assert.notNull(step.get("version"), "maven 插件 version 不能为空");
         String version = String.valueOf(step.get("version"));
         String link = String.format("https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/%s/binaries/apache-maven-%s-bin.tar.gz", version, version);
         HttpRequest request = HttpUtil.createRequest(Method.HEAD, link);
-        HttpResponse httpResponse = request.execute();
-        Assert.isTrue(httpResponse.isOk()
-            || httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP
-            || httpResponse.getStatus() == HttpStatus.HTTP_BAD_METHOD, "请填入正确的 maven 版本号");
+        try (HttpResponse httpResponse = request.execute()) {
+            boolean success = httpResponse.isOk()
+                || httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP
+                || httpResponse.getStatus() == HttpStatus.HTTP_BAD_METHOD;
+            if (success) {
+                return;
+            }
+        }
+        // 判断容器中是否存在
+        try {
+            // 根据 tag 查询
+            List<DockerInfoModel> dockerInfoModels =
+                dockerInfoService
+                    .queryByTag(workspaceId, fromTag);
+            Map<String, Object> map = machineDockerServer.dockerParameter(dockerInfoModels);
+            if (map != null) {
+                map.put("pluginName", "maven");
+                map.put("version", version);
+                IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
+                boolean exists = Convert.toBool(plugin.execute("hasDependPlugin", map), false);
+                if (exists) {
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("检查 docker 依赖错误:{}", e.getMessage());
+        }
+        // 提示远程版本
+        Collection<String> pluginVersion = this.listMavenPluginVersion();
+        throw new IllegalArgumentException("请填入正确的 maven 版本号,可用的版本如下：" + CollUtil.join(pluginVersion, StrUtil.COMMA));
+    }
+
+
+    private Collection<String> listMavenPluginVersion() {
+        String html = HttpUtil.get("https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/");
+        //使用正则获取所有可用版本
+        List<String> versions = ReUtil.findAll("<a\\s+href=\"3.*?/\">(.*?)</a>", html, 1);
+        Set<String> set = versions.stream()
+            .map(s -> StrUtil.removeSuffix(s, StrUtil.SLASH))
+            .filter(StrUtil::isNotEmpty)
+            .collect(Collectors.toSet());
+        Assert.notEmpty(set, "maven 镜像库中没有找到任何可用的 maven 版本");
+        return set;
     }
 
     /**
