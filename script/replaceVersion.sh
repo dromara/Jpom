@@ -60,30 +60,47 @@ if [ ! -n "$old_version" ]; then
   exit
 fi
 
-# 替换所有模块pom.xml中的版本
-cd ${base} && mvn versions:set -DnewVersion=$1
-
 echo "替换配置文件版本号 $new_version"
 
-if [ -f "$base/.env" ]; then
-  # 替换 docker 中的版本
-  sed -i.bak "s/${old_version}/${new_version}/g" $base/.env
+if [ "$tag" == "release" ]; then
+  # 替换 Dockerfile 中的版本
+  sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/server/Dockerfile
+  sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/agent/Dockerfile
+  sed -i.bak "s/${old_version}/${new_version}/g" $base/script/docker.sh
+  sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/server/DockerfileRelease
+elif [ "$tag" == "beta" ]; then
+  sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/server/DockerfileBeta
+else
+  echo "不支持的模式 $tag"
+  exit
 fi
 
-# 替换 Dockerfile 中的版本
-sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/server/Dockerfile
-sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/agent/Dockerfile
-sed -i.bak "s/${old_version}/${new_version}/g" $base/script/docker.sh
-sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/server/DockerfileRelease
+# 替换所有模块pom.xml中的版本
+cd "${base}" && mvn versions:set -DnewVersion=$new_version
+
+# 替换 docker 中的版本
+sed -i.bak "s/${old_version}/${new_version}/g" "$base/env-$tag.env"
 
 # logo
-sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/common/src/main/resources/banner.txt
+cat >"$base/modules/common/src/main/resources/banner.txt" <<EOF
+       _
+      | |
+      | |_ __   ___  _ __ ___
+  _   | | '_ \ / _ \| '_ \` _ \
+ | |__| | |_) | (_) | | | | | |
+  \____/| .__/ \___/|_| |_| |_|
+        | |
+        |_|
+
+ ➜ Jpom \﻿ (•◡•) / (v$new_version)
+
+EOF
 
 # vue version
-sed -i.bak "s/${old_version}/${new_version}/g" $base/web-vue/package.json
+sed -i.bak "s/${old_version}/${new_version}/g" "$base/web-vue/package.json"
 
 # gitee go
-sed -i.bak "s/${old_version}/${new_version}/g" $base/.workflow/MasterPipeline.yml
+sed -i.bak "s/${old_version}/${new_version}/g" "$base/.workflow/MasterPipeline.yml"
 
 # 保留新版本号
 echo "$new_version" >"${base}/script/tag.$tag.txt"

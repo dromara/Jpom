@@ -1,6 +1,8 @@
 version: '3.8'
 services:
   server:
+    env_file:
+      - env-release.env
     image: jpomdocker/jpom:server-${JPOM_VERSION}
     build:
       dockerfile: ./modules/server/Dockerfile

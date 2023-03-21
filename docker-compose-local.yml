@@ -1,6 +1,8 @@
 version: '3.8'
 services:
   server:
+    env_file:
+      - env-release.env
     image: jpomdocker/jpom:server-${JPOM_VERSION}
     build:
       dockerfile: ./modules/server/Dockerfile
@@ -17,6 +19,8 @@ services:
       - "2122:2122"
     hostname: server
   agent01:
+    env_file:
+      - env-release.env
     image: jpomdocker/jpom:agent-${JPOM_VERSION}
     build:
       dockerfile: ./modules/agent/Dockerfile
@@ -33,6 +37,8 @@ services:
       - server
     hostname: agent01
   agent02:
+    env_file:
+      - env-release.env
     image: jpomdocker/jpom:agent-${JPOM_VERSION}
     build:
       dockerfile: ./modules/agent/Dockerfile
