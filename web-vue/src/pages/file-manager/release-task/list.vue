@@ -175,14 +175,20 @@ export default {
       taskTypeMap,
       detailsVisible: false,
       columns: [
-        { title: "任务名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "任务名称", dataIndex: "name", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
         { title: "分发类型", dataIndex: "taskType", width: "100px", ellipsis: true, scopedSlots: { customRender: "taskType" } },
         { title: "状态", dataIndex: "status", width: "100px", ellipsis: true, scopedSlots: { customRender: "status" } },
 
-        { title: "状态描述", dataIndex: "statusMsg", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "文件ID", dataIndex: "fileId", ellipsis: true, scopedSlots: { customRender: "fileId" } },
+        { title: "状态描述", dataIndex: "statusMsg", ellipsis: true, width: 200, scopedSlots: { customRender: "tooltip" } },
+        { title: "文件ID", dataIndex: "fileId", ellipsis: true, width: 150, scopedSlots: { customRender: "fileId" } },
         { title: "发布目录", dataIndex: "releasePath", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-
+        {
+          title: "执行人",
+          dataIndex: "modifyUser",
+          width: "120px",
+          ellipsis: true,
+          scopedSlots: { customRender: "modifyUser" },
+        },
         {
           title: "任务时间",
           dataIndex: "createTimeMillis",
@@ -203,14 +209,8 @@ export default {
           },
           width: "170px",
         },
-        {
-          title: "执行人",
-          dataIndex: "modifyUser",
-          width: "120px",
-          ellipsis: true,
-          scopedSlots: { customRender: "modifyUser" },
-        },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "230px" },
+
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "230px" },
       ],
       sshList: [],
       releaseFileVisible: false,

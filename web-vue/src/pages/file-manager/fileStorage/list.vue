@@ -52,7 +52,7 @@
           <span>{{ sourceMap[text] || "未知" }}</span>
         </a-tooltip>
         <a-tooltip slot="time" slot-scope="text" placement="topLeft" :title="parseTime(text)">
-          <span>{{ parseTime(text, "{m}-{d} {h}:{i}") }}</span>
+          <span>{{ parseTime(text) }}</span>
         </a-tooltip>
 
         <template slot="exists" slot-scope="text">
@@ -275,8 +275,8 @@ export default {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       columns: [
-        { title: "文件MD5", dataIndex: "id", ellipsis: true, width: "100px", scopedSlots: { customRender: "id" } },
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "文件MD5", dataIndex: "id", ellipsis: true, width: 100, scopedSlots: { customRender: "id" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "name" } },
         { title: "大小", dataIndex: "size", sorter: true, ellipsis: true, scopedSlots: { customRender: "renderSize" }, width: "100px" },
         { title: "后缀", dataIndex: "extName", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "80px" },
         { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
@@ -301,14 +301,14 @@ export default {
           dataIndex: "createTimeMillis",
           sorter: true,
           scopedSlots: { customRender: "time" },
-          width: "100px",
+          width: 150,
         },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
           sorter: true,
           scopedSlots: { customRender: "time" },
-          width: "100px",
+          width: 150,
         },
         { title: "操作", dataIndex: "operation", align: "center", ellipsis: true, scopedSlots: { customRender: "operation" }, fixed: "right", width: "170px" },
       ],
