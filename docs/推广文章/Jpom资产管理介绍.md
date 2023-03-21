@@ -1,5 +1,5 @@
 ---
-title: 带您了解能替代 Jenkins 的国产项目运维开源软件
+title: 带您了解能替代 Jenkins 的国产【项目运维】开源软件
 date: 2023-03-20 13:31:38
 permalink: /pages/7f1127/
 categories:
@@ -118,7 +118,7 @@ Jpom 2.10.x 版本主要是解决了遗留问题、优化部分不易用的功�
 新版本中新了文件管理，可以使用文件管理快捷将文件分发到目标机器并执行相应的脚本。
 可以实现服务器基础环境的一键安装，统一执行命令脚本。
 
-**🎁 您想为离线服务器统一安装 jdk、nginx、php、docker 那么 Jpom 的文件管理功能是不错的选择**
+**🎁 您想为离线服务器统一安装 jdk、nginx、php、docker 等那么 Jpom 的文件管理功能是不错的选择**
 
 ## 资产管理 ⚙
 
@@ -187,7 +187,7 @@ jpom:
 bash ./bin/Server.sh restart -15 --h2-migrate-mysql --h2-user=jpom --h2-pass=jpom
 ```
 
-[完整的操作说明 https://jpom.top/pages/4cfb46/](https://jpom.top/pages/4cfb46/)
+完整的操作说明：[https://jpom.top/pages/4cfb46/](https://jpom.top/pages/4cfb46/)
 
 ## 赞赏支持 ❤️
 
