@@ -199,7 +199,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         }
         machineNodeModels.forEach(machineNodeModel -> {
             // 超时时间统一，避免长时间无响应
-            machineNodeModel.setJpomTimeout(10);
+            machineNodeModel.setJpomTimeout(30);
             //
             ThreadUtil.execute(() -> {
                 try {
@@ -251,13 +251,13 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         Optional.ofNullable(data.getJSONObject("jpomInfo")).ifPresent(jsonObject -> {
             JSONObject jpomManifest = jsonObject.getJSONObject("jpomManifest");
             Optional.ofNullable(jpomManifest)
-                .ifPresent(jsonObject1 -> {
-                    machineNodeModel.setJpomVersion(jsonObject1.getString("version"));
-                    machineNodeModel.setJpomBuildTime(jsonObject1.getString("timeStamp"));
-                    machineNodeModel.setOsName(jsonObject1.getString("osName"));
-                    machineNodeModel.setJpomUptime(jsonObject1.getLong("upTime"));
-                    machineNodeModel.setInstallId(jsonObject1.getString("installId"));
-                });
+                    .ifPresent(jsonObject1 -> {
+                        machineNodeModel.setJpomVersion(jsonObject1.getString("version"));
+                        machineNodeModel.setJpomBuildTime(jsonObject1.getString("timeStamp"));
+                        machineNodeModel.setOsName(jsonObject1.getString("osName"));
+                        machineNodeModel.setJpomUptime(jsonObject1.getLong("upTime"));
+                        machineNodeModel.setInstallId(jsonObject1.getString("installId"));
+                    });
             machineNodeModel.setJpomProjectCount(jsonObject.getIntValue("projectCount"));
             machineNodeModel.setJpomScriptCount(jsonObject.getIntValue("scriptCount"));
             //
