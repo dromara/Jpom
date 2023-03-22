@@ -26,6 +26,8 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.controller.outgiving.OutGivingWhitelistService;
+import io.jpom.model.data.ServerWhitelist;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -48,6 +50,12 @@ import javax.servlet.http.HttpServletResponse;
 @Feature(cls = ClassFeature.PROJECT_FILE)
 @NodeDataPermission(cls = ProjectInfoCacheService.class)
 public class ProjectFileControl extends BaseServerController {
+    private final OutGivingWhitelistService outGivingWhitelistService;
+
+    public ProjectFileControl(OutGivingWhitelistService outGivingWhitelistService) {
+        this.outGivingWhitelistService = outGivingWhitelistService;
+    }
+
 
     /**
      * 列出目录下的文件
@@ -137,7 +145,10 @@ public class ProjectFileControl extends BaseServerController {
      */
     @GetMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.REMOTE_DOWNLOAD)
-    public String remoteDownload() {
+    public String remoteDownload(String url, HttpServletRequest request) {
+        // 验证远程 地址
+        ServerWhitelist whitelist = outGivingWhitelistService.getServerWhitelistData(request);
+        whitelist.checkAllowRemoteDownloadHost(url);
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_Remote_Download).toString();
     }
 
