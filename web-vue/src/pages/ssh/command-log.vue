@@ -151,7 +151,7 @@ export default {
     },
     // 下载构建日志
     handleDownload(record) {
-      window.open(downloadLog(record.id), "_self");
+      window.open(downloadLog(record.id), "_blank");
     },
   },
 };

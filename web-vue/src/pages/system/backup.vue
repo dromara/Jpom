@@ -282,7 +282,7 @@ export default {
     },
     // 下载
     handleDownload(record) {
-      window.open(downloadBackupFile(record.id), "_self");
+      window.open(downloadBackupFile(record.id), "_blank");
     },
     // 删除
     handleDelete(record) {

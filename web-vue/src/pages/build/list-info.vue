@@ -1932,7 +1932,7 @@ export default {
     },
     // 下载构建产物
     handleDownloadFile(record) {
-      window.open(downloadBuildFileByBuild(record.id, record.buildId), "_self");
+      window.open(downloadBuildFileByBuild(record.id, record.buildId), "_blank");
     },
     // 批量构建
     batchBuild() {

@@ -139,6 +139,11 @@ const children = [
     name: "file-storage-release-task",
     component: () => import("../pages/file-manager/release-task/list"),
   },
+  {
+    path: "/certificate/list",
+    name: "/certificate-list",
+    component: () => import("../pages/certificate/list"),
+  },
 ];
 
 const management = [

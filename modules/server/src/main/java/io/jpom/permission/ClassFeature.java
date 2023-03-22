@@ -25,6 +25,7 @@ package io.jpom.permission;
 import io.jpom.func.assets.server.MachineDockerServer;
 import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.func.assets.server.MachineSshServer;
+import io.jpom.func.cert.service.CertificateInfoService;
 import io.jpom.func.files.service.FileReleaseTaskService;
 import io.jpom.func.files.service.FileStorageService;
 import io.jpom.func.user.server.UserLoginLogServer;
@@ -94,6 +95,7 @@ public enum ClassFeature {
     USER_LOGIN_LOG("登录日志", UserLoginLogServer.class),
     FILE_STORAGE("文件存储中心", FileStorageService.class),
     FILE_STORAGE_RELEASE("文件发布", FileReleaseTaskService.class),
+    CERTIFICATE_INFO("证书管理", CertificateInfoService.class),
     USER_PERMISSION_GROUP("权限分组", UserPermissionGroupServer.class),
     SYSTEM_EMAIL("邮箱配置"),
     SYSTEM_CACHE("系统缓存"),

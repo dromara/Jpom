@@ -865,7 +865,7 @@ export default {
         levelName: record.levelName,
         filename: record.filename,
       };
-      window.open(downloadProjectFile(params), "_self");
+      window.open(downloadProjectFile(params), "_blank");
     },
     // 删除
     handleDelete(record) {

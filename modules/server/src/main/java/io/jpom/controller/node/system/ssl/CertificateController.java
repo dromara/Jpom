@@ -31,7 +31,6 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.system.WhitelistDirectoryService;
-import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -69,22 +68,6 @@ public class CertificateController extends BaseServerController {
         List<String> list = whitelistDirectoryService.getCertificateDirectory(getNode());
         return JsonMessage.success("success", list);
     }
-
-    /**
-     * 保存证书
-     *
-     * @return json
-     */
-    @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    @Feature(method = MethodFeature.EDIT)
-    public String saveCertificate() {
-        if (ServletFileUpload.isMultipartContent(getRequest())) {
-            return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.System_Certificate_saveCertificate).toString();
-        }
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_saveCertificate).toString();
-    }
-
 
     /**
      * 证书列表

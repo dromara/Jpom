@@ -56,12 +56,6 @@
             <artifactId>nginxparser</artifactId>
             <version>0.9.6</version>
         </dependency>
-        <!--  证书解密-->
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.70</version>
-        </dependency>
 
         <dependency>
             <groupId>io.jpom.plugins</groupId>

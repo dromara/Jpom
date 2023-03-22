@@ -51,6 +51,7 @@ const routeMenuMap = {
   myWorkspaceList: "/my-workspace",
   fileStorage: "/file-manager/file-storage",
   fileReleaseTask: "/file-manager/release-task",
+  certificate: "/certificate/list",
 };
 
 export default routeMenuMap;

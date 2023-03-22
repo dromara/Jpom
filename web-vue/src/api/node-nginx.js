@@ -169,26 +169,6 @@ export function getCertList(params) {
 }
 
 /**
- * 编辑 cert
- * @param {
- *  file: 文件 multipart/form-data
- *  nodeId: 节点 ID
- *  data: 证书相关数据
- * } formData
- */
-export function editCert(formData) {
-  return axios({
-    url: "/node/system/certificate/saveCertificate",
-    headers: {
-      "Content-Type": "multipart/form-data;charset=UTF-8",
-    },
-    method: "post",
-    timeout: 0,
-    data: formData,
-  });
-}
-
-/**
  * 删除 cert
  * @param {
  *  nodeId: 节点 ID
