@@ -59,10 +59,6 @@ public class AgentWhitelist extends BaseJsonModel {
      */
     private List<String> project;
     /**
-     * ssl 证书文件白名单
-     */
-    private List<String> certificate;
-    /**
      * nginx 配置文件 白名单
      */
     private List<String> nginx;
@@ -100,10 +96,6 @@ public class AgentWhitelist extends BaseJsonModel {
         return useConvert(project);
     }
 
-    public List<String> certificate() {
-        return useConvert(certificate);
-    }
-
     /**
      * 格式化，判断是否与jpom 数据路径冲突
      *
@@ -115,16 +107,16 @@ public class AgentWhitelist extends BaseJsonModel {
             return null;
         }
         return list.stream()
-            .map(s -> {
-                String val = String.format("/%s/", s);
-                val = FileUtil.normalize(val);
-                FileUtils.checkSlip(val);
-                // 判断是否保护jpom 路径
-                Assert.state(!StrUtil.startWith(ExtConfigBean.getPath(), val), errorMsg);
-                return val;
-            })
-            .distinct()
-            .collect(Collectors.toList());
+                .map(s -> {
+                    String val = String.format("/%s/", s);
+                    val = FileUtil.normalize(val);
+                    FileUtils.checkSlip(val);
+                    // 判断是否保护jpom 路径
+                    Assert.state(!StrUtil.startWith(ExtConfigBean.getPath(), val), errorMsg);
+                    return val;
+                })
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     /**

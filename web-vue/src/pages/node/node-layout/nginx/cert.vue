@@ -43,7 +43,7 @@
   </div>
 </template>
 <script>
-import { deleteCert, downloadCert, getCertList, getCertWhiteList } from "@/api/node-nginx";
+import { deleteCert, downloadCert, getCertList } from "@/api/node-nginx";
 import { parseTime } from "@/utils/const";
 
 export default {
@@ -100,15 +100,8 @@ export default {
   mounted() {
     // this.calcTableHeight();
     this.loadData();
-    this.loadCertWhiteList();
   },
   methods: {
-    // 计算表格高度
-    // calcTableHeight() {
-    //   this.$nextTick(() => {
-    //     this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 155;
-    //   });
-    // },
     // 加载数据
     loadData() {
       this.loading = true;
@@ -120,17 +113,6 @@ export default {
           this.list = res.data;
         }
         this.loading = false;
-      });
-    },
-    // 加载 cert 白名单
-    loadCertWhiteList() {
-      const params = {
-        nodeId: this.node.id,
-      };
-      getCertWhiteList(params).then((res) => {
-        if (res.code === 200) {
-          this.whiteList = res.data;
-        }
       });
     },
 

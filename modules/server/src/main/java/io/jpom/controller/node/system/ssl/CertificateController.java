@@ -23,14 +23,12 @@
 package io.jpom.controller.node.system.ssl;
 
 import io.jpom.common.BaseServerController;
-import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
-import io.jpom.service.system.WhitelistDirectoryService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 
 /**
  * 证书管理
@@ -51,23 +48,6 @@ import java.util.List;
 @SystemPermission
 public class CertificateController extends BaseServerController {
 
-    private final WhitelistDirectoryService whitelistDirectoryService;
-
-    public CertificateController(WhitelistDirectoryService whitelistDirectoryService) {
-        this.whitelistDirectoryService = whitelistDirectoryService;
-    }
-
-    /**
-     * @return
-     * @author Hotstrip
-     * load Cert white list data
-     */
-    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public JsonMessage<List<String>> loadWhiteList() {
-        List<String> list = whitelistDirectoryService.getCertificateDirectory(getNode());
-        return JsonMessage.success("success", list);
-    }
 
     /**
      * 证书列表

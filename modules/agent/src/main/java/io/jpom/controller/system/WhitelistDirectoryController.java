@@ -66,14 +66,14 @@ public class WhitelistDirectoryController extends BaseJpomController {
 
 
     @PostMapping(value = "whitelistDirectory_submit", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> whitelistDirectorySubmit(String project, String certificate, String nginx, String nginxPath, String allowEditSuffix, String allowRemoteDownloadHost) {
+    public JsonMessage<String> whitelistDirectorySubmit(String project, String nginx, String nginxPath,
+                                                        String allowEditSuffix, String allowRemoteDownloadHost) {
         List<String> list = AgentWhitelist.parseToList(project, true, "项目路径白名单不能为空");
         //
-        List<String> certificateList = AgentWhitelist.parseToList(certificate, "证书路径白名单不能为空");
         List<String> nList = AgentWhitelist.parseToList(nginx, "nginx路径白名单不能为空");
         List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
         List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "允许远程下载的 host 不能配置为空");
-        return save(list, certificateList, nList, nginxPath, allowEditSuffixList, allowRemoteDownloadHostList);
+        return save(list, nList, nginxPath, allowEditSuffixList, allowRemoteDownloadHostList);
     }
 //
 //	private JsonMessage<String> save(String project, List<String> certificate, List<String> nginx, List<String> allowEditSuffixList) {
@@ -83,7 +83,6 @@ public class WhitelistDirectoryController extends BaseJpomController {
 
 
     private JsonMessage<String> save(List<String> projects,
-                                     List<String> certificate,
                                      List<String> nginx,
                                      String nginxPath,
                                      List<String> allowEditSuffixList,
@@ -94,14 +93,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
             String error = findStartsWith(projectArray, 0);
             Assert.isNull(error, "白名单目录中不能存在包含关系：" + error);
         }
-        List<String> certificateArray = null;
-        if (certificate != null && !certificate.isEmpty()) {
-            certificateArray = AgentWhitelist.covertToArray(certificate, "证书路径白名单不能位于Jpom目录下");
 
-            String error = findStartsWith(certificateArray, 0);
-            Assert.isNull(error, "证书目录中不能存在包含关系：" + error);
-
-        }
         List<String> nginxArray = null;
         if (nginx != null && !nginx.isEmpty()) {
             nginxArray = AgentWhitelist.covertToArray(nginx, "nginx路径白名单不能位于Jpom目录下");
@@ -131,7 +123,6 @@ public class WhitelistDirectoryController extends BaseJpomController {
         AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
         agentWhitelist.setNginxPath(nginxPath);
         agentWhitelist.setProject(projectArray);
-        agentWhitelist.setCertificate(certificateArray);
         agentWhitelist.setNginx(nginxArray);
         agentWhitelist.setAllowEditSuffix(allowEditSuffixList);
         agentWhitelist.setAllowRemoteDownloadHost(allowRemoteDownloadHostList == null ? null : CollUtil.newHashSet(allowRemoteDownloadHostList));
