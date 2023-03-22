@@ -117,12 +117,12 @@ export default {
       editCertVisible: false,
       templateVisible: false,
       columns: [
-        { title: "证书ID", dataIndex: "serialNumberStr", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
+        { title: "序列号 (SN)", dataIndex: "serialNumberStr", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
         { title: "证书类型", dataIndex: "keyType", ellipsis: true, width: "80px", scopedSlots: { customRender: "tooltip" } },
         { title: "颁发者", dataIndex: "issuerDnName", ellipsis: true, width: 200, scopedSlots: { customRender: "tooltip" } },
         { title: "主题", dataIndex: "subjectDnName", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
         { title: "版本号", dataIndex: "certVersion", ellipsis: true, width: "80px", scopedSlots: { customRender: "tooltip" } },
-        { title: "算法", dataIndex: "sigAlgName", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
+        { title: "密钥算法", dataIndex: "sigAlgName", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
         { title: "算法 OID", dataIndex: "sigAlgOid", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
         {
           title: "生效时间",

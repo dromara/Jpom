@@ -345,13 +345,16 @@ public class CertificateInfoController extends BaseServerController {
      * @return data
      */
     private CertificateInfoModel filling(X509Certificate cert) {
+        
+        String algorithm = cert.getPublicKey().getAlgorithm();
         CertificateInfoModel certificateInfoModel = new CertificateInfoModel();
         Date notBefore = cert.getNotBefore();
         Date notAfter = cert.getNotAfter();
         Optional.ofNullable(notAfter).ifPresent(date -> certificateInfoModel.setExpirationTime(date.getTime()));
         Optional.ofNullable(notBefore).ifPresent(date -> certificateInfoModel.setEffectiveTime(date.getTime()));
         BigInteger serialNumber = cert.getSerialNumber();
-        certificateInfoModel.setSerialNumberStr(serialNumber.toString());
+        // 使用 16 进制
+        certificateInfoModel.setSerialNumberStr(serialNumber.toString(16));
         //
         int version = cert.getVersion();
         certificateInfoModel.setCertVersion(version);

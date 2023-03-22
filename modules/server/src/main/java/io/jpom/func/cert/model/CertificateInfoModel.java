@@ -42,6 +42,7 @@ public class CertificateInfoModel extends BaseWorkspaceModel {
      */
     private String keyType;
     private String keyAlias;
+    private String fingerprint;
     /**
      * 证书密码
      */

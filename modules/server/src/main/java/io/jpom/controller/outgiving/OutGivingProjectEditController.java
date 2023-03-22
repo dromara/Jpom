@@ -28,6 +28,7 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
@@ -273,11 +274,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         //
         // 运行模式
         String runMode = getParameter("runMode");
-        RunMode runMode1 = RunMode.ClassPath;
-        try {
-            runMode1 = RunMode.valueOf(runMode);
-        } catch (Exception ignored) {
-        }
+        RunMode runMode1 = EnumUtil.fromString(RunMode.class, runMode, RunMode.ClassPath);
         defData.put("runMode", runMode1.name());
         if (runMode1 == RunMode.ClassPath || runMode1 == RunMode.JavaExtDirsCp) {
             String mainClass = getParameter("mainClass");
@@ -409,11 +406,11 @@ public class OutGivingProjectEditController extends BaseServerController {
         //
         String webhook = getParameter("webhook");
         webhook = Opt.ofBlankAble(webhook)
-            .map(s -> {
-                Validator.validateMatchRegex(RegexPool.URL_HTTP, s, "WebHooks 地址不合法");
-                return s;
-            })
-            .orElse(StrUtil.EMPTY);
+                .map(s -> {
+                    Validator.validateMatchRegex(RegexPool.URL_HTTP, s, "WebHooks 地址不合法");
+                    return s;
+                })
+                .orElse(StrUtil.EMPTY);
         outGivingModel.setWebhook(webhook);
         return tuples;
     }

@@ -143,7 +143,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
                 entity.set("nodeId", nodeModel.getId());
                 int del = super.del(entity);
                 //
-                log.debug("{} 节点没有拉取到任何{}", nodeModelName, dataName);
+                log.debug("{} 节点没有拉取到任何 {},但是删除了数据：{}", nodeModelName, dataName, del);
                 return "节点没有拉取到任何" + dataName;
             }
             // 查询现在存在的项目
@@ -153,39 +153,39 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
             List<T> cacheAll = super.listByBean(where);
             cacheAll = ObjectUtil.defaultIfNull(cacheAll, Collections.emptyList());
             Set<String> cacheIds = cacheAll.stream()
-                .map(BaseNodeModel::dataId)
-                .collect(Collectors.toSet());
+                    .map(BaseNodeModel::dataId)
+                    .collect(Collectors.toSet());
             //
             List<T> projectInfoModels = jsonArray.toJavaList(this.tClass);
             List<T> models = projectInfoModels.stream()
-                .peek(item -> this.fullData(item, nodeModel))
-                .filter(item -> {
-                    // 检查对应的工作空间 是否存在
-                    return workspaceService.exists(new WorkspaceModel(item.getWorkspaceId()));
-                })
-                .filter(projectInfoModel -> {
-                    // 避免重复同步
-                    return StrUtil.equals(nodeModel.getWorkspaceId(), projectInfoModel.getWorkspaceId());
-                })
-                .peek(item -> cacheIds.remove(item.dataId()))
-                .collect(Collectors.toList());
+                    .peek(item -> this.fullData(item, nodeModel))
+                    .filter(item -> {
+                        // 检查对应的工作空间 是否存在
+                        return workspaceService.exists(new WorkspaceModel(item.getWorkspaceId()));
+                    })
+                    .filter(projectInfoModel -> {
+                        // 避免重复同步
+                        return StrUtil.equals(nodeModel.getWorkspaceId(), projectInfoModel.getWorkspaceId());
+                    })
+                    .peek(item -> cacheIds.remove(item.dataId()))
+                    .collect(Collectors.toList());
             // 设置 临时缓存，便于放行检查
             BaseServerController.resetInfo(UserModel.EMPTY);
             //
             models.forEach(BaseNodeService.super::upsert);
             // 删除项目
             Set<String> strings = cacheIds.stream()
-                .map(s -> BaseNodeModel.fullId(nodeModel.getWorkspaceId(), nodeModel.getId(), s))
-                .collect(Collectors.toSet());
+                    .map(s -> BaseNodeModel.fullId(nodeModel.getWorkspaceId(), nodeModel.getId(), s))
+                    .collect(Collectors.toSet());
             if (CollUtil.isNotEmpty(strings)) {
                 super.delByKey(strings, null);
             }
             String format = StrUtil.format(
-                "{} 节点拉取到 {} 个{},已经缓存 {} 个{},更新 {} 个{},删除 {} 个缓存",
-                nodeModelName, CollUtil.size(jsonArray), dataName,
-                CollUtil.size(cacheAll), dataName,
-                CollUtil.size(models), dataName,
-                CollUtil.size(strings));
+                    "{} 节点拉取到 {} 个{},已经缓存 {} 个{},更新 {} 个{},删除 {} 个缓存",
+                    nodeModelName, CollUtil.size(jsonArray), dataName,
+                    CollUtil.size(cacheAll), dataName,
+                    CollUtil.size(models), dataName,
+                    CollUtil.size(strings));
             log.debug(format);
             return format;
         } catch (Exception e) {

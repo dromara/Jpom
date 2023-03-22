@@ -24,8 +24,7 @@ package io.jpom.common;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.common.multipart.MultipartFileBuilder;
@@ -42,6 +41,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -342,4 +342,12 @@ public abstract class BaseJpomController {
     public void setSessionAttribute(String name, Object object) {
         getRequestAttributes().setAttribute(name, object, RequestAttributes.SCOPE_SESSION);
     }
+
+    protected void setApplicationHeader(HttpServletResponse response, String fileName) {
+        String contentType = ObjectUtil.defaultIfNull(FileUtil.getMimeType(fileName), "application/octet-stream");
+        response.setHeader("Content-Disposition", StrUtil.format("attachment;filename=\"{}\"",
+                URLUtil.encode(fileName, CharsetUtil.CHARSET_UTF_8)));
+        response.setContentType(contentType);
+    }
+
 }

@@ -606,3 +606,32 @@ export const javaModes = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp"];
  * 有状态管理的运行模式
  */
 export const noFileModes = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "Dsl"];
+
+/*
+ * 下载导入模板
+ *
+ */
+export function importTemplate(data) {
+  return loadRouterBase("/node/manage/import-template", data);
+}
+
+/*
+ * 导出数据
+ *
+ */
+export function exportData(data) {
+  return loadRouterBase("/node/manage/export-data", data);
+}
+// 导入数据
+export function importData(formData) {
+  return axios({
+    url: "/node/manage/import-data",
+    headers: {
+      "Content-Type": "multipart/form-data;charset=UTF-8",
+    },
+    method: "post",
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData,
+  });
+}
