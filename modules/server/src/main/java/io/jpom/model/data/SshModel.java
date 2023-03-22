@@ -114,10 +114,10 @@ public class SshModel extends BaseGroupModel implements BaseSshFileController.It
     public List<String> fileDirs() {
         List<String> strings = StringUtil.jsonConvertArray(this.fileDirs, String.class);
         return Optional.ofNullable(strings)
-            .map(strings1 -> strings1.stream()
-                .map(s -> FileUtil.normalize(StrUtil.SLASH + s + StrUtil.SLASH))
-                .collect(Collectors.toList()))
-            .orElse(null);
+                .map(strings1 -> strings1.stream()
+                        .map(s -> FileUtil.normalize(StrUtil.SLASH + s + StrUtil.SLASH))
+                        .collect(Collectors.toList()))
+                .orElse(null);
     }
 
     public void fileDirs(List<String> fileDirs) {
@@ -128,7 +128,7 @@ public class SshModel extends BaseGroupModel implements BaseSshFileController.It
             }
             this.fileDirs = JSONArray.toJSONString(fileDirs);
         } else {
-            this.fileDirs = null;
+            this.fileDirs = StrUtil.EMPTY;
         }
     }
 
