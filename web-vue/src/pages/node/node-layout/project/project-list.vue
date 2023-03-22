@@ -9,7 +9,12 @@
       size="middle"
       :columns="columns"
       :pagination="pagination"
-      @change="changePage"
+      @change="
+        (pagination, filters, sorter) => {
+          this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
+          this.loadData();
+        }
+      "
       :row-selection="rowSelection"
       bordered
       rowKey="id"
@@ -30,10 +35,7 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
 
           <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-              批量操作
-              <a-icon type="down" />
-            </a>
+            <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
             <a-menu slot="overlay">
               <a-menu-item>
                 <a-button type="primary" @click="batchStart">批量启动</a-button>
@@ -46,9 +48,24 @@
               </a-menu-item>
             </a-menu>
           </a-dropdown>
-        </a-space>
 
-        状态数据是异步获取有一定时间延迟
+          <a-button icon="download" type="primary" @click="handlerExportData()">导出</a-button>
+          <a-dropdown>
+            <a-menu slot="overlay">
+              <a-menu-item key="1"> <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button> </a-menu-item>
+            </a-menu>
+
+            <a-upload name="file" accept=".csv" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
+              <a-button type="primary" icon="upload"> 导入 <a-icon type="down" /> </a-button>
+            </a-upload>
+          </a-dropdown>
+          <a-tooltip>
+            <template slot="title">
+              <div>状态数据是异步获取有一定时间延迟</div>
+            </template>
+            <a-icon type="question-circle" theme="filled" />
+          </a-tooltip>
+        </a-space>
       </template>
       <template slot="copyIcon" slot-scope="javaCopyItemList, record">
         <template v-if="javaCopyItemList">
@@ -91,7 +108,7 @@
         </template>
       </template>
 
-      <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${(record.pids || [record.pid || '-']).join(',')} / 端口号：${record.port}`">
+      <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${(record.pids || [record.pid || '-']).join(',')} / 端口号：${record.port || '-'}`">
         <span>{{ record.port || "-" }}/{{ (record.pids || [record.pid || "-"]).join(",") }}</span>
       </a-tooltip>
 
@@ -458,6 +475,9 @@ import {
   stopProject,
   getProjectGroupAll,
   releaseOutgiving,
+  importTemplate,
+  exportData,
+  importData,
 } from "@/api/node-project";
 
 export default {
@@ -503,13 +523,13 @@ export default {
       batchTitle: "",
       columns: [
         { title: "", dataIndex: "javaCopyItemList", align: "center", width: "40px", scopedSlots: { customRender: "copyIcon" } },
-        { title: "项目名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "项目名称", dataIndex: "name", width: 150, sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "项目分组", dataIndex: "group", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "group" } },
         {
           title: "项目路径",
           dataIndex: "path",
           ellipsis: true,
-          scopedSlots: { customRender: "path" },
+          scopedSlots: { customRender: "path", width: 150 },
         },
         { title: "运行方式", dataIndex: "runMode", sorter: true, width: "90px", ellipsis: true, align: "center", scopedSlots: { customRender: "runMode" } },
         { title: "修改时间", sorter: true, dataIndex: "modifyTimeMillis", width: "170px", ellipsis: true, scopedSlots: { customRender: "time" } },
@@ -524,7 +544,7 @@ export default {
         // },
         { title: "运行状态", dataIndex: "status", width: 80, ellipsis: true, align: "center", scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 180 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, fixed: "right", align: "center", width: "180px" },
       ],
       copyColumns: [
         { title: "编号", dataIndex: "id", width: "80px", ellipsis: true, scopedSlots: { customRender: "id" } },
@@ -569,6 +589,7 @@ export default {
   methods: {
     parseTime,
     randomStr,
+    CHANGE_PAGE,
     // 页面引导
     introGuide() {
       this.$store.dispatch("tryOpenGuide", {
@@ -1063,11 +1084,7 @@ export default {
         this.batchStopInfo(count);
       }
     },
-    // 分页、排序、筛选变化时触发
-    changePage(pagination, filters, sorter) {
-      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
-      this.loadData();
-    },
+
     // 折叠事件
     handleExpand(item, status) {
       //javaCopyItemList
@@ -1188,6 +1205,31 @@ export default {
             }
           });
         },
+      });
+    },
+    // 下载导入模板
+    handlerImportTemplate() {
+      window.open(
+        importTemplate({
+          nodeId: this.node.id,
+        }),
+        "_blank"
+      );
+    },
+    handlerExportData() {
+      window.open(exportData({ ...this.listQuery }), "_blank");
+    },
+    beforeUpload(file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("nodeId", this.node.id);
+      importData(formData).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.loadData();
+        }
       });
     },
   },

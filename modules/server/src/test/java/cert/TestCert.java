@@ -23,11 +23,15 @@ package cert;/*
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.HexUtil;
 import cn.hutool.crypto.GlobalBouncyCastleProvider;
 import cn.hutool.crypto.KeyUtil;
 import cn.hutool.crypto.PemUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
+import com.sun.security.cert.internal.x509.X509V1CertImpl;
 import org.junit.Test;
 
 import javax.security.cert.X509Certificate;
@@ -73,9 +77,22 @@ public class TestCert {
 
             {
                 X509Certificate cert = X509Certificate.getInstance(certificate.getEncoded());
+                byte[] encoded = cert.getEncoded();
+                System.out.println("指纹：" + SecureUtil.sha1().digestHex(encoded));
                 Date notBefore = cert.getNotBefore();
                 Date notAfter = cert.getNotAfter();
                 BigInteger serialNumber = cert.getSerialNumber();
+                if (cert instanceof X509V1CertImpl) {
+                    X509V1CertImpl x509V1Cert = (X509V1CertImpl) cert;
+                    java.security.cert.X509Certificate x509Certificate = x509V1Cert.getX509Certificate();
+                    //AuthorityKeyIdentifier
+                    byte[] extensionValue1 = x509Certificate.getExtensionValue("2.5.29.35");
+                    // SubjectKeyIdentifier
+                    byte[] extensionValue2 = x509Certificate.getExtensionValue("2.5.29.14");
+                    System.out.println(HexUtil.encodeHexStr(ArrayUtil.sub(extensionValue1, 6, extensionValue1.length)));
+                    System.out.println(HexUtil.encodeHexStr(ArrayUtil.sub(extensionValue2, 4, extensionValue2.length)));
+                }
+                System.out.println(serialNumber.toString(16));
                 int version = cert.getVersion();
                 Principal subjectDN = cert.getSubjectDN();
                 Principal issuerDN = cert.getIssuerDN();
@@ -103,6 +120,8 @@ public class TestCert {
 //        KeyStore keyStore = KeyUtil.readJKSKeyStore(file, "skkervmb".toCharArray());
         {
             X509Certificate cert = X509Certificate.getInstance(certificate.getEncoded());
+            byte[] encoded = cert.getEncoded();
+            System.out.println("指纹：" + SecureUtil.sha256().digestHex(encoded));
             Date notBefore = cert.getNotBefore();
             Date notAfter = cert.getNotAfter();
             BigInteger serialNumber = cert.getSerialNumber();
@@ -131,6 +150,8 @@ public class TestCert {
             }
             {
                 X509Certificate cert = X509Certificate.getInstance(certificate.getEncoded());
+                byte[] encoded = cert.getEncoded();
+                System.out.println("指纹：" + SecureUtil.sha256().digestHex(encoded));
                 Date notBefore = cert.getNotBefore();
                 Date notAfter = cert.getNotAfter();
                 BigInteger serialNumber = cert.getSerialNumber();
@@ -157,7 +178,8 @@ public class TestCert {
             System.out.println(certificate1Type);
             {
                 publicCert = X509Certificate.getInstance(certificate1.getEncoded());
-
+                byte[] encoded = publicCert.getEncoded();
+                System.out.println("指纹：" + SecureUtil.sha256().digestHex(encoded));
                 System.out.println(publicCert.getIssuerDN().equals(publicCert.getSubjectDN()) + "  " + publicCert.getIssuerDN() + "  " + publicCert.getSubjectDN());
                 Date notBefore = publicCert.getNotBefore();
                 Date notAfter = publicCert.getNotAfter();
@@ -227,6 +249,8 @@ public class TestCert {
             certificate1 = KeyUtil.readX509Certificate(FileUtil.getInputStream(crt));
             {
                 publicCert = X509Certificate.getInstance(certificate1.getEncoded());
+                byte[] encoded = publicCert.getEncoded();
+                System.out.println("指纹：" + SecureUtil.sha256().digestHex(encoded));
                 System.out.println(publicCert.getIssuerDN().equals(publicCert.getSubjectDN()) + "  " + publicCert.getIssuerDN() + "  " + publicCert.getSubjectDN());
                 Date notBefore = publicCert.getNotBefore();
                 Date notAfter = publicCert.getNotAfter();

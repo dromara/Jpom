@@ -22,7 +22,18 @@
  */
 package io.jpom.controller.node.manage;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.io.BomReader;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.text.StrPool;
+import cn.hutool.core.text.csv.*;
+import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.servlet.ServletUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
@@ -30,6 +41,8 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
+import io.jpom.model.BaseNodeModel;
+import io.jpom.model.RunMode;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.enums.BuildReleaseMethod;
@@ -43,16 +56,20 @@ import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.outgiving.LogReadServer;
 import io.jpom.service.outgiving.OutGivingServer;
+import lombok.Lombok;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 /**
  * 项目管理
@@ -63,6 +80,7 @@ import java.util.List;
 @RequestMapping(value = "/node/manage/")
 @Feature(cls = ClassFeature.PROJECT)
 @NodeDataPermission(cls = ProjectInfoCacheService.class)
+@Slf4j
 public class ProjectManageControl extends BaseServerController {
 
     private final OutGivingServer outGivingServer;
@@ -160,7 +178,7 @@ public class ProjectManageControl extends BaseServerController {
         JsonMessage<String> request = NodeForward.request(nodeModel, servletRequest, NodeUrl.Manage_DeleteProject);
         if (request.success()) {
             //
-            projectInfoCacheService.syncNode(nodeModel);
+            projectInfoCacheService.syncExecuteNode(nodeModel);
         }
         return request;
     }
@@ -207,5 +225,194 @@ public class ProjectManageControl extends BaseServerController {
     public JsonMessage<Object> stop() {
         NodeModel nodeModel = getNode();
         return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_Stop);
+    }
+
+
+    /**
+     * 下载导入模板
+     */
+    @GetMapping(value = "import-template", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public void importTemplate(HttpServletResponse response) throws IOException {
+        String fileName = "项目导入模板.csv";
+        this.setApplicationHeader(response, fileName);
+        //
+        CsvWriter writer = CsvUtil.getWriter(response.getWriter());
+        writer.writeLine("id", "name", "groupName", "whitelistDirectory", "path", "logPath", "runMode",
+                "mainClass",
+                "jvm", "args",
+                "javaExtDirsCp",
+                "dslContent",
+                "webHooks",
+                "autoStart");
+        writer.flush();
+    }
+
+    /**
+     * 导出数据
+     */
+    @GetMapping(value = "export-data", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DOWNLOAD)
+    public void exportData(HttpServletResponse response, HttpServletRequest request) throws IOException {
+        String workspace = projectInfoCacheService.getCheckUserWorkspace(request);
+        String fileName = "导出的项目数据 " + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
+        this.setApplicationHeader(response, fileName);
+        //
+        CsvWriteConfig csvWriteConfig = CsvWriteConfig.defaultConfig();
+        csvWriteConfig.setAlwaysDelimitText(true);
+        CsvWriter writer = CsvUtil.getWriter(response.getWriter(), csvWriteConfig);
+        int pageInt = 0;
+        writer.writeLine("id", "name", "groupName", "whitelistDirectory", "path", "logPath", "runMode",
+                "mainClass",
+                "jvm", "args", "javaExtDirsCp",
+                "dslContent",
+                "webHooks",
+                "autoStart", "outGivingProject");
+        while (true) {
+            Map<String, String> paramMap = ServletUtil.getParamMap(request);
+            // 下一页
+            paramMap.put("page", String.valueOf(++pageInt));
+            PageResultDto<ProjectInfoCacheModel> listPage = projectInfoCacheService.listPage(paramMap, false);
+            if (listPage.isEmpty()) {
+                break;
+            }
+            listPage.getResult()
+                    .stream()
+                    .map((Function<ProjectInfoCacheModel, List<Object>>) projectInfoCacheModel -> CollUtil.newArrayList(
+                            projectInfoCacheModel.getProjectId(),
+                            projectInfoCacheModel.getName(),
+                            projectInfoCacheModel.getGroup(),
+                            projectInfoCacheModel.getWhitelistDirectory(),
+                            projectInfoCacheModel.getLib(),
+                            projectInfoCacheModel.getLogPath(),
+                            projectInfoCacheModel.getRunMode(),
+                            projectInfoCacheModel.getMainClass(),
+                            encodeCsv(projectInfoCacheModel.getJvm()),
+                            encodeCsv(projectInfoCacheModel.getArgs()),
+                            encodeCsv(projectInfoCacheModel.getJavaExtDirsCp()),
+                            encodeCsv(projectInfoCacheModel.getDslContent()),
+                            projectInfoCacheModel.getToken(),
+                            projectInfoCacheModel.getAutoStart(),
+                            projectInfoCacheModel.getOutGivingProject()
+                    ))
+                    .map(objects -> objects.stream().map(StrUtil::toStringOrNull).toArray(String[]::new))
+                    .forEach(writer::writeLine);
+            if (ObjectUtil.equal(listPage.getPage(), listPage.getTotalPage())) {
+                // 最后一页
+                break;
+            }
+        }
+        writer.flush();
+    }
+
+
+    private String encodeCsv(String data) {
+        return StrUtil.replace(data, StrPool.LF, "\"\n\"");
+    }
+
+    private String decodeCsv(String data) {
+        return StrUtil.replace(data, "\"\n\"", StrPool.LF);
+    }
+
+    /**
+     * 导入数据
+     *
+     * @return json
+     */
+    @PostMapping(value = "import-data", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.UPLOAD)
+    public JsonMessage<String> importData(MultipartFile file, HttpServletRequest request) throws IOException {
+        Assert.notNull(file, "没有上传文件");
+        String workspaceId = projectInfoCacheService.getCheckUserWorkspace(request);
+        NodeModel node = getNode();
+        String originalFilename = file.getOriginalFilename();
+        String extName = FileUtil.extName(originalFilename);
+        Assert.state(StrUtil.endWithIgnoreCase(extName, "csv"), "不允许的文件格式");
+        BomReader bomReader = IoUtil.getBomReader(file.getInputStream());
+        CsvReadConfig csvReadConfig = CsvReadConfig.defaultConfig();
+        csvReadConfig.setHeaderLineNo(0);
+        CsvReader reader = CsvUtil.getReader(bomReader, csvReadConfig);
+        CsvData csvData;
+        try {
+            csvData = reader.read();
+        } catch (Exception e) {
+            log.error("解析 csv 异常", e);
+            return new JsonMessage<>(405, "解析文件异常," + e.getMessage());
+        }
+        List<CsvRow> rows = csvData.getRows();
+        Assert.notEmpty(rows, "没有任何数据");
+        int updateCount = 0, ignoreCount = 0;
+        for (int i = 0; i < rows.size(); i++) {
+            CsvRow csvRow = rows.get(i);
+            JSONObject jsonObject = this.loadProjectData(csvRow, workspaceId, node);
+            if (jsonObject == null) {
+                ignoreCount++;
+                continue;
+            }
+            try {
+                //
+                JsonMessage<String> jsonMessage = NodeForward.request(node, NodeUrl.Manage_SaveProject, jsonObject);
+                if (jsonMessage.success()) {
+                    updateCount++;
+                    continue;
+                }
+                throw new IllegalArgumentException(StrUtil.format("导入第 {} 条数据保存失败:{}", i + 2, jsonMessage.getMsg()));
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                throw Lombok.sneakyThrow(e);
+            } catch (Exception e) {
+                log.error("导入保存项目异常", e);
+                throw new IllegalArgumentException(StrUtil.format("导入第 {} 条数据异常:{}", i + 2, e.getMessage()));
+            }
+        }
+        projectInfoCacheService.syncExecuteNode(node);
+        return JsonMessage.success("导入成功,更新 {} 条数据,因为节点分发/项目副本忽略 {} 条数据", updateCount, ignoreCount);
+    }
+
+    private JSONObject loadProjectData(CsvRow csvRow, String workspaceId, NodeModel node) {
+        String id = csvRow.getByName("id");
+        String fullId = BaseNodeModel.fullId(workspaceId, node.getId(), id);
+
+        ProjectInfoCacheModel projectInfoCacheModel1 = projectInfoCacheService.getByKey(fullId);
+        if (projectInfoCacheModel1 != null) {
+            // 节点分发项目不能在这里导入
+            Boolean outGivingProject = projectInfoCacheModel1.getOutGivingProject();
+            if (outGivingProject != null && outGivingProject) {
+                return null;
+            }
+            if (StrUtil.isNotEmpty(projectInfoCacheModel1.getJavaCopyItemList())) {
+                return null;
+            }
+        }
+//        "id", "name", "groupName", "whitelistDirectory", "path", "logPath", "runMode",
+//                "mainClass",
+//                "jvm", "args", "javaExtDirsCp",
+//                "dslContent",
+//                "webHooks",
+//                "autoStart", "outGivingProject"
+        JSONObject data = new JSONObject();
+        data.put("id", id);
+        data.put("name", csvRow.getByName("name"));
+        data.put("group", csvRow.getByName("groupName"));
+        String runModeStr = csvRow.getByName("runMode");
+        // 运行模式
+        RunMode runMode1 = EnumUtil.fromString(RunMode.class, runModeStr, RunMode.ClassPath);
+        data.put("runMode", runMode1.name());
+        if (runMode1 == RunMode.ClassPath || runMode1 == RunMode.JavaExtDirsCp) {
+            data.put("mainClass", csvRow.getByName("mainClass"));
+        }
+        if (runMode1 == RunMode.JavaExtDirsCp) {
+            data.put("javaExtDirsCp", decodeCsv(csvRow.getByName("javaExtDirsCp")));
+        }
+        if (runMode1 == RunMode.Dsl) {
+            data.put("dslContent", decodeCsv(csvRow.getByName("dslContent")));
+        }
+        data.put("whitelistDirectory", csvRow.getByName("whitelistDirectory"));
+        data.put("logPath", csvRow.getByName("logPath"));
+        data.put("lib", csvRow.getByName("path"));
+        data.put("autoStart", csvRow.getByName("autoStart"));
+        data.put("token", csvRow.getByName("webHooks"));
+        data.put("jvm", decodeCsv(csvRow.getByName("jvm")));
+        data.put("args", decodeCsv(csvRow.getByName("args")));
+        return data;
     }
 }

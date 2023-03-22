@@ -76,7 +76,9 @@ public class ManageEditProjectController extends BaseAgentController {
      * @param whitelistDirectory 白名单
      * @param previewData        预检查数据
      */
-    private NodeProjectInfoModel checkParameter(NodeProjectInfoModel projectInfo, String whitelistDirectory, boolean previewData) {
+    private NodeProjectInfoModel checkParameter(NodeProjectInfoModel projectInfo,
+                                                String whitelistDirectory,
+                                                boolean previewData) {
         String id = projectInfo.getId();
         // 兼容 _
         String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
@@ -426,47 +428,4 @@ public class ManageEditProjectController extends BaseAgentController {
         }
         return JsonMessage.success("释放成功");
     }
-
-//    /**
-//     * 检查项目lib 情况
-//     *
-//     * @param id     项目id
-//     * @param newLib 新路径
-//     * @return 状态码，400是一定不能操作的，401 是提醒
-//     */
-//    @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-//    public JsonMessage<String> saveProject(String id, String newLib) {
-//        Assert.hasText(newLib, "请填写项目路径");
-//        FileUtils.checkSlip(newLib);
-//        Assert.state(!Validator.isChinese(newLib), "不建议使用中文目录");
-//        File file = FileUtil.file(newLib);
-//        //  填写的jar路径是一个存在的文件
-//        Assert.state(!FileUtil.isFile(file), "填写目录当前是一个已经存在的文件,请修改");
-//
-//        NodeProjectInfoModel exits = projectInfoService.getItem(id);
-//        if (exits == null) {
-//            // 创建项目 填写的jar路径是已经存在的文件夹
-//            Assert.state(!FileUtil.exist(file), "填写项目目录当前已经在,创建成功后会自动同步文件");
-//        } else {
-//            // 已经存在的项目
-//            File oldLib = new File(exits.allLib());
-//            if (FileUtil.equals(oldLib, file)) {
-//                // 新 旧没有变更
-//                return JsonMessage.success("没有变化");
-//            }
-//            if (file.exists()) {
-//                String msg;
-//                if (oldLib.exists()) {
-//                    // 新旧jar路径都存在，会自动覆盖新的jar路径中的文件
-//                    msg = "原项目目录已经存在并且新的项目目录已经存在,保存将覆盖新文件夹并会自动同步原项目目录";
-//                } else {
-//                    msg = "填写项目目录当前已经存在,创建成功后会自动同步文件";
-//                }
-//                return new JsonMessage<>(201, msg);
-//            } else {
-//                return new JsonMessage<>(201, "填写项目目录当前不存在,创建成功后会自动同步文件");
-//            }
-//        }
-//        return JsonMessage.success("");
-//    }
 }

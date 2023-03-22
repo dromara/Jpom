@@ -127,4 +127,8 @@ export default {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+.ant-space {
+  flex-wrap: wrap;
+  gap: 10px 0;
+}
 </style>

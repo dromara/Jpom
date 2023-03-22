@@ -37,6 +37,10 @@ import top.jpom.h2db.TableName;
 public class ProjectInfoCacheModel extends BaseNodeGroupModel {
 
     private String projectId;
+    /**
+     * 项目自动启动
+     */
+    private Boolean autoStart;
 
     private String name;
 
@@ -58,14 +62,14 @@ public class ProjectInfoCacheModel extends BaseNodeGroupModel {
      * java main 方法参数
      */
     private String args;
-
+    /**
+     * 副本
+     */
     private String javaCopyItemList;
     /**
      * WebHooks
      */
     private String token;
-
-    private String jdkId;
 
     private String runMode;
     /**
@@ -77,6 +81,10 @@ public class ProjectInfoCacheModel extends BaseNodeGroupModel {
      * 填写【lib:conf】
      */
     private String javaExtDirsCp;
+    /**
+     * DSL 内容
+     */
+    private String dslContent;
     /**
      * 排序
      */

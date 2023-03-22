@@ -33,7 +33,10 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.text.csv.*;
-import cn.hutool.core.util.*;
+import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.JschUtil;
@@ -331,18 +334,11 @@ public class MachineSshController extends BaseGroupNameController {
     @Feature(method = MethodFeature.LIST)
     public void importTemplate(HttpServletResponse response) throws IOException {
         String fileName = "ssh导入模板.csv";
-        this.setHeader(response, fileName);
+        this.setApplicationHeader(response, fileName);
         //
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
         writer.writeLine("name", "groupName", "host", "port", "user", "password", "charset", "connectType", "privateKey", "timeout");
         writer.flush();
-    }
-
-    private void setHeader(HttpServletResponse response, String fileName) {
-        String contentType = ObjectUtil.defaultIfNull(FileUtil.getMimeType(fileName), "application/octet-stream");
-        response.setHeader("Content-Disposition", StrUtil.format("attachment;filename=\"{}\"",
-                URLUtil.encode(fileName, CharsetUtil.CHARSET_UTF_8)));
-        response.setContentType(contentType);
     }
 
 
@@ -353,7 +349,7 @@ public class MachineSshController extends BaseGroupNameController {
     @Feature(method = MethodFeature.DOWNLOAD)
     public void exportData(HttpServletResponse response, HttpServletRequest request) throws IOException {
         String fileName = "导出的 ssh 数据 " + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
-        this.setHeader(response, fileName);
+        this.setApplicationHeader(response, fileName);
         //
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
         int pageInt = 0;
@@ -397,6 +393,7 @@ public class MachineSshController extends BaseGroupNameController {
      * @return json
      */
     @PostMapping(value = "import-data", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.UPLOAD)
     public JsonMessage<String> importData(MultipartFile file) throws IOException {
         Assert.notNull(file, "没有上传文件");
         String originalFilename = file.getOriginalFilename();

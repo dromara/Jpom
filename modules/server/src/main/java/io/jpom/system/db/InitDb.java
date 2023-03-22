@@ -148,14 +148,15 @@ public class InitDb implements DisposableBean, ILoadEvent {
             // 执行回调方法
             log.debug("需要执行 {} 个回调", AFTER_CALLBACK.size());
             long count = AFTER_CALLBACK.entrySet()
-                .stream()
-                .mapToInt(value -> {
-                    log.info("开始执行数据库事件：{}", value.getKey());
-                    Supplier<Boolean> supplier = value.getValue();
-                    boolean arg2 = supplier.get();
-                    log.info("数据库 {} 事件执行结束,结果：{}", value.getKey(), arg2);
-                    return arg2 ? 1 : 0;
-                }).sum();
+                    .stream()
+                    .mapToInt(value -> {
+                        log.info("开始执行数据库事件：{}", value.getKey());
+                        Supplier<Boolean> supplier = value.getValue();
+                        boolean arg2 = supplier.get();
+                        int code = arg2 ? 1 : 0;
+                        log.info("数据库 {} 事件执行结束,：{}", value.getKey(), code);
+                        return code;
+                    }).sum();
             if (count > 0) {
                 // 因为导入数据后数据结构可能发生变动
                 // 第二次初始化数据库
@@ -216,7 +217,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
             Db.use(dataSource).tx((CheckedUtil.VoidFunc1Rt<Db>) parameter -> {
                 // 分隔后执行，mysql 不能执行多条 sql 语句
                 List<String> list = StrUtil.isEmpty(sqlBuilderService.delimiter()) ?
-                    CollUtil.newArrayList(sql) : StrUtil.splitTrim(sql, sqlBuilderService.delimiter());
+                        CollUtil.newArrayList(sql) : StrUtil.splitTrim(sql, sqlBuilderService.delimiter());
                 int rows = list.stream().mapToInt(value -> {
                     try {
                         return parameter.execute(value);
@@ -290,6 +291,9 @@ public class InitDb implements DisposableBean, ILoadEvent {
             if (mode != DbExtConfig.Mode.MYSQL) {
                 throw new JpomRuntimeException(StrUtil.format("当前模式不正确，不能直接迁移到 {}", mode));
             }
+            // 都提前清理
+            StorageServiceFactory.clearExecuteSqlLog();
+            //
             String user = environment.getProperty("h2-user");
             String url = environment.getProperty("h2-url");
             String pass = environment.getProperty("h2-pass");

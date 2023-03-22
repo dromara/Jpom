@@ -38,3 +38,6 @@ ADD,FILE_STORAGE,triggerToken,String,200,,触发器token,false
 ALTER,FILE_STORAGE,name,String,255,,名称,true
 ADD,BUILD_INFO,aliasCode,String,50,,别名码,false
 ADD,FILE_STORAGE,aliasCode,String,50,,别名码,false
+ADD,PROJECT_INFO,dslContent,TEXT,,,dslContent,false
+DROP,PROJECT_INFO,jdkId,
+ADD,PROJECT_INFO,autoStart,TINYINT,,,在启动,false

@@ -36,6 +36,7 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.user.TriggerTokenLogServer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -55,6 +56,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(value = "/node")
 @Feature(cls = ClassFeature.NODE)
+@Slf4j
 public class NodeProjectInfoController extends BaseServerController {
 
     private final ProjectInfoCacheService projectInfoCacheService;
@@ -187,7 +189,7 @@ public class NodeProjectInfoController extends BaseServerController {
             updateItem = new ProjectInfoCacheModel();
             updateItem.setId(id);
             updateItem.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), projectInfoCacheService.typeName(),
-                item.getId(), user.getId()));
+                    item.getId(), user.getId()));
             projectInfoCacheService.updateById(updateItem);
         } else {
             updateItem = item;
@@ -199,8 +201,8 @@ public class NodeProjectInfoController extends BaseServerController {
     private Map<String, String> getBuildToken(ProjectInfoCacheModel item) {
         String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
         String url = ServerOpenApi.SERVER_PROJECT_TRIGGER_URL.
-            replace("{id}", item.getId()).
-            replace("{token}", item.getTriggerToken());
+                replace("{id}", item.getId()).
+                replace("{token}", item.getTriggerToken());
         String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
         Map<String, String> map = new HashMap<>(10);
         map.put("triggerUrl", FileUtil.normalize(triggerBuildUrl));
