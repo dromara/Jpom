@@ -212,12 +212,12 @@ export default {
 
     // 下载构建日志
     handleDownload(record) {
-      window.open(downloadBuildLog(record.id), "_self");
+      window.open(downloadBuildLog(record.id), "_blank");
     },
 
     // 下载构建产物
     handleFile(record) {
-      window.open(downloadBuildFile(record.id), "_self");
+      window.open(downloadBuildFile(record.id), "_blank");
     },
 
     // 回滚

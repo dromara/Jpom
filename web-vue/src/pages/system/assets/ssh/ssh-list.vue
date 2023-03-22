@@ -726,10 +726,10 @@ export default {
     },
     // 下载导入模板
     handlerImportTemplate() {
-      window.open(importTemplate(), "_self");
+      window.open(importTemplate(), "_blank");
     },
     handlerExportData() {
-      window.open(exportData({ ...this.listQuery }), "_self");
+      window.open(exportData({ ...this.listQuery }), "_blank");
     },
     beforeUpload(file) {
       const formData = new FormData();

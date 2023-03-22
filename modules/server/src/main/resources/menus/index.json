@@ -147,6 +147,10 @@
     "id": "tools",
     "childs": [
       {
+        "id": "certificate",
+        "title": "证书管理"
+      },
+      {
         "id": "myWorkspaceList",
         "title": "我的工作空间"
       },

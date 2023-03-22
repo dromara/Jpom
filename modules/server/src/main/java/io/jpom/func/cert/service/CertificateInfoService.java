@@ -20,25 +20,16 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-import cn.hutool.core.lang.Console;
-import cn.hutool.core.util.ReUtil;
-import cn.hutool.http.HttpUtil;
+package io.jpom.func.cert.service;
 
-import java.util.List;
+import io.jpom.func.cert.model.CertificateInfoModel;
+import io.jpom.service.h2db.BaseWorkspaceService;
+import org.springframework.stereotype.Service;
 
 /**
  * @author bwcx_jzy
- * @since 2023/3/21
+ * @since 2023/3/22
  */
-public class TestMaven {
-
-    public static void main(String[] args) {
-        String html = HttpUtil.get("https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/");
-        //使用正则获取所有可用版本
-        List<String> titles = ReUtil.findAll("<a\\s+href=\"3.*?/\">(.*?)</a>", html, 1);
-        for (String title : titles) {
-            //打印标题
-            Console.log(title);
-        }
-    }
+@Service
+public class CertificateInfoService extends BaseWorkspaceService<CertificateInfoModel> {
 }

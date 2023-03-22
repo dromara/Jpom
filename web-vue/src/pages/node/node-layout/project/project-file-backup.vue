@@ -311,7 +311,7 @@ export default {
         backupId: this.temp.filename,
       };
       // 请求接口拿到 blob
-      window.open(backupDownloadProjectFile(params), "_self");
+      window.open(backupDownloadProjectFile(params), "_blank");
     },
     // 删除
     handleDelete(record) {

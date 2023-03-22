@@ -468,7 +468,7 @@ export default {
         name: record.name,
       };
       // 请求接口拿到 blob
-      window.open(downloadFile(this.baseUrl, params), "_self");
+      window.open(downloadFile(this.baseUrl, params), "_blank");
     },
     // 删除文件夹
     handleDeletePath() {
