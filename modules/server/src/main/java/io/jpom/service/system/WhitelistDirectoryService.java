@@ -70,13 +70,5 @@ public class WhitelistDirectoryService {
         return agentWhitelist.getNginx();
     }
 
-    public List<String> getCertificateDirectory(NodeModel model) {
-        AgentWhitelist agentWhitelist = getData(model);
-        if (agentWhitelist == null) {
-            return null;
-        }
-        return agentWhitelist.getCertificate();
-    }
-
 
 }

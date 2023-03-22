@@ -77,9 +77,9 @@ public class WhitelistDirectoryService extends BaseDataService {
         List<String> project = agentWhitelist.getProject();
         project = ObjectUtil.defaultIfNull(project, Collections.emptyList());
         project = CollUtil.addAll(project, checkOk)
-            .stream()
-            .distinct()
-            .collect(Collectors.toList());
+                .stream()
+                .distinct()
+                .collect(Collectors.toList());
         agentWhitelist.setProject(project);
         saveWhitelistDirectory(agentWhitelist);
     }
@@ -94,17 +94,6 @@ public class WhitelistDirectoryService extends BaseDataService {
 
         AgentWhitelist agentWhitelist = getWhitelist();
         List<String> list = agentWhitelist.nginx();
-        return AgentWhitelist.checkPath(list, path);
-    }
-
-
-    public boolean checkCertificateDirectory(String path) {
-        AgentWhitelist agentWhitelist = getWhitelist();
-
-        List<String> list = agentWhitelist.certificate();
-        if (list == null) {
-            return false;
-        }
         return AgentWhitelist.checkPath(list, path);
     }
 

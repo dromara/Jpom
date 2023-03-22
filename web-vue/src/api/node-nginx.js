@@ -141,20 +141,6 @@ export function editNginxServerName(params) {
 /***************************** */
 
 /**
- * cert 白名单列表
- * @param {
- *  nodeId: 节点 ID
- * } params
- */
-export function getCertWhiteList(params) {
-  return axios({
-    url: "/node/system/certificate/white-list",
-    method: "post",
-    data: params,
-  });
-}
-
-/**
  * cert 列表
  * @param {
  *  nodeId: 节点 ID
