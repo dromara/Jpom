@@ -167,9 +167,6 @@ public class GitUtil {
     private static void setCredentials(TransportCommand<?, ?> transportCommand, Map<String, Object> parameter) {
         // 设置超时时间
         Integer timeout = (Integer) parameter.get("timeout");
-        Optional.ofNullable(timeout)
-            .map(integer -> integer <= 0 ? null : integer)
-            .ifPresent(transportCommand::setTimeout);
         // 设置账号密码
         Integer protocol = (Integer) parameter.get("protocol");
         String username = (String) parameter.get("username");
@@ -178,6 +175,10 @@ public class GitUtil {
             // http
             CredentialsProvider credentialsProvider = new SslVerifyUsernamePasswordCredentialsProvider(username, password);
             transportCommand.setCredentialsProvider(credentialsProvider);
+            //
+            Optional.ofNullable(timeout)
+                .map(integer -> integer <= 0 ? null : integer)
+                .ifPresent(transportCommand::setTimeout);
         } else if (protocol == 1) {
             // ssh
             //File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel);
@@ -188,6 +189,16 @@ public class GitUtil {
                     @Override
                     protected void configure(OpenSshConfig.Host hc, Session session) {
                         session.setConfig("StrictHostKeyChecking", "no");
+                        // ssh 需要单独设置超时
+                        Optional.ofNullable(timeout)
+                            .map(integer -> integer <= 0 ? null : integer)
+                            .ifPresent(integer -> {
+                                try {
+                                    session.setTimeout(integer * 1000);
+                                } catch (JSchException e) {
+                                    throw Lombok.sneakyThrow(e);
+                                }
+                            });
                     }
 
                     @Override
