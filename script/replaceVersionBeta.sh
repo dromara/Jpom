@@ -71,13 +71,13 @@ function updateDocUrlItem() {
 		echo "下载地址已经更新啦"
 	else
 		cat >"${pwd}/temp-docs.log" <<EOF
-## $1
+## $1-beta
 
 - [jpom-$1.zip](https://download.jpom.top/release/$1/jpom-$1.zip)
-- [server-$1-release.tar.gz](https://download.jpom.top/release/$1/server-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.tar.gz.sha1)
-- [server-$1-release.zip](https://download.jpom.top/release/$1/server-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.zip.sha1)
-- [agent-$1-release.tar.gz](https://download.jpom.top/release/$1/agent-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.tar.gz.sha1)
-- [agent-$1-release.zip](https://download.jpom.top/release/$1/agent-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.zip.sha1)
+- [server-$1-release.tar.gz](https://download.jpom.top/beta/$1/server-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/beta/$1/server-$1-release.tar.gz.sha1)
+- [server-$1-release.zip](https://download.jpom.top/beta/$1/server-$1-release.zip) | [sha1sum](https://download.jpom.top/beta/$1/server-$1-release.zip.sha1)
+- [agent-$1-release.tar.gz](https://download.jpom.top/beta/$1/agent-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/beta/$1/agent-$1-release.tar.gz.sha1)
+- [agent-$1-release.zip](https://download.jpom.top/beta/$1/agent-$1-release.zip) | [sha1sum](https://download.jpom.top/beta/$1/agent-$1-release.zip.sha1)
 
 --------
 
