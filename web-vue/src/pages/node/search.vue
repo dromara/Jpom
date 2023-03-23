@@ -69,6 +69,10 @@
         <span>{{ item.whitelistDirectory + item.lib }}</span>
       </a-tooltip>
 
+      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
+
       <template slot="status" slot-scope="text, record">
         <template v-if="record.error">
           <a-tooltip :title="record.error">
@@ -245,36 +249,44 @@ export default {
       batchVisible: false,
       batchTitle: "",
       columns: [
-        { title: "项目名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "项目名称", dataIndex: "name", width: 120, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "项目分组", dataIndex: "group", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "group" } },
-        { title: "节点名称", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
+        { title: "节点名称", dataIndex: "nodeId", width: 90, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         {
           title: "项目路径",
           dataIndex: "path",
           ellipsis: true,
+          width: 120,
           scopedSlots: { customRender: "path" },
+        },
+        { title: "运行状态", dataIndex: "status", align: "center", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
+
+        { title: "运行方式", dataIndex: "runMode", width: 90, ellipsis: true, scopedSlots: { customRender: "runMode" } },
+        {
+          title: "webhook",
+          dataIndex: "token",
+          width: 120,
+          ellipsis: true,
+          scopedSlots: { customRender: "tooltip" },
         },
         {
           title: "创建时间",
           dataIndex: "createTimeMillis",
           sorter: true,
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
-          width: 170,
+          customRender: (text) => parseTime(text),
+          width: "170px",
         },
-        { title: "运行方式", dataIndex: "runMode", width: 90, ellipsis: true, scopedSlots: { customRender: "runMode" } },
-        // {
-        //   title: "最后操作人",
-        //   dataIndex: "modifyUser",
-        //   width: 120,
-        //   ellipsis: true,
-        //   scopedSlots: { customRender: "modifyUser" },
-        // },
-        { title: "运行状态", dataIndex: "status", align: "center", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "180px" },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
+        { title: "操作", dataIndex: "operation", align: "center", fixed: "right", scopedSlots: { customRender: "operation" }, width: "180px" },
       ],
       triggerVisible: false,
       triggerUses: [

@@ -493,20 +493,35 @@ export default {
       syncToWorkspaceVisible: false,
       drawerTitle: "",
       columns: [
-        { title: "节点名称", dataIndex: "name", sorter: true, key: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "节点名称", dataIndex: "name", width: 100, sorter: true, key: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "节点地址", dataIndex: "url", key: "url", width: "190px", ellipsis: true, scopedSlots: { customRender: "url" } },
         { title: "系统名", dataIndex: "osName", key: "osName", width: "100px", ellipsis: true, scopedSlots: { customRender: "osName" } },
-        { title: "JDK 版本", dataIndex: "javaVersion", key: "javaVersion", ellipsis: true, scopedSlots: { customRender: "javaVersion" } },
-        { title: "JVM 信息", dataIndex: "jvmInfo", ellipsis: true, scopedSlots: { customRender: "jvmInfo" } },
+        { title: "JDK 版本", dataIndex: "javaVersion", width: 100, key: "javaVersion", ellipsis: true, scopedSlots: { customRender: "javaVersion" } },
+        { title: "JVM 信息", dataIndex: "jvmInfo", width: 100, ellipsis: true, scopedSlots: { customRender: "jvmInfo" } },
         // { title: "JVM 剩余内存", dataIndex: "machineNodeData.jvmFreeMemory", ellipsis: true, scopedSlots: { customRender: "freeMemory" } },
 
         { title: "项目数", dataIndex: "count", key: "count", width: "90px", scopedSlots: { customRender: "projectCount" } },
         { title: "脚本数", dataIndex: "scriptCount", key: "scriptCount", width: "90px", scopedSlots: { customRender: "scriptCount" } },
 
         { title: "插件运行", dataIndex: "runTime", width: "100px", key: "runTime", ellipsis: true, scopedSlots: { customRender: "runTime" } },
-
-        { title: "操作", dataIndex: "operation", key: "operation", width: "210px", scopedSlots: { customRender: "operation" }, align: "center" },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
+        { title: "操作", dataIndex: "operation", key: "operation", fixed: "right", width: "210px", scopedSlots: { customRender: "operation" }, align: "center" },
       ],
 
       rules: {
