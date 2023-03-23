@@ -48,7 +48,6 @@ import io.jpom.system.extconf.BuildExtConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -73,12 +72,6 @@ public class FileStorageService extends BaseGlobalOrWorkspaceService<FileStorage
         this.serverConfig = serverConfig;
         this.configBean = configBean;
         this.buildExtConfig = buildExtConfig;
-    }
-
-    @Override
-    public FileStorageModel getByKey(String keyValue, HttpServletRequest request) {
-        String workspace = this.getCheckUserWorkspace(request);
-        return super.getByKey(keyValue, true, entity -> entity.set("workspaceId", CollUtil.newArrayList(workspace, ServerConst.WORKSPACE_GLOBAL)));
     }
 
     /**
@@ -289,8 +282,8 @@ public class FileStorageService extends BaseGlobalOrWorkspaceService<FileStorage
         Entity updateEntity = this.dataBeanToEntity(update);
         //
         Entity where = Entity.create()
-                .set("source", 2)
-                .set("status", 0);
+            .set("source", 2)
+            .set("status", 0);
         return this.update(updateEntity, where);
     }
 
