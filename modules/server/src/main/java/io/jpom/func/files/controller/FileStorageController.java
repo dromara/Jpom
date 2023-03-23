@@ -206,7 +206,7 @@ public class FileStorageController extends BaseServerController {
                                     Boolean global,
                                     HttpServletRequest request) throws IOException {
         Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, "别名码只能是英文、数字"));
-        FileStorageModel storageModel = fileStorageService.getByKey(id);
+        FileStorageModel storageModel = fileStorageService.getByKey(id, request);
         Assert.notNull(storageModel, "不存在对应的文件");
         UserModel user = getUser();
         if (!user.isSystemUser()) {

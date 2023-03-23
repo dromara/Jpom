@@ -79,7 +79,7 @@ public class MachineDockerSwarmController extends BaseServerController {
         MachineDockerModel dockerInfoModel1 = machineDockerServer.getByKey(id, false);
         Assert.notNull(dockerInfoModel1, "对应的 docker 不存在");
         IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
-        Map<String, Object> parameter = dockerInfoModel1.toParameter();
+        Map<String, Object> parameter = machineDockerServer.toParameter(dockerInfoModel1);
         JSONObject data = (JSONObject) plugin.execute("tryInitializeSwarm", parameter);
 
         //
@@ -115,12 +115,12 @@ public class MachineDockerSwarmController extends BaseServerController {
         IPlugin checkPlugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
         {
             // 获取集群信息
-            managerSwarmInfo = (JSONObject) plugin.execute("inSpectSwarm", managerSwarmDocker.toParameter());
+            managerSwarmInfo = (JSONObject) plugin.execute("inSpectSwarm", machineDockerServer.toParameter(managerSwarmDocker));
             Assert.notNull(managerSwarmInfo, "集群信息不完整,不能加入改集群");
         }
         {
             // 检查节点存在的信息
-            JSONObject info = checkPlugin.execute("info", joinSwarmDocker.toParameter(), JSONObject.class);
+            JSONObject info = checkPlugin.execute("info", machineDockerServer.toParameter(joinSwarmDocker), JSONObject.class);
             Assert.notNull(info, "获取 docker 集群信息失败");
             JSONObject swarm = info.getJSONObject("swarm");
             Assert.notNull(swarm, "获取 docker 集群信息失败:-1");
@@ -145,12 +145,12 @@ public class MachineDockerSwarmController extends BaseServerController {
             roleToken = joinTokens.getString(role);
             Assert.hasText(roleToken, "不能已 " + role + " 角色加入集群");
         }
-        Map<String, Object> parameter = joinSwarmDocker.toParameter();
+        Map<String, Object> parameter = machineDockerServer.toParameter(joinSwarmDocker);
         parameter.put("token", roleToken);
         parameter.put("remoteAddrs", remoteAddr);
         plugin.execute("joinSwarm", parameter);
         // 绑定数据
-        JSONObject info = checkPlugin.execute("info", joinSwarmDocker.toParameter(), JSONObject.class);
+        JSONObject info = checkPlugin.execute("info", machineDockerServer.toParameter(joinSwarmDocker), JSONObject.class);
         machineDockerServer.updateSwarmInfo(joinSwarmDocker.getId(), managerSwarmInfo, info);
         return JsonMessage.success("集群创建成功");
     }
@@ -187,7 +187,7 @@ public class MachineDockerSwarmController extends BaseServerController {
         Assert.state(count <= 0, "当前 docker 集群还关联 " + count + " 个工作空间集群,不能退出集群");
         //
         IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
-        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        Map<String, Object> parameter = machineDockerServer.toParameter(dockerInfoModel);
         parameter.put("force", true);
         plugin.execute("leaveSwarm", parameter, JSONObject.class);
         //
@@ -223,19 +223,19 @@ public class MachineDockerSwarmController extends BaseServerController {
         List<MachineDockerModel> machineDockerModels = machineDockerServer.listByBean(machineDockerModel, false);
         Assert.notEmpty(machineDockerModels, "当前集群未找到管理节点");
         Optional<MachineDockerModel> dockerModelOptional = machineDockerModels.stream()
-            .filter(machineDockerModel1 -> machineDockerModel1.getStatus() != null && machineDockerModel1.getStatus() == 1)
-            .findFirst();
+                .filter(machineDockerModel1 -> machineDockerModel1.getStatus() != null && machineDockerModel1.getStatus() == 1)
+                .findFirst();
         Assert.state(dockerModelOptional.isPresent(), "当前集群未找到在线的管理节点");
         //
         IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
         //
         { //节点强制退出
-            Map<String, Object> parameter = first.toParameter();
+            Map<String, Object> parameter = machineDockerServer.toParameter(first);
             parameter.put("force", true);
             plugin.execute("leaveSwarm", parameter, JSONObject.class);
         }
         { // 集群删除节点
-            Map<String, Object> map = dockerModelOptional.get().toParameter();
+            Map<String, Object> map = machineDockerServer.toParameter(dockerModelOptional.get());
             map.put("nodeId", nodeId);
             plugin.execute("removeSwarmNode", map);
         }

@@ -12,9 +12,9 @@ export function dockerList(params) {
   });
 }
 
-export function editDockerByFile(formData) {
+export function dockerImportTls(formData) {
   return axios({
-    url: "/system/assets/docker/edit",
+    url: "/system/assets/docker/import-tls",
     headers: {
       "Content-Type": "multipart/form-data;charset=UTF-8",
     },

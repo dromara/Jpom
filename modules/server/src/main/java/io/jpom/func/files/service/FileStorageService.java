@@ -35,7 +35,6 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
-import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.HttpUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.ISystemTask;
@@ -43,18 +42,16 @@ import io.jpom.common.ServerConst;
 import io.jpom.func.files.model.FileStorageModel;
 import io.jpom.service.IStatusRecover;
 import io.jpom.service.ITriggerToken;
-import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.service.h2db.BaseGlobalOrWorkspaceService;
 import io.jpom.system.ServerConfig;
 import io.jpom.system.extconf.BuildExtConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -64,7 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Service
 @Slf4j
-public class FileStorageService extends BaseWorkspaceService<FileStorageModel> implements ISystemTask, IStatusRecover, ITriggerToken {
+public class FileStorageService extends BaseGlobalOrWorkspaceService<FileStorageModel> implements ISystemTask, IStatusRecover, ITriggerToken {
 
     private final ServerConfig serverConfig;
     private final JpomApplication configBean;
@@ -82,21 +79,6 @@ public class FileStorageService extends BaseWorkspaceService<FileStorageModel> i
     public FileStorageModel getByKey(String keyValue, HttpServletRequest request) {
         String workspace = this.getCheckUserWorkspace(request);
         return super.getByKey(keyValue, true, entity -> entity.set("workspaceId", CollUtil.newArrayList(workspace, ServerConst.WORKSPACE_GLOBAL)));
-    }
-
-    /**
-     * 获取文件列表
-     *
-     * @param request 请求对象
-     * @return page
-     */
-    @Override
-    public PageResultDto<FileStorageModel> listPage(HttpServletRequest request) {
-        // 验证工作空间权限
-        Map<String, String> paramMap = ServletUtil.getParamMap(request);
-        String workspaceId = this.getCheckUserWorkspace(request);
-        paramMap.put("workspaceId:in", workspaceId + StrUtil.COMMA + ServerConst.WORKSPACE_GLOBAL);
-        return super.listPage(paramMap);
     }
 
     /**

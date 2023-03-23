@@ -55,6 +55,6 @@ public class AssetsDockerImagesController extends BaseDockerImagesController {
     protected Map<String, Object> toDockerParameter(String id) {
         MachineDockerModel machineDockerModel = machineDockerServer.getByKey(id);
         Assert.notNull(machineDockerModel, "没有对应的 docker 资产");
-        return machineDockerModel.toParameter();
+        return machineDockerServer.toParameter(machineDockerModel);
     }
 }

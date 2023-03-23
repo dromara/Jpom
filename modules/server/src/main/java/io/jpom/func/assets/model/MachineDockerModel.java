@@ -22,7 +22,6 @@
  */
 package io.jpom.func.assets.model;
 
-import cn.hutool.core.annotation.PropIgnore;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
@@ -35,8 +34,6 @@ import org.springframework.util.Assert;
 import top.jpom.h2db.TableName;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author bwcx_jzy
@@ -57,9 +54,10 @@ public class MachineDockerModel extends BaseGroupNameModel {
      */
     private Boolean tlsVerify;
     /**
-     * 证书路径
+     * 证书信息
      */
-    @PropIgnore
+    private String certInfo;
+
     private Boolean certExist;
     /**
      * 状态 0 , 异常离线 1 正常
@@ -139,6 +137,7 @@ public class MachineDockerModel extends BaseGroupNameModel {
      *
      * @return path
      */
+    @Deprecated
     public String generateCertPath() {
         String dataPath = JpomApplication.getInstance().getDataPath();
         String host = this.getHost();
@@ -148,25 +147,6 @@ public class MachineDockerModel extends BaseGroupNameModel {
         return FileUtil.getAbsolutePath(docker);
     }
 
-    /**
-     * 插件 插件参数 map
-     *
-     * @return 插件需要使用到到参数
-     */
-    public Map<String, Object> toParameter() {
-        Map<String, Object> parameter = new HashMap<>(10);
-        parameter.put("dockerHost", this.getHost());
-        parameter.put("name", this.getName());
-        parameter.put("registryUsername", this.getRegistryUsername());
-        parameter.put("registryPassword", this.getRegistryPassword());
-        parameter.put("registryEmail", this.getRegistryEmail());
-        parameter.put("registryUrl", this.getRegistryUrl());
-        parameter.put("timeout", this.getHeartbeatTimeout());
-        if (this.getTlsVerify()) {
-            parameter.put("dockerCertPath", this.generateCertPath());
-        }
-        return parameter;
-    }
 
     public void restSwarm() {
         this.setSwarmId(StrUtil.EMPTY);

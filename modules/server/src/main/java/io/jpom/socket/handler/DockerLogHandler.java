@@ -25,8 +25,10 @@ package io.jpom.socket.handler;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.func.assets.model.MachineDockerModel;
+import io.jpom.func.assets.server.MachineDockerServer;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -81,9 +83,10 @@ public class DockerLogHandler extends BaseProxyHandler {
             return null;
         }
         if (consoleCommandOp == ConsoleCommandOp.showlog) {
+            MachineDockerServer machineDockerServer = SpringUtil.getBean(MachineDockerServer.class);
             super.logOpt(this.getClass(), attributes, json);
             String containerId = json.getString("containerId");
-            Map<String, Object> map = dockerInfoModel.toParameter();
+            Map<String, Object> map = machineDockerServer.toParameter(dockerInfoModel);
             map.put("containerId", containerId);
             int tail = json.getIntValue("tail");
             if (tail > 0) {

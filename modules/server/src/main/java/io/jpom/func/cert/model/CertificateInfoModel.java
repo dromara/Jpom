@@ -22,6 +22,7 @@
  */
 package io.jpom.func.cert.model;
 
+import cn.hutool.core.annotation.PropIgnore;
 import io.jpom.model.BaseWorkspaceModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -42,6 +43,9 @@ public class CertificateInfoModel extends BaseWorkspaceModel {
      */
     private String keyType;
     private String keyAlias;
+    /**
+     * 指纹
+     */
     private String fingerprint;
     /**
      * 证书密码
@@ -82,6 +86,12 @@ public class CertificateInfoModel extends BaseWorkspaceModel {
     private Long effectiveTime;
 
     private String description;
+
+    /**
+     * 文件是否存在
+     */
+    @PropIgnore
+    private Boolean fileExists;
 
     @Override
     protected boolean hasCreateUser() {
