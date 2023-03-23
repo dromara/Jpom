@@ -1,10 +1,21 @@
 <template>
   <div class="full-content">
     <template v-if="this.getUserInfo && this.getUserInfo.systemUser && !this.loading && this.listQuery.total <= 0">
-      <a-result title="当前工作空间还没有节点" sub-title="请到【系统管理】-> 【资产管理】-> 【机器管理】添加节点，或者将已添加的机器授权关联、分配到此工作空间">
+      <a-result title="当前工作空间还没有节点">
+        <template slot="subTitle"> 需要您在需要被管理的服务器中安装 agent ，并将 agent 信息添加到系统中 </template>
         <template #extra>
-          <router-link to="/system/assets/machine-list"> <a-button key="console" type="primary">现在就去</a-button></router-link>
+          <a-button type="primary" @click="fastInstallNodeShow">快速安装 </a-button>
+          <router-link to="/system/assets/machine-list"> <a-button key="console" type="primary">手动添加</a-button></router-link>
         </template>
+        <div class="desc">
+          <p style="font-size: 16px">
+            <strong>解决办法</strong>
+          </p>
+          <ol>
+            <li>【推荐】使用快速安装方式导入机器并自动添加逻辑节点</li>
+            <li>请到【系统管理】-> 【资产管理】-> 【机器管理】添加节点，或者将已添加的机器授权关联、分配到此工作空间</li>
+          </ol>
+        </div>
       </a-result>
     </template>
     <template v-else>
@@ -864,6 +875,9 @@ export default {
       this.monitorVisible = true;
       this.temp = record;
       this.temp = { ...this.temp, type };
+    },
+    fastInstallNodeShow() {
+      this.fastInstallNode = true;
     },
   },
 };
