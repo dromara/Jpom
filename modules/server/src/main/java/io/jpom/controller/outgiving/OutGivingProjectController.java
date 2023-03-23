@@ -102,8 +102,8 @@ public class OutGivingProjectController extends BaseServerController {
     }
 
     @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id,
-                                                     HttpServletRequest request) {
+    public JsonMessage<JSONObject> getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id,
+                                               HttpServletRequest request) {
         String workspaceId = outGivingServer.getCheckUserWorkspace(request);
         OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
         Objects.requireNonNull(outGivingServerItem, "没有数据");
@@ -119,34 +119,37 @@ public class OutGivingProjectController extends BaseServerController {
 
 
         List<JSONObject> collect = outGivingNodeProjectList
-            .stream()
-            .map(outGivingNodeProject -> {
-                NodeModel nodeModel = nodeMap.get(outGivingNodeProject.getNodeId());
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("sortValue", outGivingNodeProject.getSortValue());
-                jsonObject.put("disabled", outGivingNodeProject.getDisabled());
-                jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
-                jsonObject.put("projectId", outGivingNodeProject.getProjectId());
-                jsonObject.put("nodeName", nodeModel.getName());
-                String fullId = BaseNodeModel.fullId(workspaceId, outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId());
-                jsonObject.put("id", fullId);
-                ProjectInfoCacheModel projectInfoCacheModel = projectMap.get(fullId);
-                if (projectInfoCacheModel != null) {
-                    jsonObject.put("cacheProjectName", projectInfoCacheModel.getName());
-                }
+                .stream()
+                .map(outGivingNodeProject -> {
+                    NodeModel nodeModel = nodeMap.get(outGivingNodeProject.getNodeId());
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("sortValue", outGivingNodeProject.getSortValue());
+                    jsonObject.put("disabled", outGivingNodeProject.getDisabled());
+                    jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
+                    jsonObject.put("projectId", outGivingNodeProject.getProjectId());
+                    jsonObject.put("nodeName", nodeModel.getName());
+                    String fullId = BaseNodeModel.fullId(workspaceId, outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId());
+                    jsonObject.put("id", fullId);
+                    ProjectInfoCacheModel projectInfoCacheModel = projectMap.get(fullId);
+                    if (projectInfoCacheModel != null) {
+                        jsonObject.put("cacheProjectName", projectInfoCacheModel.getName());
+                    }
 
-                OutGivingLog outGivingLog = dbOutGivingLogService.getByProject(id, outGivingNodeProject);
-                if (outGivingLog != null) {
-                    jsonObject.put("outGivingStatus", outGivingLog.getStatus());
-                    jsonObject.put("outGivingResult", outGivingLog.getResult());
-                    jsonObject.put("lastTime", outGivingLog.getCreateTimeMillis());
-                    jsonObject.put("fileSize", outGivingLog.getFileSize());
-                    jsonObject.put("progressSize", outGivingLog.getProgressSize());
-                }
-                return jsonObject;
-            })
-            .collect(Collectors.toList());
-        return JsonMessage.success("", collect);
+                    OutGivingLog outGivingLog = dbOutGivingLogService.getByProject(id, outGivingNodeProject);
+                    if (outGivingLog != null) {
+                        jsonObject.put("outGivingStatus", outGivingLog.getStatus());
+                        jsonObject.put("outGivingResult", outGivingLog.getResult());
+                        jsonObject.put("lastTime", outGivingLog.getCreateTimeMillis());
+                        jsonObject.put("fileSize", outGivingLog.getFileSize());
+                        jsonObject.put("progressSize", outGivingLog.getProgressSize());
+                    }
+                    return jsonObject;
+                })
+                .collect(Collectors.toList());
+        JSONObject data = new JSONObject();
+        data.put("data", outGivingServerItem);
+        data.put("projectList", collect);
+        return JsonMessage.success("", data);
     }
 
     private File checkZip(File path, boolean unzip) {
@@ -229,11 +232,11 @@ public class OutGivingProjectController extends BaseServerController {
         int stripComponentsValue = Convert.toInt(stripComponents, 0);
         // 开启
         OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
-            .id(outGivingModel.getId())
-            .file(dest)
-            .userModel(getUser())
-            .unzip(unzip)
-            .stripComponents(stripComponentsValue);
+                .id(outGivingModel.getId())
+                .file(dest)
+                .userModel(getUser())
+                .unzip(unzip)
+                .stripComponents(stripComponentsValue);
         outGivingRunBuilder.build().startRun(selectProject);
         return JsonMessage.success("上传成功,开始分发!");
     }
@@ -285,11 +288,11 @@ public class OutGivingProjectController extends BaseServerController {
         int stripComponentsValue = Convert.toInt(stripComponents, 0);
         // 开启
         OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
-            .id(outGivingModel.getId())
-            .file(downloadFile)
-            .userModel(getUser())
-            .unzip(unzip)
-            .stripComponents(stripComponentsValue);
+                .id(outGivingModel.getId())
+                .file(downloadFile)
+                .userModel(getUser())
+                .unzip(unzip)
+                .stripComponents(stripComponentsValue);
         outGivingRunBuilder.build().startRun(selectProject);
         return JsonMessage.success("下载成功,开始分发!");
     }
@@ -342,8 +345,8 @@ public class OutGivingProjectController extends BaseServerController {
         //
         Assert.state(outGivingNodeProjects.size() > 1, "当前分发只有一个项目啦,删除整个分发即可");
         outGivingNodeProjects = outGivingNodeProjects.stream()
-            .filter(nodeProject -> !StrUtil.equals(nodeProject.getProjectId(), projectId) || !StrUtil.equals(nodeProject.getNodeId(), nodeId))
-            .collect(Collectors.toList());
+                .filter(nodeProject -> !StrUtil.equals(nodeProject.getProjectId(), projectId) || !StrUtil.equals(nodeProject.getNodeId(), nodeId))
+                .collect(Collectors.toList());
         // 更新
         OutGivingModel update = new OutGivingModel();
         update.setId(outGivingModel.getId());
