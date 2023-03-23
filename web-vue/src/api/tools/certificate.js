@@ -25,6 +25,17 @@ export function certList(params) {
 }
 
 /**
+ * cert 列表
+ */
+export function certListAll(params) {
+  return axios({
+    url: "/certificate/list-all",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
  * 删除 cert
  * @param {
  *
@@ -46,4 +57,13 @@ export function deleteCert(params) {
  */
 export function downloadCert(params) {
   return loadRouterBase("/certificate/export", params);
+}
+
+// 修改证书
+export function certificateEdit(params) {
+  return axios({
+    url: "/certificate/edit",
+    method: "post",
+    data: params,
+  });
 }

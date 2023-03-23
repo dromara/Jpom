@@ -177,7 +177,10 @@
           </a-tooltip>
 
           <template slot="operation" slot-scope="text, record">
-            <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
+            <a-space>
+              <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
+              <a-button @click="syncToWorkspaceShow(item)" type="primary" size="small">分配</a-button>
+            </a-space>
           </template>
         </a-table>
       </template>
@@ -430,16 +433,16 @@ export default {
       nodeList: [],
       layoutType: "card",
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "系统名", dataIndex: "osName", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "主机名", dataIndex: "hostName", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "节点地址", dataIndex: "jpomUrl", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "系统名", dataIndex: "osName", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "主机名", dataIndex: "hostName", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "节点地址", dataIndex: "jpomUrl", width: 150, sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "分组名", dataIndex: "groupName", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
         { title: "状态", dataIndex: "status", align: "center", width: "100px", ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "开机时间", sorter: true, dataIndex: "osSystemUptime", ellipsis: true, scopedSlots: { customRender: "duration2" } },
-        { title: "CPU占用", sorter: true, align: "center", dataIndex: "osOccupyCpu", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
-        { title: "内存占用", sorter: true, align: "center", dataIndex: "osOccupyMemory", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
-        { title: "硬盘占用", sorter: true, align: "center", dataIndex: "osOccupyDisk", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
+        { title: "开机时间", sorter: true, dataIndex: "osSystemUptime", width: 150, ellipsis: true, scopedSlots: { customRender: "duration2" } },
+        { title: "CPU占用", sorter: true, align: "center", dataIndex: "osOccupyCpu", width: "100px", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
+        { title: "内存占用", sorter: true, align: "center", dataIndex: "osOccupyMemory", width: "100px", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
+        { title: "硬盘占用", sorter: true, align: "center", dataIndex: "osOccupyDisk", width: "100px", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
         { title: "插件版本号", dataIndex: "jpomVersion", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         {
           title: "模板节点",
@@ -451,8 +454,22 @@ export default {
             return text ? "是" : "否";
           },
         },
-
-        { title: "操作", dataIndex: "operation", width: "80px", scopedSlots: { customRender: "operation" }, align: "center" },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          customRender: (text) => parseTime(text),
+          sorter: true,
+          width: "170px",
+        },
+        { title: "操作", dataIndex: "operation", width: "120px", fixed: "right", scopedSlots: { customRender: "operation" }, align: "center" },
       ],
       tableSelections: [],
       whiteConfigVisible: false,

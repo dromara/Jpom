@@ -277,6 +277,7 @@
           </a-tabs>
         </a-form-model>
       </a-modal>
+      <!-- 发布文件 -->
       <a-modal destroyOnClose v-model="releaseFileVisible" title="发布文件" width="50%" :maskClosable="false" @ok="handleCrateTask">
         <a-form-model ref="releaseFileForm" :rules="releaseFileRules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <a-form-model-item label="任务名" prop="name">

@@ -24,16 +24,19 @@ package io.jpom.func.assets.controller;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
+import cn.hutool.core.util.ZipUtil;
 import cn.hutool.db.Entity;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.JsonMessage;
-import io.jpom.common.multipart.MultipartFileBuilder;
+import io.jpom.common.ServerConst;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.func.BaseGroupNameController;
 import io.jpom.func.assets.model.MachineDockerModel;
 import io.jpom.func.assets.server.MachineDockerServer;
+import io.jpom.func.cert.model.CertificateInfoModel;
+import io.jpom.func.cert.service.CertificateInfoService;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.model.docker.DockerSwarmInfoMode;
@@ -47,8 +50,6 @@ import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.docker.DockerSwarmInfoService;
 import io.jpom.service.system.WorkspaceService;
 import io.jpom.system.ServerConfig;
-import io.jpom.util.CompressionFileUtil;
-import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -56,6 +57,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
@@ -77,86 +79,56 @@ public class MachineDockerController extends BaseGroupNameController {
     private final DockerInfoService dockerInfoService;
     private final DockerSwarmInfoService dockerSwarmInfoService;
     private final WorkspaceService workspaceService;
+    private final CertificateInfoService certificateInfoService;
 
     public MachineDockerController(MachineDockerServer machineDockerServer,
-                                   ServerConfig serverConfig,
                                    DockerInfoService dockerInfoService,
                                    DockerSwarmInfoService dockerSwarmInfoService,
-                                   WorkspaceService workspaceService) {
+                                   WorkspaceService workspaceService,
+                                   CertificateInfoService certificateInfoService,
+                                   ServerConfig serverConfig) {
         super(machineDockerServer);
         this.machineDockerServer = machineDockerServer;
-        this.serverConfig = serverConfig;
         this.dockerInfoService = dockerInfoService;
         this.dockerSwarmInfoService = dockerSwarmInfoService;
         this.workspaceService = workspaceService;
+        this.certificateInfoService = certificateInfoService;
+        this.serverConfig = serverConfig;
     }
 
     @PostMapping(value = "list-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<PageResultDto<MachineDockerModel>> listJson(HttpServletRequest request) {
         PageResultDto<MachineDockerModel> pageResultDto = machineDockerServer.listPage(request);
-        pageResultDto.each(this::checkCertPath);
         return JsonMessage.success("", pageResultDto);
     }
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> edit(String id, String host) throws Exception {
-        // 保存路径
-        File tempPath = serverConfig.getUserTempPath();
-        File savePath = FileUtil.file(tempPath, "docker", SecureUtil.sha1(host));
-        MachineDockerModel dockerInfoModel = this.takeOverModel(savePath);
-        boolean certExist = dockerInfoModel.getCertExist();
+    public JsonMessage<Object> edit(String id) throws Exception {
+        MachineDockerModel dockerInfoModel = this.takeOverModel();
         if (StrUtil.isEmpty(id)) {
             // 创建
-            if (dockerInfoModel.getTlsVerify()) {
-                Assert.state(certExist, "请上传证书文件");
-            }
-            this.check(dockerInfoModel, certExist, savePath);
+            this.check(dockerInfoModel);
             // 默认正常
             dockerInfoModel.setStatus(1);
             machineDockerServer.insert(dockerInfoModel);
         } else {
-            this.check(dockerInfoModel, certExist, savePath);
+            this.check(dockerInfoModel);
             machineDockerServer.updateById(dockerInfoModel);
         }
         //
         return JsonMessage.success("操作成功");
     }
 
-    /**
-     * 验证 证书文件是否存在
-     *
-     * @param dockerInfoModel docker
-     * @return true 证书文件存在
-     */
-    private boolean checkCertPath(MachineDockerModel dockerInfoModel) {
-        if (dockerInfoModel == null) {
-            return false;
-        }
-        if (dockerInfoModel.getCertExist() != null && dockerInfoModel.getCertExist()) {
-            return true;
-        }
-        String certPath = dockerInfoModel.generateCertPath();
-        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
-        try {
-            boolean execute = (boolean) plugin.execute("certPath", "certPath", certPath);
-            dockerInfoModel.setCertExist(execute);
-            return execute;
-        } catch (Exception e) {
-            log.error("检查 docker 证书异常", e);
-            return false;
-        }
-    }
 
     /**
      * 接收前端参数
      *
-     * @param certPathFile 证书保存临时文件夹
      * @return model
      * @throws Exception 异常
      */
-    private MachineDockerModel takeOverModel(File certPathFile) throws Exception {
+    private MachineDockerModel takeOverModel() throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
         String name = getParameter("name");
         Assert.hasText(name, "请填写 名称");
@@ -169,30 +141,17 @@ public class MachineDockerController extends BaseGroupNameController {
         String registryEmail = getParameter("registryEmail");
         int heartbeatTimeout = getParameterInt("heartbeatTimeout", -1);
         String groupName = getParameter("groupName");
+        String certInfo = getParameter("certInfo");
         boolean tlsVerify = Convert.toBool(tlsVerifyStr, false);
         //
-        boolean certExist = false;
         if (tlsVerify) {
-            // 如果是创建就必须上传证书
-            MultipartFileBuilder multipart = null;
-            try {
-                multipart = createMultipart();
-            } catch (Exception e) {
-                MachineDockerModel dockerInfoModel = machineDockerServer.getByKey(id);
-                certExist = this.checkCertPath(dockerInfoModel);
-                Assert.state(certExist, "请上传证书文件");
-            }
-            if (multipart != null) {
-                String absolutePath = FileUtil.getAbsolutePath(certPathFile);
-                multipart.setSavePath(absolutePath).addFieldName("file").setUseOriginalFilename(true);
-                String localPath = multipart.setFileExt(StringUtil.PACKAGE_EXT).save();
-                // 解压
-                File file = new File(localPath);
-                CompressionFileUtil.unCompress(file, certPathFile);
-                boolean ok = (boolean) plugin.execute("certPath", "certPath", absolutePath);
-                Assert.state(ok, "证书信息不正确,证书压缩包里面必须包含：ca.pem、key.pem、cert.pem");
-                certExist = true;
-            }
+            File filePath = certificateInfoService.getFilePath(certInfo);
+            Assert.notNull(filePath, "填写的证书信息错误");
+            // 验证证书文件是否正确
+            boolean ok = (boolean) plugin.execute("certPath", "certPath", filePath.getAbsolutePath());
+            Assert.state(ok, "证书信息不正确,证书压缩包里面必须包含：ca.pem、key.pem、cert.pem");
+        } else {
+            certInfo = StrUtil.emptyToDefault(certInfo, StrUtil.EMPTY);
         }
         boolean ok = (boolean) plugin.execute("host", "host", host);
         Assert.state(ok, "请填写正确的 host");
@@ -208,9 +167,11 @@ public class MachineDockerController extends BaseGroupNameController {
         MachineDockerModel machineDockerModel = new MachineDockerModel();
         machineDockerModel.setHeartbeatTimeout(heartbeatTimeout);
         machineDockerModel.setHost(host);
+        // 保存是会验证证书一定存在
+        machineDockerModel.setCertExist(tlsVerify);
         machineDockerModel.setName(name);
+        machineDockerModel.setCertInfo(certInfo);
         machineDockerModel.setTlsVerify(tlsVerify);
-        machineDockerModel.setCertExist(certExist);
         machineDockerModel.setRegistryUrl(registryUrl);
         machineDockerModel.setRegistryUsername(registryUsername);
         machineDockerModel.setRegistryPassword(registryPassword);
@@ -222,16 +183,9 @@ public class MachineDockerController extends BaseGroupNameController {
     }
 
 
-    private void check(MachineDockerModel dockerInfoModel, boolean certExist, File savePath) throws Exception {
-        // 移动证书
-        if (certExist) {
-            if (FileUtil.isDirectory(savePath) && FileUtil.isNotEmpty(savePath)) {
-                String generateCertPath = dockerInfoModel.generateCertPath();
-                FileUtil.moveContent(savePath, FileUtil.file(generateCertPath), true);
-            }
-        }
+    private void check(MachineDockerModel dockerInfoModel) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
-        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        Map<String, Object> parameter = machineDockerServer.toParameter(dockerInfoModel);
         parameter.put("closeBefore", true);
         String errorReason = (String) plugin.execute("ping", parameter);
         Assert.isNull(errorReason, () -> "无法连接 docker 请检查 host 或者 TLS 证书 以及仓库信息配置是否正确。" + errorReason);
@@ -296,8 +250,6 @@ public class MachineDockerController extends BaseGroupNameController {
                 long count = dockerSwarmInfoService.count(dockerInfoModel);
                 Assert.state(count <= 0, "当前 docker 还关联" + count + "个 工作空间 docker 集群不能删除");
             }
-            // 删除文件
-            FileUtil.del(machineDockerModel.generateCertPath());
         });
         machineDockerServer.delByKey(id);
         return JsonMessage.success("删除成功");
@@ -380,6 +332,41 @@ public class MachineDockerController extends BaseGroupNameController {
             }
         }
         return JsonMessage.success("", jsonObject);
+    }
+
+
+    /**
+     * 导入 docker tls
+     *
+     * @param file 文件
+     * @return model
+     * @throws Exception 异常
+     */
+    @PostMapping(value = "import-tls", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.UPLOAD)
+    public JsonMessage<String> importTls(MultipartFile file) throws Exception {
+        Assert.notNull(file, "没有上传文件");
+        // 保存路径
+        File tempPath = FileUtil.file(serverConfig.getUserTempPath(), "docker", IdUtil.fastSimpleUUID());
+        try {
+            String originalFilename = file.getOriginalFilename();
+            String extName = FileUtil.extName(originalFilename);
+            Assert.state(StrUtil.containsIgnoreCase(extName, "zip"), "上传的文件不是 zip");
+            File saveFile = FileUtil.file(tempPath, originalFilename);
+            FileUtil.mkParentDirs(saveFile);
+            file.transferTo(saveFile);
+            // 解压
+            ZipUtil.unzip(saveFile, tempPath);
+            // 先判断文件
+            boolean checkCertPath = machineDockerServer.checkCertPath(tempPath.getAbsolutePath());
+            Assert.state(checkCertPath, "证书信息不正确,证书压缩包里面必须包含：ca.pem、key.pem、cert.pem");
+            CertificateInfoModel certificateInfoModel = certificateInfoService.resolveX509(tempPath, true);
+            certificateInfoModel.setWorkspaceId(ServerConst.WORKSPACE_GLOBAL);
+            certificateInfoService.insert(certificateInfoModel);
+            return JsonMessage.success("导入成功");
+        } finally {
+            FileUtil.del(tempPath);
+        }
     }
 
 }

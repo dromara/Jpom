@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div>
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
@@ -13,6 +13,7 @@
           this.loadData();
         }
       "
+      :row-selection="rowSelection"
       bordered
       rowKey="id"
     >
@@ -36,7 +37,7 @@
           <p>描述：{{ item.description }}</p>
         </template>
         <!-- {{ text }} -->
-        <a-button type="link" style="padding: 0px" @click="handleEdit(item)" size="small">{{ text }}</a-button>
+        {{ text }}
       </a-popover>
       <template slot="fileExists" slot-scope="text">
         <a-tag v-if="text" color="green">存在</a-tag>
@@ -46,29 +47,12 @@
         <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
         <a-tag v-else>工作空间</a-tag>
       </template>
-      <template slot="operation" slot-scope="text, record">
-        <a-space>
-          <!-- <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button> -->
-          <a-button size="small" type="primary" @click="handleDownload(record)">导出</a-button>
-
-          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-        </a-space>
-      </template>
     </a-table>
     <!-- 导入 -->
     <a-modal destroyOnClose v-model="editCertVisible" width="700px" title="导入证书" @ok="handleEditCertOk" :maskClosable="false">
       <a-form-model ref="importCertForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item label="证书类型" prop="type">
-          <a-radio-group v-model="temp.type">
-            <a-radio value="pkcs12"> pkcs12(pfx) </a-radio>
-            <a-radio value="JKS"> JKS </a-radio>
-            <a-radio value="X.509"> X.509(pem、key、crt、cer) </a-radio>
-          </a-radio-group>
-        </a-form-model-item>
-
-        <a-form-model-item label="证书文件" prop="file">
+        <a-form-model-item label="证书文件" prop="file" help="请上传 zip 压缩包,并且包里面必须包含：ca.pem、key.pem、cert.pem 三个文件">
           <a-upload
-            v-if="temp.type"
             :file-list="uploadFileList"
             :remove="
               () => {
@@ -81,35 +65,44 @@
                 return false;
               }
             "
-            :accept="typeAccept[temp.type]"
+            accept=".zip"
           >
             <a-button><a-icon type="upload" />选择文件</a-button>
           </a-upload>
-          <template v-else>请选选择类型</template>
-        </a-form-model-item>
-        <a-form-model-item v-if="temp.type && temp.type !== 'X.509'" label="证书密码" prop="password" help="如果未填写将解析压缩包里面的 txt">
-          <a-input v-model="temp.password" placeholder="证书密码" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
-    <!-- 编辑证书 -->
-    <a-modal destroyOnClose v-model="editVisible" :title="`编辑证书`" @ok="handleEditOk" :maskClosable="false">
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-model-item label="证书共享" prop="global">
-          <a-radio-group v-model="temp.global">
-            <a-radio :value="true"> 全局 </a-radio>
-            <a-radio :value="false"> 当前工作空间 </a-radio>
-          </a-radio-group>
-        </a-form-model-item>
-        <a-form-model-item label="证书描述" prop="description">
-          <a-textarea v-model="temp.description" placeholder="请输入证书描述" />
-        </a-form-model-item>
-      </a-form-model>
-    </a-modal>
+    <div
+      :style="{
+        position: 'absolute',
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        borderTop: '1px solid #e9e9e9',
+        padding: '10px 16px',
+        background: '#fff',
+        textAlign: 'right',
+        zIndex: 1,
+      }"
+    >
+      <a-space>
+        <a-button
+          @click="
+            () => {
+              this.$emit('cancel');
+            }
+          "
+        >
+          取消
+        </a-button>
+        <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
+      </a-space>
+    </div>
   </div>
 </template>
 <script>
-import { certificateImportFile, certList, deleteCert, downloadCert, certificateEdit } from "@/api/tools/certificate";
+import { dockerImportTls } from "@/api/system/assets-docker";
+import { certListAll } from "@/api/tools/certificate";
 import { parseTime, CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 export default {
@@ -121,11 +114,7 @@ export default {
 
       list: [],
       uploadFileList: [],
-      typeAccept: {
-        pkcs12: ".pfx,.zip",
-        JKS: ".jks,.zip",
-        "X.509": ".zip",
-      },
+
       temp: {},
       editCertVisible: false,
 
@@ -164,20 +153,23 @@ export default {
           customRender: (text) => parseTime(text),
           width: "160px",
         },
-        { title: "操作", dataIndex: "operation", align: "center", fixed: "right", scopedSlots: { customRender: "operation" }, width: "120px" },
       ],
-      rules: {
-        // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
-        // name: [{ required: true, message: "Please input name", trigger: "blur" }],
-        // path: [{ required: true, message: "Please select path", trigger: "blur" }],
-        type: [{ required: true, message: "请选择证书类型", trigger: "blur" }],
-      },
-      editVisible: false,
+      rules: {},
+      tableSelections: [],
     };
   },
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
+        type: "radio",
+      };
     },
   },
   mounted() {
@@ -190,7 +182,7 @@ export default {
       this.loading = true;
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.loading = true;
-      certList(this.listQuery).then((res) => {
+      certListAll(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
           this.listQuery.total = res.data.total;
@@ -201,17 +193,10 @@ export default {
 
     // 添加
     handleAdd() {
-      this.temp = {};
       this.editCertVisible = true;
       this.uploadFileList = [];
       this.$refs["importCertForm"]?.resetFields();
     },
-    // // 修改
-    // handleEdit(record) {
-    //   this.temp = Object.assign({}, record);
-    //   this.uploadFileList = [];
-    //   this.editCertVisible = true;
-    // },
 
     // 提交 Cert 数据
     handleEditCertOk() {
@@ -228,11 +213,9 @@ export default {
         }
         const formData = new FormData();
         formData.append("file", this.uploadFileList[0]);
-        formData.append("type", this.temp.type);
-        formData.append("password", this.temp.password || "");
 
         // 提交数据
-        certificateImportFile(formData).then((res) => {
+        dockerImportTls(formData).then((res) => {
           if (res.code === 200) {
             // 成功
             this.$notification.success({
@@ -245,62 +228,19 @@ export default {
         });
       });
     },
-    // 删除
-    handleDelete(record) {
-      this.$confirm({
-        title: "系统提示",
-        content: "真的要删除该证书么，删除会将证书文件一并删除奥？",
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          // 组装参数
-          const params = {
-            id: record.id,
-          };
-          deleteCert(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.loadData();
-            }
-          });
-        },
-      });
-    },
-    // 下载证书文件
-    handleDownload(record) {
-      // 请求参数
-      const params = {
-        id: record.id,
-      };
-      // 请求接口拿到 blob
-      window.open(downloadCert(params), "_blank");
-    },
-    // 编辑
-    handleEdit(item) {
-      this.temp = { ...item, global: item.workspaceId === "GLOBAL" };
-      this.editVisible = true;
-      this.$refs["editForm"]?.resetFields();
-    },
-    // 编辑确认
-    handleEditOk() {
-      this.$refs["editForm"].validate((valid) => {
-        if (!valid) {
-          return false;
-        }
-        certificateEdit(this.temp).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            this.$notification.success({
-              message: res.msg,
-            });
-
-            this.editVisible = false;
-            this.loadData();
-          }
+    // 确认
+    handerConfirm() {
+      if (!this.tableSelections.length) {
+        this.$notification.warning({
+          message: "请选择要使用的证书",
         });
-      });
+        return;
+      }
+      const selectData = this.list.filter((item) => {
+        return item.id === this.tableSelections[0];
+      })[0];
+      console.log(selectData);
+      this.$emit("confirm", `${selectData.serialNumberStr}:${selectData.keyType}`);
     },
   },
 };

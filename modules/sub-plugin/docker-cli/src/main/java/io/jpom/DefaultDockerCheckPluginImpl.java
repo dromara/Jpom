@@ -22,6 +22,7 @@
  */
 package io.jpom;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -43,6 +44,7 @@ import io.jpom.plugin.PluginConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
+import javax.net.ssl.SSLHandshakeException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -150,7 +152,7 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
         URI dockerHost = config.getDockerHost();
         String host = dockerHost.toString();
         try (DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
-            .dockerHost(dockerHost).connectionTimeout(Duration.ofSeconds(3)).build()) {
+                .dockerHost(dockerHost).connectionTimeout(Duration.ofSeconds(3)).build()) {
             try (PingCmd pingCmd = DockerClientImpl.getInstance(config, httpClient).pingCmd()) {
                 pingCmd.exec();
                 return host;
@@ -195,6 +197,10 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
             return null;
         } catch (Exception e) {
             log.warn("检查 docker url 异常 {}", e.getMessage());
+            if (ExceptionUtil.isCausedBy(e, SSLHandshakeException.class)) {
+                return "SSL 无法连接(请检查证书信任的地址和配置的 docker host 是否一致):" + e.getMessage();
+            }
+            log.warn("检查 docker url 异常 {}", e.getMessage());
             return e.getMessage();
         }
     }
@@ -234,27 +240,27 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
     private List<JSONObject> getApiVersions() {
         Field[] fields = ReflectUtil.getFields(RemoteApiVersion.class);
         return Arrays.stream(fields)
-            .map(field -> {
-                boolean aFinal = Modifier.isFinal(field.getModifiers());
-                boolean aStatic = Modifier.isStatic(field.getModifiers());
-                boolean aPublic = Modifier.isPublic(field.getModifiers());
-                if (!aFinal || !aStatic || !aPublic) {
+                .map(field -> {
+                    boolean aFinal = Modifier.isFinal(field.getModifiers());
+                    boolean aStatic = Modifier.isStatic(field.getModifiers());
+                    boolean aPublic = Modifier.isPublic(field.getModifiers());
+                    if (!aFinal || !aStatic || !aPublic) {
+                        return null;
+                    }
+                    Object fieldValue = ReflectUtil.getFieldValue(null, field);
+                    if (fieldValue instanceof RemoteApiVersion) {
+                        return (RemoteApiVersion) fieldValue;
+                    }
                     return null;
-                }
-                Object fieldValue = ReflectUtil.getFieldValue(null, field);
-                if (fieldValue instanceof RemoteApiVersion) {
-                    return (RemoteApiVersion) fieldValue;
-                }
-                return null;
-            })
-            .filter(apiVersion -> apiVersion != null && apiVersion != RemoteApiVersion.UNKNOWN_VERSION)
-            .sorted((o1, o2) -> StrUtil.compareVersion(o2.getVersion(), o1.getVersion())).map(apiVersion -> {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("webVersion", apiVersion.asWebPathPart());
-                jsonObject.put("version", apiVersion.getVersion());
-                return jsonObject;
-            })
-            .collect(Collectors.toList());
+                })
+                .filter(apiVersion -> apiVersion != null && apiVersion != RemoteApiVersion.UNKNOWN_VERSION)
+                .sorted((o1, o2) -> StrUtil.compareVersion(o2.getVersion(), o1.getVersion())).map(apiVersion -> {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("webVersion", apiVersion.asWebPathPart());
+                    jsonObject.put("version", apiVersion.getVersion());
+                    return jsonObject;
+                })
+                .collect(Collectors.toList());
     }
 
     /**

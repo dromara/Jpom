@@ -60,6 +60,6 @@ public class DockerNetworkController extends BaseDockerNetworkController {
         Assert.notNull(dockerInfoModel, "没有对应 docker");
         MachineDockerModel machineDockerModel = machineDockerServer.getByKey(dockerInfoModel.getMachineDockerId());
         Assert.notNull(machineDockerModel, "没有对应的 docker 资产");
-        return machineDockerModel.toParameter();
+        return machineDockerServer.toParameter(machineDockerModel);
     }
 }

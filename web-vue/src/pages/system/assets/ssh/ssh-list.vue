@@ -392,15 +392,15 @@ export default {
         { label: "证书", value: "PUBKEY" },
       ],
       columns: [
-        { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "名称", dataIndex: "name", width: 120, sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
 
-        { title: "Host", dataIndex: "host", sorter: true, ellipsis: true, scopedSlots: { customRender: "host" } },
+        { title: "Host", dataIndex: "host", width: 120, sorter: true, ellipsis: true, scopedSlots: { customRender: "host" } },
         // { title: "Port", dataIndex: "port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "用户名", dataIndex: "user", sorter: true, width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "系统名", dataIndex: "osName", sorter: true, ellipsis: true, scopedSlots: { customRender: "osName" } },
-        { title: "CPU", dataIndex: "osOccupyCpu", sorter: true, ellipsis: true, scopedSlots: { customRender: "osOccupyCpu" } },
-        { title: "内存", dataIndex: "osOccupyMemory", sorter: true, ellipsis: true, scopedSlots: { customRender: "osOccupyMemory" } },
-        { title: "硬盘", dataIndex: "osMaxOccupyDisk", sorter: true, ellipsis: true, scopedSlots: { customRender: "osMaxOccupyDisk" } },
+        { title: "系统名", dataIndex: "osName", width: 120, sorter: true, ellipsis: true, scopedSlots: { customRender: "osName" } },
+        { title: "CPU", dataIndex: "osOccupyCpu", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "osOccupyCpu" } },
+        { title: "内存", dataIndex: "osOccupyMemory", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "osOccupyMemory" } },
+        { title: "硬盘", dataIndex: "osMaxOccupyDisk", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "osMaxOccupyDisk" } },
         // { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "连接状态", dataIndex: "status", ellipsis: true, align: "center", width: "100px", scopedSlots: { customRender: "status" } },
         {
@@ -411,13 +411,19 @@ export default {
           ellipsis: true,
         },
         {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
+        {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
           sorter: true,
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
           width: "170px",
         },
         {

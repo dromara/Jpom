@@ -59,9 +59,10 @@ public class AssetsDockerSwarmServiceController extends BaseDockerSwarmServiceCo
         Assert.notNull(machineDockerModel, "没有对应的 docker 信息");
         if (machineDockerModel.isControlAvailable()) {
             // 管理节点
-            return machineDockerModel.toParameter();
+            return machineDockerServer.toParameter(machineDockerModel);
         }
         // 非管理节点
-        return machineDockerServer.getMachineDockerBySwarmId(machineDockerModel.getSwarmId()).toParameter();
+        MachineDockerModel bySwarmId = machineDockerServer.getMachineDockerBySwarmId(machineDockerModel.getSwarmId());
+        return machineDockerServer.toParameter(bySwarmId);
     }
 }

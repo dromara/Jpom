@@ -26,9 +26,11 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONValidator;
 import io.jpom.func.assets.model.MachineDockerModel;
+import io.jpom.func.assets.server.MachineDockerServer;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -60,16 +62,19 @@ public class DockerCliHandler extends BaseTerminalHandler {
 
     private static final ConcurrentHashMap<String, HandlerItem> HANDLER_ITEM_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
+
     @Override
     public void afterConnectionEstablishedImpl(WebSocketSession session) throws Exception {
         super.afterConnectionEstablishedImpl(session);
+        MachineDockerServer machineDockerServer = SpringUtil.getBean(MachineDockerServer.class);
         Map<String, Object> attributes = session.getAttributes();
         MachineDockerModel dockerInfoModel = (MachineDockerModel) attributes.get("machineDocker");
         String containerId = (String) attributes.get("containerId");
         //
         HandlerItem handlerItem;
         try {
-            handlerItem = new HandlerItem(session, dockerInfoModel, containerId);
+            Map<String, Object> parameter = machineDockerServer.toParameter(dockerInfoModel);
+            handlerItem = new HandlerItem(session, dockerInfoModel, parameter, containerId);
             handlerItem.startRead();
         } catch (Exception e) {
             // 输出超时日志 @author jzy
@@ -123,14 +128,16 @@ public class DockerCliHandler extends BaseTerminalHandler {
     private class HandlerItem implements Runnable {
         private final WebSocketSession session;
         private final MachineDockerModel dockerInfoModel;
+        private final Map<String, Object> map;
         private final PipedInputStream inputStream = new PipedInputStream();
         private final PipedOutputStream outputStream = new PipedOutputStream(inputStream);
         private final String containerId;
 
-        HandlerItem(WebSocketSession session, MachineDockerModel dockerInfoModel, String containerId) throws IOException {
+        HandlerItem(WebSocketSession session, MachineDockerModel dockerInfoModel, Map<String, Object> map, String containerId) throws IOException {
             this.session = session;
             this.dockerInfoModel = dockerInfoModel;
             this.containerId = containerId;
+            this.map = map;
         }
 
         void startRead() {
@@ -139,7 +146,6 @@ public class DockerCliHandler extends BaseTerminalHandler {
 
         @Override
         public void run() {
-            Map<String, Object> map = dockerInfoModel.toParameter();
             map.put("containerId", containerId);
             Consumer<String> logConsumer = s -> sendBinary(session, s);
             map.put("charset", CharsetUtil.CHARSET_UTF_8);

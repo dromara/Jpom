@@ -28,7 +28,6 @@ import cn.hutool.core.comparator.CompareUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -40,6 +39,7 @@ import io.jpom.common.ILoadEvent;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.IAsyncLoad;
 import io.jpom.func.assets.model.MachineDockerModel;
+import io.jpom.func.cert.service.CertificateInfoService;
 import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.model.docker.DockerSwarmInfoMode;
 import io.jpom.plugin.IPlugin;
@@ -49,9 +49,12 @@ import io.jpom.service.docker.DockerSwarmInfoService;
 import io.jpom.service.h2db.BaseDbService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import javax.annotation.Resource;
+import java.io.File;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
 
@@ -65,6 +68,11 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     private static final String CRON_ID = "docker-monitor";
     private final DockerInfoService dockerInfoService;
     private final DockerSwarmInfoService dockerSwarmInfoService;
+
+    @Resource
+    @Lazy
+    private CertificateInfoService certificateInfoService;
+
 
     public MachineDockerServer(DockerInfoService dockerInfoService,
                                DockerSwarmInfoService dockerSwarmInfoService) {
@@ -163,7 +171,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     public boolean updateMonitor(MachineDockerModel dockerInfoModel) {
         try {
             IPlugin pluginCheck = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
-            Map<String, Object> parameter = dockerInfoModel.toParameter();
+            Map<String, Object> parameter = this.toParameter(dockerInfoModel);
             //
             JSONObject info = pluginCheck.execute("info", parameter, JSONObject.class);
             //
@@ -179,11 +187,11 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
             JSONObject swarmData = null;
             try {
                 if (dockerInfoModel.isControlAvailable()) {
-                    swarmData = plugin.execute("inSpectSwarm", dockerInfoModel.toParameter(), JSONObject.class);
+                    swarmData = plugin.execute("inSpectSwarm", this.toParameter(dockerInfoModel), JSONObject.class);
                 } else {
                     // 找到管理节点
                     MachineDockerModel managerDocker = this.getMachineDockerBySwarmId(dockerInfoModel.getSwarmId());
-                    swarmData = plugin.execute("inSpectSwarm", managerDocker.toParameter(), JSONObject.class);
+                    swarmData = plugin.execute("inSpectSwarm", this.toParameter(managerDocker), JSONObject.class);
                 }
             } catch (Exception e) {
                 log.debug("获取 {} docker 集群失败 {}", dockerInfoModel.getName(), e.getMessage());
@@ -207,7 +215,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
                 update.restSwarm();
             }
             update.setFailureMsg(StrUtil.EMPTY);
-            update.setCertExist(FileUtil.isNotEmpty(FileUtil.file(dockerInfoModel.generateCertPath())));
+            update.setCertExist(this.checkCertPath(dockerInfoModel));
             super.updateById(update);
             //
             return true;
@@ -221,6 +229,42 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
                 log.error("监控 docker[{}] 异常", dockerInfoModel.getName(), e);
             }
             this.updateStatus(dockerInfoModel.getId(), 0, message);
+            return false;
+        }
+    }
+
+    /**
+     * 验证 证书文件是否存在
+     *
+     * @param dockerInfoModel docker
+     * @return true 证书文件存在
+     */
+    private boolean checkCertPath(MachineDockerModel dockerInfoModel) {
+        try {
+            File filePath = certificateInfoService.getFilePath(dockerInfoModel.getCertInfo());
+            if (filePath == null) {
+                return false;
+            }
+            IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
+            return (boolean) plugin.execute("certPath", "certPath", filePath.getAbsolutePath());
+        } catch (Exception e) {
+            log.warn("检查 docker 证书异常 {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 验证 证书文件是否存在
+     *
+     * @param path 路径
+     * @return true 证书文件存在
+     */
+    public boolean checkCertPath(String path) {
+        try {
+            IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
+            return (boolean) plugin.execute("certPath", "certPath", path);
+        } catch (Exception e) {
+            log.warn("检查 docker 证书异常 {}", e.getMessage());
             return false;
         }
     }
@@ -270,7 +314,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
         Assert.notNull(machineDockerModel, "没有找到对应的 docker 信息");
         Integer status = machineDockerModel.getStatus();
         Assert.state(status != null && status == 1, "当前 " + machineDockerModel.getName() + " docker 不在线");
-        return machineDockerModel.toParameter();
+        return this.toParameter(machineDockerModel);
     }
 
     /**
@@ -286,7 +330,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
             if (machineDockerModel != null) {
                 Integer status = machineDockerModel.getStatus();
                 if (status != null && status == 1) {
-                    Map<String, Object> parameter = machineDockerModel.toParameter();
+                    Map<String, Object> parameter = this.toParameter(machineDockerModel);
                     // 更新名称
                     parameter.put("name", dockerInfoModel.getName());
                     return parameter;
@@ -307,7 +351,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
         Assert.notNull(first, "没有找到集群管理节点");
         Integer status = first.getStatus();
         Assert.state(status != null && status == 1, "当前 " + first.getName() + " docker 集群没有管理节点在线");
-        return first.toParameter();
+        return toParameter(first);
     }
 
     private MachineDockerModel getMachineDocker(String workspaceSwarmId) {
@@ -340,5 +384,27 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
         // 跟进在线情况排序
         machineDockerModels.sort((o1, o2) -> CompareUtil.compare(o2.getStatus(), o1.getStatus()));
         return CollUtil.getFirst(machineDockerModels);
+    }
+
+    /**
+     * 插件 插件参数 map
+     *
+     * @return 插件需要使用到到参数
+     */
+    public Map<String, Object> toParameter(MachineDockerModel machineDockerModel) {
+        Map<String, Object> parameter = new HashMap<>(10);
+        parameter.put("dockerHost", machineDockerModel.getHost());
+        parameter.put("name", machineDockerModel.getName());
+        parameter.put("registryUsername", machineDockerModel.getRegistryUsername());
+        parameter.put("registryPassword", machineDockerModel.getRegistryPassword());
+        parameter.put("registryEmail", machineDockerModel.getRegistryEmail());
+        parameter.put("registryUrl", machineDockerModel.getRegistryUrl());
+        parameter.put("timeout", machineDockerModel.getHeartbeatTimeout());
+        if (machineDockerModel.getTlsVerify()) {
+            File filePath = certificateInfoService.getFilePath(machineDockerModel.getCertInfo());
+            Assert.notNull(filePath, "docker 证书文件丢失");
+            parameter.put("dockerCertPath", filePath.getAbsolutePath());
+        }
+        return parameter;
     }
 }
