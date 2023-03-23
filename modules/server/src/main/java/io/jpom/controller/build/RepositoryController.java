@@ -22,6 +22,7 @@
  */
 package io.jpom.controller.build;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.lang.Tuple;
@@ -95,8 +96,8 @@ public class RepositoryController extends BaseServerController {
      */
     @PostMapping(value = "/build/repository/list")
     @Feature(method = MethodFeature.LIST)
-    public Object loadRepositoryList() {
-        PageResultDto<RepositoryModel> pageResult = repositoryService.listPage(getRequest());
+    public Object loadRepositoryList(HttpServletRequest request) {
+        PageResultDto<RepositoryModel> pageResult = repositoryService.listPage(request);
         return JsonMessage.success("获取成功", pageResult);
     }
 
@@ -116,15 +117,32 @@ public class RepositoryController extends BaseServerController {
         return JsonMessage.success("", repositoryModels);
     }
 
+    private RepositoryModel convertRequest(RepositoryModel repositoryModelReq) {
+        RepositoryModel repositoryModel = new RepositoryModel();
+        repositoryModel.setName(repositoryModelReq.getName());
+        repositoryModel.setUserName(repositoryModelReq.getUserName());
+        repositoryModel.setId(repositoryModelReq.getId());
+        repositoryModel.setProtocol(repositoryModelReq.getProtocol());
+        repositoryModel.setTimeout(repositoryModelReq.getTimeout());
+        repositoryModel.setGitUrl(repositoryModelReq.getGitUrl());
+        repositoryModel.setPassword(repositoryModelReq.getPassword());
+        repositoryModel.setRepoType(repositoryModelReq.getRepoType());
+        repositoryModel.setSortValue(repositoryModelReq.getSortValue());
+        repositoryModel.setRsaPrv(repositoryModelReq.getRsaPrv());
+        return repositoryModel;
+    }
+
     /**
      * edit
      *
-     * @param repositoryModelReq 仓库实体
+     * @param req 仓库实体
      * @return json
      */
     @PostMapping(value = "/build/repository/edit")
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> editRepository(RepositoryModel repositoryModelReq, HttpServletRequest request) {
+    public JsonMessage<String> editRepository(RepositoryModel req, HttpServletRequest request) {
+        RepositoryModel repositoryModelReq = this.convertRequest(req);
+        repositoryModelReq.setWorkspaceId(repositoryService.covertGlobalWorkspace(request));
         this.checkInfo(repositoryModelReq, request);
         // 检查 rsa 私钥
         boolean andUpdateSshKey = this.checkAndUpdateSshKey(repositoryModelReq);
@@ -142,8 +160,6 @@ public class RepositoryController extends BaseServerController {
                 Map<String, Object> map = repositoryModelReq.toMap();
                 Tuple branchAndTagList = (Tuple) plugin.execute("branchAndTagList", map);
                 //Tuple tuple = GitUtil.getBranchAndTagList(repositoryModelReq);
-            } catch (JpomRuntimeException jpomRuntimeException) {
-                throw jpomRuntimeException;
             } catch (Exception e) {
                 log.warn("获取仓库分支失败", e);
                 return new JsonMessage<>(500, "无法连接此仓库，" + e.getMessage());
@@ -154,8 +170,9 @@ public class RepositoryController extends BaseServerController {
             repositoryService.insert(repositoryModelReq);
         } else {
             // update data
+            repositoryService.getByKeyAndGlobal(repositoryModelReq.getId(), request);
             //repositoryModelReq.setWorkspaceId(repositoryService.getCheckUserWorkspace(getRequest()));
-            repositoryService.updateById(repositoryModelReq, request);
+            repositoryService.updateById(repositoryModelReq);
         }
 
         return new JsonMessage<>(200, "操作成功");
@@ -170,13 +187,13 @@ public class RepositoryController extends BaseServerController {
     @PostMapping(value = "/build/repository/rest_hide_field")
     @Feature(method = MethodFeature.EDIT)
     public JsonMessage<String> restHideField(@ValidatorItem String id, HttpServletRequest request) {
+        RepositoryModel byKeyAndGlobal = repositoryService.getByKeyAndGlobal(id, request);
         RepositoryModel repositoryModel = new RepositoryModel();
-        repositoryModel.setId(id);
+        repositoryModel.setId(byKeyAndGlobal.getId());
         repositoryModel.setPassword(StrUtil.EMPTY);
         repositoryModel.setRsaPrv(StrUtil.EMPTY);
         repositoryModel.setRsaPub(StrUtil.EMPTY);
-        repositoryModel.setWorkspaceId(repositoryService.getCheckUserWorkspace(request));
-        repositoryService.updateById(repositoryModel);
+        repositoryService.updateById(repositoryModel, request);
         return new JsonMessage<>(200, "操作成功");
     }
 
@@ -471,8 +488,6 @@ public class RepositoryController extends BaseServerController {
         //
         boolean repositoryUrl = this.checkRepositoryUrl(workspaceId, repositoryModelReq.getId(), repositoryModelReq.getGitUrl());
         Assert.state(!repositoryUrl, "已经存在对应的仓库信息啦");
-        // 提前处理工作空间ID
-        repositoryModelReq.setWorkspaceId(workspaceId);
     }
 
     /**
@@ -490,7 +505,7 @@ public class RepositoryController extends BaseServerController {
             Validator.validateGeneral(id, "错误的ID");
             entity.set("id", "<> " + id);
         }
-        entity.set("workspaceId", workspaceId);
+        entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL));
         entity.set("gitUrl", url);
         return repositoryService.exists(entity);
     }
@@ -543,14 +558,14 @@ public class RepositoryController extends BaseServerController {
      */
     @PostMapping(value = "/build/repository/delete")
     @Feature(method = MethodFeature.DEL)
-    public Object delRepository(String id) {
+    public Object delRepository(@ValidatorItem String id, HttpServletRequest request) {
         // 判断仓库是否被关联
         Entity entity = Entity.create();
         entity.set("repositoryId", id);
         boolean exists = buildInfoService.exists(entity);
         Assert.state(!exists, "当前仓库被构建关联，不能直接删除");
-
-        repositoryService.delByKey(id, getRequest());
+        RepositoryModel keyAndGlobal = repositoryService.getByKeyAndGlobal(id, request);
+        repositoryService.delByKey(keyAndGlobal.getId());
         File rsaFile = BuildUtil.getRepositoryRsaFile(id + ServerConst.ID_RSA);
         FileUtil.del(rsaFile);
         return JsonMessage.success("删除成功");
@@ -566,8 +581,9 @@ public class RepositoryController extends BaseServerController {
      */
     @GetMapping(value = "/build/repository/sort-item", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId) {
-        HttpServletRequest request = getRequest();
+    public JsonMessage<String> sortItem(@ValidatorItem String id,
+                                        @ValidatorItem String method,
+                                        String compareId, HttpServletRequest request) {
         if (StrUtil.equalsIgnoreCase(method, "top")) {
             repositoryService.sortToTop(id, request);
         } else if (StrUtil.equalsIgnoreCase(method, "up")) {

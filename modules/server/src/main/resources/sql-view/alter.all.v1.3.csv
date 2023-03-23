@@ -44,3 +44,4 @@ ADD,PROJECT_INFO,autoStart,TINYINT,,,在启动,false
 ADD,MACHINE_DOCKER_INFO,certInfo,String,100,,证书信息,false
 ADD,CERTIFICATE_INFO,fingerprint,String,50,,证书指纹,false
 ADD,MACHINE_DOCKER_INFO,certExist,TINYINT,,,证书是否存在,false
+ADD,REPOSITORY,createUser,String,50,,创建人,false
