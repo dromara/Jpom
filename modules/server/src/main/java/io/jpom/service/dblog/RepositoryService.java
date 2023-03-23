@@ -25,7 +25,7 @@ package io.jpom.service.dblog;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.ServerConst;
 import io.jpom.model.data.RepositoryModel;
-import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.service.h2db.BaseGlobalOrWorkspaceService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
  * Repository service
  */
 @Service
-public class RepositoryService extends BaseWorkspaceService<RepositoryModel> {
+public class RepositoryService extends BaseGlobalOrWorkspaceService<RepositoryModel> {
 
     @Override
     protected void fillSelectResult(RepositoryModel repositoryModel) {

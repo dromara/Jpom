@@ -32,6 +32,7 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.db.Entity;
+import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.ServerConst;
 import io.jpom.func.assets.model.MachineDockerModel;
@@ -44,9 +45,11 @@ import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import top.jpom.model.PageResultDto;
 
 import javax.security.cert.CertificateEncodingException;
 import javax.security.cert.X509Certificate;
+import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.math.BigInteger;
@@ -55,10 +58,7 @@ import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -134,21 +134,21 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
         //
         try {
             List<File> fileList = Arrays.stream(files)
-                    .filter(file -> !FileUtil.equals(file, keyFile))
-                    .filter(file -> StrUtil.endWithAnyIgnoreCase(file.getName(), pemNameSuffixes))
-                    .collect(Collectors.toList());
+                .filter(file -> !FileUtil.equals(file, keyFile))
+                .filter(file -> StrUtil.endWithAnyIgnoreCase(file.getName(), pemNameSuffixes))
+                .collect(Collectors.toList());
             Assert.notEmpty(fileList, "没有找到任何证书文件");
             Assert.state(fileList.size() <= 2, "找到 2 个以上的证书文件");
             //
             List<Certificate> certificates = fileList.stream()
-                    .map(file -> {
-                        try (BufferedInputStream inputStream = FileUtil.getInputStream(file)) {
-                            return KeyUtil.readX509Certificate(inputStream);
-                        } catch (Exception e) {
-                            throw Lombok.sneakyThrow(e);
-                        }
-                    })
-                    .collect(Collectors.toList());
+                .map(file -> {
+                    try (BufferedInputStream inputStream = FileUtil.getInputStream(file)) {
+                        return KeyUtil.readX509Certificate(inputStream);
+                    } catch (Exception e) {
+                        throw Lombok.sneakyThrow(e);
+                    }
+                })
+                .collect(Collectors.toList());
             Certificate certificate0 = certificates.get(0);
             Certificate certificate1 = CollUtil.get(certificates, 1);
             X509Certificate x509Certificate0 = X509Certificate.getInstance(certificate0.getEncoded());
@@ -164,8 +164,8 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
             }
             // 验证证书公钥和私钥
             PublicKey publicKey = Optional.ofNullable(rootIndex == 0 ? certificate1 : certificate0)
-                    .map(Certificate::getPublicKey)
-                    .orElse(null);
+                .map(Certificate::getPublicKey)
+                .orElse(null);
             this.testKey(publicKey, privateKey);
             //
             X509Certificate pubCert = (rootIndex == 0 ? x509Certificate1 : x509Certificate0);
@@ -181,7 +181,7 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
             if (checkRepeat) {
                 //                this.checkRepeat(certificateInfoModel.getSerialNumberStr(), certificateInfoModel.getKeyType());
                 Assert.state(!this.checkRepeat(certificateInfoModel.getSerialNumberStr(), certificateInfoModel.getKeyType()),
-                        "当前证书已经存在啦(系统全局范围内)");
+                    "当前证书已经存在啦(系统全局范围内)");
             }
             // 保存文件
             File file1 = this.getFilePath(certificateInfoModel);
@@ -293,5 +293,12 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
         certificateInfoModel.setSigAlgName(sigAlgName);
         certificateInfoModel.setSigAlgOid(sigAlgOID);
         return certificateInfoModel;
+    }
+
+    public PageResultDto<CertificateInfoModel> listPageAll(HttpServletRequest request) {
+        // 验证工作空间权限
+        Map<String, String> paramMap = ServletUtil.getParamMap(request);
+        paramMap.remove("workspaceId");
+        return super.listPage(paramMap);
     }
 }

@@ -20,12 +20,10 @@
           <a-button type="primary" @click="handleAddGitee">令牌导入</a-button>
         </a-space>
       </template>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="gitUrl" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
+
       <template slot="repoType" slot-scope="text">
         <span v-if="text === 0">GIT</span>
         <span v-else-if="text === 1">SVN</span>
@@ -36,6 +34,10 @@
         <span v-else-if="text === 1">SSH</span>
         <!-- if no protocol value, get a default value from gitUrl -->
         <span v-else>{{ record.gitUrl.indexOf("http") > -1 ? "HTTP(S)" : "SSH" }}</span>
+      </template>
+      <template slot="global" slot-scope="text">
+        <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
+        <a-tag v-else>工作空间</a-tag>
       </template>
       <template slot="operation" slot-scope="text, record, index">
         <a-space>
@@ -164,6 +166,12 @@
             <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="公钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"></a-textarea>
           </a-form-model-item>
         </template>
+        <a-form-model-item label="文件共享" prop="global">
+          <a-radio-group v-model="temp.global">
+            <a-radio :value="true"> 全局 </a-radio>
+            <a-radio :value="false"> 当前工作空间 </a-radio>
+          </a-radio-group>
+        </a-form-model-item>
         <!-- <a-form-model-item v-if="temp.id" prop="restHideField">
           <template slot="label">
             隐藏字段
@@ -248,14 +256,14 @@ export default {
       username: null,
 
       columns: [
-        { title: "仓库名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "仓库名称", dataIndex: "name", width: 200, sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         {
           title: "仓库地址",
           dataIndex: "gitUrl",
-
+          width: 300,
           sorter: true,
           ellipsis: true,
-          scopedSlots: { customRender: "gitUrl" },
+          scopedSlots: { customRender: "tooltip" },
         },
         {
           title: "仓库类型",
@@ -273,18 +281,27 @@ export default {
           ellipsis: true,
           scopedSlots: { customRender: "protocol" },
         },
+        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
+        { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
+        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
           sorter: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
-          width: "180px",
+          customRender: (text) => parseTime(text),
+          width: "170px",
         },
         {
           title: "操作",
           dataIndex: "operation",
+          fixed: "right",
           align: "center",
           width: "180px",
           scopedSlots: { customRender: "operation" },
@@ -421,7 +438,7 @@ export default {
       if (this.temp.protocol === undefined) {
         this.temp.protocol = this.temp.gitUrl.indexOf("http") > -1 ? 0 : 1;
       }
-      this.temp = { ...this.temp };
+      this.temp = { ...this.temp, global: record.workspaceId === "GLOBAL" };
       this.editVisible = true;
     },
     // 提交节点数据

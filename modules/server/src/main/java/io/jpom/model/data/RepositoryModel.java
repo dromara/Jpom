@@ -152,4 +152,9 @@ public class RepositoryModel extends BaseWorkspaceModel {
             this.desc = desc;
         }
     }
+
+    @Override
+    protected boolean hasCreateUser() {
+        return true;
+    }
 }

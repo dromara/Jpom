@@ -241,7 +241,7 @@ public class CertificateInfoController extends BaseServerController {
                 certificateInfoModel.setKeyAlias(keyAlias);
                 // 判断是否存在
                 Assert.state(!certificateInfoService.checkRepeat(certificateInfoModel.getSerialNumberStr(), certificateInfoModel.getKeyType()),
-                        "当前证书已经存在啦(系统全局范围内)");
+                    "当前证书已经存在啦(系统全局范围内)");
                 //certificateInfoService.checkRepeat(certificateInfoModel.getSerialNumberStr(), certificateInfoModel.getKeyType());
 
                 certificateInfoModel.setCertPassword(newPassword);
@@ -267,13 +267,7 @@ public class CertificateInfoController extends BaseServerController {
     @GetMapping(value = "del", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public JsonMessage<String> del(@ValidatorItem String id, HttpServletRequest request) throws IOException {
-        UserModel user = getUser();
-        CertificateInfoModel model = certificateInfoService.getByKey(id, request);
-        Assert.notNull(model, "没有对应的证书");
-        if (!user.isSystemUser()) {
-            // 不是管理员，需要验证是自己上传的文件
-            Assert.state(StrUtil.equals(model.getCreateUser(), user.getId()), "当前证书创建人不是您,不能删除证书信息");
-        }
+        CertificateInfoModel model = certificateInfoService.getByKeyAndGlobal(id, request);
         // 判断是否被 docker 使用
         MachineDockerModel machineDockerModel = new MachineDockerModel();
         machineDockerModel.setCertInfo(model.getSerialNumberStr() + StrUtil.COLON + model.getKeyType());
@@ -294,35 +288,18 @@ public class CertificateInfoController extends BaseServerController {
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public JsonMessage<String> edit(@ValidatorItem String id,
-
                                     String description,
-
-                                    Boolean global,
                                     HttpServletRequest request) throws IOException {
-        UserModel user = getUser();
-        CertificateInfoModel model = certificateInfoService.getByKey(id, request);
-        Assert.notNull(model, "没有对应的证书");
-        if (!user.isSystemUser()) {
-            // 不是管理员，需要验证是自己上传的文件
-            Assert.state(StrUtil.equals(model.getCreateUser(), user.getId()), "当前证书创建人不是您,不能编辑证书信息");
-        }
+        // 验证权限
+        certificateInfoService.getByKeyAndGlobal(id, request);
 
         CertificateInfoModel certificateInfoModel = new CertificateInfoModel();
         certificateInfoModel.setId(id);
         certificateInfoModel.setDescription(description);
         //
-        this.updateGlobal(certificateInfoModel, request, global);
+        certificateInfoModel.setWorkspaceId(certificateInfoService.covertGlobalWorkspace(request));
         certificateInfoService.updateById(certificateInfoModel);
         return JsonMessage.success("修改成功");
-    }
-
-    private void updateGlobal(CertificateInfoModel infoModel, HttpServletRequest request, Boolean global) {
-        // 判断是否为全局模式
-        if (global != null && global) {
-            infoModel.setWorkspaceId(ServerConst.WORKSPACE_GLOBAL);
-        } else {
-            infoModel.setWorkspaceId(certificateInfoService.getCheckUserWorkspace(request));
-        }
     }
 
     /**
@@ -332,13 +309,7 @@ public class CertificateInfoController extends BaseServerController {
      */
     @RequestMapping(value = "export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public void export(@ValidatorItem String id, HttpServletRequest request, HttpServletResponse response) {
-        UserModel user = getUser();
-        CertificateInfoModel model = certificateInfoService.getByKey(id, request);
-        Assert.notNull(model, "没有对应的证书");
-        if (!user.isSystemUser()) {
-            // 不是管理员，需要验证是自己上传的文件
-            Assert.state(StrUtil.equals(model.getCreateUser(), user.getId()), "当前证书创建人不是您,不能导出证书信息");
-        }
+        CertificateInfoModel model = certificateInfoService.getByKeyAndGlobal(id, request);
         File file = certificateInfoService.getFilePath(model);
         Assert.state(!FileUtil.isEmpty(file), "证书文件丢失");
 

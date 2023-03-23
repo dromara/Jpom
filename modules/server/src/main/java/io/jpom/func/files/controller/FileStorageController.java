@@ -149,7 +149,6 @@ public class FileStorageController extends BaseServerController {
                                            Integer keepDay,
                                            String description,
                                            String aliasCode,
-                                           Boolean global,
                                            HttpServletRequest request) throws IOException {
         Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, "别名码只能是英文、数字"));
         File storageSavePath = serverConfig.fileStorageSavePath();
@@ -180,20 +179,11 @@ public class FileStorageController extends BaseServerController {
         fileStorageModel.setSize(FileUtil.size(fileStorageFile));
         fileStorageModel.setSource(0);
         //
-        this.updateGlobal(fileStorageModel, request, global);
+        fileStorageModel.setWorkspaceId(fileStorageService.covertGlobalWorkspace(request));
         fileStorageModel.validUntil(keepDay, null);
         //
         fileStorageService.insert(fileStorageModel);
         return JsonMessage.success("上传成功");
-    }
-
-    private void updateGlobal(FileStorageModel fileStorageModel, HttpServletRequest request, Boolean global) {
-        // 判断是否为全局模式
-        if (global != null && global) {
-            fileStorageModel.setWorkspaceId(ServerConst.WORKSPACE_GLOBAL);
-        } else {
-            fileStorageModel.setWorkspaceId(fileStorageService.getCheckUserWorkspace(request));
-        }
     }
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -203,16 +193,9 @@ public class FileStorageController extends BaseServerController {
                                     Integer keepDay,
                                     String description,
                                     String aliasCode,
-                                    Boolean global,
                                     HttpServletRequest request) throws IOException {
         Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, "别名码只能是英文、数字"));
-        FileStorageModel storageModel = fileStorageService.getByKey(id, request);
-        Assert.notNull(storageModel, "不存在对应的文件");
-        UserModel user = getUser();
-        if (!user.isSystemUser()) {
-            // 不是管理员，需要验证是自己上传的文件
-            Assert.state(StrUtil.equals(storageModel.getCreateUser(), user.getId()), "当前文件创建人不是您,不能修改文件信息");
-        }
+        FileStorageModel storageModel = fileStorageService.getByKeyAndGlobal(id, request);
 
         FileStorageModel fileStorageModel = new FileStorageModel();
         fileStorageModel.setId(id);
@@ -220,7 +203,7 @@ public class FileStorageController extends BaseServerController {
         fileStorageModel.setAliasCode(aliasCode);
         fileStorageModel.setDescription(description);
         //
-        this.updateGlobal(fileStorageModel, request, global);
+        fileStorageModel.setWorkspaceId(fileStorageService.covertGlobalWorkspace(request));
         //
         fileStorageModel.validUntil(keepDay, storageModel.getCreateTimeMillis());
         fileStorageService.updateById(fileStorageModel);
@@ -229,14 +212,8 @@ public class FileStorageController extends BaseServerController {
 
     @GetMapping(value = "del", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> del(@ValidatorItem String id) throws IOException {
-        FileStorageModel storageModel = fileStorageService.getByKey(id);
-        Assert.notNull(storageModel, "不存在对应的文件");
-        UserModel user = getUser();
-        if (!user.isSystemUser()) {
-            // 不是管理员，需要验证是自己上传的文件
-            Assert.state(StrUtil.equals(storageModel.getCreateUser(), user.getId()), "当前文件创建人不是您,不能删除文件信息");
-        }
+    public JsonMessage<String> del(@ValidatorItem String id, HttpServletRequest request) throws IOException {
+        FileStorageModel storageModel = fileStorageService.getByKeyAndGlobal(id, request);
         //
         File storageSavePath = serverConfig.fileStorageSavePath();
         File fileStorageFile = FileUtil.file(storageSavePath, storageModel.getPath());
@@ -260,12 +237,12 @@ public class FileStorageController extends BaseServerController {
     @PostMapping(value = "remote-download", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
     public JsonMessage<String> download(
-            @ValidatorItem String url,
-            Integer keepDay,
-            String description,
-            String aliasCode,
-            Boolean global,
-            HttpServletRequest request) throws IOException {
+        @ValidatorItem String url,
+        Integer keepDay,
+        String description,
+        String aliasCode,
+        Boolean global,
+        HttpServletRequest request) throws IOException {
         Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, "别名码只能是英文、数字"));
         // 验证远程 地址
         ServerWhitelist whitelist = outGivingWhitelistService.getServerWhitelistData(request);
@@ -294,7 +271,7 @@ public class FileStorageController extends BaseServerController {
             updateInfo = new FileStorageModel();
             updateInfo.setId(id);
             updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), fileStorageService.typeName(),
-                    item.getId(), user.getId()));
+                item.getId(), user.getId()));
             fileStorageService.updateById(updateInfo);
         } else {
             updateInfo = item;
@@ -308,15 +285,15 @@ public class FileStorageController extends BaseServerController {
         Map<String, String> map = new HashMap<>(10);
         {
             String url = ServerOpenApi.FILE_STORAGE_DOWNLOAD.
-                    replace("{id}", item.getId()).
-                    replace("{token}", item.getTriggerToken());
+                replace("{id}", item.getId()).
+                replace("{token}", item.getTriggerToken());
             String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
             map.put("triggerDownloadUrl", FileUtil.normalize(triggerBuildUrl));
         }
         if (StrUtil.isNotEmpty(item.getAliasCode())) {
             String url = ServerOpenApi.FILE_STORAGE_DOWNLOAD.
-                    replace("{id}", item.getAliasCode()).
-                    replace("{token}", item.getTriggerToken());
+                replace("{id}", item.getAliasCode()).
+                replace("{token}", item.getTriggerToken());
             String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
             map.put("triggerAliasDownloadUrl", FileUtil.normalize(triggerBuildUrl));
         }

@@ -51,9 +51,6 @@
         <a-tooltip slot="source" slot-scope="text" placement="topLeft" :title="`${sourceMap[text] || '未知'}`">
           <span>{{ sourceMap[text] || "未知" }}</span>
         </a-tooltip>
-        <a-tooltip slot="time" slot-scope="text" placement="topLeft" :title="parseTime(text)">
-          <span>{{ parseTime(text) }}</span>
-        </a-tooltip>
 
         <template slot="exists" slot-scope="text">
           <a-tag v-if="text" color="green">存在</a-tag>
@@ -381,20 +378,20 @@ export default {
           width: "100px",
         },
         { title: "文件状态", dataIndex: "exists", ellipsis: true, scopedSlots: { customRender: "exists" }, width: "80px" },
-        { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: "120px" },
-        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: "120px" },
+        { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
+        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
         {
           title: "创建时间",
           dataIndex: "createTimeMillis",
           sorter: true,
-          scopedSlots: { customRender: "time" },
+          scopedSlots: { customRender: "tooltip" },
           width: "170px",
         },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
           sorter: true,
-          scopedSlots: { customRender: "time" },
+          scopedSlots: { customRender: "tooltip" },
           width: "170px",
         },
         { title: "操作", dataIndex: "operation", align: "center", ellipsis: true, scopedSlots: { customRender: "operation" }, fixed: "right", width: "170px" },
