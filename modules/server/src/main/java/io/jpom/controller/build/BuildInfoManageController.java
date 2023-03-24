@@ -142,7 +142,7 @@ public class BuildInfoManageController extends BaseServerController {
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, item.getStatus());
         Objects.requireNonNull(nowStatus);
         if (BuildStatus.Ing != nowStatus && BuildStatus.PubIng != nowStatus) {
-            return new JsonMessage<>(501, "当前状态不在进行中");
+            return JsonMessage.success("当前状态不在进行中");
         }
         boolean status = buildExecuteService.cancelTask(item.getId());
         if (!status) {
@@ -179,13 +179,13 @@ public class BuildInfoManageController extends BaseServerController {
         EnvironmentMapBuilder environmentMapBuilder = EnvironmentMapBuilder.builder(map);
         //
         ReleaseManage manage = ReleaseManage.builder()
-            .buildExtraModule(buildExtraModule)
-            .logId(buildHistoryLog.getId())
-            .userModel(userModel)
-            .buildNumberId(buildHistoryLog.getBuildNumberId())
-            .buildExecuteService(buildExecuteService)
-            .buildEnv(environmentMapBuilder)
-            .build();
+                .buildExtraModule(buildExtraModule)
+                .logId(buildHistoryLog.getId())
+                .userModel(userModel)
+                .buildNumberId(buildHistoryLog.getBuildNumberId())
+                .buildExecuteService(buildExecuteService)
+                .buildEnv(environmentMapBuilder)
+                .build();
         //
         ThreadUtil.execute(() -> manage.rollback(item));
         return JsonMessage.success("重新发布中");

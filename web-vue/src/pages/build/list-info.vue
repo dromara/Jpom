@@ -34,7 +34,17 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-          <a-button type="primary" @click="batchBuild" :disabled="!tableSelections || tableSelections.length <= 0">批量构建</a-button>
+          <template v-if="!tableSelections || tableSelections.length <= 0">
+            <a-button type="primary" :disabled="true"> 批量操作 <a-icon type="down" /> </a-button>
+          </template>
+          <a-dropdown v-else>
+            <a-menu slot="overlay">
+              <a-menu-item key="1" @click="batchBuild"> 批量构建 </a-menu-item>
+              <a-menu-item key="2" @click="batchCancel"> 批量取消 </a-menu-item>
+            </a-menu>
+            <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
+          </a-dropdown>
+
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
         </a-space>
       </template>
@@ -1947,6 +1957,25 @@ export default {
         startBuild({
           id: item,
         }).then((res) => {
+          if (res.code === 200) {
+            //
+          }
+        });
+      });
+      this.tableSelections = [];
+      this.loadData();
+    },
+    // 批量取消构建
+    batchCancel() {
+      if (!this.tableSelections || this.tableSelections.length <= 0) {
+        this.$notification.warning({
+          message: "没有选择任何数据",
+        });
+        return;
+      }
+
+      this.tableSelections.forEach((item) => {
+        stopBuild(item).then((res) => {
           if (res.code === 200) {
             //
           }
