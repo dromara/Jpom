@@ -45,9 +45,20 @@ pwd=${bin_abs_path}/../
 
 echo "当前路径：${current_path},脚本路径：${bin_abs_path}"
 
+use_tag=""
+
+if [ "$2" == "release" ]; then
+	use_tag="release"
+elif [ "$2" == "beta" ]; then
+	use_tag="beta"
+else
+	echo "不支持的模式 $2"
+	exit
+fi
+
 if [ -n "$1" ]; then
 	new_version="$1"
-	old_version=$(cat "${pwd}/docs/.vuepress/public/docs/versions.tag")
+	old_version=$(cat "${pwd}/docs/.vuepress/public/docs/versions.$use_tag.tag")
 	echo "$old_version 替换为新版本 $new_version"
 else
 	# 参数错误，退出
@@ -56,15 +67,23 @@ else
 fi
 
 if [ -z "$old_version" ]; then
-	echo "ERROR: 旧版本不存在，请确认 /docs/.vuepress/public/docs/versions.tag 中信息正确"
+	echo "ERROR: 旧版本不存在，请确认 /docs/.vuepress/public/docs/versions.$use_tag.tag 中信息正确"
 	exit
 fi
 
-# 替换远程更新包的版本号
-sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/docs/.vuepress/public/docs/versions.json"
-sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/docs/.vuepress/public/docs/release-versions.json"
-sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/package.json"
-sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/docs/.vuepress/public/docs/versions.show"
+if [ "$2" == "release" ]; then
+	# 替换远程更新包的版本号
+	sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/docs/.vuepress/public/docs/versions.json"
+	sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/docs/.vuepress/public/docs/release-versions.json"
+	sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/package.json"
+	sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/docs/.vuepress/public/docs/versions.show"
+elif [ "$2" == "beta" ]; then
+	# 替换远程更新包的版本号
+	sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/docs/.vuepress/public/docs/beta-versions.json"
+else
+	echo "不支持的模式 $2"
+	exit
+fi
 
 function updateDocUrlItem() {
 
@@ -76,11 +95,11 @@ function updateDocUrlItem() {
 		cat >"${pwd}/temp-docs.log" <<EOF
 ## $1
 
-- [jpom-$1.zip](https://download.jpom.top/release/$1/jpom-$1.zip)
-- [server-$1-release.tar.gz](https://download.jpom.top/release/$1/server-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.tar.gz.sha1)
-- [server-$1-release.zip](https://download.jpom.top/release/$1/server-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.zip.sha1)
-- [agent-$1-release.tar.gz](https://download.jpom.top/release/$1/agent-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.tar.gz.sha1)
-- [agent-$1-release.zip](https://download.jpom.top/release/$1/agent-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.zip.sha1)
+- [jpom-$1.zip](https://download.jpom.top/$use_tag/$1/jpom-$1.zip)
+- [server-$1-release.tar.gz](https://download.jpom.top/$use_tag/$1/server-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/$use_tag/$1/server-$1-release.tar.gz.sha1)
+- [server-$1-release.zip](https://download.jpom.top/$use_tag/$1/server-$1-release.zip) | [sha1sum](https://download.jpom.top/$use_tag/$1/server-$1-release.zip.sha1)
+- [agent-$1-release.tar.gz](https://download.jpom.top/$use_tag/$1/agent-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/$use_tag/$1/agent-$1-release.tar.gz.sha1)
+- [agent-$1-release.zip](https://download.jpom.top/$use_tag/$1/agent-$1-release.zip) | [sha1sum](https://download.jpom.top/$use_tag/$1/agent-$1-release.zip.sha1)
 
 --------
 
@@ -93,4 +112,4 @@ EOF
 updateDocUrlItem "$new_version"
 
 # 保留新版本号
-echo "$new_version" >"${pwd}/docs/.vuepress/public/docs/versions.tag"
+echo "$new_version" >"${pwd}/docs/.vuepress/public/docs/versions.$use_tag.tag"

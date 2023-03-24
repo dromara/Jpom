@@ -427,10 +427,15 @@ if [[ $(echo "$module" | grep "default") == "" ]]; then
 	askInstallPath
 fi
 
+use_tag="release"
+if [[ $(echo "$module" | grep "beta") != "" ]]; then
+	use_tag="beta"
+fi
+
 if [ "$offline" == "" ]; then
 	if [[ -z "${versions}" ]]; then
 		# 获取最新的版本号
-		versions=$(curl -LfsS https://jpom.top/docs/versions.tag)
+		versions=$(curl -LfsS https://jpom.top/docs/versions.$use_tag.tag)
 	fi
 
 	if [[ -z "${versions}" ]]; then
@@ -453,7 +458,7 @@ done
 # 判断是否存在文件
 if [[ ! -f "${fileName}" ]]; then
 	echo "================开始下载 $fileName================"
-	curl -LfSo "${fileName}" "https://download.jpom.top/release/${versions}/${url_type}-${versions}-release.tar.gz"
+	curl -LfSo "${fileName}" "https://download.jpom.top/$use_tag/${versions}/${url_type}-${versions}-release.tar.gz"
 fi
 # 解压
 tar -zxf "${fileName}" -C "${jpom_dir}"
