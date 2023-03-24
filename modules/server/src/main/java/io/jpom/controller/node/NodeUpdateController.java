@@ -188,7 +188,8 @@ public class NodeUpdateController extends BaseServerController {
 
     @GetMapping(value = "fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<JSONObject> fastInstall() {
-        InputStream inputStream = ExtConfigBean.getConfigResourceInputStream("/fast-install-info.json");
+        boolean beta = RemoteVersion.betaRelease();
+        InputStream inputStream = ExtConfigBean.getConfigResourceInputStream(beta ? "/fast-install-beta.json" : "/fast-install-release.json");
         String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
         JSONObject jsonObject = new JSONObject();
         JpomManifest instance = JpomManifest.getInstance();

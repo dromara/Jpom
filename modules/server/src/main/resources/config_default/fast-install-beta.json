@@ -1,0 +1,18 @@
+[
+  {
+    "name": "主地址(默认安装)",
+    "url": "curl -fsSL https://jpom.top/docs/install.sh | bash -s Agent jdk+default+beta"
+  },
+  {
+    "name": "备用地址(默认安装)",
+    "url": "curl -fsSL https://gitee.com/dromara/Jpom/raw/docs/docs/.vuepress/public/docs/install.sh | bash -s Agent jdk+default+beta"
+  },
+  {
+    "name": "主地址(自定义安装)",
+    "url": "yum install -y wget && wget -O install.sh https://jpom.top/docs/install.sh && bash install.sh Agent jdk+beta"
+  },
+  {
+    "name": "备用地址(自定义安装)",
+    "url": "yum install -y wget && wget -O install.sh https://gitee.com/dromara/Jpom/raw/docs/docs/.vuepress/public/docs/install.sh && bash install.sh Agent jdk+beta"
+  }
+]
