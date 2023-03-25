@@ -257,7 +257,7 @@ export default {
         },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" }, width: 120 },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "220px" },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "240px" },
       ],
       rules: {
         name: [{ required: true, message: "Please input Script name", trigger: "blur" }],
