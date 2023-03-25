@@ -26,8 +26,8 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.Scheduler;
 import cn.hutool.cron.TaskExecutor;
-import cn.hutool.cron.TaskTable;
 import cn.hutool.cron.listener.TaskListener;
+import cn.hutool.cron.pattern.CronPattern;
 import cn.hutool.cron.task.CronTask;
 import cn.hutool.cron.task.Task;
 import com.alibaba.fastjson2.JSONObject;
@@ -35,7 +35,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -51,23 +54,45 @@ public class CronUtils {
     /**
      * 任务统计
      */
-    private static class TaskStat {
+    public static class TaskStat {
         /**
          * 执行次数
          */
-        private int executeCount;
+        private final AtomicInteger executeCount = new AtomicInteger(0);
         /**
          * 失败次数
          */
-        private int failedCount;
+        private final AtomicInteger failedCount = new AtomicInteger(0);
         /**
          * 成功次数
          */
-        private int succeedCount;
+        private final AtomicInteger succeedCount = new AtomicInteger(0);
         /**
          * 最后执行时间
          */
         private Long lastExecuteTime;
+        /**
+         * 描述
+         */
+        private final String desc;
+
+        public TaskStat(String desc) {
+            this.desc = desc;
+        }
+
+        public void onStart() {
+            this.lastExecuteTime = SystemClock.now();
+            this.executeCount.incrementAndGet();
+        }
+
+        public void onSucceeded() {
+            this.succeedCount.incrementAndGet();
+        }
+
+        public void onFailed(String tag, Throwable exception) {
+            this.failedCount.incrementAndGet();
+            log.error("定时任务异常 {}", tag, exception);
+        }
     }
 
     /**
@@ -90,26 +115,36 @@ public class CronUtils {
             scheduler.addListener(new TaskListener() {
                 @Override
                 public void onStart(TaskExecutor executor) {
-                    TaskStat taskStat = TASK_STAT.computeIfAbsent(executor.getCronTask().getId(), s -> new TaskStat());
-                    taskStat.lastExecuteTime = SystemClock.now();
-                    taskStat.executeCount++;
+                    CronTask cronTask = executor.getCronTask();
+                    TaskStat taskStat = CronUtils.getTaskStat(cronTask.getId(), null);
+                    taskStat.onStart();
                 }
 
                 @Override
                 public void onSucceeded(TaskExecutor executor) {
-                    TaskStat taskStat = TASK_STAT.computeIfAbsent(executor.getCronTask().getId(), s -> new TaskStat());
-                    taskStat.succeedCount++;
+                    CronTask cronTask = executor.getCronTask();
+                    TaskStat taskStat = CronUtils.getTaskStat(cronTask.getId(), null);
+                    taskStat.onSucceeded();
                 }
 
                 @Override
                 public void onFailed(TaskExecutor executor, Throwable exception) {
                     CronTask cronTask = executor.getCronTask();
-                    TaskStat taskStat = TASK_STAT.computeIfAbsent(cronTask.getId(), s -> new TaskStat());
-                    taskStat.failedCount++;
-                    log.error("定时任务异常 {}", cronTask.getId(), exception);
+                    TaskStat taskStat = CronUtils.getTaskStat(cronTask.getId(), null);
+                    taskStat.onFailed(cronTask.getId(), exception);
                 }
             });
         }
+    }
+
+    /**
+     * 获取任务统计
+     *
+     * @param id 任务id
+     * @return 统计对象
+     */
+    public static TaskStat getTaskStat(String id, String desc) {
+        return TASK_STAT.computeIfAbsent(id, s -> new TaskStat(desc));
     }
 
     /**
@@ -119,21 +154,23 @@ public class CronUtils {
      */
     public static List<JSONObject> list() {
         Scheduler scheduler = CronUtil.getScheduler();
-        TaskTable taskTable = scheduler.getTaskTable();
-        List<String> ids = taskTable.getIds();
-        return ids.stream().map(s -> {
-            TaskStat taskStat = TASK_STAT.get(s);
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("taskId", s);
-            jsonObject.put("cron", scheduler.getPattern(s).toString());
-            if (taskStat != null) {
-                jsonObject.put("executeCount", taskStat.executeCount);
-                jsonObject.put("failedCount", taskStat.failedCount);
-                jsonObject.put("succeedCount", taskStat.succeedCount);
-                jsonObject.put("lastExecuteTime", taskStat.lastExecuteTime);
-            }
-            return jsonObject;
-        }).collect(Collectors.toList());
+        Set<Map.Entry<String, TaskStat>> entries = TASK_STAT.entrySet();
+        return entries.stream()
+                .map(entry -> {
+                    TaskStat taskStat = entry.getValue();
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("taskId", entry.getKey());
+                    CronPattern pattern = scheduler.getPattern(entry.getKey());
+                    Optional.ofNullable(pattern).ifPresent(cronPattern -> jsonObject.put("cron", cronPattern.toString()));
+                    if (taskStat != null) {
+                        jsonObject.put("executeCount", taskStat.executeCount.get());
+                        jsonObject.put("failedCount", taskStat.failedCount.get());
+                        jsonObject.put("succeedCount", taskStat.succeedCount.get());
+                        jsonObject.put("lastExecuteTime", taskStat.lastExecuteTime);
+                    }
+                    return jsonObject;
+                })
+                .collect(Collectors.toList());
     }
 
     /**

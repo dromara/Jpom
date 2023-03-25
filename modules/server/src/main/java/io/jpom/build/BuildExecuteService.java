@@ -253,7 +253,7 @@ public class BuildExecuteService {
             Opt.ofBlankAble(checkRepositoryDiff).map(Convert::toBool).ifPresent(taskBuilder::checkRepositoryDiff);
             this.runTask(taskBuilder.build(), buildExtraModule);
             String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
-            return new JsonMessage<>(200, msg, buildInfoModel.getBuildId());
+            return JsonMessage.success(msg, buildInfoModel.getBuildId());
         }
     }
 
