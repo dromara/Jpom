@@ -23,6 +23,7 @@
 package io.jpom.func.openapi.controller;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
@@ -42,6 +43,7 @@ import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
+import io.jpom.cron.CronUtils;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildStatus;
@@ -49,7 +51,9 @@ import io.jpom.model.user.UserModel;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.user.TriggerTokenLogServer;
 import io.jpom.system.JpomRuntimeException;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -59,8 +63,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -70,11 +74,15 @@ import java.util.stream.Collectors;
 @RestController
 @NotLogin
 @Slf4j
-public class BuildTriggerApiController extends BaseJpomController {
+public class BuildTriggerApiController extends BaseJpomController implements InitializingBean, Runnable {
 
     private final BuildInfoService buildInfoService;
     private final BuildExecuteService buildExecuteService;
     private final TriggerTokenLogServer triggerTokenLogServer;
+    /**
+     * 等待执行构建的队列
+     */
+    private final Map<String, Queue<BuildCache>> waitQueue = new ConcurrentHashMap<>();
 
     public BuildTriggerApiController(BuildInfoService buildInfoService,
                                      BuildExecuteService buildExecuteService,
@@ -109,10 +117,10 @@ public class BuildTriggerApiController extends BaseJpomController {
      * @return json
      */
     @RequestMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD2, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String trigger2(@PathVariable String id, @PathVariable String token,
-                           HttpServletRequest request,
-                           String delay,
-                           String buildRemark) {
+    public JsonMessage<Integer> trigger2(@PathVariable String id, @PathVariable String token,
+                                         HttpServletRequest request,
+                                         String delay,
+                                         String buildRemark, String useQueue) {
         BuildInfoModel item = buildInfoService.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         UserModel userModel = this.triggerTokenLogServer.getUserByToken(token, buildInfoService.typeName());
@@ -120,11 +128,25 @@ public class BuildTriggerApiController extends BaseJpomController {
         Assert.notNull(userModel, "触发token错误,或者已经失效:-1");
 
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
-        BaseServerController.resetInfo(userModel);
         // 构建外部参数
         Object[] parametersEnv = this.buildParametersEnv(request);
-        JsonMessage<Integer> start = buildExecuteService.start(id, userModel, Convert.toInt(delay, 0), 1, buildRemark, parametersEnv);
-        return start.toString();
+        Integer delay1 = Convert.toInt(delay, 0);
+        if (Convert.toBool(useQueue, false)) {
+            // 提交到队列暂存
+            BuildCache buildCache = new BuildCache();
+            buildCache.setId(id);
+            buildCache.setUserModel(userModel);
+            buildCache.setDelay(delay1);
+            buildCache.setBuildRemark(buildRemark);
+            buildCache.setParametersEnv(parametersEnv);
+            //
+            Queue<BuildCache> buildCaches = waitQueue.computeIfAbsent(id, s -> new ConcurrentLinkedDeque<>());
+            buildCaches.add(buildCache);
+            return JsonMessage.success("提交任务队列成功,当前队列数：" + buildCaches.size());
+        }
+
+        BaseServerController.resetInfo(userModel);
+        return buildExecuteService.start(id, userModel, delay1, 1, buildRemark, parametersEnv);
     }
 
     /**
@@ -163,6 +185,7 @@ public class BuildTriggerApiController extends BaseJpomController {
                 String token = jsonObject.getString("token");
                 Integer delay = jsonObject.getInteger("delay");
                 String buildRemark = jsonObject.getString("buildRemark");
+                String useQueue = jsonObject.getString("useQueue");
                 BuildInfoModel item = buildInfoService.getByKey(id);
                 if (item == null) {
                     jsonObject.put("msg", "没有对应数据");
@@ -184,11 +207,25 @@ public class BuildTriggerApiController extends BaseJpomController {
                     jsonObject.put("msg", updateItemErrorMsg);
                     return;
                 }
-                BaseServerController.resetInfo(userModel);
-                //
-                JsonMessage<Integer> start = buildExecuteService.start(id, userModel, delay, 1, buildRemark, parametersEnv);
-                jsonObject.put("msg", start.getMsg());
-                jsonObject.put("buildId", start.getData());
+                if (Convert.toBool(useQueue, false)) {
+                    // 提交到队列暂存
+                    BuildCache buildCache = new BuildCache();
+                    buildCache.setId(id);
+                    buildCache.setUserModel(userModel);
+                    buildCache.setDelay(delay);
+                    buildCache.setBuildRemark(buildRemark);
+                    buildCache.setParametersEnv(parametersEnv);
+                    //
+                    Queue<BuildCache> buildCaches = waitQueue.computeIfAbsent(id, s -> new ConcurrentLinkedDeque<>());
+                    buildCaches.add(buildCache);
+                    jsonObject.put("msg", "提交任务队列成功,当前队列数：" + buildCaches.size());
+                } else {
+                    BaseServerController.resetInfo(userModel);
+                    //
+                    JsonMessage<Integer> start = buildExecuteService.start(id, userModel, delay, 1, buildRemark, parametersEnv);
+                    jsonObject.put("msg", start.getMsg());
+                    jsonObject.put("buildId", start.getData());
+                }
             }).collect(Collectors.toList());
             return JsonMessage.success("触发成功", collect);
         } catch (Exception e) {
@@ -339,4 +376,92 @@ public class BuildTriggerApiController extends BaseJpomController {
         return jsonObject;
     }
 
+    @Data
+    private static class BuildCache {
+        private UserModel userModel;
+        // 构建外部参数
+        private Object[] parametersEnv;
+
+        private Integer delay;
+
+        private String buildRemark;
+        private String id;
+
+        private Long taskTime;
+
+        public BuildCache() {
+            this.taskTime = SystemClock.now();
+        }
+
+        @Override
+        public String toString() {
+            return JSONObject.toJSONString(this);
+        }
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> new Thread(runnable, "Jpom Build Trigger Queue"));
+        scheduler.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void run() {
+        String id = "build_trigger_queue";
+        int heartSecond = 5;
+        try {
+            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(id, StrUtil.format("{} 秒执行一次", heartSecond));
+            taskStat.onStart();
+            //
+            this.runQueue();
+            taskStat.onSucceeded();
+        } catch (Throwable throwable) {
+            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(id, StrUtil.format("{} 秒执行一次", heartSecond));
+            taskStat.onFailed(id, throwable);
+        }
+    }
+
+    private void runQueue() {
+        // 先删除空队列
+        Set<Map.Entry<String, Queue<BuildCache>>> entries = waitQueue.entrySet();
+        Iterator<Map.Entry<String, Queue<BuildCache>>> entryIterator = entries.iterator();
+        while (entryIterator.hasNext()) {
+            Map.Entry<String, Queue<BuildCache>> next = entryIterator.next();
+            Queue<BuildCache> queue = next.getValue();
+            if (queue.isEmpty()) {
+                entryIterator.remove();
+            }
+        }
+        int size = waitQueue.size();
+        log.debug("需要处理的构建数：{}", size);
+        // 遍历队列中的数据
+        waitQueue.forEach((buildId, buildCaches) -> {
+            synchronized (buildId.intern()) {
+                log.debug("需要处理的 {} 构建队列数：{}", buildId, buildCaches.size());
+                BuildInfoModel item = buildInfoService.getByKey(buildId);
+                if (item == null) {
+                    log.error("构建数据不存在：{},任务自动丢弃:{}", buildId, buildCaches.poll());
+                    return;
+                }
+                String statusMsg = buildExecuteService.checkStatus(item);
+                if (statusMsg != null) {
+                    log.debug("构建任务继续等待:{} {}", buildId, statusMsg);
+                    return;
+                }
+                BuildCache cache = buildCaches.poll();
+                if (cache == null) {
+                    return;
+                }
+                try {
+                    BaseServerController.resetInfo(cache.userModel);
+                    JsonMessage<Integer> message = buildExecuteService.start(cache.id, cache.userModel, cache.delay, 1, cache.buildRemark, cache.parametersEnv);
+                    log.info("构建触发器队列执行结果：{}", message);
+                } catch (Exception e) {
+                    log.error("创建构建任务异常", e);
+                    // 重新添加任务
+                    buildCaches.add(cache);
+                }
+            }
+        });
+    }
 }

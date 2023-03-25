@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.PatternPool;
@@ -37,10 +38,7 @@ import org.springframework.boot.convert.DurationStyle;
 
 import java.nio.charset.Charset;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.SortedMap;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -184,5 +182,15 @@ public class TestString {
     @Test
     public void testLong() {
         System.out.println(4045003435L - 5476659199L);
+    }
+
+    @Test
+    public void testMap() {
+        Map<String, String> map = new HashMap<>();
+        map.put("a", "1");
+
+        Set<String> set = new HashSet<>(map.keySet());
+        map.put("b", "2");
+        System.out.println(set);
     }
 }

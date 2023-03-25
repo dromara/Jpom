@@ -37,6 +37,7 @@ import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.*;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.cron.CronUtils;
 import io.jpom.cron.IAsyncLoad;
 import io.jpom.func.assets.model.MachineNodeModel;
 import io.jpom.func.assets.model.MachineNodeStatLogModel;
@@ -186,10 +187,20 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
 
     @Override
     public void run() {
-        MachineNodeModel machineNodeModel = new MachineNodeModel();
-        machineNodeModel.setTransportMode(0);
-        List<MachineNodeModel> machineNodeModels = this.listByBean(machineNodeModel);
-        this.checkList(machineNodeModels);
+        String id = "system_monitor_node";
+        int heartSecond = nodeConfig.getHeartSecond();
+        try {
+            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(id, StrUtil.format("{} 秒执行一次", heartSecond));
+            taskStat.onStart();
+            MachineNodeModel machineNodeModel = new MachineNodeModel();
+            machineNodeModel.setTransportMode(0);
+            List<MachineNodeModel> machineNodeModels = this.listByBean(machineNodeModel);
+            this.checkList(machineNodeModels);
+            taskStat.onSucceeded();
+        } catch (Throwable throwable) {
+            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(id, StrUtil.format("{} 秒执行一次", heartSecond));
+            taskStat.onFailed(id, throwable);
+        }
     }
 
 
