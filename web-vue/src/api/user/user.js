@@ -9,6 +9,23 @@ export function login(params) {
   });
 }
 
+// oauth2Login
+export function oauth2Login(params) {
+  return axios({
+    url: "/oauth2/login",
+    method: "post",
+    data: params,
+  });
+}
+
+export function oauth2State(params) {
+  return axios({
+    url: "/oauth2/state",
+    method: "get",
+    data: params,
+  });
+}
+
 /**
  * 验证输入的验证码
  * @param {JSON} params
