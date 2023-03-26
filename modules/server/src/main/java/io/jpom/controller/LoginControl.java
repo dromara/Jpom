@@ -46,6 +46,8 @@ import io.jpom.func.user.server.UserLoginLogServer;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.dto.UserLoginDto;
 import io.jpom.model.user.UserModel;
+import io.jpom.oauth2.AuthOauth2CustomRequest;
+import io.jpom.oauth2.Oauth2AuthSource;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.service.user.UserBindWorkspaceService;
@@ -56,12 +58,18 @@ import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
+import me.zhyd.oauth.config.AuthConfig;
+import me.zhyd.oauth.model.AuthCallback;
+import me.zhyd.oauth.model.AuthResponse;
+import me.zhyd.oauth.model.AuthUser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.awt.*;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -89,6 +97,9 @@ public class LoginControl extends BaseServerController {
     private final ServerConfig.UserConfig userConfig;
     private final ServerConfig.WebConfig webConfig;
     private final UserLoginLogServer userLoginLogServer;
+    private final ServerConfig.OauthConfig oauthConfig;
+    private AuthOauth2CustomRequest authOauth2Request;
+    
 
     public LoginControl(UserService userService,
                         UserBindWorkspaceService userBindWorkspaceService,
@@ -98,7 +109,16 @@ public class LoginControl extends BaseServerController {
         this.userBindWorkspaceService = userBindWorkspaceService;
         this.userConfig = serverConfig.getUser();
         this.webConfig = serverConfig.getWeb();
+        this.oauthConfig = serverConfig.getOauth2();
         this.userLoginLogServer = userLoginLogServer;
+        
+        AuthConfig authConfig = AuthConfig.builder()
+                .clientId(oauthConfig.getClientId())
+                .clientSecret(oauthConfig.getClientSecret())
+                .redirectUri(oauthConfig.getRedirectUri())
+                .build();
+        
+        authOauth2Request = new AuthOauth2CustomRequest( authConfig , new Oauth2AuthSource(oauthConfig));
     }
 
     /**
@@ -153,6 +173,7 @@ public class LoginControl extends BaseServerController {
         }
         return count > userConfig.getAlwaysIpLoginError();
     }
+
 
     /**
      * 登录接口
@@ -227,6 +248,63 @@ public class LoginControl extends BaseServerController {
                 }
             }
         }
+    }
+    
+    /**
+     * oauth 状态检查
+     * @param response
+     * @return json
+     * @throws IOException
+     */
+    @RequestMapping(value = "oauth2/state", method = RequestMethod.GET)
+    @ResponseBody
+    @NotLogin
+    public HashMap<String,Object> oauth2LoginState(HttpServletResponse response) throws IOException {
+    	HashMap<String,Object> data = new HashMap<String,Object>();
+    	data.put("code", 200);
+    	data.put("enabled", oauthConfig.isEnabled());
+        return data;
+    }
+    
+    /**
+     * 跳转到认证中心登录
+     * @param request
+     * @return
+     */
+    @GetMapping(value = "oauth2/login")
+    @NotLogin
+    public ModelAndView oauth2Login(HttpServletRequest request){
+    	return new ModelAndView("redirect:" + authOauth2Request.authorize(null));
+    }
+    
+    /**
+     * oauth2 登录并获取token
+     * @param code
+     * @param state
+     * @param request
+     * @return 
+     */
+    @PostMapping(value = "oauth2/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    @NotLogin
+    public JsonMessage<Object> oauth2Callback(
+    		@RequestParam(value = "code", required = true) String code,
+    		@RequestParam(value = "state", required = false)String state,
+    		HttpServletRequest request){
+    	AuthCallback authCallback = new AuthCallback();
+    	authCallback.setCode(code);
+    	authCallback.setState(state);
+    	AuthResponse<?> authResponse = authOauth2Request.login(authCallback);
+    	AuthUser authUser = (AuthUser)authResponse.getData();
+    	if(authUser != null) {
+    		UserModel userModel = userService.getByKey(authUser.getUsername());
+    		if (userModel == null) {
+    			return new JsonMessage<>(400, "OAuth 2 登录失败,用户不存在请联系管理员！");
+    		}
+    		UserLoginDto userLoginDto = this.createToken(userModel);
+            userLoginLogServer.success(userModel, false, request);
+            return new JsonMessage<>(200, "OAuth 2 登录成功", userLoginDto);
+    	}
+    	return new JsonMessage<>(400, "OAuth 2 登录失败,请联系管理员！");
     }
 
     private UserLoginDto createToken(UserModel userModel) {
