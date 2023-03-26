@@ -98,6 +98,15 @@ jpom:
     pool-wait-queue: 10
     # 日志显示 压缩折叠显示进度比例 范围 1-100
     log-reduce-progress-ratio: 5
+  oauth2:
+    enabled: false
+    clientId: 837136275440926720
+    clientSecret: 8453MjUwMzIwMjMyMjQxNDY5MzYSD5
+    serverUrl: http://sso.maxkey.top
+    authorizationUri: ${jpom.oauth2.serverUrl}/sign/authz/oauth/v20/authorize
+    accessTokenUri: ${jpom.oauth2.serverUrl}/sign/authz/oauth/v20/token
+    userInfoUri: ${jpom.oauth2.serverUrl}/sign/api/oauth/v20/me
+    redirectUri: http://localhost:3000/
 server:
   #运行端口号
   port: 2122
@@ -120,6 +129,7 @@ server:
   tomcat:
     uri-encoding: UTF-8
     connection-timeout: 10M
+
 spring:
   profiles:
     active: mysql-1
@@ -141,3 +151,5 @@ spring:
       # 是否允许远程访问（开启此配置有安全风险），默认为 false（当部署到服务器上之后，是否可以通过其他浏览器访问数据库）
       settings:
         web-allow-others: false
+
+    
