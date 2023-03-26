@@ -92,6 +92,13 @@ export function authorizeRepos(param) {
   });
 }
 
+export function providerInfo() {
+  return axios({
+    url: "/build/repository/provider_info",
+    method: "get",
+  });
+}
+
 export function sortItem(params) {
   return axios({
     url: "/build/repository/sort-item",
