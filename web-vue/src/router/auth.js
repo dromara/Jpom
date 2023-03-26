@@ -5,12 +5,20 @@
 // import { notification } from "ant-design-vue";
 import router from "./index";
 import store from "../store/index";
+import Qs from "qs";
 
 // 不需要鉴权的名单
 const whiteList = ["/login", "/install", "/system/ipAccess"];
 const noTabs = ["/full-terminal"];
 
 router.beforeEach((to, from, next) => {
+  const params = Qs.parse(location.search.substring(1));
+  if (Object.keys(params).length) {
+    // 地址栏参数转 hash 参数
+    const paramsStr = Qs.stringify(Object.assign({}, params, to.query));
+    location.href = location.origin + location.pathname + "#" + to.path + "?" + paramsStr;
+    return;
+  }
   // 检测白名单
   if (whiteList.indexOf(to.path) !== -1) {
     next();
