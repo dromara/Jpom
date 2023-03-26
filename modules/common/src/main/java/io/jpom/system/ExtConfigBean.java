@@ -24,6 +24,7 @@ package io.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -38,7 +39,9 @@ import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.Assert;
+import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,12 +89,12 @@ public class ExtConfigBean {
     public static Resource getResource() {
         String property = SpringUtil.getApplicationContext().getEnvironment().getProperty(ConfigFileApplicationListener.CONFIG_LOCATION_PROPERTY);
         Resource configResource = Opt.ofBlankAble(property)
-            .map(FileSystemResource::new)
-            .flatMap((Function<Resource, Opt<Resource>>) resource -> resource.exists() ? Opt.of(resource) : Opt.empty())
-            .orElseGet(() -> {
-                ClassPathResource classPathResource = new ClassPathResource(Const.FILE_NAME);
-                return classPathResource.exists() ? classPathResource : new ClassPathResource("/config_default/" + Const.FILE_NAME);
-            });
+                .map(FileSystemResource::new)
+                .flatMap((Function<Resource, Opt<Resource>>) resource -> resource.exists() ? Opt.of(resource) : Opt.empty())
+                .orElseGet(() -> {
+                    ClassPathResource classPathResource = new ClassPathResource(Const.FILE_NAME);
+                    return classPathResource.exists() ? classPathResource : new ClassPathResource("/config_default/" + Const.FILE_NAME);
+                });
         Assert.state(configResource.exists(), "均未找到配置文件");
         return configResource;
     }
@@ -140,21 +143,19 @@ public class ExtConfigBean {
      */
     public static InputStream getConfigResourceInputStream(String name) {
         FileUtils.checkSlip(name);
-        String property = SpringUtil.getApplicationContext().getEnvironment().getProperty(ConfigFileApplicationListener.CONFIG_LOCATION_PROPERTY);
-        InputStream inputStream = Opt.ofBlankAble(property)
-            .map((Function<String, InputStream>) s -> {
-                File file = FileUtil.file(s);
-                File configDir = FileUtil.getParent(file, 1);
-                file = FileUtil.file(configDir, name);
-                if (FileUtil.isFile(file)) {
-                    return FileUtil.getInputStream(file);
-                }
-                return null;
-            })
-            .orElseGet(() -> {
-                log.debug("外置配置不存在或者未配置：{},使用默认配置", name);
-                return getDefaultConfigResourceInputStream(name);
-            });
+        File configResourceDir = getConfigResourceDir();
+        InputStream inputStream = Opt.ofBlankAble(configResourceDir)
+                .map((Function<File, InputStream>) configDir -> {
+                    File file = FileUtil.file(configDir, name);
+                    if (FileUtil.isFile(file)) {
+                        return FileUtil.getInputStream(file);
+                    }
+                    return null;
+                })
+                .orElseGet(() -> {
+                    log.debug("外置配置不存在或者未配置：{},使用默认配置", name);
+                    return getDefaultConfigResourceInputStream(name);
+                });
         Assert.notNull(inputStream, "均未找到配置文件");
         return inputStream;
     }
@@ -173,6 +174,37 @@ public class ExtConfigBean {
         } catch (IOException e) {
             throw Lombok.sneakyThrow(e);
         }
+    }
+
+    /**
+     * 模糊匹配获取配置文件资源
+     *
+     * @param matchStr 匹配关键词
+     * @return 资源
+     */
+    public static Resource[] getConfigResources(String matchStr) {
+        PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
+        File configResourceDir = getConfigResourceDir();
+        return Opt.ofBlankAble(configResourceDir).map(file -> {
+            try {
+                String format = StrUtil.format("{}{}/{}", ResourceUtils.FILE_URL_PREFIX, file.getAbsolutePath(), matchStr);
+                Resource[] resources = pathMatchingResourcePatternResolver.getResources(format);
+                if (ArrayUtil.isEmpty(resources)) {
+                    log.warn("配置文件不存在 {}", format);
+                    return null;
+                }
+                return resources;
+            } catch (IOException e) {
+                throw Lombok.sneakyThrow(e);
+            }
+        }).orElseGet(() -> {
+            try {
+                String format = StrUtil.format("{}/config_default/{}", ResourceUtils.CLASSPATH_URL_PREFIX, matchStr);
+                return pathMatchingResourcePatternResolver.getResources(format);
+            } catch (IOException e) {
+                throw Lombok.sneakyThrow(e);
+            }
+        });
     }
 
 

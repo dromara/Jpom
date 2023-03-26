@@ -24,6 +24,7 @@ package io.jpom.controller.build.repository;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Page;
 import cn.hutool.http.HttpRequest;
@@ -34,52 +35,58 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.setting.yaml.YamlUtil;
+import io.jpom.system.ExtConfigBean;
+import lombok.Lombok;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * @author WeiHongBin
+ */
 @Slf4j
 @UtilityClass
 public class ImportRepoUtil {
 
-    private static final String IMPORT_REPO_PROVIDER_DIR = "/import-repo-provider";
-
+    private static final String IMPORT_REPO_PROVIDER_DIR = "/import-repo-provider/";
 
     @SneakyThrows
     public Map<String, Map<String, Object>> getProviderList() {
-        String normalize = FileUtil.normalize(IMPORT_REPO_PROVIDER_DIR);
-        ClassPathResource classPathResource = new ClassPathResource(normalize);
-        if (!classPathResource.exists()) {
-            return null;
-        }
-        return Arrays.stream(Objects.requireNonNull(classPathResource.getFile()
-                        .listFiles(pathname -> StrUtil.endWith(pathname.getName(), ".yml"))))
-                .map(file -> {
-                    String name = file.getName().replace(".yml", "");
-                    ImportRepoProviderConfig providerConfig = getProviderConfig(name);
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("name", name);
-                    map.put("baseUrl", providerConfig.getBaseUrl());
-                    // 是否支持查询
-                    map.put("query", providerConfig.getRepoListParam().values().stream().anyMatch(s -> s.contains("${query}")));
-                    return map;
-                }).collect(Collectors.toMap(map -> (String) map.get("name"), map -> map));
+        Resource[] configResources = ExtConfigBean.getConfigResources("import-repo-provider/*.yml");
+        return Arrays.stream(configResources)
+                .map(resource -> {
+                    String filename = resource.getFilename();
+                    String mainName = FileUtil.mainName(filename);
+
+                    try (InputStream inputStream = resource.getInputStream()) {
+                        ImportRepoProviderConfig providerConfig = YamlUtil.load(inputStream, ImportRepoProviderConfig.class);
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("name", mainName);
+                        map.put("baseUrl", providerConfig.getBaseUrl());
+                        // 是否支持查询
+                        map.put("query", providerConfig.getRepoListParam().values().stream().anyMatch(s -> s.contains("${query}")));
+                        return map;
+                    } catch (Exception e) {
+                        throw Lombok.sneakyThrow(e);
+                    }
+                })
+                .collect(Collectors.toMap(map -> (String) map.get("name"), map -> map));
     }
 
     @SneakyThrows
     public ImportRepoProviderConfig getProviderConfig(String platform) {
-        String normalize = FileUtil.normalize(String.format("%s/%s.yml", IMPORT_REPO_PROVIDER_DIR, platform));
-        ClassPathResource classPathResource = new ClassPathResource(normalize);
-        Assert.state(classPathResource.exists(), "配置文件不存在");
-        try (InputStream inputStream = classPathResource.getInputStream()) {
+        try (InputStream inputStream = ExtConfigBean.getConfigResourceInputStream(IMPORT_REPO_PROVIDER_DIR + platform + ".yml")) {
             return YamlUtil.load(inputStream, ImportRepoProviderConfig.class);
         }
     }
@@ -138,7 +145,7 @@ public class ImportRepoUtil {
             int totalCount = page.getPageSize() * page.getPageNumber();
             if ("Link".equals(provider.getRepoTotalHeader()) && StrUtil.isNotBlank(totalHeader)) {
                 // github 特殊处理
-                Pattern pattern = Pattern.compile("page=(\\d+)&per_page=(\\d+)>; rel=\"last\"");
+                Pattern pattern = PatternPool.get("page=(\\d+)&per_page=(\\d+)>; rel=\"last\"");
                 Matcher matcher = pattern.matcher(totalHeader);
                 if (matcher.find()) {
                     int linkPage = Integer.parseInt(matcher.group(2));

@@ -207,9 +207,9 @@
           <a-input v-model="giteeImportForm.condition" placeholder="输入仓库名称或者仓库路径进行搜索" />
         </a-form-model-item>
       </a-form-model>
-      <a-table :loading="loading" :columns="reposColumns" :data-source="repos" bordered rowKey="full_name" @change="reposChange" :pagination="reposPagination">
+      <a-table :loading="loading" size="middle" :columns="reposColumns" :data-source="repos" bordered rowKey="full_name" @change="reposChange" :pagination="reposPagination">
         <template slot="private" slot-scope="text, record">
-          <a-switch :disabled="true" :checked="record.private" />
+          <a-switch size="small" :disabled="true" :checked="record.private" />
         </template>
         <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
@@ -225,7 +225,7 @@
         </a-tooltip>
 
         <template slot="operation" slot-scope="text, record">
-          <a-button type="primary" :disabled="record.exists" @click="handleGiteeRepoAdd(record)">{{ record.exists ? "已存在" : "添加" }}</a-button>
+          <a-button type="primary" size="small" :disabled="record.exists" @click="handleGiteeRepoAdd(record)">{{ record.exists ? "已存在" : "添加" }}</a-button>
         </template>
       </a-table>
     </a-modal>
@@ -247,8 +247,8 @@ export default {
         gitee: {
           baseUrl: "https://gitee.com",
           name: "gitee",
-          query: true
-        }
+          query: true,
+        },
       },
       total: 0,
       temp: {},
@@ -266,7 +266,7 @@ export default {
           width: 300,
           sorter: true,
           ellipsis: true,
-          scopedSlots: { customRender: "tooltip" }
+          scopedSlots: { customRender: "tooltip" },
         },
         {
           title: "仓库类型",
@@ -274,7 +274,7 @@ export default {
           width: 100,
           sorter: true,
           ellipsis: true,
-          scopedSlots: { customRender: "repoType" }
+          scopedSlots: { customRender: "repoType" },
         },
         {
           title: "协议",
@@ -282,7 +282,7 @@ export default {
           width: 100,
           sorter: true,
           ellipsis: true,
-          scopedSlots: { customRender: "protocol" }
+          scopedSlots: { customRender: "protocol" },
         },
         { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
         { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
@@ -292,14 +292,14 @@ export default {
           dataIndex: "createTimeMillis",
           sorter: true,
           customRender: (text) => parseTime(text),
-          width: "170px"
+          width: "170px",
         },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
           sorter: true,
           customRender: (text) => parseTime(text),
-          width: "170px"
+          width: "170px",
         },
         {
           title: "操作",
@@ -307,8 +307,8 @@ export default {
           fixed: "right",
           align: "center",
           width: "180px",
-          scopedSlots: { customRender: "operation" }
-        }
+          scopedSlots: { customRender: "operation" },
+        },
       ],
       reposColumns: [
         { title: "仓库名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
@@ -320,7 +320,7 @@ export default {
           dataIndex: "description",
 
           ellipsis: true,
-          scopedSlots: { customRender: "description" }
+          scopedSlots: { customRender: "description" },
         },
         { title: "私有", dataIndex: "private", width: 80, ellipsis: true, scopedSlots: { customRender: "private" } },
         {
@@ -328,26 +328,27 @@ export default {
           dataIndex: "operation",
           width: 100,
           scopedSlots: { customRender: "operation" },
-          align: "left"
-        }
+          align: "left",
+        },
       ],
       giteeImportForm: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, { limit: 15, type: "gitee", address: "https://gitee.com" }),
       giteeImportFormRules: {
-        token: [{ required: true, message: "请输入私人令牌", trigger: "blur" }]
+        token: [{ required: true, message: "请输入私人令牌", trigger: "blur" }],
         // address: [{ required: true, message: "请填写平台地址", trigger: "blur" }],
       },
       rules: {
         name: [{ required: true, message: "请填写仓库名称", trigger: "blur" }],
-        gitUrl: [{ required: true, message: "请填写仓库地址", trigger: "blur" }]
+        gitUrl: [{ required: true, message: "请填写仓库地址", trigger: "blur" }],
       },
       importTypePlaceholder: {
         gitee: "在 设置-->安全设置-->私人令牌 中获取",
         github: "在 Settings-->Developer settings-->Personal access tokens 中获取",
+        gitlab_v3: "在 preferences-->Access Tokens 中获取",
         gitlab: "在 preferences-->Access Tokens 中获取",
         gitea: "在 设置 --> 应用 --> 生成令牌",
         gogs: "在 设置 --> 应用 --> 生成令牌",
-        other: "请输入私人令牌"
-      }
+        other: "请输入私人令牌",
+      },
     };
   },
   computed: {
@@ -357,7 +358,7 @@ export default {
     },
     reposPagination() {
       return COMPUTED_PAGINATION(this.giteeImportForm, this.PAGE_DEFAULT_SIZW_OPTIONS);
-    }
+    },
   },
   watch: {},
   created() {
@@ -391,7 +392,7 @@ export default {
     handleAdd() {
       this.temp = {
         repoType: 0,
-        protocol: 0
+        protocol: 0,
       };
       this.editVisible = true;
     },
@@ -425,12 +426,12 @@ export default {
         userName: record.username,
         password: this.giteeImportForm.token,
         name: record.name,
-        gitUrl: record.url
+        gitUrl: record.url,
       }).then((res) => {
         if (res.code === 200) {
           // 成功
           this.$notification.success({
-            message: res.msg
+            message: res.msg,
           });
           record.exists = true;
           this.loadData();
@@ -458,7 +459,7 @@ export default {
           if (res.code === 200) {
             // 成功
             this.$notification.success({
-              message: res.msg
+              message: res.msg,
             });
             this.editVisible = false;
             this.loadData();
@@ -476,19 +477,19 @@ export default {
         cancelText: "取消",
         onOk: () => {
           const params = {
-            id: record.id
+            id: record.id,
             //isRealDel: this.isSystem,
           };
           // 删除
           deleteRepository(params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
-                message: res.msg
+                message: res.msg,
               });
               this.loadData();
             }
           });
-        }
+        },
       });
     },
 
@@ -504,12 +505,12 @@ export default {
           restHideField(record.id).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
-                message: res.msg
+                message: res.msg,
               });
               this.loadData();
             }
           });
-        }
+        },
       });
     },
     // 分页、排序、筛选变化时触发
@@ -523,7 +524,7 @@ export default {
       const msgData = {
         top: "确定要将此数据置顶吗？",
         up: "确定要将此数上移吗？",
-        down: "确定要将此数据下移吗？下移操作可能因为列表后续数据没有排序值操作无效！"
+        down: "确定要将此数据下移吗？下移操作可能因为列表后续数据没有排序值操作无效！",
       };
       let msg = msgData[method] || "确定要操作吗？";
       if (!record.sortValue) {
@@ -541,21 +542,21 @@ export default {
           sortItem({
             id: record.id,
             method: method,
-            compareId: compareId
+            compareId: compareId,
           }).then((res) => {
             if (res.code == 200) {
               this.$notification.success({
-                message: res.msg
+                message: res.msg,
               });
 
               this.loadData();
               return false;
             }
           });
-        }
+        },
       });
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
