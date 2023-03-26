@@ -1,0 +1,24 @@
+baseUrl: https://gitee.com
+authType: 2
+authKey: access_token
+authValue: '${token}'
+currentUserMethod: GET
+currentUserUrl: /api/v5/user
+userNamePath: login
+repoListMethod: GET
+repoListUrl: /api/v5/user/repos
+repoListParam:
+  type: all
+  sort: pushed
+  direction: desc
+  q: '${query}'
+  page: '${page}'
+  per_page: '${pageSize}'
+repoListPath: ''
+repoConvertPath:
+  name: name
+  full_name: full_name
+  description: description
+  url: html_url
+  private: private
+repoTotalHeader: total_count

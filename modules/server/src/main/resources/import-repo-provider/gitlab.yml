@@ -1,0 +1,23 @@
+baseUrl: https://gitlab.com
+authType: 1
+authKey: Authorization
+authValue: 'Bearer ${token}'
+currentUserMethod: GET
+currentUserUrl: /api/v4/user
+userNamePath: username
+repoListMethod: GET
+repoListUrl: /api/v4/projects
+repoListParam:
+  membership: true
+  order_by: updated_at
+  search: '${query}'
+  page: '${page}'
+  per_page: '${pageSize}'
+repoListPath: ''
+repoConvertPath:
+  name: name
+  full_name: path_with_namespace
+  description: description
+  url: http_url_to_repo
+  private: $ visibility != public
+repoTotalHeader: X-Total

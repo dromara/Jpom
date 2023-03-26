@@ -1,0 +1,20 @@
+baseUrl: https://try.gitea.io
+authType: 1
+authKey: Authorization
+authValue: 'Bearer ${token}'
+currentUserMethod: GET
+currentUserUrl: /api/v1/user
+userNamePath: login
+repoListMethod: GET
+repoListUrl: /api/v1/user/repos
+repoListParam:
+  page: '${page}'
+  limit: '${pageSize}'
+repoListPath: ''
+repoConvertPath:
+  name: name
+  full_name: full_name
+  description: description
+  url: clone_url
+  private: private
+repoTotalHeader: X-Total-Count
