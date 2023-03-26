@@ -33,7 +33,10 @@ router.beforeEach((to, from, next) => {
       // });
       console.warn(`from: ${from.path} ==> to: ${to.path}`);
     }
-    next("/login");
+    next({
+      redirect: "/login",
+      query: from.query,
+    });
     return;
   }
   // 如果存在 token (已经登录)

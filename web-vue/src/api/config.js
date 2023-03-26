@@ -178,7 +178,15 @@ function toLogin(res, response, timeout = 100) {
   });
   console.error(response.config.url, res);
   store.dispatch("logOut").then(() => {
-    router.push("/login");
+    const index = location.hash.indexOf("?");
+    let params = {};
+    if (index > -1) {
+      params = Qs.parse(location.hash.substring(index + 1));
+    }
+    router.push({
+      path: "/login",
+      query: params,
+    });
     setTimeout(() => {
       location.reload();
     }, timeout);
