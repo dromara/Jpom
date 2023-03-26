@@ -49,6 +49,12 @@
             </a-row>
           </a-form-model-item>
           <a-button type="primary" html-type="submit" class="btn-login"> 登录 </a-button>
+          <a-form-model-item v-if="this.enabledOauth2Login" :wrapper-col="{ span: 24 }" >
+            第三方登录
+          </a-form-model-item>
+          <a-form-model-item v-if="this.enabledOauth2Login" :wrapper-col="{ span: 24 }" >
+            <a href="/oauth2/login"><img src="/oauth2_image" width="32px;"></a>
+          </a-form-model-item>
         </a-form-model>
       </template>
       <template v-if="this.action === 'mfa'">
@@ -64,7 +70,7 @@
   </div>
 </template>
 <script>
-import { login, demoInfo, mfaVerify } from "@/api/user/user";
+import { login, demoInfo, mfaVerify ,oauth2State,oauth2Login} from "@/api/user/user";
 import { checkSystem } from "@/api/install";
 import sha1 from "js-sha1";
 
@@ -92,12 +98,25 @@ export default {
         ],
       },
       disabledCaptcha: false,
+      enabledOauth2Login:false,
     };
   },
   created() {
     this.checkSystem();
     //this.getBg();
+    if(this.$route.query.code){
+      oauth2Login({code:this.$route.query.code,state:this.$route.query.state}).then((res) => {
+          // 登录不成功，更新验证码
+          if (res.code !== 200) {
+            //this.changeCode();
+          } else {
+            this.startDispatchLogin(res);
+          }
+        });
+    }
+
     this.changeCode();
+    this.oauth2LoginCheck();
     this.getDemoInfo();
   },
   computed: {
@@ -154,6 +173,13 @@ export default {
     // change Code
     changeCode() {
       this.randCode = "randCode.png?r=" + new Date().getTime();
+    },
+     //Check Oauth2 Login enabled
+    oauth2LoginCheck() {
+      oauth2State(null).then((res) => {
+        this.enabledOauth2Login = res.enabled;
+        console.log("enabled Oauth2 Login " + this.enabledOauth2Login);
+      });     
     },
     // login
     handleLogin(e) {

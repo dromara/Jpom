@@ -205,6 +205,13 @@ public class IndexControl extends BaseServerController {
 //        InputStream inputStream = ResourceUtil.getStream("classpath:/logo/favicon.ico");
 //        ServletUtil.write(response, inputStream, MediaType.IMAGE_PNG_VALUE);
     }
+    
+    @RequestMapping(value = "oauth2_image", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
+    @NotLogin
+    public void oauth2Image(HttpServletResponse response) throws IOException {
+        String logoFile = webConfig.getLogoFile();
+        this.loadImage(response, logoFile, "classpath:/logo/oauth2.png", "jpg", "png", "gif");
+    }
 
     private void loadImage(HttpServletResponse response, String imgFile, String defaultResource, String... suffix) throws IOException {
         if (StrUtil.isNotEmpty(imgFile)) {
