@@ -24,7 +24,6 @@ package io.jpom.controller.build;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
@@ -32,15 +31,13 @@ import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.http.HttpResponse;
-import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerConst;
 import io.jpom.common.validator.ValidatorItem;
-import io.jpom.controller.build.repository.*;
+import io.jpom.controller.build.repository.ImportRepoUtil;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.permission.ClassFeature;
@@ -50,7 +47,6 @@ import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.RepositoryService;
-import io.jpom.system.JpomRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -197,6 +193,13 @@ public class RepositoryController extends BaseServerController {
         return new JsonMessage<>(200, "操作成功");
     }
 
+    @GetMapping(value = "/build/repository/provider_info")
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<Map<String, Map<String, Object>>> providerInfo() {
+        Map<String, Map<String, Object>> providerList = ImportRepoUtil.getProviderList();
+        return JsonMessage.success(HttpStatus.OK.name(), providerList);
+    }
+
     @GetMapping(value = "/build/repository/authorize_repos")
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<PageResultDto<JSONObject>> authorizeRepos(HttpServletRequest request,
@@ -208,256 +211,23 @@ public class RepositoryController extends BaseServerController {
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
         Page page = repositoryService.parsePage(paramMap);
         Assert.hasText(token, "请填写个人令牌");
-        //String gitlabAddress = StrUtil.blankToDefault(paramMap.get("gitlabAddress"), "https://gitlab.com");
-        //String giteaAddress = paramMap.get("giteaAddress");
         // 搜索条件
         // 远程仓库
         PageResultDto<JSONObject> pageResultDto;
-        switch (type) {
-            case "gitee":
-                pageResultDto = this.giteeRepos(token, page, condition, request);
-                break;
-            case "github":
-                // GitHub 不支持条件搜索
-                pageResultDto = this.githubRepos(token, page, request);
-                break;
-            case "gitlab":
-                pageResultDto = this.gitlabRepos(token, page, condition, address, request);
-                break;
-            case "gitea":
-                pageResultDto = this.giteaRepos(token, page, condition, address, request);
-                break;
-            case "gogs":
-                pageResultDto = this.gogsRepos(token, page, condition, address, request);
-                break;
-            default:
-                throw new IllegalArgumentException("不支持的类型");
-        }
+        ImportRepoUtil.getProviderConfig(type);
+
+        String userName = ImportRepoUtil.getCurrentUserName(type, token, address);
+        cn.hutool.json.JSONObject repoList = ImportRepoUtil.getRepoList(type, condition, page, token, userName, address);
+        pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), repoList.getLong("total").intValue());
+        List<JSONObject> objects = repoList.getJSONArray("data").stream().map(o -> {
+            cn.hutool.json.JSONObject obj = (cn.hutool.json.JSONObject) o;
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.putAll(obj);
+            jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(obj.getStr("url"), request));
+            return jsonObject;
+        }).collect(Collectors.toList());
+        pageResultDto.setResult(objects);
         return JsonMessage.success(HttpStatus.OK.name(), pageResultDto);
-    }
-
-    /**
-     * gitlab 仓库
-     * <p>
-     * <a href="https://docs.gitlab.com/ee/api/projects.html#list-all-projects">https://docs.gitlab.com/ee/api/projects.html#list-all-projects</a>
-     *
-     * @param token         个人令牌
-     * @param page          分页
-     * @param gitlabAddress gitLab 地址
-     * @return page
-     */
-    private PageResultDto<JSONObject> gitlabRepos(String token, Page page, String condition, String gitlabAddress, HttpServletRequest request) {
-        gitlabAddress = StrUtil.blankToDefault(gitlabAddress, "https://gitlab.com");
-        // 删除最后的 /
-        if (gitlabAddress.endsWith("/")) {
-            gitlabAddress = gitlabAddress.substring(0, gitlabAddress.length() - 1);
-        }
-
-        // 内部自建 GitLab，一般都没有配置 https 协议，如果用户没有指定协议，默认走 http，gitlab 走 https
-        // https 访问不了的情况下自动替换为 http
-        if (!StrUtil.startWithAnyIgnoreCase(gitlabAddress, "http://", "https://")) {
-            gitlabAddress = "http://" + gitlabAddress;
-        }
-
-        HttpResponse userResponse = null;
-        try {
-            userResponse = GitLabUtil.getGitLabUserInfo(gitlabAddress, token);
-        } catch (IORuntimeException ioRuntimeException) {
-            // 连接超时，切换至 http 协议进行重试
-            if (StrUtil.startWithIgnoreCase(gitlabAddress, "https")) {
-                gitlabAddress = "http" + gitlabAddress.substring(5);
-                userResponse = GitLabUtil.getGitLabUserInfo(gitlabAddress, token);
-            }
-            Assert.state(userResponse != null, "无法连接至 GitLab：" + ioRuntimeException.getMessage());
-        }
-
-        Assert.state(userResponse.isOk(), "令牌不正确：" + userResponse.body());
-        JSONObject userBody = JSONObject.parseObject(userResponse.body());
-        String username = userBody.getString("username");
-
-        Map<String, Object> gitLabRepos = GitLabUtil.getGitLabRepos(gitlabAddress, token, page, condition);
-
-        JSONArray jsonArray = JSONArray.parseArray((String) gitLabRepos.get("body"));
-        List<JSONObject> objects = jsonArray.stream().map(o -> {
-            JSONObject repo = (JSONObject) o;
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name", repo.getString("name"));
-            String htmlUrl = repo.getString("http_url_to_repo");
-            jsonObject.put("url", htmlUrl);
-            jsonObject.put("full_name", repo.getString("path_with_namespace"));
-            // visibility 有三种：public, internal, or private.（非 public，都是 private）
-            jsonObject.put("private", !StrUtil.equalsIgnoreCase("public", repo.getString("visibility")));
-            jsonObject.put("description", repo.getString("description"));
-            jsonObject.put("username", username);
-            jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(htmlUrl, request));
-            return jsonObject;
-        }).collect(Collectors.toList());
-
-        PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), (int) gitLabRepos.get("total"));
-        pageResultDto.setResult(objects);
-        return pageResultDto;
-    }
-
-    /**
-     * github 仓库
-     *
-     * @param token 个人令牌
-     * @param page  分页
-     * @return page
-     */
-    private PageResultDto<JSONObject> githubRepos(String token, Page page, HttpServletRequest request) {
-        GitHubUtil.GitHubUserInfo gitHubUserInfo = GitHubUtil.getGitHubUserInfo(token);
-        JSONArray gitHubUserReposArray = GitHubUtil.getGitHubUserRepos(token, page);
-
-        List<JSONObject> objects = gitHubUserReposArray.stream().map(o -> {
-            JSONObject repo = (JSONObject) o;
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name", repo.getString("name"));
-            String cloneUrl = repo.getString("clone_url");
-            jsonObject.put("url", cloneUrl);
-            jsonObject.put("full_name", repo.getString("full_name"));
-            jsonObject.put("description", repo.getString("description"));
-            jsonObject.put("private", repo.getBooleanValue("private"));
-            //
-            jsonObject.put("username", gitHubUserInfo.getLogin());
-            jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(cloneUrl, request));
-            return jsonObject;
-        }).collect(Collectors.toList());
-        //
-        PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), gitHubUserInfo.public_repos);
-        pageResultDto.setResult(objects);
-        return pageResultDto;
-    }
-
-    /**
-     * gitee 仓库
-     *
-     * @param token 个人令牌
-     * @param page  分页
-     * @return page
-     */
-    private PageResultDto<JSONObject> giteeRepos(String token, Page page, String condition, HttpServletRequest request) {
-        String giteeUsername = GiteeUtil.getGiteeUsername(token);
-
-        Map<String, Object> giteeReposMap = GiteeUtil.getGiteeRepos(token, page, condition);
-        JSONArray jsonArray = (JSONArray) giteeReposMap.get("jsonArray");
-        int totalCount = (int) giteeReposMap.get("totalCount");
-
-        List<JSONObject> objects = jsonArray.stream().map(o -> {
-            JSONObject repo = (JSONObject) o;
-            JSONObject jsonObject = new JSONObject();
-            // 项目名称，如：Jpom
-            jsonObject.put("name", repo.getString("name"));
-
-            // 项目地址，如：https://gitee.com/dromara/Jpom.git
-            String htmlUrl = repo.getString("html_url");
-            jsonObject.put("url", htmlUrl);
-
-            // 所属者/项目名，如：dromara/Jpom
-            jsonObject.put("full_name", repo.getString("full_name"));
-
-            // 是否为私有仓库，是私有仓库为 true，非私有仓库为 false
-            jsonObject.put("private", repo.getBooleanValue("private"));
-
-            // 项目描述，如：简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件
-            jsonObject.put("description", repo.getString("description"));
-
-            jsonObject.put("username", giteeUsername);
-            jsonObject.put("exists", this.checkRepositoryUrl(htmlUrl, request));
-            return jsonObject;
-        }).collect(Collectors.toList());
-
-        PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), totalCount);
-        pageResultDto.setResult(objects);
-        return pageResultDto;
-    }
-
-    /**
-     * gogo仓库
-     *
-     * @param token 个人令牌
-     * @param page  分页
-     * @return page
-     */
-    private PageResultDto<JSONObject> gogsRepos(String token, Page page, String condition, String giteaAddress, HttpServletRequest request) {
-        Assert.hasText(giteaAddress, "请填写 gogs 地址");
-        String gogsUsername = GogsUtil.getUsername(giteaAddress, token);
-
-        Map<String, Object> giteaReposMap = GiteaUtil.getRepos(giteaAddress, token, page, condition);
-        JSONArray jsonArray = (JSONArray) giteaReposMap.get("jsonArray");
-        int totalCount = (int) giteaReposMap.get("totalCount");
-
-        List<JSONObject> objects = jsonArray.stream().map(o -> {
-            JSONObject repo = (JSONObject) o;
-            JSONObject jsonObject = new JSONObject();
-            // 项目名称，如：Jpom
-            jsonObject.put("name", repo.getString("name"));
-
-            // 项目地址，如：https://10.0.0.1:3000/dromara/Jpom.git
-            String htmlUrl = repo.getString("html_url");
-            jsonObject.put("url", htmlUrl);
-
-            // 所属者/项目名，如：dromara/Jpom
-            jsonObject.put("full_name", repo.getString("full_name"));
-
-            // 是否为私有仓库，是私有仓库为 true，非私有仓库为 false
-            jsonObject.put("private", repo.getBooleanValue("private"));
-
-            // 项目描述，如：简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件
-            jsonObject.put("description", repo.getString("description"));
-
-            jsonObject.put("username", gogsUsername);
-            jsonObject.put("exists", this.checkRepositoryUrl(htmlUrl, request));
-            return jsonObject;
-        }).collect(Collectors.toList());
-
-        PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), totalCount);
-        pageResultDto.setResult(objects);
-        return pageResultDto;
-    }
-
-    /**
-     * gitea仓库
-     *
-     * @param token 个人令牌
-     * @param page  分页
-     * @return page
-     */
-    private PageResultDto<JSONObject> giteaRepos(String token, Page page, String condition, String giteaAddress, HttpServletRequest request) {
-        Assert.hasText(giteaAddress, "请填写 gitea 地址");
-        String giteaUsername = GiteaUtil.getUsername(giteaAddress, token);
-
-        Map<String, Object> giteaReposMap = GiteaUtil.getRepos(giteaAddress, token, page, condition);
-        JSONArray jsonArray = (JSONArray) giteaReposMap.get("jsonArray");
-        int totalCount = (int) giteaReposMap.get("totalCount");
-
-        List<JSONObject> objects = jsonArray.stream().map(o -> {
-            JSONObject repo = (JSONObject) o;
-            JSONObject jsonObject = new JSONObject();
-            // 项目名称，如：Jpom
-            jsonObject.put("name", repo.getString("name"));
-
-            // 项目地址，如：https://10.0.0.1:3000/dromara/Jpom.git
-            String htmlUrl = repo.getString("html_url");
-            jsonObject.put("url", htmlUrl);
-
-            // 所属者/项目名，如：dromara/Jpom
-            jsonObject.put("full_name", repo.getString("full_name"));
-
-            // 是否为私有仓库，是私有仓库为 true，非私有仓库为 false
-            jsonObject.put("private", repo.getBooleanValue("private"));
-
-            // 项目描述，如：简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件
-            jsonObject.put("description", repo.getString("description"));
-
-            jsonObject.put("username", giteaUsername);
-            jsonObject.put("exists", this.checkRepositoryUrl(htmlUrl, request));
-            return jsonObject;
-        }).collect(Collectors.toList());
-
-        PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), totalCount);
-        pageResultDto.setResult(objects);
-        return pageResultDto;
     }
 
     /**

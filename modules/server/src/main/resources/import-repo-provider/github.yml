@@ -1,0 +1,27 @@
+baseUrl: https://api.github.com
+authType: 1
+authKey: Authorization
+authValue: 'Bearer ${token}'
+extraParams:
+  Accept: application/vnd.github.v3+json
+  X-GitHub-Api-Version: 2022-11-28
+extraParamsType: 1
+currentUserMethod: GET
+currentUserUrl: /user
+userNamePath: login
+repoListMethod: GET
+repoListUrl: /user/repos
+repoListParam:
+  type: all
+  sort: pushed
+  direction: desc
+  page: '${page}'
+  per_page: '${pageSize}'
+repoListPath: ''
+repoConvertPath:
+  name: name
+  full_name: full_name
+  description: description
+  url: clone_url
+  private: private
+repoTotalHeader: Link
