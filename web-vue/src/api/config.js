@@ -45,7 +45,7 @@ request.interceptors.request.use(
     if (config.headers["Content-Type"].indexOf("application/x-www-form-urlencoded") !== -1) {
       config.data = Qs.stringify(config.data);
     }
-    config.headers[TOKEN_HEADER_KEY] = store.getters.getToken;
+    config.headers[TOKEN_HEADER_KEY] = store.getters.getToken || "";
     config.headers[CACHE_WORKSPACE_ID] = getWid();
     return config;
   },

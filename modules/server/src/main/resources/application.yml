@@ -98,15 +98,6 @@ jpom:
     pool-wait-queue: 10
     # 日志显示 压缩折叠显示进度比例 范围 1-100
     log-reduce-progress-ratio: 5
-  oauth2:
-    enabled: false
-    clientId: 837136275440926720
-    clientSecret: 8453MjUwMzIwMjMyMjQxNDY5MzYSD5
-    serverUrl: http://sso.maxkey.top
-    authorizationUri: ${jpom.oauth2.serverUrl}/sign/authz/oauth/v20/authorize
-    accessTokenUri: ${jpom.oauth2.serverUrl}/sign/authz/oauth/v20/token
-    userInfoUri: ${jpom.oauth2.serverUrl}/sign/api/oauth/v20/me
-    redirectUri: http://localhost:3000/
 server:
   #运行端口号
   port: 2122
@@ -152,4 +143,3 @@ spring:
       settings:
         web-allow-others: false
 
-    

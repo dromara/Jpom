@@ -82,17 +82,6 @@ public class UserLoginLogServer extends BaseDbService<UserLoginLogModel> {
      * @param useMfa    是否使用 mfa
      * @param request   请求信息
      */
-    public void success(UserModel userModel, boolean useMfa, HttpServletRequest request) {
-        this.success(userModel, 0, useMfa, request);
-    }
-
-    /**
-     * 记录登录日志
-     *
-     * @param userModel 用户
-     * @param useMfa    是否使用 mfa
-     * @param request   请求信息
-     */
     public void success(UserModel userModel, int code, boolean useMfa, HttpServletRequest request) {
         this.log(userModel, true, useMfa, code, request);
     }

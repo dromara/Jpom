@@ -154,24 +154,6 @@ public class IndexControl extends BaseServerController {
     public void logoImage(HttpServletResponse response) throws IOException {
         String logoFile = webConfig.getLogoFile();
         this.loadImage(response, logoFile, "classpath:/logo/jpom.png", "jpg", "png", "gif");
-//        if (StrUtil.isNotEmpty(logoFile)) {
-//            if (Validator.isMatchRegex(RegexPool.URL_HTTP, logoFile)) {
-//                // 重定向
-//                response.sendRedirect(logoFile);
-//                return;
-//            }
-//            File file = FileUtil.file(logoFile);
-//            if (FileUtil.isFile(file)) {
-//                String type = FileTypeUtil.getType(file);
-//                if (StrUtil.equalsAnyIgnoreCase(type, "jpg", "png", "gif")) {
-//                    ServletUtil.write(response, file);
-//                    return;
-//                }
-//            }
-//        }
-//        // 默认logo
-//        InputStream inputStream = ResourceUtil.getStream("classpath:/logo/jpom.png");
-//        ServletUtil.write(response, inputStream, MediaType.IMAGE_PNG_VALUE);
     }
 
     /**
@@ -186,31 +168,6 @@ public class IndexControl extends BaseServerController {
     public void favicon(HttpServletResponse response) throws IOException {
         String iconFile = webConfig.getIconFile();
         this.loadImage(response, iconFile, "classpath:/logo/favicon.ico", "ico", "png");
-//        if (StrUtil.isNotEmpty(iconFile)) {
-//            if (Validator.isMatchRegex(RegexPool.URL_HTTP, iconFile)) {
-//                // 重定向
-//                response.sendRedirect(iconFile);
-//                return;
-//            }
-//            File file = FileUtil.file(iconFile);
-//            if (FileUtil.isFile(file)) {
-//                String type = FileTypeUtil.getType(file);
-//                if (StrUtil.equalsAnyIgnoreCase(type, "ico", "png")) {
-//                    ServletUtil.write(response, file);
-//                    return;
-//                }
-//            }
-//        }
-//        // favicon ico
-//        InputStream inputStream = ResourceUtil.getStream("classpath:/logo/favicon.ico");
-//        ServletUtil.write(response, inputStream, MediaType.IMAGE_PNG_VALUE);
-    }
-    
-    @RequestMapping(value = "oauth2_image", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
-    @NotLogin
-    public void oauth2Image(HttpServletResponse response) throws IOException {
-        String logoFile = webConfig.getLogoFile();
-        this.loadImage(response, logoFile, "classpath:/logo/oauth2.png", "jpg", "png", "gif");
     }
 
     private void loadImage(HttpServletResponse response, String imgFile, String defaultResource, String... suffix) throws IOException {

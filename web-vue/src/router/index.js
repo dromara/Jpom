@@ -199,6 +199,11 @@ const management = [
     component: () => import("../pages/system/mail"),
   },
   {
+    path: "/system/oauth-config",
+    name: "oauth-config",
+    component: () => import("../pages/system/oauth-config"),
+  },
+  {
     path: "/system/cache",
     name: "system-cache",
     component: () => import("../pages/system/cache"),
@@ -244,9 +249,15 @@ const router = new Router({
       name: "login",
       component: () => import("../pages/login"),
     },
+    // 用于过渡页面（避免跳转到管理页面重复请求接口，oauth2）
     {
       path: "/",
       name: "home",
+      component: () => import("../pages/layout/loading"),
+    },
+    {
+      path: "/management",
+      name: "management",
       component: () => import("../pages/layout"),
       redirect: "/node/list",
       children: children.map((item) => {

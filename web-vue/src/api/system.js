@@ -149,6 +149,21 @@ export function getMailConfigData() {
   });
 }
 
+export function oauthConfigOauth2() {
+  return axios({
+    url: "/system/oauth-config/oauth2",
+    method: "get",
+  });
+}
+
+export function oauthConfigOauth2Save(params) {
+  return axios({
+    url: "/system/oauth-config/oauth2-save",
+    method: "post",
+    data: params,
+  });
+}
+
 /**
  * 编辑配置
  * @param {

@@ -15,4 +15,5 @@ export const operateCodeMap = {
   3: "自动续期",
   4: "账号被禁用",
   5: "登录成功,需要验证 MFA",
+  6: "oauth2",
 };

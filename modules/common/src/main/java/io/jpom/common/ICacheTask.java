@@ -33,5 +33,5 @@ public interface ICacheTask {
     /**
      * 刷新缓存
      */
-    void refresh();
+    void refreshCache();
 }

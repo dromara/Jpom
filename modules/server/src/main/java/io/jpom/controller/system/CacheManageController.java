@@ -170,7 +170,7 @@ public class CacheManageController extends BaseServerController implements ICach
     }
 
     @Override
-    public void refresh() {
+    public void refreshCache() {
         File file = jpomApplication.getTempPath();
         this.tempFileSize = FileUtil.size(file);
         this.dataSize = jpomApplication.dataSize();

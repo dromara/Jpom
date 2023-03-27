@@ -388,7 +388,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
 
         private void refresh() {
             Map<String, ICacheTask> taskMap = SpringUtil.getBeansOfType(ICacheTask.class);
-            Optional.ofNullable(taskMap).ifPresent(map -> map.values().forEach(ICacheTask::refresh));
+            Optional.ofNullable(taskMap).ifPresent(map -> map.values().forEach(ICacheTask::refreshCache));
         }
     }
 }

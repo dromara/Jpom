@@ -81,7 +81,6 @@ public class SystemMailConfigController extends BaseServerController {
 
     @PostMapping(value = "mailConfig_save.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    @SystemPermission(superUser = true)
     public JsonMessage<Object> listData(MailAccountModel mailAccountModel) throws Exception {
         Assert.notNull(mailAccountModel, "请填写信息,并检查是否填写合法");
         Assert.hasText(mailAccountModel.getHost(), "请填写host");

@@ -156,7 +156,7 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
     }
 
     @Override
-    public void refresh() {
+    public void refreshCache() {
         try {
             checkErrorWorkspace();
         } catch (Exception e) {

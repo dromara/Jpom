@@ -48,13 +48,16 @@
               </a-col>
             </a-row>
           </a-form-model-item>
-          <a-button type="primary" html-type="submit" class="btn-login"> 登录 </a-button>
-          <a-form-model-item v-if="this.enabledOauth2Login" :wrapper-col="{ span: 24 }" >
-            第三方登录
+          <a-form-model-item :wrapper-col="{ span: 24 }">
+            <a-button type="primary" html-type="submit" class="btn-login"> 登录 </a-button>
           </a-form-model-item>
-          <a-form-model-item v-if="this.enabledOauth2Login" :wrapper-col="{ span: 24 }" >
-            <a href="/oauth2/login"><img src="/oauth2_image" width="32px;"></a>
-          </a-form-model-item>
+          <template v-if="this.enabledOauth2Login">
+            <a-divider>第三方登录</a-divider>
+            <!-- <a-form-model-item :wrapper-col="{ span: 24 }"> </a-form-model-item> -->
+            <a-form-model-item :wrapper-col="{ span: 24 }">
+              <a @click="toOauth2Url"><img :src="oauth2Img" width="32px;" /></a>
+            </a-form-model-item>
+          </template>
         </a-form-model>
       </template>
       <template v-if="this.action === 'mfa'">
@@ -70,7 +73,7 @@
   </div>
 </template>
 <script>
-import { login, demoInfo, mfaVerify ,oauth2State,oauth2Login} from "@/api/user/user";
+import { login, loginConfig, mfaVerify, oauth2Url, oauth2Login } from "@/api/user/user";
 import { checkSystem } from "@/api/install";
 import sha1 from "js-sha1";
 
@@ -98,26 +101,16 @@ export default {
         ],
       },
       disabledCaptcha: false,
-      enabledOauth2Login:false,
+      enabledOauth2Login: false,
+      oauth2Img: require(`@/assets/images/oauth2.png`),
     };
   },
   created() {
     this.checkSystem();
     //this.getBg();
-    if(this.$route.query.code){
-      oauth2Login({code:this.$route.query.code,state:this.$route.query.state}).then((res) => {
-          // 登录不成功，更新验证码
-          if (res.code !== 200) {
-            //this.changeCode();
-          } else {
-            this.startDispatchLogin(res);
-          }
-        });
-    }
 
     this.changeCode();
-    this.oauth2LoginCheck();
-    this.getDemoInfo();
+    this.getLoginConfig();
   },
   computed: {
     ...mapGetters(["getWorkspaceId"]),
@@ -148,6 +141,7 @@ export default {
           this.loginTitle = res.data.loginTitle;
         }
         this.disabledCaptcha = res.data.disabledCaptcha;
+        this.checkOauth2();
       });
     },
     // Controls the background display or hiding
@@ -158,28 +152,43 @@ export default {
     },
     // Get background pic
     // getBg() {},
-    getDemoInfo() {
-      demoInfo().then((res) => {
-        if (res.data && res.data.user) {
+    //
+    getLoginConfig() {
+      loginConfig().then((res) => {
+        if (res.data && res.data.demo) {
+          const demo = res.data.demo;
           const h = this.$createElement;
           this.$notification.info({
             message: "温馨提示",
-            description: h("div", null, [h("p", { domProps: { innerHTML: res.msg } }, null)]),
+            description: h("div", null, [h("p", { domProps: { innerHTML: demo.msg } }, null)]),
           });
-          this.loginForm.loginName = res.data.user;
+          this.loginForm.loginName = demo.user;
         }
+        this.enabledOauth2Login = res.data?.oauth2Custom || false;
       });
     },
     // change Code
     changeCode() {
       this.randCode = "randCode.png?r=" + new Date().getTime();
     },
-     //Check Oauth2 Login enabled
-    oauth2LoginCheck() {
-      oauth2State(null).then((res) => {
-        this.enabledOauth2Login = res.enabled;
-        console.log("enabled Oauth2 Login " + this.enabledOauth2Login);
-      });     
+    checkOauth2() {
+      if (this.$route.query.code) {
+        oauth2Login({ code: this.$route.query.code, state: this.$route.query.state }).then((res) => {
+          // 登录不成功，更新验证码
+          if (res.code !== 200) {
+            //this.changeCode();
+          } else {
+            this.startDispatchLogin(res);
+          }
+        });
+      }
+    },
+    toOauth2Url() {
+      oauth2Url().then((res) => {
+        if (res.code === 200 && res.data) {
+          location.href = res.data.toUrl;
+        }
+      });
     },
     // login
     handleLogin(e) {

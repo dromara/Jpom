@@ -137,7 +137,7 @@ public class AgentCacheManageController extends BaseAgentController implements I
     }
 
     @Override
-    public void refresh() {
+    public void refreshCache() {
         File file = configBean.getTempPath();
         this.tempFileSize = FileUtil.size(file);
         this.dataSize = configBean.dataSize();
