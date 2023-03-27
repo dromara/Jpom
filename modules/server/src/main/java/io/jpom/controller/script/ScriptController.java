@@ -112,7 +112,9 @@ public class ScriptController extends BaseServerController {
                                     @ValidatorItem String name,
                                     String autoExecCron,
                                     String defArgs,
-                                    String description, String nodeIds) {
+                                    String description,
+                                    String nodeIds,
+                                    HttpServletRequest request) {
         ScriptModel scriptModel = new ScriptModel();
         scriptModel.setId(id);
         scriptModel.setContext(context);
@@ -120,7 +122,10 @@ public class ScriptController extends BaseServerController {
         scriptModel.setNodeIds(nodeIds);
         scriptModel.setDescription(description);
         scriptModel.setDefArgs(CommandParam.checkStr(defArgs));
-
+        scriptModel.setWorkspaceId(scriptServer.covertGlobalWorkspace(request));
+        if (scriptModel.global()) {
+            Assert.state(StrUtil.isEmpty(nodeIds), "全局脚本不能配置分发节点");
+        }
         Assert.hasText(scriptModel.getContext(), "内容为空");
         //
         scriptModel.setAutoExecCron(this.checkCron(autoExecCron));
@@ -129,13 +134,14 @@ public class ScriptController extends BaseServerController {
         if (StrUtil.isEmpty(id)) {
             scriptServer.insert(scriptModel);
         } else {
-            HttpServletRequest request = getRequest();
-            ScriptModel byKey = scriptServer.getByKey(id, request);
+            ScriptModel byKey = scriptServer.getByKeyAndGlobal(id, request);
             Assert.notNull(byKey, "没有对应的数据");
             oldNodeIds = byKey.getNodeIds();
+            if (scriptModel.global()) {
+                Assert.state(StrUtil.isEmpty(oldNodeIds), "需要将脚本分发节点取消后才能修改为全局脚本");
+            }
             scriptServer.updateById(scriptModel, request);
         }
-        scriptModel.setWorkspaceId(scriptServer.getCheckUserWorkspace(getRequest()));
         this.syncNodeScript(scriptModel, oldNodeIds);
         return JsonMessage.success("修改成功");
     }
@@ -177,9 +183,8 @@ public class ScriptController extends BaseServerController {
 
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> del(String id) {
-        HttpServletRequest request = getRequest();
-        ScriptModel server = scriptServer.getByKey(id, request);
+    public JsonMessage<String> del(String id, HttpServletRequest request) {
+        ScriptModel server = scriptServer.getByKeyAndGlobal(id, request);
         if (server != null) {
             File file = server.scriptPath();
             boolean del = FileUtil.del(file);
@@ -203,11 +208,12 @@ public class ScriptController extends BaseServerController {
      */
     @RequestMapping(value = "unbind.json", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> unbind(@ValidatorItem String id) {
+    @SystemPermission
+    public JsonMessage<String> unbind(@ValidatorItem String id, HttpServletRequest request) {
         ScriptModel update = new ScriptModel();
         update.setId(id);
         update.setNodeIds(StrUtil.EMPTY);
-        scriptServer.updateById(update, getRequest());
+        scriptServer.updateById(update, request);
         return JsonMessage.success("解绑成功");
     }
 
@@ -237,8 +243,8 @@ public class ScriptController extends BaseServerController {
      */
     @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
-        ScriptModel item = scriptServer.getByKey(id, getRequest());
+    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
+        ScriptModel item = scriptServer.getByKey(id, request);
         UserModel user = getUser();
         ScriptModel updateInfo;
         if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {

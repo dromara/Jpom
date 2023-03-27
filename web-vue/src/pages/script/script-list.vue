@@ -42,7 +42,10 @@
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-
+      <template slot="global" slot-scope="text">
+        <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
+        <a-tag v-else>工作空间</a-tag>
+      </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
@@ -119,6 +122,12 @@
         </a-form-model-item>
         <a-form-model-item label="描述" prop="description">
           <a-input v-model="temp.description" :maxLength="200" type="textarea" :rows="3" style="resize: none" placeholder="详细描述" />
+        </a-form-model-item>
+        <a-form-model-item label="共享" prop="global">
+          <a-radio-group v-model="temp.global">
+            <a-radio :value="true"> 全局</a-radio>
+            <a-radio :value="false"> 当前工作空间</a-radio>
+          </a-radio-group>
         </a-form-model-item>
         <a-form-model-item>
           <template slot="label">
@@ -257,6 +266,7 @@ export default {
       columns: [
         { title: "id", dataIndex: "id", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
         { title: "名称", dataIndex: "name", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
+        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
         { title: "描述", dataIndex: "description", ellipsis: true, width: 300, scopedSlots: { customRender: "tooltip" } },
         { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
         {
@@ -265,9 +275,7 @@ export default {
           sorter: true,
           width: "170px",
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
         },
         {
           title: "创建时间",
@@ -275,17 +283,16 @@ export default {
           sorter: true,
           width: "170px",
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
         },
-        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
-        { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, width: 100, scopedSlots: { customRender: "lastRunUser" } },
+        { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
+        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
+        { title: "最后执行人", dataIndex: "lastRunUser", ellipsis: true, width: "120px", scopedSlots: { customRender: "tooltip" } },
         { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "180px" },
       ],
       rules: {
-        name: [{ required: true, message: "Please input Script name", trigger: "blur" }],
-        context: [{ required: true, message: "Please input Script context", trigger: "blur" }],
+        name: [{ required: true, message: "请输入脚本名称", trigger: "blur" }],
+        context: [{ required: true, message: "请输入脚本内容", trigger: "blur" }],
       },
       tableSelections: [],
       syncToWorkspaceVisible: false,
@@ -326,9 +333,7 @@ export default {
         this.loading = false;
       });
     },
-    parseTime(v) {
-      return parseTime(v);
-    },
+    parseTime,
     // 获取所有节点
     getAllNodeList() {
       getNodeListAll().then((res) => {
@@ -347,7 +352,7 @@ export default {
 
       this.commandParams = record.defArgs ? JSON.parse(record.defArgs) : [];
 
-      this.temp = { ...this.temp, chooseNode: record.nodeIds ? record.nodeIds.split(",") : [] };
+      this.temp = { ...this.temp, chooseNode: record.nodeIds ? record.nodeIds.split(",") : [], global: record.workspaceId === "GLOBAL", workspaceId: "" };
       this.editScriptVisible = true;
       this.getAllNodeList();
     },

@@ -88,6 +88,17 @@ public abstract class BaseGlobalOrWorkspaceService<T extends BaseWorkspaceModel>
         return super.updateById(info, entity -> entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL)));
     }
 
+    @Override
+    public int delByKey(String keyValue, HttpServletRequest request) {
+        String workspaceId = this.getCheckUserWorkspace(request);
+        return super.delByKey(keyValue, entity -> entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL)));
+    }
+
+    @Override
+    public T getByKey(String keyValue, UserModel userModel) {
+        return super.getByKey(keyValue, userModel);
+    }
+
     /**
      * 查询数据，并判断管理和创建人
      *

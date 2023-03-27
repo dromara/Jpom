@@ -279,7 +279,7 @@ export default {
     },
     // 编辑
     handleEdit(item) {
-      this.temp = { ...item, global: item.workspaceId === "GLOBAL" };
+      this.temp = { ...item, global: item.workspaceId === "GLOBAL", workspaceId: "" };
       this.editVisible = true;
       this.$refs["editForm"]?.resetFields();
     },

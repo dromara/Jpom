@@ -79,35 +79,36 @@ public class ServerScriptHandler extends BaseProxyHandler {
     @Override
     protected String handleTextMessage(Map<String, Object> attributes, WebSocketSession session, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
         ScriptModel scriptModel = (ScriptModel) attributes.get("dataItem");
-        if (consoleCommandOp != ConsoleCommandOp.heart) {
-            super.logOpt(this.getClass(), attributes, json);
-            switch (consoleCommandOp) {
-                case start: {
+        if (consoleCommandOp == ConsoleCommandOp.heart) {
+            return null;
+        }
+        super.logOpt(this.getClass(), attributes, json);
+        switch (consoleCommandOp) {
+            case start: {
 
-                    String args = json.getString("args");
-                    String executeId = this.createLog(attributes, scriptModel);
-                    json.put(Const.SOCKET_MSG_TAG, Const.SOCKET_MSG_TAG);
-                    json.put("executeId", executeId);
-                    ServerScriptProcessBuilder.addWatcher(scriptModel, executeId, args, session);
-                    JsonMessage<String> jsonMessage = new JsonMessage<>(200, "开始执行");
-                    JSONObject jsonObject = jsonMessage.toJson();
-                    jsonObject.putAll(json);
-                    this.sendMsg(session, jsonObject.toString());
-                    break;
-                }
-                case stop: {
-                    String executeId = json.getString("executeId");
-                    if (StrUtil.isEmpty(executeId)) {
-                        SocketSessionUtil.send(session, "没有执行ID");
-                        session.close();
-                        return null;
-                    }
-                    ServerScriptProcessBuilder.stopRun(executeId);
-                    break;
-                }
-                default:
-                    return null;
+                String args = json.getString("args");
+                String executeId = this.createLog(attributes, scriptModel);
+                json.put(Const.SOCKET_MSG_TAG, Const.SOCKET_MSG_TAG);
+                json.put("executeId", executeId);
+                ServerScriptProcessBuilder.addWatcher(scriptModel, executeId, args, session);
+                JsonMessage<String> jsonMessage = new JsonMessage<>(200, "开始执行");
+                JSONObject jsonObject = jsonMessage.toJson();
+                jsonObject.putAll(json);
+                this.sendMsg(session, jsonObject.toString());
+                break;
             }
+            case stop: {
+                String executeId = json.getString("executeId");
+                if (StrUtil.isEmpty(executeId)) {
+                    SocketSessionUtil.send(session, "没有执行ID");
+                    session.close();
+                    return null;
+                }
+                ServerScriptProcessBuilder.stopRun(executeId);
+                break;
+            }
+            default:
+                return null;
         }
         return null;
     }

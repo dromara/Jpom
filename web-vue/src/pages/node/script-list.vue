@@ -260,8 +260,8 @@ export default {
         { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "240px" },
       ],
       rules: {
-        name: [{ required: true, message: "Please input Script name", trigger: "blur" }],
-        context: [{ required: true, message: "Please input Script context", trigger: "blur" }],
+        name: [{ required: true, message: "请输入脚本名称", trigger: "blur" }],
+        context: [{ required: true, message: "请输入脚本内容", trigger: "blur" }],
       },
       triggerVisible: false,
       commandParams: [],

@@ -23,6 +23,8 @@
 package io.jpom.model;
 
 import cn.hutool.core.util.ClassUtil;
+import cn.hutool.core.util.StrUtil;
+import io.jpom.common.ServerConst;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -50,6 +52,10 @@ public abstract class BaseWorkspaceModel extends BaseUserModifyDbModel {
     @Override
     public String toString() {
         return super.toString();
+    }
+
+    public boolean global() {
+        return StrUtil.equals(this.workspaceId, ServerConst.WORKSPACE_GLOBAL);
     }
 
     /**

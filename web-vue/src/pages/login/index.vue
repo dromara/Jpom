@@ -55,7 +55,7 @@
             <a-divider>第三方登录</a-divider>
             <!-- <a-form-model-item :wrapper-col="{ span: 24 }"> </a-form-model-item> -->
             <a-form-model-item :wrapper-col="{ span: 24 }">
-              <a @click="toOauth2Url"><img :src="oauth2Img" width="32px;" /></a>
+              <a-tooltip @click="toOauth2Url" title="oauth2"><img :src="oauth2Img" width="32px;" /></a-tooltip>
             </a-form-model-item>
           </template>
         </a-form-model>
