@@ -31,6 +31,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.Const;
+import io.jpom.common.ServerConst;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.NodeModel;
@@ -186,6 +187,8 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             HttpServletRequest httpServletRequest = serverHttpRequest.getServletRequest();
             // 判断用户
             String userId = httpServletRequest.getParameter("userId");
+            String workspaceId = httpServletRequest.getParameter(ServerConst.WORKSPACE_ID_REQ_HEADER);
+            attributes.put("workspaceId", workspaceId);
             UserModel userModel = userService.checkUser(userId);
             if (userModel == null) {
                 attributes.put("permissionMsg", "用户不存在");
@@ -204,6 +207,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             // 判断权限
             String permissionMsg = this.checkPermission(userModel, attributes, handlerType);
             attributes.put("permissionMsg", permissionMsg);
+
             //
             String ip = ServletUtil.getClientIP(httpServletRequest);
             attributes.put("ip", ip);
@@ -227,11 +231,28 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
     private String checkPermission(UserModel userInfo, Map<String, Object> attributes, HandlerType handlerType) {
         Object dataItem = attributes.get("dataItem");
         Object nodeInfo = attributes.get("nodeInfo");
-        String workspaceId = BeanUtil.getProperty(dataItem == null ? nodeInfo : dataItem, "workspaceId");
+        Object optData = dataItem == null ? nodeInfo : dataItem;
+        String workspaceId = BeanUtil.getProperty(optData, "workspaceId");
         //?  : BeanUtil.getProperty(dataItem, "workspaceId");
+        String useWorkspaceId;
+        if (StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL)) {
+            // 操作工作空间
+            useWorkspaceId = (String) attributes.get("workspaceId");
+        } else {
+            // 数据工作空间
+            useWorkspaceId = workspaceId;
+            if (optData instanceof BaseWorkspaceModel && StrUtil.equals(workspaceId, (String) attributes.get("workspaceId"))) {
+                return "数据工作空间和操作工作空间不一致";
+            }
+        }
+        if (optData instanceof BaseWorkspaceModel) {
+            if (StrUtil.isEmpty(useWorkspaceId)) {
+                return "没有找到数据对应的工作空间,不能进行操作";
+            }
+            // 将数据的工作空间设置为当前操作的工作空间
+            BeanUtil.setProperty(optData, "workspaceId", useWorkspaceId);
+        }
         //
-        attributes.put("workspaceId", workspaceId);
-
         if (userInfo.isSuperSystemUser()) {
             return StrUtil.EMPTY;
         }
@@ -256,7 +277,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
         Feature feature = handlerClass.getAnnotation(Feature.class);
         MethodFeature method = feature.method();
         ClassFeature cls = feature.cls();
-        UserBindWorkspaceModel.PermissionResult permissionResult = userBindWorkspaceService.checkPermission(userInfo, workspaceId + StrUtil.DASHED + method.name());
+        UserBindWorkspaceModel.PermissionResult permissionResult = userBindWorkspaceService.checkPermission(userInfo, useWorkspaceId + StrUtil.DASHED + method.name());
         if (permissionResult.isSuccess()) {
             return StrUtil.EMPTY;
         }

@@ -78,9 +78,9 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getLongTermToken"]),
+    ...mapGetters(["getLongTermToken", "getWorkspaceId"]),
     socketUrl() {
-      return getWebSocketUrl("/socket/script_run", `userId=${this.getLongTermToken}&id=${this.id}&type=script&nodeId=system`);
+      return getWebSocketUrl("/socket/script_run", `userId=${this.getLongTermToken}&id=${this.id}&type=script&nodeId=system&workspaceId=${this.getWorkspaceId}`);
     },
   },
   mounted() {

@@ -32,7 +32,7 @@ import io.jpom.model.script.ScriptExecuteLogModel;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.ITriggerToken;
-import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.service.h2db.BaseGlobalOrWorkspaceService;
 import io.jpom.socket.ServerScriptProcessBuilder;
 import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +48,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements ICron<ScriptModel>, ITriggerToken {
+public class ScriptServer extends BaseGlobalOrWorkspaceService<ScriptModel> implements ICron<ScriptModel>, ITriggerToken {
 
     @Override
     public List<ScriptModel> queryStartingList() {

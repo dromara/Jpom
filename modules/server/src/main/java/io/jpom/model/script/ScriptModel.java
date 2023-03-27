@@ -115,4 +115,9 @@ public class ScriptModel extends BaseWorkspaceModel {
 //        FileUtil.writeString(getContext(), file, ExtConfigBean.getConsoleLogCharset());
         return scriptFile;
     }
+
+    @Override
+    protected boolean hasCreateUser() {
+        return true;
+    }
 }

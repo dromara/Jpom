@@ -166,7 +166,7 @@
             <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="公钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"></a-textarea>
           </a-form-model-item>
         </template>
-        <a-form-model-item label="文件共享" prop="global">
+        <a-form-model-item label="共享" prop="global">
           <a-radio-group v-model="temp.global">
             <a-radio :value="true"> 全局</a-radio>
             <a-radio :value="false"> 当前工作空间</a-radio>
@@ -444,7 +444,7 @@ export default {
       if (this.temp.protocol === undefined) {
         this.temp.protocol = this.temp.gitUrl.indexOf("http") > -1 ? 0 : 1;
       }
-      this.temp = { ...this.temp, global: record.workspaceId === "GLOBAL" };
+      this.temp = { ...this.temp, global: record.workspaceId === "GLOBAL", workspaceId: "" };
       this.editVisible = true;
     },
     // 提交节点数据

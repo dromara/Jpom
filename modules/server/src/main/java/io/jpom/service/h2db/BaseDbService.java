@@ -74,8 +74,8 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * 默认排序规则
      */
     private static final Order[] DEFAULT_ORDERS = new Order[]{
-            new Order("createTimeMillis", Direction.DESC),
-            new Order("modifyTimeMillis", Direction.DESC)
+        new Order("createTimeMillis", Direction.DESC),
+        new Order("modifyTimeMillis", Direction.DESC)
     };
 
     public void insert(T t) {
@@ -137,9 +137,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         Assert.hasText(id, "不能执行：error");
         // def modify time
         info.setModifyTimeMillis(ObjectUtil.defaultIfNull(info.getModifyTimeMillis(), SystemClock.now()));
-        // remove create time
-        Long createTimeMillis = info.getCreateTimeMillis();
-        info.setCreateTimeMillis(null);
+
         // fill modify user
         if (info instanceof BaseUserModifyDbModel) {
             BaseUserModifyDbModel modifyDbModel = (BaseUserModifyDbModel) info;
@@ -147,22 +145,25 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
             if (userModel != null) {
                 modifyDbModel.setModifyUser(ObjectUtil.defaultIfNull(modifyDbModel.getModifyUser(), userModel.getId()));
             }
-            modifyDbModel.setCreateUser(null);
         }
         //
         Entity entity = this.dataBeanToEntity(info);
         //
-        entity.remove(StrUtil.format("`{}`", ID_STR));
+        this.removeUpdate(entity);
         //
         Entity where = new Entity();
         where.set(ID_STR, id);
         if (whereConsumer != null) {
             whereConsumer.accept(where);
         }
-        int update = super.updateDb(entity, where);
-        // backtrack
-        info.setCreateTimeMillis(createTimeMillis);
-        return update;
+        return super.updateDb(entity, where);
+    }
+
+    private void removeUpdate(Entity entity) {
+        for (String s : new String[]{ID_STR, "createTimeMillis", "createUser"}) {
+            entity.remove(StrUtil.format("`{}`", s));
+            entity.remove(s);
+        }
     }
 
 
@@ -207,7 +208,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     }
 
     public int update(Entity entity, Entity where) {
-        entity.remove("createUser");
+        this.removeUpdate(entity);
         return super.updateDb(entity, where);
     }
 
