@@ -1,5 +1,16 @@
 # 🚀 版本日志
 
+### 2.10.38.3-beta
+
+### 🐣 新增功能
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】优化 删除管理脚本中的 `-XX:+AggressiveOpts` 参数
+   （感谢 [@牛孝祖](https://gitee.com/niuxiaozu) [Gitee issues I6PUNM](https://gitee.com/dromara/Jpom/issues/I6PUNM) ）
+
+------
+
 ### 2.10.38.2-beta (2023-03-27)
 
 ### 🐣 新增功能
