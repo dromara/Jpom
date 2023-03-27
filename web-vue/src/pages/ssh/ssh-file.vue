@@ -16,7 +16,7 @@
         <template slot="title">
           <a-space>
             <a-dropdown :disabled="!this.tempNode.nextPath">
-              <a-button size="small" type="primary" @click="(e) => e.preventDefault()">上传</a-button>
+              <a-button size="small" type="primary" @click="(e) => e.preventDefault()">上传小文件</a-button>
               <a-menu slot="overlay">
                 <a-menu-item @click="handleUpload">
                   <a-space><a-icon type="file-add" />上传文件</a-space>

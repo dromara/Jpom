@@ -247,7 +247,7 @@ public class LoginControl extends BaseServerController {
      */
     @GetMapping(value = "oauth2-url")
     @NotLogin
-    public JsonMessage<JSONObject> oauth2Login(HttpServletRequest request) {
+    public JsonMessage<JSONObject> oauth2LoginUrl(HttpServletRequest request) {
         String authorize = oauth2CustomAuthSource.getAuthOauth2Request().authorize(null);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("toUrl", authorize);
@@ -269,7 +269,15 @@ public class LoginControl extends BaseServerController {
                                               HttpServletRequest request) {
         AuthCallback authCallback = new AuthCallback();
         authCallback.setCode(code);
-        authCallback.setState(state);
+        if (StrUtil.isEmpty(state)) {
+            // 临时兼容没有 state 的情况
+            String uuid = IdUtil.fastSimpleUUID();
+            oauth2CustomAuthSource.getAuthOauth2Request().authorize(uuid);
+            authCallback.setState(uuid);
+        } else {
+            authCallback.setState(state);
+        }
+
         AuthResponse<?> authResponse = oauth2CustomAuthSource.getAuthOauth2Request().login(authCallback);
         if (authResponse.ok()) {
             AuthUser authUser = (AuthUser) authResponse.getData();
