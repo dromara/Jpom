@@ -8,6 +8,7 @@
 
 1. 【server】优化 删除管理脚本中的 `-XX:+AggressiveOpts` 参数
    （感谢 [@牛孝祖](https://gitee.com/niuxiaozu) [Gitee issues I6PUNM](https://gitee.com/dromara/Jpom/issues/I6PUNM) ）
+2. 【server】修复 兼容 oauth2 登录没有 state 场景（感谢@酱总）
 
 ------
 
