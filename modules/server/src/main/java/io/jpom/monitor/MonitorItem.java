@@ -122,17 +122,21 @@ public class MonitorItem implements Task {
                 if (jsonMessage.success()) {
                     JSONObject jsonObject = jsonMessage.getData();
                     int pid = jsonObject.getIntValue("pId");
-                    boolean runStatus = this.checkNotify(monitorModel, nodeModel, id, null, pid > 0);
+                    String statusMsg = jsonObject.getString("statusMsg");
+                    boolean runStatus = this.checkNotify(monitorModel, nodeModel, id, null, pid > 0, statusMsg);
                     // 检查副本
                     List<Boolean> booleanList = null;
                     JSONArray copys = jsonObject.getJSONArray("copys");
                     if (CollUtil.isNotEmpty(copys)) {
-                        booleanList = copys.stream().map(o -> {
-                            JSONObject jsonObject1 = (JSONObject) o;
-                            String copyId = jsonObject1.getString("copyId");
-                            boolean status = jsonObject1.getBooleanValue("status");
-                            return MonitorItem.this.checkNotify(monitorModel, nodeModel, id, copyId, status);
-                        }).filter(aBoolean -> !aBoolean).collect(Collectors.toList());
+                        booleanList = copys.stream()
+                            .map(o -> {
+                                JSONObject jsonObject1 = (JSONObject) o;
+                                String copyId = jsonObject1.getString("copyId");
+                                boolean status = jsonObject1.getBooleanValue("status");
+                                return MonitorItem.this.checkNotify(monitorModel, nodeModel, id, copyId, status, StrUtil.EMPTY);
+                            })
+                            .filter(aBoolean -> !aBoolean)
+                            .collect(Collectors.toList());
                     }
                     return runStatus && CollUtil.isEmpty(booleanList);
                 } else {
@@ -174,7 +178,7 @@ public class MonitorItem implements Task {
      * @param copyId       副本id
      * @param runStatus    当前运行状态
      */
-    private boolean checkNotify(MonitorModel monitorModel, NodeModel nodeModel, String id, String copyId, boolean runStatus) {
+    private boolean checkNotify(MonitorModel monitorModel, NodeModel nodeModel, String id, String copyId, boolean runStatus, String statusMsg) {
         // 获取上次状态
         String projectCopyId = id;
         String copyMsg = StrUtil.EMPTY;
@@ -223,7 +227,7 @@ public class MonitorItem implements Task {
         MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
         monitorNotifyLog.setStatus(runStatus);
         monitorNotifyLog.setTitle(title);
-        monitorNotifyLog.setContent(context);
+        monitorNotifyLog.setContent(StrUtil.format("报警内容：{} 状态消息：{}", context, statusMsg));
         monitorNotifyLog.setCreateTime(System.currentTimeMillis());
         monitorNotifyLog.setNodeId(nodeModel.getId());
         monitorNotifyLog.setProjectId(id);

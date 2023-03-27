@@ -78,6 +78,7 @@ public class ProjectStatusController extends BaseAgentController {
                 CommandOpResult status = AbstractProjectCommander.getInstance().status(nodeProjectInfoModel, null);
                 jsonObject.put("pId", status.getPid());
                 jsonObject.put("pIds", status.getPids());
+                jsonObject.put("statusMsg", status.getStatusMsg());
             } catch (Exception e) {
                 log.error("获取项目pid 失败", e);
             }
@@ -126,6 +127,7 @@ public class ProjectStatusController extends BaseAgentController {
                     //
                     itemObj.put("pid", pid);
                     itemObj.put("pids", commandOpResult.getPids());
+                    itemObj.put("statusMsg", commandOpResult.getStatusMsg());
                     if (StrUtil.isNotEmpty(commandOpResult.getPorts())) {
                         itemObj.put("port", commandOpResult.getPorts());
                     } else {
@@ -176,6 +178,7 @@ public class ProjectStatusController extends BaseAgentController {
                         itemObj.put("port", port);
                         itemObj.put("pid", pid);
                         itemObj.put("pids", status.getPids());
+                        itemObj.put("statusMsg", status.getStatusMsg());
                     } catch (Exception e) {
                         log.error("获取端口错误", e);
                         itemObj.put("error", e.getMessage());
