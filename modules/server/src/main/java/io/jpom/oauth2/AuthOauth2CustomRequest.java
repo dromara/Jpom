@@ -31,42 +31,41 @@ import me.zhyd.oauth.model.AuthToken;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthDefaultRequest;
 
-public class AuthOauth2CustomRequest  extends AuthDefaultRequest {
+/**
+ * @author MaxKey
+ */
+public class AuthOauth2CustomRequest extends AuthDefaultRequest {
 
-	public AuthOauth2CustomRequest(AuthConfig config, AuthSource source) {
-		super(config, source);
-	}
+    public AuthOauth2CustomRequest(AuthConfig config, AuthSource source) {
+        super(config, source);
+    }
 
-	@Override
-	protected AuthToken getAccessToken(AuthCallback authCallback) {
-		String body = doPostAuthorizationCode(authCallback.getCode());
-		JSONObject object = JSONObject.parseObject(body);
-		AuthToken authToken = 
-				AuthToken.builder()
-					.accessToken(object.getString("access_token"))
-					.refreshToken(object.getString("refresh_token"))
-					.idToken(object.getString("id_token"))
-					.tokenType(object.getString("token_type"))
-					.scope(object.getString("scope"))
-					.build();
-		return authToken;
-	}
+    @Override
+    protected AuthToken getAccessToken(AuthCallback authCallback) {
+        String body = doPostAuthorizationCode(authCallback.getCode());
+        JSONObject object = JSONObject.parseObject(body);
+        return AuthToken.builder()
+                .accessToken(object.getString("access_token"))
+                .refreshToken(object.getString("refresh_token"))
+                .idToken(object.getString("id_token"))
+                .tokenType(object.getString("token_type"))
+                .scope(object.getString("scope"))
+                .build();
+    }
 
-	@Override
-	protected AuthUser getUserInfo(AuthToken authToken) {
-		String body = doGetUserInfo(authToken);
-		JSONObject object = JSONObject.parseObject(body);
-		AuthUser authUser = 
-				AuthUser.builder()
-					.uuid(object.getString("id"))
-					.username(object.getString("username"))
-					.nickname(object.getString("name"))
-					.company(object.getString("organization"))
-					.email(object.getString("email"))
-					.token(authToken)
-					.source(source.toString())
-					.build();
-		return authUser;
-	}
+    @Override
+    protected AuthUser getUserInfo(AuthToken authToken) {
+        String body = doGetUserInfo(authToken);
+        JSONObject object = JSONObject.parseObject(body);
+        return AuthUser.builder()
+                .uuid(object.getString("id"))
+                .username(object.getString("username"))
+                .nickname(object.getString("name"))
+                .company(object.getString("organization"))
+                .email(object.getString("email"))
+                .token(authToken)
+                .source(source.toString())
+                .build();
+    }
 
 }

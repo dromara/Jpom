@@ -18,9 +18,9 @@ export function oauth2Login(params) {
   });
 }
 
-export function oauth2State(params) {
+export function oauth2Url(params) {
   return axios({
-    url: "/oauth2/state",
+    url: "/oauth2-url",
     method: "get",
     data: params,
   });
@@ -260,13 +260,13 @@ export function saveWorkspace(data) {
 }
 
 /**
- * demo 账号信息
+ * 登录页面 信息
  *
  * @returns
  */
-export function demoInfo() {
+export function loginConfig() {
   return axios({
-    url: "/user_demo_info",
+    url: "/login-config",
     method: "get",
     params: {},
   });

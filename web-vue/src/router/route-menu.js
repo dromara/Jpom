@@ -52,6 +52,7 @@ const routeMenuMap = {
   fileStorage: "/file-manager/file-storage",
   fileReleaseTask: "/file-manager/release-task",
   certificate: "/certificate/list",
+  authConfig: "/system/oauth-config",
 };
 
 export default routeMenuMap;

@@ -289,7 +289,7 @@ public class SystemConfigController extends BaseServerController {
             }
         }
         systemParametersServer.upsert(ProxySelectorConfig.KEY, proxys, ProxySelectorConfig.KEY);
-        proxySelectorConfig.refresh();
+        proxySelectorConfig.refreshCache();
         return JsonMessage.success("修改成功");
     }
 

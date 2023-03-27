@@ -27,6 +27,11 @@
     "id": "config",
     "childs": [
       {
+        "id": "authConfig",
+        "title": "认证管理",
+        "role": "system"
+      },
+      {
         "id": "monitorConfigEmail",
         "title": "邮箱配置",
         "role": "system"

@@ -20,59 +20,50 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.func.user.model;
+package io.jpom.oauth2;
 
-import io.jpom.model.BaseUserModifyDbModel;
+import cn.hutool.core.lang.RegexPool;
+import cn.hutool.core.lang.Validator;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import top.jpom.h2db.TableName;
+import org.springframework.util.Assert;
 
 /**
  * @author bwcx_jzy
- * @since 2023/3/9
+ * @since 2023/3/26
  */
-@EqualsAndHashCode(callSuper = true)
-@TableName(value = "USER_LOGIN_LOG", name = "用户登录日志")
 @Data
-@NoArgsConstructor
-public class UserLoginLogModel extends BaseUserModifyDbModel {
+public class Oauth2CustomConfig {
+
+    private Boolean enabled;
+    private String clientId;
+    private String clientSecret;
+    private String authorizationUri;
+    private String accessTokenUri;
+    private String userInfoUri;
+    private String redirectUri;
+    /**
+     * 是否自动创建用户
+     */
+    private Boolean autoCreteUser;
 
     /**
-     * 操作ip
+     * 是否开启
+     *
+     * @return true 开启
      */
-    private String ip;
+    public boolean enabled() {
+        return enabled != null && enabled;
+    }
 
     /**
-     * 用户名称
+     * 验证数据
      */
-    private String username;
-
-    /**
-     * 浏览器标识
-     */
-    private String userAgent;
-
-    /**
-     * 是否使用 mfa
-     */
-    private Boolean useMfa;
-
-    /**
-     * 是否成功
-     */
-    private Boolean success;
-
-    /**
-     * 错误原因
-     * <p>
-     * 0 正常登录
-     * 1 密码错误
-     * 2 被锁定
-     * 3 续期
-     * 4 账号被禁用
-     * 5 登录成功，但是需要 mfa 验证
-     * 6 oauth2 登录成功
-     */
-    private Integer operateCode;
+    public void check() {
+        Assert.hasText(this.clientId, "没有配置 clientId");
+        Assert.hasText(this.clientSecret, "没有配置 clientSecret");
+        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.authorizationUri, "请配置正确的授权 url");
+        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.accessTokenUri, "请配置正确的令牌 url");
+        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.userInfoUri, "请配置正确的用户信息 url");
+        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.redirectUri, "请配置正确的重定向 url");
+    }
 }

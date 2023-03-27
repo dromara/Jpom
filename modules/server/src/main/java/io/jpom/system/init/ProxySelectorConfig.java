@@ -102,7 +102,7 @@ public class ProxySelectorConfig extends ProxySelector implements ILoadEvent, IC
      * 刷新
      */
     @Override
-    public void refresh() {
+    public void refreshCache() {
         JSONArray array = systemParametersServer.getConfigDefNewInstance(ProxySelectorConfig.KEY, JSONArray.class);
         proxyConfigItems = array.toJavaList(ProxyConfigItem.class)
                 .stream()
@@ -118,7 +118,7 @@ public class ProxySelectorConfig extends ProxySelector implements ILoadEvent, IC
             ProxySelector.setDefault(this);
         }
         // 立马配置 全局代理
-        this.refresh();
+        this.refreshCache();
     }
 
 

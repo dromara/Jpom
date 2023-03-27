@@ -60,7 +60,7 @@ public class LoginInterceptor implements HandlerMethodInterceptor {
     public static final String SESSION_NAME = "user";
 
     private static final Map<Integer, String> MSG_CACHE = new HashMap<>(3);
-    
+
     private final ServerConfig.UserConfig userConfig;
 
     static {
@@ -91,12 +91,13 @@ public class LoginInterceptor implements HandlerMethodInterceptor {
                     this.responseLogin(request, session, response, code);
                     return false;
                 }
-            }
-            // 老版本登录拦截
-            int code = this.tryGetHeaderUser(request, session);
-            if (code > 0) {
-                this.responseLogin(request, session, response, ServerConst.AUTHORIZE_TIME_OUT_CODE);
-                return false;
+            } else {
+                // 老版本登录拦截
+                int code = this.tryGetHeaderUser(request, session);
+                if (code > 0) {
+                    this.responseLogin(request, session, response, ServerConst.AUTHORIZE_TIME_OUT_CODE);
+                    return false;
+                }
             }
         }
         //
@@ -156,9 +157,7 @@ public class LoginInterceptor implements HandlerMethodInterceptor {
     private int tryGetHeaderUser(HttpServletRequest request, HttpSession session) {
         String header = request.getHeader(ServerOpenApi.USER_TOKEN_HEAD);
         if (StrUtil.isEmpty(header)) {
-            // 兼容就版本 登录状态
-            UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
-            return user != null ? 0 : ServerConst.AUTHORIZE_TIME_OUT_CODE;
+            return ServerConst.AUTHORIZE_TIME_OUT_CODE;
         }
         UserService userService = SpringUtil.getBean(UserService.class);
         UserModel userModel = userService.checkUser(header);

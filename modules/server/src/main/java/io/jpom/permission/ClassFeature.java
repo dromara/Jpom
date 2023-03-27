@@ -98,6 +98,7 @@ public enum ClassFeature {
     CERTIFICATE_INFO("证书管理", CertificateInfoService.class),
     USER_PERMISSION_GROUP("权限分组", UserPermissionGroupServer.class),
     SYSTEM_EMAIL("邮箱配置"),
+    OAUTH_CONFIG("认证配置"),
     SYSTEM_CACHE("系统缓存"),
     SYSTEM_LOG("系统日志"),
     SYSTEM_UPGRADE("在线升级"),

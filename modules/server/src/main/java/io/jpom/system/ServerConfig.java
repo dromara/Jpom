@@ -104,15 +104,6 @@ public class ServerConfig extends BaseExtConfig {
         });
     }
 
-    private OauthConfig oauth2;
-    
-    public OauthConfig getOauth2() {
-        return Optional.ofNullable(this.oauth2).orElseGet(() -> {
-            this.oauth2 = new OauthConfig();
-            return this.oauth2;
-        });
-    }
-    
     /**
      * 获取当前登录用户的临时文件存储路径，如果没有登录则抛出异常
      *
@@ -153,18 +144,6 @@ public class ServerConfig extends BaseExtConfig {
         return file;
     }
 
-    @Data
-    public static class OauthConfig{
-    	private boolean enabled;
-    	private String clientId;
-    	private String clientSecret;
-    	private String authorizationUri;
-    	private String accessTokenUri;
-    	private String userInfoUri;
-    	private String redirectUri;
-    	
-    }
-    
     @Data
     public static class WebConfig {
 

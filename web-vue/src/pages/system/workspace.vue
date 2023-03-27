@@ -102,30 +102,25 @@ export default {
       envVarListVisible: false,
       temp: {},
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "描述", dataIndex: "description", ellipsis: true, scopedSlots: { customRender: "description" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "name" } },
+        { title: "描述", dataIndex: "description", ellipsis: true, width: 200, scopedSlots: { customRender: "description" } },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         {
           title: "创建时间",
           dataIndex: "createTimeMillis",
           sorter: true,
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
           width: "170px",
         },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
-
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
           sorter: true,
           width: "170px",
         },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "220px" },
+        { title: "操作", dataIndex: "operation", fixed: "right", align: "center", scopedSlots: { customRender: "operation" }, width: "220px" },
       ],
 
       // 表单校验规则
