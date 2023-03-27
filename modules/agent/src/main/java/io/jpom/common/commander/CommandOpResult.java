@@ -57,6 +57,10 @@ public class CommandOpResult {
      */
     private String ports;
     /**
+     * 状态消息
+     */
+    private String statusMsg;
+    /**
      * 执行结果
      */
     private final List<String> msgs = new ArrayList<>();
@@ -79,6 +83,7 @@ public class CommandOpResult {
         }
         result.pid = mainPid;
         result.ports = ports;
+        result.statusMsg = msg;
         return result;
     }
 
