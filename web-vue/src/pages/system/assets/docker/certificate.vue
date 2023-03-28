@@ -72,31 +72,33 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
-    <div
-      :style="{
-        position: 'absolute',
-        right: 0,
-        bottom: 0,
-        width: '100%',
-        borderTop: '1px solid #e9e9e9',
-        padding: '10px 16px',
-        background: '#fff',
-        textAlign: 'right',
-        zIndex: 1,
-      }"
-    >
-      <a-space>
-        <a-button
-          @click="
-            () => {
-              this.$emit('cancel');
-            }
-          "
-        >
-          取消
-        </a-button>
-        <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
-      </a-space>
+    <div style="padding: 40px">
+      <div
+        :style="{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          borderTop: '1px solid #e9e9e9',
+          padding: '10px 16px',
+          background: '#fff',
+          textAlign: 'right',
+          zIndex: 1,
+        }"
+      >
+        <a-space>
+          <a-button
+            @click="
+              () => {
+                this.$emit('cancel');
+              }
+            "
+          >
+            取消
+          </a-button>
+          <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
+        </a-space>
+      </div>
     </div>
   </div>
 </template>
@@ -239,7 +241,7 @@ export default {
       const selectData = this.list.filter((item) => {
         return item.id === this.tableSelections[0];
       })[0];
-      console.log(selectData);
+
       this.$emit("confirm", `${selectData.serialNumberStr}:${selectData.keyType}`);
     },
   },

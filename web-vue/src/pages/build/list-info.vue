@@ -191,11 +191,19 @@
           </a-row>
         </a-form-model-item>
         <a-form-model-item label="构建源仓库" prop="repositoryId">
-          <a-select show-search option-filter-prop="children" v-model="temp.repositoryId" @change="changeRepositpry" placeholder="请选择仓库">
-            <a-select-option v-for="item in repositoryList" :key="item.id" :value="item.id">{{ item.name }}[{{ item.gitUrl }}]</a-select-option>
-          </a-select>
+          <a-input-search
+            :value="`${(tempRepository && tempRepository.name) || ''}[${(tempRepository && tempRepository.gitUrl) || ''}]`"
+            readOnly
+            placeholder="请输选择仓库"
+            enter-button="选择仓库"
+            @search="
+              () => {
+                this.repositoryisible = true;
+              }
+            "
+          />
         </a-form-model-item>
-        <a-form-model-item v-if="tempRepository.repoType === 0" label="分支" prop="branchName">
+        <a-form-model-item v-if="tempRepository && tempRepository.repoType === 0" label="分支" prop="branchName">
           <a-row>
             <a-col :span="10">
               <custom-select
@@ -827,32 +835,33 @@
           </a-collapse-panel>
         </a-collapse>
       </a-form-model>
-      <div style="padding: 40px"></div>
-      <div
-        :style="{
-          position: 'absolute',
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          borderTop: '1px solid #e9e9e9',
-          padding: '10px 16px',
-          background: '#fff',
-          textAlign: 'right',
-          zIndex: 1,
-        }"
-      >
-        <a-space>
-          <a-button
-            @click="
-              () => {
-                this.editBuildVisible = false;
-              }
-            "
-          >
-            取消
-          </a-button>
-          <a-button type="primary" @click="handleEditBuildOk"> 保存 </a-button>
-        </a-space>
+      <div style="padding: 40px">
+        <div
+          :style="{
+            position: 'absolute',
+            right: 0,
+            bottom: 0,
+            width: '100%',
+            borderTop: '1px solid #e9e9e9',
+            padding: '10px 16px',
+            background: '#fff',
+            textAlign: 'right',
+            zIndex: 1,
+          }"
+        >
+          <a-space>
+            <a-button
+              @click="
+                () => {
+                  this.editBuildVisible = false;
+                }
+              "
+            >
+              取消
+            </a-button>
+            <a-button type="primary" @click="handleEditBuildOk"> 保存 </a-button>
+          </a-space>
+        </div>
       </div>
     </a-drawer>
     <!-- 触发器 -->
@@ -1124,12 +1133,44 @@
         </a-collapse-panel>
       </a-collapse>
     </a-modal>
+
+    <!-- 选择证书文件 -->
+    <a-drawer
+      destroyOnClose
+      :title="`选择仓库`"
+      placement="right"
+      :visible="repositoryisible"
+      width="85vw"
+      :zIndex="1009"
+      @close="
+        () => {
+          this.repositoryisible = false;
+        }
+      "
+    >
+      <repository
+        v-if="repositoryisible"
+        :choose="true"
+        @confirm="
+          (repositoryId) => {
+            this.temp = { ...this.temp, repositoryId: repositoryId, branchName: '', branchTagName: '' };
+            this.repositoryisible = false;
+            changeRepositpry();
+          }
+        "
+        @cancel="
+          () => {
+            this.repositoryisible = false;
+          }
+        "
+      ></repository>
+    </a-drawer>
   </div>
 </template>
 <script>
 import CustomSelect from "@/components/customSelect";
 import BuildLog from "./log";
-import { getRepositoryListAll } from "@/api/repository";
+import { getRepositoryInfo } from "@/api/repository";
 import {
   buildModeMap,
   clearBuid,
@@ -1155,12 +1196,13 @@ import Vue from "vue";
 import { dockerSwarmListAll, dockerSwarmServicesList } from "@/api/docker-swarm";
 import { getScriptListAll } from "@/api/server-script";
 import { mapGetters } from "vuex";
-
+import repository from "@/pages/repository/list.vue";
 export default {
   components: {
     BuildLog,
     CustomSelect,
     codeEditor,
+    repository,
   },
   data() {
     return {
@@ -1172,8 +1214,8 @@ export default {
       // 动态列表参数
       groupList: [],
       list: [],
-      statusMap: statusMap,
-      repositoryList: [],
+      statusMap,
+
       tempVue: null,
       // 当前仓库信息
       tempRepository: {},
@@ -1290,9 +1332,7 @@ export default {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
           sorter: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
           width: "170px",
         },
         {
@@ -1376,6 +1416,7 @@ export default {
       refreshInterval: 5,
       tableSelections: [],
       dispatchProjectList: [],
+      repositoryisible: false,
     };
   },
   computed: {
@@ -1475,15 +1516,7 @@ export default {
         }
       });
     },
-    // 加载仓库列表
-    loadRepositoryList(fn) {
-      getRepositoryListAll().then((res) => {
-        if (res.code === 200) {
-          this.repositoryList = res.data;
-          fn && fn();
-        }
-      });
-    },
+
     // 加载脚本列表
     loadScriptListList() {
       getScriptListAll().then((res) => {
@@ -1547,15 +1580,19 @@ export default {
     //   // this.loadRepositoryList();
     // },
     // 选择仓库
-    changeRepositpry(value) {
-      this.repositoryList.forEach((element) => {
-        if (element.id === value) {
-          this.tempRepository = element;
-          this.temp = { ...this.temp, branchName: "", branchTagName: "" };
-          // this.temp.branchName = "";
-          // this.temp.branchTagName = "";
-          // 刷新分支
-          this.loadBranchList();
+    changeRepositpry(noPullBranch) {
+      getRepositoryInfo({
+        id: this.temp.repositoryId,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.tempRepository = res.data;
+
+          if (noPullBranch === true) {
+            //
+          } else {
+            // 刷新分支
+            this.loadBranchList();
+          }
         }
       });
     },
@@ -1617,14 +1654,8 @@ export default {
         }
       }
       this.tempExtraData = { ...this.tempExtraData };
-      this.loadRepositoryList(() => {
-        // 从仓库列表里匹配对应的仓库信息
-
-        this.tempRepository = this.repositoryList.filter((element) => this.temp.repositoryId === element.id)[0];
-        this.editBuildVisible = true;
-        // by bwcxjzy 2022-11-25
-        //this.loadBranchList();
-      });
+      this.changeRepositpry(true);
+      this.editBuildVisible = true;
 
       this.loadDispatchList();
       this.loadDockerSwarmListAll();
@@ -1647,7 +1678,7 @@ export default {
     },
     // 获取仓库分支
     loadBranchList() {
-      if (this.tempRepository.repoType !== 0) {
+      if (this.tempRepository?.repoType !== 0) {
         return;
       }
       this.loadBranchListById(this.tempRepository?.id);

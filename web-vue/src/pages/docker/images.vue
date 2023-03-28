@@ -345,32 +345,33 @@
             </a-col>
           </a-row>
         </a-form-model-item>
-        <div style="padding: 40px"></div>
-        <div
-          :style="{
-            position: 'absolute',
-            right: 0,
-            bottom: 0,
-            width: '100%',
-            borderTop: '1px solid #e9e9e9',
-            padding: '10px 16px',
-            background: '#fff',
-            textAlign: 'right',
-            zIndex: 1,
-          }"
-        >
-          <a-space>
-            <a-button
-              @click="
-                () => {
-                  this.buildVisible = false;
-                }
-              "
-            >
-              取消
-            </a-button>
-            <a-button type="primary" @click="handleBuildOk"> 确认 </a-button>
-          </a-space>
+        <div style="padding: 40px">
+          <div
+            :style="{
+              position: 'absolute',
+              right: 0,
+              bottom: 0,
+              width: '100%',
+              borderTop: '1px solid #e9e9e9',
+              padding: '10px 16px',
+              background: '#fff',
+              textAlign: 'right',
+              zIndex: 1,
+            }"
+          >
+            <a-space>
+              <a-button
+                @click="
+                  () => {
+                    this.buildVisible = false;
+                  }
+                "
+              >
+                取消
+              </a-button>
+              <a-button type="primary" @click="handleBuildOk"> 确认 </a-button>
+            </a-space>
+          </div>
         </div>
       </a-form-model>
     </a-drawer>
