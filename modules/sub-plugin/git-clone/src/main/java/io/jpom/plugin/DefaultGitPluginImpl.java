@@ -47,15 +47,15 @@ public class DefaultGitPluginImpl implements IWorkspaceEnvPlugin {
 //            case "lastCommitMsg":
 //                return GitUtil.getLastCommitMsg(savePath, branchName);
             case "branchAndTagList":
-                return GitUtil.getBranchAndTagList(parameter);
+                return JGitUtil.getBranchAndTagList(parameter);
             case "pull": {
                 PrintWriter printWriter = (PrintWriter) parameter.get("logWriter");
-                return GitUtil.checkoutPull(parameter, savePath, branchName, printWriter);
+                return JGitUtil.checkoutPull(parameter, savePath, branchName, printWriter);
             }
             case "pullByTag": {
                 PrintWriter printWriter = (PrintWriter) parameter.get("logWriter");
                 String tagName = (String) parameter.get("tagName");
-                return GitUtil.checkoutPullTag(parameter, savePath, tagName, printWriter);
+                return JGitUtil.checkoutPullTag(parameter, savePath, tagName, printWriter);
             }
             default:
                 break;

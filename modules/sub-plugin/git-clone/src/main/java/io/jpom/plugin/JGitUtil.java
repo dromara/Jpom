@@ -33,7 +33,6 @@ import cn.hutool.core.util.StrUtil;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import io.jpom.system.JpomRuntimeException;
 import lombok.Lombok;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
@@ -68,7 +67,7 @@ import java.util.stream.Collectors;
  * add git with ssh key to visit repository
  * @since 2019/7/15
  **/
-public class GitUtil {
+public class JGitUtil {
 
     /**
      * 检查本地的remote是否存在对应的url

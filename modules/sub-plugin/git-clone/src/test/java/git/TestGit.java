@@ -23,7 +23,7 @@
 package git;
 
 import cn.hutool.core.io.FileUtil;
-import io.jpom.plugin.GitUtil;
+import io.jpom.plugin.JGitUtil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -131,7 +131,7 @@ public class TestGit {
         map.put("password", "a");
 
 
-        GitUtil.checkoutPullTag(map, file, tagName, printWriter);
+        JGitUtil.checkoutPullTag(map, file, tagName, printWriter);
 
         //GitUtil.checkoutPull(uri, file, branchName, credentialsProvider, printWriter);
 
@@ -161,7 +161,7 @@ public class TestGit {
 //        repositoryModel.setRepoType(0);
 //        repositoryModel.setUserName("a");
 //        repositoryModel.setPassword("a");
-        String[] msg = GitUtil.checkoutPullTag(map, file, tagName, printWriter);
+        String[] msg = JGitUtil.checkoutPullTag(map, file, tagName, printWriter);
         System.out.println(Arrays.toString(msg));
         //GitUtil.checkoutPull(uri, file, branchName, credentialsProvider, printWriter);
 
