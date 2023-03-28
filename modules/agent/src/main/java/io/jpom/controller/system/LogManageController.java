@@ -24,7 +24,7 @@ package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.validator.ValidatorItem;
@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -55,8 +56,8 @@ public class LogManageController extends BaseAgentController {
 
 
     @RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONArray> logData() {
-        JSONArray data = DirTreeUtil.getTreeData(LogbackConfig.getPath());
+    public JsonMessage<List<JSONObject>> logData() {
+        List<JSONObject> data = DirTreeUtil.getTreeData(LogbackConfig.getPath());
         return JsonMessage.success("", data);
     }
 

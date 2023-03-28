@@ -25,7 +25,7 @@ package io.jpom.controller.system;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -65,11 +66,11 @@ public class LogManageController extends BaseServerController {
 
     @RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONArray> logData(String nodeId) {
+    public JsonMessage<List<JSONObject>> logData(String nodeId) {
         if (StrUtil.isNotEmpty(nodeId)) {
             return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemLog);
         }
-        JSONArray data = DirTreeUtil.getTreeData(LogbackConfig.getPath());
+        List<JSONObject> data = DirTreeUtil.getTreeData(LogbackConfig.getPath());
         return JsonMessage.success("", data);
     }
 
