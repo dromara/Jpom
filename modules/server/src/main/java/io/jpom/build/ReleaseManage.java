@@ -141,13 +141,13 @@ public class ReleaseManage {
         if (syncFileStorage != null && syncFileStorage) {
             logRecorder.system("开始同步到文件管理中心");
             File dirPackage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.buildNumberId, this.resultFile, (unZip, file) -> file);
-            boolean success = fileStorageService.addFile(dirPackage, 1,
-                    buildInfoModel.getWorkspaceId(),
-                    buildInfoModel.getName(),
-                    // 默认的别名码为构建id
-                    StrUtil.emptyToDefault(buildInfoModel.getAliasCode(), buildInfoModel.getId()));
-            if (success) {
-                logRecorder.system("构建产物文件成功同步到文件管理中心");
+            String successMd5 = fileStorageService.addFile(dirPackage, 1,
+                buildInfoModel.getWorkspaceId(),
+                "构建来源," + buildInfoModel.getName(),
+                // 默认的别名码为构建id
+                StrUtil.emptyToDefault(buildInfoModel.getAliasCode(), buildInfoModel.getId()));
+            if (successMd5 != null) {
+                logRecorder.system("构建产物文件成功同步到文件管理中心,{}", successMd5);
             } else {
                 logRecorder.systemWarning("构建产物文件同步到文件管理中心失败,当前文件已经存文件管理中心存在啦");
             }
@@ -247,8 +247,8 @@ public class ReleaseManage {
             String fromTag = this.buildExtraModule.getFromTag();
             // 根据 tag 查询
             List<DockerInfoModel> dockerInfoModels = buildExecuteService
-                    .dockerInfoService
-                    .queryByTag(this.buildExtraModule.getWorkspaceId(), fromTag);
+                .dockerInfoService
+                .queryByTag(this.buildExtraModule.getWorkspaceId(), fromTag);
             Map<String, Object> map = buildExecuteService.machineDockerServer.dockerParameter(dockerInfoModels);
             if (map == null) {
                 logRecorder.systemError("{} 没有可用的 docker server", fromTag);
@@ -344,13 +344,13 @@ public class ReleaseManage {
         InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
         String s1 = IoUtil.readUtf8(templateInputStream);
         int waitFor = JpomApplication.getInstance()
-                .execScript(s1 + releaseCommand, file -> {
-                    try {
-                        return CommandUtil.execWaitFor(file, sourceFile, envFileMap, StrUtil.EMPTY, (s, process) -> logRecorder.info(s));
-                    } catch (IOException | InterruptedException e) {
-                        throw Lombok.sneakyThrow(e);
-                    }
-                });
+            .execScript(s1 + releaseCommand, file -> {
+                try {
+                    return CommandUtil.execWaitFor(file, sourceFile, envFileMap, StrUtil.EMPTY, (s, process) -> logRecorder.info(s));
+                } catch (IOException | InterruptedException e) {
+                    throw Lombok.sneakyThrow(e);
+                }
+            });
         logRecorder.system("执行发布脚本的退出码是：{}", waitFor);
         // 判断是否为严格执行
         if (buildExtraModule.strictlyEnforce()) {
@@ -443,7 +443,7 @@ public class ReleaseManage {
     private void diffSyncProject(NodeModel nodeModel, String projectId, AfterOpt afterOpt, boolean clearOld) {
         File resultFile = this.resultFile;
         String resultFileParent = resultFile.isFile() ?
-                FileUtil.getAbsolutePath(resultFile.getParent()) : FileUtil.getAbsolutePath(this.resultFile);
+            FileUtil.getAbsolutePath(resultFile.getParent()) : FileUtil.getAbsolutePath(this.resultFile);
         //
         List<File> files = FileUtil.loopFiles(resultFile);
         List<JSONObject> collect = files.stream().map(file -> {
@@ -491,19 +491,19 @@ public class ReleaseManage {
             Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
             int finalI = i;
             JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, startPath,
-                    projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, false,
-                    this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
-                        double progressPercentage = Math.floor(((float) progressSize / total) * 100);
-                        int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
-                        if (progressRangeList.add(progressRange)) {
-                            //  total, progressSize
-                            logRecorder.system("上传文件进度:{}[{}/{}] {}/{} {} ", file.getName(),
-                                    (finalI + 1), diffSize,
-                                    FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
-                                    NumberUtil.formatPercent(((float) progressSize / total), 0)
-                            );
-                        }
-                    });
+                projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, false,
+                this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
+                    double progressPercentage = Math.floor(((float) progressSize / total) * 100);
+                    int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
+                    if (progressRangeList.add(progressRange)) {
+                        //  total, progressSize
+                        logRecorder.system("上传文件进度:{}[{}/{}] {}/{} {} ", file.getName(),
+                            (finalI + 1), diffSize,
+                            FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
+                            NumberUtil.formatPercent(((float) progressSize / total), 0)
+                        );
+                    }
+                });
             Assert.state(jsonMessage.success(), "同步项目文件失败：" + jsonMessage);
             if (last) {
                 // 最后一个
@@ -537,19 +537,19 @@ public class ReleaseManage {
             String name = zipFile.getName();
             Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
             return OutGivingRun.fileUpload(zipFile,
-                    this.buildExtraModule.getProjectSecondaryDirectory(),
-                    projectId,
-                    unZip,
-                    afterOpt,
-                    nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
-                        double progressPercentage = Math.floor(((float) progressSize / total) * 100);
-                        int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
-                        if (progressRangeList.add(progressRange)) {
-                            logRecorder.system("上传文件进度:{} {}/{} {}", name,
-                                    FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
-                                    NumberUtil.formatPercent(((float) progressSize / total), 0));
-                        }
-                    });
+                this.buildExtraModule.getProjectSecondaryDirectory(),
+                projectId,
+                unZip,
+                afterOpt,
+                nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
+                    double progressPercentage = Math.floor(((float) progressSize / total) * 100);
+                    int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
+                    if (progressRangeList.add(progressRange)) {
+                        logRecorder.system("上传文件进度:{} {}/{} {}", name,
+                            FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
+                            NumberUtil.formatPercent(((float) progressSize / total), 0));
+                    }
+                });
         });
         if (jsonMessage.success()) {
             logRecorder.system("发布项目包成功：{}", jsonMessage);
@@ -568,15 +568,15 @@ public class ReleaseManage {
         String selectProject = buildEnv.get("dispatchSelectProject");
         Future<OutGivingModel.Status> statusFuture = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.buildNumberId, this.resultFile, (unZip, zipFile) -> {
             OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
-                    .id(releaseMethodDataId)
-                    .file(zipFile)
-                    .logRecorder(logRecorder)
-                    .userModel(userModel)
-                    .unzip(unZip)
-                    // 由构建配置决定是否删除
-                    .doneDeleteFile(false)
-                    .projectSecondaryDirectory(projectSecondaryDirectory)
-                    .stripComponents(0);
+                .id(releaseMethodDataId)
+                .file(zipFile)
+                .logRecorder(logRecorder)
+                .userModel(userModel)
+                .unzip(unZip)
+                // 由构建配置决定是否删除
+                .doneDeleteFile(false)
+                .projectSecondaryDirectory(projectSecondaryDirectory)
+                .stripComponents(0);
             return outGivingRunBuilder.build().startRun(selectProject);
         });
         //OutGivingRun.startRun(releaseMethodDataId, zipFile, userModel, unZip, 0);

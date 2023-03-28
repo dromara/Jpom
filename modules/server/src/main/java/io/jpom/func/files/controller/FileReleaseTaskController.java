@@ -23,7 +23,6 @@
 package io.jpom.func.files.controller;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
@@ -32,19 +31,13 @@ import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.controller.outgiving.OutGivingWhitelistService;
 import io.jpom.func.files.model.FileReleaseTaskLogModel;
-import io.jpom.func.files.model.FileStorageModel;
 import io.jpom.func.files.service.FileReleaseTaskService;
-import io.jpom.func.files.service.FileStorageService;
 import io.jpom.model.data.AgentWhitelist;
-import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.ServerWhitelist;
-import io.jpom.model.data.SshModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.node.NodeService;
-import io.jpom.service.node.ssh.SshService;
-import io.jpom.system.ServerConfig;
 import io.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -68,24 +61,14 @@ import java.util.stream.Collectors;
 @Feature(cls = ClassFeature.FILE_STORAGE_RELEASE)
 public class FileReleaseTaskController extends BaseServerController {
 
-    private final FileStorageService fileStorageService;
     private final FileReleaseTaskService fileReleaseTaskService;
-    private final ServerConfig serverConfig;
     private final OutGivingWhitelistService outGivingWhitelistService;
-    private final SshService sshService;
-    private final NodeService nodeService;
 
-    public FileReleaseTaskController(FileStorageService fileStorageService,
-                                     FileReleaseTaskService fileReleaseTaskService,
-                                     ServerConfig serverConfig,
+    public FileReleaseTaskController(FileReleaseTaskService fileReleaseTaskService,
                                      OutGivingWhitelistService outGivingWhitelistService,
-                                     SshService sshService,
                                      NodeService nodeService) {
-        this.fileStorageService = fileStorageService;
         this.fileReleaseTaskService = fileReleaseTaskService;
-        this.serverConfig = serverConfig;
         this.outGivingWhitelistService = outGivingWhitelistService;
-        this.sshService = sshService;
         this.nodeService = nodeService;
     }
 
@@ -101,7 +84,6 @@ public class FileReleaseTaskController extends BaseServerController {
                                        String beforeScript,
                                        String afterScript,
                                        HttpServletRequest request) {
-
         // 判断参数
         ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(request);
         List<String> whitelistServerOutGiving = configDeNewInstance.outGiving();
@@ -110,63 +92,9 @@ public class FileReleaseTaskController extends BaseServerController {
 
         String releasePath = FileUtil.normalize(releasePathParent + StrUtil.SLASH + releasePathSecondary);
 
-        return this.addTask(fileId, name, taskType, taskDataIds, releasePath, beforeScript, afterScript, request);
+        return fileReleaseTaskService.addTask(fileId, name, taskType, taskDataIds, releasePath, beforeScript, afterScript, null, request);
     }
 
-    private JsonMessage<String> addTask(String fileId,
-                                        String name,
-                                        int taskType,
-                                        String taskDataIds,
-                                        String releasePath,
-                                        String beforeScript,
-                                        String afterScript,
-                                        HttpServletRequest request) {
-        FileStorageModel storageModel = fileStorageService.getByKey(fileId, request);
-        Assert.notNull(storageModel, "不存在对应的文件");
-        File storageSavePath = serverConfig.fileStorageSavePath();
-        File file = FileUtil.file(storageSavePath, storageModel.getPath());
-        Assert.state(FileUtil.isFile(file), "当前文件丢失不能执行发布任务");
-        //
-        List<String> list;
-        if (taskType == 0) {
-            list = StrUtil.splitTrim(taskDataIds, StrUtil.COMMA);
-            list = list.stream().filter(s -> sshService.exists(new SshModel(s))).collect(Collectors.toList());
-            Assert.notEmpty(list, "请选择正确的ssh");
-        } else if (taskType == 1) {
-            list = StrUtil.splitTrim(taskDataIds, StrUtil.COMMA);
-            list = list.stream().filter(s -> nodeService.exists(new NodeModel(s))).collect(Collectors.toList());
-            Assert.notEmpty(list, "请选择正确的节点");
-        } else {
-            throw new IllegalArgumentException("不支持的方式");
-        }
-        // 生成任务id
-        FileReleaseTaskLogModel taskRoot = new FileReleaseTaskLogModel();
-        taskRoot.setId(IdUtil.fastSimpleUUID());
-        taskRoot.setTaskId(FileReleaseTaskLogModel.TASK_ROOT_ID);
-        taskRoot.setTaskDataId(FileReleaseTaskLogModel.TASK_ROOT_ID);
-        taskRoot.setName(name);
-        taskRoot.setFileId(fileId);
-        taskRoot.setStatus(0);
-        taskRoot.setTaskType(taskType);
-        taskRoot.setReleasePath(releasePath);
-        taskRoot.setAfterScript(afterScript);
-        taskRoot.setBeforeScript(beforeScript);
-        fileReleaseTaskService.insert(taskRoot);
-        // 子任务列表
-        for (String dataId : list) {
-            FileReleaseTaskLogModel releaseTaskLogModel = new FileReleaseTaskLogModel();
-            releaseTaskLogModel.setTaskId(taskRoot.getId());
-            releaseTaskLogModel.setTaskDataId(dataId);
-            releaseTaskLogModel.setName(name);
-            releaseTaskLogModel.setFileId(fileId);
-            releaseTaskLogModel.setStatus(0);
-            releaseTaskLogModel.setTaskType(taskType);
-            releaseTaskLogModel.setReleasePath(taskRoot.getReleasePath());
-            fileReleaseTaskService.insert(releaseTaskLogModel);
-        }
-        fileReleaseTaskService.startTask(taskRoot.getId(), file);
-        return JsonMessage.success("创建成功");
-    }
 
     @PostMapping(value = "re-task", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
@@ -180,7 +108,7 @@ public class FileReleaseTaskController extends BaseServerController {
                                       HttpServletRequest request) {
         FileReleaseTaskLogModel parentTask = fileReleaseTaskService.getByKey(parentTaskId, request);
         Assert.notNull(parentTask, "父任务不存在");
-        return addTask(fileId, name, taskType, taskDataIds, parentTask.getReleasePath(), beforeScript, afterScript, request);
+        return fileReleaseTaskService.addTask(fileId, name, taskType, taskDataIds, parentTask.getReleasePath(), beforeScript, afterScript, null, request);
     }
 
     /**

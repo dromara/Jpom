@@ -224,35 +224,49 @@ public class FileStorageService extends BaseGlobalOrWorkspaceService<FileStorage
      * @param description 描述
      * @param workspaceId 工作空间id
      * @param aliasCode   别名码
-     * @return 是否添加成功
+     * @return 返回成功的文件id
      */
-    public boolean addFile(File file, int source, String workspaceId, String description, String aliasCode) {
+    public String addFile(File file, int source, String workspaceId, String description, String aliasCode) {
+        return addFile(file, source, workspaceId, description, aliasCode, null);
+    }
+
+    /**
+     * 添加文件
+     *
+     * @param source      文件来源
+     * @param file        要文件的文件
+     * @param description 描述
+     * @param workspaceId 工作空间id
+     * @param aliasCode   别名码
+     * @return 返回成功的文件id
+     */
+    public String addFile(File file, int source, String workspaceId, String description, String aliasCode, Integer keepDay) {
         String md5 = SecureUtil.md5(file);
         File storageSavePath = serverConfig.fileStorageSavePath();
         String extName = FileUtil.extName(file);
         String path = StrUtil.format("/{}/{}.{}", DateTime.now().toString(DatePattern.PURE_DATE_FORMAT), md5, extName);
         FileStorageModel storageModel = this.getByKey(md5);
         if (storageModel != null) {
-            return false;
+            return null;
         }
         // 保存
         FileStorageModel fileStorageModel = new FileStorageModel();
         fileStorageModel.setId(md5);
         fileStorageModel.setAliasCode(aliasCode);
         fileStorageModel.setName(file.getName());
-        fileStorageModel.setDescription("构建来源," + description);
+        fileStorageModel.setDescription(description);
         fileStorageModel.setExtName(extName);
         fileStorageModel.setPath(path);
         fileStorageModel.setSize(FileUtil.size(file));
         fileStorageModel.setSource(source);
         fileStorageModel.setWorkspaceId(workspaceId);
-        fileStorageModel.validUntil(null, null);
+        fileStorageModel.validUntil(keepDay, null);
         this.insert(fileStorageModel);
         //
         File fileStorageFile = FileUtil.file(storageSavePath, path);
         FileUtil.mkParentDirs(fileStorageFile);
         FileUtil.copyFile(file, fileStorageFile, StandardCopyOption.REPLACE_EXISTING);
-        return true;
+        return md5;
     }
 
     @Override

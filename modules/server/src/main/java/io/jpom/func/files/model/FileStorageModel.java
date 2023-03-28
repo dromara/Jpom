@@ -69,7 +69,7 @@ public class FileStorageModel extends BaseWorkspaceModel {
      */
     private String description;
     /**
-     * 文件来源 0 上传 1 构建 2 下载
+     * 文件来源 0 上传 1 构建 2 下载 3 证书
      */
     private Integer source;
     /**

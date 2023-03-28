@@ -48,9 +48,8 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <!-- <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button> -->
+          <a-button size="small" type="primary" @click="handleDeployFile(record)">部署</a-button>
           <a-button size="small" type="primary" @click="handleDownload(record)">导出</a-button>
-
           <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
@@ -106,13 +105,32 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 发布文件 -->
+    <a-modal
+      destroyOnClose
+      v-model="releaseFileVisible"
+      title="部署证书"
+      width="50%"
+      :maskClosable="false"
+      @ok="
+        () => {
+          this.$refs.releaseFile?.tryCommit();
+        }
+      "
+    >
+      <a-alert message="证书将打包成 zip 文件上传到对应的文件夹" type="info" show-icon />
+      <releaseFile ref="releaseFile" v-if="releaseFileVisible" @commit="handleCommitTask"></releaseFile>
+    </a-modal>
   </div>
 </template>
 <script>
-import { certificateImportFile, certList, deleteCert, downloadCert, certificateEdit } from "@/api/tools/certificate";
+import { certificateImportFile, certList, deleteCert, downloadCert, certificateEdit, certificateDeploy } from "@/api/tools/certificate";
 import { parseTime, CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-
+import releaseFile from "@/pages/file-manager/fileStorage/releaseFile.vue";
 export default {
+  components: {
+    releaseFile,
+  },
   props: {},
   data() {
     return {
@@ -164,7 +182,7 @@ export default {
           customRender: (text) => parseTime(text),
           width: "160px",
         },
-        { title: "操作", dataIndex: "operation", align: "center", fixed: "right", scopedSlots: { customRender: "operation" }, width: "120px" },
+        { title: "操作", dataIndex: "operation", align: "center", fixed: "right", scopedSlots: { customRender: "operation" }, width: "180px" },
       ],
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
@@ -172,6 +190,7 @@ export default {
         // path: [{ required: true, message: "Please select path", trigger: "blur" }],
         type: [{ required: true, message: "请选择证书类型", trigger: "blur" }],
       },
+      releaseFileVisible: false,
       editVisible: false,
     };
   },
@@ -300,6 +319,23 @@ export default {
             this.loadData();
           }
         });
+      });
+    },
+    handleDeployFile(record) {
+      this.releaseFileVisible = true;
+      this.temp = { id: record.id };
+    },
+
+    handleCommitTask(data) {
+      certificateDeploy({ ...data, id: this.temp.id }).then((res) => {
+        if (res.code === 200) {
+          // 成功
+          this.$notification.success({
+            message: res.msg,
+          });
+
+          this.releaseFileVisible = false;
+        }
       });
     },
   },
