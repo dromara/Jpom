@@ -428,7 +428,11 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
         <img :src="$withBase('/images/friends/xiaonuo.png')" class="no-zoom friends-item-img hover-alt"  alt="国内首个国密前后端分离快速开发平台">
     </a>
 </div>
-
+<div class="friends-item" >
+    <a href="https://uniadmin.jiangruyi.com/?from=jpom" target="_blank">
+        <img :src="$withBase('/images/friends/uniadmin.png')" class="no-zoom friends-item-img hover-alt"  alt="UiAdmin是一套零前端代码通用后台，采用前后端分离技术，数据交互采用json格式">
+    </a>
+</div>
 
 <br/>
 <br/>
