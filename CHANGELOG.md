@@ -4,9 +4,12 @@
 
 ### 🐣 新增功能
 
+1. 【all】新增 文件管理发布支持发布到节点指定目录
+
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 无法正常使用下载功能
+2. 【all】升级 springboot、hutool、fastjson2、svnkit 版本
 
 ------
 

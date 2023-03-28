@@ -150,6 +150,10 @@ public class EnvironmentMapBuilder {
         return JSONObject.toJSONString(map);
     }
 
+    public JSONObject toDataJson() {
+        return JSONObject.from(map);
+    }
+
     @AllArgsConstructor
     @Data
     public static class Item {

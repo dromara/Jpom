@@ -44,7 +44,7 @@ public class TestFile {
 
         InputStream inputStream = new FileInputStream("D:\\SystemDocument\\Desktop\\Desktop.zip");
 
-        String code = IoUtil.readHex28Upper(inputStream);
+        String code = IoUtil.readHex64Upper(inputStream);
         System.out.println(code);
 
         System.out.println(FileUtil.getMimeType("D:\\SystemDocument\\Desktop\\Desktop.zip"));
@@ -85,7 +85,7 @@ public class TestFile {
     }
 
     @Test
-    public void test(){
+    public void test() {
         System.out.println(DataSizeUtil.format(1000));
     }
 }

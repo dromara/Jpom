@@ -29,36 +29,47 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.stream.CollectorUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.JschUtil;
+import com.alibaba.fastjson2.JSONObject;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.Session;
 import io.jpom.JpomApplication;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.forward.NodeForward;
+import io.jpom.common.forward.NodeUrl;
 import io.jpom.func.assets.model.MachineSshModel;
 import io.jpom.func.files.model.FileReleaseTaskLogModel;
 import io.jpom.model.EnvironmentMapBuilder;
+import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.service.IStatusRecover;
 import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
+import io.jpom.system.extconf.BuildExtConfig;
 import io.jpom.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import top.jpom.model.PageResultDto;
+import top.jpom.transport.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -72,15 +83,19 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     private final SshService sshService;
     private final JpomApplication jpomApplication;
     private final WorkspaceEnvVarService workspaceEnvVarService;
-
-    private Map<String, String> cancelTag = new ConcurrentHashMap<>();
+    private final NodeService nodeService;
+    private final BuildExtConfig buildExtConfig;
+    private final Map<String, String> cancelTag = new ConcurrentHashMap<>();
 
     public FileReleaseTaskService(SshService sshService,
                                   JpomApplication jpomApplication,
-                                  WorkspaceEnvVarService workspaceEnvVarService) {
+                                  WorkspaceEnvVarService workspaceEnvVarService,
+                                  NodeService nodeService, BuildExtConfig buildExtConfig) {
         this.sshService = sshService;
         this.jpomApplication = jpomApplication;
         this.workspaceEnvVarService = workspaceEnvVarService;
+        this.nodeService = nodeService;
+        this.buildExtConfig = buildExtConfig;
     }
 
     /**
@@ -123,6 +138,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         Integer taskType = taskRoot.getTaskType();
         if (taskType == 0) {
             crateTaskSshWork(logModels, strictSyncFinisher, taskRoot, environmentMapBuilder, storageSaveFile);
+        } else if (taskType == 1) {
+            crateTaskNodeWork(logModels, strictSyncFinisher, taskRoot, environmentMapBuilder, storageSaveFile);
         } else {
             throw new IllegalArgumentException("不支持的方式");
         }
@@ -170,6 +187,123 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     }
 
     /**
+     * 创建 节点 发布任务
+     *
+     * @param values                需要发布的任务列表
+     * @param strictSyncFinisher    线程同步器
+     * @param taskRoot              任务
+     * @param environmentMapBuilder 环境变量
+     * @param storageSaveFile       文件
+     */
+    private void crateTaskNodeWork(Collection<FileReleaseTaskLogModel> values,
+                                   StrictSyncFinisher strictSyncFinisher,
+                                   FileReleaseTaskLogModel taskRoot,
+                                   EnvironmentMapBuilder environmentMapBuilder,
+                                   File storageSaveFile) {
+        String taskId = taskRoot.getId();
+        for (FileReleaseTaskLogModel model : values) {
+            model.setAfterScript(taskRoot.getAfterScript());
+            model.setBeforeScript(taskRoot.getBeforeScript());
+            strictSyncFinisher.addWorker(() -> {
+                String modelId = model.getId();
+                try {
+                    this.updateStatus(taskId, modelId, 1, "开始发布文件");
+                    File logFile = logFile(model);
+                    LogRecorder logRecorder = LogRecorder.builder().file(logFile).charset(CharsetUtil.CHARSET_UTF_8).build();
+                    NodeModel item = nodeService.getByKey(model.getTaskDataId());
+                    if (item == null) {
+                        logRecorder.systemError("没有找到对应的节点项：{}", model.getTaskDataId());
+                        this.updateStatus(taskId, modelId, 3, StrUtil.format("没有找到对应的节点项：{}", model.getTaskDataId()));
+                        return;
+                    }
+
+                    String releasePath = model.getReleasePath();
+                    if (StrUtil.isNotEmpty(model.getBeforeScript())) {
+                        logRecorder.system("开始执行上传前命令");
+                        this.runNodeScript(model.getBeforeScript(), item, logRecorder, modelId, environmentMapBuilder, releasePath);
+                    }
+                    logRecorder.system("{} start file upload", item.getName());
+                    // 上传文件
+                    JSONObject data = new JSONObject();
+                    data.put("path", releasePath);
+                    Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
+                    JsonMessage<String> jsonMessage = NodeForward.requestSharding(item, NodeUrl.Manage_File_Upload_Sharding2, data, storageSaveFile,
+                        sliceData -> {
+                            sliceData.putAll(data);
+                            return NodeForward.request(item, NodeUrl.Manage_File_Sharding_Merge2, sliceData);
+                        },
+                        (total, progressSize) -> {
+
+                            double progressPercentage = Math.floor(((float) progressSize / total) * 100);
+                            int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
+                            if (progressRangeList.add(progressRange)) {
+                                logRecorder.system("上传文件进度:{}/{} {}",
+                                    FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
+                                    NumberUtil.formatPercent(((float) progressSize / total), 0));
+                            }
+                        });
+                    if (!jsonMessage.success()) {
+                        throw new IllegalStateException("上传文件失败：" + jsonMessage);
+                    }
+                    logRecorder.system("{} file upload done", item.getName());
+
+                    if (StrUtil.isNotEmpty(model.getAfterScript())) {
+                        logRecorder.system("开始执行上传后命令");
+                        this.runNodeScript(model.getAfterScript(), item, logRecorder, modelId, environmentMapBuilder, releasePath);
+                    }
+                    this.updateStatus(taskId, modelId, 2, "发布成功");
+                } catch (Exception e) {
+                    log.error("执行发布任务异常", e);
+                    updateStatus(taskId, modelId, 3, e.getMessage());
+                }
+            });
+        }
+    }
+
+    /**
+     * 执行节点脚本
+     *
+     * @param content               脚本内容
+     * @param model                 节点
+     * @param logRecorder           日志记录器
+     * @param id                    任务id
+     * @param environmentMapBuilder 环境变量
+     * @param path                  执行路径
+     * @throws IOException io
+     */
+    private void runNodeScript(String content, NodeModel model, LogRecorder logRecorder, String id, EnvironmentMapBuilder environmentMapBuilder, String path) throws IOException {
+        INodeInfo nodeInfo = NodeForward.parseNodeInfo(model);
+        IUrlItem urlItem = NodeForward.parseUrlItem(nodeInfo, model.getWorkspaceId(), NodeUrl.FreeScriptRun, DataContentType.FORM_URLENCODED);
+        try (IProxyWebSocket proxySession = TransportServerFactory.get().websocket(nodeInfo, urlItem)) {
+            proxySession.onMessage(s -> {
+                if (StrUtil.equals(s, "JPOM_SYSTEM_TAG:" + id)) {
+                    try {
+                        proxySession.close();
+                    } catch (IOException e) {
+                        log.error("关闭会话异常", e);
+                        logRecorder.systemError("关闭会话异常：{}", e.getMessage());
+                    }
+                    return;
+                }
+                logRecorder.info(s);
+            });
+            // 等待链接
+            proxySession.connectBlocking();
+            // 发送操作消息
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("tag", id);
+            jsonObject.put("path", path);
+            jsonObject.put("environment", environmentMapBuilder.toDataJson());
+            jsonObject.put("content", content);
+            proxySession.send(jsonObject.toString());
+            // 阻塞
+            while (proxySession.isConnected()) {
+                ThreadUtil.sleep(500, TimeUnit.MILLISECONDS);
+            }
+        }
+    }
+
+    /**
      * 创建 ssh 发布任务
      *
      * @param values                需要发布的任务列表
@@ -193,8 +327,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                 ChannelSftp channelSftp = null;
                 try {
                     this.updateStatus(taskId, modelId, 1, "开始发布文件");
-                    File file = logFile(model);
-                    LogRecorder logRecorder = LogRecorder.builder().file(file).charset(CharsetUtil.CHARSET_UTF_8).build();
+                    File logFile = logFile(model);
+                    LogRecorder logRecorder = LogRecorder.builder().file(logFile).charset(CharsetUtil.CHARSET_UTF_8).build();
                     SshModel item = sshService.getByKey(model.getTaskDataId());
                     if (item == null) {
                         logRecorder.systemError("没有找到对应的ssh项：{}", model.getTaskDataId());
@@ -248,7 +382,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         fileReleaseTaskLogModel.setTaskId(taskId);
         List<FileReleaseTaskLogModel> logModels = this.listByBean(fileReleaseTaskLogModel);
         Map<Integer, List<FileReleaseTaskLogModel>> map = logModels.stream()
-                .collect(CollectorUtil.groupingBy(logModel -> ObjectUtil.defaultIfNull(logModel.getStatus(), 0), Collectors.toList()));
+            .collect(CollectorUtil.groupingBy(logModel -> ObjectUtil.defaultIfNull(logModel.getStatus(), 0), Collectors.toList()));
         StringBuilder stringBuilder = new StringBuilder();
         //
         Opt.ofBlankAble(statusMsg).ifPresent(s -> stringBuilder.append(s).append(StrUtil.SPACE));
@@ -302,8 +436,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
 
     public File logFile(FileReleaseTaskLogModel model) {
         return FileUtil.file(jpomApplication.getDataPath(), "file-release-log",
-                model.getTaskId(),
-                model.getId() + ".log"
+            model.getTaskId(),
+            model.getId() + ".log"
         );
     }
 
@@ -320,7 +454,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         Entity updateEntity = this.dataBeanToEntity(update);
         //
         Entity where = Entity.create()
-                .set("status", CollUtil.newArrayList(0, 1));
+            .set("status", CollUtil.newArrayList(0, 1));
         return this.update(updateEntity, where);
     }
 }
