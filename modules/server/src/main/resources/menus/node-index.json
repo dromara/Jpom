@@ -6,21 +6,13 @@
   },
   {
     "id": "manage",
-    "title": "项目管理",
+    "title": "项目&脚本",
     "icon_v3": "project",
     "childs": [
       {
         "id": "manageList",
         "title": "项目列表"
-      }
-    ]
-  },
-  {
-    "id": "otherM",
-    "title": "脚本管理",
-    "icon_v3": "code",
-    "childs": [
-
+      },
       {
         "id": "script",
         "title": "脚本模板"
