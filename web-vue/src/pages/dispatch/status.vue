@@ -137,7 +137,7 @@ export default {
           ellipsis: true,
           customRender: (text) => parseTime(text),
         },
-        { title: "操作", dataIndex: "child-operation", fixed: "right", scopedSlots: { customRender: "child-operation" }, width: "120px", align: "center" },
+        { title: "操作", dataIndex: "child-operation", fixed: "right", scopedSlots: { customRender: "child-operation" }, width: "140px", align: "center" },
       ],
 
       countdownTime: Date.now(),

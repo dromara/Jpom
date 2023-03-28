@@ -140,23 +140,29 @@ export default {
       consoleVisible: false,
 
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "host", dataIndex: "machineDocker.host", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
+        { title: "host", dataIndex: "machineDocker.host", width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "状态", dataIndex: "machineDocker.status", ellipsis: true, align: "center", width: "100px", scopedSlots: { customRender: "status" } },
         { title: "docker版本", dataIndex: "machineDocker.dockerVersion", ellipsis: true, width: "120px", scopedSlots: { customRender: "tooltip" } },
-        { title: "标签", dataIndex: "tags", ellipsis: true, scopedSlots: { customRender: "tags" } },
+        { title: "标签", dataIndex: "tags", width: 100, ellipsis: true, scopedSlots: { customRender: "tags" } },
         { title: "最后修改人", dataIndex: "modifyUser", width: "120px", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
           sorter: true,
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
           width: "170px",
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "190px" },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, fixed: "right", align: "center", width: "190px" },
       ],
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
