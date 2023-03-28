@@ -529,10 +529,10 @@ export default {
           title: "项目路径",
           dataIndex: "path",
           ellipsis: true,
-          scopedSlots: { customRender: "path", width: 150 },
+          scopedSlots: { customRender: "path" },
+          width: 150,
         },
         { title: "运行方式", dataIndex: "runMode", sorter: true, width: "90px", ellipsis: true, align: "center", scopedSlots: { customRender: "runMode" } },
-        { title: "修改时间", sorter: true, dataIndex: "modifyTimeMillis", width: "170px", ellipsis: true, scopedSlots: { customRender: "time" } },
 
         // {
         //   title: "最后操作人",
@@ -544,6 +544,7 @@ export default {
         // },
         { title: "运行状态", dataIndex: "status", width: 80, ellipsis: true, align: "center", scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
+        { title: "修改时间", sorter: true, dataIndex: "modifyTimeMillis", width: "170px", ellipsis: true, scopedSlots: { customRender: "time" } },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, fixed: "right", align: "center", width: "180px" },
       ],
       copyColumns: [

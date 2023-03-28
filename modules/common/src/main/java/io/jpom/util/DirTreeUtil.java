@@ -22,11 +22,14 @@
  */
 package io.jpom.util;
 
+import cn.hutool.core.comparator.CompareUtil;
 import cn.hutool.core.io.FileUtil;
-import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 目录树
@@ -42,28 +45,29 @@ public class DirTreeUtil {
      * @param path 文件名
      * @return jsonArray
      */
-    public static JSONArray getTreeData(String path) {
+    public static List<JSONObject> getTreeData(String path) {
         File file = FileUtil.file(path);
         return readTree(file, path);
     }
 
-    private static JSONArray readTree(File file, String logFile) {
+    private static List<JSONObject> readTree(File file, String logFile) {
         File[] files = file.listFiles();
         if (files == null) {
             return null;
         }
-        JSONArray jsonArray = new JSONArray();
-        for (File file1 : files) {
-            JSONObject jsonObject = new JSONObject();
-            String path = StringUtil.delStartPath(file1, logFile, true);
-            jsonObject.put("title", file1.getName());
-            jsonObject.put("path", path);
-            if (file1.isDirectory()) {
-                JSONArray children = readTree(file1, logFile);
-                jsonObject.put("children", children);
-            }
-            jsonArray.add(jsonObject);
-        }
-        return jsonArray;
+        return Arrays.stream(files)
+            .sorted((o1, o2) -> CompareUtil.compare(o2.lastModified(), o1.lastModified()))
+            .map(file1 -> {
+                JSONObject jsonObject = new JSONObject();
+                String path = StringUtil.delStartPath(file1, logFile, true);
+                jsonObject.put("title", file1.getName());
+                jsonObject.put("path", path);
+                if (file1.isDirectory()) {
+                    List<JSONObject> children = readTree(file1, logFile);
+                    jsonObject.put("children", children);
+                }
+                return jsonObject;
+            })
+            .collect(Collectors.toList());
     }
 }

@@ -157,7 +157,9 @@ public class LoginInterceptor implements HandlerMethodInterceptor {
     private int tryGetHeaderUser(HttpServletRequest request, HttpSession session) {
         String header = request.getHeader(ServerOpenApi.USER_TOKEN_HEAD);
         if (StrUtil.isEmpty(header)) {
-            return ServerConst.AUTHORIZE_TIME_OUT_CODE;
+            // 兼容就版本 登录状态 （下载功能需要使用到 session 的登录状态）
+            UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
+            return user != null ? 0 : ServerConst.AUTHORIZE_TIME_OUT_CODE;
         }
         UserService userService = SpringUtil.getBean(UserService.class);
         UserModel userModel = userService.checkUser(header);
