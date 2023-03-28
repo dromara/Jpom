@@ -1,5 +1,6 @@
 <template>
   <div class="node-full-content">
+    <a-alert message="当前功能将择机下架，请提前使用服务端证书管理来统一实现证书分发" banner />
     <!-- 数据表格 -->
     <a-table :data-source="list" size="middle" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="title">

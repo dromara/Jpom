@@ -36,11 +36,13 @@ import io.jpom.func.files.model.FileStorageModel;
 import io.jpom.func.files.service.FileReleaseTaskService;
 import io.jpom.func.files.service.FileStorageService;
 import io.jpom.model.data.AgentWhitelist;
+import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.ServerWhitelist;
 import io.jpom.model.data.SshModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
+import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.ServerConfig;
 import io.jpom.util.FileUtils;
@@ -71,17 +73,20 @@ public class FileReleaseTaskController extends BaseServerController {
     private final ServerConfig serverConfig;
     private final OutGivingWhitelistService outGivingWhitelistService;
     private final SshService sshService;
+    private final NodeService nodeService;
 
     public FileReleaseTaskController(FileStorageService fileStorageService,
                                      FileReleaseTaskService fileReleaseTaskService,
                                      ServerConfig serverConfig,
                                      OutGivingWhitelistService outGivingWhitelistService,
-                                     SshService sshService) {
+                                     SshService sshService,
+                                     NodeService nodeService) {
         this.fileStorageService = fileStorageService;
         this.fileReleaseTaskService = fileReleaseTaskService;
         this.serverConfig = serverConfig;
         this.outGivingWhitelistService = outGivingWhitelistService;
         this.sshService = sshService;
+        this.nodeService = nodeService;
     }
 
 
@@ -127,6 +132,10 @@ public class FileReleaseTaskController extends BaseServerController {
             list = StrUtil.splitTrim(taskDataIds, StrUtil.COMMA);
             list = list.stream().filter(s -> sshService.exists(new SshModel(s))).collect(Collectors.toList());
             Assert.notEmpty(list, "请选择正确的ssh");
+        } else if (taskType == 1) {
+            list = StrUtil.splitTrim(taskDataIds, StrUtil.COMMA);
+            list = list.stream().filter(s -> nodeService.exists(new NodeModel(s))).collect(Collectors.toList());
+            Assert.notEmpty(list, "请选择正确的节点");
         } else {
             throw new IllegalArgumentException("不支持的方式");
         }
@@ -239,12 +248,12 @@ public class FileReleaseTaskController extends BaseServerController {
         List<FileReleaseTaskLogModel> logModels = fileReleaseTaskService.listByBean(fileReleaseTaskLogModel);
         if (logModels != null) {
             List<String> ids = logModels.stream()
-                    .map(logModel -> {
-                        File file = fileReleaseTaskService.logFile(logModel);
-                        FileUtil.del(file);
-                        return logModel.getId();
-                    })
-                    .collect(Collectors.toList());
+                .map(logModel -> {
+                    File file = fileReleaseTaskService.logFile(logModel);
+                    FileUtil.del(file);
+                    return logModel.getId();
+                })
+                .collect(Collectors.toList());
             fileReleaseTaskService.delByKey(ids, null);
         }
         File taskDir = fileReleaseTaskService.logTaskDir(taskLogModel);

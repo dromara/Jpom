@@ -284,7 +284,7 @@
           <a-form-model-item label="发布方式" prop="taskType">
             <a-radio-group v-model="temp.taskType" @change="taskTypeChange">
               <a-radio :value="0"> SSH </a-radio>
-              <a-radio :value="1" :disabled="true"> 节点 </a-radio>
+              <a-radio :value="1"> 节点 </a-radio>
             </a-radio-group>
           </a-form-model-item>
 
@@ -299,6 +299,20 @@
               </a-col>
               <a-col :span="1" style="margin-left: 10px">
                 <a-icon type="reload" @click="loadSshList" />
+              </a-col>
+            </a-row>
+          </a-form-model-item>
+          <a-form-model-item prop="taskDataIds" label="发布的节点" v-else-if="temp.taskType === 1">
+            <a-row>
+              <a-col :span="22">
+                <a-select show-search option-filter-prop="children" mode="multiple" v-model="temp.taskDataIds" placeholder="请选择节点">
+                  <a-select-option v-for="ssh in nodeList" :key="ssh.id">
+                    <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
+                  </a-select-option>
+                </a-select>
+              </a-col>
+              <a-col :span="1" style="margin-left: 10px">
+                <a-icon type="reload" @click="loadNodeList" />
               </a-col>
             </a-row>
           </a-form-model-item>
@@ -347,7 +361,7 @@ import { getSshListAll } from "@/api/ssh";
 import { getDispatchWhiteList } from "@/api/dispatch";
 import codeEditor from "@/components/codeEditor";
 import { addReleaseTask } from "@/api/file-manager/release-task-log";
-
+import { getNodeListAll } from "@/api/node";
 export default {
   components: {
     codeEditor,
@@ -421,6 +435,7 @@ export default {
       releaseFileVisible: false,
       sshList: [],
       accessList: [],
+      nodeList: [],
     };
   },
   computed: {
@@ -663,10 +678,13 @@ export default {
       this.taskTypeChange(0);
       this.loadAccesList();
     },
-    taskTypeChange(value) {
+    taskTypeChange() {
+      const value = this.temp.taskType;
       this.temp = { ...this.temp, taskDataIds: undefined };
       if (value === 0) {
         this.loadSshList();
+      } else if (value === 1) {
+        this.loadNodeList();
       }
     },
     // 创建任务
@@ -706,6 +724,14 @@ export default {
             resolve();
           }
         });
+      });
+    },
+    // 加载节点
+    loadNodeList() {
+      getNodeListAll().then((res) => {
+        if (res.code === 200) {
+          this.nodeList = res.data;
+        }
       });
     },
   },

@@ -58,6 +58,10 @@ public enum NodeUrl {
      */
     Script_Run("/script_run"),
     /**
+     * 自由脚本
+     */
+    FreeScriptRun("/free-script-run"),
+    /**
      * Tomcat
      */
     Tomcat_Socket("/tomcat_log"),
@@ -109,6 +113,8 @@ public enum NodeUrl {
     MANAGE_FILE_BACKUP_RECOVER("/manage/file/backup-recover"),
     Manage_File_Upload_Sharding("/manage/file/upload-sharding", true),
     Manage_File_Sharding_Merge("/manage/file/sharding-merge", true),
+    Manage_File_Upload_Sharding2("/manage/file2/upload-sharding", true),
+    Manage_File_Sharding_Merge2("/manage/file2/sharding-merge", true),
 
     Manage_File_DeleteFile("/manage/file/deleteFile"),
     /**
