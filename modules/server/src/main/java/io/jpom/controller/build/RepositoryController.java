@@ -84,10 +84,6 @@ public class RepositoryController extends BaseServerController {
     /**
      * load repository list
      *
-     * <pre>
-     *     此请求会分页列出数据，如需要不分页列出所有数据使用{@link #loadRepositoryListAll(HttpServletRequest request)}
-     * </pre>
-     *
      * @return json
      */
     @PostMapping(value = "/build/repository/list")
@@ -99,10 +95,6 @@ public class RepositoryController extends BaseServerController {
 
     /**
      * load repository list
-     *
-     * <pre>
-     *     此请求不进行分页列出所有数据，如需要分页使用{@link #loadRepositoryList()}
-     * </pre>
      *
      * @return json
      */
