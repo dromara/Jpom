@@ -1,9 +1,21 @@
 <template>
   <div class="full-content">
-    <!-- 搜索区 -->
-    <!-- <div ref="filter" class="filter"></div> -->
     <!-- 表格 -->
-    <a-table size="middle" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage">
+    <a-table
+      size="middle"
+      :columns="columns"
+      :data-source="list"
+      bordered
+      rowKey="id"
+      :row-selection="this.choose ? rowSelection : null"
+      :pagination="pagination"
+      @change="
+        (pagination, filters, sorter) => {
+          this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
+          this.loadData();
+        }
+      "
+    >
       <template slot="title">
         <a-space>
           <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="仓库名称" />
@@ -66,7 +78,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editVisible" title="编辑仓库" @ok="handleEditOk" :maskClosable="false">
+    <a-modal :zIndex="1009" destroyOnClose v-model="editVisible" title="编辑仓库" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="仓库名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="仓库名称" />
@@ -187,7 +199,7 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
-    <a-modal destroyOnClose v-model="giteeImportVisible" title="通过私人令牌导入仓库" width="80%" :footer="null" :maskClosable="false">
+    <a-modal :zIndex="1009" destroyOnClose v-model="giteeImportVisible" title="通过私人令牌导入仓库" width="80%" :footer="null" :maskClosable="false">
       <a-form-model :label-col="{ span: 4 }" :rules="giteeImportFormRules" :model="giteeImportForm" ref="giteeImportForm" :wrapper-col="{ span: 20 }">
         <a-form-model-item prop="token" label="私人令牌" help="使用私人令牌，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。">
           <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder[giteeImportForm.type]}`">
@@ -229,6 +241,34 @@
         </template>
       </a-table>
     </a-modal>
+    <div style="padding-top: 50px" v-if="this.choose">
+      <div
+        :style="{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          borderTop: '1px solid #e9e9e9',
+          padding: '10px 16px',
+          background: '#fff',
+          textAlign: 'right',
+          zIndex: 1,
+        }"
+      >
+        <a-space>
+          <a-button
+            @click="
+              () => {
+                this.$emit('cancel');
+              }
+            "
+          >
+            取消
+          </a-button>
+          <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
+        </a-space>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -237,6 +277,12 @@ import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } 
 
 export default {
   components: {},
+  props: {
+    choose: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       loading: false,
@@ -349,6 +395,7 @@ export default {
         gogs: "在 设置 --> 应用 --> 生成令牌",
         other: "请输入私人令牌",
       },
+      tableSelections: [],
     };
   },
   computed: {
@@ -359,12 +406,22 @@ export default {
     reposPagination() {
       return COMPUTED_PAGINATION(this.giteeImportForm, this.PAGE_DEFAULT_SIZW_OPTIONS);
     },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
+        type: "radio",
+      };
+    },
   },
   watch: {},
   created() {
     this.loadData();
   },
   methods: {
+    CHANGE_PAGE,
     // 加载数据
     async loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
@@ -513,11 +570,6 @@ export default {
         },
       });
     },
-    // 分页、排序、筛选变化时触发
-    changePage(pagination, filters, sorter) {
-      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
-      this.loadData();
-    },
 
     // 排序
     sortItemHander(record, index, method) {
@@ -555,6 +607,20 @@ export default {
           });
         },
       });
+    },
+    // 确认
+    handerConfirm() {
+      if (!this.tableSelections.length) {
+        this.$notification.warning({
+          message: "请选择要使用的仓库",
+        });
+        return;
+      }
+      const selectData = this.list.filter((item) => {
+        return item.id === this.tableSelections[0];
+      })[0];
+
+      this.$emit("confirm", `${selectData.id}`);
     },
   },
 };

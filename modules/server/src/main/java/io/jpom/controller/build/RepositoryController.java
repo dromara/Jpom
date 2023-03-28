@@ -106,11 +106,12 @@ public class RepositoryController extends BaseServerController {
      *
      * @return json
      */
-    @GetMapping(value = "/build/repository/list_all")
+    @GetMapping(value = "/build/repository/get")
     @Feature(method = MethodFeature.LIST)
-    public Object loadRepositoryListAll(HttpServletRequest request) {
-        List<RepositoryModel> repositoryModels = repositoryService.listByWorkspace(request);
-        return JsonMessage.success("", repositoryModels);
+    public JsonMessage<RepositoryModel> loadRepositoryGet(String id, HttpServletRequest request) {
+        RepositoryModel repositoryModel = repositoryService.getByKey(id, request);
+        Assert.notNull(repositoryModel, "没有对应的仓库");
+        return JsonMessage.success("", repositoryModel);
     }
 
     private RepositoryModel convertRequest(RepositoryModel repositoryModelReq) {

@@ -23,14 +23,15 @@ export function getRepositoryList(params) {
 }
 
 /**
- * 不分页获取所有仓库列表
+ * 获取仓库信息
  *
  * @return {axios} 请求结果 axios 对象
  */
-export function getRepositoryListAll() {
+export function getRepositoryInfo(params) {
   return axios({
-    url: "/build/repository/list_all",
+    url: "/build/repository/get",
     method: "get",
+    params,
   });
 }
 
