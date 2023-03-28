@@ -82,6 +82,7 @@ export const sourceMap = {
   0: "上传",
   1: "构建",
   2: "下载",
+  3: "证书",
 };
 
 export const statusMap = {
