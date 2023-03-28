@@ -28,10 +28,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.stream.CollectorUtil;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.JschUtil;
@@ -44,6 +41,7 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.func.assets.model.MachineSshModel;
 import io.jpom.func.files.model.FileReleaseTaskLogModel;
+import io.jpom.func.files.model.FileStorageModel;
 import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
@@ -52,6 +50,7 @@ import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
+import io.jpom.system.ServerConfig;
 import io.jpom.system.extconf.BuildExtConfig;
 import io.jpom.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -64,10 +63,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -85,17 +81,25 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     private final WorkspaceEnvVarService workspaceEnvVarService;
     private final NodeService nodeService;
     private final BuildExtConfig buildExtConfig;
+    private final ServerConfig serverConfig;
+    private final FileStorageService fileStorageService;
+
     private final Map<String, String> cancelTag = new ConcurrentHashMap<>();
 
     public FileReleaseTaskService(SshService sshService,
                                   JpomApplication jpomApplication,
                                   WorkspaceEnvVarService workspaceEnvVarService,
-                                  NodeService nodeService, BuildExtConfig buildExtConfig) {
+                                  NodeService nodeService,
+                                  BuildExtConfig buildExtConfig,
+                                  ServerConfig serverConfig,
+                                  FileStorageService fileStorageService) {
         this.sshService = sshService;
         this.jpomApplication = jpomApplication;
         this.workspaceEnvVarService = workspaceEnvVarService;
         this.nodeService = nodeService;
         this.buildExtConfig = buildExtConfig;
+        this.serverConfig = serverConfig;
+        this.fileStorageService = fileStorageService;
     }
 
     /**
@@ -115,12 +119,81 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     }
 
     /**
+     * 创建任务
+     *
+     * @param fileId       文件id
+     * @param name         名称
+     * @param taskType     任务类型
+     * @param taskDataIds  任务关联的数据id
+     * @param releasePath  发布目录
+     * @param beforeScript 发布前脚本
+     * @param afterScript  发布后的脚本
+     * @param request      请求
+     * @return json
+     */
+    public JsonMessage<String> addTask(String fileId,
+                                       String name,
+                                       int taskType,
+                                       String taskDataIds,
+                                       String releasePath,
+                                       String beforeScript,
+                                       String afterScript,
+                                       Map<String, String> env,
+                                       HttpServletRequest request) {
+        FileStorageModel storageModel = fileStorageService.getByKey(fileId, request);
+        Assert.notNull(storageModel, "不存在对应的文件");
+        File storageSavePath = serverConfig.fileStorageSavePath();
+        File file = FileUtil.file(storageSavePath, storageModel.getPath());
+        Assert.state(FileUtil.isFile(file), "当前文件丢失不能执行发布任务");
+        //
+        List<String> list;
+        if (taskType == 0) {
+            list = StrUtil.splitTrim(taskDataIds, StrUtil.COMMA);
+            list = list.stream().filter(s -> sshService.exists(new SshModel(s))).collect(Collectors.toList());
+            Assert.notEmpty(list, "请选择正确的ssh");
+        } else if (taskType == 1) {
+            list = StrUtil.splitTrim(taskDataIds, StrUtil.COMMA);
+            list = list.stream().filter(s -> nodeService.exists(new NodeModel(s))).collect(Collectors.toList());
+            Assert.notEmpty(list, "请选择正确的节点");
+        } else {
+            throw new IllegalArgumentException("不支持的方式");
+        }
+        // 生成任务id
+        FileReleaseTaskLogModel taskRoot = new FileReleaseTaskLogModel();
+        taskRoot.setId(IdUtil.fastSimpleUUID());
+        taskRoot.setTaskId(FileReleaseTaskLogModel.TASK_ROOT_ID);
+        taskRoot.setTaskDataId(FileReleaseTaskLogModel.TASK_ROOT_ID);
+        taskRoot.setName(name);
+        taskRoot.setFileId(fileId);
+        taskRoot.setStatus(0);
+        taskRoot.setTaskType(taskType);
+        taskRoot.setReleasePath(releasePath);
+        taskRoot.setAfterScript(afterScript);
+        taskRoot.setBeforeScript(beforeScript);
+        this.insert(taskRoot);
+        // 子任务列表
+        for (String dataId : list) {
+            FileReleaseTaskLogModel releaseTaskLogModel = new FileReleaseTaskLogModel();
+            releaseTaskLogModel.setTaskId(taskRoot.getId());
+            releaseTaskLogModel.setTaskDataId(dataId);
+            releaseTaskLogModel.setName(name);
+            releaseTaskLogModel.setFileId(fileId);
+            releaseTaskLogModel.setStatus(0);
+            releaseTaskLogModel.setTaskType(taskType);
+            releaseTaskLogModel.setReleasePath(taskRoot.getReleasePath());
+            this.insert(releaseTaskLogModel);
+        }
+        this.startTask(taskRoot.getId(), file, env);
+        return JsonMessage.success("创建成功");
+    }
+
+    /**
      * 开始任务d
      *
      * @param taskId          任务id
      * @param storageSaveFile 文件
      */
-    public void startTask(String taskId, File storageSaveFile) {
+    private void startTask(String taskId, File storageSaveFile, Map<String, String> env) {
         FileReleaseTaskLogModel taskRoot = this.getByKey(taskId);
         Assert.notNull(taskRoot, "没有找到父级任务");
         //
@@ -130,6 +203,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         Assert.notEmpty(logModels, "没有对应的任务");
         //
         EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.getEnv(taskRoot.getWorkspaceId());
+        Optional.ofNullable(env).ifPresent(environmentMapBuilder::putStr);
         environmentMapBuilder.put("TASK_ID", taskRoot.getTaskId());
         environmentMapBuilder.put("FILE_ID", taskRoot.getFileId());
         //
