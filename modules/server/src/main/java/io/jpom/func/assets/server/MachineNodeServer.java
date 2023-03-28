@@ -262,13 +262,13 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         Optional.ofNullable(data.getJSONObject("jpomInfo")).ifPresent(jsonObject -> {
             JSONObject jpomManifest = jsonObject.getJSONObject("jpomManifest");
             Optional.ofNullable(jpomManifest)
-                    .ifPresent(jsonObject1 -> {
-                        machineNodeModel.setJpomVersion(jsonObject1.getString("version"));
-                        machineNodeModel.setJpomBuildTime(jsonObject1.getString("timeStamp"));
-                        machineNodeModel.setOsName(jsonObject1.getString("osName"));
-                        machineNodeModel.setJpomUptime(jsonObject1.getLong("upTime"));
-                        machineNodeModel.setInstallId(jsonObject1.getString("installId"));
-                    });
+                .ifPresent(jsonObject1 -> {
+                    machineNodeModel.setJpomVersion(jsonObject1.getString("version"));
+                    machineNodeModel.setJpomBuildTime(jsonObject1.getString("timeStamp"));
+                    machineNodeModel.setOsName(jsonObject1.getString("osName"));
+                    machineNodeModel.setJpomUptime(jsonObject1.getLong("upTime"));
+                    machineNodeModel.setInstallId(jsonObject1.getString("installId"));
+                });
             machineNodeModel.setJpomProjectCount(jsonObject.getIntValue("projectCount"));
             machineNodeModel.setJpomScriptCount(jsonObject.getIntValue("scriptCount"));
             //
@@ -338,7 +338,8 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         MachineNodeModel machineNodeModel = ServletUtil.toBean(request, MachineNodeModel.class, true);
         Assert.hasText(machineNodeModel.getName(), "请填写机器名称");
         Assert.hasText(machineNodeModel.getJpomUrl(), "请填写 节点地址");
-        Assert.hasText(machineNodeModel.getJpomUsername(), "请填写节点密码");
+        Assert.hasText(machineNodeModel.getJpomUsername(), "请填写节点账号");
+        Assert.hasText(machineNodeModel.getJpomPassword(), "请填写节点密码");
         Assert.hasText(machineNodeModel.getJpomProtocol(), "请选择协议");
         //
         MachineNodeModel update = new MachineNodeModel();
