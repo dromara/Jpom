@@ -141,11 +141,11 @@ public class BuildInfoController extends BaseServerController {
      *
      * @return json
      */
-    @GetMapping(value = "/build/list_all", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/build/get", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<BuildInfoModel>> getBuildListAll(HttpServletRequest request) {
+    public JsonMessage<BuildInfoModel> getBuildListAll(String id, HttpServletRequest request) {
         // load list with page
-        List<BuildInfoModel> modelList = buildInfoService.listByWorkspace(request);
+        BuildInfoModel modelList = buildInfoService.getByKey(id, request);
         return JsonMessage.success("", modelList);
     }
 
@@ -424,7 +424,7 @@ public class BuildInfoController extends BaseServerController {
     @RequestMapping(value = "/build/branch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<JSONObject> branchList(
-            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空") String repositoryId) throws Exception {
+        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空") String repositoryId) throws Exception {
         // 根据 repositoryId 查询仓库信息
         RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, false);
         Assert.notNull(repositoryModel, "无效的仓库信息");

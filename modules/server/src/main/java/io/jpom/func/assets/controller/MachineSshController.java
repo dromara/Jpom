@@ -141,7 +141,8 @@ public class MachineSshController extends BaseGroupNameController {
                                     String charset,
                                     String id,
                                     Integer timeout,
-                                    String allowEditSuffix) {
+                                    String allowEditSuffix,
+                                    String groupName) {
         boolean add = StrUtil.isEmpty(id);
         if (add) {
             // 优先判断参数 如果是 password 在修改时可以不填写
@@ -156,6 +157,7 @@ public class MachineSshController extends BaseGroupNameController {
         }
         MachineSshModel sshModel = new MachineSshModel();
         sshModel.setId(id);
+        sshModel.setGroupName(groupName);
         sshModel.setHost(host);
         // 如果密码传递不为空就设置值 因为上面已经判断了只有修改的情况下 password 才可能为空
         if (StrUtil.isNotEmpty(password)) {
@@ -256,10 +258,10 @@ public class MachineSshController extends BaseGroupNameController {
     @PostMapping(value = "save-workspace-config", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public JsonMessage<String> saveWorkspaceConfig(
-            String fileDirs,
-            @ValidatorItem String id,
-            String notAllowedCommand,
-            String allowEditSuffix) {
+        String fileDirs,
+        @ValidatorItem String id,
+        String notAllowedCommand,
+        String allowEditSuffix) {
         SshModel sshModel = new SshModel(id);
         // 目录
         if (StrUtil.isEmpty(fileDirs)) {
@@ -364,21 +366,21 @@ public class MachineSshController extends BaseGroupNameController {
                 break;
             }
             listPage.getResult()
-                    .stream()
-                    .map((Function<MachineSshModel, List<Object>>) machineSshModel -> CollUtil.newArrayList(
-                            machineSshModel.getName(),
-                            machineSshModel.getGroupName(),
-                            machineSshModel.getHost(),
-                            machineSshModel.getPort(),
-                            machineSshModel.getUser(),
-                            machineSshModel.getPassword(),
-                            machineSshModel.getCharset(),
-                            machineSshModel.getConnectType(),
-                            machineSshModel.getPrivateKey(),
-                            machineSshModel.getTimeout()
-                    ))
-                    .map(objects -> objects.stream().map(StrUtil::toStringOrNull).toArray(String[]::new))
-                    .forEach(writer::writeLine);
+                .stream()
+                .map((Function<MachineSshModel, List<Object>>) machineSshModel -> CollUtil.newArrayList(
+                    machineSshModel.getName(),
+                    machineSshModel.getGroupName(),
+                    machineSshModel.getHost(),
+                    machineSshModel.getPort(),
+                    machineSshModel.getUser(),
+                    machineSshModel.getPassword(),
+                    machineSshModel.getCharset(),
+                    machineSshModel.getConnectType(),
+                    machineSshModel.getPrivateKey(),
+                    machineSshModel.getTimeout()
+                ))
+                .map(objects -> objects.stream().map(StrUtil::toStringOrNull).toArray(String[]::new))
+                .forEach(writer::writeLine);
             if (ObjectUtil.equal(listPage.getPage(), listPage.getTotalPage())) {
                 // 最后一页
                 break;

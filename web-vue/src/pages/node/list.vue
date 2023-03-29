@@ -70,7 +70,12 @@
           size="middle"
           rowKey="id"
           :pagination="pagination"
-          @change="changePage"
+          @change="
+            (pagination, filters, sorter) => {
+              this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
+              this.loadData();
+            }
+          "
           :row-selection="rowSelection"
         >
           <a-tooltip slot="url" slot-scope="text, record" placement="topLeft" :title="text">
@@ -573,7 +578,7 @@ export default {
     renderSize,
     PAGE_DEFAULT_SHOW_TOTAL,
     parseTime,
-
+    CHANGE_PAGE,
     introGuideList() {
       this.$store.dispatch("tryOpenGuide", {
         key: "node-list-manage",
@@ -771,11 +776,7 @@ export default {
         query: query,
       });
     },
-    // 分页、排序、筛选变化时触发
-    changePage(pagination, filters, sorter) {
-      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
-      this.loadData();
-    },
+
     // 加载工作空间数据
     loadWorkSpaceListAll() {
       getWorkSpaceListAll().then((res) => {
