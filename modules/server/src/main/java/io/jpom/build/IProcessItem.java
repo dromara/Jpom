@@ -38,7 +38,7 @@ public interface IProcessItem {
     /**
      * 执行流程
      *
-     * @return 执行结果，false 不再继续执行后续流程
+     * @return 执行异常消息，存在异常消息需要中断构建
      */
-    boolean execute();
+    String execute();
 }

@@ -92,6 +92,10 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
      */
     private Integer status;
     /**
+     * 状态消息
+     */
+    private String statusMsg;
+    /**
      * 开始时间
      */
     private Long startTime;

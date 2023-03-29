@@ -779,12 +779,6 @@ export default {
   padding: 2px 0;
 }
 
-.text-overflow-hidden {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .item-info .title {
   /* display: inline; */
   /* font-weight: bold; */

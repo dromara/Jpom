@@ -4,6 +4,7 @@
     <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" bordered rowKey="id" @change="change" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
+          <a-input allowClear class="search-input-item" @pressEnter="loadData" v-model="listQuery['%buildName%']" placeholder="构建名称" />
           <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
           </a-select>
@@ -31,12 +32,8 @@
       <a-tooltip slot="buildNumberId" slot-scope="text, record" :title="text + ' ( 点击查看日志 ) '">
         <a-tag color="#108ee9" @click="handleBuildLog(record)">#{{ text }}</a-tag>
       </a-tooltip>
-      <a-tooltip slot="status" slot-scope="text" :title="text">
-        <a-tag v-if="text === 2 || text === 5" color="green">{{ statusMap[text] || "未知" }}</a-tag>
-        <a-tag v-else-if="text === 1 || text === 4" color="orange">{{ statusMap[text] || "未知" }}</a-tag>
-        <a-tag v-else-if="text === 8" color="blue"> {{ statusMap[text] || "未知" }} </a-tag>
-        <a-tag v-else-if="text === 3 || text === 6" color="red">{{ statusMap[text] || "未知" }}</a-tag>
-        <a-tag v-else>{{ statusMap[text] || "未知" }}</a-tag>
+      <a-tooltip slot="status" slot-scope="text, item" :title="item.statusMsg || statusMap[text] || '未知'">
+        <a-tag :color="statusColor[item.status]">{{ statusMap[text] || "未知" }}</a-tag>
       </a-tooltip>
       <a-tooltip slot="releaseMethod" slot-scope="text" :title="releaseMethodMap[text]">
         <span>{{ releaseMethodMap[text] }}</span>
@@ -97,7 +94,7 @@
 </template>
 <script>
 import BuildLog from "./log";
-import { deleteBuildHistory, downloadBuildFile, downloadBuildLog, geteBuildHistory, releaseMethodMap, rollback, statusMap, triggerBuildTypeMap } from "@/api/build-info";
+import { deleteBuildHistory, downloadBuildFile, downloadBuildLog, geteBuildHistory, releaseMethodMap, rollback, statusMap, statusColor, triggerBuildTypeMap } from "@/api/build-info";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, formatDuration, parseTime, renderSize } from "@/utils/const";
 
 export default {
@@ -113,7 +110,8 @@ export default {
 
       total: 0,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-      statusMap: statusMap,
+      statusMap,
+      statusColor,
       temp: {},
       buildLogVisible: false,
       tableSelections: [],

@@ -85,6 +85,10 @@ public class BuildInfoModel extends BaseGroupModel {
      */
     private Integer status;
     /**
+     * 状态消息
+     */
+    private String statusMsg;
+    /**
      * 触发器token
      */
     private String triggerToken;

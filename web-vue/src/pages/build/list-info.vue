@@ -88,13 +88,9 @@
         </template>
         <span>{{ releaseMethodMap[text] }}</span>
       </a-tooltip>
-      <template slot="status" slot-scope="text">
-        <a-tag v-if="text === 2 || text === 5" color="green">{{ statusMap[text] || "未知" }}</a-tag>
-        <a-tag v-else-if="text === 1 || text === 4" color="orange">{{ statusMap[text] || "未知" }}</a-tag>
-        <a-tag v-else-if="text === 8" color="blue"> {{ statusMap[text] || "未知" }} </a-tag>
-        <a-tag v-else-if="text === 3 || text === 6" color="red">{{ statusMap[text] || "未知" }}</a-tag>
-        <a-tag v-else>{{ statusMap[text] || "未知" }}</a-tag>
-      </template>
+      <a-tooltip slot="status" slot-scope="text, item" :title="item.statusMsg || statusMap[text] || '未知'">
+        <a-tag :color="statusColor[item.status]" :title="item.statusMsg || statusMap[text] || '未知'">{{ statusMap[text] || "未知" }}</a-tag>
+      </a-tooltip>
       <a-tooltip slot="buildId" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
         <span v-if="record.buildId <= 0"></span>
         <a-tag v-else color="#108ee9" @click="handleBuildLog(record)">#{{ text }}</a-tag>
@@ -199,10 +195,13 @@
             <editBuildPage
               ref="editBuild"
               @confirm="
-                () => {
+                (build) => {
                   this.editBuildVisible = 0;
                   this.loadData();
                   this.loadGroupList();
+                  if ((build, buildId)) {
+                    reqStartBuild({ id: buildId }, true);
+                  }
                 }
               "
               @close="
@@ -225,10 +224,13 @@
         <editBuildPage
           ref="editBuild"
           @confirm="
-            () => {
+            (build, buildId) => {
               this.editBuildVisible = 0;
               this.loadData();
               this.loadGroupList();
+              if (build) {
+                reqStartBuild({ id: buildId }, true);
+              }
             }
           "
           @close="
@@ -326,7 +328,20 @@
 <script>
 import BuildLog from "./log";
 import CustomSelect from "@/components/customSelect";
-import { clearBuid, deleteBuild, getBuildGroupAll, getBuildList, releaseMethodMap, downloadBuildFileByBuild, startBuild, statusMap, stopBuild, sortItem, getBranchList } from "@/api/build-info";
+import {
+  clearBuid,
+  deleteBuild,
+  getBuildGroupAll,
+  getBuildList,
+  releaseMethodMap,
+  downloadBuildFileByBuild,
+  startBuild,
+  statusMap,
+  statusColor,
+  stopBuild,
+  sortItem,
+  getBranchList,
+} from "@/api/build-info";
 import { getDispatchProject } from "@/api/dispatch";
 import detailsPage from "./details.vue";
 import editBuildPage from "./edit.vue";
@@ -350,7 +365,7 @@ export default {
       groupList: [],
       list: [],
       statusMap,
-
+      statusColor,
       branchTagList: [],
       branchList: [],
       temp: {},

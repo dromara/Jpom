@@ -19,15 +19,16 @@ export function getBuildList(params, loading) {
 }
 
 /**
- * 构建列表
+ * 构建详情
  * @param {
- *  group: 分组名称
+ *
  * } params
  */
-export function getBuildListAll() {
+export function getBuildGet(params) {
   return axios({
-    url: "/build/list_all",
+    url: "/build/get",
     method: "get",
+    params,
   });
 }
 
@@ -280,6 +281,21 @@ export const statusMap = {
   6: "发布失败",
   7: "取消构建",
   8: "构建中断",
+};
+export const statusColor = {
+  // <a-tag v-if="data.status === 2 || data.status === 5" color="green">{{ statusMap[data.status] || "未知" }}</a-tag>
+  // <a-tag v-else-if="data.status === 1 || data.status === 4" color="orange">{{ statusMap[data.status] || "未知" }}</a-tag>
+  // <a-tag v-else-if="data.status === 8" color="blue"> {{ statusMap[data.status] || "未知" }} </a-tag>
+  // <a-tag v-else-if="data.status === 3 || data.status === 6" color="red">{{ statusMap[data.status] || "未知" }}</a-tag>
+  // <a-tag v-else>{{ statusMap[data.status] || "未知" }}</a-tag>
+  1: "orange",
+  2: "green",
+  3: "red",
+  4: "orange",
+  5: "green",
+  6: "red",
+  7: "",
+  8: "blue",
 };
 
 export const releaseMethodMap = {

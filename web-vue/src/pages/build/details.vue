@@ -1,12 +1,19 @@
 <template>
   <div>
-    <a-descriptions bordered>
-      <a-descriptions-item label="构建名称"> {{ data.name }}</a-descriptions-item>
-      <a-descriptions-item label="最新构建ID">
-        <a-tag color="#108ee9">#{{ data.buildId }}</a-tag>
+    <a-descriptions bordered size="small">
+      <template #title>
+        <a-space
+          >{{ data.name }}
+          <a-tooltip title="点击刷新构建信息">
+            <a-button type="link" size="small" icon="reload" @click="refresh"> </a-button>
+          </a-tooltip>
+        </a-space>
+      </template>
+
+      <a-descriptions-item label="分组">
+        {{ data.group }}
       </a-descriptions-item>
-      <a-descriptions-item label="分组"> {{ data.group }} </a-descriptions-item>
-      <a-descriptions-item label="分组/标签"> {{ data.branchName }} </a-descriptions-item>
+      <a-descriptions-item label="分组/标签"> {{ data.branchName }} {{ data.branchTagName }} </a-descriptions-item>
       <a-descriptions-item label="构建方式">
         <template v-if="data.bubuildMode === 1">
           <a-icon type="cloud" />
@@ -18,25 +25,35 @@
         </template>
       </a-descriptions-item>
       <a-descriptions-item label="产物目录"> {{ data.resultDirFile }} </a-descriptions-item>
+      <a-descriptions-item label="最新构建ID">
+        <a-tag color="#108ee9">#{{ data.buildId }}</a-tag>
+      </a-descriptions-item>
       <a-descriptions-item label="构建状态">
-        <a-tag :color="statusColor[data.status]">{{ statusMap[data.status] || "未知" }}</a-tag>
+        <a-tooltip :title="data.statusMsg">
+          <a-tag :color="statusColor[data.status]"> {{ statusMap[data.status] || "未知" }} <a-icon type="info-circle" v-if="data.statusMsg" /></a-tag>
+        </a-tooltip>
       </a-descriptions-item>
       <a-descriptions-item label="发布方式">{{ releaseMethodMap[data.releaseMethod] }} </a-descriptions-item>
       <a-descriptions-item label="定时构建"> {{ data.autoBuildCron }} </a-descriptions-item>
+      <a-descriptions-item label="别名码"> {{ data.aliasCode }} </a-descriptions-item>
       <a-descriptions-item label="创建时间"> {{ parseTime(data.createTimeMillis) }} </a-descriptions-item>
       <a-descriptions-item label="最后修改时间"> {{ parseTime(data.modifyTimeMillis) }}</a-descriptions-item>
       <a-descriptions-item label="最后修改人">{{ data.modifyUser }}</a-descriptions-item>
+      <a-descriptions-item label="源仓库" :span="3" v-if="tempRepository">{{ `${tempRepository ? tempRepository.name + "[" + tempRepository.gitUrl + "]" : ""}` }}</a-descriptions-item>
+      <a-descriptions-item label="仓库lastcommit" :span="3">{{ data.repositoryLastCommitId }}</a-descriptions-item>
     </a-descriptions>
 
     <a-row type="flex" justify="center">
-      <a-divider v-if="listQuery.total > 1" dashed>构建历史</a-divider>
+      <a-divider v-if="listQuery.total > 0" dashed>构建历史</a-divider>
       <a-timeline mode="alternate" style="width: 100%">
         <a-timeline-item v-for="item in this.historyList" :key="item.id" :color="statusColor[item.status]">
           <template slot="dot"> #{{ item.buildNumberId }}</template>
           <a-space direction="vertical" :size="1">
             <div v-if="item.buildRemark">构建备注：{{ item.buildRemark }}</div>
             <div>
-              状态：<a-tag :color="statusColor[item.status]">{{ statusMap[item.status] || "未知" }}</a-tag>
+              <a-tooltip :title="item.statusMsg || statusMap[item.status] || '未知'">
+                状态：<a-tag :color="statusColor[item.status]">{{ statusMap[item.status] || "未知" }}</a-tag>
+              </a-tooltip>
             </div>
             <div>时间：{{ parseTime(item.startTime) }} ~ {{ parseTime(item.endTime) }}</div>
             <div>触发类型：{{ triggerBuildTypeMap[item.triggerBuildType] || "未知" }}</div>
@@ -93,6 +110,7 @@
 <script>
 import { getBuildGet, releaseMethodMap, statusMap, geteBuildHistory, statusColor, triggerBuildTypeMap, downloadBuildFile, downloadBuildLog } from "@/api/build-info";
 import { parseTime, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, renderSize, formatDuration } from "@/utils/const";
+import { getRepositoryInfo } from "@/api/repository";
 export default {
   props: {
     id: {
@@ -109,17 +127,31 @@ export default {
       data: {},
       listQuery: Object.assign({ buildDataId: this.id }, PAGE_DEFAULT_LIST_QUERY),
       historyList: [],
+      tempRepository: {},
     };
   },
   created() {
-    this.getData();
-    this.listHistory();
+    this.refresh();
   },
   methods: {
     parseTime,
     formatDuration,
     PAGE_DEFAULT_SHOW_TOTAL,
     renderSize,
+    refresh() {
+      this.getData();
+      this.listHistory();
+    },
+    // 选择仓库
+    getRepositpry() {
+      getRepositoryInfo({
+        id: this.data?.repositoryId,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.tempRepository = res.data;
+        }
+      });
+    },
     // 获取构建数据
     getData() {
       // 构建基础信息
@@ -128,6 +160,7 @@ export default {
       }).then((res) => {
         if (res.data) {
           this.data = res.data;
+          this.getRepositpry();
         }
       });
     },
