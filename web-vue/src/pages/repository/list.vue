@@ -203,13 +203,26 @@
       <a-form-model :label-col="{ span: 4 }" :rules="giteeImportFormRules" :model="giteeImportForm" ref="giteeImportForm" :wrapper-col="{ span: 20 }">
         <a-form-model-item prop="token" label="私人令牌" help="使用私人令牌，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。">
           <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder[giteeImportForm.type]}`">
-            <a-input v-model="giteeImportForm.token" :placeholder="importTypePlaceholder[giteeImportForm.type]">
+            <!-- <a-input v-model="giteeImportForm.token" :placeholder="importTypePlaceholder[giteeImportForm.type]">
               <a-select slot="addonBefore" style="width: 100px" @change="importChange" v-model="giteeImportForm.type">
                 <a-select-option :value="item" v-for="item in Object.keys(providerData)" :key="item"> {{ item }}</a-select-option>
               </a-select>
 
               <a-button slot="addonAfter" size="small" type="primary" icon="search" @click="handleGiteeImportFormOk"></a-button>
-            </a-input>
+            </a-input> -->
+            <a-input-group compact>
+              <a-select style="width: 10%" @change="importChange" v-model="giteeImportForm.type">
+                <a-select-option :value="item" v-for="item in Object.keys(providerData)" :key="item"> {{ item }}</a-select-option>
+              </a-select>
+
+              <a-input-search
+                style="width: 90%; margin-top: 1px"
+                enter-button
+                v-model="giteeImportForm.token"
+                @search="handleGiteeImportFormOk"
+                :placeholder="importTypePlaceholder[giteeImportForm.type]"
+              />
+            </a-input-group>
           </a-tooltip>
         </a-form-model-item>
         <a-form-model-item prop="address" label="地址">
