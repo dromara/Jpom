@@ -215,26 +215,31 @@
               </a-tooltip>
             </template>
             <a-tab-pane key="1" tab="断点/分片单文件下载">
-              <a-alert
-                v-clipboard:copy="`${temp.triggerDownloadUrl}`"
-                v-clipboard:success="
-                  () => {
-                    tempVue.prototype.$notification.success({ message: '复制成功' });
-                  }
-                "
-                v-clipboard:error="
-                  () => {
-                    tempVue.prototype.$notification.error({ message: '复制失败' });
-                  }
-                "
-                type="info"
-                :message="`下载地址(点击可以复制)`"
-              >
-                <template slot="description">
-                  <a-tag>GET</a-tag> <span>{{ `${temp.triggerDownloadUrl}` }} </span>
-                  <a-icon type="copy" />
-                </template>
-              </a-alert>
+              <a-space style="display: block" direction="vertical" align="baseline">
+                <a-alert
+                  v-clipboard:copy="`${temp.triggerDownloadUrl}`"
+                  v-clipboard:success="
+                    () => {
+                      tempVue.prototype.$notification.success({ message: '复制成功' });
+                    }
+                  "
+                  v-clipboard:error="
+                    () => {
+                      tempVue.prototype.$notification.error({ message: '复制失败' });
+                    }
+                  "
+                  type="info"
+                  :message="`下载地址(点击可以复制)`"
+                >
+                  <template slot="description">
+                    <a-tag>GET</a-tag> <span>{{ `${temp.triggerDownloadUrl}` }} </span>
+                    <a-icon type="copy" />
+                  </template>
+                </a-alert>
+                <a :href="temp.triggerDownloadUrl" target="_blank">
+                  <a-button size="small" icon="download" type="primary">立即下载</a-button>
+                </a>
+              </a-space>
             </a-tab-pane>
             <a-tab-pane key="2" tab="断点/分片别名下载" v-if="temp.triggerAliasDownloadUrl">
               <a-space style="display: block" direction="vertical" align="baseline">
@@ -271,6 +276,9 @@
                     <a-icon type="copy" />
                   </template>
                 </a-alert>
+                <a :href="temp.triggerAliasDownloadUrl" target="_blank">
+                  <a-button size="small" icon="download" type="primary">立即下载</a-button>
+                </a>
               </a-space>
             </a-tab-pane>
           </a-tabs>
