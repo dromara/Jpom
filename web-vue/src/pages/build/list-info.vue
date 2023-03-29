@@ -1,22 +1,7 @@
 <template>
   <div class="full-content">
-    <!-- <div ref="filter" class="filter"></div> -->
     <!-- 表格 -->
-    <a-table
-      size="middle"
-      :columns="columns"
-      :data-source="list"
-      bordered
-      rowKey="id"
-      :pagination="pagination"
-      @change="
-        (pagination, filters, sorter) => {
-          this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
-          this.loadData();
-        }
-      "
-      :row-selection="rowSelection"
-    >
+    <a-card :bodyStyle="{ padding: '10px' }">
       <template slot="title">
         <a-space>
           <a-input allowClear class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="构建名称" />
@@ -45,115 +30,273 @@
             <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
           </a-dropdown>
 
+          <a-button type="primary" @click="changeLayout" :icon="this.layoutType === 'card' ? 'layout' : 'table'"> {{ this.layoutType === "card" ? "卡片" : "表格" }} </a-button>
+
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
         </a-space>
       </template>
-      <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" @click="handleDetails(record)" :title="`名称：${text} 点击查看详情`">
-        <a-button type="link" style="padding: 0px" size="small"> <a-icon type="fullscreen" />{{ text }}</a-button>
-      </a-tooltip>
-      <a-tooltip slot="branchName" slot-scope="text, record" placement="topLeft">
-        <template slot="title">
-          <div v-if="record.branchTagName">
-            <div>标签名称：{{ record.branchTagName }}</div>
-            <div>上次构建基于 commitId：{{ record.repositoryLastCommitId }}</div>
-          </div>
-          <div v-else>
-            <div>分支名称：{{ text }}</div>
-            <div>上次构建基于 commitId：{{ record.repositoryLastCommitId }}</div>
-          </div>
-        </template>
-        <span v-if="record.branchTagName"><a-icon type="tag" />{{ record.branchTagName }}</span>
-        <span v-else>{{ text }}</span>
-      </a-tooltip>
-      <!-- <a-tooltip slot="resultDirFile" slot-scope="text" placement="topLeft" :title="text">
+      <template v-if="this.layoutType === 'card'">
+        <a-row>
+          <a-row :gutter="[16, 16]">
+            <template v-if="list && list.length">
+              <a-col v-for="item in list" :key="item.id" :span="6">
+                <template>
+                  <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
+                    <template slot="title">
+                      <a-row :gutter="[4, 0]">
+                        <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+                          <a-button type="link" style="padding: 0px" size="small" @click="handleDetails(item)">
+                            <span> {{ item.name }}</span>
+                          </a-button>
+                        </a-col>
+                        <a-col :span="7" style="text-align: right" class="text-overflow-hidden">
+                          <a-tooltip :title="`当前状态：${statusMap[item.status]} ${item.statusMsg ? '状态消息：' + item.statusMsg : ''} `">
+                            <a-tag :color="statusColor[item.status]" style="margin-right: 0px"> {{ statusMap[item.status] }}</a-tag>
+                          </a-tooltip>
+                        </a-col>
+                      </a-row>
+                    </template>
+
+                    <a-tooltip>
+                      <template slot="title">
+                        <div v-if="item.branchTagName">
+                          <div>标签名称：{{ item.branchTagName }}</div>
+                          <div>上次构建基于 commitId：{{ item.repositoryLastCommitId }}</div>
+                        </div>
+                        <div v-else>
+                          <div>分支名称：{{ item.branchName }}</div>
+                          <div>上次构建基于 commitId：{{ item.repositoryLastCommitId }}</div>
+                        </div>
+                      </template>
+
+                      <a-row class="item-info">
+                        <a-col :span="6" class="title text-overflow-hidden">分组/标签:</a-col>
+                        <a-col :span="18" class="content text-overflow-hidden"> {{ item.branchName }} {{ item.branchTagName }}</a-col>
+                      </a-row>
+                    </a-tooltip>
+                    <a-tooltip :title="item.resultDirFile">
+                      <a-row class="item-info">
+                        <a-col :span="6" class="title text-overflow-hidden">产物:</a-col>
+                        <a-col :span="18" class="content text-overflow-hidden">
+                          {{ item.resultDirFile }}
+                        </a-col>
+                      </a-row>
+                    </a-tooltip>
+
+                    <a-row class="item-info">
+                      <a-col :span="6" class="title text-overflow-hidden">构建ID:</a-col>
+                      <a-col :span="18" class="content text-overflow-hidden">
+                        <span v-if="item.buildId <= 0"></span>
+                        <a-tag v-else color="#108ee9" @click="handleBuildLog(item)">#{{ item.buildId }}</a-tag>
+                      </a-col>
+                    </a-row>
+
+                    <a-row class="item-info">
+                      <a-col :span="6" class="title text-overflow-hidden">构建方式:</a-col>
+                      <a-col :span="18" class="content text-overflow-hidden">
+                        <template v-if="item.bubuildMode === 1">
+                          <a-icon type="cloud" />
+                          容器构建
+                        </template>
+                        <template v-else>
+                          <a-icon type="code" />
+                          本地构建
+                        </template>
+                      </a-col>
+                    </a-row>
+                    <a-row class="item-info">
+                      <a-col :span="6" class="title text-overflow-hidden">发布方式:</a-col>
+                      <a-col :span="18" class="content text-overflow-hidden">
+                        {{ releaseMethodMap[item.releaseMethod] }}
+                      </a-col>
+                    </a-row>
+
+                    <a-row type="flex" align="middle" justify="center" style="margin-top: 10px">
+                      <a-button-group>
+                        <a-button size="small" type="danger" v-if="item.status === 1 || item.status === 4" @click="handleStopBuild(item)">停止 </a-button>
+                        <a-dropdown v-else>
+                          <a-button size="small" type="primary" @click="handleConfirmStartBuild(item)">构建<a-icon type="down" /></a-button>
+                          <a-menu slot="overlay">
+                            <a-menu-item key="1">
+                              <a-button size="small" type="primary" @click="reqStartBuild({ id: item.id }, true)">直接构建</a-button>
+                            </a-menu-item>
+                            <a-menu-item key="2">
+                              <a-button size="small" type="primary" @click="reqStartBuild({ id: item.id }, false)">后台构建</a-button>
+                            </a-menu-item>
+                          </a-menu>
+                        </a-dropdown>
+
+                        <a-button size="small" type="primary" @click="handleEdit(item)">编辑</a-button>
+                        <a-button size="small" @click="handleDelete(item)">删除</a-button>
+                        <a-tooltip
+                          placement="leftBottom"
+                          title="清除代码(仓库目录)为删除服务器中存储仓库目录里面的所有东西,删除后下次构建将重新拉起仓库里面的文件,一般用于解决服务器中文件和远程仓库中文件有冲突时候使用。执行时间取决于源码目录大小和文件数量如超时请耐心等待，或稍后重试"
+                        >
+                          <a-button size="small" :disabled="!item.sourceDirExist" @click="handleClear(item)">清除代码 </a-button>
+                        </a-tooltip>
+                      </a-button-group>
+                    </a-row>
+                  </a-card>
+                </template>
+              </a-col>
+            </template>
+            <a-col v-else :span="24">
+              <a-empty description="没有任何节点" />
+            </a-col>
+          </a-row>
+        </a-row>
+        <a-row type="flex" justify="center">
+          <a-divider v-if="listQuery.total / listQuery.limit > 1" dashed />
+          <a-col>
+            <a-pagination
+              v-model="listQuery.page"
+              :showTotal="
+                (total) => {
+                  return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery);
+                }
+              "
+              :showSizeChanger="true"
+              :pageSizeOptions="sizeOptions"
+              :pageSize="listQuery.limit"
+              :total="listQuery.total"
+              :hideOnSinglePage="true"
+              @showSizeChange="
+                (current, size) => {
+                  this.listQuery.limit = size;
+                  this.loadData();
+                }
+              "
+              @change="this.loadData"
+              show-less-items
+            />
+          </a-col>
+        </a-row>
+      </template>
+      <template v-else-if="this.layoutType === 'table'">
+        <a-table
+          size="middle"
+          :columns="columns"
+          :data-source="list"
+          bordered
+          rowKey="id"
+          :pagination="pagination"
+          @change="
+            (pagination, filters, sorter) => {
+              this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
+              this.loadData();
+            }
+          "
+          :row-selection="rowSelection"
+        >
+          <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" @click="handleDetails(record)" :title="`名称：${text} 点击查看详情`">
+            <a-button type="link" style="padding: 0px" size="small"> <a-icon type="fullscreen" />{{ text }}</a-button>
+          </a-tooltip>
+          <a-tooltip slot="branchName" slot-scope="text, record" placement="topLeft">
+            <template slot="title">
+              <div v-if="record.branchTagName">
+                <div>标签名称：{{ record.branchTagName }}</div>
+                <div>上次构建基于 commitId：{{ record.repositoryLastCommitId }}</div>
+              </div>
+              <div v-else>
+                <div>分支名称：{{ text }}</div>
+                <div>上次构建基于 commitId：{{ record.repositoryLastCommitId }}</div>
+              </div>
+            </template>
+            <span v-if="record.branchTagName"><a-icon type="tag" />{{ record.branchTagName }}</span>
+            <span v-else>{{ text }}</span>
+          </a-tooltip>
+          <!-- <a-tooltip slot="resultDirFile" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip> -->
-      <a-tooltip
-        slot="buildMode"
-        slot-scope="text, record"
-        @click="record.status === 1 || record.status === 4 ? handleStopBuild(record) : handleConfirmStartBuild(record)"
-        placement="topLeft"
-        :title="text === 1 ? '容器构建' : '本地构建'"
-      >
-        <a-icon v-if="text === 1" type="cloud" />
-        <a-icon v-else type="code" />
-      </a-tooltip>
-      <a-tooltip slot="releaseMethod" slot-scope="text, record">
-        <template slot="title">
-          <ul>
-            <li>发布方式：{{ releaseMethodMap[text] }}</li>
-            <li>产物目录：{{ record.resultDirFile }}</li>
-            <li v-if="record.buildMode !== 1">构建命令：{{ record.script }}</li>
-          </ul>
-        </template>
-        <span>{{ releaseMethodMap[text] }}</span>
-      </a-tooltip>
-      <a-tooltip slot="status" slot-scope="text, item" :title="item.statusMsg || statusMap[text] || '未知'">
-        <a-tag :color="statusColor[item.status]" :title="item.statusMsg || statusMap[text] || '未知'">{{ statusMap[text] || "未知" }}</a-tag>
-      </a-tooltip>
-      <a-tooltip slot="buildId" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
-        <span v-if="record.buildId <= 0"></span>
-        <a-tag v-else color="#108ee9" @click="handleBuildLog(record)">#{{ text }}</a-tag>
-      </a-tooltip>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <template slot="operation" slot-scope="text, record, index">
-        <a-space>
-          <a-button size="small" type="danger" v-if="record.status === 1 || record.status === 4" @click="handleStopBuild(record)">停止 </a-button>
-          <a-dropdown v-else>
-            <a-button size="small" type="primary" @click="handleConfirmStartBuild(record)">构建<a-icon type="down" /></a-button>
-            <a-menu slot="overlay">
-              <a-menu-item key="1">
-                <a-button size="small" type="primary" @click="reqStartBuild({ id: record.id }, true)">直接构建</a-button>
-              </a-menu-item>
-              <a-menu-item key="2">
-                <a-button size="small" type="primary" @click="reqStartBuild({ id: record.id }, false)">后台构建</a-button>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown>
-          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-              更多
-              <a-icon type="down" />
-            </a>
-            <a-menu slot="overlay">
-              <a-menu-item>
-                <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" :disabled="!record.resultHasFile" type="primary" @click="handleDownloadFile(record)">下载产物</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-              </a-menu-item>
+          <a-tooltip
+            slot="buildMode"
+            slot-scope="text, record"
+            @click="record.status === 1 || record.status === 4 ? handleStopBuild(record) : handleConfirmStartBuild(record)"
+            placement="topLeft"
+            :title="text === 1 ? '容器构建' : '本地构建'"
+          >
+            <a-icon v-if="text === 1" type="cloud" />
+            <a-icon v-else type="code" />
+          </a-tooltip>
+          <a-tooltip slot="releaseMethod" slot-scope="text, record">
+            <template slot="title">
+              <ul>
+                <li>发布方式：{{ releaseMethodMap[text] }}</li>
+                <li>产物目录：{{ record.resultDirFile }}</li>
+                <li v-if="record.buildMode !== 1">构建命令：{{ record.script }}</li>
+              </ul>
+            </template>
+            <span>{{ releaseMethodMap[text] }}</span>
+          </a-tooltip>
+          <a-tooltip slot="status" slot-scope="text, item" :title="item.statusMsg || statusMap[text] || '未知'">
+            <a-tag :color="statusColor[item.status]" :title="item.statusMsg || statusMap[text] || '未知'">{{ statusMap[text] || "未知" }}</a-tag>
+          </a-tooltip>
+          <a-tooltip slot="buildId" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
+            <span v-if="record.buildId <= 0"></span>
+            <a-tag v-else color="#108ee9" @click="handleBuildLog(record)">#{{ text }}</a-tag>
+          </a-tooltip>
+          <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+          <template slot="operation" slot-scope="text, record, index">
+            <a-space>
+              <a-button size="small" type="danger" v-if="record.status === 1 || record.status === 4" @click="handleStopBuild(record)">停止 </a-button>
+              <a-dropdown v-else>
+                <a-button size="small" type="primary" @click="handleConfirmStartBuild(record)">构建<a-icon type="down" /></a-button>
+                <a-menu slot="overlay">
+                  <a-menu-item key="1">
+                    <a-button size="small" type="primary" @click="reqStartBuild({ id: record.id }, true)">直接构建</a-button>
+                  </a-menu-item>
+                  <a-menu-item key="2">
+                    <a-button size="small" type="primary" @click="reqStartBuild({ id: record.id }, false)">后台构建</a-button>
+                  </a-menu-item>
+                </a-menu>
+              </a-dropdown>
+              <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+              <a-dropdown>
+                <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+                  更多
+                  <a-icon type="down" />
+                </a>
+                <a-menu slot="overlay">
+                  <a-menu-item>
+                    <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" :disabled="!record.resultHasFile" type="primary" @click="handleDownloadFile(record)">下载产物</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                  </a-menu-item>
 
-              <a-menu-item>
-                <a-tooltip
-                  placement="leftBottom"
-                  title="清除代码(仓库目录)为删除服务器中存储仓库目录里面的所有东西,删除后下次构建将重新拉起仓库里面的文件,一般用于解决服务器中文件和远程仓库中文件有冲突时候使用。执行时间取决于源码目录大小和文件数量如超时请耐心等待，或稍后重试"
-                >
-                  <a-button size="small" type="danger" :disabled="!record.sourceDirExist" @click="handleClear(record)">清除代码 </a-button>
-                </a-tooltip>
-              </a-menu-item>
-              <a-menu-divider />
-              <a-menu-item>
-                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'top')">置顶</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'up')">上移</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total" @click="sortItemHander(record, index, 'down')">
-                  下移
-                </a-button>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown>
-        </a-space>
-      </template>
-    </a-table>
+                  <a-menu-item>
+                    <a-tooltip
+                      placement="leftBottom"
+                      title="清除代码(仓库目录)为删除服务器中存储仓库目录里面的所有东西,删除后下次构建将重新拉起仓库里面的文件,一般用于解决服务器中文件和远程仓库中文件有冲突时候使用。执行时间取决于源码目录大小和文件数量如超时请耐心等待，或稍后重试"
+                    >
+                      <a-button size="small" type="danger" :disabled="!record.sourceDirExist" @click="handleClear(record)">清除代码 </a-button>
+                    </a-tooltip>
+                  </a-menu-item>
+                  <a-menu-divider />
+                  <a-menu-item>
+                    <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'top')">置顶</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'up')">上移</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total" @click="sortItemHander(record, index, 'down')">
+                      下移
+                    </a-button>
+                  </a-menu-item>
+                </a-menu>
+              </a-dropdown>
+            </a-space>
+          </template>
+        </a-table></template
+      >
+    </a-card>
+
     <!-- 编辑区 -->
     <a-drawer
       destroyOnClose
@@ -346,7 +489,7 @@ import { getDispatchProject } from "@/api/dispatch";
 import detailsPage from "./details.vue";
 import editBuildPage from "./edit.vue";
 import triggerPage from "./trigger.vue";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
 
 export default {
   components: {
@@ -358,6 +501,7 @@ export default {
   },
   data() {
     return {
+      sizeOptions: ["8", "12", "16", "20", "24"],
       releaseMethodMap,
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
@@ -448,6 +592,7 @@ export default {
       refreshInterval: 5,
       tableSelections: [],
       dispatchProjectList: [],
+      layoutType: null,
     };
   },
   computed: {
@@ -466,14 +611,14 @@ export default {
   },
   watch: {},
   created() {
-    this.loadData();
+    this.changeLayout();
     this.loadGroupList();
     //
     this.countdownTime = Date.now() + this.refreshInterval * 1000;
   },
   methods: {
     CHANGE_PAGE,
-
+    PAGE_DEFAULT_SHOW_TOTAL,
     // 分组数据
     loadGroupList() {
       getBuildGroupAll().then((res) => {
@@ -778,10 +923,26 @@ export default {
       this.tableSelections = [];
       this.loadData();
     },
+    // 切换视图
+    changeLayout() {
+      if (!this.layoutType) {
+        const layoutType = localStorage.getItem("tableLayout");
+        // 默认表格
+        this.layoutType = layoutType === "card" ? "card" : "table";
+      } else {
+        this.layoutType = this.layoutType === "card" ? "table" : "card";
+        localStorage.setItem("tableLayout", this.layoutType);
+      }
+      this.listQuery = { ...this.listQuery, limit: this.layoutType === "card" ? 8 : 10 };
+      this.loadData();
+    },
   },
 };
 </script>
 <style scoped>
+.item-info {
+  padding: 4px 0;
+}
 /deep/ .ant-statistic div {
   display: inline-block;
 }

@@ -431,7 +431,7 @@ export default {
       workspaceList: [],
       viewLinkNode: false,
       nodeList: [],
-      layoutType: "card",
+      layoutType: null,
       columns: [
         { title: "名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "系统名", dataIndex: "osName", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
@@ -492,10 +492,8 @@ export default {
     },
   },
   mounted() {
-    const layoutType = localStorage.getItem("tableLayout");
-    this.layoutType = layoutType === "table" ? "table" : "card";
     this.loadGroupList();
-    this.getMachineList();
+    this.changeLayout();
   },
   methods: {
     parseTime,
@@ -658,8 +656,16 @@ export default {
     },
     // 切换视图
     changeLayout() {
-      this.layoutType = this.layoutType === "card" ? "table" : "card";
-      localStorage.setItem("tableLayout", this.layoutType);
+      if (!this.layoutType) {
+        const layoutType = localStorage.getItem("tableLayout");
+        // 默认表格
+        this.layoutType = layoutType === "card" ? "card" : "table";
+      } else {
+        this.layoutType = this.layoutType === "card" ? "table" : "card";
+        localStorage.setItem("tableLayout", this.layoutType);
+      }
+      this.listQuery = { ...this.listQuery, limit: this.layoutType === "card" ? 8 : 10 };
+      this.getMachineList();
     },
     syncNodeWhiteConfig() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
@@ -776,7 +782,7 @@ export default {
 
 <style scoped>
 .item-info {
-  padding: 2px 0;
+  padding: 4px 0;
 }
 
 .item-info .title {

@@ -206,7 +206,7 @@
                     <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
                       <template slot="title">
                         <a-row :gutter="[4, 0]">
-                          <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+                          <a-col :span="17" class="jpom-node-manage-btn" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
                             <a-tooltip>
                               <template slot="title">
                                 点击进入节点管理
@@ -500,7 +500,7 @@ export default {
       deadline: 0,
       temp: {},
       monitorVisible: false,
-      layoutType: "card",
+      layoutType: null,
       editNodeVisible: false,
       drawerVisible: false,
       terminalVisible: false,
@@ -567,9 +567,8 @@ export default {
     if (searchNodeName) {
       this.listQuery = { ...this.listQuery, "%name%": searchNodeName };
     }
-    const layoutType = localStorage.getItem("tableLayout");
-    this.layoutType = layoutType === "table" ? "table" : "card";
-    this.loadData();
+
+    this.changeLayout();
     this.loadGroupList();
   },
 
@@ -856,8 +855,16 @@ export default {
     },
     // 切换视图
     changeLayout() {
-      this.layoutType = this.layoutType === "card" ? "table" : "card";
-      localStorage.setItem("tableLayout", this.layoutType);
+      if (!this.layoutType) {
+        const layoutType = localStorage.getItem("tableLayout");
+        // 默认表格
+        this.layoutType = layoutType === "card" ? "card" : "table";
+      } else {
+        this.layoutType = this.layoutType === "card" ? "table" : "card";
+        localStorage.setItem("tableLayout", this.layoutType);
+      }
+      this.listQuery = { ...this.listQuery, limit: this.layoutType === "card" ? 8 : 10 };
+      this.loadData();
     },
     onFinish() {
       if (this.drawerVisible) {

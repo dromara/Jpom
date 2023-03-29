@@ -111,6 +111,10 @@ export default {
               element: document.querySelector(".layout-content"),
               intro: "这里是主要的内容展示区域",
             },
+            {
+              title: "导航助手",
+              intro: "温馨提示部分页面有表格视图和卡片视图，不同视图中的功能按钮有些微的差异奥",
+            },
           ],
         },
       });
