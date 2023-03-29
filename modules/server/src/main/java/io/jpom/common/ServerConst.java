@@ -53,6 +53,10 @@ public class ServerConst extends Const {
      * 引用工作空间环境变量的前缀
      */
     public static final String REF_WORKSPACE_ENV = "$ref.wEnv.";
+    /**
+     * 引用工作脚本模板的前缀
+     */
+    public static final String REF_SCRIPT = "$ref.script.";
 
     public static final String PROXY_PATH = "Jpom-ProxyPath";
 

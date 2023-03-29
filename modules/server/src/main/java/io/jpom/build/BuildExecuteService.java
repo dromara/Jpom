@@ -40,6 +40,7 @@ import cn.hutool.core.util.StrUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
+import io.jpom.common.ServerConst;
 import io.jpom.func.assets.server.MachineDockerServer;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseIdModel;
@@ -845,10 +846,18 @@ public class BuildExecuteService {
                 // 容器构建
                 return this.dockerCommand();
             }
-            if (StrUtil.isEmpty(buildInfoModel.getScript())) {
+            String script = buildInfoModel.getScript();
+            if (StrUtil.isEmpty(script)) {
                 String info = "没有需要执行的命令";
                 logRecorder.systemError(info);
                 return info;
+            }
+            if (StrUtil.startWith(script, ServerConst.REF_SCRIPT)) {
+                String scriptId = StrUtil.removePrefix(script, ServerConst.REF_SCRIPT);
+                ScriptModel keyAndGlobal = buildExecuteService.scriptServer.getByKey(scriptId);
+                Assert.notNull(keyAndGlobal, "请选择正确的脚本");
+                script = keyAndGlobal.getContext();
+                logRecorder.system("引入脚本内容：{}[{}]", keyAndGlobal.getName(), scriptId);
             }
             Map<String, String> environment = taskData.environmentMapBuilder.environment();
 
@@ -856,7 +865,7 @@ public class BuildExecuteService {
             String s1 = IoUtil.readUtf8(templateInputStream);
             try {
                 int waitFor = JpomApplication.getInstance()
-                    .execScript(s1 + buildInfoModel.getScript(), file -> {
+                    .execScript(s1 + script, file -> {
                         try {
                             return CommandUtil.execWaitFor(file, this.gitFile, environment, StrUtil.EMPTY, (s, process) -> logRecorder.info(s));
                         } catch (IOException | InterruptedException e) {

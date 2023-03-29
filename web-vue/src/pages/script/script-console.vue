@@ -7,8 +7,8 @@
       <log-view ref="logView" height="calc(100vh - 140px)">
         <template slot="before">
           <a-space>
-            <a-button :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">执行</a-button>
-            <a-button :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">停止</a-button>
+            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">执行</a-button>
+            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">停止</a-button>
           </a-space>
         </template>
       </log-view>
@@ -40,7 +40,7 @@
               </a-row>
             </a-col>
           </a-row>
-          <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
+          <a-button type="primary" size="small" @click="() => commandParams.push({})">添加参数</a-button>
         </a-form-model-item>
       </a-form-model>
     </a-modal>

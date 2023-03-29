@@ -241,7 +241,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
         } else {
             // 数据工作空间
             useWorkspaceId = workspaceId;
-            if (optData instanceof BaseWorkspaceModel && StrUtil.equals(workspaceId, (String) attributes.get("workspaceId"))) {
+            if (optData instanceof BaseWorkspaceModel && !StrUtil.equals(workspaceId, (String) attributes.get("workspaceId"))) {
                 return "数据工作空间和操作工作空间不一致";
             }
         }

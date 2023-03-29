@@ -39,6 +39,7 @@ import io.jpom.build.DockerYmlDsl;
 import io.jpom.build.ResultDirFileAction;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
+import io.jpom.common.ServerConst;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.func.assets.server.MachineDockerServer;
@@ -217,6 +218,12 @@ public class BuildInfoController extends BaseServerController {
             this.checkDocker(script, request);
             // 容器构建不能使用 ant 模式
             Assert.state(resultDirFileAction.getType() == ResultDirFileAction.Type.ORIGINAL, "容器构建的产物路径不能使用 ant 模式");
+        } else {
+            if (StrUtil.startWith(script, ServerConst.REF_SCRIPT)) {
+                String scriptId = StrUtil.removePrefix(script, ServerConst.REF_SCRIPT);
+                ScriptModel keyAndGlobal = scriptServer.getByKeyAndGlobal(scriptId, request, "请选择正确的脚本");
+                Assert.notNull(keyAndGlobal, "请选择正确的脚本");
+            }
         }
         if (buildExtConfig.isCheckDeleteCommand()) {
             // 判断删除命令

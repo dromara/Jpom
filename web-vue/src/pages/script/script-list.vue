@@ -4,6 +4,7 @@
     <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
+          <a-input v-model="listQuery['id']" placeholder="脚本ID" @pressEnter="loadData" allowClear class="search-input-item" />
           <a-input v-model="listQuery['%name%']" placeholder="名称" @pressEnter="loadData" allowClear class="search-input-item" />
           <a-input v-model="listQuery['%description%']" placeholder="描述" @pressEnter="loadData" class="search-input-item" />
           <a-input v-model="listQuery['%autoExecCron%']" placeholder="定时执行" @pressEnter="loadData" class="search-input-item" />
@@ -11,14 +12,7 @@
             <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="createScript">新建脚本</a-button>
-          <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
-            <a-menu slot="overlay">
-              <a-menu-item>
-                <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown>
+          <a-button type="primary" v-if="this.choose === 'checkbox'" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
           <a-tooltip>
             <template slot="title">
               <div>脚本模版是存储在服务端中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
@@ -48,32 +42,37 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
-          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
-          <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-              更多
-              <a-icon type="down" />
-            </a>
-            <a-menu slot="overlay">
-              <a-menu-item>
-                <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
-              </a-menu-item>
+          <template v-if="choose === 'checkbox'">
+            <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+            <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
+            <a-dropdown>
+              <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+                更多
+                <a-icon type="down" />
+              </a>
+              <a-menu slot="overlay">
+                <a-menu-item>
+                  <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+                </a-menu-item>
 
-              <a-menu-item>
-                <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="danger" :disabled="!record.nodeIds" @click="handleUnbind(record)">解绑</a-button>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown>
+                <a-menu-item>
+                  <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button size="small" type="danger" :disabled="!record.nodeIds" @click="handleUnbind(record)">解绑</a-button>
+                </a-menu-item>
+              </a-menu>
+            </a-dropdown>
+          </template>
+          <template v-else>
+            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+          </template>
         </a-space>
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="80vw">
+    <a-modal :zIndex="1009" destroyOnClose v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="80vw">
       <a-form-model ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
         <a-form-model-item v-if="temp.id" label="ScriptId" prop="id">
           <a-input v-model="temp.id" disabled readOnly />
@@ -249,6 +248,34 @@
     >
       <script-log v-if="drawerLogVisible" :scriptId="temp.id" />
     </a-drawer>
+    <div style="padding-top: 50px" v-if="this.choose === 'radio'">
+      <div
+        :style="{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          borderTop: '1px solid #e9e9e9',
+          padding: '10px 16px',
+          background: '#fff',
+          textAlign: 'right',
+          zIndex: 1,
+        }"
+      >
+        <a-space>
+          <a-button
+            @click="
+              () => {
+                this.$emit('cancel');
+              }
+            "
+          >
+            取消
+          </a-button>
+          <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
+        </a-space>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -267,9 +294,16 @@ export default {
     codeEditor,
     ScriptLog,
   },
-  props: {},
+  props: {
+    choose: {
+      type: String,
+      default: "checkbox",
+      // "radio" ,"checkbox"
+    },
+  },
   data() {
     return {
+      // choose: this.choose,
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       cronDataSource: CRON_DATA_SOURCE,
@@ -304,7 +338,9 @@ export default {
         { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
         { title: "最后执行人", dataIndex: "lastRunUser", ellipsis: true, width: "120px", scopedSlots: { customRender: "tooltip" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "240px" },
+        this.choose === "checkbox"
+          ? { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "240px" }
+          : { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "100px" },
       ],
       rules: {
         name: [{ required: true, message: "请输入脚本名称", trigger: "blur" }],
@@ -329,8 +365,13 @@ export default {
           this.tableSelections = selectedRowKeys;
         },
         selectedRowKeys: this.tableSelections,
+        type: this.choose,
       };
     },
+  },
+  created() {
+    // this.columns.push(
+    // );
   },
   mounted() {
     // this.calcTableHeight();
@@ -556,6 +597,19 @@ export default {
       this.temp = Object.assign({}, record);
 
       this.drawerLogVisible = true;
+    },
+    handerConfirm() {
+      if (!this.tableSelections.length) {
+        this.$notification.warning({
+          message: "请选择要使用的脚本",
+        });
+        return;
+      }
+      const selectData = this.list.filter((item) => {
+        return item.id === this.tableSelections[0];
+      })[0];
+
+      this.$emit("confirm", `${selectData.id}`);
     },
   },
 };
