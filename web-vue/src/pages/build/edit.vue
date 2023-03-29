@@ -112,17 +112,30 @@
                 <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
               </a-tooltip>
             </template>
-            <a-popover title="命令示例">
+            <a-popover title="辅助操作">
               <template slot="content">
-                <p
-                  @click="
-                    () => {
-                      this.viewScriptTemplVisible = true;
-                    }
-                  "
-                >
-                  <a-button type="link"> 点击查看 <a-icon type="fullscreen" /> </a-button>
-                </p>
+                <a-space direction="vertical">
+                  <a-button
+                    type="link"
+                    @click="
+                      () => {
+                        this.viewScriptTemplVisible = true;
+                      }
+                    "
+                  >
+                    常见构建命令示例 <a-icon type="fullscreen" />
+                  </a-button>
+                  <a-button
+                    type="link"
+                    @click="
+                      () => {
+                        this.chooseScriptVisible = 2;
+                      }
+                    "
+                  >
+                    引用脚本模板
+                  </a-button>
+                </a-space>
               </template>
               <a-input
                 v-model="temp.script"
@@ -607,9 +620,20 @@
                 <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
               </a-tooltip>
             </template>
-            <a-select allowClear show-search option-filter-prop="children" placeholder="构建过程执行对应的脚本" v-model="tempExtraData.noticeScriptId">
+            <a-input-search
+              :value="`${tempExtraData ? tempExtraData.noticeScriptId || '请选择脚本' : '请选择脚本'}`"
+              readOnly
+              placeholder="请选择脚本"
+              enter-button="选择脚本"
+              @search="
+                () => {
+                  this.chooseScriptVisible = 1;
+                }
+              "
+            />
+            <!-- <a-select allowClear show-search option-filter-prop="children" placeholder="构建过程执行对应的脚本" v-model="tempExtraData.noticeScriptId">
               <a-select-option v-for="item2 in scriptList" :key="item2.id">{{ item2.name }}</a-select-option>
-            </a-select>
+            </a-select> -->
           </a-form-model-item>
           <a-form-model-item prop="attachEnv">
             <template slot="label">
@@ -721,6 +745,40 @@
         "
       ></repository>
     </a-drawer>
+    <!-- 选择脚本 -->
+    <a-drawer
+      destroyOnClose
+      :title="`选择脚本`"
+      placement="right"
+      :visible="chooseScriptVisible != 0"
+      width="50vw"
+      :zIndex="1009"
+      @close="
+        () => {
+          this.chooseScriptVisible = 0;
+        }
+      "
+    >
+      <scriptPage
+        v-if="chooseScriptVisible"
+        choose="radio"
+        @confirm="
+          (id) => {
+            if (this.chooseScriptVisible === 1) {
+              this.tempExtraData = { ...this.tempExtraData, noticeScriptId: id };
+            } else if (this.chooseScriptVisible === 2) {
+              this.temp = { ...this.temp, script: '$ref.script.' + id };
+            }
+            this.chooseScriptVisible = 0;
+          }
+        "
+        @cancel="
+          () => {
+            this.chooseScriptVisible = 0;
+          }
+        "
+      ></scriptPage>
+    </a-drawer>
 
     <!-- 查看命令示例 -->
     <a-modal destroyOnClose width="50vw" v-model="viewScriptTemplVisible" title="构建命令示例" :footer="null" :maskClosable="false">
@@ -756,6 +814,7 @@
 <script>
 import codeEditor from "@/components/codeEditor";
 import repository from "@/pages/repository/list.vue";
+import scriptPage from "@/pages/script/script-list.vue";
 import CustomSelect from "@/components/customSelect";
 import { dockerSwarmListAll, dockerSwarmServicesList } from "@/api/docker-swarm";
 import { getBuildGroupAll, editBuild, getBranchList, buildModeMap, releaseMethodMap, getBuildGet } from "@/api/build-info";
@@ -772,6 +831,7 @@ export default {
     CustomSelect,
     codeEditor,
     repository,
+    scriptPage,
   },
   data() {
     return {
@@ -783,6 +843,7 @@ export default {
       // 当前仓库信息
       tempRepository: null,
       repositoryisible: false,
+      chooseScriptVisible: 0,
       // 当前构建信息的 extraData 属性
       tempExtraData: {},
       viewScriptTemplVisible: false,

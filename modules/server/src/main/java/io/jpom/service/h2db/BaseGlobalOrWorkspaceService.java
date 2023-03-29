@@ -119,8 +119,19 @@ public abstract class BaseGlobalOrWorkspaceService<T extends BaseWorkspaceModel>
      * @return data
      */
     public T getByKeyAndGlobal(String keyValue, HttpServletRequest request) {
+        return this.getByKeyAndGlobal(keyValue, request, "数据不存在");
+    }
+
+    /**
+     * 查询数据，并判断管理和创建人
+     *
+     * @param keyValue 主机id
+     * @param request  请求信息
+     * @return data
+     */
+    public T getByKeyAndGlobal(String keyValue, HttpServletRequest request, String errorMsg) {
         T byKey = this.getByKey(keyValue, request);
-        Assert.notNull(byKey, "数据不存在");
+        Assert.notNull(byKey, errorMsg);
         UserModel userModel = BaseServerController.getUserByThreadLocal();
         Assert.notNull(userModel, "当前未登录不能操作此数据");
         if (StrUtil.equals(byKey.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL) && !userModel.isSystemUser()) {
