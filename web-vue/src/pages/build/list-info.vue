@@ -141,7 +141,7 @@
               </a-col>
             </template>
             <a-col v-else :span="24">
-              <a-empty description="没有任何节点" />
+              <a-empty description="没有任何构建" />
             </a-col>
           </a-row>
         </a-row>

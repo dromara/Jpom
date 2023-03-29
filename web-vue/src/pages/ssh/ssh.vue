@@ -252,15 +252,15 @@ export default {
       columns: [
         { title: "名称", dataIndex: "name", sorter: true, width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
-        { title: "Host", dataIndex: "machineSsh.host", width: 100, sorter: true, ellipsis: true, scopedSlots: { customRender: "host" } },
+        { title: "Host", dataIndex: "machineSsh.host", width: 100, ellipsis: true, scopedSlots: { customRender: "host" } },
         // { title: "Port", dataIndex: "machineSsh.port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "用户名", dataIndex: "machineSsh.user", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "用户名", dataIndex: "machineSsh.user", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
-        { title: "系统名", dataIndex: "machineSsh.osName", width: 80, sorter: true, ellipsis: true, scopedSlots: { customRender: "osName" } },
+        { title: "系统名", dataIndex: "machineSsh.osName", width: 80, ellipsis: true, scopedSlots: { customRender: "osName" } },
         // { title: "系统版本", dataIndex: "machineSsh.osVersion", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "CPU", dataIndex: "machineSsh.osOccupyCpu", width: 80, sorter: true, ellipsis: true, scopedSlots: { customRender: "osOccupyCpu" } },
-        { title: "内存", dataIndex: "machineSsh.osOccupyMemory", width: 80, sorter: true, ellipsis: true, scopedSlots: { customRender: "osOccupyMemory" } },
-        { title: "硬盘", dataIndex: "machineSsh.osMaxOccupyDisk", width: 80, sorter: true, ellipsis: true, scopedSlots: { customRender: "osMaxOccupyDisk" } },
+        { title: "CPU", dataIndex: "machineSsh.osOccupyCpu", width: 80, ellipsis: true, scopedSlots: { customRender: "osOccupyCpu" } },
+        { title: "内存", dataIndex: "machineSsh.osOccupyMemory", width: 80, ellipsis: true, scopedSlots: { customRender: "osOccupyMemory" } },
+        { title: "硬盘", dataIndex: "machineSsh.osMaxOccupyDisk", width: 80, ellipsis: true, scopedSlots: { customRender: "osMaxOccupyDisk" } },
         // { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "连接状态", dataIndex: "machineSsh.status", ellipsis: true, align: "center", width: "90px", scopedSlots: { customRender: "status" } },
         // { title: "编码格式", dataIndex: "machineSsh.charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },

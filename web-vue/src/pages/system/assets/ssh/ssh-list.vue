@@ -8,7 +8,7 @@
             <a-space>
               <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="ssh名称" />
               <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%host%']" placeholder="host" />
-              <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+              <a-select show-search option-filter-prop="children" v-model="listQuery.groupName" allowClear placeholder="分组" class="search-input-item">
                 <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
               </a-select>
 
