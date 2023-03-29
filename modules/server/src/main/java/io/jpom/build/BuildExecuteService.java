@@ -79,6 +79,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -517,7 +518,23 @@ public class BuildExecuteService {
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
             Integer buildMode = taskData.buildInfoModel.getBuildMode();
             String resultDirFile = buildInfoModel.getResultDirFile();
+            String excludeReleaseAnt = this.buildExtraModule.getExcludeReleaseAnt();
+            List<String> excludeReleaseAnts = StrUtil.splitTrim(excludeReleaseAnt, StrUtil.COMMA);
             ResultDirFileAction resultDirFileAction = ResultDirFileAction.parse(resultDirFile);
+            final int[] excludeReleaseAntCount = {0};
+            Predicate<String> predicate = file -> {
+                if (CollUtil.isEmpty(excludeReleaseAnts)) {
+                    return true;
+                }
+                for (String releaseAnt : excludeReleaseAnts) {
+                    if (AntPathUtil.ANT_PATH_MATCHER.match(releaseAnt, file)) {
+                        // 过滤
+                        excludeReleaseAntCount[0]++;
+                        return false;
+                    }
+                }
+                return true;
+            };
             if (buildMode != null && buildMode == 1) {
                 // 容器构建直接下载到 结果目录
                 File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFileAction.getPath());
@@ -548,6 +565,7 @@ public class BuildExecuteService {
                         // 需要能满足二级匹配
                         return StrUtil.isEmpty(antSubMatch) || AntPathUtil.ANT_PATH_MATCHER.matchStart(antSubMatch + "**", s);
                     })
+                    .filter(predicate)
                     .mapToInt(path -> {
                         File toFile;
                         if (antFileUploadMode == ResultDirFileAction.AntFileUploadMode.KEEP_DIR) {
@@ -611,14 +629,24 @@ public class BuildExecuteService {
                 BuildUtil.mkdirHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
                 File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
                 //
+                String rootDir = FileUtil.getAbsolutePath(gitFile);
                 FileCopier.create(file, toFile)
                     .setCopyContentIfDir(true)
                     .setOverride(true)
                     .setCopyAttributes(true)
-                    .setCopyFilter(file1 -> !file1.isHidden())
+                    .setCopyFilter(file12 -> {
+                        if (file12.isHidden()) {
+                            return false;
+                        }
+                        String subPath = FileUtil.subPath(rootDir, file12);
+                        subPath = FileUtil.normalize(StrUtil.SLASH + subPath);
+                        return predicate.test(subPath);
+                    })
                     .copy();
             }
-            //logRecorder.system("mv #{} {}[{}] ", resultDirFile, resultDirFileAction.getType(), buildInfoModel.getBuildId());
+            if (CollUtil.isNotEmpty(excludeReleaseAnts)) {
+                logRecorder.system("{} 累积过滤：{} 个文件 ", excludeReleaseAnt, excludeReleaseAntCount[0]);
+            }
             return null;
         }
 

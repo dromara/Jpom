@@ -175,6 +175,11 @@ public class BuildExtraModule extends BaseModel {
      */
     private Boolean syncFileStorage;
 
+    /**
+     * 排除指定目录发布
+     */
+    private String excludeReleaseAnt;
+
     public boolean strictlyEnforce() {
         return strictlyEnforce != null && strictlyEnforce;
     }

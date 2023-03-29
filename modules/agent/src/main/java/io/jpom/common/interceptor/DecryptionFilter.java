@@ -63,7 +63,7 @@ public class DecryptionFilter implements Filter {
             chain.doFilter(servletRequest, response);
             return;
         }
-        log.debug("当前请求需要解密：{}", encryptor.name());
+        log.debug("当前请求需要解码：{}", encryptor.name());
         String contentType = request.getContentType();
         if (ContentType.isDefault(contentType)) {
             // 普通表单
@@ -75,7 +75,7 @@ public class DecryptionFilter implements Filter {
             try {
                 temp = encryptor.decrypt(body);
             } catch (Exception e) {
-                log.error("解密失败", e);
+                log.error("解码失败", e);
                 temp = body;
             }
             BodyRewritingRequestWrapper requestWrapper = new BodyRewritingRequestWrapper(request, temp.getBytes(StandardCharsets.UTF_8));
@@ -85,7 +85,7 @@ public class DecryptionFilter implements Filter {
             HttpServletRequestWrapper wrapper = new MultipartRequestWrapper(request, encryptor);
             chain.doFilter(wrapper, response);
         } else {
-            log.warn("当前请求类型不支持加密：{}", contentType);
+            log.warn("当前请求类型不支持解码：{}", contentType);
             chain.doFilter(servletRequest, response);
         }
     }
