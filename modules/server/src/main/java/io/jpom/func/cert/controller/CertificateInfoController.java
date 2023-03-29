@@ -67,10 +67,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author bwcx_jzy
@@ -372,7 +369,8 @@ public class CertificateInfoController extends BaseServerController {
             String absolutePath = FileUtil.file(tempSave, model.getSerialNumberStr() + ".zip").getAbsolutePath();
             File zip = ZipUtil.zip(file.getAbsolutePath(), absolutePath, false);
             // 添加到文件中心
-            String fileId = fileStorageService.addFile(zip, 3, certificateInfoService.getCheckUserWorkspace(request), model.getSerialNumberStr() + model.getDescription(), null, 1);
+            String description = model.getSerialNumberStr() + Optional.ofNullable(model.getDescription()).map(s -> "," + s).orElse(StrUtil.EMPTY);
+            String fileId = fileStorageService.addFile(zip, 3, certificateInfoService.getCheckUserWorkspace(request), description, null, 1);
             String releasePath = FileUtil.normalize(releasePathParent + StrUtil.SLASH + releasePathSecondary);
             // 创建发布任务
             Map<String, String> env = new HashMap<>();
