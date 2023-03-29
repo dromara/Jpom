@@ -24,7 +24,7 @@
           本地构建
         </template>
       </a-descriptions-item>
-      <a-descriptions-item label="产物"> {{ data.resultDirFile }} </a-descriptions-item>
+
       <a-descriptions-item label="最新构建ID">
         <span v-if="data.buildId <= 0"></span>
         <a-tag v-else color="#108ee9">#{{ data.buildId }}</a-tag>
@@ -37,9 +37,13 @@
       <a-descriptions-item label="发布方式">{{ releaseMethodMap[data.releaseMethod] }} </a-descriptions-item>
       <a-descriptions-item label="定时构建"> {{ data.autoBuildCron }} </a-descriptions-item>
       <a-descriptions-item label="别名码"> {{ data.aliasCode }} </a-descriptions-item>
+      <a-descriptions-item label="构建目录">
+        <a-tag>{{ data.sourceDirExist ? "存在" : "不存在" }}</a-tag>
+      </a-descriptions-item>
       <a-descriptions-item label="创建时间"> {{ parseTime(data.createTimeMillis) }} </a-descriptions-item>
       <a-descriptions-item label="最后修改时间"> {{ parseTime(data.modifyTimeMillis) }}</a-descriptions-item>
       <a-descriptions-item label="最后修改人">{{ data.modifyUser }}</a-descriptions-item>
+      <a-descriptions-item label="产物" :span="3"> {{ data.resultDirFile }} </a-descriptions-item>
       <a-descriptions-item label="源仓库" :span="3" v-if="tempRepository">{{ `${tempRepository ? tempRepository.name + "[" + tempRepository.gitUrl + "]" : ""}` }}</a-descriptions-item>
       <a-descriptions-item label="仓库lastcommit" :span="3">{{ data.repositoryLastCommitId }}</a-descriptions-item>
     </a-descriptions>
