@@ -1152,7 +1152,7 @@ public class BuildExecuteService {
             logRecorder.system("开始执行事件脚本： {}", type);
             // 环境变量
             Map<String, String> environment = taskData.environmentMapBuilder.environment(map);
-            ScriptExecuteLogModel logModel = buildExecuteService.scriptExecuteLogServer.create(scriptModel, 1);
+            ScriptExecuteLogModel logModel = buildExecuteService.scriptExecuteLogServer.create(scriptModel, 1, this.taskData.buildInfoModel.getWorkspaceId());
             File logFile = scriptModel.logFile(logModel.getId());
             File scriptFile = null;
             LogRecorder scriptLog = LogRecorder.builder().file(logFile).build();

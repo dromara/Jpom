@@ -50,6 +50,7 @@
         <a-space>
           <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
@@ -234,6 +235,20 @@
         </a-tabs>
       </a-form-model>
     </a-modal>
+    <!-- 脚本日志 -->
+    <a-drawer
+      destroyOnClose
+      title="脚本执行历史"
+      width="50vw"
+      :visible="drawerLogVisible"
+      @close="
+        () => {
+          this.drawerLogVisible = false;
+        }
+      "
+    >
+      <script-log v-if="drawerLogVisible" :scriptId="temp.id" />
+    </a-drawer>
   </div>
 </template>
 <script>
@@ -245,11 +260,12 @@ import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_Q
 import { mapGetters } from "vuex";
 import { getWorkSpaceListAll } from "@/api/workspace";
 import Vue from "vue";
-
+import ScriptLog from "@/pages/script/script-log";
 export default {
   components: {
     ScriptConsole,
     codeEditor,
+    ScriptLog,
   },
   props: {},
   data() {
@@ -288,7 +304,7 @@ export default {
         { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
         { title: "最后执行人", dataIndex: "lastRunUser", ellipsis: true, width: "120px", scopedSlots: { customRender: "tooltip" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "180px" },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "240px" },
       ],
       rules: {
         name: [{ required: true, message: "请输入脚本名称", trigger: "blur" }],
@@ -299,6 +315,7 @@ export default {
       workspaceList: [],
       triggerVisible: false,
       commandParams: [],
+      drawerLogVisible: false,
     };
   },
   computed: {
@@ -534,6 +551,11 @@ export default {
       this.temp.batchTriggerUrl = `${location.protocol}//${location.host}${res.data.batchTriggerUrl}`;
 
       this.temp = { ...this.temp };
+    },
+    handleLog(record) {
+      this.temp = Object.assign({}, record);
+
+      this.drawerLogVisible = true;
     },
   },
 };

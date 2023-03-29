@@ -338,11 +338,11 @@
             <editBuildPage
               ref="editBuild"
               @confirm="
-                (build) => {
+                (build, buildId) => {
                   this.editBuildVisible = 0;
                   this.loadData();
                   this.loadGroupList();
-                  if ((build, buildId)) {
+                  if (build) {
                     reqStartBuild({ id: buildId }, true);
                   }
                 }

@@ -947,6 +947,9 @@ export default {
       });
     },
   },
+  created() {
+    this.loadGroupList();
+  },
   methods: {
     randomStr,
     refresh() {

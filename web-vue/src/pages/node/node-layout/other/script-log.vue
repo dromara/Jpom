@@ -93,11 +93,11 @@ export default {
       temp: {},
       logVisible: false,
       columns: [
-        { title: "名称", dataIndex: "scriptName", ellipsis: true, scopedSlots: { customRender: "scriptName" } },
-        { title: "执行时间", dataIndex: "createTimeMillis", ellipsis: true, scopedSlots: { customRender: "createTimeMillis" } },
+        { title: "名称", dataIndex: "scriptName", ellipsis: true, width: 100, scopedSlots: { customRender: "scriptName" } },
+        { title: "执行时间", dataIndex: "createTimeMillis", ellipsis: true, width: 100, scopedSlots: { customRender: "createTimeMillis" } },
         { title: "触发类型", dataIndex: "triggerExecType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerExecTypeMap" } },
-        { title: "执行人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 140 },
+        { title: "执行人", dataIndex: "modifyUser", ellipsis: true, width: 100, scopedSlots: { customRender: "modifyUser" } },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "140px" },
       ],
     };
   },

@@ -131,11 +131,21 @@
       <script-console v-if="drawerConsoleVisible" :nodeId="temp.nodeId" :defArgs="temp.defArgs" :id="temp.id" :scriptId="temp.scriptId" />
     </a-drawer>
     <!-- 脚本日志 -->
-    <a-modal destroyOnClose :title="drawerTitle" width="85vw" v-model="drawerLogVisible" :footer="null" :maskClosable="false">
+    <a-drawer
+      destroyOnClose
+      :title="drawerTitle"
+      width="50vw"
+      :visible="drawerLogVisible"
+      @close="
+        () => {
+          this.drawerLogVisible = false;
+        }
+      "
+    >
       <script-log v-if="drawerLogVisible" :scriptId="temp.scriptId" :nodeId="temp.nodeId" />
-    </a-modal>
+    </a-drawer>
     <!-- 触发器 -->
-    <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null">
       <a-form-model ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template slot="tabBarExtraContent">

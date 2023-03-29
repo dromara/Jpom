@@ -168,8 +168,6 @@ public class ScriptServer extends BaseGlobalOrWorkspaceService<ScriptModel> impl
                 ScriptExecuteLogModel nodeScriptExecLogModel = execLogServer.create(scriptServerItem, 1);
                 // 执行
                 ServerScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), scriptServerItem.getDefArgs());
-            } catch (Exception e) {
-                log.error("触发自动执行命令模版异常", e);
             } finally {
                 BaseServerController.removeEmpty();
             }
