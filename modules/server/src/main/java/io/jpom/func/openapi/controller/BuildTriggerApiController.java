@@ -433,7 +433,7 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
             }
         }
         int size = waitQueue.size();
-        log.debug("需要处理的构建数：{}", size);
+        log.debug("需要处理构建微队列数：{}", size);
         // 遍历队列中的数据
         waitQueue.forEach((buildId, buildCaches) -> {
             synchronized (buildId.intern()) {

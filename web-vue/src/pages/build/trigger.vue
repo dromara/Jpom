@@ -21,7 +21,7 @@
                       批量构建全部参数举例 BODY json： [ { "id":"1", "token":"a", "delay":"0","branchName":"test","branchTagName":"1.*","script":"mvn clean
                       package","resultDirFile":"/target/","webhook":"http://test.com/webhook" } ]
                     </li>
-                    <li>参数如果传入 useQueue=true 将使用微队列来排队构建，避免几乎同时触发构建被中断构建（一般用户仓库合并代码会触发多次请求）</li>
+                    <li>参数如果传入 useQueue=true 将使用微队列来排队构建，避免几乎同时触发构建被中断构建（一般用户仓库合并代码会触发多次请求）,队列保存在内存中,重启将丢失</li>
                     <li>批量构建传入其他参数将同步执行修改</li>
                   </ul>
                 </template>
