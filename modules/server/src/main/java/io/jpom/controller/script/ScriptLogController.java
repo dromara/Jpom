@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import top.jpom.model.PageResultDto;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 
 /**
@@ -73,8 +74,8 @@ public class ScriptLogController extends BaseServerController {
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<ScriptExecuteLogModel>> scriptList() {
-        PageResultDto<ScriptExecuteLogModel> pageResultDto = scriptExecuteLogServer.listPage(getRequest());
+    public JsonMessage<PageResultDto<ScriptExecuteLogModel>> scriptList(HttpServletRequest request) {
+        PageResultDto<ScriptExecuteLogModel> pageResultDto = scriptExecuteLogServer.listPage(request);
         return JsonMessage.success("success", pageResultDto);
     }
 
@@ -88,8 +89,9 @@ public class ScriptLogController extends BaseServerController {
     @RequestMapping(value = "del_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public JsonMessage<Object> delLog(@ValidatorItem() String id,
-                                      @ValidatorItem() String executeId) {
-        ScriptModel item = scriptServer.getByKey(id, getRequest());
+                                      @ValidatorItem() String executeId,
+                                      HttpServletRequest request) {
+        ScriptModel item = scriptServer.getByKeyAndGlobal(id, request);
         Assert.notNull(item, "没有对应数据");
         File logFile = item.logFile(executeId);
         boolean fastDel = CommandUtil.systemFastDel(logFile);
@@ -110,8 +112,9 @@ public class ScriptLogController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<JSONObject> getNowLog(@ValidatorItem() String id,
                                              @ValidatorItem() String executeId,
-                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
-        ScriptModel item = scriptServer.getByKey(id, getRequest());
+                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line,
+                                             HttpServletRequest request) {
+        ScriptModel item = scriptServer.getByKey(id, request);
         Assert.notNull(item, "没有对应数据");
         File logFile = item.logFile(executeId);
         Assert.state(FileUtil.isFile(logFile), "日志文件错误");

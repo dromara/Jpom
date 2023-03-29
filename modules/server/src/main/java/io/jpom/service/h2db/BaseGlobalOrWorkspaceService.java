@@ -37,6 +37,7 @@ import top.jpom.model.PageResultDto;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * 支持全局贡献的数据
@@ -92,6 +93,17 @@ public abstract class BaseGlobalOrWorkspaceService<T extends BaseWorkspaceModel>
     public int delByKey(String keyValue, HttpServletRequest request) {
         String workspaceId = this.getCheckUserWorkspace(request);
         return super.delByKey(keyValue, entity -> entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL)));
+    }
+
+    @Override
+    public int delByWorkspace(HttpServletRequest request, Consumer<Entity> consumer) {
+        String workspaceId = this.getCheckUserWorkspace(request);
+        return super.delByKey(null, entity -> {
+            entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL));
+            consumer.accept(entity);
+            int size = entity.size();
+            Assert.state(size > 1, "没有添加任何参数");
+        });
     }
 
     @Override
