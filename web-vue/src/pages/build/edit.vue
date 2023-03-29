@@ -678,6 +678,20 @@
               </template>
             </a-input-search>
           </a-form-model-item>
+          <a-form-model-item prop="excludeReleaseAnt">
+            <template slot="label">
+              <a-tooltip>
+                排除发布
+                <template slot="title">
+                  <ul>
+                    <li>使用 ANT 表达式来实现在过滤指定目录来实现发布排除指定目录</li>
+                  </ul>
+                </template>
+                <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
+              </a-tooltip>
+            </template>
+            <a-input v-model="tempExtraData.excludeReleaseAnt" placeholder="排除发布 ANT 表达式,多个使用逗号分隔" />
+          </a-form-model-item>
         </a-collapse-panel>
       </a-collapse>
     </a-form-model>
