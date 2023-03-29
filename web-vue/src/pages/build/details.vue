@@ -24,9 +24,10 @@
           本地构建
         </template>
       </a-descriptions-item>
-      <a-descriptions-item label="产物目录"> {{ data.resultDirFile }} </a-descriptions-item>
+      <a-descriptions-item label="产物"> {{ data.resultDirFile }} </a-descriptions-item>
       <a-descriptions-item label="最新构建ID">
-        <a-tag color="#108ee9">#{{ data.buildId }}</a-tag>
+        <span v-if="data.buildId <= 0"></span>
+        <a-tag v-else color="#108ee9">#{{ data.buildId }}</a-tag>
       </a-descriptions-item>
       <a-descriptions-item label="构建状态">
         <a-tooltip :title="data.statusMsg">
