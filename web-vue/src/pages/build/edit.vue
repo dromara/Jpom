@@ -566,8 +566,8 @@
                 <template slot="title">
                   <ul>
                     <li>构建过程请求对应的地址,开始构建,构建完成,开始发布,发布完成,构建异常,发布异常</li>
-                    <li>传入参数有：buildId、buildName、type、error、triggerTime</li>
-                    <li>type 的值有：startReady、pull、executeCommand、release、done、stop、success</li>
+                    <li>传入参数有：buildId、buildName、type、statusMsg、triggerTime</li>
+                    <li>type 的值有：startReady、pull、executeCommand、release、done、stop、success、error</li>
                     <li>异步请求不能保证有序性</li>
                   </ul>
                 </template>
@@ -599,7 +599,7 @@
                 <template slot="title">
                   <ul>
                     <li>构建过程执行对应的脚本,开始构建,构建完成,开始发布,发布完成,构建异常,发布异常</li>
-                    <li>传入环境变量有：buildId、buildName、type、error、triggerTime、buildNumberId、buildSourceFile</li>
+                    <li>传入环境变量有：buildId、buildName、type、statusMsg、triggerTime、buildNumberId、buildSourceFile</li>
                     <li>执行脚本传入参数有：startReady、pull、executeCommand、release、done、stop、success</li>
                     <li><b>注意：为了避免不必要的事件执行脚本，选择的脚本的备注中包含需要实现的事件参数关键词，如果需要执行 success 事件,那么选择的脚本的备注中需要包含 success 关键词</b></li>
                   </ul>
@@ -681,7 +681,11 @@
           >
             取消
           </a-button>
-          <a-button type="primary" @click="handleEditBuildOk"> 保存 </a-button>
+          <a-tooltip v-if="this.temp.id" title="如果当前构建信息已经在其他页面更新过，需要点击刷新按钮来获取最新的信息，点击刷新后未保存的数据也将丢失">
+            <a-button @click="refresh"> 刷新</a-button>
+          </a-tooltip>
+          <a-button type="primary" @click="handleEditBuildOk(false)"> 保存 </a-button>
+          <a-button type="primary" @click="handleEditBuildOk(true)"> 保存并构建 </a-button>
         </a-space>
       </div>
     </div>
@@ -754,7 +758,7 @@ import codeEditor from "@/components/codeEditor";
 import repository from "@/pages/repository/list.vue";
 import CustomSelect from "@/components/customSelect";
 import { dockerSwarmListAll, dockerSwarmServicesList } from "@/api/docker-swarm";
-import { getBuildGroupAll, editBuild, getBranchList, buildModeMap, releaseMethodMap } from "@/api/build-info";
+import { getBuildGroupAll, editBuild, getBranchList, buildModeMap, releaseMethodMap, getBuildGet } from "@/api/build-info";
 import { getSshListAll } from "@/api/ssh";
 import { getRepositoryInfo } from "@/api/repository";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
@@ -945,6 +949,15 @@ export default {
   },
   methods: {
     randomStr,
+    refresh() {
+      getBuildGet({
+        id: this.temp.id,
+      }).then((res) => {
+        if (res.data) {
+          this.handleEdit(res.data);
+        }
+      });
+    },
     // 添加
     handleAdd() {
       this.temp = {};
@@ -1083,7 +1096,7 @@ export default {
       });
     },
     // 提交节点数据
-    handleEditBuildOk() {
+    handleEditBuildOk(build) {
       // 检验表单
       this.$refs["editBuildForm"].validate((valid) => {
         if (!valid) {
@@ -1117,7 +1130,8 @@ export default {
             this.$notification.success({
               message: res.msg,
             });
-            this.$emit("confirm");
+            //
+            this.$emit("confirm", build, res.data);
           }
         });
       });

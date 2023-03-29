@@ -145,8 +145,15 @@ public class BuildInfoController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<BuildInfoModel> getBuildListAll(String id, HttpServletRequest request) {
         // load list with page
-        BuildInfoModel modelList = buildInfoService.getByKey(id, request);
-        return JsonMessage.success("", modelList);
+        BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
+        Assert.notNull(buildInfoModel, "不存在对应的构建");
+        // 获取源码目录是否存在
+        File source = BuildUtil.getSourceById(buildInfoModel.getId());
+        buildInfoModel.setSourceDirExist(FileUtil.exist(source));
+        //
+        File file = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), buildInfoModel.getResultDirFile());
+        buildInfoModel.setResultHasFile(FileUtil.exist(file));
+        return JsonMessage.success("", buildInfoModel);
     }
 
     /**
@@ -273,11 +280,11 @@ public class BuildInfoController extends BaseServerController {
             // set default buildId
             buildInfoModel.setBuildId(0);
             buildInfoService.insert(buildInfoModel);
-            return JsonMessage.success("添加成功");
+            return JsonMessage.success("添加成功", buildInfoModel.getId());
         }
 
         buildInfoService.updateById(buildInfoModel, request);
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success("修改成功", buildInfoModel.getId());
     }
 
     private void checkDocker(String script, HttpServletRequest request) {

@@ -26,5 +26,9 @@ package io.jpom.build;
  * @author bwcx_jzy
  * @since 2023/3/2
  */
-public class InterruptException extends RuntimeException {
+public class DiyInterruptException extends RuntimeException {
+
+    public DiyInterruptException(String message) {
+        super(message);
+    }
 }

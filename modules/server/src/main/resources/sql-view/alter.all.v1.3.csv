@@ -46,3 +46,5 @@ ADD,CERTIFICATE_INFO,fingerprint,String,50,,证书指纹,false
 ADD,MACHINE_DOCKER_INFO,certExist,TINYINT,,,证书是否存在,false
 ADD,REPOSITORY,createUser,String,50,,创建人,false
 ADD,SERVER_SCRIPT_INFO,createUser,String,50,,创建人,false
+ADD,BUILD_INFO,statusMsg,TEXT,,,状态信息
+ADD,BUILDHISTORYLOG,statusMsg,TEXT,,,状态信息

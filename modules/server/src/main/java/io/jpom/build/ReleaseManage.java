@@ -115,23 +115,24 @@ public class ReleaseManage {
     }
 
 
-    public void updateStatus(BuildStatus status) {
-        buildExecuteService.updateStatus(this.buildExtraModule.getId(), this.logId, this.buildNumberId, status);
+    private void updateStatus(BuildStatus status, String msg) {
+        buildExecuteService.updateStatus(this.buildExtraModule.getId(), this.logId, this.buildNumberId, status, msg);
     }
 
     /**
      * 不修改为发布中状态
      */
-    public boolean start(Consumer<Long> consumer, BuildInfoModel buildInfoModel) throws Exception {
+    public String start(Consumer<Long> consumer, BuildInfoModel buildInfoModel) throws Exception {
         this.init();
         this.resultFile = buildExtraModule.resultDirFile(this.buildNumberId);
         this.buildEnv.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
         this.buildExtConfig = SpringUtil.getBean(BuildExtConfig.class);
         //
-        this.updateStatus(BuildStatus.PubIng);
+        this.updateStatus(BuildStatus.PubIng, "开始发布中");
         if (FileUtil.isEmpty(this.resultFile)) {
-            logRecorder.systemError("发布的文件或者文件夹为空,不能继续发布");
-            return false;
+            String info = "发布的文件或者文件夹为空,不能继续发布";
+            logRecorder.systemError(info);
+            return info;
         }
         long resultFileSize = FileUtil.size(this.resultFile);
         logRecorder.system("开始执行发布,需要发布的文件大小：{}", FileUtil.readableFileSize(resultFileSize));
@@ -168,12 +169,13 @@ public class ReleaseManage {
         } else if (releaseMethod == BuildReleaseMethod.DockerImage.getCode()) {
             return this.doDockerImage();
         } else if (releaseMethod == BuildReleaseMethod.No.getCode()) {
-            return true;
+            return null;
         } else {
-            logRecorder.systemError("没有实现的发布分发:{}", releaseMethod);
-            return false;
+            String format = StrUtil.format("没有实现的发布分发:{}", releaseMethod);
+            logRecorder.systemError(format);
+            return format;
         }
-        return true;
+        return null;
     }
 
     /**
@@ -218,7 +220,7 @@ public class ReleaseManage {
         }).collect(Collectors.joining(StrUtil.COMMA));
     }
 
-    private boolean doDockerImage() {
+    private String doDockerImage() {
         // 生成临时目录
         File tempPath = FileUtil.file(JpomApplication.getInstance().getTempPath(), "build_temp", "docker_image", this.buildExtraModule.getId() + StrUtil.DASHED + this.buildNumberId);
         try {
@@ -239,8 +241,9 @@ public class ReleaseManage {
             String dockerFile = CollUtil.getLast(list);
             File dockerfile = FileUtil.file(tempPath, dockerFile);
             if (!FileUtil.isFile(dockerfile)) {
-                logRecorder.systemError("仓库目录下没有找到 Dockerfile 文件: {}", dockerFile);
-                return false;
+                String format = StrUtil.format("仓库目录下没有找到 Dockerfile 文件: {}", dockerFile);
+                logRecorder.systemError(format);
+                return format;
             }
             File baseDir = FileUtil.file(tempPath, list.size() == 1 ? StrUtil.SLASH : CollUtil.get(list, 0));
             //
@@ -251,8 +254,9 @@ public class ReleaseManage {
                 .queryByTag(this.buildExtraModule.getWorkspaceId(), fromTag);
             Map<String, Object> map = buildExecuteService.machineDockerServer.dockerParameter(dockerInfoModels);
             if (map == null) {
-                logRecorder.systemError("{} 没有可用的 docker server", fromTag);
-                return false;
+                String format = StrUtil.format("{} 没有可用的 docker server", fromTag);
+                logRecorder.systemError(format);
+                return format;
             }
             //String dockerBuildArgs = this.buildExtraModule.getDockerBuildArgs();
             for (DockerInfoModel infoModel : dockerInfoModels) {
@@ -281,7 +285,7 @@ public class ReleaseManage {
         } finally {
             CommandUtil.systemFastDel(tempPath);
         }
-        return true;
+        return null;
     }
 
     private void updateSwarmService(String dockerTag, String swarmId, String serviceName) {
@@ -329,12 +333,12 @@ public class ReleaseManage {
     /**
      * 本地命令执行
      */
-    private boolean localCommand() {
+    private String localCommand() {
         // 执行命令
         String releaseCommand = this.buildExtraModule.getReleaseCommand();
         if (StrUtil.isEmpty(releaseCommand)) {
             logRecorder.systemError("没有需要执行的命令");
-            return true;
+            return null;
         }
         logRecorder.system("{} start exec", DateUtil.now());
 
@@ -354,9 +358,9 @@ public class ReleaseManage {
         logRecorder.system("执行发布脚本的退出码是：{}", waitFor);
         // 判断是否为严格执行
         if (buildExtraModule.strictlyEnforce()) {
-            return waitFor == 0;
+            return waitFor == 0 ? null : StrUtil.format("执行发布命令退出码非0，{}", waitFor);
         }
-        return true;
+        return null;
     }
 
     /**
@@ -596,17 +600,17 @@ public class ReleaseManage {
             this.init();
             logRecorder.system("开始回滚:{}", DateTime.now());
             //
-            boolean start = this.start(null, item);
-            logRecorder.system("执行回滚结束：{}", start);
-            if (start) {
-                this.updateStatus(BuildStatus.PubSuccess);
+            String errorMsg = this.start(null, item);
+            logRecorder.system("执行回滚结束：{}", errorMsg);
+            if (errorMsg == null) {
+                this.updateStatus(BuildStatus.PubSuccess, "发布成功");
             } else {
-                this.updateStatus(BuildStatus.PubError);
+                this.updateStatus(BuildStatus.PubError, errorMsg);
             }
         } catch (Exception e) {
             log.error("执行发布异常", e);
             logRecorder.error("执行发布异常", e);
-            this.updateStatus(BuildStatus.PubError);
+            this.updateStatus(BuildStatus.PubError, e.getMessage());
         }
     }
 }
