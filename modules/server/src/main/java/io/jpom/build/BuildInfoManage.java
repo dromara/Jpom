@@ -209,6 +209,7 @@ public class BuildInfoManage implements Runnable {
         Integer buildMode = taskData.buildInfoModel.getBuildMode();
         String resultDirFile = buildInfoModel.getResultDirFile();
         String excludeReleaseAnt = this.buildExtraModule.getExcludeReleaseAnt();
+        boolean releaseHideFile = ObjectUtil.defaultIfNull(this.buildExtraModule.getReleaseHideFile(), false);
         List<String> excludeReleaseAnts = StrUtil.splitTrim(excludeReleaseAnt, StrUtil.COMMA);
         ResultDirFileAction resultDirFileAction = ResultDirFileAction.parse(resultDirFile);
         final int[] excludeReleaseAntCount = {0};
@@ -295,7 +296,7 @@ public class BuildInfoManage implements Runnable {
                         .setCopyContentIfDir(true)
                         .setOverride(true)
                         .setCopyAttributes(true)
-                        .setCopyFilter(file1 -> !file1.isHidden())
+                        .setCopyFilter(file -> releaseHideFile || !file.isHidden())
                         .copy();
                     return 1;
                 }).sum();
@@ -325,7 +326,7 @@ public class BuildInfoManage implements Runnable {
                 .setOverride(true)
                 .setCopyAttributes(true)
                 .setCopyFilter(file12 -> {
-                    if (file12.isHidden()) {
+                    if (!releaseHideFile && file12.isHidden()) {
                         return false;
                     }
                     String subPath = FileUtil.subPath(rootDir, file12);

@@ -659,8 +659,22 @@
                 <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
               </a-tooltip>
             </template>
+            <a-row>
+              <a-col :span="4">
+                <a-switch v-model="tempExtraData.syncFileStorage" checked-children="同步" un-checked-children="不同步" />
+              </a-col>
+              <a-col :span="7" style="text-align: right">
+                <a-space>
+                  <a-tooltip>
+                    发布隐藏文件
+                    <template slot="title"> 默认构建错误将自动忽略隐藏文件,开启此选项后可以正常发布隐藏文件 </template>
 
-            <a-switch v-model="tempExtraData.syncFileStorage" checked-children="同步" un-checked-children="不同步" />
+                    <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
+                  </a-tooltip>
+                  <a-switch v-model="tempExtraData.releaseHideFile" checked-children="是" un-checked-children="否" />
+                </a-space>
+              </a-col>
+            </a-row>
           </a-form-model-item>
           <a-form-model-item label="别名码" prop="aliasCode" help="如果产物同步到文件中心,当前值会共享">
             <a-input-search
