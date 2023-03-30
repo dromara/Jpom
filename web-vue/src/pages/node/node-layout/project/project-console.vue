@@ -115,9 +115,9 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getLongTermToken"]),
+    ...mapGetters(["getLongTermToken", "getWorkspaceId"]),
     socketUrl() {
-      return getWebSocketUrl("/socket/console", `userId=${this.getLongTermToken}&id=${this.id}&nodeId=${this.nodeId}&type=console&copyId=${this.copyId || ""}`);
+      return getWebSocketUrl("/socket/console", `userId=${this.getLongTermToken}&id=${this.id}&nodeId=${this.nodeId}&type=console&copyId=${this.copyId || ""}&workspaceId=${this.getWorkspaceId}`);
     },
   },
   mounted() {

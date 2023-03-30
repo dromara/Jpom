@@ -38,7 +38,7 @@
               </a-row>
             </a-col>
           </a-row>
-          <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
+          <a-button type="primary" size="small" @click="() => commandParams.push({})">添加参数</a-button>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -80,9 +80,9 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getLongTermToken"]),
+    ...mapGetters(["getLongTermToken", "getWorkspaceId"]),
     socketUrl() {
-      return getWebSocketUrl("/socket/node/script_run", `userId=${this.getLongTermToken}&id=${this.id}&nodeId=${this.nodeId}&type=nodeScript`);
+      return getWebSocketUrl("/socket/node/script_run", `userId=${this.getLongTermToken}&id=${this.id}&nodeId=${this.nodeId}&type=nodeScript&workspaceId=${this.getWorkspaceId}`);
     },
   },
   mounted() {
