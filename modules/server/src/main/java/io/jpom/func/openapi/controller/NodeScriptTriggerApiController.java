@@ -33,7 +33,7 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.node.ScriptCacheModel;
+import io.jpom.model.node.NodeScriptCacheModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.script.NodeScriptServer;
@@ -81,7 +81,7 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
      */
     @RequestMapping(value = ServerOpenApi.NODE_SCRIPT_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token) {
-        ScriptCacheModel item = nodeScriptServer.getByKey(id);
+        NodeScriptCacheModel item = nodeScriptServer.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
         //
@@ -140,7 +140,7 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
                 JSONObject jsonObject = (JSONObject) o;
                 String id = jsonObject.getString("id");
                 String token = jsonObject.getString("token");
-                ScriptCacheModel item = nodeScriptServer.getByKey(id);
+                NodeScriptCacheModel item = nodeScriptServer.getByKey(id);
                 if (item == null) {
                     jsonObject.put("msg", "没有对应数据");
                     return;

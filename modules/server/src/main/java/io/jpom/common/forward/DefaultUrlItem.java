@@ -29,6 +29,7 @@ import io.jpom.system.ServerConfig;
 import top.jpom.transport.DataContentType;
 import top.jpom.transport.IUrlItem;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -40,12 +41,14 @@ public class DefaultUrlItem implements IUrlItem {
     private final Integer timeout;
     private final String workspaceId;
     private final DataContentType dataContentType;
+    private final Map<String, String> header;
 
-    public DefaultUrlItem(NodeUrl nodeUrl, Integer timeout, String workspaceId, DataContentType dataContentType) {
+    public DefaultUrlItem(NodeUrl nodeUrl, Integer timeout, String workspaceId, DataContentType dataContentType, Map<String, String> header) {
         this.nodeUrl = nodeUrl;
         this.timeout = timeout;
         this.workspaceId = workspaceId;
         this.dataContentType = dataContentType;
+        this.header = header;
     }
 
     @Override
@@ -88,5 +91,10 @@ public class DefaultUrlItem implements IUrlItem {
     @Override
     public DataContentType contentType() {
         return dataContentType;
+    }
+
+    @Override
+    public Map<String, String> header() {
+        return header;
     }
 }

@@ -62,10 +62,12 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
                 return;
             }
             String id = this.getParameters(session, "id");
-            if (StrUtil.isEmpty(id)) {
-                SocketSessionUtil.send(session, "脚本模板未知");
+            String workspaceId = this.getParameters(session, "workspaceId");
+            if (StrUtil.hasEmpty(id, workspaceId)) {
+                SocketSessionUtil.send(session, "脚本模板或者工作空间未知");
                 return;
             }
+
             NodeScriptModel nodeScriptModel = nodeScriptServer.getItem(id);
             if (nodeScriptModel == null) {
                 SocketSessionUtil.send(session, "没有找到对应的脚本模板");

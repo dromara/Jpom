@@ -141,38 +141,14 @@ public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> i
      * @param args             参数
      * @return 执行记录ID
      */
-    public String execute(NodeScriptModel scriptServerItem, int type, String uerName, String args) {
+    public String execute(NodeScriptModel scriptServerItem, int type, String uerName, String workspaceId, String args, Map<String, String> paramMap) {
         NodeScriptExecLogModel nodeScriptExecLogModel = new NodeScriptExecLogModel();
         nodeScriptExecLogModel.setId(IdUtil.fastSimpleUUID());
         nodeScriptExecLogModel.setCreateTimeMillis(SystemClock.now());
         nodeScriptExecLogModel.setScriptId(scriptServerItem.getId());
         nodeScriptExecLogModel.setScriptName(scriptServerItem.getName());
         nodeScriptExecLogModel.setModifyUser(uerName);
-        nodeScriptExecLogModel.setWorkspaceId(scriptServerItem.getWorkspaceId());
-        nodeScriptExecLogModel.setTriggerExecType(type);
-        execLogServer.addItem(nodeScriptExecLogModel);
-        String userArgs = StrUtil.emptyToDefault(args, scriptServerItem.getDefArgs());
-        // 执行
-        NodeScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), userArgs, null);
-        return nodeScriptExecLogModel.getId();
-    }
-
-    /**
-     * 执行脚本
-     *
-     * @param scriptServerItem 脚本
-     * @param type             类型
-     * @param args             参数
-     * @return 执行记录ID
-     */
-    public String execute(NodeScriptModel scriptServerItem, int type, String uerName, String args, Map<String, String> paramMap) {
-        NodeScriptExecLogModel nodeScriptExecLogModel = new NodeScriptExecLogModel();
-        nodeScriptExecLogModel.setId(IdUtil.fastSimpleUUID());
-        nodeScriptExecLogModel.setCreateTimeMillis(SystemClock.now());
-        nodeScriptExecLogModel.setScriptId(scriptServerItem.getId());
-        nodeScriptExecLogModel.setScriptName(scriptServerItem.getName());
-        nodeScriptExecLogModel.setModifyUser(uerName);
-        nodeScriptExecLogModel.setWorkspaceId(scriptServerItem.getWorkspaceId());
+        nodeScriptExecLogModel.setWorkspaceId(StrUtil.emptyToDefault(workspaceId, scriptServerItem.getWorkspaceId()));
         nodeScriptExecLogModel.setTriggerExecType(type);
         execLogServer.addItem(nodeScriptExecLogModel);
         String userArgs = StrUtil.emptyToDefault(args, scriptServerItem.getDefArgs());

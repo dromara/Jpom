@@ -123,9 +123,7 @@ public class ScriptController extends BaseServerController {
         scriptModel.setDescription(description);
         scriptModel.setDefArgs(CommandParam.checkStr(defArgs));
         scriptModel.setWorkspaceId(scriptServer.covertGlobalWorkspace(request));
-        if (scriptModel.global()) {
-            Assert.state(StrUtil.isEmpty(nodeIds), "全局脚本不能配置分发节点");
-        }
+
         Assert.hasText(scriptModel.getContext(), "内容为空");
         //
         scriptModel.setAutoExecCron(this.checkCron(autoExecCron));
@@ -137,9 +135,6 @@ public class ScriptController extends BaseServerController {
             ScriptModel byKey = scriptServer.getByKeyAndGlobal(id, request);
             Assert.notNull(byKey, "没有对应的数据");
             oldNodeIds = byKey.getNodeIds();
-            if (scriptModel.global()) {
-                Assert.state(StrUtil.isEmpty(oldNodeIds), "需要将脚本分发节点取消后才能修改为全局脚本");
-            }
             scriptServer.updateById(scriptModel, request);
         }
         this.syncNodeScript(scriptModel, oldNodeIds);
@@ -175,6 +170,8 @@ public class ScriptController extends BaseServerController {
             jsonObject.put("description", scriptModel.getDescription());
             jsonObject.put("name", scriptModel.getName());
             jsonObject.put("workspaceId", scriptModel.getWorkspaceId());
+            jsonObject.put("global", scriptModel.global());
+            jsonObject.put("nodeId", byKey.getId());
             JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Save, jsonObject);
             Assert.state(request.success(), "处理 " + byKey.getName() + " 节点同步脚本失败" + request.getMsg());
             nodeScriptServer.syncNode(byKey);

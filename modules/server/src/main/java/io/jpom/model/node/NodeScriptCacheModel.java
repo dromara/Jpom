@@ -37,7 +37,7 @@ import top.jpom.h2db.TableName;
 @TableName(value = "SCRIPT_INFO", name = "节点脚本模版")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ScriptCacheModel extends BaseNodeModel {
+public class NodeScriptCacheModel extends BaseNodeModel {
     /**
      * 脚本ID
      */
@@ -83,5 +83,10 @@ public class ScriptCacheModel extends BaseNodeModel {
 
     public void setDefArgs(String defArgs) {
         this.defArgs = CommandParam.convertToParam(defArgs);
+    }
+
+    @Override
+    protected boolean hasCreateUser() {
+        return true;
     }
 }

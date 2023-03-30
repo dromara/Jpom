@@ -37,11 +37,14 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
+import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
 import io.jpom.func.assets.model.MachineNodeModel;
 import io.jpom.func.assets.server.MachineNodeServer;
+import io.jpom.model.BaseIdModel;
 import io.jpom.model.data.NodeModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
 import io.jpom.system.ServerConfig;
@@ -130,7 +133,8 @@ public class NodeForward {
      */
     public static IUrlItem parseUrlItem(INodeInfo iNodeInfo, String workspaceId, NodeUrl nodeUrl, DataContentType dataContentType) {
         //
-        return new DefaultUrlItem(nodeUrl, iNodeInfo.timeout(), workspaceId, dataContentType);
+        Map<String, String> header = NodeForward.createHeader();
+        return new DefaultUrlItem(nodeUrl, iNodeInfo.timeout(), workspaceId, dataContentType, header);
     }
 
     /**
@@ -141,7 +145,8 @@ public class NodeForward {
      */
     public static IUrlItem parseUrlItem(INodeInfo iNodeInfo, String workspaceId, NodeUrl nodeUrl) {
         //
-        return new DefaultUrlItem(nodeUrl, iNodeInfo.timeout(), workspaceId, DataContentType.FORM_URLENCODED);
+        Map<String, String> header = NodeForward.createHeader();
+        return new DefaultUrlItem(nodeUrl, iNodeInfo.timeout(), workspaceId, DataContentType.FORM_URLENCODED, header);
     }
 
     /**
@@ -153,8 +158,9 @@ public class NodeForward {
      */
     public static <T> T createUrlItem(NodeModel nodeModel, NodeUrl nodeUrl, DataContentType dataContentType, BiFunction<INodeInfo, IUrlItem, T> consumer) {
         INodeInfo parseNodeInfo = parseNodeInfo(nodeModel);
+        Map<String, String> header = NodeForward.createHeader();
         //
-        IUrlItem iUrlItem = new DefaultUrlItem(nodeUrl, parseNodeInfo.timeout(), nodeModel.getWorkspaceId(), dataContentType);
+        IUrlItem iUrlItem = new DefaultUrlItem(nodeUrl, parseNodeInfo.timeout(), nodeModel.getWorkspaceId(), dataContentType, header);
         return consumer.apply(parseNodeInfo, iUrlItem);
     }
 
@@ -168,8 +174,16 @@ public class NodeForward {
 
     private static <T> T createUrlItem(INodeInfo nodeInfo, String workspaceId, NodeUrl nodeUrl, DataContentType dataContentType, BiFunction<INodeInfo, IUrlItem, T> consumer) {
         //
-        IUrlItem iUrlItem = new DefaultUrlItem(nodeUrl, nodeInfo.timeout(), workspaceId, dataContentType);
+        Map<String, String> header = NodeForward.createHeader();
+        IUrlItem iUrlItem = new DefaultUrlItem(nodeUrl, nodeInfo.timeout(), workspaceId, dataContentType, header);
         return consumer.apply(nodeInfo, iUrlItem);
+    }
+
+    private static Map<String, String> createHeader() {
+        Map<String, String> header = new HashMap<>();
+        UserModel userByThreadLocal = BaseServerController.getUserByThreadLocal();
+        header.put(Const.JPOM_SERVER_USER_NAME, Optional.ofNullable(userByThreadLocal).map(BaseIdModel::getId).orElse(StrUtil.EMPTY));
+        return header;
     }
 
 //    /**
@@ -204,10 +218,30 @@ public class NodeForward {
      * @return JSON
      */
     public static <T> JsonMessage<T> request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl, String... removeKeys) {
+        return request(nodeModel, request, nodeUrl, removeKeys, new String[]{});
+    }
+
+    /**
+     * 普通消息转发
+     *
+     * @param nodeModel 节点
+     * @param request   请求
+     * @param nodeUrl   节点的url
+     * @param <T>       泛型
+     * @return JSON
+     */
+    public static <T> JsonMessage<T> request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl, String[] removeKeys, String... appendData) {
         Map<String, String> map = Optional.ofNullable(request)
             .map(ServletUtil::getParamMap)
             .map(map1 -> MapUtil.removeAny(map1, removeKeys))
+            .map(map2 -> {
+                for (int i = 0; i < appendData.length; i += 2) {
+                    map2.put(appendData[i], appendData[i + 1]);
+                }
+                return map2;
+            })
             .orElse(null);
+
         TypeReference<JsonMessage<T>> tTypeReference = new TypeReference<JsonMessage<T>>() {
         };
         return createUrlItem(nodeModel, nodeUrl,
