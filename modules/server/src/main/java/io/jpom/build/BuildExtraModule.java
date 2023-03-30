@@ -180,6 +180,11 @@ public class BuildExtraModule extends BaseModel {
      */
     private String excludeReleaseAnt;
 
+    /**
+     * 是否发布隐藏文件
+     */
+    private Boolean releaseHideFile;
+
     public boolean strictlyEnforce() {
         return strictlyEnforce != null && strictlyEnforce;
     }
