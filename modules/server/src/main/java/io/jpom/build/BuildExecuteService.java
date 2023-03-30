@@ -322,7 +322,7 @@ public class BuildExecuteService {
         buildHistoryLog.setExtraData(buildInfoModel.getExtraData());
         dbBuildHistoryLogService.insert(buildHistoryLog);
         //
-        buildService.updateStatus(buildHistoryLog.getBuildDataId(), BuildStatus.WaitExec);
+        buildService.updateStatus(buildHistoryLog.getBuildDataId(), BuildStatus.WaitExec, "开始排队等待执行");
         return buildHistoryLog.getId();
     }
 
