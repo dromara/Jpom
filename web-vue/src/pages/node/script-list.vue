@@ -43,6 +43,10 @@
         <!-- <span>{{ text }}</span> -->
         <a-button type="link" style="padding: 0px" size="small">{{ text }}</a-button>
       </a-tooltip>
+      <template slot="global" slot-scope="text">
+        <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
+        <a-tag v-else>工作空间</a-tag>
+      </template>
       <template slot="scriptType" slot-scope="text">
         <a-tooltip v-if="text === 'server-sync'" title="服务端分发的脚本">
           <a-icon type="cluster" />
@@ -98,6 +102,12 @@
           </div>
 
           <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
+        </a-form-model-item>
+        <a-form-model-item label="共享" prop="global">
+          <a-radio-group v-model="temp.global">
+            <a-radio :value="true"> 全局</a-radio>
+            <a-radio :value="false"> 当前工作空间</a-radio>
+          </a-radio-group>
         </a-form-model-item>
         <a-form-model-item label="定时执行" prop="autoExecCron">
           <a-auto-complete v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
@@ -240,10 +250,11 @@ export default {
       drawerConsoleVisible: false,
       drawerLogVisible: false,
       columns: [
-        { title: "id", dataIndex: "id", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
+        { title: "scriptId", dataIndex: "scriptId", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
         { title: "名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "name" } },
         { title: "节点名称", dataIndex: "nodeId", ellipsis: true, width: 150, scopedSlots: { customRender: "nodeId" } },
         { title: "类型", dataIndex: "scriptType", width: 70, align: "center", ellipsis: true, scopedSlots: { customRender: "scriptType" } },
+        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
         { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, width: 120, scopedSlots: { customRender: "autoExecCron" } },
         {
           title: "修改时间",
@@ -251,9 +262,7 @@ export default {
           sorter: true,
           width: "170px",
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
         },
         {
           title: "创建时间",
@@ -261,9 +270,7 @@ export default {
           sorter: true,
           width: "170px",
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
         },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" }, width: 120 },
@@ -315,7 +322,7 @@ export default {
         nodeId: record.nodeId,
       }).then((res) => {
         if (res.code === 200) {
-          this.temp = Object.assign({}, res.data);
+          this.temp = Object.assign({}, res.data, { global: res.data.workspaceId === "GLOBAL", workspaceId: "" });
           this.temp.nodeId = record.nodeId;
           this.commandParams = this.temp.defArgs ? JSON.parse(this.temp.defArgs) : [];
           //

@@ -18,6 +18,10 @@
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <template slot="global" slot-scope="text">
+        <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
+        <a-tag v-else>工作空间</a-tag>
+      </template>
 
       <template slot="operation" slot-scope="text, record">
         <a-space>
@@ -66,6 +70,12 @@
           </div>
 
           <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
+        </a-form-model-item>
+        <a-form-model-item label="共享" prop="global">
+          <a-radio-group v-model="temp.global">
+            <a-radio :value="true"> 全局</a-radio>
+            <a-radio :value="false"> 当前工作空间</a-radio>
+          </a-radio-group>
         </a-form-model-item>
         <a-form-model-item label="定时执行" prop="autoExecCron">
           <a-auto-complete v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
@@ -120,14 +130,13 @@ export default {
         { title: "Script ID", dataIndex: "scriptId", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "tooltip" } },
         { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, scopedSlots: { customRender: "autoExecCron" } },
+        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
         {
           title: "创建时间",
           dataIndex: "createTimeMillis",
           ellipsis: true,
           sorter: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
           width: "170px",
         },
         {
@@ -136,9 +145,7 @@ export default {
           width: "170px",
           ellipsis: true,
           sorter: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
         },
         // { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, width: 150, scopedSlots: { customRender: "lastRunUser" } },
@@ -190,7 +197,7 @@ export default {
         id: record.scriptId,
         nodeId: this.node.id,
       }).then((res) => {
-        this.temp = Object.assign({}, res.data);
+        this.temp = Object.assign({}, res.data, { global: res.data.workspaceId === "GLOBAL", workspaceId: "" });
         this.commandParams = this.temp.defArgs ? JSON.parse(this.temp.defArgs) : [];
         //
         this.editScriptVisible = true;

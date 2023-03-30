@@ -35,7 +35,7 @@ import top.jpom.h2db.TableName;
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "SCRIPT_EXECUTE_LOG", name = "节点脚本模版执行记录")
 @Data
-public class ScriptExecuteLogCacheModel extends BaseNodeModel {
+public class NodeScriptExecuteLogCacheModel extends BaseNodeModel {
 
     /**
      *

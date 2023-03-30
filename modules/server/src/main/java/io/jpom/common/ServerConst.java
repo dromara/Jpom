@@ -31,12 +31,6 @@ public class ServerConst extends Const {
     public static final String GROUP_STR = "group";
 
     /**
-     * 工作空间全局
-     */
-    public static final String WORKSPACE_GLOBAL = "GLOBAL";
-
-
-    /**
      * h2 数据库表名字段
      */
     public static final String TABLE_NAME = "TABLE_NAME";

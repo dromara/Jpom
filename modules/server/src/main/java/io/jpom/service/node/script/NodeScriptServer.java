@@ -28,7 +28,7 @@ import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.node.ScriptCacheModel;
+import io.jpom.model.node.NodeScriptCacheModel;
 import io.jpom.service.ITriggerToken;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.node.NodeService;
@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  * @since 2019/8/16
  */
 @Service
-public class NodeScriptServer extends BaseNodeService<ScriptCacheModel> implements ITriggerToken {
+public class NodeScriptServer extends BaseNodeService<NodeScriptCacheModel> implements ITriggerToken {
 
 
     public NodeScriptServer(NodeService nodeService,
