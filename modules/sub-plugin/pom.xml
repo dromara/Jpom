@@ -29,7 +29,7 @@
     <parent>
         <artifactId>jpom-parent</artifactId>
         <groupId>io.jpom</groupId>
-        <version>2.10.38.8</version>
+        <version>2.10.38.9</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <packaging>pom</packaging>
@@ -42,7 +42,7 @@
         <module>encrypt</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
-    <version>2.10.38.8</version>
+    <version>2.10.38.9</version>
     <groupId>io.jpom.plugins</groupId>
     <artifactId>jpom-plugins-parent</artifactId>
     <name>Jpom Plugins</name>
