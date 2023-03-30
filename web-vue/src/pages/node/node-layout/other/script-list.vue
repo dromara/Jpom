@@ -129,7 +129,7 @@ export default {
       columns: [
         { title: "Script ID", dataIndex: "scriptId", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "tooltip" } },
-        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, scopedSlots: { customRender: "autoExecCron" } },
+        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, width: "120px", scopedSlots: { customRender: "autoExecCron" } },
         { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
         {
           title: "创建时间",
@@ -147,8 +147,9 @@ export default {
           sorter: true,
           customRender: (text) => parseTime(text),
         },
-        // { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
-        { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, width: 150, scopedSlots: { customRender: "lastRunUser" } },
+        { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
+        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: "120px" },
+        // { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, width: 150, scopedSlots: { customRender: "lastRunUser" } },
         { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "180px" },
       ],
       rules: {

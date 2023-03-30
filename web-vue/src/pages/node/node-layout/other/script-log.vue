@@ -168,8 +168,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-.filter {
-  margin-bottom: 10px;
-}
-</style>
+<style scoped></style>
