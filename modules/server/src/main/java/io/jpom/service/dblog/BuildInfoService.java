@@ -60,9 +60,10 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
      * @param id          ID
      * @param buildStatus to Status
      */
-    public void updateStatus(String id, BuildStatus buildStatus) {
+    public void updateStatus(String id, BuildStatus buildStatus, String desc) {
         BuildInfoModel buildInfoModel = new BuildInfoModel();
         buildInfoModel.setId(id);
+        buildInfoModel.setStatusMsg(desc);
         buildInfoModel.setStatus(buildStatus.getCode());
         this.updateById(buildInfoModel);
     }
