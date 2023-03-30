@@ -46,29 +46,13 @@ request.interceptors.request.use(
       config.data = Qs.stringify(config.data);
     }
     config.headers[TOKEN_HEADER_KEY] = store.getters.getToken || "";
-    config.headers[CACHE_WORKSPACE_ID] = getWid();
+    config.headers[CACHE_WORKSPACE_ID] = store.getters.getWorkspaceId;
     return config;
   },
   (error) => {
     return Promise.reject(error);
   }
 );
-
-function getWid() {
-  let wid = router.app.$route.query.wid;
-  if (!wid) {
-    wid = getHashVars().wid;
-  }
-  return wid ? wid : store.getters.getWorkspaceId;
-}
-
-function getHashVars() {
-  var vars = {};
-  location.hash.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
-    vars[key] = value;
-  });
-  return vars;
-}
 
 // 响应拦截器
 request.interceptors.response.use(
@@ -234,7 +218,7 @@ export default request;
 //
 export function loadRouterBase(url, params) {
   const paramsObj = params || {};
-  paramsObj[CACHE_WORKSPACE_ID] = getWid();
+  paramsObj[CACHE_WORKSPACE_ID] = store.getters.getWorkspaceId;
   const paramsQuery = Qs.stringify(paramsObj);
   return `${((window.routerBase || "") + url).replace(new RegExp("//", "gm"), "/")}?${paramsQuery}`;
 }
