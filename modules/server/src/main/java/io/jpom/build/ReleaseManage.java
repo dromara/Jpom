@@ -46,6 +46,7 @@ import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.func.assets.model.MachineSshModel;
+import io.jpom.func.assets.server.MachineDockerServer;
 import io.jpom.func.files.service.FileStorageService;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
@@ -100,18 +101,23 @@ public class ReleaseManage {
     private final BuildExtraModule buildExtraModule;
     private final String logId;
     private final BuildExecuteService buildExecuteService;
+    private final DockerInfoService dockerInfoService;
+    private final MachineDockerServer machineDockerServer;
+    private final FileStorageService fileStorageService;
+    private final BuildExtConfig buildExtConfig;
     private EnvironmentMapBuilder buildEnv;
-    private FileStorageService fileStorageService;
+
     private LogRecorder logRecorder;
     private File resultFile;
-    private BuildExtConfig buildExtConfig;
+
 
     private void init() {
         if (this.logRecorder == null) {
+            // 回滚的时候需要重新创建对象
             File logFile = BuildUtil.getLogFile(buildExtraModule.getId(), buildNumberId);
             this.logRecorder = LogRecorder.builder().file(logFile).build();
         }
-        fileStorageService = SpringUtil.getBean(FileStorageService.class);
+        Assert.notNull(buildEnv, "没有找到任何环境变量");
     }
 
 
@@ -126,7 +132,6 @@ public class ReleaseManage {
         this.init();
         this.resultFile = buildExtraModule.resultDirFile(this.buildNumberId);
         this.buildEnv.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
-        this.buildExtConfig = SpringUtil.getBean(BuildExtConfig.class);
         //
         this.updateStatus(BuildStatus.PubIng, "开始发布中");
         if (FileUtil.isEmpty(this.resultFile)) {
@@ -249,10 +254,9 @@ public class ReleaseManage {
             //
             String fromTag = this.buildExtraModule.getFromTag();
             // 根据 tag 查询
-            List<DockerInfoModel> dockerInfoModels = buildExecuteService
-                .dockerInfoService
+            List<DockerInfoModel> dockerInfoModels = dockerInfoService
                 .queryByTag(this.buildExtraModule.getWorkspaceId(), fromTag);
-            Map<String, Object> map = buildExecuteService.machineDockerServer.dockerParameter(dockerInfoModels);
+            Map<String, Object> map = machineDockerServer.dockerParameter(dockerInfoModels);
             if (map == null) {
                 String format = StrUtil.format("{} 没有可用的 docker server", fromTag);
                 logRecorder.systemError(format);
@@ -295,7 +299,7 @@ public class ReleaseManage {
         List<String> splitTrim = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
         String first = CollUtil.getFirst(splitTrim);
         logRecorder.system("start update swarm service: {} use image {}", serviceName, first);
-        Map<String, Object> pluginMap = buildExecuteService.machineDockerServer.dockerParameter(swarmId);
+        Map<String, Object> pluginMap = machineDockerServer.dockerParameter(swarmId);
         pluginMap.put("serviceId", serviceName);
         pluginMap.put("image", first);
         try {
@@ -309,7 +313,7 @@ public class ReleaseManage {
 
     private void doDockerImage(DockerInfoModel dockerInfoModel, Map<String, String> envMap, File dockerfile, File baseDir, String dockerTag, BuildExtraModule extraModule) {
         logRecorder.system("{} start build image {}", dockerInfoModel.getName(), dockerTag);
-        Map<String, Object> map = buildExecuteService.machineDockerServer.dockerParameter(dockerInfoModel);
+        Map<String, Object> map = machineDockerServer.dockerParameter(dockerInfoModel);
         //.toParameter();
         map.put("Dockerfile", dockerfile);
         map.put("baseDirectory", baseDir);
@@ -601,7 +605,7 @@ public class ReleaseManage {
             logRecorder.system("开始回滚:{}", DateTime.now());
             //
             String errorMsg = this.start(null, item);
-            logRecorder.system("执行回滚结束：{}", errorMsg);
+            logRecorder.system("执行回滚结束：{}", StrUtil.emptyToDefault(errorMsg, "ok"));
             if (errorMsg == null) {
                 this.updateStatus(BuildStatus.PubSuccess, "发布成功");
             } else {

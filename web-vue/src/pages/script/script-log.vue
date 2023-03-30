@@ -80,7 +80,7 @@ export default {
         { title: "名称", dataIndex: "scriptName", width: 100, ellipsis: true, scopedSlots: { customRender: "scriptName" } },
         { title: "执行时间", dataIndex: "createTimeMillis", sorter: true, ellipsis: true, width: "160px", scopedSlots: { customRender: "createTimeMillis" } },
         { title: "触发类型", dataIndex: "triggerExecType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerExecTypeMap" } },
-        { title: "执行域", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
+        { title: "执行域", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
         { title: "执行人", dataIndex: "modifyUser", ellipsis: true, width: "100px", scopedSlots: { customRender: "modifyUser" } },
         { title: "操作", dataIndex: "operation", align: "center", fixed: "right", scopedSlots: { customRender: "operation" }, width: "150px" },
       ],

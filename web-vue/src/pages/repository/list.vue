@@ -343,7 +343,7 @@ export default {
           ellipsis: true,
           scopedSlots: { customRender: "protocol" },
         },
-        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
+        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
         { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
         {

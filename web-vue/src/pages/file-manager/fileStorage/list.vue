@@ -326,7 +326,7 @@ export default {
         { title: "别名码", dataIndex: "aliasCode", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
         { title: "大小", dataIndex: "size", sorter: true, ellipsis: true, scopedSlots: { customRender: "renderSize" }, width: "100px" },
         { title: "后缀", dataIndex: "extName", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "80px" },
-        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
+        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
         { title: "来源", dataIndex: "source", ellipsis: true, scopedSlots: { customRender: "source" }, width: "80px" },
         {
           title: "过期天数",
