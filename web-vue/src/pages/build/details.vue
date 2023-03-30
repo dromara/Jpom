@@ -132,7 +132,7 @@ export default {
       data: {},
       listQuery: Object.assign({ buildDataId: this.id }, PAGE_DEFAULT_LIST_QUERY),
       historyList: [],
-      tempRepository: {},
+      tempRepository: null,
     };
   },
   created() {
