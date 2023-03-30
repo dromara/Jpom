@@ -835,7 +835,7 @@ import { getBuildGroupAll, editBuild, getBranchList, buildModeMap, releaseMethod
 import { getSshListAll } from "@/api/ssh";
 import { getRepositoryInfo } from "@/api/repository";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
-import { getScriptListAll } from "@/api/server-script";
+// import { getScriptListAll } from "@/api/server-script";
 import { getDishPatchListAll } from "@/api/dispatch";
 import { itemGroupBy, CRON_DATA_SOURCE, randomStr } from "@/utils/const";
 import { mapGetters } from "vuex";
@@ -930,7 +930,7 @@ export default {
       dockerSwarmList: [],
       //集群下 服务下拉数据
       swarmServiceListOptions: [],
-      scriptList: [],
+      // scriptList: [],
       groupList: [],
       temp: {},
       rules: {
@@ -1046,7 +1046,7 @@ export default {
       this.loadNodeProjectList();
       this.loadSshList();
       this.loadDockerSwarmListAll();
-      this.loadScriptListList();
+      // this.loadScriptListList();
 
       this.tempExtraData = {
         cacheBuild: true,
@@ -1092,7 +1092,7 @@ export default {
       this.loadDispatchList();
       this.loadDockerSwarmListAll();
       this.loadNodeProjectList();
-      this.loadScriptListList();
+      // this.loadScriptListList();
       this.loadSshList().then(() => {
         if (this.tempExtraData.releaseMethodDataId_3) {
           //
@@ -1108,14 +1108,14 @@ export default {
         }
       });
     },
-    // 加载脚本列表
-    loadScriptListList() {
-      getScriptListAll().then((res) => {
-        if (res.code === 200) {
-          this.scriptList = res.data;
-        }
-      });
-    },
+    // // 加载脚本列表
+    // loadScriptListList() {
+    //   getScriptListAll().then((res) => {
+    //     if (res.code === 200) {
+    //       this.scriptList = res.data;
+    //     }
+    //   });
+    // },
     // 加载节点分发列表
     loadDispatchList() {
       this.dispatchList = [];

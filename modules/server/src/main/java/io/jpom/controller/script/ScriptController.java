@@ -31,6 +31,7 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.data.NodeModel;
+import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
@@ -41,6 +42,7 @@ import io.jpom.script.CommandParam;
 import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.service.script.ScriptExecuteLogServer;
 import io.jpom.service.script.ScriptServer;
+import io.jpom.service.system.WorkspaceService;
 import io.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -52,10 +54,8 @@ import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -70,15 +70,18 @@ public class ScriptController extends BaseServerController {
     private final NodeScriptServer nodeScriptServer;
     private final ScriptExecuteLogServer scriptExecuteLogServer;
     private final TriggerTokenLogServer triggerTokenLogServer;
+    private final WorkspaceService workspaceService;
 
     public ScriptController(ScriptServer scriptServer,
                             NodeScriptServer nodeScriptServer,
                             ScriptExecuteLogServer scriptExecuteLogServer,
-                            TriggerTokenLogServer triggerTokenLogServer) {
+                            TriggerTokenLogServer triggerTokenLogServer,
+                            WorkspaceService workspaceService) {
         this.scriptServer = scriptServer;
         this.nodeScriptServer = nodeScriptServer;
         this.scriptExecuteLogServer = scriptExecuteLogServer;
         this.triggerTokenLogServer = triggerTokenLogServer;
+        this.workspaceService = workspaceService;
     }
 
     /**
@@ -100,8 +103,8 @@ public class ScriptController extends BaseServerController {
      */
     @GetMapping(value = "list-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<ScriptModel>> scriptListAll() {
-        List<ScriptModel> pageResultDto = scriptServer.listByWorkspace(getRequest());
+    public JsonMessage<List<ScriptModel>> scriptListAll(HttpServletRequest request) {
+        List<ScriptModel> pageResultDto = scriptServer.listByWorkspace(request);
         return JsonMessage.success("success", pageResultDto);
     }
 
@@ -142,8 +145,8 @@ public class ScriptController extends BaseServerController {
     }
 
     private void syncDelNodeScript(ScriptModel scriptModel, Collection<String> delNode) {
-        for (String s : delNode) {
-            NodeModel byKey = nodeService.getByKey(s, getRequest());
+        for (String nodeId : delNode) {
+            NodeModel byKey = nodeService.getByKey(nodeId);
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", scriptModel.getId());
             JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Del, jsonObject);
@@ -160,7 +163,7 @@ public class ScriptController extends BaseServerController {
         this.syncDelNodeScript(scriptModel, delNode);
         // 更新
         for (String newNodeId : newNodeIds) {
-            NodeModel byKey = nodeService.getByKey(newNodeId, request);
+            NodeModel byKey = nodeService.getByKey(newNodeId);
             Assert.notNull(byKey, "没有找到对应的节点");
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", scriptModel.getId());
@@ -170,7 +173,7 @@ public class ScriptController extends BaseServerController {
             jsonObject.put("defArgs", scriptModel.getDefArgs());
             jsonObject.put("description", scriptModel.getDescription());
             jsonObject.put("name", scriptModel.getName());
-            jsonObject.put("workspaceId", scriptModel.getWorkspaceId());
+            jsonObject.put("workspaceId", byKey.getWorkspaceId());
             jsonObject.put("global", scriptModel.global());
             jsonObject.put("nodeId", byKey.getId());
             JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Script_Save, jsonObject);
@@ -196,6 +199,42 @@ public class ScriptController extends BaseServerController {
             scriptExecuteLogServer.delByWorkspace(request, entity -> entity.set("scriptId", id));
         }
         return JsonMessage.success("删除成功");
+    }
+
+    @GetMapping(value = "get", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<JSONObject> get(String id, HttpServletRequest request) {
+        String workspaceId = scriptServer.getCheckUserWorkspace(request);
+        ScriptModel server = scriptServer.getByKeyAndGlobal(id, request);
+        Assert.notNull(server, "没有对应的脚本");
+        String nodeIds = server.getNodeIds();
+        List<String> newNodeIds = StrUtil.splitTrim(nodeIds, StrUtil.COMMA);
+        List<JSONObject> nodeList = newNodeIds.stream()
+            .map(s -> {
+                JSONObject jsonObject = new JSONObject();
+                NodeModel nodeModel = nodeService.getByKey(s);
+                if (nodeModel == null) {
+                    jsonObject.put("nodeName", "未知(数据丢失)");
+                } else {
+                    jsonObject.put("nodeName", nodeModel.getName());
+                    jsonObject.put("nodeId", nodeModel.getId());
+                    jsonObject.put("workspaceId", nodeModel.getWorkspaceId());
+                    WorkspaceModel workspaceModel = workspaceService.getByKey(nodeModel.getWorkspaceId());
+                    jsonObject.put("workspaceName", Optional.ofNullable(workspaceModel).map(WorkspaceModel::getName).orElse("未知(数据丢失)"));
+                }
+                return jsonObject;
+            })
+            .collect(Collectors.toList());
+        // 判断是否可以编辑节点
+        boolean prohibitSync = nodeList.stream().anyMatch(jsonObject -> {
+            String workspaceId11 = (String) jsonObject.get("workspaceId");
+            return !StrUtil.equals(workspaceId11, workspaceId);
+        });
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("data", server);
+        jsonObject.put("nodeList", nodeList);
+        jsonObject.put("prohibitSync", prohibitSync);
+        return JsonMessage.success("", jsonObject);
     }
 
     /**

@@ -36,9 +36,7 @@
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="`${nodeMap[text]} 节点ID： ${text}`">
-        <span>{{ nodeMap[text] }}</span>
-      </a-tooltip>
+
       <a-tooltip slot="name" @click="handleEdit(record)" slot-scope="text, record" placement="topLeft" :title="text">
         <!-- <span>{{ text }}</span> -->
         <a-button type="link" style="padding: 0px" size="small">{{ text }}</a-button>
@@ -252,7 +250,8 @@ export default {
       columns: [
         { title: "scriptId", dataIndex: "scriptId", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
         { title: "名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "name" } },
-        { title: "节点名称", dataIndex: "nodeId", ellipsis: true, width: 150, scopedSlots: { customRender: "nodeId" } },
+        { title: "节点名称", dataIndex: "nodeName", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
+        { title: "工作空间名称", dataIndex: "workspaceName", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
         { title: "类型", dataIndex: "scriptType", width: 70, align: "center", ellipsis: true, scopedSlots: { customRender: "scriptType" } },
         { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
         { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, width: 120, scopedSlots: { customRender: "autoExecCron" } },

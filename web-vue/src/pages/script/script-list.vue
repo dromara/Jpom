@@ -129,7 +129,10 @@
             <a-radio :value="false"> 当前工作空间</a-radio>
           </a-radio-group>
         </a-form-model-item>
-        <a-form-model-item>
+        <a-form-model-item v-if="temp.prohibitSync" label="禁用分发节点">
+          <a-tag v-for="(item, index) in temp.nodeList" :key="index">节点名称：{{ item.nodeName }} 工作空间：{{ item.workspaceName }}</a-tag>
+        </a-form-model-item>
+        <a-form-model-item v-else>
           <template slot="label">
             分发节点
             <a-tooltip v-show="!temp.id">
@@ -279,7 +282,7 @@
   </div>
 </template>
 <script>
-import { deleteScript, editScript, getScriptList, syncToWorkspace, unbindScript, getTriggerUrl } from "@/api/server-script";
+import { deleteScript, editScript, getScriptList, syncToWorkspace, unbindScript, getTriggerUrl, getScriptItem } from "@/api/server-script";
 import codeEditor from "@/components/codeEditor";
 import { getNodeListAll } from "@/api/node";
 import ScriptConsole from "@/pages/script/script-console";
@@ -316,7 +319,7 @@ export default {
       columns: [
         { title: "id", dataIndex: "id", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
         { title: "名称", dataIndex: "name", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
-        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
+        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
         { title: "描述", dataIndex: "description", ellipsis: true, width: 300, scopedSlots: { customRender: "tooltip" } },
         { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
         {
@@ -406,13 +409,27 @@ export default {
     },
     // 修改
     handleEdit(record) {
-      this.temp = Object.assign({}, record);
+      getScriptItem({
+        id: record.id,
+      }).then((res) => {
+        if (res.code === 200) {
+          const data = res.data.data;
+          this.temp = Object.assign({}, data);
 
-      this.commandParams = record.defArgs ? JSON.parse(record.defArgs) : [];
+          this.commandParams = data?.defArgs ? JSON.parse(data.defArgs) : [];
 
-      this.temp = { ...this.temp, chooseNode: record.nodeIds ? record.nodeIds.split(",") : [], global: record.workspaceId === "GLOBAL", workspaceId: "" };
-      this.editScriptVisible = true;
-      this.getAllNodeList();
+          this.temp = {
+            ...this.temp,
+            prohibitSync: res.data.prohibitSync,
+            nodeList: res.data.nodeList,
+            chooseNode: data?.nodeIds ? data.nodeIds.split(",") : [],
+            global: data.workspaceId === "GLOBAL",
+            workspaceId: "",
+          };
+          this.editScriptVisible = true;
+          this.getAllNodeList();
+        }
+      });
     },
     // 提交 Script 数据
     handleEditScriptOk() {
@@ -436,6 +453,7 @@ export default {
         }
         // 提交数据
         this.temp.nodeIds = this.temp?.chooseNode?.join(",");
+        delete this.temp.nodeList;
         editScript(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
