@@ -38,8 +38,14 @@ import lombok.EqualsAndHashCode;
 @Data
 public abstract class BaseWorkspaceModel extends BaseModel {
 
+    /**
+     * 数据关联的工作空间
+     */
     private String workspaceId;
-
+    /**
+     * 数据跟随的节点 ID
+     */
+    private String nodeId;
     /**
      * 最后修改人
      */
@@ -47,11 +53,20 @@ public abstract class BaseWorkspaceModel extends BaseModel {
 
     private String modifyTime;
 
+    /**
+     * 创建人
+     */
+    private String createUser;
+
     public String getModifyUser() {
         if (StrUtil.isEmpty(modifyUser)) {
             return StrUtil.DASHED;
         }
         return modifyUser;
+    }
+
+    public boolean global() {
+        return StrUtil.equals(this.workspaceId, Const.WORKSPACE_GLOBAL);
     }
 
     public String getWorkspaceId() {

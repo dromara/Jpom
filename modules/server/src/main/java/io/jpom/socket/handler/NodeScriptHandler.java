@@ -28,8 +28,8 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.node.ScriptCacheModel;
-import io.jpom.model.node.ScriptExecuteLogCacheModel;
+import io.jpom.model.node.NodeScriptCacheModel;
+import io.jpom.model.node.NodeScriptExecuteLogCacheModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -58,7 +58,8 @@ public class NodeScriptHandler extends BaseProxyHandler {
 
     @Override
     protected Object[] getParameters(Map<String, Object> attributes) {
-        return new Object[]{"id", attributes.get("scriptId")};
+        NodeScriptCacheModel scriptModel = (NodeScriptCacheModel) attributes.get("dataItem");
+        return new Object[]{"id", attributes.get("scriptId"), "workspaceId", scriptModel.getWorkspaceId()};
     }
 
     @Override
@@ -67,10 +68,6 @@ public class NodeScriptHandler extends BaseProxyHandler {
             super.logOpt(this.getClass(), attributes, json);
         }
         if (consoleCommandOp == ConsoleCommandOp.start) {
-            //			UserModel userModel = (UserModel) attributes.get("userInfo");
-            //			if (userModel.isDemoUser()) {
-            //				return PermissionInterceptor.DEMO_TIP;
-            //			}
             // 开始执行
             String executeId = this.createLog(attributes);
             json.put(Const.SOCKET_MSG_TAG, Const.SOCKET_MSG_TAG);
@@ -89,26 +86,26 @@ public class NodeScriptHandler extends BaseProxyHandler {
     private String createLog(Map<String, Object> attributes) {
         NodeModel nodeInfo = (NodeModel) attributes.get("nodeInfo");
         UserModel userModel = (UserModel) attributes.get("userInfo");
-        ScriptCacheModel dataItem = (ScriptCacheModel) attributes.get("dataItem");
+        NodeScriptCacheModel dataItem = (NodeScriptCacheModel) attributes.get("dataItem");
         NodeScriptExecuteLogServer logServer = SpringUtil.getBean(NodeScriptExecuteLogServer.class);
         NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
         //
         try {
             BaseServerController.resetInfo(userModel);
             //
-            ScriptCacheModel scriptCacheModel = new ScriptCacheModel();
-            scriptCacheModel.setId(dataItem.getId());
-            scriptCacheModel.setLastRunUser(userModel.getId());
-            nodeScriptServer.updateById(scriptCacheModel);
+            NodeScriptCacheModel nodeScriptCacheModel = new NodeScriptCacheModel();
+            nodeScriptCacheModel.setId(dataItem.getId());
+            nodeScriptCacheModel.setLastRunUser(userModel.getId());
+            nodeScriptServer.updateById(nodeScriptCacheModel);
             //
-            ScriptExecuteLogCacheModel scriptExecuteLogCacheModel = new ScriptExecuteLogCacheModel();
-            scriptExecuteLogCacheModel.setScriptId(dataItem.getScriptId());
-            scriptExecuteLogCacheModel.setNodeId(nodeInfo.getId());
-            scriptExecuteLogCacheModel.setScriptName(dataItem.getName());
-            scriptExecuteLogCacheModel.setTriggerExecType(0);
-            scriptExecuteLogCacheModel.setWorkspaceId(nodeInfo.getWorkspaceId());
-            logServer.insert(scriptExecuteLogCacheModel);
-            return scriptExecuteLogCacheModel.getId();
+            NodeScriptExecuteLogCacheModel nodeScriptExecuteLogCacheModel = new NodeScriptExecuteLogCacheModel();
+            nodeScriptExecuteLogCacheModel.setScriptId(dataItem.getScriptId());
+            nodeScriptExecuteLogCacheModel.setNodeId(nodeInfo.getId());
+            nodeScriptExecuteLogCacheModel.setScriptName(dataItem.getName());
+            nodeScriptExecuteLogCacheModel.setTriggerExecType(0);
+            nodeScriptExecuteLogCacheModel.setWorkspaceId(nodeInfo.getWorkspaceId());
+            logServer.insert(nodeScriptExecuteLogCacheModel);
+            return nodeScriptExecuteLogCacheModel.getId();
         } finally {
             BaseServerController.removeAll();
         }

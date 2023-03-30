@@ -29,11 +29,12 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
+import io.jpom.common.ServerConst;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.WorkspaceModel;
-import io.jpom.model.node.ScriptExecuteLogCacheModel;
+import io.jpom.model.node.NodeScriptExecuteLogCacheModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.node.NodeService;
@@ -55,7 +56,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class NodeScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLogCacheModel> {
+public class NodeScriptExecuteLogServer extends BaseNodeService<NodeScriptExecuteLogCacheModel> {
 
     public NodeScriptExecuteLogServer(NodeService nodeService,
                                       WorkspaceService workspaceService) {
@@ -117,12 +118,18 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLog
                 return null;
             }
             //
-            List<ScriptExecuteLogCacheModel> models = jsonArray.toJavaList(this.tClass).stream()
+            List<NodeScriptExecuteLogCacheModel> models = jsonArray.toJavaList(this.tClass).stream()
                 .filter(item -> {
+                    if (StrUtil.equals(item.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL)) {
+                        return true;
+                    }
                     // 检查对应的工作空间 是否存在
                     return workspaceService.exists(new WorkspaceModel(item.getWorkspaceId()));
                 })
                 .filter(item -> {
+                    if (StrUtil.equals(item.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL)) {
+                        return true;
+                    }
                     // 避免重复同步
                     return StrUtil.equals(nodeModel.getWorkspaceId(), item.getWorkspaceId());
                 })

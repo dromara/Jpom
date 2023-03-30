@@ -33,22 +33,31 @@ import io.jpom.model.data.BaseWorkspaceModel;
  */
 public abstract class BaseWorkspaceOptService<T extends BaseWorkspaceModel> extends BaseOperService<T> {
 
-	public BaseWorkspaceOptService(String fileName) {
-		super(fileName);
-	}
+    public BaseWorkspaceOptService(String fileName) {
+        super(fileName);
+    }
 
-	/**
-	 * 修改信息
-	 *
-	 * @param data 信息
-	 */
-	@Override
-	public void updateItem(T data) {
-		data.setModifyTime(DateUtil.now());
-		String userName = BaseAgentController.getNowUserName();
-		if (!StrUtil.DASHED.equals(userName)) {
-			data.setModifyUser(userName);
-		}
-		super.updateItem(data);
-	}
+    @Override
+    public void addItem(T t) {
+        String userName = BaseAgentController.getNowUserName();
+        if (!StrUtil.DASHED.equals(userName)) {
+            t.setCreateUser(userName);
+        }
+        super.addItem(t);
+    }
+
+    /**
+     * 修改信息
+     *
+     * @param data 信息
+     */
+    @Override
+    public void updateItem(T data) {
+        data.setModifyTime(DateUtil.now());
+        String userName = BaseAgentController.getNowUserName();
+        if (!StrUtil.DASHED.equals(userName)) {
+            data.setModifyUser(userName);
+        }
+        super.updateItem(data);
+    }
 }

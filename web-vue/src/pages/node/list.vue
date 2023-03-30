@@ -39,7 +39,12 @@
               "
               >快速安装
             </a-button>
-            <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
+            <a-dropdown v-if="this.layoutType === 'table'">
+              <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
+            </a-dropdown>
+            <a-tooltip v-else title="表格视图才能使用工作空间同步功能">
+              <a-button :disabled="true" type="primary"> 工作空间同步 </a-button>
+            </a-tooltip>
 
             <a-button type="primary" @click="changeLayout" :icon="this.layoutType === 'card' ? 'layout' : 'table'"> {{ this.layoutType === "card" ? "卡片" : "表格" }} </a-button>
             <a-tooltip placement="bottom">
@@ -471,7 +476,7 @@ import { getSshListAll } from "@/api/ssh";
 import { syncScript } from "@/api/node-other";
 import NodeLayout from "./node-layout";
 import Terminal from "@/pages/ssh/terminal";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, formatDuration, renderSize, formatPercent2Number, parseTime, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, formatDuration, renderSize, formatPercent2Number, parseTime, PAGE_DEFAULT_SHOW_TOTAL, getCachePageLimit } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";
 import CustomSelect from "@/components/customSelect";
 import fastInstall from "./fast-install.vue";
@@ -863,7 +868,7 @@ export default {
         this.layoutType = this.layoutType === "card" ? "table" : "card";
         localStorage.setItem("tableLayout", this.layoutType);
       }
-      this.listQuery = { ...this.listQuery, limit: this.layoutType === "card" ? 8 : 10 };
+      this.listQuery = { ...this.listQuery, limit: this.layoutType === "card" ? 8 : getCachePageLimit() };
       this.loadData();
     },
     onFinish() {

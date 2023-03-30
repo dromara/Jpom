@@ -34,6 +34,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
+import io.jpom.common.ServerConst;
 import io.jpom.model.BaseNodeModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.WorkspaceModel;
@@ -47,18 +48,17 @@ import org.springframework.util.Assert;
 import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author bwcx_jzy
  * @since 2021/12/5
  */
 @Slf4j
-public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorkspaceService<T> {
+public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGlobalOrWorkspaceService<T> {
 
     protected final NodeService nodeService;
     protected final WorkspaceService workspaceService;
@@ -76,14 +76,17 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
         // 验证工作空间权限
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
         String workspaceId = this.getCheckUserWorkspace(request);
-        paramMap.put("workspaceId", workspaceId);
         // 验证节点
         String nodeId = paramMap.get(BaseServerController.NODE_ID);
         Assert.notNull(nodeId, "没有选择节点ID");
         NodeService nodeService = SpringUtil.getBean(NodeService.class);
         NodeModel nodeModel = nodeService.getByKey(nodeId);
         Assert.notNull(nodeModel, "不存在对应的节点");
-        paramMap.put("nodeId", nodeId);
+        Assert.state(StrUtil.equals(workspaceId, nodeModel.getWorkspaceId()), "节点的工作空间和操作的工作空间补一致");
+        paramMap.remove("workspaceId");
+        paramMap.remove("nodeId");
+        paramMap.put("workspaceId:in", workspaceId + StrUtil.COMMA + ServerConst.WORKSPACE_GLOBAL);
+
         return super.listPage(paramMap);
     }
 
@@ -148,44 +151,66 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
             }
             // 查询现在存在的项目
             T where = ReflectUtil.newInstance(this.tClass);
-            where.setWorkspaceId(nodeModel.getWorkspaceId());
+            // where.setWorkspaceId(nodeModel.getWorkspaceId());
             where.setNodeId(nodeModel.getId());
             List<T> cacheAll = super.listByBean(where);
             cacheAll = ObjectUtil.defaultIfNull(cacheAll, Collections.emptyList());
+            Set<String> needDelete = new HashSet<>();
             Set<String> cacheIds = cacheAll.stream()
-                    .map(BaseNodeModel::dataId)
-                    .collect(Collectors.toSet());
+                .map(BaseNodeModel::dataId)
+                .collect(Collectors.toSet());
             //
             List<T> projectInfoModels = jsonArray.toJavaList(this.tClass);
             List<T> models = projectInfoModels.stream()
-                    .peek(item -> this.fullData(item, nodeModel))
-                    .filter(item -> {
-                        // 检查对应的工作空间 是否存在
-                        return workspaceService.exists(new WorkspaceModel(item.getWorkspaceId()));
-                    })
-                    .filter(projectInfoModel -> {
-                        // 避免重复同步
-                        return StrUtil.equals(nodeModel.getWorkspaceId(), projectInfoModel.getWorkspaceId());
-                    })
-                    .peek(item -> cacheIds.remove(item.dataId()))
-                    .collect(Collectors.toList());
+                .peek(item -> this.fullData(item, nodeModel))
+                // 只保留自己节点的数据
+                .filter(t -> StrUtil.equals(t.getNodeId(), nodeModel.getId()))
+                .filter(item -> {
+                    if (StrUtil.equals(item.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL)) {
+                        return true;
+                    }
+                    // 检查对应的工作空间 是否存在
+                    return workspaceService.exists(new WorkspaceModel(item.getWorkspaceId()));
+                })
+                .filter(item -> {
+                    if (StrUtil.equals(item.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL)) {
+                        return true;
+                    }
+                    // 避免重复同步
+                    return StrUtil.equals(nodeModel.getWorkspaceId(), item.getWorkspaceId());
+                })
+                .peek(item -> {
+                    cacheIds.remove(item.dataId());
+                    // 需要删除相反的工作空间的数据（避免出现一个脚本同步出2条数据的问题）
+                    if (StrUtil.equals(item.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL)) {
+                        needDelete.add(BaseNodeModel.fullId(nodeModel.getWorkspaceId(), nodeModel.getId(), item.dataId()));
+                    } else {
+                        needDelete.add(BaseNodeModel.fullId(ServerConst.WORKSPACE_GLOBAL, nodeModel.getId(), item.dataId()));
+                    }
+                })
+                .collect(Collectors.toList());
             // 设置 临时缓存，便于放行检查
             BaseServerController.resetInfo(UserModel.EMPTY);
             //
             models.forEach(BaseNodeService.super::upsert);
             // 删除项目
+            int delCount = 0;
             Set<String> strings = cacheIds.stream()
-                    .map(s -> BaseNodeModel.fullId(nodeModel.getWorkspaceId(), nodeModel.getId(), s))
-                    .collect(Collectors.toSet());
-            if (CollUtil.isNotEmpty(strings)) {
-                super.delByKey(strings, null);
+                .flatMap((Function<String, Stream<String>>) s -> Stream.of(
+                    BaseNodeModel.fullId(nodeModel.getWorkspaceId(), nodeModel.getId(), s),
+                    BaseNodeModel.fullId(ServerConst.WORKSPACE_GLOBAL, nodeModel.getId(), s)))
+                .collect(Collectors.toSet());
+            //
+            needDelete.addAll(strings);
+            if (CollUtil.isNotEmpty(needDelete)) {
+                delCount = super.delByKey(needDelete, null);
             }
             String format = StrUtil.format(
-                    "{} 节点拉取到 {} 个{},已经缓存 {} 个{},更新 {} 个{},删除 {} 个缓存",
-                    nodeModelName, CollUtil.size(jsonArray), dataName,
-                    CollUtil.size(cacheAll), dataName,
-                    CollUtil.size(models), dataName,
-                    CollUtil.size(strings));
+                "{} 节点拉取到 {} 个{},已经缓存 {} 个{},更新 {} 个{},删除 {} 个缓存",
+                nodeModelName, CollUtil.size(jsonArray), dataName,
+                CollUtil.size(cacheAll), dataName,
+                CollUtil.size(models), dataName,
+                delCount);
             log.debug(format);
             return format;
         } catch (Exception e) {
@@ -256,7 +281,9 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
      */
     private void fullData(T item, NodeModel nodeModel) {
         item.dataId(item.getId());
-        item.setNodeId(nodeModel.getId());
+        if (StrUtil.isEmpty(item.getNodeId())) {
+            item.setNodeId(nodeModel.getId());
+        }
         if (StrUtil.isEmpty(item.getWorkspaceId())) {
             item.setWorkspaceId(nodeModel.getWorkspaceId());
         }
@@ -287,13 +314,16 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
      * @return 影响行数
      */
     public int delCache(String dataId, String nodeId, HttpServletRequest request) {
-        String checkUserWorkspace = this.getCheckUserWorkspace(request);
-        T data = ReflectUtil.newInstance(this.tClass);
-        data.setNodeId(nodeId);
-        data.dataId(dataId);
-        data.setWorkspaceId(checkUserWorkspace);
-        Entity entity = super.dataBeanToEntity(data);
-        return super.del(entity);
+        return this.delByWorkspace(request, entity -> {
+            entity.set("nodeId", nodeId);
+            entity.set("dataId", dataId);
+        });
+//        T data = ReflectUtil.newInstance(this.tClass);
+//        data.setNodeId(nodeId);
+//        data.dataId(dataId);
+//        data.setWorkspaceId(checkUserWorkspace);
+//        Entity entity = super.dataBeanToEntity(data);
+//        return super.del(entity);
     }
 
     /**

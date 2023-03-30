@@ -4,6 +4,7 @@
  * 另外提供打开新 tab、跳转 tab、移除 tab 功能
  */
 import { CACHE_WORKSPACE_ID } from "@/utils/const";
+import router from "@/router";
 
 const app = {
   state: {
@@ -36,7 +37,11 @@ const app = {
   },
   getters: {
     getWorkspaceId(state) {
-      return state.workspaceId;
+      let wid = router.app.$route.query.wid;
+      if (!wid) {
+        wid = getHashVars().wid;
+      }
+      return wid || state.workspaceId;
     },
     getCollapsed(state) {
       if (state.collapsed === undefined || state.collapsed === null) {
@@ -46,5 +51,13 @@ const app = {
     },
   },
 };
+
+function getHashVars() {
+  var vars = {};
+  location.hash.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
+    vars[key] = value;
+  });
+  return vars;
+}
 
 export default app;

@@ -43,6 +43,8 @@ public enum BuildStatus implements BaseEnum {
     PubError(6, "发布失败"),
     Cancel(7, "取消构建"),
     Interrupt(8, "构建中断"),
+    WaitExec(9, "队列等待"),
+    AbnormalShutdown(10, "异常关闭"),
     ;
 
     private final int code;
