@@ -139,10 +139,11 @@ public class BuildInfoManageController extends BaseServerController {
     public JsonMessage<String> cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
         BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
         Objects.requireNonNull(item, "没有对应数据");
+        String checkStatus = buildExecuteService.checkStatus(item);
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, item.getStatus());
         Objects.requireNonNull(nowStatus);
-        if (BuildStatus.Ing != nowStatus && BuildStatus.PubIng != nowStatus) {
-            return JsonMessage.success("当前状态不在进行中");
+        if (checkStatus == null) {
+            return JsonMessage.success("当前状态不在进行中," + nowStatus.getDesc());
         }
         boolean status = buildExecuteService.cancelTask(item.getId());
         if (!status) {
@@ -179,13 +180,13 @@ public class BuildInfoManageController extends BaseServerController {
         EnvironmentMapBuilder environmentMapBuilder = EnvironmentMapBuilder.builder(map);
         //
         ReleaseManage manage = ReleaseManage.builder()
-                .buildExtraModule(buildExtraModule)
-                .logId(buildHistoryLog.getId())
-                .userModel(userModel)
-                .buildNumberId(buildHistoryLog.getBuildNumberId())
-                .buildExecuteService(buildExecuteService)
-                .buildEnv(environmentMapBuilder)
-                .build();
+            .buildExtraModule(buildExtraModule)
+            .logId(buildHistoryLog.getId())
+            .userModel(userModel)
+            .buildNumberId(buildHistoryLog.getBuildNumberId())
+            .buildExecuteService(buildExecuteService)
+            .buildEnv(environmentMapBuilder)
+            .build();
         //
         ThreadUtil.execute(() -> manage.rollback(item));
         return JsonMessage.success("重新发布中");
@@ -226,10 +227,9 @@ public class BuildInfoManageController extends BaseServerController {
         JSONObject data = FileUtils.readLogFile(file, line);
         // 运行中
         Integer status = queryByBean.getStatus();
-        data.put("run", status == BuildStatus.Ing.getCode() || status == BuildStatus.PubIng.getCode());
+        data.put("run", buildExecuteService.checkStatus(item) != null);
         // 构建中
-        data.put("buildRun", status == BuildStatus.Ing.getCode());
-
+        //data.put("buildRun", status == BuildStatus.Ing.getCode());
         return JsonMessage.success("ok", data);
     }
 }

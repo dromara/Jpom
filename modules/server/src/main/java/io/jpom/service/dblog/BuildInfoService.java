@@ -125,8 +125,8 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
     @Override
     public int statusRecover() {
         // 恢复异常数据
-        String updateSql = "update " + super.getTableName() + " set status=? where status=? or status=?";
-        return super.execute(updateSql, BuildStatus.No.getCode(), BuildStatus.Ing.getCode(), BuildStatus.PubIng.getCode());
+        String updateSql = "update " + super.getTableName() + " set status=? where status=? or status=? or status=?";
+        return super.execute(updateSql, BuildStatus.AbnormalShutdown.getCode(), BuildStatus.Ing.getCode(), BuildStatus.PubIng.getCode(), BuildStatus.WaitExec.getCode());
     }
 
     /**

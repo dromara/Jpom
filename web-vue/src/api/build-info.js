@@ -281,13 +281,10 @@ export const statusMap = {
   6: "发布失败",
   7: "取消构建",
   8: "构建中断",
+  9: "队列等待",
+  10: "异常关闭",
 };
 export const statusColor = {
-  // <a-tag v-if="data.status === 2 || data.status === 5" color="green">{{ statusMap[data.status] || "未知" }}</a-tag>
-  // <a-tag v-else-if="data.status === 1 || data.status === 4" color="orange">{{ statusMap[data.status] || "未知" }}</a-tag>
-  // <a-tag v-else-if="data.status === 8" color="blue"> {{ statusMap[data.status] || "未知" }} </a-tag>
-  // <a-tag v-else-if="data.status === 3 || data.status === 6" color="red">{{ statusMap[data.status] || "未知" }}</a-tag>
-  // <a-tag v-else>{{ statusMap[data.status] || "未知" }}</a-tag>
   1: "orange",
   2: "green",
   3: "red",
@@ -296,6 +293,8 @@ export const statusColor = {
   6: "red",
   7: "",
   8: "blue",
+  9: "orange",
+  10: "red",
 };
 
 export const releaseMethodMap = {

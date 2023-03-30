@@ -19,16 +19,21 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-          <template v-if="!tableSelections || tableSelections.length <= 0">
-            <a-button type="primary" :disabled="true"> 批量操作 <a-icon type="down" /> </a-button>
+          <template v-if="this.layoutType === 'table'">
+            <template v-if="!tableSelections || tableSelections.length <= 0">
+              <a-button type="primary" :disabled="true"> 批量操作 <a-icon type="down" /> </a-button>
+            </template>
+            <a-dropdown v-else>
+              <a-menu slot="overlay">
+                <a-menu-item key="1" @click="batchBuild"> 批量构建 </a-menu-item>
+                <a-menu-item key="2" @click="batchCancel"> 批量取消 </a-menu-item>
+              </a-menu>
+              <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
+            </a-dropdown>
           </template>
-          <a-dropdown v-else>
-            <a-menu slot="overlay">
-              <a-menu-item key="1" @click="batchBuild"> 批量构建 </a-menu-item>
-              <a-menu-item key="2" @click="batchCancel"> 批量取消 </a-menu-item>
-            </a-menu>
-            <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
-          </a-dropdown>
+          <a-tooltip v-else title="表格视图才能使用批量操作功能">
+            <a-button :disabled="true" type="primary"> 批量操作 <a-icon type="down" /> </a-button>
+          </a-tooltip>
 
           <a-button type="primary" @click="changeLayout" :icon="this.layoutType === 'card' ? 'layout' : 'table'"> {{ this.layoutType === "card" ? "卡片" : "表格" }} </a-button>
 
@@ -113,7 +118,7 @@
 
                     <a-row type="flex" align="middle" justify="center" style="margin-top: 10px">
                       <a-button-group>
-                        <a-button size="small" type="danger" v-if="item.status === 1 || item.status === 4" @click="handleStopBuild(item)">停止 </a-button>
+                        <a-button size="small" type="danger" v-if="item.status === 1 || item.status === 4 || item.status === 9" @click="handleStopBuild(item)">停止 </a-button>
                         <a-dropdown v-else>
                           <a-button size="small" type="primary" @click="handleConfirmStartBuild(item)">构建<a-icon type="down" /></a-button>
                           <a-menu slot="overlay">
@@ -208,13 +213,7 @@
           <!-- <a-tooltip slot="resultDirFile" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip> -->
-          <a-tooltip
-            slot="buildMode"
-            slot-scope="text, record"
-            @click="record.status === 1 || record.status === 4 ? handleStopBuild(record) : handleConfirmStartBuild(record)"
-            placement="topLeft"
-            :title="text === 1 ? '容器构建' : '本地构建'"
-          >
+          <a-tooltip slot="buildMode" slot-scope="text" placement="topLeft" :title="text === 1 ? '容器构建' : '本地构建'">
             <a-icon v-if="text === 1" type="cloud" />
             <a-icon v-else type="code" />
           </a-tooltip>
@@ -240,7 +239,7 @@
           </a-tooltip>
           <template slot="operation" slot-scope="text, record, index">
             <a-space>
-              <a-button size="small" type="danger" v-if="record.status === 1 || record.status === 4" @click="handleStopBuild(record)">停止 </a-button>
+              <a-button size="small" type="danger" v-if="record.status === 1 || record.status === 4 || record.status === 9" @click="handleStopBuild(record)">停止 </a-button>
               <a-dropdown v-else>
                 <a-button size="small" type="primary" @click="handleConfirmStartBuild(record)">构建<a-icon type="down" /></a-button>
                 <a-menu slot="overlay">
@@ -489,7 +488,7 @@ import { getDispatchProject } from "@/api/dispatch";
 import detailsPage from "./details.vue";
 import editBuildPage from "./edit.vue";
 import triggerPage from "./trigger.vue";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, PAGE_DEFAULT_SHOW_TOTAL, getCachePageLimit } from "@/utils/const";
 
 export default {
   components: {
@@ -813,7 +812,7 @@ export default {
     handleStopBuild(record) {
       this.$confirm({
         title: "系统提示",
-        content: "确定要取消构建 【名称：" + record.name + "】 吗？",
+        content: "确定要取消构建 【名称：" + record.name + "】 吗？注意：取消/停止构建不一定能正常关闭所有关联进程",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
@@ -891,18 +890,25 @@ export default {
         });
         return;
       }
-
-      this.tableSelections.forEach((item) => {
-        startBuild({
-          id: item,
-        }).then((res) => {
-          if (res.code === 200) {
-            //
-          }
-        });
+      this.$confirm({
+        title: "系统提示",
+        content: "确定要取批量构建吗？注意：同时运行多个构建将占用较大的资源,请慎重使用批量构建,如果批量构建的数量超多构建任务队列等待数，构建任务将自动取消",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          this.tableSelections.forEach((item) => {
+            startBuild({
+              id: item,
+            }).then((res) => {
+              if (res.code === 200) {
+                //
+              }
+            });
+          });
+          this.tableSelections = [];
+          this.loadData();
+        },
       });
-      this.tableSelections = [];
-      this.loadData();
     },
     // 批量取消构建
     batchCancel() {
@@ -912,16 +918,23 @@ export default {
         });
         return;
       }
-
-      this.tableSelections.forEach((item) => {
-        stopBuild(item).then((res) => {
-          if (res.code === 200) {
-            //
-          }
-        });
+      this.$confirm({
+        title: "系统提示",
+        content: "确定要取批量消选中的构建吗？注意：取消/停止构建不一定能正常关闭所有关联进程",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          this.tableSelections.forEach((item) => {
+            stopBuild(item).then((res) => {
+              if (res.code === 200) {
+                //
+              }
+            });
+          });
+          this.tableSelections = [];
+          this.loadData();
+        },
       });
-      this.tableSelections = [];
-      this.loadData();
     },
     // 切换视图
     changeLayout() {
@@ -933,7 +946,7 @@ export default {
         this.layoutType = this.layoutType === "card" ? "table" : "card";
         localStorage.setItem("tableLayout", this.layoutType);
       }
-      this.listQuery = { ...this.listQuery, limit: this.layoutType === "card" ? 8 : 10 };
+      this.listQuery = { ...this.listQuery, limit: this.layoutType === "card" ? 8 : getCachePageLimit() };
       this.loadData();
     },
   },

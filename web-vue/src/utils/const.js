@@ -36,7 +36,10 @@ export const NO_LOADING_KEY = "loading";
 export const LOADING_TIP = "loadingTip";
 
 const cachePageLimitKeyName = "page_limit";
-const cachePageLimit = parseInt(localStorage.getItem(cachePageLimitKeyName) || 10);
+
+export function getCachePageLimit() {
+  return parseInt(localStorage.getItem(cachePageLimitKeyName) || 10);
+}
 
 /**
  * 分页选择条
@@ -52,7 +55,7 @@ export function PAGE_DEFAULT_SHOW_TOTAL(total) {
   return `总计 ${total} 条`;
 }
 
-export const PAGE_DEFAULT_LIST_QUERY = { page: 1, limit: isNaN(cachePageLimit) ? 10 : cachePageLimit, total: 0 };
+export const PAGE_DEFAULT_LIST_QUERY = { page: 1, limit: isNaN(getCachePageLimit) ? 10 : getCachePageLimit, total: 0 };
 
 /**
  * 计算分页数据
