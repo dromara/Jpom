@@ -812,7 +812,7 @@
                   type="swap"
                   @click="
                     () => {
-                      temp.script = opt.value;
+                      temp = { ...temp, script: opt.value };
                       viewScriptTemplVisible = false;
                     }
                   "
