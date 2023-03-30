@@ -12,17 +12,6 @@ export function getScriptList(params) {
 }
 
 /**
- * script 服务端中的所有列表
- */
-export function getScriptListAll(params) {
-  return axios({
-    url: "/script/list-all",
-    method: "get",
-    params: params,
-  });
-}
-
-/**
  *  保存脚本
  * @param {Json} params
  * @returns
@@ -96,6 +85,14 @@ export function scriptLog(params) {
 export function syncToWorkspace(params) {
   return axios({
     url: "/script/sync-to-workspace",
+    method: "get",
+    params: params,
+  });
+}
+
+export function getScriptItem(params) {
+  return axios({
+    url: "/script/get",
     method: "get",
     params: params,
   });

@@ -84,7 +84,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
         Assert.notNull(nodeModel, "不存在对应的节点");
         Assert.state(StrUtil.equals(workspaceId, nodeModel.getWorkspaceId()), "节点的工作空间和操作的工作空间补一致");
         paramMap.remove("workspaceId");
-        paramMap.remove("nodeId");
+        paramMap.put("nodeId", nodeId);
         paramMap.put("workspaceId:in", workspaceId + StrUtil.COMMA + ServerConst.WORKSPACE_GLOBAL);
 
         return super.listPage(paramMap);
@@ -180,6 +180,9 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                     return StrUtil.equals(nodeModel.getWorkspaceId(), item.getWorkspaceId());
                 })
                 .peek(item -> {
+                    item.setNodeName(nodeModel.getName());
+                    WorkspaceModel workspaceModel = workspaceService.getByKey(nodeModel.getWorkspaceId());
+                    item.setWorkspaceName(Optional.ofNullable(workspaceModel).map(WorkspaceModel::getName).orElse("数据不存在"));
                     cacheIds.remove(item.dataId());
                     // 需要删除相反的工作空间的数据（避免出现一个脚本同步出2条数据的问题）
                     if (StrUtil.equals(item.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL)) {

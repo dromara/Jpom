@@ -37,49 +37,57 @@ import org.springframework.util.Assert;
 @Data
 public abstract class BaseNodeModel extends BaseWorkspaceModel {
 
-	/**
-	 * 节点Id
-	 *
-	 * @see io.jpom.model.data.NodeModel
-	 */
-	private String nodeId;
+    /**
+     * 节点Id
+     *
+     * @see io.jpom.model.data.NodeModel
+     */
+    private String nodeId;
+    /**
+     * 节点名称
+     */
+    private String nodeName;
+    /**
+     * 工作空间名称
+     */
+    private String workspaceName;
 
-	@Override
-	public String toString() {
-		return super.toString();
-	}
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 
-	public String fullId() {
-		String workspaceId = this.getWorkspaceId();
+    public String fullId() {
+        String workspaceId = this.getWorkspaceId();
 
-		String nodeId = this.getNodeId();
+        String nodeId = this.getNodeId();
 
-		String dataId = this.dataId();
+        String dataId = this.dataId();
 
-		return BaseNodeModel.fullId(workspaceId, nodeId, dataId);
-	}
+        return BaseNodeModel.fullId(workspaceId, nodeId, dataId);
+    }
 
-	public static String fullId(String workspaceId, String nodeId, String dataId) {
+    public static String fullId(String workspaceId, String nodeId, String dataId) {
 
-		Assert.hasText(workspaceId, "workspaceId");
+        Assert.hasText(workspaceId, "workspaceId");
 
-		Assert.hasText(workspaceId, "nodeId");
+        Assert.hasText(workspaceId, "nodeId");
 
-		Assert.hasText(workspaceId, "dataId");
-		return SecureUtil.sha1(workspaceId + nodeId + dataId);
-	}
+        Assert.hasText(workspaceId, "dataId");
+        return SecureUtil.sha1(workspaceId + nodeId + dataId);
+    }
 
-	/**
-	 * 获取数据ID
-	 *
-	 * @return 数据ID
-	 */
-	public abstract String dataId();
+    /**
+     * 获取数据ID
+     *
+     * @return 数据ID
+     */
+    public abstract String dataId();
 
-	/**
-	 * 设置数据ID
-	 *
-	 * @param id 数据ID
-	 */
-	public abstract void dataId(String id);
+    /**
+     * 设置数据ID
+     *
+     * @param id 数据ID
+     */
+    public abstract void dataId(String id);
 }

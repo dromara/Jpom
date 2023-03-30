@@ -49,3 +49,9 @@ ADD,SERVER_SCRIPT_INFO,createUser,String,50,,创建人,false
 ADD,BUILD_INFO,statusMsg,TEXT,,,状态信息
 ADD,BUILDHISTORYLOG,statusMsg,TEXT,,,状态信息
 ADD,SCRIPT_INFO,createUser,String,50,,创建人,false
+ADD,SCRIPT_INFO,nodeName,String,50,,节点名称,false
+ADD,PROJECT_INFO,nodeName,String,50,,节点名称,false
+ADD,SCRIPT_EXECUTE_LOG,nodeName,String,50,,节点名称,false
+ADD,SCRIPT_INFO,workspaceName,String,50,,工作空间名称,false
+ADD,PROJECT_INFO,workspaceName,String,50,,工作空间名称,false
+ADD,SCRIPT_EXECUTE_LOG,workspaceName,String,50,,工作空间名称,false
