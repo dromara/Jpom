@@ -23,8 +23,8 @@
           <a-dropdown v-if="this.layoutType === 'table'">
             <a-menu slot="overlay">
               <a-menu-item key="1" @click="syncToWorkspaceShow"> 分配节点 </a-menu-item>
-              <a-menu-item key="1" @click="syncNodeWhiteConfig"> 同步白名单 </a-menu-item>
-              <a-menu-item key="2" @click="syncNodeConfig"> 同步系统配置 </a-menu-item>
+              <a-menu-item key="2" @click="syncNodeWhiteConfig"> 同步白名单 </a-menu-item>
+              <a-menu-item key="3" @click="syncNodeConfig"> 同步系统配置 </a-menu-item>
             </a-menu>
             <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
           </a-dropdown>
@@ -394,7 +394,7 @@ import {
   saveWhitelist,
   saveNodeConfig,
 } from "@/api/system/assets-machine";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime, formatPercent2Number } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime, formatPercent2Number, getCachePageLimit } from "@/utils/const";
 import CustomSelect from "@/components/customSelect";
 import { mapGetters } from "vuex";
 import machineInfo from "./machine-info.vue";
@@ -664,7 +664,7 @@ export default {
         this.layoutType = this.layoutType === "card" ? "table" : "card";
         localStorage.setItem("tableLayout", this.layoutType);
       }
-      this.listQuery = { ...this.listQuery, limit: this.layoutType === "card" ? 8 : 10 };
+      this.listQuery = { ...this.listQuery, limit: this.layoutType === "card" ? 8 : getCachePageLimit() };
       this.getMachineList();
     },
     syncNodeWhiteConfig() {

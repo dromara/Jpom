@@ -82,6 +82,8 @@ public class BuildInfoModel extends BaseGroupModel {
     private String releaseMethodDataId;
     /**
      * 状态
+     *
+     * @see io.jpom.model.enums.BuildStatus
      */
     private Integer status;
     /**

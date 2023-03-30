@@ -26,9 +26,9 @@ export default {
     return {};
   },
   computed: {
-    ...mapGetters(["getLongTermToken"]),
+    ...mapGetters(["getLongTermToken", "getWorkspaceId"]),
     socketUrl() {
-      return getWebSocketUrl("/socket/ssh", `userId=${this.getLongTermToken}&id=${this.sshId}&machineSshId=${this.machineSshId}&nodeId=system&type=ssh`);
+      return getWebSocketUrl("/socket/ssh", `userId=${this.getLongTermToken}&id=${this.sshId}&machineSshId=${this.machineSshId}&nodeId=system&type=ssh&workspaceId=${this.getWorkspaceId}`);
     },
   },
   mounted() {},

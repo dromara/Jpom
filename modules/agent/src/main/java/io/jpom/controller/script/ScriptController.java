@@ -23,6 +23,7 @@
 package io.jpom.controller.script;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.IdUtil;
@@ -30,6 +31,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseAgentController;
+import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
@@ -84,13 +86,19 @@ public class ScriptController extends BaseAgentController {
     }
 
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> save(NodeScriptModel nodeScriptModel, String type) {
+    public JsonMessage<Object> save(NodeScriptModel nodeScriptModel, String type, String global, String nodeId) {
         Assert.notNull(nodeScriptModel, "没有数据");
         Assert.hasText(nodeScriptModel.getContext(), "内容为空");
         //
         String autoExecCron = nodeScriptModel.getAutoExecCron();
         autoExecCron = StringUtil.checkCron(autoExecCron, s -> s);
-        nodeScriptModel.setWorkspaceId(getWorkspaceId());
+        //
+        boolean globalBool = Convert.toBool(global, false);
+        if (globalBool) {
+            nodeScriptModel.setWorkspaceId(Const.WORKSPACE_GLOBAL);
+        } else {
+            nodeScriptModel.setWorkspaceId(getWorkspaceId());
+        }
         //
         nodeScriptModel.setContext(nodeScriptModel.getContext());
         NodeScriptModel eModel = nodeScriptServer.getItem(nodeScriptModel.getId());
@@ -99,14 +107,21 @@ public class ScriptController extends BaseAgentController {
             Assert.isNull(eModel, "id已经存在啦");
 
             nodeScriptModel.setId(IdUtil.fastSimpleUUID());
-
+            nodeScriptModel.setNodeId(nodeId);
             nodeScriptServer.addItem(nodeScriptModel);
             return JsonMessage.success("添加成功");
         } else if ("sync".equalsIgnoreCase(type)) {
+            // 同步脚本
             if (eModel == null) {
                 eModel = new NodeScriptModel();
                 eModel.setId(nodeScriptModel.getId());
+                eModel.setNodeId(nodeId);
                 needCreate = true;
+            } else {
+                if (!eModel.global() && nodeScriptModel.global()) {
+                    // 修改绑定的节点id
+                    eModel.setNodeId(nodeId);
+                }
             }
             eModel.setScriptType("server-sync");
             eModel.setWorkspaceId(nodeScriptModel.getWorkspaceId());
@@ -203,7 +218,7 @@ public class ScriptController extends BaseAgentController {
             .orElse(null);
         //
 
-        String execute = nodeScriptServer.execute(item, 2, nowUserName, args, paramMap);
+        String execute = nodeScriptServer.execute(item, 2, nowUserName, null, args, paramMap);
         return JsonMessage.success("开始执行", execute);
     }
 

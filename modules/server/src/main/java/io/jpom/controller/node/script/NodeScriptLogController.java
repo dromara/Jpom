@@ -23,13 +23,14 @@
 package io.jpom.controller.node.script;
 
 
+import cn.hutool.core.util.StrUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.node.ScriptExecuteLogCacheModel;
+import io.jpom.model.node.NodeScriptExecuteLogCacheModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -40,6 +41,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import top.jpom.model.PageResultDto;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author bwcx_jzy
@@ -62,8 +65,8 @@ public class NodeScriptLogController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<PageResultDto<ScriptExecuteLogCacheModel>> scriptList() {
-        PageResultDto<ScriptExecuteLogCacheModel> pageResultDto = nodeScriptExecuteLogServer.listPageNode(getRequest());
+    public JsonMessage<PageResultDto<NodeScriptExecuteLogCacheModel>> scriptList() {
+        PageResultDto<NodeScriptExecuteLogCacheModel> pageResultDto = nodeScriptExecuteLogServer.listPageNode(getRequest());
         return JsonMessage.success("", pageResultDto);
     }
 
@@ -88,18 +91,21 @@ public class NodeScriptLogController extends BaseServerController {
      */
     @RequestMapping(value = "del", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String del(@ValidatorItem String id, String executeId) {
+    public JsonMessage<Object> del(@ValidatorItem String id, String executeId, HttpServletRequest request) {
         NodeModel node = getNode();
-        ScriptExecuteLogCacheModel scriptExecuteLogCacheModel = new ScriptExecuteLogCacheModel();
-        scriptExecuteLogCacheModel.setId(executeId);
-        scriptExecuteLogCacheModel.setScriptId(id);
-        scriptExecuteLogCacheModel.setNodeId(node.getId());
-        ScriptExecuteLogCacheModel executeLogModel = nodeScriptExecuteLogServer.queryByBean(scriptExecuteLogCacheModel);
+        NodeScriptExecuteLogCacheModel executeLogModel = nodeScriptExecuteLogServer.getByKey(executeId, request);
         Assert.notNull(executeLogModel, "没有对应的执行日志");
-        JsonMessage<Object> request = NodeForward.request(node, getRequest(), NodeUrl.SCRIPT_DEL_LOG);
-        if (request.success()) {
+        Assert.state(StrUtil.equals(id, executeLogModel.getScriptId()), "数据关联的id 不一致");
+//        NodeScriptExecuteLogCacheModel nodeScriptExecuteLogCacheModel = new NodeScriptExecuteLogCacheModel();
+//        nodeScriptExecuteLogCacheModel.setId(executeId);
+//        nodeScriptExecuteLogCacheModel.setScriptId(id);
+//        nodeScriptExecuteLogCacheModel.setNodeId(node.getId());
+//        NodeScriptExecuteLogCacheModel executeLogModel = nodeScriptExecuteLogServer.queryByBean(nodeScriptExecuteLogCacheModel);
+
+        JsonMessage<Object> jsonMessage = NodeForward.request(node, request, NodeUrl.SCRIPT_DEL_LOG);
+        if (jsonMessage.success()) {
             nodeScriptExecuteLogServer.delByKey(executeId);
         }
-        return request.toString();
+        return jsonMessage;
     }
 }

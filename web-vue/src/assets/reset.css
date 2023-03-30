@@ -40,3 +40,12 @@ body {
 pre {
   margin: 0;
 }
+
+.ant-modal-confirm-body .ant-modal-confirm-content {
+  font-size: 16px;
+}
+
+.ant-modal-confirm-body .ant-modal-confirm-title {
+  font-size: 18px;
+  font-weight: bold;
+}

@@ -179,7 +179,7 @@ public class BuildExecuteService {
         }
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, status);
         Objects.requireNonNull(nowStatus);
-        if (BuildStatus.Ing == nowStatus || BuildStatus.PubIng == nowStatus) {
+        if (BuildStatus.Ing == nowStatus || BuildStatus.PubIng == nowStatus || BuildStatus.WaitExec == nowStatus) {
             return buildInfoModel.getName() + " 当前还在：" + nowStatus.getDesc();
         }
         return null;
@@ -281,15 +281,7 @@ public class BuildExecuteService {
         BuildInfoManage buildInfoManage = build.submitTask();
         //BuildInfoManage manage = new BuildInfoManage(taskData);
         BUILD_MANAGE_MAP.put(buildInfoModel.getId(), build);
-        threadPoolExecutor.execute(() -> {
-            try {
-                buildInfoManage.run();
-            } catch (Exception e) {
-                log.error("构建发生未知错误", e);
-            } finally {
-                BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
-            }
-        });
+        threadPoolExecutor.execute(buildInfoManage);
     }
 
     /**
@@ -300,7 +292,7 @@ public class BuildExecuteService {
      */
     public boolean cancelTask(String id) {
         return Optional.ofNullable(BUILD_MANAGE_MAP.get(id)).map(buildInfoManage1 -> {
-            buildInfoManage1.cancelTask();
+            buildInfoManage1.cancelTask("手动取消任务");
             return true;
         }).orElse(false);
     }
@@ -324,13 +316,13 @@ public class BuildExecuteService {
         buildHistoryLog.setResultDirFile(buildInfoModel.getResultDirFile());
         buildHistoryLog.setReleaseMethod(buildExtraModule.getReleaseMethod());
         //
-        buildHistoryLog.setStatus(BuildStatus.Ing.getCode());
+        buildHistoryLog.setStatus(BuildStatus.WaitExec.getCode());
         buildHistoryLog.setStartTime(SystemClock.now());
         buildHistoryLog.setBuildRemark(taskData.buildRemark);
         buildHistoryLog.setExtraData(buildInfoModel.getExtraData());
         dbBuildHistoryLogService.insert(buildHistoryLog);
         //
-        buildService.updateStatus(buildHistoryLog.getBuildDataId(), BuildStatus.Ing);
+        buildService.updateStatus(buildHistoryLog.getBuildDataId(), BuildStatus.WaitExec);
         return buildHistoryLog.getId();
     }
 
@@ -440,7 +432,7 @@ public class BuildExecuteService {
 
 
     @Builder
-    private static class BuildInfoManage {
+    private static class BuildInfoManage implements Runnable {
 
         private final TaskData taskData;
         private final BuildExtraModule buildExtraModule;
@@ -478,14 +470,17 @@ public class BuildExecuteService {
          */
         public void rejectedExecution() {
             int queueSize = threadPoolExecutor.getQueue().size();
-            logRecorder.system("当前构建中任务数：{},队列中任务数：{} 构建任务等待超时或者超出最大等待数量,取消执行当前构建", BUILD_MANAGE_MAP.size(), queueSize);
-            this.cancelTask();
+            int limitPoolSize = threadPoolExecutor.getPoolSize();
+            int corePoolSize = threadPoolExecutor.getCorePoolSize();
+            String format = StrUtil.format("当前构建中任务数：{},队列中任务数：{} 构建任务等待超时或者超出最大等待数量,当前运行中的任务数：{}/{},取消执行当前构建", BUILD_MANAGE_MAP.size(), queueSize, limitPoolSize, corePoolSize);
+            logRecorder.system(format);
+            this.cancelTask(format);
         }
 
         /**
          * 取消任务
          */
-        public void cancelTask() {
+        public void cancelTask(String desc) {
             Optional.ofNullable(process).ifPresent(Process::destroy);
             Integer buildMode = taskData.buildInfoModel.getBuildMode();
             if (buildMode != null && buildMode == 1) {
@@ -506,7 +501,7 @@ public class BuildExecuteService {
                 }
             }
             String buildId = taskData.buildInfoModel.getId();
-            buildExecuteService.updateStatus(buildId, logId, taskData.buildInfoModel.getBuildId(), BuildStatus.Cancel, "取消任务");
+            buildExecuteService.updateStatus(buildId, logId, taskData.buildInfoModel.getBuildId(), BuildStatus.Cancel, desc);
             Optional.ofNullable(currentThread).ifPresent(Thread::interrupt);
             BUILD_MANAGE_MAP.remove(buildId);
         }
@@ -1045,9 +1040,10 @@ public class BuildExecuteService {
             buildExecuteService.updateBuildResultFileSize(logId, taskData.resultFileSize, size);
         }
 
-        public void run() {
+        public void runTask() {
             currentThread = Thread.currentThread();
             logRecorder.system("开始执行构建任务,任务等待时间：{}", DateUtil.formatBetween(SystemClock.now() - submitTaskTime));
+
             // 判断任务是否被取消
             BuildHistoryLog buildHistoryLog = buildExecuteService.dbBuildHistoryLogService.getByKey(this.logId);
             if (buildHistoryLog == null) {
@@ -1058,6 +1054,9 @@ public class BuildExecuteService {
                 logRecorder.systemError("构建状态异常或者被取消");
                 return;
             }
+            BuildInfoModel buildInfoModel = this.taskData.buildInfoModel;
+            buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Ing, "开始构建,构建线程执行");
+            //
             Map<String, IProcessItem> processItemMap = this.createProcess();
             // 依次执行流程，发生异常结束整个流程
             String processName = StrUtil.EMPTY;
@@ -1068,7 +1067,7 @@ public class BuildExecuteService {
             } else {
                 BaseServerController.resetInfo(taskData.userModel);
             }
-            BuildInfoModel buildInfoModel = this.taskData.buildInfoModel;
+
             try {
                 for (Map.Entry<String, IProcessItem> stringSupplierEntry : processItemMap.entrySet()) {
                     processName = stringSupplierEntry.getKey();
@@ -1112,6 +1111,17 @@ public class BuildExecuteService {
                 logRecorder.system("构建结束 累计耗时:{}", DateUtil.formatBetween(SystemClock.now() - startTime));
                 this.asyncWebHooks("done");
                 BaseServerController.removeAll();
+            }
+        }
+
+        public void run() {
+            BuildInfoModel buildInfoModel = this.taskData.buildInfoModel;
+            try {
+                this.runTask();
+            } catch (Exception e) {
+                log.error("构建发生未知错误", e);
+            } finally {
+                BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
             }
         }
 

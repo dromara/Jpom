@@ -41,6 +41,10 @@ public class Const {
      */
     public static final String WORKSPACE_DEFAULT_ID = "DEFAULT";
     /**
+     * 工作空间全局
+     */
+    public static final String WORKSPACE_GLOBAL = "GLOBAL";
+    /**
      * 默认的分组名
      */
     public static final String DEFAULT_GROUP_NAME = "默认";

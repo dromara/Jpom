@@ -29,7 +29,7 @@ import io.jpom.common.ServerConst;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.node.ProjectInfoCacheModel;
-import io.jpom.model.node.ScriptCacheModel;
+import io.jpom.model.node.NodeScriptCacheModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -156,10 +156,10 @@ public class NodeEditController extends BaseServerController {
         }
         //
         {
-            ScriptCacheModel scriptCacheModel = new ScriptCacheModel();
-            scriptCacheModel.setNodeId(id);
-            scriptCacheModel.setWorkspaceId(nodeScriptServer.getCheckUserWorkspace(request));
-            boolean exists = nodeScriptServer.exists(scriptCacheModel);
+            NodeScriptCacheModel nodeScriptCacheModel = new NodeScriptCacheModel();
+            nodeScriptCacheModel.setNodeId(id);
+            nodeScriptCacheModel.setWorkspaceId(nodeScriptServer.getCheckUserWorkspace(request));
+            boolean exists = nodeScriptServer.exists(nodeScriptCacheModel);
             Assert.state(!exists, "该节点下还存在脚本模版，不能删除");
         }
         //

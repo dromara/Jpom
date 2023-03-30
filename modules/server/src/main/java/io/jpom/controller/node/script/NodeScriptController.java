@@ -30,7 +30,7 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.node.ScriptCacheModel;
+import io.jpom.model.node.NodeScriptCacheModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.permission.*;
 import io.jpom.service.node.script.NodeScriptExecuteLogServer;
@@ -75,8 +75,8 @@ public class NodeScriptController extends BaseServerController {
      * @author Hotstrip
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<PageResultDto<ScriptCacheModel>> scriptList() {
-        PageResultDto<ScriptCacheModel> pageResultDto = nodeScriptServer.listPageNode(getRequest());
+    public JsonMessage<PageResultDto<NodeScriptCacheModel>> scriptList(HttpServletRequest request) {
+        PageResultDto<NodeScriptCacheModel> pageResultDto = nodeScriptServer.listPageNode(request);
         return JsonMessage.success("success", pageResultDto);
     }
 
@@ -88,16 +88,16 @@ public class NodeScriptController extends BaseServerController {
      * @author Hotstrip
      */
     @PostMapping(value = "list_all", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<PageResultDto<ScriptCacheModel>> listAll() {
-        PageResultDto<ScriptCacheModel> modelPageResultDto = nodeScriptServer.listPage(getRequest());
+    public JsonMessage<PageResultDto<NodeScriptCacheModel>> listAll(HttpServletRequest request) {
+        PageResultDto<NodeScriptCacheModel> modelPageResultDto = nodeScriptServer.listPage(request);
         return JsonMessage.success("", modelPageResultDto);
     }
 
 
     @GetMapping(value = "item.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String item() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Script_Item).toString();
+    public String item(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Script_Item).toString();
     }
 
     /**
@@ -107,21 +107,20 @@ public class NodeScriptController extends BaseServerController {
      */
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String save(String autoExecCron) {
+    public JsonMessage<Object> save(String autoExecCron, HttpServletRequest request) {
         NodeModel node = getNode();
         this.checkCron(autoExecCron);
-        JsonMessage<Object> request = NodeForward.request(node, getRequest(), NodeUrl.Script_Save);
-        if (request.success()) {
+        JsonMessage<Object> jsonMessage = NodeForward.request(node, request, NodeUrl.Script_Save, new String[]{}, "nodeId", node.getId());
+        if (jsonMessage.success()) {
             nodeScriptServer.syncNode(node);
         }
-        return request.toString();
+        return jsonMessage;
     }
 
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> del(@ValidatorItem String id) {
+    public JsonMessage<Object> del(@ValidatorItem String id, HttpServletRequest request) {
         NodeModel node = getNode();
-        HttpServletRequest request = getRequest();
         JsonMessage<Object> requestData = NodeForward.request(node, request, NodeUrl.Script_Del);
         if (requestData.success()) {
             nodeScriptServer.syncNode(node);
@@ -138,10 +137,10 @@ public class NodeScriptController extends BaseServerController {
      */
     @GetMapping(value = "sync", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> syncProject() {
+    public JsonMessage<Object> syncProject(HttpServletRequest request) {
         //
         NodeModel node = getNode();
-        int cache = nodeScriptServer.delCache(node.getId(), getRequest());
+        int cache = nodeScriptServer.delCache(node.getId(), request);
         String msg = nodeScriptServer.syncExecuteNode(node);
         return JsonMessage.success("主动清除 " + cache + StrUtil.SPACE + msg);
     }
@@ -169,12 +168,12 @@ public class NodeScriptController extends BaseServerController {
      */
     @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
-        ScriptCacheModel item = nodeScriptServer.getByKey(id, getRequest());
+    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
+        NodeScriptCacheModel item = nodeScriptServer.getByKeyAndGlobal(id, request);
         UserModel user = getUser();
-        ScriptCacheModel updateInfo;
+        NodeScriptCacheModel updateInfo;
         if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
-            updateInfo = new ScriptCacheModel();
+            updateInfo = new NodeScriptCacheModel();
             updateInfo.setId(id);
             updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), nodeScriptServer.typeName(),
                 item.getId(), user.getId()));
@@ -186,7 +185,7 @@ public class NodeScriptController extends BaseServerController {
         return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
-    private Map<String, String> getBuildToken(ScriptCacheModel item) {
+    private Map<String, String> getBuildToken(NodeScriptCacheModel item) {
         String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
         String url = ServerOpenApi.NODE_SCRIPT_TRIGGER_URL.
             replace("{id}", item.getId()).

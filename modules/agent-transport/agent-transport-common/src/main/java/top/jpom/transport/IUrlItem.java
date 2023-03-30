@@ -22,6 +22,8 @@
  */
 package top.jpom.transport;
 
+import java.util.Map;
+
 /**
  * @author bwcx_jzy
  * @since 2022/12/23
@@ -56,4 +58,11 @@ public interface IUrlItem {
      * @return contentType
      */
     DataContentType contentType();
+
+    /**
+     * 请求头
+     *
+     * @return 请求头
+     */
+    Map<String, String> header();
 }
