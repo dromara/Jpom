@@ -72,7 +72,7 @@ function download() {
 		echo "下载新的安装包"
 		# 获取最新的版本号
 		url_type=$(echo "${type}" | tr 'A-Z' 'a-z')
-		versions=$(curl -LfsS https://jpom.top/docs/versions.tag)
+		versions=$(curl -LfsS https://jpom.top/docs/versions.release.tag)
 		download_url="https://download.jpom.top/release/${versions}/${url_type}-${versions}-release.tar.gz"
 		wget -O "${type}.tar.gz" "${download_url}"
 	else
