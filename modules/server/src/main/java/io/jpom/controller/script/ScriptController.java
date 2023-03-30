@@ -137,7 +137,7 @@ public class ScriptController extends BaseServerController {
             oldNodeIds = byKey.getNodeIds();
             scriptServer.updateById(scriptModel, request);
         }
-        this.syncNodeScript(scriptModel, oldNodeIds);
+        this.syncNodeScript(scriptModel, oldNodeIds, request);
         return JsonMessage.success("修改成功");
     }
 
@@ -152,7 +152,7 @@ public class ScriptController extends BaseServerController {
         }
     }
 
-    private void syncNodeScript(ScriptModel scriptModel, String oldNode) {
+    private void syncNodeScript(ScriptModel scriptModel, String oldNode, HttpServletRequest request) {
         List<String> oldNodeIds = StrUtil.splitTrim(oldNode, StrUtil.COMMA);
         List<String> newNodeIds = StrUtil.splitTrim(scriptModel.getNodeIds(), StrUtil.COMMA);
         Collection<String> delNode = CollUtil.subtract(oldNodeIds, newNodeIds);
@@ -160,7 +160,8 @@ public class ScriptController extends BaseServerController {
         this.syncDelNodeScript(scriptModel, delNode);
         // 更新
         for (String newNodeId : newNodeIds) {
-            NodeModel byKey = nodeService.getByKey(newNodeId, getRequest());
+            NodeModel byKey = nodeService.getByKey(newNodeId, request);
+            Assert.notNull(byKey, "没有找到对应的节点");
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", scriptModel.getId());
             jsonObject.put("type", "sync");
@@ -172,8 +173,8 @@ public class ScriptController extends BaseServerController {
             jsonObject.put("workspaceId", scriptModel.getWorkspaceId());
             jsonObject.put("global", scriptModel.global());
             jsonObject.put("nodeId", byKey.getId());
-            JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Save, jsonObject);
-            Assert.state(request.success(), "处理 " + byKey.getName() + " 节点同步脚本失败" + request.getMsg());
+            JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Script_Save, jsonObject);
+            Assert.state(jsonMessage.success(), "处理 " + byKey.getName() + " 节点同步脚本失败" + jsonMessage.getMsg());
             nodeScriptServer.syncNode(byKey);
         }
     }

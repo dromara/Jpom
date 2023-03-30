@@ -25,7 +25,7 @@ package io.jpom.controller.system;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import io.jpom.JpomApplication;
-import io.jpom.build.BuildExecuteService;
+import io.jpom.build.BuildInfoManage;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.ICacheTask;
@@ -104,7 +104,7 @@ public class CacheManageController extends BaseServerController implements ICach
         map.put("taskList", CronUtils.list());
         map.put("pluginSize", PluginFactory.size());
         map.put("shardingSize", BaseServerController.SHARDING_IDS.size());
-        map.put("buildKeys", BuildExecuteService.buildKeys());
+        map.put("buildKeys", BuildInfoManage.buildKeys());
         map.put("syncFinisKeys", SyncFinisherUtil.keys());
         map.put("dateTime", DateTime.now().toString());
         map.put("timeZoneId", TimeZone.getDefault().getID());

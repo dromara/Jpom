@@ -151,7 +151,7 @@ export default {
         { title: "序列号 (SN)", dataIndex: "serialNumberStr", ellipsis: true, width: 150, scopedSlots: { customRender: "name" } },
         { title: "证书类型", dataIndex: "keyType", ellipsis: true, width: "80px", scopedSlots: { customRender: "tooltip" } },
         { title: "文件状态", dataIndex: "fileExists", ellipsis: true, scopedSlots: { customRender: "fileExists" }, width: "80px" },
-        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
+        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
         { title: "颁发者", dataIndex: "issuerDnName", ellipsis: true, width: 200, scopedSlots: { customRender: "tooltip" } },
         { title: "主题", dataIndex: "subjectDnName", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
         { title: "密钥算法", dataIndex: "sigAlgName", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },

@@ -34,6 +34,8 @@ import io.jpom.common.JsonMessage;
 import io.jpom.common.validator.ValidatorConfig;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
+import io.jpom.func.assets.server.MachineDockerServer;
+import io.jpom.func.files.service.FileStorageService;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.data.BuildInfoModel;
@@ -45,6 +47,8 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
+import io.jpom.service.docker.DockerInfoService;
+import io.jpom.system.extconf.BuildExtConfig;
 import io.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -72,13 +76,25 @@ public class BuildInfoManageController extends BaseServerController {
     private final BuildInfoService buildInfoService;
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
     private final BuildExecuteService buildExecuteService;
+    private final DockerInfoService dockerInfoService;
+    private final MachineDockerServer machineDockerServer;
+    private final FileStorageService fileStorageService;
+    private final BuildExtConfig buildExtConfig;
 
     public BuildInfoManageController(BuildInfoService buildInfoService,
                                      DbBuildHistoryLogService dbBuildHistoryLogService,
-                                     BuildExecuteService buildExecuteService) {
+                                     BuildExecuteService buildExecuteService,
+                                     DockerInfoService dockerInfoService,
+                                     MachineDockerServer machineDockerServer,
+                                     FileStorageService fileStorageService,
+                                     BuildExtConfig buildExtConfig) {
         this.buildInfoService = buildInfoService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.buildExecuteService = buildExecuteService;
+        this.dockerInfoService = dockerInfoService;
+        this.machineDockerServer = machineDockerServer;
+        this.fileStorageService = fileStorageService;
+        this.buildExtConfig = buildExtConfig;
     }
 
     /**
@@ -145,7 +161,7 @@ public class BuildInfoManageController extends BaseServerController {
         if (checkStatus == null) {
             return JsonMessage.success("当前状态不在进行中," + nowStatus.getDesc());
         }
-        boolean status = buildExecuteService.cancelTask(item.getId());
+        boolean status = BuildInfoManage.cancelTaskById(item.getId());
         if (!status) {
             // 缓存中可能不存在数据,还是需要执行取消
             buildInfoService.updateStatus(id, BuildStatus.Cancel, "手动取消");
@@ -183,6 +199,10 @@ public class BuildInfoManageController extends BaseServerController {
             .buildExtraModule(buildExtraModule)
             .logId(buildHistoryLog.getId())
             .userModel(userModel)
+            .machineDockerServer(machineDockerServer)
+            .dockerInfoService(dockerInfoService)
+            .fileStorageService(fileStorageService)
+            .buildExtConfig(buildExtConfig)
             .buildNumberId(buildHistoryLog.getBuildNumberId())
             .buildExecuteService(buildExecuteService)
             .buildEnv(environmentMapBuilder)

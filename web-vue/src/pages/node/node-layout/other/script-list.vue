@@ -130,7 +130,7 @@ export default {
         { title: "Script ID", dataIndex: "scriptId", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "tooltip" } },
         { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, width: "120px", scopedSlots: { customRender: "autoExecCron" } },
-        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "80px" },
+        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
         {
           title: "创建时间",
           dataIndex: "createTimeMillis",
