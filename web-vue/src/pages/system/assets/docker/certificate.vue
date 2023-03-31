@@ -49,7 +49,7 @@
       </template>
     </a-table>
     <!-- 导入 -->
-    <a-modal destroyOnClose v-model="editCertVisible" width="700px" title="导入证书" @ok="handleEditCertOk" :maskClosable="false">
+    <a-modal destroyOnClose :zIndex="1009" v-model="editCertVisible" width="700px" title="导入证书" @ok="handleEditCertOk" :maskClosable="false">
       <a-form-model ref="importCertForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="证书文件" prop="file" help="请上传 zip 压缩包,并且包里面必须包含：ca.pem、key.pem、cert.pem 三个文件">
           <a-upload
