@@ -23,9 +23,6 @@
 </p>
 
 <p align="center">
-    <a target="_blank" href="https://travis-ci.org/dromara/Jpom">
-        <img src='https://travis-ci.org/dromara/Jpom.svg?branch=master' alt='travis'/>
-    </a>
     <a target="_blank" href="https://www.codacy.com/gh/dromara/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dromara/Jpom&amp;utm_campaign=Badge_Grade">
       <img src="https://app.codacy.com/project/badge/Grade/843b953f1446449c9a075e44ea778336" alt="codacy"/>
     </a>
