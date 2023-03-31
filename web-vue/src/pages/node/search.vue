@@ -1,6 +1,6 @@
 <template>
   <div class="full-content">
-    <template v-if="this.getUserInfo && this.getUserInfo.systemUser && !this.loading && this.listQuery.total <= 0">
+    <template v-if="this.useSuggestions">
       <a-result title="当前工作空间还没有项目" sub-title="可以创建节点分发或者到节点管理创建项目"> </a-result>
     </template>
     <a-table v-else :data-source="projList" :columns="columns" size="middle" bordered :pagination="pagination" @change="changePage" :row-selection="rowSelection" :rowKey="(record, index) => index">
@@ -312,6 +312,25 @@ export default {
         columnWidth: "40px",
         getCheckboxProps: this.getCheckboxProps,
       };
+    },
+    useSuggestions() {
+      if (this.loading) {
+        // 加载中不提示
+        return false;
+      }
+      if (!this.getUserInfo || !this.getUserInfo.systemUser) {
+        // 没有登录或者不是超级管理员
+        return false;
+      }
+      if (this.listQuery.page !== 1 || this.listQuery.total > 0) {
+        // 不是第一页 或者总记录数大于 0
+        return false;
+      }
+      // 判断是否存在搜索条件
+      const nowKeys = Object.keys(this.listQuery);
+      const defaultKeys = Object.keys(PAGE_DEFAULT_LIST_QUERY);
+      const dictOrigin = nowKeys.filter((item) => !defaultKeys.includes(item));
+      return dictOrigin.length === 0;
     },
   },
   mounted() {

@@ -1,6 +1,6 @@
 <template>
   <div class="full-content">
-    <template v-if="this.getUserInfo && this.getUserInfo.systemUser && !this.loading && this.listQuery.total <= 0">
+    <template v-if="this.useSuggestions">
       <a-result title="当前工作空间还没有SSH" sub-title="请到【系统管理】-> 【资产管理】-> 【SSH管理】添加SSH，或者将已添加的SSH授权关联、分配到此工作空间">
         <template #extra>
           <router-link to="/system/assets/ssh-list"> <a-button key="console" type="primary">现在就去</a-button></router-link>
@@ -229,7 +229,7 @@ export default {
   },
   data() {
     return {
-      loading: false,
+      loading: true,
       list: [],
       temp: {},
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
@@ -319,6 +319,25 @@ export default {
         },
         selectedRowKeys: this.tableSelections,
       };
+    },
+    useSuggestions() {
+      if (this.loading) {
+        // 加载中不提示
+        return false;
+      }
+      if (!this.getUserInfo || !this.getUserInfo.systemUser) {
+        // 没有登录或者不是超级管理员
+        return false;
+      }
+      if (this.listQuery.page !== 1 || this.listQuery.total > 0) {
+        // 不是第一页 或者总记录数大于 0
+        return false;
+      }
+      // 判断是否存在搜索条件
+      const nowKeys = Object.keys(this.listQuery);
+      const defaultKeys = Object.keys(PAGE_DEFAULT_LIST_QUERY);
+      const dictOrigin = nowKeys.filter((item) => !defaultKeys.includes(item));
+      return dictOrigin.length === 0;
     },
   },
   created() {
