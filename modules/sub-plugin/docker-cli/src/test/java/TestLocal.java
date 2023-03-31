@@ -35,7 +35,7 @@ import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.core.InvocationBuilder;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
-import io.jpom.DockerUtil;
+import org.dromara.jpom.DockerUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;

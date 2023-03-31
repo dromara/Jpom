@@ -23,7 +23,7 @@
 package git;
 
 import cn.hutool.core.io.FileUtil;
-import io.jpom.plugin.JGitUtil;
+import org.dromara.jpom.plugin.JGitUtil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;

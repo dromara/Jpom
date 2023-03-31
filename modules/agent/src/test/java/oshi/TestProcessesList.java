@@ -23,7 +23,7 @@
 package oshi;
 
 import com.alibaba.fastjson2.JSONObject;
-import io.jpom.util.OshiUtils;
+import org.dromara.jpom.util.OshiUtils;
 import org.junit.Test;
 
 import java.util.List;

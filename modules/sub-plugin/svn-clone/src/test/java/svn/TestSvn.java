@@ -22,7 +22,7 @@
  */
 package svn;
 
-import io.jpom.plugin.SvnKitUtil;
+import org.dromara.jpom.plugin.SvnKitUtil;
 import org.tmatesoft.svn.core.SVNException;
 
 import java.io.File;

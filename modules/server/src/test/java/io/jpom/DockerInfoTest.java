@@ -22,9 +22,9 @@
  */
 package io.jpom;
 
-import io.jpom.common.Const;
-import io.jpom.model.docker.DockerInfoModel;
-import io.jpom.service.docker.DockerInfoService;
+import org.dromara.jpom.common.Const;
+import org.dromara.jpom.model.docker.DockerInfoModel;
+import org.dromara.jpom.service.docker.DockerInfoService;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.Resource;

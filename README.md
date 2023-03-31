@@ -294,11 +294,11 @@ docker-compose -f docker-compose.yml up
 1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页 拉取最新完整代码 （建议使用 master 分支，如果想体验新功能可以使用
    dev 分支）
 2. 运行插件端
-	1. 运行 `io.jpom.JpomAgentApplication`
+	1. 运行 `org.dromara.jpom.JpomAgentApplication`
 	2. 留意控制台打印的默认账号密码信息
 	3. 插件端默认运行端口：`2123`
 3. 运行服务端
-	1. 运行 `io.jpom.JpomServerApplication`
+	1. 运行 `org.dromara.jpom.JpomServerApplication`
 	2. 服务端默认运行端口：`2122`
 4. 构建 vue 页面，切换到 `web-vue` 目录（前提需要本地开发环境有 node、npm 环境）
 5. 安装项目 vue 依赖，控制台执行 `npm install`

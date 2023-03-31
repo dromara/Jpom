@@ -25,7 +25,7 @@ import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.util.CommandUtil;
+import org.dromara.jpom.util.CommandUtil;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;

@@ -26,7 +26,7 @@ import ch.qos.logback.classic.LoggerContext;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.VersionCmd;
 import com.github.dockerjava.api.model.Version;
-import io.jpom.DockerUtil;
+import org.dromara.jpom.DockerUtil;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 

@@ -1,2 +1,2 @@
-org.springframework.context.ApplicationContextInitializer=io.jpom.plugin.PluginFactory
-org.springframework.context.ApplicationListener=io.jpom.plugin.PluginFactory
+org.springframework.context.ApplicationContextInitializer=org.dromara.jpom.plugin.PluginFactory
+org.springframework.context.ApplicationListener=org.dromara.jpom.plugin.PluginFactory

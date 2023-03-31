@@ -98,7 +98,7 @@
 
 说明：使用 `@apiDefine` 定义通用的文档块，然后使用 `@apiUse` 来引用，增强文档块的复用性。
 
-所有的文档块统一定义在 `server` 模块下的 `io.jpom.ApiDoc`
+所有的文档块统一定义在 `server` 模块下的 `org.dromara.jpom.ApiDoc`
 
 
 ## 分支说明

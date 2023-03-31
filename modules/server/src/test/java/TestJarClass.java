@@ -23,7 +23,7 @@
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
-import io.jpom.common.JpomManifest;
+import org.dromara.jpom.common.JpomManifest;
 import org.junit.Test;
 
 import java.io.IOException;

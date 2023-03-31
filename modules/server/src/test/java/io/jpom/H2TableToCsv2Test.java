@@ -34,9 +34,9 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.Assert;
-import top.jpom.db.IStorageService;
-import top.jpom.db.StorageServiceFactory;
-import top.jpom.h2db.TableName;
+import org.dromara.jpom.db.IStorageService;
+import org.dromara.jpom.db.StorageServiceFactory;
+import org.dromara.jpom.db.TableName;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -60,7 +60,7 @@ public class H2TableToCsv2Test extends ApplicationStartTest {
 
     @Test
     public void init() throws SQLException {
-        Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("io.jpom", TableName.class);
+        Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("org.dromara.jpom", TableName.class);
         Map<String, Map<String, Field>> TABLE_NAME_MAP = CollStreamUtil.toMap(classes, aClass -> {
             TableName tableName = aClass.getAnnotation(TableName.class);
             return tableName.value();
