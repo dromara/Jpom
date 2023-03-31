@@ -34,11 +34,11 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSONObject;
-import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.model.BaseJsonModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.model.BaseJsonModel;
 import org.springframework.util.Assert;
 
 import java.io.File;

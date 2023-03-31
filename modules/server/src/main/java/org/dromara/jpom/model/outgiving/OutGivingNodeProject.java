@@ -23,10 +23,10 @@
 package org.dromara.jpom.model.outgiving;
 
 import cn.hutool.core.util.ObjectUtil;
-import org.dromara.jpom.model.BaseEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.dromara.jpom.model.BaseEnum;
 
 /**
  * 节点项目

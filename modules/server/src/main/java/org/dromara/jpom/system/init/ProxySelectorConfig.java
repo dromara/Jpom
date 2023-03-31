@@ -25,12 +25,12 @@ package org.dromara.jpom.system.init;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ICacheTask;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.service.system.SystemParametersServer;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 

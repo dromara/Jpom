@@ -38,6 +38,8 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
+import lombok.Lombok;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.IllegalArgument2Exception;
 import org.dromara.jpom.common.commander.impl.LinuxProjectCommander;
 import org.dromara.jpom.common.commander.impl.MacOsProjectCommander;
@@ -54,8 +56,6 @@ import org.dromara.jpom.system.AgentConfig;
 import org.dromara.jpom.system.JpomRuntimeException;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JvmUtil;
-import lombok.Lombok;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import java.io.File;

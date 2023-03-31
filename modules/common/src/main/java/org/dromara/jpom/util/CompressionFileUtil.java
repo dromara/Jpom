@@ -22,22 +22,16 @@
  */
 package org.dromara.jpom.util;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.extra.compress.CompressUtil;
 import cn.hutool.extra.compress.extractor.Extractor;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.compressors.CompressorInputStream;
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
-import org.apache.commons.compress.compressors.bzip2.BZip2Utils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 
 /**
  * 压缩文件工具

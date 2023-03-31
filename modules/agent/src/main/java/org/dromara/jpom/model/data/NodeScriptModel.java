@@ -24,10 +24,10 @@ package org.dromara.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.script.CommandParam;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.script.CommandParam;
 
 import java.io.File;
 

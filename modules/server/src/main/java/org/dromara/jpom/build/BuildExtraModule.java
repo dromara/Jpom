@@ -23,14 +23,14 @@
 package org.dromara.jpom.build;
 
 import cn.hutool.core.io.FileUtil;
-import org.dromara.jpom.model.BaseModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.dromara.jpom.model.AfterOpt;
+import org.dromara.jpom.model.BaseModel;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.log.BuildHistoryLog;
 import org.dromara.jpom.util.StringUtil;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.springframework.util.Assert;
 
 import java.io.File;

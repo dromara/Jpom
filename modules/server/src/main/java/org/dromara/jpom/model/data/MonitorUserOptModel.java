@@ -23,11 +23,11 @@
 package org.dromara.jpom.model.data;
 
 import com.alibaba.fastjson2.JSON;
+import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.util.StringUtil;
-import org.dromara.jpom.db.TableName;
 
 import java.util.List;
 import java.util.stream.Collectors;

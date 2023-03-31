@@ -25,6 +25,7 @@ package org.dromara.jpom.service.dblog;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.model.data.BuildInfoModel;
@@ -32,7 +33,6 @@ import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.log.BuildHistoryLog;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.system.extconf.BuildExtConfig;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.File;

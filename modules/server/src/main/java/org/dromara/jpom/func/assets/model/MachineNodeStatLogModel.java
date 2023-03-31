@@ -24,9 +24,9 @@ package org.dromara.jpom.func.assets.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseDbModel;
+import org.dromara.jpom.model.data.NodeModel;
 
 /**
  * @author bwcx_jzy

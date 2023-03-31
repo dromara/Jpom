@@ -28,9 +28,9 @@ import cn.hutool.extra.mail.MailAccount;
 import cn.hutool.extra.mail.MailException;
 import cn.hutool.extra.mail.MailUtil;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.plugin.IDefaultPlugin;
 import org.dromara.jpom.plugin.PluginConfig;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.mail.Session;
 import javax.mail.Transport;

@@ -24,9 +24,9 @@ package org.dromara.jpom.model.data;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import org.dromara.jpom.model.BaseJsonModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.dromara.jpom.model.BaseJsonModel;
 import org.springframework.util.Assert;
 
 import java.util.List;

@@ -35,11 +35,11 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.setting.yaml.YamlUtil;
-import org.dromara.jpom.system.ExtConfigBean;
 import lombok.Lombok;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.system.ExtConfigBean;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 

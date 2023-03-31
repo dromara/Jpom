@@ -24,13 +24,13 @@ package org.dromara.jpom.model.data;
 
 import cn.hutool.core.annotation.PropIgnore;
 import cn.hutool.core.io.FileUtil;
-import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.model.BaseEnum;
-import org.dromara.jpom.model.BaseWorkspaceModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseEnum;
+import org.dromara.jpom.model.BaseWorkspaceModel;
 
 import java.io.File;
 

@@ -27,6 +27,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.permission.ClassFeature;
@@ -38,7 +39,6 @@ import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.socket.BaseProxyHandler;
 import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.util.SocketSessionUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;

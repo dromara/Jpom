@@ -26,12 +26,12 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
-import org.dromara.jpom.model.BaseGroupNameModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseGroupNameModel;
+import org.dromara.jpom.model.data.SshModel;
 
 import java.nio.charset.Charset;
 import java.util.List;

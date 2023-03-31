@@ -23,10 +23,10 @@
 package org.dromara.jpom.oauth2;
 
 import cn.hutool.core.lang.Tuple;
-import org.dromara.jpom.common.ILoadEvent;
-import org.dromara.jpom.service.system.SystemParametersServer;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.request.AuthRequest;
+import org.dromara.jpom.common.ILoadEvent;
+import org.dromara.jpom.service.system.SystemParametersServer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;

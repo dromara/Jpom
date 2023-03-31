@@ -23,10 +23,10 @@
 package org.dromara.jpom.model.data;
 
 import cn.hutool.core.util.StrUtil;
-import org.dromara.jpom.common.Const;
-import org.dromara.jpom.model.BaseModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.dromara.jpom.common.Const;
+import org.dromara.jpom.model.BaseModel;
 
 /**
  * 插件端 工作空间相关的数据

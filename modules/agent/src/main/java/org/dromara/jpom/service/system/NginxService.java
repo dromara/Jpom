@@ -33,13 +33,13 @@ import com.github.odiszapc.nginxparser.NgxBlock;
 import com.github.odiszapc.nginxparser.NgxConfig;
 import com.github.odiszapc.nginxparser.NgxEntry;
 import com.github.odiszapc.nginxparser.NgxParam;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.AgentConst;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.service.BaseDataService;
 import org.dromara.jpom.service.WhitelistDirectoryService;
 import org.dromara.jpom.util.JsonFileUtil;
 import org.dromara.jpom.util.StringUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.File;

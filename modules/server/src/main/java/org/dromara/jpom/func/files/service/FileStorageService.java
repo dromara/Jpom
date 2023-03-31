@@ -36,6 +36,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.http.HttpUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.ISystemTask;
 import org.dromara.jpom.common.ServerConst;
@@ -45,7 +46,6 @@ import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseGlobalOrWorkspaceService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.system.extconf.BuildExtConfig;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.File;

@@ -22,8 +22,8 @@
  */
 package org.dromara.jpom.system;
 
-import org.dromara.jpom.util.BaseFileTailWatcher;
 import lombok.Data;
+import org.dromara.jpom.util.BaseFileTailWatcher;
 
 /**
  * @author bwcx_jzy

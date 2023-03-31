@@ -23,12 +23,12 @@
 package org.dromara.jpom.model.data;
 
 import cn.hutool.core.annotation.PropIgnore;
-import org.dromara.jpom.func.assets.model.MachineNodeModel;
-import org.dromara.jpom.model.BaseMachineModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.func.assets.model.MachineNodeModel;
+import org.dromara.jpom.model.BaseMachineModel;
 
 /**
  * 节点实体

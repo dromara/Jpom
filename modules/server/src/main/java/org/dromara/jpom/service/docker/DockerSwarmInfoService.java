@@ -22,9 +22,9 @@
  */
 package org.dromara.jpom.service.docker;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.model.docker.DockerSwarmInfoMode;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**

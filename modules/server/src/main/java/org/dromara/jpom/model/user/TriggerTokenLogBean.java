@@ -22,11 +22,11 @@
  */
 package org.dromara.jpom.model.user;
 
-import org.dromara.jpom.service.ITriggerToken;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseDbModel;
+import org.dromara.jpom.service.ITriggerToken;
 
 /**
  * id 为 triggerToken

@@ -26,14 +26,14 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.sql.SqlLog;
 import cn.hutool.setting.Setting;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.ApplicationStartTest;
 import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.db.StorageServiceFactory;
 import org.dromara.jpom.system.ExtConfigBean;
-import lombok.extern.slf4j.Slf4j;
 import org.h2.tools.RunScript;
 import org.h2.tools.Shell;
 import org.junit.jupiter.api.Test;
-import org.dromara.jpom.db.StorageServiceFactory;
 
 import javax.sql.DataSource;
 import java.io.File;

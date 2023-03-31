@@ -22,11 +22,11 @@
  */
 package org.dromara.jpom.build;
 
+import lombok.Builder;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.model.user.UserModel;
-import lombok.Builder;
 
 import java.util.Map;
 

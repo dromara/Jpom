@@ -22,11 +22,11 @@
  */
 package org.dromara.jpom.model.data;
 
-import org.dromara.jpom.model.BaseUserModifyDbModel;
-import org.dromara.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseUserModifyDbModel;
+import org.dromara.jpom.util.StringUtil;
 
 import java.util.List;
 

@@ -24,10 +24,10 @@ package org.dromara.jpom.service.system;
 
 import cn.hutool.core.util.ReflectUtil;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.model.BaseJsonModel;
 import org.dromara.jpom.model.data.SystemParametersModel;
 import org.dromara.jpom.service.h2db.BaseDbService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.function.Function;

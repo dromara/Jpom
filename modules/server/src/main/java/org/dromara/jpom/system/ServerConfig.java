@@ -25,16 +25,13 @@ package org.dromara.jpom.system;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.model.AgentFileModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.socket.ServiceFileTailWatcher;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.dromara.jpom.system.BaseExtConfig;
-import org.dromara.jpom.system.BaseSystemConfig;
-import org.dromara.jpom.system.JpomRuntimeException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 

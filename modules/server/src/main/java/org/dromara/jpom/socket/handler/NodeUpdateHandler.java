@@ -31,6 +31,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.Type;
@@ -49,7 +50,6 @@ import org.dromara.jpom.service.system.SystemParametersServer;
 import org.dromara.jpom.socket.BaseProxyHandler;
 import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.system.ServerConfig;
-import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.transport.*;
 import org.springframework.web.socket.WebSocketSession;
 

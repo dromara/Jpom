@@ -22,11 +22,11 @@
  */
 package org.dromara.jpom.model.node;
 
-import org.dromara.jpom.model.BaseNodeModel;
-import org.dromara.jpom.script.CommandParam;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseNodeModel;
+import org.dromara.jpom.script.CommandParam;
 
 /**
  * 脚本模版实体

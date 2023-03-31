@@ -23,8 +23,8 @@
 package org.dromara.jpom.common.interceptor;
 
 import cn.hutool.core.util.ArrayUtil;
-import org.dromara.jpom.encrypt.Encryptor;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.encrypt.Encryptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
