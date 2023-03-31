@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.FileUrlResource;
-import top.jpom.db.DbExtConfig;
+import org.dromara.jpom.db.DbExtConfig;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

@@ -37,7 +37,7 @@
     <artifactId>server</artifactId>
     <version>2.10.38</version>
     <properties>
-        <start-class>io.jpom.JpomServerApplication</start-class>
+        <start-class>org.dromara.jpom.JpomServerApplication</start-class>
     </properties>
     <dependencies>
 

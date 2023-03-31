@@ -22,7 +22,7 @@
  */
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.crypto.SecureUtil;
-import io.jpom.util.CommandUtil;
+import org.dromara.jpom.util.CommandUtil;
 import org.junit.Test;
 
 import java.io.File;

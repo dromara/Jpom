@@ -30,7 +30,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
-import io.jpom.util.FileSearchUtil;
+import org.dromara.jpom.util.FileSearchUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

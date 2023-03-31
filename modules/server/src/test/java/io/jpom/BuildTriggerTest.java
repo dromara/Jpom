@@ -26,7 +26,7 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import io.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.ServerOpenApi;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 

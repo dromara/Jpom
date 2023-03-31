@@ -27,7 +27,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.Tailer;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.util.LimitQueue;
+import org.dromara.jpom.util.LimitQueue;
 import org.junit.Test;
 
 import java.io.File;

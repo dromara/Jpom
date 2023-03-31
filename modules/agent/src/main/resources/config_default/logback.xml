@@ -26,7 +26,7 @@
 <configuration scan="true" scanPeriod=" 5 seconds">
 
     <!--动态定义日志路径,请勿修改将影响查看系统日志功能-->
-    <define name="logPath" class="io.jpom.system.AgentLogbackConfig"/>
+    <define name="logPath" class="org.dromara.jpom.system.AgentLogbackConfig"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -72,13 +72,13 @@
         <appender-ref ref="LOG-ROOT"/>
     </logger>
 
-    <logger name="io.jpom.system.WebAopLog" additivity="false">
+    <logger name="org.dromara.jpom.system.WebAopLog" additivity="false">
         <!--请求响应日志 debug 才输出-->
         <level value="INFO"/>
         <appender-ref ref="LOG-ROOT"/>
     </logger>
 
-    <logger name="io.jpom" additivity="false">
+    <logger name="org.dromara.jpom" additivity="false">
         <!--建议使用 info 级别-->
         <level value="INFO"/>
         <appender-ref ref="LOG-ROOT"/>

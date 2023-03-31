@@ -37,7 +37,7 @@
     <version>2.10.38</version>
     <name>Jpom Agent</name>
     <properties>
-        <start-class>io.jpom.JpomAgentApplication</start-class>
+        <start-class>org.dromara.jpom.JpomAgentApplication</start-class>
         <!--当前程序兼容 jpom 最新版本号-->
         <jpom-min-version>1.0.0</jpom-min-version>
 
