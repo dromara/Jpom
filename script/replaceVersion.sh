@@ -64,12 +64,17 @@ echo "替换配置文件版本号 $new_version"
 
 if [ "$tag" == "release" ]; then
   # 替换 Dockerfile 中的版本
-  sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/server/Dockerfile
-  sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/agent/Dockerfile
-  sed -i.bak "s/${old_version}/${new_version}/g" $base/script/docker.sh
-  sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/server/DockerfileRelease
+  sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/Dockerfile"
+  sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/agent/Dockerfile"
+  sed -i.bak "s/${old_version}/${new_version}/g" "$base/script/docker.sh"
+  sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/DockerfileRelease"
+  # vue version
+  sed -i.bak "s/${old_version}/${new_version}/g" "$base/web-vue/package.json"
+
+  # gitee go
+  sed -i.bak "s/${old_version}/${new_version}/g" "$base/.workflow/MasterPipeline.yml"
 elif [ "$tag" == "beta" ]; then
-  sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/server/DockerfileBeta
+  sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/DockerfileBeta"
 else
   echo "不支持的模式 $tag"
   exit
@@ -95,12 +100,6 @@ cat >"$base/modules/common/src/main/resources/banner.txt" <<EOF
  ➜ Jpom \﻿ (•◡•) / (v$new_version)
 
 EOF
-
-# vue version
-sed -i.bak "s/${old_version}/${new_version}/g" "$base/web-vue/package.json"
-
-# gitee go
-sed -i.bak "s/${old_version}/${new_version}/g" "$base/.workflow/MasterPipeline.yml"
 
 # 保留新版本号
 echo "$new_version" >"${base}/script/tag.$tag.txt"
