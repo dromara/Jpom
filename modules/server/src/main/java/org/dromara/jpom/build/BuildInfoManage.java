@@ -644,6 +644,7 @@ public class BuildInfoManage implements Runnable {
             .dockerInfoService(dockerInfoService)
             .machineDockerServer(machineDockerServer)
             .buildEnv(taskData.environmentMapBuilder)
+            .fileStorageService(fileStorageService)
             .buildExecuteService(buildExecuteService)
             .buildExtConfig(buildExtConfig)
             .logRecorder(logRecorder)
