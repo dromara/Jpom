@@ -58,6 +58,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -80,7 +81,15 @@ public class OperateLogController implements AopLogInterface {
         this.dbUserOperateLogService = dbUserOperateLogService;
     }
 
-    private CacheInfo createCacheInfo(Method method, HttpServletRequest request) {
+    private ClassFeature findClassFeature(Class<?> declaringClass, Class<?> targetClass) {
+        Feature feature1 = declaringClass.getAnnotation(Feature.class);
+        if (feature1 == null || feature1.cls() == ClassFeature.NULL) {
+            feature1 = targetClass.getAnnotation(Feature.class);
+        }
+        return Optional.ofNullable(feature1).map(Feature::cls).orElse(null);
+    }
+
+    private CacheInfo createCacheInfo(Class<?> targetClass, Method method, HttpServletRequest request) {
         Feature feature = method.getAnnotation(Feature.class);
         if (feature == null) {
             return null;
@@ -97,12 +106,11 @@ public class OperateLogController implements AopLogInterface {
         }
         ClassFeature classFeature = feature.cls();
         if (classFeature == ClassFeature.NULL) {
-            Feature feature1 = declaringClass.getAnnotation(Feature.class);
-            if (feature1 == null || feature1.cls() == ClassFeature.NULL) {
+            classFeature = this.findClassFeature(declaringClass, targetClass);
+            if (classFeature == null || classFeature == ClassFeature.NULL) {
                 log.error("权限分发配置错误：{}  {} class not find", declaringClass, method.getName());
                 return null;
             }
-            classFeature = feature1.cls();
         }
         CacheInfo cacheInfo = new CacheInfo();
         cacheInfo.setClassFeature(classFeature);
@@ -120,9 +128,10 @@ public class OperateLogController implements AopLogInterface {
             MethodSignature methodSignature = (MethodSignature) signature;
             Method method = methodSignature.getMethod();
             //
+            Class<?> targetClass = joinPoint.getTarget().getClass();
             ServletRequestAttributes servletRequestAttributes = BaseServerController.getRequestAttributes();
             HttpServletRequest request = servletRequestAttributes.getRequest();
-            CacheInfo cacheInfo = this.createCacheInfo(method, request);
+            CacheInfo cacheInfo = this.createCacheInfo(targetClass, method, request);
             if (cacheInfo == null) {
                 return;
             }
