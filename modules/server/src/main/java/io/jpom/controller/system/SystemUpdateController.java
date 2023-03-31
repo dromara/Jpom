@@ -128,12 +128,14 @@ public class SystemUpdateController extends BaseServerController implements ILoa
      */
     @PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<String> changeLog(HttpServletRequest request, String machineId) {
-        JsonMessage<String> message = this.tryRequestNode(machineId, request, NodeUrl.CHANGE_LOG);
+        boolean betaRelease = RemoteVersion.betaRelease();
+        JsonMessage<String> message = this.tryRequestNode(machineId, request, NodeUrl.CHANGE_LOG, "beta", String.valueOf(betaRelease));
         if (message != null) {
             return message;
         }
         //
-        URL resource = ResourceUtil.getResource("CHANGELOG.md");
+
+        URL resource = ResourceUtil.getResource(betaRelease ? "CHANGELOG-BETA.md" : "CHANGELOG.md");
         String log = StrUtil.EMPTY;
         if (resource != null) {
             InputStream stream = URLUtil.getStream(resource);

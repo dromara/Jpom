@@ -186,28 +186,6 @@ public class NodeForward {
         return header;
     }
 
-//    /**
-//     * 普通消息转发
-//     *
-//     * @param nodeInfo 节点信息
-//     * @param request  请求
-//     * @param nodeUrl  节点的url
-//     * @param <T>      泛型
-//     * @return JSON
-//     */
-//    private static <T> JsonMessage<T> request(INodeInfo nodeInfo, HttpServletRequest request, NodeUrl nodeUrl, String... removeKeys) {
-//        Map<String, String> map = Optional.ofNullable(request)
-//            .map(ServletUtil::getParamMap)
-//            .map(map1 -> MapUtil.removeAny(map1, removeKeys))
-//            .orElse(null);
-//        TypeReference<JsonMessage<T>> tTypeReference = new TypeReference<JsonMessage<T>>() {
-//        };
-//        return createUrlItem(nodeInfo, StrUtil.EMPTY, nodeUrl,
-//            (nodeInfo1, urlItem) ->
-//                TransportServerFactory.get().executeToType(nodeInfo1, urlItem, map, tTypeReference)
-//        );
-//    }
-
     /**
      * 普通消息转发
      *
@@ -260,9 +238,28 @@ public class NodeForward {
      * @return JSON
      */
     public static <T> JsonMessage<T> request(MachineNodeModel machineNodeModel, HttpServletRequest request, NodeUrl nodeUrl, String... removeKeys) {
+        return request(machineNodeModel, request, nodeUrl, removeKeys, new String[]{});
+    }
+
+    /**
+     * 普通消息转发
+     *
+     * @param machineNodeModel 机器
+     * @param request          请求
+     * @param nodeUrl          节点的url
+     * @param <T>              泛型
+     * @return JSON
+     */
+    public static <T> JsonMessage<T> request(MachineNodeModel machineNodeModel, HttpServletRequest request, NodeUrl nodeUrl, String[] removeKeys, String... appendData) {
         Map<String, String> map = Optional.ofNullable(request)
             .map(ServletUtil::getParamMap)
             .map(map1 -> MapUtil.removeAny(map1, removeKeys))
+            .map(map2 -> {
+                for (int i = 0; i < appendData.length; i += 2) {
+                    map2.put(appendData[i], appendData[i + 1]);
+                }
+                return map2;
+            })
             .orElse(null);
         TypeReference<JsonMessage<T>> tTypeReference = new TypeReference<JsonMessage<T>>() {
         };
@@ -301,20 +298,6 @@ public class NodeForward {
         INodeInfo nodeInfo = coverNodeInfo(machineNodeModel);
         return createUrlItem(nodeInfo, StrUtil.EMPTY, nodeUrl, (nodeInfo1, urlItem) -> TransportServerFactory.get().executeToType(nodeInfo1, urlItem, jsonObject, typeReference));
     }
-
-//    /**
-//     * 普通消息转发
-//     *
-//     * @param nodeInfo   节点
-//     * @param nodeUrl    节点的url
-//     * @param jsonObject 数据
-//     * @return JSON
-//     */
-//    private static <T> JsonMessage<T> request(INodeInfo nodeInfo, NodeUrl nodeUrl, JSONObject jsonObject) {
-//        TypeReference<JsonMessage<T>> typeReference = new TypeReference<JsonMessage<T>>() {
-//        };
-//        return createUrlItem(nodeInfo, StrUtil.EMPTY, nodeUrl, (nodeInfo1, urlItem) -> TransportServerFactory.get().executeToType(nodeInfo1, urlItem, jsonObject, typeReference));
-//    }
 
     /**
      * 普通消息转发
@@ -643,44 +626,7 @@ public class NodeForward {
             });
             return null;
         });
-
     }
-
-//    /**
-//     * 获取节点socket 信息
-//     *
-//     * @param nodeModel 节点信息
-//     * @param nodeUrl   url
-//     * @return url
-//     */
-//    public static String getSocketUrl(NodeModel nodeModel, NodeUrl nodeUrl, UserModel userInfo, Object... parameters) {
-//        INodeInfo nodeInfo = parseNodeInfo(nodeModel);
-//        String ws;
-//        if ("https".equalsIgnoreCase(nodeInfo.scheme())) {
-//            ws = "wss";
-//        } else {
-//            ws = "ws";
-//        }
-//        UrlQuery urlQuery = new UrlQuery();
-//        urlQuery.add(Const.JPOM_AGENT_AUTHORIZE, nodeInfo.authorize());
-//        //
-//        String optUser = userInfo.getId();
-//        optUser = URLUtil.encode(optUser);
-//        urlQuery.add("optUser", optUser);
-//        if (ArrayUtil.isNotEmpty(parameters)) {
-//            for (int i = 0; i < parameters.length; i += 2) {
-//                Object parameter = parameters[i + 1];
-//                String value = Convert.toStr(parameter, StrUtil.EMPTY);
-//                urlQuery.add(parameters[i].toString(), URLUtil.encode(value));
-//            }
-//        }
-//        // 兼容旧版本-节点升级 @author jzy
-//        //urlQuery.add("name", URLUtil.encode(nodeModel.getLoginName()));
-//        //urlQuery.add("password", URLUtil.encode(nodeModel.getLoginPwd()));
-//        String format = StrUtil.format("{}://{}{}?{}", ws, nodeInfo.url(), nodeUrl.getUrl(), urlQuery.toString());
-//        log.debug("web socket url:{}", format);
-//        return format;
-//    }
 
     public static <T> T toJsonMessage(String body, TypeReference<T> tTypeReference) {
         if (StrUtil.isEmpty(body)) {
