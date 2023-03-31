@@ -22,7 +22,7 @@
 
           <a-dropdown v-if="this.layoutType === 'table'">
             <a-menu slot="overlay">
-              <a-menu-item key="1" @click="syncToWorkspaceShow"> 分配节点 </a-menu-item>
+              <a-menu-item key="1" @click="syncToWorkspaceShow()"> 分配节点 </a-menu-item>
               <a-menu-item key="2" @click="syncNodeWhiteConfig"> 同步白名单 </a-menu-item>
               <a-menu-item key="3" @click="syncNodeConfig"> 同步系统配置 </a-menu-item>
             </a-menu>
@@ -179,7 +179,7 @@
           <template slot="operation" slot-scope="text, record">
             <a-space>
               <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
-              <a-button @click="syncToWorkspaceShow(item)" type="primary" size="small">分配</a-button>
+              <a-button @click="syncToWorkspaceShow(record)" type="primary" size="small">分配</a-button>
             </a-space>
           </template>
         </a-table>
