@@ -476,7 +476,7 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 2. 开源项目离不开社区的支持，如果项目帮助到了你，并且想给我们加个餐。
    欢迎扫描下方右侧[微信收款码赞赏](https://jpom.top/images/wx-qrcode-praise.png)
    或通过[码云赞赏](https://gitee.com/dromara/Jpom)
-   （在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom.top/docs/index.html#/praise)
+   （在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom.top/pages/praise/2022/)
 3. 微信公众号：[CodeGzh](https://jpom.top/images/CodeGzh-QrCode.jpg) 查看一些基础教程
 4. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
 5. 参与贡献，请查看[贡献指南](#🔨贡献指南)。
