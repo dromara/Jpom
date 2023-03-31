@@ -22,7 +22,7 @@
  */
 package org.dromara.jpom.service.h2db;
 
-import io.jpom.ApplicationStartTest;
+import org.dromara.jpom.ApplicationStartTest;
 import org.dromara.jpom.service.dblog.BackupInfoService;
 import org.junit.jupiter.api.Test;
 

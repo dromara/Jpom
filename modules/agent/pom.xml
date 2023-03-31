@@ -28,7 +28,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>jpom-parent</artifactId>
-        <groupId>io.jpom</groupId>
+        <groupId>org.dromara.jpom</groupId>
         <version>2.10.38</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
@@ -46,7 +46,7 @@
     <dependencies>
 
         <dependency>
-            <groupId>io.jpom</groupId>
+            <groupId>org.dromara.jpom</groupId>
             <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -58,7 +58,7 @@
         </dependency>
 
         <dependency>
-            <groupId>io.jpom.plugins</groupId>
+            <groupId>org.dromara.jpom.plugins</groupId>
             <artifactId>webhook</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -76,7 +76,7 @@
         </dependency>
 
         <dependency>
-            <groupId>io.jpom.plugins</groupId>
+            <groupId>org.dromara.jpom.plugins</groupId>
             <artifactId>encrypt</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -148,7 +148,7 @@
                             <fork>true</fork>
                             <mainClass>${start-class}</mainClass>
                             <jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>
-                            <!--	<excludeGroupIds>io.jpom.plugins</excludeGroupIds>-->
+                            <!--	<excludeGroupIds>org.dromara.jpom.plugins</excludeGroupIds>-->
                             <excludes>
                                 <exclude>
                                     <groupId>org.projectlombok</groupId>

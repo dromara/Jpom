@@ -76,7 +76,7 @@
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
             <includes>
-                <include>io.jpom:agent</include>
+                <include>org.dromara.jpom:agent</include>
             </includes>
         </dependencySet>
     </dependencySets>

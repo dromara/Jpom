@@ -26,7 +26,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.sql.SqlLog;
 import cn.hutool.setting.Setting;
-import io.jpom.ApplicationStartTest;
+import org.dromara.jpom.ApplicationStartTest;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.system.ExtConfigBean;
 import lombok.extern.slf4j.Slf4j;

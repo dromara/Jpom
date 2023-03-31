@@ -53,7 +53,7 @@ public class WebAopLog {
         this.aopLogInterface = SpringUtil.getBeansOfType(AopLogInterface.class).values();
     }
 
-    @Pointcut("execution(public * io.jpom..*.*.controller..*.*(..)) || execution(public * io.jpom.controller..*.*(..))")
+    @Pointcut("execution(public * org.dromara.jpom..*.*.controller..*.*(..)) || execution(public * org.dromara.jpom.controller..*.*(..))")
     public void webLog() {
         //
     }
