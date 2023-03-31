@@ -108,8 +108,8 @@ function updateDocUrlItem() {
 --------
 
 EOF
-		#		插入第 12 行
-		sed -i.bak "12r ${pwd}/temp-docs.log" "${mdPath}"
+		#		插入第 14 行
+		sed -i.bak "14r ${pwd}/temp-docs.log" "${mdPath}"
 	fi
 }
 
