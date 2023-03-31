@@ -56,9 +56,17 @@ export default {
     reload() {
       this.routerActivation = false;
       // 刷新菜单
-      store.dispatch("restLoadSystemMenus").then(() => {
-        //
-      });
+      store
+        .dispatch("restLoadSystemMenus")
+        .then(() => {
+          //
+        })
+        .catch(() => {
+          // 跳转到登录页面
+          this.$router.push({
+            path: "/login",
+          });
+        });
       this.$nextTick(() => {
         this.routerActivation = true;
       });

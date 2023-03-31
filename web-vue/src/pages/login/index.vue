@@ -186,18 +186,26 @@ export default {
     checkOauth2() {
       if (this.$route.query.code) {
         oauth2Login({ code: this.$route.query.code, state: this.$route.query.state, provide: window.oauth2Provide }).then((res) => {
+          // 删除参数，避免刷新页面 code 已经被使用提示错误信息
+          let query = Object.assign({}, this.$route.query);
+          delete query.code, delete query.state;
+          this.$router.replace({
+            query: query,
+          });
           // 登录不成功，更新验证码
           if (res.code !== 200) {
-            //this.changeCode();
+            this.changeCode();
           } else {
             this.startDispatchLogin(res);
           }
         });
       }
     },
+    // 跳转到第三方系统
     toOauth2Url(provide) {
       oauth2Url({ provide: provide }).then((res) => {
         if (res.code === 200 && res.data) {
+          this.$message.loading({ content: "跳转到第三方系统中", key: "oauth2", duration: 0 });
           location.href = res.data.toUrl;
         }
       });
@@ -271,8 +279,12 @@ export default {
     dispatchLogin(data) {
       // 调用 store action 存储当前登录的用户名和 token
       this.$store.dispatch("login", { token: data.token, longTermToken: data.longTermToken }).then(() => {
-        // 跳转主页面
-        this.$router.push({ path: "/" });
+        // 刷新菜单
+        this.$store.dispatch("restLoadSystemMenus").then(() => {
+          //
+          // 跳转主页面
+          this.$router.push({ path: "/" });
+        });
       });
     },
   },

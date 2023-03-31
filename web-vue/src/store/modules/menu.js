@@ -59,19 +59,23 @@ const app = {
         // 加载系统菜单
         getMenu()
           .then((res) => {
-            res.data.forEach((element) => {
-              if (element.childs.length > 0) {
-                const childs = element.childs.map((child) => {
-                  return {
-                    ...child,
-                    path: routeMenuMap[child.id],
-                  };
-                });
-                element.childs = childs;
-              }
-            });
-            commit("setMenus", res.data);
-            resolve();
+            if (res.data) {
+              res.data?.forEach((element) => {
+                if (element.childs.length > 0) {
+                  const childs = element.childs.map((child) => {
+                    return {
+                      ...child,
+                      path: routeMenuMap[child.id],
+                    };
+                  });
+                  element.childs = childs;
+                }
+              });
+              commit("setMenus", res.data);
+              resolve();
+            } else {
+              reject();
+            }
           })
           .catch((error) => {
             reject(error);
