@@ -44,9 +44,9 @@ features: # 可选的
 # 文章列表显示方式: detailed 默认，显示详细版文章列表（包括作者、分类、标签、摘要、分页等）| simple => 显示简约版文章列表（仅标题和日期）| none 不显示文章列表
 postList: none
 notices: # 可选的
-  - id: jpom-2.10.36
-    title: 📢 Jpom v2.10.36 发布！
-    content: '<div><p>2023-03-20</p><ul><li>资产管理 SSH 管理支持导入导出数据</li><li>文件管理中心（用于统一存储管理公共文件）</li><li>仓库令牌导入支持 gogs （gogs 和 gitea 标准一致） </li></ul></div><p style="text-align: right;"><a href="/pages/changelog/new/">查看详情</a>&nbsp;&nbsp;<a href="/pages/all-downloads/">下载安装包</a></p>'
+  - id: jpom-2.10.38
+    title: 📢 Jpom v2.10.38 发布！
+    content: '<div><p>2023-03-31</p><ul><li>支持 oauth2 登录（maxkey、gitee、github）</li><li>脚本、仓库支持全局共享</li><li>文件管理发布支持发布到节点指定目录 </li></ul></div><p style="text-align: right;"><a href="/pages/changelog/new/">查看详情</a>&nbsp;&nbsp;<a href="/pages/all-downloads/">下载安装包</a></p>'
     isHtmlContent: true
     position: top-right
   - id: jpom-2.10.x
