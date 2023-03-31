@@ -1,6 +1,6 @@
 <template>
   <div class="full-content">
-    <template v-if="this.getUserInfo && this.getUserInfo.systemUser && !this.loading && this.listQuery.total <= 0">
+    <template v-if="this.useSuggestions">
       <a-result title="当前工作空间还没有节点">
         <template slot="subTitle"> 需要您在需要被管理的服务器中安装 agent ，并将 agent 信息添加到系统中 </template>
         <template #extra>
@@ -405,7 +405,7 @@
       </a-form-model>
     </a-modal>
     <!-- 管理节点 -->
-    <a-drawer destroyOnClose :title="drawerTitle" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="drawerVisible" @close="onClose">
+    <a-drawer destroyOnClose :title="`${this.temp.name}`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="drawerVisible" @close="onClose">
       <!-- 节点管理组件 -->
       <node-layout v-if="drawerVisible" :node="temp" />
     </a-drawer>
@@ -512,7 +512,7 @@ export default {
 
       fastInstallNode: false,
       syncToWorkspaceVisible: false,
-      drawerTitle: "",
+
       columns: [
         { title: "节点名称", dataIndex: "name", width: 100, sorter: true, key: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
@@ -556,6 +556,25 @@ export default {
     ...mapGetters(["getCollapsed", "getWorkspaceId", "getUserInfo"]),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
+    },
+    useSuggestions() {
+      if (this.loading) {
+        // 加载中不提示
+        return false;
+      }
+      if (!this.getUserInfo || !this.getUserInfo.systemUser) {
+        // 没有登录或者不是超级管理员
+        return false;
+      }
+      if (this.listQuery.page !== 1 || this.listQuery.total > 0) {
+        // 不是第一页 或者总记录数大于 0
+        return false;
+      }
+      // 判断是否存在搜索条件
+      const nowKeys = Object.keys(this.listQuery);
+      const defaultKeys = Object.keys(PAGE_DEFAULT_LIST_QUERY);
+      const dictOrigin = nowKeys.filter((item) => !defaultKeys.includes(item));
+      return dictOrigin.length === 0;
     },
     rowSelection() {
       return {
@@ -741,7 +760,7 @@ export default {
     // 管理节点
     handleNode(record) {
       this.temp = Object.assign({}, record);
-      this.drawerTitle = `${record.name}`;
+
       this.drawerVisible = true;
       let nodeId = this.$route.query.nodeId;
       if (nodeId !== record.id) {

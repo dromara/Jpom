@@ -114,8 +114,8 @@ public class NodeProjectInfoController extends BaseServerController {
      */
     @GetMapping(value = "list-project-group-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<String>> listGroupAll() {
-        List<String> listGroup = projectInfoCacheService.listGroup(getRequest());
+    public JsonMessage<List<String>> listGroupAll(HttpServletRequest request) {
+        List<String> listGroup = projectInfoCacheService.listGroup(request);
         return JsonMessage.success("", listGroup);
     }
 
