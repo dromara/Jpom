@@ -22,9 +22,11 @@
  */
 package io.jpom.controller.system;
 
+import cn.hutool.core.lang.Tuple;
+import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.common.JsonMessage;
-import io.jpom.oauth2.Oauth2CustomAuthSource;
-import io.jpom.oauth2.Oauth2CustomConfig;
+import io.jpom.oauth2.BaseOauth2Config;
+import io.jpom.oauth2.Oauth2Factory;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -37,6 +39,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @author bwcx_jzy
  * @since 2023/3/26
@@ -48,31 +52,34 @@ import org.springframework.web.bind.annotation.RestController;
 public class OauthConfigController {
 
     private final SystemParametersServer systemParametersServer;
-    private final Oauth2CustomAuthSource oauth2CustomAuthSource;
 
-    public OauthConfigController(SystemParametersServer systemParametersServer,
-                                 Oauth2CustomAuthSource oauth2CustomAuthSource) {
+    public OauthConfigController(SystemParametersServer systemParametersServer) {
         this.systemParametersServer = systemParametersServer;
-        this.oauth2CustomAuthSource = oauth2CustomAuthSource;
     }
 
     @GetMapping(value = "oauth2", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<Oauth2CustomConfig> oauth2() {
-        Oauth2CustomConfig item = oauth2CustomAuthSource.getOauth2Config();
-        return JsonMessage.success("", item);
+    public JsonMessage<BaseOauth2Config> oauth2(String provide) {
+        Tuple tuple = BaseOauth2Config.getDbKey(provide);
+        Assert.notNull(tuple, "没有对应的类型");
+        BaseOauth2Config configDefNewInstance = systemParametersServer.getConfigDefNewInstance(tuple.get(0), tuple.get(1));
+        return JsonMessage.success("", configDefNewInstance);
     }
 
     @PostMapping(value = "oauth2-save", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> saveOauth2(Oauth2CustomConfig oauth2CustomConfig) {
-        Assert.notNull(oauth2CustomConfig, "请填写信息,并检查是否填写合法");
-        if (oauth2CustomConfig.enabled()) {
-            oauth2CustomConfig.check();
+    public JsonMessage<Object> saveOauth2(HttpServletRequest request, String provide) {
+        Tuple tuple = BaseOauth2Config.getDbKey(provide);
+        Assert.notNull(tuple, "没有对应的类型");
+        Class<BaseOauth2Config> oauth2ConfigClass = tuple.get(1);
+        BaseOauth2Config oauth2Config = ServletUtil.toBean(request, oauth2ConfigClass, true);
+        Assert.notNull(tuple, "没有对应的类型");
+        if (oauth2Config.enabled()) {
+            oauth2Config.check();
         }
-        systemParametersServer.upsert(Oauth2CustomAuthSource.OAUTH_CONFIG_OAUTH2, oauth2CustomConfig, Oauth2CustomAuthSource.OAUTH_CONFIG_OAUTH2);
+        systemParametersServer.upsert(tuple.get(0), oauth2Config, oauth2Config.provide());
         //
-        oauth2CustomAuthSource.refreshCache();
+        Oauth2Factory.put(oauth2Config);
         return JsonMessage.success("保存成功");
     }
 }

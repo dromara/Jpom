@@ -25,45 +25,42 @@ package io.jpom.oauth2;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import me.zhyd.oauth.request.AuthRequest;
 import org.springframework.util.Assert;
 
 /**
  * @author bwcx_jzy
  * @since 2023/3/26
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class Oauth2CustomConfig {
+public class Oauth2MaxKeyConfig extends BaseOauth2Config {
+    public static final String KEY = "OAUTH_CONFIG_CUSTOM_OAUTH2";
 
-    private Boolean enabled;
-    private String clientId;
-    private String clientSecret;
     private String authorizationUri;
     private String accessTokenUri;
     private String userInfoUri;
-    private String redirectUri;
-    /**
-     * 是否自动创建用户
-     */
-    private Boolean autoCreteUser;
 
-    /**
-     * 是否开启
-     *
-     * @return true 开启
-     */
-    public boolean enabled() {
-        return enabled != null && enabled;
-    }
 
     /**
      * 验证数据
      */
     public void check() {
-        Assert.hasText(this.clientId, "没有配置 clientId");
-        Assert.hasText(this.clientSecret, "没有配置 clientSecret");
+        super.check();
         Validator.validateMatchRegex(RegexPool.URL_HTTP, this.authorizationUri, "请配置正确的授权 url");
         Validator.validateMatchRegex(RegexPool.URL_HTTP, this.accessTokenUri, "请配置正确的令牌 url");
         Validator.validateMatchRegex(RegexPool.URL_HTTP, this.userInfoUri, "请配置正确的用户信息 url");
-        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.redirectUri, "请配置正确的重定向 url");
+    }
+
+    @Override
+    public String provide() {
+        return "maxkey";
+    }
+
+    public AuthRequest authRequest() {
+        Assert.state(this.enabled(), "没有开启此 " + this.provide() + " oauth2");
+        Oauth2MaxKeyAuthSource oauth2MaxKeyAuthSource = new Oauth2MaxKeyAuthSource(this);
+        return new AuthOauth2MaxKeyRequest(this.authConfig(), oauth2MaxKeyAuthSource);
     }
 }

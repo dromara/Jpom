@@ -35,6 +35,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.http.ContentType;
 import cn.hutool.jwt.JWT;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
@@ -49,16 +50,18 @@ import io.jpom.func.user.server.UserLoginLogServer;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.dto.UserLoginDto;
 import io.jpom.model.user.UserModel;
-import io.jpom.oauth2.Oauth2CustomAuthSource;
-import io.jpom.oauth2.Oauth2CustomConfig;
+import io.jpom.oauth2.BaseOauth2Config;
+import io.jpom.oauth2.Oauth2Factory;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ServerConfig;
 import io.jpom.util.JwtUtil;
 import io.jpom.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthCallback;
 import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
+import me.zhyd.oauth.request.AuthRequest;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -68,8 +71,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.awt.*;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -78,6 +81,7 @@ import java.util.concurrent.TimeUnit;
  * @author Administrator
  */
 @RestController
+@Slf4j
 public class LoginControl extends BaseServerController {
     /**
      * ip 黑名单
@@ -95,19 +99,16 @@ public class LoginControl extends BaseServerController {
     private final ServerConfig.UserConfig userConfig;
     private final ServerConfig.WebConfig webConfig;
     private final UserLoginLogServer userLoginLogServer;
-    private final Oauth2CustomAuthSource oauth2CustomAuthSource;
 
     public LoginControl(UserService userService,
                         UserBindWorkspaceService userBindWorkspaceService,
                         ServerConfig serverConfig,
-                        UserLoginLogServer userLoginLogServer,
-                        Oauth2CustomAuthSource oauth2CustomAuthSource) {
+                        UserLoginLogServer userLoginLogServer) {
         this.userService = userService;
         this.userBindWorkspaceService = userBindWorkspaceService;
         this.userConfig = serverConfig.getUser();
         this.webConfig = serverConfig.getWeb();
         this.userLoginLogServer = userLoginLogServer;
-        this.oauth2CustomAuthSource = oauth2CustomAuthSource;
     }
 
     /**
@@ -245,13 +246,31 @@ public class LoginControl extends BaseServerController {
      * @param request 请求对象
      * @return json
      */
-    @GetMapping(value = "oauth2-url")
+    @GetMapping(value = "oauth2-url", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<JSONObject> oauth2LoginUrl(HttpServletRequest request) {
-        String authorize = oauth2CustomAuthSource.getAuthOauth2Request().authorize(null);
+    public JsonMessage<JSONObject> oauth2LoginUrl(HttpServletRequest request, @ValidatorItem String provide) {
+        AuthRequest authRequest = Oauth2Factory.get(provide);
+        String authorize = authRequest.authorize(null);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("toUrl", authorize);
         return JsonMessage.success("", jsonObject);
+    }
+
+    /**
+     * 跳转到认证中心登录
+     *
+     * @param provide 平台
+     */
+    @GetMapping(value = "oauth2-render-{provide}")
+    @NotLogin
+    public void oauth2UrlRender(HttpServletResponse response, @PathVariable String provide) {
+        try {
+            AuthRequest authRequest = Oauth2Factory.get(provide);
+            response.sendRedirect(authRequest.authorize(null));
+        } catch (Exception e) {
+            log.warn("跳转 oauth2 失败，{} {}", provide, e.getMessage());
+            ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), ContentType.JSON.toString());
+        }
     }
 
     /**
@@ -265,30 +284,25 @@ public class LoginControl extends BaseServerController {
     @PostMapping(value = "oauth2/login", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
     public JsonMessage<Object> oauth2Callback(@ValidatorItem String code,
+                                              @ValidatorItem String provide,
                                               String state,
                                               HttpServletRequest request) {
+        AuthRequest authRequest = Oauth2Factory.get(provide);
         AuthCallback authCallback = new AuthCallback();
         authCallback.setCode(code);
-        if (StrUtil.isEmpty(state)) {
-            // 临时兼容没有 state 的情况
-            String uuid = IdUtil.fastSimpleUUID();
-            oauth2CustomAuthSource.getAuthOauth2Request().authorize(uuid);
-            authCallback.setState(uuid);
-        } else {
-            authCallback.setState(state);
-        }
+        authCallback.setState(state);
 
-        AuthResponse<?> authResponse = oauth2CustomAuthSource.getAuthOauth2Request().login(authCallback);
+        AuthResponse<?> authResponse = authRequest.login(authCallback);
         if (authResponse.ok()) {
             AuthUser authUser = (AuthUser) authResponse.getData();
             String username = authUser.getUsername();
             UserModel userModel = userService.getByKey(username);
             if (userModel == null) {
-                boolean autoCreteUser = oauth2CustomAuthSource.getValue(Oauth2CustomConfig::getAutoCreteUser, false);
-                if (autoCreteUser) {
+                BaseOauth2Config oauth2Config = Oauth2Factory.getConfig(provide);
+                if (oauth2Config.autoCreteUser()) {
                     userModel = this.createUser(authUser);
                 } else {
-                    return new JsonMessage<>(400, username + " 用户不存在请联系创建");
+                    return new JsonMessage<>(400, username + " 用户不存在请联系管理创建");
                 }
             }
             //
@@ -409,9 +423,8 @@ public class LoginControl extends BaseServerController {
             demo.put("user", UserModel.DEMO_USER);
             jsonObject.put("demo", demo);
         }
-
-        boolean oauth2Custom = Optional.ofNullable(oauth2CustomAuthSource.getOauth2Config()).map(Oauth2CustomConfig::enabled).orElse(false);
-        jsonObject.put("oauth2Custom", oauth2Custom);
+        Collection<String> provides = Oauth2Factory.provides();
+        jsonObject.put("oauth2Provides", provides);
         return JsonMessage.success("", jsonObject);
     }
 }

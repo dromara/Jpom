@@ -34,9 +34,9 @@ import me.zhyd.oauth.request.AuthDefaultRequest;
 /**
  * @author MaxKey
  */
-public class AuthOauth2CustomRequest extends AuthDefaultRequest {
+public class AuthOauth2MaxKeyRequest extends AuthDefaultRequest {
 
-    public AuthOauth2CustomRequest(AuthConfig config, AuthSource source) {
+    public AuthOauth2MaxKeyRequest(AuthConfig config, AuthSource source) {
         super(config, source);
     }
 
@@ -45,12 +45,12 @@ public class AuthOauth2CustomRequest extends AuthDefaultRequest {
         String body = doPostAuthorizationCode(authCallback.getCode());
         JSONObject object = JSONObject.parseObject(body);
         return AuthToken.builder()
-                .accessToken(object.getString("access_token"))
-                .refreshToken(object.getString("refresh_token"))
-                .idToken(object.getString("id_token"))
-                .tokenType(object.getString("token_type"))
-                .scope(object.getString("scope"))
-                .build();
+            .accessToken(object.getString("access_token"))
+            .refreshToken(object.getString("refresh_token"))
+            .idToken(object.getString("id_token"))
+            .tokenType(object.getString("token_type"))
+            .scope(object.getString("scope"))
+            .build();
     }
 
     @Override
@@ -58,14 +58,14 @@ public class AuthOauth2CustomRequest extends AuthDefaultRequest {
         String body = doGetUserInfo(authToken);
         JSONObject object = JSONObject.parseObject(body);
         return AuthUser.builder()
-                .uuid(object.getString("id"))
-                .username(object.getString("username"))
-                .nickname(object.getString("name"))
-                .company(object.getString("organization"))
-                .email(object.getString("email"))
-                .token(authToken)
-                .source(source.toString())
-                .build();
+            .uuid(object.getString("id"))
+            .username(object.getString("username"))
+            .nickname(object.getString("name"))
+            .company(object.getString("organization"))
+            .email(object.getString("email"))
+            .token(authToken)
+            .source("jpom")
+            .build();
     }
 
 }

@@ -55,10 +55,7 @@ import io.jpom.system.ExtConfigBean;
 import io.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import top.jpom.db.DbExtConfig;
 
 import javax.servlet.http.HttpServletRequest;
@@ -110,6 +107,16 @@ public class IndexControl extends BaseServerController {
     @GetMapping(value = {"index", "", "/", "index.html"}, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
     public void index(HttpServletResponse response, HttpServletRequest request) {
+        this.toIndex(response, request, StrUtil.EMPTY);
+    }
+
+    @GetMapping(value = "oauth2-{provide}", produces = MediaType.TEXT_HTML_VALUE)
+    @NotLogin
+    public void oauth2(HttpServletResponse response, HttpServletRequest request, @PathVariable String provide) {
+        this.toIndex(response, request, provide);
+    }
+
+    private void toIndex(HttpServletResponse response, HttpServletRequest request, String oauth2Provide) {
         InputStream inputStream = ResourceUtil.getStream("classpath:/dist/index.html");
         String html = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
         //<div id="jpomCommonJs"></div>
@@ -134,6 +141,7 @@ public class IndexControl extends BaseServerController {
         html = StrUtil.replace(html, "<apiTimeout>", TimeUnit.SECONDS.toMillis(webApiTimeout) + "");
         html = StrUtil.replace(html, "<uploadFileSliceSize>", nodeConfig.getUploadFileSliceSize() + "");
         html = StrUtil.replace(html, "<uploadFileConcurrent>", nodeConfig.getUploadFileConcurrent() + "");
+        html = StrUtil.replace(html, "<oauth2Provide>", oauth2Provide);
         // 修改网页标题
         String title = ReUtil.get("<title>.*?</title>", html, 0);
         if (StrUtil.isNotEmpty(title)) {

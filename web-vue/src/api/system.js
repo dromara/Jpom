@@ -149,10 +149,11 @@ export function getMailConfigData() {
   });
 }
 
-export function oauthConfigOauth2() {
+export function oauthConfigOauth2(params) {
   return axios({
     url: "/system/oauth-config/oauth2",
     method: "get",
+    params,
   });
 }
 
