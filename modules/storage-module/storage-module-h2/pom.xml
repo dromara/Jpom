@@ -30,7 +30,7 @@
     <parent>
         <groupId>io.jpom.storage-module</groupId>
         <artifactId>jpom-storage-module-parent</artifactId>
-        <version>2.10.38.11</version>
+        <version>2.10.38</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
