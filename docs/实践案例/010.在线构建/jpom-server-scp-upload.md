@@ -1,0 +1,188 @@
+---
+title: 本地构建 + Jpom Server 使用 SCP 发布项目
+date: 2023-03-31 15:33:14
+permalink: /pages/practice/jpom-server-scp-upload/
+tags:
+  - SSH
+  - SCP
+  - Java
+  - 在线构建
+categories:
+  - docs
+  - 文档
+  - 实践案例
+---
+
+
+# Jpom 使用 Scp 发布实践案例
+
+# 1. 序
+
+> 使用说明：本案例使用 Jpom Server 端 2.10.37 版本作为演示，适用于支持 SSH 、SCP 命令的主机上（比如 Linux 服务器、MacOS 系统电脑、乌班图系统电脑等）
+
+先说说使用使用场景吧，任何东西脱离了实际的使用场景都是耍流氓。只有明确了使用场景，才能体会到这个案例解决的是什么问题。
+
+
+
+本篇文章所适用的场景如下：
+
+1. 我已经有一台 Linux 服务器部署了 Jpom Server，希望能通过这台服务器上的 Jpom 自动拉取代码，打包，然后直接推送打包之后的文件到其他服务器上去
+2. 我想在本地环境（比如 MacOS 电脑）直接把仓库的代码打包，并且直接上传到远程服务器，相当于使用 Jpom Server 替代 Sftp 工具的作用
+
+
+
+若是您的想法与上述场景不符合，可能本篇文章的内容就不太适合您。
+
+
+
+# 2. 步骤概览
+
+想要完成我们上面第一步的需求，我们需要下面这些步骤：
+
+![image-20230331110402268](/Users/zhangxin/Library/Application Support/typora-user-images/image-20230331110402268.png)
+
+# 3. 实践步骤
+
+## 3.1 安装 Jpom Server 端
+
+此项内容轻轻参考文档：[一键安装实践 | Jpom](https://jpom.top/pages/15b7a2/#前言)，本文不做额外说明。
+
+
+
+## 3.2 创建项目仓库
+
+项目仓库我们以这个 Hello-world 项目来演示，仓库地址：[hello-world-java: use Java write hello-world (gitee.com)](https://gitee.com/hotstrip/hello-world-java)。功能就是一个简单的 [http://localhost:8080/](https://gitee.com/link?target=http%3A%2F%2Flocalhost%3A8080%2F) 接口，返回 hello world 字符串。
+
+
+
+下面是实际操作步骤：
+
+1. 打开 Jpom Server 的管理页面，找到「在线构建」——「仓库信息」菜单
+2. 点击新增按钮，在弹出框中输入仓库名称、仓库地址、账号、密码信息，完成后点击确定
+3. 确认完成后能在列表中看到刚刚添加的仓库信息
+
+![image-20230331135345720](/Users/zhangxin/Library/Application Support/typora-user-images/image-20230331135345720.png)
+
+![image-20230331140141154](/Users/zhangxin/Library/Application Support/typora-user-images/image-20230331140141154.png)
+
+到此为止，仓库信息就已经添加好了，是不是很简单？
+
+
+
+完成了上面的步骤，我们需要暂时转移下注意力，转移到装有 Jpom Server 的服务器主机（也可以是本地开发环境电脑），以及我们想要把程序推送给远程服务器主机上面。
+
+
+
+## 3.3 配置 SSH 免密登录
+
+> 注意：这一小节内容与 Jpom 无关，仅仅与运行 Jpom Server 程序的主机和远程服务器（也就是最终项目运行的主机）有关。
+
+
+
+配置 SSH 免密登录的原因是让我们后续使用 SCP 命令上传文件时不会被阻塞，也无需输入密码。我们需要按照下面的步骤去完成配置 SSH 免密登录：
+
+
+
+1. 生成 SSH 密钥（这一步是可选的，如果你的主机上已经生成过 SSH 密钥，可以跳过该步骤）
+
+在本地主机上使用以下命令生成 SSH 密钥：
+
+```sh 
+ssh-keygen -t rsa
+```
+
+这个命令会生成一对公钥和私钥，分别保存在 ~/.ssh/id_rsa.pub 和 ~/.ssh/id_rsa 文件中。
+
+
+
+2. 将公钥添加到远程服务器
+
+使用以下命令将公钥添加到远程服务器中：
+
+```sh 
+ssh-copy-id user@remote_host
+```
+
+这个命令会将公钥添加到远程服务器 user 用户的 ~/.ssh/authorized_keys 文件中，从而实现免密登录。
+
+
+
+执行该命令之后会让你输入密码，完成后出现类似下面的信息就表示已经配置成功了，可以再次使用 SSH 登录命令去验证下是否不再需要输入密码。
+
+![image-20230331104342590](/Users/zhangxin/Library/Application Support/typora-user-images/image-20230331104342590.png)
+
+
+
+3. 使用 SCP 进行文件传输
+
+使用以下命令进行从本地主机到远程服务器的传输：
+
+```sh
+scp local_file user@remote_host:remote_file
+```
+
+该命令执行完毕后，可以在远程服务器上去看看是否把文件上传到了指定的位置。
+
+
+
+## 3.4 新增构建
+
+我们再次回到 Jpom Server 的管理页面，进行新增构建操作：
+
+1. 打开 Jpom Server 的管理页面，找到「在线构建」——「构建列表」菜单
+2. 点击新增按钮，在弹出框中输入名称、源仓库、构建方式、发布命令信息，完成后点击保存
+3. 确认完成后能在列表中看到刚刚添加的仓库信息
+
+![image-20230331145927846](/Users/zhangxin/Library/Application Support/typora-user-images/image-20230331145927846.png)
+
+![image-20230331143018290](/Users/zhangxin/Library/Application Support/typora-user-images/image-20230331143018290.png)
+
+这里面需要注意几个地方：
+
+- 构建方式使用本地，这里的「本地」是指当前安装 Jpom Server 的主机
+
+- 构建命令：也就是当前主机所支持的命令，不能在 Windows 主机上去执行 Windows 本身不支持的命令（比如 rm -rf）。
+
+  - 我们构建命令需要先进入 demo 目录，然后再使用 mvn 命令打包
+
+  - demo 是源仓库 hello-world 里面的子目录，里面存放了源代码
+
+  - 这里进入到 demo 目录之后可以直接使用 mvn 命令，是因为该项目自己集成了 maven 插件，参考下图：
+
+    ![image-20230331145713837](/Users/zhangxin/Library/Application Support/typora-user-images/image-20230331145713837.png)
+
+- 产物目录：跟构建类似，产物目录在 demo/target 里面
+
+- 发布操作：由于我们的使用场景是使用 Jpom Server 所在的主机通过 SCP 上传文件，所以这里选择本地命令（跟上面的构建方式选择本地类似）
+
+- 发布后命令：这里我们就是直接使用 SCP 上传文件到指定目录就可以了，值得注意的是 SCP 命令指定端口号参数是大写的 P，由于我们提前配置了 SSH 的免密，所以这里使用 SCP 不会被阻塞
+
+
+
+## 3.5 执行构建发布
+
+然后我们在「在线构建」——「构建列表」页面找到我们添加的构建记录，点击构建按钮，就能看到输出的日志了。
+
+![image-20230331150714358](/Users/zhangxin/Library/Application Support/typora-user-images/image-20230331150714358.png)
+
+最后登录远程服务器上去看看有没有上传成功。
+
+![image-20230331150821813](/Users/zhangxin/Library/Application Support/typora-user-images/image-20230331150821813.png)
+
+
+
+# 总结
+
+我们再来总结下，使用 Jpom Server 完成 SCP 命令发布程序其实涉及到的 Jpom 功能并不多。
+
+
+
+从功能菜单上看，就一个「在线构建」一级菜单，里面包含 3 个二级菜单，除此之外没有别的了。
+
+
+
+从整个操作步骤上看，就在新增构建的时候会涉及多一点的配置，还需要理解 Jpom 的构建命令、产物目录等名词的定义。
+
+
+
+剩下的就是服务器相关的知识了，比如 SSH、SCP 命令。
