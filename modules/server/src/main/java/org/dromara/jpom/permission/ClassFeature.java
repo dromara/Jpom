@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom.permission;
 
+import lombok.Getter;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
@@ -51,7 +52,6 @@ import org.dromara.jpom.service.system.WorkspaceEnvVarService;
 import org.dromara.jpom.service.system.WorkspaceService;
 import org.dromara.jpom.service.user.UserPermissionGroupServer;
 import org.dromara.jpom.service.user.UserService;
-import lombok.Getter;
 
 /**
  * 功能模块

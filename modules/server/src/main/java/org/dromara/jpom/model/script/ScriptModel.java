@@ -25,16 +25,16 @@ package org.dromara.jpom.model.script;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.script.CommandParam;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.FileUtils;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.dromara.jpom.db.TableName;
 
 import java.io.File;
 

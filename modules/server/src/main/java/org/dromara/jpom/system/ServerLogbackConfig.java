@@ -22,8 +22,6 @@
  */
 package org.dromara.jpom.system;
 
-import org.dromara.jpom.system.LogbackConfig;
-
 /**
  * @author bwcx_jzy
  * @since 2022/12/17

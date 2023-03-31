@@ -22,9 +22,9 @@
  */
 package org.dromara.jpom.model.system;
 
-import org.dromara.jpom.model.BaseModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.dromara.jpom.model.BaseModel;
 
 import java.util.HashMap;
 import java.util.Map;

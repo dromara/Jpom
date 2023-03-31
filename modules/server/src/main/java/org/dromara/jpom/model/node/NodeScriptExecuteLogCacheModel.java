@@ -23,10 +23,10 @@
 package org.dromara.jpom.model.node;
 
 import cn.hutool.core.annotation.PropIgnore;
-import org.dromara.jpom.model.BaseNodeModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseNodeModel;
 
 /**
  * @author bwcx_jzy

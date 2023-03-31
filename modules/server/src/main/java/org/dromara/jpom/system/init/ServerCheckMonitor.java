@@ -25,6 +25,7 @@ package org.dromara.jpom.system.init;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.ISystemTask;
 import org.dromara.jpom.common.JsonMessage;
@@ -37,7 +38,6 @@ import org.dromara.jpom.script.BaseRunScript;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.node.script.NodeScriptExecuteLogServer;
 import org.dromara.jpom.service.node.script.NodeScriptServer;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 

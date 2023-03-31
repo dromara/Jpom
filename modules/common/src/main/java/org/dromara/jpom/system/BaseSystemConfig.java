@@ -25,10 +25,10 @@ package org.dromara.jpom.system;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.cron.CronUtil;
+import lombok.Data;
 import org.dromara.jpom.common.JpomApplicationEvent;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.RemoteVersion;
-import lombok.Data;
 
 import java.nio.charset.Charset;
 

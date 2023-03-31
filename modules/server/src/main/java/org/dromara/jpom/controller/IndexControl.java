@@ -44,6 +44,7 @@ import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.interceptor.NotLogin;
+import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.SystemPermission;
@@ -56,7 +57,6 @@ import org.dromara.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
-import org.dromara.jpom.db.DbExtConfig;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

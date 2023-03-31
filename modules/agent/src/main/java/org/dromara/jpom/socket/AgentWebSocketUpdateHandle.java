@@ -24,6 +24,7 @@ package org.dromara.jpom.socket;
 
 import cn.hutool.core.lang.Tuple;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.JpomManifest;
@@ -34,7 +35,6 @@ import org.dromara.jpom.model.UploadFileModel;
 import org.dromara.jpom.model.WebSocketMessageModel;
 import org.dromara.jpom.system.AgentConfig;
 import org.dromara.jpom.util.SocketSessionUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.servlet.MultipartProperties;
 import org.springframework.stereotype.Component;

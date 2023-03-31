@@ -22,8 +22,8 @@
  */
 package org.dromara.jpom.model.enums;
 
-import org.dromara.jpom.model.BaseEnum;
 import lombok.Getter;
+import org.dromara.jpom.model.BaseEnum;
 
 /**
  * @author bwcx_jzy

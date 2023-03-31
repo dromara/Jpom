@@ -23,11 +23,11 @@
 package org.dromara.jpom.func.cert.model;
 
 import cn.hutool.core.annotation.PropIgnore;
-import org.dromara.jpom.model.BaseWorkspaceModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseWorkspaceModel;
 
 /**
  * @author bwcx_jzy

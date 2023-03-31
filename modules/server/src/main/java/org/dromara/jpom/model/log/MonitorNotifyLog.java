@@ -23,11 +23,11 @@
 package org.dromara.jpom.model.log;
 
 import cn.hutool.core.util.ObjectUtil;
-import org.dromara.jpom.model.BaseWorkspaceModel;
-import org.dromara.jpom.model.data.MonitorModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseWorkspaceModel;
+import org.dromara.jpom.model.data.MonitorModel;
 
 /**
  * 监控日志

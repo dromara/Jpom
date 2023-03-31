@@ -39,9 +39,9 @@ import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.core.RemoteApiVersion;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.plugin.IDefaultPlugin;
 import org.dromara.jpom.plugin.PluginConfig;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import javax.net.ssl.SSLHandshakeException;

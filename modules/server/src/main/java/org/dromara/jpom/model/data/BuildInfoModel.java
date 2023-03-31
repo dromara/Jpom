@@ -23,15 +23,15 @@
 package org.dromara.jpom.model.data;
 
 import cn.hutool.core.annotation.PropIgnore;
-import org.dromara.jpom.model.BaseGroupModel;
-import org.dromara.jpom.model.log.BuildHistoryLog;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Tolerate;
 import org.dromara.jpom.build.BuildExtraModule;
-import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseGroupModel;
+import org.dromara.jpom.model.enums.BuildStatus;
+import org.dromara.jpom.model.log.BuildHistoryLog;
 
 /**
  * new BuildModel class, for replace old BuildModel

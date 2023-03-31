@@ -27,11 +27,11 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.dromara.jpom.model.BaseJsonModel;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.system.JpomRuntimeException;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.springframework.util.Assert;
 
 import java.io.File;

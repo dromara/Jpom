@@ -23,11 +23,11 @@
 package org.dromara.jpom.model.data;
 
 import cn.hutool.core.annotation.PropIgnore;
-import org.dromara.jpom.model.BaseUserModifyDbModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseUserModifyDbModel;
 
 /**
  * @author Hotstrip

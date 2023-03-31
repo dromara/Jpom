@@ -22,8 +22,8 @@
  */
 package org.dromara.jpom.model.data;
 
-import org.dromara.jpom.model.BaseModel;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.model.BaseModel;
 
 /**
  * 证书实体

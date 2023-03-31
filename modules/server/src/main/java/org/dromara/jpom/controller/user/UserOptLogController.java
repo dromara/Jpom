@@ -24,6 +24,7 @@ package org.dromara.jpom.controller.user;
 
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JsonMessage;
+import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.log.UserOperateLogV1;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
@@ -34,7 +35,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.dromara.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
 

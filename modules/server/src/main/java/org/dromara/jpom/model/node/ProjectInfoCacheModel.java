@@ -22,10 +22,10 @@
  */
 package org.dromara.jpom.model.node;
 
-import org.dromara.jpom.model.BaseNodeGroupModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseNodeGroupModel;
 
 /**
  * @author bwcx_jzy

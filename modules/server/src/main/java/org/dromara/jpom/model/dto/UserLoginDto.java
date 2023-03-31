@@ -22,8 +22,8 @@
  */
 package org.dromara.jpom.model.dto;
 
-import org.dromara.jpom.model.data.WorkspaceModel;
 import lombok.Data;
+import org.dromara.jpom.model.data.WorkspaceModel;
 
 import java.util.List;
 

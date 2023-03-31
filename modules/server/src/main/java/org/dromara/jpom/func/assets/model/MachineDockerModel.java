@@ -25,14 +25,14 @@ package org.dromara.jpom.func.assets.model;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.model.BaseGroupNameModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseGroupNameModel;
 import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.springframework.util.Assert;
-import org.dromara.jpom.db.TableName;
 
 import java.io.File;
 

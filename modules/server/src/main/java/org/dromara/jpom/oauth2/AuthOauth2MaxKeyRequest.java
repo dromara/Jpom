@@ -23,7 +23,6 @@
 package org.dromara.jpom.oauth2;
 
 import com.alibaba.fastjson2.JSONObject;
-
 import me.zhyd.oauth.config.AuthConfig;
 import me.zhyd.oauth.config.AuthSource;
 import me.zhyd.oauth.model.AuthCallback;

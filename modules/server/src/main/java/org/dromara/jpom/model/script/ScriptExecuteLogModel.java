@@ -22,8 +22,8 @@
  */
 package org.dromara.jpom.model.script;
 
-import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseWorkspaceModel;
 
 /**
  * @author bwcx_jzy

@@ -28,10 +28,10 @@ import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import org.dromara.jpom.model.BaseGroupNameModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseGroupNameModel;
 import org.dromara.jpom.transport.INodeInfo;
 
 import java.net.InetSocketAddress;

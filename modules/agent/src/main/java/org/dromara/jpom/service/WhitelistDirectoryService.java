@@ -25,10 +25,10 @@ package org.dromara.jpom.service;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.AgentConst;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.util.JsonFileUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

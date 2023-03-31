@@ -23,12 +23,12 @@
 package org.dromara.jpom.model.docker;
 
 import cn.hutool.core.annotation.PropIgnore;
-import org.dromara.jpom.func.assets.model.MachineDockerModel;
-import org.dromara.jpom.model.BaseWorkspaceModel;
-import org.dromara.jpom.model.data.WorkspaceModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.func.assets.model.MachineDockerModel;
+import org.dromara.jpom.model.BaseWorkspaceModel;
+import org.dromara.jpom.model.data.WorkspaceModel;
 
 /**
  * @author bwcx_jzy

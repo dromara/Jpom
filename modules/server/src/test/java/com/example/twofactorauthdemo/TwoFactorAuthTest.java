@@ -22,9 +22,9 @@
  */
 package com.example.twofactorauthdemo;
 
-import org.dromara.jpom.util.TwoFactorAuthUtils;
 import org.databene.contiperf.PerfTest;
 import org.databene.contiperf.junit.ContiPerfRule;
+import org.dromara.jpom.util.TwoFactorAuthUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.util.Assert;

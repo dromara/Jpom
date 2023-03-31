@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom.socket;
 
+import lombok.Getter;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.service.docker.DockerInfoService;
@@ -31,7 +32,6 @@ import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.dromara.jpom.service.node.script.NodeScriptServer;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.service.script.ScriptServer;
-import lombok.Getter;
 import org.dromara.jpom.socket.handler.*;
 
 /**

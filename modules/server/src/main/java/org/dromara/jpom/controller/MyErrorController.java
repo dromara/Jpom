@@ -23,7 +23,6 @@
 package org.dromara.jpom.controller;
 
 import org.dromara.jpom.common.interceptor.NotLogin;
-import org.dromara.jpom.controller.BaseMyErrorController;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

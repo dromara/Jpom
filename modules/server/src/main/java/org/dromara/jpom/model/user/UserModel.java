@@ -25,11 +25,11 @@ package org.dromara.jpom.model.user;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import org.dromara.jpom.model.BaseUserModifyDbModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseUserModifyDbModel;
 
 import java.util.concurrent.TimeUnit;
 

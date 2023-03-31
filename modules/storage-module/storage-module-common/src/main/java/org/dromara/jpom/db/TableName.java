@@ -22,8 +22,6 @@
  */
 package org.dromara.jpom.db;
 
-import org.dromara.jpom.db.DbExtConfig;
-
 import java.lang.annotation.*;
 
 /**

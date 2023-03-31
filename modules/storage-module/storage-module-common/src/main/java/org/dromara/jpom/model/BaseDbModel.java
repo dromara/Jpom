@@ -23,7 +23,6 @@
 package org.dromara.jpom.model;
 
 import cn.hutool.core.date.SystemClock;
-import org.dromara.jpom.model.BaseIdModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

@@ -23,11 +23,11 @@
 package org.dromara.jpom.model.log;
 
 import cn.hutool.core.util.StrUtil;
-import org.dromara.jpom.model.BaseWorkspaceModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseWorkspaceModel;
 
 /**
  * ssh 终端执行日志

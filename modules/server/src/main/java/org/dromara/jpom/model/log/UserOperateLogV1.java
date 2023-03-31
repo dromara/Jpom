@@ -22,10 +22,10 @@
  */
 package org.dromara.jpom.model.log;
 
-import org.dromara.jpom.model.BaseWorkspaceModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseWorkspaceModel;
 
 /**
  * 用户操作日志

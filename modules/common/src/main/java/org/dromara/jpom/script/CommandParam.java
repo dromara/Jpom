@@ -26,10 +26,10 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONValidator;
-import org.dromara.jpom.model.BaseJsonModel;
-import org.dromara.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.dromara.jpom.model.BaseJsonModel;
+import org.dromara.jpom.util.StringUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;

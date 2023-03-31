@@ -26,6 +26,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.spring.SpringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.build.BuildExecuteService;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.cron.CronUtils;
@@ -38,7 +39,6 @@ import org.dromara.jpom.service.IStatusRecover;
 import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseGroupService;
 import org.dromara.jpom.util.StringUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;

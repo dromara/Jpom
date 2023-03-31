@@ -24,8 +24,8 @@ package org.dromara.jpom.socket;
 
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.service.system.SystemParametersServer;
-import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.socket.handler.*;
+import org.dromara.jpom.system.ServerConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;

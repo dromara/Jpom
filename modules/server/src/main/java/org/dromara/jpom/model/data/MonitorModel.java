@@ -24,14 +24,14 @@ package org.dromara.jpom.model.data;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
-import org.dromara.jpom.model.BaseEnum;
-import org.dromara.jpom.model.BaseJsonModel;
-import org.dromara.jpom.model.BaseWorkspaceModel;
-import org.dromara.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseEnum;
+import org.dromara.jpom.model.BaseJsonModel;
+import org.dromara.jpom.model.BaseWorkspaceModel;
+import org.dromara.jpom.util.StringUtil;
 
 import java.util.List;
 

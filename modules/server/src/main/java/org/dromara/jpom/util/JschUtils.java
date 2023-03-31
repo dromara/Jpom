@@ -34,9 +34,9 @@ import cn.hutool.extra.ssh.JschRuntimeException;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
 import com.jcraft.jsch.*;
-import org.dromara.jpom.system.ExtConfigBean;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.system.ExtConfigBean;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

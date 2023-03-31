@@ -24,14 +24,14 @@ package org.dromara.jpom.model.log;
 
 import cn.hutool.core.annotation.PropIgnore;
 import cn.hutool.core.util.StrUtil;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.dromara.jpom.build.BuildExtraModule;
+import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.enums.BuildStatus;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.dromara.jpom.db.TableName;
 
 /**
  * 构建历史记录

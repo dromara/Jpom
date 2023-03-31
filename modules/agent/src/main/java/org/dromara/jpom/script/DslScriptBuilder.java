@@ -32,6 +32,8 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.IllegalArgument2Exception;
@@ -45,8 +47,6 @@ import org.dromara.jpom.system.AgentConfig;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.FileUtils;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.nio.charset.Charset;
