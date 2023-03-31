@@ -77,15 +77,15 @@ public abstract class BaseServerController extends BaseJpomController {
         return nodeService.getByKey(nodeId);
     }
 
-    protected <T> JsonMessage<T> tryRequestNode(String machineId, HttpServletRequest request, NodeUrl nodeUrl) {
+    protected <T> JsonMessage<T> tryRequestNode(String machineId, HttpServletRequest request, NodeUrl nodeUrl, String... pars) {
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
-            return NodeForward.request(nodeModel, request, nodeUrl);
+            return NodeForward.request(nodeModel, request, nodeUrl, new String[]{}, pars);
         }
         if (StrUtil.isNotEmpty(machineId)) {
             MachineNodeModel model = machineNodeServer.getByKey(machineId);
             Assert.notNull(model, "没有找到对应的机器");
-            return NodeForward.request(model, request, nodeUrl);
+            return NodeForward.request(model, request, nodeUrl, new String[]{}, pars);
         }
         return null;
     }

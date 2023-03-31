@@ -143,6 +143,7 @@
                 <directory>../../</directory>
                 <includes>
                     <include>CHANGELOG.md</include>
+                    <include>CHANGELOG-BETA.md</include>
                     <include>LICENSE</include>
                 </includes>
             </resource>

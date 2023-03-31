@@ -22,6 +22,7 @@
  */
 package io.jpom.controller.system;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
@@ -100,9 +101,11 @@ public class SystemUpdateController extends BaseAgentController {
     }
 
     @PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> changeLog() {
+    public JsonMessage<String> changeLog(String beta) {
         //
-        URL resource = ResourceUtil.getResource("CHANGELOG.md");
+        boolean betaBool = Convert.toBool(beta, false);
+        boolean betaRelease = RemoteVersion.betaRelease();
+        URL resource = ResourceUtil.getResource((betaRelease || betaBool) ? "CHANGELOG-BETA.md" : "CHANGELOG.md");
         String log = StrUtil.EMPTY;
         if (resource != null) {
             InputStream stream = URLUtil.getStream(resource);
