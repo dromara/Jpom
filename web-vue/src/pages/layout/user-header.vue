@@ -496,7 +496,11 @@ export default {
               this.$notification.success({
                 message: "退出登录成功",
               });
-              this.$router.push("/login");
+              const query = Object.assign({}, this.$route.query);
+              this.$router.replace({
+                path: "/login",
+                query: query,
+              });
               resolve();
             });
           });
