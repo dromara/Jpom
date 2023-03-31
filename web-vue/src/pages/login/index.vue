@@ -51,11 +51,21 @@
           <a-form-model-item :wrapper-col="{ span: 24 }">
             <a-button type="primary" html-type="submit" class="btn-login"> 登录 </a-button>
           </a-form-model-item>
-          <template v-if="this.enabledOauth2Login">
+          <template v-if="this.enabledOauth2Provides.length">
             <a-divider>第三方登录</a-divider>
             <!-- <a-form-model-item :wrapper-col="{ span: 24 }"> </a-form-model-item> -->
             <a-form-model-item :wrapper-col="{ span: 24 }">
-              <a-tooltip @click="toOauth2Url" title="oauth2"><img :src="oauth2Img" width="32px;" /></a-tooltip>
+              <a-space>
+                <div style="width: 32px; height: 32px" v-if="this.enabledOauth2Provides.indexOf('gitee') > -1">
+                  <a-tooltip @click="toOauth2Url('gitee')" title="gitee"><img :src="giteeImg" style="width: 100%; height: 100%; object-fit: cover" /></a-tooltip>
+                </div>
+                <div style="width: 32px; height: 32px" v-if="this.enabledOauth2Provides.indexOf('maxkey') > -1">
+                  <a-tooltip @click="toOauth2Url('maxkey')" title="maxkey"><img :src="maxkeyImg" style="width: 100%; height: 100%; object-fit: cover" /></a-tooltip>
+                </div>
+                <div style="width: 32px; height: 32px" v-if="this.enabledOauth2Provides.indexOf('github') > -1">
+                  <a-tooltip @click="toOauth2Url('github')" title="github"><img :src="githubImg" style="width: 100%; height: 100%; object-fit: cover" /></a-tooltip>
+                </div>
+              </a-space>
             </a-form-model-item>
           </template>
         </a-form-model>
@@ -101,8 +111,10 @@ export default {
         ],
       },
       disabledCaptcha: false,
-      enabledOauth2Login: false,
-      oauth2Img: require(`@/assets/images/oauth2.png`),
+      enabledOauth2Provides: [],
+      maxkeyImg: require(`@/assets/images/maxkey.png`),
+      giteeImg: require(`@/assets/images/gitee.png`),
+      githubImg: require(`@/assets/images/github.png`),
     };
   },
   created() {
@@ -164,7 +176,7 @@ export default {
           });
           this.loginForm.loginName = demo.user;
         }
-        this.enabledOauth2Login = res.data?.oauth2Custom || false;
+        this.enabledOauth2Provides = res.data?.oauth2Provides || [];
       });
     },
     // change Code
@@ -173,7 +185,7 @@ export default {
     },
     checkOauth2() {
       if (this.$route.query.code) {
-        oauth2Login({ code: this.$route.query.code, state: this.$route.query.state }).then((res) => {
+        oauth2Login({ code: this.$route.query.code, state: this.$route.query.state, provide: window.oauth2Provide }).then((res) => {
           // 登录不成功，更新验证码
           if (res.code !== 200) {
             //this.changeCode();
@@ -183,8 +195,8 @@ export default {
         });
       }
     },
-    toOauth2Url() {
-      oauth2Url().then((res) => {
+    toOauth2Url(provide) {
+      oauth2Url({ provide: provide }).then((res) => {
         if (res.code === 200 && res.data) {
           location.href = res.data.toUrl;
         }

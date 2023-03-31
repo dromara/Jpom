@@ -22,7 +22,7 @@ export function oauth2Url(params) {
   return axios({
     url: "/oauth2-url",
     method: "get",
-    data: params,
+    params: params,
   });
 }
 
