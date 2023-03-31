@@ -43,7 +43,7 @@
         <version>2.7.10</version>
         <relativePath/>
     </parent>
-    <groupId>io.jpom</groupId>
+    <groupId>org.dromara.jpom</groupId>
     <artifactId>jpom-parent</artifactId>
     <name>Jpom (Java Project Online Manage)</name>
     <description>

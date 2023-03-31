@@ -84,13 +84,13 @@
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
             <includes>
-                <include>io.jpom:server</include>
+                <include>org.dromara.jpom:server</include>
             </includes>
         </dependencySet>
         <!--		<dependencySet>-->
         <!--			<outputDirectory>lib/plugins</outputDirectory>-->
         <!--			<includes>-->
-        <!--				<include>io.jpom.plugins</include>-->
+        <!--				<include>org.dromara.jpom.plugins</include>-->
         <!--			</includes>-->
         <!--		</dependencySet>-->
     </dependencySets>

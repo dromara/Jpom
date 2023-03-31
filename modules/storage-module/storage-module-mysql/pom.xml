@@ -28,7 +28,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.jpom.storage-module</groupId>
+        <groupId>org.dromara.jpom.storage-module</groupId>
         <artifactId>jpom-storage-module-parent</artifactId>
         <version>2.10.38</version>
         <relativePath>../pom.xml</relativePath>
@@ -44,7 +44,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.jpom.storage-module</groupId>
+            <groupId>org.dromara.jpom.storage-module</groupId>
             <artifactId>storage-module-common</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -55,7 +55,7 @@
         </dependency>
 
         <dependency>
-            <groupId>io.jpom</groupId>
+            <groupId>org.dromara.jpom</groupId>
             <artifactId>common</artifactId>
             <scope>provided</scope>
             <version>${project.version}</version>
