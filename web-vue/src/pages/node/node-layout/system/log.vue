@@ -72,34 +72,8 @@ export default {
   watch: {},
   created() {
     this.loadData();
-    this.$nextTick(() => {
-      setTimeout(() => {
-        this.introGuide();
-      }, 500);
-    });
   },
   methods: {
-    // 页面引导
-    introGuide() {
-      this.$store.dispatch("tryOpenGuide", {
-        key: "node-log",
-        options: {
-          hidePrev: true,
-          steps: [
-            {
-              title: "导航助手",
-              element: document.querySelector(".jpom-node-log-tree"),
-              intro: "这里是 Agent 节点里面的日志文件，点击具体的文件可以在右边的区域查看日志内容。",
-            },
-            {
-              title: "导航助手",
-              element: document.querySelector(".ant-tree-node-content-wrapper"),
-              intro: "您还可以用右键点击，会弹出一个操作选项的窗口（嗯，入口隐藏的比较深，所以有必要提示一下）。",
-            },
-          ],
-        },
-      });
-    },
     // 加载数据
     loadData() {
       this.list = [];
