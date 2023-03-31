@@ -17,7 +17,7 @@
               </a-tooltip>
 
               <a-button type="primary" @click="handleAdd">新增</a-button>
-              <a-button :disabled="!this.tableSelections.length" @click="syncToWorkspaceShow" type="primary"> 批量分配</a-button>
+              <a-button :disabled="!this.tableSelections.length" @click="syncToWorkspaceShow()" type="primary"> 批量分配</a-button>
               <a-button icon="download" type="primary" @click="handlerExportData()">导出</a-button>
               <a-dropdown>
                 <a-menu slot="overlay">
