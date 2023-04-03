@@ -563,10 +563,30 @@ export default {
       this.listQuery.id = this.reqDataId;
       (this.type === "container" ? dockerContainerList(this.urlPrefix, this.listQuery) : dockerContainerListCompose(this.urlPrefix, this.listQuery)).then((res) => {
         if (res.code === 200) {
-          this.list = res.data;
+          this.list = this.sortPort(res.data || []).map((item) => {
+            let child = item.child;
+            if (child) {
+              child = this.sortPort(child);
+            }
+            return { ...item, child: child };
+          });
         }
         this.loading = false;
         this.countdownTime = Date.now() + 5 * 1000;
+      });
+    },
+    sortPort(list) {
+      return list.map((item) => {
+        let ports = item.ports;
+        if (ports) {
+          try {
+            ports = ports.sort((a, b) => a.privatePort - b.privatePort || (a.type || "").toLowerCase().localeCompare((b.type || "").toLowerCase()));
+          } catch (e) {
+            console.error(e);
+          }
+        }
+
+        return { ...item, ports: ports };
       });
     },
     doAction(record, actionKey) {
