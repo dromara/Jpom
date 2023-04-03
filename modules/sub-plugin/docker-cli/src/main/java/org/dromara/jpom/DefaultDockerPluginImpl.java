@@ -463,7 +463,8 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
             String containerId = (String) parameter.get("containerId");
             Charset charset = (Charset) parameter.get("charset");
             Integer tail = (Integer) parameter.get("tail");
-            DockerClientUtil.pullLog(dockerClient, containerId, tail, charset, consumer);
+            Boolean timestamps = Convert.toBool(parameter.get("timestamps"));
+            DockerClientUtil.pullLog(dockerClient, containerId, timestamps, tail, charset, consumer);
         } catch (InterruptedException e) {
             consumer.accept("获取容器日志被中断:" + e);
         }
