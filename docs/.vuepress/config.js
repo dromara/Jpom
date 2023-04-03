@@ -11,7 +11,7 @@ module.exports = {
     }
   },
   theme: 'vdoing', // 使用依赖包主题
-  title: "Jpom",
+  title: "Jpom 官方文档",
   description: '简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件',
   base: "/",
   port: 2216,
