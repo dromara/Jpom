@@ -105,7 +105,7 @@ notices: # 可选的
   text-align: center;
   display: inline-block;
   margin: 5px;
-  border: 2px solid #EBEEF5;
+  border: 1px solid var(--borderColor);
   box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
   border-radius: 8px;
   padding: 10px;
