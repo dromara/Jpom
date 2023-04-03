@@ -101,6 +101,7 @@ public class DockerLogHandler extends BaseProxyHandler {
             };
             map.put("charset", CharsetUtil.CHARSET_UTF_8);
             map.put("consumer", consumer);
+            map.put("timestamps", json.getBoolean("timestamps"));
             IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
             try {
                 plugin.execute("logContainer", map);

@@ -56,7 +56,7 @@ public class DockerClientUtil {
      * @param consumer     回调
      * @throws InterruptedException 打断异常
      */
-    public static void pullLog(DockerClient dockerClient, String containerId, Integer tail, Charset charset, Consumer<String> consumer) throws InterruptedException {
+    public static void pullLog(DockerClient dockerClient, String containerId, Boolean timestamps, Integer tail, Charset charset, Consumer<String> consumer) throws InterruptedException {
         Assert.state(tail == null || tail > 0, "tail > 0");
         // 获取日志
         LogContainerCmd logContainerCmd = dockerClient.logContainerCmd(containerId);
@@ -66,6 +66,7 @@ public class DockerClientUtil {
             logContainerCmd.withTail(tail);
         }
         logContainerCmd
+            .withTimestamps(timestamps)
             .withStdOut(true)
             .withStdErr(true)
             .withFollowStream(true)

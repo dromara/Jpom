@@ -3,13 +3,21 @@
   <div>
     <log-view ref="logView" seg="" height="60vh" marginTop="-10px">
       <template slot="before">
-        <a-tooltip title="为避免显示内容太多而造成浏览器卡顿,读取日志最后多少行日志。修改后需要回车才能重新读取，小于 1 则读取所有">
-          <a-input addonBefore="读取行数" style="width: 200px" v-model="tail" placeholder="读取行数" @pressEnter="initWebSocket">
-            <template slot="addonAfter">
-              <a-icon type="reload" @click="initWebSocket" />
-            </template>
-          </a-input>
-        </a-tooltip>
+        <a-space>
+          <a-tooltip title="为避免显示内容太多而造成浏览器卡顿,读取日志最后多少行日志。修改后需要回车才能重新读取，小于 1 则读取所有">
+            读取行数：
+            <a-input-number v-model="tail" placeholder="读取行数">
+              <!-- <template slot="addonAfter"> </template> -->
+            </a-input-number>
+          </a-tooltip>
+          <div>
+            时间戳：
+            <a-switch v-model="timestamps" checked-children="显示" un-checked-children="不显示" />
+          </div>
+          <a-button type="primary" icon="reload" size="small" @click="initWebSocket"> 刷新 </a-button>
+
+          |
+        </a-space>
       </template>
     </log-view>
   </div>
@@ -39,6 +47,7 @@ export default {
     return {
       socket: null,
       tail: 500,
+      timestamps: false,
     };
   },
   computed: {
@@ -105,7 +114,8 @@ export default {
         //   }
         //   return;
         // }
-        this.$refs.logView.appendLine(msg.data);
+        const msgLine = msg.data || "";
+        this.$refs.logView.appendLine(msgLine.substring(0, msgLine.lastIndexOf("\n")));
         clearInterval(this.heart);
         // 创建心跳，防止掉线
         this.heart = setInterval(() => {
@@ -119,6 +129,7 @@ export default {
         op: op,
         containerId: this.containerId,
         tail: this.tail,
+        timestamps: this.timestamps,
       };
       this.socket.send(JSON.stringify(data));
     },

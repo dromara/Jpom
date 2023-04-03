@@ -8,6 +8,7 @@
 2. 【server】修复 资产管理相关权限、操作日志无法记录问题（感谢@咻咻咻秀啊）
 3. 【server】修复 docker 控制台 、日志无法正常使用
 4. 【server】优化 docker 控制台页面布局优化，支持单独查看 docker-compose
+5. 【server】优化 docker 实时查看日志支持配置是否显示时间戳
 
 ------
 
