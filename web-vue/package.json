@@ -44,8 +44,8 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-vue": "^7.15.1",
     "prettier": "^2.3.2",
-    "stylus": "^0.54.8",
-    "stylus-loader": "^3.0.2",
+    "less": "^3.0.4",
+    "less-loader": "^5.0.0",
     "vue-template-compiler": "^2.6.14"
   },
   "eslintConfig": {

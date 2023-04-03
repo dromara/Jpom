@@ -62,6 +62,21 @@ export function dockerContainerList(urlPrefix, params) {
 }
 
 /**
+ * 容器中的列表
+ * @param {JSON} params
+ */
+export function dockerContainerListCompose(urlPrefix, params) {
+  return axios({
+    url: urlPrefix + "/container/list-compose",
+    method: "post",
+    data: params,
+    headers: {
+      loading: "no",
+    },
+  });
+}
+
+/**
  * 查看 docker info
  * @param {JSON} params
  */

@@ -557,10 +557,10 @@ export default {
   },
 };
 </script>
-<style scoped lang="stylus">
+<style scoped>
 .ssh-file-layout {
   padding: 0;
-  min-height calc(100vh - 75px);
+  min-height: calc(100vh - 75px);
 }
 
 .dir-container {
@@ -572,7 +572,7 @@ export default {
   border: 1px solid #e2e2e2;
   /* height: calc(100vh - 80px); */
   /* overflow-y: auto; */
-   overflow-x: auto;
+  overflow-x: auto;
 }
 
 .file-content {

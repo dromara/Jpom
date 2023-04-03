@@ -1,8 +1,15 @@
 <template>
-  <a-layout class="node-layout" ref="nodeLayout" id="nodeLayout">
+  <a-layout class="node-layout" ref="nodeLayout" id="nodeLayout" :class="` ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
     <!-- 侧边栏 节点管理菜单 -->
-    <a-layout-sider theme="light" :class="`node-sider jpom-node-sider ${this.fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}`">
-      <a-menu theme="light" mode="inline" @openChange="openChange" :default-selected-keys="selectedKeys" :openKeys="openKey">
+    <a-layout-sider theme="light" :class="`node-sider jpom-node-sider ${this.fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}  ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
+      <a-menu
+        theme="light"
+        mode="inline"
+        @openChange="openChange"
+        :default-selected-keys="selectedKeys"
+        :openKeys="openKey"
+        :class="`${this.fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'} ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`"
+      >
         <template v-for="(menu, index) in nodeMenuList">
           <a-sub-menu v-if="menu.childs" :key="menu.id" :class="menu.id">
             <span slot="title">
@@ -22,7 +29,8 @@
     </a-layout-sider>
     <!-- 节点管理的各个组件 -->
     <!-- class="layout-content jpom-node-content drawer-layout-content" -->
-    <a-layout-content :class="`layout-content jpom-node-content ${this.fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'}`">
+
+    <a-layout-content :class="`layout-content jpom-node-content ${this.fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'} ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
       <welcome v-if="currentId === 'welcome'" :node="node" />
       <project-list v-if="currentId === 'manageList'" :node="node" />
 
@@ -96,6 +104,9 @@ export default {
     },
     menuMultipleFlag() {
       return this.getGuideCache.menuMultipleFlag === undefined ? true : this.getGuideCache.menuMultipleFlag;
+    },
+    scrollbarFlag() {
+      return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
     },
   },
   watch: {},
@@ -180,15 +191,14 @@ export default {
   },
 };
 </script>
-<style scoped lang="stylus">
-
+<style scoped>
 .sider-scroll {
   min-height: calc(100vh -85px);
   overflow-y: auto;
 }
 
 .layout-content-scroll {
-  min-height: calc(100vh - 85px)
+  min-height: calc(100vh - 85px);
   overflow-y: auto;
 }
 
@@ -198,7 +208,7 @@ export default {
 }
 
 .layout-content-full-screen {
- height: calc(100vh - 85px);
+  height: calc(100vh - 85px);
   overflow-y: scroll;
 }
 </style>
