@@ -42,6 +42,22 @@
       </a-form-model-item>
 
       <a-form-model-item prop="releasePathParent" label="发布目录">
+        <template slot="help">
+          <a-tooltip title="需要配置授权目录（白名单才能正常使用发布）,授权目录主要是用于确定可以发布到哪些目录中"
+            ><a-button
+              icon="info-circle"
+              size="small"
+              type="link"
+              @click="
+                () => {
+                  this.configDir = true;
+                }
+              "
+            >
+              配置目录
+            </a-button>
+          </a-tooltip></template
+        >
         <a-input-group compact>
           <a-select show-search allowClear style="width: 30%" v-model="temp.releasePathParent" placeholder="请选择发布的一级目录">
             <a-select-option v-for="item in accessList" :key="item">
@@ -71,6 +87,29 @@
         </a-tabs>
       </a-form-model-item>
     </a-form-model>
+
+    <a-modal
+      destroyOnClose
+      v-model="configDir"
+      :title="`配置授权目录`"
+      :footer="null"
+      :maskClosable="false"
+      @cancel="
+        () => {
+          this.configDir = false;
+        }
+      "
+    >
+      <whiteList
+        v-if="configDir"
+        @cancel="
+          () => {
+            this.configDir = false;
+            this.loadAccesList();
+          }
+        "
+      ></whiteList>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -78,9 +117,11 @@ import { getSshListAll } from "@/api/ssh";
 import { getDispatchWhiteList } from "@/api/dispatch";
 import { getNodeListAll } from "@/api/node";
 import codeEditor from "@/components/codeEditor";
+import whiteList from "@/pages/dispatch/white-list.vue";
 export default {
   components: {
     codeEditor,
+    whiteList,
   },
   data() {
     return {
@@ -94,6 +135,7 @@ export default {
       sshList: [],
       accessList: [],
       nodeList: [],
+      configDir: false,
     };
   },
   created() {

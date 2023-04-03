@@ -99,6 +99,20 @@
             </a-col>
           </a-row>
         </a-form-model-item>
+        <a-form-model-item prop="taskDataIds" label="发布的节点" v-else-if="temp.taskType === 1">
+          <a-row>
+            <a-col :span="22">
+              <a-select show-search option-filter-prop="children" mode="multiple" v-model="temp.taskDataIds" placeholder="请选择节点">
+                <a-select-option v-for="ssh in nodeList" :key="ssh.id">
+                  <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
+                </a-select-option>
+              </a-select>
+            </a-col>
+            <a-col :span="1" style="margin-left: 10px">
+              <a-icon type="reload" @click="loadNodeList" />
+            </a-col>
+          </a-row>
+        </a-form-model-item>
 
         <a-form-model-item prop="releasePathParent" label="发布目录">
           <a-input placeholder="请输入发布目录" :disabled="true" v-model="temp.releasePath" />
@@ -159,6 +173,7 @@ import taskDetailsPage from "./details.vue";
 import { getSshListAll } from "@/api/ssh";
 import codeEditor from "@/components/codeEditor";
 import { hasFile } from "@/api/file-manager/file-storage";
+import { getNodeListAll } from "@/api/node";
 
 export default {
   components: {
@@ -209,6 +224,7 @@ export default {
         { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "230px" },
       ],
       sshList: [],
+      nodeList: [],
       releaseFileVisible: false,
       releaseFileRules: {
         name: [{ required: true, message: "请输入文件任务名", trigger: "blur" }],
@@ -282,6 +298,14 @@ export default {
         });
       });
     },
+    // 加载节点
+    loadNodeList() {
+      getNodeListAll().then((res) => {
+        if (res.code === 200) {
+          this.nodeList = res.data;
+        }
+      });
+    },
     // 重建任务
     handleRetask(row) {
       taskDetails({
@@ -294,6 +318,8 @@ export default {
           delete this.temp.id;
           if (taskData?.taskType === 0) {
             this.loadSshList();
+          } else if (taskData?.taskType === 1) {
+            this.loadNodeList();
           }
           const taskList = res.data?.taskList || [];
           this.temp = {
