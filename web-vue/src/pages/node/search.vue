@@ -249,7 +249,7 @@ export default {
       batchVisible: false,
       batchTitle: "",
       columns: [
-        { title: "项目名称", dataIndex: "name", width: 120, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "项目名称", dataIndex: "name", width: 200, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "项目分组", dataIndex: "group", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "group" } },
         { title: "节点名称", dataIndex: "nodeId", width: 90, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         {

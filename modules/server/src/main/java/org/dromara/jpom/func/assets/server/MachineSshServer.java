@@ -37,7 +37,6 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
-import cn.hutool.extra.ssh.JschRuntimeException;
 import cn.hutool.extra.ssh.JschUtil;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -372,10 +371,10 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
             } else if (StrUtil.startWith(privateKey, JschUtils.HEADER)) {
                 // 直接采用 private key content 登录，无需写入文件
                 session = JschUtils.createSession(sshModel.getHost(),
-                        sshModel.getPort(),
-                        user,
-                        StrUtil.trim(privateKey),
-                        passwordByte);
+                    sshModel.getPort(),
+                    user,
+                    StrUtil.trim(privateKey),
+                    passwordByte);
             } else if (StrUtil.isEmpty(privateKey)) {
                 File home = FileUtil.getUserHomeDir();
                 Assert.notNull(home, "用户目录没有找到");
@@ -398,7 +397,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
                 // 简要私钥文件是否存在
                 Assert.state(FileUtil.isFile(rsaFile), "私钥文件不存在：" + FileUtil.getAbsolutePath(rsaFile));
                 session = JschUtil.createSession(sshModel.getHost(),
-                        sshModel.getPort(), user, FileUtil.getAbsolutePath(rsaFile), passwordByte);
+                    sshModel.getPort(), user, FileUtil.getAbsolutePath(rsaFile), passwordByte);
             }
             try {
                 session.setServerAliveInterval(timeout);
@@ -409,7 +408,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
             try {
                 session.connect(timeout);
             } catch (JSchException e) {
-                throw new JschRuntimeException(e);
+                throw Lombok.sneakyThrow(e);
             }
         } else {
             throw new IllegalArgumentException("不支持的模式");

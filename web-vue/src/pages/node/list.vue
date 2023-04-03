@@ -514,8 +514,8 @@ export default {
       syncToWorkspaceVisible: false,
 
       columns: [
-        { title: "节点名称", dataIndex: "name", width: 100, sorter: true, key: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "节点名称", dataIndex: "name", width: 200, sorter: true, key: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "状态", dataIndex: "status", width: "100px", ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "节点地址", dataIndex: "url", key: "url", width: "190px", ellipsis: true, scopedSlots: { customRender: "url" } },
         { title: "系统名", dataIndex: "osName", key: "osName", width: "100px", ellipsis: true, scopedSlots: { customRender: "osName" } },
         { title: "JDK 版本", dataIndex: "javaVersion", width: 100, key: "javaVersion", ellipsis: true, scopedSlots: { customRender: "javaVersion" } },

@@ -56,7 +56,7 @@
                         </a-col>
                         <a-col :span="7" style="text-align: right" class="text-overflow-hidden">
                           <a-tooltip :title="`当前状态：${statusMap[item.status]} ${item.statusMsg ? '状态消息：' + item.statusMsg : ''} `">
-                            <a-tag :color="statusColor[item.status]" style="margin-right: 0px"> {{ statusMap[item.status] }}</a-tag>
+                            <a-tag :color="statusColor[item.status]" style="margin-right: 0px"> {{ statusMap[item.status] || "未知" }}</a-tag>
                           </a-tooltip>
                         </a-col>
                       </a-row>

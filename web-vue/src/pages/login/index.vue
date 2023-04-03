@@ -55,15 +55,15 @@
             <a-divider>第三方登录</a-divider>
             <!-- <a-form-model-item :wrapper-col="{ span: 24 }"> </a-form-model-item> -->
             <a-form-model-item :wrapper-col="{ span: 24 }">
-              <a-space>
-                <div style="width: 32px; height: 32px" v-if="this.enabledOauth2Provides.indexOf('gitee') > -1">
-                  <a-tooltip @click="toOauth2Url('gitee')" title="gitee"><img :src="giteeImg" style="width: 100%; height: 100%; object-fit: cover" /></a-tooltip>
+              <a-space :size="20">
+                <div class="oauth2-item" v-if="this.enabledOauth2Provides.indexOf('gitee') > -1">
+                  <a-tooltip @click="toOauth2Url('gitee')" title="gitee"><img :src="giteeImg" /></a-tooltip>
                 </div>
-                <div style="width: 32px; height: 32px" v-if="this.enabledOauth2Provides.indexOf('maxkey') > -1">
-                  <a-tooltip @click="toOauth2Url('maxkey')" title="maxkey"><img :src="maxkeyImg" style="width: 100%; height: 100%; object-fit: cover" /></a-tooltip>
+                <div class="oauth2-item" v-if="this.enabledOauth2Provides.indexOf('maxkey') > -1">
+                  <a-tooltip @click="toOauth2Url('maxkey')" title="maxkey"><img :src="maxkeyImg" /></a-tooltip>
                 </div>
-                <div style="width: 32px; height: 32px" v-if="this.enabledOauth2Provides.indexOf('github') > -1">
-                  <a-tooltip @click="toOauth2Url('github')" title="github"><img :src="githubImg" style="width: 100%; height: 100%; object-fit: cover" /></a-tooltip>
+                <div class="oauth2-item" v-if="this.enabledOauth2Provides.indexOf('github') > -1">
+                  <a-tooltip @click="toOauth2Url('github')" title="github"><img :src="githubImg" /></a-tooltip>
                 </div>
               </a-space>
             </a-form-model-item>
@@ -72,7 +72,7 @@
       </template>
       <template v-if="this.action === 'mfa'">
         <a-form-model ref="mfaDataForm" :label-col="{ span: 0 }" :model="mfaData" :rules="rules" @submit="handleMfa">
-          <a-form-model-item label="验证码" :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }" prop="mfaCode">
+          <a-form-model-item label="验证码" :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }" prop="mfaCode" help="需要验证 MFA">
             <a-input v-model="mfaData.mfaCode" placeholder="mfa 验证码" />
           </a-form-model-item>
 
@@ -113,7 +113,7 @@ export default {
       disabledCaptcha: false,
       enabledOauth2Provides: [],
       maxkeyImg: require(`@/assets/images/maxkey.png`),
-      giteeImg: require(`@/assets/images/gitee.png`),
+      giteeImg: require(`@/assets/images/gitee.svg`),
       githubImg: require(`@/assets/images/github.png`),
     };
   },
@@ -350,18 +350,29 @@ export default {
 .rand-code img {
   width: 100%;
   height: 100%;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
   display: inherit;
 }
 .btn-login {
   width: 100%;
   margin: 10px 0;
 }
-</style>
-<style>
-.ant-card-meta-title {
+/deep/ .ant-card-meta-title {
   font-size: 30px;
 }
-.ant-card-body {
+/deep/ .ant-card-body {
   padding: 30px;
+}
+
+.oauth2-item {
+  width: 40px;
+  height: 40px;
+}
+
+.oauth2-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 </style>

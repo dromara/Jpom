@@ -206,9 +206,9 @@
       </a-form-model>
     </a-modal>
     <!-- 控制台 -->
-    <a-drawer destroyOnClose :title="`${temp.name} 控制台`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="consoleVisible" @close="onClose">
-      <console v-if="consoleVisible" :visible="consoleVisible" :machineDockerId="temp.id" urlPrefix="/system/assets/docker"></console>
-    </a-drawer>
+    <!-- <a-drawer destroyOnClose :title="`${temp.name} 控制台`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="consoleVisible" @close="onClose"> -->
+    <console v-if="consoleVisible" :visible="consoleVisible" :machineDockerId="temp.id" urlPrefix="/system/assets/docker" @close="onClose"></console>
+    <!-- </a-drawer> -->
     <!-- 集群控制台 -->
     <a-drawer
       destroyOnClose

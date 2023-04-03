@@ -30,7 +30,6 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.ChannelType;
-import cn.hutool.extra.ssh.JschRuntimeException;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
 import com.jcraft.jsch.*;
@@ -209,7 +208,7 @@ public class JschUtils {
             Identity identity = ContentIdentity.newInstance(privateKeyByte, null, sshUser, jsch);
             jsch.addIdentity(identity, passphrase);
         } catch (Exception e) {
-            throw new JschRuntimeException(e);
+            throw Lombok.sneakyThrow(e);
         }
         return JschUtil.createSession(jsch, sshHost, sshPort, sshUser);
     }
