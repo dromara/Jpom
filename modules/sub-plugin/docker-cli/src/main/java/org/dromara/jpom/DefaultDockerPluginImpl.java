@@ -37,6 +37,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.InvocationBuilder;
+import com.github.dockerjava.core.NameParser;
 import lombok.Lombok;
 import lombok.SneakyThrows;
 import org.dromara.jpom.plugin.PluginConfig;
@@ -222,15 +223,13 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
 
         Consumer<String> logConsumer = (Consumer<String>) parameter.get("logConsumer");
         String repositoryStr = (String) parameter.get("repository");
-        List<String> split = StrUtil.split(repositoryStr, StrUtil.COLON);
-        int size = CollUtil.size(split);
-        Assert.state(size > 0 && size <= 2, "镜像标签错误");
-        String repository = CollUtil.getFirst(split);
+        Assert.hasText(repositoryStr, "请填写镜名称");
+        NameParser.ReposTag reposTag = NameParser.parseRepositoryTag(repositoryStr);
         // 解析 tag
-        String tag = size > 1 ? CollUtil.getLast(split) : null;
+        String tag = reposTag.tag;
         tag = StrUtil.emptyToDefault(tag, "latest");
-        logConsumer.accept(StrUtil.format("start pull {}:{}", repository, tag));
-        PullImageCmd pullImageCmd = dockerClient.pullImageCmd(repository)
+        logConsumer.accept(StrUtil.format("start pull {}:{}", reposTag.repos, tag));
+        PullImageCmd pullImageCmd = dockerClient.pullImageCmd(reposTag.repos)
             .withTag(tag)
             .withAuthConfig(dockerClient.authConfig());
         pullImageCmd.exec(new InvocationBuilder.AsyncResultCallback<PullResponseItem>() {
