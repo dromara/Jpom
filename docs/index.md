@@ -438,6 +438,10 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
         <img :src="$withBase('/images/friends/aizuda.png')" class="no-zoom friends-item-img hover-alt"  alt="AIZUDA - 低代码开源技术交流社区">
     </a>
 </div>
-
+<div class="friends-item" >
+    <a href="https://baomidou.com/?from=jpom" target="_blank">
+        <img :src="$withBase('/images/friends/baomidou.svg')" class="no-zoom friends-item-img hover-alt"  alt="MyBatis-Plus 🚀为简化开发而生">
+    </a>
+</div>
 <br/>
 <br/>
