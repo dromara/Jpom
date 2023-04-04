@@ -433,6 +433,11 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
         <img :src="$withBase('/images/friends/uniadmin.png')" class="no-zoom friends-item-img hover-alt"  alt="UiAdmin是一套零前端代码通用后台，采用前后端分离技术，数据交互采用json格式">
     </a>
 </div>
+<div class="friends-item" >
+    <a href="http://aizuda.com/?from=jpom" target="_blank">
+        <img :src="$withBase('/images/friends/aizuda.png')" class="no-zoom friends-item-img hover-alt"  alt="AIZUDA - 低代码开源技术交流社区">
+    </a>
+</div>
 
 <br/>
 <br/>
