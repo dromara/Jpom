@@ -69,8 +69,7 @@ notices: # 可选的
 
 <style lang="stylus">
 .action-button-diy
-	margin-left 0.5rem
-    margin-top 0.5rem
+	margin 0.5rem 0 0 0.5rem
 	display inline-block
 	font-size 1.2rem
 	background-color $accentColor
