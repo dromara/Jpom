@@ -157,7 +157,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getLongTermToken"]),
+    ...mapGetters(["getLongTermToken", "getWorkspaceId"]),
     selectPath() {
       if (!Object.keys(this.tempNode).length) {
         return "";
@@ -198,7 +198,7 @@ export default {
         const itemProjectData = this.nodeProjectList[item.nodeId].projects.filter((projectData) => {
           return item.projectId === projectData.projectId;
         })[0];
-        const socketUrl = getWebSocketUrl("/socket/console", `userId=${this.getLongTermToken}&id=${itemProjectData.id}&nodeId=${item.nodeId}&type=console&copyId=`);
+        const socketUrl = getWebSocketUrl("/socket/console", `userId=${this.getLongTermToken}&id=${itemProjectData.id}&nodeId=${item.nodeId}&type=console&copyId=&workspaceId=${this.getWorkspaceId}`);
         const domId = `pre-dom-${item.nodeId},${item.projectId}`;
         this.socketCache = { ...this.socketCache, [domId]: {} };
         const socket = this.initWebSocket(domId, socketUrl);
