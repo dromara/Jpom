@@ -42,8 +42,8 @@ Linux)
 esac
 base=${bin_abs_path}/../
 
-echo "当前路径：${current_path} 脚本路径：${bin_abs_path}"
 tag="$2"
+echo "当前路径：${current_path} 脚本路径：${bin_abs_path} $tag"
 
 if [ -n "$1" ]; then
 	new_version="$1"
@@ -51,18 +51,18 @@ if [ -n "$1" ]; then
 	echo "$old_version 替换为新版本 $new_version"
 else
 	# 参数错误，退出
-	echo "ERROR: 请指定新版本！"
-	exit
+	echo "ERROR: 请指定新版本！" 2>&2
+	exit 1
 fi
 
 if [ ! -n "$old_version" ]; then
-	echo "ERROR: 旧版本不存在，请确认 /script/tag.$tag.txt 中信息正确"
-	exit
+	echo "ERROR: 旧版本不存在，请确认 /script/tag.$tag.txt 中信息正确" 2>&2
+	exit 1
 fi
 
 echo "替换配置文件版本号 $new_version"
 
-if [ "$tag" == "release" ]; then
+if [[ "$tag" == "release" ]]; then
 	# 替换 Dockerfile 中的版本
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/Dockerfile"
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/agent/Dockerfile"
@@ -77,12 +77,12 @@ if [ "$tag" == "release" ]; then
 elif [ "$tag" == "beta" ]; then
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/DockerfileBeta"
 else
-	echo "不支持的模式 $tag"
-	exit
+	echo "不支持的模式 $tag" 2>&2
+	exit 2
 fi
 
 # 替换所有模块pom.xml中的版本
-cd "${base}" && mvn versions:set -DnewVersion=$new_version
+cd "${base}" && mvn -s "$base/script/settings.xml" versions:set -DnewVersion=$new_version
 
 # 替换 docker 中的版本
 sed -i.bak "s/${old_version}/${new_version}/g" "$base/env-$tag.env"
