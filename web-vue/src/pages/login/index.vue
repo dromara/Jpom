@@ -182,6 +182,7 @@ export default {
     // change Code
     changeCode() {
       this.randCode = "randCode.png?r=" + new Date().getTime();
+      this.loginForm = { ...this.loginForm, code: "" };
     },
     checkOauth2() {
       if (this.$route.query.code) {
