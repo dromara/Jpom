@@ -602,22 +602,6 @@ export default {
     PAGE_DEFAULT_SHOW_TOTAL,
     parseTime,
     CHANGE_PAGE,
-    introGuideList() {
-      this.$store.dispatch("tryOpenGuide", {
-        key: "node-list-manage",
-        beforeKey: "index",
-        options: {
-          hidePrev: true,
-          steps: [
-            {
-              title: "导航助手",
-              element: document.querySelector(".jpom-node-manage-btn"),
-              intro: "点击【节点管理】按钮可以进入节点管理,节点管理里面可以挖掘更多功能",
-            },
-          ],
-        },
-      });
-    },
     // 获取所有的分组
     loadGroupList() {
       getNodeGroupAll().then((res) => {
@@ -659,11 +643,7 @@ export default {
                 this.handleNode(item);
               }
             });
-            if (res.data.total > 0) {
-              this.$nextTick(() => {
-                this.introGuideList();
-              });
-            }
+
             resolve();
             this.refreshInterval = 30;
             this.deadline = Date.now() + this.refreshInterval * 1000;
