@@ -51,6 +51,8 @@ public abstract class BaseWorkspaceModel extends BaseModel {
      */
     private String modifyUser;
 
+    private String createTime;
+
     private String modifyTime;
 
     /**

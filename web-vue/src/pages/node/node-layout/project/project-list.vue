@@ -81,13 +81,7 @@
       <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="`名称：${text}`" @click="handleEdit(record)">
         <a-button type="link" style="padding: 0px" size="small"><a-icon v-if="record.outGivingProject" type="apartment" />{{ text }} </a-button>
       </a-tooltip>
-      <template slot="time" slot-scope="text, record">
-        <a-tooltip :title="`创建时间：${parseTime(record.createTimeMillis)}，${record.modifyTimeMillis ? '修改时间：' + parseTime(record.modifyTimeMillis) : ''}`">
-          <span>{{ parseTime(record.modifyTimeMillis) }}</span>
-          <!-- <br /> -->
-          <!-- <span>{{ parseTime(record.createTimeMillis) }}</span> -->
-        </a-tooltip>
-      </template>
+
       <a-tooltip slot="path" slot-scope="text, item" placement="topLeft" :title="item.whitelistDirectory + item.lib">
         <span>{{ item.whitelistDirectory + item.lib }}</span>
       </a-tooltip>
@@ -544,7 +538,15 @@ export default {
         // },
         { title: "运行状态", dataIndex: "status", width: 80, ellipsis: true, align: "center", scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "修改时间", sorter: true, dataIndex: "modifyTimeMillis", width: "170px", ellipsis: true, scopedSlots: { customRender: "time" } },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          sorter: true,
+          ellipsis: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
+        { title: "修改时间", sorter: true, dataIndex: "modifyTimeMillis", width: "170px", ellipsis: true, customRender: (text) => parseTime(text) },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, fixed: "right", align: "center", width: "180px" },
       ],
       copyColumns: [

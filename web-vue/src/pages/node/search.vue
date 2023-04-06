@@ -93,7 +93,13 @@
       <template slot="operation" slot-scope="text, record, index">
         <a-space>
           <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
-          <a-button size="small" type="primary" @click="handleConsole(record)" v-show="noFileModes.includes(record.runMode)">控制台</a-button>
+          <template v-if="noFileModes.includes(record.runMode)">
+            <a-button size="small" type="primary" @click="handleConsole(record)">控制台</a-button>
+          </template>
+          <template v-else>
+            <a-tooltip title="文件类型没有控制台功能"> <a-button size="small" type="primary" :disabled="true">控制台</a-button></a-tooltip>
+          </template>
+
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
@@ -101,7 +107,12 @@
             </a>
             <a-menu slot="overlay">
               <a-menu-item>
-                <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+                <template v-if="noFileModes.includes(record.runMode)">
+                  <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+                </template>
+                <template v-else>
+                  <a-tooltip title="文件类型没有触发器功能"> <a-button size="small" type="primary" :disabled="true">触发器</a-button></a-tooltip>
+                </template>
               </a-menu-item>
               <a-menu-item>
                 <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'top')">置顶</a-button>
@@ -286,7 +297,7 @@ export default {
           customRender: (text) => parseTime(text),
           width: "170px",
         },
-        { title: "操作", dataIndex: "operation", align: "center", fixed: "right", scopedSlots: { customRender: "operation" }, width: "180px" },
+        { title: "操作", dataIndex: "operation", align: "center", fixed: "right", scopedSlots: { customRender: "operation" }, width: "190px" },
       ],
       triggerVisible: false,
       triggerUses: [

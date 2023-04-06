@@ -77,7 +77,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      */
     private String token;
 
-    private String createTime;
 
     private RunMode runMode;
     /**
