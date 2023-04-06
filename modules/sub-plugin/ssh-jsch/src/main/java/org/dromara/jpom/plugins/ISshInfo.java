@@ -20,33 +20,52 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-import com.github.dockerjava.core.NameParser;
-import org.junit.Test;
+package org.dromara.jpom.plugins;
 
-import java.util.Formatter;
+import java.nio.charset.Charset;
 
 /**
  * @author bwcx_jzy
- * @since 2022/2/7
+ * @since 2023/4/6
  */
-public class TestFormatter {
+public interface ISshInfo {
 
-    @Test
-    public void test() {
-        System.out.println(String.format("${a}", "1"));
-        Formatter formatter = new Formatter();
-        System.out.println(formatter.format("${a}", "1"));
-    }
+    int timeout();
 
-    @Test
-    public void testTag() {
-        NameParser.ReposTag reposTag = NameParser.parseRepositoryTag("192.168.33.106:10087/library/sso:3.0.0.RELEASE");
-        System.out.println(reposTag);
+    String host();
 
-        reposTag = NameParser.parseRepositoryTag("sso:3.0.0.RELEASE");
-        System.out.println(reposTag);
+    ConnectType connectType();
 
-        reposTag = NameParser.parseRepositoryTag("sso");
-        System.out.println(reposTag);
+    Charset charset();
+
+    int port();
+
+    String user();
+
+    String password();
+
+    /**
+     * 私钥
+     *
+     * @return 私钥
+     */
+    String privateKey();
+
+    /**
+     * id
+     *
+     * @return 数据id
+     */
+    String id();
+
+    enum ConnectType {
+        /**
+         * 账号密码
+         */
+        PASS,
+        /**
+         * 密钥
+         */
+        PUBKEY
     }
 }

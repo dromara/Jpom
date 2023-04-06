@@ -60,9 +60,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <version>0.1.55</version>
+            <groupId>org.dromara.jpom.plugins</groupId>
+            <artifactId>ssh-jsch</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -129,10 +129,16 @@
             <artifactId>storage-module-mysql</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>me.zhyd.oauth</groupId>
             <artifactId>JustAuth</artifactId>
             <version>1.16.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-cache</artifactId>
         </dependency>
     </dependencies>
     <build>

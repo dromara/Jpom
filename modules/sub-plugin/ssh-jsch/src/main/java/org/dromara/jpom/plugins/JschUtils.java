@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.dromara.jpom.util;
+package org.dromara.jpom.plugins;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
@@ -36,6 +36,7 @@ import com.jcraft.jsch.*;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.system.ExtConfigBean;
+import org.dromara.jpom.util.StringUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

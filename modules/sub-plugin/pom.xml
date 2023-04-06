@@ -40,6 +40,7 @@
         <module>docker-cli</module>
         <module>git-clone</module>
         <module>encrypt</module>
+        <module>ssh-jsch</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
     <version>2.10.40.2</version>

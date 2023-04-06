@@ -41,6 +41,7 @@ import org.dromara.jpom.model.data.CommandExecLogModel;
 import org.dromara.jpom.model.data.CommandModel;
 import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.model.user.UserModel;
+import org.dromara.jpom.plugins.JschUtils;
 import org.dromara.jpom.script.CommandParam;
 import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;

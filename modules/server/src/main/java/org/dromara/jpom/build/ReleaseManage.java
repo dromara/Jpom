@@ -65,6 +65,7 @@ import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.outgiving.OutGivingRun;
 import org.dromara.jpom.plugin.IPlugin;
 import org.dromara.jpom.plugin.PluginFactory;
+import org.dromara.jpom.plugins.JschUtils;
 import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.service.docker.DockerSwarmInfoService;
 import org.dromara.jpom.service.node.NodeService;
