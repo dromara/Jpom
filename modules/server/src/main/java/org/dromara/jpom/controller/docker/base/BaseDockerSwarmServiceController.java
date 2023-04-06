@@ -22,12 +22,17 @@
  */
 package org.dromara.jpom.controller.docker.base;
 
+import cn.hutool.cache.impl.TimedCache;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -35,6 +40,7 @@ import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.plugin.IPlugin;
 import org.dromara.jpom.plugin.PluginFactory;
+import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.service.docker.DockerSwarmInfoService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.util.FileUtils;
@@ -45,19 +51,41 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
  * @author bwcx_jzy
  * @since 2022/2/14
  */
+@Slf4j
 public abstract class BaseDockerSwarmServiceController extends BaseDockerController {
+    private static final TimedCache<String, Set<String>> LOG_CACHE = new TimedCache<>(30 * 1000);
     protected final ServerConfig serverConfig;
 
     public BaseDockerSwarmServiceController(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
+        // 30 秒检查一次
+        LOG_CACHE.schedulePrune(30 * 1000);
+        // 监控过期
+        LOG_CACHE.setListener((key, userIds) -> {
+            try {
+                log.debug("异步资源过期,需要主动关闭,{} {}", key, userIds);
+                IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+                Map<String, Object> map = MapUtil.of("uuid", key);
+                plugin.execute("closeAsyncResource", map);
+                //
+                for (String userId : userIds) {
+                    File file = FileUtil.file(serverConfig.getUserTempPath(userId), "docker-swarm-log", key + ".log");
+                    FileUtil.del(file);
+                }
+            } catch (Exception e) {
+                log.error("关闭资源失败", e);
+            }
+        });
     }
 
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -134,6 +162,8 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
         parameter.put("charset", CharsetUtil.CHARSET_UTF_8);
         parameter.put("consumer", logConsumer);
         parameter.put("tail", 50);
+        // 操作id
+        parameter.put("uuid", uuid);
         ThreadUtil.execute(() -> {
             try {
                 plugin.execute(StrUtil.equalsIgnoreCase(type, "service") ? "logService" : "logTask", parameter);
@@ -142,6 +172,8 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
             }
             logRecorder.system("pull end");
         });
+        // 添加到缓存中
+        LOG_CACHE.put(uuid, CollUtil.newHashSet(getUser().getId()));
         return JsonMessage.success("开始拉取", uuid);
     }
 
@@ -161,6 +193,10 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
             return new JsonMessage<>(201, "还没有日志文件");
         }
         JSONObject data = FileUtils.readLogFile(file, line);
+        // 更新缓存，避免超时被清空
+        Set<String> userIds = ObjectUtil.defaultIfNull(LOG_CACHE.get(id), new HashSet<>());
+        userIds.add(getUser().getId());
+        LOG_CACHE.put(id, userIds);
         return JsonMessage.success("ok", data);
     }
 }

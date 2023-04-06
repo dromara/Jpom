@@ -457,15 +457,18 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
     @SuppressWarnings("unchecked")
     private void logContainerCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
+        String uuid = (String) parameter.get("uuid");
         Consumer<String> consumer = (Consumer<String>) parameter.get("consumer");
         try {
             String containerId = (String) parameter.get("containerId");
             Charset charset = (Charset) parameter.get("charset");
             Integer tail = (Integer) parameter.get("tail");
             Boolean timestamps = Convert.toBool(parameter.get("timestamps"));
-            DockerClientUtil.pullLog(dockerClient, containerId, timestamps, tail, charset, consumer);
+            DockerClientUtil.pullLog(dockerClient, containerId, timestamps, tail, charset, consumer, autoCloseable -> DockerUtil.putClose(uuid, autoCloseable));
         } catch (InterruptedException e) {
             consumer.accept("获取容器日志被中断:" + e);
+        } finally {
+            DockerUtil.close(uuid);
         }
     }
 
@@ -636,4 +639,13 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
 
     }
 
+    /**
+     * 关闭异步资源
+     *
+     * @param parameter 参数
+     */
+    private void closeAsyncResourceCmd(Map<String, Object> parameter) {
+        String uuid = (String) parameter.get("uuid");
+        DockerUtil.close(uuid);
+    }
 }

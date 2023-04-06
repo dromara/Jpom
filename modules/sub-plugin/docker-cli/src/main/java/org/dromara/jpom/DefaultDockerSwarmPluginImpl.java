@@ -117,6 +117,7 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
     private void logServiceCmd(Map<String, Object> parameter, String id, String type) {
         DockerClient dockerClient = DockerUtil.get(parameter);
         Consumer<String> consumer = (Consumer<String>) parameter.get("consumer");
+        String uuid = (String) parameter.get("uuid");
         try {
 
             LogSwarmObjectCmd logSwarmObjectCmd = StrUtil.equalsIgnoreCase(type, "Service") ? dockerClient.logServiceCmd(id) : dockerClient.logTaskCmd(id);
@@ -128,9 +129,12 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
             if (tail != null && tail > 1) {
                 logSwarmObjectCmd.withTail(tail);
             }
-            logSwarmObjectCmd.withDetails(true).withStderr(true)
+            ResultCallback.Adapter<Frame> exec = logSwarmObjectCmd
+                .withDetails(true)
+                .withStderr(true)
                 .withFollow(true)
-                .withStdout(true).exec(new ResultCallback.Adapter<Frame>() {
+                .withStdout(true)
+                .exec(new ResultCallback.Adapter<Frame>() {
                     @Override
                     public void onNext(Frame object) {
                         byte[] payload = object.getPayload();
@@ -140,9 +144,14 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
                         String s = new String(payload, charset);
                         consumer.accept(s);
                     }
-                }).awaitCompletion();
+                });
+            // 添加到缓存中
+            DockerUtil.putClose(uuid, exec);
+            exec.awaitCompletion();
         } catch (InterruptedException e) {
             consumer.accept("获取容器日志被中断:" + e);
+        } finally {
+            DockerUtil.close(uuid);
         }
     }
 
