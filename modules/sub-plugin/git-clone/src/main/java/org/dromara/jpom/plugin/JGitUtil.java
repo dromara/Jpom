@@ -445,7 +445,7 @@ public class JGitUtil {
         if (ex instanceof TransportException) {
             String msg = ex.getMessage();
             if (msg.contains(JGitText.get().notAuthorized) || msg.contains(JGitText.get().authenticationNotSupported)) {
-                throw new IllegalArgumentException("git账号密码不正确", ex);
+                throw new IllegalArgumentException("git账号密码不正确," + msg, ex);
             }
             throw ex;
         } else if (ex instanceof NoHeadException) {
