@@ -15,6 +15,7 @@
         "
         bordered
         rowKey="id"
+        :row-selection="rowSelection"
       >
         <template slot="title">
           <a-space>
@@ -27,6 +28,7 @@
             </a-tooltip>
             <a-button type="primary" @click="handleUpload">上传文件</a-button>
             <a-button type="primary" @click="handleRemoteDownload">远程下载</a-button>
+            <a-button type="danger" :disabled="!tableSelections || tableSelections.length <= 0" @click="handleBatchDelete"> 批量删除 </a-button>
           </a-space>
         </template>
         <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
@@ -377,11 +379,20 @@ export default {
       tempVue: null,
       triggerVisible: false,
       releaseFileVisible: false,
+      tableSelections: [],
     };
   },
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
+      };
     },
   },
   created() {
@@ -544,6 +555,33 @@ export default {
                 message: res.msg,
               });
 
+              this.loadData();
+            }
+          });
+        },
+      });
+    },
+    // 批量删除
+    handleBatchDelete() {
+      if (!this.tableSelections || this.tableSelections.length <= 0) {
+        this.$notification.warning({
+          message: "没有选择任何数据",
+        });
+        return;
+      }
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要删除这些文件么？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          delFile({ ids: this.tableSelections.join(",") }).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.tableSelections = [];
               this.loadData();
             }
           });

@@ -53,6 +53,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -212,15 +213,29 @@ public class FileStorageController extends BaseServerController {
 
     @GetMapping(value = "del", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> del(@ValidatorItem String id, HttpServletRequest request) throws IOException {
+    public JsonMessage<String> del(String id, String ids, HttpServletRequest request) throws IOException {
+        this.delItem(id, request);
+        List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
+        for (String s : list) {
+            this.delItem(s, request);
+        }
+        return JsonMessage.success("删除成功");
+    }
+
+    private void delItem(String id, HttpServletRequest request) {
+        if (StrUtil.isEmpty(id)) {
+            return;
+        }
         FileStorageModel storageModel = fileStorageService.getByKeyAndGlobal(id, request);
+        if (storageModel == null) {
+            return;
+        }
         //
         File storageSavePath = serverConfig.fileStorageSavePath();
         File fileStorageFile = FileUtil.file(storageSavePath, storageModel.getPath());
         FileUtil.del(fileStorageFile);
         //
         fileStorageService.delByKey(id);
-        return JsonMessage.success("删除成功");
     }
 
     /**
