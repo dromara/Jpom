@@ -41,7 +41,6 @@
         <maven.compiler.target>8</maven.compiler.target>
         <start-class>org.dromara.jpom.updater.Updater</start-class>
         <snakeyaml.version>2.0</snakeyaml.version>
-        <fastjson2.version>2.0.21</fastjson2.version>
         <freemarker.version>2.3.31</freemarker.version>
     </properties>
 

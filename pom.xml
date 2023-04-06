@@ -59,13 +59,13 @@
         <jpom-min-version>2.10.0</jpom-min-version>
         <spring-boot.version>2.7.10</spring-boot.version>
 
-        <common-boot.version>2.4.0</common-boot.version>
         <!-- 跳过测试 -->
         <skipTests>true</skipTests>
         <maven.test.skip>true</maven.test.skip>
         <!--        <maven.javadoc.skip>true</maven.javadoc.skip>-->
         <hutool.version>5.8.16</hutool.version>
         <fastjson2.version>2.0.26</fastjson2.version>
+        <fastjson-version>2.0.26</fastjson-version>
     </properties>
     <dependencies>
         <dependency>

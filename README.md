@@ -4,7 +4,7 @@
 	</a>
 </p>
 <p align="center">
-	<strong>简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件</strong>
+	<strong>🚀简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件</strong>
 </p>
 
 <p align="center">
