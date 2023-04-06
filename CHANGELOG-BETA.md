@@ -9,6 +9,7 @@
 3. 【server】修复 docker 集群日志查看后未自动关闭造成日志文件继续增长的问题（@无味。）
 4. 【server】优化 服务端缓存项目信息的创建时间和修改时间同步为节点中的数据创建、修改时间
 5. 【server】优化 文件管理支持批量删除（感谢@左手生活，右手浪漫）
+6. 【all】优化 取消 agent hutool-cache 包依赖、server JustAuth fastjson 依赖配置为 fastjson2
 
 ------
 
