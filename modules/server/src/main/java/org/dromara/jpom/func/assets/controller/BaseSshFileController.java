@@ -55,7 +55,7 @@ import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.CompressionFileUtil;
-import org.dromara.jpom.util.JschUtils;
+import org.dromara.jpom.plugins.JschUtils;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;

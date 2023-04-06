@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom.system.db;
 
+import cn.hutool.cache.GlobalPruneTimer;
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.CheckedUtil;
@@ -148,15 +149,15 @@ public class InitDb implements DisposableBean, ILoadEvent {
             // 执行回调方法
             log.debug("需要执行 {} 个回调", AFTER_CALLBACK.size());
             long count = AFTER_CALLBACK.entrySet()
-                    .stream()
-                    .mapToInt(value -> {
-                        log.info("开始执行数据库事件：{}", value.getKey());
-                        Supplier<Boolean> supplier = value.getValue();
-                        boolean arg2 = supplier.get();
-                        int code = arg2 ? 1 : 0;
-                        log.info("数据库 {} 事件执行结束,：{}", value.getKey(), code);
-                        return code;
-                    }).sum();
+                .stream()
+                .mapToInt(value -> {
+                    log.info("开始执行数据库事件：{}", value.getKey());
+                    Supplier<Boolean> supplier = value.getValue();
+                    boolean arg2 = supplier.get();
+                    int code = arg2 ? 1 : 0;
+                    log.info("数据库 {} 事件执行结束,：{}", value.getKey(), code);
+                    return code;
+                }).sum();
             if (count > 0) {
                 // 因为导入数据后数据结构可能发生变动
                 // 第二次初始化数据库
@@ -217,7 +218,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
             Db.use(dataSource).tx((CheckedUtil.VoidFunc1Rt<Db>) parameter -> {
                 // 分隔后执行，mysql 不能执行多条 sql 语句
                 List<String> list = StrUtil.isEmpty(sqlBuilderService.delimiter()) ?
-                        CollUtil.newArrayList(sql) : StrUtil.splitTrim(sql, sqlBuilderService.delimiter());
+                    CollUtil.newArrayList(sql) : StrUtil.splitTrim(sql, sqlBuilderService.delimiter());
                 int rows = list.stream().mapToInt(value -> {
                     try {
                         return parameter.execute(value);
@@ -237,6 +238,8 @@ public class InitDb implements DisposableBean, ILoadEvent {
     public void destroy() throws Exception {
         // 需要优先关闭线程池，避免异常更新数据的逻辑没有释放
         JpomApplication.shutdownGlobalThreadPool();
+        //
+        GlobalPruneTimer.INSTANCE.shutdownNow();
         // 关闭数据库
         IoUtil.close(StorageServiceFactory.get());
     }

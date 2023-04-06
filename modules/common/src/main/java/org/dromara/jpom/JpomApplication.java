@@ -22,7 +22,6 @@
  */
 package org.dromara.jpom;
 
-import cn.hutool.cache.GlobalPruneTimer;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.GlobalThreadPool;
@@ -250,7 +249,6 @@ public class JpomApplication implements DisposableBean, InitializingBean {
                 executorService.shutdownNow();
             }
         });
-        GlobalPruneTimer.INSTANCE.shutdownNow();
     }
 
     @Override

@@ -78,10 +78,7 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-cron</artifactId>
         </dependency>
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-cache</artifactId>
-        </dependency>
+
 
         <!--   aop-->
         <dependency>
