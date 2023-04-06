@@ -552,7 +552,7 @@ public class DockerBuild implements AutoCloseable {
     private void pullLog(DockerClient dockerClient, String containerId, LogRecorder logRecorder) {
         // 获取日志
         try {
-            DockerClientUtil.pullLog(dockerClient, containerId, false, null, StandardCharsets.UTF_8, logRecorder::append);
+            DockerClientUtil.pullLog(dockerClient, containerId, false, null, StandardCharsets.UTF_8, logRecorder::append, null);
         } catch (InterruptedException e) {
             logRecorder.error("获取容器日志操作被中断:", e);
         } catch (RuntimeException e) {

@@ -35,6 +35,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.build.BuildExecuteService;
 import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.build.ResultDirFileAction;
@@ -403,6 +404,7 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
     public void afterPropertiesSet() throws Exception {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> new Thread(runnable, "Jpom Build Trigger Queue"));
         scheduler.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
+        JpomApplication.register("build_trigger_queue", scheduler);
     }
 
     @Override

@@ -110,12 +110,21 @@ public class ServerConfig extends BaseExtConfig {
      * @return file
      */
     public File getUserTempPath() {
-        File file = configBean.getTempPath();
         UserModel userModel = BaseServerController.getUserModel();
         if (userModel == null) {
             throw new JpomRuntimeException("没有登录");
         }
-        file = FileUtil.file(file, userModel.getId());
+        return getUserTempPath(userModel.getId());
+    }
+
+    /**
+     * 获取指定用户操作的临时目录
+     *
+     * @return file
+     */
+    public File getUserTempPath(String userId) {
+        File file = configBean.getTempPath();
+        file = FileUtil.file(file, userId);
         FileUtil.mkdir(file);
         return file;
     }
