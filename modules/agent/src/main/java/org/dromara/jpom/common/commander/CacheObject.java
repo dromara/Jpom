@@ -82,7 +82,7 @@ public class CacheObject<T> {
      */
     public static <K, V> V get(Map<K, CacheObject<V>> map, K key) {
         CacheObject<V> cacheObject = map.get(key);
-        if (cacheObject.isExpired()) {
+        if (cacheObject == null || cacheObject.isExpired()) {
             map.remove(key);
             return null;
         }
