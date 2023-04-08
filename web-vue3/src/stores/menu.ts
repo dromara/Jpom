@@ -9,87 +9,70 @@ import { getMenu } from '@/api/menu'
 import routeMenuMap from '@/router/route-menu'
 import { defineStore } from 'pinia'
 
+interface IState {
+	activeTabKey: string
+	tabList: any[]
+	activeMenuKey: string
+	menuOpenKeys: string[]
+	menus: any[]
+	activeMenu: string
+}
 export const useMenuStore = defineStore('menu', {
-	state: () => ({
-		activeTabKey: localStorage.getItem(ACTIVE_TAB_KEY),
+	state: (): IState => ({
+		activeTabKey: localStorage.getItem(ACTIVE_TAB_KEY) || '',
 		tabList: localStorage.getItem(TAB_LIST_KEY) ? JSON.parse(localStorage.getItem(TAB_LIST_KEY)!) : [],
-		activeMenuKey: localStorage.getItem(ACTIVE_MENU_KEY),
+		activeMenuKey: localStorage.getItem(ACTIVE_MENU_KEY) || '',
 		menuOpenKeys: [],
 		menus: [],
+		activeMenu: '',
 	}),
 
-	// mutations: {
-	//   setActiveTabKey(state, activeKey) {
-	//     state.activeTabKey = activeKey;
-	//   },
-	//   setTabList(state, tabList) {
-	//     state.tabList = tabList;
-	//     localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList));
-	//   },
-	//   setActiveMenuKey(state, activeMenuKey) {
-	//     state.activeMenuKey = activeMenuKey;
-	//   },
-
-	//   setMenuOpenKeys(state, keys) {
-	//     state.menuOpenKeys = keys;
-	//   },
-	//   setMenus(state, menus) {
-	//     state.menus = menus;
-	//   },
-	// },
 	actions: {
 		// 加载系统菜单 action
-		loadSystemMenus({ dispatch, state }) {
-			return new Promise((resolve, reject) => {
-				if (state.menus.length) {
-					// 避免重复加载
-					resolve(true)
-					return
-				}
-				dispatch('restLoadSystemMenus')
-					.then(() => {
-						resolve(true)
-					})
-					.catch((error) => {
-						reject(error)
-					})
-			})
+		async loadSystemMenus() {
+			if (this.menus.length) {
+				// 避免重复加载
+				Promise.resolve(true)
+			}
+			return await this.restLoadSystemMenus()
 		},
-		restLoadSystemMenus({ commit }) {
-			return new Promise((resolve, reject) => {
-				// 加载系统菜单
-				getMenu()
-					.then((res) => {
-						if (res.data) {
-							res.data?.forEach((element) => {
-								if (element.childs.length > 0) {
-									const childs = element.childs.map((child) => {
-										return {
-											...child,
-											path: routeMenuMap[child.id],
-										}
-									})
-									element.childs = childs
-								}
-							})
-							commit('setMenus', res.data)
-							resolve()
-						} else {
-							reject()
-						}
-					})
-					.catch((error) => {
-						reject(error)
-					})
-			})
+		async restLoadSystemMenus() {
+			// return new Promise((resolve, reject) => {
+			// 	// 加载系统菜单
+
+			// })
+
+			await getMenu()
+				.then((res) => {
+					if (res.data) {
+						res.data?.forEach((element: any) => {
+							if (element.childs.length > 0) {
+								const childs = element.childs.map((child: any) => {
+									return {
+										...child,
+										path: routeMenuMap[child.id],
+									}
+								})
+								element.childs = childs
+							}
+						})
+						this.menus = res.data
+						Promise.resolve()
+					} else {
+						Promise.reject()
+					}
+				})
+				.catch((error) => {
+					Promise.reject(error)
+				})
 		},
 		// 添加 tab
-		addTab({ commit, state, dispatch }, tab) {
+		addTab(tab) {
 			return new Promise((resolve) => {
 				// 从 store 里面拿到 menus 匹配 path 得到当前的菜单，设置 tab 的标题
-				const menus = state.menus
-				let currentMenu = null,
-					firstMenu = null
+				const menus = this.menus
+				let currentMenu: any = undefined
+				let firstMenu: any = undefined
 				menus.forEach((menu) => {
 					menu.childs.forEach((subMenu) => {
 						if (!firstMenu) {
@@ -101,7 +84,7 @@ export const useMenuStore = defineStore('menu', {
 						}
 					})
 				})
-				let tabList = state.tabList || []
+				let tabList = this.tabList || []
 				// 过滤已经不能显示的菜单
 				tabList = tabList.filter((item) => {
 					return (
@@ -114,7 +97,7 @@ export const useMenuStore = defineStore('menu', {
 						}).length > 0
 					)
 				})
-				commit('setTabList', tabList)
+				this.tabList = tabList
 				if (!currentMenu) {
 					// 打开第一个菜单
 					resolve(firstMenu)
@@ -132,44 +115,45 @@ export const useMenuStore = defineStore('menu', {
 				} else {
 					// 新增
 					tabList.push(tab)
-					commit('setTabList', tabList)
+					this.tabList = tabList
 				}
 				// 设置当前选择的菜单
-				dispatch('activeTabKey', tab.key)
-				dispatch('activeMenu', tab.id)
-				resolve()
+				this.activeTabKey = tab.key
+				this.activeMenu = tab.id
+				resolve(true)
 			})
 		},
 		// 删除 tab
-		removeTab({ commit, state, dispatch }, key) {
+		removeTab(key: string) {
 			return new Promise((resolve) => {
-				let tabList = state.tabList
+				let tabList = this.tabList
 				const index = tabList.findIndex((ele) => ele.key === key)
 				tabList.splice(index, 1)
 
-				commit('setTabList', tabList)
+				this.tabList = tabList
 				localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList))
 				// 如果删除的是 activeTabKey
-				if (state.activeTabKey === key) {
+				if (this.activeTabKey === key) {
 					// 寻找下一个
 					const tempTab = tabList[Math.min(index, 0)]
 					// 如果还是原来激活的 tab 就不用更新
-					if (state.activeTabKey !== tempTab.key) {
-						dispatch('activeTabKey', tempTab.key)
-						resolve()
+					if (this.activeTabKey !== tempTab.key) {
+						this.activeTabKey = tempTab.key
+						resolve(true)
 					}
 				}
 			})
 		},
 		// 清除 tabs
-		clearTabs({ commit, state, dispatch }, { key, position }) {
+		clearTabs({ key, position }: { key?: string; position?: string }) {
 			return new Promise((resolve) => {
-				let tabList = state.tabList
-				key = key || state.activeTabKey
+				let tabList = this.tabList
+				key = key || this.activeTabKey
 				if (key === 'all') {
 					// 清空全部
-					commit('setTabList', [])
-					dispatch('activeTabKey', '')
+					this.tabList = tabList
+					this.activeTabKey = ''
+					localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList))
 					return
 				}
 				// 找到当前 index
@@ -186,11 +170,10 @@ export const useMenuStore = defineStore('menu', {
 					// 只保留当前
 					tabList = [currentTab]
 				}
-				commit('setTabList', tabList)
+				this.tabList = tabList
 				localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList))
-				//
-				if (state.activeTabKey !== key) {
-					dispatch('activeTabKey', key)
+				if (this.activeTabKey !== key) {
+					this.activeTabKey = key
 					resolve(key)
 				}
 			})
@@ -206,7 +189,7 @@ export const useMenuStore = defineStore('menu', {
 		},
 
 		// 打开的菜单
-		menuOpenKeys(keys: string[] | string) {
+		setMenuOpenKeys(keys: string[] | string) {
 			if (Array.isArray(keys)) {
 				this.menuOpenKeys = keys
 			} else if (typeof keys == 'string') {
