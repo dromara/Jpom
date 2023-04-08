@@ -1,7 +1,14 @@
 <template>
   <div class="full-content">
+    <template v-if="this.useSuggestions">
+      <a-result title="当前工作空间还没有 Docker" sub-title="请到【系统管理】-> 【资产管理】-> 【Docker管理】添加Docker，或者将已添加的Docker授权关联、分配到此工作空间">
+        <template #extra>
+          <router-link to="/system/assets/docker-list"> <a-button key="console" type="primary">现在就去</a-button></router-link>
+        </template>
+      </a-result>
+    </template>
     <!-- 数据表格 -->
-    <a-table size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id" :row-selection="rowSelection">
+    <a-table v-else size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
@@ -28,9 +35,18 @@
           <a-tag color="red">信息丢失</a-tag>
         </a-tooltip>
       </template>
-      <template slot="tags" slot-scope="tags">
+      <a-tooltip
+        slot="tags"
+        slot-scope="tags"
+        :title="
+          (tags || '')
+            .split(':')
+            .filter((item) => item)
+            .join(',')
+        "
+      >
         <a-tag v-for="item in (tags || '').split(':').filter((item) => item)" :key="item"> {{ item }}</a-tag>
-      </template>
+      </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" :disabled="!record.machineDocker || record.machineDocker.status !== 1" @click="handleConsole(record)">控制台</a-button>
@@ -82,9 +98,9 @@
     </a-modal>
 
     <!-- 控制台 -->
-    <a-drawer destroyOnClose :title="`${temp.name} 控制台`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="consoleVisible" @close="onClose">
-      <console v-if="consoleVisible" :visible="consoleVisible" :id="temp.id" urlPrefix="/docker"></console>
-    </a-drawer>
+    <!-- <a-drawer destroyOnClose :title="`${temp.name} 控制台`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="consoleVisible" @close="onClose"> -->
+    <console v-if="consoleVisible" :visible="consoleVisible" :id="temp.id" urlPrefix="/docker" @close="onClose"></console>
+    <!-- </a-drawer> -->
     <!-- 同步到其他工作空间 -->
     <a-modal destroyOnClose v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
       <a-alert message="温馨提示" type="warning">
@@ -122,7 +138,7 @@ export default {
   props: {},
   data() {
     return {
-      loading: false,
+      loading: true,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
 
       list: [],
@@ -133,23 +149,29 @@ export default {
       consoleVisible: false,
 
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "host", dataIndex: "machineDocker.host", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
+        { title: "host", dataIndex: "machineDocker.host", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "状态", dataIndex: "machineDocker.status", ellipsis: true, align: "center", width: "100px", scopedSlots: { customRender: "status" } },
         { title: "docker版本", dataIndex: "machineDocker.dockerVersion", ellipsis: true, width: "120px", scopedSlots: { customRender: "tooltip" } },
-        { title: "标签", dataIndex: "tags", ellipsis: true, scopedSlots: { customRender: "tags" } },
+        { title: "标签", dataIndex: "tags", width: 100, ellipsis: true, scopedSlots: { customRender: "tags" } },
         { title: "最后修改人", dataIndex: "modifyUser", width: "120px", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
           sorter: true,
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
           width: "170px",
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "190px" },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, fixed: "right", align: "center", width: "190px" },
       ],
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
@@ -171,7 +193,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getCollapsed", "getWorkspaceId"]),
+    ...mapGetters(["getCollapsed", "getWorkspaceId", "getUserInfo"]),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
     },
@@ -182,6 +204,25 @@ export default {
         },
         selectedRowKeys: this.tableSelections,
       };
+    },
+    useSuggestions() {
+      if (this.loading) {
+        // 加载中不提示
+        return false;
+      }
+      if (!this.getUserInfo || !this.getUserInfo.systemUser) {
+        // 没有登录或者不是超级管理员
+        return false;
+      }
+      if (this.listQuery.page !== 1 || this.listQuery.total > 0) {
+        // 不是第一页 或者总记录数大于 0
+        return false;
+      }
+      // 判断是否存在搜索条件
+      const nowKeys = Object.keys(this.listQuery);
+      const defaultKeys = Object.keys(PAGE_DEFAULT_LIST_QUERY);
+      const dictOrigin = nowKeys.filter((item) => !defaultKeys.includes(item));
+      return dictOrigin.length === 0;
     },
   },
   mounted() {

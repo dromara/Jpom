@@ -32,6 +32,10 @@
       <template slot="triggerExecTypeMap" slot-scope="text">
         <span>{{ triggerExecTypeMap[text] || "未知" }}</span>
       </template>
+      <template slot="global" slot-scope="text">
+        <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
+        <a-tag v-else>工作空间</a-tag>
+      </template>
       <a-tooltip slot="createTimeMillis" slot-scope="text, record" :title="`${parseTime(record.createTimeMillis)}`">
         <span>{{ parseTime(record.createTimeMillis) }}</span>
       </a-tooltip>
@@ -59,8 +63,9 @@ export default {
     ScriptLogView,
   },
   props: {
-    node: {
-      type: Object,
+    scriptId: {
+      type: String,
+      default: "",
     },
   },
   data() {
@@ -72,11 +77,12 @@ export default {
       temp: {},
       logVisible: false,
       columns: [
-        { title: "名称", dataIndex: "scriptName", ellipsis: true, scopedSlots: { customRender: "scriptName" } },
-        { title: "执行时间", dataIndex: "createTimeMillis", sorter: true, ellipsis: true, scopedSlots: { customRender: "createTimeMillis" } },
+        { title: "名称", dataIndex: "scriptName", width: 100, ellipsis: true, scopedSlots: { customRender: "scriptName" } },
+        { title: "执行时间", dataIndex: "createTimeMillis", sorter: true, ellipsis: true, width: "160px", scopedSlots: { customRender: "createTimeMillis" } },
         { title: "触发类型", dataIndex: "triggerExecType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerExecTypeMap" } },
-        { title: "执行人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 150 },
+        { title: "执行域", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
+        { title: "执行人", dataIndex: "modifyUser", ellipsis: true, width: "100px", scopedSlots: { customRender: "modifyUser" } },
+        { title: "操作", dataIndex: "operation", align: "center", fixed: "right", scopedSlots: { customRender: "operation" }, width: "150px" },
       ],
     };
   },
@@ -92,7 +98,7 @@ export default {
     // 加载数据
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
-
+      this.listQuery.scriptId = this.scriptId;
       this.loading = true;
       getScriptLogList(this.listQuery).then((res) => {
         if (res.code === 200) {
@@ -102,9 +108,7 @@ export default {
         this.loading = false;
       });
     },
-    parseTime(v) {
-      return parseTime(v);
-    },
+    parseTime,
     viewLog(record) {
       this.logVisible = true;
       this.temp = record;

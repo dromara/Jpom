@@ -1,6 +1,13 @@
 <template>
   <div class="full-content">
-    <a-table size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered :rowKey="(record, index) => index">
+    <template v-if="this.useSuggestions">
+      <a-result title="当前工作空间还没有 Docker 集群" sub-title="请到【系统管理】-> 【资产管理】-> 【Docker管理】添加Docker并创建集群，或者将已存在的的 Docker 集群授权关联、分配到此工作空间">
+        <template #extra>
+          <router-link to="/system/assets/docker-list"> <a-button key="console" type="primary">现在就去</a-button></router-link>
+        </template>
+      </a-result>
+    </template>
+    <a-table v-else size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
@@ -84,7 +91,7 @@ export default {
   props: {},
   data() {
     return {
-      loading: false,
+      loading: true,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       temp: {},
@@ -102,19 +109,15 @@ export default {
           dataIndex: "modifyTimeMillis",
           sorter: true,
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
-          width: 170,
+          customRender: (text) => parseTime(text),
+          width: "170px",
         },
         {
           title: "集群创建时间",
           dataIndex: "machineDocker.swarmCreatedAt",
           sorter: true,
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
           width: "170px",
         },
         {
@@ -122,9 +125,7 @@ export default {
           dataIndex: "machineDocker.swarmUpdatedAt",
           sorter: true,
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
           width: "170px",
         },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "220px" },
@@ -141,9 +142,28 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getCollapsed"]),
+    ...mapGetters(["getCollapsed", "getUserInfo"]),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
+    },
+    useSuggestions() {
+      if (this.loading) {
+        // 加载中不提示
+        return false;
+      }
+      if (!this.getUserInfo || !this.getUserInfo.systemUser) {
+        // 没有登录或者不是超级管理员
+        return false;
+      }
+      if (this.listQuery.page !== 1 || this.listQuery.total > 0) {
+        // 不是第一页 或者总记录数大于 0
+        return false;
+      }
+      // 判断是否存在搜索条件
+      const nowKeys = Object.keys(this.listQuery);
+      const defaultKeys = Object.keys(PAGE_DEFAULT_LIST_QUERY);
+      const dictOrigin = nowKeys.filter((item) => !defaultKeys.includes(item));
+      return dictOrigin.length === 0;
     },
   },
   mounted() {

@@ -3,19 +3,31 @@
     <a-tabs default-active-key="1">
       <a-tab-pane key="1" tab="管理">
         <!-- 数据表格 -->
-        <a-table :data-source="list" :columns="columns" size="middle" :pagination="pagination" @change="changePage" bordered rowKey="id">
+        <a-table :data-source="list" :columns="columns" size="middle" :pagination="pagination" @change="changePage" bordered rowKey="id" :row-selection="rowSelection">
           <template slot="title">
             <a-space>
               <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="ssh名称" />
               <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%host%']" placeholder="host" />
-              <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+              <a-select show-search option-filter-prop="children" v-model="listQuery.groupName" allowClear placeholder="分组" class="search-input-item">
                 <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
               </a-select>
-              <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-                <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-              </a-tooltip>
-              <a-button type="primary" @click="handleAdd">新增</a-button>
 
+              <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
+                <a-button type="primary" :loading="loading" @click="loadData">搜索 </a-button>
+              </a-tooltip>
+
+              <a-button type="primary" @click="handleAdd">新增</a-button>
+              <a-button :disabled="!this.tableSelections.length" @click="syncToWorkspaceShow()" type="primary"> 批量分配</a-button>
+              <a-button icon="download" type="primary" @click="handlerExportData()">导出</a-button>
+              <a-dropdown>
+                <a-menu slot="overlay">
+                  <a-menu-item key="1"> <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button> </a-menu-item>
+                </a-menu>
+
+                <a-upload name="file" accept=".csv" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
+                  <a-button type="primary" icon="upload"> 导入 <a-icon type="down" /> </a-button>
+                </a-upload>
+              </a-dropdown>
               <a-tooltip>
                 <template slot="title">
                   <div>
@@ -34,28 +46,53 @@
             <a-button style="padding: 0" type="link" size="small" @click="handleEdit(item)"> {{ text }}</a-button>
           </a-tooltip>
           <a-tooltip slot="tooltip" slot-scope="text" :title="text"> {{ text }}</a-tooltip>
-          <template slot="nodeId" slot-scope="text, record">
-            <template v-if="sshAgentInfo[record.id]">
-              <a-tooltip v-if="sshAgentInfo[record.id].error" :title="sshAgentInfo[record.id].error">
-                <a-tag>连接异常</a-tag>
-              </a-tooltip>
-              <template v-else>
-                <div v-if="sshAgentInfo[record.id].javaVersion">
-                  <a-tooltip
-                    v-if="sshAgentInfo[record.id].pid > 0"
-                    placement="topLeft"
-                    :title="` ssh 中已经运行了插件端进程ID：${sshAgentInfo[record.id].pid},java :  ${sshAgentInfo[record.id].javaVersion}`"
-                  >
-                    <a-tag> {{ sshAgentInfo[record.id].pid }}</a-tag>
-                  </a-tooltip>
-                  <a-button v-else size="small" type="primary" @click="install(record)">安装节点</a-button>
-                </div>
+          <a-tooltip slot="host" slot-scope="text, record" :title="`${text}:${record.port}`"> {{ text }}:{{ record.port }}</a-tooltip>
 
-                <a-tag v-else>没有Java环境</a-tag>
-              </template>
+          <a-popover title="系统信息" slot="osName" slot-scope="text, record">
+            <template slot="content">
+              <p>系统名：{{ record.osName }}</p>
+              <p>系统版本：{{ record.osVersion }}</p>
+              <p>CPU型号：{{ record.osCpuIdentifierName }}</p>
+              <p>主机名：{{ record.hostName }}</p>
+              <p>开机时间：{{ formatDuration(record.osSystemUptime) }}</p>
             </template>
-            <div v-else>- {{ sshAgentInfo[record.id] }}</div>
+            {{ text || "未知" }}
+          </a-popover>
+          <template slot="nodeId" slot-scope="text, record">
+            <div v-if="record.javaVersion">
+              <a-tooltip v-if="record.jpomAgentPid > 0" placement="topLeft" :title="` ssh 中已经运行了插件端进程ID：${record.jpomAgentPid},java :  ${record.javaVersion}`">
+                <a-tag> {{ record.jpomAgentPid }}</a-tag>
+              </a-tooltip>
+              <a-button v-else size="small" type="primary" @click="install(record)">安装节点</a-button>
+            </div>
+
+            <a-tag color="orange" v-else>no java</a-tag>
           </template>
+          <template slot="status" slot-scope="text, record">
+            <a-tooltip :title="record.statusMsg">
+              <a-tag :color="record.status === 1 ? 'green' : 'red'">{{ record.status === 1 ? "正常" : "无法连接" }}</a-tag>
+            </a-tooltip>
+          </template>
+          <a-tooltip slot="renderSize" slot-scope="text" placement="topLeft" :title="renderSize(text)">
+            <span>{{ renderSize(text) }}</span>
+          </a-tooltip>
+          <a-tooltip slot="osOccupyMemory" slot-scope="text, record" placement="topLeft" :title="`内存使用率：${formatPercent(record.osOccupyMemory)},总内存：${renderSize(record.osMoneyTotal)}`">
+            <span>{{ formatPercent(record.osOccupyMemory) }}/{{ renderSize(record.osMoneyTotal) }}</span>
+          </a-tooltip>
+
+          <a-popover title="硬盘信息" slot="osMaxOccupyDisk" slot-scope="text, record">
+            <template slot="content">
+              <p>硬盘总量：{{ renderSize(record.osMoneyTotal) }}</p>
+              <p>硬盘最大的使用率：{{ formatPercent(record.osMaxOccupyDisk) }}</p>
+              <p>使用率最大的分区：{{ record.osMaxOccupyDiskName }}</p>
+            </template>
+            <span>{{ formatPercent(record.osMaxOccupyDisk) }} / {{ renderSize(record.osMoneyTotal) }}</span>
+          </a-popover>
+
+          <a-tooltip slot="osOccupyCpu" slot-scope="text, record" placement="topLeft" :title="`CPU使用率：${formatPercent2Number(record.osOccupyCpu)}%,CPU数：${record.osCpuCores}`">
+            <span>{{ (formatPercent2Number(record.osOccupyCpu) || "-") + "%" }} / {{ record.osCpuCores }}</span>
+          </a-tooltip>
+
           <template slot="operation" slot-scope="text, record">
             <a-space>
               <a-dropdown>
@@ -309,14 +346,16 @@ import {
   machineSshListData,
   machineSshListGroup,
   machineSshEdit,
-  machineSshCheckAgent,
   machineSshDelete,
   machineListGroupWorkspaceSsh,
   machineSshSaveWorkspaceConfig,
   machineSshDistribute,
   restHideField,
+  importTemplate,
+  exportData,
+  importData,
 } from "@/api/system/assets-ssh";
-import { COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, CHANGE_PAGE } from "@/utils/const";
+import { COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, CHANGE_PAGE, renderSize, formatPercent, formatDuration, formatPercent2Number } from "@/utils/const";
 import fastInstall from "@/pages/node/fast-install.vue";
 import CustomSelect from "@/components/customSelect";
 import SshFile from "@/pages/ssh/ssh-file";
@@ -330,6 +369,14 @@ export default {
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
+      };
     },
   },
   data() {
@@ -345,27 +392,38 @@ export default {
         { label: "证书", value: "PUBKEY" },
       ],
       columns: [
-        { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "名称", dataIndex: "name", width: 120, sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
 
-        { title: "Host", dataIndex: "host", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "Port", dataIndex: "port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "用户名", dataIndex: "user", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "Host", dataIndex: "host", width: 120, sorter: true, ellipsis: true, scopedSlots: { customRender: "host" } },
+        // { title: "Port", dataIndex: "port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "用户名", dataIndex: "user", sorter: true, width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "系统名", dataIndex: "osName", width: 120, sorter: true, ellipsis: true, scopedSlots: { customRender: "osName" } },
+        { title: "CPU", dataIndex: "osOccupyCpu", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "osOccupyCpu" } },
+        { title: "内存", dataIndex: "osOccupyMemory", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "osOccupyMemory" } },
+        { title: "硬盘", dataIndex: "osMaxOccupyDisk", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "osMaxOccupyDisk" } },
+        // { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "连接状态", dataIndex: "status", ellipsis: true, align: "center", width: "100px", scopedSlots: { customRender: "status" } },
         {
           title: "节点状态",
           dataIndex: "nodeId",
           scopedSlots: { customRender: "nodeId" },
-          width: "120px",
+          width: "80px",
           ellipsis: true,
+        },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
         },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
           sorter: true,
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
           width: "170px",
         },
         {
@@ -375,6 +433,7 @@ export default {
           width: "300px",
           align: "center",
           // ellipsis: true,
+          fixed: "right",
         },
       ],
       // 表单校验规则
@@ -393,7 +452,7 @@ export default {
         password: [{ required: true, message: "请输入登录密码", trigger: "blur" }],
       },
       nodeVisible: false,
-      sshAgentInfo: {},
+
       terminalVisible: false,
       terminalFullscreen: false,
       viewOperationLog: false,
@@ -403,6 +462,7 @@ export default {
       configWorkspaceSshVisible: false,
       syncToWorkspaceVisible: false,
       workspaceList: [],
+      tableSelections: [],
     };
   },
   created() {
@@ -410,6 +470,10 @@ export default {
     this.loadGroupList();
   },
   methods: {
+    formatDuration,
+    renderSize,
+    formatPercent,
+    formatPercent2Number,
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true;
@@ -419,19 +483,6 @@ export default {
           this.list = res.data.result;
           this.listQuery.total = res.data.total;
           //
-
-          let ids = this.list
-            .map((item) => {
-              return item.id;
-            })
-            .join(",");
-          if (ids.length > 0) {
-            machineSshCheckAgent({
-              ids: ids,
-            }).then((res) => {
-              this.sshAgentInfo = { ...res.data };
-            });
-          }
         }
         this.loading = false;
       });
@@ -630,9 +681,11 @@ export default {
     syncToWorkspaceShow(item) {
       this.syncToWorkspaceVisible = true;
       this.loadWorkSpaceListAll();
-      this.temp = {
-        id: item.id,
-      };
+      if (item) {
+        this.temp = {
+          ids: item.id,
+        };
+      }
     },
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
@@ -640,6 +693,10 @@ export default {
           message: "请选择工作空间",
         });
         return false;
+      }
+      if (!this.temp.ids) {
+        this.temp = { ...this.temp, ids: this.tableSelections.join(",") };
+        this.tableSelections = [];
       }
       // 同步
       machineSshDistribute(this.temp).then((res) => {
@@ -671,6 +728,25 @@ export default {
             }
           });
         },
+      });
+    },
+    // 下载导入模板
+    handlerImportTemplate() {
+      window.open(importTemplate(), "_blank");
+    },
+    handlerExportData() {
+      window.open(exportData({ ...this.listQuery }), "_blank");
+    },
+    beforeUpload(file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      importData(formData).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.loadData();
+        }
       });
     },
   },

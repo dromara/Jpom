@@ -29,7 +29,7 @@
               </a-upload>
               <a-tooltip :title="`打包时间：${agentTimeStamp || '未知'}`">
                 Agent版本：{{ agentVersion | version }}
-                <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">新版本：{{ temp.newVersion }} </a-tag>
+                <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">新版本：{{ temp.newVersion }} <a-icon type="download" /></a-tag>
                 <!-- </div> -->
               </a-tooltip>
 
@@ -141,6 +141,7 @@ export default {
   mounted() {
     this.getNodeList();
     this.loadGroupList();
+    this.checkAgentFileVersion();
   },
   beforeDestroy() {
     this.socket && this.socket.close();
@@ -300,7 +301,7 @@ export default {
         this.agentVersion = newData.version;
         this.agentTimeStamp = newData.timeStamp;
       } catch (e) {
-        this.agentVersion = data;
+        this.agentVersion = data || "";
       }
       this.checkAgentFileVersion();
       this.updateList();
@@ -348,6 +349,12 @@ export default {
       this.updateList();
     },
     updateNode() {
+      if (!this.agentVersion) {
+        this.$notification.error({
+          message: "请先上传或者下载新版本",
+        });
+        return;
+      }
       const len = this.tableSelections.length;
       const html =
         "确认要将选中的  <b style='color:red;font-size: 20px;'>" +

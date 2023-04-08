@@ -43,6 +43,10 @@
       <template slot="triggerExecTypeMap" slot-scope="text">
         <span>{{ triggerExecTypeMap[text] || "未知" }}</span>
       </template>
+      <template slot="global" slot-scope="text">
+        <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
+        <a-tag v-else>工作空间</a-tag>
+      </template>
       <a-tooltip slot="createTimeMillis" slot-scope="text, record" :title="`${parseTime(record.createTimeMillis)}`">
         <span>{{ parseTime(record.createTimeMillis) }}</span>
       </a-tooltip>
@@ -93,11 +97,12 @@ export default {
       temp: {},
       logVisible: false,
       columns: [
-        { title: "名称", dataIndex: "scriptName", ellipsis: true, scopedSlots: { customRender: "scriptName" } },
-        { title: "执行时间", dataIndex: "createTimeMillis", ellipsis: true, scopedSlots: { customRender: "createTimeMillis" } },
+        { title: "名称", dataIndex: "scriptName", ellipsis: true, width: 100, scopedSlots: { customRender: "scriptName" } },
+        { title: "执行时间", dataIndex: "createTimeMillis", ellipsis: true, width: "160px", scopedSlots: { customRender: "createTimeMillis" } },
         { title: "触发类型", dataIndex: "triggerExecType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerExecTypeMap" } },
-        { title: "执行人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 140 },
+        { title: "执行域", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
+        { title: "执行人", dataIndex: "modifyUser", ellipsis: true, width: 100, scopedSlots: { customRender: "modifyUser" } },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "140px" },
       ],
     };
   },
@@ -163,8 +168,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-.filter {
-  margin-bottom: 10px;
-}
-</style>
+<style scoped></style>

@@ -9,7 +9,12 @@
       size="middle"
       :columns="columns"
       :pagination="pagination"
-      @change="changePage"
+      @change="
+        (pagination, filters, sorter) => {
+          this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
+          this.loadData();
+        }
+      "
       :row-selection="rowSelection"
       bordered
       rowKey="id"
@@ -30,10 +35,7 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
 
           <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-              批量操作
-              <a-icon type="down" />
-            </a>
+            <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
             <a-menu slot="overlay">
               <a-menu-item>
                 <a-button type="primary" @click="batchStart">批量启动</a-button>
@@ -46,9 +48,24 @@
               </a-menu-item>
             </a-menu>
           </a-dropdown>
-        </a-space>
 
-        状态数据是异步获取有一定时间延迟
+          <a-button icon="download" type="primary" @click="handlerExportData()">导出</a-button>
+          <a-dropdown>
+            <a-menu slot="overlay">
+              <a-menu-item key="1"> <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button> </a-menu-item>
+            </a-menu>
+
+            <a-upload name="file" accept=".csv" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
+              <a-button type="primary" icon="upload"> 导入 <a-icon type="down" /> </a-button>
+            </a-upload>
+          </a-dropdown>
+          <a-tooltip>
+            <template slot="title">
+              <div>状态数据是异步获取有一定时间延迟</div>
+            </template>
+            <a-icon type="question-circle" theme="filled" />
+          </a-tooltip>
+        </a-space>
       </template>
       <template slot="copyIcon" slot-scope="javaCopyItemList, record">
         <template v-if="javaCopyItemList">
@@ -62,15 +79,9 @@
         </template>
       </template>
       <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="`名称：${text}`" @click="handleEdit(record)">
-        <a-button type="link" style="padding: 0px" size="small"><a-icon v-if="record.outGivingProject === 1" type="apartment" />{{ text }} </a-button>
+        <a-button type="link" style="padding: 0px" size="small"><a-icon v-if="record.outGivingProject" type="apartment" />{{ text }} </a-button>
       </a-tooltip>
-      <template slot="time" slot-scope="text, record" placement="topLeft">
-        <a-tooltip :title="`创建时间：${parseTime(record.createTimeMillis)}，${record.modifyTimeMillis ? '修改时间：' + parseTime(record.modifyTimeMillis) : ''}`">
-          <span>{{ parseTime(record.modifyTimeMillis) }}</span>
-          <!-- <br /> -->
-          <!-- <span>{{ parseTime(record.createTimeMillis) }}</span> -->
-        </a-tooltip>
-      </template>
+
       <a-tooltip slot="path" slot-scope="text, item" placement="topLeft" :title="item.whitelistDirectory + item.lib">
         <span>{{ item.whitelistDirectory + item.lib }}</span>
       </a-tooltip>
@@ -91,8 +102,8 @@
         </template>
       </template>
 
-      <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.pid},  端口号：${record.port}`">
-        <span v-if="record.pid">{{ record.port }}/{{ record.pid }}</span>
+      <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${(record.pids || [record.pid || '-']).join(',')} / 端口号：${record.port || '-'}`">
+        <span>{{ record.port || "-" }}/{{ (record.pids || [record.pid || "-"]).join(",") }}</span>
       </a-tooltip>
 
       <template slot="expandedRowRender" slot-scope="record">
@@ -135,18 +146,29 @@
               <!-- <a-menu-item>
                 <a-button size="small" type="primary" @click="handleReplica(record)" v-if="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
               </a-menu-item> -->
-              <a-menu-item>
-                <a-tooltip v-if="record.outGivingProject" title="节点分发项目需要到节点分发中去删除">
-                  <a-button size="small" type="danger" :disabled="record.outGivingProject === 1">删除</a-button>
-                </a-tooltip>
-                <a-button v-else size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-tooltip v-if="record.outGivingProject" title="节点分发项目需要到节点分发中去删除">
-                  <a-button size="small" type="danger" :disabled="record.outGivingProject === 1">彻底删除</a-button>
-                </a-tooltip>
-                <a-button v-else size="small" type="danger" @click="handleDelete(record, 'thorough')">彻底删除</a-button>
-              </a-menu-item>
+              <template v-if="record.outGivingProject">
+                <a-menu-item>
+                  <a-tooltip title="节点分发项目需要到节点分发中去删除">
+                    <a-button size="small" type="danger" :disabled="true">删除</a-button>
+                  </a-tooltip>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-tooltip title="节点分发项目需要到节点分发中去删除">
+                    <a-button size="small" type="danger" :disabled="true">彻底删除</a-button>
+                  </a-tooltip>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button size="small" type="danger" @click="handleReleaseOutgiving(record)">释放分发</a-button>
+                </a-menu-item>
+              </template>
+              <template v-else>
+                <a-menu-item>
+                  <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button size="small" type="danger" @click="handleDelete(record, 'thorough')">彻底删除</a-button>
+                </a-menu-item>
+              </template>
             </a-menu>
           </a-dropdown>
         </a-space>
@@ -446,6 +468,10 @@ import {
   startProject,
   stopProject,
   getProjectGroupAll,
+  releaseOutgiving,
+  importTemplate,
+  exportData,
+  importData,
 } from "@/api/node-project";
 
 export default {
@@ -491,16 +517,16 @@ export default {
       batchTitle: "",
       columns: [
         { title: "", dataIndex: "javaCopyItemList", align: "center", width: "40px", scopedSlots: { customRender: "copyIcon" } },
-        { title: "项目名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "项目名称", dataIndex: "name", width: 150, sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "项目分组", dataIndex: "group", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "group" } },
         {
           title: "项目路径",
           dataIndex: "path",
           ellipsis: true,
           scopedSlots: { customRender: "path" },
+          width: 150,
         },
         { title: "运行方式", dataIndex: "runMode", sorter: true, width: "90px", ellipsis: true, align: "center", scopedSlots: { customRender: "runMode" } },
-        { title: "修改时间", sorter: true, dataIndex: "modifyTimeMillis", width: "170px", ellipsis: true, scopedSlots: { customRender: "time" } },
 
         // {
         //   title: "最后操作人",
@@ -512,7 +538,16 @@ export default {
         // },
         { title: "运行状态", dataIndex: "status", width: 80, ellipsis: true, align: "center", scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 180 },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          sorter: true,
+          ellipsis: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
+        { title: "修改时间", sorter: true, dataIndex: "modifyTimeMillis", width: "170px", ellipsis: true, customRender: (text) => parseTime(text) },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, fixed: "right", align: "center", width: "180px" },
       ],
       copyColumns: [
         { title: "编号", dataIndex: "id", width: "80px", ellipsis: true, scopedSlots: { customRender: "id" } },
@@ -557,6 +592,7 @@ export default {
   methods: {
     parseTime,
     randomStr,
+    CHANGE_PAGE,
     // 页面引导
     introGuide() {
       this.$store.dispatch("tryOpenGuide", {
@@ -638,6 +674,7 @@ export default {
                   if (res2.data[element.projectId]) {
                     element.port = res2.data[element.projectId].port;
                     element.pid = res2.data[element.projectId].pid;
+                    element.pids = res2.data[element.projectId].pids;
                     element.status = element.pid > 0;
                     element.error = res2.data[element.projectId].error;
                   }
@@ -1050,11 +1087,7 @@ export default {
         this.batchStopInfo(count);
       }
     },
-    // 分页、排序、筛选变化时触发
-    changePage(pagination, filters, sorter) {
-      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
-      this.loadData();
-    },
+
     // 折叠事件
     handleExpand(item, status) {
       //javaCopyItemList
@@ -1085,7 +1118,14 @@ export default {
                   // element.pid = res.data[element.id].pid;
                   // element.status = true;
 
-                  return { ...copyItem, status: res.data[copyItem.id].pid > 0, pid: res.data[copyItem.id].pid, port: res.data[copyItem.id].port, error: res.data[copyItem.id].error };
+                  return {
+                    ...copyItem,
+                    status: res.data[copyItem.id].pid > 0,
+                    pid: res.data[copyItem.id].pid,
+                    pids: res.data[copyItem.id].pids,
+                    port: res.data[copyItem.id].port,
+                    error: res.data[copyItem.id].error,
+                  };
                 }
                 return copyItem;
               });
@@ -1133,6 +1173,66 @@ export default {
             }
           });
         },
+      });
+    },
+    // 释放分发
+    handleReleaseOutgiving(project) {
+      const html =
+        "<b style='font-size: 20px;'>确定要释放当前项目的分发功能吗？</b>" +
+        "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
+        "<li>请慎重操作，否则会产生冗余数据。</b></li>" +
+        "<li>一般用于误操作后将本删除转为普通项目再删除项目</li>" +
+        "<li>如果关联的分发还存在再重新编辑对应分发后当前项目会再次切换为分发项目！！！</li>" +
+        " </ul>";
+
+      const h = this.$createElement;
+      this.$confirm({
+        title: "危险操作！！！",
+        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
+        okButtonProps: { props: { type: "danger", size: "small" } },
+        cancelButtonProps: { props: { type: "primary" } },
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          const params = {
+            nodeId: this.node.id,
+            id: project.projectId,
+          };
+          releaseOutgiving(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+
+              this.loadData();
+            }
+          });
+        },
+      });
+    },
+    // 下载导入模板
+    handlerImportTemplate() {
+      window.open(
+        importTemplate({
+          nodeId: this.node.id,
+        }),
+        "_blank"
+      );
+    },
+    handlerExportData() {
+      window.open(exportData({ ...this.listQuery }), "_blank");
+    },
+    beforeUpload(file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("nodeId", this.node.id);
+      importData(formData).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.loadData();
+        }
       });
     },
   },

@@ -1,43 +1,20 @@
-///
-/// The MIT License (MIT)
-///
-/// Copyright (c) 2019 Code Technology Studio
-///
-/// Permission is hereby granted, free of charge, to any person obtaining a copy of
-/// this software and associated documentation files (the "Software"), to deal in
-/// the Software without restriction, including without limitation the rights to
-/// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-/// the Software, and to permit persons to whom the Software is furnished to do so,
-/// subject to the following conditions:
-///
-/// The above copyright notice and this permission notice shall be included in all
-/// copies or substantial portions of the Software.
-///
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-/// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-/// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-/// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-/// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///
-
-import axios, { AxiosInstance, AxiosResponse } from 'axios'
+import axios from 'axios'
 import Qs from 'qs'
-import store from '../store'
+import store from '../stores'
 import router from '../router'
 import { NO_NOTIFY_KEY, NO_LOADING_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID, LOADING_TIP } from '@/utils/const'
 import { refreshToken } from './user/user'
 
 import { notification } from 'ant-design-vue'
 
-let startTime = 0
-
+// axios.defaults.baseURL = 'http://localhost:2122'
+let startTime
+//
 const delTimeout = 20 * 1000
 //
 const apiTimeout = window.apiTimeout === '<apiTimeout>' ? delTimeout : window.apiTimeout
 
-const request: AxiosInstance = axios.create({
-	baseURL: import.meta.env.JPOM_BASE_API_URL,
+const request = axios.create({
 	timeout: apiTimeout || delTimeout,
 	headers: {
 		'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -52,9 +29,9 @@ request.interceptors.request.use(
 	(config) => {
 		// 如果 headers 里面配置了 loading: no 就不用 loading
 		if (!config.headers[NO_LOADING_KEY]) {
-			// this.$setLoading({
-			// 	spinning: true,
-			// 	tip: config.headers[LOADING_TIP] || "加载数据中，请稍候...",
+			// Vue.prototype.$setLoading({
+			//   spinning: true,
+			//   tip: config.headers[LOADING_TIP] || "加载数据中，请稍候...",
 			// });
 			startTime = new Date().getTime()
 		}
@@ -67,31 +44,14 @@ request.interceptors.request.use(
 		if (config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
 			config.data = Qs.stringify(config.data)
 		}
-		config.headers[TOKEN_HEADER_KEY] = store.getters.getToken
-		config.headers[CACHE_WORKSPACE_ID] = getWid()
+		config.headers[TOKEN_HEADER_KEY] = store.getters.getToken || ''
+		config.headers[CACHE_WORKSPACE_ID] = store.getters.getWorkspaceId
 		return config
 	},
 	(error) => {
 		return Promise.reject(error)
 	}
 )
-
-function getWid() {
-	// let wid = router.app.$route.query.wid;
-	let wid = ''
-	if (!wid) {
-		wid = getHashVars().wid
-	}
-	return wid ? wid : store.getters.getWorkspaceId
-}
-
-function getHashVars() {
-	var vars = {}
-	location.hash.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
-		vars[key] = value
-	})
-	return vars
-}
 
 // 响应拦截器
 request.interceptors.response.use(
@@ -102,7 +62,7 @@ request.interceptors.response.use(
 			const waitTime = endTime - startTime < 1000 ? 300 : 0
 			// 时间过短延迟一定时间
 			await waitTimePromise(waitTime, () => {
-				// this.$setLoading(false);
+				// Vue.prototype.$setLoading(false);
 			})
 			return wrapResult(response)
 		} else {
@@ -112,7 +72,7 @@ request.interceptors.response.use(
 	(error) => {
 		if (!error.response) {
 			// 网络异常
-			// this.$setLoading(false);
+			// Vue.prototype.$setLoading(false);
 			notification.error({
 				message: 'Network Error No response',
 				description: '网络开了小差！请重试...:' + error,
@@ -121,7 +81,7 @@ request.interceptors.response.use(
 		}
 		// 如果 headers 里面配置了 loading: no 就不用 loading
 		if (!error.response.config.headers[NO_LOADING_KEY]) {
-			// this.$setLoading(false);
+			// Vue.prototype.$setLoading(false);
 		}
 		// 如果 headers 里面配置了 tip: no 就不用弹出提示信息
 		if (!error.response.config.headers[NO_NOTIFY_KEY]) {
@@ -143,16 +103,17 @@ request.interceptors.response.use(
 )
 
 // 等待 x ms
-function waitTimePromise(time: number, fn: Function) {
+function waitTimePromise(time, fn) {
 	return new Promise((resolve) => {
 		setTimeout(() => {
 			fn && fn()
+			resolve()
 		}, time)
 	})
 }
 
 // 判断结果
-function wrapResult(response: AxiosResponse) {
+function wrapResult(response) {
 	// 如果 responseType 是 blob 表示是下载文件
 	if (response.request.responseType === 'blob') {
 		return response.data
@@ -200,7 +161,15 @@ function toLogin(res, response, timeout = 100) {
 	})
 	console.error(response.config.url, res)
 	store.dispatch('logOut').then(() => {
-		router.push('/login')
+		const index = location.hash.indexOf('?')
+		let params = {}
+		if (index > -1) {
+			params = Qs.parse(location.hash.substring(index + 1))
+		}
+		router.push({
+			path: '/login',
+			query: params,
+		})
 		setTimeout(() => {
 			location.reload()
 		}, timeout)
@@ -248,7 +217,7 @@ export default request
 //
 export function loadRouterBase(url, params) {
 	const paramsObj = params || {}
-	paramsObj[CACHE_WORKSPACE_ID] = getWid()
+	paramsObj[CACHE_WORKSPACE_ID] = store.getters.getWorkspaceId
 	const paramsQuery = Qs.stringify(paramsObj)
 	return `${((window.routerBase || '') + url).replace(new RegExp('//', 'gm'), '/')}?${paramsQuery}`
 }

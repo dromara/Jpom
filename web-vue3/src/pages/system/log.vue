@@ -183,7 +183,7 @@ export default {
         path: this.temp.path,
       };
       // 请求接口拿到 blob
-      window.open(downloadFile(params), "_self");
+      window.open(downloadFile(params), "_blank");
     },
     // 删除文件
     deleteLog() {

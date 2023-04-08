@@ -1,7 +1,7 @@
 <template>
   <div class="full-content">
     <!-- 数据表格 -->
-    <a-table size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
+    <a-table size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
@@ -12,6 +12,7 @@
             <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">添加</a-button>
+          <a-button :disabled="!this.tableSelections.length" @click="syncToWorkspaceShow()" type="primary"> 批量分配</a-button>
           <a-tooltip title="自动检测服务端所在服务器中是否存在 docker，如果存在将自动添加到列表中">
             <a-button type="dashed" @click="handleTryLocalDocker"> <a-icon type="question-circle" theme="filled" />自动探测 </a-button>
           </a-tooltip>
@@ -45,7 +46,7 @@
         </template>
       </template>
 
-      <a-tooltip slot="tlsVerify" slot-scope="text, record" placement="topLeft" :title="record.tlsVerify ? '开启 TLS 认证' : '关闭 TLS 认证'">
+      <a-tooltip slot="tlsVerify" slot-scope="text, record" placement="topLeft" :title="record.tlsVerify ? '开启 TLS 认证,证书信息：' + record.certInfo : '关闭 TLS 认证'">
         <template v-if="record.tlsVerify">
           <template v-if="record.certExist"> <a-switch size="small" v-model="record.tlsVerify" :disabled="true" checked-children="开" un-checked-children="关" /> </template>
           <a-tag v-else color="red"> 证书丢失 </a-tag>
@@ -108,6 +109,7 @@
                 <li>如果端口暴露到公网很<b style="color: red"> 容易出现挖矿情况 </b></li>
                 <li>所以这里 我们<b style="color: red">强烈建议您使用 TLS 证书</b>（证书生成方式可以参考文档）来连接 docker 提升安全性</li>
                 <li>如果端口<b style="color: red">保证在内网中使用可以忽略 TLS 证书</b></li>
+                <li>注意：<b style="color: red">证书的允许的 IP 需要和 docker host 一致</b></li>
               </ul>
             </template>
           </a-alert>
@@ -121,29 +123,20 @@
         </a-form-model-item>
 
         <a-form-model-item label="TLS 认证" prop="tlsVerify">
-          <template slot="help">
-            <span v-if="temp.certExist">已经存在证书文件,可以不用上传</span>
-          </template>
-          <a-row>
-            <a-col :span="5">
-              <a-switch v-model="temp.tlsVerify" checked-children="开" un-checked-children="关" />
-            </a-col>
-            <a-col :span="16" v-if="temp.tlsVerify">
-              证书文件:
-              <a-upload
-                :file-list="uploadFileList"
-                :remove="
-                  () => {
-                    uploadFileList = [];
-                  }
-                "
-                :before-upload="beforeUpload"
-                :accept="'.zip'"
-              >
-                <a-button><a-icon type="upload" />选择文件</a-button>
-              </a-upload>
-            </a-col>
-          </a-row>
+          <a-switch v-model="temp.tlsVerify" checked-children="开" un-checked-children="关" />
+        </a-form-model-item>
+
+        <a-form-model-item v-if="temp.tlsVerify" label="证书信息" prop="certInfo" help="可以通过证书管理中提前上传或者点击后面选择证书去选择/导入证书">
+          <a-input-search
+            v-model="temp.certInfo"
+            placeholder="请输入证书信息或者选择证书信息,证书信息填写规则：序列号:证书类型"
+            enter-button="选择证书"
+            @search="
+              () => {
+                this.certificateVisible = true;
+              }
+            "
+          />
         </a-form-model-item>
 
         <a-collapse>
@@ -213,9 +206,9 @@
       </a-form-model>
     </a-modal>
     <!-- 控制台 -->
-    <a-drawer destroyOnClose :title="`${temp.name} 控制台`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="consoleVisible" @close="onClose">
-      <console v-if="consoleVisible" :visible="consoleVisible" :machineDockerId="temp.id" urlPrefix="/system/assets/docker"></console>
-    </a-drawer>
+    <!-- <a-drawer destroyOnClose :title="`${temp.name} 控制台`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="consoleVisible" @close="onClose"> -->
+    <console v-if="consoleVisible" :visible="consoleVisible" :machineDockerId="temp.id" urlPrefix="/system/assets/docker" @close="onClose"></console>
+    <!-- </a-drawer> -->
     <!-- 集群控制台 -->
     <a-drawer
       destroyOnClose
@@ -234,7 +227,7 @@
         <a-form-model-item label="分配类型" prop="type">
           <a-radio-group v-model="temp.type">
             <a-radio value="docker"> docker </a-radio>
-            <a-radio value="swarm" :disabled="!temp.swarmId"> 集群 </a-radio>
+            <a-radio value="swarm" :disabled="temp.swarmId === true ? false : true"> 集群 </a-radio>
           </a-radio-group>
         </a-form-model-item>
         <a-form-model-item label="选择工作空间" prop="workspaceId">
@@ -271,13 +264,41 @@
         </a-tab-pane>
       </a-tabs>
     </a-modal>
+    <!-- 选择证书文件 -->
+    <a-drawer
+      destroyOnClose
+      :title="`选择证书文件`"
+      placement="right"
+      :visible="certificateVisible"
+      width="85vw"
+      :zIndex="1009"
+      @close="
+        () => {
+          this.certificateVisible = false;
+        }
+      "
+    >
+      <certificate
+        v-if="certificateVisible"
+        @confirm="
+          (certInfo) => {
+            this.temp = { ...this.temp, certInfo: certInfo };
+            this.certificateVisible = false;
+          }
+        "
+        @cancel="
+          () => {
+            this.certificateVisible = false;
+          }
+        "
+      ></certificate>
+    </a-drawer>
   </div>
 </template>
 <script>
 import {
   dockerList,
   editDocker,
-  editDockerByFile,
   tryLocalDocker,
   deleteDcoker,
   initDockerSwarm,
@@ -292,20 +313,19 @@ import { getWorkSpaceListAll } from "@/api/workspace";
 import Console from "@/pages/docker/console";
 import SwarmConsole from "@/pages/docker/swarm/console.vue";
 import { mapGetters } from "vuex";
-
+import certificate from "./certificate.vue";
 export default {
   components: {
     Console,
     SwarmConsole,
+    certificate,
   },
   props: {},
   data() {
     return {
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-
       list: [],
-      uploadFileList: [],
       temp: {},
       editVisible: false,
       templateVisible: false,
@@ -315,8 +335,8 @@ export default {
       joinSwarmVisible: false,
       swarmList: [],
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "host", dataIndex: "host", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", width: 120, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "host", dataIndex: "host", width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "docker版本", dataIndex: "dockerVersion", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
 
         { title: "状态", dataIndex: "status", ellipsis: true, align: "center", width: "100px", scopedSlots: { customRender: "status" } },
@@ -325,16 +345,22 @@ export default {
         // { title: "apiVersion", dataIndex: "apiVersion", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "最后修改人", dataIndex: "modifyUser", width: 120, ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
         {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
+        {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
           sorter: true,
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
           width: "170px",
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "300px" },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, fixed: "right", align: "center", width: "300px" },
       ],
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
@@ -358,12 +384,22 @@ export default {
         dockerList: [],
         swarmList: [],
       },
+      tableSelections: [],
+      certificateVisible: false,
     };
   },
   computed: {
     ...mapGetters(["getCollapsed"]),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
+      };
     },
   },
   mounted() {
@@ -399,7 +435,7 @@ export default {
     handleAdd() {
       this.temp = {};
       this.editVisible = true;
-      this.uploadFileList = [];
+
       this.$refs["editForm"]?.resetFields();
     },
     // 控制台
@@ -448,22 +484,12 @@ export default {
     handleEdit(record) {
       this.temp = { ...record };
       this.editVisible = true;
-      this.uploadFileList = [];
 
       // this.temp = { ...this.temp };
 
       this.$refs["editForm"]?.resetFields();
     },
-    // handleRemove() {
-    //   // const index = this.uploadFileList.indexOf(file);
-    //   // const newFileList = this.uploadFileList.slice();
-    //   // newFileList.splice(index, 1);
-    //   this.uploadFileList = [];
-    // },
-    beforeUpload(file) {
-      this.uploadFileList = [...this.uploadFileList, file];
-      return false;
-    },
+
     // 提交  数据
     handleEditOk() {
       // 检验表单
@@ -473,42 +499,16 @@ export default {
         }
         const temp = Object.assign({}, this.temp);
 
-        if (this.uploadFileList.length) {
-          const formData = new FormData();
-          formData.append("file", this.uploadFileList[0]);
-          for (let key in temp) {
-            formData.append(key, temp[key] || "");
+        editDocker(temp).then((res) => {
+          if (res.code === 200) {
+            // 成功
+            this.$notification.success({
+              message: res.msg,
+            });
+            this.editVisible = false;
+            this.loadData();
           }
-
-          // formData.append("name", this.temp.name || "");
-          // formData.append("tlsVerify", this.temp.tlsVerify || "");
-          // formData.append("host", this.temp.host || "");
-          // formData.append("apiVersion", this.temp.apiVersion || "");
-          // formData.append("heartbeatTimeout", this.temp.heartbeatTimeout || "");
-          // 提交数据
-          editDockerByFile(formData).then((res) => {
-            if (res.code === 200) {
-              // 成功
-              this.$notification.success({
-                message: res.msg,
-              });
-
-              this.editVisible = false;
-              this.loadData();
-            }
-          });
-        } else {
-          editDocker(temp).then((res) => {
-            if (res.code === 200) {
-              // 成功
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.editVisible = false;
-              this.loadData();
-            }
-          });
-        }
+        });
       });
     },
     // 删除
@@ -651,10 +651,16 @@ export default {
     syncToWorkspaceShow(item) {
       this.syncToWorkspaceVisible = true;
       this.loadWorkSpaceListAll();
-      this.temp = {
-        id: item.id,
-        swarmId: item.swarmId,
-      };
+      if (item) {
+        this.temp = {
+          ids: item.id,
+          swarmId: item.swarmId ? true : false,
+        };
+      } else {
+        this.temp = {
+          swarmId: true,
+        };
+      }
     },
     handleSyncToWorkspace() {
       if (!this.temp.type) {
@@ -668,6 +674,10 @@ export default {
           message: "请选择工作空间",
         });
         return false;
+      }
+      if (!this.temp.ids) {
+        this.temp = { ...this.temp, ids: this.tableSelections.join(",") };
+        this.tableSelections = [];
       }
       // 同步
       machineDockerDistribute(this.temp).then((res) => {

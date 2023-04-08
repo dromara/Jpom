@@ -1,9 +1,21 @@
 <template>
   <div class="full-content">
-    <!-- 搜索区 -->
-    <!-- <div ref="filter" class="filter"></div> -->
     <!-- 表格 -->
-    <a-table size="middle" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage">
+    <a-table
+      size="middle"
+      :columns="columns"
+      :data-source="list"
+      bordered
+      rowKey="id"
+      :row-selection="this.choose ? rowSelection : null"
+      :pagination="pagination"
+      @change="
+        (pagination, filters, sorter) => {
+          this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
+          this.loadData();
+        }
+      "
+    >
       <template slot="title">
         <a-space>
           <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="仓库名称" />
@@ -17,15 +29,13 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-          <a-button type="primary" @click="handleAddGitee">导入</a-button>
+          <a-button type="primary" @click="handleAddGitee">令牌导入</a-button>
         </a-space>
       </template>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="gitUrl" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
+
       <template slot="repoType" slot-scope="text">
         <span v-if="text === 0">GIT</span>
         <span v-else-if="text === 1">SVN</span>
@@ -36,6 +46,10 @@
         <span v-else-if="text === 1">SSH</span>
         <!-- if no protocol value, get a default value from gitUrl -->
         <span v-else>{{ record.gitUrl.indexOf("http") > -1 ? "HTTP(S)" : "SSH" }}</span>
+      </template>
+      <template slot="global" slot-scope="text">
+        <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
+        <a-tag v-else>工作空间</a-tag>
       </template>
       <template slot="operation" slot-scope="text, record, index">
         <a-space>
@@ -64,7 +78,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editVisible" title="编辑仓库" @ok="handleEditOk" :maskClosable="false">
+    <a-modal :zIndex="1009" destroyOnClose v-model="editVisible" title="编辑仓库" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="仓库名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="仓库名称" />
@@ -164,6 +178,12 @@
             <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="公钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"></a-textarea>
           </a-form-model-item>
         </template>
+        <a-form-model-item label="共享" prop="global">
+          <a-radio-group v-model="temp.global">
+            <a-radio :value="true"> 全局</a-radio>
+            <a-radio :value="false"> 当前工作空间</a-radio>
+          </a-radio-group>
+        </a-form-model-item>
         <!-- <a-form-model-item v-if="temp.id" prop="restHideField">
           <template slot="label">
             隐藏字段
@@ -179,51 +199,42 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
-    <a-modal destroyOnClose v-model="giteeImportVisible" title="通过私人令牌导入仓库" width="80%" :footer="null" :maskClosable="false">
+    <a-modal :zIndex="1009" destroyOnClose v-model="giteeImportVisible" title="通过私人令牌导入仓库" width="80%" :footer="null" :maskClosable="false">
       <a-form-model :label-col="{ span: 4 }" :rules="giteeImportFormRules" :model="giteeImportForm" ref="giteeImportForm" :wrapper-col="{ span: 20 }">
-        <a-form-model-item prop="token">
-          <template slot="label">
-            私人令牌
-            <a-tooltip>
-              <template slot="title">
-                <ul>
-                  <li>使用私人令牌，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。</li>
-                </ul>
-              </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-input-group compact>
-            <a-select v-model="giteeImportForm.type" @change="importTypeChange">
-              <a-select-option value="gitee"> gitee </a-select-option>
-              <a-select-option value="github"> github </a-select-option>
-              <a-select-option value="gitlab"> gitlab </a-select-option>
-              <a-select-option value="gitea"> gitea </a-select-option>
-            </a-select>
-            <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder}`">
-              <a-input-search style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.token" @search="handleGiteeImportFormOk" :placeholder="importTypePlaceholder" />
-            </a-tooltip>
-          </a-input-group>
-          <a-input-group compact style="width: 105%">
-            <a-tooltip title="输入仓库名称或者仓库路径进行搜索">
-              <a-input style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.condition" placeholder="输入仓库名称或者仓库路径进行搜索" />
-            </a-tooltip>
-          </a-input-group>
-          <a-input-group compact style="width: 105%" v-if="giteeImportForm.type === 'gitlab'">
-            <a-tooltip title="请输入 GitLab 的地址，支持自建 GitLab，不需要输入协议，如：gitlab.com、gitlab.jpom.io、10.1.2.3、10.1.2.3:8888 等">
-              <a-input style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.gitlabAddress" placeholder="gitlab.com" />
-            </a-tooltip>
-          </a-input-group>
-          <a-input-group compact style="width: 105%" v-if="giteeImportForm.type === 'gitea'">
-            <a-tooltip title="请输入 gitea 的地址，不需要输入协议，如：10.1.2.3、10.1.2.3:3000 等">
-              <a-input style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.giteaAddress" placeholder="10.1.2.3:3000" />
-            </a-tooltip>
-          </a-input-group>
+        <a-form-model-item prop="token" label="私人令牌" help="使用私人令牌，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。">
+          <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder[giteeImportForm.type]}`">
+            <!-- <a-input v-model="giteeImportForm.token" :placeholder="importTypePlaceholder[giteeImportForm.type]">
+              <a-select slot="addonBefore" style="width: 100px" @change="importChange" v-model="giteeImportForm.type">
+                <a-select-option :value="item" v-for="item in Object.keys(providerData)" :key="item"> {{ item }}</a-select-option>
+              </a-select>
+
+              <a-button slot="addonAfter" size="small" type="primary" icon="search" @click="handleGiteeImportFormOk"></a-button>
+            </a-input> -->
+            <a-input-group compact>
+              <a-select style="width: 10%" @change="importChange" v-model="giteeImportForm.type">
+                <a-select-option :value="item" v-for="item in Object.keys(providerData)" :key="item"> {{ item }}</a-select-option>
+              </a-select>
+
+              <a-input-search
+                style="width: 90%; margin-top: 1px"
+                enter-button
+                v-model="giteeImportForm.token"
+                @search="handleGiteeImportFormOk"
+                :placeholder="importTypePlaceholder[giteeImportForm.type]"
+              />
+            </a-input-group>
+          </a-tooltip>
+        </a-form-model-item>
+        <a-form-model-item prop="address" label="地址">
+          <a-input v-model="giteeImportForm.address" placeholder="请填写平台地址" />
+        </a-form-model-item>
+        <a-form-model-item prop="condition" label="搜索" help="输入仓库名称或者仓库路径进行搜索" v-if="providerData[giteeImportForm.type].query">
+          <a-input v-model="giteeImportForm.condition" placeholder="输入仓库名称或者仓库路径进行搜索" />
         </a-form-model-item>
       </a-form-model>
-      <a-table :loading="loading" :columns="reposColumns" :data-source="repos" bordered rowKey="full_name" @change="reposChange" :pagination="reposPagination">
+      <a-table :loading="loading" size="middle" :columns="reposColumns" :data-source="repos" bordered rowKey="full_name" @change="reposChange" :pagination="reposPagination">
         <template slot="private" slot-scope="text, record">
-          <a-switch :disabled="true" :checked="record.private" />
+          <a-switch size="small" :disabled="true" :checked="record.private" />
         </template>
         <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
@@ -239,24 +250,65 @@
         </a-tooltip>
 
         <template slot="operation" slot-scope="text, record">
-          <a-button type="primary" :disabled="record.exists" @click="handleGiteeRepoAdd(record)">{{ record.exists ? "已存在" : "添加" }}</a-button>
+          <a-button type="primary" size="small" :disabled="record.exists" @click="handleGiteeRepoAdd(record)">{{ record.exists ? "已存在" : "添加" }}</a-button>
         </template>
       </a-table>
     </a-modal>
+    <div style="padding-top: 50px" v-if="this.choose">
+      <div
+        :style="{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          borderTop: '1px solid #e9e9e9',
+          padding: '10px 16px',
+          background: '#fff',
+          textAlign: 'right',
+          zIndex: 1,
+        }"
+      >
+        <a-space>
+          <a-button
+            @click="
+              () => {
+                this.$emit('cancel');
+              }
+            "
+          >
+            取消
+          </a-button>
+          <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
+        </a-space>
+      </div>
+    </div>
   </div>
 </template>
 <script>
-import { authorizeRepos, deleteRepository, editRepository, getRepositoryList, restHideField, sortItem } from "@/api/repository";
+import { providerInfo, authorizeRepos, deleteRepository, editRepository, getRepositoryList, restHideField, sortItem } from "@/api/repository";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 
 export default {
   components: {},
+  props: {
+    choose: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       loading: false,
       PAGE_DEFAULT_SIZW_OPTIONS: ["15", "20", "25", "30", "35", "40", "50"],
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, { limit: 15 }),
       list: [],
+      providerData: {
+        gitee: {
+          baseUrl: "https://gitee.com",
+          name: "gitee",
+          query: true,
+        },
+      },
       total: 0,
       temp: {},
       isSystem: false,
@@ -264,16 +316,16 @@ export default {
       giteeImportVisible: false,
       repos: [],
       username: null,
-      importTypePlaceholder: "",
+
       columns: [
-        { title: "仓库名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "仓库名称", dataIndex: "name", width: 200, sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         {
           title: "仓库地址",
           dataIndex: "gitUrl",
-
+          width: 300,
           sorter: true,
           ellipsis: true,
-          scopedSlots: { customRender: "gitUrl" },
+          scopedSlots: { customRender: "tooltip" },
         },
         {
           title: "仓库类型",
@@ -291,21 +343,27 @@ export default {
           ellipsis: true,
           scopedSlots: { customRender: "protocol" },
         },
+        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
+        { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
+        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
           sorter: true,
-          customRender: (text) => {
-            if (!text) {
-              return "";
-            }
-            return parseTime(text);
-          },
-          width: 180,
+          customRender: (text) => parseTime(text),
+          width: "170px",
         },
         {
           title: "操作",
           dataIndex: "operation",
+          fixed: "right",
           align: "center",
           width: "180px",
           scopedSlots: { customRender: "operation" },
@@ -332,14 +390,25 @@ export default {
           align: "left",
         },
       ],
-      giteeImportForm: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, { limit: 15, type: "gitee" }),
+      giteeImportForm: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, { limit: 15, type: "gitee", address: "https://gitee.com" }),
       giteeImportFormRules: {
         token: [{ required: true, message: "请输入私人令牌", trigger: "blur" }],
+        // address: [{ required: true, message: "请填写平台地址", trigger: "blur" }],
       },
       rules: {
         name: [{ required: true, message: "请填写仓库名称", trigger: "blur" }],
         gitUrl: [{ required: true, message: "请填写仓库地址", trigger: "blur" }],
       },
+      importTypePlaceholder: {
+        gitee: "在 设置-->安全设置-->私人令牌 中获取",
+        github: "在 Settings-->Developer settings-->Personal access tokens 中获取",
+        gitlab_v3: "在 preferences-->Access Tokens 中获取",
+        gitlab: "在 preferences-->Access Tokens 中获取",
+        gitea: "在 设置 --> 应用 --> 生成令牌",
+        gogs: "在 设置 --> 应用 --> 生成令牌",
+        other: "请输入私人令牌",
+      },
+      tableSelections: [],
     };
   },
   computed: {
@@ -350,14 +419,24 @@ export default {
     reposPagination() {
       return COMPUTED_PAGINATION(this.giteeImportForm, this.PAGE_DEFAULT_SIZW_OPTIONS);
     },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
+        type: "radio",
+      };
+    },
   },
   watch: {},
   created() {
     this.loadData();
   },
   methods: {
+    CHANGE_PAGE,
     // 加载数据
-    loadData(pointerEvent) {
+    async loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.loading = true;
       getRepositoryList(this.listQuery).then((res) => {
@@ -367,6 +446,13 @@ export default {
         }
         this.loading = false;
       });
+      const response = await providerInfo();
+      if (response.code === 200) {
+        this.providerData = response.data;
+      }
+    },
+    importChange(value) {
+      this.giteeImportForm.address = this.providerData[value].baseUrl;
     },
     // // 筛选
     // handleFilter() {
@@ -382,7 +468,6 @@ export default {
     },
     handleAddGitee() {
       this.giteeImportVisible = true;
-      this.importTypeChange(this.giteeImportForm.type);
     },
     handleGiteeImportFormOk() {
       this.$refs["giteeImportForm"].validate((valid) => {
@@ -429,7 +514,7 @@ export default {
       if (this.temp.protocol === undefined) {
         this.temp.protocol = this.temp.gitUrl.indexOf("http") > -1 ? 0 : 1;
       }
-      this.temp = { ...this.temp };
+      this.temp = { ...this.temp, global: record.workspaceId === "GLOBAL", workspaceId: "" };
       this.editVisible = true;
     },
     // 提交节点数据
@@ -498,23 +583,7 @@ export default {
         },
       });
     },
-    // 分页、排序、筛选变化时触发
-    changePage(pagination, filters, sorter) {
-      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
-      this.loadData();
-    },
-    // 在导入仓库时，选择不同的 git 平台显示不同的提示语
-    importTypeChange(val) {
-      if (val === "gitee") {
-        this.importTypePlaceholder = "在 设置-->安全设置-->私人令牌 中获取";
-      } else if (val === "github") {
-        this.importTypePlaceholder = "在 Settings-->Developer settings-->Personal access tokens 中获取";
-      } else if (val === "gitlab") {
-        this.importTypePlaceholder = "在 preferences-->Access Tokens 中获取";
-      } else {
-        this.importTypePlaceholder = "请输入私人令牌";
-      }
-    },
+
     // 排序
     sortItemHander(record, index, method) {
       const msgData = {
@@ -551,6 +620,20 @@ export default {
           });
         },
       });
+    },
+    // 确认
+    handerConfirm() {
+      if (!this.tableSelections.length) {
+        this.$notification.warning({
+          message: "请选择要使用的仓库",
+        });
+        return;
+      }
+      const selectData = this.list.filter((item) => {
+        return item.id === this.tableSelections[0];
+      })[0];
+
+      this.$emit("confirm", `${selectData.id}`);
     },
   },
 };

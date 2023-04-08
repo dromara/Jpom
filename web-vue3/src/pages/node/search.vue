@@ -1,7 +1,9 @@
 <template>
   <div class="full-content">
-    <!-- <div ref="filter" class="filter"></div> -->
-    <a-table :data-source="projList" :columns="columns" size="middle" bordered :pagination="pagination" @change="changePage" :row-selection="rowSelection" :rowKey="(record, index) => index">
+    <template v-if="this.useSuggestions">
+      <a-result title="当前工作空间还没有项目" sub-title="可以创建节点分发或者到节点管理创建项目"> </a-result>
+    </template>
+    <a-table v-else :data-source="projList" :columns="columns" size="middle" bordered :pagination="pagination" @change="changePage" :row-selection="rowSelection" :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
           <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
@@ -54,7 +56,7 @@
         </a-space>
       </template>
       <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="text">
-        <a-icon v-if="record.outGivingProject === 1" type="apartment" />
+        <a-icon v-if="record.outGivingProject" type="apartment" />
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
@@ -65,6 +67,10 @@
       </a-tooltip>
       <a-tooltip slot="path" slot-scope="text, item" placement="topLeft" :title="item.whitelistDirectory + item.lib">
         <span>{{ item.whitelistDirectory + item.lib }}</span>
+      </a-tooltip>
+
+      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
       </a-tooltip>
 
       <template slot="status" slot-scope="text, record">
@@ -81,13 +87,19 @@
         </template>
       </template>
 
-      <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.pid},  端口号：${record.port}`">
-        <span v-if="record.pid">{{ record.port }}/{{ record.pid }}</span>
+      <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${(record.pids || [record.pid || '-']).join(',')} / 端口号：${record.port}`">
+        <span>{{ record.port || "-" }}/{{ (record.pids || [record.pid || "-"]).join(",") }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record, index">
         <a-space>
           <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
-          <a-button size="small" type="primary" @click="handleConsole(record)" v-show="noFileModes.includes(record.runMode)">控制台</a-button>
+          <template v-if="noFileModes.includes(record.runMode)">
+            <a-button size="small" type="primary" @click="handleConsole(record)">控制台</a-button>
+          </template>
+          <template v-else>
+            <a-tooltip title="文件类型没有控制台功能"> <a-button size="small" type="primary" :disabled="true">控制台</a-button></a-tooltip>
+          </template>
+
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
@@ -95,7 +107,12 @@
             </a>
             <a-menu slot="overlay">
               <a-menu-item>
-                <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+                <template v-if="noFileModes.includes(record.runMode)">
+                  <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+                </template>
+                <template v-else>
+                  <a-tooltip title="文件类型没有触发器功能"> <a-button size="small" type="primary" :disabled="true">触发器</a-button></a-tooltip>
+                </template>
               </a-menu-item>
               <a-menu-item>
                 <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'top')">置顶</a-button>
@@ -165,12 +182,12 @@
                 v-clipboard:copy="`${temp.triggerUrl}?action=${item.value}`"
                 v-clipboard:success="
                   () => {
-                    this.$notification.success({ message: '复制成功' });
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
                   }
                 "
                 v-clipboard:error="
                   () => {
-                    this.$notification.error({ message: '复制失败' });
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
                   }
                 "
                 type="info"
@@ -186,12 +203,12 @@
                 v-clipboard:copy="temp.batchTriggerUrl"
                 v-clipboard:success="
                   () => {
-                    this.$notification.success({ message: '复制成功' });
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
                   }
                 "
                 v-clipboard:error="
                   () => {
-                    this.$notification.error({ message: '复制失败' });
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
                   }
                 "
                 type="info"
@@ -216,6 +233,8 @@ import File from "@/pages/node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, concurrentExecution, itemGroupBy, parseTime } from "@/utils/const";
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
+import Vue from "vue";
+import { mapGetters } from "vuex";
 
 export default {
   components: {
@@ -241,36 +260,44 @@ export default {
       batchVisible: false,
       batchTitle: "",
       columns: [
-        { title: "项目名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "项目名称", dataIndex: "name", width: 200, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "项目分组", dataIndex: "group", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "group" } },
-        { title: "节点名称", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
+        { title: "节点名称", dataIndex: "nodeId", width: 90, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         {
           title: "项目路径",
           dataIndex: "path",
           ellipsis: true,
+          width: 120,
           scopedSlots: { customRender: "path" },
+        },
+        { title: "运行状态", dataIndex: "status", align: "center", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
+
+        { title: "运行方式", dataIndex: "runMode", width: 90, ellipsis: true, scopedSlots: { customRender: "runMode" } },
+        {
+          title: "webhook",
+          dataIndex: "token",
+          width: 120,
+          ellipsis: true,
+          scopedSlots: { customRender: "tooltip" },
         },
         {
           title: "创建时间",
           dataIndex: "createTimeMillis",
           sorter: true,
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
-          width: 170,
+          customRender: (text) => parseTime(text),
+          width: "170px",
         },
-        { title: "运行方式", dataIndex: "runMode", width: 90, ellipsis: true, scopedSlots: { customRender: "runMode" } },
-        // {
-        //   title: "最后操作人",
-        //   dataIndex: "modifyUser",
-        //   width: 120,
-        //   ellipsis: true,
-        //   scopedSlots: { customRender: "modifyUser" },
-        // },
-        { title: "运行状态", dataIndex: "status", align: "center", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "180px" },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
+        { title: "操作", dataIndex: "operation", align: "center", fixed: "right", scopedSlots: { customRender: "operation" }, width: "190px" },
       ],
       triggerVisible: false,
       triggerUses: [
@@ -282,6 +309,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(["getUserInfo"]),
     filePath() {
       return (this.temp.whitelistDirectory || "") + (this.temp.lib || "");
     },
@@ -295,6 +323,25 @@ export default {
         columnWidth: "40px",
         getCheckboxProps: this.getCheckboxProps,
       };
+    },
+    useSuggestions() {
+      if (this.loading) {
+        // 加载中不提示
+        return false;
+      }
+      if (!this.getUserInfo || !this.getUserInfo.systemUser) {
+        // 没有登录或者不是超级管理员
+        return false;
+      }
+      if (this.listQuery.page !== 1 || this.listQuery.total > 0) {
+        // 不是第一页 或者总记录数大于 0
+        return false;
+      }
+      // 判断是否存在搜索条件
+      const nowKeys = Object.keys(this.listQuery);
+      const defaultKeys = Object.keys(PAGE_DEFAULT_LIST_QUERY);
+      const dictOrigin = nowKeys.filter((item) => !defaultKeys.includes(item));
+      return dictOrigin.length === 0;
     },
   },
   mounted() {
@@ -366,6 +413,7 @@ export default {
                     if (res2.data[element.projectId] && element.nodeId === data.type) {
                       element.port = res2.data[element.projectId].port;
                       element.pid = res2.data[element.projectId].pid;
+                      element.pids = res2.data[element.projectId].pids;
                       element.status = element.pid > 0;
                       element.error = res2.data[element.projectId].error;
                     }
@@ -667,6 +715,7 @@ export default {
     // 触发器
     handleTrigger(record) {
       this.temp = Object.assign({}, record);
+      this.tempVue = Vue;
       getProjectTriggerUrl({
         id: record.id,
       }).then((res) => {

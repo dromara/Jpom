@@ -299,7 +299,6 @@ import CustomSelect from "@/components/customSelect";
 import NodeTop from "@/pages/node/node-layout/node-top";
 import { generateNodeTopChart, drawChart, machineInfo, generateNodeNetChart, machineDiskInfo, machineHwDiskInfo, generateNodeNetworkTimeChart, machineNetworkInterfaces } from "@/api/node-stat";
 import { statusMap } from "@/api/system/assets-machine";
-import * as echarts from "echarts";
 
 export default {
   components: {
@@ -347,7 +346,7 @@ export default {
         { title: "名称", dataIndex: "name", width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "端口", dataIndex: "port", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "所有者", dataIndex: "user", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "项目名称", dataIndex: "jpomName", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+
         { title: "状态", dataIndex: "state", width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "虚拟内存", dataIndex: "virtualSize", width: "100px", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
         { title: "CPU", dataIndex: "processCpuLoadCumulative", width: "100px", ellipsis: true, scopedSlots: { customRender: "percentTooltip" } },
@@ -487,9 +486,9 @@ export default {
     loadNodeTop() {
       nodeMonitorData({ ...this.idInfo }, false).then((res) => {
         if (res.code === 200) {
-          this.historyChart = drawChart(echarts, res.data, "top-chart", generateNodeTopChart);
-          this.netHistoryChart = drawChart(echarts, res.data, "net-chart", generateNodeNetChart);
-          this.networkDelayChart = drawChart(echarts, res.data, "network-delay-chart", generateNodeNetworkTimeChart);
+          this.historyChart = drawChart(res.data, "top-chart", generateNodeTopChart);
+          this.netHistoryChart = drawChart(res.data, "net-chart", generateNodeNetChart);
+          this.networkDelayChart = drawChart(res.data, "network-delay-chart", generateNodeNetworkTimeChart);
         }
       });
     },

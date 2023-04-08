@@ -1,7 +1,14 @@
 <template>
   <div class="full-content">
+    <template v-if="this.useSuggestions">
+      <a-result title="当前工作空间还没有SSH" sub-title="请到【系统管理】-> 【资产管理】-> 【SSH管理】添加SSH，或者将已添加的SSH授权关联、分配到此工作空间">
+        <template #extra>
+          <router-link to="/system/assets/ssh-list"> <a-button key="console" type="primary">现在就去</a-button></router-link>
+        </template>
+      </a-result>
+    </template>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :columns="columns" size="middle" :pagination="pagination" @change="changePage" bordered rowKey="id" :row-selection="rowSelection">
+    <a-table v-else :data-source="list" :columns="columns" size="middle" :pagination="pagination" @change="changePage" bordered rowKey="id" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
           <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="ssh名称" />
@@ -28,6 +35,51 @@
         </a-space>
       </template>
       <a-tooltip slot="tooltip" slot-scope="text" :title="text"> {{ text }}</a-tooltip>
+      <a-tooltip slot="host" slot-scope="text, record" :title="`${record.machineSsh && record.machineSsh.host}:${record.machineSsh && record.machineSsh.port}`">
+        {{ record.machineSsh && record.machineSsh.host }}:{{ record.machineSsh && record.machineSsh.port }}
+      </a-tooltip>
+      <template slot="status" slot-scope="text, record">
+        <a-tooltip :title="record.machineSsh && record.machineSsh.statusMsg">
+          <a-tag :color="record.machineSsh && record.machineSsh.status === 1 ? 'green' : 'red'">{{ record.machineSsh && record.machineSsh.status === 1 ? "正常" : "无法连接" }}</a-tag>
+        </a-tooltip>
+      </template>
+      <a-popover title="系统信息" slot="osName" slot-scope="text, record">
+        <template slot="content">
+          <p>系统名：{{ record.machineSsh && record.machineSsh.osName }}</p>
+          <p>系统版本：{{ record.machineSsh && record.machineSsh.osVersion }}</p>
+          <p>CPU型号：{{ record.machineSsh && record.machineSsh.osCpuIdentifierName }}</p>
+          <p>主机名：{{ record.machineSsh && record.machineSsh.hostName }}</p>
+          <p>开机时间：{{ formatDuration(record.machineSsh && record.machineSsh.osSystemUptime) }}</p>
+        </template>
+        {{ text || "未知" }}
+      </a-popover>
+      <a-tooltip
+        slot="osOccupyMemory"
+        slot-scope="text, record"
+        placement="topLeft"
+        :title="`内存使用率：${formatPercent(record.machineSsh && record.machineSsh.osOccupyMemory)},总内存：${renderSize(record.machineSsh && record.machineSsh.osMoneyTotal)}`"
+      >
+        <span>{{ formatPercent(record.machineSsh && record.machineSsh.osOccupyMemory) }}/{{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</span>
+      </a-tooltip>
+
+      <a-tooltip
+        slot="osOccupyCpu"
+        slot-scope="text, record"
+        placement="topLeft"
+        :title="`CPU使用率：${formatPercent2Number(record.machineSsh && record.machineSsh.osOccupyCpu)}%,CPU数：${record.machineSsh && record.machineSsh.osCpuCores}`"
+      >
+        <span>{{ (formatPercent2Number(record.machineSsh && record.machineSsh.osOccupyCpu) || "-") + "%" }} / {{ record.machineSsh && record.machineSsh.osCpuCores }}</span>
+      </a-tooltip>
+
+      <a-popover title="硬盘信息" slot="osMaxOccupyDisk" slot-scope="text, record">
+        <template slot="content">
+          <p>硬盘总量：{{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</p>
+          <p>硬盘最大的使用率：{{ formatPercent(record.machineSsh && record.machineSsh.osMaxOccupyDisk) }}</p>
+          <p>使用率最大的分区：{{ record.machineSsh && record.machineSsh.osMaxOccupyDiskName }}</p>
+        </template>
+        <span>{{ formatPercent(record.machineSsh && record.machineSsh.osMaxOccupyDisk) }} / {{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</span>
+      </a-popover>
+
       <template slot="nodeId" slot-scope="text, record">
         <template v-if="record.linkNode">
           <a-tooltip placement="topLeft" :title="`节点名称：${record.linkNode.name}`">
@@ -53,10 +105,15 @@
               </a-menu-item>
             </a-menu>
           </a-dropdown>
+          <template v-if="record.fileDirs">
+            <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
+          </template>
+          <template v-else>
+            <a-tooltip placement="topLeft" title="如果按钮不可用,请去资产管理 ssh 列表的关联中添加当前工作空间允许管理的授权文件夹">
+              <a-button size="small" type="primary" :disabled="true">文件</a-button>
+            </a-tooltip>
+          </template>
 
-          <a-tooltip placement="topLeft" title="如果按钮不可用,请去资产管理 ssh 列表的关联中添加当前工作空间允许管理的授权文件夹">
-            <a-button size="small" type="primary" :disabled="!record.fileDirs" @click="handleFile(record)">文件</a-button>
-          </a-tooltip>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
@@ -156,7 +213,7 @@
 import { deleteSsh, editSsh, getSshList, syncToWorkspace, getSshGroupAll } from "@/api/ssh";
 import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, formatPercent2Number, renderSize, formatDuration, formatPercent } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";
 
 import { mapGetters } from "vuex";
@@ -172,7 +229,7 @@ export default {
   },
   data() {
     return {
-      loading: false,
+      loading: true,
       list: [],
       temp: {},
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
@@ -193,27 +250,41 @@ export default {
       viewOperationLog: false,
 
       columns: [
-        { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", sorter: true, width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
-        { title: "Host", dataIndex: "machineSsh.host", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "Port", dataIndex: "machineSsh.port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "用户名", dataIndex: "machineSsh.user", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "编码格式", dataIndex: "machineSsh.charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "Host", dataIndex: "machineSsh.host", width: 100, ellipsis: true, scopedSlots: { customRender: "host" } },
+        // { title: "Port", dataIndex: "machineSsh.port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "用户名", dataIndex: "machineSsh.user", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+
+        { title: "系统名", dataIndex: "machineSsh.osName", width: 80, ellipsis: true, scopedSlots: { customRender: "osName" } },
+        // { title: "系统版本", dataIndex: "machineSsh.osVersion", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "CPU", dataIndex: "machineSsh.osOccupyCpu", width: 80, ellipsis: true, scopedSlots: { customRender: "osOccupyCpu" } },
+        { title: "内存", dataIndex: "machineSsh.osOccupyMemory", width: 80, ellipsis: true, scopedSlots: { customRender: "osOccupyMemory" } },
+        { title: "硬盘", dataIndex: "machineSsh.osMaxOccupyDisk", width: 80, ellipsis: true, scopedSlots: { customRender: "osMaxOccupyDisk" } },
+        // { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "连接状态", dataIndex: "machineSsh.status", ellipsis: true, align: "center", width: "90px", scopedSlots: { customRender: "status" } },
+        // { title: "编码格式", dataIndex: "machineSsh.charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         {
           title: "关联节点",
           dataIndex: "nodeId",
           scopedSlots: { customRender: "nodeId" },
-          width: 120,
+          width: "100px",
           ellipsis: true,
+        },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
         },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
           sorter: true,
           ellipsis: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
+          customRender: (text) => parseTime(text),
           width: "170px",
         },
         {
@@ -223,6 +294,7 @@ export default {
           width: "200px",
           align: "center",
           // ellipsis: true,
+          fixed: "right",
         },
       ],
 
@@ -235,7 +307,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getWorkspaceId"]),
+    ...mapGetters(["getWorkspaceId", "getUserInfo"]),
 
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
@@ -248,12 +320,35 @@ export default {
         selectedRowKeys: this.tableSelections,
       };
     },
+    useSuggestions() {
+      if (this.loading) {
+        // 加载中不提示
+        return false;
+      }
+      if (!this.getUserInfo || !this.getUserInfo.systemUser) {
+        // 没有登录或者不是超级管理员
+        return false;
+      }
+      if (this.listQuery.page !== 1 || this.listQuery.total > 0) {
+        // 不是第一页 或者总记录数大于 0
+        return false;
+      }
+      // 判断是否存在搜索条件
+      const nowKeys = Object.keys(this.listQuery);
+      const defaultKeys = Object.keys(PAGE_DEFAULT_LIST_QUERY);
+      const dictOrigin = nowKeys.filter((item) => !defaultKeys.includes(item));
+      return dictOrigin.length === 0;
+    },
   },
   created() {
     this.loadData();
     this.loadGroupList();
   },
   methods: {
+    formatPercent2Number,
+    renderSize,
+    formatPercent,
+    formatDuration,
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true;
