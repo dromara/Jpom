@@ -1,6 +1,6 @@
 import axios from "../config";
 
-export function userLoginLgin(params) {
+export function userLoginLgin(params:any) {
   return axios({
     url: "/user/login-log/list-data",
     method: "post",
