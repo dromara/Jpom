@@ -7,9 +7,7 @@
       <a-form-model-item label="项目路径" prop="project">
         <a-input v-model="temp.project" type="textarea" :rows="5" style="resize: none" placeholder="请输入项目存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径" />
       </a-form-model-item>
-      <a-form-model-item label="证书路径" prop="certificate">
-        <a-input v-model="temp.certificate" type="textarea" :rows="5" style="resize: none" placeholder="请输入证书存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径" />
-      </a-form-model-item>
+
       <a-form-model-item label="Nginx 白名单路径" prop="nginx">
         <a-input v-model="temp.nginx" type="textarea" :rows="5" style="resize: none" placeholder="请输入 nginx 存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径" />
       </a-form-model-item>

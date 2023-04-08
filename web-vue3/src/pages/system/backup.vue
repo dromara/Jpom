@@ -16,37 +16,43 @@
           <a-button type="primary" @click="handleSqlUpload">导入备份</a-button>
         </a-space>
       </template>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="name" slot-scope="text" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="backupType" slot-scope="text" placement="topleft" :title="text">
+      <a-tooltip slot="backupType" slot-scope="text" :title="text">
         <span>{{ backupTypeMap[text] }}</span>
-      </template>
-      <template slot="baleTimeStamp" slot-scope="text">
-        <a-tooltip placement="topLeft" :title="`${parseTime(text)}`"> {{ parseTime(text) }} </a-tooltip>
-      </template>
-      <a-tooltip slot="status" slot-scope="text, reocrd" placement="topLeft" :title="`${backupStatusMap[text]} 点击复制文件路径`">
-        <div
-          v-clipboard:copy="reocrd.filePath"
-          v-clipboard:success="
-            () => {
-              this.$notification.success({
-                message: '复制成功',
-              });
-            }
-          "
-          v-clipboard:error="
-            () => {
-              this.$notification.error({
-                message: '复制失败',
-              });
-            }
-          "
-        >
-          {{ backupStatusMap[text] }}
-          <a-icon type="copy" />
-        </div>
       </a-tooltip>
+      <template slot="baleTimeStamp" slot-scope="text">
+        <a-tooltip :title="`${parseTime(text)}`"> {{ parseTime(text) }} </a-tooltip>
+      </template>
+      <template slot="status" slot-scope="text, reocrd">
+        <a-tooltip v-if="reocrd.fileExist" :title="`${backupStatusMap[text]} 点击复制文件路径`">
+          <div
+            v-clipboard:copy="reocrd.filePath"
+            v-clipboard:success="
+              () => {
+                tempVue.prototype.$notification.success({
+                  message: '复制成功',
+                });
+              }
+            "
+            v-clipboard:error="
+              () => {
+                tempVue.prototype.$notification.error({
+                  message: '复制失败',
+                });
+              }
+            "
+          >
+            {{ backupStatusMap[text] }}
+            <a-icon type="copy" />
+          </div>
+        </a-tooltip>
+        <a-tooltip v-else :title="`备份文件不存在:${reocrd.filePath}`">
+          <a-icon type="warning" />
+        </a-tooltip>
+      </template>
+
       <a-tooltip slot="fileSize" slot-scope="text, reocrd" placement="topLeft" :title="renderSizeFormat(text) + ' ' + reocrd.sha1Sum">
         <a-tag color="#108ee9">{{ renderSizeFormat(text) }}</a-tag>
       </a-tooltip>
@@ -58,9 +64,9 @@
       </a-tooltip> -->
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button size="small" type="primary" @click="handleDownload(record)">下载</a-button>
+          <a-button size="small" type="primary" :disabled="!record.fileExist || record.status !== 1" @click="handleDownload(record)">下载</a-button>
+          <a-button size="small" type="danger" :disabled="!record.fileExist || record.status !== 1" @click="handleRestore(record)">还原</a-button>
           <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-          <a-button size="small" type="danger" :disabled="record.status !== 1" @click="handleRestore(record)">还原</a-button>
         </a-space>
       </template>
     </a-table>
@@ -102,6 +108,7 @@
 <script>
 import { backupStatusMap, backupTypeArray, backupTypeMap, createBackup, deleteBackup, downloadBackupFile, getBackupList, getTableNameList, restoreBackup, uploadBackupFile } from "@/api/backup-info";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, renderSize } from "@/utils/const";
+import Vue from "vue";
 
 export default {
   components: {},
@@ -164,20 +171,17 @@ export default {
           dataIndex: "createTimeMillis",
           sorter: true,
           customRender: (text) => {
-            if (!text) {
-              return "";
-            }
             return parseTime(text);
           },
-          width: 170,
+          width: "170px",
         },
         {
           title: "操作",
           dataIndex: "operation",
-          width: 180,
+          width: "180px",
           scopedSlots: { customRender: "operation" },
           align: "center",
-          // fixed: "right",
+          fixed: "right",
         },
       ],
       rules: {
@@ -186,6 +190,7 @@ export default {
         resultDirFile: [{ required: true, message: "Please input build target path", trigger: "blur" }],
         releasePath: [{ required: true, message: "Please input release path", trigger: "blur" }],
       },
+      tempVue: Vue,
       timer: null,
     };
   },
@@ -277,7 +282,7 @@ export default {
     },
     // 下载
     handleDownload(record) {
-      window.open(downloadBackupFile(record.id), "_self");
+      window.open(downloadBackupFile(record.id), "_blank");
     },
     // 删除
     handleDelete(record) {

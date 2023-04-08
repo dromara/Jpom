@@ -10,26 +10,28 @@
       </a-button>
       <a-button type="primary" class="btn-group-item">
         <div class="user-name">
-          <a-tooltip :title="getUserInfo.name"> {{ getUserInfo.name }} </a-tooltip>
+          <a-tooltip :title="this.getUserInfo.name"> {{ getUserInfo.name }} </a-tooltip>
         </div>
       </a-button>
       <a-dropdown>
         <a-button type="primary" class="jpom-user-operation btn-group-item" icon="down"> </a-button>
         <a-menu slot="overlay">
-          <a-sub-menu>
-            <template #title>
-              <a-button type="link" icon="swap">切换工作空间</a-button>
-            </template>
-            <template v-for="(item, index) in myWorkspaceList">
-              <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace" @click="handleWorkspaceChange(item.id)" :key="index">
-                <a-button type="link" :disabled="item.id === selectWorkspace">
-                  {{ item.name }}
-                </a-button>
-              </a-menu-item>
-              <a-menu-divider v-if="index != -1" :key="`${item.id}-divider`" />
-            </template>
-          </a-sub-menu>
-          <a-menu-divider />
+          <template v-if="this.mode === 'normal'">
+            <a-sub-menu>
+              <template #title>
+                <a-button type="link" icon="swap">切换工作空间</a-button>
+              </template>
+              <template v-for="(item, index) in myWorkspaceList">
+                <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace" @click="handleWorkspaceChange(item.id)" :key="index">
+                  <a-button type="link" :disabled="item.id === selectWorkspace">
+                    {{ item.name }}
+                  </a-button>
+                </a-menu-item>
+                <a-menu-divider v-if="index != -1" :key="`${item.id}-divider`" />
+              </template>
+            </a-sub-menu>
+            <a-menu-divider />
+          </template>
           <a-menu-item @click="handleUpdatePwd">
             <a-button type="link" icon="lock"> 安全管理 </a-button>
           </a-menu-item>
@@ -105,12 +107,12 @@
                       v-clipboard:copy="temp.mfaKey"
                       v-clipboard:success="
                         () => {
-                          this.$notification.success({ message: '复制成功' });
+                          tempVue.prototype.$notification.success({ message: '复制成功' });
                         }
                       "
                       v-clipboard:error="
                         () => {
-                          this.$notification.error({ message: '复制失败' });
+                          tempVue.prototype.$notification.error({ message: '复制失败' });
                         }
                       "
                       readOnly
@@ -172,12 +174,12 @@
               v-clipboard:copy="temp.token"
               v-clipboard:success="
                 () => {
-                  this.$notification.success({ message: '复制成功' });
+                  tempVue.prototype.$notification.success({ message: '复制成功' });
                 }
               "
               v-clipboard:error="
                 () => {
-                  this.$notification.error({ message: '复制失败' });
+                  tempVue.prototype.$notification.error({ message: '复制失败' });
                 }
               "
             >
@@ -193,12 +195,12 @@
               v-clipboard:copy="temp.md5Token"
               v-clipboard:success="
                 () => {
-                  this.$notification.success({ message: '复制成功' });
+                  tempVue.prototype.$notification.success({ message: '复制成功' });
                 }
               "
               v-clipboard:error="
                 () => {
-                  this.$notification.error({ message: '复制失败' });
+                  tempVue.prototype.$notification.error({ message: '复制失败' });
                 }
               "
             >
@@ -283,9 +285,10 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { bindMfa, closeMfa, editUserInfo, generateMfa, getUserInfo as fetchUserInfo, myWorkspace, sendEmailCode, updatePwd } from "@/api/user/user";
-// import QRCode from "qrcodejs2";
+import { bindMfa, closeMfa, editUserInfo, generateMfa, getUserInfo, myWorkspace, sendEmailCode, updatePwd } from "@/api/user/user";
+import QRCode from "qrcodejs2";
 import sha1 from "js-sha1";
+import Vue from "vue";
 import { MFA_APP_TIP_ARRAY } from "@/utils/const";
 import UserLog from "./user-log.vue";
 
@@ -305,6 +308,7 @@ export default {
       updateNameVisible: false,
       updateUserVisible: false,
       temp: {},
+      tempVue: null,
       myWorkspaceList: [],
       selectWorkspace: "",
       customizeVisible: false,
@@ -372,33 +376,35 @@ export default {
     },
     creatQrCode(qrCodeDom, text) {
       // console.log(qrCodeDom);
-      // new QRCode(qrCodeDom, {
-      //   text: text || "xxxx",
-      //   width: 120,
-      //   height: 120,
-      //   colorDark: "#000000",
-      //   colorLight: "#ffffff",
-      //   correctLevel: QRCode.CorrectLevel.H,
-      // });
+      new QRCode(qrCodeDom, {
+        text: text || "xxxx",
+        width: 120,
+        height: 120,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H,
+      });
     },
     init() {
-      myWorkspace().then((res) => {
-        if (res.code == 200 && res.data) {
-          this.myWorkspaceList = res.data;
-          let wid = this.$route.query.wid;
-          wid = wid ? wid : this.getWorkspaceId;
-          const existWorkspace = this.myWorkspaceList.filter((item) => item.id === wid);
-          if (existWorkspace.length) {
-            this.$router.push({
-              query: { ...this.$route.query, wid: wid },
-            });
-            this.selectWorkspace = wid;
-          } else {
-            this.handleWorkspaceChange(res.data[0]?.id);
+      if (this.mode === "normal") {
+        myWorkspace().then((res) => {
+          if (res.code == 200 && res.data) {
+            this.myWorkspaceList = res.data;
+            let wid = this.$route.query.wid;
+            wid = wid ? wid : this.getWorkspaceId;
+            const existWorkspace = this.myWorkspaceList.filter((item) => item.id === wid);
+            if (existWorkspace.length) {
+              this.$router.push({
+                query: { ...this.$route.query, wid: wid },
+              });
+              this.selectWorkspace = wid;
+            } else {
+              this.handleWorkspaceChange(res.data[0]?.id);
+            }
           }
-          this.checkMfa();
-        }
-      });
+        });
+      }
+      this.checkMfa();
     },
     checkMfa() {
       if (!this.getUserInfo) {
@@ -490,7 +496,11 @@ export default {
               this.$notification.success({
                 message: "退出登录成功",
               });
-              this.$router.push("/login");
+              const query = Object.assign({}, this.$route.query);
+              this.$router.replace({
+                path: "/login",
+                query: query,
+              });
               resolve();
             });
           });
@@ -540,12 +550,13 @@ export default {
     },
     // 加载修改用户资料对话框
     handleUpdateUser() {
-      fetchUserInfo().then((res) => {
+      getUserInfo().then((res) => {
         if (res.code === 200) {
           this.temp = res.data;
           this.temp.token = this.getToken;
           //this.temp.md5Token = res.data.md5Token;
           this.updateUserVisible = true;
+          this.tempVue = Vue;
         }
       });
     },
@@ -603,7 +614,7 @@ export default {
         this.temp = { tabActiveKey: key };
       } else if (key == 2) {
         this.temp = { tabActiveKey: key };
-        fetchUserInfo().then((res) => {
+        getUserInfo().then((res) => {
           if (res.code === 200) {
             this.temp = { ...this.temp, status: res.data.bindMfa };
             this.$nextTick(() => {
@@ -618,10 +629,11 @@ export default {
       if (!this.temp.status) {
         return;
       }
+      this.tempVue = Vue;
       this.$nextTick(() => {
         const qrCodeDom = document.getElementById("qrCodeUrl");
         qrCodeDom.innerHTML = "";
-        // this.creatQrCode(qrCodeDom, this.temp.url);
+        this.creatQrCode(qrCodeDom, this.temp.url);
         this.$nextTick(function () {
           this.$refs.twoCode.focus();
         });

@@ -4,27 +4,27 @@
       <a-tab-pane key="1" tab="缓存信息">
         <a-alert message="请勿手动删除数据目录下面文件,如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除" style="margin-top: 10px; margin-bottom: 40px" banner />
         <a-timeline>
+          <a-timeline-item v-if="temp.dateTime">
+            <span class="layui-elem-quote">
+              插件端时间：{{ temp.dateTime }} <a-tag>{{ temp.timeZoneId }}</a-tag>
+            </span>
+          </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">数据目录占用空间：{{ temp.dataSize }}</span>
+            <span class="layui-elem-quote">数据目录占用空间：{{ renderSize(temp.dataSize) }}</span>
           </a-timeline-item>
           <a-timeline-item v-if="temp.fileSize">
             <a-space>
-              <span class="layui-elem-quote">临时文件占用空间：{{ temp.fileSize }}</span>
-              <a-button size="small" type="primary" v-if="temp.fileSize !== '0'" class="btn" @click="clear('fileSize')">清空</a-button>
+              <span class="layui-elem-quote">临时文件占用空间：{{ renderSize(temp.fileSize) }}</span>
+              <a-button size="small" type="primary" class="btn" @click="clear('fileSize')">清空</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item v-if="temp.oldJarsSize">
             <a-space>
-              <span class="layui-elem-quote">旧版程序包占有空间：{{ temp.oldJarsSize }}</span>
-              <a-button size="small" type="primary" v-if="temp.oldJarsSize !== '0'" class="btn" @click="clear('oldJarsSize')">清空</a-button>
+              <span class="layui-elem-quote">旧版程序包占有空间：{{ renderSize(temp.oldJarsSize) }}</span>
+              <a-button size="small" type="primary" class="btn" @click="clear('oldJarsSize')">清空</a-button>
             </a-space>
           </a-timeline-item>
-          <a-timeline-item>
-            <a-space>
-              <span class="layui-elem-quote">进程名缓存：{{ temp.pidName }}</span>
-              <a-button size="small" type="primary" v-if="temp.pidName" class="btn" @click="clear('pidName')">清空</a-button>
-            </a-space>
-          </a-timeline-item>
+
           <a-timeline-item>
             <a-space>
               <span class="layui-elem-quote">进程端口缓存：{{ temp.pidPort }}</span>
@@ -60,7 +60,7 @@
 <script>
 import { getNodeCache, clearCache } from "@/api/system";
 import TaskStat from "@/pages/system/taskStat";
-import { parseTime } from "@/utils/const";
+import { renderSize } from "@/utils/const";
 export default {
   components: {
     TaskStat,
@@ -80,7 +80,8 @@ export default {
     this.loadData();
   },
   methods: {
-    parseTime: parseTime,
+    // parseTime,
+    renderSize,
     // load data
     loadData() {
       getNodeCache(this.node.id).then((res) => {

@@ -22,13 +22,14 @@
 
           <a-dropdown v-if="this.layoutType === 'table'">
             <a-menu slot="overlay">
-              <a-menu-item key="1" @click="syncNodeWhiteConfig"> 同步白名单 </a-menu-item>
-              <a-menu-item key="2" @click="syncNodeConfig"> 同步系统配置 </a-menu-item>
+              <a-menu-item key="1" @click="syncToWorkspaceShow()"> 分配节点 </a-menu-item>
+              <a-menu-item key="2" @click="syncNodeWhiteConfig"> 同步白名单 </a-menu-item>
+              <a-menu-item key="3" @click="syncNodeConfig"> 同步系统配置 </a-menu-item>
             </a-menu>
-            <a-button type="primary"> 同步配置 <a-icon type="down" /> </a-button>
+            <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
           </a-dropdown>
           <a-tooltip v-else title="表格视图才能使用同步配置功能">
-            <a-button :disabled="true" type="primary"> 同步配置 <a-icon type="down" /> </a-button>
+            <a-button :disabled="true" type="primary"> 批量操作 <a-icon type="down" /> </a-button>
           </a-tooltip>
           <a-button type="primary" @click="changeLayout" :icon="this.layoutType === 'card' ? 'layout' : 'table'"> {{ this.layoutType === "card" ? "卡片" : "表格" }} </a-button>
           <a-tooltip>
@@ -176,7 +177,10 @@
           </a-tooltip>
 
           <template slot="operation" slot-scope="text, record">
-            <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
+            <a-space>
+              <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
+              <a-button @click="syncToWorkspaceShow(record)" type="primary" size="small">分配</a-button>
+            </a-space>
           </template>
         </a-table>
       </template>
@@ -246,6 +250,14 @@
                   <a-select-option value="DIRECT">DIRECT</a-select-option>
                 </a-select>
               </a-input>
+            </a-form-model-item>
+
+            <a-form-model-item label="编码方式" prop="transportEncryption">
+              <a-select show-search default-value="0" v-model="temp.transportEncryption" placeholder="请选择编码方式">
+                <a-select-option :value="0">不编码</a-select-option>
+                <a-select-option :value="1">BASE64</a-select-option>
+                <a-select-option :value="2">AES</a-select-option>
+              </a-select>
             </a-form-model-item>
           </a-collapse-panel>
         </a-collapse>
@@ -382,7 +394,7 @@ import {
   saveWhitelist,
   saveNodeConfig,
 } from "@/api/system/assets-machine";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime, formatPercent2Number } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime, formatPercent2Number, getCachePageLimit } from "@/utils/const";
 import CustomSelect from "@/components/customSelect";
 import { mapGetters } from "vuex";
 import machineInfo from "./machine-info.vue";
@@ -419,18 +431,18 @@ export default {
       workspaceList: [],
       viewLinkNode: false,
       nodeList: [],
-      layoutType: "card",
+      layoutType: null,
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "系统名", dataIndex: "osName", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "主机名", dataIndex: "hostName", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "节点地址", dataIndex: "jpomUrl", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "系统名", dataIndex: "osName", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "主机名", dataIndex: "hostName", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "节点地址", dataIndex: "jpomUrl", width: 150, sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "分组名", dataIndex: "groupName", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
         { title: "状态", dataIndex: "status", align: "center", width: "100px", ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "开机时间", sorter: true, dataIndex: "osSystemUptime", ellipsis: true, scopedSlots: { customRender: "duration2" } },
-        { title: "CPU占用", sorter: true, align: "center", dataIndex: "osOccupyCpu", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
-        { title: "内存占用", sorter: true, align: "center", dataIndex: "osOccupyMemory", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
-        { title: "硬盘占用", sorter: true, align: "center", dataIndex: "osOccupyDisk", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
+        { title: "开机时间", sorter: true, dataIndex: "osSystemUptime", width: 150, ellipsis: true, scopedSlots: { customRender: "duration2" } },
+        { title: "CPU占用", sorter: true, align: "center", dataIndex: "osOccupyCpu", width: "100px", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
+        { title: "内存占用", sorter: true, align: "center", dataIndex: "osOccupyMemory", width: "100px", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
+        { title: "硬盘占用", sorter: true, align: "center", dataIndex: "osOccupyDisk", width: "100px", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
         { title: "插件版本号", dataIndex: "jpomVersion", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         {
           title: "模板节点",
@@ -442,8 +454,22 @@ export default {
             return text ? "是" : "否";
           },
         },
-
-        { title: "操作", dataIndex: "operation", width: "80px", scopedSlots: { customRender: "operation" }, align: "center" },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          customRender: (text) => parseTime(text),
+          sorter: true,
+          width: "170px",
+        },
+        { title: "操作", dataIndex: "operation", width: "120px", fixed: "right", scopedSlots: { customRender: "operation" }, align: "center" },
       ],
       tableSelections: [],
       whiteConfigVisible: false,
@@ -466,10 +492,8 @@ export default {
     },
   },
   mounted() {
-    const layoutType = localStorage.getItem("tableLayout");
-    this.layoutType = layoutType === "table" ? "table" : "card";
     this.loadGroupList();
-    this.getMachineList();
+    this.changeLayout();
   },
   methods: {
     parseTime,
@@ -570,9 +594,11 @@ export default {
     syncToWorkspaceShow(item) {
       this.syncToWorkspaceVisible = true;
       this.loadWorkSpaceListAll();
-      this.temp = {
-        id: item.id,
-      };
+      if (item) {
+        this.temp = {
+          ids: item.id,
+        };
+      }
     },
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
@@ -580,6 +606,10 @@ export default {
           message: "请选择工作空间",
         });
         return false;
+      }
+      if (!this.temp.ids) {
+        this.temp = { ...this.temp, ids: this.tableSelections.join(",") };
+        this.tableSelections = [];
       }
       // 同步
       machineDistribute(this.temp).then((res) => {
@@ -626,8 +656,16 @@ export default {
     },
     // 切换视图
     changeLayout() {
-      this.layoutType = this.layoutType === "card" ? "table" : "card";
-      localStorage.setItem("tableLayout", this.layoutType);
+      if (!this.layoutType) {
+        const layoutType = localStorage.getItem("tableLayout");
+        // 默认表格
+        this.layoutType = layoutType === "card" ? "card" : "table";
+      } else {
+        this.layoutType = this.layoutType === "card" ? "table" : "card";
+        localStorage.setItem("tableLayout", this.layoutType);
+      }
+      this.listQuery = { ...this.listQuery, limit: this.layoutType === "card" ? 8 : getCachePageLimit() };
+      this.getMachineList();
     },
     syncNodeWhiteConfig() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
@@ -744,13 +782,7 @@ export default {
 
 <style scoped>
 .item-info {
-  padding: 2px 0;
-}
-
-.text-overflow-hidden {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  padding: 4px 0;
 }
 
 .item-info .title {

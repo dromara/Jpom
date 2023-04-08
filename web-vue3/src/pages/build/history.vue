@@ -1,16 +1,10 @@
 <template>
   <div class="full-content">
-    <!-- <div ref="filter" class="filter">
-
-      <a-button type="primary" @click="handleFilter">刷新</a-button>
-    </div> -->
     <!-- 数据表格 -->
     <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" bordered rowKey="id" @change="change" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
-          <a-select show-search option-filter-prop="children" v-model="listQuery.buildDataId" allowClear placeholder="请选择构建名称" class="search-input-item">
-            <a-select-option v-for="build in buildList" :key="build.id" :title="build.name">{{ build.name }}</a-select-option>
-          </a-select>
+          <a-input allowClear class="search-input-item" @pressEnter="loadData" v-model="listQuery['%buildName%']" placeholder="构建名称" />
           <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
           </a-select>
@@ -38,12 +32,8 @@
       <a-tooltip slot="buildNumberId" slot-scope="text, record" :title="text + ' ( 点击查看日志 ) '">
         <a-tag color="#108ee9" @click="handleBuildLog(record)">#{{ text }}</a-tag>
       </a-tooltip>
-      <a-tooltip slot="status" slot-scope="text" :title="text">
-        <a-tag v-if="text === 2 || text === 5" color="green">{{ statusMap[text] || "未知" }}</a-tag>
-        <a-tag v-else-if="text === 1 || text === 4" color="orange">{{ statusMap[text] || "未知" }}</a-tag>
-        <a-tag v-else-if="text === 8" color="blue"> {{ statusMap[text] || "未知" }} </a-tag>
-        <a-tag v-else-if="text === 3 || text === 6" color="red">{{ statusMap[text] || "未知" }}</a-tag>
-        <a-tag v-else>{{ statusMap[text] || "未知" }}</a-tag>
+      <a-tooltip slot="status" slot-scope="text, item" :title="item.statusMsg || statusMap[text] || '未知'">
+        <a-tag :color="statusColor[item.status]">{{ statusMap[text] || "未知" }}</a-tag>
       </a-tooltip>
       <a-tooltip slot="releaseMethod" slot-scope="text" :title="releaseMethodMap[text]">
         <span>{{ releaseMethodMap[text] }}</span>
@@ -52,9 +42,6 @@
         <span>{{ triggerBuildTypeMap[text] }}</span>
       </a-tooltip>
 
-      <a-tooltip slot="startTime" slot-scope="text, record" :title="`开始时间：${parseTime(record.startTime)}，${record.endTime ? '结束时间：' + parseTime(record.endTime) : ''}`">
-        <span>{{ parseTime(record.startTime) }}</span>
-      </a-tooltip>
       <a-tooltip slot="resultFileSize" slot-scope="text, record" :title="`产物文件大小：${renderSize(record.resultFileSize)}， 日志文件： ${renderSize(record.buildLogFileSize)}`">
         <span>{{ renderSize(record.resultFileSize) }}</span>
         <!-- <div>{{ parseTime(record.endTime) }}</div> -->
@@ -107,7 +94,7 @@
 </template>
 <script>
 import BuildLog from "./log";
-import { deleteBuildHistory, downloadBuildFile, downloadBuildLog, getBuildListAll, geteBuildHistory, releaseMethodMap, rollback, statusMap, triggerBuildTypeMap } from "@/api/build-info";
+import { deleteBuildHistory, downloadBuildFile, downloadBuildLog, geteBuildHistory, releaseMethodMap, rollback, statusMap, statusColor, triggerBuildTypeMap } from "@/api/build-info";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, formatDuration, parseTime, renderSize } from "@/utils/const";
 
 export default {
@@ -120,10 +107,11 @@ export default {
       triggerBuildTypeMap: triggerBuildTypeMap,
       loading: false,
       list: [],
-      buildList: [],
+
       total: 0,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-      statusMap: statusMap,
+      statusMap,
+      statusColor,
       temp: {},
       buildLogVisible: false,
       tableSelections: [],
@@ -139,15 +127,22 @@ export default {
           title: "开始时间",
           dataIndex: "startTime",
           sorter: true,
-          scopedSlots: { customRender: "startTime" },
+          customRender: (text) => parseTime(text),
           width: "170px",
         },
         {
           title: "耗时",
           dataIndex: "endTime",
-          sorter: true,
+          // sorter: true,
           scopedSlots: { customRender: "endTime" },
           width: "120px",
+        },
+        {
+          title: "数据更新时间",
+          dataIndex: "modifyTimeMillis",
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
         },
         { title: "发布方式", dataIndex: "releaseMethod", width: "100px", ellipsis: true, scopedSlots: { customRender: "releaseMethod" } },
         { title: "构建人", dataIndex: "modifyUser", width: "130px", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
@@ -167,21 +162,14 @@ export default {
     },
   },
   created() {
-    this.loadBuildList();
+    // this.loadBuildList();
     this.loadData();
   },
   methods: {
     parseTime,
     renderSize,
     formatDuration,
-    // 加载构建列表
-    loadBuildList() {
-      getBuildListAll().then((res) => {
-        if (res.code === 200) {
-          this.buildList = res.data;
-        }
-      });
-    },
+
     // 加载数据
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
@@ -212,12 +200,12 @@ export default {
 
     // 下载构建日志
     handleDownload(record) {
-      window.open(downloadBuildLog(record.id), "_self");
+      window.open(downloadBuildLog(record.id), "_blank");
     },
 
     // 下载构建产物
     handleFile(record) {
-      window.open(downloadBuildFile(record.id), "_self");
+      window.open(downloadBuildFile(record.id), "_blank");
     },
 
     // 回滚

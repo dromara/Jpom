@@ -33,16 +33,18 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="`${nodeMap[text]} 节点ID： ${text}`">
-        <span>{{ nodeMap[text] }}</span>
-      </a-tooltip>
+
       <a-tooltip slot="name" @click="handleEdit(record)" slot-scope="text, record" placement="topLeft" :title="text">
         <!-- <span>{{ text }}</span> -->
         <a-button type="link" style="padding: 0px" size="small">{{ text }}</a-button>
       </a-tooltip>
+      <template slot="global" slot-scope="text">
+        <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
+        <a-tag v-else>工作空间</a-tag>
+      </template>
       <template slot="scriptType" slot-scope="text">
         <a-tooltip v-if="text === 'server-sync'" title="服务端分发的脚本">
           <a-icon type="cluster" />
@@ -52,13 +54,6 @@
         </a-tooltip>
       </template>
 
-      <a-tooltip
-        slot="modifyTimeMillis"
-        slot-scope="text, record"
-        :title="`创建时间：${parseTime(record.createTimeMillis)} ${record.modifyTimeMillis ? '修改时间：' + parseTime(record.modifyTimeMillis) : ''}`"
-      >
-        <span>{{ parseTime(record.modifyTimeMillis) }}</span>
-      </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
@@ -83,8 +78,34 @@
             <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
           </div>
         </a-form-model-item>
-        <a-form-model-item label="默认参数" prop="defArgs">
+        <!-- <a-form-model-item label="默认参数" prop="defArgs">
           <a-input v-model="temp.defArgs" placeholder="默认参数" />
+        </a-form-model-item> -->
+        <a-form-model-item label="默认参数">
+          <div v-for="(item, index) in commandParams" :key="item.key">
+            <a-row type="flex" justify="center" align="middle">
+              <a-col :span="22">
+                <a-input :addon-before="`参数${index + 1}描述`" v-model="item.desc" placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义" />
+                <a-input :addon-before="`参数${index + 1}值`" v-model="item.value" placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值" />
+              </a-col>
+              <a-col :span="2">
+                <a-row type="flex" justify="center" align="middle">
+                  <a-col>
+                    <a-icon @click="() => commandParams.splice(index, 1)" type="minus-circle" style="color: #ff0000" />
+                  </a-col>
+                </a-row>
+              </a-col>
+            </a-row>
+            <a-divider style="margin: 5px 0" />
+          </div>
+
+          <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
+        </a-form-model-item>
+        <a-form-model-item label="共享" prop="global">
+          <a-radio-group v-model="temp.global">
+            <a-radio :value="true"> 全局</a-radio>
+            <a-radio :value="false"> 当前工作空间</a-radio>
+          </a-radio-group>
         </a-form-model-item>
         <a-form-model-item label="定时执行" prop="autoExecCron">
           <a-auto-complete v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
@@ -118,11 +139,21 @@
       <script-console v-if="drawerConsoleVisible" :nodeId="temp.nodeId" :defArgs="temp.defArgs" :id="temp.id" :scriptId="temp.scriptId" />
     </a-drawer>
     <!-- 脚本日志 -->
-    <a-modal destroyOnClose :title="drawerTitle" width="85vw" v-model="drawerLogVisible" :footer="null" :maskClosable="false">
+    <a-drawer
+      destroyOnClose
+      :title="drawerTitle"
+      width="50vw"
+      :visible="drawerLogVisible"
+      @close="
+        () => {
+          this.drawerLogVisible = false;
+        }
+      "
+    >
       <script-log v-if="drawerLogVisible" :scriptId="temp.scriptId" :nodeId="temp.nodeId" />
-    </a-modal>
+    </a-drawer>
     <!-- 触发器 -->
-    <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null">
       <a-form-model ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template slot="tabBarExtraContent">
@@ -145,12 +176,12 @@
                 v-clipboard:copy="temp.triggerUrl"
                 v-clipboard:success="
                   () => {
-                    this.$notification.success({ message: '复制成功' });
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
                   }
                 "
                 v-clipboard:error="
                   () => {
-                    this.$notification.error({ message: '复制失败' });
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
                   }
                 "
                 type="info"
@@ -165,12 +196,12 @@
                 v-clipboard:copy="temp.batchTriggerUrl"
                 v-clipboard:success="
                   () => {
-                    this.$notification.success({ message: '复制成功' });
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
                   }
                 "
                 v-clipboard:error="
                   () => {
-                    this.$notification.error({ message: '复制失败' });
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
                   }
                 "
                 type="info"
@@ -195,6 +226,7 @@ import { getNodeListAll } from "@/api/node";
 import ScriptConsole from "@/pages/node/node-layout/other/script-console";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import ScriptLog from "@/pages/node/node-layout/other/script-log";
+import Vue from "vue";
 
 export default {
   components: {
@@ -216,20 +248,40 @@ export default {
       drawerConsoleVisible: false,
       drawerLogVisible: false,
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "节点名称", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
+        { title: "scriptId", dataIndex: "scriptId", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "name" } },
+        { title: "节点名称", dataIndex: "nodeName", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
+        { title: "工作空间名称", dataIndex: "workspaceName", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
         { title: "类型", dataIndex: "scriptType", width: 70, align: "center", ellipsis: true, scopedSlots: { customRender: "scriptType" } },
+        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
         { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, width: 120, scopedSlots: { customRender: "autoExecCron" } },
-        { title: "修改时间", dataIndex: "modifyTimeMillis", width: 170, sorter: true, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
-        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
-        { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "220px" },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          sorter: true,
+          width: "170px",
+          ellipsis: true,
+          customRender: (text) => parseTime(text),
+        },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          sorter: true,
+          width: "170px",
+          ellipsis: true,
+          customRender: (text) => parseTime(text),
+        },
+        { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
+        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: "120px" },
+        { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" }, width: 120 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "240px" },
       ],
       rules: {
-        name: [{ required: true, message: "Please input Script name", trigger: "blur" }],
-        context: [{ required: true, message: "Please input Script context", trigger: "blur" }],
+        name: [{ required: true, message: "请输入脚本名称", trigger: "blur" }],
+        context: [{ required: true, message: "请输入脚本内容", trigger: "blur" }],
       },
       triggerVisible: false,
+      commandParams: [],
     };
   },
   computed: {
@@ -262,9 +314,7 @@ export default {
         this.loading = false;
       });
     },
-    parseTime(v) {
-      return parseTime(v);
-    },
+    parseTime,
     // 修改
     handleEdit(record) {
       itemScript({
@@ -272,8 +322,9 @@ export default {
         nodeId: record.nodeId,
       }).then((res) => {
         if (res.code === 200) {
-          this.temp = Object.assign({}, res.data);
+          this.temp = Object.assign({}, res.data, { global: res.data.workspaceId === "GLOBAL", workspaceId: "" });
           this.temp.nodeId = record.nodeId;
+          this.commandParams = this.temp.defArgs ? JSON.parse(this.temp.defArgs) : [];
           //
           this.editScriptVisible = true;
         }
@@ -291,6 +342,19 @@ export default {
       this.$refs["editScriptForm"].validate((valid) => {
         if (!valid) {
           return false;
+        }
+        if (this.commandParams && this.commandParams.length > 0) {
+          for (let i = 0; i < this.commandParams.length; i++) {
+            if (!this.commandParams[i].desc) {
+              this.$notification.error({
+                message: "请填写第" + (i + 1) + "个参数的描述",
+              });
+              return false;
+            }
+          }
+          this.temp.defArgs = JSON.stringify(this.commandParams);
+        } else {
+          this.temp.defArgs = "";
         }
         // 提交数据
         editScript(this.temp).then((res) => {
@@ -373,6 +437,7 @@ export default {
     // 触发器
     handleTrigger(record) {
       this.temp = Object.assign({}, record);
+      this.tempVue = Vue;
       getTriggerUrl({
         id: record.id,
       }).then((res) => {

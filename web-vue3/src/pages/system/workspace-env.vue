@@ -127,9 +127,6 @@ export default {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
           customRender: (text) => {
-            if (!text) {
-              return "";
-            }
             return parseTime(text);
           },
           sorter: true,

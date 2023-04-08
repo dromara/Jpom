@@ -111,6 +111,14 @@ export default {
               element: document.querySelector(".layout-content"),
               intro: "这里是主要的内容展示区域",
             },
+            {
+              title: "导航助手",
+              intro: "温馨提示部分页面有表格视图和卡片视图，不同视图中的功能按钮有些微的差异奥",
+            },
+            {
+              title: "导航助手",
+              intro: "温馨提示部分数据创建页面会存在小问号提示功能或者属性的作用以及含义,建议您都看看小问号里面的内容",
+            },
           ],
         },
       });
@@ -146,7 +154,7 @@ export default {
       });
       // 控制台输出版本号信息
       const buildInfo = pageBuildInfo();
-      executionRequest("https://jpom.top/docs/versions.show", { ...buildInfo }).then((data) => {
+      executionRequest("https://jpom.top/docs/versions.show", { ...buildInfo, p: this.$route.path }).then((data) => {
         console.log(
           "\n %c " + parseTime(buildInfo.t) + " %c vs %c " + buildInfo.v + " %c vs %c " + data,
           "color: #ffffff; background: #f1404b; padding:5px 0;",
@@ -164,7 +172,7 @@ export default {
   },
 };
 </script>
-<style scoped lang="less">
+<style scoped>
 #app-layout {
   min-height: 100vh;
 }

@@ -2,15 +2,37 @@
   <div>
     <a-timeline>
       <a-timeline-item>
-        <span class="layui-elem-quote">当前程序打包时间：{{ temp.timeStamp }}</span>
+        <span class="layui-elem-quote">
+          当前程序打包时间：{{ temp.timeStamp }}
+          <a-tag v-if="this.nodeId || this.machineId">agent</a-tag>
+          <a-tag v-else>server</a-tag>
+        </span>
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote">当前前端打包时间：{{ temp.vueTimeStamp }}</span>
       </a-timeline-item>
+      <a-timeline-item v-if="!this.nodeId && !this.machineId">
+        <span class="layui-elem-quote">beta计划：</span>
+        <a-space>
+          <a-switch checked-children="加入" un-checked-children="未加入" :disabled="true" v-model="temp.joinBetaRelease" />
+          <template v-if="temp.joinBetaRelease">
+            <a-button type="link" @click="handleChangeBetaRelease(false)">关闭 beat计划</a-button>
+          </template>
+          <template v-else>
+            <a-tooltip>
+              <template #title>
+                加入 beta 计划可以及时获取到最新的功能、一些优化功能、最快修复 bug 的版本，但是 beta 版也可能在部分新功能上存在不稳定的情况。您需要根据您业务情况来评估是否可以加入 beta，在使用 beta
+                版过程中遇到问题可以随时反馈给我们，我们会尽快为您解答。
+              </template>
+              <a-button icon="question-circle" type="link" @click="handleChangeBetaRelease(true)">我要加入</a-button>
+            </a-tooltip>
+          </template>
+        </a-space>
+      </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote">当前版本号：{{ temp.version }} </span>
         <template v-if="temp.upgrade !== undefined">
-          <a-tag v-if="temp.upgrade" color="pink" @click="upgrageVerion">新版本：{{ temp.newVersion }} </a-tag>
+          <a-tag v-if="temp.upgrade" color="pink" @click="upgrageVerion">新版本：{{ temp.newVersion }} {{ temp.newBeta ? "/beta" : "" }} <a-icon type="download" /></a-tag>
           <a-tag v-else color="orange" @click="checkVersion">
             <a-icon type="rocket" />
           </a-tag>
@@ -65,7 +87,8 @@
   </div>
 </template>
 <script>
-import { systemInfo, uploadUpgradeFile, changelog, checkVersion, remoteUpgrade, uploadUpgradeFileMerge } from "@/api/system";
+import { systemInfo, uploadUpgradeFile, changelog, checkVersion, remoteUpgrade, uploadUpgradeFileMerge, changBetaRelease } from "@/api/system";
+import Vue from "vue";
 import MarkdownItVue from "markdown-it-vue";
 import "markdown-it-vue/dist/markdown-it-vue.css";
 import { RESTART_UPGRADE_WAIT_TIME_COUNT, parseTime, compareVersion, pageBuildInfo, formatDuration } from "@/utils/const";
@@ -124,7 +147,7 @@ export default {
         this.temp = res.data?.manifest;
         //
         // vueTimeStamp
-        this.temp = { ...this.temp, vueTimeStamp: parseTime(this.getMeta("build-time")) };
+        this.temp = { ...this.temp, vueTimeStamp: parseTime(this.getMeta("build-time")), joinBetaRelease: res.data?.joinBetaRelease };
         //
         changelog({
           nodeId: this.nodeId,
@@ -247,7 +270,7 @@ export default {
     },
     startCheckUpgradeStatus(msg) {
       this.checkCount = 0;
-      this.$setLoading({
+      Vue.prototype.$setLoading({
         spinning: true,
         tip: (msg || "升级中，请稍候...") + ",请耐心等待暂时不用刷新页面,升级成功后会自动刷新",
       });
@@ -260,7 +283,7 @@ export default {
           .then((res) => {
             let manifest = res.data?.manifest;
             if (res.code === 200 && manifest?.timeStamp !== this.temp.timeStamp) {
-              this.$setLoading("closeAll");
+              Vue.prototype.$setLoading("closeAll");
               clearInterval(this.timer);
               this.$notification.success({
                 message: "升级成功",
@@ -274,7 +297,7 @@ export default {
                 this.$notification.warning({
                   message: "未升级成功：" + (res.msg || ""),
                 });
-                this.$setLoading("closeAll");
+                Vue.prototype.$setLoading("closeAll");
                 clearInterval(this.timer);
               }
             }
@@ -282,13 +305,13 @@ export default {
           .catch((error) => {
             console.error(error);
             if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
-              this.$setLoading("closeAll");
+              Vue.prototype.$setLoading("closeAll");
               clearInterval(this.timer);
               this.$notification.error({
                 message: "升级超时,请去服务器查看控制台日志排查问题",
               });
             } else {
-              this.$setLoading({
+              Vue.prototype.$setLoading({
                 spinning: true,
                 tip: (msg || "升级中，请稍候...") + ",请耐心等待暂时不用刷新页面,升级成功后会自动刷新",
               });
@@ -352,7 +375,7 @@ export default {
           resolve(false);
           return;
         }
-        this.temp = { ...this.temp, upgrade: data.upgrade, newVersion: data.tagName };
+        this.temp = { ...this.temp, upgrade: data.upgrade, newVersion: data.tagName, newBeta: data.beta };
 
         if (this.temp.upgrade && data.changelog) {
           this.changelog = data.changelog;
@@ -392,6 +415,37 @@ export default {
               });
 
               this.startCheckUpgradeStatus(res.msg);
+            }
+          });
+        },
+      });
+    },
+    // 加入beta计划
+    handleChangeBetaRelease(beta) {
+      const html = beta
+        ? "确认要加入 beta 计划吗？<ul style='color:red;'>" +
+          "<li><b> 加入 beta 计划可以及时获取到最新的功能、一些优化功能、最快修复 bug 的版本，但是 beta 版也可能在部分新功能上存在不稳定的情况。</b></li>" +
+          "<li><b>您需要根据您业务情况来评估是否可以加入 beta。</b></li>" +
+          "<li>在使用 beta 版过程中遇到问题可以随时反馈给我们，我们会尽快为您解答。</li>" +
+          " </ul>"
+        : "确认要关闭 beta 计划吗？";
+      const h = this.$createElement;
+      this.$confirm({
+        title: "系统提示",
+        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          //
+          changBetaRelease({
+            beta: beta,
+          }).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+
+              this.loadData();
             }
           });
         },

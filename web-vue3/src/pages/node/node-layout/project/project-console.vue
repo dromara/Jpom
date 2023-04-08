@@ -115,9 +115,9 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getLongTermToken"]),
+    ...mapGetters(["getLongTermToken", "getWorkspaceId"]),
     socketUrl() {
-      return getWebSocketUrl("/socket/console", `userId=${this.getLongTermToken}&id=${this.id}&nodeId=${this.nodeId}&type=console&copyId=${this.copyId || ""}`);
+      return getWebSocketUrl("/socket/console", `userId=${this.getLongTermToken}&id=${this.id}&nodeId=${this.nodeId}&type=console&copyId=${this.copyId || ""}&workspaceId=${this.getWorkspaceId}`);
     },
   },
   mounted() {
@@ -293,7 +293,7 @@ export default {
         copyId: this.copyId,
       };
       // 请求接口拿到 blob
-      window.open(downloadProjectLogFile(params), "_self");
+      window.open(downloadProjectLogFile(params), "_blank");
     },
     // 日志备份列表
     handleLogBack() {
@@ -326,7 +326,7 @@ export default {
         key: record.filename,
       };
       // 请求接口拿到 blob
-      window.open(downloadProjectLogBackFile(params), "_self");
+      window.open(downloadProjectLogBackFile(params), "_blank");
     },
     // 删除日志备份文件
     handleDelete(record) {

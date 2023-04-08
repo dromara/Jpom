@@ -15,19 +15,14 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <a-tooltip
-        slot="modifyTimeMillis"
-        slot-scope="text, record"
-        :title="`创建时间：${parseTime(record.createTimeMillis)} ${record.modifyTimeMillis ? '修改时间：' + parseTime(record.modifyTimeMillis) : ''}`"
-      >
-        <span>{{ parseTime(record.modifyTimeMillis) }}</span>
-      </a-tooltip>
+      <template slot="global" slot-scope="text">
+        <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
+        <a-tag v-else>工作空间</a-tag>
+      </template>
+
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
@@ -53,8 +48,34 @@
             <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
           </div>
         </a-form-model-item>
-        <a-form-model-item label="默认参数" prop="defArgs">
+        <!-- <a-form-model-item label="默认参数" prop="defArgs">
           <a-input v-model="temp.defArgs" placeholder="默认参数" />
+        </a-form-model-item> -->
+        <a-form-model-item label="默认参数">
+          <div v-for="(item, index) in commandParams" :key="item.key">
+            <a-row type="flex" justify="center" align="middle">
+              <a-col :span="22">
+                <a-input :addon-before="`参数${index + 1}描述`" v-model="item.desc" placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义" />
+                <a-input :addon-before="`参数${index + 1}值`" v-model="item.value" placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值" />
+              </a-col>
+              <a-col :span="2">
+                <a-row type="flex" justify="center" align="middle">
+                  <a-col>
+                    <a-icon @click="() => commandParams.splice(index, 1)" type="minus-circle" style="color: #ff0000" />
+                  </a-col>
+                </a-row>
+              </a-col>
+            </a-row>
+            <a-divider style="margin: 5px 0" />
+          </div>
+
+          <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
+        </a-form-model-item>
+        <a-form-model-item label="共享" prop="global">
+          <a-radio-group v-model="temp.global">
+            <a-radio :value="true"> 全局</a-radio>
+            <a-radio :value="false"> 当前工作空间</a-radio>
+          </a-radio-group>
         </a-form-model-item>
         <a-form-model-item label="定时执行" prop="autoExecCron">
           <a-auto-complete v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
@@ -106,18 +127,36 @@ export default {
       drawerConsoleVisible: false,
 
       columns: [
-        // { title: "Script ID", dataIndex: "id", width: 200, ellipsis: true, scopedSlots: { customRender: "id" } },
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, scopedSlots: { customRender: "autoExecCron" } },
-        { title: "修改时间", dataIndex: "modifyTimeMillis", width: 180, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
-        // { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
-        { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 180 },
+        { title: "Script ID", dataIndex: "scriptId", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "tooltip" } },
+        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, width: "120px", scopedSlots: { customRender: "autoExecCron" } },
+        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => parseTime(text),
+          width: "170px",
+        },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          width: "170px",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => parseTime(text),
+        },
+        { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
+        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: "120px" },
+        // { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, width: 150, scopedSlots: { customRender: "lastRunUser" } },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "180px" },
       ],
       rules: {
-        name: [{ required: true, message: "Please input Script name", trigger: "blur" }],
-        context: [{ required: true, message: "Please input Script context", trigger: "blur" }],
+        name: [{ required: true, message: "请输入脚本名称", trigger: "blur" }],
+        context: [{ required: true, message: "请输入脚本内容", trigger: "blur" }],
       },
+      commandParams: [],
     };
   },
   computed: {
@@ -144,14 +183,13 @@ export default {
         this.loading = false;
       });
     },
-    parseTime(v) {
-      return parseTime(v);
-    },
+    parseTime,
     // 添加
     handleAdd() {
       this.temp = {
         type: "add",
       };
+      this.commandParams = [];
       this.editScriptVisible = true;
     },
     // 修改
@@ -160,7 +198,8 @@ export default {
         id: record.scriptId,
         nodeId: this.node.id,
       }).then((res) => {
-        this.temp = Object.assign({}, res.data);
+        this.temp = Object.assign({}, res.data, { global: res.data.workspaceId === "GLOBAL", workspaceId: "" });
+        this.commandParams = this.temp.defArgs ? JSON.parse(this.temp.defArgs) : [];
         //
         this.editScriptVisible = true;
       });
@@ -172,6 +211,19 @@ export default {
           message: "服务端同步的脚本不能在此修改",
         });
         return;
+      }
+      if (this.commandParams && this.commandParams.length > 0) {
+        for (let i = 0; i < this.commandParams.length; i++) {
+          if (!this.commandParams[i].desc) {
+            this.$notification.error({
+              message: "请填写第" + (i + 1) + "个参数的描述",
+            });
+            return false;
+          }
+        }
+        this.temp.defArgs = JSON.stringify(this.commandParams);
+      } else {
+        this.temp.defArgs = "";
       }
       // 检验表单
       this.$refs["editScriptForm"].validate((valid) => {
