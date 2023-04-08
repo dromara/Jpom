@@ -12,9 +12,8 @@ import { defineStore } from 'pinia'
 export const useMenuStore = defineStore('menu', {
 	state: () => ({
 		activeTabKey: localStorage.getItem(ACTIVE_TAB_KEY),
-		tabList: JSON.parse(localStorage.getItem(TAB_LIST_KEY)) || [],
+		tabList: localStorage.getItem(TAB_LIST_KEY) ? JSON.parse(localStorage.getItem(TAB_LIST_KEY)!) : [],
 		activeMenuKey: localStorage.getItem(ACTIVE_MENU_KEY),
-
 		menuOpenKeys: [],
 		menus: [],
 	}),
@@ -44,12 +43,12 @@ export const useMenuStore = defineStore('menu', {
 			return new Promise((resolve, reject) => {
 				if (state.menus.length) {
 					// 避免重复加载
-					resolve()
+					resolve(true)
 					return
 				}
 				dispatch('restLoadSystemMenus')
 					.then(() => {
-						resolve()
+						resolve(true)
 					})
 					.catch((error) => {
 						reject(error)
@@ -196,25 +195,25 @@ export const useMenuStore = defineStore('menu', {
 				}
 			})
 		},
-		activeTabKey({ commit }, key) {
-			commit('setActiveTabKey', key)
+		setActiveTabKey(key: string) {
+			this.activeTabKey = key
 			localStorage.setItem(ACTIVE_TAB_KEY, key)
 		},
 		// 选中当前菜单
-		activeMenu({ commit }, activeMenuKey) {
-			commit('setActiveMenuKey', activeMenuKey)
+		setActiveMenu(activeMenuKey: string) {
+			this.activeMenuKey = activeMenuKey
 			localStorage.setItem(ACTIVE_MENU_KEY, activeMenuKey)
 		},
 
 		// 打开的菜单
-		menuOpenKeys({ commit, state }, keys) {
+		menuOpenKeys(keys: string[] | string) {
 			if (Array.isArray(keys)) {
-				commit('setMenuOpenKeys', keys)
+				this.menuOpenKeys = keys
 			} else if (typeof keys == 'string') {
-				const nowKeys = state.menuOpenKeys
+				const nowKeys = this.menuOpenKeys
 				if (!nowKeys.includes(keys)) {
 					nowKeys.push(keys)
-					commit('setMenuOpenKeys', nowKeys)
+					this.menuOpenKeys = nowKeys
 				}
 			}
 		},
