@@ -34,8 +34,9 @@ router.beforeEach((to, from, next) => {
       console.warn(`from: ${from.path} ==> to: ${to.path}`);
     }
     next({
-      redirect: "/login",
+      path: "/login",
       query: from.query,
+      replace: true,
     });
     return;
   }
@@ -60,6 +61,7 @@ router.beforeEach((to, from, next) => {
       .catch(() => {
         next({
           redirect: "/",
+          replace: true,
         });
       });
   } else {
@@ -75,6 +77,7 @@ router.beforeEach((to, from, next) => {
       .catch(() => {
         next({
           redirect: "/",
+          replace: true,
         });
       });
   }
