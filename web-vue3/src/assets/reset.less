@@ -1,0 +1,103 @@
+/* 全局样式，重置样式 */
+html,
+body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.ant-drawer-body {
+  padding: 10px;
+}
+
+.ant-table-wrapper {
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.ant-table-body {
+  overflow-x: auto !important;
+}
+
+.search-input-item {
+  width: 140px;
+  /* margin-right: 10px; */
+}
+
+.filter {
+  margin-bottom: 10px;
+}
+/* 
+.ant-btn {
+  margin-right: 10px;
+} */
+
+.ant-btn-sm {
+  font-size: 12px;
+}
+
+pre {
+  margin: 0;
+}
+
+.ant-modal-confirm-body .ant-modal-confirm-content {
+  font-size: 16px;
+}
+
+.ant-modal-confirm-body .ant-modal-confirm-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.hide-scrollbar *::-webkit-scrollbar {
+  width: 0 !important;
+  display: none;
+}
+
+.hide-scrollbar * {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar pre::-webkit-scrollbar {
+  width: 0 !important;
+  display: none;
+}
+
+.hide-scrollbar pre {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@color-border-last: #e5e5e5;
+@color-neutral-last: #f7f8fa;
+@scrollbar-size: 4px;
+
+// 兼容火狐
+* {
+  scrollbar-width: thin;
+  scrollbar-color: @color-border-last @color-neutral-last;
+}
+// 滚动条样式
+.ant-table-body::-webkit-scrollbar {
+  width: @scrollbar-size;
+  // height: @scrollbar-size;
+  //  width: 10px;
+  height: 10px;
+  // width: 2px;
+  border-radius: 2px;
+  background-color: transparent;
+}
+// 滚动条-活动按钮
+.ant-table-body::-webkit-scrollbar-thumb {
+  background: @color-border-last;
+  border-radius: 2px;
+  box-shadow: inset 0 0 6px @color-border-last;
+}
+// 滚动条背景
+.ant-table-body::-webkit-scrollbar-track {
+  background-color: @color-neutral-last;
+  border-radius: 2px;
+  box-shadow: inset 0 0 6px @color-neutral-last;
+}
