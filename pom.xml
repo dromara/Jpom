@@ -147,6 +147,7 @@
 
                         <exclude>docs/**</exclude>
                         <exclude>web-vue/**</exclude>
+                        <exclude>web-vue3/**</exclude>
                         <exclude>**/*.yml</exclude>
                         <exclude>**/*.md</exclude>
                         <exclude>**/*.txt</exclude>
