@@ -1,0 +1,29 @@
+# http://editorconfig.org
+
+# 和父级配置一致，避免使用新的工作空间打开当前项目，无法获取到配置问题
+
+root = true
+
+[*]
+indent_style = space
+charset = utf-8
+end_of_line = lf
+trim_trailing_whitespace = true
+insert_final_newline = true
+max_line_length = 200
+
+[*.{json, yml}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+insert_final_newline = false
+trim_trailing_whitespace = false
+
+[*.{vue,ts}]
+indent_style = space
+indent_size = 2
+
+[*.js]
+indent_style = space
+indent_size = 2
