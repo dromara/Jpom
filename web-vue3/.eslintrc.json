@@ -1,0 +1,28 @@
+{
+  "root": true,
+  "env": {
+    "node": true,
+    "es2021": true,
+    "browser": true
+  },
+  "parser": "vue-eslint-parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "parser": "@typescript-eslint/parser",
+    "ecmaFeatures": {
+      "jsx": true // 启用 jsx
+    }
+  },
+  "plugins": ["prettier", "@typescript-eslint"],
+  "extends": [
+    "eslint:recommended", // 内置规则
+    "plugin:vue/vue3-recommended", // 支持 vue sfc
+    "prettier"
+  ],
+  "rules": {
+    // 禁止使用 var，而应该用 let 或 const
+    "no-var": "error",
+    "@typescript-eslint/no-unused-vars": ["error", { "args": "none" }],
+    "vue/multi-word-component-names": "off"
+  }
+}
