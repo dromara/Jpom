@@ -7,21 +7,43 @@
         <div class="dir-container">
           <a-space>
             <a-button size="small" type="primary" @click="loadData">刷新目录</a-button>
-            <a-button size="small" type="primary" v-if="showConsole" @click="goConsole" v-show="noFileModes.includes(runMode)">控制台</a-button>
+            <a-button
+              size="small"
+              type="primary"
+              v-if="showConsole"
+              @click="goConsole"
+              v-show="noFileModes.includes(runMode)"
+              >控制台</a-button
+            >
             <a-button size="small" type="primary" @click="backupList">备份列表</a-button>
           </a-space>
         </div>
 
-        <a-directory-tree :replace-fields="treeReplaceFields" @select="nodeClick" :loadData="onTreeData" :treeData="treeList"></a-directory-tree>
+        <a-directory-tree
+          :replace-fields="treeReplaceFields"
+          @select="nodeClick"
+          :loadData="onTreeData"
+          :treeData="treeList"
+        ></a-directory-tree>
       </a-layout-sider>
       <!-- 表格 -->
       <a-layout-content class="file-content">
-        <a-table :data-source="fileList" size="middle" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+        <a-table
+          :data-source="fileList"
+          size="middle"
+          :loading="loading"
+          :columns="columns"
+          :pagination="false"
+          bordered
+          :rowKey="(record, index) => index"
+        >
           <template slot="title">
             <!-- <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
             <a-space>
               <a-dropdown :disabled="!Object.keys(this.tempNode).length">
-                <a-button size="small" type="primary" @click="(e) => e.preventDefault()"><a-icon type="upload" />上传</a-button>
+                <a-button size="small" type="primary" @click="(e) => e.preventDefault()"
+                  ><a-icon type="upload" />上传</a-button
+                >
                 <a-menu slot="overlay">
                   <a-menu-item @click="handleUpload">
                     <a-space><a-icon type="file" />上传文件</a-space>
@@ -48,8 +70,12 @@
                   </a-menu-item>
                 </a-menu>
               </a-dropdown>
-              <a-tooltip title="通过 URL 下载远程文件到项目文件夹,需要到节点系统配置->白名单配置中配置允许的 HOST 白名单">
-                <a-button size="small" type="primary" @click="openRemoteUpload"><a-icon type="cloud-download" /></a-button>
+              <a-tooltip
+                title="通过 URL 下载远程文件到项目文件夹,需要到节点系统配置->白名单配置中配置允许的 HOST 白名单"
+              >
+                <a-button size="small" type="primary" @click="openRemoteUpload"
+                  ><a-icon type="cloud-download"
+                /></a-button>
               </a-tooltip>
               <a-tooltip title="刷新文件表格">
                 <a-button size="small" type="primary" @click="loadFileList"><a-icon type="reload" /></a-button>
@@ -58,7 +84,7 @@
                 <a-button size="small" type="danger" @click="clearFile"><a-icon type="delete" /></a-button>
               </a-tooltip>
 
-              <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath || "" }}</a-tag>
+              <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath || '' }}</a-tag>
               <div>文件名栏支持右键菜单</div>
             </a-space>
           </template>
@@ -67,7 +93,9 @@
               <div>{{ text }}</div>
               <a-menu slot="overlay">
                 <a-menu-item key="1">
-                  <a-button icon="bars" @click="goReadFile(record)" :disabled="!record.textFileEdit" type="link"> 跟踪文件 </a-button>
+                  <a-button icon="bars" @click="goReadFile(record)" :disabled="!record.textFileEdit" type="link">
+                    跟踪文件
+                  </a-button>
                 </a-menu-item>
                 <a-menu-item key="2">
                   <a-button icon="highlight" @click="handleRenameFile(record)" type="link"> 重命名 </a-button>
@@ -76,9 +104,14 @@
             </a-dropdown>
           </a-tooltip>
           <template slot="isDirectory" slot-scope="text">
-            <span>{{ text ? "目录" : "文件" }}</span>
+            <span>{{ text ? '目录' : '文件' }}</span>
           </template>
-          <a-tooltip slot="fileSizeLong" slot-scope="text, item" placement="topLeft" :title="`${text ? renderSize(text) : item.fileSize}`">
+          <a-tooltip
+            slot="fileSizeLong"
+            slot-scope="text, item"
+            placement="topLeft"
+            :title="`${text ? renderSize(text) : item.fileSize}`"
+          >
             <template v-if="text">
               {{ renderSize(text) }}
             </template>
@@ -99,7 +132,9 @@
               </template>
               <template v-else>
                 <a-tooltip title="需要到 节点管理中的系统管理的白名单配置中配置允许编辑的文件后缀">
-                  <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEditFile(record)">编辑</a-button>
+                  <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEditFile(record)"
+                    >编辑</a-button
+                  >
                 </a-tooltip>
                 <a-button size="small" type="primary" @click="handleDownload(record)">下载</a-button>
               </template>
@@ -108,28 +143,39 @@
           </template>
         </a-table>
         <!-- 批量上传文件 -->
-        <a-modal destroyOnClose v-model="uploadFileVisible" :closable="!uploading" :keyboard="false" width="35vw" title="上传项目文件" :footer="null" :maskClosable="false">
+        <a-modal
+          destroyOnClose
+          v-model="uploadFileVisible"
+          :closable="!uploading"
+          :keyboard="false"
+          width="35vw"
+          title="上传项目文件"
+          :footer="null"
+          :maskClosable="false"
+        >
           <a-space direction="vertical" style="display: block" size="large">
             <a-upload
               :file-list="uploadFileList"
               :remove="
                 (file) => {
-                  const index = this.uploadFileList.indexOf(file);
+                  const index = this.uploadFileList.indexOf(file)
                   //const newFileList = this.uploadFileList.slice();
 
-                  this.uploadFileList.splice(index, 1);
+                  this.uploadFileList.splice(index, 1)
                 }
               "
               :before-upload="
                 (file) => {
-                  this.uploadFileList = [...this.uploadFileList, file];
-                  return false;
+                  this.uploadFileList = [...this.uploadFileList, file]
+                  return false
                 }
               "
               multiple
               :disabled="!!percentage"
             >
-              <template v-if="percentage"> <a-icon type="loading" v-if="this.uploadFileList.length" /><span v-else>-</span> </template>
+              <template v-if="percentage">
+                <a-icon type="loading" v-if="this.uploadFileList.length" /><span v-else>-</span>
+              </template>
 
               <a-button v-else icon="upload">选择文件</a-button>
             </a-upload>
@@ -138,9 +184,15 @@
               <a-col span="24">
                 <a-progress :percent="percentage" class="max-progress">
                   <template #format="percent">
-                    {{ percent }}%<template v-if="percentageInfo.total"> ({{ renderSize(percentageInfo.total) }}) </template>
-                    <template v-if="percentageInfo.duration"> 当前文件用时:{{ formatDuration(percentageInfo.duration) }} </template>
-                    <template v-if="uploadFileList.length"> 完成 {{ successSize }} 个 / 共{{ uploadFileList.length }}个 </template>
+                    {{ percent }}%<template v-if="percentageInfo.total">
+                      ({{ renderSize(percentageInfo.total) }})
+                    </template>
+                    <template v-if="percentageInfo.duration">
+                      当前文件用时:{{ formatDuration(percentageInfo.duration) }}
+                    </template>
+                    <template v-if="uploadFileList.length">
+                      完成 {{ successSize }} 个 / 共{{ uploadFileList.length }}个
+                    </template>
                   </template>
                 </a-progress>
               </a-col>
@@ -150,20 +202,29 @@
           </a-space>
         </a-modal>
         <!-- 上传压缩文件 -->
-        <a-modal destroyOnClose v-model="uploadZipFileVisible" :closable="!uploading" :keyboard="false" width="35vw" title="上传压缩文件" :footer="null" :maskClosable="false">
+        <a-modal
+          destroyOnClose
+          v-model="uploadZipFileVisible"
+          :closable="!uploading"
+          :keyboard="false"
+          width="35vw"
+          title="上传压缩文件"
+          :footer="null"
+          :maskClosable="false"
+        >
           <a-space direction="vertical" style="display: block" size="large">
             <a-upload
               :file-list="uploadFileList"
               :remove="
                 () => {
-                  this.uploadFileList = [];
+                  this.uploadFileList = []
                 }
               "
               :disabled="!!percentage"
               :before-upload="
                 (file) => {
-                  this.uploadFileList = [file];
-                  return false;
+                  this.uploadFileList = [file]
+                  return false
                 }
               "
               :accept="ZIP_ACCEPT"
@@ -175,23 +236,46 @@
               <a-col span="24">
                 <a-progress :percent="percentage" class="max-progress">
                   <template #format="percent">
-                    {{ percent }}%<template v-if="percentageInfo.total"> ({{ renderSize(percentageInfo.total) }}) </template>
-                    <template v-if="percentageInfo.duration"> 当前文件用时:{{ formatDuration(percentageInfo.duration) }} </template>
-                    <template v-if="uploadFileList.length"> 完成 {{ successSize }} 个 / 共{{ uploadFileList.length }}个 </template>
+                    {{ percent }}%<template v-if="percentageInfo.total">
+                      ({{ renderSize(percentageInfo.total) }})
+                    </template>
+                    <template v-if="percentageInfo.duration">
+                      当前文件用时:{{ formatDuration(percentageInfo.duration) }}
+                    </template>
+                    <template v-if="uploadFileList.length">
+                      完成 {{ successSize }} 个 / 共{{ uploadFileList.length }}个
+                    </template>
                   </template>
                 </a-progress>
               </a-col>
             </a-row>
 
-            <a-switch v-model="uploadData.checkBox" checked-children="清空覆盖" un-checked-children="不清空" style="margin-bottom: 10px" />
+            <a-switch
+              v-model="uploadData.checkBox"
+              checked-children="清空覆盖"
+              un-checked-children="不清空"
+              style="margin-bottom: 10px"
+            />
 
-            <a-input-number style="width: 100%" v-model="uploadData.stripComponents" :min="0" placeholder="解压时候自动剔除压缩包里面多余的文件夹名" />
+            <a-input-number
+              style="width: 100%"
+              v-model="uploadData.stripComponents"
+              :min="0"
+              placeholder="解压时候自动剔除压缩包里面多余的文件夹名"
+            />
 
             <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">开始上传</a-button>
           </a-space>
         </a-modal>
 
-        <a-modal destroyOnClose v-model="editFileVisible" width="80vw" :title="`编辑文件 ${filename}`" :maskClosable="true" @cancel="handleCloseModal">
+        <a-modal
+          destroyOnClose
+          v-model="editFileVisible"
+          width="80vw"
+          :title="`编辑文件 ${filename}`"
+          :maskClosable="true"
+          @cancel="handleCloseModal"
+        >
           <div style="height: 60vh">
             <code-editor showTool v-if="editFileVisible" v-model="fileContent" :fileSuffix="filename"></code-editor>
           </div>
@@ -203,8 +287,8 @@
               type="primary"
               @click="
                 () => {
-                  updateFileData();
-                  handleCloseModal();
+                  updateFileData()
+                  handleCloseModal()
                 }
               "
             >
@@ -213,21 +297,51 @@
           </template>
         </a-modal>
         <!--远程下载  -->
-        <a-modal destroyOnClose v-model="uploadRemoteFileVisible" title="远程下载文件" @ok="handleRemoteUpload" @cancel="openRemoteUpload" :maskClosable="false">
-          <a-form-model :model="remoteDownloadData" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }" :rules="rules" ref="ruleForm">
-            <a-form-model-item label="远程下载URL" prop="url">
+        <a-modal
+          destroyOnClose
+          v-model="uploadRemoteFileVisible"
+          title="远程下载文件"
+          @ok="handleRemoteUpload"
+          @cancel="openRemoteUpload"
+          :maskClosable="false"
+        >
+          <a-form-model
+            :model="remoteDownloadData"
+            :label-col="{ span: 6 }"
+            :wrapper-col="{ span: 18 }"
+            :rules="rules"
+            ref="ruleForm"
+          >
+            <a-form-item label="远程下载URL" prop="url">
               <a-input v-model="remoteDownloadData.url" placeholder="远程下载地址" />
-            </a-form-model-item>
-            <a-form-model-item label="是否为压缩包">
-              <a-switch v-model="remoteDownloadData.unzip" checked-children="是" un-checked-children="否" v-decorator="['unzip', { valuePropName: 'checked' }]" />
-            </a-form-model-item>
-            <a-form-model-item label="剔除文件夹" v-if="remoteDownloadData.unzip">
-              <a-input-number style="width: 100%" v-model="remoteDownloadData.stripComponents" :min="0" placeholder="解压时候自动剔除压缩包里面多余的文件夹名" />
-            </a-form-model-item>
+            </a-form-item>
+            <a-form-item label="是否为压缩包">
+              <a-switch
+                v-model="remoteDownloadData.unzip"
+                checked-children="是"
+                un-checked-children="否"
+                v-decorator="['unzip', { valuePropName: 'checked' }]"
+              />
+            </a-form-item>
+            <a-form-item label="剔除文件夹" v-if="remoteDownloadData.unzip">
+              <a-input-number
+                style="width: 100%"
+                v-model="remoteDownloadData.stripComponents"
+                :min="0"
+                placeholder="解压时候自动剔除压缩包里面多余的文件夹名"
+              />
+            </a-form-item>
           </a-form-model>
         </a-modal>
         <!-- 创建文件/文件夹 -->
-        <a-modal destroyOnClose v-model="addFileFolderVisible" width="300px" :title="addFileOrFolderType === 1 ? '新增目录' : '新建文件'" :footer="null" :maskClosable="true">
+        <a-modal
+          destroyOnClose
+          v-model="addFileFolderVisible"
+          width="300px"
+          :title="addFileOrFolderType === 1 ? '新增目录' : '新建文件'"
+          :footer="null"
+          :maskClosable="true"
+        >
           <a-space direction="vertical" style="width: 100%">
             <span v-if="uploadPath">当前目录:{{ uploadPath }}</span>
             <!-- <a-tag v-if="">目录创建成功后需要手动刷新右边树才能显示出来哟</a-tag> -->
@@ -235,12 +349,21 @@
               <a-input v-model="fileFolderName" placeholder="输入文件或者文件夹名" />
             </a-tooltip>
             <a-row type="flex" justify="center">
-              <a-button type="primary" :disabled="fileFolderName.length === 0" @click="startAddFileFolder">确认</a-button>
+              <a-button type="primary" :disabled="fileFolderName.length === 0" @click="startAddFileFolder"
+                >确认</a-button
+              >
             </a-row>
           </a-space>
         </a-modal>
         <!-- 从命名文件/文件夹 -->
-        <a-modal destroyOnClose v-model="renameFileFolderVisible" width="300px" :title="`重命名`" :footer="null" :maskClosable="true">
+        <a-modal
+          destroyOnClose
+          v-model="renameFileFolderVisible"
+          width="300px"
+          :title="`重命名`"
+          :footer="null"
+          :maskClosable="true"
+        >
           <a-space direction="vertical" style="width: 100%">
             <a-input v-model="fileFolderName" placeholder="输入新名称" />
 
@@ -262,7 +385,7 @@
       :maskClosable="true"
       @cancel="
         () => {
-          loadData();
+          loadData()
         }
       "
     >
@@ -282,35 +405,35 @@ import {
   renameFileFolder,
   updateFile,
   uploadProjectFile,
-  shardingMerge,
-} from "@/api/node-project";
-import { ZIP_ACCEPT, renderSize, formatDuration, concurrentExecution, parseTime } from "@/utils/const";
-import codeEditor from "@/components/codeEditor";
-import projectFileBackup from "./project-file-backup.vue";
-import { uploadPieces } from "@/utils/upload-pieces";
+  shardingMerge
+} from '@/api/node-project'
+import { ZIP_ACCEPT, renderSize, formatDuration, concurrentExecution, parseTime } from '@/utils/const'
+import codeEditor from '@/components/codeEditor'
+import projectFileBackup from './project-file-backup.vue'
+import { uploadPieces } from '@/utils/upload-pieces'
 
 export default {
   components: {
     codeEditor,
-    projectFileBackup,
+    projectFileBackup
   },
   props: {
     nodeId: {
-      type: String,
+      type: String
     },
     projectId: {
-      type: String,
+      type: String
     },
     runMode: {
-      type: String,
+      type: String
     },
     absPath: {
-      type: String,
+      type: String
     },
     showConsole: {
       type: Boolean,
-      default: true,
-    },
+      default: true
+    }
   },
   data() {
     return {
@@ -322,17 +445,17 @@ export default {
       uploadFileList: [],
       tempNode: {},
       temp: {},
-      filename: "",
+      filename: '',
       uploadFileVisible: false,
       uploadZipFileVisible: false,
       uploadRemoteFileVisible: false,
       editFileVisible: false,
       backupListVisible: false,
       successSize: 0,
-      fileContent: "",
+      fileContent: '',
       treeReplaceFields: {
-        title: "filename",
-        isLeaf: "isDirectory",
+        title: 'filename',
+        isLeaf: 'isDirectory'
       },
 
       // 是否是上传状态
@@ -340,54 +463,80 @@ export default {
       percentage: 0,
       percentageInfo: {},
       uploadData: {
-        checkBox: false,
+        checkBox: false
       },
 
       // tableHeight: "80vh",
       defaultProps: {
-        children: "children",
-        label: "filename",
+        children: 'children',
+        label: 'filename'
       },
       remoteDownloadData: {
-        id: "",
-        url: "",
-        unzip: false,
+        id: '',
+        url: '',
+        unzip: false
       },
       columns: [
-        { title: "文件名称", dataIndex: "filename", ellipsis: true, scopedSlots: { customRender: "filename" } },
-        { title: "文件类型", dataIndex: "isDirectory", width: "100px", ellipsis: true, scopedSlots: { customRender: "isDirectory" } },
-        { title: "文件大小", dataIndex: "fileSizeLong", width: 120, ellipsis: true, scopedSlots: { customRender: "fileSizeLong" }, sorter: (a, b) => a.fileSizeLong - b.fileSizeLong },
-        { title: "修改时间", dataIndex: "modifyTimeLong", width: "180px", ellipsis: true, scopedSlots: { customRender: "modifyTimeLong" }, sorter: (a, b) => a.modifyTimeLong - b.modifyTimeLong },
-        { title: "操作", dataIndex: "operation", width: "180px", align: "center", scopedSlots: { customRender: "operation" } },
+        { title: '文件名称', dataIndex: 'filename', ellipsis: true, scopedSlots: { customRender: 'filename' } },
+        {
+          title: '文件类型',
+          dataIndex: 'isDirectory',
+          width: '100px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'isDirectory' }
+        },
+        {
+          title: '文件大小',
+          dataIndex: 'fileSizeLong',
+          width: 120,
+          ellipsis: true,
+          scopedSlots: { customRender: 'fileSizeLong' },
+          sorter: (a, b) => a.fileSizeLong - b.fileSizeLong
+        },
+        {
+          title: '修改时间',
+          dataIndex: 'modifyTimeLong',
+          width: '180px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'modifyTimeLong' },
+          sorter: (a, b) => a.modifyTimeLong - b.modifyTimeLong
+        },
+        {
+          title: '操作',
+          dataIndex: 'operation',
+          width: '180px',
+          align: 'center',
+          scopedSlots: { customRender: 'operation' }
+        }
       ],
       rules: {
-        url: [{ required: true, message: "远程下载Url不为空", trigger: "change" }],
+        url: [{ required: true, message: '远程下载Url不为空', trigger: 'change' }]
       },
       addFileFolderVisible: false,
       // 目录1 文件2 标识
       addFileOrFolderType: 1,
-      fileFolderName: "",
-      oldFileFolderName: "",
-      renameFileFolderVisible: false,
-    };
+      fileFolderName: '',
+      oldFileFolderName: '',
+      renameFileFolderVisible: false
+    }
   },
   computed: {
     fileUploadDisabled() {
-      return this.uploadFileList.length === 0 || this.uploading;
+      return this.uploadFileList.length === 0 || this.uploading
     },
     uploadPath() {
       if (!Object.keys(this.tempNode).length) {
-        return "";
+        return ''
       }
       if (this.tempNode.level === 1) {
-        return "";
+        return ''
       } else {
-        return (this.tempNode.levelName || "") + "/" + this.tempNode.filename;
+        return (this.tempNode.levelName || '') + '/' + this.tempNode.filename
       }
-    },
+    }
   },
   mounted() {
-    this.loadData();
+    this.loadData()
   },
   methods: {
     renderSize,
@@ -397,35 +546,35 @@ export default {
     onTreeData(treeNode) {
       return new Promise((resolve) => {
         if (treeNode.dataRef.children || !treeNode.dataRef.isDirectory) {
-          resolve();
-          return;
+          resolve()
+          return
         }
-        this.loadNode(treeNode.dataRef, resolve);
-      });
+        this.loadNode(treeNode.dataRef, resolve)
+      })
     },
     // 加载数据
     loadData() {
-      const key = "root-" + new Date().getTime();
+      const key = 'root-' + new Date().getTime()
       this.treeList = [
         {
-          filename: "目录：" + (this.absPath || ""),
+          filename: '目录：' + (this.absPath || ''),
           level: 1,
           isDirectory: true,
           key: key,
-          isLeaf: false,
-        },
-      ];
+          isLeaf: false
+        }
+      ]
       // 设置默认展开第一个
       setTimeout(() => {
-        const node = this.treeList[0];
-        this.tempNode = node;
-        this.expandKeys = [key];
-        this.loadFileList();
-      }, 1000);
+        const node = this.treeList[0]
+        this.tempNode = node
+        this.expandKeys = [key]
+        this.loadFileList()
+      }, 1000)
     },
     // 加载子节点
     loadNode(data, resolve) {
-      this.tempNode = data;
+      this.tempNode = data
       // 如果是目录
       if (data.isDirectory) {
         setTimeout(() => {
@@ -433,8 +582,8 @@ export default {
           const params = {
             nodeId: this.nodeId,
             id: this.projectId,
-            path: this.uploadPath,
-          };
+            path: this.uploadPath
+          }
           // if (node.level === 1) {
           //   params.path = ''
           // } else {
@@ -445,24 +594,24 @@ export default {
             if (res.code === 200) {
               const treeData = res.data
                 .filter((ele) => {
-                  return ele.isDirectory;
+                  return ele.isDirectory
                 })
                 .map((ele) => {
-                  ele.isLeaf = !ele.isDirectory;
-                  ele.key = ele.filename + "-" + new Date().getTime();
-                  return ele;
-                });
-              data.children = treeData;
+                  ele.isLeaf = !ele.isDirectory
+                  ele.key = ele.filename + '-' + new Date().getTime()
+                  return ele
+                })
+              data.children = treeData
 
-              this.treeList = [...this.treeList];
-              resolve();
+              this.treeList = [...this.treeList]
+              resolve()
             } else {
-              resolve();
+              resolve()
             }
-          });
-        }, 500);
+          })
+        }, 500)
       } else {
-        resolve();
+        resolve()
       }
     },
     handleEditFile(record) {
@@ -470,23 +619,23 @@ export default {
         nodeId: this.nodeId,
         id: this.projectId,
         filePath: this.uploadPath,
-        filename: record.filename,
-      };
+        filename: record.filename
+      }
       // 读取文件数据
       readFile(params).then((res) => {
         if (res.code === 200) {
-          this.editFileVisible = true;
-          this.filename = record.filename;
+          this.editFileVisible = true
+          this.filename = record.filename
           setTimeout(() => {
-            this.fileContent = res.data;
-          }, 300);
+            this.fileContent = res.data
+          }, 300)
         }
-      });
+      })
     },
     // 关闭编辑器弹窗
     handleCloseModal() {
-      this.fileContent = "";
-      this.editFileVisible = false;
+      this.fileContent = ''
+      this.editFileVisible = false
     },
 
     updateFileData() {
@@ -495,178 +644,183 @@ export default {
         id: this.projectId,
         filePath: this.uploadPath,
         filename: this.filename,
-        fileText: this.fileContent,
-      };
+        fileText: this.fileContent
+      }
 
       updateFile(params).then((res) => {
         if (res.code === 200) {
           this.$notification.success({
-            message: res.msg,
-          });
+            message: res.msg
+          })
         }
-      });
+      })
     },
 
     // 点击树节点
     nodeClick(selectedKeys, { node }) {
       if (node.dataRef.isDirectory) {
-        this.tempNode = node.dataRef;
-        this.loadFileList();
+        this.tempNode = node.dataRef
+        this.loadFileList()
       }
     },
     // 上传文件
     handleUpload() {
       if (Object.keys(this.tempNode).length === 0) {
         this.$notification.error({
-          message: "请选择一个节点",
-        });
-        return;
+          message: '请选择一个节点'
+        })
+        return
       }
       //初始化成功数
-      this.successSize = 0;
-      this.uploadFileList = [];
-      this.uploading = false;
-      this.percentage = 0;
-      this.percentageInfo = {};
-      this.uploadFileVisible = true;
+      this.successSize = 0
+      this.uploadFileList = []
+      this.uploading = false
+      this.percentage = 0
+      this.percentageInfo = {}
+      this.uploadFileVisible = true
     },
     // handleRemove(file) {},
 
     // 开始上传文件
     startUpload() {
       // 设置上传状态
-      this.uploading = true;
-      this.successSize = 0;
+      this.uploading = true
+      this.successSize = 0
       // 遍历上传文件
       concurrentExecution(
         this.uploadFileList.map((item, index) => {
           // console.log(item);
-          return index;
+          return index
         }),
         1,
         (curItem) => {
-          const file = this.uploadFileList[curItem];
+          const file = this.uploadFileList[curItem]
           this.uploadFileList = this.uploadFileList.map((fileItem, fileIndex) => {
             if (fileIndex === curItem) {
-              fileItem.status = "uploading";
+              fileItem.status = 'uploading'
             }
-            return fileItem;
-          });
-          this.percentage = 0;
-          this.percentageInfo = {};
+            return fileItem
+          })
+          this.percentage = 0
+          this.percentageInfo = {}
           return new Promise((resolve, reject) => {
             uploadPieces({
               file,
               process: (process, end, total, duration) => {
-                this.percentage = Math.max(this.percentage, process);
-                this.percentageInfo = { end, total, duration };
+                this.percentage = Math.max(this.percentage, process)
+                this.percentageInfo = { end, total, duration }
               },
               success: (uploadData, name) => {
                 // 准备合并
-                shardingMerge({ ...uploadData[0], nodeId: this.nodeId, id: this.projectId, levelName: this.uploadPath }).then((res) => {
+                shardingMerge({
+                  ...uploadData[0],
+                  nodeId: this.nodeId,
+                  id: this.projectId,
+                  levelName: this.uploadPath
+                }).then((res) => {
                   if (res.code === 200) {
-                    this.successSize++;
+                    this.successSize++
                     this.$notification.success({
-                      message: name + " " + res.msg,
-                    });
+                      message: name + ' ' + res.msg
+                    })
                     this.uploadFileList = this.uploadFileList.map((fileItem, fileIndex) => {
                       if (fileIndex === curItem) {
-                        fileItem.status = "done";
+                        fileItem.status = 'done'
                       }
-                      return fileItem;
-                    });
+                      return fileItem
+                    })
 
-                    resolve();
+                    resolve()
                   } else {
                     this.uploadFileList = this.uploadFileList.map((fileItem, fileIndex) => {
                       if (fileIndex === curItem) {
-                        fileItem.status = "error";
+                        fileItem.status = 'error'
                       }
-                      return fileItem;
-                    });
-                    reject();
+                      return fileItem
+                    })
+                    reject()
                   }
-                });
+                })
               },
               error: (msg) => {
                 this.uploadFileList = this.uploadFileList.map((fileItem, fileIndex) => {
                   if (fileIndex === curItem) {
-                    fileItem.status = "error";
+                    fileItem.status = 'error'
                   }
-                  return fileItem;
-                });
+                  return fileItem
+                })
                 this.$notification.error({
-                  message: msg,
-                });
-                reject();
+                  message: msg
+                })
+                reject()
               },
               uploadCallback: (formData) => {
                 return new Promise((resolve, reject) => {
-                  formData.append("nodeId", this.nodeId);
-                  formData.append("id", this.projectId);
+                  formData.append('nodeId', this.nodeId)
+                  formData.append('id', this.projectId)
                   // 计算属性 uploadPath
-                  formData.append("levelName", this.uploadPath);
+                  formData.append('levelName', this.uploadPath)
 
                   // 上传文件
                   uploadProjectFile(formData)
                     .then((res) => {
                       if (res.code === 200) {
-                        resolve();
+                        resolve()
                       } else {
-                        reject();
+                        reject()
                       }
                     })
                     .catch(() => {
-                      reject();
-                    });
-                });
-              },
-            });
-          });
+                      reject()
+                    })
+                })
+              }
+            })
+          })
         }
       ).then(() => {
-        this.uploading = this.successSize !== this.uploadFileList.length;
+        this.uploading = this.successSize !== this.uploadFileList.length
         // // 判断是否全部上传完成
         if (!this.uploading) {
-          this.uploadFileList = [];
+          this.uploadFileList = []
           setTimeout(() => {
-            this.percentage = 0;
-            this.percentageInfo = {};
-            this.loadFileList();
-            this.uploadFileVisible = false;
-          }, 2000);
+            this.percentage = 0
+            this.percentageInfo = {}
+            this.loadFileList()
+            this.uploadFileVisible = false
+          }, 2000)
         }
-      });
+      })
     },
     // 上传压缩文件
     handleZipUpload() {
       if (Object.keys(this.tempNode).length === 0) {
         this.$notification.error({
-          message: "请选择一个节点",
-        });
-        return;
+          message: '请选择一个节点'
+        })
+        return
       }
-      this.uploadData = {};
-      this.successSize = 0;
-      this.uploadFileList = [];
-      this.uploading = false;
-      this.percentage = 0;
-      this.percentageInfo = {};
-      this.uploadZipFileVisible = true;
+      this.uploadData = {}
+      this.successSize = 0
+      this.uploadFileList = []
+      this.uploading = false
+      this.percentage = 0
+      this.percentageInfo = {}
+      this.uploadZipFileVisible = true
     },
 
     // 开始上传压缩文件
     startZipUpload() {
       // 设置上传状态
-      this.uploading = true;
-      this.percentage = 0;
-      this.percentageInfo = {};
-      const file = this.uploadFileList[0];
+      this.uploading = true
+      this.percentage = 0
+      this.percentageInfo = {}
+      const file = this.uploadFileList[0]
       uploadPieces({
         file,
         process: (process, end, total, duration) => {
-          this.percentage = Math.max(this.percentage, process);
-          this.percentageInfo = { end, total, duration };
+          this.percentage = Math.max(this.percentage, process)
+          this.percentageInfo = { end, total, duration }
         },
         success: (uploadData, name) => {
           // 准备合并
@@ -678,59 +832,59 @@ export default {
             nodeId: this.nodeId,
             id: this.projectId,
             levelName: this.uploadPath,
-            type: "unzip",
+            type: 'unzip',
             stripComponents: this.uploadData.stripComponents || 0,
-            clearType: this.uploadData.checkBox ? "clear" : "noClear",
+            clearType: this.uploadData.checkBox ? 'clear' : 'noClear'
           }).then((res) => {
             if (res.code === 200) {
-              this.successSize++;
+              this.successSize++
               this.$notification.success({
-                message: name + " " + res.msg,
-              });
-              this.uploading = this.successSize !== this.uploadFileList.length;
+                message: name + ' ' + res.msg
+              })
+              this.uploading = this.successSize !== this.uploadFileList.length
               // // 判断是否全部上传完成
               if (!this.uploading) {
-                this.uploadFileList = [];
+                this.uploadFileList = []
                 setTimeout(() => {
-                  this.percentage = 0;
-                  this.percentageInfo = {};
-                  this.loadFileList();
-                  this.uploadZipFileVisible = false;
-                }, 2000);
+                  this.percentage = 0
+                  this.percentageInfo = {}
+                  this.loadFileList()
+                  this.uploadZipFileVisible = false
+                }, 2000)
               }
             }
-          });
+          })
         },
         error: (msg) => {
           this.$notification.error({
-            message: msg,
-          });
+            message: msg
+          })
         },
         uploadCallback: (formData) => {
           return new Promise((resolve, reject) => {
-            formData.append("nodeId", this.nodeId);
-            formData.append("id", this.projectId);
+            formData.append('nodeId', this.nodeId)
+            formData.append('id', this.projectId)
             // 计算属性 uploadPath
-            formData.append("levelName", this.uploadPath);
-            formData.append("type", "unzip");
-            formData.append("stripComponents", this.uploadData.stripComponents || 0);
-            formData.append("clearType", this.uploadData.checkBox ? "clear" : "noClear");
+            formData.append('levelName', this.uploadPath)
+            formData.append('type', 'unzip')
+            formData.append('stripComponents', this.uploadData.stripComponents || 0)
+            formData.append('clearType', this.uploadData.checkBox ? 'clear' : 'noClear')
 
             // 上传文件
             uploadProjectFile(formData)
               .then((res) => {
                 if (res.code === 200) {
-                  resolve();
+                  resolve()
                 } else {
-                  reject();
+                  reject()
                 }
               })
               .catch(() => {
-                reject();
-              });
-          });
-        },
-      });
+                reject()
+              })
+          })
+        }
+      })
 
       // // 上传文件
       // const file = this.uploadFileList[0];
@@ -759,12 +913,12 @@ export default {
     //打开远程上传
     openRemoteUpload() {
       // this.$refs.ruleForm.resetFields();
-      this.uploadRemoteFileVisible = true;
+      this.uploadRemoteFileVisible = true
     },
     //关闭远程上传
     closeRemoteUpload() {
       //   this.$refs.ruleForm.resetFields();
-      this.uploadRemoteFileVisible = false;
+      this.uploadRemoteFileVisible = false
     },
     //处理上传文件
     handleRemoteUpload() {
@@ -776,39 +930,39 @@ export default {
             url: this.remoteDownloadData.url,
             levelName: this.uploadPath,
             unzip: this.remoteDownloadData.unzip,
-            stripComponents: this.remoteDownloadData.stripComponents || 0,
-          };
+            stripComponents: this.remoteDownloadData.stripComponents || 0
+          }
           remoteDownload(params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
-                message: res.msg,
-              });
-              this.remoteDownloadData = {};
-              this.uploadRemoteFileVisible = false;
-              this.loadFileList();
+                message: res.msg
+              })
+              this.remoteDownloadData = {}
+              this.uploadRemoteFileVisible = false
+              this.loadFileList()
             }
-          });
+          })
         } else {
-          return false;
+          return false
         }
-      });
+      })
     },
     // 加载文件列表
     loadFileList() {
       if (Object.keys(this.tempNode).length === 0) {
         this.$notification.warn({
-          message: "请选择一个节点",
-        });
-        return false;
+          message: '请选择一个节点'
+        })
+        return false
       }
       // 请求参数
       const params = {
         nodeId: this.nodeId,
         id: this.projectId,
-        path: this.uploadPath,
-      };
-      this.fileList = [];
-      this.loading = true;
+        path: this.uploadPath
+      }
+      this.fileList = []
+      this.loading = true
       // 加载文件
       getFileList(params).then((res) => {
         if (res.code === 200) {
@@ -817,96 +971,100 @@ export default {
             // if (!element.isDirectory) {
             // 设置文件表格
             this.fileList.push({
-              ...element,
-            });
+              ...element
+            })
             // }
-          });
+          })
         }
-        this.loading = false;
-      });
+        this.loading = false
+      })
     },
     // 清空文件
     clearFile() {
-      const msg = this.uploadPath ? "真的要清空 【" + this.uploadPath + "】目录和文件么？" : "真的要清空项目目录和文件么？";
+      const msg = this.uploadPath
+        ? '真的要清空 【' + this.uploadPath + '】目录和文件么？'
+        : '真的要清空项目目录和文件么？'
       this.$confirm({
-        title: "系统提示",
+        title: '系统提示',
         content: msg,
-        okText: "确认",
-        cancelText: "取消",
+        okText: '确认',
+        cancelText: '取消',
         onOk: () => {
           // 请求参数
           const params = {
             nodeId: this.nodeId,
             id: this.projectId,
-            type: "clear",
-            levelName: this.uploadPath,
-          };
+            type: 'clear',
+            levelName: this.uploadPath
+          }
           // 删除
           deleteProjectFile(params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
-                message: res.msg,
-              });
-              this.loadFileList();
+                message: res.msg
+              })
+              this.loadFileList()
             }
-          });
-        },
-      });
+          })
+        }
+      })
     },
     // 下载
     handleDownload(record) {
       this.$notification.info({
-        message: "正在下载，请稍等...",
-      });
+        message: '正在下载，请稍等...'
+      })
       // 请求参数
       const params = {
         nodeId: this.nodeId,
         id: this.projectId,
         levelName: record.levelName,
-        filename: record.filename,
-      };
-      window.open(downloadProjectFile(params), "_blank");
+        filename: record.filename
+      }
+      window.open(downloadProjectFile(params), '_blank')
     },
     // 删除
     handleDelete(record) {
-      const msg = record.isDirectory ? "真的要删除【" + record.filename + "】文件夹么？" : "真的要删除【" + record.filename + "】文件么？";
+      const msg = record.isDirectory
+        ? '真的要删除【' + record.filename + '】文件夹么？'
+        : '真的要删除【' + record.filename + '】文件么？'
       this.$confirm({
-        title: "系统提示",
+        title: '系统提示',
         content: msg,
-        okText: "确认",
-        cancelText: "取消",
+        okText: '确认',
+        cancelText: '取消',
         onOk: () => {
           // 请求参数
           const params = {
             nodeId: this.nodeId,
             id: this.projectId,
             levelName: record.levelName,
-            filename: record.filename,
-          };
+            filename: record.filename
+          }
           // 删除
           deleteProjectFile(params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
-                message: res.msg,
-              });
-              this.loadData();
+                message: res.msg
+              })
+              this.loadData()
               // this.loadFileList();
             }
-          });
-        },
-      });
+          })
+        }
+      })
     },
     goConsole() {
-      this.$emit("goConsole");
+      this.$emit('goConsole')
     },
     goReadFile(record) {
       // const filePath = this.uploadPath + record.filename;
-      this.$emit("goReadFile", this.uploadPath, record.filename);
+      this.$emit('goReadFile', this.uploadPath, record.filename)
     },
     handleAddFile(type) {
-      this.addFileFolderVisible = true;
-      this.addFileOrFolderType = type;
-      this.fileFolderName = "";
+      this.addFileFolderVisible = true
+      this.addFileOrFolderType = type
+      this.fileFolderName = ''
     },
     // 确认新增文件  目录
     startAddFileFolder() {
@@ -915,23 +1073,23 @@ export default {
         id: this.projectId,
         levelName: this.uploadPath,
         filename: this.fileFolderName,
-        unFolder: this.addFileOrFolderType === 1 ? false : true,
-      };
+        unFolder: this.addFileOrFolderType === 1 ? false : true
+      }
       newFileFolder(params).then((res) => {
         if (res.code === 200) {
           this.$notification.success({
-            message: res.msg,
-          });
-          this.addFileFolderVisible = false;
-          this.loadData();
+            message: res.msg
+          })
+          this.addFileFolderVisible = false
+          this.loadData()
           // this.loadFileList();
         }
-      });
+      })
     },
     handleRenameFile(record) {
-      this.renameFileFolderVisible = true;
-      this.fileFolderName = record.filename;
-      this.oldFileFolderName = record.filename;
+      this.renameFileFolderVisible = true
+      this.fileFolderName = record.filename
+      this.oldFileFolderName = record.filename
     },
     // 确认修改文件 目录名称
     renameFileFolder() {
@@ -940,24 +1098,24 @@ export default {
         id: this.projectId,
         levelName: this.uploadPath,
         newname: this.fileFolderName,
-        filename: this.oldFileFolderName,
-      };
+        filename: this.oldFileFolderName
+      }
       renameFileFolder(params).then((res) => {
         if (res.code === 200) {
           this.$notification.success({
-            message: res.msg,
-          });
-          this.renameFileFolderVisible = false;
-          this.loadFileList();
+            message: res.msg
+          })
+          this.renameFileFolderVisible = false
+          this.loadFileList()
         }
-      });
+      })
     },
     // 查看备份列表
     backupList() {
-      this.backupListVisible = true;
-    },
-  },
-};
+      this.backupListVisible = true
+    }
+  }
+}
 </script>
 
 <style scoped>

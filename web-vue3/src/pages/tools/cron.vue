@@ -12,8 +12,15 @@
                 <li><strong>分</strong> ：范围：0~59</li>
                 <li><strong>时</strong> ：范围：0~23</li>
                 <li><strong>日</strong> ：范围：1~31，<strong>"L"</strong> 表示月的最后一天</li>
-                <li><strong>月</strong> ：范围：1~12，同时支持不区分大小写的别名："jan","feb", "mar", "apr", "may","jun", "jul", "aug", "sep","oct", "nov", "dec"</li>
-                <li><strong>周</strong> ：范围：0 (Sunday)~6(Saturday)，7也可以表示周日，同时支持不区分大小写的别名："sun","mon", "tue", "wed", "thu","fri", "sat"，<strong>"L"</strong> 表示周六</li>
+                <li>
+                  <strong>月</strong> ：范围：1~12，同时支持不区分大小写的别名："jan","feb", "mar", "apr", "may","jun",
+                  "jul", "aug", "sep","oct", "nov", "dec"
+                </li>
+                <li>
+                  <strong>周</strong> ：范围：0
+                  (Sunday)~6(Saturday)，7也可以表示周日，同时支持不区分大小写的别名："sun","mon", "tue", "wed",
+                  "thu","fri", "sat"，<strong>"L"</strong> 表示周六
+                </li>
               </ol>
               <p>为了兼容Quartz表达式，同时支持6位和7位表达式，其中：<br /></p>
 
@@ -37,7 +44,9 @@
               <ul>
                 <li><strong>*</strong> ：表示匹配这个位置所有的时间</li>
                 <li><strong>?</strong> ：表示匹配这个位置任意的时间（与"*"作用一致）</li>
-                <li><strong>*&#47;2</strong> ：表示间隔时间，例如在分上，表示每两分钟，同样*可以使用数字列表代替，逗号分隔</li>
+                <li>
+                  <strong>*&#47;2</strong> ：表示间隔时间，例如在分上，表示每两分钟，同样*可以使用数字列表代替，逗号分隔
+                </li>
                 <li><strong>2-8</strong> ：表示连续区间，例如在分上，表示2,3,4,5,6,7,8分</li>
                 <li><strong>2,3,5,8</strong> ：表示列表</li>
                 <li><strong>cronA | cronB</strong> ：表示多个定时表达式</li>
@@ -61,27 +70,40 @@
                 <li><strong>*&#47;2 * * * *</strong> ：每两分钟执行</li>
                 <li><strong>* 12 * * *</strong> ：12点的每分钟执行</li>
                 <li><strong>59 11 * * 1,2</strong> ：每周一和周二的11:59执行</li>
-                <li><strong>3-18&#47;5 * * * *</strong> ：3~18分，每5分钟执行一次，即0:03, 0:08, 0:13, 0:18, 1:03, 1:08……</li>
+                <li>
+                  <strong>3-18&#47;5 * * * *</strong> ：3~18分，每5分钟执行一次，即0:03, 0:08, 0:13, 0:18, 1:03, 1:08……
+                </li>
               </ul>
             </a-collapse-panel>
           </a-collapse>
           <a-form-model :model="temp" ref="form" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-            <a-form-model-item label="cron表达式" prop="cron">
+            <a-form-item label="cron表达式" prop="cron">
               <a-input v-model="temp.cron" placeholder="请输入要检查的 cron 表达式" />
-            </a-form-model-item>
-            <a-form-model-item label="计划次数" prop="count">
-              <a-input-number v-model="temp.count" :min="1" placeholder="请输入获取的计划运行次数" style="width: 100%" />
-            </a-form-model-item>
-            <a-form-model-item label="匹配秒">
+            </a-form-item>
+            <a-form-item label="计划次数" prop="count">
+              <a-input-number
+                v-model="temp.count"
+                :min="1"
+                placeholder="请输入获取的计划运行次数"
+                style="width: 100%"
+              />
+            </a-form-item>
+            <a-form-item label="匹配秒">
               <a-switch v-model="temp.isMatchSecond" checked-children="是" un-checked-children="否" />
-            </a-form-model-item>
-            <a-form-model-item label="时间范围" prop="date" help="默认是当前时间到今年结束">
-              <a-range-picker format="YYYY-MM-DD" valueFormat="YYYY-MM-DD" separator="至" v-model="temp.date" style="width: 100%" />
-            </a-form-model-item>
+            </a-form-item>
+            <a-form-item label="时间范围" prop="date" help="默认是当前时间到今年结束">
+              <a-range-picker
+                format="YYYY-MM-DD"
+                valueFormat="YYYY-MM-DD"
+                separator="至"
+                v-model="temp.date"
+                style="width: 100%"
+              />
+            </a-form-item>
 
-            <a-form-model-item :wrapper-col="{ span: 14, offset: 4 }">
+            <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
               <a-button type="primary" @click="onSubmit"> 检查 </a-button>
-            </a-form-model-item>
+            </a-form-item>
           </a-form-model>
         </a-space>
       </a-col>
@@ -89,7 +111,7 @@
       <a-col :span="10">
         <a-list bordered :data-source="resultList" :locale="locale">
           <a-list-item slot="renderItem" slot-scope="item">
-            {{ parseTime(item, "{y}-{m}-{d} {h}:{i}:{s} 周{a}") }}
+            {{ parseTime(item, '{y}-{m}-{d} {h}:{i}:{s} 周{a}') }}
           </a-list-item>
           <div slot="header">结果</div>
         </a-list>
@@ -98,56 +120,56 @@
   </div>
 </template>
 <script>
-import { cronTools } from "@/api/tools";
-import { parseTime } from "@/utils/const";
+import { cronTools } from '@/api/tools'
+import { parseTime } from '@/utils/const'
 export default {
   data() {
     return {
       temp: {
-        count: 10,
+        count: 10
       },
       locale: {
-        emptyText: "暂无数据",
+        emptyText: '暂无数据'
       },
       resultList: [],
       // 表单校验规则
       rules: {
-        cron: [{ required: true, message: "请输入要检查的 cron 表达式", trigger: "blur" }],
-        count: [{ required: true, message: "请输入获取的计划运行次数", trigger: "blur" }],
-      },
-    };
+        cron: [{ required: true, message: '请输入要检查的 cron 表达式', trigger: 'blur' }],
+        count: [{ required: true, message: '请输入获取的计划运行次数', trigger: 'blur' }]
+      }
+    }
   },
   mounted() {
-    const cron = this.$route.query.cron;
+    const cron = this.$route.query.cron
     if (cron) {
-      this.temp = { ...this.temp, cron: cron };
+      this.temp = { ...this.temp, cron: cron }
       this.$nextTick(() => {
-        this.onSubmit();
-      });
+        this.onSubmit()
+      })
     }
   },
   methods: {
     parseTime,
     onSubmit() {
-      this.$refs["form"].validate((valid) => {
+      this.$refs['form'].validate((valid) => {
         if (!valid) {
-          return false;
+          return false
         }
-        this.resultList = [];
+        this.resultList = []
         this.locale = {
-          emptyText: "暂无数据",
-        };
-        const temp = { ...this.temp, date: this.temp.date && this.temp.date[0] + " ~ " + this.temp.date[1] };
+          emptyText: '暂无数据'
+        }
+        const temp = { ...this.temp, date: this.temp.date && this.temp.date[0] + ' ~ ' + this.temp.date[1] }
 
         cronTools(temp).then((res) => {
           //   console.log(res);
-          this.resultList = res.data || [];
+          this.resultList = res.data || []
           this.locale = {
-            emptyText: res.msg,
-          };
-        });
-      });
-    },
-  },
-};
+            emptyText: res.msg
+          }
+        })
+      })
+    }
+  }
+}
 </script>

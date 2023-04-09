@@ -92,11 +92,11 @@
         :label-col="{ span: 4 }"
         :wrapper-col="{ span: 18 }"
       >
-        <a-form-model-item label="监控名称" prop="name">
+        <a-form-item label="监控名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="监控名称" />
-        </a-form-model-item>
+        </a-form-item>
 
-        <a-form-model-item label="开启状态" prop="status">
+        <a-form-item label="开启状态" prop="status">
           <a-space size="large">
             <a-switch v-model="temp.status" checked-children="开" un-checked-children="关" />
             <div>
@@ -104,22 +104,22 @@
               <a-switch v-model="temp.autoRestart" checked-children="开" un-checked-children="关" />
             </div>
           </a-space>
-        </a-form-model-item>
+        </a-form-item>
 
-        <!-- <a-form-model-item label="自动重启" prop="autoRestart">
+        <!-- <a-form-item label="自动重启" prop="autoRestart">
 
-          </a-form-model-item> -->
+          </a-form-item> -->
 
-        <!-- <a-form-model-item label="监控周期" prop="cycle">
+        <!-- <a-form-item label="监控周期" prop="cycle">
           <a-radio-group v-model="temp.cycle" name="cycle">
             <a-radio :value="1">1 分钟</a-radio>
             <a-radio :value="5">5 分钟</a-radio>
             <a-radio :value="10">10 分钟</a-radio>
             <a-radio :value="30">30 分钟</a-radio>
           </a-radio-group>
-        </a-form-model-item> -->
+        </a-form-item> -->
 
-        <a-form-model-item label="监控周期" prop="execCron">
+        <a-form-item label="监控周期" prop="execCron">
           <a-auto-complete
             v-model="temp.execCron"
             placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
@@ -136,8 +136,8 @@
               </a-select-opt-group>
             </template>
           </a-auto-complete>
-        </a-form-model-item>
-        <a-form-model-item label="监控项目" prop="projects">
+        </a-form-item>
+        <a-form-item label="监控项目" prop="projects">
           <a-select
             option-label-prop="label"
             v-model="projectKeys"
@@ -161,8 +161,8 @@
               </a-select-option>
             </a-select-opt-group>
           </a-select>
-        </a-form-model-item>
-        <a-form-model-item prop="notifyUser" class="jpom-notify">
+        </a-form-item>
+        <a-form-item prop="notifyUser" class="jpom-notify">
           <template slot="label">
             联系人
             <a-tooltip v-show="!temp.id">
@@ -178,7 +178,7 @@
             :titles="['待选择', '已选择']"
             show-search
             :list-style="{
-              width: '18vw',
+              width: '18vw'
             }"
             :filter-option="filterOption"
             :target-keys="targetKeys"
@@ -198,8 +198,8 @@
               </span>
             </template>
           </a-transfer>
-        </a-form-model-item>
-        <a-form-model-item prop="webhook">
+        </a-form-item>
+        <a-form-item prop="webhook">
           <template slot="label">
             WebHooks
             <a-tooltip v-show="!temp.id">
@@ -216,7 +216,7 @@
             </a-tooltip>
           </template>
           <a-input v-model="temp.webhook" placeholder="接收报警消息,非必填，GET请求" />
-        </a-form-model-item>
+        </a-form-item>
       </a-form-model>
     </a-modal>
   </div>
@@ -232,7 +232,7 @@ import {
   CRON_DATA_SOURCE,
   PAGE_DEFAULT_LIST_QUERY,
   itemGroupBy,
-  parseTime,
+  parseTime
 } from '@/utils/const'
 
 export default {
@@ -262,7 +262,7 @@ export default {
           dataIndex: 'autoRestart',
           ellipsis: true,
           scopedSlots: { customRender: 'autoRestart' },
-          width: 120,
+          width: 120
         },
         { title: '报警状态', dataIndex: 'alarm', ellipsis: true, scopedSlots: { customRender: 'alarm' }, width: 120 },
         {
@@ -271,7 +271,7 @@ export default {
           ellipsis: true,
           align: 'center',
           scopedSlots: { customRender: 'modifyUser' },
-          width: 120,
+          width: 120
         },
         {
           title: '修改时间',
@@ -283,25 +283,25 @@ export default {
             }
             return parseTime(text)
           },
-          width: 180,
+          width: 180
         },
         {
           title: '操作',
           dataIndex: 'operation',
           ellipsis: true,
           scopedSlots: { customRender: 'operation' },
-          width: 120,
-        },
+          width: 120
+        }
       ],
       rules: {
-        name: [{ required: true, message: 'Please input monitor name', trigger: 'blur' }],
-      },
+        name: [{ required: true, message: 'Please input monitor name', trigger: 'blur' }]
+      }
     }
   },
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
-    },
+    }
   },
   watch: {},
   created() {
@@ -319,10 +319,10 @@ export default {
               title: '导航助手',
               element: document.querySelector('.jpom-notify'),
               intro:
-                '如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。',
-            },
-          ],
-        },
+                '如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。'
+            }
+          ]
+        }
       })
     },
 
@@ -455,7 +455,7 @@ export default {
 
         if (targetKeysTemp.length <= 0 && !this.temp.webhook) {
           this.$notification.warn({
-            message: '请选择一位报警联系人或者填写webhook',
+            message: '请选择一位报警联系人或者填写webhook'
           })
           return false
         }
@@ -465,13 +465,13 @@ export default {
           status: this.temp.status ? 'on' : 'off',
           autoRestart: this.temp.autoRestart ? 'on' : 'off',
           projects: JSON.stringify(projects),
-          notifyUser: JSON.stringify(targetKeysTemp),
+          notifyUser: JSON.stringify(targetKeysTemp)
         }
         editMonitor(params).then((res) => {
           if (res.code === 200) {
             // 成功
             this.$notification.success({
-              message: res.msg,
+              message: res.msg
             })
             this.$refs['editMonitorForm'].resetFields()
             this.editMonitorVisible = false
@@ -492,20 +492,20 @@ export default {
           deleteMonitor(record.id).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
-                message: res.msg,
+                message: res.msg
               })
               this.loadData()
             }
           })
-        },
+        }
       })
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
       this.loadData()
-    },
-  },
+    }
+  }
 }
 </script>
 <style scoped></style>

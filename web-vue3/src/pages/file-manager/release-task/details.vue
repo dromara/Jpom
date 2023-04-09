@@ -1,25 +1,25 @@
 <template>
   <div>
     <a-form-model :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
-      <a-form-model-item label="任务名" prop="name">
+      <a-form-item label="任务名" prop="name">
         <a-input placeholder="请输入任务名" :disabled="true" :value="temp.taskData && temp.taskData.name" />
-      </a-form-model-item>
+      </a-form-item>
 
-      <a-form-model-item label="发布方式" prop="taskType">
+      <a-form-item label="发布方式" prop="taskType">
         <a-radio-group :value="temp.taskData && temp.taskData.taskType" :disabled="true">
           <a-radio :value="0"> SSH </a-radio>
           <a-radio :value="1"> 节点 </a-radio>
         </a-radio-group>
-      </a-form-model-item>
+      </a-form-item>
 
-      <a-form-model-item prop="releasePath" label="发布目录">
+      <a-form-item prop="releasePath" label="发布目录">
         <a-input placeholder="请输入任务名" :disabled="true" :value="temp.taskData && temp.taskData.releasePath" />
-      </a-form-model-item>
-      <a-form-model-item prop="releasePath" label="状态" :help="temp.taskData && temp.taskData.statusMsg">
-        {{ statusMap[temp.taskData && temp.taskData.status] || "未知" }}
-      </a-form-model-item>
+      </a-form-item>
+      <a-form-item prop="releasePath" label="状态" :help="temp.taskData && temp.taskData.statusMsg">
+        {{ statusMap[temp.taskData && temp.taskData.status] || '未知' }}
+      </a-form-item>
 
-      <a-form-model-item label="执行日志">
+      <a-form-item label="执行日志">
         <a-tabs :activeKey="activeKey" @change="tabCallback">
           <a-tab-pane v-for="item in temp.taskList" :key="item.id">
             <template slot="tab">
@@ -27,20 +27,20 @@
               <template v-if="temp.taskData && temp.taskData.taskType === 0">
                 {{
                   sshList.filter((item2) => {
-                    return item2.id === item.taskDataId;
+                    return item2.id === item.taskDataId
                   })[0] &&
                   sshList.filter((item2) => {
-                    return item2.id === item.taskDataId;
+                    return item2.id === item.taskDataId
                   })[0].name
                 }}
               </template>
               <template v-else-if="temp.taskData && temp.taskData.taskType === 1">
                 {{
                   nodeList.filter((item2) => {
-                    return item2.id === item.taskDataId;
+                    return item2.id === item.taskDataId
                   })[0] &&
                   nodeList.filter((item2) => {
-                    return item2.id === item.taskDataId;
+                    return item2.id === item.taskDataId
                   })[0].name
                 }}
               </template>
@@ -51,14 +51,19 @@
             <log-view :ref="`logView-${item.id}`" height="60vh" />
           </a-tab-pane>
         </a-tabs>
-      </a-form-model-item>
-      <a-form-model-item label="执行脚本" prop="releaseBeforeCommand">
+      </a-form-item>
+      <a-form-item label="执行脚本" prop="releaseBeforeCommand">
         <a-tabs tabPosition="right">
           <a-tab-pane key="before" tab="上传前">
             <div style="height: 40vh; overflow-y: scroll">
               <code-editor
                 :code="temp.taskData && temp.taskData.beforeScript"
-                :options="{ mode: temp.taskData && temp.taskData.taskType === 0 ? 'shell' : '', tabSize: 2, theme: 'abcdef', readOnly: true }"
+                :options="{
+                  mode: temp.taskData && temp.taskData.taskType === 0 ? 'shell' : '',
+                  tabSize: 2,
+                  theme: 'abcdef',
+                  readOnly: true
+                }"
               ></code-editor>
             </div>
           </a-tab-pane>
@@ -66,164 +71,169 @@
             <div style="height: 40vh; overflow-y: scroll">
               <code-editor
                 :code="temp.taskData && temp.taskData.afterScript"
-                :options="{ mode: temp.taskData && temp.taskData.taskType === 0 ? 'shell' : '', tabSize: 2, theme: 'abcdef', readOnly: true }"
+                :options="{
+                  mode: temp.taskData && temp.taskData.taskType === 0 ? 'shell' : '',
+                  tabSize: 2,
+                  theme: 'abcdef',
+                  readOnly: true
+                }"
               ></code-editor>
             </div>
           </a-tab-pane>
         </a-tabs>
-      </a-form-model-item>
+      </a-form-item>
     </a-form-model>
   </div>
 </template>
 <script>
-import { taskDetails, statusMap, taskLogInfoList } from "@/api/file-manager/release-task-log";
-import LogView from "@/components/logView";
-import codeEditor from "@/components/codeEditor";
-import { getSshListAll } from "@/api/ssh";
-import { getNodeListAll } from "@/api/node";
+import { taskDetails, statusMap, taskLogInfoList } from '@/api/file-manager/release-task-log'
+import LogView from '@/components/logView'
+import codeEditor from '@/components/codeEditor'
+import { getSshListAll } from '@/api/ssh'
+import { getNodeListAll } from '@/api/node'
 
 export default {
   components: {
     LogView,
-    codeEditor,
+    codeEditor
   },
   props: {
     taskId: {
-      type: String,
-    },
+      type: String
+    }
   },
   data() {
     return {
       statusMap,
       logList: [],
-      activeKey: "",
+      activeKey: '',
       logTimerMap: {},
       logMap: {},
       temp: {},
       sshList: [],
-      nodeList: [],
-    };
+      nodeList: []
+    }
   },
   beforeDestroy() {
     if (this.logTimerMap) {
       this.temp.taskList?.forEach((item) => {
-        clearInterval(this.logTimerMap[item.id]);
-      });
+        clearInterval(this.logTimerMap[item.id])
+      })
     }
   },
   mounted() {
-    this.loadData();
+    this.loadData()
   },
   methods: {
     // 加载日志内容
     loadData() {
-      this.activeKey = this.temp.id || "";
+      this.activeKey = this.temp.id || ''
       taskDetails({
-        id: this.taskId,
+        id: this.taskId
       }).then((res) => {
         if (res.code === 200) {
-          this.temp = res.data;
+          this.temp = res.data
           if (this.temp.taskData?.taskType === 0) {
-            this.loadSshList();
+            this.loadSshList()
           } else if (this.temp.taskData?.taskType === 1) {
-            this.loadNodeList();
+            this.loadNodeList()
           }
 
           if (!this.activeKey) {
-            this.activeKey = this.temp.taskList && this.temp.taskList[0].id;
+            this.activeKey = this.temp.taskList && this.temp.taskList[0].id
           }
-          this.tabCallback(this.activeKey);
+          this.tabCallback(this.activeKey)
         }
-      });
+      })
     },
     // 加载 SSH 列表
     loadSshList() {
       return new Promise((resolve) => {
-        this.sshList = [];
+        this.sshList = []
         getSshListAll().then((res) => {
           if (res.code === 200) {
-            this.sshList = res.data;
-            resolve();
+            this.sshList = res.data
+            resolve()
           }
-        });
-      });
+        })
+      })
     },
     // 加载节点
     loadNodeList() {
       getNodeListAll().then((res) => {
         if (res.code === 200) {
-          this.nodeList = res.data;
+          this.nodeList = res.data
         }
-      });
+      })
     },
     initItemTimer(item) {
       if (!item) {
-        return;
+        return
       }
       // 加载构建日志
       this.logMap[item.id] = {
         line: 1,
-        run: true,
-      };
-      this.pullLog(item);
+        run: true
+      }
+      this.pullLog(item)
       this.logTimerMap[item.id] = setInterval(() => {
-        this.pullLog(item);
-      }, 2000);
+        this.pullLog(item)
+      }, 2000)
     },
     pullLog(item) {
       const params = {
         id: item.id,
         line: this.logMap[item.id].line,
-        tryCount: 0,
-      };
+        tryCount: 0
+      }
 
       taskLogInfoList(params).then((res) => {
         if (res.code === 200) {
           if (!res.data) {
             this.$notification.warning({
-              message: res.msg,
-            });
+              message: res.msg
+            })
             if (res.data.status !== 0) {
               // 还未开始的不计算次数
-              this.logMap[item.id].tryCount = this.logMap[item.id].tryCount + 1;
+              this.logMap[item.id].tryCount = this.logMap[item.id].tryCount + 1
               if (this.logMap[item.id].tryCount > 10) {
-                clearInterval(this.logTimerMap[item.id]);
+                clearInterval(this.logTimerMap[item.id])
               }
             }
-            return false;
+            return false
           }
           // 停止请求
           if (!res.data.run) {
-            clearInterval(this.logTimerMap[item.id]);
+            clearInterval(this.logTimerMap[item.id])
           }
-          this.logMap[item.id].run = res.data.run;
+          this.logMap[item.id].run = res.data.run
           // 更新日志
 
-          this.$refs[`logView-${item.id}`][0]?.appendLine(res.data.dataLines);
+          this.$refs[`logView-${item.id}`][0]?.appendLine(res.data.dataLines)
 
-          this.logMap[item.id].line = res.data.line;
+          this.logMap[item.id].line = res.data.line
 
-          this.logMap = { ...this.logMap };
+          this.logMap = { ...this.logMap }
         }
-      });
+      })
     },
     tabCallback(key) {
       if (!key) {
-        return;
+        return
       }
-      this.activeKey = key;
+      this.activeKey = key
       // console.log(this.$refs);
       if (this.logTimerMap[key]) {
-        return;
+        return
       }
       this.$nextTick(() => {
         const data = this.temp.taskList?.filter((item1) => {
-          return item1.id === key;
-        })[0];
-        this.initItemTimer(data);
-      });
-    },
-  },
-};
+          return item1.id === key
+        })[0]
+        this.initItemTimer(data)
+      })
+    }
+  }
+}
 </script>
 <style scoped></style>

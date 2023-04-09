@@ -1,15 +1,50 @@
 <template>
   <div>
-    <a-table :data-source="list" size="middle" :columns="columns" bordered :pagination="false" :rowKey="(record, index) => index">
+    <a-table
+      :data-source="list"
+      size="middle"
+      :columns="columns"
+      bordered
+      :pagination="false"
+      :rowKey="(record, index) => index"
+    >
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['serviceId']" @pressEnter="loadData" v-if="!this.serviceId" placeholder="服务id" class="search-input-item" />
-          <a-input v-model="listQuery['taskName']" @pressEnter="loadData" placeholder="任务名称" class="search-input-item" />
-          <a-input v-model="listQuery['taskId']" @pressEnter="loadData" placeholder="任务id" class="search-input-item" />
-          <a-input v-model="listQuery['taskNode']" @pressEnter="loadData" placeholder="节点id" class="search-input-item" />
+          <a-input
+            v-model="listQuery['serviceId']"
+            @pressEnter="loadData"
+            v-if="!this.serviceId"
+            placeholder="服务id"
+            class="search-input-item"
+          />
+          <a-input
+            v-model="listQuery['taskName']"
+            @pressEnter="loadData"
+            placeholder="任务名称"
+            class="search-input-item"
+          />
+          <a-input
+            v-model="listQuery['taskId']"
+            @pressEnter="loadData"
+            placeholder="任务id"
+            class="search-input-item"
+          />
+          <a-input
+            v-model="listQuery['taskNode']"
+            @pressEnter="loadData"
+            placeholder="节点id"
+            class="search-input-item"
+          />
 
           <a-tooltip :title="TASK_STATE[listQuery['taskState']]">
-            <a-select show-search option-filter-prop="children" v-model="listQuery['taskState']" allowClear placeholder="状态" class="search-input-item">
+            <a-select
+              show-search
+              option-filter-prop="children"
+              v-model="listQuery['taskState']"
+              allowClear
+              placeholder="状态"
+              class="search-input-item"
+            >
               <a-select-option :key="key" v-for="(item, key) in TASK_STATE">{{ item }}- {{ key }}</a-select-option>
               <a-select-option value="">状态</a-select-option>
             </a-select>
@@ -26,7 +61,12 @@
         <a-icon v-if="item.managerStatus && item.managerStatus.leader" type="cloud-server" />
         {{ text }}
       </a-tooltip>
-      <a-popover :title="`状态信息：${TASK_STATE[text]}`" slot="desiredState" slot-scope="text, item" placement="topLeft">
+      <a-popover
+        :title="`状态信息：${TASK_STATE[text]}`"
+        slot="desiredState"
+        slot-scope="text, item"
+        placement="topLeft"
+      >
         <template slot="content">
           <p>
             当前状态：<a-tag>{{ text }}-{{ TASK_STATE[text] }}</a-tag>
@@ -51,10 +91,19 @@
 
       <a-tooltip slot="os" slot-scope="text, item" placement="topLeft" :title="text">
         <span>
-          <a-tag>{{ text }}-{{ item.description && item.description.platform && item.description.platform.architecture }}</a-tag>
+          <a-tag
+            >{{ text }}-{{
+              item.description && item.description.platform && item.description.platform.architecture
+            }}</a-tag
+          >
         </span>
       </a-tooltip>
-      <a-tooltip slot="updatedAt" slot-scope="text, item" placement="topLeft" :title="`修改时间：${text} 创建时间：${item.createdAt}`">
+      <a-tooltip
+        slot="updatedAt"
+        slot-scope="text, item"
+        placement="topLeft"
+        :title="`修改时间：${text} 创建时间：${item.createdAt}`"
+      >
         <span>
           {{ parseTime(text) }}
         </span>
@@ -71,19 +120,19 @@
     <!-- 编辑节点 -->
     <a-modal destroyOnClose v-model="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item label="角色" prop="role">
+        <a-form-item label="角色" prop="role">
           <a-radio-group name="role" v-model="temp.role">
             <a-radio value="WORKER"> 工作节点</a-radio>
             <a-radio value="MANAGER"> 管理节点 </a-radio>
           </a-radio-group>
-        </a-form-model-item>
-        <a-form-model-item label="状态" prop="availability">
+        </a-form-item>
+        <a-form-item label="状态" prop="availability">
           <a-radio-group name="availability" v-model="temp.availability">
             <a-radio value="ACTIVE"> 活跃</a-radio>
             <a-radio value="PAUSE"> 暂停 </a-radio>
             <a-radio value="DRAIN"> 排空 </a-radio>
           </a-radio-group>
-        </a-form-model-item>
+        </a-form-item>
       </a-form-model>
     </a-modal>
     <!-- 查看日志 -->
@@ -94,27 +143,27 @@
 </template>
 
 <script>
-import { dockerSwarmNodeUpdate, dockerSwarmServicesTaskList, TASK_STATE } from "@/api/docker-swarm";
-import { parseTime } from "@/utils/const";
-import PullLog from "./pull-log";
+import { dockerSwarmNodeUpdate, dockerSwarmServicesTaskList, TASK_STATE } from '@/api/docker-swarm'
+import { parseTime } from '@/utils/const'
+import PullLog from './pull-log'
 
 export default {
   components: { PullLog },
   props: {
     id: {
-      type: String,
+      type: String
     },
     serviceId: { type: String },
     taskState: {
-      type: String,
+      type: String
     },
     visible: {
       type: Boolean,
-      default: false,
+      default: false
     },
     urlPrefix: {
-      type: String,
-    },
+      type: String
+    }
   },
   data() {
     return {
@@ -128,21 +177,45 @@ export default {
       autoUpdateTime: null,
       logVisible: false,
       rules: {
-        role: [{ required: true, message: "请选择节点角色", trigger: "blur" }],
-        availability: [{ required: true, message: "请选择节点状态", trigger: "blur" }],
+        role: [{ required: true, message: '请选择节点角色', trigger: 'blur' }],
+        availability: [{ required: true, message: '请选择节点状态', trigger: 'blur' }]
       },
       columns: [
-        { title: "序号", width: "80px", ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
-        { title: "任务Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "节点Id", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "服务ID", dataIndex: "serviceId", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "镜像", dataIndex: "spec.containerSpec.image", ellipsis: true, width: 120, scopedSlots: { customRender: "tooltip" } },
+        {
+          title: '序号',
+          width: '80px',
+          ellipsis: true,
+          align: 'center',
+          customRender: (text, record, index) => `${index + 1}`
+        },
+        { title: '任务Id', dataIndex: 'id', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '节点Id', dataIndex: 'nodeId', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '服务ID', dataIndex: 'serviceId', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: '镜像',
+          dataIndex: 'spec.containerSpec.image',
+          ellipsis: true,
+          width: 120,
+          scopedSlots: { customRender: 'tooltip' }
+        },
         // { title: "副本数", dataIndex: "spec.mode.replicated.replicas", width: 90, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         // { title: "端点", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
         // { title: "节点地址", width: 150, dataIndex: "status.address", ellipsis: true, scopedSlots: { customRender: "address" } },
-        { title: "状态", width: 140, dataIndex: "desiredState", ellipsis: true, scopedSlots: { customRender: "desiredState" } },
-        { title: "错误信息", width: 150, dataIndex: "status.err", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "slot", width: "80px", dataIndex: "slot", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        {
+          title: '状态',
+          width: 140,
+          dataIndex: 'desiredState',
+          ellipsis: true,
+          scopedSlots: { customRender: 'desiredState' }
+        },
+        {
+          title: '错误信息',
+          width: 150,
+          dataIndex: 'status.err',
+          ellipsis: true,
+          scopedSlots: { customRender: 'tooltip' }
+        },
+        { title: 'slot', width: '80px', dataIndex: 'slot', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
 
         // { title: "系统类型", width: 140, align: "center", dataIndex: "description.platform.os", ellipsis: true, scopedSlots: { customRender: "os" } },
         // {
@@ -154,79 +227,85 @@ export default {
         //   width: 170,
         // },
         {
-          title: "修改时间",
-          dataIndex: "updatedAt",
+          title: '修改时间',
+          dataIndex: 'updatedAt',
           ellipsis: true,
-          scopedSlots: { customRender: "updatedAt" },
+          scopedSlots: { customRender: 'updatedAt' },
           sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
-          sortDirections: ["descend", "ascend"],
-          defaultSortOrder: "descend",
-          width: "180px",
+          sortDirections: ['descend', 'ascend'],
+          defaultSortOrder: 'descend',
+          width: '180px'
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "80px" },
+        {
+          title: '操作',
+          dataIndex: 'operation',
+          scopedSlots: { customRender: 'operation' },
+          align: 'center',
+          width: '80px'
+        }
       ],
-      countdownTime: Date.now(),
-    };
+      countdownTime: Date.now()
+    }
   },
   computed: {},
   beforeDestroy() {},
   mounted() {
-    this.listQuery.taskState = this.taskState;
-    this.loadData();
+    this.listQuery.taskState = this.taskState
+    this.loadData()
   },
   methods: {
     parseTime,
     // 加载数据
     loadData() {
       if (!this.visible) {
-        return;
+        return
       }
-      this.loading = true;
+      this.loading = true
       if (this.serviceId) {
-        this.listQuery.serviceId = this.serviceId;
+        this.listQuery.serviceId = this.serviceId
       }
-      this.listQuery.id = this.id;
+      this.listQuery.id = this.id
       dockerSwarmServicesTaskList(this.urlPrefix, this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data;
+          this.list = res.data
         }
-        this.loading = false;
-        this.countdownTime = Date.now() + 5 * 1000;
-      });
+        this.loading = false
+        this.countdownTime = Date.now() + 5 * 1000
+      })
     },
     // 日志
     handleLog(record) {
-      this.logVisible = true;
-      this.temp = record;
+      this.logVisible = true
+      this.temp = record
     },
     handleEdit(record) {
-      this.editVisible = true;
+      this.editVisible = true
       this.temp = {
         nodeId: record.id,
         role: record.spec.role,
-        availability: record.spec.availability,
-      };
+        availability: record.spec.availability
+      }
     },
     handleEditOk() {
-      this.$refs["editForm"].validate((valid) => {
+      this.$refs['editForm'].validate((valid) => {
         if (!valid) {
-          return false;
+          return false
         }
-        this.temp.id = this.id;
+        this.temp.id = this.id
         dockerSwarmNodeUpdate(this.urlPrefix, this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
             this.$notification.success({
-              message: res.msg,
-            });
-            this.editVisible = false;
-            this.loadData();
+              message: res.msg
+            })
+            this.editVisible = false
+            this.loadData()
           }
-        });
-      });
-    },
-  },
-};
+        })
+      })
+    }
+  }
+}
 </script>
 <style scoped>
 /deep/ .ant-statistic div {
