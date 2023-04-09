@@ -82,36 +82,28 @@
             </a-col>
             <a-divider type="vertical" />
             <a-col :span="20">
-              <a-form :form="bindMfaForm" :label-col="{ span: 0 }" @submit="handleMfaSure" class="init-form">
-                <a-form-item label="二维码" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }" style="margin-bottom: 5px">
+              <a-form :model="mfaForm" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }" @submit="handleMfaSure"
+                class="init-form">
+                <a-form-item label="二维码" style="margin-bottom: 5px">
                   <div class="qrcode">
                     <qrcode-vue :value="qrCode.value" :size="qrCode.size" level="H" />
                   </div>
                 </a-form-item>
-                <a-form-item label="MFA key" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
-                  <a-input v-clipboard:copy="mfaData.key" v-clipboard:success="
-                    () => {
-                      notification.success({ message: '复制成功' })
-                    }
-                  " v-clipboard:error="
-  () => {
-    notification.error({ message: '复制失败' })
-  }
-" readOnly disabled v-model="mfaData.key">
-                    <copy-outlined />
-                  </a-input>
+                <a-form-item label="MFA key" name="mfa">
+                  <a-input-group compact>
+                    <a-input v-model:value="mfaForm.mfa" disabled style="width: calc(100% - 32px)">
+                    </a-input>
+                    <a-button style="padding: 4px 6px;">
+                      <a-typography-paragraph :copyable="{ text: mfaForm.mfa }"></a-typography-paragraph>
+                    </a-button>
+                  </a-input-group>
                 </a-form-item>
 
-                <a-form-item label="验证码" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
-                  <a-input v-decorator="[
-                    'twoCode',
-                    {
-                      rules: [
-                        { required: true, message: '请输入两步验证码' },
-                        { pattern: /^\d{6}$/, message: '验证码 6 为纯数字' },
-                      ],
-                    },
-                  ]" placeholder="两步验证码" />
+                <a-form-item label="验证码" name="twoCode" :rules="[
+                  { required: true, message: '请输入两步验证码' },
+                  { pattern: /^\d{6}$/, message: '验证码 6 为纯数字' },
+                ]">
+                  <a-input v-model:value="mfaForm.twoCode" placeholder="两步验证码" />
                 </a-form-item>
 
                 <a-form-item>
@@ -119,7 +111,7 @@
                     <a-col :span="10">
                       <a-space>
                         <a-button type="primary" html-type="submit" class="btn"> 确认绑定 </a-button>
-                        <a-button type="dashed" @click="ignoreBindMfa"> 忽略 </a-button>
+                        <a-button type="dashed" @click="handleIgnoreBindMfa"> 忽略 </a-button>
                       </a-space>
                     </a-col>
                   </a-row>
@@ -147,20 +139,24 @@ import { checkSystem } from '@/api/install'
 import { initInstall } from '@/api/install'
 import { onMounted, reactive, ref } from 'vue'
 import { UserOutlined, SolutionOutlined, CopyOutlined } from '@ant-design/icons-vue'
-
 import QrcodeVue from 'qrcode.vue'
-import { notification } from 'ant-design-vue'
+import { Modal, notification } from 'ant-design-vue'
+import userStore from '@/stores/user'
+import appStore from '@/stores/app'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const loginForm = reactive({
   userName: '',
   userPwd: '',
 })
-const bindMfaForm = reactive({})
-const setpCurrent = ref(0)
-const mfaData = reactive({
-  key: '',
-  url: '',
+const mfaForm = reactive({
+  twoCode: '',
+  mfa: ''
 })
+const setpCurrent = ref(0)
+
 const canInstall = ref(true)
 
 const qrCode = reactive({
@@ -181,110 +177,52 @@ const handleLogin = (values: any) => {
         message: res.msg,
       })
       const tokenData = res.data.tokenData
-      mfaData.key = res.data.mfaKey
-      mfaData.url = res.data.url
+      mfaForm.mfa = res.data.mfaKey
       setpCurrent.value = 1
       qrCode.value = res.data.url
-
-      // // 调用 store action 存储当前登录的用户名和 token
-      // this.$store
-      //   .dispatch('login', { token: tokenData.token, longTermToken: tokenData.longTermToken })
-      //   .then(() => {
-      //     // 跳转主页面
-      //     //  this.$router.push({ path: "/" });
-      //   })
-      // const firstWorkspace = tokenData.bindWorkspaceModels[0]
-      // this.$store.dispatch('changeWorkspace', firstWorkspace.id).then(() => { })
+      userStore.login({ token: tokenData.token, longTermToken: tokenData.longTermToken })
+      router.push({ path: '/' })
+      const firstWorkspace = tokenData.bindWorkspaceModels[0]
+      appStore.changeWorkspace(firstWorkspace.id)
     }
   })
 }
 
-const handleMfaSure = (e) => {
-  e.preventDefault()
-  this.bindMfaForm.validateFields((err, values) => {
-    if (!err) {
-      const params = {
-        ...values,
-        mfa: this.mfaData.key,
-      }
-
-      bindMfa(params).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg,
-          })
-          // 跳转主页面;
-          this.$router.push({ path: '/' })
-        }
+const handleMfaSure = () => {
+  bindMfa(mfaForm).then((res) => {
+    if (res.code === 200) {
+      notification.success({
+        message: res.msg,
       })
+      // 跳转主页面;
+      router.push({ path: '/' })
     }
   })
 }
 
 // 忽略 mfa
-const ignoreBindMfa = () => {
-  this.$confirm({
+const handleIgnoreBindMfa = () => {
+  Modal.confirm({
     title: '系统提示',
     content: '确定要忽略绑定两步验证吗？强烈建议超级管理员开启两步验证来保证账号安全性',
     okText: '确认',
     cancelText: '取消',
     onOk: () => {
-      this.$router.push({ path: '/' })
+      router.push({ path: '/' })
     },
-  })
+  });
 }
 
 const goHome = () => {
-  this.$router.replace({ path: '/' })
-}
-// /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*? +]).*$/
-// 验证密码安全强度
-const checkPasswordStrong = (fieldValue) => {
-  function checkStrong(sPW) {
-    let Modes = 0
-    for (let i = 0; i < sPW.length; i++) {
-      // 测试每一个字符的类别并统计一共有多少种模式.
-      Modes |= CharMode(sPW.charCodeAt(i))
-    }
-    return bitTotal(Modes)
-  }
-
-  //判断字符类型
-  const CharMode = (iN) => {
-    if (iN >= 48 && iN <= 57)
-      //数字
-      return 1
-    if (iN >= 65 && iN <= 90)
-      //大写字母
-      return 2
-    if (iN >= 97 && iN <= 122)
-      //小写
-      return 4
-    else return 8 //特殊字符
-  }
-
-  //统计字符类型
-  const bitTotal = (num) => {
-    var modes = 0
-    for (let i = 0; i < 4; i++) {
-      if (num & 1) modes++
-      num >>>= 1
-    }
-    return modes
-  }
-
-  if (!fieldValue || fieldValue == '') {
-    return false
-  }
-  return checkStrong(fieldValue) >= 3
+  router.replace({ path: '/' })
 }
 
 onMounted(() => {
   checkSystem().then((res) => {
     if (res.code === 222) {
-      // canInstall.value = true
+      canInstall.value = true
     } else {
-      // canInstall.value = false
+      canInstall.value = false
     }
   })
 })
