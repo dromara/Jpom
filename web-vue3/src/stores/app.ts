@@ -5,7 +5,7 @@ import { defineStore } from 'pinia'
 import { CACHE_WORKSPACE_ID } from '@/utils/const'
 import { getHashQuery } from '@/utils/utils'
 
-const useAppStore = defineStore('app', {
+export const useAppStore = defineStore('app', {
   state: () => ({
     workspaceId: localStorage.getItem(CACHE_WORKSPACE_ID),
     // 菜单折叠
@@ -31,4 +31,4 @@ const useAppStore = defineStore('app', {
   },
 })
 
-export default useAppStore()
+// export default useAppStore()

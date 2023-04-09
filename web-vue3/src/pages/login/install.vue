@@ -141,8 +141,8 @@ import { onMounted, reactive, ref } from 'vue'
 import { UserOutlined, SolutionOutlined, CopyOutlined } from '@ant-design/icons-vue'
 import QrcodeVue from 'qrcode.vue'
 import { Modal, notification } from 'ant-design-vue'
-import userStore from '@/stores/user'
-import appStore from '@/stores/app'
+import { useUserStore } from '@/stores/user'
+import { useAppStore } from '@/stores/app'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -171,6 +171,8 @@ const handleLogin = (values: any) => {
     userPwd: sha1(values.userPwd),
   }
   initInstall(params).then((res) => {
+    const userStore = useUserStore()
+    const appStore = useAppStore()
     // 登录不成功，更新验证码
     if (res.code === 200) {
       notification.success({
