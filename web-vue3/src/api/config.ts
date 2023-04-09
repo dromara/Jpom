@@ -10,6 +10,8 @@ import { useMenuStore } from '@/stores/menu'
 const _window = window as any
 const delTimeout = 20 * 1000
 const apiTimeout = _window.apiTimeout === '<apiTimeout>' ? delTimeout : _window.apiTimeout
+// debug routerBase
+const routerBase = _window.routerBase === '<routerBase>' ? '' : _window.routerBase
 
 const pro = process.env.NODE_ENV === 'production'
 
@@ -30,15 +32,13 @@ instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const userStore = useUserStore()
 
   const { headers } = config
-  const accessToken = localStorage.getItem('accessToken')
-  headers['Authorization'] = accessToken ? 'Bearer ' + accessToken : ''
   headers[TOKEN_HEADER_KEY] = userStore.token
   headers[CACHE_WORKSPACE_ID] = appStore.getWorkspaceId
 
-  // if (_window.routerBase) {
-  //   // 防止 url 出现 //
-  //   config.url = (_window.routerBase + config.url).replace(new RegExp('//', 'gm'), '/')
-  // }
+  if (routerBase) {
+    // 防止 url 出现 //
+    config.url = (routerBase + config.url).replace(new RegExp('//', 'gm'), '/')
+  }
   return config
 })
 

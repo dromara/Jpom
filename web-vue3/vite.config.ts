@@ -24,6 +24,7 @@ import path from 'node:path'
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
+import { createHtmlPlugin } from 'vite-plugin-html'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -84,6 +85,21 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    plugins: [vue(), vueJsx()],
+    plugins: [
+      vue(),
+      vueJsx(),
+      createHtmlPlugin({
+        minify: true,
+        inject: {
+          data: {
+            title: env.JPOM_APP_TITLE,
+            base_url: env.JPOM_BASE_URL,
+            build: new Date().getTime(),
+            env: process.env.NODE_ENV,
+            buildVersion: process.env.npm_package_version,
+          },
+        },
+      }),
+    ],
   }
 })
