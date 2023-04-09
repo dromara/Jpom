@@ -9,33 +9,30 @@
   </a-config-provider>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
-import { notification, message } from 'ant-design-vue'
-import { onMounted, provide, computed } from 'vue'
+import { onMounted, provide } from 'vue'
 import { useMenuStore } from '@/stores/menu'
-
+const { proxy }: any = getCurrentInstance()
 
 onMounted(() => {
-  notification.config({
+  proxy.$notification.config({
     top: '100px',
-    duration: 4,
+    duration: 4
   })
 
-  message.config({ duration: 4 })
+  proxy.$message.config({ duration: 4 })
 })
 
 const reload = () => {
   const menuStore = useMenuStore()
   // 刷新菜单
-  menuStore.restLoadSystemMenus();
+  menuStore.restLoadSystemMenus()
 }
 
-
 provide('app', {
-  reload,
+  reload
 })
-
 </script>
 
 <style lang="less">

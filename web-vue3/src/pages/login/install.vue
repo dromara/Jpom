@@ -80,8 +80,8 @@
                 { required: true, message: '请输入密码' },
                 {
                   pattern: /^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,18}$/,
-                  message: '密码必须包含数字，字母，字符，且大于6位',
-                },
+                  message: '密码必须包含数字，字母，字符，且大于6位'
+                }
               ]"
             >
               <a-input-password v-model:value="loginForm.userPwd" placeholder="密码（6-18位数字、字母、符号组合）" />
@@ -137,7 +137,7 @@
                   name="twoCode"
                   :rules="[
                     { required: true, message: '请输入两步验证码' },
-                    { pattern: /^\d{6}$/, message: '验证码 6 为纯数字' },
+                    { pattern: /^\d{6}$/, message: '验证码 6 为纯数字' }
                   ]"
                 >
                   <a-input v-model:value="mfaForm.twoCode" placeholder="两步验证码" />
@@ -174,23 +174,22 @@ import { MFA_APP_TIP_ARRAY } from '@/utils/const'
 import sha1 from 'js-sha1'
 import { checkSystem } from '@/api/install'
 import { initInstall } from '@/api/install'
-import { onMounted, reactive, ref } from 'vue'
-import { UserOutlined, SolutionOutlined } from '@ant-design/icons-vue'
+// import { onMounted, reactive, ref } from 'vue'
 import QrcodeVue from 'qrcode.vue'
-import { Modal, notification } from 'ant-design-vue'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
 import { useRouter } from 'vue-router'
+const { proxy }: any = getCurrentInstance()
 
 const router = useRouter()
 
 const loginForm = reactive({
   userName: '',
-  userPwd: '',
+  userPwd: ''
 })
 const mfaForm = reactive({
   twoCode: '',
-  mfa: '',
+  mfa: ''
 })
 const setpCurrent = ref(0)
 
@@ -198,22 +197,22 @@ const canInstall = ref(true)
 
 const qrCode = reactive({
   value: '',
-  size: 120,
+  size: 120
 })
 
 // login
 const handleLogin = (values: any) => {
   const params = {
     ...values,
-    userPwd: sha1(values.userPwd),
+    userPwd: sha1(values.userPwd)
   }
   initInstall(params).then((res) => {
     const userStore = useUserStore()
     const appStore = useAppStore()
     // 登录不成功，更新验证码
     if (res.code === 200) {
-      notification.success({
-        message: res.msg,
+      proxy.$notification.success({
+        message: res.msg
       })
       const tokenData = res.data.tokenData
       mfaForm.mfa = res.data.mfaKey
@@ -230,8 +229,8 @@ const handleLogin = (values: any) => {
 const handleMfaSure = () => {
   bindMfa(mfaForm).then((res) => {
     if (res.code === 200) {
-      notification.success({
-        message: res.msg,
+      proxy.$notification.success({
+        message: res.msg
       })
       // 跳转主页面;
       router.push({ path: '/' })
@@ -241,14 +240,14 @@ const handleMfaSure = () => {
 
 // 忽略 mfa
 const handleIgnoreBindMfa = () => {
-  Modal.confirm({
+  proxy.$confirm({
     title: '系统提示',
     content: '确定要忽略绑定两步验证吗？强烈建议超级管理员开启两步验证来保证账号安全性',
     okText: '确认',
     cancelText: '取消',
     onOk: () => {
       router.push({ path: '/' })
-    },
+    }
   })
 }
 
