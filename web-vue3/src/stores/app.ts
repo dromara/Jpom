@@ -3,7 +3,7 @@
  */
 import { defineStore } from 'pinia'
 import { CACHE_WORKSPACE_ID } from '@/utils/const'
-import { useRoute } from 'vue-router'
+import { getHashQuery } from '@/utils/utils'
 
 const useAppStore = defineStore('app', {
   state: () => ({
@@ -25,10 +25,8 @@ const useAppStore = defineStore('app', {
   },
   getters: {
     getWorkspaceId(state) {
-      const route = useRoute()
-      // let wid = router.app.$route.query.wid
-      let wid = route.query.wid
-      return wid || state.workspaceId
+      const query = getHashQuery()
+      return query.wid || state.workspaceId
     },
   },
 })

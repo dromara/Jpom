@@ -17,7 +17,8 @@ interface IState {
   menus: any[]
   activeMenu: string
 }
-export const useMenuStore = defineStore('menu', {
+
+const useMenuStore = defineStore('menu', {
   state: (): IState => ({
     activeTabKey: localStorage.getItem(ACTIVE_TAB_KEY) || '',
     tabList: localStorage.getItem(TAB_LIST_KEY) ? JSON.parse(localStorage.getItem(TAB_LIST_KEY)!) : [],
@@ -220,3 +221,5 @@ export const useMenuStore = defineStore('menu', {
     },
   },
 })
+
+export default useMenuStore()

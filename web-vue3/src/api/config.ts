@@ -5,7 +5,7 @@ import { refreshToken } from './user/user'
 import { notification } from 'ant-design-vue'
 import appStore from '@/stores/app'
 import userStore from '@/stores/user'
-import { useMenuStore } from '@/stores/menu'
+import menuStore from '@/stores/menu'
 
 const _window = window as any
 const delTimeout = 20 * 1000
@@ -15,7 +15,7 @@ const pro = process.env.NODE_ENV === 'production'
 
 // 创建实例
 const instance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_APP_API_BASE_URL,
+  baseURL: import.meta.env.JPOM_BASE_API_URL,
 
   timeout: apiTimeout || delTimeout,
   headers: {
@@ -27,13 +27,15 @@ const instance: AxiosInstance = axios.create({
 // 请求拦截
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const { headers } = config
-  headers[TOKEN_HEADER_KEY] = userStore.getToken
+  const accessToken = localStorage.getItem('accessToken')
+  headers['Authorization'] = accessToken ? 'Bearer ' + accessToken : ''
+  headers[TOKEN_HEADER_KEY] = userStore.token
   headers[CACHE_WORKSPACE_ID] = appStore.getWorkspaceId
 
-  if (_window.routerBase) {
-    // 防止 url 出现 //
-    config.url = (_window.routerBase + config.url).replace(new RegExp('//', 'gm'), '/')
-  }
+  // if (_window.routerBase) {
+  //   // 防止 url 出现 //
+  //   config.url = (_window.routerBase + config.url).replace(new RegExp('//', 'gm'), '/')
+  // }
   return config
 })
 
@@ -142,8 +144,8 @@ async function redoRequest(config: AxiosRequestConfig) {
   const result = await refreshToken()
   if (result.code === 200) {
     // 调用 store action 存储当前登录的用户名和 token
-    await userStore.reLogin(result.data)
-    await useMenuStore().loadSystemMenus()
+    await userStore.login(result.data)
+    await menuStore.loadSystemMenus()
     request(config)
     return result
   }
