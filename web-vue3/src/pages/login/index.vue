@@ -36,7 +36,7 @@
     <a-card class="login-card" hoverable>
       <a-card-meta :title="`${loginTitle}`" style="text-align: center" description="" />
       <br />
-      <template v-if="this.action === 'login'">
+      <template v-if="action === 'login'">
         <a-form-model ref="loginForm" :label-col="{ span: 0 }" :model="loginForm" :rules="rules" @submit="handleLogin">
           <a-form-model-item :wrapper-col="{ span: 24 }" prop="loginName">
             <a-input v-model="loginForm.loginName" placeholder="用户名" />
@@ -44,7 +44,7 @@
           <a-form-model-item :wrapper-col="{ span: 24 }" prop="userPwd">
             <a-input-password v-model="loginForm.userPwd" placeholder="密码" />
           </a-form-model-item>
-          <a-form-model-item v-if="!this.disabledCaptcha" :wrapper-col="{ span: 24 }" prop="code">
+          <a-form-model-item v-if="!disabledCaptcha" :wrapper-col="{ span: 24 }" prop="code">
             <a-row>
               <a-col :span="14">
                 <a-input v-model="loginForm.code" placeholder="验证码" />
@@ -96,12 +96,194 @@
     </a-card>
   </div>
 </template>
-<script>
+<script setup lang="ts">
+import { onMounted, ref, computed, h, reactive } from 'vue'
 import { login, loginConfig, mfaVerify, oauth2Url, oauth2Login } from '@/api/user/user'
 import { checkSystem } from '@/api/install'
 import sha1 from 'js-sha1'
+import { useRouter, useRoute } from 'vue-router'
+import { notification, message } from 'ant-design-vue'
+import { useAppStore } from '@/stores/app'
 
-import { mapGetters } from 'vuex'
+interface IFormState {
+  loginName: string
+  userPwd: string
+  code: string
+}
+
+const router = useRouter()
+const route = useRoute()
+const appStore = useAppStore()
+const loginTitle = ref('登录JPOM')
+const loginForm = reactive<IFormState>({
+  loginName: '',
+  userPwd: '',
+  code: '',
+})
+const mfaData = reactive({
+  mfaCode: '',
+  token: '',
+})
+const action = ref<'mfa' | 'login'>('login')
+const enabledOauth2Provides = ref<string[]>([])
+
+const randCode = ref(import.meta.env.JPOM_BASE_API_URL + '/randCode.png')
+const dynamicBg = ref(localStorage.getItem('dynamicBg') === 'true')
+const disabledCaptcha = ref(false)
+
+const backgroundImage = computed(() => {
+  return dynamicBg.value ? `url(https://picsum.photos/${screen.width}/${screen.height}/?random)` : ''
+})
+
+// 检查是否需要初始化
+const beginCheckSystem = () => {
+  checkSystem().then((res) => {
+    if (res.code !== 200) {
+      notification.warn({
+        message: res.msg,
+      })
+    }
+    if (res.code === 999) {
+      router.push('/system/ipAccess')
+    } else if (res.code === 222) {
+      router.push('/install')
+    }
+    if (res.data?.loginTitle) {
+      loginTitle.value = res.data.loginTitle
+    }
+    disabledCaptcha.value = res.data.disabledCaptcha
+    checkOauth2()
+  })
+}
+
+const getLoginConfig = () => {
+  loginConfig().then((res) => {
+    if (res.data && res.data.demo) {
+      const demo = res.data.demo
+
+      notification.info({
+        message: '温馨提示',
+        description: h('div', null, [h('p', { domProps: { innerHTML: demo.msg } }, null)]),
+      })
+      loginForm.loginName = demo.user
+    }
+    enabledOauth2Provides.value = res.data?.oauth2Provides || []
+  })
+}
+// change Code
+const changeCode = () => {
+  randCode.value = 'randCode.png?r=' + new Date().getTime()
+  loginForm.code = ''
+}
+const checkOauth2 = () => {
+  if (route.query.code) {
+    oauth2Login({
+      code: route.query.code,
+      state: route.query.state,
+      provide: window.oauth2Provide,
+    }).then((res) => {
+      // 删除参数，避免刷新页面 code 已经被使用提示错误信息
+      let query = Object.assign({}, route.query)
+      delete query.code, delete query.state
+      router.replace({
+        query: query,
+      })
+      // 登录不成功，更新验证码
+      if (res.code !== 200) {
+        changeCode()
+      } else {
+        startDispatchLogin(res)
+      }
+    })
+  }
+}
+// 跳转到第三方系统
+const toOauth2Url = (provide: string) => {
+  oauth2Url({ provide: provide }).then((res) => {
+    if (res.code === 200 && res.data) {
+      message.loading({ content: '跳转到第三方系统中', key: 'oauth2', duration: 0 })
+      location.href = res.data.toUrl
+    }
+  })
+}
+const startDispatchLogin = (res: any) => {
+  notification.success({
+    message: res.msg,
+  })
+  const existWorkspace = res.data.bindWorkspaceModels.filter((item: any) => item.id === appStore.getWorkspaceId)
+  if (existWorkspace.length) {
+    // 缓存的还存在
+    dispatchLogin(res.data)
+  } else {
+    // 之前的工作空间已经不存在,切换到当前列表的第一个
+    // 还没有选择工作空间，默认选中第一个 用户加载菜单
+    let firstWorkspace = res.data.bindWorkspaceModels[0]
+    appStore.changeWorkspace(firstWorkspace.id)
+    dispatchLogin(res.data)
+  }
+}
+const dispatchLogin = (data) => {
+  // 调用 store action 存储当前登录的用户名和 token
+  this.$store.dispatch('login', { token: data.token, longTermToken: data.longTermToken }).then(() => {
+    // 刷新菜单
+    this.$store.dispatch('restLoadSystemMenus').then(() => {
+      //
+      // 跳转主页面
+      router.push({ path: '/' })
+    })
+  })
+}
+
+// Controls the background display or hiding
+const handleToggleBg = () => {
+  dynamicBg.value = !dynamicBg
+  localStorage.setItem('dynamicBg', String(dynamicBg))
+  //this.getBg();
+}
+
+const handleLogin = (values: IFormState) => {
+  const params = {
+    ...values,
+    userPwd: sha1(loginForm.userPwd),
+  }
+  login(params).then((res) => {
+    if (res.code === 201) {
+      action.value = 'mfa'
+      mfaData.token = res.data.tempToken
+      return
+    }
+    // 登录不成功，更新验证码
+    if (res.code !== 200) {
+      changeCode()
+    } else {
+      startDispatchLogin(res)
+    }
+  })
+}
+
+const handleMfa = (values) => {
+  mfaVerify({
+    token: mfaData.token,
+    code: values.mfaCode,
+  }).then((res) => {
+    if (res.code === 201) {
+      // 过期需要重新登录
+      action.value = 'login'
+      mfaData.token = ''
+      mfaData.mfaCode = ''
+      return
+    } else if (res.code === 200) {
+      startDispatchLogin(res)
+    }
+  })
+}
+
+onMounted(() => {
+  beginCheckSystem()
+  changeCode()
+  getLoginConfig()
+})
+
 export default {
   data() {
     return {
@@ -150,162 +332,9 @@ export default {
     },
   },
   methods: {
-    // 检查是否需要初始化
-    checkSystem() {
-      checkSystem().then((res) => {
-        if (res.code !== 200) {
-          this.$notification.warn({
-            message: res.msg,
-          })
-        }
-        if (res.code === 999) {
-          this.$router.push('/system/ipAccess')
-        } else if (res.code === 222) {
-          this.$router.push('/install')
-        }
-        if (res.data?.loginTitle) {
-          this.loginTitle = res.data.loginTitle
-        }
-        this.disabledCaptcha = res.data.disabledCaptcha
-        this.checkOauth2()
-      })
-    },
-    // Controls the background display or hiding
-    handleToggleBg() {
-      this.dynamicBg = !this.dynamicBg
-      localStorage.setItem('dynamicBg', this.dynamicBg)
-      //this.getBg();
-    },
     // Get background pic
     // getBg() {},
     //
-    getLoginConfig() {
-      loginConfig().then((res) => {
-        if (res.data && res.data.demo) {
-          const demo = res.data.demo
-          const h = this.$createElement
-          this.$notification.info({
-            message: '温馨提示',
-            description: h('div', null, [h('p', { domProps: { innerHTML: demo.msg } }, null)]),
-          })
-          this.loginForm.loginName = demo.user
-        }
-        this.enabledOauth2Provides = res.data?.oauth2Provides || []
-      })
-    },
-    // change Code
-    changeCode() {
-      this.randCode = 'randCode.png?r=' + new Date().getTime()
-      this.loginForm = { ...this.loginForm, code: '' }
-    },
-    checkOauth2() {
-      if (this.$route.query.code) {
-        oauth2Login({
-          code: this.$route.query.code,
-          state: this.$route.query.state,
-          provide: window.oauth2Provide,
-        }).then((res) => {
-          // 删除参数，避免刷新页面 code 已经被使用提示错误信息
-          let query = Object.assign({}, this.$route.query)
-          delete query.code, delete query.state
-          this.$router.replace({
-            query: query,
-          })
-          // 登录不成功，更新验证码
-          if (res.code !== 200) {
-            this.changeCode()
-          } else {
-            this.startDispatchLogin(res)
-          }
-        })
-      }
-    },
-    // 跳转到第三方系统
-    toOauth2Url(provide) {
-      oauth2Url({ provide: provide }).then((res) => {
-        if (res.code === 200 && res.data) {
-          this.$message.loading({ content: '跳转到第三方系统中', key: 'oauth2', duration: 0 })
-          location.href = res.data.toUrl
-        }
-      })
-    },
-    // login
-    handleLogin(e) {
-      e.preventDefault()
-      this.$refs['loginForm'].validate((valid) => {
-        if (!valid) {
-          return false
-        }
-        const params = {
-          ...this.loginForm,
-          userPwd: sha1(this.loginForm.userPwd),
-        }
-        login(params).then((res) => {
-          if (res.code === 201) {
-            //
-            this.action = 'mfa'
-            this.mfaData.token = res.data.tempToken
-            return
-          }
-          // 登录不成功，更新验证码
-          if (res.code !== 200) {
-            this.changeCode()
-          } else {
-            this.startDispatchLogin(res)
-          }
-        })
-      })
-    },
-    // 验证 验证码
-    handleMfa(e) {
-      e.preventDefault()
-      this.$refs['mfaDataForm'].validate((valid) => {
-        if (!valid) {
-          return false
-        }
-        mfaVerify({
-          token: this.mfaData.token,
-          code: this.mfaData.mfaCode,
-        }).then((res) => {
-          if (res.code === 201) {
-            // 过期需要重新登录
-            this.action = 'login'
-            this.mfaData = {}
-            return
-          } else if (res.code === 200) {
-            this.startDispatchLogin(res)
-          }
-        })
-      })
-    },
-    startDispatchLogin(res) {
-      this.$notification.success({
-        message: res.msg,
-      })
-      const existWorkspace = res.data.bindWorkspaceModels.filter((item) => item.id === this.getWorkspaceId)
-      if (existWorkspace.length) {
-        // 缓存的还存在
-        this.dispatchLogin(res.data)
-      } else {
-        // 之前的工作空间已经不存在,切换到当前列表的第一个
-        // 还没有选择工作空间，默认选中第一个 用户加载菜单
-        let firstWorkspace = res.data.bindWorkspaceModels[0]
-        this.$store.dispatch('changeWorkspace', firstWorkspace.id).then(() => {
-          this.dispatchLogin(res.data)
-        })
-      }
-    },
-    dispatchLogin(data) {
-      // 调用 store action 存储当前登录的用户名和 token
-      this.$store.dispatch('login', { token: data.token, longTermToken: data.longTermToken }).then(() => {
-        // 刷新菜单
-        this.$store.dispatch('restLoadSystemMenus').then(() => {
-          //
-          // 跳转主页面
-          this.$router.push({ path: '/' })
-        })
-      })
-    },
   },
 }
 </script>

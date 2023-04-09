@@ -22,3 +22,4 @@
 ///
 
 declare module 'js-sha1'
+declare module 'spark-md5'
