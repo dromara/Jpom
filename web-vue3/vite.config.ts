@@ -26,6 +26,13 @@ import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import { createHtmlPlugin } from 'vite-plugin-html'
 
+//自动导入vue中hook reactive ref等
+import AutoImport from 'unplugin-auto-import/vite'
+//自动导入ui-组件 比如说ant-design-vue  element-plus等
+import Components from 'unplugin-vue-components/vite'
+//ant-design-vue
+import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // 加载环境配置
@@ -39,14 +46,14 @@ export default defineConfig(({ mode }) => {
 
     resolve: {
       alias: {
-        '@/': `${path.resolve(__dirname, 'src')}/`,
+        '@/': `${path.resolve(__dirname, 'src')}/`
       },
       // 忽略后缀名的配置选项
-      extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
+      extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
     },
     build: {
       sourcemap: mode !== 'production', // 非生产环境都生成sourcemap
-      outDir: '../modules/server/src/main/resources/dist2',
+      outDir: '../modules/server/src/main/resources/dist2'
     },
     server: {
       port: JPOM_PORT,
@@ -56,38 +63,51 @@ export default defineConfig(({ mode }) => {
           target: `wss://${HOST}`,
           //  true/false: if you want to proxy websockets
           ws: false,
-          secure: false,
+          secure: false
         },
         '/tomcat_log': {
           target: `wss://${HOST}`,
           //  true/false: if you want to proxy websockets
           ws: false,
-          secure: false,
+          secure: false
         },
         '/console': {
           target: `wss://${HOST}`,
           //  true/false: if you want to proxy websockets
           ws: false,
-          secure: false,
+          secure: false
         },
         '/script_run': {
           target: `wss://${HOST}`,
           //  true/false: if you want to proxy websockets
           ws: false,
-          secure: false,
+          secure: false
         },
         // http
         '/api': {
           target: `http://${HOST}`,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, ''),
-          timeout: 10 * 60 * 1000,
-        },
-      },
+          timeout: 10 * 60 * 1000
+        }
+      }
     },
     plugins: [
       vue(),
       vueJsx(),
+      AutoImport({
+        //安装两行后你会发现在组件中不用再导入ref，reactive等
+        imports: ['vue', 'vue-router'],
+        dts: 'src/d.ts/auto-import.d.ts',
+        //ant-design-vue
+        resolvers: [AntDesignVueResolver()]
+      }),
+      Components({
+        dts: 'src/d.ts/components.d.ts',
+        //ant-design-vue   importStyle = false 样式就没了
+        resolvers: [AntDesignVueResolver({ importStyle: true, resolveIcons: true })]
+      }),
+
       createHtmlPlugin({
         minify: true,
         inject: {
@@ -96,10 +116,10 @@ export default defineConfig(({ mode }) => {
             base_url: env.JPOM_BASE_URL,
             build: new Date().getTime(),
             env: process.env.NODE_ENV,
-            buildVersion: process.env.npm_package_version,
-          },
-        },
-      }),
-    ],
+            buildVersion: process.env.npm_package_version
+          }
+        }
+      })
+    ]
   }
 })
