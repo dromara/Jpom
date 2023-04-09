@@ -2,9 +2,13 @@ import SparkMD5 from 'spark-md5'
 import { concurrentExecution } from '@/utils/const'
 import { generateShardingId } from '@/api/common'
 import Vue from 'vue'
+import { GlobalWindow } from '@/interface/common'
 
-const uploadFileSliceSize = window.uploadFileSliceSize === '<uploadFileSliceSize>' ? 1 : window.uploadFileSliceSize
-const uploadFileConcurrent = window.uploadFileConcurrent === '<uploadFileConcurrent>' ? 1 : window.uploadFileConcurrent
+const _window = window as unknown as GlobalWindow
+
+const uploadFileSliceSize = _window.uploadFileSliceSize === '<uploadFileSliceSize>' ? 1 : _window.uploadFileSliceSize
+const uploadFileConcurrent =
+  _window.uploadFileConcurrent === '<uploadFileConcurrent>' ? 1 : _window.uploadFileConcurrent
 
 /**
  * 文件分片上传
