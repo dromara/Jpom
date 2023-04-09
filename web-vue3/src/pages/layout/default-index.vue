@@ -1,6 +1,7 @@
 <template>
   <a-layout id="app-layout">
-    <a-layout-sider v-model="collapsed" :trigger="null" collapsible :class="`${this.fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}`">
+    <a-layout-sider v-model="collapsed" :trigger="null" collapsible
+      :class="`${this.fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}`">
       <a-tooltip placement="right" title="点击可以折叠左侧菜单栏">
         <div class="logo" @click="changeCollapsed()">
           <img :src="logoUrl" />
@@ -13,7 +14,8 @@
       <a-layout-header class="app-header">
         <content-tab :mode="this.mode" />
       </a-layout-header>
-      <a-layout-content :class="`layout-content ${this.fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'}`">
+      <a-layout-content
+        :class="`layout-content ${this.fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'}`">
         <keep-alive>
           <router-view />
         </keep-alive>
@@ -46,14 +48,15 @@ export default {
       collapsed: false,
       subTitle: "项目管理",
       logoUrl: "",
+      fullScreenFlag: false
     };
   },
-  computed: {
-    ...mapGetters(["getCollapsed", "getGuideCache"]),
-    fullScreenFlag() {
-      return this.getGuideCache.fullScreenFlag === undefined ? true : this.getGuideCache.fullScreenFlag;
-    },
-  },
+  // computed: {
+  //   ...mapGetters(["getCollapsed", "getGuideCache"]),
+  //   fullScreenFlag() {
+  //     return this.getGuideCache.fullScreenFlag === undefined ? true : this.getGuideCache.fullScreenFlag;
+  //   },
+  // },
   watch: {},
   mounted() {
     this.checkSystem();
@@ -176,6 +179,7 @@ export default {
 #app-layout {
   min-height: 100vh;
 }
+
 #app-layout .icon-btn {
   float: left;
   font-size: 18px;
@@ -200,21 +204,25 @@ export default {
   overflow: hidden;
   padding: 0 16px;
 }
+
 #app-layout .logo img {
   height: 26px;
   vertical-align: sub;
   margin-right: 6px;
 }
+
 .app-header {
   display: flex;
   background: #fff;
   padding: 10px 10px 0;
   height: auto;
 }
+
 .sider-scroll {
   min-height: 100vh;
   overflow-y: auto;
 }
+
 .sider-full-screen {
   height: 100vh;
   overflow-y: scroll;
@@ -223,6 +231,7 @@ export default {
 .layout-content-scroll {
   overflow-y: auto;
 }
+
 .layout-content-full-screen {
   height: calc(100vh - 120px);
   overflow-y: scroll;
@@ -236,8 +245,8 @@ export default {
   background: #fff;
   /* min-height: 280px; */
 }
+
 .drawer-layout-content {
   min-height: calc(100vh - 85px);
   overflow-y: auto;
-}
-</style>
+}</style>

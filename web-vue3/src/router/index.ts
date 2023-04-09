@@ -240,23 +240,23 @@ const router = createRouter({
       component: () => import('../pages/login/index.vue'),
     },
     // 用于过渡页面（避免跳转到管理页面重复请求接口，oauth2）
-    // {
-    //   path: '/',
-    //   name: 'home',
-    //   component: () => import('../pages/layout/loading.vue'),
-    // },
-    // {
-    //   path: '/management',
-    //   name: 'management',
-    //   component: () => import('../pages/layout/index.vue'),
-    //   redirect: '/node/list',
-    //   children: children.map((item: any) => {
-    //     const props = item.props || {}
-    //     props.routerUrl = item.path
-    //     item.props = props
-    //     return item
-    //   }),
-    // },
+    {
+      path: '/',
+      name: 'home',
+      component: () => import('../pages/layout/loading.vue'),
+    },
+    {
+      path: '/management',
+      name: 'management',
+      component: () => import('../pages/layout/index.vue'),
+      redirect: '/node/list',
+      children: children.map((item: any) => {
+        const props = item.props || {}
+        props.routerUrl = item.path
+        item.props = props
+        return item
+      }),
+    },
     {
       path: '/install',
       name: 'install',

@@ -1,7 +1,6 @@
 import SparkMD5 from 'spark-md5'
 import { concurrentExecution } from '@/utils/const'
 import { generateShardingId } from '@/api/common'
-import Vue from 'vue'
 import { GlobalWindow } from '@/interface/common'
 
 const _window = window as unknown as GlobalWindow
@@ -43,10 +42,10 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
    **/
   const readFileMd5 = () => {
     //
-    Vue.prototype.$setLoading({
-      spinning: true,
-      tip: '解析文件,准备上传中'
-    })
+    // Vue.prototype.$setLoading({
+    //   spinning: true,
+    //   tip: '解析文件,准备上传中',
+    // })
     const reader = new FileReader()
     const spark = new SparkMD5.ArrayBuffer()
     let start = 0
@@ -55,10 +54,10 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
     const batch = 1024 * 1024 * 2
     const asyncUpdate = function () {
       if (start < total) {
-        Vue.prototype.$setLoading({
-          spinning: true,
-          tip: '解析文件,准备上传中 ' + ((start / total) * 100).toFixed(2) + '%'
-        })
+        // Vue.prototype.$setLoading({
+        //   spinning: true,
+        //   tip: '解析文件,准备上传中 ' + ((start / total) * 100).toFixed(2) + '%',
+        // })
         let end = Math.min(start + batch, total)
         reader.readAsArrayBuffer(blobSlice.call(file, start, end))
         start = end
@@ -67,7 +66,7 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
         fileMd5 = spark.end()
         // 释放缓存
         spark.destroy()
-        Vue.prototype.$setLoading('closeAll')
+        // Vue.prototype.$setLoading('closeAll')
         // 判断是否需要继续
         if (uploadBeforeAbrot) {
           uploadBeforeAbrot(fileMd5).then(() => {
@@ -98,7 +97,7 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
         spark.append(event.target.result)
         asyncUpdate()
       } catch (e) {
-        Vue.prototype.$setLoading('closeAll')
+        // Vue.prototype.$setLoading('closeAll')
         error('解析文件失败：' + e)
       }
     }

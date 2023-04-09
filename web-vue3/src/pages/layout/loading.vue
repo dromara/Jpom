@@ -1,29 +1,25 @@
 <template>
-  <div>loading</div>
+  <div style="display: flex; align-items: center; justify-content: center; width: 100vw;height: 100vh; ">loading</div>
 </template>
-<script>
-import { mapGetters } from "vuex";
-export default {
-  components: {},
-  computed: {
-    ...mapGetters(["getToken", "getUserInfo"]),
-  },
-  data() {
-    return {};
-  },
+<script lang="ts" setup>
+import { useUserStore } from '@/stores/user';
+import { onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 
-  watch: {},
-  mounted() {
-    if (this.getUserInfo && this.getToken) {
-      this.$router.push({ path: "/node/list" });
-    } else {
-      // 将参数携带进去
-      this.$router.push({
-        path: "/login",
-        query: this.$route.query,
-      });
-    }
-  },
-  methods: {},
-};
+const router = useRouter();
+const route = useRoute();
+
+onMounted(() => {
+  const userStore = useUserStore();
+
+  if (userStore.userInfo && userStore.token) {
+    router.push({ path: "/node/list" });
+  } else {
+    // 将参数携带进去
+    router.push({
+      path: "/login",
+      query: route.query,
+    });
+  }
+});
 </script>
