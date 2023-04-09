@@ -1,69 +1,74 @@
 <template>
   <a-config-provider :locale="locale">
-    <div id="app" :class="`${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
+    <div id="app" :class="`${scrollbarFlag ? '' : 'hide-scrollbar'}`">
       <router-view v-if="routerActivation" />
       <template>
         <a-back-top />
       </template>
-      <a-spin v-bind="globalLoadingProps">
-        <div></div>
-      </a-spin>
     </div>
   </a-config-provider>
 </template>
 
 <script>
-import zhCN from "ant-design-vue/es/locale/zh_CN";
+import zhCN from 'ant-design-vue/es/locale/zh_CN'
 // import { mapGetters } from "vuex";
 // import store from "@/store/index";
+// import guideStore from '@/stores/guide'
+import { notification, message } from 'ant-design-vue'
+import { onMounted, ref, provide, computed } from 'vue'
 
-export default {
-  name: "App",
-  data() {
-    return {
-      locale: zhCN,
-      routerActivation: true,
-      globalLoadingProps: {
-        spinning: false,
-        tip: "加载中",
-        size: "large",
-        delayTime: 500,
-      },
-    };
-  },
-  provide() {
-    return {
-      reload: this.reload,
-    };
-  },
-  components: {},
-  // computed: {
-  //   ...mapGetters(["getGuideCache"]),
-  //   scrollbarFlag() {
-  //     return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
-  //   },
-  // },
-  created() {
-    this.$notification.config({
-      top: "100px",
-      duration: 4,
-    });
+const routerActivation = ref(true)
+const locale = ref(zhCN)
 
-    this.$message.config({ duration: 4 });
-  },
-  methods: {
-    reload() {
-      this.routerActivation = false;
-      // 刷新菜单
-      // store.dispatch("restLoadSystemMenus").then(() => {
-      //   //
-      // });
-      this.$nextTick(() => {
-        this.routerActivation = true;
-      });
-    },
-  },
-};
+const scrollbarFlag = computed(() => {
+  // return guideStore.scrollbarFlag === undefined ? true : guideStore.scrollbarFlag
+})
+
+onMounted(() => {
+  notification.config({
+    top: '100px',
+    duration: 4,
+  })
+
+  message.config({ duration: 4 })
+})
+
+const reload = () => {
+  routerActivation.value = false
+  // 刷新菜单
+  // store.dispatch("restLoadSystemMenus").then(() => {
+  //   //
+  // });
+  this.$nextTick(() => {
+    routerActivation.value = true
+  })
+}
+
+provide({
+  reload: reload,
+})
+
+// export default {
+//   name: 'App',
+//   data() {
+//     return {
+//       locale: zhCN,
+//       routerActivation: true,
+//     }
+//   },
+//   provide() {
+//     return
+//   },
+//   components: {},
+//   // computed: {
+//   //   ...mapGetters(["getGuideCache"]),
+//   //   scrollbarFlag() {
+//   //     return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
+//   //   },
+//   // },
+//   created() {},
+//   methods: {},
+// }
 </script>
 
 <style lang="less">

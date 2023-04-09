@@ -103,7 +103,7 @@ import { checkSystem } from '@/api/install'
 import sha1 from 'js-sha1'
 import { useRouter, useRoute } from 'vue-router'
 import { notification, message } from 'ant-design-vue'
-import { useAppStore } from '@/stores/app'
+import appStore from '@/stores/app'
 
 interface IFormState {
   loginName: string
@@ -113,7 +113,7 @@ interface IFormState {
 
 const router = useRouter()
 const route = useRoute()
-const appStore = useAppStore()
+
 const loginTitle = ref('登录JPOM')
 const loginForm = reactive<IFormState>({
   loginName: '',
