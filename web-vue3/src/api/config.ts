@@ -108,7 +108,7 @@ function waitTimePromise(time, fn) {
   return new Promise((resolve) => {
     setTimeout(() => {
       fn && fn()
-      resolve()
+      resolve(true)
     }, time)
   })
 }
@@ -204,7 +204,7 @@ function redoRequest(config) {
       if (result.code === 200) {
         // 调用 store action 存储当前登录的用户名和 token
         store.dispatch('login', result.data)
-        resolve()
+        resolve(true)
       }
     })
   }).then(() => {

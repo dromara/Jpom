@@ -27,61 +27,63 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-	// 加载环境配置
-	const env = loadEnv(mode, __dirname, 'JPOM')
-	const { JPOM_PROXY_HOST: HOST, JPOM_BASE_URL, JPOM_PORT } = env
-	console.log(env, `当前为${mode}环境`)
+  // 加载环境配置
+  const env = loadEnv(mode, __dirname, 'JPOM')
+  const { JPOM_PROXY_HOST: HOST, JPOM_BASE_URL, JPOM_PORT } = env
+  console.log(env, `当前为${mode}环境`)
 
-	return {
-		base: JPOM_BASE_URL, // 公共基础路径，如当值为jpom时网站访问路径为：https://jpom.top/jpom
-		envPrefix: 'JPOM_', // 可在项目中通过import.meta.env.JPOM_xxx获取环境变量
-		resolve: {
-			alias: {
-				'@/': `${path.resolve(__dirname, 'src')}/`,
-			},
-			// 忽略后缀名的配置选项
-			extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
-		},
-		build: {
-			sourcemap: mode !== 'production', // 非生产环境都生成sourcemap
-		},
-		server: {
-			port: JPOM_PORT,
-			proxy: {
-				// websocket
-				'/ssh': {
-					target: `wss://${HOST}`,
-					//  true/false: if you want to proxy websockets
-					ws: false,
-					secure: false,
-				},
-				'/tomcat_log': {
-					target: `wss://${HOST}`,
-					//  true/false: if you want to proxy websockets
-					ws: false,
-					secure: false,
-				},
-				'/console': {
-					target: `wss://${HOST}`,
-					//  true/false: if you want to proxy websockets
-					ws: false,
-					secure: false,
-				},
-				'/script_run': {
-					target: `wss://${HOST}`,
-					//  true/false: if you want to proxy websockets
-					ws: false,
-					secure: false,
-				},
-				// http
-				'/api': {
-					target: `http://${HOST}`,
-					changeOrigin: true,
-					rewrite: (path) => path.replace(/^\/api/, ''),
-					timeout: 10 * 60 * 1000,
-				},
-			},
-		},
-		plugins: [vue(), vueJsx()],
-	}
+  return {
+    base: JPOM_BASE_URL, // 公共基础路径，如当值为jpom时网站访问路径为：https://jpom.top/jpom
+    envPrefix: 'JPOM_', // 可在项目中通过import.meta.env.JPOM_xxx获取环境变量
+
+    resolve: {
+      alias: {
+        '@/': `${path.resolve(__dirname, 'src')}/`,
+      },
+      // 忽略后缀名的配置选项
+      extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
+    },
+    build: {
+      sourcemap: mode !== 'production', // 非生产环境都生成sourcemap
+      outDir: '../modules/server/src/main/resources/dist2',
+    },
+    server: {
+      port: JPOM_PORT,
+      proxy: {
+        // websocket
+        '/ssh': {
+          target: `wss://${HOST}`,
+          //  true/false: if you want to proxy websockets
+          ws: false,
+          secure: false,
+        },
+        '/tomcat_log': {
+          target: `wss://${HOST}`,
+          //  true/false: if you want to proxy websockets
+          ws: false,
+          secure: false,
+        },
+        '/console': {
+          target: `wss://${HOST}`,
+          //  true/false: if you want to proxy websockets
+          ws: false,
+          secure: false,
+        },
+        '/script_run': {
+          target: `wss://${HOST}`,
+          //  true/false: if you want to proxy websockets
+          ws: false,
+          secure: false,
+        },
+        // http
+        '/api': {
+          target: `http://${HOST}`,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, ''),
+          timeout: 10 * 60 * 1000,
+        },
+      },
+    },
+    plugins: [vue(), vueJsx()],
+  }
 })

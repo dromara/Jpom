@@ -1,32 +1,10 @@
-///
-/// The MIT License (MIT)
-///
-/// Copyright (c) 2019 Code Technology Studio
-///
-/// Permission is hereby granted, free of charge, to any person obtaining a copy of
-/// this software and associated documentation files (the "Software"), to deal in
-/// the Software without restriction, including without limitation the rights to
-/// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-/// the Software, and to permit persons to whom the Software is furnished to do so,
-/// subject to the following conditions:
-///
-/// The above copyright notice and this permission notice shall be included in all
-/// copies or substantial portions of the Software.
-///
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-/// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-/// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-/// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-/// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///
+import SparkMD5 from 'spark-md5'
+import { concurrentExecution } from '@/utils/const'
+import { generateShardingId } from '@/api/common'
+import Vue from 'vue'
 
-import SparkMD5 from "spark-md5";
-import { concurrentExecution } from "@/utils/const";
-import { generateShardingId } from "@/api/common";
-
-const uploadFileSliceSize = window.uploadFileSliceSize === "<uploadFileSliceSize>" ? 1 : window.uploadFileSliceSize;
-const uploadFileConcurrent = window.uploadFileConcurrent === "<uploadFileConcurrent>" ? 1 : window.uploadFileConcurrent;
+const uploadFileSliceSize = window.uploadFileSliceSize === '<uploadFileSliceSize>' ? 1 : window.uploadFileSliceSize
+const uploadFileConcurrent = window.uploadFileConcurrent === '<uploadFileConcurrent>' ? 1 : window.uploadFileConcurrent
 
 /**
  * 文件分片上传
@@ -37,156 +15,164 @@ const uploadFileConcurrent = window.uploadFileConcurrent === "<uploadFileConcurr
  * @params success {Function} 成功回调函数
  * @params error {Function} 失败回调函数
  */
-export const uploadPieces = ({ file, uploadCallback, success, process, error }) => {
-	// 如果文件传入为空直接 return 返回
-	if (!file || file.length < 1) {
-		return error("文件不能为空");
-	}
-	if (!window.FileReader) {
-		return error("您的浏览器版本太低，不支持该功能");
-	}
-	let fileMd5 = ""; //
-	let sliceId = "";
-	const chunkSize = uploadFileSliceSize * 1024 * 1024; // 1MB一片
-	const chunkCount = Math.ceil(file.size / chunkSize); // 总片数
-	const chunkList = []; // 分片列表
-	const uploaded = []; // 已经上传的
-	let total = 0;
-	const blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
+export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success, process, error }) => {
+  // 如果文件传入为空直接 return 返回
+  if (!file || file.length < 1) {
+    return error('文件不能为空')
+  }
+  if (!window.FileReader) {
+    return error('您的浏览器版本太低，不支持该功能')
+  }
+  let fileMd5 = '' //
+  let sliceId = ''
+  const chunkSize = uploadFileSliceSize * 1024 * 1024 // 1MB一片
+  const chunkCount = Math.ceil(file.size / chunkSize) // 总片数
+  const chunkList = [] // 分片列表
+  const uploaded = [] // 已经上传的
+  let total = 0
+  const blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice
 
-	/***
-	 * 获取md5
-	 **/
-	const readFileMd5 = () => {
-		//
-		this.$setLoading({
-			spinning: true,
-			tip: "解析文件,准备上传中",
-		});
-		const reader = new FileReader();
-		const spark = new SparkMD5.ArrayBuffer();
-		let start = 0;
-		total = file.size;
-		// 默认 2M 解析缓存
-		const batch = 1024 * 1024 * 2;
-		const asyncUpdate = function () {
-			if (start < total) {
-				this.$setLoading({
-					spinning: true,
-					tip: "解析文件,准备上传中 " + ((start / total) * 100).toFixed(2) + "%",
-				});
-				let end = Math.min(start + batch, total);
-				reader.readAsArrayBuffer(blobSlice.call(file, start, end));
-				start = end;
-			} else {
-				// 解析结束
-				fileMd5 = spark.end();
-				// 释放缓存
-				spark.destroy();
-				for (let i = 0; i < chunkCount; i++) {
-					chunkList.push(Number(i));
-				}
-				this.$setLoading("closeAll");
-				//生成分片 id
-				generateShardingId().then((res) => {
-					if (res.code === 200) {
-						sliceId = res.data;
-						concurrentUpload();
-					} else {
-						error("文件上传id生成失败：" + res.msg);
-					}
-				});
-			}
-		};
-		reader.onload = function (event) {
-			try {
-				spark.append(event.target.result);
-				asyncUpdate();
-			} catch (e) {
-				this.$setLoading("closeAll");
-				this.$notification.error({
-					message: "解析文件失败：" + e,
-				});
-				error("解析文件失败：" + e);
-			}
-		};
-		asyncUpdate();
-	};
-	/***
-	 * 获取每一个分片的详情
-	 **/
-	const getChunkInfo = (file, currentChunk, chunkSize) => {
-		let start = currentChunk * chunkSize;
-		let end = Math.min(file.size, start + chunkSize);
-		let chunk = blobSlice.call(file, start, end);
-		return {
-			start,
-			end,
-			chunk,
-		};
-	};
-	/***
-	 * 并发上传
-	 **/
-	const concurrentUpload = () => {
-		const startTime = new Date().getTime();
-		// 设置初始化进度（避免第一份分片卡顿）
-		process(0.01, 1, total, new Date().getTime() - startTime);
-		concurrentExecution(chunkList, uploadFileConcurrent, (curItem) => {
-			return new Promise((resolve, reject) => {
-				const { chunk } = getChunkInfo(file, curItem, chunkSize);
-				const chunkInfo = {
-					chunk,
-					currentChunk: curItem,
-					chunkCount,
-				};
+  /***
+   * 获取md5
+   **/
+  const readFileMd5 = () => {
+    //
+    Vue.prototype.$setLoading({
+      spinning: true,
+      tip: '解析文件,准备上传中',
+    })
+    const reader = new FileReader()
+    const spark = new SparkMD5.ArrayBuffer()
+    let start = 0
+    total = file.size
+    // 默认 2M 解析缓存
+    const batch = 1024 * 1024 * 2
+    const asyncUpdate = function () {
+      if (start < total) {
+        Vue.prototype.$setLoading({
+          spinning: true,
+          tip: '解析文件,准备上传中 ' + ((start / total) * 100).toFixed(2) + '%',
+        })
+        let end = Math.min(start + batch, total)
+        reader.readAsArrayBuffer(blobSlice.call(file, start, end))
+        start = end
+      } else {
+        // 解析结束
+        fileMd5 = spark.end()
+        // 释放缓存
+        spark.destroy()
+        Vue.prototype.$setLoading('closeAll')
+        // 判断是否需要继续
+        if (uploadBeforeAbrot) {
+          uploadBeforeAbrot(fileMd5).then(() => {
+            startUpload()
+          })
+        } else {
+          startUpload()
+        }
+      }
+    }
+    const startUpload = () => {
+      for (let i = 0; i < chunkCount; i++) {
+        chunkList.push(Number(i))
+      }
 
-				// 构建上传文件的formData
-				const uploadData = createUploadData(chunkInfo);
+      //生成分片 id
+      generateShardingId().then((res) => {
+        if (res.code === 200) {
+          sliceId = res.data
+          concurrentUpload()
+        } else {
+          error('文件上传id生成失败：' + res.msg)
+        }
+      })
+    }
+    reader.onload = function (event) {
+      try {
+        spark.append(event.target.result)
+        asyncUpdate()
+      } catch (e) {
+        Vue.prototype.$setLoading('closeAll')
+        error('解析文件失败：' + e)
+      }
+    }
+    asyncUpdate()
+  }
+  /***
+   * 获取每一个分片的详情
+   **/
+  const getChunkInfo = (file, currentChunk, chunkSize) => {
+    let start = currentChunk * chunkSize
+    let end = Math.min(file.size, start + chunkSize)
+    let chunk = blobSlice.call(file, start, end)
+    return {
+      start,
+      end,
+      chunk,
+    }
+  }
+  /***
+   * 并发上传
+   **/
+  const concurrentUpload = () => {
+    const startTime = new Date().getTime()
+    // 设置初始化进度（避免第一份分片卡顿）
+    process(0.01, 1, total, new Date().getTime() - startTime)
+    concurrentExecution(chunkList, uploadFileConcurrent, (curItem) => {
+      return new Promise((resolve, reject) => {
+        const { chunk } = getChunkInfo(file, curItem, chunkSize)
+        const chunkInfo = {
+          chunk,
+          currentChunk: curItem,
+          chunkCount,
+        }
 
-				uploadCallback(uploadData)
-					.then(() => {
-						uploaded.push(chunkInfo.currentChunk + 1);
-						const sd = parseInt((uploaded.length / chunkInfo.chunkCount) * 100);
-						// console.log(chunk);
-						process(sd, Math.min(uploaded.length * chunkSize, total), total, new Date().getTime() - startTime);
-						//
-						/***
-						 * 创建文件上传参数
-						 **/
-						const createUploadData2 = {
-							nowSlice: chunkInfo.currentChunk + 1,
-							totalSlice: chunkCount,
-							sliceId: sliceId,
-							fileSumMd5: fileMd5,
-						};
-						resolve(createUploadData2);
-					})
-					.catch(() => {
-						reject();
-					});
-			});
-		}).then((uploadData) => {
-			success(uploadData, file.name);
-			//   console.log("finish", res);
-		});
-	};
+        // 构建上传文件的formData
+        const uploadData = createUploadData(chunkInfo)
 
-	/***
-	 * 创建文件上传参数
-	 **/
-	const createUploadData = (chunkInfo) => {
-		const fetchForm = new FormData();
-		const nowSlice = chunkInfo.currentChunk;
-		fetchForm.append("nowSlice", nowSlice);
-		fetchForm.append("totalSlice", chunkCount);
-		fetchForm.append("sliceId", sliceId);
-		const chunkfile = new File([chunkInfo.chunk], file.name + "." + nowSlice);
-		fetchForm.append("file", chunkfile); // fetchForm.append('file', chunkInfo.chunk)
-		fetchForm.append("fileSumMd5", fileMd5);
+        uploadCallback(uploadData)
+          .then(() => {
+            uploaded.push(chunkInfo.currentChunk + 1)
+            const sd = parseInt((uploaded.length / chunkInfo.chunkCount) * 100)
+            // console.log(chunk);
+            process(sd, Math.min(uploaded.length * chunkSize, total), total, new Date().getTime() - startTime)
+            //
+            /***
+             * 创建文件上传参数
+             **/
+            const createUploadData2 = {
+              nowSlice: chunkInfo.currentChunk + 1,
+              totalSlice: chunkCount,
+              sliceId: sliceId,
+              fileSumMd5: fileMd5,
+            }
+            resolve(createUploadData2)
+          })
+          .catch(() => {
+            reject()
+          })
+      })
+    }).then((uploadData) => {
+      success(uploadData, file.name)
+      //   console.log("finish", res);
+    })
+  }
 
-		return fetchForm;
-	};
+  /***
+   * 创建文件上传参数
+   **/
+  const createUploadData = (chunkInfo) => {
+    const fetchForm = new FormData()
+    const nowSlice = chunkInfo.currentChunk
+    fetchForm.append('nowSlice', nowSlice)
+    fetchForm.append('totalSlice', chunkCount)
+    fetchForm.append('sliceId', sliceId)
+    const chunkfile = new File([chunkInfo.chunk], file.name + '.' + nowSlice)
+    fetchForm.append('file', chunkfile) // fetchForm.append('file', chunkInfo.chunk)
+    fetchForm.append('fileSumMd5', fileMd5)
 
-	readFileMd5(); // 开始执行代码
-};
+    return fetchForm
+  }
+
+  readFileMd5() // 开始执行代码
+}
