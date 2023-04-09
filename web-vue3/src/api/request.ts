@@ -3,7 +3,7 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, In
 import { NO_NOTIFY_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID } from '@/utils/const'
 import { refreshToken } from './user/user'
 import { notification } from 'ant-design-vue'
-import { useAppStore } from '@/stores/app'
+import appStore from '@/stores/app'
 import useUserStore from '@/stores/user'
 import { useMenuStore } from '@/stores/menu'
 
@@ -14,7 +14,6 @@ const apiTimeout = _window.apiTimeout === '<apiTimeout>' ? delTimeout : _window.
 const pro = process.env.NODE_ENV === 'production'
 
 const userStore = useUserStore()
-const appStore = useAppStore()
 
 // 创建实例
 const instance: AxiosInstance = axios.create({
