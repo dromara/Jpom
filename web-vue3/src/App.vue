@@ -1,7 +1,7 @@
 <template>
   <a-config-provider :locale="zhCN">
-    <div id="app">
-      <router-view />
+    <div :class="`${scrollbarFlag ? '' : 'hide-scrollbar'}`">
+      <router-view v-if="routerActivation" />
       <template>
         <a-back-top />
       </template>
@@ -13,7 +13,14 @@
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
 import { onMounted, provide } from 'vue'
 import { useMenuStore } from '@/stores/menu'
+import useGuideStore from '@/stores/guide'
 const { proxy }: any = getCurrentInstance()
+
+const routerActivation = ref(true)
+const guideStore = useGuideStore().getGuideCache
+const scrollbarFlag = computed(() => {
+  return guideStore.scrollbarFlag === undefined ? true : guideStore.scrollbarFlag
+})
 
 onMounted(() => {
   proxy.$notification.config({
@@ -25,9 +32,13 @@ onMounted(() => {
 })
 
 const reload = () => {
-  const menuStore = useMenuStore()
-  // 刷新菜单
-  menuStore.restLoadSystemMenus()
+  routerActivation.value = false
+  nextTick(() => {
+    const menuStore = useMenuStore()
+    // 刷新菜单
+    menuStore.restLoadSystemMenus()
+    routerActivation.value = true
+  })
 }
 
 provide('app', {

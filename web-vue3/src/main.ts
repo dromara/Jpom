@@ -1,4 +1,4 @@
-import '@/assets/style.css'
+// import '@/assets/style.css'
 import '@/assets/reset.less'
 import App from './App.vue'
 import Antd from 'ant-design-vue'
