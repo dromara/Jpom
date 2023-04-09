@@ -23,7 +23,7 @@ const useGuideStore = defineStore('guide', {
     // 引导缓存
     guideCache: localStorage.getItem(key) || '',
     disabledGuide: false,
-    inDocker: false,
+    inDocker: false
   }),
 
   actions: {
@@ -61,7 +61,7 @@ const useGuideStore = defineStore('guide', {
     commitGuide(guideData: IState) {
       this.disabledGuide = guideData.disabledGuide
       this.inDocker = guideData.inDocker
-    },
+    }
   },
   getters: {
     getGuideCache(state): IStateGuideCache {
@@ -79,11 +79,11 @@ const useGuideStore = defineStore('guide', {
     },
     getInDocker(state) {
       return state.inDocker
-    },
-  },
+    }
+  }
 })
 
-export default useGuideStore()
+export default useGuideStore
 
 // const app = {
 //   state: {

@@ -27,6 +27,7 @@ declare module '@vue/runtime-core' {
     ASpace: typeof import('ant-design-vue/es')['Space']
     AStep: typeof import('ant-design-vue/es')['Step']
     ASteps: typeof import('ant-design-vue/es')['Steps']
+    ATooltip: typeof import('ant-design-vue/es')['Tooltip']
     ATypographyParagraph: typeof import('ant-design-vue/es')['TypographyParagraph']
     CodeEditor: typeof import('./../components/codeEditor/index.vue')['default']
     CompositionTransfer: typeof import('./../components/compositionTransfer/composition-transfer.vue')['default']
