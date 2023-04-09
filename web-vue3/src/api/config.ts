@@ -142,6 +142,8 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
   return data
 }
 
+export default request
+
 // 刷新 jwt token 并且重试上次请求
 async function redoRequest(config: AxiosRequestConfig) {
   const result = await refreshToken()
@@ -180,4 +182,12 @@ function toLogin(res: IResponse<any>, response: AxiosResponse<IResponse<any>>) {
   return false
 }
 
-export default request
+export function loadRouterBase(url: string, params: any) {
+  const paramsObj = params || {}
+  paramsObj[CACHE_WORKSPACE_ID] = useAppStore().getWorkspaceId
+  let queryStr = ''
+  Object.keys(paramsObj).forEach((key, i) => {
+    queryStr += `${i === 0 ? '' : '&'}${key}=${paramsObj[key]}`
+  })
+  return `${((routerBase || '') + url).replace(new RegExp('//', 'gm'), '/')}?${queryStr}`
+}
