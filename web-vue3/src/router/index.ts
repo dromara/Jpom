@@ -1,27 +1,4 @@
-///
-/// The MIT License (MIT)
-///
-/// Copyright (c) 2019 Code Technology Studio
-///
-/// Permission is hereby granted, free of charge, to any person obtaining a copy of
-/// this software and associated documentation files (the "Software"), to deal in
-/// the Software without restriction, including without limitation the rights to
-/// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-/// the Software, and to permit persons to whom the Software is furnished to do so,
-/// subject to the following conditions:
-///
-/// The above copyright notice and this permission notice shall be included in all
-/// copies or substantial portions of the Software.
-///
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-/// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-/// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-/// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-/// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///
-
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 const children = [
   {
@@ -183,7 +160,7 @@ const management = [
   {
     path: '/user/list',
     name: 'user-list',
-    component: () => import('../pages/user.vue'),
+    component: () => import('../pages/user/index.vue'),
   },
   {
     path: '/operation/log',
@@ -250,7 +227,7 @@ const management = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes: [
     // {
     //   path: "/test",
@@ -260,26 +237,26 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('../pages/login.vue'),
+      component: () => import('../pages/login/index.vue'),
     },
     // 用于过渡页面（避免跳转到管理页面重复请求接口，oauth2）
-    {
-      path: '/',
-      name: 'home',
-      component: () => import('../pages/layout/loading.vue'),
-    },
-    {
-      path: '/management',
-      name: 'management',
-      component: () => import('../pages/layout.vue'),
-      redirect: '/node/list',
-      children: children.map((item: any) => {
-        const props = item.props || {}
-        props.routerUrl = item.path
-        item.props = props
-        return item
-      }),
-    },
+    // {
+    //   path: '/',
+    //   name: 'home',
+    //   component: () => import('../pages/layout/loading.vue'),
+    // },
+    // {
+    //   path: '/management',
+    //   name: 'management',
+    //   component: () => import('../pages/layout/index.vue'),
+    //   redirect: '/node/list',
+    //   children: children.map((item: any) => {
+    //     const props = item.props || {}
+    //     props.routerUrl = item.path
+    //     item.props = props
+    //     return item
+    //   }),
+    // },
     {
       path: '/install',
       name: 'install',
@@ -291,9 +268,9 @@ const router = createRouter({
       component: () => import('../pages/ssh/full-terminal.vue'),
     },
     {
-      path: '*',
+      path: '/*',
       name: '404',
-      component: () => import('../pages/404.vue'),
+      component: () => import('../pages/404/index.vue'),
     },
     {
       path: '/system/ipAccess',
