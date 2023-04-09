@@ -305,7 +305,7 @@
           @cancel="openRemoteUpload"
           :maskClosable="false"
         >
-          <a-form-model
+          <a-form
             :model="remoteDownloadData"
             :label-col="{ span: 6 }"
             :wrapper-col="{ span: 18 }"
@@ -331,7 +331,7 @@
                 placeholder="解压时候自动剔除压缩包里面多余的文件夹名"
               />
             </a-form-item>
-          </a-form-model>
+          </a-form>
         </a-modal>
         <!-- 创建文件/文件夹 -->
         <a-modal

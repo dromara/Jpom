@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-form-model ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
+    <a-form ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
       <a-form-item label="名称" prop="name">
         <a-row>
           <a-col :span="10">
@@ -872,7 +872,7 @@
           </a-form-item>
         </a-collapse-panel>
       </a-collapse>
-    </a-form-model>
+    </a-form>
     <div>
       <div
         :style="{

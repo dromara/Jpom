@@ -119,7 +119,7 @@
     </a-table>
     <!-- 编辑节点 -->
     <a-modal destroyOnClose v-model="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="角色" prop="role">
           <a-radio-group name="role" v-model="temp.role">
             <a-radio value="WORKER"> 工作节点</a-radio>
@@ -133,7 +133,7 @@
             <a-radio value="DRAIN"> 排空 </a-radio>
           </a-radio-group>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 查看日志 -->
     <a-modal destroyOnClose v-model="logVisible" title="查看日志" width="80vw" :footer="null" :maskClosable="false">

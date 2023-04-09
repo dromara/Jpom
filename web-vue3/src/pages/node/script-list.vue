@@ -104,13 +104,7 @@
       :maskClosable="false"
       width="80vw"
     >
-      <a-form-model
-        ref="editScriptForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 3 }"
-        :wrapper-col="{ span: 19 }"
-      >
+      <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
         <a-alert v-if="this.temp.scriptType === 'server-sync'" message="服务端同步的脚本不能在此修改" banner />
         <a-form-item label="Script 名称" prop="name">
           <a-input v-model="temp.name" placeholder="名称" />
@@ -178,7 +172,7 @@
         <a-form-item label="描述" prop="description">
           <a-input v-model="temp.description" type="textarea" :rows="3" style="resize: none" placeholder="详细描述" />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 脚本控制台组件 -->
     <a-drawer
@@ -216,7 +210,7 @@
     </a-drawer>
     <!-- 触发器 -->
     <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null">
-      <a-form-model ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+      <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template slot="tabBarExtraContent">
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
@@ -279,7 +273,7 @@
             </a-space>
           </a-tab-pane>
         </a-tabs>
-      </a-form-model>
+      </a-form>
     </a-modal>
   </div>
 </template>

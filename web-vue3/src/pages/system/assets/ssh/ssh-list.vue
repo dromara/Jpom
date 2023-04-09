@@ -195,13 +195,7 @@
           @ok="handleEditSshOk"
           :maskClosable="false"
         >
-          <a-form-model
-            ref="editSshForm"
-            :rules="rules"
-            :model="temp"
-            :label-col="{ span: 4 }"
-            :wrapper-col="{ span: 18 }"
-          >
+          <a-form ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
             <a-form-item label="SSH 名称" prop="name">
               <a-input v-model="temp.name" :maxLength="50" placeholder="SSH 名称" />
             </a-form-item>
@@ -294,7 +288,7 @@
                 placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，多个使用换行。示例：设置编码：txt@utf-8， 不设置编码：txt"
               />
             </a-form-item>
-          </a-form-model>
+          </a-form>
         </a-modal>
         <!-- 安装节点 -->
         <a-modal
@@ -393,7 +387,7 @@
           @ok="handleConfigWorkspaceSshOk"
           :maskClosable="false"
         >
-          <a-form-model
+          <a-form
             ref="editConfigWorkspaceSshForm"
             :rules="rules"
             :model="temp"
@@ -454,7 +448,7 @@
                 placeholder="禁止命令是不允许在终端执行的名，多个逗号隔开。(超级管理员没有任何限制)"
               />
             </a-form-item>
-          </a-form-model>
+          </a-form>
         </a-modal>
         <!-- 分配到其他工作空间 -->
         <a-modal
@@ -464,7 +458,7 @@
           @ok="handleSyncToWorkspace"
           :maskClosable="false"
         >
-          <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+          <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
             <a-form-item> </a-form-item>
             <a-form-item label="选择工作空间" prop="workspaceId">
               <a-select
@@ -476,7 +470,7 @@
                 <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
               </a-select>
             </a-form-item>
-          </a-form-model>
+          </a-form>
         </a-modal>
       </a-tab-pane>
       <a-tab-pane key="2" tab="命令日志"> <OperationLog type="machinessh"></OperationLog></a-tab-pane>

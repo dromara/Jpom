@@ -94,13 +94,7 @@
       @ok="handleEditCommandOk"
       :maskClosable="false"
     >
-      <a-form-model
-        ref="editCommandForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 3 }"
-        :wrapper-col="{ span: 20 }"
-      >
+      <a-form ref="editCommandForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="命令名称" prop="name">
           <a-input v-model="temp.name" :maxLength="100" placeholder="命令名称" />
         </a-form-item>
@@ -194,7 +188,7 @@
             placeholder="命令详细描述"
           />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
 
     <a-modal
@@ -205,7 +199,7 @@
       @ok="handleExecuteCommandOk"
       :maskClosable="false"
     >
-      <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="命令名称" prop="name">
           <a-input v-model="temp.name" :disabled="true" placeholder="命令名称" />
         </a-form-item>
@@ -257,7 +251,7 @@
           </a-row>
           <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 执行日志 -->
     <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
@@ -280,7 +274,7 @@
           </ul>
         </template>
       </a-alert>
-      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" prop="workspaceId">
           <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
@@ -289,18 +283,12 @@
             }}</a-select-option>
           </a-select>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
 
     <!-- 触发器 -->
     <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
-      <a-form-model
-        ref="editTriggerForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 6 }"
-        :wrapper-col="{ span: 16 }"
-      >
+      <a-form ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template slot="tabBarExtraContent">
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
@@ -363,7 +351,7 @@
             </a-space>
           </a-tab-pane>
         </a-tabs>
-      </a-form-model>
+      </a-form>
     </a-modal>
   </div>
 </template>

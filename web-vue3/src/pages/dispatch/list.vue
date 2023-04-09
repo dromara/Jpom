@@ -160,13 +160,7 @@
       :maskClosable="false"
       @cancel="clearDispatchList"
     >
-      <a-form-model
-        ref="linkDispatchForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 18 }"
-      >
+      <a-form ref="linkDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item prop="id">
           <template slot="label">
             分发 ID
@@ -361,7 +355,7 @@
           </template>
           <a-input v-model="temp.webhook" placeholder="分发过程请求,非必填，GET请求" />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 创建/编辑分发项目 -->
     <a-modal
@@ -372,13 +366,7 @@
       @ok="handleEditDispatchOk"
       :maskClosable="false"
     >
-      <a-form-model
-        ref="editDispatchForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 18 }"
-      >
+      <a-form ref="editDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item prop="id">
           <template slot="label">
             分发 ID
@@ -762,7 +750,7 @@
           </template>
           <a-input v-model="temp.webhook" placeholder="分发过程请求,非必填，GET请求" />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 分发项目 -->
     <a-modal
@@ -776,13 +764,7 @@
       @ok="handleDispatchOk"
       :maskClosable="false"
     >
-      <a-form-model
-        ref="dispatchForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 20 }"
-      >
+      <a-form ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="方式" prop="type">
           <a-radio-group v-model="temp.type" name="type" :disabled="!!percentage">
             <a-radio :value="'upload'">上传文件</a-radio>
@@ -860,7 +842,7 @@
             </a-select-option>
           </a-select>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
 
     <!-- 配置分发 -->

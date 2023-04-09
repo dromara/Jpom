@@ -46,7 +46,7 @@
       @ok="handleEditOk"
       :maskClosable="false"
     >
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="日志名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="日志项目名称" />
         </a-form-item>
@@ -116,7 +116,7 @@
 
           <a-button type="primary" @click="() => temp.projectList.push({})">添加</a-button>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 实时阅读 -->
     <a-drawer

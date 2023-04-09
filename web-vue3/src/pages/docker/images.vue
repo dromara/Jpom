@@ -90,7 +90,7 @@
       title="构建容器"
       :maskClosable="false"
     >
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
+      <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="基础镜像" prop="name">
           <a-row>
             <a-col :span="10">
@@ -413,7 +413,7 @@
             </a-space>
           </div>
         </div>
-      </a-form-model>
+      </a-form>
     </a-drawer>
     <!-- 日志 -->
     <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="pull日志" :footer="null" :maskClosable="false">

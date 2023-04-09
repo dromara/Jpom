@@ -157,7 +157,7 @@
       @ok="handleEditOk"
       :maskClosable="false"
     >
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-space direction="vertical">
           <a-alert banner>
             <template slot="message">
@@ -229,18 +229,18 @@
             </a-form-item>
           </a-collapse-panel>
         </a-collapse>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 创建集群 -->
     <a-modal destroyOnClose v-model="initSwarmVisible" title="创建 Docker 集群" @ok="handleSwarm" :maskClosable="false">
-      <a-form-model ref="initForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form ref="initForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-alert message="温馨提示" type="warning">
           <template slot="description">
             创建集群会将尝试获取 docker
             中集群信息，如果存在集群信息将自动同步集群信息到系统，反之不存在集群信息将自动创建 swarm 集群
           </template>
         </a-alert>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 加入集群 -->
     <a-modal
@@ -250,7 +250,7 @@
       @ok="handleSwarmJoin"
       :maskClosable="false"
     >
-      <a-form-model ref="joinForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form ref="joinForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="选择集群" prop="managerId">
           <a-select
             show-search
@@ -285,7 +285,7 @@
             <a-radio value="manager"> 管理节点 </a-radio>
           </a-radio-group>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 控制台 -->
     <!-- <a-drawer destroyOnClose :title="`${temp.name} 控制台`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="consoleVisible" @close="onClose"> -->
@@ -322,7 +322,7 @@
       @ok="handleSyncToWorkspace"
       :maskClosable="false"
     >
-      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
         <a-form-item label="分配类型" prop="type">
           <a-radio-group v-model="temp.type">
@@ -335,7 +335,7 @@
             <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 查看 docker 关联工作空间的信息 -->
     <a-modal

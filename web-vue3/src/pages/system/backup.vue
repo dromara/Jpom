@@ -116,13 +116,7 @@
       width="600px"
       :maskClosable="false"
     >
-      <a-form-model
-        ref="editBackupForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 20 }"
-      >
+      <a-form ref="editBackupForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="备份类型" prop="backupType">
           <a-radio-group v-model="temp.backupType" name="backupType">
             <a-radio v-for="item in backupTypeList" v-show="!item.disabled" :key="item.key" :value="item.key">{{
@@ -141,7 +135,7 @@
             @change="handleChange"
           />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 上传 SQL 备份文件 -->
     <a-modal

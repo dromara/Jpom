@@ -480,13 +480,7 @@
       @ok="handleEditNodeOk"
       :maskClosable="false"
     >
-      <a-form-model
-        ref="editNodeForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 19 }"
-      >
+      <a-form ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 19 }">
         <a-form-item label="节点名称" prop="name">
           <a-input :maxLength="50" v-model="temp.name" placeholder="节点名称" />
         </a-form-item>
@@ -522,7 +516,7 @@
             }}</a-select-option>
           </a-select>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 管理节点 -->
     <a-drawer
@@ -587,7 +581,7 @@
           </ul>
         </template>
       </a-alert>
-      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" prop="workspaceId">
           <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
@@ -596,7 +590,7 @@
             }}</a-select-option>
           </a-select>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 历史监控 -->
     <a-modal

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-form-model :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
+    <a-form :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
       <a-form-item label="任务名" prop="name">
         <a-input placeholder="请输入任务名" :disabled="true" :value="temp.taskData && temp.taskData.name" />
       </a-form-item>
@@ -82,7 +82,7 @@
           </a-tab-pane>
         </a-tabs>
       </a-form-item>
-    </a-form-model>
+    </a-form>
   </div>
 </template>
 <script>

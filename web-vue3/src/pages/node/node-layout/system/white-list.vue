@@ -3,7 +3,7 @@
     <template>
       <a-alert style="margin-bottom: 20px" message="路径需要配置绝对路径,不支持软链" type="info" />
     </template>
-    <a-form-model ref="editForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+    <a-form ref="editForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
       <a-form-item label="项目路径" prop="project">
         <a-input
           v-model="temp.project"
@@ -50,7 +50,7 @@
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button type="primary" :disabled="submitAble" @click="onSubmit">提交</a-button>
       </a-form-item>
-    </a-form-model>
+    </a-form>
   </div>
 </template>
 <script>

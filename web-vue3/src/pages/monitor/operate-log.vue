@@ -60,13 +60,7 @@
       @ok="handleEditOperateMonitorOk"
       :maskClosable="false"
     >
-      <a-form-model
-        ref="editMonitorForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 5 }"
-        :wrapper-col="{ span: 17 }"
-      >
+      <a-form ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 5 }" :wrapper-col="{ span: 17 }">
         <a-form-item label="监控名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="监控名称" />
         </a-form-item>
@@ -126,7 +120,7 @@
             @change="handleNotifyUserChange"
           />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
   </div>
 </template>

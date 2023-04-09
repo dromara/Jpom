@@ -207,7 +207,7 @@
       @ok="handleEditSshOk"
       :maskClosable="false"
     >
-      <a-form-model ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="SSH 名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="SSH 名称" />
         </a-form-item>
@@ -221,7 +221,7 @@
           >
           </custom-select>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
 
     <!-- 文件管理 -->
@@ -289,7 +289,7 @@
           </ul>
         </template>
       </a-alert>
-      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" prop="workspaceId">
           <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
@@ -298,7 +298,7 @@
             }}</a-select-option>
           </a-select>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
   </div>
 </template>

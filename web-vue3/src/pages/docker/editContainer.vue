@@ -111,7 +111,7 @@
         </a-descriptions></a-col
       >
       <a-col :span="12">
-        <a-form-model ref="editForm" :model="temp" :label-col="{ span: 7 }" :wrapper-col="{ span: 17 }">
+        <a-form ref="editForm" :model="temp" :label-col="{ span: 7 }" :wrapper-col="{ span: 17 }">
           <a-form-item prop="blkioWeight">
             <template slot="label">
               Block IO 权重
@@ -229,7 +229,7 @@
             </template>
             <a-input style="width: 100%" v-model="temp.memoryReservation" placeholder="软内存限制。" />
           </a-form-item>
-        </a-form-model>
+        </a-form>
       </a-col>
     </a-row>
   </div>

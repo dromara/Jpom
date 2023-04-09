@@ -77,13 +77,13 @@
     </a-table>
     <!-- 创建集群区 -->
     <a-modal destroyOnClose v-model="editVisible" title="编辑 Docker 集群" @ok="handleEditOk" :maskClosable="false">
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="集群名称" prop="name">
           <a-input v-model="temp.name" placeholder="容器名称" />
         </a-form-item>
 
         <a-form-item label="标签" prop="tag"><a-input v-model="temp.tag" placeholder="关联容器标签" /> </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
 
     <!-- 控制台 -->

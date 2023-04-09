@@ -75,13 +75,7 @@
       @ok="handleEditCertOk"
       :maskClosable="false"
     >
-      <a-form-model
-        ref="importCertForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 18 }"
-      >
+      <a-form ref="importCertForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="证书类型" prop="type">
           <a-radio-group v-model="temp.type">
             <a-radio value="pkcs12"> pkcs12(pfx) </a-radio>
@@ -119,11 +113,11 @@
         >
           <a-input v-model="temp.password" placeholder="证书密码" />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 编辑证书 -->
     <a-modal destroyOnClose v-model="editVisible" :title="`编辑证书`" @ok="handleEditOk" :maskClosable="false">
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+      <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="证书共享" prop="global">
           <a-radio-group v-model="temp.global">
             <a-radio :value="true"> 全局 </a-radio>
@@ -133,7 +127,7 @@
         <a-form-item label="证书描述" prop="description">
           <a-textarea v-model="temp.description" placeholder="请输入证书描述" />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 发布文件 -->
     <a-modal

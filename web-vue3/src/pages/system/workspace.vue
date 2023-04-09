@@ -52,7 +52,7 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal destroyOnClose v-model="editVisible" title="编辑工作空间" @ok="handleEditOk" :maskClosable="false">
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item label="名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="工作空间名称" />
         </a-form-item>
@@ -60,7 +60,7 @@
         <a-form-item label="描述" prop="description">
           <a-input v-model="temp.description" :maxLength="200" type="textarea" :rows="5" placeholder="工作空间描述" />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 环境变量 -->
     <a-modal
@@ -81,7 +81,7 @@
       @ok="onSubmitMenus"
       :maskClosable="false"
     >
-      <a-form-model ref="editWhiteForm" :model="menusConfigData">
+      <a-form ref="editWhiteForm" :model="menusConfigData">
         <a-row type="flex" justify="center">
           <a-alert :message="`菜单配置只对非超级管理员生效`" style="margin-top: 10px; margin-bottom: 20px" banner />
           <a-col :span="12">
@@ -121,7 +121,7 @@
             </a-card>
           </a-col>
         </a-row>
-      </a-form-model>
+      </a-form>
     </a-modal>
   </div>
 </template>

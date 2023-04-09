@@ -252,13 +252,7 @@
     </a-card>
     <!-- 编辑区 -->
     <a-modal destroyOnClose v-model="editVisible" width="50%" title="编辑机器" @ok="handleEditOk" :maskClosable="false">
-      <a-form-model
-        ref="editNodeForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 19 }"
-      >
+      <a-form ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 19 }">
         <a-form-item label="机器名称" prop="name">
           <a-input :maxLength="50" v-model="temp.name" placeholder="机器名称" />
         </a-form-item>
@@ -359,7 +353,7 @@
             </a-form-item>
           </a-collapse-panel>
         </a-collapse>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 机器信息组件 -->
     <a-drawer
@@ -388,14 +382,14 @@
       <!-- <a-alert message="温馨提示" type="warning">
         <template slot="description"> </template>
       </a-alert> -->
-      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" prop="workspaceId">
           <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
             <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 机器在线升级相关信息 -->
     <a-drawer
@@ -446,7 +440,7 @@
         style="margin-top: 10px; margin-bottom: 20px"
         banner
       />
-      <a-form-model ref="editWhiteForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-form ref="editWhiteForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item label="模板节点">
           <a-select
             show-search
@@ -505,7 +499,7 @@
             placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，示例：设置编码：txt@utf-8， 不设置编码：txt"
           />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 分发机器配置 -->
     <a-modal
@@ -527,7 +521,7 @@
         style="margin-top: 10px; margin-bottom: 20px"
         banner
       />
-      <a-form-model ref="editNodeConfigForm" :model="temp">
+      <a-form ref="editNodeConfigForm" :model="temp">
         <a-form-item label="模版节点">
           <a-select
             show-search
@@ -545,7 +539,7 @@
         <a-form-item class="config-editor" :wrapper-col="{ span: 24 }">
           <code-editor v-model="temp.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
   </div>
 </template>

@@ -70,13 +70,7 @@
       @ok="handleEditCertOk"
       :maskClosable="false"
     >
-      <a-form-model
-        ref="importCertForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 18 }"
-      >
+      <a-form ref="importCertForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item
           label="证书文件"
           prop="file"
@@ -100,7 +94,7 @@
             <a-button><a-icon type="upload" />选择文件</a-button>
           </a-upload>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <div style="padding: 40px">
       <div

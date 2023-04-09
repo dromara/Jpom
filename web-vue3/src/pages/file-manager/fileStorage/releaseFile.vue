@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-form-model
+    <a-form
       ref="releaseFileForm"
       :rules="releaseFileRules"
       :model="temp"
@@ -116,7 +116,7 @@
           </a-tab-pane>
         </a-tabs>
       </a-form-item>
-    </a-form-model>
+    </a-form>
 
     <a-modal
       destroyOnClose

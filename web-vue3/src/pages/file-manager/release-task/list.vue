@@ -111,7 +111,7 @@
       :maskClosable="false"
       @ok="handleReCrateTask"
     >
-      <a-form-model
+      <a-form
         ref="releaseFileForm"
         :rules="releaseFileRules"
         :model="temp"
@@ -200,11 +200,11 @@
             </a-tab-pane>
           </a-tabs>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 查看文件 -->
     <a-modal destroyOnClose v-model="viewFileVisible" :title="`查看文件`" :footer="null" :maskClosable="false">
-      <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+      <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="文件名" prop="name">
           {{ temp.name }}
         </a-form-item>
@@ -223,7 +223,7 @@
         <a-form-item label="文件描述" prop="description">
           {{ temp.description }}
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
   </div>
 </template>

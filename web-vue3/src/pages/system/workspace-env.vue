@@ -67,13 +67,7 @@
 
     <!-- 环境变量编辑区 -->
     <a-modal v-model="editEnvVisible" title="编辑环境变量" width="50vw" @ok="handleEnvEditOk" :maskClosable="false">
-      <a-form-model
-        ref="editEnvForm"
-        :rules="rulesEnv"
-        :model="envTemp"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 18 }"
-      >
+      <a-form ref="editEnvForm" :rules="rulesEnv" :model="envTemp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="名称" prop="name">
           <a-input v-model="envTemp.name" :maxLength="50" placeholder="变量名称" />
         </a-form-item>
@@ -126,7 +120,7 @@
             </a-select-option>
           </a-select>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
   </div>
 </template>

@@ -516,7 +516,7 @@
       @ok="handleStartBuild"
       :maskClosable="false"
     >
-      <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+      <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="名称" prop="name">
           <a-input readOnly disabled v-model="temp.name" />
         </a-form-item>
@@ -615,7 +615,7 @@
             </a-select-option>
           </a-select>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
   </div>
 </template>
