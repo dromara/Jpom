@@ -1,10 +1,23 @@
 <template>
   <div class="full-content">
     <!-- 数据表格 -->
-    <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" @change="changePage" bordered :rowKey="(record, index) => index">
+    <a-table
+      :data-source="list"
+      size="middle"
+      :columns="columns"
+      :pagination="pagination"
+      @change="changePage"
+      bordered
+      :rowKey="(record, index) => index"
+    >
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="日志名称" class="search-input-item" />
+          <a-input
+            v-model="listQuery['%name%']"
+            @pressEnter="loadData"
+            placeholder="日志名称"
+            class="search-input-item"
+          />
 
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
@@ -25,12 +38,19 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editVisible" width="60%" title="编辑日志搜索" @ok="handleEditOk" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      v-model="editVisible"
+      width="60%"
+      title="编辑日志搜索"
+      @ok="handleEditOk"
+      :maskClosable="false"
+    >
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item label="日志名称" prop="name">
+        <a-form-item label="日志名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="日志项目名称" />
-        </a-form-model-item>
-        <a-form-model-item label="绑定节点" required>
+        </a-form-item>
+        <a-form-item label="绑定节点" required>
           <a-row v-for="(item, index) in temp.projectList" :key="index">
             <a-col :span="11">
               <span>节点: </span>
@@ -44,29 +64,42 @@
                       ...temp,
                       projectList: temp.projectList.map((item, index1) => {
                         if (index1 === index && item.projectId) {
-                          return Object.assign(item, { projectId: undefined });
+                          return Object.assign(item, { projectId: undefined })
                         }
-                        return item;
-                      }),
-                    };
+                        return item
+                      })
+                    }
                   }
                 "
               >
-                <a-select-option v-for="nodeItem in nodeList" :key="nodeItem.id" :disabled="!nodeProjectList[nodeItem.id] || !nodeProjectList[nodeItem.id].projects || nodeItem.openStatus !== 1">
+                <a-select-option
+                  v-for="nodeItem in nodeList"
+                  :key="nodeItem.id"
+                  :disabled="
+                    !nodeProjectList[nodeItem.id] || !nodeProjectList[nodeItem.id].projects || nodeItem.openStatus !== 1
+                  "
+                >
                   {{ nodeItem.name }}
                 </a-select-option>
               </a-select>
             </a-col>
             <a-col :span="11">
               <span>项目: </span>
-              <a-select :disabled="!item.nodeId" style="width: 80%" v-model="item.projectId" :placeholder="`请选择项目`">
+              <a-select
+                :disabled="!item.nodeId"
+                style="width: 80%"
+                v-model="item.projectId"
+                :placeholder="`请选择项目`"
+              >
                 <!-- <a-select-option value=""> 请先选择节点</a-select-option> -->
                 <template v-if="nodeProjectList[item.nodeId]">
                   <a-select-option
                     v-for="project in nodeProjectList[item.nodeId].projects"
                     :disabled="
                       temp.projectList.filter((item, nowIndex) => {
-                        return item.nodeId === project.nodeId && item.projectId === project.projectId && nowIndex !== index;
+                        return (
+                          item.nodeId === project.nodeId && item.projectId === project.projectId && nowIndex !== index
+                        )
                       }).length > 0
                     "
                     :key="project.projectId"
@@ -82,7 +115,7 @@
           </a-row>
 
           <a-button type="primary" @click="() => temp.projectList.push({})">添加</a-button>
-        </a-form-model-item>
+        </a-form-item>
       </a-form-model>
     </a-modal>
     <!-- 实时阅读 -->
@@ -93,22 +126,22 @@
       :visible="logReadVisible"
       @close="
         () => {
-          this.logReadVisible = false;
-          this.loadData();
+          this.logReadVisible = false
+          this.loadData()
         }
       "
     >
       <template #title>
         搜索查看
-        {{ temp.cacheData && temp.cacheData.logFile ? ":" + temp.cacheData.logFile : "" }}
+        {{ temp.cacheData && temp.cacheData.logFile ? ':' + temp.cacheData.logFile : '' }}
       </template>
       <logReadView
         v-if="logReadVisible"
         :data="this.temp"
         @changeTitle="
           (logFile) => {
-            const cacheData = { ...this.temp.cacheData, logFile: logFile };
-            this.temp = { ...this.temp, cacheData: cacheData };
+            const cacheData = { ...this.temp.cacheData, logFile: logFile }
+            this.temp = { ...this.temp, cacheData: cacheData }
           }
         "
       ></logReadView>
@@ -116,16 +149,16 @@
   </div>
 </template>
 <script>
-import { deleteLogRead, editLogRead, getLogReadList } from "@/api/log-read";
-import { getNodeListAll, getProjectListAll } from "@/api/node";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, itemGroupBy, parseTime } from "@/utils/const";
+import { deleteLogRead, editLogRead, getLogReadList } from '@/api/log-read'
+import { getNodeListAll, getProjectListAll } from '@/api/node'
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, itemGroupBy, parseTime } from '@/utils/const'
 
-import { mapGetters } from "vuex";
-import logReadView from "./logReadView";
+import { mapGetters } from 'vuex'
+import logReadView from './logReadView'
 
 export default {
   components: {
-    logReadView,
+    logReadView
   },
   data() {
     return {
@@ -139,118 +172,132 @@ export default {
       temp: {},
       editVisible: false,
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: '名称', dataIndex: 'name', ellipsis: true, scopedSlots: { customRender: 'name' } },
 
-        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, align: "center", scopedSlots: { customRender: "modifyUser" }, width: 120 },
         {
-          title: "修改时间",
-          dataIndex: "modifyTimeMillis",
+          title: '修改人',
+          dataIndex: 'modifyUser',
+          ellipsis: true,
+          align: 'center',
+          scopedSlots: { customRender: 'modifyUser' },
+          width: 120
+        },
+        {
+          title: '修改时间',
+          dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: (text) => {
-            if (!text || text === "0") {
-              return "";
+            if (!text || text === '0') {
+              return ''
             }
-            return parseTime(text);
+            return parseTime(text)
           },
-          width: 180,
+          width: 180
         },
-        { title: "操作", dataIndex: "operation", ellipsis: true, scopedSlots: { customRender: "operation" }, width: 180, align: "center" },
+        {
+          title: '操作',
+          dataIndex: 'operation',
+          ellipsis: true,
+          scopedSlots: { customRender: 'operation' },
+          width: 180,
+          align: 'center'
+        }
       ],
       rules: {
-        name: [{ required: true, message: "请填写日志项目名称", trigger: "blur" }],
-      },
-    };
+        name: [{ required: true, message: '请填写日志项目名称', trigger: 'blur' }]
+      }
+    }
   },
   computed: {
-    ...mapGetters(["getCollapsed"]),
+    ...mapGetters(['getCollapsed']),
     pagination() {
-      return COMPUTED_PAGINATION(this.listQuery);
-    },
+      return COMPUTED_PAGINATION(this.listQuery)
+    }
   },
   watch: {},
   created() {
-    this.loadData();
+    this.loadData()
   },
   methods: {
     // 加载数据
     loadData(pointerEvent) {
-      this.loading = true;
-      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
+      this.loading = true
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
       getLogReadList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data.result;
-          this.listQuery.total = res.data.total;
+          this.list = res.data.result
+          this.listQuery.total = res.data.total
         }
-        this.loading = false;
-      });
+        this.loading = false
+      })
     },
     // 加载节点以及项目
     loadNodeList() {
       return new Promise((resolve) => {
         this.loadNodeList2().then(() => {
           this.getProjectListAll().then(() => {
-            resolve();
-          });
-        });
-      });
+            resolve()
+          })
+        })
+      })
     },
     // 加载节点以及项目
     loadNodeList2() {
       return new Promise((resolve) => {
         getNodeListAll().then((res) => {
           if (res.code === 200) {
-            this.nodeList = res.data;
-            this.nodeName = res.data.groupBy((item) => item.id);
-            resolve();
+            this.nodeList = res.data
+            this.nodeName = res.data.groupBy((item) => item.id)
+            resolve()
           }
-        });
-      });
+        })
+      })
     },
     // 加载用户列表
     getProjectListAll() {
       return new Promise((resolve) => {
         getProjectListAll().then((res) => {
           if (res.code === 200) {
-            this.nodeProjectList = itemGroupBy(res.data, "nodeId", "id", "projects").groupBy((item) => item.id);
-            resolve();
+            this.nodeProjectList = itemGroupBy(res.data, 'nodeId', 'id', 'projects').groupBy((item) => item.id)
+            resolve()
             // console.log(this.nodeList);
             // console.log(this.nodeProjectList);
           }
-        });
-      });
+        })
+      })
     },
     // 新增
     handleAdd() {
       this.temp = {
-        projectList: [],
-      };
+        projectList: []
+      }
       this.loadNodeList().then(() => {
-        this.editVisible = true;
-      });
+        this.editVisible = true
+      })
     },
     // 修改
     handleEdit(record) {
-      this.temp = Object.assign({}, record, { projectList: JSON.parse(record.nodeProject) });
+      this.temp = Object.assign({}, record, { projectList: JSON.parse(record.nodeProject) })
 
       this.loadNodeList().then(() => {
-        this.editVisible = true;
-      });
+        this.editVisible = true
+      })
     },
     handleEditOk() {
       // 检验表单
-      this.$refs["editForm"].validate((valid) => {
+      this.$refs['editForm'].validate((valid) => {
         if (!valid) {
-          return false;
+          return false
         }
-        const temp = Object.assign({}, this.temp);
+        const temp = Object.assign({}, this.temp)
         temp.projectList = temp.projectList?.filter((item) => {
-          return item.nodeId && item.projectId;
-        });
+          return item.nodeId && item.projectId
+        })
         if (!temp.projectList || !temp.projectList.length) {
           this.$notification.warn({
-            message: "至少选择一个节点和项目",
-          });
-          return false;
+            message: '至少选择一个节点和项目'
+          })
+          return false
         }
         // console.log(temp);
 
@@ -258,48 +305,51 @@ export default {
           if (res.code === 200) {
             // 成功
             this.$notification.success({
-              message: res.msg,
-            });
-            this.$refs["editForm"].resetFields();
-            this.editVisible = false;
-            this.loadData();
+              message: res.msg
+            })
+            this.$refs['editForm'].resetFields()
+            this.editVisible = false
+            this.loadData()
           }
-        });
-      });
+        })
+      })
     },
     // 删除
     handleDelete(record) {
       this.$confirm({
-        title: "系统提示",
-        content: "真的要删除日志搜索么？",
-        okText: "确认",
-        cancelText: "取消",
+        title: '系统提示',
+        content: '真的要删除日志搜索么？',
+        okText: '确认',
+        cancelText: '取消',
         onOk: () => {
           // 删除
           deleteLogRead(record.id).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
-                message: res.msg,
-              });
-              this.loadData();
+                message: res.msg
+              })
+              this.loadData()
             }
-          });
-        },
-      });
+          })
+        }
+      })
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
-      this.loadData();
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
+      this.loadData()
     },
     // 打开阅读
     handleLogRead(record) {
       // console.log(record);
-      this.temp = Object.assign({}, record, { projectList: JSON.parse(record.nodeProject), cacheData: JSON.parse(record.cacheData || "{}") });
-      this.logReadVisible = true;
+      this.temp = Object.assign({}, record, {
+        projectList: JSON.parse(record.nodeProject),
+        cacheData: JSON.parse(record.cacheData || '{}')
+      })
+      this.logReadVisible = true
       //
-    },
-  },
-};
+    }
+  }
+}
 </script>
 <style scoped></style>
