@@ -4,16 +4,14 @@ import { NO_NOTIFY_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID } from '@/utils/con
 import { refreshToken } from './user/user'
 import { notification } from 'ant-design-vue'
 import appStore from '@/stores/app'
-import useUserStore from '@/stores/user'
-import { useMenuStore } from '@/stores/menu'
+import userStore from '@/stores/user'
+import menuStore from '@/stores/menu'
 
 const _window = window as any
 const delTimeout = 20 * 1000
 const apiTimeout = _window.apiTimeout === '<apiTimeout>' ? delTimeout : _window.apiTimeout
 
 const pro = process.env.NODE_ENV === 'production'
-
-const userStore = useUserStore()
 
 // 创建实例
 const instance: AxiosInstance = axios.create({
@@ -147,7 +145,7 @@ async function redoRequest(config: AxiosRequestConfig) {
   if (result.code === 200) {
     // 调用 store action 存储当前登录的用户名和 token
     await userStore.reLogin(result.data)
-    await useMenuStore().loadSystemMenus()
+    await menuStore.loadSystemMenus()
     request(config)
     return result
   }
