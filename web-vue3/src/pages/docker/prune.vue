@@ -1,6 +1,6 @@
 <template>
   <div class="full-content">
-    <a-form-model ref="ruleForm" :model="pruneForm" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }" :rules="rules">
+    <a-form ref="ruleForm" :model="pruneForm" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }" :rules="rules">
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-alert message="修剪操作会删除相关数据，请谨慎操作。请您再确认本操作后果后再使用" banner />
       </a-form-item>
@@ -41,7 +41,7 @@
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button type="primary" @click="onPruneSubmit"> 确定 </a-button>
       </a-form-item>
-    </a-form-model>
+    </a-form>
   </div>
 </template>
 <script>

@@ -80,7 +80,7 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal destroyOnClose v-model="editVisible" title="编辑  Docker" @ok="handleEditOk" :maskClosable="false">
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="容器名称" prop="name">
           <a-input v-model="temp.name" placeholder="容器名称" />
         </a-form-item>
@@ -123,7 +123,7 @@
             </a-tag>
           </template>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
 
     <!-- 控制台 -->
@@ -153,7 +153,7 @@
           </ul>
         </template>
       </a-alert>
-      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" prop="workspaceId">
           <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
@@ -162,7 +162,7 @@
             }}</a-select-option>
           </a-select>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
   </div>
 </template>

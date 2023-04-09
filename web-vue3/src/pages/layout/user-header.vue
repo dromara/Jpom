@@ -71,7 +71,7 @@
     >
       <a-tabs v-model="temp.tabActiveKey" @change="tabChange">
         <a-tab-pane :key="1" tab="修改密码">
-          <a-form-model ref="pwdForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+          <a-form ref="pwdForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
             <a-form-item label="原密码" prop="oldPwd">
               <a-input-password v-model="temp.oldPwd" placeholder="请输入原密码" />
             </a-form-item>
@@ -88,7 +88,7 @@
                 </a-col>
               </a-row>
             </a-form-item>
-          </a-form-model>
+          </a-form>
         </a-tab-pane>
         <a-tab-pane :key="2" tab="两步验证">
           <a-row>
@@ -102,13 +102,7 @@
               </template>
             </a-alert>
             <a-col :span="12">
-              <a-form-model
-                ref="mfaForm"
-                :model="temp"
-                :rules="rules"
-                :label-col="{ span: 6 }"
-                :wrapper-col="{ span: 14 }"
-              >
+              <a-form ref="mfaForm" :model="temp" :rules="rules" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
                 <a-form-item label="当前状态" prop="status">
                   <a-switch checked-children="开启中" disabled un-checked-children="关闭中" v-model="temp.status" />
                 </a-form-item>
@@ -171,7 +165,7 @@
                     </a-col>
                   </a-row>
                 </a-form-item>
-              </a-form-model>
+              </a-form>
             </a-col>
             <a-col :span="12">
               <h3 id="两步验证应用">两步验证应用</h3>
@@ -189,7 +183,7 @@
       @ok="handleUpdateUserOk"
       :maskClosable="false"
     >
-      <a-form-model ref="userForm" :rules="rules" :model="temp" :label-col="{ span: 8 }" :wrapper-col="{ span: 15 }">
+      <a-form ref="userForm" :rules="rules" :model="temp" :label-col="{ span: 8 }" :wrapper-col="{ span: 15 }">
         <a-form-item label="临时token" prop="token">
           <a-input disabled v-model="temp.token" placeholder="Token">
             <a-tooltip
@@ -254,11 +248,11 @@
         <a-form-item label="企业微信通知地址" prop="workWx">
           <a-input v-model="temp.workWx" placeholder="企业微信通知地址" />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 个性配置区 -->
     <a-modal destroyOnClose v-model="customizeVisible" title="个性配置区" :footer="null" :maskClosable="false">
-      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-alert banner>
           <template slot="message"> 下列配置信息仅在当前浏览器生效,清空浏览器缓存配置将恢复默认 </template>
         </a-alert>
@@ -311,7 +305,7 @@
             />
           </a-space>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- mfa 提示 -->
     <a-modal

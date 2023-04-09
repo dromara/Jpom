@@ -6,7 +6,9 @@ import { GlobalWindow } from '@/interface/common'
 
 const _window = window as unknown as GlobalWindow
 
-const uploadFileSliceSize = _window.uploadFileSliceSize === '<uploadFileSliceSize>' ? 1 : _window.uploadFileSliceSize
+const uploadFileSliceSize = Number(
+  _window.uploadFileSliceSize === '<uploadFileSliceSize>' ? 1 : _window.uploadFileSliceSize
+)
 const uploadFileConcurrent =
   _window.uploadFileConcurrent === '<uploadFileConcurrent>' ? 1 : _window.uploadFileConcurrent
 
@@ -31,7 +33,7 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
   let sliceId = ''
   const chunkSize = uploadFileSliceSize * 1024 * 1024 // 1MB一片
   const chunkCount = Math.ceil(file.size / chunkSize) // 总片数
-  const chunkList = [] // 分片列表
+  const chunkList: any[] = [] // 分片列表
   const uploaded = [] // 已经上传的
   let total = 0
   const blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice
@@ -43,7 +45,7 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
     //
     Vue.prototype.$setLoading({
       spinning: true,
-      tip: '解析文件,准备上传中',
+      tip: '解析文件,准备上传中'
     })
     const reader = new FileReader()
     const spark = new SparkMD5.ArrayBuffer()
@@ -55,7 +57,7 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
       if (start < total) {
         Vue.prototype.$setLoading({
           spinning: true,
-          tip: '解析文件,准备上传中 ' + ((start / total) * 100).toFixed(2) + '%',
+          tip: '解析文件,准备上传中 ' + ((start / total) * 100).toFixed(2) + '%'
         })
         let end = Math.min(start + batch, total)
         reader.readAsArrayBuffer(blobSlice.call(file, start, end))
@@ -112,7 +114,7 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
     return {
       start,
       end,
-      chunk,
+      chunk
     }
   }
   /***
@@ -128,7 +130,7 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
         const chunkInfo = {
           chunk,
           currentChunk: curItem,
-          chunkCount,
+          chunkCount
         }
 
         // 构建上传文件的formData
@@ -148,7 +150,7 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
               nowSlice: chunkInfo.currentChunk + 1,
               totalSlice: chunkCount,
               sliceId: sliceId,
-              fileSumMd5: fileMd5,
+              fileSumMd5: fileMd5
             }
             resolve(createUploadData2)
           })

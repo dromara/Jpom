@@ -76,7 +76,7 @@
               </ul>
             </a-collapse-panel>
           </a-collapse>
-          <a-form-model :model="temp" ref="form" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+          <a-form :model="temp" ref="form" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
             <a-form-item label="cron表达式" prop="cron">
               <a-input v-model="temp.cron" placeholder="请输入要检查的 cron 表达式" />
             </a-form-item>
@@ -104,7 +104,7 @@
             <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
               <a-button type="primary" @click="onSubmit"> 检查 </a-button>
             </a-form-item>
-          </a-form-model>
+          </a-form>
         </a-space>
       </a-col>
 

@@ -113,7 +113,7 @@
       @ok="handleEditOk"
       :maskClosable="false"
     >
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+      <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="仓库名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="仓库名称" />
         </a-form-item>
@@ -248,7 +248,7 @@
         <a-form-item label="超时时间(s)" prop="timeout">
           <a-input-number v-model="temp.timeout" :min="0" placeholder="拉取仓库超时时间,单位秒" style="width: 100%" />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <a-modal
       :zIndex="1009"
@@ -259,7 +259,7 @@
       :footer="null"
       :maskClosable="false"
     >
-      <a-form-model
+      <a-form
         :label-col="{ span: 4 }"
         :rules="giteeImportFormRules"
         :model="giteeImportForm"
@@ -307,7 +307,7 @@
         >
           <a-input v-model="giteeImportForm.condition" placeholder="输入仓库名称或者仓库路径进行搜索" />
         </a-form-item>
-      </a-form-model>
+      </a-form>
       <a-table
         :loading="loading"
         size="middle"

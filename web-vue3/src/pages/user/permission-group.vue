@@ -36,7 +36,7 @@
       @ok="handleEditUserOk"
       :maskClosable="false"
     >
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="名称" />
         </a-form-item>
@@ -186,7 +186,7 @@
         <a-form-item label="描述" prop="description">
           <a-input v-model="temp.description" :maxLength="200" type="textarea" :rows="5" placeholder="描述" />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
   </div>
 </template>

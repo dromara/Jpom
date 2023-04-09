@@ -11,7 +11,7 @@
         style="margin-top: 10px; margin-bottom: 20px"
         banner
       />
-      <a-form-model ref="editForm" :model="temp">
+      <a-form ref="editForm" :model="temp">
         <a-form-item class="config-editor">
           <code-editor v-model="temp.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
         </a-form-item>
@@ -21,7 +21,7 @@
             <a-button type="danger" class="btn" @click="onSubmit(true)">保存并重启</a-button>
           </a-space>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-tab-pane>
     <a-tab-pane key="2" class="ip-config-panel">
       <span slot="tab">
@@ -39,7 +39,7 @@
         style="margin-top: 10px"
         banner
       />
-      <a-form-model
+      <a-form
         style="margin-top: 10px"
         ref="editIpConfigForm"
         :model="temp"
@@ -86,7 +86,7 @@
         <a-form-item :wrapper-col="{ offset: 10 }" class="ip-config-button">
           <a-button type="primary" class="btn" @click="onSubmitIp()">保存</a-button>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-tab-pane>
 
     <!-- 全局代理 -->
@@ -101,7 +101,7 @@
         banner
       />
       <a-row justify="center" type="flex">
-        <a-form-model layout="inline" ref="editProxyForm" :model="proxyConfigData">
+        <a-form layout="inline" ref="editProxyForm" :model="proxyConfigData">
           <a-row v-for="(item, index) in proxyConfigData.globalProxy" :key="index">
             <a-form-item label="通配符" prop="pattern">
               <a-input
@@ -160,7 +160,7 @@
               </a-space>
             </a-form-item>
           </a-row>
-        </a-form-model>
+        </a-form>
       </a-row>
     </a-tab-pane>
   </a-tabs>

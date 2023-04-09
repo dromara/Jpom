@@ -85,13 +85,7 @@
       @ok="handleEditMonitorOk"
       :maskClosable="false"
     >
-      <a-form-model
-        ref="editMonitorForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 18 }"
-      >
+      <a-form ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="监控名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="监控名称" />
         </a-form-item>
@@ -217,7 +211,7 @@
           </template>
           <a-input v-model="temp.webhook" placeholder="接收报警消息,非必填，GET请求" />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
   </div>
 </template>

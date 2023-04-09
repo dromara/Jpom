@@ -238,13 +238,7 @@
       @ok="handleEditProjectOk"
       :maskClosable="false"
     >
-      <a-form-model
-        ref="editProjectForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 18 }"
-      >
+      <a-form ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="项目 ID" prop="id">
           <a-input
             :maxLength="50"
@@ -539,7 +533,7 @@
         >
           <a-alert :message="temp.runCommand || '无'" type="success" />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 项目文件组件 -->
     <a-drawer

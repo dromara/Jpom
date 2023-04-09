@@ -1,6 +1,6 @@
 <template>
   <div class="node-full-content">
-    <a-form-model ref="editForm" :model="temp">
+    <a-form ref="editForm" :model="temp">
       <a-alert
         v-if="temp.file"
         :message="`配置文件路径:${temp.file}`"
@@ -15,7 +15,7 @@
         <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit(false)">保存</a-button>
         <a-button type="danger" class="btn" :disabled="submitAble" @click="onSubmit(true)">保存并重启</a-button>
       </a-form-item>
-    </a-form-model>
+    </a-form>
   </div>
 </template>
 <script>

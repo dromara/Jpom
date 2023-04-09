@@ -114,13 +114,7 @@
       @ok="handleEditUserOk"
       :maskClosable="false"
     >
-      <a-form-model
-        ref="editUserForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 18 }"
-      >
+      <a-form ref="editUserForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="登录名称" prop="id">
           <a-input
             @change="checkTipUserName"
@@ -195,7 +189,7 @@
             </a-select-option>
           </a-select>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <a-modal destroyOnClose v-model="showUserPwd" title="用户密码提示" :maskClosable="false" :footer="null">
       <a-result status="success" :title="this.temp.title">

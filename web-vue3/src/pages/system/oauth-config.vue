@@ -3,7 +3,7 @@
     <a-alert message="账号如果开启 MFA(两步验证)，使用 Oauth2 登录不会验证 MFA(两步验证)" type="info" show-icon />
     <a-tabs>
       <a-tab-pane key="gitee" tab="Gitee Oauth2">
-        <a-form-model ref="editForm" :model="gitee" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
+        <a-form ref="editForm" :model="gitee" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
           <a-form-item label="是否开启" prop="enabled">
             <a-switch v-model="gitee.enabled" checked-children="启用" un-checked-children="停用" />
           </a-form-item>
@@ -30,16 +30,10 @@
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
             <a-button type="primary" class="btn" @click="onSubmit('gitee')">提交</a-button>
           </a-form-item>
-        </a-form-model>
+        </a-form>
       </a-tab-pane>
       <a-tab-pane key="maxkey" tab="MaxKey Oauth2">
-        <a-form-model
-          ref="editForm"
-          :model="maxkey"
-          :rules="rules"
-          :label-col="{ span: 4 }"
-          :wrapper-col="{ span: 16 }"
-        >
+        <a-form ref="editForm" :model="maxkey" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
           <a-form-item label="是否开启" prop="enabled">
             <a-switch v-model="maxkey.enabled" checked-children="启用" un-checked-children="停用" />
           </a-form-item>
@@ -75,16 +69,10 @@
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
             <a-button type="primary" class="btn" @click="onSubmit('maxkey')">提交</a-button>
           </a-form-item>
-        </a-form-model>
+        </a-form>
       </a-tab-pane>
       <a-tab-pane key="github" tab="Github Oauth2">
-        <a-form-model
-          ref="editForm"
-          :model="github"
-          :rules="rules"
-          :label-col="{ span: 4 }"
-          :wrapper-col="{ span: 16 }"
-        >
+        <a-form ref="editForm" :model="github" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
           <a-form-item label="是否开启" prop="enabled">
             <a-switch v-model="github.enabled" checked-children="启用" un-checked-children="停用" />
           </a-form-item>
@@ -112,7 +100,7 @@
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
             <a-button type="primary" class="btn" @click="onSubmit('github')">提交</a-button>
           </a-form-item>
-        </a-form-model>
+        </a-form>
       </a-tab-pane>
     </a-tabs>
   </div>

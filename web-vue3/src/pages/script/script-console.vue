@@ -20,7 +20,7 @@
 
     <!--远程下载  -->
     <a-modal destroyOnClose v-model="editArgs" title="添加运行参数" @ok="startExecution" :maskClosable="false">
-      <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" ref="ruleForm">
+      <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" ref="ruleForm">
         <!-- <a-form-item label="执行参数" prop="args">
           <a-input v-model="temp.args" placeholder="执行参数,没有参数可以不填写" />
         </a-form-item> -->
@@ -57,7 +57,7 @@
           </a-row>
           <a-button type="primary" size="small" @click="() => commandParams.push({})">添加参数</a-button>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
   </div>
 </template>

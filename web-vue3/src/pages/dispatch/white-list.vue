@@ -4,7 +4,7 @@
       <a-alert message="节点分发的白名单路径配置" type="info" />
       <a-alert message="路径需要配置绝对路径,不支持软链" type="info" />
 
-      <a-form-model ref="editForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-form ref="editForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item label="白名单路径" prop="id">
           <a-input
             v-model="temp.outGiving"
@@ -26,7 +26,7 @@
         <a-form-item :wrapper-col="{ span: 14, offset: 6 }">
           <a-button type="primary" :disabled="submitAble" @click="onSubmit">提交</a-button>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-space>
   </div>
 </template>

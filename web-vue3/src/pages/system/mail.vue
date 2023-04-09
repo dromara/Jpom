@@ -1,6 +1,6 @@
 <template>
   <div class="full-content">
-    <a-form-model ref="editForm" :model="temp" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
+    <a-form ref="editForm" :model="temp" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
       <a-form-item label="SMTP 服务器" prop="host">
         <a-auto-complete v-model="temp.host" placeholder="SMTP 服务器域名" option-label-prop="value">
           <template slot="dataSource">
@@ -76,7 +76,7 @@
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit">提交</a-button>
       </a-form-item>
-    </a-form-model>
+    </a-form>
     <a-alert
       message="阿里云企业邮箱配置"
       description="SMTP 地址：smtp.mxhichina.com，端口使用 465 并且开启 SSL，用户名需要和邮件发送人一致，密码为邮箱的登录密码"

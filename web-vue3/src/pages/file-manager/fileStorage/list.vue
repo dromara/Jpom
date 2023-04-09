@@ -114,7 +114,7 @@
         @ok="handleUploadOk"
         :maskClosable="false"
       >
-        <a-form-model ref="form" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+        <a-form ref="form" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <a-form-item label="选择文件" prop="file">
             <a-progress v-if="percentage" :percent="percentage">
               <template #format="percent">
@@ -177,11 +177,11 @@
           <a-form-item label="文件描述" prop="description">
             <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
           </a-form-item>
-        </a-form-model>
+        </a-form>
       </a-modal>
       <!-- 编辑文件 -->
       <a-modal destroyOnClose v-model="editVisible" :title="`修改文件`" @ok="handleEditOk" :maskClosable="false">
-        <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+        <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <a-form-item label="文件名" prop="name">
             <a-input placeholder="文件名" v-model="temp.name" />
           </a-form-item>
@@ -218,7 +218,7 @@
           <a-form-item label="文件描述" prop="description">
             <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
           </a-form-item>
-        </a-form-model>
+        </a-form>
       </a-modal>
       <!--远程下载  -->
       <a-modal
@@ -228,13 +228,7 @@
         @ok="handleRemoteUpload"
         :maskClosable="false"
       >
-        <a-form-model
-          :model="temp"
-          :label-col="{ span: 6 }"
-          :wrapper-col="{ span: 18 }"
-          :rules="rules"
-          ref="remoteForm"
-        >
+        <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }" :rules="rules" ref="remoteForm">
           <a-form-item label="远程下载URL" prop="url">
             <a-input v-model="temp.url" placeholder="远程下载地址" />
           </a-form-item>
@@ -271,7 +265,7 @@
           <a-form-item label="文件描述" prop="description">
             <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
           </a-form-item>
-        </a-form-model>
+        </a-form>
       </a-modal>
       <!-- 断点下载 -->
       <a-modal
@@ -282,7 +276,7 @@
         :footer="null"
         :maskClosable="false"
       >
-        <a-form-model ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+        <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-tabs default-active-key="1">
             <template slot="tabBarExtraContent">
               <a-tooltip title="重置下载 token 信息,重置后之前的下载 token 将失效">
@@ -357,7 +351,7 @@
               </a-space>
             </a-tab-pane>
           </a-tabs>
-        </a-form-model>
+        </a-form>
       </a-modal>
       <!-- 发布文件 -->
       <a-modal

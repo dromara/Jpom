@@ -106,7 +106,7 @@
       @ok="handleEditOk"
       :maskClosable="false"
     >
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="服务名称" prop="name">
           <a-input v-model="temp.name" :disabled="temp.serviceId ? true : false" placeholder="服务名称" />
         </a-form-item>
@@ -473,7 +473,7 @@
             </a-tab-pane>
           </a-tabs>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 查看任务 -->
     <a-modal destroyOnClose v-model="taskVisible" title="查看任务" width="80vw" :footer="null" :maskClosable="false">

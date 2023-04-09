@@ -65,13 +65,7 @@
       :maskClosable="false"
       width="80vw"
     >
-      <a-form-model
-        ref="editScriptForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 3 }"
-        :wrapper-col="{ span: 18 }"
-      >
+      <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 18 }">
         <a-alert v-if="this.temp.scriptType === 'server-sync'" message="服务端同步的脚本不能在此修改" banner />
         <a-form-item v-if="temp.id" label="ScriptId" prop="id">
           <a-input v-model="temp.id" disabled readOnly />
@@ -149,7 +143,7 @@
             placeholder="详细描述"
           />
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 脚本控制台组件 -->
     <a-drawer

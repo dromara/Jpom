@@ -120,13 +120,7 @@
       :maskClosable="false"
       width="80vw"
     >
-      <a-form-model
-        ref="editScriptForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 3 }"
-        :wrapper-col="{ span: 19 }"
-      >
+      <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
         <a-form-item v-if="temp.id" label="ScriptId" prop="id">
           <a-input v-model="temp.id" disabled readOnly />
         </a-form-item>
@@ -228,7 +222,7 @@
             </a-select-option>
           </a-select>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 脚本控制台组件 -->
     <a-drawer
@@ -258,7 +252,7 @@
           </ul>
         </template>
       </a-alert>
-      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" prop="workspaceId">
           <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
@@ -267,17 +261,11 @@
             }}</a-select-option>
           </a-select>
         </a-form-item>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 触发器 -->
     <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
-      <a-form-model
-        ref="editTriggerForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 6 }"
-        :wrapper-col="{ span: 16 }"
-      >
+      <a-form ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template slot="tabBarExtraContent">
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
@@ -340,7 +328,7 @@
             </a-space>
           </a-tab-pane>
         </a-tabs>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 脚本日志 -->
     <a-drawer
