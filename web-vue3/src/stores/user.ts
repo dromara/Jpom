@@ -32,7 +32,7 @@ const useUserStore = defineStore('user', {
       })
     },
     // 登录 data = {token: 'xxx', userName: 'name'}
-    async reLogin(data: any) {
+    async login(data: any) {
       this.token = data.token || ''
       this.longTermToken = data.longTermToken || ''
       if (this.token) {

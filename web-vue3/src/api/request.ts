@@ -146,7 +146,7 @@ async function redoRequest(config: AxiosRequestConfig) {
   const result = await refreshToken()
   if (result.code === 200) {
     // 调用 store action 存储当前登录的用户名和 token
-    await userStore.reLogin(result.data)
+    await userStore.login(result.data)
     await useMenuStore().loadSystemMenus()
     request(config)
     return result
