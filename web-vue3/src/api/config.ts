@@ -1,6 +1,7 @@
+import Vue from 'vue'
 import axios from 'axios'
 import Qs from 'qs'
-import store from '../stores'
+import store from '../store'
 import router from '../router'
 import { NO_NOTIFY_KEY, NO_LOADING_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID, LOADING_TIP } from '@/utils/const'
 import { refreshToken } from './user/user'
@@ -8,9 +9,9 @@ import { refreshToken } from './user/user'
 import { notification } from 'ant-design-vue'
 
 // axios.defaults.baseURL = 'http://localhost:2122'
-let startTime: number = 0
+let startTime
 //
-const delTimeout: number = 20 * 1000
+const delTimeout = 20 * 1000
 //
 const apiTimeout = window.apiTimeout === '<apiTimeout>' ? delTimeout : window.apiTimeout
 
@@ -22,17 +23,17 @@ const request = axios.create({
   responseType: 'json',
 })
 
-const pro: boolean = process.env.NODE_ENV === 'production'
+const pro = process.env.NODE_ENV === 'production'
 
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
     // 如果 headers 里面配置了 loading: no 就不用 loading
     if (!config.headers[NO_LOADING_KEY]) {
-      // Vue.prototype.$setLoading({
-      //   spinning: true,
-      //   tip: config.headers[LOADING_TIP] || "加载数据中，请稍候...",
-      // });
+      Vue.prototype.$setLoading({
+        spinning: true,
+        tip: config.headers[LOADING_TIP] || '加载数据中，请稍候...',
+      })
       startTime = new Date().getTime()
     }
     delete config.headers[LOADING_TIP]
@@ -62,7 +63,7 @@ request.interceptors.response.use(
       const waitTime = endTime - startTime < 1000 ? 300 : 0
       // 时间过短延迟一定时间
       await waitTimePromise(waitTime, () => {
-        // Vue.prototype.$setLoading(false);
+        Vue.prototype.$setLoading(false)
       })
       return wrapResult(response)
     } else {
@@ -72,7 +73,7 @@ request.interceptors.response.use(
   (error) => {
     if (!error.response) {
       // 网络异常
-      // Vue.prototype.$setLoading(false);
+      Vue.prototype.$setLoading(false)
       notification.error({
         message: 'Network Error No response',
         description: '网络开了小差！请重试...:' + error,
@@ -81,7 +82,7 @@ request.interceptors.response.use(
     }
     // 如果 headers 里面配置了 loading: no 就不用 loading
     if (!error.response.config.headers[NO_LOADING_KEY]) {
-      // Vue.prototype.$setLoading(false);
+      Vue.prototype.$setLoading(false)
     }
     // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
     if (!error.response.config.headers[NO_NOTIFY_KEY]) {

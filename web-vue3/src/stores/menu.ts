@@ -67,7 +67,7 @@ export const useMenuStore = defineStore('menu', {
         })
     },
     // 添加 tab
-    addTab(tab) {
+    addTab(tab: any) {
       return new Promise((resolve) => {
         // 从 store 里面拿到 menus 匹配 path 得到当前的菜单，设置 tab 的标题
         const menus = this.menus
