@@ -2,9 +2,9 @@ import { TOKEN_KEY, USER_INFO_KEY, MENU_KEY, LONG_TERM_TOKEN } from '@/utils/con
 
 import { getUserInfo, loginOut } from '@/api/user/user'
 import { defineStore } from 'pinia'
-import menuStore from './menu'
+import { useMenuStore } from './menu'
 
-const useUserStore = defineStore('user', {
+export const useUserStore = defineStore('user', {
   state: () => ({
     token: localStorage.getItem(TOKEN_KEY) || '',
     longTermToken: localStorage.getItem(LONG_TERM_TOKEN) || '',
@@ -51,6 +51,7 @@ const useUserStore = defineStore('user', {
     // 退出登录 移除对应的 store
     async logOut() {
       localStorage.removeItem(TOKEN_KEY)
+      const menuStore = useMenuStore()
       menuStore.menus = []
       localStorage.removeItem(MENU_KEY)
       // 调用其他 action
@@ -71,4 +72,4 @@ const useUserStore = defineStore('user', {
   },
 })
 
-export default useUserStore()
+// export default useUserStore()

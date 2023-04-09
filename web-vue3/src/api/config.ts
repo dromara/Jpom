@@ -3,9 +3,9 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, In
 import { NO_NOTIFY_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID } from '@/utils/const'
 import { refreshToken } from './user/user'
 import { notification } from 'ant-design-vue'
-import appStore from '@/stores/app'
-import userStore from '@/stores/user'
-import menuStore from '@/stores/menu'
+import { useAppStore } from '@/stores/app'
+import { useUserStore } from '@/stores/user'
+import { useMenuStore } from '@/stores/menu'
 
 const _window = window as any
 const delTimeout = 20 * 1000
@@ -26,6 +26,9 @@ const instance: AxiosInstance = axios.create({
 
 // 请求拦截
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const appStore = useAppStore()
+  const userStore = useUserStore()
+
   const { headers } = config
   const accessToken = localStorage.getItem('accessToken')
   headers['Authorization'] = accessToken ? 'Bearer ' + accessToken : ''
@@ -144,6 +147,9 @@ async function redoRequest(config: AxiosRequestConfig) {
   const result = await refreshToken()
   if (result.code === 200) {
     // 调用 store action 存储当前登录的用户名和 token
+    const userStore = useUserStore()
+    const menuStore = useMenuStore()
+
     await userStore.login(result.data)
     await menuStore.loadSystemMenus()
     request(config)
@@ -157,6 +163,7 @@ function toLogin(res: IResponse<any>, response: AxiosResponse<IResponse<any>>) {
     message: '提示信息 ' + (pro ? '' : response.config.url),
     description: res.msg,
   })
+  const userStore = useUserStore()
 
   userStore.logOut()
   // .then(() => {

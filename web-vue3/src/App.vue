@@ -1,7 +1,7 @@
 <template>
-  <a-config-provider :locale="locale">
-    <div id="app" :class="`${scrollbarFlag ? '' : 'hide-scrollbar'}`">
-      <router-view v-if="routerActivation" />
+  <a-config-provider :locale="zhCN">
+    <div id="app">
+      <router-view />
       <template>
         <a-back-top />
       </template>
@@ -9,20 +9,12 @@
   </a-config-provider>
 </template>
 
-<script>
+<script lang="ts">
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
-// import { mapGetters } from "vuex";
-// import store from "@/store/index";
-// import guideStore from '@/stores/guide'
 import { notification, message } from 'ant-design-vue'
-import { onMounted, ref, provide, computed } from 'vue'
+import { onMounted, provide, computed } from 'vue'
+import { useMenuStore } from '@/stores/menu'
 
-const routerActivation = ref(true)
-const locale = ref(zhCN)
-
-const scrollbarFlag = computed(() => {
-  // return guideStore.scrollbarFlag === undefined ? true : guideStore.scrollbarFlag
-})
 
 onMounted(() => {
   notification.config({
@@ -34,41 +26,16 @@ onMounted(() => {
 })
 
 const reload = () => {
-  routerActivation.value = false
+  const menuStore = useMenuStore()
   // 刷新菜单
-  // store.dispatch("restLoadSystemMenus").then(() => {
-  //   //
-  // });
-  this.$nextTick(() => {
-    routerActivation.value = true
-  })
+  menuStore.restLoadSystemMenus();
 }
 
-provide({
-  reload: reload,
+
+provide('app', {
+  reload,
 })
 
-// export default {
-//   name: 'App',
-//   data() {
-//     return {
-//       locale: zhCN,
-//       routerActivation: true,
-//     }
-//   },
-//   provide() {
-//     return
-//   },
-//   components: {},
-//   // computed: {
-//   //   ...mapGetters(["getGuideCache"]),
-//   //   scrollbarFlag() {
-//   //     return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
-//   //   },
-//   // },
-//   created() {},
-//   methods: {},
-// }
 </script>
 
 <style lang="less">
@@ -103,6 +70,7 @@ provide({
   right: 0;
   display: flex;
 }
+
 .ant-spin-text {
   text-shadow: 0 0 black !important;
 }
