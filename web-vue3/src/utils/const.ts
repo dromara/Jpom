@@ -252,7 +252,7 @@ export const PROJECT_DSL_DEFATUL =
  * @param {String} parameter 参数
  * @returns
  */
-export function getWebSocketUrl(url, parameter) {
+export function getWebSocketUrl(url: string, parameter: any) {
   const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://'
   const domain = window.routerBase
   const fullUrl = (domain + url).replace(new RegExp('//', 'gm'), '/')
@@ -266,11 +266,11 @@ export function getWebSocketUrl(url, parameter) {
  * @params asyncHandle {Function} - 对`list`的每一个项的处理函数，参数为当前处理项，必须 return 一个Promise来确定是否继续进行迭代
  * @return {Promise} - 返回一个 Promise 值来确认所有数据是否迭代完成
  */
-export function concurrentExecution(list, limit, asyncHandle) {
+export function concurrentExecution(list: [], limit: number, asyncHandle: Function) {
   // 递归执行
-  const recursion = (arr) => {
+  const recursion = (arr: []) => {
     // 执行方法 arr.shift() 取出并移除第一个数据
-    return asyncHandle(arr.shift()).then((res) => {
+    return asyncHandle(arr.shift()).then((res: any) => {
       // 数组还未迭代完，递归继续进行迭代
       if (arr.length !== 0) {
         return recursion(arr)
@@ -280,7 +280,7 @@ export function concurrentExecution(list, limit, asyncHandle) {
     })
   }
   // 创建新的并发数组
-  let listCopy = [].concat(list)
+  const listCopy = [].concat(list) as []
   // 正在进行的所有并发异步操作
   let asyncList = []
   limit = limit > listCopy.length ? listCopy.length : limit

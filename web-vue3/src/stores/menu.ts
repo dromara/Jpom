@@ -74,7 +74,7 @@ export const useMenuStore = defineStore('menu', {
         let currentMenu: any = undefined
         let firstMenu: any = undefined
         menus.forEach((menu) => {
-          menu.childs.forEach((subMenu) => {
+          menu.childs.forEach((subMenu: any) => {
             if (!firstMenu) {
               firstMenu = subMenu
             }
@@ -90,7 +90,7 @@ export const useMenuStore = defineStore('menu', {
           return (
             menus.filter((menu) => {
               return (
-                menu.childs.filter((subMenu) => {
+                menu.childs.filter((subMenu: any) => {
                   return subMenu.path === item.path
                 }).length > 0
               )
@@ -151,9 +151,9 @@ export const useMenuStore = defineStore('menu', {
         key = key || this.activeTabKey
         if (key === 'all') {
           // 清空全部
-          this.tabList = tabList
+          this.tabList = []
           this.activeTabKey = ''
-          localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList))
+          localStorage.setItem(TAB_LIST_KEY, JSON.stringify(this.tabList))
           return
         }
         // 找到当前 index
