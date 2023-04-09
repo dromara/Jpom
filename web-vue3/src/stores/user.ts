@@ -2,9 +2,7 @@ import { TOKEN_KEY, USER_INFO_KEY, MENU_KEY, LONG_TERM_TOKEN } from '@/utils/con
 
 import { getUserInfo, loginOut } from '@/api/user/user'
 import { defineStore } from 'pinia'
-import { useMenuStore } from './menu'
-
-const menuStore = useMenuStore()
+import menuStore from './menu'
 
 const useUserStore = defineStore('user', {
   state: () => ({
@@ -73,4 +71,4 @@ const useUserStore = defineStore('user', {
   },
 })
 
-export default useUserStore
+export default useUserStore()
