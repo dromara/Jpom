@@ -8,8 +8,18 @@ const _window = window as unknown as GlobalWindow
 const uploadFileSliceSize = Number(
   _window.uploadFileSliceSize === '<uploadFileSliceSize>' ? 1 : _window.uploadFileSliceSize
 )
-const uploadFileConcurrent =
+const uploadFileConcurrent = Number(
   _window.uploadFileConcurrent === '<uploadFileConcurrent>' ? 1 : _window.uploadFileConcurrent
+)
+
+interface PiecesPar {
+  file: File
+  uploadCallback: Function
+  uploadBeforeAbrot: Function
+  success: Function
+  process: Function
+  error: Function
+}
 
 /**
  * 文件分片上传
@@ -20,7 +30,7 @@ const uploadFileConcurrent =
  * @params success {Function} 成功回调函数
  * @params error {Function} 失败回调函数
  */
-export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success, process, error }) => {
+export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success, process, error }: PiecesPar) => {
   // 如果文件传入为空直接 return 返回
   if (!file || file.length < 1) {
     return error('文件不能为空')
@@ -28,14 +38,14 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
   if (!window.FileReader) {
     return error('您的浏览器版本太低，不支持该功能')
   }
-  let fileMd5 = '' //
-  let sliceId = ''
-  const chunkSize = uploadFileSliceSize * 1024 * 1024 // 1MB一片
-  const chunkCount = Math.ceil(file.size / chunkSize) // 总片数
-  const chunkList: any[] = [] // 分片列表
-  const uploaded = [] // 已经上传的
-  let total = 0
-  const blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice
+  let fileMd5: string = '' //
+  let sliceId: string = ''
+  const chunkSize: number = uploadFileSliceSize * 1024 * 1024 // 1MB一片
+  const chunkCount: number = Math.ceil(file.size / chunkSize) // 总片数
+  const chunkList: number[] = [] // 分片列表
+  const uploaded: number[] = [] // 已经上传的
+  let total: number = 0
+  const blobSlice = (<any>File.prototype).slice || (<any>File.prototype).mozSlice || (<any>File.prototype).webkitSlice
 
   /***
    * 获取md5
@@ -94,7 +104,7 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
     }
     reader.onload = function (event) {
       try {
-        spark.append(event.target.result)
+        spark.append(event.target?.result)
         asyncUpdate()
       } catch (e) {
         // Vue.prototype.$setLoading('closeAll')
@@ -103,14 +113,27 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
     }
     asyncUpdate()
   }
+
+  interface IChunkInfo {
+    chunk: Blob
+    start: number
+    end: number
+  }
+
+  interface IChunkInfo2 {
+    chunkCount: number
+    chunk: Blob
+    currentChunk: number
+  }
+
   /***
    * 获取每一个分片的详情
    **/
-  const getChunkInfo = (file, currentChunk, chunkSize) => {
-    let start = currentChunk * chunkSize
-    let end = Math.min(file.size, start + chunkSize)
-    let chunk = blobSlice.call(file, start, end)
-    return {
+  const getChunkInfo = (file: File, currentChunk: number, chunkSize: number) => {
+    let start: number = currentChunk * chunkSize
+    let end: number = Math.min(file.size, start + chunkSize)
+    let chunk: Blob = blobSlice.call(file, start, end)
+    return <IChunkInfo>{
       start,
       end,
       chunk
@@ -120,25 +143,25 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
    * 并发上传
    **/
   const concurrentUpload = () => {
-    const startTime = new Date().getTime()
+    const startTime: number = new Date().getTime()
     // 设置初始化进度（避免第一份分片卡顿）
     process(0.01, 1, total, new Date().getTime() - startTime)
     concurrentExecution(chunkList, uploadFileConcurrent, (curItem) => {
       return new Promise((resolve, reject) => {
         const { chunk } = getChunkInfo(file, curItem, chunkSize)
-        const chunkInfo = {
+        const chunkInfo: IChunkInfo2 = {
           chunk,
           currentChunk: curItem,
           chunkCount
         }
 
         // 构建上传文件的formData
-        const uploadData = createUploadData(chunkInfo)
+        const uploadData: FormData = createUploadData(chunkInfo)
 
         uploadCallback(uploadData)
           .then(() => {
             uploaded.push(chunkInfo.currentChunk + 1)
-            const sd = parseInt((uploaded.length / chunkInfo.chunkCount) * 100)
+            const sd = parseInt(String((uploaded.length / chunkInfo.chunkCount) * 100))
             // console.log(chunk);
             process(sd, Math.min(uploaded.length * chunkSize, total), total, new Date().getTime() - startTime)
             //
@@ -166,11 +189,11 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
   /***
    * 创建文件上传参数
    **/
-  const createUploadData = (chunkInfo) => {
-    const fetchForm = new FormData()
+  const createUploadData = (chunkInfo: IChunkInfo2) => {
+    const fetchForm: FormData = new FormData()
     const nowSlice = chunkInfo.currentChunk
-    fetchForm.append('nowSlice', nowSlice)
-    fetchForm.append('totalSlice', chunkCount)
+    fetchForm.append('nowSlice', String(nowSlice))
+    fetchForm.append('totalSlice', String(chunkCount))
     fetchForm.append('sliceId', sliceId)
     const chunkfile = new File([chunkInfo.chunk], file.name + '.' + nowSlice)
     fetchForm.append('file', chunkfile) // fetchForm.append('file', chunkInfo.chunk)
