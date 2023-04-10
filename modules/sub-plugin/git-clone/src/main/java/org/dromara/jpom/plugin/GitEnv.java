@@ -37,6 +37,7 @@ public class GitEnv {
                 return false;
             }
             log.info("git安装位置：{}", result);
+            return true;
         } else {
             log.warn("不支持的系统类型：{}", osInfo.getName());
             return false;
