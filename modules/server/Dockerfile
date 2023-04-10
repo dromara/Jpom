@@ -32,7 +32,7 @@ VOLUME ["/root/.m2","/target/dependency/web-vue/node_modules"]
 ARG TEMP_VERSION=""
 ARG JPOM_VERSION
 ENV USE_JPOM_VERSION=${JPOM_VERSION}${TEMP_VERSION}
-RUN --mount=type=cache,target=/root/.m2 sh ./script/replaceVersion.sh ${USE_JPOM_VERSION}
+RUN --mount=type=cache,target=/root/.m2  bash ./script/replaceVersion.sh "${USE_JPOM_VERSION}" "release"
 
 ENV NODE_VERSION 16.13.1
 

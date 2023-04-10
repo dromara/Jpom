@@ -210,6 +210,12 @@ function start() {
 		echo "silence auto exit 0,${pid}"
 		exit 0
 	fi
+	echo "Jpom server starting:$pid"
+	pid=$(getPid)
+	if [ "$pid" == "" ]; then
+		echo "Please check the $Log for failure details"
+		errorExit "Jpom server Startup failed"
+	fi
 	tail -fn 0 --pid="$pid" "$server_log"
 }
 

@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+import com.github.dockerjava.core.NameParser;
 import org.junit.Test;
 
 import java.util.Formatter;
@@ -30,10 +31,22 @@ import java.util.Formatter;
  */
 public class TestFormatter {
 
-	@Test
-	public void test() {
-		System.out.println(String.format("${a}", "1"));
-		Formatter formatter = new Formatter();
-		System.out.println(formatter.format("${a}", "1"));
-	}
+    @Test
+    public void test() {
+        System.out.println(String.format("${a}", "1"));
+        Formatter formatter = new Formatter();
+        System.out.println(formatter.format("${a}", "1"));
+    }
+
+    @Test
+    public void testTag() {
+        NameParser.ReposTag reposTag = NameParser.parseRepositoryTag("192.168.33.106:10087/library/sso:3.0.0.RELEASE");
+        System.out.println(reposTag);
+
+        reposTag = NameParser.parseRepositoryTag("sso:3.0.0.RELEASE");
+        System.out.println(reposTag);
+
+        reposTag = NameParser.parseRepositoryTag("sso");
+        System.out.println(reposTag);
+    }
 }

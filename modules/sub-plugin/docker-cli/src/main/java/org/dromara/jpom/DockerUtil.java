@@ -62,6 +62,7 @@ public class DockerUtil {
     }
 
     private static final Map<String, DockerClient> DOCKER_CLIENT_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, AutoCloseable> CACHE_CLOSET = new ConcurrentHashMap<>();
 
     /**
      * dockerfile 文件名称
@@ -180,5 +181,15 @@ public class DockerUtil {
     public static JSONObject toJSON(Object object) {
         String jsonString = JSONObject.toJSONString(object);
         return (JSONObject) JSON.parse(jsonString);
+    }
+
+    public static void putClose(String id, AutoCloseable autoCloseable) {
+        AutoCloseable closeable = CACHE_CLOSET.put(id, autoCloseable);
+        // 关闭上一次资源
+        IoUtil.close(closeable);
+    }
+
+    public static void close(String id) {
+        IoUtil.close(CACHE_CLOSET.remove(id));
     }
 }

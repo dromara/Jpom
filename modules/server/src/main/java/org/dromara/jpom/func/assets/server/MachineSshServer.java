@@ -37,7 +37,6 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
-import cn.hutool.extra.ssh.JschRuntimeException;
 import cn.hutool.extra.ssh.JschUtil;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -54,10 +53,11 @@ import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.plugin.IWorkspaceEnvPlugin;
 import org.dromara.jpom.plugin.PluginFactory;
+import org.dromara.jpom.plugins.ISshInfo;
 import org.dromara.jpom.service.h2db.BaseDbService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.system.ExtConfigBean;
-import org.dromara.jpom.util.JschUtils;
+import org.dromara.jpom.plugins.JschUtils;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
@@ -343,13 +343,13 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
      * @param sshModel sshModel
      * @return session
      */
-    public Session getSessionByModelNoFill(MachineSshModel sshModel) {
+    public Session getSessionByModelNoFill(ISshInfo sshModel) {
         Assert.notNull(sshModel, "没有对应 SSH 信息");
         Session session = null;
         int timeout = sshModel.timeout();
         MachineSshModel.ConnectType connectType = sshModel.connectType();
-        String user = sshModel.getUser();
-        String password = sshModel.getPassword();
+        String user = sshModel.user();
+        String password = sshModel.password();
         // 转化密码字段
         IWorkspaceEnvPlugin plugin = (IWorkspaceEnvPlugin) PluginFactory.getPlugin(IWorkspaceEnvPlugin.PLUGIN_NAME);
         try {
@@ -359,11 +359,11 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
             throw Lombok.sneakyThrow(e);
         }
         if (connectType == MachineSshModel.ConnectType.PASS) {
-            session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), user, password, timeout);
+            session = JschUtil.openSession(sshModel.host(), sshModel.port(), user, password, timeout);
 
         } else if (connectType == MachineSshModel.ConnectType.PUBKEY) {
             File rsaFile = null;
-            String privateKey = sshModel.getPrivateKey();
+            String privateKey = sshModel.privateKey();
             byte[] passwordByte = StrUtil.isEmpty(password) ? null : StrUtil.bytes(password);
             //sshModel.password();
             if (StrUtil.startWith(privateKey, URLUtil.FILE_URL_PREFIX)) {
@@ -371,11 +371,11 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
                 rsaFile = FileUtil.file(rsaPath);
             } else if (StrUtil.startWith(privateKey, JschUtils.HEADER)) {
                 // 直接采用 private key content 登录，无需写入文件
-                session = JschUtils.createSession(sshModel.getHost(),
-                        sshModel.getPort(),
-                        user,
-                        StrUtil.trim(privateKey),
-                        passwordByte);
+                session = JschUtils.createSession(sshModel.host(),
+                    sshModel.port(),
+                    user,
+                    StrUtil.trim(privateKey),
+                    passwordByte);
             } else if (StrUtil.isEmpty(privateKey)) {
                 File home = FileUtil.getUserHomeDir();
                 Assert.notNull(home, "用户目录没有找到");
@@ -389,7 +389,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
             } else {
                 //这里的实现，用于把 private key 写入到一个临时文件中，此方式不太采取
                 File tempPath = JpomApplication.getInstance().getTempPath();
-                String sshFile = StrUtil.emptyToDefault(sshModel.getId(), IdUtil.fastSimpleUUID());
+                String sshFile = StrUtil.emptyToDefault(sshModel.id(), IdUtil.fastSimpleUUID());
                 rsaFile = FileUtil.file(tempPath, "ssh", sshFile);
                 FileUtil.writeString(privateKey, rsaFile, CharsetUtil.UTF_8);
             }
@@ -397,8 +397,8 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
             if (session == null) {
                 // 简要私钥文件是否存在
                 Assert.state(FileUtil.isFile(rsaFile), "私钥文件不存在：" + FileUtil.getAbsolutePath(rsaFile));
-                session = JschUtil.createSession(sshModel.getHost(),
-                        sshModel.getPort(), user, FileUtil.getAbsolutePath(rsaFile), passwordByte);
+                session = JschUtil.createSession(sshModel.host(),
+                    sshModel.port(), user, FileUtil.getAbsolutePath(rsaFile), passwordByte);
             }
             try {
                 session.setServerAliveInterval(timeout);
@@ -409,7 +409,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
             try {
                 session.connect(timeout);
             } catch (JSchException e) {
-                throw new JschRuntimeException(e);
+                throw Lombok.sneakyThrow(e);
             }
         } else {
             throw new IllegalArgumentException("不支持的模式");

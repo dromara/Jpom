@@ -22,7 +22,6 @@
  */
 package org.dromara.jpom.common.commander;
 
-import cn.hutool.cache.impl.LRUCache;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
@@ -61,6 +60,7 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.jar.Attributes;
@@ -84,7 +84,7 @@ public abstract class AbstractProjectCommander {
     /**
      * 进程Id 获取端口号
      */
-    public static final LRUCache<Integer, String> PID_PORT = new LRUCache<>(100, TimeUnit.MINUTES.toMillis(10));
+    public static final Map<Integer, CacheObject<String>> PID_PORT = new ConcurrentHashMap<>();
 
     private final Charset fileCharset;
 
@@ -629,7 +629,7 @@ public abstract class AbstractProjectCommander {
         if (pid <= 0) {
             return StrUtil.DASHED;
         }
-        String cachePort = PID_PORT.get(pid);
+        String cachePort = CacheObject.get(PID_PORT, pid);
         if (cachePort != null) {
             return cachePort;
         }
@@ -656,7 +656,7 @@ public abstract class AbstractProjectCommander {
         }
         String allPort = CollUtil.join(ports, StrUtil.COMMA);
         // 缓存
-        PID_PORT.put(pid, allPort);
+        CacheObject.put(PID_PORT, pid, allPort);
         return allPort;
     }
 

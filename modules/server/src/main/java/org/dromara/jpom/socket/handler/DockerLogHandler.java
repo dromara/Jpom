@@ -23,7 +23,9 @@
 package org.dromara.jpom.socket.handler;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
@@ -99,8 +101,11 @@ public class DockerLogHandler extends BaseProxyHandler {
                     log.error("发消息异常", e);
                 }
             };
+            attributes.put("uuid", IdUtil.fastSimpleUUID());
+            map.put("uuid", attributes.get("uuid"));
             map.put("charset", CharsetUtil.CHARSET_UTF_8);
             map.put("consumer", consumer);
+            map.put("timestamps", json.getBoolean("timestamps"));
             IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
             try {
                 plugin.execute("logContainer", map);
@@ -119,7 +124,15 @@ public class DockerLogHandler extends BaseProxyHandler {
     public void destroy(WebSocketSession session) {
         //
         super.destroy(session);
-//		ScriptProcessBuilder.stopWatcher(session);
+        Map<String, Object> attributes = session.getAttributes();
+        String uuid = (String) attributes.get("uuid");
+        try {
+            IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+            Map<String, Object> map = MapUtil.of("uuid", uuid);
+            plugin.execute("closeAsyncResource", map);
+        } catch (Exception e) {
+            log.error("关闭资源失败", e);
+        }
         SocketSessionUtil.close(session);
     }
 }

@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.exceptions.InvocationTargetRuntimeException;
@@ -36,6 +37,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.InvocationBuilder;
+import com.github.dockerjava.core.NameParser;
 import lombok.Lombok;
 import lombok.SneakyThrows;
 import org.dromara.jpom.plugin.PluginConfig;
@@ -131,60 +133,60 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         UpdateContainerCmd updateContainerCmd = dockerClient.updateContainerCmd(containerId);
         //
         Optional.ofNullable(parameter.get("cpusetCpus"))
-                .map(StrUtil::toStringOrNull)
-                .ifPresent(updateContainerCmd::withCpusetCpus);
+            .map(StrUtil::toStringOrNull)
+            .ifPresent(updateContainerCmd::withCpusetCpus);
 
         Optional.ofNullable(parameter.get("cpusetMems"))
-                .map(StrUtil::toStringOrNull)
-                .ifPresent(updateContainerCmd::withCpusetMems);
+            .map(StrUtil::toStringOrNull)
+            .ifPresent(updateContainerCmd::withCpusetMems);
 
         Optional.ofNullable(parameter.get("cpuPeriod"))
-                .map(Convert::toInt)
-                .ifPresent(updateContainerCmd::withCpuPeriod);
+            .map(Convert::toInt)
+            .ifPresent(updateContainerCmd::withCpuPeriod);
 
         Optional.ofNullable(parameter.get("cpuQuota"))
-                .map(Convert::toInt)
-                .ifPresent(updateContainerCmd::withCpuQuota);
+            .map(Convert::toInt)
+            .ifPresent(updateContainerCmd::withCpuQuota);
 
         Optional.ofNullable(parameter.get("cpuShares"))
-                .map(Convert::toInt)
-                .ifPresent(updateContainerCmd::withCpuShares);
+            .map(Convert::toInt)
+            .ifPresent(updateContainerCmd::withCpuShares);
 
         Optional.ofNullable(parameter.get("blkioWeight"))
-                .map(Convert::toInt)
-                .ifPresent(updateContainerCmd::withBlkioWeight);
+            .map(Convert::toInt)
+            .ifPresent(updateContainerCmd::withBlkioWeight);
 
         Optional.ofNullable(parameter.get("memoryReservation"))
-                .map(StrUtil::toStringOrNull)
-                .map(s -> {
-                    if (StrUtil.isEmpty(s)) {
-                        return null;
-                    }
-                    return DataSizeUtil.parse(s);
-                })
-                .ifPresent(updateContainerCmd::withMemoryReservation);
+            .map(StrUtil::toStringOrNull)
+            .map(s -> {
+                if (StrUtil.isEmpty(s)) {
+                    return null;
+                }
+                return DataSizeUtil.parse(s);
+            })
+            .ifPresent(updateContainerCmd::withMemoryReservation);
 
         Optional.ofNullable(parameter.get("memory"))
-                .map(StrUtil::toStringOrNull)
-                .map(s -> {
-                    if (StrUtil.isEmpty(s)) {
-                        return null;
-                    }
-                    return DataSizeUtil.parse(s);
-                })
-                .ifPresent(updateContainerCmd::withMemory);
+            .map(StrUtil::toStringOrNull)
+            .map(s -> {
+                if (StrUtil.isEmpty(s)) {
+                    return null;
+                }
+                return DataSizeUtil.parse(s);
+            })
+            .ifPresent(updateContainerCmd::withMemory);
 
         //            updateContainerCmd.withKernelMemory(DataSizeUtil.parse("10M"));
 
         Optional.ofNullable(parameter.get("memorySwap"))
-                .map(StrUtil::toStringOrNull)
-                .map(s -> {
-                    if (StrUtil.isEmpty(s)) {
-                        return null;
-                    }
-                    return DataSizeUtil.parse(s);
-                })
-                .ifPresent(updateContainerCmd::withMemorySwap);
+            .map(StrUtil::toStringOrNull)
+            .map(s -> {
+                if (StrUtil.isEmpty(s)) {
+                    return null;
+                }
+                return DataSizeUtil.parse(s);
+            })
+            .ifPresent(updateContainerCmd::withMemorySwap);
 
         UpdateContainerResponse updateContainerResponse = updateContainerCmd.exec();
         return DockerUtil.toJSON(updateContainerResponse);
@@ -221,17 +223,15 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
 
         Consumer<String> logConsumer = (Consumer<String>) parameter.get("logConsumer");
         String repositoryStr = (String) parameter.get("repository");
-        List<String> split = StrUtil.split(repositoryStr, StrUtil.COLON);
-        int size = CollUtil.size(split);
-        Assert.state(size > 0 && size <= 2, "镜像标签错误");
-        String repository = CollUtil.getFirst(split);
+        Assert.hasText(repositoryStr, "请填写镜名称");
+        NameParser.ReposTag reposTag = NameParser.parseRepositoryTag(repositoryStr);
         // 解析 tag
-        String tag = size > 1 ? CollUtil.getLast(split) : null;
+        String tag = reposTag.tag;
         tag = StrUtil.emptyToDefault(tag, "latest");
-        logConsumer.accept(StrUtil.format("start pull {}:{}", repository, tag));
-        PullImageCmd pullImageCmd = dockerClient.pullImageCmd(repository)
-                .withTag(tag)
-                .withAuthConfig(dockerClient.authConfig());
+        logConsumer.accept(StrUtil.format("start pull {}:{}", reposTag.repos, tag));
+        PullImageCmd pullImageCmd = dockerClient.pullImageCmd(reposTag.repos)
+            .withTag(tag)
+            .withAuthConfig(dockerClient.authConfig());
         pullImageCmd.exec(new InvocationBuilder.AsyncResultCallback<PullResponseItem>() {
             @Override
             public void onNext(PullResponseItem object) {
@@ -263,33 +263,33 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         CreateContainerCmd containerCmd = dockerClient.createContainerCmd(imageId);
         containerCmd.withName(name);
         Opt.ofBlankAble(labels)
-                .map(s -> UrlQuery.of(s, CharsetUtil.CHARSET_UTF_8))
-                .map(UrlQuery::getQueryMap)
-                .map((Function<Map<CharSequence, CharSequence>, Map<String, String>>) map -> {
-                    HashMap<String, String> labelMap = MapUtil.newHashMap();
-                    for (Map.Entry<CharSequence, CharSequence> entry : map.entrySet()) {
-                        labelMap.put(StrUtil.toString(entry.getKey()), StrUtil.toString(entry.getValue()));
-                    }
-                    return labelMap;
-                })
-                .ifPresent(containerCmd::withLabels);
+            .map(s -> UrlQuery.of(s, CharsetUtil.CHARSET_UTF_8))
+            .map(UrlQuery::getQueryMap)
+            .map((Function<Map<CharSequence, CharSequence>, Map<String, String>>) map -> {
+                HashMap<String, String> labelMap = MapUtil.newHashMap();
+                for (Map.Entry<CharSequence, CharSequence> entry : map.entrySet()) {
+                    labelMap.put(StrUtil.toString(entry.getKey()), StrUtil.toString(entry.getValue()));
+                }
+                return labelMap;
+            })
+            .ifPresent(containerCmd::withLabels);
 
         HostConfig hostConfig = HostConfig.newHostConfig();
         Opt.ofBlankAble(runtime).ifPresent(hostConfig::withRuntime);
         List<ExposedPort> exposedPortList = new ArrayList<>();
         if (StrUtil.isNotEmpty(exposedPorts)) {
             List<PortBinding> portBindings = StrUtil.splitTrim(exposedPorts, StrUtil.COMMA)
-                    .stream()
-                    .map(PortBinding::parse)
-                    .peek(portBinding -> exposedPortList.add(portBinding.getExposedPort()))
-                    .collect(Collectors.toList());
+                .stream()
+                .map(PortBinding::parse)
+                .peek(portBinding -> exposedPortList.add(portBinding.getExposedPort()))
+                .collect(Collectors.toList());
             hostConfig.withPortBindings(portBindings);
         }
         if (StrUtil.isNotEmpty(volumes)) {
             List<Bind> binds = StrUtil.splitTrim(volumes, StrUtil.COMMA)
-                    .stream()
-                    .map(Bind::parse)
-                    .collect(Collectors.toList());
+                .stream()
+                .map(Bind::parse)
+                .collect(Collectors.toList());
             hostConfig.withBinds(binds);
         }
         Opt.ofBlankAble(networkMode).ifPresent(hostConfig::withNetworkMode);
@@ -298,9 +298,9 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         // 环境变量
         if (env != null) {
             List<String> envList = env.entrySet()
-                    .stream()
-                    .map(entry -> StrUtil.format("{}={}", entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toList());
+                .stream()
+                .map(entry -> StrUtil.format("{}={}", entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
             containerCmd.withEnv(envList);
         }
         Optional.ofNullable(storageOpt).map(map -> {
@@ -315,8 +315,8 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         List<String> commands = (List<String>) parameter.get("commands");
         Optional.ofNullable(commands).ifPresent(strings -> {
             List<String> list = strings.stream()
-                    .filter(StrUtil::isNotEmpty)
-                    .collect(Collectors.toList());
+                .filter(StrUtil::isNotEmpty)
+                .collect(Collectors.toList());
             if (CollUtil.isNotEmpty(list)) {
                 containerCmd.withCmd(list);
             }
@@ -385,18 +385,18 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
 
             BuildImageCmd buildImageCmd = dockerClient.buildImageCmd();
             buildImageCmd
-                    .withBaseDirectory(baseDirectory)
-                    .withDockerfile(dockerfile)
-                    .withBuildAuthConfigs(authConfigurations)
-                    .withTags(CollUtil.newHashSet(StrUtil.splitTrim(tags, StrUtil.COMMA)));
+                .withBaseDirectory(baseDirectory)
+                .withDockerfile(dockerfile)
+                .withBuildAuthConfigs(authConfigurations)
+                .withTags(CollUtil.newHashSet(StrUtil.splitTrim(tags, StrUtil.COMMA)));
             // 添加构建参数
             UrlQuery query = UrlQuery.of(buildArgs, CharsetUtil.CHARSET_UTF_8);
             query.getQueryMap()
-                    .forEach((key, value) -> {
-                        String valueStr = StrUtil.toString(value);
-                        valueStr = StringUtil.formatStrByMap(valueStr, env);
-                        buildImageCmd.withBuildArg(StrUtil.toString(key), valueStr);
-                    });
+                .forEach((key, value) -> {
+                    String valueStr = StrUtil.toString(value);
+                    valueStr = StringUtil.formatStrByMap(valueStr, env);
+                    buildImageCmd.withBuildArg(StrUtil.toString(key), valueStr);
+                });
             // 标签
             UrlQuery labelsQuery = UrlQuery.of(labels, CharsetUtil.CHARSET_UTF_8);
             HashMap<String, String> labelMap = MapUtil.newHashMap();
@@ -457,14 +457,18 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
     @SuppressWarnings("unchecked")
     private void logContainerCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
+        String uuid = (String) parameter.get("uuid");
         Consumer<String> consumer = (Consumer<String>) parameter.get("consumer");
         try {
             String containerId = (String) parameter.get("containerId");
             Charset charset = (Charset) parameter.get("charset");
             Integer tail = (Integer) parameter.get("tail");
-            DockerClientUtil.pullLog(dockerClient, containerId, tail, charset, consumer);
+            Boolean timestamps = Convert.toBool(parameter.get("timestamps"));
+            DockerClientUtil.pullLog(dockerClient, containerId, timestamps, tail, charset, consumer, autoCloseable -> DockerUtil.putClose(uuid, autoCloseable));
         } catch (InterruptedException e) {
             consumer.accept("获取容器日志被中断:" + e);
+        } finally {
+            DockerUtil.close(uuid);
         }
     }
 
@@ -523,8 +527,25 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         dockerClient.removeImageCmd(imageId).withForce(true).exec();
     }
 
-
+    /**
+     * 不包含 docker compose
+     *
+     * @param parameter 参数
+     * @return list
+     */
     private List<JSONObject> listContainerCmd(Map<String, Object> parameter) {
+        List<JSONObject> list = this.listContainerByLabelCmd(parameter, null);
+        String composeLabel = "com.docker.compose.project";
+        return list.stream()
+            .filter(jsonObject -> {
+                JSONObject labels = jsonObject.getJSONObject("labels");
+                String project = MapUtil.get(labels, composeLabel, String.class);
+                return project == null;
+            })
+            .collect(Collectors.toList());
+    }
+
+    private List<JSONObject> listContainerByLabelCmd(Map<String, Object> parameter, String label) {
         DockerClient dockerClient = DockerUtil.get(parameter);
 
         ListContainersCmd listContainersCmd = dockerClient.listContainersCmd();
@@ -537,14 +558,51 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         if (StrUtil.isNotEmpty(containerId)) {
             listContainersCmd.withIdFilter(CollUtil.newArrayList(containerId));
         }
-//		String imageId = (String) parameter.get("imageId");
-//		if (StrUtil.isNotEmpty(imageId)) {
-//			listContainersCmd.withFilter("image", CollUtil.newArrayList(imageId));
-//		}
+
+        Opt.ofBlankAble(label).ifPresent(s -> {
+            // 只筛选 docker compose
+            listContainersCmd.withLabelFilter(CollUtil.newArrayList(s));
+        });
+        String imageId = (String) parameter.get("imageId");
         List<Container> exec = listContainersCmd.exec();
         exec = ObjectUtil.defaultIfNull(exec, new ArrayList<>());
-        return exec.stream().map(DockerUtil::toJSON).collect(Collectors.toList());
+        return exec.stream()
+            .map(DockerUtil::toJSON)
+            .filter(jsonObject -> {
+                if (StrUtil.isEmpty(imageId)) {
+                    return true;
+                }
+                String imageId1 = jsonObject.getString("imageId");
+                return StrUtil.contains(imageId1, imageId);
+            })
+            .collect(Collectors.toList());
+    }
 
+    /**
+     * 不包含 docker compose
+     *
+     * @param parameter 参数
+     * @return list
+     */
+    private List<JSONObject> listComposeContainerCmd(Map<String, Object> parameter) {
+        String composeLabel = "com.docker.compose.project";
+        List<JSONObject> list = this.listContainerByLabelCmd(parameter, composeLabel);
+        //
+        Map<String, List<JSONObject>> map = CollStreamUtil.groupKeyValue(list, jsonObject -> {
+            JSONObject labels = jsonObject.getJSONObject("labels");
+            return Optional.ofNullable(labels)
+                .map(jsonObject1 -> jsonObject1.getString(composeLabel))
+                .orElse("null");
+        }, jsonObject -> jsonObject);
+        //
+        return map.entrySet().stream()
+            .map(stringListEntry -> {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("name", stringListEntry.getKey());
+                jsonObject.put("child", stringListEntry.getValue());
+                return jsonObject;
+            })
+            .collect(Collectors.toList());
     }
 
     private void restartContainerCmd(Map<String, Object> parameter) {
@@ -581,4 +639,13 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
 
     }
 
+    /**
+     * 关闭异步资源
+     *
+     * @param parameter 参数
+     */
+    private void closeAsyncResourceCmd(Map<String, Object> parameter) {
+        String uuid = (String) parameter.get("uuid");
+        DockerUtil.close(uuid);
+    }
 }

@@ -107,7 +107,7 @@ public class BuildExecuteService {
         }
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, status);
         Objects.requireNonNull(nowStatus);
-        if (BuildStatus.Ing == nowStatus || BuildStatus.PubIng == nowStatus || BuildStatus.WaitExec == nowStatus) {
+        if (nowStatus.isProgress()) {
             return buildInfoModel.getName() + " 当前还在：" + nowStatus.getDesc();
         }
         return null;
@@ -253,7 +253,7 @@ public class BuildExecuteService {
         buildHistoryLog.setId(logId);
         buildHistoryLog.setStatusMsg(msg);
         buildHistoryLog.setStatus(buildStatus.getCode());
-        if (buildStatus != BuildStatus.PubIng) {
+        if (!buildStatus.isProgress()) {
             // 结束
             buildHistoryLog.setEndTime(SystemClock.now());
         }

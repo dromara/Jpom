@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -56,7 +57,13 @@ public class DockerClientUtil {
      * @param consumer     回调
      * @throws InterruptedException 打断异常
      */
-    public static void pullLog(DockerClient dockerClient, String containerId, Integer tail, Charset charset, Consumer<String> consumer) throws InterruptedException {
+    public static void pullLog(DockerClient dockerClient,
+                               String containerId,
+                               Boolean timestamps,
+                               Integer tail,
+                               Charset charset,
+                               Consumer<String> consumer,
+                               Consumer<AutoCloseable> consumerAdapter) throws InterruptedException {
         Assert.state(tail == null || tail > 0, "tail > 0");
         // 获取日志
         LogContainerCmd logContainerCmd = dockerClient.logContainerCmd(containerId);
@@ -65,7 +72,8 @@ public class DockerClientUtil {
         } else {
             logContainerCmd.withTail(tail);
         }
-        logContainerCmd
+        ResultCallback.Adapter<Frame> exec = logContainerCmd
+            .withTimestamps(timestamps)
             .withStdOut(true)
             .withStdErr(true)
             .withFollowStream(true)
@@ -79,7 +87,10 @@ public class DockerClientUtil {
                     String s = new String(payload, charset);
                     consumer.accept(s);
                 }
-            }).awaitCompletion();
+            });
+        Optional.ofNullable(consumerAdapter).ifPresent(consumer1 -> consumer1.accept(exec));
+        //
+        exec.awaitCompletion();
     }
 
     /**

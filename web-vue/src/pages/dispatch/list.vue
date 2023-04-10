@@ -813,7 +813,7 @@ export default {
       totalProjectNum: 0,
       columns: [
         { title: "分发 ID", dataIndex: "id", ellipsis: true, width: 110, scopedSlots: { customRender: "tooltip" } },
-        { title: "分发名称", dataIndex: "name", ellipsis: true, width: 150, scopedSlots: { customRender: "name" } },
+        { title: "分发名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "name" } },
         { title: "项目分组", dataIndex: "group", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "group" } },
         { title: "分发类型", dataIndex: "outGivingProject", width: "90px", ellipsis: true, scopedSlots: { customRender: "outGivingProject" } },
         { title: "分发后", dataIndex: "afterOpt", ellipsis: true, width: "150px", scopedSlots: { customRender: "afterOpt" } },

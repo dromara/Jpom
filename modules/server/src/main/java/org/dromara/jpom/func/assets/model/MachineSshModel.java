@@ -24,6 +24,7 @@ package org.dromara.jpom.func.assets.model;
 
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
 import lombok.Data;
@@ -32,6 +33,7 @@ import lombok.NoArgsConstructor;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseGroupNameModel;
 import org.dromara.jpom.model.data.SshModel;
+import org.dromara.jpom.plugins.ISshInfo;
 
 import java.nio.charset.Charset;
 import java.util.List;
@@ -46,7 +48,7 @@ import java.util.concurrent.TimeUnit;
 @TableName(value = "MACHINE_SSH_INFO", name = "机器SSH信息")
 @Data
 @NoArgsConstructor
-public class MachineSshModel extends BaseGroupNameModel {
+public class MachineSshModel extends BaseGroupNameModel implements ISshInfo {
 
     /**
      * 主机地址
@@ -175,15 +177,47 @@ public class MachineSshModel extends BaseGroupNameModel {
         }
     }
 
-    public MachineSshModel.ConnectType connectType() {
+    @Override
+    public String id() {
+        return getId();
+    }
+
+    @Override
+    public String host() {
+        return getHost();
+    }
+
+    @Override
+    public String user() {
+        return getUser();
+    }
+
+    @Override
+    public String password() {
+        return getPassword();
+    }
+
+    @Override
+    public String privateKey() {
+        return getPrivateKey();
+    }
+
+    @Override
+    public int port() {
+        return ObjectUtil.defaultIfNull(getPort(), 0);
+    }
+
+    @Override
+    public ISshInfo.ConnectType connectType() {
         return EnumUtil.fromString(MachineSshModel.ConnectType.class, this.connectType, MachineSshModel.ConnectType.PASS);
     }
 
     /**
      * 超时时间
      *
-     * @return 最小值 1 分钟
+     * @return 最小值 1 秒钟
      */
+    @Override
     public int timeout() {
         if (this.timeout == null) {
             return (int) TimeUnit.SECONDS.toMillis(5);
@@ -191,20 +225,8 @@ public class MachineSshModel extends BaseGroupNameModel {
         return (int) TimeUnit.SECONDS.toMillis(Math.max(1, this.timeout));
     }
 
+    @Override
     public Charset charset() {
         return CharsetUtil.parse(this.getCharset(), CharsetUtil.CHARSET_UTF_8);
     }
-
-
-    public enum ConnectType {
-        /**
-         * 账号密码
-         */
-        PASS,
-        /**
-         * 密钥
-         */
-        PUBKEY
-    }
-
 }

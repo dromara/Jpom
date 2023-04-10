@@ -35,9 +35,18 @@
           <a-tag color="red">信息丢失</a-tag>
         </a-tooltip>
       </template>
-      <template slot="tags" slot-scope="tags">
+      <a-tooltip
+        slot="tags"
+        slot-scope="tags"
+        :title="
+          (tags || '')
+            .split(':')
+            .filter((item) => item)
+            .join(',')
+        "
+      >
         <a-tag v-for="item in (tags || '').split(':').filter((item) => item)" :key="item"> {{ item }}</a-tag>
-      </template>
+      </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" :disabled="!record.machineDocker || record.machineDocker.status !== 1" @click="handleConsole(record)">控制台</a-button>
@@ -89,9 +98,9 @@
     </a-modal>
 
     <!-- 控制台 -->
-    <a-drawer destroyOnClose :title="`${temp.name} 控制台`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="consoleVisible" @close="onClose">
-      <console v-if="consoleVisible" :visible="consoleVisible" :id="temp.id" urlPrefix="/docker"></console>
-    </a-drawer>
+    <!-- <a-drawer destroyOnClose :title="`${temp.name} 控制台`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="consoleVisible" @close="onClose"> -->
+    <console v-if="consoleVisible" :visible="consoleVisible" :id="temp.id" urlPrefix="/docker" @close="onClose"></console>
+    <!-- </a-drawer> -->
     <!-- 同步到其他工作空间 -->
     <a-modal destroyOnClose v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
       <a-alert message="温馨提示" type="warning">
@@ -141,7 +150,7 @@ export default {
 
       columns: [
         { title: "名称", dataIndex: "name", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
-        { title: "host", dataIndex: "machineDocker.host", width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "host", dataIndex: "machineDocker.host", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "状态", dataIndex: "machineDocker.status", ellipsis: true, align: "center", width: "100px", scopedSlots: { customRender: "status" } },
         { title: "docker版本", dataIndex: "machineDocker.dockerVersion", ellipsis: true, width: "120px", scopedSlots: { customRender: "tooltip" } },
         { title: "标签", dataIndex: "tags", width: 100, ellipsis: true, scopedSlots: { customRender: "tags" } },

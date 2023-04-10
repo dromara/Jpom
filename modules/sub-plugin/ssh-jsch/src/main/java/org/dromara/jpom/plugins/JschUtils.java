@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.dromara.jpom.util;
+package org.dromara.jpom.plugins;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
@@ -30,13 +30,13 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.ChannelType;
-import cn.hutool.extra.ssh.JschRuntimeException;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
 import com.jcraft.jsch.*;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.system.ExtConfigBean;
+import org.dromara.jpom.util.StringUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -209,7 +209,7 @@ public class JschUtils {
             Identity identity = ContentIdentity.newInstance(privateKeyByte, null, sshUser, jsch);
             jsch.addIdentity(identity, passphrase);
         } catch (Exception e) {
-            throw new JschRuntimeException(e);
+            throw Lombok.sneakyThrow(e);
         }
         return JschUtil.createSession(jsch, sshHost, sshPort, sshUser);
     }

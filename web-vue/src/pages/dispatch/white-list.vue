@@ -53,6 +53,7 @@ export default {
         }
         // button recover
         this.submitAble = false;
+        this.$emit("cancel");
       });
     },
   },

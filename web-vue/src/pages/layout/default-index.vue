@@ -172,7 +172,7 @@ export default {
   },
 };
 </script>
-<style scoped lang="stylus">
+<style scoped>
 #app-layout {
   min-height: 100vh;
 }
@@ -224,7 +224,7 @@ export default {
   overflow-y: auto;
 }
 .layout-content-full-screen {
-  height calc(100vh - 120px);
+  height: calc(100vh - 120px);
   overflow-y: scroll;
 }
 </style>
