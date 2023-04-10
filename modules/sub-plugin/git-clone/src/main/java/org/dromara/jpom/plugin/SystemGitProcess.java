@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 * @author Hong
 * @since 2023/4/10
 */
+@Slf4j
 public class SystemGitProcess extends AbstractGitProcess {
 
     protected SystemGitProcess(IWorkspaceEnvPlugin workspaceEnvPlugin, Map<String, Object> parameter) {
