@@ -8,6 +8,8 @@ import java.util.Map;
  * GIt执行器
  * <br>
  * Created By Hong on 2023/3/31
+ *
+ * @author Hong
  **/
 public class GitProcessFactory implements GitProcess {
 
@@ -32,7 +34,7 @@ public class GitProcessFactory implements GitProcess {
     }
 
     @Override
-    public Object pull() throws Exception {
+    public String[] pull() throws Exception {
         return gitProcess.pull();
     }
 
