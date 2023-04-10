@@ -79,7 +79,7 @@ export function COMPUTED_PAGINATION(queryParam, pageSizeOptions) {
     hideOnSinglePage: limit <= 20,
     showTotal: (total) => {
       return PAGE_DEFAULT_SHOW_TOTAL(total)
-    },
+    }
   }
 }
 
@@ -124,76 +124,76 @@ export const CRON_DATA_SOURCE = [
     children: [
       {
         title: '',
-        value: '',
-      },
-    ],
+        value: ''
+      }
+    ]
   },
   {
     title: '分钟级别',
     children: [
       {
         title: '1分钟',
-        value: '0 0/1 * * * ?',
+        value: '0 0/1 * * * ?'
       },
       {
         title: '5分钟',
-        value: '0 0/5 * * * ?',
+        value: '0 0/5 * * * ?'
       },
       {
         title: '10分钟',
-        value: '0 0/10 * * * ?',
+        value: '0 0/10 * * * ?'
       },
       {
         title: '30分钟',
-        value: '0 0/30 * * * ?',
-      },
-    ],
+        value: '0 0/30 * * * ?'
+      }
+    ]
   },
   {
     title: '小时级别',
     children: [
       {
         title: '每小时',
-        value: '0 0 0/1 * * ?',
-      },
-    ],
+        value: '0 0 0/1 * * ?'
+      }
+    ]
   },
   {
     title: '天级别',
     children: [
       {
         title: '凌晨0点和中午12点',
-        value: '0 0 0,12 * * ?',
+        value: '0 0 0,12 * * ?'
       },
       {
         title: '凌晨0点',
-        value: '0 0 0 * * ?',
-      },
-    ],
+        value: '0 0 0 * * ?'
+      }
+    ]
   },
   {
     title: '秒级别（默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）',
     children: [
       {
         title: '5秒一次',
-        value: '0/5 * * * * ?',
+        value: '0/5 * * * * ?'
       },
       {
         title: '10秒一次',
-        value: '0/10 * * * * ?',
+        value: '0/10 * * * * ?'
       },
       {
         title: '30秒一次',
-        value: '0/30 * * * * ?',
-      },
-    ],
-  },
+        value: '0/30 * * * * ?'
+      }
+    ]
+  }
 ]
 
 /**
  * 压缩文件格式
  */
-export const ZIP_ACCEPT = '.tar,.bz2,.gz,.zip,.tar.bz2,.tar.gz'
+export const ZIP_ACCEPT: string = '.tar,.bz2,.gz,.zip,.tar.bz2,.tar.gz'
 
 /**
  * mfa app 应用举例
@@ -204,7 +204,7 @@ export const MFA_APP_TIP_ARRAY = [
   '<strong>Authy</strong> 功能丰富 专为两步验证码 <a href="https://authy.com/download/">iOS/Android/Windows/Mac/Linux</a> &nbsp; <a href="https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=cn">Chrome 扩展</a>',
   '<strong>Google Authenticator</strong> 简单易用，但不支持密钥导出备份 <a href="https://apps.apple.com/us/app/google-authenticator/id388497605">iOS</a> <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;hl=cn">Android</a>',
   '<strong>Microsoft Authenticator</strong> 使用微软全家桶的推荐 <a href="https://www.microsoft.com/zh-cn/account/authenticator">iOS/Android</a>',
-  '<strong>1Password</strong> 强大安全的密码管理付费应用<a href="https://1password.com/zh-cn/downloads/">iOS/Android/Windows/Mac/Linux/ChromeOS</a>',
+  '<strong>1Password</strong> 强大安全的密码管理付费应用<a href="https://1password.com/zh-cn/downloads/">iOS/Android/Windows/Mac/Linux/ChromeOS</a>'
 ]
 
 /**
@@ -255,7 +255,7 @@ export const PROJECT_DSL_DEFATUL =
 export function getWebSocketUrl(url: string, parameter: any) {
   const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://'
   const domain = window.routerBase
-  const fullUrl = (domain + url).replace(new RegExp('//', 'gm'), '/')
+  const fullUrl: string = (domain + url).replace(new RegExp('//', 'gm'), '/')
   return `${protocol}${location.host}${fullUrl}?${parameter}`
 }
 
@@ -266,11 +266,11 @@ export function getWebSocketUrl(url: string, parameter: any) {
  * @params asyncHandle {Function} - 对`list`的每一个项的处理函数，参数为当前处理项，必须 return 一个Promise来确定是否继续进行迭代
  * @return {Promise} - 返回一个 Promise 值来确认所有数据是否迭代完成
  */
-export function concurrentExecution(list: [], limit: number, asyncHandle: Function) {
+export function concurrentExecution<T>(list: T[], limit: number, asyncHandle: (arg: T) => Promise<any>) {
   // 递归执行
-  const recursion = (arr: []) => {
+  const recursion = (arr: T[]): Promise<T> => {
     // 执行方法 arr.shift() 取出并移除第一个数据
-    return asyncHandle(arr.shift()).then((res: any) => {
+    return asyncHandle(arr.shift() as T).then((res: T) => {
       // 数组还未迭代完，递归继续进行迭代
       if (arr.length !== 0) {
         return recursion(arr)
@@ -279,10 +279,11 @@ export function concurrentExecution(list: [], limit: number, asyncHandle: Functi
       }
     })
   }
+
   // 创建新的并发数组
-  const listCopy = [].concat(list) as []
+  const listCopy = ([] as T[]).concat(list)
   // 正在进行的所有并发异步操作
-  let asyncList = []
+  let asyncList = [] as Promise<T>[]
   limit = limit > listCopy.length ? listCopy.length : limit
 
   while (limit--) {
@@ -292,7 +293,7 @@ export function concurrentExecution(list: [], limit: number, asyncHandle: Functi
   return Promise.all(asyncList)
 }
 
-export function readJsonStrField(json, key) {
+export function readJsonStrField(json: string, key: string) {
   try {
     const data = JSON.parse(json)[key] || ''
     if (Object.prototype.toString.call(data) === '[object Object]') {
@@ -321,7 +322,7 @@ export function randomStr(len = 2) {
  * @param {*} time
  * @param {*} cFormat
  */
-export function parseTime(time, cFormat) {
+export function parseTime(time: string | number | Date | null, cFormat: string | undefined) {
   if (arguments.length === 0) {
     return '-'
   }
@@ -329,7 +330,7 @@ export function parseTime(time, cFormat) {
     return '-'
   }
   // 处理 time 参数
-  if (isNaN(Number(time)) === false) {
+  if (!isNaN(Number(time))) {
     time = Number(time)
   }
   const format = cFormat || '{y}-{m}-{d} {h}:{i}:{s}'
@@ -337,28 +338,31 @@ export function parseTime(time, cFormat) {
   if (typeof time === 'object') {
     date = time
   } else {
-    if (('' + time).length === 10) time = parseInt(time) * 1000
+    const strTime = '' + time
+    if (strTime.length === 10) {
+      time = parseInt(strTime) * 1000
+    }
     date = new Date(time)
   }
-  const formatObj = {
+  const formatObj: { [key: string]: number } = {
     y: date.getFullYear(),
     m: date.getMonth() + 1,
     d: date.getDate(),
     h: date.getHours(),
     i: date.getMinutes(),
     s: date.getSeconds(),
-    a: date.getDay(),
+    a: date.getDay()
   }
-  const time_str = format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
-    let value = formatObj[key]
+  const time_str = format.replace(/{(y|m|d|h|i|s|a)+}/g, (_m: string, result: string, key: string) => {
+    const value = formatObj[key]
     // Note: getDay() returns 0 on Sunday
     if (key === 'a') {
       return ['日', '一', '二', '三', '四', '五', '六'][value]
     }
     if (result.length > 0 && value < 10) {
-      value = '0' + value
+      return '0' + value
     }
-    return value || 0
+    return String(value || '0')
   })
   return time_str
 }
@@ -465,7 +469,7 @@ export function formatDuration(ms, seg, levelCount) {
     小时: Math.floor(ms / 3600000) % 24,
     分钟: Math.floor(ms / 60000) % 60,
     秒: Math.floor(ms / 1000) % 60,
-    毫秒: Math.floor(ms) % 1000,
+    毫秒: Math.floor(ms) % 1000
   }
   return Object.entries(time)
     .filter((val) => val[1] !== 0)
@@ -548,6 +552,6 @@ export function pageBuildInfo() {
     t: buildTime,
     e: buildEnv,
     df: (document.title || '').toLowerCase().includes('jpom'),
-    t2: Date.now(),
+    t2: Date.now()
   }
 }
