@@ -104,7 +104,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, computed, h, reactive } from 'vue'
 import { login, loginConfig, mfaVerify, oauth2Url, oauth2Login } from '@/api/user/user'
 import { checkSystem } from '@/api/install'
 import sha1 from 'js-sha1'
@@ -117,6 +116,7 @@ import { useMenuStore } from '@/stores/menu'
 import maxkeyImg from '@/assets/images/maxkey.png'
 import giteeImg from '@/assets/images/gitee.svg'
 import githubImg from '@/assets/images/github.png'
+import { GlobalWindow } from '@/interface/common'
 
 interface IFormState {
   loginName: string
@@ -147,7 +147,9 @@ const dynamicBg = ref(localStorage.getItem('dynamicBg') === 'true')
 const disabledCaptcha = ref(false)
 
 const backgroundImage = computed(() => {
-  return dynamicBg.value ? `url(https://picsum.photos/${screen.width}/${screen.height}/?random)` : ''
+  return dynamicBg.value
+    ? { backgroundImage: `url(https://picsum.photos/${screen.width}/${screen.height}/?random)` }
+    : {}
 })
 
 // 检查是否需要初始化
@@ -190,12 +192,14 @@ const changeCode = () => {
   randCode.value = import.meta.env.JPOM_BASE_API_URL + 'randCode.png?r=' + new Date().getTime()
   loginForm.code = ''
 }
+const _window = window as unknown as GlobalWindow
+
 const checkOauth2 = () => {
   if (route.query.code) {
     oauth2Login({
       code: route.query.code,
       state: route.query.state,
-      provide: window.oauth2Provide
+      provide: _window.oauth2Provide
     }).then((res) => {
       // 删除参数，避免刷新页面 code 已经被使用提示错误信息
       let query = Object.assign({}, route.query)
@@ -249,8 +253,8 @@ const dispatchLogin = (data: any) => {
 
 // Controls the background display or hiding
 const handleToggleBg = () => {
-  dynamicBg.value = !dynamicBg
-  localStorage.setItem('dynamicBg', String(dynamicBg))
+  dynamicBg.value = !dynamicBg.value
+  localStorage.setItem('dynamicBg', String(dynamicBg.value))
 }
 
 const handleLogin = (values: IFormState) => {
