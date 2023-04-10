@@ -13,10 +13,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 系统Git操作
- * <br>
- * Created By Hong on 2023/3/31
- **/
+* @author Hong
+* @since 2023/4/10
+*/
 public class SystemGitProcess extends AbstractGitProcess {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SystemGitProcess.class);
@@ -28,20 +27,23 @@ public class SystemGitProcess extends AbstractGitProcess {
     @Override
     public Tuple branchAndTagList() throws Exception {
         File savePath = handleSaveFile();
+        Map<String, Object> map = getParameter();
+        String url = (String) map.get("url");
         if (!existsGit()) {
-            // 目录下面无git，需要拉取代码;
-            pull();
+            // 初始化本地仓库
+            processCmd(new String[]{"git", "init"}, savePath);
+            // 添加远程仓库
+            processCmd(new String[]{"git", "remote", "add", "origin", url}, savePath);
         }
-        String result = processCmd(new String[]{"git", "branch", "-r"}, savePath);
+        String result = processCmd(new String[]{"git", "ls-remote"}, savePath);
         List<String> branchRemote = new ArrayList<>();
-        for (String branch : result.split("\n")) {
-            if (branch.contains("origin/HEAD")) continue;
-            branchRemote.add(branch.trim());
-        }
-        result = processCmd(new String[]{"git", "tag"}, savePath);
         List<String> tagRemote = new ArrayList<>();
-        for (String tag : result.split("\n")) {
-            tagRemote.add(tag.trim());
+        for (String branch : result.split("\n")) {
+            if (branch.contains("heads")) {
+                branchRemote.add(branch.substring(branch.lastIndexOf("/") + 1));
+            } else if (branch.contains("tags")) {
+                tagRemote.add(branch.substring(branch.lastIndexOf("/") + 1));
+            }
         }
         return new Tuple(branchRemote, tagRemote);
     }
