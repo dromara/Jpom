@@ -1,9 +1,8 @@
 package org.dromara.jpom.plugin;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
+import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 
@@ -11,10 +10,11 @@ import java.util.Map;
  * GIt执行基类
  * <br>
  * Created By Hong on 2023/3/31
+ *
+ * @author Hong
  **/
+@Slf4j
 public abstract class AbstractGitProcess implements GitProcess {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGitProcess.class);
 
     private final IWorkspaceEnvPlugin workspaceEnvPlugin;
     private final Map<String, Object> parameter;
@@ -26,6 +26,7 @@ public abstract class AbstractGitProcess implements GitProcess {
 
     /**
      * 解密参数
+     *
      * @param parameter 参数
      */
     protected Map<String, Object> decryptParameter(Map<String, Object> parameter) {
@@ -33,7 +34,7 @@ public abstract class AbstractGitProcess implements GitProcess {
             parameter.put("password", workspaceEnvPlugin.convertRefEnvValue(parameter, "password"));
             parameter.put("username", workspaceEnvPlugin.convertRefEnvValue(parameter, "username"));
         } catch (Exception e) {
-            LOGGER.error("解密参数失败", e);
+            log.error("解密参数失败", e);
         }
         return parameter;
     }
@@ -61,11 +62,5 @@ public abstract class AbstractGitProcess implements GitProcess {
      */
     protected String getTagName() {
         return (String) parameter.get("tagName");
-    }
-
-    protected void debug(String msg, Object... val) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(msg, val);
-        }
     }
 }

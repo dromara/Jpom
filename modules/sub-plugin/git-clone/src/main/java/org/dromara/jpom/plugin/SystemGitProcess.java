@@ -1,14 +1,16 @@
 package org.dromara.jpom.plugin;
 
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.util.CommandUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-import java.io.*;
+import java.io.File;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,9 +19,8 @@ import java.util.stream.Collectors;
  * <br>
  * Created By Hong on 2023/3/31
  **/
+@Slf4j
 public class SystemGitProcess extends AbstractGitProcess {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SystemGitProcess.class);
 
     protected SystemGitProcess(IWorkspaceEnvPlugin workspaceEnvPlugin, Map<String, Object> parameter) {
         super(workspaceEnvPlugin, parameter);
@@ -35,7 +36,9 @@ public class SystemGitProcess extends AbstractGitProcess {
         String result = processCmd(new String[]{"git", "branch", "-r"}, savePath);
         List<String> branchRemote = new ArrayList<>();
         for (String branch : result.split("\n")) {
-            if (branch.contains("origin/HEAD")) continue;
+            if (branch.contains("origin/HEAD")) {
+                continue;
+            }
             branchRemote.add(branch.trim());
         }
         result = processCmd(new String[]{"git", "tag"}, savePath);
@@ -47,7 +50,7 @@ public class SystemGitProcess extends AbstractGitProcess {
     }
 
     @Override
-    public Object pull() throws Exception {
+    public String[] pull() throws Exception {
         Map<String, Object> map = getParameter();
         String branchName = (String) map.getOrDefault("branchName", "master");
         return pull(map, branchName);
@@ -60,16 +63,17 @@ public class SystemGitProcess extends AbstractGitProcess {
         return pull(map, branchName);
     }
 
-    private Object pull(Map<String, Object> map, String branchOrTag) throws Exception {
+    private String[] pull(Map<String, Object> map, String branchOrTag) {
         String url = (String) map.get("url");
         File savePath = handleSaveFile();
         String username = (String) map.getOrDefault("username", "");
         String password = (String) map.getOrDefault("password", "");
         String userPwd = username + ":" + password + "@";
-        if (userPwd.equals(":@")) {
+        if (":@".equals(userPwd)) {
             userPwd = "";
         }
-        if (map.getOrDefault("protocol", 0).equals(0)) {
+        int protocol = (int) map.getOrDefault("protocol", 0);
+        if (protocol == 0) {
             // HTTP or HTTPS
             if (url.startsWith("http://")) {
                 url = new StringBuilder(url).insert(7, userPwd).toString();
@@ -79,33 +83,32 @@ public class SystemGitProcess extends AbstractGitProcess {
         }
         if (!existsGit()) {
             // 目录下面无git，重新clone
-            String result = processCmd(new String[]{"git", "clone", "-b", branchOrTag, url, savePath.getAbsolutePath()});
+            String result = processCmd("git", "clone", "-b", branchOrTag, url, savePath.getAbsolutePath());
             if (result.contains("fatal")) {
                 throw new RuntimeException(result);
             }
-            LOGGER.info("Clone 代码成功：{}", result);
+            log.info("Clone 代码成功：{}", result);
         } else {
             String result = processCmd(new String[]{"git", "pull", "origin ", branchOrTag + ":" + branchOrTag}, savePath);
             if (result.contains("fatal")) {
                 throw new RuntimeException(result);
             }
-            LOGGER.info("Pull 代码成功：{}", result);
+            log.info("Pull 代码成功：{}", result);
         }
 
         // 获取提交日志
         String result = processCmd(new String[]{"git", "log", "-1", branchOrTag}, savePath);
-        List<String> list = Arrays.stream(result.split("\n")).filter(it -> StringUtils.hasText(it)).map(it -> it.trim()).collect(Collectors.toList());
+        List<String> list = Arrays.stream(result.split("\n")).filter(StringUtils::hasText).map(String::trim).collect(Collectors.toList());
         if (!list.isEmpty() && list.get(0).contains("warning")) {
             list = list.subList(1, list.size());
         }
         String commitId = list.get(0).substring(7);
-        String desc = branchOrTag;
         String msg = list.get(3);
         String person = list.get(1).substring(7).replace(" ", "")
             .replace("<", "[").replace(">", "]");
-        String time = DateUtil.format(new Date(list.get(2).substring(5).trim()), "yyyy-MM-dd HH:mm:ss");
+        String time = DateUtil.format(DateUtil.parse(list.get(2).substring(5).trim()), DatePattern.NORM_DATETIME_FORMAT);
         String parentCount = "1";
-        return new String[]{commitId, StrUtil.format("{} {} {} {} {}", desc, msg, person, time, parentCount)};
+        return new String[]{commitId, StrUtil.format("{} {} {} {} {}", branchOrTag, msg, person, time, parentCount)};
     }
 
     /**
@@ -114,17 +117,15 @@ public class SystemGitProcess extends AbstractGitProcess {
     private File handleSaveFile() {
         Map<String, Object> map = getParameter();
         File rsaFile = (File) map.get("rsaFile");
-        if (rsaFile.isFile() && rsaFile.exists()) {
+        if (FileUtil.isFile(rsaFile)) {
             String url = (String) map.get("url");
             url = url.substring(4, url.indexOf(":"));
             setPrivateGitRsa(url, rsaFile);
-            debug("使用私有Rsa进行操作Git");
+            log.debug("使用私有Rsa进行操作Git");
         }
         strictHostKeyChecking();
         File saveFile = getSaveFile();
-        if (!saveFile.exists()) {
-            saveFile.mkdirs();
-        }
+        FileUtil.mkdir(saveFile);
         return saveFile;
     }
 
@@ -154,7 +155,7 @@ public class SystemGitProcess extends AbstractGitProcess {
         String result = processCmd(new String[]{"git", "status"}, savePath);
         if (result.startsWith("fatal")) {
             // 目录下面无git，需要拉取代码
-            debug("{}下无git仓库", savePath.getAbsolutePath());
+            log.debug("{}下无git仓库", savePath.getAbsolutePath());
             return false;
         }
         return true;
@@ -165,8 +166,7 @@ public class SystemGitProcess extends AbstractGitProcess {
      * 指定私钥
      */
     private boolean setPrivateGitRsa(String host, File rsaFile) {
-        String path = System.getProperty("user.home") + "/.ssh";
-        File config = new File(path + "/config");
+        File config = FileUtil.file(FileUtil.getUserHomePath(), ".ssh", "config");
         List<String> configs = readGitConfig(config);
         boolean isHost = false;
         for (int i = 0; i < configs.size(); i++) {
@@ -200,8 +200,7 @@ public class SystemGitProcess extends AbstractGitProcess {
      * 设置git不验证host
      */
     private boolean strictHostKeyChecking() {
-        String path = System.getProperty("user.home") + "/.ssh";
-        File config = new File(path + "/config");
+        File config = FileUtil.file(FileUtil.getUserHomePath(), ".ssh", "config");
         List<String> configs = readGitConfig(config);
         boolean isStrictHostKeyChecking = false, isUserKnownHostsFile = false;
         for (int i = 0; i < configs.size(); i++) {
@@ -229,33 +228,14 @@ public class SystemGitProcess extends AbstractGitProcess {
         if (!config.exists()) {
             return new ArrayList<>();
         }
-        List<String> list = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(config))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                list.add(line);
-            }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return list;
+        return FileUtil.readLines(config, Charset.defaultCharset());
     }
 
     /**
      * 写入配置文件
      */
     private boolean writeGitConfig(File config, List<String> configs) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(config))) {
-            for (String s : configs) {
-                writer.write(s);
-                writer.newLine();
-                writer.flush();
-            }
-            return true;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        FileUtil.writeLines(configs, config, Charset.defaultCharset());
+        return true;
     }
 }
