@@ -180,8 +180,8 @@ public class SystemGitProcess extends AbstractGitProcess {
                 if (configs.get(i + 3).contains("IdentityFile")) {
                     configs.set(i + 3, "\tIdentityFile " + rsaFile.getAbsolutePath());
                 }
-                if (configs.get(i + 2).contains("IdentitiesOnly")) {
-                    configs.set(i + 2, "\tIdentitiesOnly yes");
+                if (configs.get(i + 4).contains("IdentitiesOnly")) {
+                    configs.set(i + 4, "\tIdentitiesOnly yes");
                 }
                 isHost = true;
             }
