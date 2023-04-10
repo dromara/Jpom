@@ -20,40 +20,25 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.dromara.jpom.plugin;
+package git;
 
-import org.eclipse.jgit.api.Git;
-
-import java.util.Map;
+import org.dromara.jpom.plugin.GitEnv;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * @author bwcx_jzy
- * @since 2022/2/22
- */
-@PluginConfig(name = "git-clone")
-public class DefaultGitPluginImpl implements IWorkspaceEnvPlugin {
+ *
+ * <br>
+ * Created By Hong on 2023/3/31
+ **/
+public class TestGitEnv {
 
-    @Override
-    public Object execute(Object main, Map<String, Object> parameter) throws Exception {
-        String type = main.toString();
-        GitProcess gitProcess = new GitProcessFactory(parameter, this);
-        switch (type) {
-            case "branchAndTagList":
-                return gitProcess.branchAndTagList();
-            case "pull": {
-                return gitProcess.pull();
-            }
-            case "pullByTag": {
-                return gitProcess.pullByTag();
-            }
-            default:
-                break;
-        }
-        return null;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestGitEnv.class);
+
+    @Test
+    public void test() {
+        LOGGER.info("系统中是否存在GIT环境：{}", GitEnv.existsSystemGit());
     }
 
-    @Override
-    public void close() throws Exception {
-        Git.shutdown();
-    }
 }
