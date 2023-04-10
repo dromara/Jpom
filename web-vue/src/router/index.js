@@ -1,3 +1,4 @@
+import Vue from "vue";
 import Router from "vue-router";
 
 // NavigationDuplicated: Avoided redundant navigation to current location: "xxxx".
@@ -6,6 +7,8 @@ const originalPush = Router.prototype.push;
 Router.prototype.push = function push(location) {
   return originalPush.call(this, location).catch((err) => err);
 };
+
+Vue.use(Router);
 
 const children = [
   {
