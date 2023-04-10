@@ -30,8 +30,8 @@ public abstract class AbstractGitProcess implements GitProcess {
      */
     protected Map<String, Object> decryptParameter(Map<String, Object> parameter) {
         try {
-//            parameter.put("password", workspaceEnvPlugin.convertRefEnvValue(parameter, "password"));
-//            parameter.put("username", workspaceEnvPlugin.convertRefEnvValue(parameter, "username"));
+            parameter.put("password", workspaceEnvPlugin.convertRefEnvValue(parameter, "password"));
+            parameter.put("username", workspaceEnvPlugin.convertRefEnvValue(parameter, "username"));
         } catch (Exception e) {
             LOGGER.error("解密参数失败", e);
         }
