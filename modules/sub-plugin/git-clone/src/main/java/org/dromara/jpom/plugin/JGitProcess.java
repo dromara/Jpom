@@ -9,6 +9,8 @@ import java.util.Map;
  * JGit操作
  * <br>
  * Created By Hong on 2023/3/31
+ *
+ * @author Hong
  **/
 public class JGitProcess extends AbstractGitProcess {
 
@@ -22,7 +24,7 @@ public class JGitProcess extends AbstractGitProcess {
     }
 
     @Override
-    public Object pull() throws Exception {
+    public String[] pull() throws Exception {
         Map<String, Object> map = getParameter();
         PrintWriter printWriter = (PrintWriter) map.get("logWriter");
         return JGitUtil.checkoutPull(map, getSaveFile(), getBranchName(), printWriter);

@@ -22,23 +22,22 @@
  */
 package git;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.plugin.GitEnv;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- *
  * <br>
  * Created By Hong on 2023/3/31
+ *
+ * @author Hong
  **/
+@Slf4j
 public class TestGitEnv {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestGitEnv.class);
 
     @Test
     public void test() {
-        LOGGER.info("系统中是否存在GIT环境：{}", GitEnv.existsSystemGit());
+        log.info("系统中是否存在GIT环境：{}", GitEnv.existsSystemGit());
     }
 
 }
