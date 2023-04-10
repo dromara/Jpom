@@ -35,24 +35,32 @@ public enum BuildStatus implements BaseEnum {
      *
      */
     No(0, "未构建"),
-    Ing(1, "构建中"),
+    Ing(1, "构建中", true),
     Success(2, "构建结束"),
     Error(3, "构建失败"),
-    PubIng(4, "发布中"),
+    PubIng(4, "发布中", true),
     PubSuccess(5, "发布成功"),
     PubError(6, "发布失败"),
     Cancel(7, "取消构建"),
     Interrupt(8, "构建中断"),
-    WaitExec(9, "队列等待"),
+    WaitExec(9, "队列等待", true),
     AbnormalShutdown(10, "异常关闭"),
     ;
 
     private final int code;
     private final String desc;
+    private final boolean progress;
 
     BuildStatus(int code, String desc) {
         this.code = code;
         this.desc = desc;
+        this.progress = false;
+    }
+
+    BuildStatus(int code, String desc, boolean progress) {
+        this.code = code;
+        this.desc = desc;
+        this.progress = progress;
     }
 
 }

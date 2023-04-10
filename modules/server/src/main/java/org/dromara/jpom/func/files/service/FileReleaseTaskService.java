@@ -47,6 +47,7 @@ import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.SshModel;
+import org.dromara.jpom.plugins.JschUtils;
 import org.dromara.jpom.service.IStatusRecover;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.service.node.NodeService;

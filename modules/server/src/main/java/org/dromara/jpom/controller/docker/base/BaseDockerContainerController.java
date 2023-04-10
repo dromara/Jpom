@@ -93,6 +93,22 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     /**
      * @return json
      */
+    @PostMapping(value = "list-compose", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<List<JSONObject>> listCompose(@ValidatorItem String id) throws Exception {
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = this.toDockerParameter(id);
+        parameter.put("name", getParameter("name"));
+        parameter.put("containerId", getParameter("containerId"));
+        parameter.put("imageId", getParameter("imageId"));
+        parameter.put("showAll", getParameter("showAll"));
+        List<JSONObject> listContainer = (List<JSONObject>) plugin.execute("listComposeContainer", parameter);
+        return JsonMessage.success("", listContainer);
+    }
+
+    /**
+     * @return json
+     */
     @GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public JsonMessage<Object> del(@ValidatorItem String id, String containerId) throws Exception {
@@ -165,7 +181,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
      */
     @GetMapping(value = "inspect-container", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<JSONObject> inspectContainer(@ValidatorItem String id, String containerId) throws Exception {
+    public JsonMessage<JSONObject> inspectContainer(@ValidatorItem String id, @ValidatorItem String containerId) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);

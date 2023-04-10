@@ -33,7 +33,7 @@ trim_trailing_whitespace = true
 insert_final_newline = true
 max_line_length = 200
 
-[*.{json, yml}]
+[*.{json,yml}]
 indent_style = space
 indent_size = 2
 max_line_length = off
@@ -46,7 +46,11 @@ max_line_length = off
 [*.bat]
 end_of_line = crlf
 
-[*.vue]
+[*.{vue,js,ts}]
+indent_style = space
+indent_size = 2
+
+[*.ts]
 indent_style = space
 indent_size = 2
 

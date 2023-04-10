@@ -23,6 +23,8 @@
 package org.dromara.jpom.service.h2db;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
@@ -159,8 +161,30 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
             Set<String> cacheIds = cacheAll.stream()
                 .map(BaseNodeModel::dataId)
                 .collect(Collectors.toSet());
-            //
-            List<T> projectInfoModels = jsonArray.toJavaList(this.tClass);
+            // 转换数据修改时间
+            List<T> projectInfoModels = jsonArray.stream().map(o -> {
+                // modifyTime,createTime
+                JSONObject jsonObject = (JSONObject) o;
+                T t = jsonObject.to(tClass);
+                Opt.ofBlankAble(jsonObject.getString("createTime")).map(s -> {
+                    try {
+                        return DateUtil.parse(s);
+                    } catch (Exception e) {
+                        log.warn("数据创建时间格式不正确 {} {}", s, jsonObject);
+                        return null;
+                    }
+                }).ifPresent(s -> t.setCreateTimeMillis(s.getTime()));
+                //
+                Opt.ofBlankAble(jsonObject.getString("modifyTime")).map(s -> {
+                    try {
+                        return DateUtil.parse(s);
+                    } catch (Exception e) {
+                        log.warn("数据修改时间格式不正确 {} {}", s, jsonObject);
+                        return null;
+                    }
+                }).ifPresent(s -> t.setModifyTimeMillis(s.getTime()));
+                return t;
+            }).collect(Collectors.toList());
             List<T> models = projectInfoModels.stream()
                 .peek(item -> this.fullData(item, nodeModel))
                 // 只保留自己节点的数据

@@ -3,7 +3,7 @@ import App from "./App.vue";
 
 import "./components/lazy_antd";
 
-import "./assets/reset.css";
+import "./assets/reset.less";
 const introJs = require("intro.js");
 import "intro.js/introjs.css";
 // import 'intro.js/themes/introjs-flattener.css';

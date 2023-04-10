@@ -189,6 +189,12 @@ function start() {
 		echo "silence auto exit 0,${pid}"
 		exit 0
 	fi
+	echo "Jpom agent starting:$pid"
+	pid=$(getPid)
+	if [ "$pid" == "" ]; then
+		echo "Please check the $Log for failure details"
+		errorExit "Jpom agent Startup failed"
+	fi
 	tail -fn 0 --pid="$pid" "$agent_log"
 }
 

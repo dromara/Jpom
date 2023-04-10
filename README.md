@@ -4,7 +4,7 @@
 	</a>
 </p>
 <p align="center">
-	<strong>简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件</strong>
+	<strong>🚀简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件</strong>
 </p>
 
 <p align="center">
@@ -285,6 +285,7 @@ git clone https://gitee.com/dromara/Jpom.git
 cd Jpom
 docker-compose -f docker-compose.yml up
 # docker-compose -f docker-compose.yml up --build
+# docker-compose -f docker-compose.yml build --no-cache
 # docker-compose -f docker-compose-local.yml up
 # docker-compose -f docker-compose-local.yml build --build-arg TEMP_VERSION=.0
 ```

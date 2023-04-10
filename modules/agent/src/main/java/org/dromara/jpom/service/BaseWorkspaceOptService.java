@@ -39,6 +39,7 @@ public abstract class BaseWorkspaceOptService<T extends BaseWorkspaceModel> exte
 
     @Override
     public void addItem(T t) {
+        t.setCreateTime(DateUtil.now());
         String userName = BaseAgentController.getNowUserName();
         if (!StrUtil.DASHED.equals(userName)) {
             t.setCreateUser(userName);

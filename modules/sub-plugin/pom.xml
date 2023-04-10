@@ -29,7 +29,7 @@
     <parent>
         <artifactId>jpom-parent</artifactId>
         <groupId>org.dromara.jpom</groupId>
-        <version>2.10.39.2</version>
+        <version>2.10.40.4</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <packaging>pom</packaging>
@@ -40,9 +40,10 @@
         <module>docker-cli</module>
         <module>git-clone</module>
         <module>encrypt</module>
+        <module>ssh-jsch</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
-    <version>2.10.39.2</version>
+    <version>2.10.40.4</version>
     <groupId>org.dromara.jpom.plugins</groupId>
     <artifactId>jpom-plugins-parent</artifactId>
     <name>Jpom Plugins</name>

@@ -12,21 +12,6 @@
         </a-radio-group>
       </a-form-model-item>
 
-      <a-form-model-item prop="taskDataIds" label="发布的SSH" v-if="temp.taskType === 0">
-        <a-row>
-          <a-col :span="22">
-            <a-select show-search option-filter-prop="children" mode="multiple" v-model="temp.taskDataIds" placeholder="请选择SSH">
-              <a-select-option v-for="ssh in sshList" :key="ssh.id">
-                <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
-              </a-select-option>
-            </a-select>
-          </a-col>
-          <a-col :span="1" style="margin-left: 10px">
-            <a-icon type="reload" @click="loadSshList" />
-          </a-col>
-        </a-row>
-      </a-form-model-item>
-
       <a-form-model-item prop="releasePath" label="发布目录">
         <a-input placeholder="请输入任务名" :disabled="true" :value="temp.taskData && temp.taskData.releasePath" />
       </a-form-model-item>
@@ -39,14 +24,26 @@
           <a-tab-pane v-for="item in temp.taskList" :key="item.id">
             <template slot="tab">
               <a-icon v-if="!logMap[item.id] || logMap[item.id].run" type="loading" />
-              {{
-                sshList.filter((sshItem) => {
-                  return sshItem.id === item.taskDataId;
-                })[0] &&
-                sshList.filter((sshItem) => {
-                  return sshItem.id === item.taskDataId;
-                })[0].name
-              }}
+              <template v-if="temp.taskData && temp.taskData.taskType === 0">
+                {{
+                  sshList.filter((item2) => {
+                    return item2.id === item.taskDataId;
+                  })[0] &&
+                  sshList.filter((item2) => {
+                    return item2.id === item.taskDataId;
+                  })[0].name
+                }}
+              </template>
+              <template v-else-if="temp.taskData && temp.taskData.taskType === 1">
+                {{
+                  nodeList.filter((item2) => {
+                    return item2.id === item.taskDataId;
+                  })[0] &&
+                  nodeList.filter((item2) => {
+                    return item2.id === item.taskDataId;
+                  })[0].name
+                }}
+              </template>
               <template>
                 <a-tooltip v-if="item.statusMsg" :title="item.statusMsg"><a-icon type="info-circle" /></a-tooltip>
               </template>
@@ -83,6 +80,7 @@ import { taskDetails, statusMap, taskLogInfoList } from "@/api/file-manager/rele
 import LogView from "@/components/logView";
 import codeEditor from "@/components/codeEditor";
 import { getSshListAll } from "@/api/ssh";
+import { getNodeListAll } from "@/api/node";
 
 export default {
   components: {
@@ -103,6 +101,7 @@ export default {
       logMap: {},
       temp: {},
       sshList: [],
+      nodeList: [],
     };
   },
   beforeDestroy() {
@@ -126,6 +125,8 @@ export default {
           this.temp = res.data;
           if (this.temp.taskData?.taskType === 0) {
             this.loadSshList();
+          } else if (this.temp.taskData?.taskType === 1) {
+            this.loadNodeList();
           }
 
           if (!this.activeKey) {
@@ -145,6 +146,14 @@ export default {
             resolve();
           }
         });
+      });
+    },
+    // 加载节点
+    loadNodeList() {
+      getNodeListAll().then((res) => {
+        if (res.code === 200) {
+          this.nodeList = res.data;
+        }
       });
     },
     initItemTimer(item) {

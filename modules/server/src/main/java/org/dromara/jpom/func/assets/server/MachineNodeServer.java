@@ -35,6 +35,7 @@ import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.*;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
@@ -183,6 +184,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         int heartSecond = nodeConfig.getHeartSecond();
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> new Thread(runnable, "Jpom Node Monitor"));
         scheduler.scheduleAtFixedRate(this, 0, heartSecond, TimeUnit.SECONDS);
+        JpomApplication.register("node_monitor", scheduler);
     }
 
     @Override

@@ -630,7 +630,19 @@
                   this.chooseScriptVisible = 1;
                 }
               "
-            />
+            >
+              <template slot="addonBefore" v-if="this.tempExtraData && this.tempExtraData.noticeScriptId">
+                <span
+                  @click="
+                    () => {
+                      this.tempExtraData = { ...this.tempExtraData, noticeScriptId: '' };
+                    }
+                  "
+                >
+                  重置选择
+                </span>
+              </template>
+            </a-input-search>
             <!-- <a-select allowClear show-search option-filter-prop="children" placeholder="构建过程执行对应的脚本" v-model="tempExtraData.noticeScriptId">
               <a-select-option v-for="item2 in scriptList" :key="item2.id">{{ item2.name }}</a-select-option>
             </a-select> -->
