@@ -134,7 +134,7 @@ export default {
           this.logoUrl = ((res.data.routerBase || "") + "/logo_image").replace(new RegExp("//", "gm"), "/");
 
           // 禁用导航
-          this.$store.dispatch("commitGuide", { disabledGuide: res.data.disabledGuide, inDocker: res.data.inDocker });
+          this.$store.dispatch("commitGuide", { disabledGuide: res.data.disabledGuide, extendPlugins: res.data.extendPlugins });
           this.$notification.config({
             placement: res.data.notificationPlacement ? res.data.notificationPlacement : "topRight",
           });

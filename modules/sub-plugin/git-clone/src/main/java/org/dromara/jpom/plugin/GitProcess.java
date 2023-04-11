@@ -28,8 +28,11 @@ public interface GitProcess {
     String[] pull() throws Exception;
 
     /**
-     * 谱曲指定标签
+     * 拉取指定标签
+     *
+     * @return 拉取结果
+     * @throws Exception 异常
      */
-    Object pullByTag() throws Exception;
+    String[] pullByTag() throws Exception;
 
 }

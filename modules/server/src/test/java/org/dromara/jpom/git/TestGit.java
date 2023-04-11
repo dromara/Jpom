@@ -20,43 +20,45 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.dromara.jpom.plugin;
+package org.dromara.jpom.git;
 
-import org.eclipse.jgit.api.Git;
+import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.ApplicationStartTest;
+import org.dromara.jpom.plugin.IPlugin;
+import org.dromara.jpom.plugin.PluginFactory;
+import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author bwcx_jzy
- * @since 2022/2/22
+ * @since 2023/4/10
  */
-@PluginConfig(name = "git-clone")
-public class DefaultGitPluginImpl implements IWorkspaceEnvPlugin {
+@Slf4j
+public class TestGit extends ApplicationStartTest {
 
-    @Override
-    public Object execute(Object main, Map<String, Object> parameter) throws Exception {
-        String type = main.toString();
-        GitProcess gitProcess = GitProcessFactory.get(parameter, this);
-        switch (type) {
-            case "branchAndTagList":
-                return gitProcess.branchAndTagList();
-            case "pull": {
-                return gitProcess.pull();
-            }
-            case "pullByTag": {
-                return gitProcess.pullByTag();
-            }
-            case "systemGit": {
-                return GitEnv.existsSystemGit();
-            }
-            default:
-                break;
-        }
-        return null;
+
+    @Test
+    public void test1() {
+        System.out.println(1);
     }
 
-    @Override
-    public void close() throws Exception {
-        Git.shutdown();
+    @Test
+    public void test() throws Exception {
+        IPlugin plugin = PluginFactory.getPlugin("git-clone");
+        Map<String, Object> map = new HashMap<>();
+//        map.put("gitProcessType", "JGit");
+        map.put("gitProcessType", "SystemGit");
+        map.put("url", "git@gitee.com:keepbx/Jpom-demo-case.git");//git@github.com:emqx/emqx-operator.git
+//        map.put("url", "https://gitee.com/keepbx/Jpom-demo-case");
+//        map.put("rsaFile", FileUtil.file(FileUtil.getUserHomePath(), ".ssh", "id_rsa"));
+        map.put("reduceProgressRatio", 1);
+        map.put("timeout", 60);
+        map.put("protocol", 1);
+        map.put("username", "");
+        map.put("password", "");
+        Object obj = plugin.execute("branchAndTagList", map);
+        System.err.println(obj);
     }
 }

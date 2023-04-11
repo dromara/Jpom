@@ -186,6 +186,11 @@ public class BuildExtraModule extends BaseModel {
      */
     private Boolean releaseHideFile;
 
+    /**
+     * 克隆深度
+     */
+    private Integer cloneDepth;
+
     public boolean strictlyEnforce() {
         return strictlyEnforce != null && strictlyEnforce;
     }

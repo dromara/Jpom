@@ -1,7 +1,5 @@
 package org.dromara.jpom.plugin;
 
-import cn.hutool.core.lang.Tuple;
-
 import java.util.Map;
 
 /**
@@ -11,35 +9,17 @@ import java.util.Map;
  *
  * @author Hong
  **/
-public class GitProcessFactory implements GitProcess {
+public class GitProcessFactory {
 
     private static final String DEFAULT_GIT_PROCESS = "JGit";
     private static final String SYSTEM_GIT_PROCESS = "SystemGit";
 
-    private final GitProcess gitProcess;
-
-    protected GitProcessFactory(Map<String, Object> parameter, IWorkspaceEnvPlugin workspaceEnvPlugin) {
+    public static GitProcess get(Map<String, Object> parameter, IWorkspaceEnvPlugin workspaceEnvPlugin) {
         String processType = (String) parameter.getOrDefault("gitProcessType", DEFAULT_GIT_PROCESS);
         if (SYSTEM_GIT_PROCESS.equalsIgnoreCase(processType) && GitEnv.existsSystemGit()) {
-            gitProcess = new SystemGitProcess(workspaceEnvPlugin, parameter);
+            return new SystemGitProcess(workspaceEnvPlugin, parameter);
         } else {
-            gitProcess = new JGitProcess(workspaceEnvPlugin, parameter);
+            return new JGitProcess(workspaceEnvPlugin, parameter);
         }
-
-    }
-
-    @Override
-    public Tuple branchAndTagList() throws Exception {
-        return gitProcess.branchAndTagList();
-    }
-
-    @Override
-    public String[] pull() throws Exception {
-        return gitProcess.pull();
-    }
-
-    @Override
-    public Object pullByTag() throws Exception {
-        return gitProcess.pullByTag();
     }
 }

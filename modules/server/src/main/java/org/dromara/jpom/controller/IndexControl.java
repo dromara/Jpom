@@ -39,6 +39,7 @@ import cn.hutool.http.ContentType;
 import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.ServerConst;
@@ -48,6 +49,8 @@ import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.SystemPermission;
+import org.dromara.jpom.plugin.IPlugin;
+import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.service.system.SystemParametersServer;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
@@ -63,7 +66,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -74,6 +80,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping(value = "/")
+@Slf4j
 public class IndexControl extends BaseServerController {
 
     private final UserService userService;
@@ -229,7 +236,23 @@ public class IndexControl extends BaseServerController {
         data.put("disabledCaptcha", webConfig.isDisabledCaptcha());
         data.put("notificationPlacement", webConfig.getNotificationPlacement());
         // 用于判断是否属于容器部署
-        data.put("inDocker", StrUtil.isNotEmpty(SystemUtil.get("JPOM_PKG")));
+        boolean inDocker = StrUtil.isNotEmpty(SystemUtil.get("JPOM_PKG"));
+        List<String> extendPlugins = new ArrayList<>();
+        if (inDocker) {
+            extendPlugins.add("inDocker");
+        }
+        // 验证 git 仓库信息
+        try {
+            IPlugin plugin = PluginFactory.getPlugin("git-clone");
+            Map<String, Object> map = new HashMap<>();
+            boolean systemGit = (boolean) plugin.execute("systemGit", map);
+            if (systemGit) {
+                extendPlugins.add("system-git");
+            }
+        } catch (Exception e) {
+            log.warn("检查 git 客户端异常", e);
+        }
+        data.put("extendPlugins", extendPlugins);
         if (userService.canUse()) {
             return JsonMessage.success("success", data);
         }

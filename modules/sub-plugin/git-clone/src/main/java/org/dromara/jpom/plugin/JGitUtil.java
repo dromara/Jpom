@@ -164,7 +164,7 @@ public class JGitUtil {
      * @param parameter        参数
      */
     private static void setCredentials(TransportCommand<?, ?> transportCommand, Map<String, Object> parameter) {
-        // 设置超时时间
+        // 设置超时时间 秒
         Integer timeout = (Integer) parameter.get("timeout");
         // 设置账号密码
         Integer protocol = (Integer) parameter.get("protocol");

@@ -11,7 +11,7 @@ const app = {
     // 引导缓存
     guideCache: localStorage.getItem(key),
     disabledGuide: false,
-    inDocker: false,
+    extendPlugins: [],
   },
   mutations: {
     setGuideCache(state, guideCache) {
@@ -20,7 +20,7 @@ const app = {
     },
     commitGuide(state, guideData) {
       state.disabledGuide = guideData.disabledGuide;
-      state.inDocker = guideData.inDocker;
+      state.extendPlugins = guideData.extendPlugins || [];
     },
   },
   actions: {
@@ -112,8 +112,8 @@ const app = {
     getDisabledGuide(state) {
       return state.disabledGuide;
     },
-    getInDocker(state) {
-      return state.inDocker;
+    getExtendPlugins(state) {
+      return state.extendPlugins || [];
     },
   },
 };
