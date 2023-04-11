@@ -1,6 +1,7 @@
 package org.dromara.jpom.plugin;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.comparator.VersionComparator;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
@@ -108,6 +109,8 @@ public class SystemGitProcess extends AbstractGitProcess {
                 tagRemote.add(StrUtil.removePrefix(last, Constants.R_TAGS));
             }
         }
+        branchRemote.sort((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1));
+        tagRemote.sort((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1));
         return new Tuple(branchRemote, tagRemote);
     }
 
