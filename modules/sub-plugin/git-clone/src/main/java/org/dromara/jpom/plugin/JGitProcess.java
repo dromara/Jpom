@@ -20,20 +20,18 @@ public class JGitProcess extends AbstractGitProcess {
 
     @Override
     public Tuple branchAndTagList() throws Exception {
-        return JGitUtil.getBranchAndTagList(getParameter());
+        return JGitUtil.getBranchAndTagList(parameter);
     }
 
     @Override
     public String[] pull() throws Exception {
-        Map<String, Object> map = getParameter();
-        PrintWriter printWriter = (PrintWriter) map.get("logWriter");
-        return JGitUtil.checkoutPull(map, getSaveFile(), getBranchName(), printWriter);
+        PrintWriter printWriter = (PrintWriter) parameter.get("logWriter");
+        return JGitUtil.checkoutPull(parameter, getSaveFile(), getBranchName(), printWriter);
     }
 
     @Override
-    public Object pullByTag() throws Exception {
-        Map<String, Object> map = getParameter();
-        PrintWriter printWriter = (PrintWriter) getParameter().get("logWriter");
-        return JGitUtil.checkoutPullTag(map, getSaveFile(), getTagName(), printWriter);
+    public String[] pullByTag() throws Exception {
+        PrintWriter printWriter = (PrintWriter) parameter.get("logWriter");
+        return JGitUtil.checkoutPullTag(parameter, getSaveFile(), getTagName(), printWriter);
     }
 }

@@ -429,6 +429,13 @@ public class BuildInfoManage implements Runnable {
                 // git with password
                 IPlugin plugin = PluginFactory.getPlugin("git-clone");
                 Map<String, Object> map = repositoryModel.toMap();
+                // 指定 clone 深度
+                Integer cloneDepth = buildExtraModule.getCloneDepth();
+                map.put("depth", cloneDepth);
+                if (cloneDepth != null) {
+                    // 使用系统
+                    map.put("gitProcessType", "SystemGit");
+                }
                 Tuple tuple = (Tuple) plugin.execute("branchAndTagList", map);
                 //GitUtil.getBranchAndTagList(repositoryModel);
                 Assert.notNull(tuple, "获取仓库分支失败");

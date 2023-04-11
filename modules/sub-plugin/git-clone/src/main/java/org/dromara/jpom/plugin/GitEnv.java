@@ -19,10 +19,22 @@ public class GitEnv {
     private static final String WIN_EXISTS_GIT = "where git";
     private static final String LINUX_EXISTS_GIT = "which git";
 
+    private static Boolean result;
+
     /**
      * 操作系统是否有GIT环境
      */
     public static boolean existsSystemGit() {
+        if (result == null) {
+            result = existsSystemGit2();
+        }
+        return result;
+    }
+
+    /**
+     * 操作系统是否有GIT环境
+     */
+    private static boolean existsSystemGit2() {
         String result;
         OsInfo osInfo = SystemUtil.getOsInfo();
         if (osInfo.isWindows()) {
@@ -44,4 +56,5 @@ public class GitEnv {
         }
         return false;
     }
+
 }

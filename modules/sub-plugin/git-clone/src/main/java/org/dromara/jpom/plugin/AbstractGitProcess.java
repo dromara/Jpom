@@ -3,7 +3,6 @@ package org.dromara.jpom.plugin;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -17,7 +16,7 @@ import java.util.Map;
 public abstract class AbstractGitProcess implements GitProcess {
 
     private final IWorkspaceEnvPlugin workspaceEnvPlugin;
-    private final Map<String, Object> parameter;
+    protected final Map<String, Object> parameter;
 
     protected AbstractGitProcess(IWorkspaceEnvPlugin workspaceEnvPlugin, Map<String, Object> parameter) {
         this.workspaceEnvPlugin = workspaceEnvPlugin;
@@ -39,9 +38,6 @@ public abstract class AbstractGitProcess implements GitProcess {
         return parameter;
     }
 
-    protected Map<String, Object> getParameter() {
-        return Collections.unmodifiableMap(this.parameter);
-    }
 
     /**
      * 获取保存路径
@@ -54,7 +50,7 @@ public abstract class AbstractGitProcess implements GitProcess {
      * 获取分支Name
      */
     protected String getBranchName() {
-        return (String) parameter.getOrDefault("branchName", "master");
+        return (String) parameter.get("branchName");
     }
 
     /**

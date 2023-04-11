@@ -25,58 +25,63 @@
           "
         />
       </a-form-model-item>
-      <a-form-model-item v-if="tempRepository && tempRepository.repoType === 0" label="分支" prop="branchName">
-        <a-row>
-          <a-col :span="10">
-            <custom-select
-              v-model="temp.branchName"
-              :disabled="temp.branchTagName ? true : false"
-              :data="branchList"
-              @onRefreshSelect="loadBranchList"
-              inputPlaceholder="自定义分支通配表达式"
-              selectPlaceholder="请选择构建对应的分支,必选"
-              @change="
-                () => {
-                  this.$refs['editBuildForm'] && this.$refs['editBuildForm'].clearValidate();
-                }
-              "
-            >
-              <div slot="inputTips">
-                支持通配符(AntPathMatcher)
-                <ul>
-                  <li>? 匹配一个字符</li>
-                  <li>* 匹配零个或多个字符</li>
-                  <li>** 匹配路径中的零个或多个目录</li>
-                </ul>
-              </div>
-            </custom-select>
-          </a-col>
-          <a-col :span="4" style="text-align: right"> 标签(TAG)：</a-col>
-          <a-col :span="10">
-            <custom-select
-              v-model="temp.branchTagName"
-              :data="branchTagList"
-              @onRefreshSelect="loadBranchList"
-              inputPlaceholder="自定义标签通配表达式"
-              selectPlaceholder="选择构建的标签,不选为最新提交"
-              @change="
-                () => {
-                  this.$refs['editBuildForm'] && this.$refs['editBuildForm'].clearValidate();
-                }
-              "
-            >
-              <div slot="inputTips">
-                支持通配符(AntPathMatcher)
-                <ul>
-                  <li>? 匹配一个字符</li>
-                  <li>* 匹配零个或多个字符</li>
-                  <li>** 匹配路径中的零个或多个目录</li>
-                </ul>
-              </div>
-            </custom-select>
-          </a-col>
-        </a-row>
-      </a-form-model-item>
+      <template v-if="tempRepository && tempRepository.repoType === 0">
+        <a-form-model-item label="分支" prop="branchName">
+          <a-row>
+            <a-col :span="10">
+              <custom-select
+                v-model="temp.branchName"
+                :disabled="temp.branchTagName ? true : false"
+                :data="branchList"
+                @onRefreshSelect="loadBranchList"
+                inputPlaceholder="自定义分支通配表达式"
+                selectPlaceholder="请选择构建对应的分支,必选"
+                @change="
+                  () => {
+                    this.$refs['editBuildForm'] && this.$refs['editBuildForm'].clearValidate();
+                  }
+                "
+              >
+                <div slot="inputTips">
+                  支持通配符(AntPathMatcher)
+                  <ul>
+                    <li>? 匹配一个字符</li>
+                    <li>* 匹配零个或多个字符</li>
+                    <li>** 匹配路径中的零个或多个目录</li>
+                  </ul>
+                </div>
+              </custom-select>
+            </a-col>
+            <a-col :span="4" style="text-align: right"> 标签(TAG)：</a-col>
+            <a-col :span="10">
+              <custom-select
+                v-model="temp.branchTagName"
+                :data="branchTagList"
+                @onRefreshSelect="loadBranchList"
+                inputPlaceholder="自定义标签通配表达式"
+                selectPlaceholder="选择构建的标签,不选为最新提交"
+                @change="
+                  () => {
+                    this.$refs['editBuildForm'] && this.$refs['editBuildForm'].clearValidate();
+                  }
+                "
+              >
+                <div slot="inputTips">
+                  支持通配符(AntPathMatcher)
+                  <ul>
+                    <li>? 匹配一个字符</li>
+                    <li>* 匹配零个或多个字符</li>
+                    <li>** 匹配路径中的零个或多个目录</li>
+                  </ul>
+                </div>
+              </custom-select>
+            </a-col>
+          </a-row>
+        </a-form-model-item>
+        <a-form-model-item v-if="this.getExtendPlugins.indexOf('system-git') > -1" label="克隆深度" prop="cloneDepth">
+          <a-input-number style="width: 100%" v-model="tempExtraData.cloneDepth" placeholder="自定义克隆深度，避免大仓库全部克隆" />
+        </a-form-model-item>
+      </template>
 
       <a-collapse :activeKey="['0', '1', '2']" expandIconPosition="right">
         <a-collapse-panel key="0">
@@ -91,7 +96,7 @@
                       <li>容器构建是指使用 docker 容器执行构建,这样可以达到和宿主机环境隔离不用安装依赖环境</li>
                       <li>使用容器构建，docker 容器所在的宿主机需要有公网,因为需要远程下载环境依赖的 sdk 和镜像</li>
                       <li>创建后构建方式不支持修改</li>
-                      <li v-if="this.getInDocker">容器安装的服务端不能使用本地构建</li>
+                      <li v-if="this.getExtendPlugins.indexOf('inDocker') > -1">容器安装的服务端不能使用本地构建</li>
                     </ul>
                   </template>
                   <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
@@ -1016,7 +1021,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getInDocker"]),
+    ...mapGetters(["getExtendPlugins"]),
     selectSshDirs() {
       if (!this.sshList || this.sshList.length <= 0) {
         return [];
@@ -1042,7 +1047,7 @@ export default {
       return Object.keys(this.buildModeMap).map((item) => {
         return {
           value: parseInt(item),
-          disabled: parseInt(item) === 0 && this.getInDocker ? true : false,
+          disabled: parseInt(item) === 0 && this.getExtendPlugins.indexOf("inDocker") > -1,
           name: this.buildModeMap[item],
         };
       });

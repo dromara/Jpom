@@ -28,6 +28,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.util.*;
 import cn.hutool.system.SystemUtil;
+import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.system.ExtConfigBean;
 
@@ -185,25 +186,77 @@ public class CommandUtil {
      * @throws IOException IO
      */
     private static String exec(String[] cmd, File file) throws IOException {
-        log.debug("exec file {} {}", ArrayUtil.join(cmd, StrUtil.SPACE), file == null ? StrUtil.EMPTY : file);
-        Process process = new ProcessBuilder(cmd).directory(file).redirectErrorStream(true).start();
-        Charset charset;
+        List<String> resultList = new ArrayList<>();
         boolean isLog;
+        Charset charset;
         try {
             charset = ExtConfigBean.getConsoleLogCharset();
             isLog = true;
         } catch (Exception e) {
-            // 直接执行，使用默认编码格式
-            charset = CharsetUtil.systemCharset();
             // 不记录日志
             isLog = false;
+            // 直接执行，使用默认编码格式
+            charset = CharsetUtil.systemCharset();
         }
-        charset = ObjectUtil.defaultIfNull(charset, CharsetUtil.defaultCharset());
-        String result = RuntimeUtil.getResult(process, charset);
+        int code = exec(file, null, charset, resultList::add, cmd);
+        String result = String.join(StrUtil.LF, resultList);
         if (isLog) {
-            log.debug("exec {} {} {}", charset.name(), Arrays.toString(cmd), result);
+            log.debug("exec[{}] {} {} {}", code, charset.name(), Arrays.toString(cmd), result);
         }
         return result;
+    }
+
+    /**
+     * 执行命令
+     *
+     * @param cmd         命令行
+     * @param file        执行的目录
+     * @param lineHandler 命令回调
+     * @param env         环境变量
+     * @throws IOException IO
+     */
+    public static int exec(File file, Map<String, String> env, LineHandler lineHandler, String... cmd) throws IOException {
+        Charset charset;
+        try {
+            charset = ExtConfigBean.getConsoleLogCharset();
+        } catch (Exception e) {
+            // 直接执行，使用默认编码格式
+            charset = CharsetUtil.systemCharset();
+        }
+        return exec(file, env, charset, lineHandler, cmd);
+    }
+
+
+    /**
+     * 执行命令
+     *
+     * @param cmd         命令行
+     * @param charset     编码格式
+     * @param file        执行的目录
+     * @param lineHandler 命令回调
+     * @param env         环境变量
+     * @throws IOException IO
+     */
+    public static int exec(File file, Map<String, String> env, Charset charset, LineHandler lineHandler, String... cmd) throws IOException {
+        log.debug("exec file {} {}", ArrayUtil.join(cmd, StrUtil.SPACE), file == null ? StrUtil.EMPTY : file);
+        ProcessBuilder processBuilder = new ProcessBuilder(cmd);
+        Map<String, String> environment = processBuilder.directory(file).environment();
+        // 环境变量
+        Optional.ofNullable(env).ifPresent(environment::putAll);
+        Process process = processBuilder.redirectErrorStream(true).start();
+        Charset charset2 = ObjectUtil.defaultIfNull(charset, CharsetUtil.defaultCharset());
+        InputStream in = null;
+        try {
+            in = process.getInputStream();
+            IoUtil.readLines(in, charset2, lineHandler);
+            // 等待结束
+            return process.waitFor();
+        } catch (InterruptedException e) {
+            throw Lombok.sneakyThrow(e);
+        } finally {
+            IoUtil.close(in);
+            RuntimeUtil.destroy(process);
+        }
     }
 
     /**
