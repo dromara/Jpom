@@ -478,8 +478,9 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
    欢迎扫描下方[微信、支付宝收款码赞赏](https://jpom.top/images/praise-qrcorde.png)
    或通过[码云赞赏](https://gitee.com/dromara/Jpom)
    （在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom.top/pages/praise/publicity/)
-3. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
-4. 参与贡献，请查看[贡献指南](#🔨贡献指南)。
+3. 企业技术服务请单独与我们联系沟通服务方案
+4. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
+5. 参与贡献，请查看[贡献指南](#🔨贡献指南)。
 
 感谢所有赞赏以及参与贡献的小伙伴，你们的支持是我们不断更新前进的动力！
 
