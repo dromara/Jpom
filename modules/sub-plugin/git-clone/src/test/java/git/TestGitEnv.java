@@ -23,7 +23,7 @@
 package git;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.plugin.GitEnv;
+import org.dromara.jpom.plugin.GitProcessFactory;
 import org.junit.Test;
 
 /**
@@ -37,7 +37,7 @@ public class TestGitEnv {
 
     @Test
     public void test() {
-        log.info("系统中是否存在GIT环境：{}", GitEnv.existsSystemGit());
+        log.info("系统中是否存在GIT环境：{}", GitProcessFactory.existsSystemGit());
     }
 
 }

@@ -47,7 +47,7 @@ public class DefaultGitPluginImpl implements IWorkspaceEnvPlugin {
                 return gitProcess.pullByTag();
             }
             case "systemGit": {
-                return GitEnv.existsSystemGit();
+                return GitProcessFactory.existsSystemGit();
             }
             default:
                 break;
