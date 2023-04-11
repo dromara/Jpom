@@ -342,15 +342,14 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
      */
     public int delCache(String dataId, String nodeId, HttpServletRequest request) {
         return this.delByWorkspace(request, entity -> {
-            entity.set("nodeId", nodeId);
-            entity.set("dataId", dataId);
+            T data = ReflectUtil.newInstance(this.tClass);
+            data.setNodeId(nodeId);
+            data.dataId(dataId);
+            Entity entity1 = dataBeanToEntity(data);
+            entity.putAll(entity1);
         });
-//        T data = ReflectUtil.newInstance(this.tClass);
-//        data.setNodeId(nodeId);
-//        data.dataId(dataId);
-//        data.setWorkspaceId(checkUserWorkspace);
-//        Entity entity = super.dataBeanToEntity(data);
-//        return super.del(entity);
+
+
     }
 
     /**

@@ -7,6 +7,7 @@
 1. 【agent】修复 获取项目状态部分情况出现 NPE （感谢@酱总）
 2. 【server】修复 清空浏览器缓存未跳转到登录页面
 3. 【server】优化 构建拉取 git 仓库支持使用服务器中的 git 插件，实现配置克隆深度参数
+4. 【server】修复 删除节点脚本报错（感谢 [@xiaozhi](https://gitee.com/XiaoZhiGongChengShi) [Gitee issues I6USMY](https://gitee.com/dromara/Jpom/issues/I6USMY) ）
 
 ------
 
