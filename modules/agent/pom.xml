@@ -29,12 +29,12 @@
     <parent>
         <artifactId>jpom-parent</artifactId>
         <groupId>org.dromara.jpom</groupId>
-        <version>2.10.40.4</version>
+        <version>2.10.40.5</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>agent</artifactId>
-    <version>2.10.40.4</version>
+    <version>2.10.40.5</version>
     <name>Jpom Agent</name>
     <properties>
         <start-class>org.dromara.jpom.JpomAgentApplication</start-class>
