@@ -40,7 +40,7 @@ export default {
   },
   computed: {},
   mounted() {
-    this.$nextTick(() => {
+    nextTick(() => {
       setTimeout(() => {
         this.initSocket()
       }, 200)

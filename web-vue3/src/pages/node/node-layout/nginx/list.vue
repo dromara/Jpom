@@ -293,7 +293,7 @@ export default {
           this.treeList = res.data
         }
         // 取出第一个默认选中
-        this.$nextTick(() => {
+        nextTick(() => {
           const node = this.treeList[0]
           if (node) {
             this.tempNode = node

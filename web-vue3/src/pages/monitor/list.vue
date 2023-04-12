@@ -336,7 +336,7 @@ export default {
     loadUserList(fn) {
       getUserListAll().then((res) => {
         if (res.code === 200) {
-          this.$nextTick(() => {
+          nextTick(() => {
             this.userList = res.data.map((element) => {
               let canUse = element.email || element.dingDing || element.workWx
               return { key: element.id, name: element.name, disabled: !canUse }
@@ -387,7 +387,7 @@ export default {
       this.editMonitorVisible = true
       this.loadUserList()
       this.loadNodeProjectList()
-      this.$nextTick(() => {
+      nextTick(() => {
         setTimeout(() => {
           this.introGuide()
         }, 500)

@@ -847,7 +847,7 @@ export default {
     handleAdd() {
       this.temp = {}
       this.editBuildVisible = 2
-      this.$nextTick(() => {
+      nextTick(() => {
         this.$refs.editBuild.handleAdd()
       })
     },
@@ -862,14 +862,14 @@ export default {
     handleEdit(record) {
       this.editBuildVisible = 2
       this.temp = { id: record.id, triggerToken: record.triggerToken }
-      this.$nextTick(() => {
+      nextTick(() => {
         this.$refs.editBuild.handleEdit({ ...record })
       })
     },
     handleDetails(record) {
       this.editBuildVisible = 1
       this.temp = { id: record.id, triggerToken: record.triggerToken }
-      this.$nextTick(() => {
+      nextTick(() => {
         this.$refs.editBuild.handleEdit({ ...record })
       })
     },

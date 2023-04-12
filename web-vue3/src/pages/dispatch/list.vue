@@ -1189,7 +1189,7 @@ export default {
     },
     // 编辑分发
     handleEditDispatch(record) {
-      this.$nextTick(() => {
+      nextTick(() => {
         this.$refs['linkDispatchForm'] && this.$refs['linkDispatchForm'].resetFields()
       })
       this.loadNodeList(() => {
@@ -1308,7 +1308,7 @@ export default {
         this.loadGroupList()
 
         this.editDispatchVisible = true
-        this.$nextTick(() => {
+        nextTick(() => {
           this.$refs['editDispatchForm'].resetFields()
           setTimeout(() => {
             this.introGuide()
@@ -1318,7 +1318,7 @@ export default {
     },
     // 编辑分发项目
     handleEditDispatchProject(record) {
-      this.$nextTick(() => {
+      nextTick(() => {
         this.$refs['editDispatchForm'] && this.$refs['editDispatchForm'].resetFields()
       })
 

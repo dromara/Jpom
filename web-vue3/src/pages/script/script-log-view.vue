@@ -4,38 +4,38 @@
   </div>
 </template>
 <script>
-import { scriptLog } from "@/api/server-script";
-import LogView from "@/components/logView";
+import { scriptLog } from '@/api/server-script'
+import LogView from '@/components/logView'
 export default {
   components: {
-    LogView,
+    LogView
   },
   props: {
     temp: {
-      type: Object,
-    },
+      type: Object
+    }
   },
   data() {
     return {
       logTimer: null,
       // logText: "loading...",
-      line: 1,
-    };
+      line: 1
+    }
   },
   beforeDestroy() {
     if (this.logTimer) {
-      clearInterval(this.logTimer);
+      clearInterval(this.logTimer)
     }
   },
   mounted() {
-    this.init();
+    this.init()
   },
   methods: {
     init() {
-      this.loadData();
+      this.loadData()
       this.logTimer = setInterval(() => {
-        this.loadData();
-      }, 2000);
+        this.loadData()
+      }, 2000)
     },
     // 加载日志内容
     loadData() {
@@ -44,13 +44,13 @@ export default {
         executeId: this.temp.id,
         id: this.temp.scriptId,
         nodeId: this.temp.nodeId,
-        line: this.line,
-      };
+        line: this.line
+      }
       scriptLog(params).then((res) => {
         if (res.code === 200) {
           // 停止请求
           if (res.data.run === false) {
-            clearInterval(this.logTimer);
+            clearInterval(this.logTimer)
           }
           // 更新日志
           // if (this.logText === "loading...") {
@@ -60,11 +60,11 @@ export default {
           // lines.forEach((element) => {
           //   this.logText += `${element}\r\n`;
           // });
-          this.$refs.logView.appendLine(res.data.dataLines);
-          this.line = res.data.line;
+          this.$refs.logView.appendLine(res.data.dataLines)
+          this.line = res.data.line
           // if (lines.length) {
           //   // 自动滚动到底部
-          //   this.$nextTick(() => {
+          //   nextTick(() => {
           //     setTimeout(() => {
           //       const textarea = document.getElementById("script-log-textarea");
           //       if (textarea) {
@@ -74,9 +74,9 @@ export default {
           //   });
           // }
         }
-      });
-    },
-  },
-};
+      })
+    }
+  }
+}
 </script>
 <style scoped></style>

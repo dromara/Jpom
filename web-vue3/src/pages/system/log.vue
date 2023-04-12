@@ -71,7 +71,7 @@ export default {
   watch: {},
   created() {
     this.loadData()
-    this.$nextTick(() => {
+    nextTick(() => {
       setTimeout(() => {
         this.introGuide()
       }, 500)

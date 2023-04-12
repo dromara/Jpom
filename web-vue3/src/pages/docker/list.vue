@@ -424,7 +424,7 @@ export default {
     // handleClose(removedTag) {},
     showInput() {
       this.temp = { ...this.temp, inputVisible: true }
-      this.$nextTick(function () {
+      nextTick(function () {
         this.$refs.tagInput.focus()
       })
     },

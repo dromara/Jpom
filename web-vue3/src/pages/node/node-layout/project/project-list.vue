@@ -938,7 +938,7 @@ export default {
       this.loadAccesList()
 
       this.editProjectVisible = true
-      this.$nextTick(() => {
+      nextTick(() => {
         setTimeout(() => {
           this.introGuide()
         }, 500)

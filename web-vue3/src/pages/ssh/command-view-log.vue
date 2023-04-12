@@ -115,7 +115,7 @@ export default {
           this.logMap[item.id].line = res.data.line
           // if (lines.length) {
           //   // 自动滚动到底部
-          //   this.$nextTick(() => {
+          //   nextTick(() => {
           //     setTimeout(() => {
           //       const textarea = document.getElementById("build-log-textarea-" + item.id);
           //       if (textarea) {
@@ -135,7 +135,7 @@ export default {
       if (this.logTimerMap[key]) {
         return
       }
-      this.$nextTick(() => {
+      nextTick(() => {
         const index = this.logList
           .map((item1, index) => {
             return item1.id == key ? index : -1
