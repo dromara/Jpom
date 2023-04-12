@@ -1,14 +1,21 @@
 <template>
-  <a-layout class="node-layout" ref="nodeLayout" id="nodeLayout" :class="` ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
+  <a-layout class="node-layout" ref="nodeLayout" id="nodeLayout" :class="` ${scrollbarFlag ? '' : 'hide-scrollbar'}`">
     <!-- 侧边栏 节点管理菜单 -->
-    <a-layout-sider theme="light" :class="`node-sider jpom-node-sider ${this.fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}  ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
+    <a-layout-sider
+      theme="light"
+      :class="`node-sider jpom-node-sider ${fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}  ${
+        scrollbarFlag ? '' : 'hide-scrollbar'
+      }`"
+    >
       <a-menu
         theme="light"
         mode="inline"
         @openChange="openChange"
         :default-selected-keys="selectedKeys"
         :openKeys="openKey"
-        :class="`${this.fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'} ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`"
+        :class="`${fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'} ${
+          scrollbarFlag ? '' : 'hide-scrollbar'
+        }`"
       >
         <template v-for="(menu, index) in nodeMenuList">
           <a-sub-menu v-if="menu.childs" :key="menu.id" :class="menu.id">
@@ -16,7 +23,12 @@
               <a-icon :type="menu.icon_v3" />
               <span>{{ menu.title }}</span>
             </span>
-            <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" @click="handleMenuClick(subMenu.id, subMenu.pId)" :class="subMenu.id">
+            <a-menu-item
+              v-for="subMenu in menu.childs"
+              :key="subMenu.id"
+              @click="handleMenuClick(subMenu.id, subMenu.pId)"
+              :class="subMenu.id"
+            >
               <span>{{ subMenu.title }}</span>
             </a-menu-item>
           </a-sub-menu>
@@ -30,7 +42,11 @@
     <!-- 节点管理的各个组件 -->
     <!-- class="layout-content jpom-node-content drawer-layout-content" -->
 
-    <a-layout-content :class="`layout-content jpom-node-content ${this.fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'} ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
+    <a-layout-content
+      :class="`layout-content jpom-node-content ${
+        fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'
+      } ${scrollbarFlag ? '' : 'hide-scrollbar'}`"
+    >
       <welcome v-if="currentId === 'welcome'" :node="node" />
       <project-list v-if="currentId === 'manageList'" :node="node" />
 
@@ -49,22 +65,22 @@
   </a-layout>
 </template>
 <script>
-import { getNodeMenu } from "@/api/menu";
-import Welcome from "@/pages/node/node-layout/welcome";
-import ProjectList from "@/pages/node/node-layout/project/project-list";
+import { getNodeMenu } from '@/api/menu'
+import Welcome from '@/pages/node/node-layout/welcome'
+import ProjectList from '@/pages/node/node-layout/project/project-list'
 
-import Recover from "@/pages/node/node-layout/project/recover-list";
+import Recover from '@/pages/node/node-layout/project/recover-list'
 
-import ScriptTemplate from "@/pages/node/node-layout/other/script-list";
-import ScriptLog from "@/pages/node/node-layout/other/script-log";
-import NginxList from "@/pages/node/node-layout/nginx/list";
-import Cert from "@/pages/node/node-layout/nginx/cert";
-import WhiteList from "@/pages/node/node-layout/system/white-list.vue";
-import Cache from "@/pages/node/node-layout/system/cache";
-import Log from "@/pages/node/node-layout/system/log.vue";
+import ScriptTemplate from '@/pages/node/node-layout/other/script-list'
+import ScriptLog from '@/pages/node/node-layout/other/script-log'
+import NginxList from '@/pages/node/node-layout/nginx/list'
+import Cert from '@/pages/node/node-layout/nginx/cert'
+import WhiteList from '@/pages/node/node-layout/system/white-list.vue'
+import Cache from '@/pages/node/node-layout/system/cache'
+import Log from '@/pages/node/node-layout/system/log.vue'
 
-import ConfigFile from "@/pages/node/node-layout/system/config-file.vue";
-import { mapGetters } from "vuex";
+import ConfigFile from '@/pages/node/node-layout/system/config-file.vue'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -80,79 +96,80 @@ export default {
     Log,
 
     ConfigFile,
-    ScriptLog,
+    ScriptLog
   },
   props: {
     node: {
-      type: Object,
-    },
+      type: Object
+    }
   },
   data() {
     return {
       nodeMenuList: [],
-      selectedKeys: [this.$route.query.id || "welcome"],
-      openKey: [],
-    };
+      selectedKeys: [this.$route.query.id || 'welcome'],
+      openKey: []
+    }
   },
   computed: {
-    ...mapGetters(["getGuideCache"]),
+    ...mapGetters(['getGuideCache']),
     fullScreenFlag() {
-      return this.getGuideCache.fullScreenFlag === undefined ? true : this.getGuideCache.fullScreenFlag;
+      return this.getGuideCache.fullScreenFlag === undefined ? true : this.getGuideCache.fullScreenFlag
     },
     currentId() {
-      return this.selectedKeys[0];
+      return this.selectedKeys[0]
     },
     menuMultipleFlag() {
-      return this.getGuideCache.menuMultipleFlag === undefined ? true : this.getGuideCache.menuMultipleFlag;
+      return this.getGuideCache.menuMultipleFlag === undefined ? true : this.getGuideCache.menuMultipleFlag
     },
     scrollbarFlag() {
-      return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
-    },
+      return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag
+    }
   },
   watch: {},
   created() {
-    let keyList = [];
+    let keyList = []
     if (this.$route.query.pId) {
       // 打开对应的父级菜单
-      keyList = [this.$route.query.pId, "systemConfig"];
+      keyList = [this.$route.query.pId, 'systemConfig']
     }
-    this.openKey = keyList;
-    this.loadNodeMenu();
+    this.openKey = keyList
+    this.loadNodeMenu()
     setTimeout(() => {
-      this.introGuide();
-    }, 1000);
+      this.introGuide()
+    }, 1000)
   },
   methods: {
     // 页面引导
     introGuide() {
-      this.$store.dispatch("tryOpenGuide", {
-        key: "node-index",
+      this.$store.dispatch('tryOpenGuide', {
+        key: 'node-index',
         options: {
           hidePrev: true,
           steps: [
             {
-              title: "导航助手",
-              element: document.querySelector(".ant-drawer-title"),
-              intro: "这里是这个节点的名称和节点地址",
+              title: '导航助手',
+              element: document.querySelector('.ant-drawer-title'),
+              intro: '这里是这个节点的名称和节点地址'
             },
             {
-              title: "导航助手",
-              element: document.querySelector(".jpom-node-sider"),
-              intro: "这里是这个节点的侧边栏菜单",
+              title: '导航助手',
+              element: document.querySelector('.jpom-node-sider'),
+              intro: '这里是这个节点的侧边栏菜单'
             },
             {
-              title: "导航助手",
-              element: document.querySelector(".jpom-node-content"),
-              intro: "这里是这个节点的主要内容展示区",
+              title: '导航助手',
+              element: document.querySelector('.jpom-node-content'),
+              intro: '这里是这个节点的主要内容展示区'
             },
             {
-              title: "导航助手",
-              element: document.querySelector(".whitelistDirectory"),
-              intro: "白名单目录是一个配置型菜单，里面配置的内容将会在</p><p><b>项目列表</b></br><b>Nginx 列表</b></br><b>证书管理</b></p> 【系统管理】->【白名单配置】。",
-            },
-          ],
-        },
-      });
+              title: '导航助手',
+              element: document.querySelector('.whitelistDirectory'),
+              intro:
+                '白名单目录是一个配置型菜单，里面配置的内容将会在</p><p><b>项目列表</b></br><b>Nginx 列表</b></br><b>证书管理</b></p> 【系统管理】->【白名单配置】。'
+            }
+          ]
+        }
+      })
     },
     // 加载菜单
     loadNodeMenu() {
@@ -162,34 +179,34 @@ export default {
             const childs =
               item.childs &&
               item.childs.map((sub) => {
-                return { ...sub, pId: item.id };
-              });
-            return { ...item, childs };
-          });
-          this.nodeMenuList = data;
+                return { ...sub, pId: item.id }
+              })
+            return { ...item, childs }
+          })
+          this.nodeMenuList = data
         }
-      });
+      })
     },
     // 点击菜单
     handleMenuClick(id, pId) {
-      this.selectedKeys = [id];
+      this.selectedKeys = [id]
       this.$router.push({
         query: {
           ...this.$route.query,
           pId: pId,
-          id: id,
-        },
-      });
+          id: id
+        }
+      })
     },
     openChange(keys) {
       if (keys.length && !this.menuMultipleFlag) {
         // 保留一个打开
-        keys = [keys[keys.length - 1]];
+        keys = [keys[keys.length - 1]]
       }
-      this.openKey = keys;
-    },
-  },
-};
+      this.openKey = keys
+    }
+  }
+}
 </script>
 <style scoped>
 .sider-scroll {

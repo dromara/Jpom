@@ -47,7 +47,7 @@
           <a-button :loading="loading" type="primary" @click="getMachineList">搜索</a-button>
           <a-button type="primary" @click="addMachine">添加机器</a-button>
 
-          <a-dropdown v-if="this.layoutType === 'table'">
+          <a-dropdown v-if="layoutType === 'table'">
             <a-menu slot="overlay">
               <a-menu-item key="1" @click="syncToWorkspaceShow()"> 分配节点 </a-menu-item>
               <a-menu-item key="2" @click="syncNodeWhiteConfig"> 同步白名单 </a-menu-item>
@@ -58,7 +58,7 @@
           <a-tooltip v-else title="表格视图才能使用同步配置功能">
             <a-button :disabled="true" type="primary"> 批量操作 <a-icon type="down" /> </a-button>
           </a-tooltip>
-          <a-button type="primary" @click="changeLayout" :icon="this.layoutType === 'card' ? 'layout' : 'table'">
+          <a-button type="primary" @click="changeLayout" :icon="layoutType === 'card' ? 'layout' : 'table'">
             {{ this.layoutType === 'card' ? '卡片' : '表格' }}
           </a-button>
           <a-tooltip>
@@ -77,7 +77,7 @@
         </a-space>
       </template>
       <!-- 卡片视图 -->
-      <template v-if="this.layoutType === 'card'">
+      <template v-if="layoutType === 'card'">
         <a-row>
           <a-row :gutter="[16, 16]">
             <template v-if="list && list.length">
@@ -192,14 +192,14 @@
                   this.getMachineList()
                 }
               "
-              @change="this.getMachineList"
+              @change="getMachineList"
               show-less-items
             />
           </a-col>
         </a-row>
       </template>
       <!-- 表格视图 -->
-      <template v-else-if="this.layoutType === 'table'">
+      <template v-else-if="layoutType === 'table'">
         <a-table
           :columns="columns"
           :data-source="list"
