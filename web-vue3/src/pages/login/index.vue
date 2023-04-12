@@ -107,8 +107,6 @@
 import { login, loginConfig, mfaVerify, oauth2Url, oauth2Login } from '@/api/user/user'
 import { checkSystem } from '@/api/install'
 import sha1 from 'js-sha1'
-import { useRouter, useRoute } from 'vue-router'
-import { notification, message } from 'ant-design-vue'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { useMenuStore } from '@/stores/menu'
@@ -116,7 +114,6 @@ import { useMenuStore } from '@/stores/menu'
 import maxkeyImg from '@/assets/images/maxkey.png'
 import giteeImg from '@/assets/images/gitee.svg'
 import githubImg from '@/assets/images/github.png'
-import { GlobalWindow } from '@/interface/common'
 
 interface IFormState {
   loginName: string
@@ -156,7 +153,7 @@ const backgroundImage = computed(() => {
 const beginCheckSystem = () => {
   checkSystem().then((res) => {
     if (res.code !== 200) {
-      notification.warn({
+      $notification.warn({
         message: res.msg
       })
     }
@@ -177,10 +174,10 @@ const getLoginConfig = () => {
   loginConfig().then((res) => {
     if (res.data && res.data.demo) {
       const demo = res.data.demo
-
-      notification.info({
+      const p = h('p', { domProps: { innerHTML: demo.msg } }, [])
+      $notification.info({
         message: '温馨提示',
-        description: h('div', null, [h('p', { domProps: { innerHTML: demo.msg } }, null)])
+        description: h('div', {}, [p])
       })
       loginForm.loginName = demo.user
     }
@@ -192,14 +189,13 @@ const changeCode = () => {
   randCode.value = import.meta.env.JPOM_BASE_API_URL + 'randCode.png?r=' + new Date().getTime()
   loginForm.code = ''
 }
-const _window = window as unknown as GlobalWindow
 
 const checkOauth2 = () => {
   if (route.query.code) {
     oauth2Login({
       code: route.query.code,
       state: route.query.state,
-      provide: _window.oauth2Provide
+      provide: jpomWindow.oauth2Provide
     }).then((res) => {
       // 删除参数，避免刷新页面 code 已经被使用提示错误信息
       let query = Object.assign({}, route.query)
@@ -220,13 +216,13 @@ const checkOauth2 = () => {
 const toOauth2Url = (provide: string) => {
   oauth2Url({ provide: provide }).then((res) => {
     if (res.code === 200 && res.data) {
-      message.loading({ content: '跳转到第三方系统中', key: 'oauth2', duration: 0 })
+      $message.loading({ content: '跳转到第三方系统中', key: 'oauth2', duration: 0 })
       location.href = res.data.toUrl
     }
   })
 }
 const startDispatchLogin = (res: any) => {
-  notification.success({
+  $notification.success({
     message: res.msg
   })
   const existWorkspace = res.data.bindWorkspaceModels.find((item: any) => item.id === appStore.getWorkspaceId)

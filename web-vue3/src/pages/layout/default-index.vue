@@ -4,12 +4,12 @@
       v-model="collapsed"
       :trigger="null"
       collapsible
-      :class="`${this.fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}`"
+      :class="`${fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}`"
     >
       <a-tooltip placement="right" title="点击可以折叠左侧菜单栏">
         <div class="logo" @click="changeCollapsed()">
           <img :src="logoUrl" />
-          {{ this.subTitle }}
+          {{ subTitle }}
         </div>
       </a-tooltip>
       <side-menu class="side-menu" :mode="mode" />
@@ -28,156 +28,86 @@
     </a-layout>
   </a-layout>
 </template>
-<script>
-import { mapGetters } from 'vuex'
+<script setup lang="ts">
 import SideMenu from './side-menu'
 // import UserHeader from "./user-header";
 import ContentTab from './content-tab'
 import { checkSystem } from '@/api/install'
 import { executionRequest } from '@/api/external'
 import { parseTime, pageBuildInfo } from '@/utils/const'
+import { useAppStore } from '@/stores/app'
+import { useGuideStore } from '@/stores/guide'
 
-export default {
-  props: {
-    mode: {
-      type: String
-    }
-  },
-  components: {
-    SideMenu,
-    // UserHeader,
-    ContentTab
-  },
-  data() {
-    return {
-      collapsed: false,
-      subTitle: '项目管理',
-      logoUrl: '',
-      fullScreenFlag: false
-    }
-  },
-  // computed: {
-  //   ...mapGetters(["getCollapsed", "getGuideCache"]),
-  //   fullScreenFlag() {
-  //     return this.getGuideCache.fullScreenFlag === undefined ? true : this.getGuideCache.fullScreenFlag;
-  //   },
-  // },
-  watch: {},
-  mounted() {
-    this.checkSystem()
-
-    this.collapsed = this.getCollapsed ? true : false
-  },
-  methods: {
-    // 页面引导
-    introGuide() {
-      // 如果要显示引导并且没有使用过
-      this.$store.dispatch('tryOpenGuide', {
-        key: 'index',
-        options: {
-          hidePrev: true,
-          steps: [
-            {
-              title: '导航助手',
-              intro:
-                '<p>不要慌，这是页面导航系统,介绍界面上的一些基本信息.</br>' +
-                '<span style="color:red;"><b>第一次使用本系统强烈建议您简单看看引导</b></span></br>' +
-                '如果您不想看到，可以点击<b>空白处</b>直接关闭。</p><p>另外，可以使用键盘<b>左右方向键</b>切换上一步或者下一步哦</p>'
-            },
-            {
-              title: '导航助手',
-              element: document.querySelector('.logo'),
-              intro: '点击这里可以折叠切换左侧菜单栏'
-            },
-            {
-              title: '导航助手',
-              element: document.querySelector('.side-menu'),
-              intro: '这里是侧边栏菜单区域，温馨提醒系统中还存在【节点管理】导航哟，期待您挖掘'
-            },
-            {
-              title: '导航助手',
-              element: document.querySelector('.jpom-workspace'),
-              intro: '这里是工作空间,可以自由切换工作空间'
-            },
-            {
-              title: '导航助手',
-              element: document.querySelector('.jpom-user-operation'),
-              intro: '这里可以设置当前管理员的邮箱或者其他信息，开启关闭导航，重置导航等，当然还有退出登录'
-            },
-            {
-              title: '导航助手',
-              element: document.querySelector('.app-header'),
-              intro: '这是页面头部，会出现多个 Tab 标签页，以及个人信息等操作按钮'
-            },
-            {
-              title: '导航助手',
-              element: document.querySelector('.ant-tabs-nav-wrap'),
-              intro: '这里是打开的选项卡，选项卡支持右键菜单哟(关闭其他,关闭左侧,关闭右侧)'
-            },
-            {
-              title: '导航助手',
-              element: document.querySelector('.layout-content'),
-              intro: '这里是主要的内容展示区域'
-            },
-            {
-              title: '导航助手',
-              intro: '温馨提示部分页面有表格视图和卡片视图，不同视图中的功能按钮有些微的差异奥'
-            },
-            {
-              title: '导航助手',
-              intro: '温馨提示部分数据创建页面会存在小问号提示功能或者属性的作用以及含义,建议您都看看小问号里面的内容'
-            }
-          ]
-        }
-      })
-    },
-    // 检查是否需要初始化
-    checkSystem() {
-      checkSystem().then((res) => {
-        if (res.data) {
-          window.routerBase = res.data.routerBase || ''
-          if (res.data.subTitle) {
-            this.subTitle = res.data.subTitle
-          }
-          this.logoUrl = ((res.data.routerBase || '') + '/logo_image').replace(new RegExp('//', 'gm'), '/')
-
-          // 禁用导航
-          this.$store.dispatch('commitGuide', { disabledGuide: res.data.disabledGuide, inDocker: res.data.inDocker })
-          $notification.config({
-            placement: res.data.notificationPlacement ? res.data.notificationPlacement : 'topRight'
-          })
-        }
-        if (res.code !== 200) {
-          $notification.warn({
-            message: res.msg
-          })
-        } else {
-          this.introGuide()
-        }
-        if (res.code === 999) {
-          this.$router.push('/system/ipAccess')
-        } else if (res.code === 222) {
-          this.$router.push('/install')
-        }
-      })
-      // 控制台输出版本号信息
-      const buildInfo = pageBuildInfo()
-      executionRequest('https://jpom.top/docs/versions.show', { ...buildInfo, p: this.$route.path }).then((data) => {
-        console.log(
-          '\n %c ' + parseTime(buildInfo.t) + ' %c vs %c ' + buildInfo.v + ' %c vs %c ' + data,
-          'color: #ffffff; background: #f1404b; padding:5px 0;',
-          'background: #1890ff; padding:5px 0;',
-          'color: #ffffff; background: #f1404b; padding:5px 0;',
-          'background: #1890ff; padding:5px 0;',
-          'color: #ffffff; background: #f1404b; padding:5px 0;'
-        )
-      })
-    },
-    changeCollapsed() {
-      this.collapsed = !this.collapsed
-      this.$store.dispatch('collapsed', this.collapsed ? 1 : 0)
-    }
+defineProps({
+  mode: {
+    type: String,
+    required: true
   }
+})
+
+const collapsed = ref(false)
+const subTitle = ref('项目管理')
+const logoUrl = ref('')
+const fullScreenFlag = ref(false)
+const appStore = useAppStore()
+const guideStore = useGuideStore()
+onMounted(() => {
+  checkSystemHannder()
+
+  collapsed.value = appStore.getCollapsed
+})
+
+const router = useRouter()
+const route = useRoute()
+
+// 检查是否需要初始化
+const checkSystemHannder = () => {
+  checkSystem().then((res) => {
+    if (res.data) {
+      jpomWindow.routerBase = res.data.routerBase || ''
+      if (res.data.subTitle) {
+        subTitle.value = res.data.subTitle
+      }
+      logoUrl.value = ((res.data.routerBase || '') + '/logo_image').replace(new RegExp('//', 'gm'), '/')
+
+      // 禁用导航
+      guideStore.commitGuide({
+        disabledGuide: res.data.disabledGuide ? true : false,
+        extendPlugins: res.data.extendPlugins as string[]
+      })
+
+      $notification.config({
+        placement: res.data.notificationPlacement ? res.data.notificationPlacement : 'topRight'
+      })
+    }
+    if (res.code !== 200) {
+      $notification.warn({
+        message: res.msg
+      })
+    } else {
+    }
+    if (res.code === 999) {
+      router.push('/system/ipAccess')
+    } else if (res.code === 222) {
+      router.push('/install')
+    }
+  })
+  // 控制台输出版本号信息
+  const buildInfo = pageBuildInfo()
+  executionRequest('https://jpom.top/docs/versions.show', { ...buildInfo, p: route.path }).then((data) => {
+    console.log(
+      '\n %c ' + parseTime(buildInfo.t) + ' %c vs %c ' + buildInfo.v + ' %c vs %c ' + data,
+      'color: #ffffff; background: #f1404b; padding:5px 0;',
+      'background: #1890ff; padding:5px 0;',
+      'color: #ffffff; background: #f1404b; padding:5px 0;',
+      'background: #1890ff; padding:5px 0;',
+      'color: #ffffff; background: #f1404b; padding:5px 0;'
+    )
+  })
+}
+const changeCollapsed = () => {
+  collapsed.value = !collapsed.value
+  appStore.collapsed(collapsed.value)
 }
 </script>
 <style scoped>

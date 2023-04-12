@@ -6,9 +6,12 @@
 const key = 'Jpom-Guide-Cache'
 
 interface IState {
-  guideCache: string
   disabledGuide: boolean
-  inDocker: boolean
+  extendPlugins: string[]
+}
+
+interface IStateCache extends IState {
+  guideCache: string
 }
 
 interface IStateGuideCache {
@@ -17,12 +20,12 @@ interface IStateGuideCache {
   menuMultipleFlag: boolean
 }
 
-const useGuideStore = defineStore('guide', {
-  state: (): IState => ({
+export const useGuideStore = defineStore('guide', {
+  state: (): IStateCache => ({
     // 引导缓存
     guideCache: localStorage.getItem(key) || '',
     disabledGuide: false,
-    inDocker: false
+    extendPlugins: []
   }),
 
   actions: {
@@ -59,7 +62,7 @@ const useGuideStore = defineStore('guide', {
     },
     commitGuide(guideData: IState) {
       this.disabledGuide = guideData.disabledGuide
-      this.inDocker = guideData.inDocker
+      this.extendPlugins = guideData.extendPlugins
     }
   },
   getters: {
@@ -76,13 +79,11 @@ const useGuideStore = defineStore('guide', {
     getDisabledGuide(state) {
       return state.disabledGuide
     },
-    getInDocker(state) {
-      return state.inDocker
+    getExtendPlugins(state) {
+      return state.extendPlugins
     }
   }
 })
-
-export default useGuideStore
 
 // const app = {
 //   state: {

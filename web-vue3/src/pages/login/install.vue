@@ -178,7 +178,6 @@ import { initInstall } from '@/api/install'
 import QrcodeVue from 'qrcode.vue'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
-import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
