@@ -174,7 +174,7 @@
               :disabled="!!percentage"
             >
               <template v-if="percentage">
-                <a-icon type="loading" v-if="this.uploadFileList.length" /><span v-else>-</span>
+                <a-icon type="loading" v-if="uploadFileList.length" /><span v-else>-</span>
               </template>
 
               <a-button v-else icon="upload">选择文件</a-button>
@@ -345,7 +345,7 @@
           <a-space direction="vertical" style="width: 100%">
             <span v-if="uploadPath">当前目录:{{ uploadPath }}</span>
             <!-- <a-tag v-if="">目录创建成功后需要手动刷新右边树才能显示出来哟</a-tag> -->
-            <a-tooltip :title="this.addFileOrFolderType === 1 ? '目录创建成功后需要手动刷新右边树才能显示出来哟' : ''">
+            <a-tooltip :title="addFileOrFolderType === 1 ? '目录创建成功后需要手动刷新右边树才能显示出来哟' : ''">
               <a-input v-model="fileFolderName" placeholder="输入文件或者文件夹名" />
             </a-tooltip>
             <a-row type="flex" justify="center">
@@ -389,7 +389,7 @@
         }
       "
     >
-      <projectFileBackup v-if="backupListVisible" :nodeId="this.nodeId" :projectId="this.projectId"></projectFileBackup>
+      <projectFileBackup v-if="backupListVisible" :nodeId="nodeId" :projectId="projectId"></projectFileBackup>
     </a-modal>
   </div>
 </template>

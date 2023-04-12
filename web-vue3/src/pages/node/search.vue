@@ -1,6 +1,6 @@
 <template>
   <div class="full-content">
-    <template v-if="this.useSuggestions">
+    <template v-if="useSuggestions">
       <a-result title="当前工作空间还没有项目" sub-title="可以创建节点分发或者到节点管理创建项目"> </a-result>
     </template>
     <a-table
@@ -42,7 +42,7 @@
             <a-button :loading="loading" type="primary" @click="getNodeProjectData">搜索</a-button>
           </a-tooltip>
 
-          <a-dropdown v-if="this.selectedRowKeys && this.selectedRowKeys.length">
+          <a-dropdown v-if="selectedRowKeys && this.selectedRowKeys.length">
             <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
             <a-menu slot="overlay">
               <a-menu-item>

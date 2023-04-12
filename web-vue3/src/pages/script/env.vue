@@ -1,22 +1,22 @@
 <template>
   <div class="full-content">
-    <workspaceEnv ref="workspaceEnv" :workspaceId="this.getWorkspaceId" :global="true" />
+    <workspaceEnv ref="workspaceEnv" :workspaceId="getWorkspaceId" :global="true" />
   </div>
 </template>
 <script>
-import workspaceEnv from "@/pages/system/workspace-env.vue";
-import { mapGetters } from "vuex";
+import workspaceEnv from '@/pages/system/workspace-env.vue'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
-    workspaceEnv,
+    workspaceEnv
   },
   data() {
-    return {};
+    return {}
   },
-  computed: { ...mapGetters(["getWorkspaceId"]) },
+  computed: { ...mapGetters(['getWorkspaceId']) },
   created() {},
-  methods: {},
-};
+  methods: {}
+}
 </script>
 <style scoped></style>

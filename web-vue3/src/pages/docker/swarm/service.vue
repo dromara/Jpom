@@ -480,15 +480,15 @@
       <swarm-task
         v-if="taskVisible"
         :visible="taskVisible"
-        :taskState="this.temp.state"
-        :id="this.id"
-        :serviceId="this.temp.id"
-        :urlPrefix="this.urlPrefix"
+        :taskState="temp.state"
+        :id="id"
+        :serviceId="temp.id"
+        :urlPrefix="urlPrefix"
       />
     </a-modal>
     <!-- 查看日志 -->
     <a-modal destroyOnClose v-model="logVisible" title="查看日志" width="80vw" :footer="null" :maskClosable="false">
-      <pull-log v-if="logVisible" :id="this.id" :dataId="this.temp.id" type="service" />
+      <pull-log v-if="logVisible" :id="id" :dataId="temp.id" type="service" />
     </a-modal>
   </div>
 </template>

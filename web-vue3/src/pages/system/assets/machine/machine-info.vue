@@ -12,20 +12,40 @@
             {{ machineInfo && machineInfo.name }}
           </template>
           <template slot="extra">
-            <a-tag v-if="machineInfo" :color="machineInfo && machineInfo.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
-              {{ statusMap[machineInfo && machineInfo.status] || "未知" }}
+            <a-tag
+              v-if="machineInfo"
+              :color="machineInfo && machineInfo.status === 1 ? 'green' : 'pink'"
+              style="margin-right: 0px"
+            >
+              {{ statusMap[machineInfo && machineInfo.status] || '未知' }}
             </a-tag>
           </template>
           <a-space direction="vertical" style="display: block">
-            <a-alert v-if="machineInfo && machineInfo.status !== 1" message="状态描述" :description="(machineInfo && machineInfo.statusMsg) || ''" type="warning" show-icon />
+            <a-alert
+              v-if="machineInfo && machineInfo.status !== 1"
+              message="状态描述"
+              :description="(machineInfo && machineInfo.statusMsg) || ''"
+              type="warning"
+              show-icon
+            />
             <a-descriptions :column="4" :bordered="true">
               <template slot="title"> </template>
 
-              <a-descriptions-item label="系统名" :span="2">{{ machineInfo && machineInfo.osName }}</a-descriptions-item>
-              <a-descriptions-item label="系统版本" :span="2">{{ machineInfo && machineInfo.osVersion }}</a-descriptions-item>
-              <a-descriptions-item label="硬件信息" :span="2"> {{ machineInfo && machineInfo.osHardwareVersion }} </a-descriptions-item>
-              <a-descriptions-item label="CPU型号" :span="2"> {{ machineInfo && machineInfo.osCpuIdentifierName }} </a-descriptions-item>
-              <a-descriptions-item label="主机名" :span="2"> {{ machineInfo && machineInfo.hostName }} </a-descriptions-item>
+              <a-descriptions-item label="系统名" :span="2">{{
+                machineInfo && machineInfo.osName
+              }}</a-descriptions-item>
+              <a-descriptions-item label="系统版本" :span="2">{{
+                machineInfo && machineInfo.osVersion
+              }}</a-descriptions-item>
+              <a-descriptions-item label="硬件信息" :span="2">
+                {{ machineInfo && machineInfo.osHardwareVersion }}
+              </a-descriptions-item>
+              <a-descriptions-item label="CPU型号" :span="2">
+                {{ machineInfo && machineInfo.osCpuIdentifierName }}
+              </a-descriptions-item>
+              <a-descriptions-item label="主机名" :span="2">
+                {{ machineInfo && machineInfo.hostName }}
+              </a-descriptions-item>
               <a-descriptions-item label="IPV4" :span="2">
                 <template v-if="machineInfo && machineInfo.ipv4List && machineInfo.ipv4List.length">
                   {{ machineInfo && machineInfo.ipv4List[0] }}
@@ -48,29 +68,53 @@
                 </template>
               </a-descriptions-item>
               <a-descriptions-item label="CPU数">{{ machineInfo && machineInfo.osCpuCores }} </a-descriptions-item>
-              <a-descriptions-item label="内存">{{ renderSize(machineInfo && machineInfo.osMoneyTotal) }} </a-descriptions-item>
-              <a-descriptions-item label="虚拟内存">{{ renderSize(machineInfo && machineInfo.osVirtualMax) }} </a-descriptions-item>
-              <a-descriptions-item label="交互内存">{{ renderSize(machineInfo && machineInfo.osSwapTotal) }} </a-descriptions-item>
-              <a-descriptions-item label="硬盘">{{ renderSize(machineInfo && machineInfo.osFileStoreTotal) }} </a-descriptions-item>
+              <a-descriptions-item label="内存"
+                >{{ renderSize(machineInfo && machineInfo.osMoneyTotal) }}
+              </a-descriptions-item>
+              <a-descriptions-item label="虚拟内存"
+                >{{ renderSize(machineInfo && machineInfo.osVirtualMax) }}
+              </a-descriptions-item>
+              <a-descriptions-item label="交互内存"
+                >{{ renderSize(machineInfo && machineInfo.osSwapTotal) }}
+              </a-descriptions-item>
+              <a-descriptions-item label="硬盘"
+                >{{ renderSize(machineInfo && machineInfo.osFileStoreTotal) }}
+              </a-descriptions-item>
 
               <a-descriptions-item label="负载">{{ machineInfo && machineInfo.osLoadAverage }} </a-descriptions-item>
-              <a-descriptions-item label="系统运行时间">{{ formatDuration(((machineInfo && machineInfo.osSystemUptime) || 0) * 1000, "", 3) }} </a-descriptions-item>
+              <a-descriptions-item label="系统运行时间"
+                >{{ formatDuration(((machineInfo && machineInfo.osSystemUptime) || 0) * 1000, '', 3) }}
+              </a-descriptions-item>
               <a-descriptions-item label="插件版本">{{ machineInfo && machineInfo.jpomVersion }} </a-descriptions-item>
-              <a-descriptions-item label="插件运行时间">{{ formatDuration(machineInfo && machineInfo.jpomUptime, "", 3) }} </a-descriptions-item>
-              <a-descriptions-item label="插件构建时间">{{ machineInfo && machineInfo.jpomBuildTime }} </a-descriptions-item>
+              <a-descriptions-item label="插件运行时间"
+                >{{ formatDuration(machineInfo && machineInfo.jpomUptime, '', 3) }}
+              </a-descriptions-item>
+              <a-descriptions-item label="插件构建时间"
+                >{{ machineInfo && machineInfo.jpomBuildTime }}
+              </a-descriptions-item>
               <a-descriptions-item label="JDK版本">{{ machineInfo && machineInfo.javaVersion }} </a-descriptions-item>
-              <a-descriptions-item label="JVM总内存">{{ renderSize(machineInfo && machineInfo.jvmTotalMemory) }} </a-descriptions-item>
-              <a-descriptions-item label="JVM剩余内存">{{ renderSize(machineInfo && machineInfo.jvmFreeMemory) }} </a-descriptions-item>
+              <a-descriptions-item label="JVM总内存"
+                >{{ renderSize(machineInfo && machineInfo.jvmTotalMemory) }}
+              </a-descriptions-item>
+              <a-descriptions-item label="JVM剩余内存"
+                >{{ renderSize(machineInfo && machineInfo.jvmFreeMemory) }}
+              </a-descriptions-item>
 
-              <a-descriptions-item label="项目数">{{ machineInfo && machineInfo.jpomProjectCount }} </a-descriptions-item>
-              <a-descriptions-item label="脚本数">{{ machineInfo && machineInfo.jpomScriptCount }} </a-descriptions-item>
-              <a-descriptions-item label="网络延迟">{{ formatDuration(machineInfo && machineInfo.networkDelay) }} </a-descriptions-item>
+              <a-descriptions-item label="项目数"
+                >{{ machineInfo && machineInfo.jpomProjectCount }}
+              </a-descriptions-item>
+              <a-descriptions-item label="脚本数"
+                >{{ machineInfo && machineInfo.jpomScriptCount }}
+              </a-descriptions-item>
+              <a-descriptions-item label="网络延迟"
+                >{{ formatDuration(machineInfo && machineInfo.networkDelay) }}
+              </a-descriptions-item>
 
               <a-descriptions-item label="硬盘占用" :span="4">
                 <a-progress
                   :stroke-color="{
                     '0%': '#87d068',
-                    '100%': 'red',
+                    '100%': 'red'
                   }"
                   :percent="formatPercent2Number((machineInfo && machineInfo.osOccupyDisk) || 0)"
                 />
@@ -79,7 +123,7 @@
                 <a-progress
                   :stroke-color="{
                     '0%': '#87d068',
-                    '100%': 'red',
+                    '100%': 'red'
                   }"
                   :percent="formatPercent2Number((machineInfo && machineInfo.osOccupyMemory) || 0)"
                 />
@@ -88,7 +132,7 @@
                 <a-progress
                   :stroke-color="{
                     '0%': '#87d068',
-                    '100%': 'red',
+                    '100%': 'red'
                   }"
                   :percent="formatPercent2Number((machineInfo && machineInfo.osOccupyCpu) || 0)"
                 />
@@ -101,21 +145,27 @@
         <a-space direction="vertical" style="display: block">
           <a-card size="small" title="基础信息">
             <template slot="extra">
-              <a-button size="small" v-if="historyChart" type="primary" @click="handleHistory"><a-icon type="area-chart" />历史监控图表</a-button>
+              <a-button size="small" v-if="historyChart" type="primary" @click="handleHistory"
+                ><a-icon type="area-chart" />历史监控图表</a-button
+              >
             </template>
             <!-- top 图表 -->
             <div id="top-chart" class="chart">loading...</div>
           </a-card>
           <a-card size="small" title="网络流量信息">
             <template slot="extra">
-              <a-button size="small" v-if="netHistoryChart" type="primary" @click="handleHistory('network-stat')"><a-icon type="area-chart" />历史监控图表</a-button>
+              <a-button size="small" v-if="netHistoryChart" type="primary" @click="handleHistory('network-stat')"
+                ><a-icon type="area-chart" />历史监控图表</a-button
+              >
             </template>
             <!-- 网络流量图表 -->
             <div id="net-chart" class="chart">loading...</div>
           </a-card>
           <a-card size="small" title="机器延迟">
             <template slot="extra">
-              <a-button size="small" v-if="networkDelayChart" type="primary" @click="handleHistory('networkDelay')"><a-icon type="area-chart" />历史监控图表</a-button>
+              <a-button size="small" v-if="networkDelayChart" type="primary" @click="handleHistory('networkDelay')"
+                ><a-icon type="area-chart" />历史监控图表</a-button
+              >
             </template>
             <!-- 机器延迟 图表 -->
             <div id="network-delay-chart" class="chart">loading...</div>
@@ -153,7 +203,15 @@
             </a-row>
           </template>
 
-          <a-table size="middle" :loading="loading" :columns="processColumns" :data-source="processList" bordered rowKey="processId" :pagination="false">
+          <a-table
+            size="middle"
+            :loading="loading"
+            :columns="processColumns"
+            :data-source="processList"
+            bordered
+            rowKey="processId"
+            :pagination="false"
+          >
             <a-tooltip slot="percentTooltip" slot-scope="text" placement="topLeft" :title="formatPercent(text)">
               {{ formatPercent(text) }}
             </a-tooltip>
@@ -161,7 +219,7 @@
               {{ parseTime(text) }}
             </a-tooltip>
             <a-tooltip slot="durationTooltip" slot-scope="text" placement="topLeft" :title="formatDuration(text)">
-              {{ formatDuration(text, "", 2) }}
+              {{ formatDuration(text, '', 2) }}
             </a-tooltip>
 
             <a-tooltip slot="sizeTooltip" slot-scope="text" placement="topLeft" :title="renderSize(text)">
@@ -177,7 +235,15 @@
         </a-card>
       </a-tab-pane>
       <a-tab-pane key="disk" tab="文件系统">
-        <a-table size="middle" :loading="diskLoading" :columns="diskColumns" :data-source="diskList" bordered rowKey="uuid" :pagination="false">
+        <a-table
+          size="middle"
+          :loading="diskLoading"
+          :columns="diskColumns"
+          :data-source="diskList"
+          bordered
+          rowKey="uuid"
+          :pagination="false"
+        >
           <a-tooltip slot="percentTooltip" slot-scope="text" placement="topLeft" :title="formatPercent(text)">
             {{ formatPercent(text) }}
           </a-tooltip>
@@ -194,7 +260,14 @@
         </a-table>
       </a-tab-pane>
       <a-tab-pane key="hw-disk" tab="硬件硬盘">
-        <a-table size="middle" :columns="hwDiskColumns" :data-source="hwDiskList" bordered :rowKey="(record, index) => index" :pagination="false">
+        <a-table
+          size="middle"
+          :columns="hwDiskColumns"
+          :data-source="hwDiskList"
+          bordered
+          :rowKey="(record, index) => index"
+          :pagination="false"
+        >
           <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
             {{ text }}
           </a-tooltip>
@@ -202,9 +275,17 @@
             {{ renderSize(text) }}
           </a-tooltip>
           <a-tooltip slot="durationTooltip" slot-scope="text" placement="topLeft" :title="formatDuration(text)">
-            {{ formatDuration(text, "", 2) }}
+            {{ formatDuration(text, '', 2) }}
           </a-tooltip>
-          <a-table size="middle" slot="expandedRowRender" slot-scope="item" :columns="hwDiskPartitionColumns" :rowKey="(record, index) => index" :data-source="item.partition" :pagination="false">
+          <a-table
+            size="middle"
+            slot="expandedRowRender"
+            slot-scope="item"
+            :columns="hwDiskPartitionColumns"
+            :rowKey="(record, index) => index"
+            :data-source="item.partition"
+            :pagination="false"
+          >
             <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
               {{ text }}
             </a-tooltip>
@@ -255,15 +336,29 @@
         LOWER_LAYER_DOWN(7); -->
 
               <a-tag v-if="item.ifOperStatus === 'UP'" color="green">{{ item.ifOperStatus }}</a-tag>
-              <a-tag v-else-if="item.ifOperStatus === 'DOWN' || item.ifOperStatus === 'TESTING' || item.ifOperStatus === 'DORMANT'" color="orange">{{ item.ifOperStatus }}</a-tag>
-              <a-tag v-else-if="item.ifOperStatus === 'UNKNOWN' || item.ifOperStatus === 'NOT_PRESENT' || item.ifOperStatus === 'LOWER_LAYER_DOWN'" color="red">{{ item.ifOperStatus }}</a-tag>
+              <a-tag
+                v-else-if="
+                  item.ifOperStatus === 'DOWN' || item.ifOperStatus === 'TESTING' || item.ifOperStatus === 'DORMANT'
+                "
+                color="orange"
+                >{{ item.ifOperStatus }}</a-tag
+              >
+              <a-tag
+                v-else-if="
+                  item.ifOperStatus === 'UNKNOWN' ||
+                  item.ifOperStatus === 'NOT_PRESENT' ||
+                  item.ifOperStatus === 'LOWER_LAYER_DOWN'
+                "
+                color="red"
+                >{{ item.ifOperStatus }}</a-tag
+              >
               <a-tag v-else>{{ item.ifOperStatus }}</a-tag>
             </template>
             <a-descriptions title="" bordered :column="4">
               <a-descriptions-item label="MAC"> {{ item.macaddr }} </a-descriptions-item>
               <a-descriptions-item label="MTU"> {{ item.mtu }} </a-descriptions-item>
               <a-descriptions-item label="速度">{{ renderBpsSize(item.speed) }} </a-descriptions-item>
-              <a-descriptions-item label="虚拟MAC">{{ item.knownVmMacAddr ? "是" : "否" }} </a-descriptions-item>
+              <a-descriptions-item label="虚拟MAC">{{ item.knownVmMacAddr ? '是' : '否' }} </a-descriptions-item>
 
               <a-descriptions-item label="IPV4" :span="4">
                 <a-tag :key="ipItem" v-for="ipItem in item.ipv4addr || []">{{ ipItem }}</a-tag>
@@ -287,39 +382,67 @@
     </a-tabs>
 
     <!-- 历史监控 -->
-    <a-modal destroyOnClose v-model="monitorVisible.visible" width="75%" title="历史监控图表" :footer="null" :maskClosable="false">
-      <node-top v-if="monitorVisible && monitorVisible.visible" :nodeId="this.nodeId" :machineId="this.machineId" :type="monitorVisible.type"></node-top>
+    <a-modal
+      destroyOnClose
+      v-model="monitorVisible.visible"
+      width="75%"
+      title="历史监控图表"
+      :footer="null"
+      :maskClosable="false"
+    >
+      <node-top
+        v-if="monitorVisible && monitorVisible.visible"
+        :nodeId="nodeId"
+        :machineId="machineId"
+        :type="monitorVisible.type"
+      ></node-top>
     </a-modal>
   </div>
 </template>
 <script>
-import { nodeMonitorData, getProcessList, killPid } from "@/api/node";
-import { renderSize, formatPercent, parseTime, formatDuration, formatPercent2Number, renderBpsSize } from "@/utils/const";
-import CustomSelect from "@/components/customSelect";
-import NodeTop from "@/pages/node/node-layout/node-top";
-import { generateNodeTopChart, drawChart, machineInfo, generateNodeNetChart, machineDiskInfo, machineHwDiskInfo, generateNodeNetworkTimeChart, machineNetworkInterfaces } from "@/api/node-stat";
-import { statusMap } from "@/api/system/assets-machine";
+import { nodeMonitorData, getProcessList, killPid } from '@/api/node'
+import {
+  renderSize,
+  formatPercent,
+  parseTime,
+  formatDuration,
+  formatPercent2Number,
+  renderBpsSize
+} from '@/utils/const'
+import CustomSelect from '@/components/customSelect'
+import NodeTop from '@/pages/node/node-layout/node-top'
+import {
+  generateNodeTopChart,
+  drawChart,
+  machineInfo,
+  generateNodeNetChart,
+  machineDiskInfo,
+  machineHwDiskInfo,
+  generateNodeNetworkTimeChart,
+  machineNetworkInterfaces
+} from '@/api/node-stat'
+import { statusMap } from '@/api/system/assets-machine'
 
 export default {
   components: {
     CustomSelect,
-    NodeTop,
+    NodeTop
   },
   props: {
     nodeId: {
-      type: String,
+      type: String
     },
     machineId: {
-      type: String,
-    },
+      type: String
+    }
   },
   computed: {
     idInfo() {
       return {
         nodeId: this.nodeId,
-        machineId: this.machineId,
-      };
-    },
+        machineId: this.machineId
+      }
+    }
   },
   data() {
     return {
@@ -329,70 +452,147 @@ export default {
       processList: [],
       diskList: [],
       hwDiskList: [],
-      defaultProcessNames: ["java", "python", "mysql", "php", "docker"],
+      defaultProcessNames: ['java', 'python', 'mysql', 'php', 'docker'],
       processNames: [],
       monitorVisible: {
         visible: false,
-        type: "",
+        type: ''
       },
-      timeRange: "",
+      timeRange: '',
       historyData: [],
       processSearch: {
-        processName: "java",
-        processCount: 20,
+        processName: 'java',
+        processCount: 20
       },
       processColumns: [
-        { title: "ID", dataIndex: "processId", width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "名称", dataIndex: "name", width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "端口", dataIndex: "port", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "所有者", dataIndex: "user", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        {
+          title: 'ID',
+          dataIndex: 'processId',
+          width: '80px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'tooltip' }
+        },
+        { title: '名称', dataIndex: 'name', width: '80px', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '端口', dataIndex: 'port', width: '100px', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: '所有者',
+          dataIndex: 'user',
+          width: '100px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'tooltip' }
+        },
 
-        { title: "状态", dataIndex: "state", width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "虚拟内存", dataIndex: "virtualSize", width: "100px", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
-        { title: "CPU", dataIndex: "processCpuLoadCumulative", width: "100px", ellipsis: true, scopedSlots: { customRender: "percentTooltip" } },
-        { title: "驻留集", dataIndex: "residentSetSize", width: "100px", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
-        { title: "优先级", dataIndex: "priority", width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "启动时间", dataIndex: "startTime", width: "180px", ellipsis: true, scopedSlots: { customRender: "timeTooltip" } },
-        { title: "运行时间", dataIndex: "upTime", width: "100px", ellipsis: true, scopedSlots: { customRender: "durationTooltip" } },
-        { title: "用户时间", dataIndex: "userTime", width: "100px", ellipsis: true, scopedSlots: { customRender: "durationTooltip" } },
-        { title: "路径", dataIndex: "path", width: "180px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "启动命令", dataIndex: "commandLine", width: "180px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "80px", fixed: "right" },
+        { title: '状态', dataIndex: 'state', width: '80px', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: '虚拟内存',
+          dataIndex: 'virtualSize',
+          width: '100px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'sizeTooltip' }
+        },
+        {
+          title: 'CPU',
+          dataIndex: 'processCpuLoadCumulative',
+          width: '100px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'percentTooltip' }
+        },
+        {
+          title: '驻留集',
+          dataIndex: 'residentSetSize',
+          width: '100px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'sizeTooltip' }
+        },
+        {
+          title: '优先级',
+          dataIndex: 'priority',
+          width: '80px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'tooltip' }
+        },
+        {
+          title: '启动时间',
+          dataIndex: 'startTime',
+          width: '180px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'timeTooltip' }
+        },
+        {
+          title: '运行时间',
+          dataIndex: 'upTime',
+          width: '100px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'durationTooltip' }
+        },
+        {
+          title: '用户时间',
+          dataIndex: 'userTime',
+          width: '100px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'durationTooltip' }
+        },
+        { title: '路径', dataIndex: 'path', width: '180px', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: '启动命令',
+          dataIndex: 'commandLine',
+          width: '180px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'tooltip' }
+        },
+        {
+          title: '操作',
+          dataIndex: 'operation',
+          scopedSlots: { customRender: 'operation' },
+          align: 'center',
+          width: '80px',
+          fixed: 'right'
+        }
       ],
       diskColumns: [
-        { title: "uuid", dataIndex: "uuid", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "卷", dataIndex: "mount", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "文件系统类型", dataIndex: "type", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "描述", dataIndex: "description", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "剩余空间(未分配)", dataIndex: "freeSpace", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
-        { title: "剩余空间", dataIndex: "usableSpace", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
-        { title: "总空间", dataIndex: "totalSpace", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
-        { title: "剩余 inode 数", dataIndex: "freeInodes", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "总 inode 数", dataIndex: "totalInodes", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "选项", dataIndex: "options", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: 'uuid', dataIndex: 'uuid', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '名称', dataIndex: 'name', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '卷', dataIndex: 'mount', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '文件系统类型', dataIndex: 'type', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '描述', dataIndex: 'description', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: '剩余空间(未分配)',
+          dataIndex: 'freeSpace',
+          ellipsis: true,
+          scopedSlots: { customRender: 'sizeTooltip' }
+        },
+        { title: '剩余空间', dataIndex: 'usableSpace', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
+        { title: '总空间', dataIndex: 'totalSpace', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
+        { title: '剩余 inode 数', dataIndex: 'freeInodes', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '总 inode 数', dataIndex: 'totalInodes', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '选项', dataIndex: 'options', ellipsis: true, scopedSlots: { customRender: 'tooltip' } }
       ],
       hwDiskColumns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "型号", dataIndex: "model", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "序号", dataIndex: "serial", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "大小", dataIndex: "size", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
-        { title: "写入大小", dataIndex: "writeBytes", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
-        { title: "读取大小", dataIndex: "readBytes", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
-        { title: "写入次数", dataIndex: "writes", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
-        { title: "读取次数", dataIndex: "reads", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
-        { title: "运行时间", dataIndex: "transferTime", ellipsis: true, scopedSlots: { customRender: "durationTooltip" } },
-        { title: "队列数", dataIndex: "currentQueueLength", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: '名称', dataIndex: 'name', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '型号', dataIndex: 'model', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '序号', dataIndex: 'serial', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '大小', dataIndex: 'size', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
+        { title: '写入大小', dataIndex: 'writeBytes', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
+        { title: '读取大小', dataIndex: 'readBytes', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
+        { title: '写入次数', dataIndex: 'writes', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
+        { title: '读取次数', dataIndex: 'reads', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
+        {
+          title: '运行时间',
+          dataIndex: 'transferTime',
+          ellipsis: true,
+          scopedSlots: { customRender: 'durationTooltip' }
+        },
+        { title: '队列数', dataIndex: 'currentQueueLength', ellipsis: true, scopedSlots: { customRender: 'tooltip' } }
       ],
       hwDiskPartitionColumns: [
-        { title: "分区ID", dataIndex: "identification", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "挂载分区", dataIndex: "mountPoint", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "类型", dataIndex: "type", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "大小", dataIndex: "size", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
-        { title: "主要ID", dataIndex: "major", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "次要ID", dataIndex: "minor", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "uuid", dataIndex: "uuid", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: '分区ID', dataIndex: 'identification', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '挂载分区', dataIndex: 'mountPoint', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '名称', dataIndex: 'name', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '类型', dataIndex: 'type', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '大小', dataIndex: 'size', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
+        { title: '主要ID', dataIndex: 'major', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: '次要ID', dataIndex: 'minor', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        { title: 'uuid', dataIndex: 'uuid', ellipsis: true, scopedSlots: { customRender: 'tooltip' } }
       ],
       refreshInterval: 5,
       historyChart: null,
@@ -400,24 +600,24 @@ export default {
       networkDelayChart: null,
       countdownTime: Date.now(),
       machineInfo: null,
-      networkInterfaces: [],
-    };
+      networkInterfaces: []
+    }
   },
   mounted() {
-    this.processNames = Object.assign([], this.defaultProcessNames);
-    this.initData();
-    window.addEventListener("resize", this.resize);
+    this.processNames = Object.assign([], this.defaultProcessNames)
+    this.initData()
+    window.addEventListener('resize', this.resize)
   },
   destroyed() {
-    window.removeEventListener("resize", this.resize);
+    window.removeEventListener('resize', this.resize)
   },
   watch: {
     refreshInterval: {
       deep: false,
       handler() {
-        this.cacheNodeProcess();
-      },
-    },
+        this.cacheNodeProcess()
+      }
+    }
   },
   methods: {
     formatPercent,
@@ -430,176 +630,180 @@ export default {
       machineInfo({ ...this.idInfo }).then((res) => {
         //
         if (res.data) {
-          this.machineInfo = res.data.data;
+          this.machineInfo = res.data.data
           if (this.machineInfo) {
-            let ipListStr = (this.machineInfo && this.machineInfo.hostIpv4s) || "";
-            this.machineInfo = { ...this.machineInfo, ipv4List: ipListStr.length ? ipListStr.split(",") : "" };
+            let ipListStr = (this.machineInfo && this.machineInfo.hostIpv4s) || ''
+            this.machineInfo = { ...this.machineInfo, ipv4List: ipListStr.length ? ipListStr.split(',') : '' }
           }
-          this.refreshInterval = res.data.heartSecond;
+          this.refreshInterval = res.data.heartSecond
         }
-      });
+      })
     },
     addNodeProcess(v) {
-      this.processNames = v;
-      this.cacheNodeProcess();
+      this.processNames = v
+      this.cacheNodeProcess()
     },
     restProcessNames() {
-      this.processNames = this.defaultProcessNames;
+      this.processNames = this.defaultProcessNames
       this.processSearch = {
         processName: this.defaultProcessNames[0],
-        processCount: 20,
-      };
-      this.cacheNodeProcess();
-      this.loadNodeProcess();
+        processCount: 20
+      }
+      this.cacheNodeProcess()
+      this.loadNodeProcess()
     },
     // 初始化页面
     initData() {
-      const nodeCache = this.getCacheNodeProcess();
+      const nodeCache = this.getCacheNodeProcess()
 
-      this.processSearch = { ...this.processSearch, processName: nodeCache?.processName || this.processSearch.processName, processCount: nodeCache?.processCount || this.processSearch.processCount };
-      this.processNames = nodeCache?.processNames || this.processNames;
+      this.processSearch = {
+        ...this.processSearch,
+        processName: nodeCache?.processName || this.processSearch.processName,
+        processCount: nodeCache?.processCount || this.processSearch.processCount
+      }
+      this.processNames = nodeCache?.processNames || this.processNames
       // 加载缓存信息
       //this.refreshInterval = this.getCacheNode("refreshInterval", this.refreshInterval);
       //
-      this.pullNodeData();
+      this.pullNodeData()
     },
     pullNodeData() {
-      this.loadNodeTop();
-      this.loadNodeProcess();
-      this.getMachineInfo();
-      this.getMachineDiskInfo();
-      this.getMachineNetworkInterfaces();
-      this.getMachineHwDiskInfo();
+      this.loadNodeTop()
+      this.loadNodeProcess()
+      this.getMachineInfo()
+      this.getMachineDiskInfo()
+      this.getMachineNetworkInterfaces()
+      this.getMachineHwDiskInfo()
       // 重新计算倒计时
-      this.countdownTime = Date.now() + this.refreshInterval * 1000;
+      this.countdownTime = Date.now() + this.refreshInterval * 1000
     },
     changeTabs(activeKey) {
-      if (activeKey === "stat") {
-        this.loadNodeTop();
+      if (activeKey === 'stat') {
+        this.loadNodeTop()
       }
     },
     resize() {
-      this.historyChart?.resize();
-      this.netHistoryChart?.resize();
+      this.historyChart?.resize()
+      this.netHistoryChart?.resize()
     },
     // 请求 top 命令绘制图表
     loadNodeTop() {
       nodeMonitorData({ ...this.idInfo }, false).then((res) => {
         if (res.code === 200) {
-          this.historyChart = drawChart(res.data, "top-chart", generateNodeTopChart);
-          this.netHistoryChart = drawChart(res.data, "net-chart", generateNodeNetChart);
-          this.networkDelayChart = drawChart(res.data, "network-delay-chart", generateNodeNetworkTimeChart);
+          this.historyChart = drawChart(res.data, 'top-chart', generateNodeTopChart)
+          this.netHistoryChart = drawChart(res.data, 'net-chart', generateNodeNetChart)
+          this.networkDelayChart = drawChart(res.data, 'network-delay-chart', generateNodeNetworkTimeChart)
         }
-      });
+      })
     },
     // 加载节点进程列表
     loadNodeProcess(v) {
-      this.loading = this.processList.length <= 0;
+      this.loading = this.processList.length <= 0
       getProcessList({
         ...this.idInfo,
         processName: this.processSearch.processName,
-        count: this.processSearch.processCount,
+        count: this.processSearch.processCount
       }).then((res) => {
         if (res.code === 200) {
-          this.processList = res.data;
+          this.processList = res.data
         } else {
-          this.processList = [];
+          this.processList = []
         }
 
-        this.loading = false;
-      });
+        this.loading = false
+      })
       if (v) {
-        this.cacheNodeProcess();
+        this.cacheNodeProcess()
       }
     },
     // kill pid
     kill(record) {
       this.$confirm({
-        title: "系统提示",
-        content: "真的要 Kill 这个进程么？",
-        okText: "确认",
-        cancelText: "取消",
+        title: '系统提示',
+        content: '真的要 Kill 这个进程么？',
+        okText: '确认',
+        cancelText: '取消',
         onOk: () => {
           // kill
           const params = {
             ...this.idInfo,
-            pid: record.processId,
-          };
+            pid: record.processId
+          }
           killPid(params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
-                message: res.msg,
-              });
-              this.loadNodeProcess();
+                message: res.msg
+              })
+              this.loadNodeProcess()
             }
-          });
-        },
-      });
+          })
+        }
+      })
     },
     // 历史图表
     handleHistory(type) {
       this.monitorVisible = {
         visible: true,
-        type: type,
-      };
+        type: type
+      }
     },
     cacheNodeProcess() {
-      const cacheJson = this.getCacheAllNode();
+      const cacheJson = this.getCacheAllNode()
       // console.log(cacheJson);
-      const cacheId = this.nodeId || this.machineId;
-      cacheJson[cacheId] = cacheJson[cacheId] || {};
-      cacheJson[cacheId].processNames = this.processNames;
-      cacheJson[cacheId].processName = this.processSearch.processName;
-      cacheJson[cacheId].processCount = this.processSearch.processCount;
+      const cacheId = this.nodeId || this.machineId
+      cacheJson[cacheId] = cacheJson[cacheId] || {}
+      cacheJson[cacheId].processNames = this.processNames
+      cacheJson[cacheId].processName = this.processSearch.processName
+      cacheJson[cacheId].processCount = this.processSearch.processCount
       //cacheJson["refreshInterval"] = this.refreshInterval;
-      localStorage.setItem("node-process-name", JSON.stringify(cacheJson));
+      localStorage.setItem('node-process-name', JSON.stringify(cacheJson))
     },
     getCacheNodeProcess() {
-      const cacheId = this.nodeId || this.machineId;
-      return this.getCacheNode(cacheId, {});
+      const cacheId = this.nodeId || this.machineId
+      return this.getCacheNode(cacheId, {})
     },
 
     getCacheAllNode() {
-      const str = localStorage.getItem("node-process-name") || "";
-      let cacheJson;
+      const str = localStorage.getItem('node-process-name') || ''
+      let cacheJson
       try {
-        cacheJson = JSON.parse(str);
+        cacheJson = JSON.parse(str)
       } catch (e) {
-        cacheJson = {};
+        cacheJson = {}
       }
-      return cacheJson;
+      return cacheJson
     },
 
     getCacheNode(key, defaultValue) {
-      const cacheJson = this.getCacheAllNode();
+      const cacheJson = this.getCacheAllNode()
 
-      return cacheJson[key] || defaultValue;
+      return cacheJson[key] || defaultValue
     },
     getMachineDiskInfo() {
-      this.diskLoading = !this.diskList || this.diskList.length <= 0;
+      this.diskLoading = !this.diskList || this.diskList.length <= 0
       machineDiskInfo({ ...this.idInfo }).then((res) => {
-        this.diskList = res.data;
+        this.diskList = res.data
         if (this.diskList) {
-          this.diskLoading = false;
+          this.diskLoading = false
         }
-      });
+      })
     },
     getMachineNetworkInterfaces() {
       machineNetworkInterfaces({ ...this.idInfo }).then((res) => {
         this.networkInterfaces = (res.data || []).sort((item1, item2) => {
-          const item1All = item1.bytesRecv || 0 + item1.bytesSecv || 0;
-          const item2All = item2.bytesRecv || 0 + item2.bytesSecv || 0;
-          return item2All - item1All;
-        });
-      });
+          const item1All = item1.bytesRecv || 0 + item1.bytesSecv || 0
+          const item2All = item2.bytesRecv || 0 + item2.bytesSecv || 0
+          return item2All - item1All
+        })
+      })
     },
     getMachineHwDiskInfo() {
       machineHwDiskInfo({ ...this.idInfo }).then((res) => {
-        this.hwDiskList = res.data || [];
-      });
-    },
-  },
-};
+        this.hwDiskList = res.data || []
+      })
+    }
+  }
+}
 </script>
 <style scoped>
 .chart {

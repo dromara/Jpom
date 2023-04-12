@@ -1,27 +1,27 @@
 <template>
   <div class="node-full-content">
-    <machine-info :nodeId="this.node.id"></machine-info>
+    <machine-info :nodeId="node.id"></machine-info>
   </div>
 </template>
 <script>
-import machineInfo from "@/pages/system/assets/machine/machine-info";
+import machineInfo from '@/pages/system/assets/machine/machine-info'
 
 export default {
   components: {
-    machineInfo,
+    machineInfo
   },
   props: {
     node: {
-      type: Object,
-    },
+      type: Object
+    }
   },
   data() {
-    return {};
+    return {}
   },
   mounted() {},
   destroyed() {},
   watch: {},
-  methods: {},
-};
+  methods: {}
+}
 </script>
 <style scoped></style>

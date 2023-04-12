@@ -1,6 +1,6 @@
 <template>
   <div class="full-content">
-    <template v-if="this.useSuggestions">
+    <template v-if="useSuggestions">
       <a-result
         title="当前工作空间还没有SSH"
         sub-title="请到【系统管理】-> 【资产管理】-> 【SSH管理】添加SSH，或者将已添加的SSH授权关联、分配到此工作空间"
@@ -247,7 +247,7 @@
         top: this.terminalFullscreen ? 0 : false,
         paddingBottom: 0
       }"
-      :width="this.terminalFullscreen ? '100vw' : '80vw'"
+      :width="terminalFullscreen ? '100vw' : '80vw'"
       :bodyStyle="{
         padding: '0px 10px',
         paddingTop: '10px',

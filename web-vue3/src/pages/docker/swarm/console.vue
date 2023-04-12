@@ -16,55 +16,55 @@
 
     <a-layout class="layout-content drawer-layout-content">
       <a-layout-content>
-        <swarm-node v-if="menuKey === 'node'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
-        <swarm-service v-if="menuKey === 'server'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
-        <swarm-task v-if="menuKey === 'task'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+        <swarm-node v-if="menuKey === 'node'" :id="id" :visible="visible" :urlPrefix="urlPrefix" />
+        <swarm-service v-if="menuKey === 'server'" :id="id" :visible="visible" :urlPrefix="urlPrefix" />
+        <swarm-task v-if="menuKey === 'task'" :id="id" :visible="visible" :urlPrefix="urlPrefix" />
       </a-layout-content>
     </a-layout>
   </a-layout>
 </template>
 <script>
-import SwarmNode from "./node";
-import SwarmService from "./service";
-import SwarmTask from "./task";
+import SwarmNode from './node'
+import SwarmService from './service'
+import SwarmTask from './task'
 export default {
   props: {
     id: {
-      type: String,
+      type: String
     },
     initMenu: {
       type: String,
-      default: "node",
+      default: 'node'
     },
     visible: {
       type: Boolean,
-      default: false,
+      default: false
     },
     urlPrefix: {
-      type: String,
-    },
+      type: String
+    }
   },
   components: {
     SwarmNode,
     SwarmService,
-    SwarmTask,
+    SwarmTask
   },
   data() {
     return {
       menuKeyArray: [],
-      menuKey: "",
-    };
+      menuKey: ''
+    }
   },
   mounted() {
-    this.menuKey = this.initMenu;
-    this.menuKeyArray = [this.initMenu];
+    this.menuKey = this.initMenu
+    this.menuKeyArray = [this.initMenu]
   },
   methods: {
     menuClick(item) {
-      this.menuKey = item.key;
-    },
-  },
-};
+      this.menuKey = item.key
+    }
+  }
+}
 </script>
 <style scoped>
 .drawer-layout-content {

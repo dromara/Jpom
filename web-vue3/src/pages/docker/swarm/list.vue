@@ -1,6 +1,6 @@
 <template>
   <div class="full-content">
-    <template v-if="this.useSuggestions">
+    <template v-if="useSuggestions">
       <a-result
         title="当前工作空间还没有 Docker 集群"
         sub-title="请到【系统管理】-> 【资产管理】-> 【Docker管理】添加Docker并创建集群，或者将已存在的的 Docker 集群授权关联、分配到此工作空间"

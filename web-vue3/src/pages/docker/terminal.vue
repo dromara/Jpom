@@ -1,44 +1,44 @@
 <template>
-  <terminal :url="this.socketUrl" />
+  <terminal :url="socketUrl" />
 </template>
 <script>
-import { mapGetters } from "vuex";
-import { getWebSocketUrl } from "@/utils/const";
-import terminal from "@/components/terminal";
+import { mapGetters } from 'vuex'
+import { getWebSocketUrl } from '@/utils/const'
+import terminal from '@/components/terminal'
 
 // https://blog.csdn.net/qq_41840688/article/details/108636267
 
 export default {
   components: {
-    terminal,
+    terminal
   },
   props: {
     id: {
       type: String,
-      default: "",
+      default: ''
     },
     containerId: {
-      type: String,
+      type: String
     },
     machineDockerId: {
       type: String,
-      default: "",
-    },
+      default: ''
+    }
   },
   data() {
-    return {};
+    return {}
   },
   computed: {
-    ...mapGetters(["getLongTermToken", "getWorkspaceId"]),
+    ...mapGetters(['getLongTermToken', 'getWorkspaceId']),
     socketUrl() {
       return getWebSocketUrl(
-        "/socket/docker_cli",
+        '/socket/docker_cli',
         `userId=${this.getLongTermToken}&id=${this.id}&machineDockerId=${this.machineDockerId}&nodeId=system&type=docker&containerId=${this.containerId}&workspaceId=${this.getWorkspaceId}`
-      );
-    },
+      )
+    }
   },
   mounted() {},
   beforeDestroy() {},
-  methods: {},
-};
+  methods: {}
+}
 </script>

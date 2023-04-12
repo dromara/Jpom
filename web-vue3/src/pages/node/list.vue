@@ -1,6 +1,6 @@
 <template>
   <div class="full-content">
-    <template v-if="this.useSuggestions">
+    <template v-if="useSuggestions">
       <a-result title="当前工作空间还没有节点">
         <template slot="subTitle"> 需要您在需要被管理的服务器中安装 agent ，并将 agent 信息添加到系统中 </template>
         <template #extra>
@@ -50,7 +50,7 @@
               "
               >快速安装
             </a-button>
-            <a-dropdown v-if="this.layoutType === 'table'">
+            <a-dropdown v-if="layoutType === 'table'">
               <a-button
                 type="primary"
                 :disabled="!tableSelections || !tableSelections.length"
@@ -62,7 +62,7 @@
               <a-button :disabled="true" type="primary"> 工作空间同步 </a-button>
             </a-tooltip>
 
-            <a-button type="primary" @click="changeLayout" :icon="this.layoutType === 'card' ? 'layout' : 'table'">
+            <a-button type="primary" @click="changeLayout" :icon="layoutType === 'card' ? 'layout' : 'table'">
               {{ this.layoutType === 'card' ? '卡片' : '表格' }}
             </a-button>
             <a-tooltip placement="bottom">
@@ -88,7 +88,7 @@
           </a-space>
         </template>
         <a-table
-          v-if="this.layoutType === 'table'"
+          v-if="layoutType === 'table'"
           :columns="columns"
           :data-source="list"
           bordered
@@ -266,7 +266,7 @@
             </a-space>
           </template>
         </a-table>
-        <template v-else-if="this.layoutType === 'card'">
+        <template v-else-if="layoutType === 'card'">
           <a-row>
             <a-row :gutter="[16, 16]">
               <template v-if="list && list.length">
@@ -462,7 +462,7 @@
                     this.loadData()
                   }
                 "
-                @change="this.loadData"
+                @change="loadData"
                 show-less-items
               />
             </a-col>
@@ -601,7 +601,7 @@
       :footer="null"
       :maskClosable="false"
     >
-      <node-top v-if="monitorVisible" :type="this.temp.type" :nodeId="this.temp.id"></node-top>
+      <node-top v-if="monitorVisible" :type="temp.type" :nodeId="temp.id"></node-top>
     </a-modal>
   </div>
 </template>

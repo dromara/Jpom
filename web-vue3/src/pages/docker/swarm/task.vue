@@ -137,7 +137,7 @@
     </a-modal>
     <!-- 查看日志 -->
     <a-modal destroyOnClose v-model="logVisible" title="查看日志" width="80vw" :footer="null" :maskClosable="false">
-      <pull-log v-if="logVisible" :id="this.id" :dataId="this.temp.id" type="taks" :urlPrefix="this.urlPrefix" />
+      <pull-log v-if="logVisible" :id="id" :dataId="temp.id" type="taks" :urlPrefix="urlPrefix" />
     </a-modal>
   </div>
 </template>

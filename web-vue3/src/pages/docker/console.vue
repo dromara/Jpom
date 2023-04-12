@@ -8,7 +8,7 @@
       :visible="true"
       @close="onClose"
       :bodyStyle="{
-        padding: '0',
+        padding: '0'
       }"
     >
       <template #title>
@@ -40,51 +40,92 @@
         </a-space>
       </template>
 
-      <a-layout :class="`layout-content drawer-layout-content ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`" style="padding-bottom: 10px">
+      <a-layout
+        :class="`layout-content drawer-layout-content ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`"
+        style="padding-bottom: 10px"
+      >
         <a-layout-content>
-          <container :key="menuKey" v-if="menuKey === 'containers'" type="container" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+          <container
+            :key="menuKey"
+            v-if="menuKey === 'containers'"
+            type="container"
+            :id="id"
+            :machineDockerId="machineDockerId"
+            :visible="visible"
+            :urlPrefix="urlPrefix"
+          />
           <container
             :key="`docker-compose`"
             v-else-if="menuKey === 'docker-compose'"
             type="compose"
-            :id="this.id"
-            :machineDockerId="this.machineDockerId"
-            :visible="this.visible"
-            :urlPrefix="this.urlPrefix"
+            :id="id"
+            :machineDockerId="machineDockerId"
+            :visible="visible"
+            :urlPrefix="urlPrefix"
           />
-          <images v-if="menuKey === 'images'" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
-          <volumes v-if="menuKey === 'volumes'" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
-          <info v-if="menuKey === 'info'" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
-          <networks v-if="menuKey === 'networks'" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
-          <prune v-if="menuKey === 'prune'" :id="this.id" :machineDockerId="this.machineDockerId" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+          <images
+            v-if="menuKey === 'images'"
+            :id="id"
+            :machineDockerId="machineDockerId"
+            :visible="visible"
+            :urlPrefix="urlPrefix"
+          />
+          <volumes
+            v-if="menuKey === 'volumes'"
+            :id="id"
+            :machineDockerId="machineDockerId"
+            :visible="visible"
+            :urlPrefix="urlPrefix"
+          />
+          <info
+            v-if="menuKey === 'info'"
+            :id="id"
+            :machineDockerId="machineDockerId"
+            :visible="visible"
+            :urlPrefix="urlPrefix"
+          />
+          <networks
+            v-if="menuKey === 'networks'"
+            :id="id"
+            :machineDockerId="machineDockerId"
+            :visible="visible"
+            :urlPrefix="urlPrefix"
+          />
+          <prune
+            v-if="menuKey === 'prune'"
+            :id="id"
+            :machineDockerId="machineDockerId"
+            :visible="visible"
+            :urlPrefix="urlPrefix"
+          />
         </a-layout-content>
       </a-layout>
     </a-drawer>
   </div>
 </template>
 <script>
-import Container from "./container";
-import Images from "./images";
-import Volumes from "./volumes";
-import Info from "./info";
-import Networks from "./networks";
-import Prune from "./prune";
-import { mapGetters } from "vuex";
+import Container from './container'
+import Images from './images'
+import Volumes from './volumes'
+import Info from './info'
+import Networks from './networks'
+import Prune from './prune'
+import { mapGetters } from 'vuex'
 export default {
   props: {
     id: {
-      type: String,
+      type: String
     },
     visible: {
       type: Boolean,
-      default: false,
+      default: false
     },
     machineDockerId: {
-      type: String,
+      type: String
     },
     urlPrefix: {
-      type: String,
-    },
+      type: String
+    }
   },
   components: {
     Container,
@@ -92,29 +133,29 @@ export default {
     Volumes,
     Info,
     Networks,
-    Prune,
+    Prune
   },
   data() {
     return {
-      menuKeyArray: ["containers"],
-      menuKey: "containers",
-    };
+      menuKeyArray: ['containers'],
+      menuKey: 'containers'
+    }
   },
   computed: {
-    ...mapGetters(["getCollapsed", "getGuideCache"]),
+    ...mapGetters(['getCollapsed', 'getGuideCache']),
     scrollbarFlag() {
-      return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
-    },
+      return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag
+    }
   },
   mounted() {},
   methods: {
     menuClick(item) {
-      this.menuKey = item.key;
+      this.menuKey = item.key
     },
     onClose() {
-      this.$emit("close");
-    },
-  },
-};
+      this.$emit('close')
+    }
+  }
+}
 </script>
 <style scoped></style>

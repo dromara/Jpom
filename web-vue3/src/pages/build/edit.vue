@@ -99,7 +99,7 @@
                       <li>容器构建是指使用 docker 容器执行构建,这样可以达到和宿主机环境隔离不用安装依赖环境</li>
                       <li>使用容器构建，docker 容器所在的宿主机需要有公网,因为需要远程下载环境依赖的 sdk 和镜像</li>
                       <li>创建后构建方式不支持修改</li>
-                      <li v-if="this.getInDocker">容器安装的服务端不能使用本地构建</li>
+                      <li v-if="getInDocker">容器安装的服务端不能使用本地构建</li>
                     </ul>
                   </template>
                   <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
@@ -777,7 +777,7 @@
                 }
               "
             >
-              <template slot="addonBefore" v-if="this.tempExtraData && this.tempExtraData.noticeScriptId">
+              <template slot="addonBefore" v-if="tempExtraData && this.tempExtraData.noticeScriptId">
                 <span
                   @click="
                     () => {
@@ -898,7 +898,7 @@
             取消
           </a-button>
           <a-tooltip
-            v-if="this.temp.id"
+            v-if="temp.id"
             title="如果当前构建信息已经在其他页面更新过，需要点击刷新按钮来获取最新的信息，点击刷新后未保存的数据也将丢失"
           >
             <a-button @click="refresh"> 刷新</a-button>

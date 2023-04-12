@@ -66,7 +66,7 @@
       width="80vw"
     >
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 18 }">
-        <a-alert v-if="this.temp.scriptType === 'server-sync'" message="服务端同步的脚本不能在此修改" banner />
+        <a-alert v-if="temp.scriptType === 'server-sync'" message="服务端同步的脚本不能在此修改" banner />
         <a-form-item v-if="temp.id" label="ScriptId" prop="id">
           <a-input v-model="temp.id" disabled readOnly />
         </a-form-item>
