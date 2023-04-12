@@ -34,7 +34,7 @@ export const useGuideStore = defineStore('guide', {
       localStorage.setItem(key, this.guideCache)
     },
     // 页面全屏开关
-    toggleFullScreenFlag() {
+    toggleFullScreenFlag(): Promise<boolean> {
       return new Promise((resolve) => {
         const cache = this.getGuideCache
         cache.fullScreenFlag = !(cache.fullScreenFlag === undefined ? true : cache.fullScreenFlag)
@@ -43,7 +43,7 @@ export const useGuideStore = defineStore('guide', {
       })
     },
     // 页面滚动条
-    toggleScrollbarFlag() {
+    toggleScrollbarFlag(): Promise<boolean> {
       return new Promise((resolve) => {
         const cache = this.getGuideCache
         cache.scrollbarFlag = !(cache.scrollbarFlag === undefined ? true : cache.scrollbarFlag)
@@ -52,7 +52,7 @@ export const useGuideStore = defineStore('guide', {
       })
     },
     // 打开多菜单开关
-    toggleMenuFlag() {
+    toggleMenuFlag(): Promise<boolean> {
       return new Promise((resolve) => {
         const cache = this.getGuideCache
         cache.menuMultipleFlag = !(cache.menuMultipleFlag === undefined ? true : cache.menuMultipleFlag)
@@ -68,13 +68,13 @@ export const useGuideStore = defineStore('guide', {
   getters: {
     getGuideCache(state): IStateGuideCache {
       const cacheStr = state.guideCache || ''
-      let cahce
+      let cache
       try {
-        cahce = JSON.parse(cacheStr)
+        cache = JSON.parse(cacheStr)
       } catch (e) {
-        cahce = {}
+        cache = {}
       }
-      return cahce
+      return cache
     },
     getDisabledGuide(state) {
       return state.disabledGuide

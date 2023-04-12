@@ -34,48 +34,48 @@ const whiteList = ['/login', '/install', '/system/ipAccess']
 const noTabs = ['/full-terminal']
 
 router.beforeEach((to, from, next) => {
-	// 检测白名单
-	if (whiteList.indexOf(to.path) !== -1) {
-		next()
-		return
-	}
-	// 判断 token 是否存在
-	if (!store.getters.getToken) {
-		if (from.path !== '/') {
-			// notification.error({
-			//   message: "未登录，无法访问！",
-			//   description: `from: ${from.path} ==> to: ${to.path}`,
-			// });
-			console.warn(`from: ${from.path} ==> to: ${to.path}`)
-		}
-		next('/login')
-		return
-	}
-	// 如果存在 token (已经登录)
-	// 刷新用户信息
-	store.dispatch('pageReloadRefreshUserInfo')
-	// 没有 tabs 独立页面
-	if (noTabs.indexOf(to.path) !== -1) {
-		next()
-		return
-	}
-	if (to.meta?.mode === 'management') {
-		// 刷新菜单
-		store.dispatch('loadManagementSystemMenus').then(() => {
-			// 存储 store
-			store.dispatch('addManagementTab', { key: to.name, path: to.path }).then((toMenu) => {
-				toMenu ? next(toMenu.path) : next()
-			})
-		})
-	} else {
-		// 刷新菜单
-		store.dispatch('loadSystemMenus').then(() => {
-			// 存储 store
-			store.dispatch('addTab', { key: to.name, path: to.path }).then((toMenu) => {
-				toMenu ? next(toMenu.path) : next()
-			})
-		})
-	}
+  // 检测白名单
+  if (whiteList.indexOf(to.path) !== -1) {
+    next()
+    return
+  }
+  // 判断 token 是否存在
+  if (!store.getters.getToken) {
+    if (from.path !== '/') {
+      // notification.error({
+      //   message: "未登录，无法访问！",
+      //   description: `from: ${from.path} ==> to: ${to.path}`,
+      // });
+      console.warn(`from: ${from.path} ==> to: ${to.path}`)
+    }
+    next('/login')
+    return
+  }
+  // 如果存在 token (已经登录)
+  // 刷新用户信息
+  store.dispatch('pageReloadRefreshUserInfo')
+  // 没有 tabs 独立页面
+  if (noTabs.indexOf(to.path) !== -1) {
+    next()
+    return
+  }
+  if (to.meta?.mode === 'management') {
+    // 刷新菜单
+    store.dispatch('loadManagementSystemMenus').then(() => {
+      // 存储 store
+      store.dispatch('addManagementTab', { key: to.name, path: to.path }).then((toMenu) => {
+        toMenu ? next(toMenu.path) : next()
+      })
+    })
+  } else {
+    // 刷新菜单
+    store.dispatch('loadSystemMenus').then(() => {
+      // 存储 store
+      store.dispatch('addTab', { key: to.name, path: to.path }).then((toMenu) => {
+        toMenu ? next(toMenu.path) : next()
+      })
+    })
+  }
 })
 
 // https://www.jb51.net/article/242702.htm
@@ -92,14 +92,14 @@ router.beforeEach((to, from, next) => {
  * 如果不成功就只刷新A页面，停留在当前的A页面。
  */
 router.onError((error) => {
-	const jsPattern = /Loading chunk (\S)+ failed/g
-	const cssPattern = /Loading CSS chunk (\S)+ failed/g
-	const isChunkLoadFailed = error.message.match(jsPattern || cssPattern)
-	//const targetPath = router.history.pending.fullPath;
-	if (isChunkLoadFailed) {
-		//localStorage.setItem("targetPath", targetPath);
-		window.location.reload()
-	}
+  const jsPattern = /Loading chunk (\S)+ failed/g
+  const cssPattern = /Loading CSS chunk (\S)+ failed/g
+  const isChunkLoadFailed = error.message.match(jsPattern || cssPattern)
+  //const targetPath = router.history.pending.fullPath;
+  if (isChunkLoadFailed) {
+    //localStorage.setItem("targetPath", targetPath);
+    window.location.reload()
+  }
 })
 
 // router.onReady(() => {
