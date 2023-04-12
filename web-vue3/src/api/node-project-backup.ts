@@ -1,5 +1,5 @@
-import axios from "./config";
-import { loadRouterBase } from "./config";
+import axios from './config'
+import { loadRouterBase } from './config'
 
 /**
  * 项目列表
@@ -8,23 +8,23 @@ import { loadRouterBase } from "./config";
  *  id: 项目ID
  * }
  */
-export function listBackup(params) {
+export function listBackup(params: any) {
   return axios({
-    url: "/node/manage/file/list-backup",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/file/list-backup',
+    method: 'post',
+    data: params
+  })
 }
 
-export function backupFileList(params) {
+export function backupFileList(params: any) {
   return axios({
-    url: "/node/manage/file/backup-item-files",
-    method: "post",
+    url: '/node/manage/file/backup-item-files',
+    method: 'post',
     headers: {
-      loading: "no",
+      loading: 'no'
     },
-    data: params,
-  });
+    data: params
+  })
 }
 
 /**
@@ -36,8 +36,8 @@ export function backupFileList(params) {
  *  filename: 文件名称
  * } params
  */
-export function backupDownloadProjectFile(params) {
-  return loadRouterBase("/node/manage/file/backup-download", params);
+export function backupDownloadProjectFile(params: any) {
+  return loadRouterBase('/node/manage/file/backup-download', params)
 }
 
 /**
@@ -50,12 +50,12 @@ export function backupDownloadProjectFile(params) {
  *
  * } params
  */
-export function backupDeleteProjectFile(params) {
+export function backupDeleteProjectFile(params: any) {
   return axios({
-    url: "/node/manage/file/backup-delete",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/file/backup-delete',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -68,10 +68,10 @@ export function backupDeleteProjectFile(params) {
  *
  * } params
  */
-export function backupRecoverProjectFile(params) {
+export function backupRecoverProjectFile(params: any) {
   return axios({
-    url: "/node/manage/file/backup-recover",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/file/backup-recover',
+    method: 'post',
+    data: params
+  })
 }

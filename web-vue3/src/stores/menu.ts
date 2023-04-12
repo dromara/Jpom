@@ -3,13 +3,13 @@
  * 存储所有打开的 tab 窗口，并且记录当前激活的 tab
  * 另外提供打开新 tab、跳转 tab、移除 tab 功能
  */
-import { ACTIVE_TAB_KEY, TAB_LIST_KEY, ACTIVE_MENU_KEY } from '@/utils/const'
+import { ACTIVE_MENU_KEY, ACTIVE_TAB_KEY, TAB_LIST_KEY } from '@/utils/const'
 
 import { getMenu } from '@/api/menu'
 import routeMenuMap from '@/router/route-menu'
 import { defineStore } from 'pinia'
 
-interface IState {
+export interface IMenuState {
   activeTabKey: string
   tabList: any[]
   activeMenuKey: string
@@ -19,13 +19,13 @@ interface IState {
 }
 
 export const useMenuStore = defineStore('menu', {
-  state: (): IState => ({
+  state: (): IMenuState => ({
     activeTabKey: localStorage.getItem(ACTIVE_TAB_KEY) || '',
     tabList: localStorage.getItem(TAB_LIST_KEY) ? JSON.parse(localStorage.getItem(TAB_LIST_KEY)!) : [],
     activeMenuKey: localStorage.getItem(ACTIVE_MENU_KEY) || '',
     menuOpenKeys: [],
     menus: [],
-    activeMenu: '',
+    activeMenu: ''
   }),
 
   actions: {
@@ -33,7 +33,7 @@ export const useMenuStore = defineStore('menu', {
     async loadSystemMenus() {
       if (this.menus.length) {
         // 避免重复加载
-        Promise.resolve(true)
+        return true
       }
       return await this.restLoadSystemMenus()
     },
@@ -48,13 +48,12 @@ export const useMenuStore = defineStore('menu', {
           if (res.data) {
             res.data?.forEach((element: any) => {
               if (element.childs.length > 0) {
-                const childs = element.childs.map((child: any) => {
+                element.childs = element.childs.map((child: any) => {
                   return {
                     ...child,
-                    path: routeMenuMap[child.id],
+                    path: routeMenuMap[child.id]
                   }
                 })
-                element.childs = childs
               }
             })
             this.menus = res.data
@@ -193,14 +192,16 @@ export const useMenuStore = defineStore('menu', {
     setMenuOpenKeys(keys: string[] | string) {
       if (Array.isArray(keys)) {
         this.menuOpenKeys = keys
-      } else if (typeof keys == 'string') {
-        const nowKeys = this.menuOpenKeys
-        if (!nowKeys.includes(keys)) {
-          nowKeys.push(keys)
-          this.menuOpenKeys = nowKeys
+      } else {
+        {
+          const nowKeys = this.menuOpenKeys
+          if (!nowKeys.includes(keys)) {
+            nowKeys.push(keys)
+            this.menuOpenKeys = nowKeys
+          }
         }
       }
-    },
+    }
   },
   getters: {
     getMenus(state) {
@@ -218,8 +219,8 @@ export const useMenuStore = defineStore('menu', {
 
     getMenuOpenKeys(state) {
       return state.menuOpenKeys
-    },
-  },
+    }
+  }
 })
 
 // export default useMenuStore()

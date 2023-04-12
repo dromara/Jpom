@@ -3,38 +3,38 @@ import { parseTime, formatPercent2, renderSize, formatDuration } from '@/utils/c
 // import echarts from "echarts";
 
 // 获取机器信息
-export function machineInfo(params) {
+export function machineInfo(params: any) {
   return axios({
     url: '/node/machine-info',
     method: 'get',
     params: params,
     headers: {
-      loading: 'no',
-    },
+      loading: 'no'
+    }
   })
 }
 
 // 机器文件系统
-export function machineDiskInfo(params) {
+export function machineDiskInfo(params: any) {
   return axios({
     url: '/node/disk-info',
     method: 'get',
     params,
     headers: {
-      loading: 'no',
-    },
+      loading: 'no'
+    }
   })
 }
 
 // 机器硬件硬盘
-export function machineHwDiskInfo(params) {
+export function machineHwDiskInfo(params: any) {
   return axios({
     url: '/node/hw-disk-info',
     method: 'get',
     params,
     headers: {
-      loading: 'no',
-    },
+      loading: 'no'
+    }
   })
 }
 
@@ -43,7 +43,7 @@ const defaultData = {
     // text: "系统 Top 监控",
   },
   tooltip: {
-    trigger: 'axis',
+    trigger: 'axis'
   },
   legend: {
     // data: legends,
@@ -53,11 +53,11 @@ const defaultData = {
     left: '1%',
     right: '2%',
     bottom: '1%',
-    containLabel: true,
+    containLabel: true
   },
   xAxis: {
     type: 'category',
-    boundaryGap: false,
+    boundaryGap: false
     // data: scales,
   },
   calculable: true,
@@ -69,7 +69,7 @@ const defaultData = {
   //   },
   //   max: 100,
   // },
-  dataZoom: [{ type: 'inside' }, { type: 'slider' }],
+  dataZoom: [{ type: 'inside' }, { type: 'slider' }]
   // series: series,
 }
 
@@ -78,42 +78,42 @@ const defaultData = {
  * @param { JSON } data
  * @returns
  */
-export function generateNodeTopChart(data) {
+export function generateNodeTopChart(params: any) {
   const cpuItem = {
     name: 'cpu占用',
     type: 'line',
     data: [],
     showSymbol: false,
     // 设置折线为曲线
-    smooth: true,
+    smooth: true
   }
   const diskItem = {
     name: '磁盘占用',
     type: 'line',
     data: [],
     showSymbol: false,
-    smooth: true,
+    smooth: true
   }
   const memoryItem = {
     name: '内存占用',
     type: 'line',
     data: [],
     showSymbol: false,
-    smooth: true,
+    smooth: true
   }
   const virtualMemory = {
     name: '虚拟内存占用',
     type: 'line',
     data: [],
     showSymbol: false,
-    smooth: true,
+    smooth: true
   }
   const swapMemory = {
     name: '交互内存占用',
     type: 'line',
     data: [],
     showSymbol: false,
-    smooth: true,
+    smooth: true
   }
   const scales = []
   for (var i = data.length - 1; i >= 0; i--) {
@@ -136,31 +136,31 @@ export function generateNodeTopChart(data) {
   // 指定图表的配置项和数据
   return Object.assign({}, defaultData, {
     legend: {
-      data: legends,
+      data: legends
     },
     xAxis: {
-      data: scales,
+      data: scales
     },
     yAxis: {
       type: 'value',
       axisLabel: {
         // 设置y轴数值为%
-        formatter: '{value} %',
+        formatter: '{value} %'
       },
-      max: 100,
+      max: 100
     },
     tooltip: {
       trigger: 'axis',
       show: true,
-      formatter: function (params) {
+      formatter: function (params: any) {
         var html = params[0].name + '<br>'
         for (var i = 0; i < params.length; i++) {
           html += params[i].marker + params[i].seriesName + ':' + formatPercent2(params[i].value) + '<br>'
         }
         return html
-      },
+      }
     },
-    series: series,
+    series: series
   })
 }
 
@@ -169,21 +169,21 @@ export function generateNodeTopChart(data) {
  * @param { JSON } data
  * @returns
  */
-export function generateNodeNetChart(data) {
+export function generateNodeNetChart(params: any) {
   const rxItem = {
     name: '接收',
     type: 'line',
     data: [],
     showSymbol: false,
     // 设置折线为曲线
-    smooth: true,
+    smooth: true
   }
   const txItem = {
     name: '发送',
     type: 'line',
     data: [],
     showSymbol: false,
-    smooth: true,
+    smooth: true
   }
   const scales = []
   for (var i = data.length - 1; i >= 0; i--) {
@@ -203,10 +203,10 @@ export function generateNodeNetChart(data) {
   // 指定图表的配置项和数据
   return Object.assign({}, defaultData, {
     legend: {
-      data: legends,
+      data: legends
     },
     xAxis: {
-      data: scales,
+      data: scales
     },
     yAxis: {
       type: 'value',
@@ -215,21 +215,21 @@ export function generateNodeNetChart(data) {
         // formatter: "{value} bit/s",
         formatter: (value) => {
           return renderSize(value)
-        },
-      },
+        }
+      }
     },
     tooltip: {
       trigger: 'axis',
       show: true,
-      formatter: function (params) {
+      formatter: function (params: any) {
         var html = params[0].name + '<br>'
         for (var i = 0; i < params.length; i++) {
           html += params[i].marker + params[i].seriesName + ':' + renderSize(params[i].value) + '/s <br>'
         }
         return html
-      },
+      }
     },
-    series: series,
+    series: series
   })
 }
 
@@ -238,14 +238,14 @@ export function generateNodeNetChart(data) {
  * @param { JSON } data
  * @returns
  */
-export function generateNodeNetworkTimeChart(data) {
+export function generateNodeNetworkTimeChart(params: any) {
   const dataArray = {
     name: '网络延迟',
     type: 'line',
     data: [],
     showSymbol: false,
     // 设置折线为曲线
-    smooth: true,
+    smooth: true
   }
   const scales = []
   for (var i = data.length - 1; i >= 0; i--) {
@@ -262,10 +262,10 @@ export function generateNodeNetworkTimeChart(data) {
   // 指定图表的配置项和数据
   return Object.assign({}, defaultData, {
     legend: {
-      data: legends,
+      data: legends
     },
     xAxis: {
-      data: scales,
+      data: scales
     },
     yAxis: {
       type: 'value',
@@ -273,21 +273,21 @@ export function generateNodeNetworkTimeChart(data) {
         // formatter: "{value} ms",
         formatter: (value) => {
           return formatDuration(value)
-        },
-      },
+        }
+      }
     },
     tooltip: {
       trigger: 'axis',
       show: true,
-      formatter: function (params) {
+      formatter: function (params: any) {
         var html = params[0].name + '<br>'
         for (var i = 0; i < params.length; i++) {
           html += params[i].marker + params[i].seriesName + ':' + formatDuration(params[i].value) + ' <br>'
         }
         return html
-      },
+      }
     },
-    series: series,
+    series: series
   })
 }
 
@@ -319,13 +319,13 @@ export function drawChart(data, domId, parseFn) {
 // };
 
 // 机器网络
-export function machineNetworkInterfaces(params) {
+export function machineNetworkInterfaces(params: any) {
   return axios({
     url: '/node/network-interfaces',
     method: 'get',
     params,
     headers: {
-      loading: 'no',
-    },
+      loading: 'no'
+    }
   })
 }

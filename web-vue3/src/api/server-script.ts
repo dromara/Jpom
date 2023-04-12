@@ -1,14 +1,14 @@
-import axios from "./config";
+import axios from './config'
 
 /**
  * script 服务端中的列表
  */
-export function getScriptList(params) {
+export function getScriptList(params: any) {
   return axios({
-    url: "/script/list",
-    method: "post",
-    data: params,
-  });
+    url: '/script/list',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -16,12 +16,12 @@ export function getScriptList(params) {
  * @param {Json} params
  * @returns
  */
-export function editScript(params) {
+export function editScript(params: any) {
   return axios({
-    url: "/script/save.json",
-    method: "post",
-    data: params,
-  });
+    url: '/script/save.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -30,12 +30,12 @@ export function editScript(params) {
  
  * params.id 编辑修改时判断 ID
  */
-export function deleteScript(params) {
+export function deleteScript(params: any) {
   return axios({
-    url: "/script/del.json",
-    method: "post",
-    data: params,
-  });
+    url: '/script/del.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -44,74 +44,74 @@ export function deleteScript(params) {
  
  * params.id 编辑修改时判断 ID
  */
-export function unbindScript(params) {
+export function unbindScript(params: any) {
   return axios({
-    url: "/script/unbind.json",
-    method: "get",
-    params: params,
-  });
+    url: '/script/unbind.json',
+    method: 'get',
+    params: params
+  })
 }
 
 // 脚本模版日志列表
-export function getScriptLogList(params) {
+export function getScriptLogList(params: any) {
   return axios({
-    url: "/script_log/list",
-    method: "post",
-    data: params,
-  });
+    url: '/script_log/list',
+    method: 'post',
+    data: params
+  })
 }
 
 // 删除执行记录
-export function scriptDel(params) {
+export function scriptDel(params: any) {
   return axios({
-    url: "/script_log/del_log",
-    method: "post",
-    data: params,
-  });
+    url: '/script_log/del_log',
+    method: 'post',
+    data: params
+  })
 }
 
 //执行记录 详情
-export function scriptLog(params) {
+export function scriptLog(params: any) {
   return axios({
-    url: "/script_log/log",
-    method: "post",
+    url: '/script_log/log',
+    method: 'post',
     data: params,
     headers: {
-      tip: "no",
-    },
-  });
+      tip: 'no'
+    }
+  })
 }
 
-export function syncToWorkspace(params) {
+export function syncToWorkspace(params: any) {
   return axios({
-    url: "/script/sync-to-workspace",
-    method: "get",
-    params: params,
-  });
+    url: '/script/sync-to-workspace',
+    method: 'get',
+    params: params
+  })
 }
 
-export function getScriptItem(params) {
+export function getScriptItem(params: any) {
   return axios({
-    url: "/script/get",
-    method: "get",
-    params: params,
-  });
+    url: '/script/get',
+    method: 'get',
+    params: params
+  })
 }
 
 /**
  * 获取触发器地址
  * @param {*} id
  */
-export function getTriggerUrl(data) {
+export function getTriggerUrl(data: any) {
   return axios({
-    url: "/script/trigger-url",
-    method: "post",
-    data: data,
-  });
+    url: '/script/trigger-url',
+    method: 'post',
+    data: data
+  })
 }
 
 export const triggerExecTypeMap = {
-  0: "手动",
-  1: "自动",
-  2: "触发器",
-};
+  0: '手动',
+  1: '自动',
+  2: '触发器'
+}
