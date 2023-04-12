@@ -1,5 +1,5 @@
-import axios from "./config";
-import { loadRouterBase } from "./config";
+import axios from './config'
+import { loadRouterBase } from './config'
 
 /**
  * 上传文件到 SSH 节点
@@ -10,41 +10,41 @@ import { loadRouterBase } from "./config";
  *  path: 父级目录
  * } formData
  */
-export function uploadFile(baseUrl, formData) {
+export function uploadFile(baseUrl: string, formData: FormData) {
   return axios({
-    url: baseUrl + "upload",
+    url: baseUrl + 'upload',
     headers: {
-      "Content-Type": "multipart/form-data;charset=UTF-8",
+      'Content-Type': 'multipart/form-data;charset=UTF-8'
     },
-    method: "post",
+    method: 'post',
     // 0 表示无超时时间
     timeout: 0,
-    data: formData,
-  });
+    data: formData
+  })
 }
 
 /**
  * 授权目录列表
  * @param {String} id
  */
-export function getRootFileList(baseUrl, id) {
+export function getRootFileList(baseUrl: string, id: string) {
   return axios({
-    url: baseUrl + "root_file_data.json",
-    method: "post",
-    data: { id },
-  });
+    url: baseUrl + 'root_file_data.json',
+    method: 'post',
+    data: { id }
+  })
 }
 
 /**
  * 文件列表
  * @param {id, path, children} params
  */
-export function getFileList(baseUrl, params) {
+export function getFileList(baseUrl: string, params: any) {
   return axios({
-    url: baseUrl + "list_file_data.json",
-    method: "post",
-    data: params,
-  });
+    url: baseUrl + 'list_file_data.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -52,44 +52,44 @@ export function getFileList(baseUrl, params) {
  * 下载文件的返回是 blob 类型，把 blob 用浏览器下载下来
  * @param {id, path, name} params
  */
-export function downloadFile(baseUrl, params) {
-  return loadRouterBase(baseUrl + "download.html", params);
+export function downloadFile(baseUrl: string, params: any) {
+  return loadRouterBase(baseUrl + 'download.html', params)
 }
 
 /**
  * 删除文件
  * @param {id, path, name} params x
  */
-export function deleteFile(baseUrl, params) {
+export function deleteFile(baseUrl: string, params: any) {
   return axios({
-    url: baseUrl + "delete.json",
-    method: "post",
-    data: params,
-  });
+    url: baseUrl + 'delete.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
  * 读取文件
  * @param {id, path, name} params x
  */
-export function readFile(baseUrl, params) {
+export function readFile(baseUrl: string, params: any) {
   return axios({
-    url: baseUrl + "read_file_data.json",
-    method: "post",
-    data: params,
-  });
+    url: baseUrl + 'read_file_data.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
  * 保存文件
  * @param {id, path, name,content} params x
  */
-export function updateFileData(baseUrl, params) {
+export function updateFileData(baseUrl: string, params: any) {
   return axios({
-    url: baseUrl + "update_file_data.json",
-    method: "post",
-    data: params,
-  });
+    url: baseUrl + 'update_file_data.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -97,12 +97,12 @@ export function updateFileData(baseUrl, params) {
  * @param params
  * @returns {id, path, name,unFolder} params x
  */
-export function newFileFolder(baseUrl, params) {
+export function newFileFolder(baseUrl: string, params: any) {
   return axios({
-    url: baseUrl + "new_file_folder.json",
-    method: "post",
-    data: params,
-  });
+    url: baseUrl + 'new_file_folder.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -110,10 +110,10 @@ export function newFileFolder(baseUrl, params) {
  * @param params
  * @returns {id, levelName, filename,newname} params x
  */
-export function renameFileFolder(baseUrl, params) {
+export function renameFileFolder(baseUrl: string, params: any) {
   return axios({
-    url: baseUrl + "rename.json",
-    method: "post",
-    data: params,
-  });
+    url: baseUrl + 'rename.json',
+    method: 'post',
+    data: params
+  })
 }

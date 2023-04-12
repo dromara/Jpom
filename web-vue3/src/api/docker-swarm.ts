@@ -1,31 +1,31 @@
-import axios from "./config";
+import axios from './config'
 
 /**
  * 容器列表
  * @param {JSON} params
  */
-export function dockerSwarmList(params) {
+export function dockerSwarmList(params: any) {
   return axios({
-    url: "/docker/swarm/list",
-    method: "post",
-    data: params,
-  });
+    url: '/docker/swarm/list',
+    method: 'post',
+    data: params
+  })
 }
 
-export function dockerSwarmListAll(params) {
+export function dockerSwarmListAll(params: any) {
   return axios({
-    url: "/docker/swarm/list-all",
-    method: "get",
-    params: params,
-  });
+    url: '/docker/swarm/list-all',
+    method: 'get',
+    params: params
+  })
 }
 
-export function editDockerSwarm(data) {
+export function editDockerSwarm(data: any) {
   return axios({
-    url: "/docker/swarm/edit",
-    method: "post",
-    data: data,
-  });
+    url: '/docker/swarm/edit',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -34,123 +34,123 @@ export function editDockerSwarm(data) {
  *  id: docker ID
  * } params
  */
-export function delSwarm(params) {
+export function delSwarm(params: any) {
   return axios({
-    url: "/docker/swarm/del",
-    method: "get",
-    params,
-  });
+    url: '/docker/swarm/del',
+    method: 'get',
+    params
+  })
 }
 
 /**
  * 容器集群节点列表
  * @param {JSON} params
  */
-export function dockerSwarmNodeList(urlPrefix, params) {
+export function dockerSwarmNodeList(urlPrefix: string, params: any) {
   return axios({
-    url: urlPrefix + "/docker/swarm/node-list",
-    method: "post",
+    url: urlPrefix + '/docker/swarm/node-list',
+    method: 'post',
     data: params,
     headers: {
-      loading: "no",
-    },
-  });
+      loading: 'no'
+    }
+  })
 }
 
 /**
  * 容器集群节点修改
  * @param {JSON} params
  */
-export function dockerSwarmNodeUpdate(urlPrefix, params) {
+export function dockerSwarmNodeUpdate(urlPrefix: string, params: any) {
   return axios({
-    url: urlPrefix + "/docker/swarm/update",
-    method: "post",
-    data: params,
-  });
+    url: urlPrefix + '/docker/swarm/update',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
  * 容器集群服务列表
  * @param {JSON} params
  */
-export function dockerSwarmServicesList(urlPrefix, params) {
+export function dockerSwarmServicesList(urlPrefix: string, params: any) {
   return axios({
-    url: urlPrefix + "/docker/swarm-service/list",
-    method: "post",
+    url: urlPrefix + '/docker/swarm-service/list',
+    method: 'post',
     data: params,
     headers: {
-      loading: "no",
-    },
-  });
+      loading: 'no'
+    }
+  })
 }
 
 /**
  * 容器集群服务任务列表
  * @param {JSON} params
  */
-export function dockerSwarmServicesTaskList(urlPrefix, params) {
+export function dockerSwarmServicesTaskList(urlPrefix: string, params: any) {
   return axios({
-    url: urlPrefix + "/docker/swarm-service/task-list",
-    method: "post",
+    url: urlPrefix + '/docker/swarm-service/task-list',
+    method: 'post',
     data: params,
     headers: {
-      loading: "no",
-    },
-  });
+      loading: 'no'
+    }
+  })
 }
 
 /**
  * 容器集群节点 删除服务
  * @param {JSON} params
  */
-export function dockerSwarmServicesDel(urlPrefix, params) {
+export function dockerSwarmServicesDel(urlPrefix: string, params: any) {
   return axios({
-    url: urlPrefix + "/docker/swarm-service/del",
-    method: "get",
-    params: params,
-  });
+    url: urlPrefix + '/docker/swarm-service/del',
+    method: 'get',
+    params: params
+  })
 }
 
 /**
  * 容器集群节点 删除服务
  * @param {JSON} params
  */
-export function dockerSwarmServicesEdit(urlPrefix, params) {
+export function dockerSwarmServicesEdit(urlPrefix: string, params: any) {
   return axios({
-    url: urlPrefix + "/docker/swarm-service/edit",
-    method: "post",
+    url: urlPrefix + '/docker/swarm-service/edit',
+    method: 'post',
     data: params,
     headers: {
-      "Content-Type": "application/json",
-    },
-  });
+      'Content-Type': 'application/json'
+    }
+  })
 }
 
 /**
  * 开始拉取服务日志
  * @param {JSON} params
  */
-export function dockerSwarmServicesStartLog(urlPrefix, params) {
+export function dockerSwarmServicesStartLog(urlPrefix: string, params: any) {
   return axios({
-    url: urlPrefix + "/docker/swarm-service/start-log",
-    method: "get",
-    params: params,
-  });
+    url: urlPrefix + '/docker/swarm-service/start-log',
+    method: 'get',
+    params: params
+  })
 }
 
 /**
  * 拉取服务日志
  * @param {JSON} params
  */
-export function dockerSwarmServicesPullLog(urlPrefix, params) {
+export function dockerSwarmServicesPullLog(urlPrefix: string, params: any) {
   return axios({
-    url: urlPrefix + "/docker/swarm-service/pull-log",
-    method: "get",
+    url: urlPrefix + '/docker/swarm-service/pull-log',
+    method: 'get',
     params: params,
     headers: {
-      loading: "no",
-    },
-  });
+      loading: 'no'
+    }
+  })
 }
 
 /**
@@ -187,19 +187,19 @@ export function dockerSwarmServicesPullLog(urlPrefix, params) {
             <a-select-option key="ORPHANED">已失联</a-select-option>
  */
 export const TASK_STATE = {
-  NEW: "新建状态",
+  NEW: '新建状态',
   // ALLOCATED: "已分配",
-  PENDING: "待处理",
-  ASSIGNED: "已分配",
-  ACCEPTED: "处理中",
-  PREPARING: "准备中",
-  READY: "准备",
-  STARTING: "开始执行任务",
-  RUNNING: "执行任务中",
-  COMPLETE: "执行成功",
-  SHUTDOWN: "停止",
-  FAILED: "执行失败",
-  REJECTED: "拒绝",
-  REMOVE: "移除",
-  ORPHANED: "已失联",
-};
+  PENDING: '待处理',
+  ASSIGNED: '已分配',
+  ACCEPTED: '处理中',
+  PREPARING: '准备中',
+  READY: '准备',
+  STARTING: '开始执行任务',
+  RUNNING: '执行任务中',
+  COMPLETE: '执行成功',
+  SHUTDOWN: '停止',
+  FAILED: '执行失败',
+  REJECTED: '拒绝',
+  REMOVE: '移除',
+  ORPHANED: '已失联'
+}

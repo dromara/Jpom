@@ -3,8 +3,8 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, In
 import { NO_NOTIFY_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID } from '@/utils/const'
 import { refreshToken } from './user/user'
 import { notification } from 'ant-design-vue'
-import appStore from '@/stores/app'
-import useUserStore from '@/stores/user'
+import { useAppStore } from '@/stores/app'
+import { useUserStore } from '@/stores/user'
 import { useMenuStore } from '@/stores/menu'
 
 const _window = window as any
@@ -21,14 +21,15 @@ const instance: AxiosInstance = axios.create({
 
   timeout: apiTimeout || delTimeout,
   headers: {
-    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
   },
-  responseType: 'json',
+  responseType: 'json'
 })
 
 // 请求拦截
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const { headers } = config
+  const appStore = useAppStore()
   const accessToken = localStorage.getItem('accessToken')
   headers['Authorization'] = accessToken ? 'Bearer ' + accessToken : ''
   headers[TOKEN_HEADER_KEY] = userStore.token
@@ -52,19 +53,19 @@ instance.interceptors.response.use(
     if (!error.response) {
       notification.error({
         message: 'Network Error No response',
-        description: '网络开了小差！请重试...:' + error,
+        description: '网络开了小差！请重试...:' + error
       })
     } else if (!error.response.config.headers[NO_NOTIFY_KEY]) {
       const { status, statusText, data } = error.response
       if (!status) {
         notification.error({
           message: 'Network Error',
-          description: '网络开了小差！请重试...:' + error,
+          description: '网络开了小差！请重试...:' + error
         })
       } else {
         notification.error({
           message: '状态码错误 ' + status,
-          description: (statusText || '') + (data || ''),
+          description: (statusText || '') + (data || '')
         })
       }
     }
@@ -88,7 +89,7 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
     typeof arg === 'string'
       ? {
           url: arg,
-          ...config,
+          ...config
         }
       : arg
   const response = await instance.request<IResponse<T>>(options)
@@ -103,7 +104,7 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
   if (data.code === 801) {
     notification.info({
       message: '登录信息过期，尝试自动续签...',
-      description: '如果不需要自动续签，请修改配置文件。该续签将不会影响页面。',
+      description: '如果不需要自动续签，请修改配置文件。该续签将不会影响页面。'
     })
     redoRequest(response.config)
     return Promise.reject(data)
@@ -119,7 +120,7 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
   if (data.code === 999) {
     notification.error({
       message: '禁止访问',
-      description: '禁止访问,当前IP限制访问',
+      description: '禁止访问,当前IP限制访问'
     })
     window.location.href = _window.routerBase + '/system/ipAccess'
     return Promise.reject(data)
@@ -131,7 +132,7 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
     if (!response.config.headers[NO_NOTIFY_KEY]) {
       notification.error({
         message: '提示信息 ' + (pro ? '' : response.config.url),
-        description: data.msg,
+        description: data.msg
       })
       console.error(response.config.url, data)
     }
@@ -157,7 +158,7 @@ async function redoRequest(config: AxiosRequestConfig) {
 function toLogin(res: IResponse<any>, response: AxiosResponse<IResponse<any>>) {
   notification.warn({
     message: '提示信息 ' + (pro ? '' : response.config.url),
-    description: res.msg,
+    description: res.msg
   })
 
   userStore.logOut()

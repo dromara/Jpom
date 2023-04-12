@@ -16,7 +16,7 @@ external.interceptors.response.use(
   }
 );
 
-export function executionRequest(url, param) {
+export function executionRequest(url:string, param:any) {
   return external({
     url: url,
     method: "get",

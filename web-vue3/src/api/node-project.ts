@@ -1,8 +1,8 @@
 /**
  * 节点管理 api
  */
-import axios from "./config";
-import { loadRouterBase } from "./config";
+import axios from './config'
+import { loadRouterBase } from './config'
 
 /**
  * 项目列表
@@ -11,12 +11,12 @@ import { loadRouterBase } from "./config";
  *  group: 分组名称
  * }
  */
-export function getProjectList(params) {
+export function getProjectList(params: any) {
   return axios({
-    url: "/node/manage/get_project_info",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/get_project_info',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -26,17 +26,17 @@ export function getProjectList(params) {
  *  ids: 项目 ID 数组字符串格式 ["id1", "id2"]
  * }
  */
-export function getRuningProjectInfo(params, noTip) {
+export function getRuningProjectInfo(params:any, noTip:string) {
   return axios({
-    url: "/node/manage/getProjectPort",
-    method: "post",
+    url: '/node/manage/getProjectPort',
+    method: 'post',
     data: params,
     timeout: 0,
     headers: {
-      loading: "no",
-      tip: noTip ? "no" : "",
-    },
-  });
+      loading: 'no',
+      tip: noTip ? 'no' : ''
+    }
+  })
 }
 
 /**
@@ -44,16 +44,16 @@ export function getRuningProjectInfo(params, noTip) {
  * @param {*} params
  * @returns
  */
-export function getRuningProjectCopyInfo(params) {
+export function getRuningProjectCopyInfo(params: any) {
   return axios({
-    url: "/node/manage/getProjectCopyPort",
-    method: "post",
+    url: '/node/manage/getProjectCopyPort',
+    method: 'post',
     data: params,
     timeout: 0,
     headers: {
-      loading: "no",
-    },
-  });
+      loading: 'no'
+    }
+  })
 }
 
 /**
@@ -63,24 +63,24 @@ export function getRuningProjectCopyInfo(params) {
  *  id: 项目 ID
  * } params
  */
-export function getProjectData(params) {
+export function getProjectData(params: any) {
   return axios({
-    url: "/node/manage/getProjectData.json",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/getProjectData.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
  * 项目白名单列表
  * @param {String} nodeId 节点 ID
  */
-export function getProjectAccessList(nodeId) {
+export function getProjectAccessList(nodeId:string) {
   return axios({
-    url: "/node/manage/project-access-list",
-    method: "post",
-    data: { nodeId },
-  });
+    url: '/node/manage/project-access-list',
+    method: 'post',
+    data: { nodeId }
+  })
 }
 
 /**
@@ -101,7 +101,7 @@ export function getProjectAccessList(nodeId) {
  *  args_xxn: 副本 n args 参数
  * }
  */
-export function editProject(params, replicaParams) {
+export function editProject(params:any, replicaParams:any) {
   const data = {
     nodeId: params.nodeId,
     id: params.id,
@@ -119,13 +119,13 @@ export function editProject(params, replicaParams) {
     logPath: params.logPath,
     autoStart: params.autoStart,
     dslContent: params.dslContent,
-    ...replicaParams,
-  };
+    ...replicaParams
+  }
   return axios({
-    url: "/node/manage/saveProject",
-    method: "post",
-    data,
-  });
+    url: '/node/manage/saveProject',
+    method: 'post',
+    data
+  })
 }
 
 /**
@@ -136,20 +136,20 @@ export function editProject(params, replicaParams) {
  *  copyId: copyId
  * } params
  */
-export function deleteProject(params) {
+export function deleteProject(params: any) {
   return axios({
-    url: "/node/manage/deleteProject",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/deleteProject',
+    method: 'post',
+    data: params
+  })
 }
 
-export function releaseOutgiving(params) {
+export function releaseOutgiving(params: any) {
   return axios({
-    url: "/node/manage/release-outgiving",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/release-outgiving',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -159,15 +159,15 @@ export function releaseOutgiving(params) {
  *  id: 项目 ID
  * } params
  */
-export function getFileList(params) {
+export function getFileList(params: any) {
   return axios({
-    url: "/node/manage/file/getFileList",
-    method: "post",
+    url: '/node/manage/file/getFileList',
+    method: 'post',
     headers: {
-      loading: "no",
+      loading: 'no'
     },
-    data: params,
-  });
+    data: params
+  })
 }
 
 /**
@@ -179,8 +179,8 @@ export function getFileList(params) {
  *  filename: 文件名称
  * } params
  */
-export function downloadProjectFile(params) {
-  return loadRouterBase("/node/manage/file/download", params);
+export function downloadProjectFile(params: any) {
+  return loadRouterBase('/node/manage/file/download', params)
   // return axios({
   //   url: "/node/manage/file/download",
   //   method: "get",
@@ -190,29 +190,29 @@ export function downloadProjectFile(params) {
   // });
 }
 
-export function readFile(formData) {
+export function readFile(formData:any) {
   return axios({
-    url: "/node/manage/file/read_file",
-    method: "get",
-    params: formData,
-  });
+    url: '/node/manage/file/read_file',
+    method: 'get',
+    params: formData
+  })
 }
 
-export function remoteDownload(formData) {
+export function remoteDownload(formData:any) {
   return axios({
-    url: "/node/manage/file/remote_download",
-    method: "get",
+    url: '/node/manage/file/remote_download',
+    method: 'get',
     timeout: 0,
-    params: formData,
-  });
+    params: formData
+  })
 }
 
-export function updateFile(formData) {
+export function updateFile(formData:any) {
   return axios({
-    url: "/node/manage/file/update_config_file",
-    method: "post",
-    data: formData,
-  });
+    url: '/node/manage/file/update_config_file',
+    method: 'post',
+    data: formData
+  })
 }
 
 /**
@@ -226,18 +226,18 @@ export function updateFile(formData) {
  *  clearType: {clear: 清空文件夹, noClear: 不清空} *上传压缩文件时需要
  * } formData
  */
-export function uploadProjectFile(formData) {
+export function uploadProjectFile(formData:FormData) {
   return axios({
-    url: "/node/manage/file/upload-sharding",
+    url: '/node/manage/file/upload-sharding',
     headers: {
-      "Content-Type": "multipart/form-data;charset=UTF-8",
-      loading: "no",
+      'Content-Type': 'multipart/form-data;charset=UTF-8',
+      loading: 'no'
     },
-    method: "post",
+    method: 'post',
     // 0 表示无超时时间
     timeout: 0,
-    data: formData,
-  });
+    data: formData
+  })
 }
 
 /**
@@ -251,15 +251,15 @@ export function uploadProjectFile(formData) {
  *  clearType: {clear: 清空文件夹, noClear: 不清空} *上传压缩文件时需要
  * } formData
  */
-export function shardingMerge(formData) {
+export function shardingMerge(formData:any) {
   return axios({
-    url: "/node/manage/file/sharding-merge",
+    url: '/node/manage/file/sharding-merge',
     headers: {},
-    method: "post",
+    method: 'post',
     // 0 表示无超时时间
     timeout: 0,
-    data: formData,
-  });
+    data: formData
+  })
 }
 
 /**
@@ -272,40 +272,40 @@ export function shardingMerge(formData) {
  *  type: 操作类型 {clear: 清空, noclear: 不清空} 填入此参数可以忽略 levelName 和 filename 参数
  * } params
  */
-export function deleteProjectFile(params) {
+export function deleteProjectFile(params: any) {
   return axios({
-    url: "/node/manage/file/deleteFile",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/file/deleteFile',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
  * 项目回收列表
  * @param {String} nodeId 节点 ID
  */
-export function getRecoverList(nodeId) {
+export function getRecoverList(nodeId:string) {
   return axios({
-    url: "/node/manage/recover/recover-list",
-    method: "post",
-    data: { nodeId },
-  });
+    url: '/node/manage/recover/recover-list',
+    method: 'post',
+    data: { nodeId }
+  })
 }
 
-/**
- * 获取回收项目信息
- * @param {
- *  nodeId: 节点 ID
- *  id: 项目 ID
- * } params
- */
-export function getRecoverData(params) {
-  return axios({
-    url: "/node/manage/recover/data.json",
-    method: "post",
-    data: params,
-  });
-}
+// /**
+//  * 获取回收项目信息
+//  * @param {
+//  *  nodeId: 节点 ID
+//  *  id: 项目 ID
+//  * } params
+//  */
+// export function getRecoverData(params: any) {
+//   return axios({
+//     url: '/node/manage/recover/data.json',
+//     method: 'post',
+//     data: params
+//   })
+// }
 
 /**
  * 获取项目日志文件大小
@@ -315,15 +315,15 @@ export function getRecoverData(params) {
  *  copyId: copyId
  * } params
  */
-export function getProjectLogSize(params) {
+export function getProjectLogSize(params: any) {
   return axios({
-    url: "/node/manage/log/logSize",
-    method: "post",
+    url: '/node/manage/log/logSize',
+    method: 'post',
     data: params,
     headers: {
-      loading: "no",
-    },
-  });
+      loading: 'no'
+    }
+  })
 }
 
 /**
@@ -334,8 +334,8 @@ export function getProjectLogSize(params) {
  *  copyId: copyId
  * } params
  */
-export function downloadProjectLogFile(params) {
-  return loadRouterBase("/node/manage/log/export.html", params);
+export function downloadProjectLogFile(params: any) {
+  return loadRouterBase('/node/manage/log/export.html', params)
 }
 
 /**
@@ -345,12 +345,12 @@ export function downloadProjectLogFile(params) {
  *  id: 项目 ID
  * } params
  */
-export function getLogBackList(params) {
+export function getLogBackList(params: any) {
   return axios({
-    url: "/node/manage/log/log-back-list",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/log/log-back-list',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -362,8 +362,8 @@ export function getLogBackList(params) {
  *  key: 文件名
  * } params
  */
-export function downloadProjectLogBackFile(params) {
-  return loadRouterBase("/node/manage/log/logBack_download", params);
+export function downloadProjectLogBackFile(params: any) {
+  return loadRouterBase('/node/manage/log/logBack_download', params)
 }
 
 /**
@@ -375,12 +375,12 @@ export function downloadProjectLogBackFile(params) {
  *  name: 文件名
  * } params
  */
-export function deleteProjectLogBackFile(params) {
+export function deleteProjectLogBackFile(params: any) {
   return axios({
-    url: "/node/manage/log/logBack_delete",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/log/logBack_delete',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -391,13 +391,13 @@ export function deleteProjectLogBackFile(params) {
  *  copyId: copyId
  * } params
  */
-export function getInternalData(params) {
+export function getInternalData(params: any) {
   return axios({
-    url: "/node/manage/getInternalData",
-    method: "post",
+    url: '/node/manage/getInternalData',
+    method: 'post',
     timeout: 0,
-    data: params,
-  });
+    data: params
+  })
 }
 
 // /**
@@ -406,7 +406,7 @@ export function getInternalData(params) {
 //  *  nodeId: 节点 ID
 //  * } params
 //  */
-// export function getThreadInfo(params) {
+// export function getThreadInfo(params:any) {
 //   return axios({
 //     url: "/node/manage/threadInfos",
 //     method: "post",
@@ -423,7 +423,7 @@ export function getInternalData(params) {
 //  *  copyId: copyId
 //  * } params
 //  */
-// export function exportStack(params) {
+// export function exportStack(params:any) {
 //   return axios({
 //     url: "/node/manage/stack",
 //     method: "get",
@@ -441,7 +441,7 @@ export function getInternalData(params) {
 //  *  copyId: copyId
 //  * } params
 //  */
-// export function exportRam(params) {
+// export function exportRam(params:any) {
 //   return axios({
 //     url: "/node/manage/ram",
 //     method: "get",
@@ -458,12 +458,12 @@ export function getInternalData(params) {
  *  id: 项目 ID
  * } params
  */
-export function getProjectReplicaList(params) {
+export function getProjectReplicaList(params: any) {
   return axios({
-    url: "/node/manage/project_copy_list",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/project_copy_list',
+    method: 'post',
+    data: params
+  })
 }
 
 // /**
@@ -473,7 +473,7 @@ export function getProjectReplicaList(params) {
 //  *  newLib: 新目录地址
 //  * } params
 //  */
-// export function nodeJudgeLibExist(params) {
+// export function nodeJudgeLibExist(params:any) {
 //   return axios({
 //     url: "/node/manage/judge_lib.json",
 //     method: "post",
@@ -492,16 +492,16 @@ export function getProjectReplicaList(params) {
  *  copyId: 副本id
  * } params
  */
-export function restartProject(params) {
+export function restartProject(params: any) {
   return axios({
-    url: "/node/manage/restart",
-    method: "post",
+    url: '/node/manage/restart',
+    method: 'post',
     data: params,
     headers: {
-      loading: "no",
-      tip: "no",
-    },
-  });
+      loading: 'no',
+      tip: 'no'
+    }
+  })
 }
 
 /**
@@ -512,16 +512,16 @@ export function restartProject(params) {
  *  copyId: 副本id
  * } params
  */
-export function startProject(params) {
+export function startProject(params: any) {
   return axios({
-    url: "/node/manage/start",
-    method: "post",
+    url: '/node/manage/start',
+    method: 'post',
     data: params,
     headers: {
-      loading: "no",
-      tip: "no",
-    },
-  });
+      loading: 'no',
+      tip: 'no'
+    }
+  })
 }
 
 /**
@@ -532,28 +532,28 @@ export function startProject(params) {
  *  copyId: 副本id
  * } params
  */
-export function stopProject(params) {
+export function stopProject(params: any) {
   return axios({
-    url: "/node/manage/stop",
-    method: "post",
+    url: '/node/manage/stop',
+    method: 'post',
     data: params,
     headers: {
-      loading: "no",
-      tip: "no",
-    },
-  });
+      loading: 'no',
+      tip: 'no'
+    }
+  })
 }
 
 /**
  * 获取触发器地址
  * @param {*} id
  */
-export function getProjectTriggerUrl(data) {
+export function getProjectTriggerUrl(data:any) {
   return axios({
-    url: "/node/project-trigger-url",
-    method: "post",
-    data: data,
-  });
+    url: '/node/project-trigger-url',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -561,12 +561,12 @@ export function getProjectTriggerUrl(data) {
  * @param params
  * @returns {id, path, name,unFolder} params x
  */
-export function newFileFolder(params) {
+export function newFileFolder(params: any) {
   return axios({
-    url: "/node/manage/file/new_file_folder",
-    method: "get",
-    params,
-  });
+    url: '/node/manage/file/new_file_folder',
+    method: 'get',
+    params
+  })
 }
 
 /**
@@ -574,12 +574,12 @@ export function newFileFolder(params) {
  * @param params
  * @returns {id, levelName, filename,newname} params x
  */
-export function renameFileFolder(params) {
+export function renameFileFolder(params: any) {
   return axios({
-    url: "/node/manage/file/rename_file_folder",
-    method: "get",
-    params,
-  });
+    url: '/node/manage/file/rename_file_folder',
+    method: 'get',
+    params
+  })
 }
 
 /**
@@ -587,51 +587,51 @@ export function renameFileFolder(params) {
  */
 export function getProjectGroupAll() {
   return axios({
-    url: "/node/list-project-group-all",
-    method: "get",
-  });
+    url: '/node/list-project-group-all',
+    method: 'get'
+  })
 }
 
 /**
  * 所有的运行模式
  */
-export const runModeList = ["Dsl", "ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"];
+export const runModeList = ['Dsl', 'ClassPath', 'Jar', 'JarWar', 'JavaExtDirsCp', 'File']
 
 /**
  * java 项目的运行模式
  */
-export const javaModes = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp"];
+export const javaModes = ['ClassPath', 'Jar', 'JarWar', 'JavaExtDirsCp']
 
 /**
  * 有状态管理的运行模式
  */
-export const noFileModes = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "Dsl"];
+export const noFileModes = ['ClassPath', 'Jar', 'JarWar', 'JavaExtDirsCp', 'Dsl']
 
 /*
  * 下载导入模板
  *
  */
-export function importTemplate(data) {
-  return loadRouterBase("/node/manage/import-template", data);
+export function importTemplate(data:any) {
+  return loadRouterBase('/node/manage/import-template', data)
 }
 
 /*
  * 导出数据
  *
  */
-export function exportData(data) {
-  return loadRouterBase("/node/manage/export-data", data);
+export function exportData(data:any) {
+  return loadRouterBase('/node/manage/export-data', data)
 }
 // 导入数据
-export function importData(formData) {
+export function importData(formData:FormData) {
   return axios({
-    url: "/node/manage/import-data",
+    url: '/node/manage/import-data',
     headers: {
-      "Content-Type": "multipart/form-data;charset=UTF-8",
+      'Content-Type': 'multipart/form-data;charset=UTF-8'
     },
-    method: "post",
+    method: 'post',
     // 0 表示无超时时间
     timeout: 0,
-    data: formData,
-  });
+    data: formData
+  })
 }

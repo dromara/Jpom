@@ -1,35 +1,35 @@
-import axios from "@/api/config";
+import axios from '@/api/config'
 
 /**
  * 容器列表
  * @param {JSON} params
  */
-export function dockerList(params) {
+export function dockerList(params: any) {
   return axios({
-    url: "/system/assets/docker/list-data",
-    method: "post",
-    data: params,
-  });
+    url: '/system/assets/docker/list-data',
+    method: 'post',
+    data: params
+  })
 }
 
-export function dockerImportTls(formData) {
+export function dockerImportTls(formData: FormData) {
   return axios({
-    url: "/system/assets/docker/import-tls",
+    url: '/system/assets/docker/import-tls',
     headers: {
-      "Content-Type": "multipart/form-data;charset=UTF-8",
+      'Content-Type': 'multipart/form-data;charset=UTF-8'
     },
-    method: "post",
+    method: 'post',
     timeout: 0,
-    data: formData,
-  });
+    data: formData
+  })
 }
 
-export function editDocker(data) {
+export function editDocker(data: any) {
   return axios({
-    url: "/system/assets/docker/edit",
-    method: "post",
-    data: data,
-  });
+    url: '/system/assets/docker/edit',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -38,12 +38,12 @@ export function editDocker(data) {
  *
  * } params
  */
-export function tryLocalDocker(params) {
+export function tryLocalDocker(params: any) {
   return axios({
-    url: "/system/assets/docker/try-local-docker",
-    method: "get",
-    params,
-  });
+    url: '/system/assets/docker/try-local-docker',
+    method: 'get',
+    params
+  })
 }
 
 /**
@@ -52,36 +52,36 @@ export function tryLocalDocker(params) {
  *  id: docker ID
  * } params
  */
-export function deleteDcoker(params) {
+export function deleteDcoker(params: any) {
   return axios({
-    url: "/system/assets/docker/del",
-    method: "get",
-    params,
-  });
+    url: '/system/assets/docker/del',
+    method: 'get',
+    params
+  })
 }
 
-export function initDockerSwarm(data) {
+export function initDockerSwarm(data: any) {
   return axios({
-    url: "/system/assets/docker/init",
-    method: "post",
-    data: data,
-  });
+    url: '/system/assets/docker/init',
+    method: 'post',
+    data: data
+  })
 }
 
-export function joinDockerSwarm(data) {
+export function joinDockerSwarm(data: any) {
   return axios({
-    url: "/system/assets/docker/join",
-    method: "post",
-    data: data,
-  });
+    url: '/system/assets/docker/join',
+    method: 'post',
+    data: data
+  })
 }
 
-export function dockerSwarmListAll(params) {
+export function dockerSwarmListAll(params: any) {
   return axios({
-    url: "/system/assets/docker/swarm/list-all",
-    method: "get",
-    params: params,
-  });
+    url: '/system/assets/docker/swarm/list-all',
+    method: 'get',
+    params: params
+  })
 }
 
 /**
@@ -90,38 +90,38 @@ export function dockerSwarmListAll(params) {
  *  id: docker ID
  * } params
  */
-export function dcokerSwarmLeaveForce(params) {
+export function dcokerSwarmLeaveForce(params: any) {
   return axios({
-    url: "/system/assets/docker/leave-force",
-    method: "get",
-    params,
-  });
+    url: '/system/assets/docker/leave-force',
+    method: 'get',
+    params
+  })
 }
 
 /**
  * 容器集群节点剔除
  * @param {JSON} params
  */
-export function dockerSwarmNodeLeave(params) {
+export function dockerSwarmNodeLeave(params: any) {
   return axios({
-    url: "/system/assets/docker/leave-node",
-    method: "get",
-    params: params,
-  });
+    url: '/system/assets/docker/leave-node',
+    method: 'get',
+    params: params
+  })
 }
 
-export function machineDockerDistribute(params) {
+export function machineDockerDistribute(params: any) {
   return axios({
-    url: "/system/assets/docker/distribute",
-    method: "post",
-    params: params,
-  });
+    url: '/system/assets/docker/distribute',
+    method: 'post',
+    params: params
+  })
 }
 
-export function dockerListWorkspace(params) {
+export function dockerListWorkspace(params: any) {
   return axios({
-    url: "/system/assets/docker/list-workspace-docker",
-    method: "get",
-    params: params,
-  });
+    url: '/system/assets/docker/list-workspace-docker',
+    method: 'get',
+    params: params
+  })
 }

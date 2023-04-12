@@ -3,10 +3,10 @@ import '@/assets/reset.less'
 import App from './App.vue'
 import Antd from 'ant-design-vue'
 import router from './router'
-import { createPinia } from 'pinia'
+import {createPinia, Pinia} from 'pinia'
 import { message, notification, Modal } from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.css'
-const pinia = createPinia()
+const pinia: Pinia = createPinia()
 
 const app = createApp(App)
 

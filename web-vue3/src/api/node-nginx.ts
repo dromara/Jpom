@@ -1,17 +1,17 @@
-import axios from "./config";
-import { loadRouterBase } from "./config";
+import axios from './config'
+import { loadRouterBase } from './config'
 /**
  * Nginx 目录列表
  * @param {
  *  nodeId: 节点 ID
  * } params
  */
-export function getNginxDirectoryList(params) {
+export function getNginxDirectoryList(params: any) {
   return axios({
-    url: "/node/system/nginx/tree.json",
-    method: "post",
-    data: params,
-  });
+    url: '/node/system/nginx/tree.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -22,12 +22,12 @@ export function getNginxDirectoryList(params) {
  *  name: 子级目录
  * } params
  */
-export function getNginxFileList(params) {
+export function getNginxFileList(params: any) {
   return axios({
-    url: "/node/system/nginx/list_data.json",
-    method: "post",
-    data: params,
-  });
+    url: '/node/system/nginx/list_data.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -40,12 +40,12 @@ export function getNginxFileList(params) {
  *  context: 内容
  * } params
  */
-export function editNginxConfig(params) {
+export function editNginxConfig(params: any) {
   return axios({
-    url: "/node/system/nginx/updateNgx",
-    method: "post",
-    data: params,
-  });
+    url: '/node/system/nginx/updateNgx',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -56,12 +56,12 @@ export function editNginxConfig(params) {
  *  name: 文件名称
  * } params
  */
-export function deleteNginxConfig(params) {
+export function deleteNginxConfig(params: any) {
   return axios({
-    url: "/node/system/nginx/delete",
-    method: "post",
-    data: params,
-  });
+    url: '/node/system/nginx/delete',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -70,12 +70,12 @@ export function deleteNginxConfig(params) {
  *  nodeId: 节点 ID
  * } params
  */
-export function loadNginxWhiteList(params) {
+export function loadNginxWhiteList(params: any) {
   return axios({
-    url: "/node/system/nginx/white-list",
-    method: "post",
-    data: params,
-  });
+    url: '/node/system/nginx/white-list',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -86,12 +86,12 @@ export function loadNginxWhiteList(params) {
  *  name: 文件名称
  * } params
  */
-export function loadNginxConfig(params) {
+export function loadNginxConfig(params: any) {
   return axios({
-    url: "/node/system/nginx/load-config",
-    method: "post",
-    data: params,
-  });
+    url: '/node/system/nginx/load-config',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -100,12 +100,12 @@ export function loadNginxConfig(params) {
  *  nodeId: 节点 ID
  * } params
  */
-export function loadNginxData(params) {
+export function loadNginxData(params: any) {
   return axios({
-    url: "/node/system/nginx/status",
-    method: "post",
-    data: params,
-  });
+    url: '/node/system/nginx/status',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -115,12 +115,12 @@ export function loadNginxData(params) {
  *  command: 命令 {open || reload || stop}
  * } params
  */
-export function doNginxCommand(params) {
+export function doNginxCommand(params: any) {
   return axios({
     url: `/node/system/nginx/${params.command}`,
-    method: "post",
-    data: params,
-  });
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -130,12 +130,12 @@ export function doNginxCommand(params) {
  *  name: Nginx 服务名称
  * } params
  */
-export function editNginxServerName(params) {
+export function editNginxServerName(params: any) {
   return axios({
-    url: "/node/system/nginx/updateConf",
-    method: "post",
-    data: params,
-  });
+    url: '/node/system/nginx/updateConf',
+    method: 'post',
+    data: params
+  })
 }
 
 /***************************** */
@@ -146,12 +146,12 @@ export function editNginxServerName(params) {
  *  nodeId: 节点 ID
  * } params
  */
-export function getCertList(params) {
+export function getCertList(params: any) {
   return axios({
-    url: "/node/system/certificate/getCertList",
-    method: "post",
-    data: params,
-  });
+    url: '/node/system/certificate/getCertList',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -161,12 +161,12 @@ export function getCertList(params) {
  *  id: 证书 ID
  * } params
  */
-export function deleteCert(params) {
+export function deleteCert(params: any) {
   return axios({
-    url: "/node/system/certificate/delete",
-    method: "post",
-    data: params,
-  });
+    url: '/node/system/certificate/delete',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -176,6 +176,6 @@ export function deleteCert(params) {
  *  id: 证书 ID
  * } params
  */
-export function downloadCert(params) {
-  return loadRouterBase("/node/system/certificate/export", params);
+export function downloadCert(params: any) {
+  return loadRouterBase('/node/system/certificate/export', params)
 }

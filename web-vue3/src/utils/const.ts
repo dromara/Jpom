@@ -1,3 +1,5 @@
+import { GlobalWindow } from '@/interface/common'
+
 // 常量池
 export const USER_NAME_KEY = 'Jpom-UserName'
 
@@ -37,25 +39,29 @@ export const LOADING_TIP = 'loadingTip'
 
 const cachePageLimitKeyName = 'page_limit'
 
-export function getCachePageLimit() {
-  return parseInt(localStorage.getItem(cachePageLimitKeyName) || 10)
+export function getCachePageLimit(): number {
+  return Number(localStorage.getItem(cachePageLimitKeyName) || 10)
 }
 
 /**
  * 分页选择条
  */
-export const PAGE_DEFAULT_SIZW_OPTIONS = ['5', '10', '15', '20', '25', '30', '35', '40', '50']
+export const PAGE_DEFAULT_SIZW_OPTIONS: string[] = ['5', '10', '15', '20', '25', '30', '35', '40', '50']
 
 /**
  * 展示总条数计算方法
  * @param {Number} total 总记录数
  * @returns String
  */
-export function PAGE_DEFAULT_SHOW_TOTAL(total) {
+export function PAGE_DEFAULT_SHOW_TOTAL(total: number) {
   return `总计 ${total} 条`
 }
 
-export const PAGE_DEFAULT_LIST_QUERY = { page: 1, limit: isNaN(getCachePageLimit) ? 10 : getCachePageLimit, total: 0 }
+export const PAGE_DEFAULT_LIST_QUERY = {
+  page: 1,
+  limit: isNaN(getCachePageLimit()) ? 10 : getCachePageLimit(),
+  total: 0
+}
 
 /**
  * 计算分页数据
@@ -63,7 +69,7 @@ export const PAGE_DEFAULT_LIST_QUERY = { page: 1, limit: isNaN(getCachePageLimit
  * @param {Array} pageSizeOptions 分页选择条选项
  * @returns
  */
-export function COMPUTED_PAGINATION(queryParam, pageSizeOptions) {
+export function COMPUTED_PAGINATION(queryParam: any, pageSizeOptions: []) {
   // console.log(queryParam);
   const limit = queryParam.limit || PAGE_DEFAULT_LIST_QUERY.limit
   const total = queryParam.total || 0
@@ -77,7 +83,7 @@ export function COMPUTED_PAGINATION(queryParam, pageSizeOptions) {
     showLessItems: true,
     // 只有在分页条数在 小于 2 的时候隐藏，避免设置太大无法切回
     hideOnSinglePage: limit <= 20,
-    showTotal: (total) => {
+    showTotal: (total: number) => {
       return PAGE_DEFAULT_SHOW_TOTAL(total)
     }
   }
@@ -89,7 +95,7 @@ export function COMPUTED_PAGINATION(queryParam, pageSizeOptions) {
  * @param {JSON} param1
  * @returns
  */
-export function CHANGE_PAGE(listQuery, { pagination, sorter }) {
+export function CHANGE_PAGE(listQuery: any, { pagination, sorter }: any) {
   if (pagination && Object.keys(pagination).length) {
     listQuery = { ...listQuery, page: pagination.current, limit: pagination.pageSize }
     //
@@ -198,7 +204,7 @@ export const ZIP_ACCEPT: string = '.tar,.bz2,.gz,.zip,.tar.bz2,.tar.gz'
 /**
  * mfa app 应用举例
  */
-export const MFA_APP_TIP_ARRAY = [
+export const MFA_APP_TIP_ARRAY: string[] = [
   '<strong>【推荐】微信小程序搜索 数盾OTP',
   '<strong>【推荐】腾讯身份验证码</strong> 简单好用 <a href="https://a.app.qq.com/o/simple.jsp?pkgname=com.tencent.authenticator">Android</a>',
   '<strong>Authy</strong> 功能丰富 专为两步验证码 <a href="https://authy.com/download/">iOS/Android/Windows/Mac/Linux</a> &nbsp; <a href="https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=cn">Chrome 扩展</a>',
@@ -253,8 +259,9 @@ export const PROJECT_DSL_DEFATUL =
  * @returns
  */
 export function getWebSocketUrl(url: string, parameter: any) {
-  const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://'
-  const domain = window.routerBase
+  const protocol: string = location.protocol === 'https:' ? 'wss://' : 'ws://'
+  const _window: GlobalWindow = window as unknown as GlobalWindow
+  const domain: string = _window.routerBase
   const fullUrl: string = (domain + url).replace(new RegExp('//', 'gm'), '/')
   return `${protocol}${location.host}${fullUrl}?${parameter}`
 }
@@ -373,7 +380,7 @@ export function parseTime(time: string | number | Date | null, cFormat: string |
  * @param defaultValue
  * @returns
  */
-export function renderSize(value, defaultValue = '-') {
+export function renderSize(value: any, defaultValue = '-') {
   return formatUnits(value, 1024, ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'], defaultValue)
 }
 
@@ -383,7 +390,7 @@ export function renderSize(value, defaultValue = '-') {
  * @param defaultValue
  * @returns
  */
-export function renderBpsSize(value, defaultValue = '-') {
+export function renderBpsSize(value: any, defaultValue = '-') {
   return formatUnits(value, 1024, ['bps', 'Kbps', 'Mbps', 'Gbps', 'Tbps', 'Pbps', 'Ebps', 'Zbps', 'Ybps'], defaultValue)
 }
 
@@ -391,23 +398,25 @@ export function renderBpsSize(value, defaultValue = '-') {
  * 格式化文件大小
  * @param {*} value
  * @param defaultValue
+ * @param unitArr 单位
+ * @param base 基础值
  * @returns
  */
-export function formatUnits(value, base, unitArr, defaultValue = '-') {
+export function formatUnits(value: any, base: number, unitArr: string[], defaultValue = '-') {
   if (null == value || value === '') {
     return defaultValue
   }
 
-  var index = 0
-  var srcsize = parseFloat(value)
+  var index: number = 0
+  var srcsize: number = parseFloat(value)
   if (srcsize <= 0) {
     return defaultValue
   }
   // console.log(value, srcsize);
   index = Math.floor(Math.log(srcsize) / Math.log(base))
-  var size = srcsize / Math.pow(base, index)
-  size = size.toFixed(2) //保留的小数位数
-  return size + unitArr[index]
+  var size: number = srcsize / Math.pow(base, index)
+  //保留的小数位数
+  return size.toFixed(2) + unitArr[index]
 }
 
 /**
@@ -415,11 +424,11 @@ export function formatUnits(value, base, unitArr, defaultValue = '-') {
  * @param {function} group
  * @returns Object
  */
-Array.prototype.groupBy = function (group) {
+;(Array.prototype as any).groupBy = function (group: Function) {
   return group && typeof group === 'function'
     ? Array.prototype.reduce.call(
         this,
-        function (c, v) {
+        function (c: any, v) {
           var k = group(v)
           c[k] = v
           return c
@@ -429,12 +438,12 @@ Array.prototype.groupBy = function (group) {
     : this
 }
 //
-export function itemGroupBy(arr, groupKey, key, dataKey) {
+export function itemGroupBy(arr: any[], groupKey: string, key: string, dataKey: string) {
   key = key || 'type'
   dataKey = dataKey || 'data'
 
-  let newArr = [],
-    types = {},
+  let newArr: any[] = [],
+    types: any = {},
     // newItem,
     i,
     j,
@@ -457,7 +466,7 @@ export function itemGroupBy(arr, groupKey, key, dataKey) {
  * @param {String} levelCount 格式化个数
  * @returns
  */
-export function formatDuration(ms, seg, levelCount) {
+export function formatDuration(ms: any, seg: string, levelCount: number) {
   if (isNaN(Number(ms))) {
     return ms
   }
@@ -479,7 +488,7 @@ export function formatDuration(ms, seg, levelCount) {
 }
 
 //小数转换为分数(小数先转换成number类型，再乘以100，并且保留2位小数)
-export function formatPercent(point, keep = 2) {
+export function formatPercent(point: any, keep = 2) {
   if (!point) {
     return '-'
   }
@@ -487,24 +496,24 @@ export function formatPercent(point, keep = 2) {
 }
 
 //小数转换为分数(小数先转换成number类型，并且保留2位小数)
-export function formatPercent2(point, keep = 2) {
+export function formatPercent2(point: any, keep = 2) {
   if (null == point) {
     return '-'
   }
-  var percent = Number(point).toFixed(keep)
+  var percent: string = Number(point).toFixed(keep)
   percent += '%'
   return percent
 }
 
 //小数转换为分数(小数先转换成number类型，再乘以100，并且保留2位小数)
-export function formatPercent2Number(point, keep = 2) {
+export function formatPercent2Number(point: any, keep = 2) {
   if (null == point) {
     return 0
   }
   return Number(Number(point).toFixed(keep))
 }
 
-export function compareVersion(version1, version2) {
+export function compareVersion(version1: any, version2: any) {
   if (version1 == null && version2 == null) {
     return 0
   } else if (version1 == null) {
@@ -521,10 +530,11 @@ export function compareVersion(version1, version2) {
   const v1s = version1.split('.')
   const v2s = version2.split('.')
 
-  let diff = 0
-  const minLength = Math.min(v1s.length, v2s.length) // 取最小长度值
+  let diff: number = 0
+  const minLength: number = Math.min(v1s.length, v2s.length) // 取最小长度值
 
-  for (let i = 0; i < minLength; i++) {
+  let i: number
+  for (i = 0; i < minLength; i++) {
     let v1 = v1s[i]
     let v2 = v2s[i]
     // 先比较长度
@@ -544,13 +554,13 @@ export function compareVersion(version1, version2) {
 
 // 当前页面构建信息
 export function pageBuildInfo() {
-  const htmlVersion = document.head?.querySelector('[name~=jpom-version][content]')?.content
-  const buildTime = document.head?.querySelector('[name~=build-time][content]')?.content
-  const buildEnv = document.head?.querySelector('[name~=build-env][content]')?.content
+  const htmlVersion: any = document.head?.querySelector('[name~=jpom-version][content]')
+  const buildTime: any = document.head?.querySelector('[name~=build-time][content]')
+  const buildEnv: any = document.head?.querySelector('[name~=build-env][content]')
   return {
-    v: htmlVersion,
-    t: buildTime,
-    e: buildEnv,
+    v: htmlVersion?.content,
+    t: buildTime?.content,
+    e: buildEnv?.content,
     df: (document.title || '').toLowerCase().includes('jpom'),
     t2: Date.now()
   }

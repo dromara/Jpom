@@ -24,8 +24,8 @@
  * 深拷贝
  * @param data
  */
-export function cloneDeep(data) {
-  return JSON.parse(JSON.stringify(data));
+export function cloneDeep(data: any) {
+  return JSON.parse(JSON.stringify(data))
 }
 
 /**
@@ -33,19 +33,19 @@ export function cloneDeep(data) {
  * @param tree
  * @param hasChildren
  */
-export function treeToList(tree, hasChildren = false) {
-  let queen = [];
-  const out = [];
-  queen = queen.concat(JSON.parse(JSON.stringify(tree)));
+export function treeToList(tree: any[], hasChildren = false) {
+  let queen: any[] = []
+  const out = []
+  queen = queen.concat(JSON.parse(JSON.stringify(tree)))
   while (queen.length) {
-    const first = queen.shift();
+    const first = queen.shift()
     if (first?.children) {
-      queen = queen.concat(first.children);
-      if (!hasChildren) delete first.children;
+      queen = queen.concat(first.children)
+      if (!hasChildren) delete first.children
     }
-    out.push(first);
+    out.push(first)
   }
-  return out;
+  return out
 }
 
 /**
@@ -55,28 +55,28 @@ export function treeToList(tree, hasChildren = false) {
  * @param parentId
  * @param key
  */
-export function listToTree(list, tree, parentId = 0, key = "parentId") {
-  list.forEach((item) => {
+export function listToTree(list: any, tree: any, parentId = 0, key = 'parentId') {
+  list.forEach((item: any) => {
     if (item[key] === parentId) {
       const child = {
         ...item,
-        children: [],
-      };
-      listToTree(list, child.children, item.key, key);
-      if (!child.children?.length) delete child.children;
-      tree.push(child);
+        children: []
+      }
+      listToTree(list, child.children, item.key, key)
+      if (!child.children?.length) delete child.children
+      tree.push(child)
     }
-  });
-  return tree;
+  })
+  return tree
 }
 
 /**
  * 获取树节点 key 列表
  * @param treeData
  */
-export function getTreeKeys(treeData) {
-  const list = treeToList(treeData);
-  return list.map((item) => item.key);
+export function getTreeKeys(treeData: any) {
+  const list = treeToList(treeData)
+  return list.map((item) => item.key)
 }
 
 // /**
@@ -117,8 +117,8 @@ export function getTreeKeys(treeData) {
  * @param selectedKeys
  * @param eventKey
  */
-export function isChecked(selectedKeys, eventKey) {
-  return selectedKeys.indexOf(eventKey) !== -1;
+export function isChecked(selectedKeys: any[], eventKey: any) {
+  return selectedKeys.indexOf(eventKey) !== -1
 }
 
 /**
@@ -127,16 +127,16 @@ export function isChecked(selectedKeys, eventKey) {
  * @param targetKeys
  * @param direction
  */
-export function handleLeftTreeData(data, targetKeys, direction = "right") {
-  data.forEach((item) => {
-    if (direction === "right") {
-      item.disabled = targetKeys.includes(item.key);
-    } else if (direction === "left") {
-      if (item.disabled && targetKeys.includes(item.key)) item.disabled = false;
+export function handleLeftTreeData(data: any, targetKeys: any, direction = 'right') {
+  data.forEach((item: any) => {
+    if (direction === 'right') {
+      item.disabled = targetKeys.includes(item.key)
+    } else if (direction === 'left') {
+      if (item.disabled && targetKeys.includes(item.key)) item.disabled = false
     }
-    if (item.children) handleLeftTreeData(item.children, targetKeys, direction);
-  });
-  return data;
+    if (item.children) handleLeftTreeData(item.children, targetKeys, direction)
+  })
+  return data
 }
 
 /**
@@ -145,27 +145,27 @@ export function handleLeftTreeData(data, targetKeys, direction = "right") {
  * @param targetKeys
  * @param direction
  */
-export function handleRightTreeData(data, targetKeys, direction = "right") {
-  const list = treeToList(data);
-  const arr = [];
-  const tree = [];
+export function handleRightTreeData(data: any, targetKeys: any, direction = 'right') {
+  const list = treeToList(data)
+  const arr: any[] = []
+  const tree: any[] = []
   list.forEach((item) => {
-    if (direction === "right") {
+    if (direction === 'right') {
       if (targetKeys.includes(item.key)) {
-        const content = { ...item };
-        if (content.children) delete content.children;
-        arr.push({ ...content });
+        const content = { ...item }
+        if (content.children) delete content.children
+        arr.push({ ...content })
       }
-    } else if (direction === "left") {
+    } else if (direction === 'left') {
       if (!targetKeys.includes(item.key)) {
-        const content = { ...item };
-        if (content.children) delete content.children;
-        arr.push({ ...content });
+        const content = { ...item }
+        if (content.children) delete content.children
+        arr.push({ ...content })
       }
     }
-  });
-  listToTree(arr, tree, 0);
-  return tree;
+  })
+  listToTree(arr, tree, 0)
+  return tree
 }
 
 /**
@@ -173,10 +173,10 @@ export function handleRightTreeData(data, targetKeys, direction = "right") {
  * @param list
  * @param dataSource
  */
-export function flatten(list, dataSource) {
-  list.forEach((item) => {
-    dataSource.push(item);
-    if (item.children) flatten(item.children, dataSource);
-  });
-  return dataSource;
+export function flatten(list: any, dataSource: any) {
+  list.forEach((item: any) => {
+    dataSource.push(item)
+    if (item.children) flatten(item.children, dataSource)
+  })
+  return dataSource
 }

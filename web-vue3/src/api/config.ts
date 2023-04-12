@@ -1,4 +1,4 @@
-import { IResponse } from './../interface/request.d'
+import { IResponse } from '@/interface/request'
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { NO_NOTIFY_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID } from '@/utils/const'
 import { refreshToken } from './user/user'

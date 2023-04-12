@@ -1,15 +1,15 @@
-import axios from "./config";
+import axios from './config'
 
 /**
  *
- * @param data
+ * @param params
  */
-export function editWorkSpace(data) {
+export function editWorkSpace(params: any) {
   return axios({
-    url: "/system/workspace/edit",
-    method: "post",
-    data: data,
-  });
+    url: '/system/workspace/edit',
+    method: 'post',
+    data: params
+  })
 }
 
 /*
@@ -17,12 +17,12 @@ export function editWorkSpace(data) {
  * @param {*}
  * } params
  */
-export function getWorkSpaceList(params) {
+export function getWorkSpaceList(params: any) {
   return axios({
-    url: "/system/workspace/list",
-    method: "post",
-    data: params,
-  });
+    url: '/system/workspace/list',
+    method: 'post',
+    data: params
+  })
 }
 
 /*
@@ -32,10 +32,10 @@ export function getWorkSpaceList(params) {
  */
 export function getWorkSpaceListAll() {
   return axios({
-    url: "/system/workspace/list_all",
-    method: "get",
-    data: {},
-  });
+    url: '/system/workspace/list_all',
+    method: 'get',
+    data: {}
+  })
 }
 
 /*
@@ -43,12 +43,12 @@ export function getWorkSpaceListAll() {
  * @param {String} id
  * } params
  */
-export function deleteWorkspace(id) {
+export function deleteWorkspace(id: string) {
   return axios({
-    url: "/system/workspace/delete",
-    method: "get",
-    params: { id: id },
-  });
+    url: '/system/workspace/delete',
+    method: 'get',
+    params: { id: id }
+  })
 }
 
 /*
@@ -56,24 +56,24 @@ export function deleteWorkspace(id) {
  * @param {*}
  * } params
  */
-export function getWorkspaceEnvList(params) {
+export function getWorkspaceEnvList(params: any) {
   return axios({
-    url: "/system/workspace_env/list",
-    method: "post",
-    data: params,
-  });
+    url: '/system/workspace_env/list',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
  *
  * @param data
  */
-export function editWorkspaceEnv(data) {
+export function editWorkspaceEnv(data: any) {
   return axios({
-    url: "/system/workspace_env/edit",
-    method: "post",
-    data: data,
-  });
+    url: '/system/workspace_env/edit',
+    method: 'post',
+    data: data
+  })
 }
 
 /*
@@ -81,32 +81,32 @@ export function editWorkspaceEnv(data) {
  * @param {String} id
  * } params
  */
-export function deleteWorkspaceEnv(params) {
+export function deleteWorkspaceEnv(params: any) {
   return axios({
-    url: "/system/workspace_env/delete",
-    method: "get",
-    params: params,
-  });
+    url: '/system/workspace_env/delete',
+    method: 'get',
+    params: params
+  })
 }
 
 /**
  * 加载 菜单配置信息
  */
-export function getMenusConfig(data) {
+export function getMenusConfig(data: any) {
   return axios({
-    url: "/system/workspace/get_menus_config",
-    method: "post",
-    data,
-  });
+    url: '/system/workspace/get_menus_config',
+    method: 'post',
+    data
+  })
 }
 
 /**
  * 保存菜单配置信息
  */
-export function saveMenusConfig(data) {
+export function saveMenusConfig(data: any) {
   return axios({
-    url: "/system/workspace/save_menus_config.json",
-    method: "post",
-    data: data,
-  });
+    url: '/system/workspace/save_menus_config.json',
+    method: 'post',
+    data: data
+  })
 }

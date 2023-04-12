@@ -1,4 +1,4 @@
-import axios from "./config";
+import axios from './config'
 
 /**
  * 分页获取仓库列表
@@ -14,12 +14,12 @@ import axios from "./config";
  * @param {String} params.gitUrl        仓库地址
  * @return {axios} 请求结果 axios 对象
  */
-export function getRepositoryList(params) {
+export function getRepositoryList(params: any) {
   return axios({
-    url: "/build/repository/list",
-    method: "post",
-    data: params,
-  });
+    url: '/build/repository/list',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -27,12 +27,12 @@ export function getRepositoryList(params) {
  *
  * @return {axios} 请求结果 axios 对象
  */
-export function getRepositoryInfo(params) {
+export function getRepositoryInfo(params: any) {
   return axios({
-    url: "/build/repository/get",
-    method: "get",
-    params,
-  });
+    url: '/build/repository/get',
+    method: 'get',
+    params
+  })
 }
 
 /**
@@ -49,12 +49,12 @@ export function getRepositoryInfo(params) {
  * @param {String} params.rsaPub      公钥信息
  * @return {axios} 请求结果 axios 对象
  */
-export function editRepository(params) {
+export function editRepository(params: any) {
   return axios({
-    url: "/build/repository/edit",
-    method: "post",
-    data: params,
-  });
+    url: '/build/repository/edit',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -65,12 +65,12 @@ export function editRepository(params) {
  * @param {Boolean} params.isRealDel    是否真正删除
  * @return {axios} 请求结果 axios 对象
  */
-export function deleteRepository(params) {
+export function deleteRepository(params: any) {
   return axios({
-    url: "/build/repository/delete",
-    method: "post",
-    data: params,
-  });
+    url: '/build/repository/delete',
+    method: 'post',
+    data: params
+  })
 }
 /**
  * restHideField by id
@@ -79,31 +79,31 @@ export function deleteRepository(params) {
  */
 export function restHideField(id) {
   return axios({
-    url: "/build/repository/rest_hide_field",
-    method: "post",
-    data: { id },
-  });
+    url: '/build/repository/rest_hide_field',
+    method: 'post',
+    data: { id }
+  })
 }
 
 export function authorizeRepos(param) {
   return axios({
-    url: "/build/repository/authorize_repos",
-    method: "get",
-    params: param,
-  });
+    url: '/build/repository/authorize_repos',
+    method: 'get',
+    params: param
+  })
 }
 
 export function providerInfo() {
   return axios({
-    url: "/build/repository/provider_info",
-    method: "get",
-  });
+    url: '/build/repository/provider_info',
+    method: 'get'
+  })
 }
 
-export function sortItem(params) {
+export function sortItem(params: any) {
   return axios({
-    url: "/build/repository/sort-item",
-    method: "get",
-    params: params,
-  });
+    url: '/build/repository/sort-item',
+    method: 'get',
+    params: params
+  })
 }

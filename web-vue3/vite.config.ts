@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 import path from 'node:path'
-import { defineConfig, loadEnv } from 'vite'
+import { ConfigEnv, defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import { createHtmlPlugin } from 'vite-plugin-html'
@@ -34,10 +34,10 @@ import Components from 'unplugin-vue-components/vite'
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode }: ConfigEnv) => {
   // 加载环境配置
-  const env = loadEnv(mode, __dirname, 'JPOM')
-  const { JPOM_PROXY_HOST: HOST, JPOM_BASE_URL, JPOM_PORT } = env
+  const env: Record<string, string> = loadEnv(mode, __dirname, 'JPOM')
+  const { JPOM_PROXY_HOST: HOST, JPOM_BASE_URL, JPOM_PORT }: Record<string, string> = env
   console.log(env, `当前为${mode}环境`)
 
   return {
@@ -56,7 +56,7 @@ export default defineConfig(({ mode }) => {
       outDir: '../modules/server/src/main/resources/dist2'
     },
     server: {
-      port: JPOM_PORT,
+      port: Number(JPOM_PORT),
       proxy: {
         // websocket
         '/ssh': {

@@ -22,16 +22,16 @@
 ///
 
 // https://github.com/hua1995116/ansi-color-parse
-const ansiparse = function (str) {
+const ansiparse:any = function (str:any) {
   //
   // I'm terrible at writing parsers.
   //
   var matchingControl = null,
     matchingData = null,
-    matchingText = '',
-    ansiState = [],
-    result = [],
-    state = {},
+    matchingText: string = '',
+    ansiState: any[] = [],
+    result: any[] = [],
+    state: any = {},
     eraseChar
 
   //

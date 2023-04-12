@@ -1,15 +1,15 @@
-import axios from "./config";
+import axios from './config'
 
 /**
  * white list data
  * @param {nodeId} nodeId
  */
-export function getWhiteList(data) {
+export function getWhiteList(data: any) {
   return axios({
-    url: "/node/system/white-list",
-    method: "post",
-    data: data,
-  });
+    url: '/node/system/white-list',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -21,10 +21,10 @@ export function getWhiteList(data) {
  *  nginx: Nginx 目录
  * } params
  */
-export function editWhiteList(params) {
+export function editWhiteList(params: any) {
   return axios({
-    url: "/node/system/whitelistDirectory_submit",
-    method: "post",
-    data: params,
-  });
+    url: '/node/system/whitelistDirectory_submit',
+    method: 'post',
+    data: params
+  })
 }
