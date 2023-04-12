@@ -26,27 +26,27 @@
 </template>
 <script>
 // import { getProjectData, getProjectLogSize, downloadProjectLogFile, getLogBackList, downloadProjectLogBackFile, deleteProjectLogBackFile } from "@/api/node-project";
-import { mapGetters } from "vuex";
-import { getWebSocketUrl } from "@/utils/const";
-import LogView from "@/components/logView";
+import { mapGetters } from 'vuex'
+import { getWebSocketUrl } from '@/api/config'
+import LogView from '@/components/logView'
 
 export default {
   components: {
-    LogView,
+    LogView
   },
   props: {
     nodeId: {
-      type: String,
+      type: String
     },
     projectId: {
-      type: String,
+      type: String
     },
     id: {
-      type: String,
+      type: String
     },
     readFilePath: {
-      type: String,
-    },
+      type: String
+    }
   },
   data() {
     return {
@@ -55,59 +55,66 @@ export default {
       loading: false,
       socket: null,
 
-      heart: null,
-    };
+      heart: null
+    }
   },
   computed: {
-    ...mapGetters(["getLongTermToken", "getWorkspaceId"]),
+    ...mapGetters(['getLongTermToken', 'getWorkspaceId']),
     socketUrl() {
-      return getWebSocketUrl("/socket/console", `userId=${this.getLongTermToken}&id=${this.id}&nodeId=${this.nodeId}&type=console&copyId=&workspaceId=${this.getWorkspaceId}`);
-    },
+      return getWebSocketUrl(
+        '/socket/console',
+        `userId=${this.getLongTermToken}&id=${this.id}&nodeId=${this.nodeId}&type=console&copyId=&workspaceId=${this.getWorkspaceId}`
+      )
+    }
   },
   mounted() {
     // this.loadProject();
-    this.initWebSocket();
+    this.initWebSocket()
   },
   beforeDestroy() {
     if (this.socket) {
-      this.socket.close();
+      this.socket.close()
     }
-    clearInterval(this.heart);
+    clearInterval(this.heart)
   },
   methods: {
     // 初始化
     initWebSocket() {
       //this.logContext = "";
-      if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
-        this.socket = new WebSocket(this.socketUrl);
+      if (
+        !this.socket ||
+        this.socket.readyState !== this.socket.OPEN ||
+        this.socket.readyState !== this.socket.CONNECTING
+      ) {
+        this.socket = new WebSocket(this.socketUrl)
       }
       // 连接成功后
       this.socket.onopen = () => {
-        this.sendMsg("showlog");
-      };
+        this.sendMsg('showlog')
+      }
       this.socket.onerror = (err) => {
-        console.error(err);
-        this.$notification.error({
-          message: "web socket 错误,请检查是否开启 ws 代理",
-        });
-        clearInterval(this.heart);
-      };
+        console.error(err)
+        $notification.error({
+          message: 'web socket 错误,请检查是否开启 ws 代理'
+        })
+        clearInterval(this.heart)
+      }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
-        console.error(err);
-        this.$message.warning("会话已经关闭");
-        clearInterval(this.heart);
-      };
+        console.error(err)
+        $message.warning('会话已经关闭')
+        clearInterval(this.heart)
+      }
       this.socket.onmessage = (msg) => {
-        this.$refs.logView.appendLine(msg.data);
+        this.$refs.logView.appendLine(msg.data)
 
-        clearInterval(this.heart);
+        clearInterval(this.heart)
         // 创建心跳，防止掉线
         this.heart = setInterval(() => {
-          this.sendMsg("heart");
+          this.sendMsg('heart')
           // this.loadFileSize();
-        }, 5000);
-      };
+        }, 5000)
+      }
     },
 
     // 发送消息
@@ -115,16 +122,16 @@ export default {
       const data = {
         op: op,
         projectId: this.projectId,
-        fileName: this.readFilePath,
-      };
-      this.socket.send(JSON.stringify(data));
+        fileName: this.readFilePath
+      }
+      this.socket.send(JSON.stringify(data))
     },
 
     goFile() {
-      this.$emit("goFile");
-    },
-  },
-};
+      this.$emit('goFile')
+    }
+  }
+}
 </script>
 <style scoped>
 .filter {

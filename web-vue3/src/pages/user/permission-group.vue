@@ -380,7 +380,7 @@ export default {
         )
         delete temp.allowExecuteArray
         if (!emitKeys || emitKeys.length <= 0) {
-          this.$notification.error({
+          $notification.error({
             message: '请选择工作空间'
           })
           return false
@@ -391,7 +391,7 @@ export default {
         // 需要判断当前操作是【新增】还是【修改】
         editPermissionGroup(temp).then((res) => {
           if (res.code === 200) {
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.$refs['editForm'].resetFields()
@@ -403,7 +403,7 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除权限组么？',
         okText: '确认',
@@ -412,7 +412,7 @@ export default {
           // 删除
           deletePermissionGroup(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -429,7 +429,7 @@ export default {
     },
     checkTipUserName() {
       if (this.temp?.id === 'demo') {
-        this.$confirm({
+        $confirm({
           title: '系统提示',
           content:
             'demo 账号是系统特定演示使用的账号,系统默认将对 demo 账号限制很多权限。非演示场景不建议使用 demo 账号',

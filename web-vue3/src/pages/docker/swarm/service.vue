@@ -656,7 +656,7 @@ export default {
     handleEdit(record) {
       const spec = record.spec
       if (!spec) {
-        this.$notification.error({
+        $notification.error({
           message: '信息不完整不能编辑'
         })
         return
@@ -770,7 +770,7 @@ export default {
         dockerSwarmServicesEdit(this.urlPrefix, temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.editVisible = false
@@ -781,7 +781,7 @@ export default {
     },
     // 删除
     handleDel(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除此服务么？',
         okText: '确认',
@@ -794,7 +794,7 @@ export default {
           }
           dockerSwarmServicesDel(this.urlPrefix, params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()

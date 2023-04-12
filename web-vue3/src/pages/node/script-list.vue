@@ -453,7 +453,7 @@ export default {
     // 提交 Script 数据
     handleEditScriptOk() {
       if (this.temp.scriptType === 'server-sync') {
-        this.$notification.warning({
+        $notification.warning({
           message: '服务端同步的脚本不能在此修改'
         })
         return
@@ -466,7 +466,7 @@ export default {
         if (this.commandParams && this.commandParams.length > 0) {
           for (let i = 0; i < this.commandParams.length; i++) {
             if (!this.commandParams[i].desc) {
-              this.$notification.error({
+              $notification.error({
                 message: '请填写第' + (i + 1) + '个参数的描述'
               })
               return false
@@ -480,7 +480,7 @@ export default {
         editScript(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
 
@@ -492,7 +492,7 @@ export default {
       })
     },
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除脚本么？',
         okText: '确认',
@@ -506,7 +506,7 @@ export default {
           // 删除
           deleteScript(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -531,7 +531,7 @@ export default {
     //   this.drawerConsoleVisible = false;
     // },
     delAll() {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '确定要清除服务端所有的脚步模版缓存信息吗？',
         okText: '确认',
@@ -540,7 +540,7 @@ export default {
           // 删除
           delAllCache().then((res) => {
             if (res.code == 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -574,7 +574,7 @@ export default {
         rest: 'rest'
       }).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.fillTriggerResult(res)

@@ -718,7 +718,7 @@ export default {
     },
     // kill pid
     kill(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要 Kill 这个进程么？',
         okText: '确认',
@@ -731,7 +731,7 @@ export default {
           }
           killPid(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadNodeProcess()

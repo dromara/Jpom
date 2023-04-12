@@ -264,7 +264,7 @@ export default {
         editDockerSwarm(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.editVisible = false
@@ -283,7 +283,7 @@ export default {
 
     //   const h = this.$createElement;
     //   //
-    //   this.$confirm({
+    //   $confirm({
     //     title: "危险操作！！！",
     //     content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
     //     okButtonProps: { props: { type: "danger", size: "small" } },
@@ -297,7 +297,7 @@ export default {
     //       };
     //       unbindSwarm(params).then((res) => {
     //         if (res.code === 200) {
-    //           this.$notification.success({
+    //           $notification.success({
     //             message: res.msg,
     //           });
     //           this.loadData();
@@ -308,7 +308,7 @@ export default {
     // },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除该记录么？删除后构建关联的容器标签将无法使用',
         okText: '确认',
@@ -320,7 +320,7 @@ export default {
           }
           delSwarm(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()

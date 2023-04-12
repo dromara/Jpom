@@ -318,7 +318,7 @@ export default {
         const temp = Object.assign({}, this.temp, { id: this.reqDataId })
         dockerUpdateContainer(this.urlPrefix, temp).then((res) => {
           if (res.code === 200) {
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.editVisible = false

@@ -253,20 +253,6 @@ export const PROJECT_DSL_DEFATUL =
   '\r\n'
 
 /**
- * 获取 socket 地址
- * @param {String} url 二级地址
- * @param {String} parameter 参数
- * @returns
- */
-export function getWebSocketUrl(url: string, parameter: any) {
-  const protocol: string = location.protocol === 'https:' ? 'wss://' : 'ws://'
-  const _window: GlobalWindow = window as unknown as GlobalWindow
-  const domain: string = _window.routerBase
-  const fullUrl: string = (domain + url).replace(new RegExp('//', 'gm'), '/')
-  return `${protocol}${location.host}${fullUrl}?${parameter}`
-}
-
-/**
  * 并发执行
  * @params list {Array} - 要迭代的数组
  * @params limit {Number} - 并发数量控制数,最好小于3

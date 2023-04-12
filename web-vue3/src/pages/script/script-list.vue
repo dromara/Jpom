@@ -592,7 +592,7 @@ export default {
         if (this.commandParams && this.commandParams.length > 0) {
           for (let i = 0; i < this.commandParams.length; i++) {
             if (!this.commandParams[i].desc) {
-              this.$notification.error({
+              $notification.error({
                 message: '请填写第' + (i + 1) + '个参数的描述'
               })
               return false
@@ -608,7 +608,7 @@ export default {
         editScript(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
 
@@ -620,7 +620,7 @@ export default {
       })
     },
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除脚本么？',
         okText: '确认',
@@ -633,7 +633,7 @@ export default {
           // 删除
           deleteScript(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -668,7 +668,7 @@ export default {
         ' </ul>'
 
       const h = this.$createElement
-      this.$confirm({
+      $confirm({
         title: '危险操作！！！',
         content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),
         okButtonProps: { props: { type: 'danger', size: 'small' } },
@@ -681,7 +681,7 @@ export default {
             id: record.id
           }).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -709,7 +709,7 @@ export default {
     //
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
-        this.$notification.warn({
+        $notification.warn({
           message: '请选择工作空间'
         })
         return false
@@ -720,7 +720,7 @@ export default {
         toWorkspaceId: this.temp.workspaceId
       }).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.tableSelections = []
@@ -749,7 +749,7 @@ export default {
         rest: 'rest'
       }).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.fillTriggerResult(res)
@@ -769,7 +769,7 @@ export default {
     },
     handerConfirm() {
       if (!this.tableSelections.length) {
-        this.$notification.warning({
+        $notification.warning({
           message: '请选择要使用的脚本'
         })
         return

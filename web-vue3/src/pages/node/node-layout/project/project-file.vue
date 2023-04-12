@@ -649,7 +649,7 @@ export default {
 
       updateFile(params).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
         }
@@ -666,7 +666,7 @@ export default {
     // 上传文件
     handleUpload() {
       if (Object.keys(this.tempNode).length === 0) {
-        this.$notification.error({
+        $notification.error({
           message: '请选择一个节点'
         })
         return
@@ -720,7 +720,7 @@ export default {
                 }).then((res) => {
                   if (res.code === 200) {
                     this.successSize++
-                    this.$notification.success({
+                    $notification.success({
                       message: name + ' ' + res.msg
                     })
                     this.uploadFileList = this.uploadFileList.map((fileItem, fileIndex) => {
@@ -749,7 +749,7 @@ export default {
                   }
                   return fileItem
                 })
-                this.$notification.error({
+                $notification.error({
                   message: msg
                 })
                 reject()
@@ -795,7 +795,7 @@ export default {
     // 上传压缩文件
     handleZipUpload() {
       if (Object.keys(this.tempNode).length === 0) {
-        this.$notification.error({
+        $notification.error({
           message: '请选择一个节点'
         })
         return
@@ -838,7 +838,7 @@ export default {
           }).then((res) => {
             if (res.code === 200) {
               this.successSize++
-              this.$notification.success({
+              $notification.success({
                 message: name + ' ' + res.msg
               })
               this.uploading = this.successSize !== this.uploadFileList.length
@@ -856,7 +856,7 @@ export default {
           })
         },
         error: (msg) => {
-          this.$notification.error({
+          $notification.error({
             message: msg
           })
         },
@@ -893,7 +893,7 @@ export default {
       // // 上传文件
       // uploadProjectFile(formData).then((res) => {
       //   if (res.code === 200) {
-      //     this.$notification.success({
+      //     $notification.success({
       //       message: res.msg,
       //     });
       //     this.successSize++;
@@ -934,7 +934,7 @@ export default {
           }
           remoteDownload(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.remoteDownloadData = {}
@@ -950,7 +950,7 @@ export default {
     // 加载文件列表
     loadFileList() {
       if (Object.keys(this.tempNode).length === 0) {
-        this.$notification.warn({
+        $notification.warn({
           message: '请选择一个节点'
         })
         return false
@@ -984,7 +984,7 @@ export default {
       const msg = this.uploadPath
         ? '真的要清空 【' + this.uploadPath + '】目录和文件么？'
         : '真的要清空项目目录和文件么？'
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: msg,
         okText: '确认',
@@ -1000,7 +1000,7 @@ export default {
           // 删除
           deleteProjectFile(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadFileList()
@@ -1011,7 +1011,7 @@ export default {
     },
     // 下载
     handleDownload(record) {
-      this.$notification.info({
+      $notification.info({
         message: '正在下载，请稍等...'
       })
       // 请求参数
@@ -1028,7 +1028,7 @@ export default {
       const msg = record.isDirectory
         ? '真的要删除【' + record.filename + '】文件夹么？'
         : '真的要删除【' + record.filename + '】文件么？'
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: msg,
         okText: '确认',
@@ -1044,7 +1044,7 @@ export default {
           // 删除
           deleteProjectFile(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -1077,7 +1077,7 @@ export default {
       }
       newFileFolder(params).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.addFileFolderVisible = false
@@ -1102,7 +1102,7 @@ export default {
       }
       renameFileFolder(params).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.renameFileFolderVisible = false

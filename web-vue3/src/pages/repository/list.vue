@@ -624,7 +624,7 @@ export default {
       }).then((res) => {
         if (res.code === 200) {
           // 成功
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           record.exists = true
@@ -652,7 +652,7 @@ export default {
         editRepository(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.editVisible = false
@@ -664,7 +664,7 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除仓库信息么？',
         okText: '确认',
@@ -677,7 +677,7 @@ export default {
           // 删除
           deleteRepository(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -689,7 +689,7 @@ export default {
 
     // 清除隐藏字段
     restHideField(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要清除仓库隐藏字段信息么？（密码，私钥）',
         okText: '确认',
@@ -698,7 +698,7 @@ export default {
           // 恢复
           restHideField(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -721,7 +721,7 @@ export default {
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: msg,
         okText: '确认',
@@ -734,7 +734,7 @@ export default {
             compareId: compareId
           }).then((res) => {
             if (res.code == 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
 
@@ -748,7 +748,7 @@ export default {
     // 确认
     handerConfirm() {
       if (!this.tableSelections.length) {
-        this.$notification.warning({
+        $notification.warning({
           message: '请选择要使用的仓库'
         })
         return

@@ -541,7 +541,7 @@ const restGuide = () => {
 }
 // 退出登录
 const logOut = () => {
-  this.$confirm({
+  $confirm({
     title: '系统提示',
     content: '真的要退出系统么？',
     okText: '确认',
@@ -710,7 +710,7 @@ const closeMfaFn = () => {
     if (!valid) {
       return false
     }
-    this.$confirm({
+    $confirm({
       title: '系统提示',
       content: '确定要关闭两步验证吗？关闭后账号安全性将受到影响,关闭后已经存在的 mfa key 将失效',
       okText: '确认',

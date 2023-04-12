@@ -570,7 +570,7 @@ export default {
 
         // 判断文件
         if (this.fileList.length === 0) {
-          this.$notification.error({
+          $notification.error({
             message: '请选择文件'
           })
           return false
@@ -588,7 +588,7 @@ export default {
                 if (res.code === 200) {
                   if (res.data) {
                     //
-                    this.$notification.warning({
+                    $notification.warning({
                       message: `当前文件已经存在啦,文件名：${res.data.name} ,是否共享：${
                         res.data.workspaceId === 'GLOBAL' ? '是' : '否'
                       }`
@@ -626,7 +626,7 @@ export default {
               })
           },
           error: (msg) => {
-            this.$notification.error({
+            $notification.error({
               message: msg
             })
             this.uploading = false
@@ -667,7 +667,7 @@ export default {
         fileEdit(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
 
@@ -679,7 +679,7 @@ export default {
     },
     // 删除文件
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除当前文件么？' + record.name,
         okText: '确认',
@@ -690,7 +690,7 @@ export default {
             id: record.id
           }).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
 
@@ -703,12 +703,12 @@ export default {
     // 批量删除
     handleBatchDelete() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
-        this.$notification.warning({
+        $notification.warning({
           message: '没有选择任何数据'
         })
         return
       }
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除这些文件么？',
         okText: '确认',
@@ -717,7 +717,7 @@ export default {
           // 删除
           delFile({ ids: this.tableSelections.join(',') }).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.tableSelections = []
@@ -745,7 +745,7 @@ export default {
         remoteDownload(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
 
@@ -775,7 +775,7 @@ export default {
         rest: 'rest'
       }).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.fillDownloadUrlResult(res)
@@ -801,7 +801,7 @@ export default {
       addReleaseTask({ ...data, fileId: this.temp.fileId }).then((res) => {
         if (res.code === 200) {
           // 成功
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
 

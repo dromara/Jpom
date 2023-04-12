@@ -3,7 +3,8 @@
     <!-- 侧边栏 文件树 -->
     <a-layout-sider theme="light" class="sider jpom-log-tree" width="20%">
       <a-empty v-if="list.length === 0" />
-      <a-directory-tree :treeData="list" :replaceFields="replaceFields" @select="select" default-expand-all> </a-directory-tree>
+      <a-directory-tree :treeData="list" :replaceFields="replaceFields" @select="select" default-expand-all>
+      </a-directory-tree>
     </a-layout-sider>
     <!-- 单个文件内容 -->
     <a-layout-content class="log-content">
@@ -33,13 +34,13 @@
   </a-layout>
 </template>
 <script>
-import { getLogList, downloadFile, deleteLog } from "@/api/system";
-import { mapGetters } from "vuex";
-import { getWebSocketUrl } from "@/utils/const";
-import LogView from "@/components/logView";
+import { getLogList, downloadFile, deleteLog } from '@/api/system'
+import { mapGetters } from 'vuex'
+import { getWebSocketUrl } from '@/api/config'
+import LogView from '@/components/logView'
 export default {
   components: {
-    LogView,
+    LogView
   },
   data() {
     return {
@@ -47,127 +48,130 @@ export default {
       socket: null,
       // 日志内容
       // logContext: "choose file loading context...",
-      tomcatId: "system",
-      nodeId: "system",
+      tomcatId: 'system',
+      nodeId: 'system',
       replaceFields: {
-        children: "children",
-        title: "title",
-        key: "path",
+        children: 'children',
+        title: 'title',
+        key: 'path'
       },
       visible: false,
-      temp: {},
-    };
+      temp: {}
+    }
   },
   computed: {
-    ...mapGetters(["getLongTermToken"]),
+    ...mapGetters(['getLongTermToken']),
     socketUrl() {
-      return getWebSocketUrl("/socket/tomcat_log", `userId=${this.getLongTermToken}&tomcatId=${this.tomcatId}&nodeId=${this.nodeId}&type=tomcat`);
-    },
+      return getWebSocketUrl(
+        '/socket/tomcat_log',
+        `userId=${this.getLongTermToken}&tomcatId=${this.tomcatId}&nodeId=${this.nodeId}&type=tomcat`
+      )
+    }
   },
   watch: {},
   created() {
-    this.loadData();
+    this.loadData()
     this.$nextTick(() => {
       setTimeout(() => {
-        this.introGuide();
-      }, 500);
-    });
+        this.introGuide()
+      }, 500)
+    })
   },
   beforeDestroy() {
     if (this.socket) {
-      this.socket.close();
+      this.socket.close()
     }
   },
   methods: {
     // 页面引导
     introGuide() {
-      this.$store.dispatch("tryOpenGuide", {
-        key: "server-log",
+      this.$store.dispatch('tryOpenGuide', {
+        key: 'server-log',
         options: {
           hidePrev: true,
           steps: [
             {
-              title: "导航助手",
-              element: document.querySelector(".jpom-log-tree"),
-              intro: "这里是 Server 端里面的日志文件，点击具体的文件可以在右边的区域查看日志内容。",
+              title: '导航助手',
+              element: document.querySelector('.jpom-log-tree'),
+              intro: '这里是 Server 端里面的日志文件，点击具体的文件可以在右边的区域查看日志内容。'
             },
             {
-              title: "导航助手",
-              element: document.querySelector(".ant-tree-node-content-wrapper"),
-              intro: "您还可以用右键点击，会弹出一个操作选项的窗口（嗯，入口隐藏的比较深，所以有必要提示一下）。",
-            },
-          ],
-        },
-      });
+              title: '导航助手',
+              element: document.querySelector('.ant-tree-node-content-wrapper'),
+              intro: '您还可以用右键点击，会弹出一个操作选项的窗口（嗯，入口隐藏的比较深，所以有必要提示一下）。'
+            }
+          ]
+        }
+      })
     },
     // 加载数据
     loadData() {
-      this.list = [];
+      this.list = []
       getLogList().then((res) => {
         if (res.code === 200) {
           res.data.forEach((element) => {
             if (element.children) {
-              this.calcTreeNode(element.children);
+              this.calcTreeNode(element.children)
             }
             // 组装数据
             this.list.push({
               ...element,
-              isLeaf: !element.children ? true : false,
-            });
-          });
+              isLeaf: !element.children ? true : false
+            })
+          })
         }
-      });
+      })
     },
     // 递归处理节点
     calcTreeNode(list) {
       list.forEach((element) => {
         if (element.children) {
-          this.calcTreeNode(element.children);
+          this.calcTreeNode(element.children)
         } else {
           // 叶子节点
-          element.isLeaf = true;
+          element.isLeaf = true
         }
-      });
+      })
     },
     // 选择节点
     select(selectedKeys, { node }) {
       if (this.temp?.path === node.dataRef?.path) {
-        return;
+        return
       }
       if (!node.dataRef.isLeaf) {
-        return;
+        return
       }
       const data = {
-        op: "showlog",
+        op: 'showlog',
         tomcatId: this.tomcatId,
-        fileName: node.dataRef.path,
-      };
-      this.temp = node.dataRef;
-      this.$refs.logView.clearLogCache();
+        fileName: node.dataRef.path
+      }
+      this.temp = node.dataRef
+      this.$refs.logView.clearLogCache()
 
-      this.socket?.close();
+      this.socket?.close()
 
-      this.socket = new WebSocket(this.socketUrl);
+      this.socket = new WebSocket(this.socketUrl)
       // 连接成功后
       this.socket.onopen = () => {
-        this.socket.send(JSON.stringify(data));
-      };
+        this.socket.send(JSON.stringify(data))
+      }
       this.socket.onmessage = (msg) => {
         // this.logContext += `${msg.data}\r\n`;
-        this.$refs.logView.appendLine(msg.data);
-      };
+        this.$refs.logView.appendLine(msg.data)
+      }
       this.socket.onerror = (err) => {
-        console.error(err);
-        this.$notification.error({
-          message: "web socket 错误,请检查是否开启 ws 代理",
-        });
-      };
+        console.error(err)
+        $notification.error({
+          message: 'web socket 错误,请检查是否开启 ws 代理'
+        })
+      }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
-        console.error(err);
-        this.$message.warning("会话已经关闭");
+        console.error(err)
+        $message.warning('会话已经关闭')
         // clearInterval(this.heart);
-      };
+      }
     },
     // // 右键点击
     // rightClick({ node }) {
@@ -180,38 +184,38 @@ export default {
       // 请求参数
       const params = {
         nodeId: null,
-        path: this.temp.path,
-      };
+        path: this.temp.path
+      }
       // 请求接口拿到 blob
-      window.open(downloadFile(params), "_blank");
+      window.open(downloadFile(params), '_blank')
     },
     // 删除文件
     deleteLog() {
-      this.$confirm({
-        title: "系统提示",
-        content: "真的要删除日志文件么？",
-        okText: "确认",
-        cancelText: "取消",
+      $confirm({
+        title: '系统提示',
+        content: '真的要删除日志文件么？',
+        okText: '确认',
+        cancelText: '取消',
         onOk: () => {
           const params = {
             nodeId: null,
-            path: this.temp.path,
-          };
+            path: this.temp.path
+          }
           // 删除日志
           deleteLog(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.visible = false;
-              this.loadData();
+              $notification.success({
+                message: res.msg
+              })
+              this.visible = false
+              this.loadData()
             }
-          });
-        },
-      });
-    },
-  },
-};
+          })
+        }
+      })
+    }
+  }
+}
 </script>
 <style scoped>
 .log-layout {

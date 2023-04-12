@@ -383,7 +383,7 @@ export default {
         editDocker(temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.editVisible = false
@@ -394,7 +394,7 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除该记录么？删除后构建关联的容器标签将无法使用',
         okText: '确认',
@@ -406,7 +406,7 @@ export default {
           }
           deleteDcoker(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -432,7 +432,7 @@ export default {
       this.$refs['editForm'].validateField('tagInput', (errmsg) => {
         if (errmsg) {
           // console.log(err);
-          this.$notification.warn({
+          $notification.warn({
             message: errmsg
           })
           return false
@@ -466,7 +466,7 @@ export default {
     //
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
-        this.$notification.warn({
+        $notification.warn({
           message: '请选择工作空间'
         })
         return false
@@ -477,7 +477,7 @@ export default {
         toWorkspaceId: this.temp.workspaceId
       }).then((res) => {
         if (res.code == 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.tableSelections = []

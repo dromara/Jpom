@@ -542,7 +542,7 @@ export default {
       if (!action) {
         return
       }
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: action.msg,
         okText: '确认',
@@ -555,7 +555,7 @@ export default {
           }
           action.api(this.urlPrefix, params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -567,7 +567,7 @@ export default {
     tryPull(record) {
       const repoTags = record?.repoTags[0]
       if (!repoTags) {
-        this.$notification.error({
+        $notification.error({
           message: '镜像名称不正确 不能更新'
         })
         return
@@ -657,7 +657,7 @@ export default {
         })
         dockerImageCreateContainer(this.urlPrefix, temp).then((res) => {
           if (res.code === 200) {
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.buildVisible = false
@@ -668,7 +668,7 @@ export default {
     // 拉取镜像
     pullImage() {
       if (!this.pullImageName) {
-        this.$notification.warn({
+        $notification.warn({
           message: '请填写要拉取的镜像名称'
         })
         return

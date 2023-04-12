@@ -540,7 +540,7 @@ export default {
         // 提交数据
         editSsh(this.temp).then((res) => {
           if (res.code === 200) {
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             //this.$refs['editSshForm'].resetFields();
@@ -572,7 +572,7 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除 SSH 么？',
         okText: '确认',
@@ -581,7 +581,7 @@ export default {
           // 删除
           deleteSsh(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -640,7 +640,7 @@ export default {
     //
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
-        this.$notification.warn({
+        $notification.warn({
           message: '请选择工作空间'
         })
         return false
@@ -651,7 +651,7 @@ export default {
         toWorkspaceId: this.temp.workspaceId
       }).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.tableSelections = []

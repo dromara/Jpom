@@ -2,7 +2,6 @@
  * 引导相关 store
  *
  */
-import { defineStore } from 'pinia'
 
 const key = 'Jpom-Guide-Cache'
 

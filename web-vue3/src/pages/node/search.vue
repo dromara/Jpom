@@ -644,7 +644,7 @@ export default {
     //批量开始
     batchStart() {
       if (this.selectedRowKeys.length <= 0) {
-        this.$notification.warning({
+        $notification.warning({
           message: '请选中要启动的项目'
         })
         return
@@ -690,7 +690,7 @@ export default {
     //批量重启
     batchRestart() {
       if (this.selectedRowKeys.length <= 0) {
-        this.$notification.warning({
+        $notification.warning({
           message: '请选中要重启的项目'
         })
         return
@@ -736,7 +736,7 @@ export default {
     //批量关闭
     batchStop() {
       if (this.selectedRowKeys.length <= 0) {
-        this.$notification.warning({
+        $notification.warning({
           message: '请选中要关闭的项目'
         })
       }
@@ -793,7 +793,7 @@ export default {
       this.getNodeProjectData()
     },
     delAll() {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '确定要清除服务端所有的项目缓存信息吗？清除后需要重新同步节点项目才能正常使用项目相关功能',
         okText: '确认',
@@ -802,7 +802,7 @@ export default {
           // 删除
           delAllProjectCache().then((res) => {
             if (res.code == 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.getNodeProjectData()
@@ -824,7 +824,7 @@ export default {
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.projList[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: msg,
         okText: '确认',
@@ -837,7 +837,7 @@ export default {
             compareId: compareId
           }).then((res) => {
             if (res.code == 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
 
@@ -869,7 +869,7 @@ export default {
         rest: 'rest'
       }).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.fillTriggerResult(res)

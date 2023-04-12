@@ -11,7 +11,7 @@ import {
 
 import { getSystemMenu as getMenu } from '@/api/menu'
 import routeMenuMap from '@/router/route-menu'
-import { defineStore } from 'pinia'
+
 import { IMenuState } from '@/stores/menu'
 
 export const useMenuStore = defineStore('menu', {

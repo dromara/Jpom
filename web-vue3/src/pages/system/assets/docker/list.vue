@@ -643,7 +643,7 @@ export default {
         editDocker(temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.editVisible = false
@@ -654,7 +654,7 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除该 Docker 么？删除只会检查本地系统的数据关联,不会删除 docker 容器中数据',
         okText: '确认',
@@ -666,7 +666,7 @@ export default {
           }
           deleteDcoker(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -686,7 +686,7 @@ export default {
         '<li>操作不能撤回奥</li>' +
         ' </ul>'
       const h = this.$createElement
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),
         okText: '确认',
@@ -698,7 +698,7 @@ export default {
           }
           dcokerSwarmLeaveForce(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -729,7 +729,7 @@ export default {
         initDockerSwarm(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.initSwarmVisible = false
@@ -759,7 +759,7 @@ export default {
         joinDockerSwarm(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.joinSwarmVisible = false
@@ -773,7 +773,7 @@ export default {
       tryLocalDocker().then((res) => {
         if (res.code === 200) {
           // 成功
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.loadData()
@@ -805,13 +805,13 @@ export default {
     },
     handleSyncToWorkspace() {
       if (!this.temp.type) {
-        this.$notification.warn({
+        $notification.warn({
           message: '请选择分配类型'
         })
         return false
       }
       if (!this.temp.workspaceId) {
-        this.$notification.warn({
+        $notification.warn({
           message: '请选择工作空间'
         })
         return false
@@ -823,7 +823,7 @@ export default {
       // 同步
       machineDockerDistribute(this.temp).then((res) => {
         if (res.code == 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
 

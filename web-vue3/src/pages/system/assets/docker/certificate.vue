@@ -298,7 +298,7 @@ export default {
           return false
         }
         if (this.uploadFileList.length === 0) {
-          this.$notification.error({
+          $notification.error({
             message: '请选择证书文件'
           })
           return false
@@ -310,7 +310,7 @@ export default {
         dockerImportTls(formData).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
 
@@ -323,7 +323,7 @@ export default {
     // 确认
     handerConfirm() {
       if (!this.tableSelections.length) {
-        this.$notification.warning({
+        $notification.warning({
           message: '请选择要使用的证书'
         })
         return

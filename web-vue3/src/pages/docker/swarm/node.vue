@@ -302,7 +302,7 @@ export default {
         dockerSwarmNodeUpdate(this.urlPrefix, this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.editVisible = false
@@ -313,7 +313,7 @@ export default {
     },
     //
     handleLeava(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要在该集群剔除此节点么？',
         okText: '确认',
@@ -326,7 +326,7 @@ export default {
           }
           dockerSwarmNodeLeave(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()

@@ -389,7 +389,7 @@ export default {
     // 加载文件列表
     loadFileList() {
       if (Object.keys(this.tempNode).length === 0) {
-        this.$notification.warn({
+        $notification.warn({
           message: '请选择一个节点'
         })
         return false
@@ -427,7 +427,7 @@ export default {
     // 上传文件
     handleUpload() {
       if (Object.keys(this.tempNode).length === 0) {
-        this.$notification.error({
+        $notification.error({
           message: '请选择一个节点'
         })
         return
@@ -478,7 +478,7 @@ export default {
       }
       newFileFolder(this.baseUrl, params).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.addFileFolderVisible = false
@@ -512,7 +512,7 @@ export default {
         // 上传文件
         uploadFile(this.baseUrl, formData).then((res) => {
           if (res.code === 200) {
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.loadFileList()
@@ -551,7 +551,7 @@ export default {
 
       updateFileData(this.baseUrl, params).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.editFileVisible = false
@@ -572,7 +572,7 @@ export default {
     },
     // 删除文件夹
     handleDeletePath() {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除当前文件夹么？',
         okText: '确认',
@@ -587,7 +587,7 @@ export default {
           // 删除
           deleteFile(this.baseUrl, params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               // 刷新树
@@ -601,7 +601,7 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除文件么？',
         okText: '确认',
@@ -617,7 +617,7 @@ export default {
           // 删除
           deleteFile(this.baseUrl, params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadFileList()
@@ -646,7 +646,7 @@ export default {
       }
       renameFileFolder(this.baseUrl, params).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.renameFileFolderVisible = false

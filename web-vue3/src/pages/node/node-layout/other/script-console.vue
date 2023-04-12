@@ -61,7 +61,7 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import { getWebSocketUrl } from '@/utils/const'
+import { getWebSocketUrl } from '@/api/config'
 import LogView from '@/components/logView'
 
 export default {
@@ -135,7 +135,7 @@ export default {
       }
       this.socket.onerror = (err) => {
         console.error(err)
-        this.$notification.error({
+        $notification.error({
           message: 'web socket 错误,请检查是否开启 ws 代理'
         })
         clearInterval(this.heart)
@@ -144,7 +144,7 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        this.$message.warning('会话已经关闭')
+        $message.warning('会话已经关闭')
         clearInterval(this.heart)
         this.btnLoading = true
       }
@@ -152,7 +152,7 @@ export default {
         if (msg.data.indexOf('JPOM_MSG') > -1 && msg.data.indexOf('op') > -1) {
           const res = JSON.parse(msg.data)
           if (res.code === 200) {
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             // 如果操作是启动或者停止
@@ -166,7 +166,7 @@ export default {
               this.temp = { ...this.temp, executeId: res.executeId }
             }
           } else {
-            this.$notification.error({
+            $notification.error({
               message: res.msg
             })
             this.scriptStatus = 0

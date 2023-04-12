@@ -448,7 +448,7 @@ export default {
           .map((item) => item.key)
 
         if (targetKeysTemp.length <= 0 && !this.temp.webhook) {
-          this.$notification.warn({
+          $notification.warn({
             message: '请选择一位报警联系人或者填写webhook'
           })
           return false
@@ -464,7 +464,7 @@ export default {
         editMonitor(params).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.$refs['editMonitorForm'].resetFields()
@@ -476,7 +476,7 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除监控么？',
         okText: '确认',
@@ -485,7 +485,7 @@ export default {
           // 删除
           deleteMonitor(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()

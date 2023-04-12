@@ -1383,7 +1383,7 @@ export default {
         // 设置参数
         if (this.temp.releaseMethod === 2) {
           if (this.temp.releaseMethodDataIdList.length < 2) {
-            this.$notification.warn({
+            $notification.warn({
               message: '请选择节点项目,可能是节点中不存在任何项目,需要去节点中创建项目'
             })
             return false
@@ -1408,7 +1408,7 @@ export default {
         editBuild(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             //

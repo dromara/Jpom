@@ -1258,7 +1258,7 @@ export default {
         }
         // 校验分发节点数据
         if (this.dispatchList.length < 1) {
-          this.$notification.error({ message: '至少选择1个节点项目' })
+          $notification.error({ message: '至少选择1个节点项目' })
           return false
         }
         this.dispatchList.forEach((item, index) => {
@@ -1269,7 +1269,7 @@ export default {
         editDispatch(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.targetKeys = []
@@ -1405,7 +1405,7 @@ export default {
         const tempData = Object.assign({}, this.temp)
         // 检查
         if (tempData.nodeIdList.length < 1) {
-          this.$notification.warn({
+          $notification.warn({
             message: '请至少选择 1 个节点'
           })
           return false
@@ -1440,7 +1440,7 @@ export default {
         editDispatchProject(tempData).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.$refs['editDispatchForm'].resetFields()
@@ -1495,7 +1495,7 @@ export default {
         if (this.temp.type == 'upload') {
           // 判断文件
           if (this.fileList.length === 0) {
-            this.$notification.error({
+            $notification.error({
               message: '请选择文件'
             })
             return false
@@ -1540,7 +1540,7 @@ export default {
                 })
             },
             error: (msg) => {
-              this.$notification.error({
+              $notification.error({
                 message: msg
               })
               this.uploading = false
@@ -1568,25 +1568,25 @@ export default {
         }
         if (this.temp.type == 'download') {
           if (!this.temp.url) {
-            this.$notification.error({
+            $notification.error({
               message: '请填写远程URL'
             })
             return false
           }
           // 远程下载
-          // this.$message.loading({ content: "正在下载文件...", key, duration: 0 });
+          // $message.loading({ content: "正在下载文件...", key, duration: 0 });
           remoteDownload(this.temp).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
-              // this.$message.success({ content: "下载成功,开始分发!", key });
+              // $message.success({ content: "下载成功,开始分发!", key });
 
               this.loadData()
               this.dispatchVisible = false
               this.$refs['dispatchForm'] && this.$refs['dispatchForm'].resetFields()
             } else {
-              // this.$message.warn({ content: "下载失败", key });
+              // $message.warn({ content: "下载失败", key });
             }
           })
           return true
@@ -1596,7 +1596,7 @@ export default {
     // 删除
     handleDelete(record, thorough) {
       if (record.outGivingProject) {
-        this.$confirm({
+        $confirm({
           title: '系统提示',
           content: thorough
             ? '真的要彻底删除分发信息么？删除后节点下面的项目也都将彻底删除，彻底项目会自动删除项目相关文件奥(包含项目日志，日志备份，项目文件)'
@@ -1607,7 +1607,7 @@ export default {
             // 删除
             delDisPatchProject({ id: record.id, thorough: thorough }).then((res) => {
               if (res.code === 200) {
-                this.$notification.success({
+                $notification.success({
                   message: res.msg
                 })
 
@@ -1618,7 +1618,7 @@ export default {
         })
         return
       }
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要释放分发信息么？释放之后节点下面的项目信息还会保留，如需删除还需要到节点管理中操作',
         okText: '确认',
@@ -1627,7 +1627,7 @@ export default {
           // 删除
           releaseDelDisPatch(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
 
@@ -1648,7 +1648,7 @@ export default {
         ' </ul>'
 
       const h = this.$createElement
-      this.$confirm({
+      $confirm({
         title: '危险操作！！！',
         content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),
         okButtonProps: { props: { type: 'danger', size: 'small' } },
@@ -1659,7 +1659,7 @@ export default {
           // 删除
           unbindOutgiving(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
 
@@ -1713,7 +1713,7 @@ export default {
     // 添加分发
     addDispachList() {
       if (this.dispatchList.length >= this.totalProjectNum) {
-        this.$notification.error({
+        $notification.error({
           message: '已无更多节点项目，请先创建项目'
         })
         return false
@@ -1731,7 +1731,7 @@ export default {
 
     // 取消
     handleCancel(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的取消当前分发吗？',
         okText: '确认',
@@ -1740,7 +1740,7 @@ export default {
           // 删除
           cancelOutgiving({ id: record.id }).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -1781,7 +1781,7 @@ export default {
       }
       saveDispatchProjectConfig(temp).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.viewDispatchManager = false
@@ -1799,7 +1799,7 @@ export default {
         ' </ul>'
 
       const h = this.$createElement
-      this.$confirm({
+      $confirm({
         title: '危险操作！！！',
         content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),
         okButtonProps: { props: { type: 'danger', size: 'small' } },
@@ -1813,7 +1813,7 @@ export default {
             id: this.temp.id
           }).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.handleViewDispatchManagerById(this.temp.id)

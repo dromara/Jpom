@@ -734,7 +734,7 @@ export default {
         // 提交数据
         machineSshEdit(this.temp).then((res) => {
           if (res.code === 200) {
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.editSshVisible = false
@@ -761,7 +761,7 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除机器 SSH 么？',
         okText: '确认',
@@ -772,7 +772,7 @@ export default {
             id: record.id
           }).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -823,7 +823,7 @@ export default {
         // 提交数据
         machineSshSaveWorkspaceConfig(this.temp).then((res) => {
           if (res.code === 200) {
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.configWorkspaceSshVisible = false
@@ -840,7 +840,7 @@ export default {
     },
     // 删除工作空间的数据
     handleDeleteWorkspaceItem(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除对应工作空间的 SSH 么？',
         okText: '确认',
@@ -849,7 +849,7 @@ export default {
           // 删除
           deleteForeSsh(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               machineListGroupWorkspaceSsh({
@@ -890,7 +890,7 @@ export default {
     },
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
-        this.$notification.warn({
+        $notification.warn({
           message: '请选择工作空间'
         })
         return false
@@ -902,7 +902,7 @@ export default {
       // 同步
       machineSshDistribute(this.temp).then((res) => {
         if (res.code == 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
 
@@ -913,7 +913,7 @@ export default {
     },
     // 清除隐藏字段
     handerRestHideField(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要清除 SSH 隐藏字段信息么？（密码，私钥）',
         okText: '确认',
@@ -922,7 +922,7 @@ export default {
           // 恢复
           restHideField(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -943,7 +943,7 @@ export default {
       formData.append('file', file)
       importData(formData).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.loadData()

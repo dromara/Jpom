@@ -122,7 +122,7 @@ export default {
           return
         }
         //
-        this.$confirm({
+        $confirm({
           title: '系统提示',
           content: '确定要修剪对应的信息吗？修剪会自动清理对应的数据',
           okText: '确认',
@@ -138,7 +138,7 @@ export default {
 
             dockerPrune(this.urlPrefix, params).then((res) => {
               if (res.code === 200) {
-                this.$notification.success({
+                $notification.success({
                   message: res.msg
                 })
               }
