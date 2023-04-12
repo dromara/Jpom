@@ -315,7 +315,7 @@ export function randomStr(len = 2) {
  * @param {*} time
  * @param {*} cFormat
  */
-export function parseTime(time: string | number | Date | null, cFormat: string | undefined) {
+export function parseTime(time: string | number | Date | null, cFormat?: string | undefined | null) {
   if (arguments.length === 0) {
     return '-'
   }
