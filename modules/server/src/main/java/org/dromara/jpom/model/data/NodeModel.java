@@ -33,7 +33,7 @@ import org.dromara.jpom.model.BaseMachineModel;
 /**
  * 节点实体
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/16
  */
 @EqualsAndHashCode(callSuper = true)

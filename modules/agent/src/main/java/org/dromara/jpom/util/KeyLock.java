@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 根据执行KEY 多线程锁
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2018/8/24.
  */
 public class KeyLock<K> {

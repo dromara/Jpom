@@ -40,7 +40,7 @@ import java.io.IOException;
 /**
  * 脚本模板socket
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/24
  */
 @ServerEndpoint(value = "/script_run")

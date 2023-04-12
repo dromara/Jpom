@@ -29,7 +29,7 @@ import java.lang.annotation.*;
 /**
  * 字段验证配置
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2018/8/21.
  */
 @Target(ElementType.PARAMETER)

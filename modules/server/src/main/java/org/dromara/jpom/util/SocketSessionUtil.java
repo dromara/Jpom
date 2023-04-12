@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * socket 会话对象
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2018/9/29
  */
 @Slf4j

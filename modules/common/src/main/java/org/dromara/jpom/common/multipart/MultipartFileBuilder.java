@@ -41,7 +41,7 @@ import java.util.*;
 /**
  * 文件上传builder
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2018/10/23
  */
 public class MultipartFileBuilder {

@@ -30,11 +30,11 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
+import cn.keepbx.jpom.JpomAppType;
+import cn.keepbx.jpom.Type;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.JpomAppType;
 import org.dromara.jpom.common.JpomManifest;
-import org.dromara.jpom.common.Type;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.FileUtils;
@@ -55,7 +55,7 @@ import java.util.function.Function;
 /**
  * Jpom
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/16
  */
 @Slf4j

@@ -34,7 +34,7 @@ import java.io.File;
 /**
  * 项目管理
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  */
 @Service
 public class ProjectInfoService extends BaseWorkspaceOptService<NodeProjectInfoModel> {

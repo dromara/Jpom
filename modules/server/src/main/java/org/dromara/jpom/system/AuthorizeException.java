@@ -27,7 +27,7 @@ import org.dromara.jpom.common.JsonMessage;
 /**
  * 授权错误
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/17
  */
 public class AuthorizeException extends RuntimeException {

@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * 授权拦截
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/17
  */
 @Configuration

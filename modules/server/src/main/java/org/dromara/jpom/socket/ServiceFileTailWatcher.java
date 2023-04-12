@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 文件跟随器
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/07/21
  */
 @Slf4j

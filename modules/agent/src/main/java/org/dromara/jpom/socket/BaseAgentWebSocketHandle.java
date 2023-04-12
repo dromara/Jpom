@@ -45,7 +45,7 @@ import static javax.websocket.CloseReason.CloseCodes.CANNOT_ACCEPT;
 /**
  * 插件端socket 基类
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/24
  */
 @Slf4j

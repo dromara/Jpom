@@ -27,7 +27,7 @@ import org.dromara.jpom.model.BaseJsonModel;
 /**
  * agent 端自动生成的密码实体
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/18
  */
 public class AgentAutoUser extends BaseJsonModel {

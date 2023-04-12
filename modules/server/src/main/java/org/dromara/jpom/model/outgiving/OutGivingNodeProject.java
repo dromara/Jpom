@@ -31,7 +31,7 @@ import org.dromara.jpom.model.BaseEnum;
 /**
  * 节点项目
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/22
  */
 @Data

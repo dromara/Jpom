@@ -29,6 +29,7 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
+import cn.keepbx.jpom.Type;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
@@ -96,7 +97,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
         JsonMessage<JSONObject> message = this.tryRequestNode(machineId, request, NodeUrl.Info);
         return Optional.ofNullable(message).orElseGet(() -> {
             JpomManifest instance = JpomManifest.getInstance();
-            RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
+            cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
             //
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("manifest", instance);
@@ -211,11 +212,11 @@ public class SystemUpdateController extends BaseServerController implements ILoa
      * @see RemoteVersion
      */
     @PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<RemoteVersion> checkVersion(HttpServletRequest request,
+    public JsonMessage<cn.keepbx.jpom.RemoteVersion> checkVersion(HttpServletRequest request,
                                                    String machineId) {
-        JsonMessage<RemoteVersion> message = this.tryRequestNode(machineId, request, NodeUrl.CHECK_VERSION);
+        JsonMessage<cn.keepbx.jpom.RemoteVersion> message = this.tryRequestNode(machineId, request, NodeUrl.CHECK_VERSION);
         return Optional.ofNullable(message).orElseGet(() -> {
-            RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
+            cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
             return JsonMessage.success("", remoteVersion);
         });
     }

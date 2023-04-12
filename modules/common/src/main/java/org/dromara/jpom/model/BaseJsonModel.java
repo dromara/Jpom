@@ -30,7 +30,7 @@ import java.io.Serializable;
 /**
  * json方法基础类
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/10
  */
 public abstract class BaseJsonModel implements Serializable {

@@ -27,7 +27,7 @@ import java.lang.annotation.*;
 /**
  * 游客可以访问的Controller 标记
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2017/5/9.
  */
 @Documented

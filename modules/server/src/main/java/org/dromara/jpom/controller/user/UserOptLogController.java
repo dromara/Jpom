@@ -41,7 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 用户操作日志
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/19
  */
 @RestController

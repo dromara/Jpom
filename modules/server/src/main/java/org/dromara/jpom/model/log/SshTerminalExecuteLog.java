@@ -32,7 +32,7 @@ import org.dromara.jpom.model.BaseWorkspaceModel;
 /**
  * ssh 终端执行日志
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2021/08/04
  */
 @EqualsAndHashCode(callSuper = true)

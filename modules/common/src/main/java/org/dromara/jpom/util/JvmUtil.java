@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 /**
  * jvm jmx 工具
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/13
  */
 public class JvmUtil {

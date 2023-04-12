@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Jpom server 端
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/16
  */
 public abstract class BaseServerController extends BaseJpomController {

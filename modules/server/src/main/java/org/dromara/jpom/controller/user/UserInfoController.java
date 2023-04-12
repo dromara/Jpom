@@ -46,7 +46,7 @@ import java.util.List;
 /**
  * 用户管理
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2018/9/28
  */
 @RestController

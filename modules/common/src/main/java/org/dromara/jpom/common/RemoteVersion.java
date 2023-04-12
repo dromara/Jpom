@@ -22,28 +22,19 @@
  */
 package org.dromara.jpom.common;
 
-import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
-import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.SystemPropsUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
+import cn.keepbx.jpom.Type;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.model.BaseJsonModel;
 import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -64,206 +55,12 @@ import java.util.function.Consumer;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Slf4j
-public class RemoteVersion extends BaseJsonModel {
+public class RemoteVersion extends cn.keepbx.jpom.RemoteVersion {
 
-    /**
-     * 主 url 用于拉取远程版本信息
-     * <p>
-     * 1. <a href="https://jpom.top/docs/release-versions.json">https://jpom.top/docs/release-versions.json</a>
-     */
-    private static final String DEFAULT_URL = "https://jpom.top/docs/release-versions.json";
-    private static final String BETA_URL = "https://jpom.top/docs/beta-versions.json";
-    private static String remoteVersionUrl;
-    /**
-     * 检查间隔时间
-     */
-    private static final int CHECK_INTERVAL = 24;
-
-    /**
-     * 版本信息
-     */
-    private String tagName;
-    /**
-     * 插件端下载地址
-     */
-    private String agentUrl;
-    /**
-     * 服务端下载地址
-     */
-    private String serverUrl;
-    /**
-     * 更新日志 (远程url)
-     */
-    private String changelogUrl;
-    /**
-     * 更新日志
-     */
-    private String changelog;
-    /**
-     * 上次获取时间
-     */
-    private Long lastTime;
-
-    /**
-     * 是否有新版本
-     */
-    private Boolean upgrade;
-    /**
-     * 是否为 beta 版本
-     */
-    private Boolean beta;
 
     @Override
     public String toString() {
-        return super.toString();
-    }
-
-    public static void setRemoteVersionUrl(String remoteVersionUrl) {
-        RemoteVersion.remoteVersionUrl = remoteVersionUrl;
-    }
-
-    /**
-     * 获取 版本检查的 url
-     *
-     * @return 远程地址
-     */
-    private static String loadDefaultUrl() {
-        boolean beta = betaRelease();
-        return beta ? BETA_URL : DEFAULT_URL;
-    }
-
-    /**
-     * 判断当前是否加入 beta 计划
-     *
-     * @return true 已经加入 false 未加入
-     */
-    public static boolean betaRelease() {
-        String betaRelease = SystemPropsUtil.get("JOIN_JPOM_BETA_RELEASE", StrUtil.EMPTY);
-        return Convert.toBool(betaRelease, false);
-    }
-
-    public static void changeBetaRelease(String beta) {
-        SystemPropsUtil.set("JOIN_JPOM_BETA_RELEASE", beta);
-    }
-
-    /**
-     * 获取远程最新版本
-     *
-     * @return 版本信息
-     */
-    public static RemoteVersion loadRemoteInfo() {
-        String body = StrUtil.EMPTY;
-        try {
-            String remoteVersionUrl = StrUtil.emptyToDefault(RemoteVersion.remoteVersionUrl, loadDefaultUrl());
-            remoteVersionUrl = Validator.isUrl(remoteVersionUrl) ? remoteVersionUrl : loadDefaultUrl();
-            // 获取缓存中到信息
-            RemoteVersion remoteVersion = RemoteVersion.loadTransitUrl(remoteVersionUrl);
-            if (remoteVersion == null || StrUtil.isEmpty(remoteVersion.getTagName())) {
-                // 没有版本信息
-                return null;
-            }
-            // 缓存信息
-            RemoteVersion.cacheLoadTime(remoteVersion);
-            return remoteVersion;
-        } catch (Exception e) {
-            log.warn("获取远程版本信息失败:{} {}", e.getMessage(), body);
-            return null;
-        }
-    }
-
-    /**
-     * 获取第一层信息，用于中转
-     *
-     * @param remoteVersionUrl 请url
-     * @return 中转URL
-     */
-    private static RemoteVersion loadTransitUrl(String remoteVersionUrl) {
-        String body = StrUtil.EMPTY;
-        try {
-            log.debug("use remote version url: {}", remoteVersionUrl);
-            HttpRequest request = HttpUtil.createGet(remoteVersionUrl, true);
-            request.timeout(10 * 1000);
-            try (HttpResponse execute = request.execute()) {
-                body = execute.body();
-            }
-            //
-            JSONObject jsonObject = JSONObject.parseObject(body);
-            RemoteVersion remoteVersion = jsonObject.toJavaObject(RemoteVersion.class);
-            if (StrUtil.isAllNotEmpty(remoteVersion.getTagName(), remoteVersion.getAgentUrl(), remoteVersion.getServerUrl(), remoteVersion.getServerUrl())) {
-                return remoteVersion;
-            }
-            String jumpUrl = jsonObject.getString("url");
-            if (StrUtil.isEmpty(jumpUrl)) {
-                return null;
-            }
-            return loadTransitUrl(jumpUrl);
-        } catch (Exception e) {
-            log.warn("获取远程版本信息失败:{} {}", e.getMessage(), body);
-            return null;
-        }
-    }
-
-    /**
-     * 缓存信息
-     *
-     * @param remoteVersion 远程版本信息
-     */
-    private static void cacheLoadTime(RemoteVersion remoteVersion) {
-        remoteVersion = ObjectUtil.defaultIfNull(remoteVersion, new RemoteVersion());
-        remoteVersion.setLastTime(SystemClock.now());
-        // 判断是否可以升级
-        JpomManifest instance = JpomManifest.getInstance();
-        if (!instance.isDebug()) {
-            String version = instance.getVersion();
-            String tagName = remoteVersion.getTagName();
-            tagName = StrUtil.removePrefixIgnoreCase(tagName, "v");
-            remoteVersion.setUpgrade(StrUtil.compareVersion(version, tagName) < 0);
-        } else {
-            remoteVersion.setUpgrade(false);
-        }
-        // 检查是否存在下载地址
-        Type type = instance.getType();
-        String remoteUrl = type.getRemoteUrl(remoteVersion);
-        if (StrUtil.isEmpty(remoteUrl)) {
-            remoteVersion.setUpgrade(false);
-        }
-        // 获取 changelog
-        String changelogUrl = remoteVersion.getChangelogUrl();
-        if (StrUtil.isNotEmpty(changelogUrl)) {
-            try (HttpResponse execute = HttpUtil.createGet(changelogUrl, true).execute()) {
-                String body = execute.body();
-                remoteVersion.setChangelog(body);
-            }
-        }
-        //
-        FileUtil.writeUtf8String(remoteVersion.toString(), getFile());
-    }
-
-    /**
-     * 当前缓存中的 远程版本信息
-     *
-     * @return RemoteVersion
-     */
-    public static RemoteVersion cacheInfo() {
-        if (!FileUtil.isFile(getFile())) {
-            return null;
-        }
-        RemoteVersion remoteVersion = null;
-        String fileStr = StrUtil.EMPTY;
-        try {
-            fileStr = FileUtil.readUtf8String(getFile());
-            if (StrUtil.isEmpty(fileStr)) {
-                return null;
-            }
-            remoteVersion = JSONObject.parseObject(fileStr, RemoteVersion.class);
-        } catch (Exception e) {
-            log.warn("解析远程版本信息失败:{} {}", e.getMessage(), fileStr);
-        }
-        // 判断上次获取时间
-        Long lastTime = remoteVersion == null ? 0 : remoteVersion.getLastTime();
-        lastTime = ObjectUtil.defaultIfNull(lastTime, 0L);
-        long interval = SystemClock.now() - lastTime;
-        return interval >= TimeUnit.HOURS.toMillis(CHECK_INTERVAL) ? null : remoteVersion;
+        return JSONObject.toJSONString(cn.keepbx.jpom.RemoteVersion.cacheInfo());
     }
 
     /**
@@ -276,7 +73,7 @@ public class RemoteVersion extends BaseJsonModel {
      * @throws IOException 异常
      */
     public static Tuple download(String savePath, Type type, boolean checkRepeat) throws IOException {
-        RemoteVersion remoteVersion = loadRemoteInfo();
+        cn.keepbx.jpom.RemoteVersion remoteVersion = loadRemoteInfo();
         Assert.notNull(remoteVersion, "没有可用的新版本升级:-1");
         // 检查是否存在下载地址
         String remoteUrl = type.getRemoteUrl(remoteVersion);
@@ -334,14 +131,5 @@ public class RemoteVersion extends BaseJsonModel {
             consumer.accept(data);
         }
         JpomApplication.restart();
-    }
-
-    /**
-     * 保存的文件
-     *
-     * @return file
-     */
-    private static File getFile() {
-        return FileUtil.file(JpomApplication.getInstance().getDataPath(), Const.REMOTE_VERSION);
     }
 }

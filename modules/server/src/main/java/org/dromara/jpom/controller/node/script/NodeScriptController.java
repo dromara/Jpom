@@ -47,7 +47,7 @@ import java.util.Map;
 /**
  * 脚本管理
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/24
  */
 @RestController

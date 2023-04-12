@@ -31,7 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 
 /**
- * Created by jiangzeyin on 2019/3/15.
+ * Created by bwcx_jzy on 2019/3/15.
  */
 public class TestJavaTail {
     public static void main(String[] args) throws IOException, InterruptedException {

@@ -24,10 +24,10 @@ package org.dromara.jpom.system.init;
 
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.keepbx.jpom.event.ISystemTask;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ILoadEvent;
-import org.dromara.jpom.common.ISystemTask;
 import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.RemoteVersion;
 import org.dromara.jpom.common.forward.NodeForward;

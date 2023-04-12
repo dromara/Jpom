@@ -27,6 +27,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.Type;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -104,7 +105,7 @@ public class NodeUpdateController extends BaseServerController {
      */
     @GetMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<JSONObject> checkVersion() {
-        RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
+        cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
         AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class, agentFileModel1 -> {
             if (agentFileModel1 == null || !FileUtil.exist(agentFileModel1.getSavePath())) {
                 return null;

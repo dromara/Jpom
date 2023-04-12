@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 /**
  * 项目配置信息实体
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

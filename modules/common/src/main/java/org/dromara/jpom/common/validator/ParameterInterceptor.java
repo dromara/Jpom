@@ -48,7 +48,7 @@ import java.lang.reflect.Method;
  * <p>
  * 配置方法
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2018/8/21.
  */
 @Slf4j

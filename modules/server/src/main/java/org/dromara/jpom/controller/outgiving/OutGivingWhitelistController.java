@@ -51,7 +51,7 @@ import java.util.Map;
 /**
  * 节点白名单
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/22
  */
 @RestController

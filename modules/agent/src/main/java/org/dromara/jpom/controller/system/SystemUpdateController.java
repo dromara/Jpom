@@ -29,6 +29,7 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
+import cn.keepbx.jpom.Type;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.*;
 import org.dromara.jpom.system.AgentConfig;
@@ -121,8 +122,8 @@ public class SystemUpdateController extends BaseAgentController {
      * @see RemoteVersion
      */
     @PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<RemoteVersion> checkVersion() {
-        RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
+    public JsonMessage<cn.keepbx.jpom.RemoteVersion> checkVersion() {
+        cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
         return JsonMessage.success("", remoteVersion);
     }
 

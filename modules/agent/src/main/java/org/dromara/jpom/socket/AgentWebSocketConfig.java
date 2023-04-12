@@ -40,7 +40,7 @@ import java.util.Set;
 /**
  * 插件端socket 配置
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/19
  */
 @Configuration

@@ -27,7 +27,7 @@ import lombok.Getter;
 /**
  * agent 端的请求地址枚举
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/16
  */
 @Getter

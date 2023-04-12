@@ -45,7 +45,7 @@ import java.io.File;
 /**
  * agent 端授权账号信息
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/17
  */
 @Slf4j

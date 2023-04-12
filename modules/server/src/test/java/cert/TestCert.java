@@ -46,7 +46,7 @@ import java.util.Date;
 import java.util.Enumeration;
 
 /**
- * Created by jiangzeyin on 2019/3/7.
+ * Created by bwcx_jzy on 2019/3/7.
  */
 public class TestCert {
 

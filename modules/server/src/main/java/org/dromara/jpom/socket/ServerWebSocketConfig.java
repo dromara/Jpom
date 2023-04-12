@@ -34,7 +34,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 /**
  * socket 配置
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  */
 @Configuration
 @EnableWebSocket

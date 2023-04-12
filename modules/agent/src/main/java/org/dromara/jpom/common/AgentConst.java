@@ -25,7 +25,7 @@ package org.dromara.jpom.common;
 /**
  * 插件端配置
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/16
  */
 public class AgentConst {

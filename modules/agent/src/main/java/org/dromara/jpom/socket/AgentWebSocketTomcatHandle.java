@@ -44,7 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 系统日志
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/16
  */
 @ServerEndpoint(value = "/tomcat_log")

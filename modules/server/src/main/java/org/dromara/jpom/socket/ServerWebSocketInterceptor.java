@@ -61,7 +61,7 @@ import java.util.Map;
 /**
  * socket 拦截器、鉴权
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/19
  */
 @Slf4j

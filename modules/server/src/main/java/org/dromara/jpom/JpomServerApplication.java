@@ -27,9 +27,9 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.keepbx.jpom.JpomAppType;
+import cn.keepbx.jpom.Type;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.JpomAppType;
-import org.dromara.jpom.common.Type;
 import org.dromara.jpom.model.data.SystemIpConfigModel;
 import org.dromara.jpom.service.system.SystemParametersServer;
 import org.dromara.jpom.service.user.UserService;
@@ -41,7 +41,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 /**
  * jpom 启动类
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2017/9/14
  */
 @SpringBootApplication(scanBasePackages = {"org.dromara.jpom"})

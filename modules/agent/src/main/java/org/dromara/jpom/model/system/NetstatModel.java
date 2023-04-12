@@ -28,7 +28,7 @@ import org.dromara.jpom.model.BaseJsonModel;
 /**
  * 网络端口信息实体
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/10
  */
 public class NetstatModel extends BaseJsonModel {

@@ -36,10 +36,10 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
+import cn.keepbx.jpom.event.ISystemTask;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.ILoadEvent;
-import org.dromara.jpom.common.ISystemTask;
 import org.dromara.jpom.common.RemoteVersion;
 import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.cron.CronUtils;
@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
 /**
  * 自动备份控制台日志，防止日志文件过大
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/3/17
  */
 @Slf4j

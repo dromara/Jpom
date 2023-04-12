@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 登录拦截器
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2017/2/4.
  */
 @Configuration

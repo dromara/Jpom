@@ -53,7 +53,7 @@ import java.util.Objects;
 /**
  * controller
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/16
  */
 @Slf4j
@@ -307,7 +307,7 @@ public abstract class BaseJpomController {
      *
      * @param name name
      * @return str
-     * @author jiangzeyin
+     * @author bwcx_jzy
      */
     public String getSessionAttribute(String name) {
         return Objects.toString(getSessionAttributeObj(name), "");
@@ -327,7 +327,7 @@ public abstract class BaseJpomController {
      * 移除session 值
      *
      * @param name name
-     * @author jiangzeyin
+     * @author bwcx_jzy
      */
     public void removeSessionAttribute(String name) {
         getRequestAttributes().removeAttribute(name, RequestAttributes.SCOPE_SESSION);
