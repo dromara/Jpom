@@ -787,7 +787,7 @@ export default {
         machineEdit(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.$refs['editNodeForm'].resetFields()
@@ -804,7 +804,7 @@ export default {
     },
     // 删除机器
     deleteMachineInfo(item) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除机器么？删除会检查数据关联性',
         okText: '确认',
@@ -815,7 +815,7 @@ export default {
             id: item.id
           }).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.getMachineList()
@@ -844,7 +844,7 @@ export default {
     },
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
-        this.$notification.warn({
+        $notification.warn({
           message: '请选择工作空间'
         })
         return false
@@ -856,7 +856,7 @@ export default {
       // 同步
       machineDistribute(this.temp).then((res) => {
         if (res.code == 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
 
@@ -911,7 +911,7 @@ export default {
     },
     syncNodeWhiteConfig() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
-        this.$notification.warn({
+        $notification.warn({
           message: '请选择要同步白名单的机器节点'
         })
         return
@@ -925,7 +925,7 @@ export default {
             this.temp = { ...this.temp, templateNodeId: this.templateNodeList[0].id }
             this.loadWhitelistData(this.temp.templateNodeId)
           } else {
-            this.$notification.warn({
+            $notification.warn({
               message: '还没有配置模板节点'
             })
           }
@@ -951,7 +951,7 @@ export default {
       }).then((res) => {
         if (res.code === 200) {
           // 成功
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.tableSelections = []
@@ -961,7 +961,7 @@ export default {
     },
     syncNodeConfig() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
-        this.$notification.warn({
+        $notification.warn({
           message: '请选择要同步系统配置的机器节点'
         })
         return
@@ -975,7 +975,7 @@ export default {
             this.temp = { ...this.temp, templateNodeId: this.templateNodeList[0].id }
             this.loadNodeConfig(this.temp.templateNodeId)
           } else {
-            this.$notification.warn({
+            $notification.warn({
               message: '还没有配置模板节点'
             })
           }
@@ -993,7 +993,7 @@ export default {
     },
     // submit
     onNodeSubmit(restart) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: restart
           ? '真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！ 保存成功后请及时关注重启状态！！'
@@ -1008,7 +1008,7 @@ export default {
           }).then((res) => {
             if (res.code === 200) {
               // 成功
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.nodeConfigVisible = false

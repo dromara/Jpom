@@ -97,10 +97,14 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       vueJsx(),
       AutoImport({
         //安装两行后你会发现在组件中不用再导入ref，reactive等
-        imports: ['vue', 'vue-router'],
+        imports: ['vue', 'vue-router', 'pinia'],
         dts: 'src/d.ts/auto-import.d.ts',
         //ant-design-vue
         resolvers: [AntDesignVueResolver()]
+      }),
+      AutoImport({
+        dirs: ['src/d.ts/global'],
+        dts: 'src/d.ts/auto-global-import.d.ts'
       }),
       Components({
         dts: 'src/d.ts/components.d.ts',

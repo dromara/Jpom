@@ -204,7 +204,7 @@ export default {
                 this.editorValue = this.formatStrInJson(this.editorValue);
               }
             } catch (e) {
-              this.$message.error("格式化代码出错：" + e.toString());
+              $message.error("格式化代码出错：" + e.toString());
             }
           },
         },
@@ -308,7 +308,7 @@ export default {
       }
     } catch (e) {
       console.log("初始化codemirror出错：" + e);
-      // this.$message.error("初始化codemirror出错：" + e);
+      // $message.error("初始化codemirror出错：" + e);
     }
   },
   created() {},

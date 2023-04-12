@@ -229,7 +229,7 @@ export default {
 
     // submit
     onSubmit(restart) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！',
         okText: '确认',
@@ -239,7 +239,7 @@ export default {
           editConfig(this.temp).then((res) => {
             if (res.code === 200) {
               // 成功
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               if (this.temp.restart) {
@@ -265,7 +265,7 @@ export default {
               if (res.code === 200) {
                 clearInterval(this.timer)
                 this.$setLoading(false)
-                this.$notification.success({
+                $notification.success({
                   message: '重启成功'
                 })
 
@@ -274,7 +274,7 @@ export default {
                 }, 1000)
               } else {
                 if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
-                  this.$notification.warning({
+                  $notification.warning({
                     message: '未重启成功：' + (res.msg || '')
                   })
                   this.$setLoading(false)
@@ -286,7 +286,7 @@ export default {
               console.error(error)
               if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                 this.$setLoading(false)
-                this.$notification.error({
+                $notification.error({
                   message: '重启超时,请去服务器查看控制台日志排查问题'
                 })
                 clearInterval(this.timer)
@@ -298,7 +298,7 @@ export default {
     },
     // submit ip config
     onSubmitIp() {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content:
           '真的要保存当前配置吗？IP 白名单请慎重配置奥( 白名单是指只允许访问的 IP ),配置后立马生效 如果配置错误将出现无法访问的情况,需要手动恢复奥！！！',
@@ -308,7 +308,7 @@ export default {
           editIpConfig(this.ipTemp).then((res) => {
             if (res.code === 200) {
               // 成功
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
             }
@@ -330,7 +330,7 @@ export default {
       saveProxyConfig(this.proxyConfigData.globalProxy).then((res) => {
         if (res.code === 200) {
           // 成功
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
         }

@@ -311,25 +311,25 @@ export default {
           return false
         }
         if (this.monitorUserKeys.length === 0) {
-          this.$notification.error({
+          $notification.error({
             message: '请选择监控用户'
           })
           return false
         }
         if (this.methodFeatureKeys.length === 0) {
-          this.$notification.error({
+          $notification.error({
             message: '请选择监控操作'
           })
           return false
         }
         if (this.classFeatureKeys.length === 0) {
-          this.$notification.error({
+          $notification.error({
             message: '请选择监控的功能'
           })
           return false
         }
         if (this.notifyUserKeys.length === 0) {
-          this.$notification.error({
+          $notification.error({
             message: '请选择报警联系人'
           })
           return false
@@ -343,7 +343,7 @@ export default {
         editMonitorOperate(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.$refs['editMonitorForm'].resetFields()
@@ -355,7 +355,7 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除操作监控么？',
         okText: '确认',
@@ -364,7 +364,7 @@ export default {
           // 删除
           deleteMonitorOperate(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()

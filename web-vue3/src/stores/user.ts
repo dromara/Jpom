@@ -1,7 +1,6 @@
 import { TOKEN_KEY, USER_INFO_KEY, MENU_KEY, LONG_TERM_TOKEN } from '@/utils/const'
 
 import { getUserInfo, loginOut } from '@/api/user/user'
-import { defineStore } from 'pinia'
 import { useMenuStore } from './menu'
 
 export const useUserStore = defineStore('user', {
@@ -9,7 +8,7 @@ export const useUserStore = defineStore('user', {
     token: localStorage.getItem(TOKEN_KEY) || '',
     longTermToken: localStorage.getItem(LONG_TERM_TOKEN) || '',
     userInfo: localStorage.getItem(USER_INFO_KEY) ? JSON.parse(localStorage.getItem(USER_INFO_KEY)!) : {},
-    reloadUserInfo: false,
+    reloadUserInfo: false
   }),
   actions: {
     async refreshUserInfo() {
@@ -57,7 +56,7 @@ export const useUserStore = defineStore('user', {
       // 调用其他 action
       menuStore.clearTabs({ key: 'all' })
       return loginOut({})
-    },
+    }
   },
   getters: {
     getToken(state) {
@@ -68,8 +67,8 @@ export const useUserStore = defineStore('user', {
     },
     getUserInfo(state) {
       return state.userInfo
-    },
-  },
+    }
+  }
 })
 
 // export default useUserStore()

@@ -65,7 +65,7 @@ export default {
       editConfig(this.temp).then((res) => {
         if (res.code === 200) {
           // 成功
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           if (this.temp.restart) {
@@ -90,7 +90,7 @@ export default {
               if (res.code === 200) {
                 clearInterval(this.timer)
                 this.$setLoading(false)
-                this.$notification.success({
+                $notification.success({
                   message: '重启成功'
                 })
 
@@ -99,7 +99,7 @@ export default {
                 }, 1000)
               } else {
                 if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
-                  this.$notification.warning({
+                  $notification.warning({
                     message: '未重启成功：' + (res.msg || '')
                   })
                   this.$setLoading(false)
@@ -111,7 +111,7 @@ export default {
               console.error(error)
               if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                 this.$setLoading(false)
-                this.$notification.error({
+                $notification.error({
                   message: '重启超时,请去服务器查看控制台日志排查问题'
                 })
                 clearInterval(this.timer)

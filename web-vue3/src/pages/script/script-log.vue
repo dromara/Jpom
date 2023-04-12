@@ -1,11 +1,32 @@
 <template>
   <div class="node-full-content">
     <!-- 数据表格 -->
-    <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
+    <a-table
+      :data-source="list"
+      size="middle"
+      :columns="columns"
+      @change="changePage"
+      :pagination="pagination"
+      bordered
+      rowKey="id"
+    >
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['%scriptName%']" placeholder="名称" @pressEnter="loadData" allowClear class="search-input-item" />
-          <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
+          <a-input
+            v-model="listQuery['%scriptName%']"
+            placeholder="名称"
+            @pressEnter="loadData"
+            allowClear
+            class="search-input-item"
+          />
+          <a-select
+            show-search
+            option-filter-prop="children"
+            v-model="listQuery.triggerExecType"
+            allowClear
+            placeholder="触发类型"
+            class="search-input-item"
+          >
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-range-picker
@@ -30,7 +51,7 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="triggerExecTypeMap" slot-scope="text">
-        <span>{{ triggerExecTypeMap[text] || "未知" }}</span>
+        <span>{{ triggerExecTypeMap[text] || '未知' }}</span>
       </template>
       <template slot="global" slot-scope="text">
         <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
@@ -54,19 +75,19 @@
   </div>
 </template>
 <script>
-import { getScriptLogList, scriptDel, triggerExecTypeMap } from "@/api/server-script";
-import ScriptLogView from "@/pages/script/script-log-view";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
+import { getScriptLogList, scriptDel, triggerExecTypeMap } from '@/api/server-script'
+import ScriptLogView from '@/pages/script/script-log-view'
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 
 export default {
   components: {
-    ScriptLogView,
+    ScriptLogView
   },
   props: {
     scriptId: {
       type: String,
-      default: "",
-    },
+      default: ''
+    }
   },
   data() {
     return {
@@ -77,72 +98,110 @@ export default {
       temp: {},
       logVisible: false,
       columns: [
-        { title: "名称", dataIndex: "scriptName", width: 100, ellipsis: true, scopedSlots: { customRender: "scriptName" } },
-        { title: "执行时间", dataIndex: "createTimeMillis", sorter: true, ellipsis: true, width: "160px", scopedSlots: { customRender: "createTimeMillis" } },
-        { title: "触发类型", dataIndex: "triggerExecType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerExecTypeMap" } },
-        { title: "执行域", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
-        { title: "执行人", dataIndex: "modifyUser", ellipsis: true, width: "100px", scopedSlots: { customRender: "modifyUser" } },
-        { title: "操作", dataIndex: "operation", align: "center", fixed: "right", scopedSlots: { customRender: "operation" }, width: "150px" },
-      ],
-    };
+        {
+          title: '名称',
+          dataIndex: 'scriptName',
+          width: 100,
+          ellipsis: true,
+          scopedSlots: { customRender: 'scriptName' }
+        },
+        {
+          title: '执行时间',
+          dataIndex: 'createTimeMillis',
+          sorter: true,
+          ellipsis: true,
+          width: '160px',
+          scopedSlots: { customRender: 'createTimeMillis' }
+        },
+        {
+          title: '触发类型',
+          dataIndex: 'triggerExecType',
+          width: 100,
+          ellipsis: true,
+          scopedSlots: { customRender: 'triggerExecTypeMap' }
+        },
+        {
+          title: '执行域',
+          dataIndex: 'workspaceId',
+          ellipsis: true,
+          scopedSlots: { customRender: 'global' },
+          width: '90px'
+        },
+        {
+          title: '执行人',
+          dataIndex: 'modifyUser',
+          ellipsis: true,
+          width: '100px',
+          scopedSlots: { customRender: 'modifyUser' }
+        },
+        {
+          title: '操作',
+          dataIndex: 'operation',
+          align: 'center',
+          fixed: 'right',
+          scopedSlots: { customRender: 'operation' },
+          width: '150px'
+        }
+      ]
+    }
   },
   computed: {
     pagination() {
-      return COMPUTED_PAGINATION(this.listQuery);
-    },
+      return COMPUTED_PAGINATION(this.listQuery)
+    }
   },
   mounted() {
-    this.loadData();
+    this.loadData()
   },
   methods: {
     // 加载数据
     loadData(pointerEvent) {
-      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
-      this.listQuery.scriptId = this.scriptId;
-      this.loading = true;
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
+      this.listQuery.scriptId = this.scriptId
+      this.loading = true
       getScriptLogList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data.result;
-          this.listQuery.total = res.data.total;
+          this.list = res.data.result
+          this.listQuery.total = res.data.total
         }
-        this.loading = false;
-      });
+        this.loading = false
+      })
     },
     parseTime,
     viewLog(record) {
-      this.logVisible = true;
-      this.temp = record;
+      this.logVisible = true
+      this.temp = record
     },
     handleDelete(record) {
-      this.$confirm({
-        title: "系统提示",
-        content: "真的要删除执行记录么？",
-        okText: "确认",
-        cancelText: "取消",
+      $confirm({
+        title: '系统提示',
+        content: '真的要删除执行记录么？',
+        okText: '确认',
+        cancelText: '取消',
         onOk: () => {
           // 组装参数
           const params = {
             id: record.scriptId,
-            executeId: record.id,
-          };
+            executeId: record.id
+          }
           // 删除
           scriptDel(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.loadData();
+              $notification.success({
+                message: res.msg
+              })
+              this.loadData()
             }
-          });
-        },
-      });
+          })
+        }
+      })
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
-      this.loadData();
-    },
-  },
-};
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
+      this.loadData()
+    }
+  }
+}
 </script>
 <style scoped></style>

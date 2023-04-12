@@ -11,10 +11,8 @@
 
 <script setup lang="ts">
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
-import { onMounted, provide } from 'vue'
 import { useMenuStore } from '@/stores/menu'
 import useGuideStore from '@/stores/guide'
-const { proxy }: any = getCurrentInstance()
 
 const routerActivation = ref(true)
 const guideStore = useGuideStore().getGuideCache
@@ -22,14 +20,7 @@ const scrollbarFlag = computed(() => {
   return guideStore.scrollbarFlag === undefined ? true : guideStore.scrollbarFlag
 })
 
-onMounted(() => {
-  proxy.$notification.config({
-    top: '100px',
-    duration: 4
-  })
-
-  proxy.$message.config({ duration: 4 })
-})
+onMounted(() => {})
 
 const reload = () => {
   routerActivation.value = false

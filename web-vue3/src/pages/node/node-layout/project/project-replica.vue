@@ -2,11 +2,25 @@
   <div class="node-full-content">
     <!-- <div ref="filter" class="filter"></div> -->
     <!-- 表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table
+      :data-source="list"
+      :loading="loading"
+      :columns="columns"
+      :pagination="false"
+      bordered
+      :rowKey="(record, index) => index"
+    >
       <template #title>
         <a-button type="primary" @click="handleFilter">刷新</a-button>
       </template>
-      <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关" />
+      <a-switch
+        slot="status"
+        slot-scope="text"
+        :checked="text"
+        disabled
+        checked-children="开"
+        un-checked-children="关"
+      />
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button type="primary" @click="handleConsole(record)">控制台</a-button>
@@ -16,129 +30,149 @@
       </template>
     </a-table>
     <!-- 项目控制台组件 -->
-    <a-drawer destroyOnClose :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <console v-if="drawerConsoleVisible" :nodeId="node.id" :id="project.id" :projectId="project.projectId" :replica="temp" :copyId="temp.id" />
+    <a-drawer
+      destroyOnClose
+      :title="drawerTitle"
+      placement="right"
+      width="85vw"
+      :visible="drawerConsoleVisible"
+      @close="onConsoleClose"
+    >
+      <console
+        v-if="drawerConsoleVisible"
+        :nodeId="node.id"
+        :id="project.id"
+        :projectId="project.projectId"
+        :replica="temp"
+        :copyId="temp.id"
+      />
     </a-drawer>
   </div>
 </template>
 <script>
-import Console from "./project-console";
+import Console from './project-console'
 
-import { getProjectReplicaList, deleteProject, getRuningProjectCopyInfo } from "@/api/node-project";
+import { getProjectReplicaList, deleteProject, getRuningProjectCopyInfo } from '@/api/node-project'
 export default {
   props: {
     node: {
-      type: Object,
+      type: Object
     },
     project: {
-      type: Object,
-    },
+      type: Object
+    }
   },
   components: {
-    Console,
+    Console
   },
   data() {
     return {
       loading: false,
       list: [],
       temp: {},
-      drawerTitle: "",
+      drawerTitle: '',
       drawerConsoleVisible: false,
 
       columns: [
-        { title: "副本编号", dataIndex: "id", width: 150, ellipsis: true, scopedSlots: { customRender: "id" } },
-        { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "进程 ID", dataIndex: "pid", width: 100, ellipsis: true, scopedSlots: { customRender: "pid" } },
-        { title: "端口号", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "最后修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 220 },
-      ],
-    };
+        { title: '副本编号', dataIndex: 'id', width: 150, ellipsis: true, scopedSlots: { customRender: 'id' } },
+        { title: '状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: { customRender: 'status' } },
+        { title: '进程 ID', dataIndex: 'pid', width: 100, ellipsis: true, scopedSlots: { customRender: 'pid' } },
+        { title: '端口号', dataIndex: 'port', width: 100, ellipsis: true, scopedSlots: { customRender: 'port' } },
+        {
+          title: '最后修改时间',
+          dataIndex: 'modifyTime',
+          width: 180,
+          ellipsis: true,
+          scopedSlots: { customRender: 'modifyTime' }
+        },
+        { title: '操作', dataIndex: 'operation', scopedSlots: { customRender: 'operation' }, width: 220 }
+      ]
+    }
   },
   mounted() {
-    this.handleFilter();
+    this.handleFilter()
   },
   methods: {
     // 加载数据
     loadData() {
-      this.loading = true;
-      this.list = [];
+      this.loading = true
+      this.list = []
       const params = {
         nodeId: this.node.id,
-        id: this.project.projectId,
-      };
+        id: this.project.projectId
+      }
       getProjectReplicaList(params).then((res) => {
         if (res.code === 200) {
-          this.list = res.data;
-          this.getRuningProjectCopyInfo();
+          this.list = res.data
+          this.getRuningProjectCopyInfo()
         }
-        this.loading = false;
-      });
+        this.loading = false
+      })
     },
     getRuningProjectCopyInfo() {
-      const ids = this.list.map((item) => item.id);
+      const ids = this.list.map((item) => item.id)
       const tempParams = {
         nodeId: this.node.id,
         id: this.project.projectId,
-        copyIds: JSON.stringify(ids),
-      };
+        copyIds: JSON.stringify(ids)
+      }
 
       getRuningProjectCopyInfo(tempParams).then((res) => {
         if (res.code === 200) {
           this.list = this.list.map((element) => {
             if (res.data[element.id]) {
-              element.port = res.data[element.id].port;
-              element.pid = res.data[element.id].pid;
-              element.status = true;
+              element.port = res.data[element.id].port
+              element.pid = res.data[element.id].pid
+              element.status = true
             }
-            return element;
-          });
+            return element
+          })
         }
-      });
+      })
     },
     // 筛选
     handleFilter() {
-      this.loadData();
+      this.loadData()
     },
     // 控制台
     handleConsole(record) {
-      this.temp = Object.assign({}, record);
-      this.drawerTitle = `控制台(${this.temp.tagId})`;
-      this.drawerConsoleVisible = true;
+      this.temp = Object.assign({}, record)
+      this.drawerTitle = `控制台(${this.temp.tagId})`
+      this.drawerConsoleVisible = true
     },
     // 关闭控制台
     onConsoleClose() {
-      this.drawerConsoleVisible = false;
-      this.handleFilter();
+      this.drawerConsoleVisible = false
+      this.handleFilter()
     },
 
     // 删除
     handleDelete(record) {
-      this.$confirm({
-        title: "系统提示",
-        content: "真的要删除副本项目么？",
-        okText: "确认",
-        cancelText: "取消",
+      $confirm({
+        title: '系统提示',
+        content: '真的要删除副本项目么？',
+        okText: '确认',
+        cancelText: '取消',
         onOk: () => {
           // 删除
           const params = {
             nodeId: this.node.id,
             id: this.project.projectId,
-            copyId: record.id,
-          };
+            copyId: record.id
+          }
           deleteProject(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.loadData();
+              $notification.success({
+                message: res.msg
+              })
+              this.loadData()
             }
-          });
-        },
-      });
-    },
-  },
-};
+          })
+        }
+      })
+    }
+  }
+}
 </script>
 <style scoped>
 /* .filter {

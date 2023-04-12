@@ -190,7 +190,7 @@ export default {
       taskLogInfoList(params).then((res) => {
         if (res.code === 200) {
           if (!res.data) {
-            this.$notification.warning({
+            $notification.warning({
               message: res.msg
             })
             if (res.data.status !== 0) {

@@ -235,7 +235,7 @@ export default {
         '<li>如果升级失败需要手动恢复奥</li>' +
         ' </ul>'
       const h = this.$createElement
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),
         okText: '确认',
@@ -265,7 +265,7 @@ export default {
               })
             },
             error: (msg) => {
-              this.$notification.error({
+              $notification.error({
                 message: msg
               })
             },
@@ -294,7 +294,7 @@ export default {
           // // 上传文件
           // uploadUpgradeFile(formData).then((res) => {
           //   if (res.code === 200) {
-          //     this.$notification.success({
+          //     $notification.success({
           //       message: res.msg,
           //     });
 
@@ -322,7 +322,7 @@ export default {
             if (res.code === 200 && manifest?.timeStamp !== this.temp.timeStamp) {
               Vue.prototype.$setLoading('closeAll')
               clearInterval(this.timer)
-              this.$notification.success({
+              $notification.success({
                 message: '升级成功'
               })
               this.temp = manifest
@@ -331,7 +331,7 @@ export default {
               }, 1000)
             } else {
               if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
-                this.$notification.warning({
+                $notification.warning({
                   message: '未升级成功：' + (res.msg || '')
                 })
                 Vue.prototype.$setLoading('closeAll')
@@ -344,7 +344,7 @@ export default {
             if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
               Vue.prototype.$setLoading('closeAll')
               clearInterval(this.timer)
-              this.$notification.error({
+              $notification.error({
                 message: '升级超时,请去服务器查看控制台日志排查问题'
               })
             } else {
@@ -391,7 +391,7 @@ export default {
         const upgrade = compareVersion(this.temp.version, tagName) < 0
 
         if (upgrade && tip) {
-          this.$notification.success({
+          $notification.success({
             duration: 10,
             message: function (h) {
               //
@@ -415,7 +415,7 @@ export default {
         if (!data) {
           this.temp = { ...this.temp, upgrade: false }
           if (tip) {
-            this.$notification.success({
+            $notification.success({
               message: '没有检查到最新版'
             })
           }
@@ -428,7 +428,7 @@ export default {
           this.changelog = data.changelog
         }
         if (tip) {
-          this.$notification.success({
+          $notification.success({
             message: this.temp.upgrade ? '检测到新版本 ' + data.tagName : '没有检查到最新版'
           })
         }
@@ -445,7 +445,7 @@ export default {
         '<li>如果升级失败需要手动恢复奥</li>' +
         ' </ul>'
       const h = this.$createElement
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),
         okText: '确认',
@@ -457,7 +457,7 @@ export default {
             machineId: this.machineId
           }).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
 
@@ -477,7 +477,7 @@ export default {
           ' </ul>'
         : '确认要关闭 beta 计划吗？'
       const h = this.$createElement
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),
         okText: '确认',
@@ -488,7 +488,7 @@ export default {
             beta: beta
           }).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
 

@@ -8,7 +8,12 @@
           <template v-if="temp.projectList && temp.cacheData">
             <div>
               节点：
-              <a-select :value="`${temp.cacheData.useNodeId},${temp.cacheData.useProjectId}`" style="width: 200px" @change="nodeChange" placeholder="请选择节点">
+              <a-select
+                :value="`${temp.cacheData.useNodeId},${temp.cacheData.useProjectId}`"
+                style="width: 200px"
+                @change="nodeChange"
+                placeholder="请选择节点"
+              >
                 <a-select-option v-for="item in temp.projectList" :key="`${item.nodeId},${item.projectId}`">
                   {{ nodeName[item.nodeId] && nodeName[item.nodeId].name }}
                 </a-select-option>
@@ -18,7 +23,13 @@
           <!-- <a-button size="small" type="primary" @click="loadFileData">刷新目录</a-button> -->
         </div>
 
-        <a-directory-tree :replace-fields="treeReplaceFields" @select="nodeClick" :loadData="onTreeData" :treeData="treeList"> </a-directory-tree>
+        <a-directory-tree
+          :replace-fields="treeReplaceFields"
+          @select="nodeClick"
+          :loadData="onTreeData"
+          :treeData="treeList"
+        >
+        </a-directory-tree>
       </a-layout-sider>
       <!-- 表格 -->
       <a-layout-content class="file-content">
@@ -31,16 +42,34 @@
                 <!-- ^.*\d+.*$ -->
                 <!-- .*(0999996|0999995).*   .*(a|b).* -->
                 <a-tooltip placement="right" title="关键词高亮,支持正则(正则可能影响性能请酌情使用)">
-                  <a-input placeholder="关键词,支持正则" :style="`width: 250px`" v-model="temp.cacheData.keyword" @pressEnter="sendSearchLog"> </a-input>
+                  <a-input
+                    placeholder="关键词,支持正则"
+                    :style="`width: 250px`"
+                    v-model="temp.cacheData.keyword"
+                    @pressEnter="sendSearchLog"
+                  >
+                  </a-input>
                 </a-tooltip>
               </div>
               <div>
                 显示前N行
-                <a-input-number id="inputNumber" v-model="temp.cacheData.beforeCount" :min="0" :max="1000" @pressEnter="sendSearchLog" />
+                <a-input-number
+                  id="inputNumber"
+                  v-model="temp.cacheData.beforeCount"
+                  :min="0"
+                  :max="1000"
+                  @pressEnter="sendSearchLog"
+                />
               </div>
               <div>
                 显示后N行
-                <a-input-number id="inputNumber" v-model="temp.cacheData.afterCount" :min="0" :max="1000" @pressEnter="sendSearchLog" />
+                <a-input-number
+                  id="inputNumber"
+                  v-model="temp.cacheData.afterCount"
+                  :min="0"
+                  :max="1000"
+                  @pressEnter="sendSearchLog"
+                />
               </div>
               <a-popover title="正则语法参考">
                 <template slot="content">
@@ -50,21 +79,26 @@
                     <li><b>.*(异常).*</b> - 匹配包含 异常 的行</li>
                   </ul>
                 </template>
-                <a-button type="link" style="padding: 0" icon="unordered-list"><span style="margin-left: 2px">语法参考</span></a-button>
+                <a-button type="link" style="padding: 0" icon="unordered-list"
+                  ><span style="margin-left: 2px">语法参考</span></a-button
+                >
               </a-popover>
             </a-space>
             <a-space>
               <div>
                 <!-- 搜索模式 -->
-                <a-tooltip placement="right" title="搜索模式,默认查看文件最后多少行，从头搜索指从指定行往下搜索，从尾搜索指从文件尾往上搜索多少行">
+                <a-tooltip
+                  placement="right"
+                  title="搜索模式,默认查看文件最后多少行，从头搜索指从指定行往下搜索，从尾搜索指从文件尾往上搜索多少行"
+                >
                   <a-select
                     :style="`width: 250px`"
                     :value="temp.cacheData.first"
                     @change="
                       (value) => {
-                        const cacheData = { ...temp.cacheData, first: value };
-                        temp = { ...temp, cacheData: cacheData };
-                        sendSearchLog();
+                        const cacheData = { ...temp.cacheData, first: value }
+                        temp = { ...temp, cacheData: cacheData }
+                        sendSearchLog()
                       }
                     "
                   >
@@ -75,11 +109,23 @@
               </div>
               <div>
                 文件前N行
-                <a-input-number id="inputNumber" v-model="temp.cacheData.head" :min="0" :max="1000" @pressEnter="sendSearchLog" />
+                <a-input-number
+                  id="inputNumber"
+                  v-model="temp.cacheData.head"
+                  :min="0"
+                  :max="1000"
+                  @pressEnter="sendSearchLog"
+                />
               </div>
               <div>
                 文件后N行
-                <a-input-number id="inputNumber" v-model="temp.cacheData.tail" :min="0" :max="1000" @pressEnter="sendSearchLog" />
+                <a-input-number
+                  id="inputNumber"
+                  v-model="temp.cacheData.tail"
+                  :min="0"
+                  :max="1000"
+                  @pressEnter="sendSearchLog"
+                />
               </div>
               <a-popover title="搜索配置参考">
                 <template slot="content">
@@ -93,7 +139,9 @@
                     <li><b>从头搜索、文件前20行、文件后3行</b> - 在文件第 3 - 20 行中搜索</li>
                   </ul>
                 </template>
-                <a-button type="link" style="padding: 0" icon="unordered-list"><span style="margin-left: 2px">搜索参考</span></a-button>
+                <a-button type="link" style="padding: 0" icon="unordered-list"
+                  ><span style="margin-left: 2px">搜索参考</span></a-button
+                >
               </a-popover>
             </a-space>
           </a-space>
@@ -104,7 +152,11 @@
             <a-tab-pane forceRender v-if="nodeName[item.nodeId]" :key="`${item.nodeId},${item.projectId}`">
               <template slot="tab">
                 【{{ nodeName[item.nodeId] && nodeName[item.nodeId].name }}】
-                {{ nodeProjectList[item.nodeId] && nodeProjectList[item.nodeId].projects && nodeProjectList[item.nodeId].projects.filter((item1) => item1.projectId === item.projectId)[0].name }}
+                {{
+                  nodeProjectList[item.nodeId] &&
+                  nodeProjectList[item.nodeId].projects &&
+                  nodeProjectList[item.nodeId].projects.filter((item1) => item1.projectId === item.projectId)[0].name
+                }}
               </template>
               <viewPre
                 :ref="`pre-dom-${item.nodeId},${item.projectId}`"
@@ -113,7 +165,7 @@
                 :config="{
                   logScroll: true,
                   logShowLine: 5000,
-                  searchValue: '',
+                  searchValue: ''
                 }"
               ></viewPre>
             </a-tab-pane>
@@ -124,158 +176,165 @@
   </div>
 </template>
 <script>
-import { getNodeListAll, getProjectListAll } from "@/api/node";
-import { getFileList } from "@/api/node-project";
-import { getWebSocketUrl, itemGroupBy } from "@/utils/const";
-import { mapGetters } from "vuex";
-import viewPre from "@/components/logView/view-pre";
-import { updateCache } from "@/api/log-read";
+import { getNodeListAll, getProjectListAll } from '@/api/node'
+import { getFileList } from '@/api/node-project'
+import { itemGroupBy } from '@/utils/const'
+import { getWebSocketUrl } from '@/api/config'
+import { mapGetters } from 'vuex'
+import viewPre from '@/components/logView/view-pre'
+import { updateCache } from '@/api/log-read'
 
 export default {
   components: {
-    viewPre,
+    viewPre
   },
   props: {
-    data: Object,
+    data: Object
   },
   data() {
     return {
       treeReplaceFields: {
-        title: "filename",
-        isLeaf: "isDirectory",
+        title: 'filename',
+        isLeaf: 'isDirectory'
       },
       tempNode: {},
       tempFileNode: {},
       treeList: [],
-      activeTagKey: "",
+      activeTagKey: '',
 
       nodeProjectList: {},
       nodeList: [],
       nodeName: {},
       temp: {},
-      socketCache: {},
-    };
+      socketCache: {}
+    }
   },
   computed: {
-    ...mapGetters(["getLongTermToken", "getWorkspaceId"]),
+    ...mapGetters(['getLongTermToken', 'getWorkspaceId']),
     selectPath() {
       if (!Object.keys(this.tempNode).length) {
-        return "";
+        return ''
       }
       if (this.tempNode.level === 1) {
-        return "";
+        return ''
       } else {
-        return (this.tempNode.levelName || "") + "/" + this.tempNode.filename;
+        return (this.tempNode.levelName || '') + '/' + this.tempNode.filename
       }
     },
     selectFilePath() {
       if (!Object.keys(this.tempFileNode).length) {
-        return "";
+        return ''
       }
       if (this.tempFileNode.level === 1) {
-        return "";
+        return ''
       } else {
-        return (this.tempFileNode.levelName || "") + "/" + this.tempFileNode.filename;
+        return (this.tempFileNode.levelName || '') + '/' + this.tempFileNode.filename
       }
-    },
+    }
   },
   created() {
-    this.temp = { ...this.data };
+    this.temp = { ...this.data }
 
-    const cacheData = this.temp.cacheData;
-    cacheData.useProjectId = this.temp.projectList[0].projectId;
-    cacheData.useNodeId = this.temp.projectList[0].nodeId;
-    cacheData.beforeCount = cacheData.beforeCount || 0;
-    cacheData.afterCount = cacheData.afterCount || 10;
-    cacheData.head = cacheData.head || 0;
-    cacheData.tail = cacheData.tail || 100;
-    cacheData.first = cacheData.first === undefined ? "false" : cacheData.first + "";
-    this.temp = { ...this.temp, cacheData: cacheData };
+    const cacheData = this.temp.cacheData
+    cacheData.useProjectId = this.temp.projectList[0].projectId
+    cacheData.useNodeId = this.temp.projectList[0].nodeId
+    cacheData.beforeCount = cacheData.beforeCount || 0
+    cacheData.afterCount = cacheData.afterCount || 10
+    cacheData.head = cacheData.head || 0
+    cacheData.tail = cacheData.tail || 100
+    cacheData.first = cacheData.first === undefined ? 'false' : cacheData.first + ''
+    this.temp = { ...this.temp, cacheData: cacheData }
     this.loadNodeList().then(() => {
-      this.loadFileData();
+      this.loadFileData()
       //   console.log(this.nodeProjectList);
       this.temp.projectList.forEach((item) => {
         const itemProjectData = this.nodeProjectList[item.nodeId].projects.filter((projectData) => {
-          return item.projectId === projectData.projectId;
-        })[0];
-        const socketUrl = getWebSocketUrl("/socket/console", `userId=${this.getLongTermToken}&id=${itemProjectData.id}&nodeId=${item.nodeId}&type=console&copyId=&workspaceId=${this.getWorkspaceId}`);
-        const domId = `pre-dom-${item.nodeId},${item.projectId}`;
-        this.socketCache = { ...this.socketCache, [domId]: {} };
-        const socket = this.initWebSocket(domId, socketUrl);
+          return item.projectId === projectData.projectId
+        })[0]
+        const socketUrl = getWebSocketUrl(
+          '/socket/console',
+          `userId=${this.getLongTermToken}&id=${itemProjectData.id}&nodeId=${item.nodeId}&type=console&copyId=&workspaceId=${this.getWorkspaceId}`
+        )
+        const domId = `pre-dom-${item.nodeId},${item.projectId}`
+        this.socketCache = { ...this.socketCache, [domId]: {} }
+        const socket = this.initWebSocket(domId, socketUrl)
 
-        this.socketCache = { ...this.socketCache, [domId]: { socket: socket, projectId: item.projectId, nodeId: item.nodeId } };
+        this.socketCache = {
+          ...this.socketCache,
+          [domId]: { socket: socket, projectId: item.projectId, nodeId: item.nodeId }
+        }
 
         // 连接成功后
         socket.onopen = () => {
           if (cacheData.logFile) {
             // 之前已经打开的
-            this.sendMsg(domId, "showlog", this.temp.cacheData);
+            this.sendMsg(domId, 'showlog', this.temp.cacheData)
           }
-        };
-      });
+        }
+      })
       //
-    });
-    this.activeTagKey = this.temp.cacheData.useNodeId + "," + this.temp.cacheData.useProjectId;
+    })
+    this.activeTagKey = this.temp.cacheData.useNodeId + ',' + this.temp.cacheData.useProjectId
     // console.log(cacheData);
   },
   beforeDestroy() {
     Object.keys(this.socketCache).forEach((item) => {
-      clearInterval(this.socketCache[item].heart);
-    });
+      clearInterval(this.socketCache[item].heart)
+    })
   },
   destroyed() {
     Object.keys(this.socketCache).forEach((item) => {
-      clearInterval(this.socketCache[item].heart);
-    });
+      clearInterval(this.socketCache[item].heart)
+    })
   },
   methods: {
     initWebSocket(id, url) {
-      let socket;
+      let socket
       if (!socket || socket.readyState !== socket.OPEN || socket.readyState !== socket.CONNECTING) {
-        socket = new WebSocket(url);
+        socket = new WebSocket(url)
       }
 
       socket.onerror = (err) => {
-        console.error(err);
-        this.$notification.error({
-          key: "log-read-error",
-          message: "web socket 错误,请检查是否开启 ws 代理",
-        });
-        clearInterval(this.socketCache[id].heart);
-      };
+        console.error(err)
+        $notification.error({
+          key: 'log-read-error',
+          message: 'web socket 错误,请检查是否开启 ws 代理'
+        })
+        clearInterval(this.socketCache[id].heart)
+      }
       socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
-        console.error(err);
-        this.$notification.info({
-          key: "log-read-close",
-          message: "会话已经关闭",
-        });
-        clearInterval(this.socketCache[id].heart);
-      };
+        console.error(err)
+        $notification.info({
+          key: 'log-read-close',
+          message: '会话已经关闭'
+        })
+        clearInterval(this.socketCache[id].heart)
+      }
       socket.onmessage = (msg) => {
         //console.log(msg);
-        this.$refs[id][0].appendLine(msg.data);
+        this.$refs[id][0].appendLine(msg.data)
 
-        clearInterval(this.socketCache[id].heart);
+        clearInterval(this.socketCache[id].heart)
         // 创建心跳，防止掉线
         this.socketCache[id].heart = setInterval(() => {
-          this.sendMsg(id, "heart");
+          this.sendMsg(id, 'heart')
           // this.loadFileSize();
-        }, 5000);
-      };
+        }, 5000)
+      }
 
-      return socket;
+      return socket
     },
     // 发送消息
     sendMsg(id, op, other) {
-      const cacheData = this.socketCache[id];
+      const cacheData = this.socketCache[id]
       //   console.log(cacheData, id);
       const data = {
         op: op,
         projectId: cacheData.projectId,
-        search: true,
-      };
-      cacheData.socket.send(JSON.stringify(Object.assign({}, data, other)));
+        search: true
+      }
+      cacheData.socket.send(JSON.stringify(Object.assign({}, data, other)))
     },
     // appendLine(id, data) {},
     // 加载节点以及项目
@@ -283,131 +342,133 @@ export default {
       return new Promise((resolve) => {
         this.loadNodeList2().then(() => {
           this.getProjectListAll().then(() => {
-            resolve();
-          });
-        });
-      });
+            resolve()
+          })
+        })
+      })
     },
     // 加载节点以及项目
     loadNodeList2() {
       return new Promise((resolve) => {
         getNodeListAll().then((res) => {
           if (res.code === 200) {
-            this.nodeList = res.data;
-            this.nodeName = res.data.groupBy((item) => item.id);
-            resolve();
+            this.nodeList = res.data
+            this.nodeName = res.data.groupBy((item) => item.id)
+            resolve()
           }
-        });
-      });
+        })
+      })
     },
     // 加载用户列表
     getProjectListAll() {
       return new Promise((resolve) => {
         getProjectListAll().then((res) => {
           if (res.code === 200) {
-            this.nodeProjectList = itemGroupBy(res.data, "nodeId", "id", "projects").groupBy((item) => item.id);
-            resolve();
+            this.nodeProjectList = itemGroupBy(res.data, 'nodeId', 'id', 'projects').groupBy((item) => item.id)
+            resolve()
             // console.log(this.nodeList);
             // console.log(this.nodeProjectList);
           }
-        });
-      });
+        })
+      })
     },
     nodeChange(value) {
-      const keyArray = value.split(",");
+      const keyArray = value.split(',')
 
-      const cacheData = { ...this.temp.cacheData, useNodeId: keyArray[0], useProjectId: keyArray[1] };
-      this.temp = { ...this.temp, cacheData: cacheData };
-      this.loadFileData();
+      const cacheData = { ...this.temp.cacheData, useNodeId: keyArray[0], useProjectId: keyArray[1] }
+      this.temp = { ...this.temp, cacheData: cacheData }
+      this.loadFileData()
       //
-      this.activeTagKey = value;
+      this.activeTagKey = value
     },
     // 点击树节点
     nodeClick(selectedKeys, { node }) {
       if (node.dataRef.isDirectory) {
-        this.tempNode = node.dataRef;
+        this.tempNode = node.dataRef
         //this.loadFileList();
       } else {
         if (node.dataRef.textFileEdit) {
-          this.tempFileNode = node.dataRef;
+          this.tempFileNode = node.dataRef
           // let cacheData = ;
-          const cacheData = { ...this.temp.cacheData, logFile: this.selectFilePath };
-          this.temp = { ...this.temp, cacheData: cacheData };
-          this.$emit("changeTitle", this.selectFilePath);
+          const cacheData = { ...this.temp.cacheData, logFile: this.selectFilePath }
+          this.temp = { ...this.temp, cacheData: cacheData }
+          this.$emit('changeTitle', this.selectFilePath)
           //
-          this.sendSearchLog();
+          this.sendSearchLog()
         } else {
           //
-          this.$message.error("当前文件不可读,需要配置可读文件白名单");
+          $message.error('当前文件不可读,需要配置可读文件白名单')
         }
       }
     },
     onTreeData(treeNode) {
       return new Promise((resolve) => {
         if (treeNode.dataRef.children || !treeNode.dataRef.isDirectory) {
-          resolve();
-          return;
+          resolve()
+          return
         }
-        this.loadNode(treeNode.dataRef, resolve);
-      });
+        this.loadNode(treeNode.dataRef, resolve)
+      })
     },
     // 加载数据
     loadFileData() {
-      const key = "root-" + new Date().getTime();
-      const temp = this.temp;
-      const projectName = this.nodeProjectList[temp.cacheData.useNodeId].projects.filter((item) => item.projectId === temp.cacheData.useProjectId)[0].name;
+      const key = 'root-' + new Date().getTime()
+      const temp = this.temp
+      const projectName = this.nodeProjectList[temp.cacheData.useNodeId].projects.filter(
+        (item) => item.projectId === temp.cacheData.useProjectId
+      )[0].name
       this.treeList = [
         {
           filename: projectName,
           level: 1,
           isDirectory: true,
           key: key,
-          isLeaf: false,
-        },
-      ];
+          isLeaf: false
+        }
+      ]
 
       // 设置默认展开第一个
       setTimeout(() => {
-        this.tempNode = this.treeList[0];
+        this.tempNode = this.treeList[0]
         //this.expandKeys = [key];
         //this.loadFileList();
-      }, 1000);
+      }, 1000)
     },
     // 加载子节点
     loadNode(data, resolve) {
-      this.tempNode = data;
+      this.tempNode = data
       // 如果是目录
       if (data.isDirectory) {
         setTimeout(() => {
           // 请求参数
-          const cacheData = this.temp.cacheData;
+          const cacheData = this.temp.cacheData
 
           const params = {
             nodeId: cacheData.useNodeId,
             id: cacheData.useProjectId,
-            path: this.selectPath,
-          };
+            path: this.selectPath
+          }
 
           // 加载文件
           getFileList(params).then((res) => {
             if (res.code === 200) {
               data.children = res.data.map((ele) => {
-                ele.isLeaf = !ele.isDirectory;
-                ele.key = ele.filename + "-" + new Date().getTime();
+                ele.isLeaf = !ele.isDirectory
+                ele.key = ele.filename + '-' + new Date().getTime()
                 //ele.disabled = ele.textFileEdit;
 
-                return ele;
-              });
+                return ele
+              })
 
-              this.treeList = [...this.treeList];
-              resolve();
+              this.treeList = [...this.treeList]
+              resolve()
             } else {
-              resolve();
+              resolve()
             }
-          });
-        }, 500);
+          })
+        }, 500)
       } else {
-        resolve();
+        resolve()
       }
     },
     sendSearchLog() {
@@ -415,15 +476,15 @@ export default {
         // 先更新缓存再请求搜索，避免长loading
         updateCache(Object.assign({}, this.temp.cacheData, { id: this.temp.id })).then(() => {
           Object.keys(this.socketCache).forEach((item) => {
-            this.$refs[item][0].clearLogCache();
-            this.sendMsg(item, "showlog", this.temp.cacheData);
-          });
-        });
+            this.$refs[item][0].clearLogCache()
+            this.sendMsg(item, 'showlog', this.temp.cacheData)
+          })
+        })
       }
       //
-    },
-  },
-};
+    }
+  }
+}
 </script>
 
 <style scoped>

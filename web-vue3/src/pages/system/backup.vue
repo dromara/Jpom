@@ -355,7 +355,7 @@ export default {
         createBackup(this.targetKeys).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.$refs['editBackupForm'].resetFields()
@@ -371,7 +371,7 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除备份信息么？',
         okText: '确认',
@@ -380,7 +380,7 @@ export default {
           // 删除
           deleteBackup(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -398,7 +398,7 @@ export default {
         '<li>重置初始化在启动时候传入参数 <b> --rest:load_init_db </b> </li>' +
         ' </ul>还原过程中不能操作哦...'
       const h = this.$createElement
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),
         okText: '确认',
@@ -408,7 +408,7 @@ export default {
           // 还原
           restoreBackup(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -435,7 +435,7 @@ export default {
     },
     // 开始上传 SQL 文件
     startSqlUpload() {
-      this.$notification.info({
+      $notification.info({
         message: '正在上传文件，请稍后...'
       })
       // 设置上传状态
@@ -452,7 +452,7 @@ export default {
       // 上传文件
       uploadBackupFile(formData).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.successSize++

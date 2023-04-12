@@ -3,7 +3,7 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import { getWebSocketUrl } from '@/utils/const'
+import { getWebSocketUrl } from '@/api/config'
 import terminal from '@/components/terminal'
 
 // https://blog.csdn.net/qq_41840688/article/details/108636267

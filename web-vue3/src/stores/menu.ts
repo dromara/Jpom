@@ -7,7 +7,6 @@ import { ACTIVE_MENU_KEY, ACTIVE_TAB_KEY, TAB_LIST_KEY } from '@/utils/const'
 
 import { getMenu } from '@/api/menu'
 import routeMenuMap from '@/router/route-menu'
-import { defineStore } from 'pinia'
 
 export interface IMenuState {
   activeTabKey: string

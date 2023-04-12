@@ -239,7 +239,7 @@ export default {
         editWorkspaceEnv(this.envTemp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.$refs['editEnvForm'].resetFields()
@@ -251,7 +251,7 @@ export default {
     },
     //
     handleEnvDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的删除当前变量吗？',
         okText: '确认',
@@ -263,7 +263,7 @@ export default {
             workspaceId: this.workspaceId
           }).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadDataEnvVar()

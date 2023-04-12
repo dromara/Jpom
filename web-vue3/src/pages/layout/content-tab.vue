@@ -5,28 +5,36 @@
         <a-dropdown :trigger="['contextmenu']">
           <span style="display: inline-table">{{ tab.title }}</span>
           <a-menu slot="overlay">
-            <a-menu-item @click="
-              closeTabs({
-                key: tab.key,
-              })
-            ">
+            <a-menu-item
+              @click="
+                closeTabs({
+                  key: tab.key
+                })
+              "
+            >
               <a-button type="link" :disabled="nowTabList.length <= 1">关闭其他</a-button>
             </a-menu-item>
-            <a-menu-item @click="
-              closeTabs({
-                key: tab.key,
-                position: 'left',
-              })
-            ">
+            <a-menu-item
+              @click="
+                closeTabs({
+                  key: tab.key,
+                  position: 'left'
+                })
+              "
+            >
               <a-button type="link" :disabled="nowTabList.length <= 1 || index === 0">关闭左侧</a-button>
             </a-menu-item>
-            <a-menu-item @click="
-              closeTabs({
-                key: tab.key,
-                position: 'right',
-              })
-            ">
-              <a-button type="link" :disabled="nowTabList.length <= 1 || index === nowTabList.length - 1">关闭右侧</a-button>
+            <a-menu-item
+              @click="
+                closeTabs({
+                  key: tab.key,
+                  position: 'right'
+                })
+              "
+            >
+              <a-button type="link" :disabled="nowTabList.length <= 1 || index === nowTabList.length - 1"
+                >关闭右侧</a-button
+              >
             </a-menu-item>
           </a-menu>
         </a-dropdown>
@@ -36,51 +44,51 @@
   </a-tabs>
 </template>
 <script lang="ts" setup>
-import UserHeader from "./user-header";
+import UserHeader from './user-header'
 
-import { mapGetters } from "vuex";
+import { mapGetters } from 'vuex'
 
 const props = defineProps<{
-  mode: string;
-}>();
+  mode: string
+}>()
 
 const onEdit = (key, action) => {
-  if (action === "remove") {
+  if (action === 'remove') {
     if (this.nowTabList.length === 1) {
-      this.$notification.warn({
-        message: "不能关闭了",
-      });
-      return;
+      $notification.warn({
+        message: '不能关闭了'
+      })
+      return
     }
-    this.$store.dispatch(props.mode === "normal" ? "removeTab" : "removeManagementTab", key).then(() => {
-      this.activeTab();
-    });
+    this.$store.dispatch(props.mode === 'normal' ? 'removeTab' : 'removeManagementTab', key).then(() => {
+      this.activeTab()
+    })
   }
 }
 
-
 // 关闭 tabs
 const closeTabs = (data) => {
-  this.$notification.success({
-    message: "操作成功",
-  });
-  this.$store.dispatch(props.mode === "normal" ? "clearTabs" : "clearManagementTabs", data).then(() => {
-    this.activeTab();
-  });
+  $notification.success({
+    message: '操作成功'
+  })
+  this.$store.dispatch(props.mode === 'normal' ? 'clearTabs' : 'clearManagementTabs', data).then(() => {
+    this.activeTab()
+  })
 }
-
 
 const activeTab = (key) => {
-  key = key || this.activeKey;
-  const index = this.nowTabList.findIndex((ele) => ele.key === key);
-  const activeTab = this.nowTabList[index];
-  this.$router.push({ query: { ...this.$route.query, sPid: activeTab.parentId, sId: activeTab.id }, path: activeTab.path });
+  key = key || this.activeKey
+  const index = this.nowTabList.findIndex((ele) => ele.key === key)
+  const activeTab = this.nowTabList[index]
+  this.$router.push({
+    query: { ...this.$route.query, sPid: activeTab.parentId, sId: activeTab.id },
+    path: activeTab.path
+  })
   //
-  this.$store.dispatch(props.mode === "normal" ? "activeMenu" : "activeManagementMenu", activeTab.id);
-  this.$store.dispatch(props.mode === "normal" ? "menuOpenKeys" : "menuManagementOpenKeys", activeTab.parentId);
-  return activeTab;
+  this.$store.dispatch(props.mode === 'normal' ? 'activeMenu' : 'activeManagementMenu', activeTab.id)
+  this.$store.dispatch(props.mode === 'normal' ? 'menuOpenKeys' : 'menuManagementOpenKeys', activeTab.parentId)
+  return activeTab
 }
-
 
 // computed: {
 //     ...mapGetters(["getActiveTabKey", "getManagementActiveTabKey", "getTabList", "getManagementTabList", "getCollapsed"]),
@@ -96,7 +104,6 @@ const activeTab = (key) => {
 //       return props.mode === "normal" ? this.getTabList : this.getManagementTabList;
 //     },
 //   },
-
 </script>
 <style scoped>
 .my-tabs {

@@ -294,7 +294,7 @@ export default {
           return item.nodeId && item.projectId
         })
         if (!temp.projectList || !temp.projectList.length) {
-          this.$notification.warn({
+          $notification.warn({
             message: '至少选择一个节点和项目'
           })
           return false
@@ -304,7 +304,7 @@ export default {
         editLogRead(temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.$refs['editForm'].resetFields()
@@ -316,7 +316,7 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除日志搜索么？',
         okText: '确认',
@@ -325,7 +325,7 @@ export default {
           // 删除
           deleteLogRead(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()

@@ -893,7 +893,7 @@ export default {
         editNode(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.$refs['editNodeForm'].resetFields()
@@ -905,7 +905,7 @@ export default {
       })
     },
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除节点么？删除会检查数据关联性,并且节点不存在项目或者脚本',
         okText: '确认',
@@ -914,7 +914,7 @@ export default {
           // 删除
           deleteNode(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -934,7 +934,7 @@ export default {
         ' </ul>'
 
       const h = this.$createElement
-      this.$confirm({
+      $confirm({
         title: '危险操作！！！',
         content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),
         okButtonProps: { props: { type: 'danger', size: 'small' } },
@@ -945,7 +945,7 @@ export default {
           // 删除
           unbind(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -969,7 +969,7 @@ export default {
     syncNode(node) {
       syncProject(node.id).then((res) => {
         if (res.code == 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           return false
@@ -981,7 +981,7 @@ export default {
         nodeId: node.id
       }).then((res) => {
         if (res.code == 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
         }
@@ -1017,7 +1017,7 @@ export default {
     //
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
-        this.$notification.warn({
+        $notification.warn({
           message: '请选择工作空间'
         })
         return false
@@ -1028,7 +1028,7 @@ export default {
         toWorkspaceId: this.temp.workspaceId
       }).then((res) => {
         if (res.code == 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.tableSelections = []
@@ -1050,7 +1050,7 @@ export default {
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: msg,
         okText: '确认',
@@ -1063,7 +1063,7 @@ export default {
             compareId: compareId
           }).then((res) => {
             if (res.code == 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
 

@@ -143,12 +143,12 @@ export default {
 
           // 禁用导航
           this.$store.dispatch('commitGuide', { disabledGuide: res.data.disabledGuide, inDocker: res.data.inDocker })
-          this.$notification.config({
+          $notification.config({
             placement: res.data.notificationPlacement ? res.data.notificationPlacement : 'topRight'
           })
         }
         if (res.code !== 200) {
-          this.$notification.warn({
+          $notification.warn({
             message: res.msg
           })
         } else {

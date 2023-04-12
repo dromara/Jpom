@@ -344,7 +344,7 @@ export default {
           return false
         }
         if (this.uploadFileList.length === 0) {
-          this.$notification.error({
+          $notification.error({
             message: '请选择证书文件'
           })
           return false
@@ -358,7 +358,7 @@ export default {
         certificateImportFile(formData).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
 
@@ -370,7 +370,7 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除该证书么，删除会将证书文件一并删除奥？',
         okText: '确认',
@@ -382,7 +382,7 @@ export default {
           }
           deleteCert(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -415,7 +415,7 @@ export default {
         certificateEdit(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
 
@@ -434,7 +434,7 @@ export default {
       certificateDeploy({ ...data, id: this.temp.id }).then((res) => {
         if (res.code === 200) {
           // 成功
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
 

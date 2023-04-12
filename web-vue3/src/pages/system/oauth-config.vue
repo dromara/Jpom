@@ -141,7 +141,7 @@ export default {
       oauthConfigOauth2Save(this[key]).then((res) => {
         if (res.code === 200) {
           // 成功
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
         }

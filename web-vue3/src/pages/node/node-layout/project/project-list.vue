@@ -1006,7 +1006,7 @@ export default {
     // 提交
     handleEditProjectOk() {
       if (this.temp.outGivingProject) {
-        this.$notification.warning({
+        $notification.warning({
           message: '独立的项目分发请到分发管理中去修改'
         })
         return
@@ -1035,7 +1035,7 @@ export default {
         replicaParams['javaCopyIds'] = javaCopyIds
         editProject(params, replicaParams).then((res) => {
           if (res.code === 200) {
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.$refs['editProjectForm'].resetFields()
@@ -1091,7 +1091,7 @@ export default {
     // },
     // 删除
     handleDelete(record, thorough) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: thorough
           ? '真的要彻底删除项目么？彻底项目会自动删除项目相关文件奥(包含项目日志，日志备份，项目文件)'
@@ -1107,7 +1107,7 @@ export default {
           }
           deleteProject(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -1131,7 +1131,7 @@ export default {
     //       //   this.temp = { ...this.temp, libExist: true, libExistMsg: res.msg };
     //       // }
     //       if (res.code !== 200) {
-    //         this.$notification.warning({
+    //         $notification.warning({
     //           message: "提示",
     //           description: res.msg,
     //         });
@@ -1195,7 +1195,7 @@ export default {
     //批量开始
     batchStart() {
       if (this.selectedRows.length <= 0) {
-        this.$notification.warning({
+        $notification.warning({
           message: '请选中要启动的项目'
         })
         return
@@ -1239,7 +1239,7 @@ export default {
     //批量重启
     batchRestart() {
       if (this.selectedRows.length <= 0) {
-        this.$notification.warning({
+        $notification.warning({
           message: '请选中要重启的项目'
         })
         return
@@ -1281,7 +1281,7 @@ export default {
     //批量关闭
     batchStop() {
       if (this.selectedRows.length <= 0) {
-        this.$notification.warning({
+        $notification.warning({
           message: '请选中要关闭的项目'
         })
         return
@@ -1375,7 +1375,7 @@ export default {
     },
     // 删除
     handleDeleteCopy(project, record, thorough) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: thorough
           ? '真的要彻底删除项目副本么?彻底删除项目会自动删除副本相关文件奥(包含项目日志，日志备份)'
@@ -1392,7 +1392,7 @@ export default {
           }
           deleteProject(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
 
@@ -1422,7 +1422,7 @@ export default {
         ' </ul>'
 
       const h = this.$createElement
-      this.$confirm({
+      $confirm({
         title: '危险操作！！！',
         content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),
         okButtonProps: { props: { type: 'danger', size: 'small' } },
@@ -1436,7 +1436,7 @@ export default {
           }
           releaseOutgiving(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
 
@@ -1464,7 +1464,7 @@ export default {
       formData.append('nodeId', this.node.id)
       importData(formData).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.loadData()

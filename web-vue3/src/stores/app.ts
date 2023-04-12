@@ -1,7 +1,6 @@
 /**
  * 应用工作空间相关
  */
-import { defineStore } from 'pinia'
 import { CACHE_WORKSPACE_ID } from '@/utils/const'
 import { getHashQuery } from '@/utils/utils'
 
@@ -9,7 +8,7 @@ export const useAppStore = defineStore('app', {
   state: () => ({
     workspaceId: localStorage.getItem(CACHE_WORKSPACE_ID),
     // 菜单折叠
-    isCollapsed: !!localStorage.getItem('collapsed'),
+    isCollapsed: !!localStorage.getItem('collapsed')
   }),
 
   actions: {
@@ -21,14 +20,14 @@ export const useAppStore = defineStore('app', {
     collapsed(isCollapsed: boolean) {
       this.isCollapsed = isCollapsed
       localStorage.setItem('collapsed', String(isCollapsed))
-    },
+    }
   },
   getters: {
     getWorkspaceId(state) {
       const query = getHashQuery()
       return query.wid || state.workspaceId
-    },
-  },
+    }
+  }
 })
 
 // export default useAppStore()

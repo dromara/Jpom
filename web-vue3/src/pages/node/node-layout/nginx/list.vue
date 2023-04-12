@@ -385,7 +385,7 @@ export default {
         editNginxConfig(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.$refs['editNginxForm'].resetFields()
@@ -404,7 +404,7 @@ export default {
       } else {
         msg = '真的要' + (type === 'real' ? '永久' : '临时') + '删除文件么？'
       }
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: msg,
         okText: '确认',
@@ -421,7 +421,7 @@ export default {
           // 删除
           deleteNginxConfig(params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               //this.loadDirectoryList();
@@ -448,7 +448,7 @@ export default {
         }
         editNginxServerName(params).then((res) => {
           if (res.code === 200) {
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.$refs['editNginxNameForm'].resetFields()
@@ -466,7 +466,7 @@ export default {
       }
       doNginxCommand(params).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.loadNginxData()

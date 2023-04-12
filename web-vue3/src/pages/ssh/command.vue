@@ -466,7 +466,7 @@ export default {
         if (this.commandParams && this.commandParams.length > 0) {
           for (let i = 0; i < this.commandParams.length; i++) {
             if (!this.commandParams[i].desc) {
-              this.$notification.error({
+              $notification.error({
                 message: '请填写第' + (i + 1) + '个参数的描述'
               })
               return false
@@ -480,7 +480,7 @@ export default {
         editCommand(this.temp).then((res) => {
           this.formLoading = false
           if (res.code === 200) {
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.editCommandVisible = false
@@ -545,7 +545,7 @@ export default {
     },
     //  删除命令
     handleDelete(row) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除“' + row.name + '”命令？',
         okText: '确认',
@@ -554,7 +554,7 @@ export default {
           // 删除
           deleteCommand(row.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.getCommandData()
@@ -572,7 +572,7 @@ export default {
 
     handleExecuteCommandOk() {
       if (!this.chooseSsh || this.chooseSsh.length <= 0) {
-        this.$notification.error({
+        $notification.error({
           message: '请选择执行节点'
         })
         return false
@@ -584,7 +584,7 @@ export default {
         nodes: this.chooseSsh.join(',')
       }).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.executeCommandVisible = false
@@ -615,7 +615,7 @@ export default {
     //
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
-        this.$notification.warn({
+        $notification.warn({
           message: '请选择工作空间'
         })
         return false
@@ -626,7 +626,7 @@ export default {
         toWorkspaceId: this.temp.workspaceId
       }).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.tableSelections = []
@@ -655,7 +655,7 @@ export default {
         rest: 'rest'
       }).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.fillTriggerResult(res)

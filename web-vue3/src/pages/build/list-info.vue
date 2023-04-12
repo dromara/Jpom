@@ -888,7 +888,7 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除构建信息么？删除也将同步删除所有的构建历史记录信息',
         okText: '确认',
@@ -897,7 +897,7 @@ export default {
           // 删除
           deleteBuild(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -909,7 +909,7 @@ export default {
 
     // 清除构建
     handleClear(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要清除构建信息么？',
         okText: '确认',
@@ -917,7 +917,7 @@ export default {
         onOk: () => {
           clearBuid(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -984,7 +984,7 @@ export default {
       return new Promise((resolve) => {
         startBuild(data).then((res) => {
           if (res.code === 200) {
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.loadData()
@@ -1002,7 +1002,7 @@ export default {
     },
     // 停止构建
     handleStopBuild(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '确定要取消构建 【名称：' + record.name + '】 吗？注意：取消/停止构建不一定能正常关闭所有关联进程',
         okText: '确认',
@@ -1011,7 +1011,7 @@ export default {
           this.temp = Object.assign({}, record)
           stopBuild(this.temp.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -1046,7 +1046,7 @@ export default {
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: msg,
         okText: '确认',
@@ -1059,7 +1059,7 @@ export default {
             compareId: compareId
           }).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
 
@@ -1077,12 +1077,12 @@ export default {
     // 批量构建
     batchBuild() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
-        this.$notification.warning({
+        $notification.warning({
           message: '没有选择任何数据'
         })
         return
       }
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content:
           '确定要取批量构建吗？注意：同时运行多个构建将占用较大的资源,请慎重使用批量构建,如果批量构建的数量超多构建任务队列等待数，构建任务将自动取消',
@@ -1106,12 +1106,12 @@ export default {
     // 批量取消构建
     batchCancel() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
-        this.$notification.warning({
+        $notification.warning({
           message: '没有选择任何数据'
         })
         return
       }
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '确定要取批量消选中的构建吗？注意：取消/停止构建不一定能正常关闭所有关联进程',
         okText: '确认',

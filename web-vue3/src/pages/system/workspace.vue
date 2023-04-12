@@ -243,7 +243,7 @@ export default {
         editWorkSpace(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
             this.$refs['editForm'].resetFields()
@@ -260,7 +260,7 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的当前工作空间么,删除前需要将关联数据都删除后才能删除当前工作空间？',
         okText: '确认',
@@ -269,7 +269,7 @@ export default {
           // 删除
           deleteWorkspace(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -345,7 +345,7 @@ export default {
       }).then((res) => {
         if (res.code === 200) {
           // 成功
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
           this.configMenuVisible = false

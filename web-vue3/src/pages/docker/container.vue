@@ -713,7 +713,7 @@ export default {
       if (!action) {
         return
       }
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: action.msg,
         okText: '确认',
@@ -726,7 +726,7 @@ export default {
           }
           action.api(this.urlPrefix, params).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()

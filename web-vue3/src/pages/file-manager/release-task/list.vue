@@ -361,7 +361,7 @@ export default {
 
     //  删除命令
     handleDelete(row) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除该执行记录吗？',
         okText: '确认',
@@ -372,7 +372,7 @@ export default {
             id: row.id
           }).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -437,7 +437,7 @@ export default {
         reReleaseTask({ ...this.temp, taskDataIds: this.temp.taskDataIds?.join(',') }).then((res) => {
           if (res.code === 200) {
             // 成功
-            this.$notification.success({
+            $notification.success({
               message: res.msg
             })
 
@@ -449,7 +449,7 @@ export default {
     },
     // 取消
     handleCancelTask(record) {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的取消当前发布任务吗？',
         okText: '确认',
@@ -458,7 +458,7 @@ export default {
           // 删除
           cancelReleaseTask({ id: record.id }).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
+              $notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -477,7 +477,7 @@ export default {
             this.temp = res.data
             this.viewFileVisible = true
           } else {
-            this.$notification.warning({
+            $notification.warning({
               message: '文件不存在啦'
             })
           }

@@ -216,7 +216,7 @@ export default {
       editMailConfig(this.temp).then((res) => {
         if (res.code === 200) {
           // 成功
-          this.$notification.success({
+          $notification.success({
             message: res.msg
           })
         }
