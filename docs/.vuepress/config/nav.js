@@ -36,7 +36,10 @@ module.exports = [
     ]
   },
   {
-    text: '🤝用户', link: '/pages/user/'
+    text: '🤝企业服务', link: '/pages/cb4136/'
+  },
+  {
+    text: ' 🚩用户', link: '/pages/user/'
   },
   {
     text: '📰更新记录', link: '/pages/changelog/new/', items: [
