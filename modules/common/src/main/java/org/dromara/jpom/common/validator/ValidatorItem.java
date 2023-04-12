@@ -27,7 +27,7 @@ import java.lang.annotation.*;
 /**
  * 验证规则
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2018/8/21
  */
 @Target(ElementType.PARAMETER)

@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 /**
  * 分发实体
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/21
  */
 @TableName(value = "OUT_GIVING", name = "节点分发")

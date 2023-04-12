@@ -25,7 +25,7 @@ package org.dromara.jpom.system;
 /**
  * agent 插件端异常
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/17
  */
 public class AgentException extends RuntimeException {

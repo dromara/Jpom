@@ -35,7 +35,7 @@ import java.util.List;
 /**
  * 分发管理
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/21
  */
 @Service

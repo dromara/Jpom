@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
 /**
  * 初始化数据库
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/19
  */
 @Configuration

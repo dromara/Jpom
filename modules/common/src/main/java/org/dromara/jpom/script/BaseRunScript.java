@@ -27,9 +27,9 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.keepbx.jpom.log.ILogRecorder;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.util.ILogRecorder;
 import org.dromara.jpom.util.LogRecorder;
 
 import java.io.File;

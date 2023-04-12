@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * 白名单
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/16
  */
 @Service

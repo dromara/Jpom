@@ -49,7 +49,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * 权限拦截器
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/03/16.
  */
 @Configuration

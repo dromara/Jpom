@@ -34,7 +34,7 @@ import java.io.File;
 /**
  * 脚本模板
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/24
  */
 @Data

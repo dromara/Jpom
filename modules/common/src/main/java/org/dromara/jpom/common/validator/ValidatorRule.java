@@ -25,7 +25,7 @@ package org.dromara.jpom.common.validator;
 /**
  * 验证规则
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since  2018/8/21.
  */
 public enum ValidatorRule {
@@ -68,13 +68,13 @@ public enum ValidatorRule {
     /**
      * 小数
      *
-     * @see ParameterInterceptor#validatorNumber(cn.jiangzeyin.common.validator.ValidatorItem, String)
+     * @see ParameterInterceptor#validatorNumber(cn.bwcx_jzy.common.validator.ValidatorItem, String)
      */
     DECIMAL,
     /**
      * 数字
      *
-     * @see ParameterInterceptor#validatorNumber(cn.jiangzeyin.common.validator.ValidatorItem, String)
+     * @see ParameterInterceptor#validatorNumber(cn.bwcx_jzy.common.validator.ValidatorItem, String)
      */
     NUMBERS,
     /**

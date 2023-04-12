@@ -25,7 +25,7 @@ package org.dromara.jpom.common.validator;
 /**
  * 错误条件
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2018/12/25
  */
 public enum ErrorCondition {

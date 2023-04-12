@@ -27,7 +27,7 @@ import cn.hutool.core.util.StrUtil;
 /**
  * Jpom 运行错误
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/16
  */
 public class JpomRuntimeException extends RuntimeException {

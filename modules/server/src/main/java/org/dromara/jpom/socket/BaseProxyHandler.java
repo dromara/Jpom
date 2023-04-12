@@ -40,7 +40,7 @@ import java.util.Map;
 /**
  * 服务端socket 基本类
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/25
  */
 @Slf4j

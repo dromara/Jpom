@@ -92,6 +92,12 @@
             <version>1.22</version>
         </dependency>
 
+        <dependency>
+            <groupId>cn.keepbx.jpom</groupId>
+            <artifactId>jpom-core-common</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
     </dependencies>
 
     <profiles>

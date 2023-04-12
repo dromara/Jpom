@@ -31,7 +31,7 @@ import java.io.File;
 /**
  * windows 系统查询命令
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/16
  */
 public class WindowsSystemCommander extends AbstractSystemCommander {

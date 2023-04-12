@@ -25,7 +25,7 @@ package org.dromara.jpom.model;
 /**
  * 项目的运行方式
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/22
  */
 public enum RunMode {

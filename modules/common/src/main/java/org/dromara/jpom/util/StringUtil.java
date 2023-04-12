@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 /**
  * main 方法运行参数工具
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @see SimpleCommandLinePropertySource
  * @since 2019/4/7
  */

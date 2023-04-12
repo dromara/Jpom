@@ -28,7 +28,7 @@ import lombok.EqualsAndHashCode;
 /**
  * 基础实体（带id）
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/3/14
  */
 @EqualsAndHashCode(callSuper = true)

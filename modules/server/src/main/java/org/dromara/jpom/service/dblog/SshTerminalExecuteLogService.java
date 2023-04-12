@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 /**
  * ssh 终端执行日志
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2021/08/04
  */
 @Service

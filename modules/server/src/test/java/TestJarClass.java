@@ -33,7 +33,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**
- * Created by jiangzeyin on 2019/4/13.
+ * Created by bwcx_jzy on 2019/4/13.
  */
 public class TestJarClass {
 

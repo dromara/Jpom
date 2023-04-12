@@ -27,7 +27,7 @@ import java.lang.annotation.*;
 /**
  * 不需要授权
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/17
  */
 @Documented

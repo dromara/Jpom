@@ -52,7 +52,7 @@ import java.util.function.Function;
 /**
  * 外部资源配置
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/16
  */
 @Slf4j

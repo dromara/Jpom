@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 /**
  * 节点分发白名单
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/22
  */
 @EqualsAndHashCode(callSuper = true)

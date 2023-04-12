@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 /**
  * 白名单服务
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/2/28
  */
 @Service

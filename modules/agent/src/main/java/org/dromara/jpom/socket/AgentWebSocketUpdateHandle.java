@@ -23,13 +23,13 @@
 package org.dromara.jpom.socket;
 
 import cn.hutool.core.lang.Tuple;
+import cn.keepbx.jpom.Type;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.JsonMessage;
-import org.dromara.jpom.common.Type;
 import org.dromara.jpom.model.AgentFileModel;
 import org.dromara.jpom.model.UploadFileModel;
 import org.dromara.jpom.model.WebSocketMessageModel;

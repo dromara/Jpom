@@ -30,7 +30,7 @@ import org.dromara.jpom.model.BaseWorkspaceModel;
 /**
  * 用户操作日志
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/19
  */
 @EqualsAndHashCode(callSuper = true)

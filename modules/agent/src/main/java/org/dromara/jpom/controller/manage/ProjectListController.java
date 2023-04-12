@@ -41,7 +41,7 @@ import java.util.List;
 /**
  * 管理的信息获取接口
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/16
  */
 @RestController

@@ -38,7 +38,7 @@ import java.util.Objects;
 /**
  * agent 端
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/17
  */
 public abstract class BaseAgentController extends BaseJpomController {

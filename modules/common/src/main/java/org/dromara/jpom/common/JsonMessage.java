@@ -23,6 +23,7 @@
 package org.dromara.jpom.common;
 
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.BaseJsonMessage;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONObject;
@@ -30,26 +31,22 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterImplToString;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
  * 通用的json 数据格式
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2017/2/6.
  * @since 1.0
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class JsonMessage<T> implements Serializable {
-    public static final String CODE = "code";
-    public static final String MSG = "msg";
-    public static final String DATA = "data";
-
-    public static int DEFAULT_SUCCESS_CODE = 200;
+public class JsonMessage<T> extends BaseJsonMessage<T> {
 
     static {
         ObjectWriterProvider writerProvider = JSONFactory.getDefaultObjectWriterProvider();
@@ -64,23 +61,13 @@ public class JsonMessage<T> implements Serializable {
         JSON.config(JSONWriter.Feature.WriteEnumsUsingName);
     }
 
-    private int code;
-    private String msg;
-    private T data;
-
 
     public JsonMessage(int code, String msg, T data) {
-        this.code = code;
-        this.msg = msg;
-        this.data = data;
+        super(code, msg, data);
     }
 
     public JsonMessage(int code, String msg) {
         this(code, msg, null);
-    }
-
-    public boolean success() {
-        return this.code == DEFAULT_SUCCESS_CODE;
     }
 
     /**
@@ -96,7 +83,7 @@ public class JsonMessage<T> implements Serializable {
 
     /**
      * @return json
-     * @author jiangzeyin
+     * @author bwcx_jzy
      */
     @Override
     public String toString() {
@@ -120,7 +107,7 @@ public class JsonMessage<T> implements Serializable {
      * @param code code
      * @param msg  msg
      * @return json
-     * @author jiangzeyin
+     * @author bwcx_jzy
      */
     public static String getString(int code, String msg) {
         return getString(code, msg, null);
@@ -143,7 +130,7 @@ public class JsonMessage<T> implements Serializable {
      * @param msg  msg
      * @param data data
      * @return json
-     * @author jiangzeyin
+     * @author bwcx_jzy
      */
     public static String getString(int code, String msg, Object data) {
         return toJson(code, msg, data).toString();

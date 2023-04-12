@@ -33,6 +33,10 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.hutool.system.SystemUtil;
+import cn.keepbx.jpom.Type;
+import cn.keepbx.jpom.event.ICacheTask;
+import cn.keepbx.jpom.event.ISystemTask;
 import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -73,7 +77,7 @@ import java.util.Optional;
 /**
  * 启动 、关闭监听
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/7
  */
 @Slf4j
@@ -117,7 +121,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
             file = FileUtil.createTempFile("jpom", ".temp", file, true);
         } catch (Exception e) {
             log.error(StrUtil.format("Jpom Failed to create data directory, directory location：{}," +
-                    "Please check whether the current user has permission to this directory or modify the configuration file：{} jpom.path in is the path where the directory can be created", path, extConfigPath), e);
+                "Please check whether the current user has permission to this directory or modify the configuration file：{} jpom.path in is the path where the directory can be created", path, extConfigPath), e);
             asyncExit(-1);
         }
         FileUtil.del(file);
@@ -333,6 +337,12 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        //
+        File file = FileUtil.file(JpomApplication.getInstance().getDataPath(), Const.REMOTE_VERSION);
+        SystemUtil.set("JPOM_REMOTE_VERSION_CACHE_FILE", file.getAbsolutePath());
+        SystemUtil.set("JPOM_IS_DEBUG", String.valueOf(JpomManifest.getInstance().isDebug()));
+        SystemUtil.set("JPOM_TYPE", JpomManifest.getInstance().getType().name());
+        SystemUtil.set("JPOM_VERSION", JpomManifest.getInstance().getVersion());
         // 检查目录权限
         this.checkPath();
         this.install();
@@ -341,15 +351,15 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         // 开始加载子模块
         Map<String, ILoadEvent> loadEventMap = applicationContext.getBeansOfType(ILoadEvent.class);
         loadEventMap.values()
-                .stream()
-                .sorted((o1, o2) -> CompareUtil.compare(o1.getOrder(), o2.getOrder()))
-                .forEach(iLoadEvent -> {
-                    try {
-                        iLoadEvent.afterPropertiesSet(applicationContext);
-                    } catch (Exception e) {
-                        throw Lombok.sneakyThrow(e);
-                    }
-                });
+            .stream()
+            .sorted((o1, o2) -> CompareUtil.compare(o1.getOrder(), o2.getOrder()))
+            .forEach(iLoadEvent -> {
+                try {
+                    iLoadEvent.afterPropertiesSet(applicationContext);
+                } catch (Exception e) {
+                    throw Lombok.sneakyThrow(e);
+                }
+            });
         // 检查更新文件
         this.checkUpdate();
         // 开始异常加载

@@ -50,7 +50,7 @@ import java.nio.charset.Charset;
 /**
  * 插件端,控制台socket
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/16
  */
 @ServerEndpoint(value = "/console")

@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 用户实体
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/1/16
  */
 @EqualsAndHashCode(callSuper = true)

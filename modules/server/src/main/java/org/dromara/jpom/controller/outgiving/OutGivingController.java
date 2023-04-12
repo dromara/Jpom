@@ -64,7 +64,7 @@ import java.util.stream.Collectors;
 /**
  * 分发控制
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/20
  */
 @RestController

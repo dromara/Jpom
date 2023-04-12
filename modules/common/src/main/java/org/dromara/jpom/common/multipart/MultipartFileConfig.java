@@ -28,7 +28,7 @@ import cn.hutool.system.UserInfo;
 /**
  * 上传文件保存路径
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2017/10/25
  */
 public class MultipartFileConfig {

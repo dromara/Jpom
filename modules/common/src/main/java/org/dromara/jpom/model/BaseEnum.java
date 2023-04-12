@@ -35,7 +35,7 @@ import java.util.Objects;
 /**
  * 基础枚举接口
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/19
  */
 public interface BaseEnum {

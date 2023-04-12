@@ -37,6 +37,7 @@ import cn.hutool.http.useragent.UserAgentInfo;
 import cn.hutool.system.JavaInfo;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
+import cn.keepbx.jpom.Type;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
@@ -61,7 +62,7 @@ import java.util.zip.ZipFile;
 /**
  * Jpom 的运行信息
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/7
  */
 @Slf4j

@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 /**
  * 白名单
  *
- * @author jiangzeyin
+ * @author bwcx_jzy
  * @since 2019/4/16
  */
 @Slf4j
