@@ -4,84 +4,92 @@
       ref="codemirror"
       :style="`height:${this.height}`"
       v-model="showContext"
-      :options="{ theme: 'panda-syntax', mode: 'verilog', cursorBlinkRate: -1, tabSize: 2, readOnly: true, styleActiveLine: true, lineWrapping: this.config.wordBreak }"
+      :options="{
+        theme: 'panda-syntax',
+        mode: 'verilog',
+        cursorBlinkRate: -1,
+        tabSize: 2,
+        readOnly: true,
+        styleActiveLine: true,
+        lineWrapping: this.config.wordBreak
+      }"
     ></code-editor>
   </div>
 </template>
 
 <script>
-import ansiparse from "@/utils/parse-ansi";
-import codeEditor from "@/components/codeEditor";
+import ansiparse from '@/utils/parse-ansi'
+import codeEditor from '@/components/codeEditor'
 
 export default {
   components: {
-    codeEditor,
+    codeEditor
   },
   props: {
     height: {
       String,
-      default: "50vh",
+      default: '50vh'
     },
 
     config: Object,
     id: {
       String,
-      default: "logScrollArea",
-    },
+      default: 'logScrollArea'
+    }
   },
   data() {
     return {
-      defText: "loading context...",
-      logContext: "",
-    };
+      defText: 'loading context...',
+      logContext: ''
+    }
   },
   computed: {
     wordBreak() {
-      this.changeBuffer();
-      return this.config.wordBreak || false;
+      this.changeBuffer()
+      return this.config.wordBreak || false
     },
     showContext: {
       get() {
-        return this.logContext || this.defText;
+        return this.logContext || this.defText
       },
-      set() {},
-    },
+      set() {}
+    }
   },
   mounted() {},
   methods: {
     //
     appendLine(data) {
       if (!data) {
-        return;
+        return
       }
-      const dataArray = Array.isArray(data) ? data : [data];
+      const dataArray = Array.isArray(data) ? data : [data]
       this.logContext += dataArray
         .map((item) => {
           return (
             // gitee isuess I657JR
             ansiparse(item)
               .map((ansiItem) => {
-                return ansiItem.text;
+                return ansiItem.text
               })
-              .join("") + "\r\n"
-          );
+              .join('') + '\r\n'
+          )
         })
-        .join("");
+        .join('')
       if (this.config.logScroll) {
         setTimeout(() => {
           // 延迟触发滚动
-          this.$nextTick(() => {
-            this.$refs?.codemirror?.scrollToBottom();
-          });
-        }, 500);
+          nextTick(() => {
+            this.$refs?.codemirror?.scrollToBottom()
+          })
+        }, 500)
       }
     },
 
     clearLogCache() {
-      this.logContext = "";
-    },
-  },
-};
+      this.logContext = ''
+    }
+  }
+}
 </script>
 
 <style scoped></style>

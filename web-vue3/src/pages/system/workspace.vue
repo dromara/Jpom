@@ -222,7 +222,7 @@ export default {
       // };
       // this.envVarListQuery.workspaceId = record.id;
       this.envVarListVisible = true
-      this.$nextTick(() => {
+      nextTick(() => {
         this.$refs.workspaceEnv.loadDataEnvVar()
       })
     },

@@ -678,7 +678,7 @@ const handleWorkspaceChange = (value: string) => {
 //     getUserInfo().then((res) => {
 //       if (res.code === 200) {
 //         this.temp = { ...this.temp, status: res.data.bindMfa };
-//         this.$nextTick(() => {
+//         nextTick(() => {
 //           this.$refs?.twoCode?.focus();
 //         });
 //       }
@@ -692,11 +692,11 @@ const showQrCode = () => {
     return
   }
   this.tempVue = Vue
-  this.$nextTick(() => {
+  nextTick(() => {
     const qrCodeDom = document.getElementById('qrCodeUrl')
     qrCodeDom.innerHTML = ''
     this.creatQrCode(qrCodeDom, this.temp.url)
-    this.$nextTick(function () {
+    nextTick(function () {
       this.$refs.twoCode.focus()
     })
   })

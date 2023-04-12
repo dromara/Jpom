@@ -263,7 +263,7 @@ export default {
       this.monitorUserKeys = []
       this.loadUserList()
       this.editOperateMonitorVisible = true
-      this.$nextTick(() => {
+      nextTick(() => {
         setTimeout(() => {
           this.introGuide()
         }, 500)

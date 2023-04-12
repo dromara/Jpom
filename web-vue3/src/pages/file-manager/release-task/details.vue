@@ -226,7 +226,7 @@ export default {
       if (this.logTimerMap[key]) {
         return
       }
-      this.$nextTick(() => {
+      nextTick(() => {
         const data = this.temp.taskList?.filter((item1) => {
           return item1.id === key
         })[0]

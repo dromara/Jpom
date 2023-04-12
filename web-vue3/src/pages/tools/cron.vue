@@ -143,7 +143,7 @@ export default {
     const cron = this.$route.query.cron
     if (cron) {
       this.temp = { ...this.temp, cron: cron }
-      this.$nextTick(() => {
+      nextTick(() => {
         this.onSubmit()
       })
     }

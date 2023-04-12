@@ -179,7 +179,6 @@ import QrcodeVue from 'qrcode.vue'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
 import { useRouter } from 'vue-router'
-const { proxy }: any = getCurrentInstance()
 
 const router = useRouter()
 
@@ -211,7 +210,7 @@ const handleLogin = (values: any) => {
     const appStore = useAppStore()
     // 登录不成功，更新验证码
     if (res.code === 200) {
-      proxy.$notification.success({
+      $notification.success({
         message: res.msg
       })
       const tokenData = res.data.tokenData
@@ -229,7 +228,7 @@ const handleLogin = (values: any) => {
 const handleMfaSure = () => {
   bindMfa(mfaForm).then((res) => {
     if (res.code === 200) {
-      proxy.$notification.success({
+      $notification.success({
         message: res.msg
       })
       // 跳转主页面;
@@ -240,7 +239,7 @@ const handleMfaSure = () => {
 
 // 忽略 mfa
 const handleIgnoreBindMfa = () => {
-  proxy.$confirm({
+  $confirm({
     title: '系统提示',
     content: '确定要忽略绑定两步验证吗？强烈建议超级管理员开启两步验证来保证账号安全性',
     okText: '确认',
