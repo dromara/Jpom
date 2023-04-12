@@ -3,7 +3,6 @@
  */
 import { CACHE_WORKSPACE_ID } from '@/utils/const'
 import { getHashQuery } from '@/utils/utils'
-import { stat } from 'fs'
 
 export const useAppStore = defineStore('app', {
   state: () => ({
