@@ -12,6 +12,9 @@ actions:
   - actionText: ⚡️赞赏 Jpom
     actionLink: /pages/praise/
     actionClass: action-button-diy
+  - actionText: 🤝企业服务
+    actionLink: /pages/cb4136/
+    actionClass: action-button-diy
 bannerBg: none # auto => 网格纹背景(有bodyBgImg时无背景)，默认 | none => 无 | '大图地址' | background: 自定义背景样式       提示：如发现文本颜色不适应你的背景时可以到palette.styl修改$bannerTextColor变量
 
 features: # 可选的
@@ -91,6 +94,7 @@ notices: # 可选的
   border-radius: 30px;
   box-sizing: border-box;
   border: 2px solid #4274F4;
+  margin-top: 10px;
 }
 
 .main-right{
