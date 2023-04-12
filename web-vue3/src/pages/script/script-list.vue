@@ -45,7 +45,7 @@
           <a-button type="primary" @click="createScript">新建脚本</a-button>
           <a-button
             type="primary"
-            v-if="this.choose === 'checkbox'"
+            v-if="choose === 'checkbox'"
             :disabled="!tableSelections || !tableSelections.length"
             @click="syncToWorkspaceShow"
             >工作空间同步</a-button
@@ -344,7 +344,7 @@
     >
       <script-log v-if="drawerLogVisible" :scriptId="temp.id" />
     </a-drawer>
-    <div style="padding-top: 50px" v-if="this.choose === 'radio'">
+    <div style="padding-top: 50px" v-if="choose === 'radio'">
       <div
         :style="{
           position: 'absolute',

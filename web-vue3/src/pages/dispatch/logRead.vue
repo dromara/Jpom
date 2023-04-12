@@ -137,7 +137,7 @@
       </template>
       <logReadView
         v-if="logReadVisible"
-        :data="this.temp"
+        :data="temp"
         @changeTitle="
           (logFile) => {
             const cacheData = { ...this.temp.cacheData, logFile: logFile }

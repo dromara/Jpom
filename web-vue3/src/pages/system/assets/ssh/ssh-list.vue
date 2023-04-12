@@ -330,7 +330,7 @@
             top: this.terminalFullscreen ? 0 : false,
             paddingBottom: 0
           }"
-          :width="this.terminalFullscreen ? '100vw' : '80vw'"
+          :width="terminalFullscreen ? '100vw' : '80vw'"
           :bodyStyle="{
             padding: '0px 10px',
             paddingTop: '10px',

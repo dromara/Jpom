@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="this.triggerToken || this.triggerVisible">
+    <div v-if="triggerToken || this.triggerVisible">
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1" type="card">
           <template slot="tabBarExtraContent">

@@ -192,7 +192,7 @@
       </a-form>
     </a-modal>
     <a-modal destroyOnClose v-model="showUserPwd" title="用户密码提示" :maskClosable="false" :footer="null">
-      <a-result status="success" :title="this.temp.title">
+      <a-result status="success" :title="temp.title">
         <template #subTitle>
           账号新密码为：
           <b

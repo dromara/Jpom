@@ -52,7 +52,7 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-          <template v-if="this.layoutType === 'table'">
+          <template v-if="layoutType === 'table'">
             <template v-if="!tableSelections || tableSelections.length <= 0">
               <a-button type="primary" :disabled="true"> 批量操作 <a-icon type="down" /> </a-button>
             </template>
@@ -68,14 +68,14 @@
             <a-button :disabled="true" type="primary"> 批量操作 <a-icon type="down" /> </a-button>
           </a-tooltip>
 
-          <a-button type="primary" @click="changeLayout" :icon="this.layoutType === 'card' ? 'layout' : 'table'">
+          <a-button type="primary" @click="changeLayout" :icon="layoutType === 'card' ? 'layout' : 'table'">
             {{ this.layoutType === 'card' ? '卡片' : '表格' }}
           </a-button>
 
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
         </a-space>
       </template>
-      <template v-if="this.layoutType === 'card'">
+      <template v-if="layoutType === 'card'">
         <a-row>
           <a-row :gutter="[16, 16]">
             <template v-if="list && list.length">
@@ -228,13 +228,13 @@
                   this.loadData()
                 }
               "
-              @change="this.loadData"
+              @change="loadData"
               show-less-items
             />
           </a-col>
         </a-row>
       </template>
-      <template v-else-if="this.layoutType === 'table'">
+      <template v-else-if="layoutType === 'table'">
         <a-table
           size="middle"
           :columns="columns"
@@ -437,7 +437,7 @@
               <a-icon type="info" />
               构建信息
             </span>
-            <detailsPage :id="this.temp.id" />
+            <detailsPage :id="temp.id" />
           </a-tab-pane>
 
           <a-tab-pane :key="2" forceRender>
@@ -469,7 +469,7 @@
               <a-icon type="api" />
               触发器
             </span>
-            <triggerPage :id="this.temp.id" :triggerToken="this.temp.triggerToken" />
+            <triggerPage :id="temp.id" :triggerToken="temp.triggerToken" />
           </a-tab-pane>
         </a-tabs>
       </template>

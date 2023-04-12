@@ -11,7 +11,7 @@
       v-model="selected"
       :style="selStyle"
       :open="selectOpen"
-      :disabled="this.disabled"
+      :disabled="disabled"
       @blur="setSelectOpen(false)"
       showSearch
       @focus="setSelectOpen(true)"

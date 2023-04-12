@@ -7,7 +7,7 @@
       :data-source="list"
       bordered
       rowKey="id"
-      :row-selection="this.choose ? rowSelection : null"
+      :row-selection="choose ? rowSelection : null"
       :pagination="pagination"
       @change="
         (pagination, filters, sorter) => {
@@ -341,7 +341,7 @@
         </template>
       </a-table>
     </a-modal>
-    <div style="padding-top: 50px" v-if="this.choose">
+    <div style="padding-top: 50px" v-if="choose">
       <div
         :style="{
           position: 'absolute',

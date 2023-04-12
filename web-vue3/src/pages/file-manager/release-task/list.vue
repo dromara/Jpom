@@ -100,7 +100,7 @@
         }
       "
     >
-      <task-details-page v-if="detailsVisible" :taskId="this.temp.id" />
+      <task-details-page v-if="detailsVisible" :taskId="temp.id" />
     </a-drawer>
     <!-- 重建任务 -->
     <a-modal
