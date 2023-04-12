@@ -41,7 +41,7 @@
       </template>
 
       <a-layout
-        :class="`layout-content drawer-layout-content ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`"
+        :class="`layout-content drawer-layout-content ${scrollbarFlag ? '' : 'hide-scrollbar'}`"
         style="padding-bottom: 10px"
       >
         <a-layout-content>

@@ -19,7 +19,7 @@
         <content-tab :mode="mode" />
       </a-layout-header>
       <a-layout-content
-        :class="`layout-content ${this.fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'}`"
+        :class="`layout-content ${fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'}`"
       >
         <keep-alive>
           <router-view />
