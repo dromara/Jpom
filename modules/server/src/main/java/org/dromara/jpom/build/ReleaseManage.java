@@ -394,6 +394,8 @@ public class ReleaseManage {
             session = sshService.getSessionByModel(machineSshModel);
             Charset charset = machineSshModel.charset();
             int timeout = machineSshModel.timeout();
+            String releasePath = this.buildExtraModule.getReleasePath();
+            envFileMap.put("SSH_RELEASE_PATH", releasePath);
             // 执行发布前命令
             if (StrUtil.isNotEmpty(this.buildExtraModule.getReleaseBeforeCommand())) {
                 //
@@ -401,7 +403,6 @@ public class ReleaseManage {
                 JschUtils.execCallbackLine(session, charset, timeout, this.buildExtraModule.getReleaseBeforeCommand(), StrUtil.EMPTY, envFileMap, logRecorder::info);
             }
 
-            String releasePath = this.buildExtraModule.getReleasePath();
             if (StrUtil.isEmpty(releasePath)) {
                 logRecorder.systemWarning("发布目录为空");
             } else {
