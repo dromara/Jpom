@@ -272,6 +272,21 @@ export function loginConfig() {
   });
 }
 
+/**
+ * 登录验证码
+ *
+ * @returns
+ */
+export function loginRandCode() {
+  return axios({
+    url: "/rand-code",
+    method: "get",
+    params: {
+      t: new Date().getTime(),
+    },
+  });
+}
+
 export function listLoginLog(params) {
   return axios({
     url: "/user/list-login-log-data",

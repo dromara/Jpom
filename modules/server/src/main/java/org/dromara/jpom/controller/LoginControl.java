@@ -25,6 +25,7 @@ package org.dromara.jpom.controller;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.LFUCache;
 import cn.hutool.cache.impl.TimedCache;
+import cn.hutool.captcha.AbstractCaptcha;
 import cn.hutool.captcha.CircleCaptcha;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.BetweenFormatter;
@@ -62,6 +63,7 @@ import org.dromara.jpom.service.user.UserService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.util.JwtUtil;
 import org.dromara.jpom.util.StringUtil;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -70,7 +72,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.awt.*;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -82,7 +83,7 @@ import java.util.concurrent.TimeUnit;
  */
 @RestController
 @Slf4j
-public class LoginControl extends BaseServerController {
+public class LoginControl extends BaseServerController implements InitializingBean {
     /**
      * ip 黑名单
      */
@@ -113,24 +114,26 @@ public class LoginControl extends BaseServerController {
 
     /**
      * 验证码
-     *
-     * @throws IOException IO
      */
-    @RequestMapping(value = "randCode.png", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
+    @RequestMapping(value = "rand-code", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public void randCode(HttpServletResponse response) throws IOException {
+    public JsonMessage<String> randCode() {
         if (webConfig.isDisabledCaptcha()) {
-            ServletUtil.write(response, JsonMessage.success("验证码已禁用").toString(), MediaType.APPLICATION_JSON_VALUE);
-            return;
+            return new JsonMessage<>(400, "验证码已禁用");
         }
+        AbstractCaptcha captcha = this.createCaptcha();
+        setSessionAttribute(LOGIN_CODE, captcha.getCode());
+        String base64Data = captcha.getImageBase64Data();
+        return new JsonMessage<>(200, "", base64Data);
+    }
+
+    private CircleCaptcha createCaptcha() {
         int height = 50;
         CircleCaptcha circleCaptcha = new CircleCaptcha(100, height, 4, 8);
         // 设置为默认字体
         circleCaptcha.setFont(new Font(null, Font.PLAIN, (int) (height * 0.75)));
         circleCaptcha.createCode();
-        circleCaptcha.write(response.getOutputStream());
-        String code = circleCaptcha.getCode();
-        setSessionAttribute(LOGIN_CODE, code);
+        return circleCaptcha;
     }
 
     /**
@@ -423,8 +426,20 @@ public class LoginControl extends BaseServerController {
             demo.put("user", UserModel.DEMO_USER);
             jsonObject.put("demo", demo);
         }
+        jsonObject.put("disabledCaptcha", webConfig.isDisabledCaptcha());
         Collection<String> provides = Oauth2Factory.provides();
         jsonObject.put("oauth2Provides", provides);
         return JsonMessage.success("", jsonObject);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        try {
+            this.createCaptcha();
+            log.debug("当前服务器验证码可用");
+        } catch (Exception e) {
+            log.warn("当前服务器生成验证码异常,自动禁用验证码", e);
+            webConfig.setDisabledCaptcha(true);
+        }
     }
 }

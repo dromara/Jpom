@@ -233,7 +233,7 @@ public class IndexControl extends BaseServerController {
         data.put("subTitle", webConfig.getSubTitle());
         data.put("loginTitle", webConfig.getLoginTitle());
         data.put("disabledGuide", webConfig.isDisabledGuide());
-        data.put("disabledCaptcha", webConfig.isDisabledCaptcha());
+        //data.put("disabledCaptcha", webConfig.isDisabledCaptcha());
         data.put("notificationPlacement", webConfig.getNotificationPlacement());
         // 用于判断是否属于容器部署
         boolean inDocker = StrUtil.isNotEmpty(SystemUtil.get("JPOM_PKG"));
