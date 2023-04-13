@@ -267,4 +267,25 @@ public class StringUtil {
                 }).filter(Objects::nonNull).collect(Collectors.toList());
         return CollStreamUtil.toMap(collect, objects -> objects.get(0), objects -> objects.get(1));
     }
+
+    /**
+     * 转换耗时函数，结果更友好
+     * @param millis 毫秒
+     * @return
+     */
+    public static String formatMillis(long millis) {
+        if (millis < 1000) {
+            return millis + "ms";
+        }
+        if (millis < 60 * 1000) {
+            return millis / 1000 + "s";
+        }
+        if (millis < 60 * 60 * 1000) {
+            return millis / 1000 / 60 + "m";
+        }
+        if (millis < 24 * 60 * 60 * 1000) {
+            return millis / 1000 / 60 / 60 + "h";
+        }
+        return millis / 1000 / 60 / 60 / 24 + "d";
+    }
 }
