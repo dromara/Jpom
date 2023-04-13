@@ -32,7 +32,7 @@
     </a-spin>
     <!-- 文件管理 -->
     <a-drawer destroyOnClose v-if="sshData" :title="`${sshData.name} (${sshData.host}) 文件管理`" placement="right" width="90vw" :visible="drawerVisible" @close="onClose">
-      <ssh-file v-if="drawerVisible" :ssh="sshData" />
+      <ssh-file v-if="drawerVisible" :sshId="sshData.id" />
     </a-drawer>
   </div>
 </template>
