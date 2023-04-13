@@ -43,7 +43,8 @@
               </a-col>
               <a-col :offset="2" :span="8">
                 <div class="rand-code">
-                  <img :src="randCode" @click="changeCode" />
+                  <img v-if="randCode" :src="randCode" @click="changeCode" />
+                  <a-icon v-else type="loading" />
                 </div>
               </a-col>
             </a-row>
@@ -83,7 +84,7 @@
   </div>
 </template>
 <script>
-import { login, loginConfig, mfaVerify, oauth2Url, oauth2Login } from "@/api/user/user";
+import { login, loginConfig, mfaVerify, oauth2Url, oauth2Login, loginRandCode } from "@/api/user/user";
 import { checkSystem } from "@/api/install";
 import sha1 from "js-sha1";
 
@@ -98,7 +99,7 @@ export default {
       },
       mfaData: {},
       action: "login",
-      randCode: "randCode.png",
+      randCode: "",
       dynamicBg: localStorage.getItem("dynamicBg") === "true",
       loginTitle: "登录JPOM",
       rules: {
@@ -121,7 +122,6 @@ export default {
     this.checkSystem();
     //this.getBg();
 
-    this.changeCode();
     this.getLoginConfig();
   },
   computed: {
@@ -152,7 +152,7 @@ export default {
         if (res.data?.loginTitle) {
           this.loginTitle = res.data.loginTitle;
         }
-        this.disabledCaptcha = res.data.disabledCaptcha;
+
         this.checkOauth2();
       });
     },
@@ -176,12 +176,21 @@ export default {
           });
           this.loginForm.loginName = demo.user;
         }
+        this.disabledCaptcha = res.data?.disabledCaptcha;
         this.enabledOauth2Provides = res.data?.oauth2Provides || [];
+        if (!this.disabledCaptcha) {
+          this.changeCode();
+        }
       });
     },
     // change Code
     changeCode() {
-      this.randCode = "randCode.png?r=" + new Date().getTime();
+      // this.randCode = "randCode.png?r=" + new Date().getTime();
+      loginRandCode().then((res) => {
+        if (res.code === 200) {
+          this.randCode = res.data;
+        }
+      });
       this.loginForm = { ...this.loginForm, code: "" };
     },
     checkOauth2() {
