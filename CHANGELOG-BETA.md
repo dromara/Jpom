@@ -7,6 +7,7 @@
 1. 【server】优化 构建 SSH 发布命令支持 `SSH_RELEASE_PATH` 环境变量（感谢@定格）
 2. 【server】修复 全屏终端无法打开文件管理（感谢@Pluto）
 3. 【server】优化 自动探测服务端登录验证码是否可用
+4. 【all】优化 文件编辑后缀识别支持配置文件名或者正则表达式（感谢@MichelleChung）
 
 ------
 

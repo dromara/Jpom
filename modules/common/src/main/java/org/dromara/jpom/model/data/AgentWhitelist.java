@@ -27,6 +27,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -108,16 +109,16 @@ public class AgentWhitelist extends BaseJsonModel {
             return null;
         }
         return list.stream()
-                .map(s -> {
-                    String val = String.format("/%s/", s);
-                    val = FileUtil.normalize(val);
-                    FileUtils.checkSlip(val);
-                    // 判断是否保护jpom 路径
-                    Assert.state(!StrUtil.startWith(ExtConfigBean.getPath(), val), errorMsg);
-                    return val;
-                })
-                .distinct()
-                .collect(Collectors.toList());
+            .map(s -> {
+                String val = String.format("/%s/", s);
+                val = FileUtil.normalize(val);
+                FileUtils.checkSlip(val);
+                // 判断是否保护jpom 路径
+                Assert.state(!StrUtil.startWith(ExtConfigBean.getPath(), val), errorMsg);
+                return val;
+            })
+            .distinct()
+            .collect(Collectors.toList());
     }
 
     /**
@@ -240,7 +241,11 @@ public class AgentWhitelist extends BaseJsonModel {
         }
         Set<Map.Entry<String, Charset>> entries = map.entrySet();
         for (Map.Entry<String, Charset> entry : entries) {
-            if (StrUtil.endWithIgnoreCase(filename, StrUtil.DOT + entry.getKey())) {
+            if (StrUtil.endWithAnyIgnoreCase(filename, entry.getKey(), StrUtil.DOT + entry.getKey())) {
+                return entry.getValue();
+            }
+            if (ReUtil.isMatch(entry.getKey(), filename)) {
+                // 满足正则条件
                 return entry.getValue();
             }
         }
