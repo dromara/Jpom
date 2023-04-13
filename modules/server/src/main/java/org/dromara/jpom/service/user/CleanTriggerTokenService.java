@@ -41,29 +41,7 @@ public class CleanTriggerTokenService extends BaseDbService<TriggerTokenLogBean>
             return;
         }
 
-        // 根据触发器类型 type 分组查询触发器数据关联的表
-        String sql = String.format("select TYPE from %s group by TYPE", this.getTableName());
-        log.info("sql: {}", sql);
-        List<TriggerTokenLogBean> triggerTokenTypeList = queryList(sql);
-        if (triggerTokenTypeList == null || triggerTokenTypeList.isEmpty()) {
-            log.warn("trigger token type list is empty, no need to clean");
-            return;
-        }
-
-        List<String> dataIdList = new ArrayList<>();
-
-        // 遍历数据，分别查询对应的数据库表
-        triggerTokenTypeList.forEach(item -> {
-            // 构造 sql 查询对应表数据的 ID
-            String selectSql = String.format("select ID from %s", item.getType());
-            List<Entity> entityList = query(selectSql);
-            log.info("select sql: {}, size: {}", selectSql, entityList.size());
-
-            // 遍历数据，获取 ID
-            entityList.forEach(entity -> {
-                dataIdList.add(entity.getStr("ID"));
-            });
-        });
+        List<String> dataIdList = queryDataIdList();
 
         // 统计删除条数
         int delCount = 0;
@@ -79,5 +57,32 @@ public class CleanTriggerTokenService extends BaseDbService<TriggerTokenLogBean>
         }
 
         log.info("clean trigger token count: {}", delCount);
+    }
+
+    private List<String> queryDataIdList() {
+        List<String> dataIdList = new ArrayList<>();
+        // 根据触发器类型 type 分组查询触发器数据关联的表
+        String sql = String.format("select TYPE from %s group by TYPE", this.getTableName());
+        log.info("sql: {}", sql);
+        List<TriggerTokenLogBean> triggerTokenTypeList = queryList(sql);
+        if (triggerTokenTypeList == null || triggerTokenTypeList.isEmpty()) {
+            log.warn("trigger token type list is empty, no need to clean");
+            return dataIdList;
+        }
+
+        // 遍历数据，分别查询对应的数据库表
+        triggerTokenTypeList.forEach(item -> {
+            // 构造 sql 查询对应表数据的 ID
+            String selectSql = String.format("select ID from %s", item.getType());
+            List<Entity> entityList = query(selectSql);
+            log.info("select sql: {}, size: {}", selectSql, entityList.size());
+
+            // 遍历数据，获取 ID
+            entityList.forEach(entity -> {
+                dataIdList.add(entity.getStr("ID"));
+            });
+        });
+
+        return dataIdList;
     }
 }
