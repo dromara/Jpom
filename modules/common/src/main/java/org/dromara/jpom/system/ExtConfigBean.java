@@ -29,6 +29,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.hutool.system.SystemUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
@@ -89,12 +90,12 @@ public class ExtConfigBean {
     public static Resource getResource() {
         String property = SpringUtil.getApplicationContext().getEnvironment().getProperty(ConfigFileApplicationListener.CONFIG_LOCATION_PROPERTY);
         Resource configResource = Opt.ofBlankAble(property)
-                .map(FileSystemResource::new)
-                .flatMap((Function<Resource, Opt<Resource>>) resource -> resource.exists() ? Opt.of(resource) : Opt.empty())
-                .orElseGet(() -> {
-                    ClassPathResource classPathResource = new ClassPathResource(Const.FILE_NAME);
-                    return classPathResource.exists() ? classPathResource : new ClassPathResource("/config_default/" + Const.FILE_NAME);
-                });
+            .map(FileSystemResource::new)
+            .flatMap((Function<Resource, Opt<Resource>>) resource -> resource.exists() ? Opt.of(resource) : Opt.empty())
+            .orElseGet(() -> {
+                ClassPathResource classPathResource = new ClassPathResource(Const.FILE_NAME);
+                return classPathResource.exists() ? classPathResource : new ClassPathResource("/config_default/" + Const.FILE_NAME);
+            });
         Assert.state(configResource.exists(), "均未找到配置文件");
         return configResource;
     }
@@ -145,17 +146,17 @@ public class ExtConfigBean {
         FileUtils.checkSlip(name);
         File configResourceDir = getConfigResourceDir();
         InputStream inputStream = Opt.ofBlankAble(configResourceDir)
-                .map((Function<File, InputStream>) configDir -> {
-                    File file = FileUtil.file(configDir, name);
-                    if (FileUtil.isFile(file)) {
-                        return FileUtil.getInputStream(file);
-                    }
-                    return null;
-                })
-                .orElseGet(() -> {
-                    log.debug("外置配置不存在或者未配置：{},使用默认配置", name);
-                    return getDefaultConfigResourceInputStream(name);
-                });
+            .map((Function<File, InputStream>) configDir -> {
+                File file = FileUtil.file(configDir, name);
+                if (FileUtil.isFile(file)) {
+                    return FileUtil.getInputStream(file);
+                }
+                return null;
+            })
+            .orElseGet(() -> {
+                log.debug("外置配置不存在或者未配置：{},使用默认配置", name);
+                return getDefaultConfigResourceInputStream(name);
+            });
         Assert.notNull(inputStream, "均未找到配置文件");
         return inputStream;
     }
@@ -211,8 +212,14 @@ public class ExtConfigBean {
     public static String getPath() {
         if (StrUtil.isEmpty(path)) {
             if (JpomManifest.getInstance().isDebug()) {
-                // 调试模式 为根路径的 jpom文件
-                File newFile = FileUtil.file(FileUtil.getUserHomeDir(), "jpom", JpomApplication.getAppType().name().toLowerCase());
+                File newFile;
+                String jpomDevPath = SystemUtil.get("JPOM_DEV_PATH");
+                if (StrUtil.isNotEmpty(jpomDevPath)) {
+                    newFile = FileUtil.file(jpomDevPath, JpomApplication.getAppType().name().toLowerCase());
+                } else {
+                    // 调试模式 为根路径的 jpom文件
+                    newFile = FileUtil.file(FileUtil.getUserHomeDir(), "jpom", JpomApplication.getAppType().name().toLowerCase());
+                }
                 path = FileUtil.getAbsolutePath(newFile);
             } else {
                 // 获取当前项目运行路径的父级
