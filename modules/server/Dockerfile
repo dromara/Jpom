@@ -80,6 +80,8 @@ WORKDIR $JPOM_HOME
 
 COPY --from=builder ${DEPENDENCY}/modules/server/target/${JPOM_PKG} ${JPOM_HOME}
 
+RUN apt-get install -y git
+
 # 时区
 ENV TZ Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
