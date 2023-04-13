@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
  */
 public class DockerBuild implements AutoCloseable {
 
-    private static final String[] DEPEND_PLUGIN = new String[]{"java", "maven", "node", "go", "python3","gradle"};
+    private static final String[] DEPEND_PLUGIN = new String[]{"java", "maven", "node", "go", "python3", "gradle"};
 
     private final Map<String, Object> parameter;
     private final DockerClient dockerClient;
@@ -273,7 +273,7 @@ public class DockerBuild implements AutoCloseable {
                 } else if ("go".equals(uses)) {
                     stepsScript.append(goScript(step));
                 } else if ("gradle".equals(uses)) {
-                        stepsScript.append(gradleScript(step));
+                    stepsScript.append(gradleScript(step));
                 } else if ("python3".equals(uses)) {
                     stepsScript.append(python3Script(step));
                 }

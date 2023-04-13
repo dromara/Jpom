@@ -117,7 +117,7 @@ public class DockerYmlDsl extends BaseJsonModel {
                 Assert.isInstanceOf(Map.class, step.get("env"), "env 必须是 map 类型");
             }
             if (step.containsKey("uses")) {
-                List<String> supportedPlugins = ListUtil.of("node", "java", "maven", "cache", "go", "python3","gradle");
+                List<String> supportedPlugins = ListUtil.of("node", "java", "maven", "cache", "go", "python3", "gradle");
                 Assert.isInstanceOf(String.class, step.get("uses"), "uses 只支持 String 类型");
                 String uses = (String) step.get("uses");
                 Assert.isTrue(supportedPlugins.contains(uses), String.format("目前仅支持的插件: %s", supportedPlugins));
