@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
  */
 public class DockerBuild implements AutoCloseable {
 
-    private static final String[] DEPEND_PLUGIN = new String[]{"java", "maven", "node", "go", "python3"};
+    private static final String[] DEPEND_PLUGIN = new String[]{"java", "maven", "node", "go", "python3","gradle"};
 
     private final Map<String, Object> parameter;
     private final DockerClient dockerClient;
@@ -272,6 +272,8 @@ public class DockerBuild implements AutoCloseable {
                     afterScriptList.add(cacheScript[1]);
                 } else if ("go".equals(uses)) {
                     stepsScript.append(goScript(step));
+                } else if ("gradle".equals(uses)) {
+                        stepsScript.append(gradleScript(step));
                 } else if ("python3".equals(uses)) {
                     stepsScript.append(python3Script(step));
                 }
@@ -304,6 +306,17 @@ public class DockerBuild implements AutoCloseable {
         String path = String.format("/opt/jpom_go_%s", version);
         String script = "# goScript\n";
         script += String.format("echo \"export GOROOT=%s\" >> /etc/profile\n", path);
+        script += String.format("echo \"export PATH=$PATH:%s/bin\" >> /etc/profile\n", path);
+        script += "source /etc/profile \n";
+        return script;
+    }
+
+
+    private String gradleScript(Map<String, Object> step) {
+        String version = String.valueOf(step.get("version"));
+        String path = String.format("/opt/jpom_gradle_%s", version);
+        String script = "# gradleScript\n";
+        script += String.format("echo \"export GRADLE_HOME=%s\" >> /etc/profile\n", path);
         script += String.format("echo \"export PATH=$PATH:%s/bin\" >> /etc/profile\n", path);
         script += "source /etc/profile \n";
         return script;

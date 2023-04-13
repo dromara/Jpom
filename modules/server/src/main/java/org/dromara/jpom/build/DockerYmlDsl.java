@@ -117,7 +117,7 @@ public class DockerYmlDsl extends BaseJsonModel {
                 Assert.isInstanceOf(Map.class, step.get("env"), "env 必须是 map 类型");
             }
             if (step.containsKey("uses")) {
-                List<String> supportedPlugins = ListUtil.of("node", "java", "maven", "cache", "go", "python3");
+                List<String> supportedPlugins = ListUtil.of("node", "java", "maven", "cache", "go", "python3","gradle");
                 Assert.isInstanceOf(String.class, step.get("uses"), "uses 只支持 String 类型");
                 String uses = (String) step.get("uses");
                 Assert.isTrue(supportedPlugins.contains(uses), String.format("目前仅支持的插件: %s", supportedPlugins));
@@ -125,6 +125,8 @@ public class DockerYmlDsl extends BaseJsonModel {
                     nodePluginCheck(step);
                 } else if ("java".equals(uses)) {
                     javaPluginCheck(step);
+                } else if ("gradle".equals(uses)) {
+                    gradlePluginCheck(step);
                 } else if ("maven".equals(uses)) {
                     mavenPluginCheck(step, dockerInfoService, machineDockerServer, workspaceId);
                 } else if ("cache".equals(uses)) {
@@ -139,6 +141,9 @@ public class DockerYmlDsl extends BaseJsonModel {
         }
         if (usesSet.contains("maven") && !usesSet.contains("java")) {
             throw new IllegalArgumentException("maven 插件依赖 java , 使用 maven 插件必须优先引入 java 插件");
+        }
+        if (usesSet.contains("gradle") && !usesSet.contains("java")) {
+            throw new IllegalArgumentException("gradle 插件依赖 java , 使用 gradle 插件必须优先引入 java 插件");
         }
         Assert.isTrue(containsRun, "steps 中没有发现任何 run , run 用于执行命令");
     }
@@ -212,6 +217,22 @@ public class DockerYmlDsl extends BaseJsonModel {
         Integer version = Integer.valueOf(String.valueOf(step.get("version")));
         List<Integer> supportedVersions = ListUtil.of(8, 11, 17, 18);
         Assert.isTrue(supportedVersions.contains(version), String.format("目前java 插件支持的版本: %s", supportedVersions));
+    }
+
+
+    /**
+     * 检查 gradle 插件
+     *
+     * @param step 参数
+     */
+    private void gradlePluginCheck(Map<String, Object> step) {
+        Assert.notNull(step.get("version"), "gradle 插件 version 不能为空");
+        String version = String.valueOf(step.get("version"));
+        String link = String.format("https://downloads.gradle-dn.com/distributions/gradle-%s-bin.zip", version);
+        HttpResponse httpResponse = HttpUtil.createRequest(Method.HEAD, link).execute();
+        Assert.isTrue(httpResponse.isOk() ||
+            httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP ||
+            httpResponse.getStatus() == HttpStatus.HTTP_SEE_OTHER, "请填入正确的 gradle 版本号");
     }
 
     /**
