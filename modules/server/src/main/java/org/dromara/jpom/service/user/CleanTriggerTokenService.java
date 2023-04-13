@@ -1,11 +1,13 @@
 package org.dromara.jpom.service.user;
 
+import cn.hutool.core.date.BetweenFormatter;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.SystemClock;
 import cn.hutool.db.Entity;
 import cn.keepbx.jpom.event.ISystemTask;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.model.user.TriggerTokenLogBean;
 import org.dromara.jpom.service.h2db.BaseDbService;
-import org.dromara.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,13 +25,12 @@ public class CleanTriggerTokenService extends BaseDbService<TriggerTokenLogBean>
     @Override
     public void executeTask() {
         log.info("clean trigger token start...");
-        long start = System.currentTimeMillis();
+        long start = SystemClock.now();
 
         // 调用方法处理逻辑
         cleanTriggerToken();
 
-        long end = System.currentTimeMillis();
-        log.info("clean trigger token end... cost time: {}" , StringUtil.formatMillis(end - start));
+        log.info("clean trigger token end... cost time: {}" , DateUtil.formatBetween(SystemClock.now() - start, BetweenFormatter.Level.MILLISECOND));
     }
 
     private void cleanTriggerToken() {
