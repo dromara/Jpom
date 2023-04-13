@@ -76,13 +76,12 @@ public class CleanTriggerTokenService extends BaseDbService<TriggerTokenLogBean>
             // 构造 sql 查询对应表数据的 ID
             String selectSql = String.format("select ID from %s", item.getType());
             List<Entity> entityList = query(selectSql);
-            if (entityList == null) {
-                return;
+            if (entityList != null) {
+                // 遍历数据，获取 ID
+                dataIdList.addAll(entityList.stream()
+                    .map(entity -> entity.getStr("ID"))
+                    .collect(Collectors.toList()));
             }
-            // 遍历数据，获取 ID
-            dataIdList.addAll(entityList.stream()
-                .map(entity -> entity.getStr("ID"))
-                .collect(Collectors.toList()));
         });
 
         return dataIdList;
