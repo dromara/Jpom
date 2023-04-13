@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 清理触发器 token
+ *
  * @author Hotstrip
  * @since 2023-04-13
  */
@@ -30,14 +32,14 @@ public class CleanTriggerTokenService extends BaseDbService<TriggerTokenLogBean>
         // 调用方法处理逻辑
         cleanTriggerToken();
 
-        log.info("clean trigger token end... cost time: {}" , DateUtil.formatBetween(SystemClock.now() - start, BetweenFormatter.Level.MILLISECOND));
+        log.info("clean trigger token end... cost time: {}", DateUtil.formatBetween(SystemClock.now() - start, BetweenFormatter.Level.MILLISECOND));
     }
 
     private void cleanTriggerToken() {
         // 查询数据库中的数据
         List<TriggerTokenLogBean> triggerTokenList = list();
         if (triggerTokenList == null || triggerTokenList.isEmpty()) {
-            log.warn("trigger token list is empty, no need to clean");
+            log.debug("trigger token list is empty, no need to clean");
             return;
         }
 
@@ -63,10 +65,9 @@ public class CleanTriggerTokenService extends BaseDbService<TriggerTokenLogBean>
         List<String> dataIdList = new ArrayList<>();
         // 根据触发器类型 type 分组查询触发器数据关联的表
         String sql = String.format("select TYPE from %s group by TYPE", this.getTableName());
-        log.info("sql: {}", sql);
         List<TriggerTokenLogBean> triggerTokenTypeList = queryList(sql);
         if (triggerTokenTypeList == null || triggerTokenTypeList.isEmpty()) {
-            log.warn("trigger token type list is empty, no need to clean");
+            log.debug("trigger token type list is empty, no need to clean");
             return dataIdList;
         }
 
@@ -75,12 +76,13 @@ public class CleanTriggerTokenService extends BaseDbService<TriggerTokenLogBean>
             // 构造 sql 查询对应表数据的 ID
             String selectSql = String.format("select ID from %s", item.getType());
             List<Entity> entityList = query(selectSql);
-            log.info("select sql: {}, size: {}", selectSql, entityList.size());
-
+            if (entityList == null) {
+                return;
+            }
             // 遍历数据，获取 ID
-            entityList.forEach(entity -> {
-                dataIdList.add(entity.getStr("ID"));
-            });
+            dataIdList.addAll(entityList.stream()
+                .map(entity -> entity.getStr("ID"))
+                .collect(Collectors.toList()));
         });
 
         return dataIdList;
