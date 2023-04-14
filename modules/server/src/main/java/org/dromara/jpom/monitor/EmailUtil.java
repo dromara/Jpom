@@ -23,10 +23,10 @@
 package org.dromara.jpom.monitor;
 
 import cn.hutool.extra.spring.SpringUtil;
+import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSON;
 import org.dromara.jpom.model.data.MailAccountModel;
 import org.dromara.jpom.model.data.MonitorModel;
-import org.dromara.jpom.plugin.IPlugin;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.system.SystemParametersServer;
 

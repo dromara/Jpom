@@ -23,6 +23,7 @@
 package org.dromara.jpom.controller.monitor;
 
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSON;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JsonMessage;
@@ -32,7 +33,6 @@ import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
-import org.dromara.jpom.plugin.IPlugin;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.system.SystemParametersServer;
 import org.springframework.http.MediaType;

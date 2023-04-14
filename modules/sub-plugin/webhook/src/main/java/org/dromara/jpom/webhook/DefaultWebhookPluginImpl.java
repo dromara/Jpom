@@ -27,9 +27,9 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
+import cn.keepbx.jpom.plugins.PluginConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.plugin.IDefaultPlugin;
-import org.dromara.jpom.plugin.PluginConfig;
 
 import java.util.Map;
 

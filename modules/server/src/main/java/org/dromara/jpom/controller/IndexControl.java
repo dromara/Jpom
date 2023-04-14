@@ -37,6 +37,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
 import cn.hutool.system.SystemUtil;
+import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +50,6 @@ import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.SystemPermission;
-import org.dromara.jpom.plugin.IPlugin;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.service.system.SystemParametersServer;
@@ -145,9 +145,9 @@ public class IndexControl extends BaseServerController {
         html = StrUtil.replace(html, "<link rel=\"icon\" href=\"favicon.ico\">", "<link rel=\"icon\" href=\"" + proxyPath + "favicon.ico\">");
         // <apiTimeOut>
         int webApiTimeout = webConfig.getApiTimeout();
-        html = StrUtil.replace(html, "<apiTimeout>", TimeUnit.SECONDS.toMillis(webApiTimeout) + "");
-        html = StrUtil.replace(html, "<uploadFileSliceSize>", nodeConfig.getUploadFileSliceSize() + "");
-        html = StrUtil.replace(html, "<uploadFileConcurrent>", nodeConfig.getUploadFileConcurrent() + "");
+        html = StrUtil.replace(html, "<apiTimeout>", String.valueOf(TimeUnit.SECONDS.toMillis(webApiTimeout)));
+        html = StrUtil.replace(html, "<uploadFileSliceSize>", String.valueOf(nodeConfig.getUploadFileSliceSize()));
+        html = StrUtil.replace(html, "<uploadFileConcurrent>", String.valueOf(nodeConfig.getUploadFileConcurrent()));
         html = StrUtil.replace(html, "<oauth2Provide>", oauth2Provide);
         // 修改网页标题
         String title = ReUtil.get("<title>.*?</title>", html, 0);

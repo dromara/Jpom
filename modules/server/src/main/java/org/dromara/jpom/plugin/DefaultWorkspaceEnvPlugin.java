@@ -23,6 +23,7 @@
 package org.dromara.jpom.plugin;
 
 import cn.hutool.extra.spring.SpringUtil;
+import cn.keepbx.jpom.plugins.PluginConfig;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
 

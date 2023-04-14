@@ -22,6 +22,8 @@
  */
 package org.dromara.jpom.plugin;
 
+import cn.keepbx.jpom.plugins.PluginConfig;
+
 import java.io.File;
 import java.util.Map;
 
