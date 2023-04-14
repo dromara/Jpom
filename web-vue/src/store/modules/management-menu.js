@@ -3,7 +3,7 @@
  * 存储所有打开的 tab 窗口，并且记录当前激活的 tab
  * 另外提供打开新 tab、跳转 tab、移除 tab 功能
  */
-import { MANAGEMENT_ACTIVE_TAB_KEY, MANAGEMENT_TAB_LIST_KEY, MANAGEMENT_ACTIVE_MENU_KEY } from "@/utils/const";
+import { MANAGEMENT_ACTIVE_MENU_KEY, MANAGEMENT_ACTIVE_TAB_KEY, MANAGEMENT_TAB_LIST_KEY } from "@/utils/const";
 
 import { getSystemMenu } from "@/api/menu";
 import routeMenuMap from "@/router/route-menu";
@@ -37,9 +37,9 @@ const app = {
   },
   actions: {
     // 加载系统菜单 action
-    loadManagementSystemMenus({ commit, state }) {
+    loadManagementSystemMenus({ commit, state }, rest) {
       return new Promise((resolve, reject) => {
-        if (state.menus.length) {
+        if (state.menus.length && !rest) {
           // 避免重复加载
           resolve();
           return;
@@ -49,13 +49,12 @@ const app = {
           .then((res) => {
             res.data.forEach((element) => {
               if (element.childs.length > 0) {
-                const childs = element.childs.map((child) => {
+                element.childs = element.childs.map((child) => {
                   return {
                     ...child,
                     path: routeMenuMap[child.id],
                   };
                 });
-                element.childs = childs;
               }
             });
             commit("setManagementMenus", res.data);
