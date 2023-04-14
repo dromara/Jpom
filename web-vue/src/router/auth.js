@@ -12,13 +12,6 @@ const whiteList = ["/login", "/install", "/system/ipAccess"];
 const noTabs = ["/full-terminal"];
 
 router.beforeEach((to, from, next) => {
-  const params = Qs.parse(location.search.substring(1));
-  if (Object.keys(params).length) {
-    // 地址栏参数转 hash 参数
-    const paramsStr = Qs.stringify(Object.assign({}, params, to.query));
-    location.href = location.origin + location.pathname + "#" + to.path + "?" + paramsStr;
-    return;
-  }
   // 检测白名单
   if (whiteList.indexOf(to.path) !== -1) {
     next();
@@ -60,7 +53,7 @@ router.beforeEach((to, from, next) => {
       })
       .catch(() => {
         next({
-          redirect: "/",
+          path: "/",
           replace: true,
         });
       });
@@ -76,7 +69,7 @@ router.beforeEach((to, from, next) => {
       })
       .catch(() => {
         next({
-          redirect: "/",
+          path: "/",
           replace: true,
         });
       });
@@ -85,6 +78,13 @@ router.beforeEach((to, from, next) => {
 
 router.afterEach((to) => {
   store.dispatch("showInfo", to);
+  const params = Qs.parse(location.search.substring(1));
+  if (Object.keys(params).length) {
+    //地址栏参数转 hash 参数
+    const paramsStr = Qs.stringify(Object.assign({}, params, to.query));
+    //console.error(`${location.origin}${location.pathname}#${to.path}?${paramsStr}`);
+    location.href = `${location.origin}${location.pathname}#${to.path}?${paramsStr}`;
+  }
 });
 
 // https://www.jb51.net/article/242702.htm
