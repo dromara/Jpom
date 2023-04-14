@@ -286,7 +286,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
      */
     @PostMapping(value = "oauth2/login", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<Object> oauth2Callback(@ValidatorItem String code,
+    public JsonMessage<UserLoginDto> oauth2Callback(@ValidatorItem String code,
                                               @ValidatorItem String provide,
                                               String state,
                                               HttpServletRequest request) {
