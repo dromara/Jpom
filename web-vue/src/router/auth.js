@@ -83,6 +83,10 @@ router.beforeEach((to, from, next) => {
   }
 });
 
+router.afterEach((to) => {
+  store.dispatch("showInfo", to);
+});
+
 // https://www.jb51.net/article/242702.htm
 // 监听到路由错误 刷新页面
 

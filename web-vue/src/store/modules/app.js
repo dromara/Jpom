@@ -5,12 +5,15 @@
  */
 import { CACHE_WORKSPACE_ID } from "@/utils/const";
 import router from "@/router";
+import { executionRequest } from "@/api/external";
+import { parseTime, pageBuildInfo } from "@/utils/const";
 
 const app = {
   state: {
     workspaceId: localStorage.getItem(CACHE_WORKSPACE_ID),
     // 菜单折叠
     collapsed: localStorage.getItem("collapsed"),
+    showInfo: false,
   },
   mutations: {
     setWorkspace(state, workspaceId) {
@@ -33,6 +36,24 @@ const app = {
     collapsed({ commit }, collapsed) {
       commit("setCollapsed", collapsed);
       localStorage.setItem("collapsed", collapsed);
+    },
+    showInfo({ state }, to) {
+      if (state.showInfo) {
+        return;
+      }
+      // 控制台输出版本号信息
+      const buildInfo = pageBuildInfo();
+      executionRequest("https://jpom.top/docs/versions.show", { ...buildInfo, p: to.path }).then((data) => {
+        console.log(
+          "\n %c " + parseTime(buildInfo.t) + " %c vs %c " + buildInfo.v + " %c vs %c " + data,
+          "color: #ffffff; background: #f1404b; padding:5px 0;",
+          "background: #1890ff; padding:5px 0;",
+          "color: #ffffff; background: #f1404b; padding:5px 0;",
+          "background: #1890ff; padding:5px 0;",
+          "color: #ffffff; background: #f1404b; padding:5px 0;"
+        );
+        state.showInfo = true;
+      });
     },
   },
   getters: {

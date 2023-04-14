@@ -180,16 +180,16 @@ export default {
   computed: {},
   watch: {},
   created() {
-    this.$nextTick(() => {
-      setTimeout(() => {
-        this.introGuide();
-      }, 500);
-      // this.creatQrCode();
-    });
     //
     checkSystem().then((res) => {
       if (res.code === 222) {
         this.canInstall = true;
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.introGuide();
+          }, 500);
+          // this.creatQrCode();
+        });
       } else {
         this.canInstall = false;
       }
