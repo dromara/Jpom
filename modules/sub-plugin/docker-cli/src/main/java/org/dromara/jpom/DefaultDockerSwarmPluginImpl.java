@@ -30,6 +30,7 @@ import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.plugins.PluginConfig;
 import com.alibaba.fastjson2.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
@@ -38,7 +39,6 @@ import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.command.RemoveSwarmNodeCmdImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.plugin.IDefaultPlugin;
-import org.dromara.jpom.plugin.PluginConfig;
 import org.springframework.util.Assert;
 
 import java.nio.charset.Charset;

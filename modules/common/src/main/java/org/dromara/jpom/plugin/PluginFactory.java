@@ -30,6 +30,8 @@ import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.util.ClassLoaderUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.plugins.IPlugin;
+import cn.keepbx.jpom.plugins.PluginConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.system.ExtConfigBean;

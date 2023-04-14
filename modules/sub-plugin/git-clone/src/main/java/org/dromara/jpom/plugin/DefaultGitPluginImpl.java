@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom.plugin;
 
+import cn.keepbx.jpom.plugins.PluginConfig;
 import org.eclipse.jgit.api.Git;
 
 import java.util.Map;

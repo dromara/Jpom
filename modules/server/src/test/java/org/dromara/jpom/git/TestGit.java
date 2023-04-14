@@ -22,9 +22,9 @@
  */
 package org.dromara.jpom.git;
 
+import cn.keepbx.jpom.plugins.IPlugin;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.ApplicationStartTest;
-import org.dromara.jpom.plugin.IPlugin;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.junit.jupiter.api.Test;
 

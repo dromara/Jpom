@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom.plugin;
 
+import cn.keepbx.jpom.plugins.IPlugin;
 import org.dromara.jpom.system.ExtConfigBean;
 
 import java.io.InputStream;

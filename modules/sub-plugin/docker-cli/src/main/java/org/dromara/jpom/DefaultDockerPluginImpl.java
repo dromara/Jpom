@@ -32,6 +32,7 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.util.*;
+import cn.keepbx.jpom.plugins.PluginConfig;
 import com.alibaba.fastjson2.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
@@ -40,7 +41,6 @@ import com.github.dockerjava.core.InvocationBuilder;
 import com.github.dockerjava.core.NameParser;
 import lombok.Lombok;
 import lombok.SneakyThrows;
-import org.dromara.jpom.plugin.PluginConfig;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.util.Assert;
 

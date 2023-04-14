@@ -36,7 +36,9 @@ import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
+import cn.keepbx.jpom.plugins.IPlugin;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.IllegalArgument2Exception;
@@ -47,7 +49,6 @@ import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.model.system.NetstatModel;
-import org.dromara.jpom.plugin.IPlugin;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.script.DslScriptBuilder;
 import org.dromara.jpom.socket.AgentFileTailWatcher;
@@ -103,16 +104,17 @@ public abstract class AbstractProjectCommander {
         }
         AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
         AgentConfig.ProjectConfig.LogConfig logConfig = agentConfig.getProject().getLog();
-        if (SystemUtil.getOsInfo().isLinux()) {
+        OsInfo osInfo = SystemUtil.getOsInfo();
+        if (osInfo.isLinux()) {
             // Linux系统
             abstractProjectCommander = new LinuxProjectCommander(logConfig.getFileCharset());
-        } else if (SystemUtil.getOsInfo().isWindows()) {
+        } else if (osInfo.isWindows()) {
             // Windows系统
             abstractProjectCommander = new WindowsProjectCommander(logConfig.getFileCharset());
-        } else if (SystemUtil.getOsInfo().isMac()) {
+        } else if (osInfo.isMac()) {
             abstractProjectCommander = new MacOsProjectCommander(logConfig.getFileCharset());
         } else {
-            throw new JpomRuntimeException("不支持的：" + SystemUtil.getOsInfo().getName());
+            throw new JpomRuntimeException("不支持的：" + osInfo.getName());
         }
         return abstractProjectCommander;
     }

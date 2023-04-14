@@ -26,6 +26,7 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.plugins.PluginConfig;
 import com.alibaba.fastjson2.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.PingCmd;
@@ -41,7 +42,6 @@ import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.plugin.IDefaultPlugin;
-import org.dromara.jpom.plugin.PluginConfig;
 import org.springframework.util.Assert;
 
 import javax.net.ssl.SSLHandshakeException;

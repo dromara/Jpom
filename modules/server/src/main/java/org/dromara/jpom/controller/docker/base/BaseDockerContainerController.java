@@ -24,13 +24,13 @@ package org.dromara.jpom.controller.docker.base;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
-import org.dromara.jpom.plugin.IPlugin;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.docker.DockerInfoService;
 import org.springframework.http.MediaType;

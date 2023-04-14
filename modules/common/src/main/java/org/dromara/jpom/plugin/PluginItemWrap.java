@@ -24,6 +24,8 @@ package org.dromara.jpom.plugin;
 
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.keepbx.jpom.plugins.IPlugin;
+import cn.keepbx.jpom.plugins.PluginConfig;
 import lombok.Getter;
 
 /**

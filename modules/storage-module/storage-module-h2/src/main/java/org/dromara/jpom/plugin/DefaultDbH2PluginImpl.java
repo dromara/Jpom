@@ -26,6 +26,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FastByteArrayOutputStream;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.plugins.PluginConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.db.StorageServiceFactory;
 import org.h2.store.FileLister;
