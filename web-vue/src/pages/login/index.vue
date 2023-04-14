@@ -289,12 +289,8 @@ export default {
     dispatchLogin(data) {
       // 调用 store action 存储当前登录的用户名和 token
       this.$store.dispatch("login", { token: data.token, longTermToken: data.longTermToken }).then(() => {
-        // 刷新菜单
-        this.$store.dispatch("restLoadSystemMenus").then(() => {
-          //
-          // 跳转主页面
-          this.$router.push({ path: "/" });
-        });
+        // 跳转主页面
+        this.$router.push({ path: "/" });
       });
     },
   },

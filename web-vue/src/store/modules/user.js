@@ -43,7 +43,7 @@ const user = {
           if (res.code === 200) {
             commit("setUserInfo", res.data);
             localStorage.setItem(USER_INFO_KEY, JSON.stringify(res.data));
-            resolve();
+            resolve(res.data);
           }
         });
       });
@@ -62,9 +62,16 @@ const user = {
       return new Promise((resolve) => {
         commit("setToken", data);
         //commit('setUserName', data.userName);
-        dispatch("refreshUserInfo");
+        dispatch("refreshUserInfo").then((userinfo) => {
+          if (userinfo?.systemUser) {
+            // 刷新管理员菜单
+            dispatch("loadManagementSystemMenus", true).then(() => {
+              //
+            });
+          }
+        });
         // 加载系统菜单 这里需要等待 action 执行完毕返回 promise, 否则第一次登录可能会从 store 里面获取不到 menus 数据而报错
-        dispatch("loadSystemMenus").then(() => {
+        dispatch("restLoadSystemMenus").then(() => {
           resolve();
         });
       });
