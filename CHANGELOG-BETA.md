@@ -1,5 +1,21 @@
 # 🚀 版本日志
 
+### 2.10.40.6-beta
+
+### 🐣 新增功能
+
+1. 【server】新增 容器构建中对 gradle 插件的支持（感谢 [@xiaozhi](https://gitee.com/XiaoZhiGongChengShi) [Gitee pr 188](https://gitee.com/dromara/Jpom/pulls/188) ）
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】优化 构建 SSH 发布命令支持 `SSH_RELEASE_PATH` 环境变量（感谢@定格）
+2. 【server】修复 全屏终端无法打开文件管理（感谢@Pluto）
+3. 【server】优化 自动探测服务端登录验证码是否可用
+4. 【all】优化 文件编辑后缀识别支持配置文件名或者正则表达式（感谢@MichelleChung）
+5. 【server】优化 支持自动执行触发器清理
+
+------
+
 ### 2.10.40.5-beta (2023-04-12)
 
 ### 🐞 解决BUG、优化功能
