@@ -27,8 +27,6 @@ import SideMenu from "./side-menu";
 // import UserHeader from "./user-header";
 import ContentTab from "./content-tab";
 import { checkSystem } from "@/api/install";
-import { executionRequest } from "@/api/external";
-import { parseTime, pageBuildInfo } from "@/utils/const";
 
 export default {
   props: {
@@ -151,18 +149,6 @@ export default {
         } else if (res.code === 222) {
           this.$router.push("/install");
         }
-      });
-      // 控制台输出版本号信息
-      const buildInfo = pageBuildInfo();
-      executionRequest("https://jpom.top/docs/versions.show", { ...buildInfo, p: this.$route.path }).then((data) => {
-        console.log(
-          "\n %c " + parseTime(buildInfo.t) + " %c vs %c " + buildInfo.v + " %c vs %c " + data,
-          "color: #ffffff; background: #f1404b; padding:5px 0;",
-          "background: #1890ff; padding:5px 0;",
-          "color: #ffffff; background: #f1404b; padding:5px 0;",
-          "background: #1890ff; padding:5px 0;",
-          "color: #ffffff; background: #f1404b; padding:5px 0;"
-        );
       });
     },
     changeCollapsed() {
