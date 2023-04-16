@@ -4,21 +4,21 @@
       @click="mangerMenuClick" :openKeys="mangerMenuOpenkeys">
       <a-menu-item key="admin-manager">
         <template v-if="props.mode === 'normal'">
-          <a-icon type="setting" :style="{ fontSize: '18px' }" />
+          <icon type="setting" :style="{ fontSize: '18px' }" />
           <span>系统管理</span>
         </template>
         <template v-if="props.mode === 'management'">
-          <a-icon type="desktop" :style="{ fontSize: '18px' }" />
+          <icon type="desktop" :style="{ fontSize: '18px' }" />
           <span>功能管理</span>
         </template>
       </a-menu-item>
     </a-menu>
     <a-menu theme="dark" mode="inline" v-model="selectedKeys" @openChange="openChange" :openKeys="getMenuOpenKeys2">
       <a-sub-menu v-for="menu in props.mode == 'normal' ? getMenus : getManagementMenus" :key="menu.id">
-        <span slot="title">
-          <a-icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
+        <template #title>
+          <icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
           <span>{{ menu.title }}</span>
-        </span>
+        </template>
         <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" :p="(subMenu.parent = menu)"
           @click="handleClick(subMenu)">
           <span>{{ subMenu.title }}</span>
@@ -28,6 +28,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import Icon from '@/components/Icon';
 import { useGuideStore } from '@/stores/guide';
 import { useMenuStore } from '@/stores/menu';
 import { useUserStore } from '@/stores/user';
