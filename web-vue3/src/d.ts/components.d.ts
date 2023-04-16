@@ -74,6 +74,7 @@ declare module '@vue/runtime-core' {
     CodeEditor: typeof import('./../components/codeEditor/index.vue')['default']
     CompositionTransfer: typeof import('./../components/compositionTransfer/composition-transfer.vue')['default']
     CustomSelect: typeof import('./../components/customSelect/index.vue')['default']
+    LoadingOutlined: typeof import('@ant-design/icons-vue')['LoadingOutlined']
     LogView: typeof import('./../components/logView/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

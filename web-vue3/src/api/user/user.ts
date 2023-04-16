@@ -140,7 +140,7 @@ export function editUser(params: any) {
 // }
 
 // 删除用户
-export function deleteUser(id:string) {
+export function deleteUser(id: string) {
   return axios({
     url: '/user/deleteUser',
     method: 'post',
@@ -170,7 +170,7 @@ export function editUserInfo(params: any) {
  * 发送邮箱验证码
  * @param {String} email 邮箱地址
  */
-export function sendEmailCode(email:string) {
+export function sendEmailCode(email: string) {
   return axios({
     url: '/user/sendCode.json',
     method: 'post',
@@ -184,7 +184,7 @@ export function sendEmailCode(email:string) {
  * @param {String} id 管理员 ID
  * @returns
  */
-export function unlockUser(id:string) {
+export function unlockUser(id: string) {
   return axios({
     url: '/user/unlock',
     method: 'get',
@@ -197,7 +197,7 @@ export function unlockUser(id:string) {
  * @param {String} id 管理员 ID
  * @returns
  */
-export function closeUserMfa(id:string) {
+export function closeUserMfa(id: string) {
   return axios({
     url: '/user/close_user_mfa',
     method: 'get',
@@ -210,7 +210,7 @@ export function closeUserMfa(id:string) {
  * @param {String} id 管理员 ID
  * @returns
  */
-export function restUserPwd(id:string) {
+export function restUserPwd(id: string) {
   return axios({
     url: '/user/rest-user-pwd',
     method: 'get',
@@ -223,7 +223,7 @@ export function restUserPwd(id:string) {
  * @param {String} userId 管理员 ID
  * @returns
  */
-export function workspaceList(userId:string) {
+export function workspaceList(userId: string) {
   return axios({
     url: '/user/workspace_list',
     method: 'get',
@@ -249,7 +249,7 @@ export function myWorkspace() {
  *
  * @returns
  */
-export function saveWorkspace(data:any) {
+export function saveWorkspace(data: any) {
   return axios({
     url: '/user/save-workspace',
     method: 'post',
@@ -270,6 +270,18 @@ export function loginConfig() {
     url: '/login-config',
     method: 'get',
     params: {}
+  })
+}
+
+/**
+ * 登录验证码
+ * @returns
+ */
+export function loginRandCode(params: object) {
+  return axios({
+    url: '/rand-code',
+    method: 'get',
+    params: params
   })
 }
 

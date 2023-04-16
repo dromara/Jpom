@@ -51,7 +51,8 @@
               </a-col>
               <a-col :offset="2" :span="8">
                 <div class="rand-code">
-                  <img :src="randCode" @click="changeCode" />
+                  <img v-if="randCode" :src="randCode" @click="changeCode" />
+                  <loading-outlined v-else />
                 </div>
               </a-col>
             </a-row>
@@ -104,7 +105,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { login, loginConfig, mfaVerify, oauth2Url, oauth2Login } from '@/api/user/user'
+import { login, loginConfig, mfaVerify, oauth2Url, oauth2Login, loginRandCode } from '@/api/user/user'
 import { checkSystem } from '@/api/install'
 import sha1 from 'js-sha1'
 import { useAppStore } from '@/stores/app'
@@ -139,7 +140,7 @@ const mfaData = reactive({
 const action = ref<'mfa' | 'login'>('login')
 const enabledOauth2Provides = ref<string[]>([])
 
-const randCode = ref(import.meta.env.JPOM_BASE_API_URL + '/randCode.png')
+const randCode = ref('')
 const dynamicBg = ref(localStorage.getItem('dynamicBg') === 'true')
 const disabledCaptcha = ref(false)
 
@@ -186,8 +187,14 @@ const getLoginConfig = () => {
 }
 // change Code
 const changeCode = () => {
-  randCode.value = import.meta.env.JPOM_BASE_API_URL + 'randCode.png?r=' + new Date().getTime()
-  loginForm.code = ''
+  loginRandCode({
+    t: new Date().getTime()
+  }).then((res) => {
+    if (res.code === 200) {
+      randCode.value = res.data
+      loginForm.code = ''
+    }
+  })
 }
 
 const checkOauth2 = () => {

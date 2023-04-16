@@ -3,12 +3,16 @@
  */
 import { CACHE_WORKSPACE_ID } from '@/utils/const'
 import { getHashQuery } from '@/utils/utils'
+import { RouteLocationNormalized } from 'vue-router'
+import { executionRequest } from '@/api/external'
+import { parseTime, pageBuildInfo } from '@/utils/const'
 
 export const useAppStore = defineStore('app', {
   state: () => ({
     workspaceId: localStorage.getItem(CACHE_WORKSPACE_ID),
     // 菜单折叠
-    isCollapsed: !!localStorage.getItem('collapsed')
+    isCollapsed: !!localStorage.getItem('collapsed'),
+    isShowInfo: false
   }),
 
   actions: {
@@ -20,6 +24,24 @@ export const useAppStore = defineStore('app', {
     collapsed(isCollapsed: boolean) {
       this.isCollapsed = isCollapsed
       localStorage.setItem('collapsed', String(isCollapsed))
+    },
+    showInfo(to: RouteLocationNormalized) {
+      if (this.isShowInfo) {
+        return
+      }
+      // 控制台输出版本号信息
+      const buildInfo = pageBuildInfo()
+      executionRequest('https://jpom.top/docs/versions.show', { ...buildInfo, p: to.path }).then((data) => {
+        console.log(
+          '\n %c ' + parseTime(buildInfo.t) + ' %c vs %c ' + buildInfo.v + ' %c vs %c ' + data,
+          'color: #ffffff; background: #f1404b; padding:5px 0;',
+          'background: #1890ff; padding:5px 0;',
+          'color: #ffffff; background: #f1404b; padding:5px 0;',
+          'background: #1890ff; padding:5px 0;',
+          'color: #ffffff; background: #f1404b; padding:5px 0;'
+        )
+        this.isShowInfo = true
+      })
     }
   },
   getters: {
