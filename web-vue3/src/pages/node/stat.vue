@@ -36,7 +36,7 @@
                     </ul>
                   </div>
                 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
               <a-col :span="3" class="header-statistic">
                 <a-statistic-countdown format="s 秒" title="刷新倒计时 " :value="deadline" @finish="onFinish" />

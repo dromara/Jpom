@@ -47,7 +47,7 @@
                 </ul>
               </div>
             </template>
-            <a-icon type="question-circle" theme="filled" />
+            <question-circle-filled />
           </a-tooltip>
         </a-space>
       </template>

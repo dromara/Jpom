@@ -62,7 +62,7 @@
               <div>如果不需要保留较多构建历史信息可以到服务端修改构建相关配置参数</div>
               <div>构建历史可能占有较多硬盘空间,建议根据实际情况配置保留个数</div>
             </template>
-            <a-icon type="question-circle" theme="filled" />
+            <question-circle-filled />
           </a-tooltip>
         </a-space>
       </template>

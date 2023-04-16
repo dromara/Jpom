@@ -62,7 +62,7 @@
                 </ul>
               </div>
             </template>
-            <a-icon type="question-circle" theme="filled" />
+            <question-circle-filled />
           </a-tooltip>
         </a-space>
       </template>
@@ -207,7 +207,7 @@
             分发节点
             <a-tooltip v-show="!temp.id">
               <template slot="title"> 分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本中 </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-select

@@ -4,7 +4,7 @@
       :getPopupContainer="
         this.popupContainerParent
           ? (triggerNode) => {
-              return triggerNode.parentNode || document.body;
+              return triggerNode.parentNode || document.body
             }
           : null
       "
@@ -39,7 +39,7 @@
               <template slot="title">
                 <slot name="inputTips"></slot>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </a-input-search>
         </div>
@@ -53,111 +53,111 @@
 </template>
 
 <script>
-import { Select } from "ant-design-vue";
+import { Select } from 'ant-design-vue'
 
 export default {
   components: {
     Select,
     VNodes: {
       functional: true,
-      render: (h, ctx) => ctx.props.vnodes,
-    },
+      render: (h, ctx) => ctx.props.vnodes
+    }
   },
 
   data() {
     return {
-      selectInput: "",
+      selectInput: '',
       selectOpen: false,
       selectFocus: false,
       inputFocus: false,
       optionList: [],
-      selected: "",
-    };
+      selected: ''
+    }
   },
   props: {
     // 继承原组件所有props
     ...Select.props,
     data: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
     inputPlaceholder: {
       type: String,
-      default: "请输入...",
+      default: '请输入...'
     },
     selectPlaceholder: {
       type: String,
-      default: "请选择",
+      default: '请选择'
     },
-    selStyle: { type: String, default: "" },
+    selStyle: { type: String, default: '' },
     suffixIcon: {
       type: String,
-      default: "reload",
+      default: 'reload'
     },
     maxLength: {
       type: Number,
-      default: 200,
+      default: 200
     },
     popupContainerParent: {
       type: Boolean,
-      default: true,
-    },
+      default: true
+    }
   },
   watch: {
     value: {
       handler(v) {
-        this.selected = v;
+        this.selected = v
       },
-      immediate: true,
+      immediate: true
     },
     data: {
       handler(v) {
-        this.optionList = v;
+        this.optionList = v
       },
       deep: true,
-      immediate: true,
-    },
+      immediate: true
+    }
   },
 
   methods: {
     refreshSelect() {
-      this.$emit("onRefreshSelect");
+      this.$emit('onRefreshSelect')
     },
     selectChange(v) {
-      this.$emit("input", v);
-      this.selectOpen = false;
-      this.$emit("change", v);
+      this.$emit('input', v)
+      this.selectOpen = false
+      this.$emit('change', v)
     },
     onSearch(v) {
       if (!v) {
-        return;
+        return
       }
-      let index = this.optionList.indexOf(v);
+      let index = this.optionList.indexOf(v)
       if (index === -1) {
-        this.optionList = [...this.optionList, v];
+        this.optionList = [...this.optionList, v]
       }
-      this.selectInput = "";
-      this.selected = v;
+      this.selectInput = ''
+      this.selected = v
       //
-      this.selectChange(v);
-      this.$emit("addOption", this.optionList);
+      this.selectChange(v)
+      this.$emit('addOption', this.optionList)
     },
     setSelectOpen(v) {
-      this.selectFocus = v;
+      this.selectFocus = v
       if (this.inputFocus || this.selectFocus) {
-        this.selectOpen = true;
-        return;
+        this.selectOpen = true
+        return
       }
-      this.selectOpen = false;
+      this.selectOpen = false
     },
     visibleInput(v) {
-      this.inputFocus = v;
+      this.inputFocus = v
       if (this.inputFocus || this.selectFocus) {
-        this.selectOpen = true;
-        return;
+        this.selectOpen = true
+        return
       }
-      this.selectOpen = false;
-    },
-  },
-};
+      this.selectOpen = false
+    }
+  }
+}
 </script>

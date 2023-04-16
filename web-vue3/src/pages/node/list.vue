@@ -6,7 +6,8 @@
         <template #extra>
           <a-button type="primary" @click="fastInstallNodeShow">快速安装 </a-button>
           <router-link to="/system/assets/machine-list">
-            <a-button key="console" type="primary">手动添加</a-button></router-link>
+            <a-button key="console" type="primary">手动添加</a-button></router-link
+          >
         </template>
         <div class="desc">
           <p style="font-size: 16px">
@@ -27,22 +28,35 @@
           <a-space>
             <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="节点名称" />
 
-            <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组"
-              class="search-input-item">
+            <a-select
+              show-search
+              option-filter-prop="children"
+              v-model="listQuery.group"
+              allowClear
+              placeholder="分组"
+              class="search-input-item"
+            >
               <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
             </a-select>
             <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
               <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
             </a-tooltip>
-            <a-button type="primary" @click="
-              () => {
-                fastInstallNode = true
-              }
-            ">快速安装
+            <a-button
+              type="primary"
+              @click="
+                () => {
+                  fastInstallNode = true
+                }
+              "
+              >快速安装
             </a-button>
             <a-dropdown v-if="layoutType === 'table'">
-              <a-button type="primary" :disabled="!tableSelections || !tableSelections.length"
-                @click="syncToWorkspaceShow">工作空间同步</a-button>
+              <a-button
+                type="primary"
+                :disabled="!tableSelections || !tableSelections.length"
+                @click="syncToWorkspaceShow"
+                >工作空间同步</a-button
+              >
             </a-dropdown>
             <a-tooltip v-else title="表格视图才能使用工作空间同步功能">
               <a-button :disabled="true" type="primary"> 工作空间同步 </a-button>
@@ -66,20 +80,29 @@
                   </ul>
                 </div>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
             <div class="header-statistic">
               <a-statistic-countdown format="s 秒" title="刷新倒计时 " :value="deadline" @finish="onFinish" />
             </div>
           </a-space>
         </template>
-        <a-table v-if="layoutType === 'table'" :columns="columns" :data-source="list" bordered size="middle" rowKey="id"
-          :pagination="pagination" @change="
+        <a-table
+          v-if="layoutType === 'table'"
+          :columns="columns"
+          :data-source="list"
+          bordered
+          size="middle"
+          rowKey="id"
+          :pagination="pagination"
+          @change="
             (pagination, filters, sorter) => {
               listQuery.value = CHANGE_PAGE(listQuery.value, { pagination, sorter })
               loadData()
             }
-          " :row-selection="rowSelection">
+          "
+          :row-selection="rowSelection"
+        >
           <a-tooltip slot="url" slot-scope="text, record" placement="topLeft" :title="text">
             <template v-if="record.machineNodeData">
               <span>{{ record.machineNodeData.jpomProtocol }}://{{ record.machineNodeData.jpomUrl }}</span>
@@ -100,11 +123,19 @@
               </a-tooltip>
             </template>
           </template>
-          <a-tooltip slot="status" slot-scope="text, item" placement="topLeft" :title="`${statusMap[item.machineNodeData && item.machineNodeData.status] || '未知'} ${item.machineNodeData && item.machineNodeData.statusMsg
-            }`">
+          <a-tooltip
+            slot="status"
+            slot-scope="text, item"
+            placement="topLeft"
+            :title="`${statusMap[item.machineNodeData && item.machineNodeData.status] || '未知'} ${
+              item.machineNodeData && item.machineNodeData.statusMsg
+            }`"
+          >
             <template v-if="item.openStatus === 1">
-              <a-tag :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'"
-                style="margin-right: 0px">
+              <a-tag
+                :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'"
+                style="margin-right: 0px"
+              >
                 {{ statusMap[item.machineNodeData && item.machineNodeData.status] || '未知' }}
               </a-tag>
             </template>
@@ -116,18 +147,29 @@
           <a-tooltip slot="javaVersion" slot-scope="text, item" placement="topLeft" :title="text">
             <span>{{ item.machineNodeData && item.machineNodeData.javaVersion }}</span>
           </a-tooltip>
-          <a-tooltip slot="jvmInfo" slot-scope="text, item" placement="topLeft" :title="`剩余内存：${renderSize(
-            item.machineNodeData && item.machineNodeData.jvmFreeMemory
-          )} 总内存：${renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory)}`">
-            <span>{{ renderSize(item.machineNodeData && item.machineNodeData.jvmFreeMemory) }} /
-              {{ renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory) }}</span>
+          <a-tooltip
+            slot="jvmInfo"
+            slot-scope="text, item"
+            placement="topLeft"
+            :title="`剩余内存：${renderSize(
+              item.machineNodeData && item.machineNodeData.jvmFreeMemory
+            )} 总内存：${renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory)}`"
+          >
+            <span
+              >{{ renderSize(item.machineNodeData && item.machineNodeData.jvmFreeMemory) }} /
+              {{ renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory) }}</span
+            >
           </a-tooltip>
           <!-- <a-tooltip slot="freeMemory" slot-scope="text" placement="topLeft" :title="renderSize(text)">
         <span>{{ renderSize(text) }}</span>
       </a-tooltip> -->
 
-          <a-tooltip slot="runTime" slot-scope="text, item" placement="topLeft"
-            :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime)">
+          <a-tooltip
+            slot="runTime"
+            slot-scope="text, item"
+            placement="topLeft"
+            :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime)"
+          >
             <span>{{ formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 2) }}</span>
           </a-tooltip>
           <template slot="projectCount" slot-scope="text, item">
@@ -152,12 +194,19 @@
           <template slot="operation" slot-scope="text, record, index">
             <a-space>
               <a-tooltip title="如果按钮不可用则表示当前节点已经关闭啦,需要去编辑中启用">
-                <a-button size="small" class="jpom-node-manage-btn" type="primary" @click="handleNode(record)"
-                  :disabled="record.openStatus !== 1"><a-icon type="apartment" />管理</a-button>
+                <a-button
+                  size="small"
+                  class="jpom-node-manage-btn"
+                  type="primary"
+                  @click="handleNode(record)"
+                  :disabled="record.openStatus !== 1"
+                  ><a-icon type="apartment" />管理</a-button
+                >
               </a-tooltip>
               <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
-                <a-button size="small" type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"><a-icon
-                    type="code" />终端</a-button>
+                <a-button size="small" type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"
+                  ><a-icon type="code" />终端</a-button
+                >
               </a-tooltip>
 
               <a-dropdown>
@@ -176,25 +225,39 @@
                     </a-tooltip>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-tooltip placement="leftBottom" title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用">
+                    <a-tooltip
+                      placement="leftBottom"
+                      title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用"
+                    >
                       <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
                     </a-tooltip>
                   </a-menu-item>
                   <a-menu-divider />
                   <a-menu-item>
-                    <a-button size="small" type="primary"
+                    <a-button
+                      size="small"
+                      type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
-                      @click="sortItemHander(record, index, 'top')">置顶</a-button>
+                      @click="sortItemHander(record, index, 'top')"
+                      >置顶</a-button
+                    >
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button size="small" type="primary"
+                    <a-button
+                      size="small"
+                      type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
-                      @click="sortItemHander(record, index, 'up')">上移</a-button>
+                      @click="sortItemHander(record, index, 'up')"
+                      >上移</a-button
+                    >
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button size="small" type="primary"
+                    <a-button
+                      size="small"
+                      type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
-                      @click="sortItemHander(record, index, 'down')">
+                      @click="sortItemHander(record, index, 'down')"
+                    >
                       下移
                     </a-button>
                   </a-menu-item>
@@ -212,8 +275,11 @@
                     <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
                       <template slot="title">
                         <a-row :gutter="[4, 0]">
-                          <a-col :span="17" class="jpom-node-manage-btn"
-                            style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+                          <a-col
+                            :span="17"
+                            class="jpom-node-manage-btn"
+                            style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
+                          >
                             <a-tooltip>
                               <template slot="title">
                                 点击进入节点管理
@@ -236,8 +302,10 @@
                                   状态描述：{{ (item.machineNodeData && item.machineNodeData.statusMsg) || '' }}
                                 </div>
                               </template>
-                              <a-tag :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'"
-                                style="margin-right: 0px">
+                              <a-tag
+                                :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'"
+                                style="margin-right: 0px"
+                              >
                                 {{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
                               </a-tag>
                             </a-tooltip>
@@ -248,41 +316,71 @@
                       <a-row :gutter="[8, 8]">
                         <a-col :span="8" style="text-align: center">
                           <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`CPU 占用率：${item.occupyCpu}%`">
-                            <a-progress type="circle" :width="80" :stroke-color="{
-                              '0%': '#87d068',
-                              '30%': '#87d068',
-                              '100%': '#108ee9'
-                            }" size="small" status="active" :percent="item.occupyCpu" />
+                            <a-progress
+                              type="circle"
+                              :width="80"
+                              :stroke-color="{
+                                '0%': '#87d068',
+                                '30%': '#87d068',
+                                '100%': '#108ee9'
+                              }"
+                              size="small"
+                              status="active"
+                              :percent="item.occupyCpu"
+                            />
                           </a-tooltip>
                         </a-col>
                         <a-col :span="8" style="text-align: center">
                           <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`硬盘占用率：${item.occupyDisk}%`">
-                            <a-progress type="circle" :width="80" :stroke-color="{
-                              '0%': '#87d068',
-                              '30%': '#87d068',
-                              '100%': '#108ee9'
-                            }" size="small" status="active" :percent="item.occupyDisk" />
+                            <a-progress
+                              type="circle"
+                              :width="80"
+                              :stroke-color="{
+                                '0%': '#87d068',
+                                '30%': '#87d068',
+                                '100%': '#108ee9'
+                              }"
+                              size="small"
+                              status="active"
+                              :percent="item.occupyDisk"
+                            />
                           </a-tooltip>
                         </a-col>
                         <a-col :span="8" style="text-align: center">
-                          <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`内存占用率：${item.occupyMemory}%`">
-                            <a-progress :width="80" type="circle" :stroke-color="{
-                              '0%': '#87d068',
-                              '30%': '#87d068',
-                              '100%': '#108ee9'
-                            }" size="small" status="active" :percent="item.occupyMemory" />
+                          <a-tooltip
+                            @click="handleHistory(item, 'nodeTop')"
+                            :title="`内存占用率：${item.occupyMemory}%`"
+                          >
+                            <a-progress
+                              :width="80"
+                              type="circle"
+                              :stroke-color="{
+                                '0%': '#87d068',
+                                '30%': '#87d068',
+                                '100%': '#108ee9'
+                              }"
+                              size="small"
+                              status="active"
+                              :percent="item.occupyMemory"
+                            />
                           </a-tooltip>
                         </a-col>
                       </a-row>
 
                       <a-row :gutter="[8, 8]" style="text-align: center">
                         <a-col :span="8">
-                          <a-tooltip @click="handleHistory(item, 'networkDelay')" :title="`${'延迟' +
-                            (formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) ||
-                              '-') +
-                            ' 点击查看历史趋势'
-                            }`">
-                            <a-statistic title="延迟" :value="item.machineNodeData && item.machineNodeData.networkDelay"
+                          <a-tooltip
+                            @click="handleHistory(item, 'networkDelay')"
+                            :title="`${
+                              '延迟' +
+                              (formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) ||
+                                '-') +
+                              ' 点击查看历史趋势'
+                            }`"
+                          >
+                            <a-statistic
+                              title="延迟"
+                              :value="item.machineNodeData && item.machineNodeData.networkDelay"
                               valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
                               :formatter="
                                 (v) => {
@@ -291,14 +389,18 @@
                                     '-'
                                   )
                                 }
-                              " />
+                              "
+                            />
                           </a-tooltip>
                         </a-col>
                         <a-col :span="8">
-                          <a-tooltip :title="
-                            formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 1) || '-'
-                          ">
-                            <a-statistic title="运行时间"
+                          <a-tooltip
+                            :title="
+                              formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 1) || '-'
+                            "
+                          >
+                            <a-statistic
+                              title="运行时间"
                               valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
                               :formatter="
                                 (v) => {
@@ -307,13 +409,16 @@
                                     '-'
                                   )
                                 }
-                              " />
+                              "
+                            />
                           </a-tooltip>
                         </a-col>
                         <a-col :span="8">
                           <a-tooltip
-                            :title="`${parseTime(item.machineNodeData && item.machineNodeData.modifyTimeMillis)}`">
-                            <a-statistic title="更新时间"
+                            :title="`${parseTime(item.machineNodeData && item.machineNodeData.modifyTimeMillis)}`"
+                          >
+                            <a-statistic
+                              title="更新时间"
                               valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
                               :formatter="
                                 (v) => {
@@ -322,7 +427,8 @@
                                     '{h}:{i}:{s}'
                                   )
                                 }
-                              " />
+                              "
+                            />
                           </a-tooltip>
                         </a-col>
                       </a-row>
@@ -338,17 +444,27 @@
           <a-row type="flex" justify="center">
             <a-divider v-if="listQuery.total / listQuery.limit > 1" dashed />
             <a-col>
-              <a-pagination v-model="listQuery.page" :showTotal="
-                (total) => {
-                  return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery)
-                }
-              " :showSizeChanger="true" :pageSizeOptions="sizeOptions" :pageSize="listQuery.limit"
-                :total="listQuery.total" :hideOnSinglePage="true" @showSizeChange="
+              <a-pagination
+                v-model="listQuery.page"
+                :showTotal="
+                  (total) => {
+                    return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery)
+                  }
+                "
+                :showSizeChanger="true"
+                :pageSizeOptions="sizeOptions"
+                :pageSize="listQuery.limit"
+                :total="listQuery.total"
+                :hideOnSinglePage="true"
+                @showSizeChange="
                   (current, size) => {
                     listQuery.value.limit = size
                     loadData()
                   }
-                " @change="loadData" show-less-items />
+                "
+                @change="loadData"
+                show-less-items
+              />
             </a-col>
           </a-row>
         </template>
@@ -356,24 +472,41 @@
     </template>
 
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editNodeVisible" width="50%" title="编辑节点" @ok="handleEditNodeOk"
-      :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      v-model="editNodeVisible"
+      width="50%"
+      title="编辑节点"
+      @ok="handleEditNodeOk"
+      :maskClosable="false"
+    >
       <a-form ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 19 }">
         <a-form-item label="节点名称" prop="name">
           <a-input :maxLength="50" v-model="temp.name" placeholder="节点名称" />
         </a-form-item>
         <a-form-item label="分组名称" prop="group">
-          <custom-select v-model="temp.group" :data="groupList" suffixIcon="" inputPlaceholder="添加分组"
-            selectPlaceholder="选择分组名">
+          <custom-select
+            v-model="temp.group"
+            :data="groupList"
+            suffixIcon=""
+            inputPlaceholder="添加分组"
+            selectPlaceholder="选择分组名"
+          >
           </custom-select>
         </a-form-item>
 
         <a-form-item label="节点状态" prop="openStatus">
-          <a-switch :checked="temp.openStatus == 1" @change="
-            (checked) => {
-              temp.openStatus = checked ? 1 : 0
-            }
-          " checked-children="启用" un-checked-children="停用" default-checked />
+          <a-switch
+            :checked="temp.openStatus == 1"
+            @change="
+              (checked) => {
+                temp.openStatus = checked ? 1 : 0
+              }
+            "
+            checked-children="启用"
+            un-checked-children="停用"
+            default-checked
+          />
         </a-form-item>
         <a-form-item label="绑定 SSH " prop="sshId">
           <a-select show-search option-filter-prop="children" v-model="temp.sshId" placeholder="请选择SSH">
@@ -386,35 +519,59 @@
       </a-form>
     </a-modal>
     <!-- 管理节点 -->
-    <a-drawer destroyOnClose :title="`${temp.name}`" placement="right"
-      :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="drawerVisible"
-      @close="onClose">
+    <a-drawer
+      destroyOnClose
+      :title="`${temp.name}`"
+      placement="right"
+      :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
+      :visible="drawerVisible"
+      @close="onClose"
+    >
       <!-- 节点管理组件 -->
       <node-layout v-if="drawerVisible" :node="temp" />
     </a-drawer>
     <!-- Terminal -->
-    <a-modal v-model="terminalVisible" :bodyStyle="{
-      padding: '0px 10px',
-      paddingTop: '10px',
-      marginRight: '10px',
-      height: `70vh`
-    }" width="80%" title="Terminal" :footer="null" :maskClosable="false">
+    <a-modal
+      v-model="terminalVisible"
+      :bodyStyle="{
+        padding: '0px 10px',
+        paddingTop: '10px',
+        marginRight: '10px',
+        height: `70vh`
+      }"
+      width="80%"
+      title="Terminal"
+      :footer="null"
+      :maskClosable="false"
+    >
       <terminal v-if="terminalVisible" :sshId="temp.sshId" :nodeId="temp.id" />
     </a-modal>
 
     <!-- 快速安装插件端 -->
-    <a-modal destroyOnClose v-model="fastInstallNode" width="80%" title="快速安装插件端" :footer="null" :maskClosable="false"
+    <a-modal
+      destroyOnClose
+      v-model="fastInstallNode"
+      width="80%"
+      title="快速安装插件端"
+      :footer="null"
+      :maskClosable="false"
       @cancel="
         () => {
           fastInstallNode.value = false
           loadData()
         }
-      ">
+      "
+    >
       <fastInstall v-if="fastInstallNode"></fastInstall>
     </a-modal>
     <!-- 同步到其他工作空间 -->
-    <a-modal destroyOnClose v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace"
-      :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      v-model="syncToWorkspaceVisible"
+      title="同步到其他工作空间"
+      @ok="handleSyncToWorkspace"
+      :maskClosable="false"
+    >
       <a-alert message="温馨提示" type="warning">
         <template slot="description">
           <ul>
@@ -436,8 +593,14 @@
       </a-form>
     </a-modal>
     <!-- 历史监控 -->
-    <a-modal destroyOnClose v-model="monitorVisible" width="75%" :title="`${temp.name}历史监控图表`" :footer="null"
-      :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      v-model="monitorVisible"
+      width="75%"
+      :title="`${temp.name}历史监控图表`"
+      :footer="null"
+      :maskClosable="false"
+    >
       <node-top v-if="monitorVisible" :type="temp.type" :nodeId="temp.id"></node-top>
     </a-modal>
   </div>
@@ -595,7 +758,6 @@ const rules = {
 
 const workspaceList = ref([])
 
-
 const pagination = computed(() => {
   return COMPUTED_PAGINATION(listQuery.value)
 })
@@ -620,7 +782,6 @@ const useSuggestions = computed(() => {
   return dictOrigin.length === 0
 })
 
-
 const tableSelections = ref([])
 const rowSelection = computed(() => {
   return {
@@ -629,8 +790,6 @@ const rowSelection = computed(() => {
     }
   }
 })
-
-
 
 onMounted(() => {
   const searchNodeName = route.query.searchNodeName
@@ -641,7 +800,6 @@ onMounted(() => {
   loadGroupList()
 })
 
-
 // 获取所有的分组
 const groupList = ref([])
 const loadGroupList = () => {
@@ -651,7 +809,6 @@ const loadGroupList = () => {
     }
   })
 }
-
 
 // 加载 SSH 列表
 const sshList = ref([])
@@ -721,7 +878,7 @@ const handleEdit = (record: any) => {
 }
 
 // 提交节点数据
-const editNodeForm = ref<FormInstance>();
+const editNodeForm = ref<FormInstance>()
 const handleEditNodeOk = () => {
   // 检验表单
   editNodeForm.value?.validate().then((valid) => {
@@ -941,31 +1098,24 @@ const handleHistory = (record, type) => {
   temp.value = { ...temp.value, type }
 }
 
-
 const fastInstallNodeShow = () => {
   fastInstallNode.value = true
 }
 
-
 // export default {
 
+// computed: {
+//   ...mapGetters(['getCollapsed', 'getWorkspaceId', 'getUserInfo']),
+// },
 
-  // computed: {
-  //   ...mapGetters(['getCollapsed', 'getWorkspaceId', 'getUserInfo']),
-  // },
+// methods: {
+// formatDuration,
+// renderSize,
+// PAGE_DEFAULT_SHOW_TOTAL,
+// parseTime,
+// CHANGE_PAGE,
 
-  // methods: {
-    // formatDuration,
-    // renderSize,
-    // PAGE_DEFAULT_SHOW_TOTAL,
-    // parseTime,
-    // CHANGE_PAGE,
-
-
-
-
-
-  // }
+// }
 // }
 </script>
 <style scoped lang="less">

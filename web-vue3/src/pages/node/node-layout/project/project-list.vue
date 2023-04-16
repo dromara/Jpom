@@ -78,7 +78,7 @@
             <template slot="title">
               <div>状态数据是异步获取有一定时间延迟</div>
             </template>
-            <a-icon type="question-circle" theme="filled" />
+            <question-circle-filled />
           </a-tooltip>
         </a-space>
       </template>
@@ -298,7 +298,7 @@
                   <li><b>File</b> 项目为静态文件夹,没有项目状态以及控制等功能</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-select v-model="temp.runMode" placeholder="请选择运行方式">
@@ -317,7 +317,7 @@
                   <li>项目文件会存放到 <br />&nbsp;&nbsp;<b>项目白名单路径+项目文件夹</b></li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-input-group compact>
@@ -339,7 +339,7 @@
               <template slot="title">
                 <ul></ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
         </a-form-item> -->
@@ -362,7 +362,7 @@
                 </p>
                 <p>配置详情请参考配置示例</p>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-tabs>
@@ -395,7 +395,7 @@
                   <li>可选择的列表和项目白名单目录是一致的，即相同配置</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-select v-model="temp.logPath" placeholder="请选择项目白名单路径">
@@ -440,7 +440,7 @@
               副本
               <a-tooltip v-show="temp.type !== 'edit'">
                 <template slot="title"> 副本是指同一个项目在一个节点（服务器）中运行多份 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </template>
             <a-collapse v-if="temp.javaCopyItemList && temp.javaCopyItemList.length">
@@ -496,7 +496,7 @@
             自启动
             <a-tooltip v-show="temp.type !== 'edit'">
               <template slot="title">插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-switch v-model="temp.autoStart" checked-children="开" un-checked-children="关" />
@@ -512,7 +512,7 @@
                   <li>type 的值有：stop、beforeStop、start、beforeRestart、fileChange</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-input v-model="temp.token" placeholder="项目启动,停止,重启都将请求对应的地址,非必填，GET请求" />

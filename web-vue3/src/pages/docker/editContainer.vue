@@ -117,7 +117,7 @@
               Block IO 权重
               <a-tooltip>
                 <template slot="title"> Block IO 权重（相对权重）。 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input-number
@@ -133,7 +133,7 @@
               CPU 权重
               <a-tooltip>
                 <template slot="title"> 一个整数值，表示此容器相对于其他容器的相对 CPU 权重。 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input-number
@@ -147,7 +147,7 @@
               执行的 CPU
               <a-tooltip>
                 <template slot="title"> 允许执行的 CPU（例如，0-3、0,1）。 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input style="width: 100%" v-model="temp.cpusetCpus" placeholder="允许执行的 CPU（例如，0-3、0,1）。" />
@@ -157,7 +157,7 @@
               CpusetMems
               <a-tooltip>
                 <template slot="title"> 允许执行的内存节点 (MEM) (0-3, 0,1)。 仅在 NUMA 系统上有效。 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input
@@ -171,7 +171,7 @@
               CPU 周期
               <a-tooltip>
                 <template slot="title"> CPU 周期的长度，以微秒为单位。 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input-number
@@ -185,7 +185,7 @@
               CPU 时间
               <a-tooltip>
                 <template slot="title"> 容器在一个 CPU 周期内可以获得的 CPU 时间的微秒。 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input-number
@@ -200,7 +200,7 @@
               内存
               <a-tooltip>
                 <template slot="title"> 设置内存限制。 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input style="width: 100%" v-model="temp.memory" placeholder="设置内存限制。" />
@@ -210,7 +210,7 @@
               总内存
               <a-tooltip>
                 <template slot="title"> 总内存（内存 + 交换）。 设置为 -1 以禁用交换。 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input
@@ -224,7 +224,7 @@
               软内存
               <a-tooltip>
                 <template slot="title"> 软内存限制。 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input style="width: 100%" v-model="temp.memoryReservation" placeholder="软内存限制。" />

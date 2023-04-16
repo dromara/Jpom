@@ -72,7 +72,7 @@
                 <li>节点地址为插件端的 IP:PORT 插件端端口默认为：2123</li>
               </ul>
             </template>
-            <a-icon type="question-circle" theme="filled" />
+            <question-circle-filled />
           </a-tooltip>
         </a-space>
       </template>
@@ -278,7 +278,7 @@
                   <li>如果插件端正常运行但是连接失败请检查端口是否开放,防火墙规则,云服务器的安全组入站规则</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-input v-model="temp.jpomUrl" placeholder="节点地址 (127.0.0.1:2123)">
@@ -306,7 +306,7 @@
                 节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json
                 文件查看（如果自定义配置了账号密码将没有此文件）
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-input-password v-model="temp.jpomPassword" placeholder="节点密码,请查看节点启动输出的信息" />

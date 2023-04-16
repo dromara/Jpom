@@ -23,7 +23,7 @@
                     <li>数据目录大小包含：临时文件、在线构建文件、数据库文件等</li>
                   </ul>
                 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </span>
           </a-timeline-item>
@@ -51,7 +51,7 @@
                     </li>
                   </ul>
                 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </span>
           </a-timeline-item>
