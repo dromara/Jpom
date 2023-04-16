@@ -14,7 +14,7 @@ import routeMenuMap from '@/router/route-menu'
 
 import { IMenuState } from '@/stores/menu'
 
-export const useManagementMenuStore = defineStore('menu', {
+export const useManagementMenuStore = defineStore('MANAGEMENT-menu', {
   state: (): IMenuState => ({
     activeTabKey: localStorage.getItem(ACTIVE_TAB_KEY) || '',
     tabList: localStorage.getItem(TAB_LIST_KEY) ? JSON.parse(localStorage.getItem(TAB_LIST_KEY)!) : [],
