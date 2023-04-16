@@ -1,40 +1,32 @@
 <template>
-  <a-tabs v-model="activeKey" class="my-tabs" hide-add type="editable-card" @edit="onEdit" @change="changeTab">
-    <a-tab-pane v-for="(tab, index) in nowTabList" :key="tab.key" :closable="nowTabList.length > 1">
+  <a-tabs v-model="activeTabKey" class="my-tabs" hide-add type="editable-card" @edit="onEdit">
+    <a-tab-pane v-for="(tab, index) in tabList" :key="tab.key" :closable="tabList.length > 1">
       <template #tab>
         <a-dropdown :trigger="['contextmenu']">
           <span style="display: inline-table">{{ tab.title }}</span>
           <a-menu #overlay>
-            <a-menu-item
-              @click="
-                closeTabs({
-                  key: tab.key
-                })
-              "
-            >
-              <a-button type="link" :disabled="nowTabList.length <= 1">关闭其他</a-button>
+            <a-menu-item @click="
+              closeTabs({
+                key: tab.key
+              })
+            ">
+              <a-button type="link" :disabled="tabList.length <= 1">关闭其他</a-button>
             </a-menu-item>
-            <a-menu-item
-              @click="
-                closeTabs({
-                  key: tab.key,
-                  position: 'left'
-                })
-              "
-            >
-              <a-button type="link" :disabled="nowTabList.length <= 1 || index === 0">关闭左侧</a-button>
+            <a-menu-item @click="
+              closeTabs({
+                key: tab.key,
+                position: 'left'
+              })
+            ">
+              <a-button type="link" :disabled="tabList.length <= 1 || index === 0">关闭左侧</a-button>
             </a-menu-item>
-            <a-menu-item
-              @click="
-                closeTabs({
-                  key: tab.key,
-                  position: 'right'
-                })
-              "
-            >
-              <a-button type="link" :disabled="nowTabList.length <= 1 || index === nowTabList.length - 1"
-                >关闭右侧</a-button
-              >
+            <a-menu-item @click="
+              closeTabs({
+                key: tab.key,
+                position: 'right'
+              })
+            ">
+              <a-button type="link" :disabled="tabList.length <= 1 || index === tabList.length - 1">关闭右侧</a-button>
             </a-menu-item>
           </a-menu>
         </a-dropdown>
@@ -45,21 +37,44 @@
 </template>
 <script lang="ts" setup>
 import userHeader from './user-header.vue'
+import { useMenuStore } from '@/stores/menu';
+import { useManagementMenuStore } from '@/stores/management-menu';
+
+const router = useRouter()
+const route = useRoute()
 
 const props = defineProps<{
   mode: string
 }>()
 
-const onEdit = (key, action) => {
+const menuStore = props.mode === 'normal' ? useMenuStore() : useManagementMenuStore()
+
+const { activeTabKey, tabList } = toRefs(menuStore)
+
+const activeTab = (key?: string) => {
+  key = key || activeTabKey.value
+  const index = tabList.value.findIndex((ele) => ele.key === key)
+  const activeTab = tabList.value[index]
+  router.push({
+    query: { ...route.query, sPid: activeTab.parentId, sId: activeTab.id },
+    path: activeTab.path
+  })
+
+  menuStore.activeMenu = activeTab.id
+  menuStore.menuOpenKeys = activeTab.paren
+  return activeTab
+}
+
+const onEdit = (key: string, action: 'remove') => {
   if (action === 'remove') {
-    if (this.nowTabList.length === 1) {
+    if (tabList.value.length === 1) {
       $notification.warn({
         message: '不能关闭了'
       })
       return
     }
-    this.$store.dispatch(props.mode === 'normal' ? 'removeTab' : 'removeManagementTab', key).then(() => {
-      this.activeTab()
+    menuStore.removeTab(key).then(() => {
+      activeTab()
     })
   }
 }
@@ -69,44 +84,14 @@ const closeTabs = (data) => {
   $notification.success({
     message: '操作成功'
   })
-  this.$store.dispatch(props.mode === 'normal' ? 'clearTabs' : 'clearManagementTabs', data).then(() => {
-    this.activeTab()
+  menuStore.clearTabs(data).then(() => {
+    activeTab()
   })
 }
-
-const activeTab = (key) => {
-  key = key || this.activeKey
-  const index = this.nowTabList.findIndex((ele) => ele.key === key)
-  const activeTab = this.nowTabList[index]
-  this.$router.push({
-    query: { ...this.$route.query, sPid: activeTab.parentId, sId: activeTab.id },
-    path: activeTab.path
-  })
-  //
-  this.$store.dispatch(props.mode === 'normal' ? 'activeMenu' : 'activeManagementMenu', activeTab.id)
-  this.$store.dispatch(props.mode === 'normal' ? 'menuOpenKeys' : 'menuManagementOpenKeys', activeTab.parentId)
-  return activeTab
-}
-
-// computed: {
-//     ...mapGetters(["getActiveTabKey", "getManagementActiveTabKey", "getTabList", "getManagementTabList", "getCollapsed"]),
-//     activeKey: {
-//       get() {
-//         return props.mode === "normal" ? this.getActiveTabKey : this.getManagementActiveTabKey;
-//       },
-//       set(value) {
-//         this.activeTab(value);
-//       },
-//     },
-//     nowTabList() {
-//       return props.mode === "normal" ? this.getTabList : this.getManagementTabList;
-//     },
-//   },
 </script>
 <style scoped>
 .my-tabs {
   flex: auto;
-  /* margin-right: 20px; */
   align-self: center;
   height: 40px;
 }
