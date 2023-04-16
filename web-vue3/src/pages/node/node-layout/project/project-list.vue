@@ -42,26 +42,30 @@
 
           <a-dropdown>
             <a-button type="primary"> 批量操作 <down-outlined /> </a-button>
-            <a-menu #overlay>
-              <a-menu-item>
-                <a-button type="primary" @click="batchStart">批量启动</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button type="primary" @click="batchRestart">批量重启</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button type="danger" @click="batchStop">批量关闭</a-button>
-              </a-menu-item>
-            </a-menu>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item>
+                  <a-button type="primary" @click="batchStart">批量启动</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button type="primary" @click="batchRestart">批量重启</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button type="danger" @click="batchStop">批量关闭</a-button>
+                </a-menu-item>
+              </a-menu>
+            </template>
           </a-dropdown>
 
           <a-button icon="download" type="primary" @click="handlerExportData()">导出</a-button>
           <a-dropdown>
-            <a-menu #overlay>
-              <a-menu-item key="1">
-                <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button>
-              </a-menu-item>
-            </a-menu>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item key="1">
+                  <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button>
+                </a-menu-item>
+              </a-menu>
+            </template>
 
             <a-upload
               name="file"
@@ -184,40 +188,42 @@
               更多
               <down-outlined />
             </a>
-            <a-menu #overlay>
-              <a-menu-item>
-                <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
-              </a-menu-item>
-              <!-- <a-menu-item>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item>
+                  <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
+                </a-menu-item>
+                <!-- <a-menu-item>
                 <a-button size="small" type="primary" @click="handleReplica(record)" v-if="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
               </a-menu-item> -->
-              <template v-if="record.outGivingProject">
-                <a-menu-item>
-                  <a-tooltip title="节点分发项目需要到节点分发中去删除">
-                    <a-button size="small" type="danger" :disabled="true">删除</a-button>
-                  </a-tooltip>
-                </a-menu-item>
-                <a-menu-item>
-                  <a-tooltip title="节点分发项目需要到节点分发中去删除">
-                    <a-button size="small" type="danger" :disabled="true">彻底删除</a-button>
-                  </a-tooltip>
-                </a-menu-item>
-                <a-menu-item>
-                  <a-button size="small" type="danger" @click="handleReleaseOutgiving(record)">释放分发</a-button>
-                </a-menu-item>
-              </template>
-              <template v-else>
-                <a-menu-item>
-                  <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-                </a-menu-item>
-                <a-menu-item>
-                  <a-button size="small" type="danger" @click="handleDelete(record, 'thorough')">彻底删除</a-button>
-                </a-menu-item>
-              </template>
-            </a-menu>
+                <template v-if="record.outGivingProject">
+                  <a-menu-item>
+                    <a-tooltip title="节点分发项目需要到节点分发中去删除">
+                      <a-button size="small" type="danger" :disabled="true">删除</a-button>
+                    </a-tooltip>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-tooltip title="节点分发项目需要到节点分发中去删除">
+                      <a-button size="small" type="danger" :disabled="true">彻底删除</a-button>
+                    </a-tooltip>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" type="danger" @click="handleReleaseOutgiving(record)">释放分发</a-button>
+                  </a-menu-item>
+                </template>
+                <template v-else>
+                  <a-menu-item>
+                    <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" type="danger" @click="handleDelete(record, 'thorough')">彻底删除</a-button>
+                  </a-menu-item>
+                </template>
+              </a-menu>
+            </template>
           </a-dropdown>
         </a-space>
       </template>

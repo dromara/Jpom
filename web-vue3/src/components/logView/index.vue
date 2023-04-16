@@ -32,11 +32,13 @@
               </a-tooltip>
               <!-- <a-dropdown>
                 <a-button type="link" style="padding: 0" icon="setting"> 设置 <down-outlined /></a-button>
-                <a-menu #overlay>
+                <template #overlay>
+                <a-menu >
                   <a-menu-item key="0"> </a-menu-item>
                   <a-menu-divider />
                   <a-menu-item key="3"> </a-menu-item>
                 </a-menu>
+                </template>
               </a-dropdown> -->
             </a-space>
           </a-col>

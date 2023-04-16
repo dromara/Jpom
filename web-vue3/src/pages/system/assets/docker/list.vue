@@ -125,23 +125,25 @@
           <a-button size="small" @click="viewWorkspaceDataHander(record)" type="primary">关联</a-button>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <down-outlined /> </a>
-            <a-menu #overlay>
-              <a-menu-item>
-                <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button
-                  size="small"
-                  :disabled="!record.swarmId || record.status !== 1"
-                  type="danger"
-                  @click="handleLeaveForce(record)"
-                  >退出集群</a-button
-                >
-              </a-menu-item>
-            </a-menu>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item>
+                  <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button
+                    size="small"
+                    :disabled="!record.swarmId || record.status !== 1"
+                    type="danger"
+                    @click="handleLeaveForce(record)"
+                    >退出集群</a-button
+                  >
+                </a-menu-item>
+              </a-menu>
+            </template>
           </a-dropdown>
         </a-space>
       </template>

@@ -31,40 +31,42 @@
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <down-outlined /> </a>
-            <a-menu #overlay>
-              <a-menu-item>
-                <a-button type="danger" size="small" :disabled="record.parent === 'sys'" @click="handleDelete(record)"
-                  >删除</a-button
-                >
-              </a-menu-item>
-              <a-menu-item>
-                <a-button
-                  type="danger"
-                  size="small"
-                  :disabled="record.pwdErrorCount === 0"
-                  @click="handleUnlock(record)"
-                  >解锁</a-button
-                >
-              </a-menu-item>
-              <a-menu-item>
-                <a-button
-                  type="danger"
-                  size="small"
-                  :disabled="record.parent === 'sys'"
-                  @click="restUserPwdHander(record)"
-                  >重置密码</a-button
-                >
-              </a-menu-item>
-              <a-menu-item>
-                <a-button
-                  type="danger"
-                  size="small"
-                  :disabled="record.twoFactorAuthKey ? false : true"
-                  @click="handleCloseMfa(record)"
-                  >关闭MFA</a-button
-                >
-              </a-menu-item>
-            </a-menu>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item>
+                  <a-button type="danger" size="small" :disabled="record.parent === 'sys'" @click="handleDelete(record)"
+                    >删除</a-button
+                  >
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button
+                    type="danger"
+                    size="small"
+                    :disabled="record.pwdErrorCount === 0"
+                    @click="handleUnlock(record)"
+                    >解锁</a-button
+                  >
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button
+                    type="danger"
+                    size="small"
+                    :disabled="record.parent === 'sys'"
+                    @click="restUserPwdHander(record)"
+                    >重置密码</a-button
+                  >
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button
+                    type="danger"
+                    size="small"
+                    :disabled="record.twoFactorAuthKey ? false : true"
+                    @click="handleCloseMfa(record)"
+                    >关闭MFA</a-button
+                  >
+                </a-menu-item>
+              </a-menu>
+            </template>
           </a-dropdown>
         </a-space>
       </template>

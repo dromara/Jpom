@@ -136,27 +136,29 @@
               更多
               <down-outlined />
             </a>
-            <a-menu #overlay>
-              <a-menu-item>
-                <template v-if="record.releaseMethod !== 5">
-                  <a-button
-                    size="small"
-                    :disabled="!record.hasFile || record.releaseMethod === 0"
-                    type="danger"
-                    @click="handleRollback(record)"
-                    >回滚
-                  </a-button>
-                </template>
-                <template v-else>
-                  <a-tooltip title="Dockerfile 构建方式不支持在这里回滚">
-                    <a-button size="small" :disabled="true" type="danger">回滚 </a-button>
-                  </a-tooltip>
-                </template>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-              </a-menu-item>
-            </a-menu>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item>
+                  <template v-if="record.releaseMethod !== 5">
+                    <a-button
+                      size="small"
+                      :disabled="!record.hasFile || record.releaseMethod === 0"
+                      type="danger"
+                      @click="handleRollback(record)"
+                      >回滚
+                    </a-button>
+                  </template>
+                  <template v-else>
+                    <a-tooltip title="Dockerfile 构建方式不支持在这里回滚">
+                      <a-button size="small" :disabled="true" type="danger">回滚 </a-button>
+                    </a-tooltip>
+                  </template>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                </a-menu-item>
+              </a-menu>
+            </template>
           </a-dropdown>
         </a-space>
       </template>

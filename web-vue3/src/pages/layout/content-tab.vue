@@ -1,34 +1,44 @@
 <template>
-  <a-tabs v-model="activeTabKey" class="my-tabs" hide-add type="editable-card" @edit="onEdit">
+  <a-tabs v-model:activeKey="activeTabKey" class="my-tabs" hide-add type="editable-card" @edit="onEdit">
     <a-tab-pane v-for="(tab, index) in tabList" :key="tab.key" :closable="tabList.length > 1">
       <template #tab>
         <a-dropdown :trigger="['contextmenu']">
           <span style="display: inline-table">{{ tab.title }}</span>
-          <a-menu #overlay>
-            <a-menu-item @click="
-              closeTabs({
-                key: tab.key
-              })
-            ">
-              <a-button type="link" :disabled="tabList.length <= 1">关闭其他</a-button>
-            </a-menu-item>
-            <a-menu-item @click="
-              closeTabs({
-                key: tab.key,
-                position: 'left'
-              })
-            ">
-              <a-button type="link" :disabled="tabList.length <= 1 || index === 0">关闭左侧</a-button>
-            </a-menu-item>
-            <a-menu-item @click="
-              closeTabs({
-                key: tab.key,
-                position: 'right'
-              })
-            ">
-              <a-button type="link" :disabled="tabList.length <= 1 || index === tabList.length - 1">关闭右侧</a-button>
-            </a-menu-item>
-          </a-menu>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item
+                @click="
+                  closeTabs({
+                    key: tab.key
+                  })
+                "
+              >
+                <a-button type="link" :disabled="tabList.length <= 1">关闭其他</a-button>
+              </a-menu-item>
+              <a-menu-item
+                @click="
+                  closeTabs({
+                    key: tab.key,
+                    position: 'left'
+                  })
+                "
+              >
+                <a-button type="link" :disabled="tabList.length <= 1 || index === 0">关闭左侧</a-button>
+              </a-menu-item>
+              <a-menu-item
+                @click="
+                  closeTabs({
+                    key: tab.key,
+                    position: 'right'
+                  })
+                "
+              >
+                <a-button type="link" :disabled="tabList.length <= 1 || index === tabList.length - 1"
+                  >关闭右侧</a-button
+                >
+              </a-menu-item>
+            </a-menu>
+          </template>
         </a-dropdown>
       </template>
     </a-tab-pane>
@@ -37,8 +47,8 @@
 </template>
 <script lang="ts" setup>
 import userHeader from './user-header.vue'
-import { useMenuStore } from '@/stores/menu';
-import { useManagementMenuStore } from '@/stores/management-menu';
+import { useMenuStore } from '@/stores/menu'
+import { useManagementMenuStore } from '@/stores/management-menu'
 
 const router = useRouter()
 const route = useRoute()

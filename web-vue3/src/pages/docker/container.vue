@@ -180,30 +180,34 @@
               <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
                 <a-icon type="more" />
               </a>
-              <a-menu #overlay>
-                <a-menu-item>
-                  <atooltip title="编辑容器的一些基础参数">
-                    <a-button
-                      size="small"
-                      type="link"
-                      icon="edit"
-                      :disabled="record.state !== 'running'"
-                      @click="editContainer(record)"
-                      >编辑</a-button
-                    >
-                  </atooltip>
-                </a-menu-item>
-                <a-menu-item>
-                  <a-tooltip title="点击查看日志">
-                    <a-button size="small" type="link" icon="message" @click="viewLog(record)">日志</a-button>
-                  </a-tooltip>
-                </a-menu-item>
-                <a-menu-item>
-                  <a-tooltip title="强制删除">
-                    <a-button size="small" type="link" icon="delete" @click="doAction(record, 'remove')">删除</a-button>
-                  </a-tooltip>
-                </a-menu-item>
-              </a-menu>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item>
+                    <atooltip title="编辑容器的一些基础参数">
+                      <a-button
+                        size="small"
+                        type="link"
+                        icon="edit"
+                        :disabled="record.state !== 'running'"
+                        @click="editContainer(record)"
+                        >编辑</a-button
+                      >
+                    </atooltip>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-tooltip title="点击查看日志">
+                      <a-button size="small" type="link" icon="message" @click="viewLog(record)">日志</a-button>
+                    </a-tooltip>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-tooltip title="强制删除">
+                      <a-button size="small" type="link" icon="delete" @click="doAction(record, 'remove')"
+                        >删除</a-button
+                      >
+                    </a-tooltip>
+                  </a-menu-item>
+                </a-menu>
+              </template>
             </a-dropdown>
           </a-space>
         </template>
@@ -429,32 +433,34 @@
                 <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
                   <a-icon type="more" />
                 </a>
-                <a-menu #overlay>
-                  <a-menu-item>
-                    <atooltip title="编辑容器的一些基础参数">
-                      <a-button
-                        size="small"
-                        type="link"
-                        icon="edit"
-                        :disabled="record.state !== 'running'"
-                        @click="editContainer(record)"
-                        >编辑</a-button
-                      >
-                    </atooltip>
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a-tooltip title="点击查看日志">
-                      <a-button size="small" type="link" icon="message" @click="viewLog(record)">日志</a-button>
-                    </a-tooltip>
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a-tooltip title="强制删除">
-                      <a-button size="small" type="link" icon="delete" @click="doAction(record, 'remove')"
-                        >删除</a-button
-                      >
-                    </a-tooltip>
-                  </a-menu-item>
-                </a-menu>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item>
+                      <atooltip title="编辑容器的一些基础参数">
+                        <a-button
+                          size="small"
+                          type="link"
+                          icon="edit"
+                          :disabled="record.state !== 'running'"
+                          @click="editContainer(record)"
+                          >编辑</a-button
+                        >
+                      </atooltip>
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-tooltip title="点击查看日志">
+                        <a-button size="small" type="link" icon="message" @click="viewLog(record)">日志</a-button>
+                      </a-tooltip>
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-tooltip title="强制删除">
+                        <a-button size="small" type="link" icon="delete" @click="doAction(record, 'remove')"
+                          >删除</a-button
+                        >
+                      </a-tooltip>
+                    </a-menu-item>
+                  </a-menu>
+                </template>
               </a-dropdown>
             </a-space>
           </template>

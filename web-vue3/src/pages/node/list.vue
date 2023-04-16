@@ -218,54 +218,56 @@
                   更多
                   <down-outlined />
                 </a>
-                <a-menu #overlay>
-                  <a-menu-item>
-                    <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-                  </a-menu-item>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item>
+                      <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+                    </a-menu-item>
 
-                  <a-menu-item>
-                    <a-tooltip placement="leftBottom" title="删除会检查数据关联性,并且节点不存在项目或者脚本">
-                      <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-                    </a-tooltip>
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a-tooltip
-                      placement="leftBottom"
-                      title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用"
-                    >
-                      <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
-                    </a-tooltip>
-                  </a-menu-item>
-                  <a-menu-divider />
-                  <a-menu-item>
-                    <a-button
-                      size="small"
-                      type="primary"
-                      :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
-                      @click="sortItemHander(record, index, 'top')"
-                      >置顶</a-button
-                    >
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a-button
-                      size="small"
-                      type="primary"
-                      :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
-                      @click="sortItemHander(record, index, 'up')"
-                      >上移</a-button
-                    >
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a-button
-                      size="small"
-                      type="primary"
-                      :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
-                      @click="sortItemHander(record, index, 'down')"
-                    >
-                      下移
-                    </a-button>
-                  </a-menu-item>
-                </a-menu>
+                    <a-menu-item>
+                      <a-tooltip placement="leftBottom" title="删除会检查数据关联性,并且节点不存在项目或者脚本">
+                        <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                      </a-tooltip>
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-tooltip
+                        placement="leftBottom"
+                        title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用"
+                      >
+                        <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
+                      </a-tooltip>
+                    </a-menu-item>
+                    <a-menu-divider />
+                    <a-menu-item>
+                      <a-button
+                        size="small"
+                        type="primary"
+                        :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
+                        @click="sortItemHander(record, index, 'top')"
+                        >置顶</a-button
+                      >
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-button
+                        size="small"
+                        type="primary"
+                        :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
+                        @click="sortItemHander(record, index, 'up')"
+                        >上移</a-button
+                      >
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-button
+                        size="small"
+                        type="primary"
+                        :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
+                        @click="sortItemHander(record, index, 'down')"
+                      >
+                        下移
+                      </a-button>
+                    </a-menu-item>
+                  </a-menu>
+                </template>
               </a-dropdown>
             </a-space>
           </template>

@@ -112,6 +112,7 @@ export const useManagementMenuStore = defineStore('MANAGEMENT-menu', {
           // 新增
           tabList.push(tab)
           this.tabList = tabList
+          localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList))
         }
         // 设置当前选择的菜单
         this.activeTabKey = tab.key

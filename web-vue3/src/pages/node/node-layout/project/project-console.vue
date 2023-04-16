@@ -38,16 +38,18 @@
                 <down-outlined />
               </a-tag>
             </a>
-            <a-menu #overlay>
-              <a-menu-item>
-                <a-button type="primary" size="small" :disabled="!project.logSize" @click="handleDownload"
-                  >导出日志</a-button
-                >
-              </a-menu-item>
-              <a-menu-item>
-                <a-button type="primary" size="small" @click="handleLogBack">备份列表</a-button>
-              </a-menu-item>
-            </a-menu>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item>
+                  <a-button type="primary" size="small" :disabled="!project.logSize" @click="handleDownload">
+                    导出日志
+                  </a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button type="primary" size="small" @click="handleLogBack">备份列表</a-button>
+                </a-menu-item>
+              </a-menu>
+            </template>
           </a-dropdown>
         </a-space>
       </template>

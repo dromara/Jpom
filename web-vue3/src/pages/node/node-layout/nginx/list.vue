@@ -34,26 +34,28 @@
                   更多操作
                   <down-outlined />
                 </a>
-                <a-menu #overlay>
-                  <a-menu-item>
-                    <a-button type="primary" @click="handleEditNginx">编辑 Nginx 服务</a-button>
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a-button :disabled="nginxData.status" type="primary" @click="handleNginxCommand('open')"
-                      >启动 Nginx</a-button
-                    >
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('reload')"
-                      >重新加载 Nginx</a-button
-                    >
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('close')"
-                      >停止 Nginx</a-button
-                    >
-                  </a-menu-item>
-                </a-menu>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item>
+                      <a-button type="primary" @click="handleEditNginx">编辑 Nginx 服务</a-button>
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-button :disabled="nginxData.status" type="primary" @click="handleNginxCommand('open')"
+                        >启动 Nginx</a-button
+                      >
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('reload')"
+                        >重新加载 Nginx</a-button
+                      >
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('close')"
+                        >停止 Nginx</a-button
+                      >
+                    </a-menu-item>
+                  </a-menu>
+                </template>
               </a-dropdown>
               <a-tooltip>
                 <template #title>
