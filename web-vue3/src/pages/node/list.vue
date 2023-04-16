@@ -90,7 +90,7 @@
             </template>
             <span v-else> - </span>
           </a-tooltip>
-          <template #name slot-scope="text, record">
+          <!-- <template #name slot-scope="text, record">
             <template v-if="record.openStatus !== 1">
               <a-tooltip :title="`${text}`">
                 <span>{{ text }}</span>
@@ -103,7 +103,7 @@
                 </a-button>
               </a-tooltip>
             </template>
-          </template>
+          </template> -->
           <a-tooltip #status slot-scope="text, item" placement="topLeft" :title="`${statusMap[item.machineNodeData && item.machineNodeData.status] || '未知'} ${item.machineNodeData && item.machineNodeData.statusMsg
             }`">
             <template v-if="item.openStatus === 1">
@@ -204,6 +204,7 @@
                       </a-button>
                     </a-menu-item>
                   </a-menu>
+                </template>
               </a-dropdown>
             </a-space>
           </template>
@@ -447,7 +448,7 @@
     </a-modal>
   </div>
 </template>
-<script lang="ts" setup>
+<script lang="tsx" setup>
 import {
   CHANGE_PAGE,
   COMPUTED_PAGINATION,
@@ -495,10 +496,7 @@ const columns = [
     width: 200,
     sorter: true,
     key: 'name',
-    ellipsis: true,
-    customRender(text, record, index) {
-      return (<div>sdsdas < /div>)
-    }
+    ellipsis: true
   },
   { title: '状态', dataIndex: 'status', width: '100px', ellipsis: true, scopedSlots: { customRender: 'status' } },
   {
@@ -532,7 +530,7 @@ const columns = [
     ellipsis: true,
     scopedSlots: { customRender: 'jvmInfo' }
   },
-  // { title: "JVM 剩余内存", dataIndex: "machineNodeData.jvmFreeMemory", ellipsis: true, scopedSlots: { customRender: "freeMemory" } },
+  // {title: "JVM 剩余内存", dataIndex: "machineNodeData.jvmFreeMemory", ellipsis: true, scopedSlots: {customRender: "freeMemory" } },
 
   {
     title: '项目数',
