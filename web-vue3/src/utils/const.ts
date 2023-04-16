@@ -69,7 +69,7 @@ export const PAGE_DEFAULT_LIST_QUERY = {
  * @param {Array} pageSizeOptions 分页选择条选项
  * @returns
  */
-export function COMPUTED_PAGINATION(queryParam: any, pageSizeOptions: []) {
+export function COMPUTED_PAGINATION(queryParam: any, pageSizeOptions?: []) {
   // console.log(queryParam);
   const limit = queryParam.limit || PAGE_DEFAULT_LIST_QUERY.limit
   const total = queryParam.total || 0
