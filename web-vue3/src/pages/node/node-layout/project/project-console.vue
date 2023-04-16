@@ -15,7 +15,7 @@
     <!-- </div> -->
     <!-- console -->
     <log-view :ref="`logView`" height="calc(100vh - 140px)">
-      <template slot="before">
+      <template #before>
         <a-space>
           <a-button size="small" :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start"
             >启动</a-button
@@ -38,7 +38,7 @@
                 <a-icon type="down" />
               </a-tag>
             </a>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item>
                 <a-button type="primary" size="small" :disabled="!project.logSize" @click="handleDownload"
                   >导出日志</a-button
@@ -83,13 +83,13 @@
         bordered
         :rowKey="(record, index) => index"
       >
-        <a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip #filename slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip slot="fileSize" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip #fileSize slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <template slot="operation" slot-scope="text, record">
+        <template #operation slot-scope="text, record">
           <a-space>
             <a-button type="primary" @click="handleDownloadLogback(record)">下载</a-button>
             <a-button type="danger" @click="handleDelete(record)">删除</a-button>

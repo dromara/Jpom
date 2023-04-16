@@ -2,7 +2,7 @@
   <div>
     <template v-if="type === 'container'">
       <a-table :data-source="list" size="middle" :columns="columns" :pagination="false" bordered rowKey="id">
-        <template slot="title">
+        <template #title>
           <a-space>
             <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
             <a-input
@@ -26,8 +26,8 @@
           </a-space>
         </template>
 
-        <a-popover :title="`容器名称：${(text || []).join(',')}`" slot="names" slot-scope="text, record">
-          <template slot="content">
+        <a-popover :title="`容器名称：${(text || []).join(',')}`" #names slot-scope="text, record">
+          <template #content>
             <p>容器Id: {{ record.id }}</p>
             <p>镜像：{{ record.image }}</p>
             <p>镜像Id: {{ record.imageId }}</p>
@@ -36,8 +36,8 @@
           <span>{{ (text || []).join(',') }}</span>
         </a-popover>
 
-        <a-popover :title="`容器名标签`" slot="labels" slot-scope="text, record">
-          <template slot="content">
+        <a-popover :title="`容器名标签`" #labels slot-scope="text, record">
+          <template #content>
             <template v-if="record.labels">
               <p v-for="(value, key) in record.labels" :key="key">{{ key }}<a-icon type="arrow-right" />{{ value }}</p>
             </template>
@@ -47,8 +47,8 @@
           </template>
           <template v-else>-</template>
         </a-popover>
-        <a-popover :title="`挂载`" slot="mounts" slot-scope="text, record">
-          <template slot="content">
+        <a-popover :title="`挂载`" #mounts slot-scope="text, record">
+          <template #content>
             <template v-if="record.mounts">
               <div v-for="(item, index) in record.mounts" :key="index">
                 <p>
@@ -65,16 +65,16 @@
           <template v-else>-</template>
         </a-popover>
 
-        <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
 
-        <a-tooltip slot="showid" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip #showid slot-scope="text" placement="topLeft" :title="text">
           <span style="display: none"> {{ (array = text.split(':')) }}</span>
           <span>{{ array[array.length - 1].slice(0, 12) }}</span>
         </a-tooltip>
 
-        <a-popover slot="ports" slot-scope="text, record" placement="topLeft">
+        <a-popover #ports slot-scope="text, record" placement="topLeft">
           <template #title>
             网络端口
             <ul>
@@ -83,7 +83,7 @@
               </li>
             </ul>
           </template>
-          <template slot="content">
+          <template #content>
             <template v-if="record.networkSettings">
               <template v-if="record.networkSettings.networks">
                 <template v-if="record.networkSettings.networks.bridge">
@@ -133,15 +133,15 @@
           }}</span>
         </a-popover>
 
-        <template slot="state" slot-scope="text, record">
+        <template #state slot-scope="text, record">
           <a-tooltip :title="(record.status || '') + ' 点击查看日志'" @click="viewLog(record)">
             <a-switch :checked="text === 'running'" :disabled="true">
-              <a-icon slot="checkedChildren" type="check-circle" />
-              <a-icon slot="unCheckedChildren" type="warning" />
+              <a-icon #checkedChildren type="check-circle" />
+              <a-icon #unCheckedChildren type="warning" />
             </a-switch>
           </a-tooltip>
         </template>
-        <template slot="operation" slot-scope="text, record">
+        <template #operation slot-scope="text, record">
           <a-space>
             <template v-if="record.state === 'running'">
               <a-tooltip title="容器是运行中可以进入终端">
@@ -180,7 +180,7 @@
               <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
                 <a-icon type="more" />
               </a>
-              <a-menu slot="overlay">
+              <a-menu #overlay>
                 <a-menu-item>
                   <atooltip title="编辑容器的一些基础参数">
                     <a-button
@@ -222,7 +222,7 @@
           }
         "
       >
-        <template slot="title">
+        <template #title>
           <a-space>
             <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
             <a-input
@@ -245,10 +245,10 @@
             <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="autoUpdate" />
           </a-space>
         </template>
-        <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <template slot="state" slot-scope="text, record">
+        <template #state slot-scope="text, record">
           <span style="display: none">
             {{
               (array = (record.child || []).map((item) => {
@@ -270,7 +270,7 @@
         </template>
 
         <a-table
-          slot="expandedRowRender"
+          #expandedRowRender
           slot-scope="record"
           :data-source="record.child"
           size="middle"
@@ -279,8 +279,8 @@
           bordered
           rowKey="id"
         >
-          <a-popover :title="`容器名称：${(text || []).join(',')}`" slot="names" slot-scope="text, record">
-            <template slot="content">
+          <a-popover :title="`容器名称：${(text || []).join(',')}`" #names slot-scope="text, record">
+            <template #content>
               <p>容器Id: {{ record.id }}</p>
               <p>镜像：{{ record.image }}</p>
               <p>镜像Id: {{ record.imageId }}</p>
@@ -289,8 +289,8 @@
             <span>{{ (text || []).join(',') }}</span>
           </a-popover>
 
-          <a-popover :title="`容器名标签`" slot="labels" slot-scope="text, record">
-            <template slot="content">
+          <a-popover :title="`容器名标签`" #labels slot-scope="text, record">
+            <template #content>
               <template v-if="record.labels">
                 <p v-for="(value, key) in record.labels" :key="key">
                   {{ key }}<a-icon type="arrow-right" />{{ value }}
@@ -302,8 +302,8 @@
             </template>
             <template v-else>-</template>
           </a-popover>
-          <a-popover :title="`挂载`" slot="mounts" slot-scope="text, record">
-            <template slot="content">
+          <a-popover :title="`挂载`" #mounts slot-scope="text, record">
+            <template #content>
               <template v-if="record.mounts">
                 <div v-for="(item, index) in record.mounts" :key="index">
                   <p>
@@ -320,16 +320,16 @@
             <template v-else>-</template>
           </a-popover>
 
-          <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+          <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
             <span>{{ text }}</span>
           </a-tooltip>
 
-          <a-tooltip slot="showid" slot-scope="text" placement="topLeft" :title="text">
+          <a-tooltip #showid slot-scope="text" placement="topLeft" :title="text">
             <span style="display: none"> {{ (array = text.split(':')) }}</span>
             <span>{{ array[array.length - 1].slice(0, 12) }}</span>
           </a-tooltip>
 
-          <a-popover slot="ports" slot-scope="text, record" placement="topLeft">
+          <a-popover #ports slot-scope="text, record" placement="topLeft">
             <template #title>
               网络端口
               <ul>
@@ -338,7 +338,7 @@
                 </li>
               </ul>
             </template>
-            <template slot="content">
+            <template #content>
               <template v-if="record.networkSettings">
                 <template v-if="record.networkSettings.networks">
                   <template v-if="record.networkSettings.networks.bridge">
@@ -388,15 +388,15 @@
             }}</span>
           </a-popover>
 
-          <template slot="state" slot-scope="text, record">
+          <template #state slot-scope="text, record">
             <a-tooltip :title="(record.status || '') + ' 点击查看日志'" @click="viewLog(record)">
               <a-switch :checked="text === 'running'" :disabled="true">
-                <a-icon slot="checkedChildren" type="check-circle" />
-                <a-icon slot="unCheckedChildren" type="warning" />
+                <a-icon #checkedChildren type="check-circle" />
+                <a-icon #unCheckedChildren type="warning" />
               </a-switch>
             </a-tooltip>
           </template>
-          <template slot="operation" slot-scope="text, record">
+          <template #operation slot-scope="text, record">
             <a-space>
               <template v-if="record.state === 'running'">
                 <a-tooltip title="容器是运行中可以进入终端">
@@ -429,7 +429,7 @@
                 <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
                   <a-icon type="more" />
                 </a>
-                <a-menu slot="overlay">
+                <a-menu #overlay>
                   <a-menu-item>
                     <atooltip title="编辑容器的一些基础参数">
                       <a-button

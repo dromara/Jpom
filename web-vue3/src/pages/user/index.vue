@@ -11,7 +11,7 @@
       bordered
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input v-model="listQuery.id" @pressEnter="loadData" placeholder="用户名ID" class="search-input-item" />
           <a-input
@@ -26,12 +26,12 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
         </a-space></template
       >
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item>
                 <a-button type="danger" size="small" :disabled="record.parent === 'sys'" @click="handleDelete(record)"
                   >删除</a-button
@@ -68,7 +68,7 @@
           </a-dropdown>
         </a-space>
       </template>
-      <template slot="systemUser" slot-scope="text, record">
+      <template #systemUser slot-scope="text, record">
         <a-switch
           size="small"
           checked-children="是"
@@ -77,7 +77,7 @@
           :checked="record.systemUser == 1"
         />
       </template>
-      <template slot="status" slot-scope="text, record">
+      <template #status slot-scope="text, record">
         <a-switch
           size="small"
           checked-children="启用"
@@ -87,7 +87,7 @@
         />
       </template>
 
-      <template slot="twoFactorAuthKey" slot-scope="text, record">
+      <template #twoFactorAuthKey slot-scope="text, record">
         <a-switch
           size="small"
           checked-children="开"
@@ -97,11 +97,11 @@
         />
       </template>
 
-      <a-tooltip slot="id" slot-scope="text" :title="text">
+      <a-tooltip #id slot-scope="text" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <a-tooltip slot="email" slot-scope="text" :title="text">
+      <a-tooltip #email slot-scope="text" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
     </a-table>
@@ -129,10 +129,10 @@
           <a-input v-model="temp.name" :maxLength="50" placeholder="昵称" />
         </a-form-item>
         <a-form-item prop="systemUser">
-          <template slot="label">
+          <template #label>
             管理员
             <a-tooltip v-if="createOption">
-              <template slot="title"> 管理员拥有：管理服务端的部分权限 </template>
+              <template #title> 管理员拥有：管理服务端的部分权限 </template>
               <question-circle-filled />
             </a-tooltip>
           </template>
@@ -155,7 +155,7 @@
             </a-col>
             <a-col :span="4" style="text-align: right">
               <a-tooltip>
-                <template slot="title"> 禁用后该用户不能登录平台 </template>
+                <template #title> 禁用后该用户不能登录平台 </template>
                 <a-icon v-if="createOption" type="question-circle" theme="filled" />
                 状态：
               </a-tooltip>
@@ -191,7 +191,7 @@
         </a-form-item>
       </a-form>
     </a-modal>
-    <a-modal destroyOnClose v-model="showUserPwd" title="用户密码提示" :maskClosable="false" :footer="null">
+    <a-modal destroyOnClose v-model:visible="showUserPwd" title="用户密码提示" :maskClosable="false" :footer="null">
       <a-result status="success" :title="temp.title">
         <template #subTitle>
           账号新密码为：

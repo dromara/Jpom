@@ -2,7 +2,7 @@
   <div class="full-content">
     <!-- 表格 -->
     <a-card :bodyStyle="{ padding: '10px' }">
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             allowClear
@@ -57,7 +57,7 @@
               <a-button type="primary" :disabled="true"> 批量操作 <a-icon type="down" /> </a-button>
             </template>
             <a-dropdown v-else>
-              <a-menu slot="overlay">
+              <a-menu #overlay>
                 <a-menu-item key="1" @click="batchBuild"> 批量构建 </a-menu-item>
                 <a-menu-item key="2" @click="batchCancel"> 批量取消 </a-menu-item>
               </a-menu>
@@ -82,7 +82,7 @@
               <a-col v-for="item in list" :key="item.id" :span="6">
                 <template>
                   <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
-                    <template slot="title">
+                    <template #title>
                       <a-row :gutter="[4, 0]">
                         <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
                           <a-button type="link" style="padding: 0px" size="small" @click="handleDetails(item)">
@@ -104,7 +104,7 @@
                     </template>
 
                     <a-tooltip>
-                      <template slot="title">
+                      <template #title>
                         <div v-if="item.branchTagName">
                           <div>标签名称：{{ item.branchTagName }}</div>
                           <div>上次构建基于 commitId：{{ item.repositoryLastCommitId }}</div>
@@ -172,7 +172,7 @@
                           <a-button size="small" type="primary" @click="handleConfirmStartBuild(item)"
                             >构建<a-icon type="down"
                           /></a-button>
-                          <a-menu slot="overlay">
+                          <a-menu #overlay>
                             <a-menu-item key="1">
                               <a-button size="small" type="primary" @click="reqStartBuild({ id: item.id }, true)"
                                 >直接构建</a-button
@@ -251,7 +251,7 @@
           :row-selection="rowSelection"
         >
           <a-tooltip
-            slot="name"
+            #name
             slot-scope="text, record"
             placement="topLeft"
             @click="handleDetails(record)"
@@ -259,8 +259,8 @@
           >
             <a-button type="link" style="padding: 0px" size="small"> <a-icon type="fullscreen" />{{ text }}</a-button>
           </a-tooltip>
-          <a-tooltip slot="branchName" slot-scope="text, record" placement="topLeft">
-            <template slot="title">
+          <a-tooltip #branchName slot-scope="text, record" placement="topLeft">
+            <template #title>
               <div v-if="record.branchTagName">
                 <div>标签名称：{{ record.branchTagName }}</div>
                 <div>上次构建基于 commitId：{{ record.repositoryLastCommitId }}</div>
@@ -273,20 +273,15 @@
             <span v-if="record.branchTagName"><a-icon type="tag" />{{ record.branchTagName }}</span>
             <span v-else>{{ text }}</span>
           </a-tooltip>
-          <!-- <a-tooltip slot="resultDirFile" slot-scope="text" placement="topLeft" :title="text">
+          <!-- <a-tooltip #resultDirFile slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip> -->
-          <a-tooltip
-            slot="buildMode"
-            slot-scope="text"
-            placement="topLeft"
-            :title="text === 1 ? '容器构建' : '本地构建'"
-          >
+          <a-tooltip #buildMode slot-scope="text" placement="topLeft" :title="text === 1 ? '容器构建' : '本地构建'">
             <a-icon v-if="text === 1" type="cloud" />
             <a-icon v-else type="code" />
           </a-tooltip>
-          <a-tooltip slot="releaseMethod" slot-scope="text, record">
-            <template slot="title">
+          <a-tooltip #releaseMethod slot-scope="text, record">
+            <template #title>
               <ul>
                 <li>发布方式：{{ releaseMethodMap[text] }}</li>
                 <li>产物目录：{{ record.resultDirFile }}</li>
@@ -295,19 +290,19 @@
             </template>
             <span>{{ releaseMethodMap[text] }}</span>
           </a-tooltip>
-          <a-tooltip slot="status" slot-scope="text, item" :title="item.statusMsg || statusMap[text] || '未知'">
+          <a-tooltip #status slot-scope="text, item" :title="item.statusMsg || statusMap[text] || '未知'">
             <a-tag :color="statusColor[item.status]" :title="item.statusMsg || statusMap[text] || '未知'">{{
               statusMap[text] || '未知'
             }}</a-tag>
           </a-tooltip>
-          <a-tooltip slot="buildId" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
+          <a-tooltip #buildId slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
             <span v-if="record.buildId <= 0"></span>
             <a-tag v-else color="#108ee9" @click="handleBuildLog(record)">#{{ text }}</a-tag>
           </a-tooltip>
-          <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+          <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
             <span>{{ text }}</span>
           </a-tooltip>
-          <template slot="operation" slot-scope="text, record, index">
+          <template #operation slot-scope="text, record, index">
             <a-space>
               <a-button
                 size="small"
@@ -320,7 +315,7 @@
                 <a-button size="small" type="primary" @click="handleConfirmStartBuild(record)"
                   >构建<a-icon type="down"
                 /></a-button>
-                <a-menu slot="overlay">
+                <a-menu #overlay>
                   <a-menu-item key="1">
                     <a-button size="small" type="primary" @click="reqStartBuild({ id: record.id }, true)"
                       >直接构建</a-button
@@ -339,7 +334,7 @@
                   更多
                   <a-icon type="down" />
                 </a>
-                <a-menu slot="overlay">
+                <a-menu #overlay>
                   <a-menu-item>
                     <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
                   </a-menu-item>
@@ -433,7 +428,7 @@
       <template v-if="temp.id">
         <a-tabs v-model="editBuildVisible" tabPosition="top" size="small">
           <a-tab-pane :key="1">
-            <span slot="tab">
+            <span #tab>
               <a-icon type="info" />
               构建信息
             </span>
@@ -441,7 +436,7 @@
           </a-tab-pane>
 
           <a-tab-pane :key="2" forceRender>
-            <span slot="tab">
+            <span #tab>
               <a-icon type="edit" />
               编辑构建
             </span>
@@ -465,7 +460,7 @@
             ></editBuildPage>
           </a-tab-pane>
           <a-tab-pane :key="3">
-            <span slot="tab">
+            <span #tab>
               <a-icon type="api" />
               触发器
             </span>
@@ -529,7 +524,7 @@
             inputPlaceholder="自定义分支通配表达式"
             selectPlaceholder="请选择构建对应的分支"
           >
-            <div slot="inputTips">
+            <div #inputTips>
               支持通配符(AntPathMatcher)
               <ul>
                 <li>? 匹配一个字符</li>
@@ -551,7 +546,7 @@
             inputPlaceholder="自定义标签通配表达式"
             selectPlaceholder="选择构建的标签,不选为最新提交"
           >
-            <div slot="inputTips">
+            <div #inputTips>
               支持通配符(AntPathMatcher)
               <ul>
                 <li>? 匹配一个字符</li>
@@ -569,7 +564,7 @@
             <a-switch v-model="temp.checkRepositoryDiff" checked-children="是" un-checked-children="否" />
             <span>
               <a-tooltip>
-                <template slot="title"> 差异构建是指构建时候是否判断仓库代码有变动，如果没有变动则不执行构建 </template>
+                <template #title> 差异构建是指构建时候是否判断仓库代码有变动，如果没有变动则不执行构建 </template>
                 <question-circle-filled />
               </a-tooltip>
               该选项仅本次构建生效

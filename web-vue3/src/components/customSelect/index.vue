@@ -18,11 +18,11 @@
       @change="selectChange"
       :placeholder="selectPlaceholder"
     >
-      <a-icon slot="suffixIcon" v-if="suffixIcon" :type="suffixIcon" @click="refreshSelect" />
-      <template v-if="$slots.suffixIcon && !suffixIcon" slot="suffixIcon">
+      <a-icon #suffixIcon v-if="suffixIcon" :type="suffixIcon" @click="refreshSelect" />
+      <template v-if="$slots.suffixIcon && !suffixIcon" #suffixIcon>
         <slot name="suffixIcon"></slot>
       </template>
-      <div slot="dropdownRender" slot-scope="menu">
+      <div #dropdownRender slot-scope="menu">
         <div style="padding: 8px 8px; cursor: pointer; display: flex" @mousedown="(e) => e.preventDefault()">
           <a-input-search
             enter-button="添加"
@@ -35,8 +35,8 @@
             :placeholder="inputPlaceholder"
             size="small"
           >
-            <a-tooltip slot="suffix" v-if="$slots.inputTips">
-              <template slot="title">
+            <a-tooltip #suffix v-if="$slots.inputTips">
+              <template #title>
                 <slot name="inputTips"></slot>
               </template>
               <question-circle-filled />

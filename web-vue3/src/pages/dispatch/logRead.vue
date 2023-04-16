@@ -10,7 +10,7 @@
       bordered
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             v-model="listQuery['%name%']"
@@ -25,11 +25,11 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
         </a-space>
       </template>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #name slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
           <a-button type="primary" size="small" @click="handleLogRead(record)">查看</a-button>

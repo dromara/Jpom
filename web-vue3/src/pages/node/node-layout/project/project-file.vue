@@ -37,14 +37,14 @@
           bordered
           :rowKey="(record, index) => index"
         >
-          <template slot="title">
+          <template #title>
             <!-- <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
             <a-space>
               <a-dropdown :disabled="!Object.keys(this.tempNode).length">
                 <a-button size="small" type="primary" @click="(e) => e.preventDefault()"
                   ><a-icon type="upload" />上传</a-button
                 >
-                <a-menu slot="overlay">
+                <a-menu #overlay>
                   <a-menu-item @click="handleUpload">
                     <a-space><a-icon type="file" />上传文件</a-space>
                   </a-menu-item>
@@ -55,7 +55,7 @@
               </a-dropdown>
               <a-dropdown :disabled="!Object.keys(this.tempNode).length">
                 <a-button size="small" type="primary" @click="(e) => e.preventDefault()">新建</a-button>
-                <a-menu slot="overlay">
+                <a-menu #overlay>
                   <a-menu-item @click="handleAddFile(1)">
                     <a-space>
                       <a-icon type="folder-add" />
@@ -88,10 +88,10 @@
               <div>文件名栏支持右键菜单</div>
             </a-space>
           </template>
-          <a-tooltip slot="filename" slot-scope="text, record" placement="topLeft" :title="text">
+          <a-tooltip #filename slot-scope="text, record" placement="topLeft" :title="text">
             <a-dropdown :trigger="['contextmenu']">
               <div>{{ text }}</div>
-              <a-menu slot="overlay">
+              <a-menu #overlay>
                 <a-menu-item key="1">
                   <a-button icon="bars" @click="goReadFile(record)" :disabled="!record.textFileEdit" type="link">
                     跟踪文件
@@ -103,11 +103,11 @@
               </a-menu>
             </a-dropdown>
           </a-tooltip>
-          <template slot="isDirectory" slot-scope="text">
+          <template #isDirectory slot-scope="text">
             <span>{{ text ? '目录' : '文件' }}</span>
           </template>
           <a-tooltip
-            slot="fileSizeLong"
+            #fileSizeLong
             slot-scope="text, item"
             placement="topLeft"
             :title="`${text ? renderSize(text) : item.fileSize}`"
@@ -117,10 +117,10 @@
             </template>
             <span v-else>{{ item.fileSize }}</span>
           </a-tooltip>
-          <a-tooltip slot="modifyTimeLong" slot-scope="text, record" :title="`${parseTime(record.modifyTimeLong)}}`">
+          <a-tooltip #modifyTimeLong slot-scope="text, record" :title="`${parseTime(record.modifyTimeLong)}}`">
             <span>{{ parseTime(record.modifyTimeLong) }}</span>
           </a-tooltip>
-          <template slot="operation" slot-scope="text, record">
+          <template #operation slot-scope="text, record">
             <a-space>
               <template v-if="record.isDirectory">
                 <a-tooltip title="目录不能编辑">
@@ -280,7 +280,7 @@
             <code-editor showTool v-if="editFileVisible" v-model="fileContent" :fileSuffix="filename"></code-editor>
           </div>
 
-          <template slot="footer">
+          <template #footer>
             <a-button @click="handleCloseModal"> 关闭 </a-button>
             <a-button type="primary" @click="updateFileData"> 保存 </a-button>
             <a-button

@@ -56,7 +56,7 @@
       <a-divider v-if="listQuery.total > 0" dashed>构建历史</a-divider>
       <a-timeline mode="alternate" style="width: 100%">
         <a-timeline-item v-for="item in this.historyList" :key="item.id" :color="statusColor[item.status]">
-          <template slot="dot"> #{{ item.buildNumberId }}</template>
+          <template #dot> #{{ item.buildNumberId }}</template>
           <a-space direction="vertical" :size="1">
             <div v-if="item.buildRemark">构建备注：{{ item.buildRemark }}</div>
             <div>

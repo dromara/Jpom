@@ -38,26 +38,21 @@
           <a-button type="primary" @click="addEnvVar">新增</a-button>
         </a-space>
       </template>
-      <a-tooltip
-        slot="value"
-        slot-scope="text, item"
-        placement="topLeft"
-        :title="item.privacy === 1 ? '隐私字段' : text"
-      >
+      <a-tooltip #value slot-scope="text, item" placement="topLeft" :title="item.privacy === 1 ? '隐私字段' : text">
         <a-icon v-if="item.privacy === 1" type="eye-invisible" />
         <span v-else>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #name slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="description" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #description slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="workspaceId" slot-scope="text">
+      <template #workspaceId slot-scope="text">
         <span>{{ text === 'GLOBAL' ? '全局' : '当前工作空间' }}</span>
       </template>
 
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleEnvEdit(record)">编辑</a-button>
           <a-button size="small" type="danger" @click="handleEnvDelete(record)">删除</a-button>
@@ -78,10 +73,10 @@
           <a-input v-model="envTemp.description" :maxLength="200" type="textarea" :rows="5" placeholder="变量描述" />
         </a-form-item>
         <a-form-item prop="privacy">
-          <template slot="label">
+          <template #label>
             隐私变量
             <a-tooltip v-show="!envTemp.id">
-              <template slot="title">
+              <template #title>
                 隐私变量是指一些密码字段或者关键密钥等重要信息，隐私字段只能修改不能查看（编辑弹窗中无法看到对应值）。
                 隐私字段一旦创建后将不能切换为非隐私字段
               </template>
@@ -101,10 +96,10 @@
           />
         </a-form-item>
         <a-form-item>
-          <template slot="label">
+          <template #label>
             分发节点
             <a-tooltip v-show="!envTemp.id">
-              <template slot="title"> 分发节点是指将变量同步到对应节点，在节点脚本中也可以使用当前变量</template>
+              <template #title> 分发节点是指将变量同步到对应节点，在节点脚本中也可以使用当前变量</template>
               <question-circle-filled />
             </a-tooltip>
           </template>

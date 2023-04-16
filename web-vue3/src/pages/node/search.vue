@@ -14,7 +14,7 @@
       :row-selection="rowSelection"
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
@@ -44,7 +44,7 @@
 
           <a-dropdown v-if="selectedRowKeys && this.selectedRowKeys.length">
             <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item>
                 <a-button type="primary" @click="batchStart">批量启动</a-button>
               </a-menu-item>
@@ -66,7 +66,7 @@
           </a-tooltip>
 
           <a-tooltip>
-            <template slot="title">
+            <template #title>
               <div>
                 <ul>
                   <li>项目是存储在节点中的、创建需要到节点管理里面去操作</li>
@@ -79,25 +79,25 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="text">
+      <a-tooltip #name slot-scope="text, record" placement="topLeft" :title="text">
         <a-icon v-if="record.outGivingProject" type="apartment" />
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #nodeId slot-scope="text" placement="topLeft" :title="text">
         <a-button type="link" style="padding: 0px" size="small" @click="toNode(text)">
           <span>{{ nodeMap[text] }}</span>
           <a-icon type="fullscreen" />
         </a-button>
       </a-tooltip>
-      <a-tooltip slot="path" slot-scope="text, item" placement="topLeft" :title="item.whitelistDirectory + item.lib">
+      <a-tooltip #path slot-scope="text, item" placement="topLeft" :title="item.whitelistDirectory + item.lib">
         <span>{{ item.whitelistDirectory + item.lib }}</span>
       </a-tooltip>
 
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <template slot="status" slot-scope="text, record">
+      <template #status slot-scope="text, record">
         <template v-if="record.error">
           <a-tooltip :title="record.error">
             <a-icon type="warning" />
@@ -112,14 +112,14 @@
       </template>
 
       <a-tooltip
-        slot="port"
+        #port
         slot-scope="text, record"
         placement="topLeft"
         :title="`进程号：${(record.pids || [record.pid || '-']).join(',')} / 端口号：${record.port}`"
       >
         <span>{{ record.port || '-' }}/{{ (record.pids || [record.pid || '-']).join(',') }}</span>
       </a-tooltip>
-      <template slot="operation" slot-scope="text, record, index">
+      <template #operation slot-scope="text, record, index">
         <a-space>
           <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
           <template v-if="noFileModes.includes(record.runMode)">
@@ -136,7 +136,7 @@
               更多
               <a-icon type="down" />
             </a>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item>
                 <template v-if="noFileModes.includes(record.runMode)">
                   <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
@@ -233,11 +233,11 @@
       />
     </a-drawer>
     <!-- 批量操作状态 -->
-    <a-modal destroyOnClose v-model="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
+    <a-modal destroyOnClose v-model:visible="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
       <a-list bordered :data-source="selectedRowKeys">
-        <a-list-item slot="renderItem" slot-scope="item">
+        <a-list-item #renderItem slot-scope="item">
           <a-list-item-meta :description="item.email">
-            <a slot="title"> {{ projList[item].name }}</a>
+            <a #title> {{ projList[item].name }}</a>
           </a-list-item-meta>
           <div>
             <a-tooltip :title="`${projList[item].cause || '未开始'}`"
@@ -248,10 +248,17 @@
       </a-list>
     </a-modal>
     <!-- 触发器 -->
-    <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      v-model:visible="triggerVisible"
+      title="触发器"
+      width="50%"
+      :footer="null"
+      :maskClosable="false"
+    >
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
-          <template slot="tabBarExtraContent">
+          <template #tabBarExtraContent>
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>
@@ -259,7 +266,7 @@
           <a-tab-pane key="1" tab="执行">
             <a-space style="display: block" direction="vertical" align="baseline">
               <a-alert message="温馨提示" type="warning">
-                <template slot="description">
+                <template #description>
                   <ul>
                     <li>单个触发器地址中：第一个随机字符串为项目ID(服务端)，第二个随机字符串为 token</li>
                     <li>
@@ -287,7 +294,7 @@
                 type="info"
                 :message="`${item.desc}触发器地址(点击可以复制)`"
               >
-                <template slot="description">
+                <template #description>
                   <a-tag>GET</a-tag> <span>{{ `${temp.triggerUrl}?action=${item.value}` }} </span>
                   <a-icon type="copy" />
                 </template>
@@ -308,7 +315,7 @@
                 type="info"
                 :message="`批量触发器地址(点击可以复制)`"
               >
-                <template slot="description">
+                <template #description>
                   <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
                   <a-icon type="copy" />
                 </template>

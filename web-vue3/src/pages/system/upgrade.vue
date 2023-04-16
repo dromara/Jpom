@@ -14,7 +14,7 @@
           @change="changePage"
           :row-selection="rowSelection"
         >
-          <template slot="title">
+          <template #title>
             <a-row v-if="percentage">
               <a-col span="24"><a-progress v-if="percentage" :percent="percentage" /> </a-col>
             </a-row>
@@ -78,21 +78,21 @@
               <!-- 打包时间：{{ agentTimeStamp | version }}</div> -->
             </a-space>
           </template>
-          <a-tooltip slot="tooltip" slot-scope="text" :title="text">
+          <a-tooltip #tooltip slot-scope="text" :title="text">
             <span>{{ text }}</span>
           </a-tooltip>
-          <template slot="version" slot-scope="text">
+          <template #version slot-scope="text">
             {{ text | version }}
           </template>
-          <a-tooltip slot="upTime" slot-scope="text" placement="topLeft" :title="formatDuration(text)">
+          <a-tooltip #upTime slot-scope="text" placement="topLeft" :title="formatDuration(text)">
             <span>{{ formatDuration(text, '', 2) }}</span>
           </a-tooltip>
-          <template slot="status" slot-scope="text">
+          <template #status slot-scope="text">
             <a-tag :color="text === 1 ? 'green' : 'pink'" style="margin-right: 0px">
               {{ statusMap[text] || '未知' }}
             </a-tag>
           </template>
-          <template slot="updateStatus" slot-scope="text">
+          <template #updateStatus slot-scope="text">
             <div v-if="text && text.type === 'restarting'">
               <a-tooltip :title="text.data"> {{ text.data }} </a-tooltip>
             </div>
@@ -104,7 +104,7 @@
               <a-progress :percent="text.percent" />
             </div>
           </template>
-          <template slot="operation" slot-scope="text, record">
+          <template #operation slot-scope="text, record">
             <a-button type="primary" size="small" @click="updateNodeHandler(record)">更新</a-button>
           </template>
         </a-table>

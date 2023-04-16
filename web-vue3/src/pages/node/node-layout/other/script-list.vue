@@ -10,7 +10,7 @@
       bordered
       rowKey="id"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
@@ -23,15 +23,15 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="global" slot-scope="text">
+      <template #global slot-scope="text">
         <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
         <a-tag v-else>工作空间</a-tag>
       </template>
 
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
           <a-button
@@ -121,9 +121,9 @@
             placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
             option-label-prop="value"
           >
-            <template slot="dataSource">
+            <template #dataSource>
               <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
-                <span slot="label">
+                <span #label>
                   {{ group.title }}
                 </span>
                 <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value">

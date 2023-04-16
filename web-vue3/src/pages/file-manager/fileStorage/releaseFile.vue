@@ -60,7 +60,7 @@
       </a-form-item>
 
       <a-form-item prop="releasePathParent" label="发布目录">
-        <template slot="help">
+        <template #help>
           <a-tooltip title="需要配置授权目录（白名单才能正常使用发布）,授权目录主要是用于确定可以发布到哪些目录中"
             ><a-button
               icon="info-circle"
@@ -87,7 +87,7 @@
             <a-select-option v-for="item in accessList" :key="item">
               <a-tooltip :title="item">{{ item }}</a-tooltip>
             </a-select-option>
-            <a-icon slot="suffixIcon" type="reload" @click="loadAccesList" />
+            <a-icon #suffixIcon type="reload" @click="loadAccesList" />
           </a-select>
 
           <a-input style="width: 70%" v-model="temp.releasePathSecondary" placeholder="请填写发布的二级目录" />

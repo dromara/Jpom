@@ -10,7 +10,7 @@
       bordered
       rowKey="id"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
@@ -33,7 +33,7 @@
           </a-tooltip>
 
           <a-tooltip>
-            <template slot="title">
+            <template #title>
               <div>节点脚本模版是存储在节点中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
 
               <div>
@@ -52,19 +52,19 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <a-tooltip slot="name" @click="handleEdit(record)" slot-scope="text, record" placement="topLeft" :title="text">
+      <a-tooltip #name @click="handleEdit(record)" slot-scope="text, record" placement="topLeft" :title="text">
         <!-- <span>{{ text }}</span> -->
         <a-button type="link" style="padding: 0px" size="small">{{ text }}</a-button>
       </a-tooltip>
-      <template slot="global" slot-scope="text">
+      <template #global slot-scope="text">
         <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
         <a-tag v-else>工作空间</a-tag>
       </template>
-      <template slot="scriptType" slot-scope="text">
+      <template #scriptType slot-scope="text">
         <a-tooltip v-if="text === 'server-sync'" title="服务端分发的脚本">
           <a-icon type="cluster" />
         </a-tooltip>
@@ -73,7 +73,7 @@
         </a-tooltip>
       </template>
 
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
           <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
@@ -157,9 +157,9 @@
             placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
             option-label-prop="value"
           >
-            <template slot="dataSource">
+            <template #dataSource>
               <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
-                <span slot="label">
+                <span #label>
                   {{ group.title }}
                 </span>
                 <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value">
@@ -209,10 +209,10 @@
       <script-log v-if="drawerLogVisible" :scriptId="temp.scriptId" :nodeId="temp.nodeId" />
     </a-drawer>
     <!-- 触发器 -->
-    <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null">
+    <a-modal destroyOnClose v-model:visible="triggerVisible" title="触发器" width="50%" :footer="null">
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
-          <template slot="tabBarExtraContent">
+          <template #tabBarExtraContent>
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>
@@ -220,7 +220,7 @@
           <a-tab-pane key="1" tab="执行">
             <a-space style="display: block" direction="vertical" align="baseline">
               <a-alert message="温馨提示" type="warning">
-                <template slot="description">
+                <template #description>
                   <ul>
                     <li>单个触发器地址中：第一个随机字符串为脚本ID，第二个随机字符串为 token</li>
                     <li>
@@ -245,7 +245,7 @@
                 type="info"
                 :message="`单个触发器地址(点击可以复制)`"
               >
-                <template slot="description">
+                <template #description>
                   <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   <a-icon type="copy" />
                 </template>
@@ -265,7 +265,7 @@
                 type="info"
                 :message="`批量触发器地址(点击可以复制)`"
               >
-                <template slot="description">
+                <template #description>
                   <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
                   <a-icon type="copy" />
                 </template>

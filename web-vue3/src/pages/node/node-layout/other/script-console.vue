@@ -6,7 +6,7 @@
     <!-- console -->
     <div>
       <log-view :ref="`logView`" height="calc(100vh - 140px)">
-        <template slot="before">
+        <template #before>
           <a-space>
             <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start"
               >执行</a-button
@@ -20,7 +20,7 @@
     </div>
 
     <!--远程下载  -->
-    <a-modal destroyOnClose v-model="editArgs" title="添加运行参数" @ok="startExecution" :maskClosable="false">
+    <a-modal destroyOnClose v-model:visible="editArgs" title="添加运行参数" @ok="startExecution" :maskClosable="false">
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" ref="ruleForm">
         <a-form-item
           label="命令参数"
@@ -37,7 +37,7 @@
                 v-model="item.value"
                 :placeholder="`参数值 ${item.desc ? ',' + item.desc : ''}`"
               >
-                <template slot="suffix">
+                <template #suffix>
                   <a-tooltip v-if="item.desc" :title="item.desc">
                     <a-icon type="info-circle" style="color: rgba(0, 0, 0, 0.45)" />
                   </a-tooltip>

@@ -113,10 +113,10 @@
       <a-col :span="12">
         <a-form ref="editForm" :model="temp" :label-col="{ span: 7 }" :wrapper-col="{ span: 17 }">
           <a-form-item prop="blkioWeight">
-            <template slot="label">
+            <template #label>
               Block IO 权重
               <a-tooltip>
-                <template slot="title"> Block IO 权重（相对权重）。 </template>
+                <template #title> Block IO 权重（相对权重）。 </template>
                 <question-circle-filled />
               </a-tooltip>
             </template>
@@ -129,10 +129,10 @@
             />
           </a-form-item>
           <a-form-item prop="cpuShares">
-            <template slot="label">
+            <template #label>
               CPU 权重
               <a-tooltip>
-                <template slot="title"> 一个整数值，表示此容器相对于其他容器的相对 CPU 权重。 </template>
+                <template #title> 一个整数值，表示此容器相对于其他容器的相对 CPU 权重。 </template>
                 <question-circle-filled />
               </a-tooltip>
             </template>
@@ -143,20 +143,20 @@
             />
           </a-form-item>
           <a-form-item prop="cpusetCpus">
-            <template slot="label">
+            <template #label>
               执行的 CPU
               <a-tooltip>
-                <template slot="title"> 允许执行的 CPU（例如，0-3、0,1）。 </template>
+                <template #title> 允许执行的 CPU（例如，0-3、0,1）。 </template>
                 <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input style="width: 100%" v-model="temp.cpusetCpus" placeholder="允许执行的 CPU（例如，0-3、0,1）。" />
           </a-form-item>
           <a-form-item prop="cpusetMems">
-            <template slot="label">
+            <template #label>
               CpusetMems
               <a-tooltip>
-                <template slot="title"> 允许执行的内存节点 (MEM) (0-3, 0,1)。 仅在 NUMA 系统上有效。 </template>
+                <template #title> 允许执行的内存节点 (MEM) (0-3, 0,1)。 仅在 NUMA 系统上有效。 </template>
                 <question-circle-filled />
               </a-tooltip>
             </template>
@@ -167,10 +167,10 @@
             />
           </a-form-item>
           <a-form-item prop="cpuPeriod">
-            <template slot="label">
+            <template #label>
               CPU 周期
               <a-tooltip>
-                <template slot="title"> CPU 周期的长度，以微秒为单位。 </template>
+                <template #title> CPU 周期的长度，以微秒为单位。 </template>
                 <question-circle-filled />
               </a-tooltip>
             </template>
@@ -181,10 +181,10 @@
             />
           </a-form-item>
           <a-form-item prop="cpuQuota">
-            <template slot="label">
+            <template #label>
               CPU 时间
               <a-tooltip>
-                <template slot="title"> 容器在一个 CPU 周期内可以获得的 CPU 时间的微秒。 </template>
+                <template #title> 容器在一个 CPU 周期内可以获得的 CPU 时间的微秒。 </template>
                 <question-circle-filled />
               </a-tooltip>
             </template>
@@ -196,20 +196,20 @@
           </a-form-item>
 
           <a-form-item prop="memory">
-            <template slot="label">
+            <template #label>
               内存
               <a-tooltip>
-                <template slot="title"> 设置内存限制。 </template>
+                <template #title> 设置内存限制。 </template>
                 <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input style="width: 100%" v-model="temp.memory" placeholder="设置内存限制。" />
           </a-form-item>
           <a-form-item prop="memorySwap">
-            <template slot="label">
+            <template #label>
               总内存
               <a-tooltip>
-                <template slot="title"> 总内存（内存 + 交换）。 设置为 -1 以禁用交换。 </template>
+                <template #title> 总内存（内存 + 交换）。 设置为 -1 以禁用交换。 </template>
                 <question-circle-filled />
               </a-tooltip>
             </template>
@@ -220,10 +220,10 @@
             />
           </a-form-item>
           <a-form-item prop="memoryReservation">
-            <template slot="label">
+            <template #label>
               软内存
               <a-tooltip>
-                <template slot="title"> 软内存限制。 </template>
+                <template #title> 软内存限制。 </template>
                 <question-circle-filled />
               </a-tooltip>
             </template>

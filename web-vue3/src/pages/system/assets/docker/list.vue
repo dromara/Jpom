@@ -11,7 +11,7 @@
       rowKey="id"
       :row-selection="rowSelection"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
           <a-input v-model="listQuery['%host%']" @pressEnter="loadData" placeholder="host" class="search-input-item" />
@@ -34,14 +34,14 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="name" slot-scope="text, item" :title="text">
+      <a-tooltip #name slot-scope="text, item" :title="text">
         <a-button style="padding: 0" type="link" size="small" @click="handleEdit(item)"> {{ text }}</a-button>
       </a-tooltip>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <template slot="swarmId" slot-scope="text, record">
+      <template #swarmId slot-scope="text, record">
         <template v-if="text">
           <a-tooltip v-if="record.swarmControlAvailable" title="管理节点">
             <a-icon type="cluster" />
@@ -50,7 +50,7 @@
             <a-icon type="block" />
           </a-tooltip>
           <a-popover title="集群信息">
-            <template slot="content">
+            <template #content>
               <p>集群ID：{{ record.swarmId }}</p>
               <p>当前节点ID：{{ record.swarmNodeId }}</p>
               <p>当前节点地址：{{ record.swarmNodeAddr }}</p>
@@ -63,7 +63,7 @@
       </template>
 
       <a-tooltip
-        slot="tlsVerify"
+        #tlsVerify
         slot-scope="text, record"
         placement="topLeft"
         :title="record.tlsVerify ? '开启 TLS 认证,证书信息：' + record.certInfo : '关闭 TLS 认证'"
@@ -91,20 +91,20 @@
         </template>
       </a-tooltip>
 
-      <template slot="status" slot-scope="text, record">
+      <template #status slot-scope="text, record">
         <a-tag color="green" v-if="record.status === 1">正常</a-tag>
         <a-tooltip v-else :title="record.failureMsg">
           <a-tag color="red">无法连接</a-tag>
         </a-tooltip>
       </template>
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" :disabled="record.status !== 1" @click="handleConsole(record)"
             >控制台</a-button
           >
           <template v-if="!record.swarmId && record.status === 1">
             <a-popover title="集群操作">
-              <template slot="content">
+              <template #content>
                 <p><a-button size="small" type="primary" @click="initSwarm(record)">创建集群</a-button></p>
                 <p><a-button size="small" type="primary" @click="joinSwarm(record)">加入集群</a-button></p>
               </template>
@@ -125,7 +125,7 @@
           <a-button size="small" @click="viewWorkspaceDataHander(record)" type="primary">关联</a-button>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item>
                 <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
               </a-menu-item>
@@ -158,7 +158,7 @@
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-space direction="vertical">
           <a-alert banner>
-            <template slot="message">
+            <template #message>
               <ul>
                 <li>
                   系统使用 docker http 接口实现和 docker 通讯和管理，但是默认<b style="color: red">没有开启任何认证</b>
@@ -230,10 +230,16 @@
       </a-form>
     </a-modal>
     <!-- 创建集群 -->
-    <a-modal destroyOnClose v-model="initSwarmVisible" title="创建 Docker 集群" @ok="handleSwarm" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      v-model:visible="initSwarmVisible"
+      title="创建 Docker 集群"
+      @ok="handleSwarm"
+      :maskClosable="false"
+    >
       <a-form ref="initForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-alert message="温馨提示" type="warning">
-          <template slot="description">
+          <template #description>
             创建集群会将尝试获取 docker
             中集群信息，如果存在集群信息将自动同步集群信息到系统，反之不存在集群信息将自动创建 swarm 集群
           </template>
@@ -347,7 +353,7 @@
       <a-tabs>
         <a-tab-pane key="1" tab="docker">
           <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.dockerList">
-            <a-list-item slot="renderItem" slot-scope="item" style="display: block">
+            <a-list-item #renderItem slot-scope="item" style="display: block">
               <a-row>
                 <a-col :span="10">Docker 名称：{{ item.name }}</a-col>
                 <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
@@ -358,7 +364,7 @@
         </a-tab-pane>
         <a-tab-pane key="2" tab="集群">
           <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.swarmList">
-            <a-list-item slot="renderItem" slot-scope="item" style="display: block">
+            <a-list-item #renderItem slot-scope="item" style="display: block">
               <a-row>
                 <a-col :span="10">集群名称：{{ item.name }}</a-col>
                 <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>

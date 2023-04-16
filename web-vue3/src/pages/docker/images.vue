@@ -8,7 +8,7 @@
       bordered
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <div>
             显示所有
@@ -29,16 +29,16 @@
           placeholder="要拉取的镜像名称"
           class="search-input-item"
         >
-          <a-button slot="enterButton"> <a-icon type="cloud-download" /> </a-button>
+          <a-button #enterButton> <a-icon type="cloud-download" /> </a-button>
         </a-input-search>
         <!-- <a-button type="primary" @click="pullImage">拉取</a-button> -->
       </template>
 
-      <a-tooltip slot="repoTags" slot-scope="text" placement="topLeft" :title="(text || []).join(',')">
+      <a-tooltip #repoTags slot-scope="text" placement="topLeft" :title="(text || []).join(',')">
         <span>{{ (text || []).join(',') }}</span>
       </a-tooltip>
       <a-tooltip
-        slot="size"
+        #size
         slot-scope="text, record"
         placement="topLeft"
         :title="renderSize(text) + ' ' + renderSize(record.virtualSize)"
@@ -46,14 +46,14 @@
         <span>{{ renderSize(text) }}</span>
       </a-tooltip>
 
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <a-tooltip slot="id" slot-scope="text" :title="text">
+      <a-tooltip #id slot-scope="text" :title="text">
         <span> {{ text && text.split(':')[1].slice(0, 12) }}</span>
       </a-tooltip>
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <!-- <a-tooltip title="停止" v-if="record.state === 'running'">
           <a-button size="small" type="link" @click="doAction(record, 'stop')"><a-icon type="stop" /></a-button>
@@ -117,12 +117,7 @@
                     </a-col>
                     <a-col :span="8" :offset="1">
                       <a-input addon-before="容器" :disabled="item.disabled" v-model="item.port" placeholder="容器端口">
-                        <a-select
-                          slot="addonAfter"
-                          :disabled="item.disabled"
-                          v-model="item.scheme"
-                          placeholder="端口协议"
-                        >
+                        <a-select #addonAfter :disabled="item.disabled" v-model="item.scheme" placeholder="端口协议">
                           <a-select-option value="tcp">tcp</a-select-option>
                           <a-select-option value="udp">udp</a-select-option>
                           <a-select-option value="sctp">sctp</a-select-option>
@@ -260,7 +255,7 @@
             placeholder="网络模式：bridge、container:<name|id>、host、container、none"
             option-label-prop="value"
           >
-            <template slot="dataSource">
+            <template #dataSource>
               <a-select-option
                 v-for="dataItem in [
                   {
@@ -294,7 +289,7 @@
             placeholder="重启策略：no、always、unless-stopped、on-failure"
             option-label-prop="value"
           >
-            <template slot="dataSource">
+            <template #dataSource>
               <a-select-option
                 v-for="dataItem in [
                   {
@@ -364,7 +359,7 @@
             /></a-col>
             <a-col :span="4" style="text-align: right">
               <a-tooltip>
-                <template slot="title">
+                <template #title>
                   <p>--privileged</p>
                   <ul>
                     privileged=true|false 介绍

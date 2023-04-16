@@ -5,7 +5,7 @@
         <a-row>
           <a-space style="display: inline">
             <a-input v-model="addName" placeholder="创建文件 /xxx/xxx/xxx" style="width: 100%">
-              <template slot="addonAfter"
+              <template #addonAfter
                 ><a-button type="primary" size="small" :disabled="!addName" @click="addItemHander"
                   >确认</a-button
                 ></template
@@ -19,7 +19,7 @@
         <a-space direction="vertical" style="display: flex">
           <div class="config-editor">
             <code-editor :showTool="temp.name ? true : false" v-model="temp.content" :fileSuffix="temp.name">
-              <template slot="tool_before">
+              <template #tool_before>
                 <div v-show="temp.name">
                   名称： <a-tag color="red">{{ temp.name }}</a-tag>
                 </div>

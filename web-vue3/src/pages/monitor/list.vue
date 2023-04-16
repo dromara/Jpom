@@ -10,7 +10,7 @@
       bordered
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             v-model="listQuery['%name%']"
@@ -36,11 +36,11 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
         </a-space>
       </template>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #name slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
       <a-switch
-        slot="status"
+        #status
         size="small"
         slot-scope="text"
         :checked="text"
@@ -49,7 +49,7 @@
         un-checked-children="关闭"
       />
       <a-switch
-        slot="autoRestart"
+        #autoRestart
         size="small"
         slot-scope="text"
         :checked="text"
@@ -58,7 +58,7 @@
         un-checked-children="否"
       />
       <a-switch
-        slot="alarm"
+        #alarm
         size="small"
         slot-scope="text"
         :checked="text"
@@ -66,10 +66,10 @@
         checked-children="报警中"
         un-checked-children="未报警"
       />
-      <a-tooltip slot="parent" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #parent slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
           <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
@@ -119,9 +119,9 @@
             placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
             option-label-prop="value"
           >
-            <template slot="dataSource">
+            <template #dataSource>
               <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
-                <span slot="label">
+                <span #label>
                   {{ group.title }}
                 </span>
                 <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value">
@@ -157,10 +157,10 @@
           </a-select>
         </a-form-item>
         <a-form-item prop="notifyUser" class="jpom-notify">
-          <template slot="label">
+          <template #label>
             联系人
             <a-tooltip v-show="!temp.id">
-              <template slot="title">
+              <template #title>
                 如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。
               </template>
               <question-circle-filled />
@@ -194,10 +194,10 @@
           </a-transfer>
         </a-form-item>
         <a-form-item prop="webhook">
-          <template slot="label">
+          <template #label>
             WebHooks
             <a-tooltip v-show="!temp.id">
-              <template slot="title">
+              <template #title>
                 <ul>
                   <li>发生报警时候请求</li>
                   <li>

@@ -11,13 +11,13 @@
         :rowKey="(record, index) => index"
       >
         <template v-if="backupListData.path" #title> 备份文件存储目录：{{ backupListData.path }} </template>
-        <a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip #filename slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip slot="fileSize" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip #fileSize slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <template slot="operation" slot-scope="text, record">
+        <template #operation slot-scope="text, record">
           <a-space>
             <a-button size="small" type="primary" @click="handleBackupFile(record)">详情</a-button>
             <a-button size="small" type="danger" @click="handlBackupeDelete(record)">删除</a-button>
@@ -63,7 +63,7 @@
           bordered
           :rowKey="(record, index) => index"
         >
-          <template slot="title">
+          <template #title>
             <a-popconfirm
               :title="`${
                 uploadPath ? '将还原【' + uploadPath + '】目录,' : ''
@@ -73,7 +73,7 @@
               @confirm="recoverNet('', uploadPath)"
               @cancel="recoverNet('clear', uploadPath)"
             >
-              <a-icon slot="icon" type="question-circle-o" style="color: red" />
+              <a-icon #icon type="question-circle-o" style="color: red" />
               <!-- @click="recoverPath(uploadPath)" -->
               <a-button size="small" type="primary">还原</a-button>
             </a-popconfirm>
@@ -82,16 +82,16 @@
               <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath || '' }}</a-tag>
             </a-space>
           </template>
-          <a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
+          <a-tooltip #filename slot-scope="text" placement="topLeft" :title="text">
             <span>{{ text }}</span>
           </a-tooltip>
-          <a-tooltip slot="isDirectory" slot-scope="text" placement="topLeft" :title="text">
+          <a-tooltip #isDirectory slot-scope="text" placement="topLeft" :title="text">
             <span>{{ text ? '目录' : '文件' }}</span>
           </a-tooltip>
-          <a-tooltip slot="fileSize" slot-scope="text" placement="topLeft" :title="text">
+          <a-tooltip #fileSize slot-scope="text" placement="topLeft" :title="text">
             <span>{{ text }}</span>
           </a-tooltip>
-          <template slot="operation" slot-scope="text, record">
+          <template #operation slot-scope="text, record">
             <a-space>
               <template v-if="record.isDirectory">
                 <a-tooltip title="不能下载目录">
@@ -112,7 +112,7 @@
                   @confirm="recoverNet('', record.filename)"
                   @cancel="recoverNet('clear', record.filename)"
                 >
-                  <a-icon slot="icon" type="question-circle-o" style="color: red" />
+                  <a-icon #icon type="question-circle-o" style="color: red" />
                   <a-button size="small" type="primary">还原</a-button>
                 </a-popconfirm>
               </template>

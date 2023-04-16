@@ -15,7 +15,7 @@
         <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none" />
       </div> -->
       <log-view :ref="`logView`" height="calc(100vh - 165px)">
-        <template slot="before">
+        <template #before>
           <a-space>
             <a-button type="primary" size="small" @click="loadData">刷新</a-button>
             <a-button type="danger" size="small" :disabled="!this.temp.path" @click="deleteLog">删除</a-button>
@@ -27,7 +27,7 @@
     <!-- 对话框 -->
     <!-- <a-modal v-model="visible" title="系统提示" :footer="null">
       <a-space>
-        
+
         <a-button @click="visible = false">取消</a-button>
       </a-space>
     </a-modal> -->

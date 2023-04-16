@@ -19,7 +19,7 @@
           bordered
           :rowKey="(record, index) => index"
         >
-          <template slot="title">
+          <template #title>
             <a-space>
               <div>
                 查询：
@@ -34,7 +34,7 @@
                   更多操作
                   <a-icon type="down" />
                 </a>
-                <a-menu slot="overlay">
+                <a-menu #overlay>
                   <a-menu-item>
                     <a-button type="primary" @click="handleEditNginx">编辑 Nginx 服务</a-button>
                   </a-menu-item>
@@ -56,7 +56,7 @@
                 </a-menu>
               </a-dropdown>
               <a-tooltip>
-                <template slot="title">
+                <template #title>
                   <div>nginx 管理是指在想编辑配置文件，并自动重新加载(reload)</div>
 
                   <div>
@@ -78,7 +78,7 @@
             </a-space>
           </template>
           <a-tooltip
-            slot="name"
+            #name
             slot-scope="text, record"
             placement="topLeft"
             :title="`名称：${text}  server 节点数 ${record.serverCount}`"
@@ -89,27 +89,27 @@
               <span>{{ text }}</span>
             </div>
           </a-tooltip>
-          <!-- <a-tooltip slot="isDirectory" slot-scope="text" placement="topLeft" :title="text">
+          <!-- <a-tooltip #isDirectory slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text ? "目录" : "文件" }}</span>
         </a-tooltip> -->
           <a-tooltip
-            slot="serverName"
+            #serverName
             slot-scope="text, record"
             placement="topLeft"
             :title="record.serverName || record.server_name || ''"
           >
             <span>{{ record.serverName || record.server_name || '' }}</span>
           </a-tooltip>
-          <a-tooltip slot="location" slot-scope="text, record" placement="topLeft" :title="record.location">
+          <a-tooltip #location slot-scope="text, record" placement="topLeft" :title="record.location">
             <span>{{ record.location }}</span>
           </a-tooltip>
-          <a-tooltip slot="time" slot-scope="text" placement="topLeft" :title="text">
+          <a-tooltip #time slot-scope="text" placement="topLeft" :title="text">
             <span>{{ text }}</span>
           </a-tooltip>
-          <template slot="operation" slot-scope="text, record">
+          <template #operation slot-scope="text, record">
             <!-- <a-button type="primary" @click="handleEdit(record)">编辑</a-button> -->
             <a-popover title="删除确认" v-if="record.name.endsWith('.conf')">
-              <template slot="content">
+              <template #content>
                 <p>
                   <a-button size="small" type="danger" @click="handleDelete(record, 'temp', 'none')">临时删除</a-button>
                 </p>
@@ -120,7 +120,7 @@
               <a-button size="small" type="danger">删除</a-button>
             </a-popover>
             <a-popover title="还原" v-else>
-              <template slot="content">
+              <template #content>
                 <p>
                   <a-button size="small" type="danger" @click="handleDelete(record, 'temp', 'back')">还原配置</a-button>
                 </p>

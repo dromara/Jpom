@@ -17,7 +17,7 @@
         rowKey="id"
         :row-selection="rowSelection"
       >
-        <template slot="title">
+        <template #title>
           <a-space>
             <a-input
               v-model="listQuery['%name%']"
@@ -57,15 +57,15 @@
             </a-button>
           </a-space>
         </template>
-        <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip slot="id" slot-scope="text, item" placement="topLeft" :title="text">
+        <a-tooltip #id slot-scope="text, item" placement="topLeft" :title="text">
           <span v-if="item.status === 0 || item.status === 2">-</span>
           <span v-else>{{ text }}</span>
         </a-tooltip>
-        <a-popover slot="name" slot-scope="text, item" title="文件信息">
-          <template slot="content">
+        <a-popover #name slot-scope="text, item" title="文件信息">
+          <template #content>
             <p>文件名：{{ text }}</p>
             <p>文件描述：{{ item.description }}</p>
             <p v-if="item.status !== undefined">下载状态：{{ statusMap[item.status] || '未知' }}</p>
@@ -75,22 +75,22 @@
           <a-button type="link" style="padding: 0px" @click="handleEdit(item)" size="small">{{ text }}</a-button>
         </a-popover>
 
-        <a-tooltip slot="renderSize" slot-scope="text" placement="topLeft" :title="renderSize(text)">
+        <a-tooltip #renderSize slot-scope="text" placement="topLeft" :title="renderSize(text)">
           <span>{{ renderSize(text) }}</span>
         </a-tooltip>
-        <a-tooltip slot="source" slot-scope="text" placement="topLeft" :title="`${sourceMap[text] || '未知'}`">
+        <a-tooltip #source slot-scope="text" placement="topLeft" :title="`${sourceMap[text] || '未知'}`">
           <span>{{ sourceMap[text] || '未知' }}</span>
         </a-tooltip>
 
-        <template slot="exists" slot-scope="text">
+        <template #exists slot-scope="text">
           <a-tag v-if="text" color="green">存在</a-tag>
           <a-tag v-else color="red">丢失</a-tag>
         </template>
-        <template slot="global" slot-scope="text">
+        <template #global slot-scope="text">
           <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
           <a-tag v-else>工作空间</a-tag>
         </template>
-        <template slot="operation" slot-scope="text, record">
+        <template #operation slot-scope="text, record">
           <a-space>
             <!-- <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button> -->
             <a-button size="small" :disabled="!record.exists" type="primary" @click="handleDownloadUrl(record)"
@@ -169,7 +169,7 @@
                 }
               "
             >
-              <template slot="enterButton">
+              <template #enterButton>
                 <a-button type="primary"> 随机生成 </a-button>
               </template>
             </a-input-search>
@@ -180,7 +180,13 @@
         </a-form>
       </a-modal>
       <!-- 编辑文件 -->
-      <a-modal destroyOnClose v-model="editVisible" :title="`修改文件`" @ok="handleEditOk" :maskClosable="false">
+      <a-modal
+        destroyOnClose
+        v-model:visible="editVisible"
+        :title="`修改文件`"
+        @ok="handleEditOk"
+        :maskClosable="false"
+      >
         <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <a-form-item label="文件名" prop="name">
             <a-input placeholder="文件名" v-model="temp.name" />
@@ -210,7 +216,7 @@
                 }
               "
             >
-              <template slot="enterButton">
+              <template #enterButton>
                 <a-button type="primary"> 随机生成 </a-button>
               </template>
             </a-input-search>
@@ -257,7 +263,7 @@
                 }
               "
             >
-              <template slot="enterButton">
+              <template #enterButton>
                 <a-button type="primary"> 随机生成 </a-button>
               </template>
             </a-input-search>
@@ -278,7 +284,7 @@
       >
         <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-tabs default-active-key="1">
-            <template slot="tabBarExtraContent">
+            <template #tabBarExtraContent>
               <a-tooltip title="重置下载 token 信息,重置后之前的下载 token 将失效">
                 <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
               </a-tooltip>
@@ -300,7 +306,7 @@
                   type="info"
                   :message="`下载地址(点击可以复制)`"
                 >
-                  <template slot="description">
+                  <template #description>
                     <a-tag>GET</a-tag> <span>{{ `${temp.triggerDownloadUrl}` }} </span>
                     <a-icon type="copy" />
                   </template>
@@ -313,7 +319,7 @@
             <a-tab-pane key="2" tab="断点/分片别名下载" v-if="temp.triggerAliasDownloadUrl">
               <a-space style="display: block" direction="vertical" align="baseline">
                 <a-alert message="温馨提示" type="warning">
-                  <template slot="description">
+                  <template #description>
                     <ul>
                       <li>
                         支持自定义排序字段：sort=createTimeMillis:desc
@@ -340,7 +346,7 @@
                   type="info"
                   :message="`下载地址(点击可以复制)`"
                 >
-                  <template slot="description">
+                  <template #description>
                     <a-tag>GET</a-tag> <span>{{ `${temp.triggerAliasDownloadUrl}` }} </span>
                     <a-icon type="copy" />
                   </template>

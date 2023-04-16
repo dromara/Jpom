@@ -24,7 +24,7 @@
       rowKey="id"
       :row-selection="rowSelection"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
 
@@ -36,11 +36,11 @@
           >
         </a-space>
       </template>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <template slot="status" slot-scope="text, record">
+      <template #status slot-scope="text, record">
         <template v-if="record.machineDocker">
           <a-tag color="green" v-if="record.machineDocker.status === 1">正常</a-tag>
           <a-tooltip v-else :title="record.machineDocker.failureMsg">
@@ -53,7 +53,7 @@
         </a-tooltip>
       </template>
       <a-tooltip
-        slot="tags"
+        #tags
         slot-scope="tags"
         :title="
           (tags || '')
@@ -64,7 +64,7 @@
       >
         <a-tag v-for="item in (tags || '').split(':').filter((item) => item)" :key="item"> {{ item }}</a-tag>
       </a-tooltip>
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button
             size="small"
@@ -79,7 +79,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editVisible" title="编辑  Docker" @ok="handleEditOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model:visible="editVisible" title="编辑  Docker" @ok="handleEditOk" :maskClosable="false">
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="容器名称" prop="name">
           <a-input v-model="temp.name" placeholder="容器名称" />
@@ -145,7 +145,7 @@
       :maskClosable="false"
     >
       <a-alert message="温馨提示" type="warning">
-        <template slot="description">
+        <template #description>
           <ul>
             <li>同步机制采用容器 host 确定是同一个服务器（docker）</li>
             <li>当目标工作空间不存在对应的节点时候将自动创建一个新的docker（逻辑docker）</li>

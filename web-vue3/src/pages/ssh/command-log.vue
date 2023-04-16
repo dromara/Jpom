@@ -9,7 +9,7 @@
       @change="changePage"
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             v-model="listQuery['%commandName%']"
@@ -48,20 +48,20 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="sshName" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #sshName slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="commandName" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #commandName slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="status" slot-scope="text">
+      <template #status slot-scope="text">
         <span>{{ statusMap[text] || '未知' }}</span>
       </template>
-      <template slot="triggerExecTypeMap" slot-scope="text">
+      <template #triggerExecTypeMap slot-scope="text">
         <span>{{ triggerExecTypeMap[text] || '未知' }}</span>
       </template>
 
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button type="primary" size="small" :disabled="!record.hasLog" @click="handleView(record)">查看</a-button>
           <a-button type="primary" size="small" :disabled="!record.hasLog" @click="handleDownload(record)"

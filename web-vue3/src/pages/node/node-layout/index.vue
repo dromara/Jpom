@@ -13,13 +13,11 @@
         @openChange="openChange"
         :default-selected-keys="selectedKeys"
         :openKeys="openKey"
-        :class="`${fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'} ${
-          scrollbarFlag ? '' : 'hide-scrollbar'
-        }`"
+        :class="`${fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'} ${scrollbarFlag ? '' : 'hide-scrollbar'}`"
       >
         <template v-for="(menu, index) in nodeMenuList">
           <a-sub-menu v-if="menu.childs" :key="menu.id" :class="menu.id">
-            <span slot="title">
+            <span #title>
               <a-icon :type="menu.icon_v3" />
               <span>{{ menu.title }}</span>
             </span>

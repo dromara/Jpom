@@ -11,7 +11,7 @@
       size="middle"
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             class="search-input-item"
@@ -53,7 +53,7 @@
         </a-space>
       </template>
       <a-tooltip
-        slot="commands"
+        #commands
         slot-scope="text"
         placement="topLeft"
         :title="text"
@@ -70,16 +70,16 @@
         "
       >
         <a-button type="link" icon="copy" size="small"> {{ text }} </a-button>
-        <!-- <a-input disabled :value="text"><a-icon slot="suffix" type="copy" /></a-input> -->
+        <!-- <a-input disabled :value="text"><a-icon #suffix type="copy" /></a-input> -->
       </a-tooltip>
-      <a-tooltip slot="modifyUser" slot-scope="text, item" placement="topLeft" :title="item.modifyUser || item.userId">
+      <a-tooltip #modifyUser slot-scope="text, item" placement="topLeft" :title="item.modifyUser || item.userId">
         <span>{{ item.modifyUser || item.userId }}</span>
       </a-tooltip>
 
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="refuse" slot-scope="text">
+      <template #refuse slot-scope="text">
         <span>{{ text ? '成功' : '拒绝' }}</span>
       </template>
     </a-table>

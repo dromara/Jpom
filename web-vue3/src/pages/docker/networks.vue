@@ -7,7 +7,7 @@
     bordered
     :rowKey="(record, index) => index"
   >
-    <template slot="title">
+    <template #title>
       <a-space>
         <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
         <a-input v-model="listQuery['networkId']" @pressEnter="loadData" placeholder="id" class="search-input-item" />
@@ -16,11 +16,11 @@
       </a-space>
     </template>
 
-    <a-tooltip slot="Created" slot-scope="text" placement="topLeft" :title="text['Created']">
+    <a-tooltip #Created slot-scope="text" placement="topLeft" :title="text['Created']">
       <span>{{ parseTime(text['Created']) }}</span>
     </a-tooltip>
     <a-tooltip
-      slot="ipam"
+      #ipam
       slot-scope="text"
       placement="topLeft"
       :title="`${text && text.driver}  ${
@@ -42,14 +42,14 @@
       }}</span>
     </a-tooltip>
 
-    <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+    <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
       <span>{{ text }}</span>
     </a-tooltip>
 
-    <a-tooltip slot="id" slot-scope="text" :title="text">
+    <a-tooltip #id slot-scope="text" :title="text">
       <span> {{ text.split(':')[1].slice(0, 12) }}</span>
     </a-tooltip>
-    <template slot="operation" slot-scope="text, record">
+    <template #operation slot-scope="text, record">
       <a-space>
         <!-- <a-tooltip title="停止" v-if="record.state === 'running'">
           <a-button size="small" type="link" @click="doAction(record, 'stop')"><a-icon type="stop" /></a-button>

@@ -17,7 +17,7 @@
             <span>
               数据目录占用空间：{{ renderSize(temp.dataSize) }} (10分钟刷新一次)
               <a-tooltip>
-                <template slot="title">
+                <template #title>
                   <ul>
                     <li>数据目录是指程序在运行过程中产生的文件以及数据存储目录</li>
                     <li>数据目录大小包含：临时文件、在线构建文件、数据库文件等</li>
@@ -44,7 +44,7 @@
             <span>
               在线构建文件占用空间：{{ renderSize(temp.cacheBuildFileSize) }} (10分钟刷新一次)
               <a-tooltip>
-                <template slot="title">
+                <template #title>
                   <ul>
                     <li>
                       在线构建文件主要保存，仓库文件，构建历史产物等。不支持主动清除，如果文件占用过大可以配置保留规则和对单个构建配置是否保存仓库、产物文件等
@@ -87,7 +87,7 @@
           </a-timeline-item>
           <a-timeline-item>
             <a-popover title="正在构建">
-              <template slot="content">
+              <template #content>
                 <p v-for="item in temp.buildKeys || []" :key="item">{{ item }}</p>
               </template>
               <a-space>
@@ -98,7 +98,7 @@
           </a-timeline-item>
           <a-timeline-item>
             <a-popover title="正在运行的线程同步器">
-              <template slot="content">
+              <template #content>
                 <p v-for="item in temp.syncFinisKeys || []" :key="item">{{ item }}</p>
               </template>
               <a-space>
@@ -109,12 +109,12 @@
           </a-timeline-item>
           <a-timeline-item>
             <a-popover title="错误的工作空间数据">
-              <template slot="content">
+              <template #content>
                 <a-collapse>
                   <a-collapse-panel :header="key" v-for="(item, key) in temp.errorWorkspace" :key="key">
                     <p v-for="(item2, index) in item" :key="index">{{ item2 }}</p>
                     <a-icon
-                      slot="extra"
+                      #extra
                       type="delete"
                       @click="
                         (e) => {

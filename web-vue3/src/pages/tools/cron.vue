@@ -110,10 +110,10 @@
 
       <a-col :span="10">
         <a-list bordered :data-source="resultList" :locale="locale">
-          <a-list-item slot="renderItem" slot-scope="item">
+          <a-list-item #renderItem slot-scope="item">
             {{ parseTime(item, '{y}-{m}-{d} {h}:{i}:{s} 周{a}') }}
           </a-list-item>
-          <div slot="header">结果</div>
+          <div #header>结果</div>
         </a-list>
       </a-col>
     </a-row>

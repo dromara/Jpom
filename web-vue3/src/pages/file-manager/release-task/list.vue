@@ -14,7 +14,7 @@
       "
       rowKey="id"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             v-model="listQuery['%name%']"
@@ -47,26 +47,26 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <template slot="fileId" slot-scope="text, item">
+      <template #fileId slot-scope="text, item">
         <a-button type="link" style="padding: 0px" @click="handleViewFile(item)" size="small">{{ text }}</a-button>
       </template>
 
-      <template slot="status" slot-scope="text">
+      <template #status slot-scope="text">
         <a-tag v-if="text === 2" color="green">{{ statusMap[text] || '未知' }}</a-tag>
         <a-tag v-else-if="text === 0 || text === 1" color="orange">{{ statusMap[text] || '未知' }}</a-tag>
         <a-tag v-else-if="text === 4" color="blue"> {{ statusMap[text] || '未知' }} </a-tag>
         <a-tag v-else-if="text === 3" color="red">{{ statusMap[text] || '未知' }}</a-tag>
         <a-tag v-else>{{ statusMap[text] || '未知' }}</a-tag>
       </template>
-      <template slot="taskType" slot-scope="text">
+      <template #taskType slot-scope="text">
         <span>{{ taskTypeMap[text] || '未知' }}</span>
       </template>
 
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button type="primary" size="small" @click="handleView(record)">查看</a-button>
 
@@ -203,7 +203,7 @@
       </a-form>
     </a-modal>
     <!-- 查看文件 -->
-    <a-modal destroyOnClose v-model="viewFileVisible" :title="`查看文件`" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model:visible="viewFileVisible" :title="`查看文件`" :footer="null" :maskClosable="false">
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="文件名" prop="name">
           {{ temp.name }}

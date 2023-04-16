@@ -11,7 +11,7 @@
       rowKey="id"
       :row-selection="rowSelection"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             v-model="listQuery['id']"
@@ -51,7 +51,7 @@
             >工作空间同步</a-button
           >
           <a-tooltip>
-            <template slot="title">
+            <template #title>
               <div>脚本模版是存储在服务端中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
 
               <div>
@@ -67,17 +67,17 @@
         </a-space>
       </template>
 
-      <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #nodeId slot-scope="text" placement="topLeft" :title="text">
         <span>{{ nodeMap[text] }}</span>
       </a-tooltip>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="global" slot-scope="text">
+      <template #global slot-scope="text">
         <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
         <a-tag v-else>工作空间</a-tag>
       </template>
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <template v-if="choose === 'checkbox'">
             <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
@@ -88,7 +88,7 @@
                 更多
                 <a-icon type="down" />
               </a>
-              <a-menu slot="overlay">
+              <a-menu #overlay>
                 <a-menu-item>
                   <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
                 </a-menu-item>
@@ -169,9 +169,9 @@
             placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
             option-label-prop="value"
           >
-            <template slot="dataSource">
+            <template #dataSource>
               <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
-                <span slot="label">
+                <span #label>
                   {{ group.title }}
                 </span>
                 <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value">
@@ -203,10 +203,10 @@
           >
         </a-form-item>
         <a-form-item v-else>
-          <template slot="label">
+          <template #label>
             分发节点
             <a-tooltip v-show="!temp.id">
-              <template slot="title"> 分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本中 </template>
+              <template #title> 分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本中 </template>
               <question-circle-filled />
             </a-tooltip>
           </template>
@@ -244,7 +244,7 @@
       :maskClosable="false"
     >
       <a-alert message="温馨提示" type="warning">
-        <template slot="description">
+        <template #description>
           <ul>
             <li>同步机制采用<b>脚本名称</b>确定是同一个脚本</li>
             <li>当目标工作空间不存在对应的 脚本 时候将自动创建一个新的 脚本</li>
@@ -264,10 +264,17 @@
       </a-form>
     </a-modal>
     <!-- 触发器 -->
-    <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      v-model:visible="triggerVisible"
+      title="触发器"
+      width="50%"
+      :footer="null"
+      :maskClosable="false"
+    >
       <a-form ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
-          <template slot="tabBarExtraContent">
+          <template #tabBarExtraContent>
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>
@@ -275,7 +282,7 @@
           <a-tab-pane key="1" tab="执行">
             <a-space style="display: block" direction="vertical" align="baseline">
               <a-alert message="温馨提示" type="warning">
-                <template slot="description">
+                <template #description>
                   <ul>
                     <li>单个触发器地址中：第一个随机字符串为脚本ID，第二个随机字符串为 token</li>
                     <li>
@@ -300,7 +307,7 @@
                 type="info"
                 :message="`单个触发器地址(点击可以复制)`"
               >
-                <template slot="description">
+                <template #description>
                   <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   <a-icon type="copy" />
                 </template>
@@ -320,7 +327,7 @@
                 type="info"
                 :message="`批量触发器地址(点击可以复制)`"
               >
-                <template slot="description">
+                <template #description>
                   <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
                   <a-icon type="copy" />
                 </template>

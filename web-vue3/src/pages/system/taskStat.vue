@@ -1,31 +1,33 @@
 <template>
   <div>
     <a-table size="middle" rowKey="taskId" :columns="taskColumns" bordered :data-source="taskList" :pagination="false">
-      <template slot="title">
+      <template #title>
         <a-button size="small" type="primary" @click="refresh"> <a-icon type="reload" /> </a-button>
       </template>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="time" slot-scope="text" placement="topLeft" :title="parseTime(text)">
+      <a-tooltip #time slot-scope="text" placement="topLeft" :title="parseTime(text)">
         <span>{{ parseTime(text) }}</span>
       </a-tooltip>
-      <a-tooltip slot="cron" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #cron slot-scope="text" placement="topLeft" :title="text">
         <!-- <a-icon type="unordered-list" /> -->
-        <a-button type="link" style="padding: 0px" size="small" @click="toCronTaskList(text)"> {{ text }} <a-icon type="unordered-list" /> </a-button>
+        <a-button type="link" style="padding: 0px" size="small" @click="toCronTaskList(text)">
+          {{ text }} <a-icon type="unordered-list" />
+        </a-button>
       </a-tooltip>
     </a-table>
   </div>
 </template>
 <script>
-import { parseTime } from "@/utils/const";
+import { parseTime } from '@/utils/const'
 export default {
-  name: "TaskStat",
+  name: 'TaskStat',
   props: {
     taskList: {
       type: Array,
-      default: () => [],
-    },
+      default: () => []
+    }
   },
   data() {
     return {
@@ -33,92 +35,92 @@ export default {
 
       taskColumns: [
         {
-          title: "任务ID",
-          dataIndex: "taskId",
+          title: '任务ID',
+          dataIndex: 'taskId',
 
           // sorter: (a, b) => (a && b ? a.localeCompare(b, "zh-CN") : 0),
-          scopedSlots: { customRender: "tooltip" },
+          scopedSlots: { customRender: 'tooltip' },
           ellipsis: true,
           filters: [
             {
-              text: "构建",
-              value: "build",
+              text: '构建',
+              value: 'build'
             },
             {
-              text: "节点脚本",
-              value: "script",
+              text: '节点脚本',
+              value: 'script'
             },
             {
-              text: "服务端脚本",
-              value: "server_script",
+              text: '服务端脚本',
+              value: 'server_script'
             },
             {
-              text: "ssh 脚本",
-              value: "ssh_command",
-            },
+              text: 'ssh 脚本',
+              value: 'ssh_command'
+            }
           ],
-          onFilter: (value, record) => record.taskId.indexOf(value) === 0,
+          onFilter: (value, record) => record.taskId.indexOf(value) === 0
         },
         {
-          title: "cron",
-          dataIndex: "cron",
-          scopedSlots: { customRender: "cron" },
+          title: 'cron',
+          dataIndex: 'cron',
+          scopedSlots: { customRender: 'cron' }
           // sorter: (a, b) => (a && b ? a.localeCompare(b, "zh-CN") : 0),
           // sortDirections: ["descend", "ascend"],
         },
         {
-          title: "执行次数",
-          dataIndex: "executeCount",
-          sortDirections: ["descend", "ascend"],
+          title: '执行次数',
+          dataIndex: 'executeCount',
+          sortDirections: ['descend', 'ascend'],
           width: 140,
-          sorter: (a, b) => a.executeCount || 0 - b.executeCount || 0,
+          sorter: (a, b) => a.executeCount || 0 - b.executeCount || 0
         },
         {
-          title: "成功次数",
-          dataIndex: "succeedCount",
-          sortDirections: ["descend", "ascend"],
+          title: '成功次数',
+          dataIndex: 'succeedCount',
+          sortDirections: ['descend', 'ascend'],
           width: 140,
-          sorter: (a, b) => a.succeedCount || 0 - b.succeedCount || 0,
+          sorter: (a, b) => a.succeedCount || 0 - b.succeedCount || 0
         },
         {
-          title: "失败次数",
-          dataIndex: "failedCount",
-          sortDirections: ["descend", "ascend"],
+          title: '失败次数',
+          dataIndex: 'failedCount',
+          sortDirections: ['descend', 'ascend'],
           width: 140,
-          sorter: (a, b) => a.failedCount || 0 - b.failedCount || 0,
+          sorter: (a, b) => a.failedCount || 0 - b.failedCount || 0
         },
         {
-          title: "最后执行时间",
-          dataIndex: "lastExecuteTime",
-          sortDirections: ["descend", "ascend"],
-          defaultSortOrder: "descend",
+          title: '最后执行时间',
+          dataIndex: 'lastExecuteTime',
+          sortDirections: ['descend', 'ascend'],
+          defaultSortOrder: 'descend',
           width: 180,
           sorter: (a, b) => a.lastExecuteTime || 0 - b.lastExecuteTime || 0,
-          scopedSlots: { customRender: "time" },
-        },
-      ],
-    };
+          scopedSlots: { customRender: 'time' }
+        }
+      ]
+    }
   },
   mounted() {},
   methods: {
     parseTime: parseTime,
     refresh() {
-      this.$emit("refresh");
+      this.$emit('refresh')
     },
     // 前往 cron 详情
     toCronTaskList(cron) {
       const newpage = this.$router.resolve({
-        name: "cron-task-list",
-        path: "/tools/cron",
+        name: 'cron-task-list',
+        path: '/tools/cron',
         query: {
           ...this.$route.query,
-          sPid: "tools",
-          sId: "cronTools",
-          cron: cron,
-        },
-      });
-      window.open(newpage.href, "_blank");
-    },
-  },
-};
+          sPid: 'tools',
+          sId: 'cronTools',
+          cron: cron
+        }
+      })
+      window.open(newpage.href, '_blank')
+    }
+  }
+}
 </script>

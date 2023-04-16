@@ -11,31 +11,31 @@
       bordered
       :rowKey="(record, index) => index"
     >
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #name slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #id slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #group slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="lib" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #lib slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="delUser" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #delUser slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-button type="primary" @click="handleDetail(record)">详情</a-button>
       </template>
     </a-table>
     <!-- 详情区 -->
-    <a-modal destroyOnClose v-model="detailVisible" width="600px" title="详情信息" :footer="null">
+    <a-modal destroyOnClose v-model:visible="detailVisible" width="600px" title="详情信息" :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">
-        <a-list-item slot="renderItem" slot-scope="item">
+        <a-list-item #renderItem slot-scope="item">
           <a-list-item-meta :description="item.description">
-            <h4 slot="title">{{ item.title }}</h4>
+            <h4 #title>{{ item.title }}</h4>
           </a-list-item-meta>
         </a-list-item>
       </a-list>
