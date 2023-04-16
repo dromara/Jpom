@@ -3,25 +3,24 @@
  * 比如某些路由必须要登录
  */
 import router from './index'
-import { useAppStore } from '@/stores/app'
-import { useUserStore } from '@/stores/user'
+import { useMenuStore } from '@/stores/menu'
+import { useManagementMenuStore } from '@/stores/management-menu'
 import Qs from 'qs'
-
-const userStore = useUserStore()
-const appStore = useAppStore()
 
 // 不需要鉴权的名单
 const whiteList = ['/login', '/install', '/system/ipAccess']
 const noTabs = ['/full-terminal']
 
 router.beforeEach((to, from, next) => {
+  const menuStore = useMenuStore()
+  const managementMenuStore = useManagementMenuStore()
   // 检测白名单
   if (whiteList.indexOf(to.path) !== -1) {
     next()
     return
   }
   // 判断 token 是否存在
-  if (!userStore.getToken) {
+  if (!userStore().getToken) {
     if (from.path !== '/') {
       // notification.error({
       //   message: "未登录，无法访问！",
@@ -38,50 +37,39 @@ router.beforeEach((to, from, next) => {
   }
   // 如果存在 token (已经登录)
   // 刷新用户信息
-  userStore.pageReloadRefreshUserInfo()
+  userStore().pageReloadRefreshUserInfo()
 
   // 没有 tabs 独立页面
   if (noTabs.indexOf(to.path) !== -1) {
     next()
     return
   }
-  if (to.meta?.mode === 'management') {
-    // 刷新菜单
-    store
-      .dispatch('loadManagementSystemMenus')
-      .then(() => {
-        // 存储 store
-        store.dispatch('addManagementTab', { key: to.name, path: to.path }).then((toMenu) => {
-          toMenu ? next(toMenu.path) : next()
-        })
+  let menuStore2 = to.meta?.mode === 'management' ? managementMenuStore : menuStore
+  // if (to.meta?.mode === 'management') {
+  //   // 刷新菜单
+  //   menuStore2 = managementMenuStore
+  // } else {
+  //   // 刷新菜单
+  //   menuStore2 = menuStore
+  // }
+  menuStore2
+    .loadSystemMenus()
+    .then(() => {
+      // 存储 store
+      menuStore2.addTab({ key: to.name, path: to.path }).then((toMenu: any) => {
+        toMenu ? next(toMenu.path) : next()
       })
-      .catch(() => {
-        next({
-          path: '/',
-          replace: true
-        })
+    })
+    .catch(() => {
+      next({
+        path: '/',
+        replace: true
       })
-  } else {
-    // 刷新菜单
-    store
-      .dispatch('loadSystemMenus')
-      .then(() => {
-        // 存储 store
-        store.dispatch('addTab', { key: to.name, path: to.path }).then((toMenu) => {
-          toMenu ? next(toMenu.path) : next()
-        })
-      })
-      .catch(() => {
-        next({
-          path: '/',
-          replace: true
-        })
-      })
-  }
+    })
 })
 
 router.afterEach((to) => {
-  appStore.showInfo(to)
+  appStore().showInfo(to)
   const params = Qs.parse(location.search.substring(1))
   if (Object.keys(params).length) {
     //地址栏参数转 hash 参数

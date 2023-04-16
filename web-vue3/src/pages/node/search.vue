@@ -343,7 +343,7 @@ import {
   parseTime
 } from '@/utils/const'
 import FileRead from '@/pages/node/node-layout/project/project-file-read'
-import Vue from 'vue'
+// import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
 export default {

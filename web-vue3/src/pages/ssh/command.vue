@@ -364,7 +364,7 @@ import codeEditor from '@/components/codeEditor'
 import CommandLog from './command-view-log'
 import { mapGetters } from 'vuex'
 import { getWorkSpaceListAll } from '@/api/workspace'
-import Vue from 'vue'
+// import Vue from 'vue'
 
 export default {
   components: { codeEditor, CommandLog },

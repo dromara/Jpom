@@ -284,7 +284,7 @@ import { getNodeListAll } from '@/api/node'
 import ScriptConsole from '@/pages/node/node-layout/other/script-console'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import ScriptLog from '@/pages/node/node-layout/other/script-log'
-import Vue from 'vue'
+// import Vue from 'vue'
 
 export default {
   components: {

@@ -181,7 +181,7 @@ import {
   uploadBackupFile
 } from '@/api/backup-info'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, renderSize } from '@/utils/const'
-import Vue from 'vue'
+// import Vue from 'vue'
 
 export default {
   components: {},

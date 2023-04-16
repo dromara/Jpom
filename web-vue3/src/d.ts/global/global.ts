@@ -1,9 +1,9 @@
 import { GlobalWindow } from '@/interface/common'
+import { useAppStore } from '@/stores/app'
+import { message, notification, Modal } from 'ant-design-vue'
+import { useUserStore } from '@/stores/user'
 
 export const jpomWindow = window as unknown as GlobalWindow
-
-import { message, notification, Modal } from 'ant-design-vue'
-
 // 注册全局的组件
 export const $message = message
 export const $notification = notification
@@ -20,3 +20,11 @@ $notification.config({
 })
 
 $message.config({ duration: 4 })
+
+export const appStore = () => {
+  return useAppStore()
+}
+
+export const userStore = () => {
+  return useUserStore()
+}
