@@ -30,12 +30,12 @@
           <a-button size="small" v-if="!copyId" type="primary" @click="goFile">文件管理</a-button>
 
           <a-dropdown>
-            <!-- <a type="link" class="ant-dropdown-link"> 更多<a-icon type="down" /> </a> -->
+            <!-- <a type="link" class="ant-dropdown-link"> 更多<down-outlined /> </a> -->
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               <a-tag>
                 文件大小: {{ project.logSize || '-' }}
                 <!-- 更多 -->
-                <a-icon type="down" />
+                <down-outlined />
               </a-tag>
             </a>
             <a-menu #overlay>

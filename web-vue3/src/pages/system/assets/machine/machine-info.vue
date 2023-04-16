@@ -190,7 +190,7 @@
                     selectPlaceholder="选择进程名"
                     suffixIcon=""
                   >
-                    <template #suffixIcon> <a-icon type="down" /></template>
+                    <template #suffixIcon> <down-outlined /></template>
                   </custom-select>
                   <a-tooltip title="查看的进程数量">
                     <a-input-number v-model="processSearch.processCount" :min="1" @change="loadNodeProcess" />

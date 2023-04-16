@@ -32,7 +32,7 @@
               <a-dropdown>
                 <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
                   更多操作
-                  <a-icon type="down" />
+                  <down-outlined />
                 </a>
                 <a-menu #overlay>
                   <a-menu-item>

@@ -31,7 +31,7 @@
                 />
               </a-tooltip>
               <!-- <a-dropdown>
-                <a-button type="link" style="padding: 0" icon="setting"> 设置 <a-icon type="down" /></a-button>
+                <a-button type="link" style="padding: 0" icon="setting"> 设置 <down-outlined /></a-button>
                 <a-menu #overlay>
                   <a-menu-item key="0"> </a-menu-item>
                   <a-menu-divider />

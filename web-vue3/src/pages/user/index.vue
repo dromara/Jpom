@@ -30,7 +30,7 @@
         <a-space>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
           <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <down-outlined /> </a>
             <a-menu #overlay>
               <a-menu-item>
                 <a-button type="danger" size="small" :disabled="record.parent === 'sys'" @click="handleDelete(record)"

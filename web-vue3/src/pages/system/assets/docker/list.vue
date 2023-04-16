@@ -124,7 +124,7 @@
           <a-button size="small" @click="syncToWorkspaceShow(record)" type="primary">分配</a-button>
           <a-button size="small" @click="viewWorkspaceDataHander(record)" type="primary">关联</a-button>
           <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <down-outlined /> </a>
             <a-menu #overlay>
               <a-menu-item>
                 <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>

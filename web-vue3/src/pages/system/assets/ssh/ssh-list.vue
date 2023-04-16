@@ -62,7 +62,7 @@
                   :multiple="false"
                   :before-upload="beforeUpload"
                 >
-                  <a-button type="primary" icon="upload"> 导入 <a-icon type="down" /> </a-button>
+                  <a-button type="primary" icon="upload"> 导入 <down-outlined /> </a-button>
                 </a-upload>
               </a-dropdown>
               <a-tooltip>
@@ -169,7 +169,7 @@
               <a-dropdown>
                 <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
                   更多
-                  <a-icon type="down" />
+                  <down-outlined />
                 </a>
                 <a-menu #overlay>
                   <a-menu-item>

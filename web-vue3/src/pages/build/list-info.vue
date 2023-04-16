@@ -54,22 +54,26 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
           <template v-if="layoutType === 'table'">
             <template v-if="!tableSelections || tableSelections.length <= 0">
-              <a-button type="primary" :disabled="true"> 批量操作 <a-icon type="down" /> </a-button>
+              <a-button type="primary" :disabled="true"> 批量操作 <down-outlined /> </a-button>
             </template>
             <a-dropdown v-else>
               <a-menu #overlay>
                 <a-menu-item key="1" @click="batchBuild"> 批量构建 </a-menu-item>
                 <a-menu-item key="2" @click="batchCancel"> 批量取消 </a-menu-item>
               </a-menu>
-              <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
+              <a-button type="primary"> 批量操作 <down-outlined /> </a-button>
             </a-dropdown>
           </template>
           <a-tooltip v-else title="表格视图才能使用批量操作功能">
-            <a-button :disabled="true" type="primary"> 批量操作 <a-icon type="down" /> </a-button>
+            <a-button :disabled="true" type="primary"> 批量操作 <down-outlined /> </a-button>
           </a-tooltip>
 
-          <a-button type="primary" @click="changeLayout" :icon="layoutType === 'card' ? 'layout' : 'table'">
+          <a-button type="primary" @click="changeLayout">
             {{ this.layoutType === 'card' ? '卡片' : '表格' }}
+            <template #icon>
+              <layout-outlined v-if="layoutType === 'card'" />
+              <table-outlined v-else />
+            </template>
           </a-button>
 
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
@@ -332,7 +336,7 @@
               <a-dropdown>
                 <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
                   更多
-                  <a-icon type="down" />
+                  <down-outlined />
                 </a>
                 <a-menu #overlay>
                   <a-menu-item>

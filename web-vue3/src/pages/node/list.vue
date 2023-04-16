@@ -62,8 +62,12 @@
               <a-button :disabled="true" type="primary"> 工作空间同步 </a-button>
             </a-tooltip>
 
-            <a-button type="primary" @click="changeLayout" :icon="layoutType === 'card' ? 'layout' : 'table'">
+            <a-button type="primary" @click="changeLayout">
               {{ layoutType === 'card' ? '卡片' : '表格' }}
+              <template #icon>
+                <layout-outlined v-if="layoutType === 'card'" />
+                <table-outlined v-else />
+              </template>
             </a-button>
             <a-tooltip placement="bottom">
               <template #title>
@@ -212,7 +216,7 @@
               <a-dropdown>
                 <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
                   更多
-                  <a-icon type="down" />
+                  <down-outlined />
                 </a>
                 <a-menu #overlay>
                   <a-menu-item>
@@ -850,7 +854,7 @@ const loadData = (pointerEvent?: any) => {
         })
       listQuery.value.total = res.data.total
       let nodeId = route.query.nodeId
-      list.value.map((item) => {
+      list.value.forEach((item: any) => {
         if (nodeId === item.id) {
           handleNode(item)
         }
@@ -933,7 +937,7 @@ const handleUnbind = (record: any) => {
 
   $confirm({
     title: '危险操作！！！',
-    content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),
+    content: h('div', null, [h('p', { domProps: { innerHTML: html } }, [])]),
     okButtonProps: { props: { type: 'danger', size: 'small' } },
     cancelButtonProps: { props: { type: 'primary' } },
     okText: '确认',
@@ -1077,13 +1081,13 @@ const changeLayout = () => {
   listQuery.value = { ...listQuery.value, limit: layoutType.value === 'card' ? 8 : getCachePageLimit() }
   loadData()
 }
-
+const attrs = useAttrs()
 const onFinish = () => {
   if (drawerVisible.value) {
     // 打开节点 不刷新
     return
   }
-  if (this.$attrs.routerUrl !== route.path) {
+  if (attrs.routerUrl !== route.path) {
     // 重新计算倒计时
     deadline.value = Date.now() + refreshInterval.value * 1000
     return

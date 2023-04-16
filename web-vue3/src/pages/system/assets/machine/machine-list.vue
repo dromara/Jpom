@@ -53,13 +53,17 @@
               <a-menu-item key="2" @click="syncNodeWhiteConfig"> 同步白名单 </a-menu-item>
               <a-menu-item key="3" @click="syncNodeConfig"> 同步系统配置 </a-menu-item>
             </a-menu>
-            <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
+            <a-button type="primary"> 批量操作 <down-outlined /> </a-button>
           </a-dropdown>
           <a-tooltip v-else title="表格视图才能使用同步配置功能">
-            <a-button :disabled="true" type="primary"> 批量操作 <a-icon type="down" /> </a-button>
+            <a-button :disabled="true" type="primary"> 批量操作 <down-outlined /> </a-button>
           </a-tooltip>
-          <a-button type="primary" @click="changeLayout" :icon="layoutType === 'card' ? 'layout' : 'table'">
+          <a-button type="primary" @click="changeLayout">
             {{ this.layoutType === 'card' ? '卡片' : '表格' }}
+            <template #icon>
+              <layout-outlined v-if="layoutType === 'card'" />
+              <table-outlined v-else />
+            </template>
           </a-button>
           <a-tooltip>
             <template #title>
