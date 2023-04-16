@@ -1,33 +1,14 @@
-///
-/// The MIT License (MIT)
-///
-/// Copyright (c) 2019 Code Technology Studio
-///
-/// Permission is hereby granted, free of charge, to any person obtaining a copy of
-/// this software and associated documentation files (the "Software"), to deal in
-/// the Software without restriction, including without limitation the rights to
-/// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-/// the Software, and to permit persons to whom the Software is furnished to do so,
-/// subject to the following conditions:
-///
-/// The above copyright notice and this permission notice shall be included in all
-/// copies or substantial portions of the Software.
-///
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-/// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-/// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-/// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-/// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///
-
 /**
  * 路由鉴权
  * 比如某些路由必须要登录
  */
-// import { notification } from "ant-design-vue";
 import router from './index'
-import store from '../stores/index'
+import { useAppStore } from '@/stores/app'
+import { useUserStore } from '@/stores/user'
+import Qs from 'qs'
+
+const userStore = useUserStore()
+const appStore = useAppStore()
 
 // 不需要鉴权的名单
 const whiteList = ['/login', '/install', '/system/ipAccess']
@@ -40,7 +21,7 @@ router.beforeEach((to, from, next) => {
     return
   }
   // 判断 token 是否存在
-  if (!store.getters.getToken) {
+  if (!userStore.getToken) {
     if (from.path !== '/') {
       // notification.error({
       //   message: "未登录，无法访问！",
@@ -48,12 +29,17 @@ router.beforeEach((to, from, next) => {
       // });
       console.warn(`from: ${from.path} ==> to: ${to.path}`)
     }
-    next('/login')
+    next({
+      path: '/login',
+      query: from.query,
+      replace: true
+    })
     return
   }
   // 如果存在 token (已经登录)
   // 刷新用户信息
-  store.dispatch('pageReloadRefreshUserInfo')
+  userStore.pageReloadRefreshUserInfo()
+
   // 没有 tabs 独立页面
   if (noTabs.indexOf(to.path) !== -1) {
     next()
@@ -61,20 +47,47 @@ router.beforeEach((to, from, next) => {
   }
   if (to.meta?.mode === 'management') {
     // 刷新菜单
-    store.dispatch('loadManagementSystemMenus').then(() => {
-      // 存储 store
-      store.dispatch('addManagementTab', { key: to.name, path: to.path }).then((toMenu) => {
-        toMenu ? next(toMenu.path) : next()
+    store
+      .dispatch('loadManagementSystemMenus')
+      .then(() => {
+        // 存储 store
+        store.dispatch('addManagementTab', { key: to.name, path: to.path }).then((toMenu) => {
+          toMenu ? next(toMenu.path) : next()
+        })
       })
-    })
+      .catch(() => {
+        next({
+          path: '/',
+          replace: true
+        })
+      })
   } else {
     // 刷新菜单
-    store.dispatch('loadSystemMenus').then(() => {
-      // 存储 store
-      store.dispatch('addTab', { key: to.name, path: to.path }).then((toMenu) => {
-        toMenu ? next(toMenu.path) : next()
+    store
+      .dispatch('loadSystemMenus')
+      .then(() => {
+        // 存储 store
+        store.dispatch('addTab', { key: to.name, path: to.path }).then((toMenu) => {
+          toMenu ? next(toMenu.path) : next()
+        })
       })
-    })
+      .catch(() => {
+        next({
+          path: '/',
+          replace: true
+        })
+      })
+  }
+})
+
+router.afterEach((to) => {
+  appStore.showInfo(to)
+  const params = Qs.parse(location.search.substring(1))
+  if (Object.keys(params).length) {
+    //地址栏参数转 hash 参数
+    const paramsStr = Qs.stringify(Object.assign({}, params, to.query))
+    //console.error(`${location.origin}${location.pathname}#${to.path}?${paramsStr}`);
+    location.href = `${location.origin}${location.pathname}#${to.path}?${paramsStr}`
   }
 })
 

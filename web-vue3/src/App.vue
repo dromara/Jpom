@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
 import { useMenuStore } from '@/stores/menu'
-import useGuideStore from '@/stores/guide'
+import { useGuideStore } from '@/stores/guide'
 
 const routerActivation = ref(true)
 const guideStore = useGuideStore().getGuideCache
