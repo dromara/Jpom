@@ -20,7 +20,7 @@ _roadhog-api-doc
 
 # production
 dist/
-/.vscode
+#/.vscode
 
 # misc
 .DS_Store
@@ -33,7 +33,7 @@ yarn.lock
 package-lock.json
 *bak
 pom.xml.versionsBackup
-.vscode
+#.vscode
 
 # visual studio code
 .history
