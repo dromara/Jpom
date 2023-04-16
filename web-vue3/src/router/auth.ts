@@ -6,12 +6,13 @@ import router from './index'
 import { useMenuStore } from '@/stores/menu'
 import { useManagementMenuStore } from '@/stores/management-menu'
 import Qs from 'qs'
+import {RouteLocationNormalized,NavigationGuardNext} from "vue-router";
 
 // 不需要鉴权的名单
-const whiteList = ['/login', '/install', '/system/ipAccess']
-const noTabs = ['/full-terminal']
+const whiteList: string[] = ['/login', '/install', '/system/ipAccess']
+const noTabs: string[] = ['/full-terminal']
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
   const menuStore = useMenuStore()
   const managementMenuStore = useManagementMenuStore()
   // 检测白名单
@@ -68,7 +69,7 @@ router.beforeEach((to, from, next) => {
     })
 })
 
-router.afterEach((to) => {
+router.afterEach((to: RouteLocationNormalized) => {
   appStore().showInfo(to)
   const params = Qs.parse(location.search.substring(1))
   if (Object.keys(params).length) {
@@ -93,8 +94,8 @@ router.afterEach((to) => {
  * 如果不成功就只刷新A页面，停留在当前的A页面。
  */
 router.onError((error) => {
-  const jsPattern = /Loading chunk (\S)+ failed/g
-  const cssPattern = /Loading CSS chunk (\S)+ failed/g
+  const jsPattern: RegExp = /Loading chunk (\S)+ failed/g
+  const cssPattern: RegExp = /Loading CSS chunk (\S)+ failed/g
   const isChunkLoadFailed = error.message.match(jsPattern || cssPattern)
   //const targetPath = router.history.pending.fullPath;
   if (isChunkLoadFailed) {
