@@ -1,7 +1,8 @@
-import { TOKEN_KEY, USER_INFO_KEY, MENU_KEY, LONG_TERM_TOKEN } from '@/utils/const'
+import { TOKEN_KEY, USER_INFO_KEY, LONG_TERM_TOKEN } from '@/utils/const'
 
 import { getUserInfo, loginOut } from '@/api/user/user'
 import { useMenuStore } from './menu'
+import { useManagementMenuStore } from './management-menu'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -44,17 +45,25 @@ export const useUserStore = defineStore('user', {
       } else {
         localStorage.removeItem(LONG_TERM_TOKEN)
       }
-      await this.refreshUserInfo()
+      const userInfo: any = await this.refreshUserInfo()
+
+      const menuStore = useMenuStore()
+      await menuStore.restLoadSystemMenus()
+      if (userInfo?.systemUser) {
+        const managementMenuStore = useManagementMenuStore()
+        managementMenuStore.restLoadSystemMenus()
+      }
       return true
     },
     // 退出登录 移除对应的 store
     async logOut() {
       localStorage.removeItem(TOKEN_KEY)
       const menuStore = useMenuStore()
-      menuStore.menus = []
-      localStorage.removeItem(MENU_KEY)
       // 调用其他 action
       menuStore.clearTabs({ key: 'all' })
+      //
+      const managementMenuStore = useManagementMenuStore()
+      managementMenuStore.clearTabs({ key: 'all' })
       return loginOut({})
     }
   },

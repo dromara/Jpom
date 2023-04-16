@@ -181,7 +181,7 @@
   </div>
 </template>
 <script>
-import Vue from 'vue'
+// import Vue from 'vue'
 import { getTriggerUrl } from '@/api/build-info'
 export default {
   props: {

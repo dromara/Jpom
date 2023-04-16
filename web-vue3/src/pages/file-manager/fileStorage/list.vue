@@ -395,7 +395,7 @@ import {
   triggerUrl
 } from '@/api/file-manager/file-storage'
 import { uploadPieces } from '@/utils/upload-pieces'
-import Vue from 'vue'
+// import Vue from 'vue'
 import releaseFile from './releaseFile.vue'
 import { addReleaseTask } from '@/api/file-manager/release-task-log'
 

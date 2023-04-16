@@ -197,12 +197,22 @@ const changeCode = () => {
   })
 }
 
+const parseOauth2Provide = () => {
+  if (jpomWindow.oauth2Provide === '<oauth2Provide>') {
+    const pathname = location.pathname.substring(1)
+    const pathArray = pathname.split('-')
+    return pathArray[pathArray.length - 1]
+    // console.log(location.pathname.substring(1))
+  }
+  return jpomWindow.oauth2Provide
+}
+
 const checkOauth2 = () => {
   if (route.query.code) {
     oauth2Login({
       code: route.query.code,
       state: route.query.state,
-      provide: jpomWindow.oauth2Provide
+      provide: parseOauth2Provide()
     }).then((res) => {
       // 删除参数，避免刷新页面 code 已经被使用提示错误信息
       let query = Object.assign({}, route.query)
@@ -247,8 +257,6 @@ const startDispatchLogin = (res: any) => {
 const dispatchLogin = (data: any) => {
   // 调用 store action 存储当前登录的用户名和 token
   userStore.login({ token: data.token, longTermToken: data.longTermToken }).then(() => {
-    // 刷新菜单
-    useMenuStore().restLoadSystemMenus()
     // 跳转主页面
     router.push({ path: '/' })
   })

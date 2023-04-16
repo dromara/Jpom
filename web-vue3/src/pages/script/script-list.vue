@@ -390,7 +390,7 @@ import ScriptConsole from '@/pages/script/script-console'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import { mapGetters } from 'vuex'
 import { getWorkSpaceListAll } from '@/api/workspace'
-import Vue from 'vue'
+// import Vue from 'vue'
 import ScriptLog from '@/pages/script/script-log'
 export default {
   components: {

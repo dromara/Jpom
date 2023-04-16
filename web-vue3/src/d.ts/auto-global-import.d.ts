@@ -11,5 +11,7 @@ declare global {
   const $notification: typeof import('./global/global')['$notification']
   const $success: typeof import('./global/global')['$success']
   const $warning: typeof import('./global/global')['$warning']
+  const appStore: typeof import('./global/global')['appStore']
   const jpomWindow: typeof import('./global/global')['jpomWindow']
+  const userStore: typeof import('./global/global')['userStore']
 }
