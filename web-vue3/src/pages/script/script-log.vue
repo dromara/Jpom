@@ -69,7 +69,14 @@
       </template>
     </a-table>
     <!-- 日志 -->
-    <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      :width="'80vw'"
+      v-model:visible="logVisible"
+      title="执行日志"
+      :footer="null"
+      :maskClosable="false"
+    >
       <script-log-view v-if="logVisible" :temp="temp" />
     </a-modal>
   </div>
