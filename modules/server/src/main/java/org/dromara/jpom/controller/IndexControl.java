@@ -23,6 +23,7 @@
 package org.dromara.jpom.controller;
 
 import cn.hutool.cache.Cache;
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.io.FileUtil;
@@ -30,10 +31,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.ReUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
 import cn.hutool.system.SystemUtil;
@@ -164,11 +162,12 @@ public class IndexControl extends BaseServerController {
      * @apiGroup index
      * @apiSuccess {Object} BODY image
      */
-    @RequestMapping(value = "logo_image", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
+    @RequestMapping(value = "logo-image", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public void logoImage(HttpServletResponse response) throws IOException {
+    public JsonMessage<String> logoImage(HttpServletResponse response) {
         String logoFile = webConfig.getLogoFile();
-        this.loadImage(response, logoFile, "classpath:/logo/jpom.png", "jpg", "png", "gif");
+        String imageSrc = this.loadImageSrc(response, logoFile, "classpath:/logo/jpom.png", "jpg", "png", "gif");
+        return JsonMessage.success("", imageSrc);
     }
 
     /**
@@ -205,6 +204,30 @@ public class IndexControl extends BaseServerController {
         // favicon ico
         InputStream inputStream = ResourceUtil.getStream(defaultResource);
         ServletUtil.write(response, inputStream, MediaType.IMAGE_PNG_VALUE);
+    }
+
+    private String loadImageSrc(HttpServletResponse response, String imgFile, String defaultResource, String... suffix) {
+        if (StrUtil.isNotEmpty(imgFile)) {
+            if (Validator.isMatchRegex(RegexPool.URL_HTTP, imgFile)) {
+                // 重定向
+                return imgFile;
+            }
+            File file = FileUtil.file(imgFile);
+            if (FileUtil.isFile(file)) {
+                String type = FileTypeUtil.getType(file);
+                String extName = FileUtil.extName(file);
+                if (StrUtil.equalsAnyIgnoreCase(type, suffix) || StrUtil.equalsAnyIgnoreCase(extName, suffix)) {
+                    ServletUtil.write(response, file);
+                    String encode = Base64.encode(file);
+                    String mimeType = FileUtil.getMimeType(file.toPath());
+                    return URLUtil.getDataUriBase64(mimeType, encode);
+                }
+            }
+        }
+        // favicon ico
+        InputStream inputStream = ResourceUtil.getStream(defaultResource);
+        String encode = Base64.encode(inputStream);
+        return URLUtil.getDataUriBase64(MediaType.IMAGE_PNG_VALUE, encode);
     }
 
 

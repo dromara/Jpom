@@ -65,13 +65,19 @@
             <a-form-item :wrapper-col="{ span: 24 }">
               <a-space :size="20">
                 <div class="oauth2-item" v-if="enabledOauth2Provides.includes('gitee')">
-                  <a-tooltip @click="toOauth2Url('gitee')" title="gitee"><img :src="giteeImg" /></a-tooltip>
+                  <a-tooltip @click="toOauth2Url('gitee')" title="gitee">
+                    <img alt="gitee" :src="giteeImg" />
+                  </a-tooltip>
                 </div>
                 <div class="oauth2-item" v-if="enabledOauth2Provides.includes('maxkey')">
-                  <a-tooltip @click="toOauth2Url('maxkey')" title="maxkey"><img :src="maxkeyImg" /></a-tooltip>
+                  <a-tooltip @click="toOauth2Url('maxkey')" title="maxkey">
+                    <img alt="maxkey" :src="maxkeyImg" />
+                  </a-tooltip>
                 </div>
                 <div class="oauth2-item" v-if="enabledOauth2Provides.includes('github')">
-                  <a-tooltip @click="toOauth2Url('github')" title="github"><img :src="githubImg" /></a-tooltip>
+                  <a-tooltip @click="toOauth2Url('github')" title="github">
+                    <img alt="github" :src="githubImg" />
+                  </a-tooltip>
                 </div>
               </a-space>
             </a-form-item>

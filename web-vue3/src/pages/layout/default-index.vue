@@ -8,7 +8,7 @@
     >
       <a-tooltip placement="right" title="点击可以折叠左侧菜单栏">
         <div class="logo" @click="changeCollapsed()">
-          <img :src="logoUrl" />
+          <img :src="logoUrl || defaultLogo" alt="logo" />
           {{ subTitle }}
         </div>
       </a-tooltip>
@@ -32,9 +32,10 @@
 import SideMenu from './side-menu'
 // import UserHeader from "./user-header";
 import ContentTab from './content-tab'
-import { checkSystem } from '@/api/install'
+import { checkSystem, loadingLogo } from '@/api/install'
 import { useAppStore } from '@/stores/app'
 import { useGuideStore } from '@/stores/guide'
+import defaultLogo from '@/assets/images/jpom.png'
 
 defineProps({
   mode: {
@@ -44,7 +45,7 @@ defineProps({
 })
 
 const collapsed = ref(false)
-const subTitle = ref('项目管理')
+const subTitle = ref('项目运维')
 const logoUrl = ref('')
 const fullScreenFlag = ref(false)
 const appStore = useAppStore()
@@ -66,7 +67,6 @@ const checkSystemHannder = () => {
       if (res.data.subTitle) {
         subTitle.value = res.data.subTitle
       }
-      logoUrl.value = ((res.data.routerBase || '') + '/logo_image').replace(new RegExp('//', 'gm'), '/')
 
       // 禁用导航
       guideStore.commitGuide({
@@ -89,6 +89,10 @@ const checkSystemHannder = () => {
     } else if (res.code === 222) {
       router.push('/install')
     }
+  })
+
+  loadingLogo().then((res) => {
+    logoUrl.value = res.data || ''
   })
 }
 const changeCollapsed = () => {
