@@ -22,12 +22,8 @@
                 <a-button type="link" icon="swap">切换工作空间</a-button>
               </template>
               <template v-for="(item, index) in myWorkspaceList">
-                <a-menu-item
-                  v-if="index != -1"
-                  :disabled="item.id === selectWorkspace"
-                  @click="handleWorkspaceChange(item.id)"
-                  :key="index"
-                >
+                <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace"
+                  @click="handleWorkspaceChange(item.id)" :key="index">
                   <a-button type="link" :disabled="item.id === selectWorkspace">
                     {{ item.name }}
                   </a-button>
@@ -61,25 +57,18 @@
     </a-button-group>
 
     <!-- 修改密码区 -->
-    <a-modal
-      destroyOnClose
-      v-model="updateNameVisible"
-      :width="'60vw'"
-      title="安全管理"
-      :footer="null"
-      :maskClosable="false"
-    >
-      <a-tabs v-model="temp.tabActiveKey" @change="tabChange">
+    <a-modal destroyOnClose v-model="updateNameVisible" :width="'60vw'" title="安全管理" :footer="null" :maskClosable="false">
+      <a-tabs v-model="tabActiveKey" @change="tabChange">
         <a-tab-pane :key="1" tab="修改密码">
-          <a-form ref="pwdForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+          <a-form :rules="pwdRules" :model="pwdState" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
             <a-form-item label="原密码" name="oldPwd">
-              <a-input-password v-model="temp.oldPwd" placeholder="请输入原密码" />
+              <a-input-password v-model:value="pwdState.oldPwd" placeholder="请输入原密码" />
             </a-form-item>
             <a-form-item label="新密码" name="newPwd">
-              <a-input-password v-model="temp.newPwd" placeholder="请输入新密码" />
+              <a-input-password v-model:value="pwdState.newPwd" placeholder="请输入新密码" />
             </a-form-item>
             <a-form-item label="确认密码" name="confirmPwd">
-              <a-input-password v-model="temp.confirmPwd" placeholder="请输入确认密码" />
+              <a-input-password v-model:value="pwdState.confirmPwd" placeholder="请输入确认密码" />
             </a-form-item>
             <a-form-item>
               <a-row type="flex" justify="center">
@@ -92,7 +81,7 @@
         </a-tab-pane>
         <a-tab-pane :key="2" tab="两步验证">
           <a-row>
-            <a-alert type="warning" v-if="temp.needVerify">
+            <a-alert type="warning" v-if="mfaState.needVerify">
               <template slot="message"> 提示 </template>
               <template slot="description">
                 <ul style="color: red">
@@ -102,11 +91,12 @@
               </template>
             </a-alert>
             <a-col :span="12">
-              <a-form ref="mfaForm" :model="temp" :rules="rules" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+              <a-form ref="mfaForm" :model="mfaState" :rules="mfaRules" :label-col="{ span: 6 }"
+                :wrapper-col="{ span: 14 }">
                 <a-form-item label="当前状态" name="status">
-                  <a-switch checked-children="开启中" disabled un-checked-children="关闭中" v-model="temp.status" />
+                  <a-switch checked-children="开启中" disabled un-checked-children="关闭中" v-model="mfaState.status" />
                 </a-form-item>
-                <template v-if="temp.needVerify">
+                <template v-if="mfaState.needVerify">
                   <a-form-item label="二维码">
                     <a-row>
                       <a-col :span="14">
@@ -115,31 +105,24 @@
                     </a-row>
                   </a-form-item>
                   <a-form-item label="MFA key">
-                    <a-input
-                      v-clipboard:copy="temp.mfaKey"
-                      v-clipboard:success="
-                        () => {
-                          tempVue.prototype.$notification.success({ message: '复制成功' })
-                        }
-                      "
-                      v-clipboard:error="
-                        () => {
-                          tempVue.prototype.$notification.error({ message: '复制失败' })
-                        }
-                      "
-                      readOnly
-                      disabled
-                      v-model="temp.mfaKey"
-                    >
+                    <a-input v-clipboard:copy="mfaState.mfaKey" v-clipboard:success="
+                      () => {
+                        // tempVue.prototype.$notification.success({ message: '复制成功' })
+                      }
+                    " v-clipboard:error="
+  () => {
+    // tempVue.prototype.$notification.error({ message: '复制失败' })
+  }
+" readOnly disabled v-model="mfaState.mfaKey">
                       <a-icon slot="prefix" type="copy" />
                     </a-input>
                   </a-form-item>
                 </template>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
-                <a-form-item v-if="temp.needVerify" label="验证码" name="twoCode">
-                  <a-input v-model="temp.twoCode" ref="twoCode" placeholder="两步验证码" />
+                <a-form-item v-if="mfaState.needVerify" label="验证码" name="twoCode">
+                  <a-input v-model="mfaState.twoCode" ref="twoCode" placeholder="两步验证码" />
                 </a-form-item>
-                <a-form-item v-if="temp.needVerify">
+                <a-form-item v-if="mfaState.needVerify">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
                       <a-button type="primary" html-type="submit" @click="handleBindMfa">确认绑定</a-button>
@@ -147,10 +130,10 @@
                   </a-row>
                 </a-form-item>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
-                <a-form-item v-if="!temp.needVerify && temp.status" label="验证码" name="twoCode">
-                  <a-input v-model="temp.twoCode" ref="twoCode" placeholder="两步验证码" />
+                <a-form-item v-if="!mfaState.needVerify && mfaState.status" label="验证码" name="twoCode">
+                  <a-input v-model="mfaState.twoCode" ref="twoCode" placeholder="两步验证码" />
                 </a-form-item>
-                <a-form-item v-if="!temp.needVerify && temp.status">
+                <a-form-item v-if="!mfaState.needVerify && mfaState.status">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
                       <a-button type="primary" html-type="submit" @click="closeMfaFn">确认关闭</a-button>
@@ -158,7 +141,7 @@
                   </a-row>
                 </a-form-item>
 
-                <a-form-item v-if="!temp.needVerify && !temp.status">
+                <a-form-item v-if="!mfaState.needVerify && !mfaState.status">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
                       <a-button type="primary" @click="openMfaFn">开启 MFA</a-button>
@@ -177,77 +160,59 @@
     </a-modal>
 
     <!-- 修改用户资料区 -->
-    <a-modal
-      destroyOnClose
-      v-model="updateUserVisible"
-      title="修改用户资料"
-      @ok="handleUpdateUserOk"
-      :maskClosable="false"
-    >
-      <a-form ref="userForm" :rules="rules" :model="temp" :label-col="{ span: 8 }" :wrapper-col="{ span: 15 }">
+    <a-modal destroyOnClose v-model="updateUserVisible" title="修改用户资料" @ok="handleUpdateUserOk" :maskClosable="false">
+      <a-form :rules="userRules" :model="temp" :label-col="{ span: 8 }" :wrapper-col="{ span: 15 }">
         <a-form-item label="临时token" name="token">
-          <a-input disabled v-model="temp.token" placeholder="Token">
-            <a-tooltip
-              slot="suffix"
-              title="复制"
-              v-clipboard:copy="temp.token"
-              v-clipboard:success="
-                () => {
-                  tempVue.prototype.$notification.success({ message: '复制成功' })
-                }
-              "
-              v-clipboard:error="
-                () => {
-                  tempVue.prototype.$notification.error({ message: '复制失败' })
-                }
-              "
-            >
+          <a-input disabled v-model="userState.token" placeholder="Token">
+            <a-tooltip slot="suffix" title="复制" v-clipboard:copy="userState.token" v-clipboard:success="
+              () => {
+                // tempVue.prototype.$notification.success({ message: '复制成功' })
+              }
+            " v-clipboard:error="
+  () => {
+    // tempVue.prototype.$notification.error({ message: '复制失败' })
+  }
+">
               <a-icon type="copy" />
             </a-tooltip>
           </a-input>
         </a-form-item>
         <a-form-item label="长期token" name="md5Token">
-          <a-input disabled v-model="temp.md5Token" placeholder="Token">
-            <a-tooltip
-              slot="suffix"
-              title="复制"
-              v-clipboard:copy="temp.md5Token"
-              v-clipboard:success="
-                () => {
-                  tempVue.prototype.$notification.success({ message: '复制成功' })
-                }
-              "
-              v-clipboard:error="
-                () => {
-                  tempVue.prototype.$notification.error({ message: '复制失败' })
-                }
-              "
-            >
+          <a-input disabled v-model="userState.md5Token" placeholder="Token">
+            <a-tooltip slot="suffix" title="复制" v-clipboard:copy="userState.md5Token" v-clipboard:success="
+              () => {
+                // tempVue.prototype.$notification.success({ message: '复制成功' })
+              }
+            " v-clipboard:error="
+  () => {
+    // tempVue.prototype.$notification.error({ message: '复制失败' })
+  }
+">
               <a-icon type="copy" />
             </a-tooltip>
           </a-input>
         </a-form-item>
         <a-form-item label="昵称" name="name">
-          <a-input v-model="temp.name" placeholder="昵称" />
+          <a-input v-model="userState.name" placeholder="昵称" />
         </a-form-item>
         <a-form-item label="邮箱地址" name="email">
-          <a-input v-model="temp.email" placeholder="邮箱地址" />
+          <a-input v-model="userState.email" placeholder="邮箱地址" />
         </a-form-item>
         <a-form-item v-show="showCode" label="邮箱验证码" name="code">
           <a-row :gutter="8">
             <a-col :span="15">
-              <a-input v-model="temp.code" placeholder="邮箱验证码" />
+              <a-input v-model="userState.code" placeholder="邮箱验证码" />
             </a-col>
             <a-col :span="4">
-              <a-button type="primary" :disabled="!temp.email" @click="sendEmailCode">发送验证码</a-button>
+              <a-button type="primary" :disabled="!userState.email" @click="handleSendEmailCode">发送验证码</a-button>
             </a-col>
           </a-row>
         </a-form-item>
         <a-form-item label="钉钉通知地址" name="dingDing">
-          <a-input v-model="temp.dingDing" placeholder="钉钉通知地址" />
+          <a-input v-model="userState.dingDing" placeholder="钉钉通知地址" />
         </a-form-item>
         <a-form-item label="企业微信通知地址" name="workWx">
-          <a-input v-model="temp.workWx" placeholder="企业微信通知地址" />
+          <a-input v-model="userState.workWx" placeholder="企业微信通知地址" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -258,88 +223,52 @@
         <a-alert banner>
           <template slot="message"> 下列配置信息仅在当前浏览器生效,清空浏览器缓存配置将恢复默认 </template>
         </a-alert>
-        <a-form-item label="页面导航" name="token">
+        <!-- <a-form-item label="页面导航" name="token">
           <a-space>
-            <a-switch
-              checked-children="开"
-              @click="toggleGuide"
-              :checked="!this.guideStatus"
-              :disabled="getDisabledGuide"
-              un-checked-children="关"
-            />
+            <a-switch checked-children="开" @click="toggleGuide" :checked="!this.guideStatus" :disabled="getDisabledGuide"
+              un-checked-children="关" />
 
             <div v-if="!this.guideStatus">
               重置导航
               <a-icon type="rest" @click="restGuide" />
             </div>
           </a-space>
-        </a-form-item>
+        </a-form-item> -->
         <a-form-item label="菜单配置" name="token">
           <a-space>
             同时展开多个：
-            <a-switch
-              checked-children="是"
-              @click="toggleMenuMultiple"
-              :checked="menuMultipleFlag"
-              un-checked-children="否"
-            />
+            <a-switch checked-children="是" @click="toggleMenuMultiple" :checked="guideCache.menuMultipleFlag"
+              un-checked-children="否" />
           </a-space>
         </a-form-item>
         <a-form-item label="页面配置" name="token">
           <a-space>
             自动撑开：
-            <a-switch
-              checked-children="是"
-              @click="toggleFullScreenFlag"
-              :checked="fullScreenFlag"
-              un-checked-children="否"
-            />
+            <a-switch checked-children="是" @click="toggleFullScreenFlag" :checked="guideCache.fullScreenFlag"
+              un-checked-children="否" />
           </a-space>
         </a-form-item>
         <a-form-item label="滚动条显示" name="token">
           <a-space>
             全局配置：
-            <a-switch
-              checked-children="显示"
-              @click="toggleScrollbarFlag"
-              :checked="scrollbarFlag"
-              un-checked-children="不显示"
-            />
+            <a-switch checked-children="显示" @click="toggleScrollbarFlag" :checked="guideCache.scrollbarFlag"
+              un-checked-children="不显示" />
           </a-space>
         </a-form-item>
       </a-form>
     </a-modal>
     <!-- mfa 提示 -->
-    <a-modal
-      destroyOnClose
-      v-model="bindMfaTip"
-      title="安全提醒"
-      :footer="null"
-      :maskClosable="false"
-      :closable="false"
-      :keyboard="false"
-    >
+    <a-modal destroyOnClose v-model="bindMfaTip" title="安全提醒" :footer="null" :maskClosable="false" :closable="false"
+      :keyboard="false">
       <a-space direction="vertical">
-        <a-alert
-          message="安全提醒"
-          description="为了您的账号安全系统要求必须开启两步验证来确保账号的安全性"
-          type="error"
-          :closable="false"
-        />
+        <a-alert message="安全提醒" description="为了您的账号安全系统要求必须开启两步验证来确保账号的安全性" type="error" :closable="false" />
         <a-row align="middle" type="flex" justify="center">
           <a-button type="danger" @click="toBindMfa"> 立即开启 </a-button>
         </a-row>
       </a-space>
     </a-modal>
     <!-- 查看操作日志 -->
-    <a-modal
-      destroyOnClose
-      v-model="viewLogVisible"
-      :width="'90vw'"
-      title="操作日志"
-      :footer="null"
-      :maskClosable="false"
-    >
+    <a-modal destroyOnClose v-model="viewLogVisible" :width="'90vw'" title="操作日志" :footer="null" :maskClosable="false">
       <user-log v-if="viewLogVisible"></user-log>
     </a-modal>
   </div>
@@ -358,19 +287,20 @@ import {
 } from '@/api/user/user'
 // import QRCode from "qrcodejs2";
 import sha1 from 'js-sha1'
-// import Vue from "vue";
 import { MFA_APP_TIP_ARRAY } from '@/utils/const'
 import UserLog from './user-log.vue'
 import { inject, onMounted, reactive, ref, toRefs } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { notification } from 'ant-design-vue'
+import { Form, notification } from 'ant-design-vue'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
+import { useGuideStore } from '@/stores/guide'
 
 const router = useRouter()
 const route = useRoute()
 const appStore = useAppStore()
 const userStore = useUserStore()
+const guideStore = useGuideStore()
 
 const props = defineProps<{
   mode: string
@@ -379,12 +309,13 @@ const props = defineProps<{
 const reload = inject('reload')
 
 const { userInfo } = toRefs(userStore)
+const { guideCache } = toRefs(guideStore)
+
 
 const collapsed = ref(false)
 const updateNameVisible = ref(false)
 const updateUserVisible = ref(false)
 const temp = reactive({})
-const tempVue = ref(null)
 const myWorkspaceList = ref([])
 const selectWorkspace = ref('')
 const customizeVisible = ref(false)
@@ -393,35 +324,10 @@ const mFA_APP_TIP_ARRAY = ref(MFA_APP_TIP_ARRAY)
 const isBindMfa = ref(false)
 const viewLogVisible = ref(false)
 
-const rules = ref({
-  name: [
-    { required: true, message: '请输入昵称', trigger: 'blur' },
-    { max: 10, message: '昵称长度为2-10', trigger: 'blur' },
-    { min: 2, message: '昵称长度为2-10', trigger: 'blur' }
-  ],
-  oldPwd: [
-    { required: true, message: '请输入原密码', trigger: 'blur' },
-    { max: 20, message: '密码长度为6-20', trigger: 'blur' },
-    { min: 6, message: '密码长度为6-20', trigger: 'blur' }
-  ],
-  newPwd: [
-    { required: true, message: '请输入新密码', trigger: 'blur' },
-    { max: 20, message: '密码长度为6-20', trigger: 'blur' },
-    { min: 6, message: '密码长度为6-20', trigger: 'blur' }
-  ],
-  confirmPwd: [
-    { required: true, message: '请输入确认密码', trigger: 'blur' },
-    { max: 20, message: '密码长度为6-20', trigger: 'blur' },
-    { min: 6, message: '密码长度为6-20', trigger: 'blur' }
-  ],
-  email: [
-    // { required: true, message: "请输入邮箱", trigger: "blur" }
-  ],
-  twoCode: [
-    { required: true, message: '请输入两步验证码', trigger: ['change', 'blur'] },
-    { pattern: /^\d{6}$/, message: '验证码 6 为纯数字', trigger: ['change', 'blur'] }
-  ]
+const showCode = computed(() => {
+  return userInfo.value.email !== userState.value.email;
 })
+
 
 const customize = () => {
   customizeVisible.value = true
@@ -460,85 +366,69 @@ const init = () => {
   checkMfa()
 }
 
+
+const bindMfaTip = ref(false)
 const checkMfa = () => {
-  if (!this.getUserInfo) {
+  if (!userInfo) {
     return
   }
-  if (this.getUserInfo.forceMfa === true && this.getUserInfo.bindMfa === false) {
-    this.bindMfaTip = true
+  if (userInfo?.forceMfa === true && userInfo.bindMfa === false) {
+    bindMfaTip.value = true
   }
 }
+
 const toBindMfa = () => {
-  this.bindMfaTip = false
-  this.updateNameVisible = true
-  this.tabChange(2)
+  bindMfaTip.value = false
+  updateNameVisible.value = true
+  tabChange(2)
 }
 
 // 切换引导
-const toggleGuide = () => {
-  this.$store.dispatch('toggleGuideFlag').then((flag) => {
-    if (flag) {
-      notification.success({
-        message: '关闭页面操作引导、导航'
-      })
-    } else {
-      notification.success({
-        message: '开启页面操作引导、导航'
-      })
-    }
-  })
-}
+// const toggleGuide = () => {
+//   guideStore.toggleGuideFlag().then((flag: boolean) => {
+//     notification.success({
+//       message: flag ? '关闭页面操作引导、导航' : '开启页面操作引导、导航'
+//     })
+//   })
+// }
+
 // 切换菜单打开
 const toggleMenuMultiple = () => {
-  this.$store.dispatch('toggleMenuFlag').then((flag) => {
-    if (flag) {
-      notification.success({
-        message: '可以同时展开多个菜单'
-      })
-    } else {
-      notification.success({
-        message: '同时只能展开一个菜单'
-      })
-    }
-  })
-}
-// 页面全屏
-const toggleFullScreenFlag = () => {
-  this.$store.dispatch('toggleFullScreenFlag').then((flag) => {
-    if (flag) {
-      notification.success({
-        message: '页面内容自动撑开出现屏幕滚动条'
-      })
-    } else {
-      notification.success({
-        message: '页面全屏，高度 100%。局部区域可以滚动'
-      })
-    }
-  })
-}
-
-// 切换滚动条是否显示
-const toggleScrollbarFlag = () => {
-  this.$store.dispatch('toggleScrollbarFlag').then((flag) => {
-    if (flag) {
-      notification.success({
-        message: '页面内容会出现滚动条'
-      })
-    } else {
-      notification.success({
-        message: '隐藏滚动条。纵向滚动方式提醒：滚轮，横行滚动方式：Shift+滚轮'
-      })
-    }
-  })
-}
-
-const restGuide = () => {
-  this.$store.dispatch('restGuide').then(() => {
+  guideStore.toggleMenuFlag().then((flag: boolean) => {
     notification.success({
-      message: '重置页面操作引导、导航成功'
+      message: flag ? '可以同时展开多个菜单' : '同时只能展开一个菜单'
     })
   })
 }
+
+// 页面全屏
+const toggleFullScreenFlag = () => {
+  guideStore.toggleFullScreenFlag().then((flag: boolean) => {
+    notification.success({
+      message: flag ? '页面全屏，高度 100%。局部区域可以滚动' : '页面内容自动撑开出现屏幕滚动条'
+    })
+  })
+}
+
+
+// 切换滚动条是否显示
+const toggleScrollbarFlag = () => {
+  guideStore.toggleScrollbarFlag().then((flag: boolean) => {
+    notification.success({
+      message: flag ? '页面内容会出现滚动条' : '隐藏滚动条。纵向滚动方式提醒：滚轮，横行滚动方式：Shift+滚轮'
+    })
+  })
+}
+
+// const restGuide = () => {
+//   guideStore.restGuide().then(() => {
+//     notification.success({
+//       message: '重置页面操作引导、导航成功'
+//     })
+//   })
+// }
+
+
 // 退出登录
 const logOut = () => {
   $confirm({
@@ -547,39 +437,60 @@ const logOut = () => {
     okText: '确认',
     cancelText: '取消',
     onOk: () => {
-      return new Promise((resolve) => {
-        // 退出登录
-        this.$store.dispatch('logOut').then(() => {
-          notification.success({
-            message: '退出登录成功'
-          })
-          const query = Object.assign({}, this.$route.query)
-          router.replace({
-            path: '/login',
-            query: query
-          })
-          resolve()
+      userStore.logOut().then(() => {
+        notification.success({
+          message: '退出登录成功'
+        })
+        const query = Object.assign({}, route.query)
+        router.replace({
+          path: '/login',
+          query: query
         })
       })
     }
   })
 }
 
+
+const pwdState = reactive({
+  oldPwd: '',
+  newPwd: '',
+  confirmPwd: ''
+})
+
+const pwdRules = {
+  oldPwd: [
+    { required: true, message: '请输入原密码', trigger: 'blur' },
+    { max: 20, message: '密码长度为6-20', trigger: 'blur' },
+    { min: 6, message: '密码长度为6-20', trigger: 'blur' }
+  ],
+  newPwd: [
+    { required: true, message: '请输入新密码', trigger: 'blur' },
+    { max: 20, message: '密码长度为6-20', trigger: 'blur' },
+    { min: 6, message: '密码长度为6-20', trigger: 'blur' }
+  ],
+  confirmPwd: [
+    { required: true, message: '请输入确认密码', trigger: 'blur' },
+    { max: 20, message: '密码长度为6-20', trigger: 'blur' },
+    { min: 6, message: '密码长度为6-20', trigger: 'blur' }
+  ]
+}
+
+const pwdForm = Form.useForm(pwdState, pwdRules);
+
 // 加载修改密码对话框
 const handleUpdatePwd = () => {
-  this.updateNameVisible = true
-  this.tabChange(1)
-  this.$refs['pwdForm'] && this.$refs['pwdForm'].resetFields()
+  updateNameVisible.value = true
+  tabChange(1)
+  pwdForm.resetFields()
 }
+
 // 修改密码
 const handleUpdatePwdOk = () => {
   // 检验表单
-  this.$refs['pwdForm'].validate((valid) => {
-    if (!valid) {
-      return false
-    }
+  pwdForm.validate((values: any) => {
     // 判断两次新密码是否一致
-    if (this.temp.newPwd !== this.temp.confirmPwd) {
+    if (pwdState.newPwd !== pwdState.confirmPwd) {
       notification.error({
         message: '两次密码不一致...'
       })
@@ -587,19 +498,19 @@ const handleUpdatePwdOk = () => {
     }
     // 提交修改
     const params = {
-      oldPwd: sha1(this.temp.oldPwd),
-      newPwd: sha1(this.temp.newPwd)
+      oldPwd: sha1(pwdState.oldPwd),
+      newPwd: sha1(pwdState.newPwd)
     }
     updatePwd(params).then((res) => {
       // 修改成功
       if (res.code === 200) {
         // 退出登录
-        this.$store.dispatch('logOut').then(() => {
+        userStore.logOut().then(() => {
           notification.success({
             message: res.msg
           })
-          this.$refs['pwdForm'].resetFields()
-          this.updateNameVisible = false
+          pwdForm.resetFields()
+          updateNameVisible.value = false
           router.push('/login')
         })
       }
@@ -607,25 +518,45 @@ const handleUpdatePwdOk = () => {
   })
 }
 
+
+const userState = ref({
+  md5Token: '',
+  token: '',
+  name: '',
+  email: '',
+  workWx: '',
+  code: '',
+  dingDing: '',
+})
+
+const userRules = {
+  name: [
+    { required: true, message: '请输入昵称', trigger: 'blur' },
+    { max: 10, message: '昵称长度为2-10', trigger: 'blur' },
+    { min: 2, message: '昵称长度为2-10', trigger: 'blur' }
+  ],
+}
+
 // 加载修改用户资料对话框
 const handleUpdateUser = () => {
   getUserInfo().then((res) => {
     if (res.code === 200) {
-      userInfo.value = { ...res.data, token: userStore.token }
+      userState.value = { ...res.data, token: userStore.token }
       updateUserVisible.value = true
     }
   })
 }
 
+
 // 发送邮箱验证码
-const sendEmailCode = () => {
-  if (!this.temp.email) {
+const handleSendEmailCode = () => {
+  if (!userState.value.email) {
     notification.error({
       message: '请输入邮箱地址'
     })
     return
   }
-  sendEmailCode(this.temp.email).then((res) => {
+  sendEmailCode(userState.value.email).then((res) => {
     if (res.code === 200) {
       notification.success({
         message: res.msg
@@ -634,25 +565,25 @@ const sendEmailCode = () => {
   })
 }
 
+const userForm = Form.useForm(userState, userRules);
 // 修改用户资料
 const handleUpdateUserOk = () => {
   // 检验表单
-  this.$refs['userForm'].validate((valid) => {
+  userForm.validate((valid) => {
     if (!valid) {
       return false
     }
-    const tempData = Object.assign({}, this.temp)
-    delete tempData.token, delete tempData.md5Token
-    editUserInfo(tempData).then((res) => {
+    const { token, md5Token, ...rest } = userState.value
+    editUserInfo(rest).then((res) => {
       // 修改成功
       if (res.code === 200) {
         notification.success({
           message: res.msg
         })
         // 清空表单校验
-        this.$refs['userForm'].resetFields()
-        this.updateUserVisible = false
-        this.$store.dispatch('refreshUserInfo')
+        userForm.resetFields()
+        updateUserVisible.value = false
+        userStore.refreshUserInfo()
       }
     })
   })
@@ -661,52 +592,51 @@ const handleUpdateUserOk = () => {
 const handleWorkspaceChange = (value: string) => {
   appStore.changeWorkspace(value)
 
-  router
-    .push({
-      query: { ...route.query, wid: value }
-    })
-    .then(() => {
-      reload()
-    })
-}
-
-// const abChange = (key) => {
-//   if (key === 1) {
-//     this.temp = { tabActiveKey: key };
-//   } else if (key == 2) {
-//     this.temp = { tabActiveKey: key };
-//     getUserInfo().then((res) => {
-//       if (res.code === 200) {
-//         this.temp = { ...this.temp, status: res.data.bindMfa };
-//         nextTick(() => {
-//           this.$refs?.twoCode?.focus();
-//         });
-//       }
-//     });
-//   }
-// }
-
-const showQrCode = () => {
-  // console.log(this.temp);
-  if (!this.temp.status) {
-    return
-  }
-  this.tempVue = Vue
-  nextTick(() => {
-    const qrCodeDom = document.getElementById('qrCodeUrl')
-    qrCodeDom.innerHTML = ''
-    this.creatQrCode(qrCodeDom, this.temp.url)
-    nextTick(function () {
-      this.$refs.twoCode.focus()
-    })
+  router.push({
+    query: { ...route.query, wid: value }
   })
 }
 
+const tabActiveKey = ref(1)
+
+const tabChange = (key: number) => {
+  tabActiveKey.value = key
+  if (key === 1) {
+    getUserInfo().then((res) => {
+      if (res.code === 200) {
+        mfaState.status = res.data.bindMfa
+        nextTick(() => {
+          this.$refs?.twoCode?.focus();
+        });
+      }
+    });
+  }
+}
+
+
+const mfaState = reactive({
+  needVerify: false,
+  status: false,
+  email: '',
+  emailCode: '',
+  twoCode: '',
+  mfaKey: '',
+  url: '',
+  showSaveTip: false
+})
+
+const mfaRules = {
+  twoCode: [
+    { required: true, message: '请输入两步验证码', trigger: ['change', 'blur'] },
+    { pattern: /^\d{6}$/, message: '验证码 6 为纯数字', trigger: ['change', 'blur'] }
+  ]
+}
+
+const mfaForm = Form.useForm(mfaState, mfaRules);
+
 // 关闭 mfa
 const closeMfaFn = () => {
-  //console.log(this.$refs["mfaForm"]);
-  this.$refs['mfaForm'].validate((valid) => {
-    // console.log(valid);
+  mfaForm.validate((valid) => {
     if (!valid) {
       return false
     }
@@ -718,13 +648,14 @@ const closeMfaFn = () => {
       onOk: () => {
         //
         closeMfa({
-          code: this.temp.twoCode
+          code: mfaState.twoCode
         }).then((res) => {
           if (res.code === 200) {
             notification.success({
               message: res.msg
             })
-            this.temp = { ...this.temp, needVerify: false, status: false }
+            mfaState.needVerify = false
+            mfaState.status = false
           }
         })
       }
@@ -737,18 +668,15 @@ const openMfaFn = () => {
   //
   generateMfa().then((res) => {
     if (res.code === 200) {
-      Object.assign(this.temp, {
-        status: true,
-        mfaKey: res.data.mfaKey,
-        url: res.data.url,
-        needVerify: true,
-        showSaveTip: true,
-        twoCode: ''
-      })
-      this.temp = { ...this.temp }
-      this.showQrCode()
+      mfaState.status = true
+      mfaState.mfaKey = res.data.mfaKey
+      mfaState.url = res.data.url,
+        mfaState.needVerify = true,
+        mfaState.showSaveTip = true,
+        mfaState.twoCode = ''
+
+      // this.showQrCode()
       notification.info({
-        // placement: "",
         message: '需要输入验证码,确认绑定后才生效奥'
       })
     }
@@ -757,14 +685,15 @@ const openMfaFn = () => {
 
 const handleBindMfa = () => {
   bindMfa({
-    mfa: temp.mfaKey,
-    twoCode: temp.twoCode
+    mfa: mfaState.mfaKey,
+    twoCode: mfaState.twoCode
   }).then((res) => {
     if (res.code === 200) {
       notification.success({
         message: res.msg
       })
-      this.temp = { ...this.temp, needVerify: false, twoCode: '' }
+      mfaState.needVerify = false
+      mfaState.twoCode = ''
     }
   })
 }
@@ -777,35 +706,9 @@ onMounted(() => {
   init()
 })
 
-// export default {
-
-// computed: {
-//   ...mapGetters(["getToken", "getUserInfo", "getWorkspaceId", "getGuideCache", "getDisabledGuide"]),
-
-//   showCode() {
-//     return this.getUserInfo.email !== this.temp.email;
-//   },
-//   guideStatus() {
-//     return this.getGuideCache.close;
-//   },
-//   menuMultipleFlag() {
-//     return this.getGuideCache.menuMultipleFlag === undefined ? true : this.getGuideCache.menuMultipleFlag;
-//   },
-//   fullScreenFlag() {
-//     return this.getGuideCache.fullScreenFlag === undefined ? true : this.getGuideCache.fullScreenFlag;
-//   },
-//   scrollbarFlag() {
-//     return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
-//   },
-// },
-
-//   inject: ["reload"],
-//   created() {
-//     this.init();
-//   },
-// };
 </script>
-<style scoped>
+
+<style scoped lang="less">
 .btn-group-item {
   padding: 0 5px;
 }

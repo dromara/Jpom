@@ -11,7 +11,7 @@ interface IState {
 }
 
 interface IStateCache extends IState {
-  guideCache: string
+  guideCache: IStateGuideCache
 }
 
 interface IStateGuideCache {
@@ -23,15 +23,15 @@ interface IStateGuideCache {
 export const useGuideStore = defineStore('guide', {
   state: (): IStateCache => ({
     // 引导缓存
-    guideCache: localStorage.getItem(key) || '',
+    guideCache: localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)!) : {},
     disabledGuide: false,
     extendPlugins: []
   }),
 
   actions: {
     setGuideCache(cache: IStateGuideCache) {
-      this.guideCache = JSON.stringify(cache)
-      localStorage.setItem(key, this.guideCache)
+      this.guideCache = cache
+      localStorage.setItem(key, JSON.stringify(cache))
     },
     // 页面全屏开关
     toggleFullScreenFlag(): Promise<boolean> {
@@ -67,14 +67,7 @@ export const useGuideStore = defineStore('guide', {
   },
   getters: {
     getGuideCache(state): IStateGuideCache {
-      const cacheStr = state.guideCache || ''
-      let cache
-      try {
-        cache = JSON.parse(cacheStr)
-      } catch (e) {
-        cache = {}
-      }
-      return cache
+      return state.guideCache
     },
     getDisabledGuide(state) {
       return state.disabledGuide
