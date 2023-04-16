@@ -205,11 +205,11 @@ public class ServerConfig extends BaseExtConfig {
         private String notificationPlacement;
 
         public String getName() {
-            return StrUtil.emptyToDefault(name, "Jpom项目管理系统");
+            return StrUtil.emptyToDefault(name, "Jpom项目运维系统");
         }
 
         public String getSubTitle() {
-            return StrUtil.emptyToDefault(subTitle, "项目管理");
+            return StrUtil.emptyToDefault(subTitle, "项目运维");
         }
 
         public String getLoginTitle() {

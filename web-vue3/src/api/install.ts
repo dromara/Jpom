@@ -11,6 +11,16 @@ export function checkSystem() {
   })
 }
 
+export function loadingLogo() {
+  return axios({
+    url: '/logo-image',
+    method: 'get',
+    headers: {
+      loading: 'no'
+    }
+  })
+}
+
 /**
  * 初始化系统
  * @param {

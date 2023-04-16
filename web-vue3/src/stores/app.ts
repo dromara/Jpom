@@ -29,19 +29,24 @@ export const useAppStore = defineStore('app', {
       if (this.isShowInfo) {
         return
       }
+      this.isShowInfo = true
       // 控制台输出版本号信息
       const buildInfo = pageBuildInfo()
-      executionRequest('https://jpom.top/docs/versions.show', { ...buildInfo, p: to.path }).then((data) => {
-        console.log(
-          '\n %c ' + parseTime(buildInfo.t) + ' %c vs %c ' + buildInfo.v + ' %c vs %c ' + data,
-          'color: #ffffff; background: #f1404b; padding:5px 0;',
-          'background: #1890ff; padding:5px 0;',
-          'color: #ffffff; background: #f1404b; padding:5px 0;',
-          'background: #1890ff; padding:5px 0;',
-          'color: #ffffff; background: #f1404b; padding:5px 0;'
-        )
-        this.isShowInfo = true
-      })
+      executionRequest('https://jpom.top/docs/versions.show', { ...buildInfo, p: to.path })
+        .then((data) => {
+          console.log(
+            '\n %c ' + parseTime(buildInfo.t) + ' %c vs %c ' + buildInfo.v + ' %c vs %c ' + data,
+            'color: #ffffff; background: #f1404b; padding:5px 0;',
+            'background: #1890ff; padding:5px 0;',
+            'color: #ffffff; background: #f1404b; padding:5px 0;',
+            'background: #1890ff; padding:5px 0;',
+            'color: #ffffff; background: #f1404b; padding:5px 0;'
+          )
+        })
+        .catch(() => {
+          // 解锁
+          this.isShowInfo = false
+        })
     }
   },
   getters: {
