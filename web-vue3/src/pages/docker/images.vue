@@ -411,7 +411,14 @@
       </a-form>
     </a-drawer>
     <!-- 日志 -->
-    <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="pull日志" :footer="null" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      :width="'80vw'"
+      v-model:visible="logVisible"
+      title="pull日志"
+      :footer="null"
+      :maskClosable="false"
+    >
       <pull-image-Log v-if="logVisible" :id="temp.id" :machineDockerId="machineDockerId" :urlPrefix="urlPrefix" />
     </a-modal>
   </div>

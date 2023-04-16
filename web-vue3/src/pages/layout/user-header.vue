@@ -69,7 +69,7 @@
     <!-- 修改密码区 -->
     <a-modal
       destroyOnClose
-      v-model="updateNameVisible"
+      v-model:visible="updateNameVisible"
       :width="'60vw'"
       title="安全管理"
       :footer="null"
@@ -191,53 +191,27 @@
     <!-- 修改用户资料区 -->
     <a-modal
       destroyOnClose
-      v-model="updateUserVisible"
+      v-model:visible="updateUserVisible"
       title="修改用户资料"
       @ok="handleUpdateUserOk"
       :maskClosable="false"
     >
       <a-form :rules="userRules" :model="temp" :label-col="{ span: 8 }" :wrapper-col="{ span: 15 }">
         <a-form-item label="临时token" name="token">
-          <a-input disabled v-model="userState.token" placeholder="Token">
-            <a-tooltip
-              #suffix
-              title="复制"
-              v-clipboard:copy="userState.token"
-              v-clipboard:success="
-                () => {
-                  // tempVue.prototype.$notification.success({ message: '复制成功' })
-                }
-              "
-              v-clipboard:error="
-                () => {
-                  // tempVue.prototype.$notification.error({ message: '复制失败' })
-                }
-              "
-            >
-              <a-icon type="copy" />
-            </a-tooltip>
-          </a-input>
+          <a-input-group compact>
+            <a-input v-model:value="userState.token" disabled style="width: calc(100% - 32px)"> </a-input>
+            <a-button style="padding: 4px 6px">
+              <a-typography-paragraph :copyable="{ text: userState.token }"></a-typography-paragraph>
+            </a-button>
+          </a-input-group>
         </a-form-item>
         <a-form-item label="长期token" name="md5Token">
-          <a-input disabled v-model="userState.md5Token" placeholder="Token">
-            <a-tooltip
-              #suffix
-              title="复制"
-              v-clipboard:copy="userState.md5Token"
-              v-clipboard:success="
-                () => {
-                  // tempVue.prototype.$notification.success({ message: '复制成功' })
-                }
-              "
-              v-clipboard:error="
-                () => {
-                  // tempVue.prototype.$notification.error({ message: '复制失败' })
-                }
-              "
-            >
-              <a-icon type="copy" />
-            </a-tooltip>
-          </a-input>
+          <a-input-group compact>
+            <a-input v-model:value="userState.md5Token" disabled style="width: calc(100% - 32px)"> </a-input>
+            <a-button style="padding: 4px 6px">
+              <a-typography-paragraph :copyable="{ text: userState.md5Token }"></a-typography-paragraph>
+            </a-button>
+          </a-input-group>
         </a-form-item>
         <a-form-item label="昵称" name="name">
           <a-input v-model="userState.name" placeholder="昵称" />
