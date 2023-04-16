@@ -85,7 +85,7 @@
                 隐私变量是指一些密码字段或者关键密钥等重要信息，隐私字段只能修改不能查看（编辑弹窗中无法看到对应值）。
                 隐私字段一旦创建后将不能切换为非隐私字段
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-switch
@@ -105,7 +105,7 @@
             分发节点
             <a-tooltip v-show="!envTemp.id">
               <template slot="title"> 分发节点是指将变量同步到对应节点，在节点脚本中也可以使用当前变量</template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-select

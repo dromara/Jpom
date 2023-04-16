@@ -30,9 +30,7 @@
             批量分配</a-button
           >
           <a-tooltip title="自动检测服务端所在服务器中是否存在 docker，如果存在将自动添加到列表中">
-            <a-button type="dashed" @click="handleTryLocalDocker">
-              <a-icon type="question-circle" theme="filled" />自动探测
-            </a-button>
+            <a-button type="dashed" @click="handleTryLocalDocker"> <question-circle-filled />自动探测 </a-button>
           </a-tooltip>
         </a-space>
       </template>

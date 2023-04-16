@@ -48,7 +48,7 @@
               <li>Alt-G Jump to line</li>
             </ul>
           </template>
-          <a-icon type="question-circle" theme="filled" />
+          <question-circle-filled />
         </a-tooltip>
       </a-space>
     </div>

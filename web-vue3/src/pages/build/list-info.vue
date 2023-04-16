@@ -570,7 +570,7 @@
             <span>
               <a-tooltip>
                 <template slot="title"> 差异构建是指构建时候是否判断仓库代码有变动，如果没有变动则不执行构建 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
               该选项仅本次构建生效
             </span>

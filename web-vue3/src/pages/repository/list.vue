@@ -139,7 +139,7 @@
               账号
               <a-tooltip v-if="!temp.id">
                 <template slot="title"> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input v-model="temp.userName" placeholder="登录用户">
@@ -158,7 +158,7 @@
               密码
               <a-tooltip v-if="!temp.id">
                 <template slot="title"> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input-password v-if="temp.id === undefined" v-model="temp.password" placeholder="登录密码">
@@ -188,7 +188,7 @@
               密码
               <a-tooltip v-if="!temp.id">
                 <template slot="title"> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input-password v-model="temp.password" placeholder="证书密码">
@@ -240,7 +240,7 @@
             隐藏字段
             <a-tooltip>
               <template slot="title"> 密码字段和私钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我 </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-button style="margin-left: 10px" type="danger" @click="restHideField(temp)">清除</a-button>

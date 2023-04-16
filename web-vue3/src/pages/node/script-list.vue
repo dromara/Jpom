@@ -44,7 +44,7 @@
                 </ul>
               </div>
             </template>
-            <a-icon type="question-circle" theme="filled" />
+            <question-circle-filled />
           </a-tooltip>
 
           <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息, 需要重新同步">

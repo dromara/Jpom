@@ -133,7 +133,7 @@
             管理员
             <a-tooltip v-if="createOption">
               <template slot="title"> 管理员拥有：管理服务端的部分权限 </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-row>

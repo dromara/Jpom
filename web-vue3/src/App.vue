@@ -32,9 +32,7 @@ const reload = () => {
   })
 }
 
-provide('app', {
-  reload
-})
+provide('reload', reload)
 </script>
 
 <style lang="less">

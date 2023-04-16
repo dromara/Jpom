@@ -31,7 +31,7 @@
                 <li>工作空间环境变量用于构建命令相关</li>
               </ul>
             </template>
-            <a-icon type="question-circle" theme="filled" />
+            <question-circle-filled />
           </a-tooltip>
         </a-space>
       </template>

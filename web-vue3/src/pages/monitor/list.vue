@@ -163,7 +163,7 @@
               <template slot="title">
                 如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-transfer
@@ -206,7 +206,7 @@
                   <li>runStatus 值为 true 表示项目当前为运行中(异常恢复),false 表示项目当前未运行(发生异常)</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-input v-model="temp.webhook" placeholder="接收报警消息,非必填，GET请求" />

@@ -75,7 +75,7 @@
                     </ul>
                   </div>
                 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
             </a-space>
           </template>
@@ -223,7 +223,7 @@
                 用户名
                 <a-tooltip v-if="!temp.id">
                   <template slot="title"> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
-                  <a-icon type="question-circle" theme="filled" />
+                  <question-circle-filled />
                 </a-tooltip>
               </template>
               <a-input v-model="temp.user" placeholder="用户">
@@ -248,7 +248,7 @@
                 密码
                 <a-tooltip v-if="!temp.id">
                   <template slot="title"> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
-                  <a-icon type="question-circle" theme="filled" />
+                  <question-circle-filled />
                 </a-tooltip>
               </template>
               <a-input-password
@@ -263,7 +263,7 @@
                   <template slot="title"
                     >不填将使用默认的 $HOME/.ssh 目录中的配置,使用优先级是：id_dsa>id_rsa>identity
                   </template>
-                  <a-icon type="question-circle" theme="filled" />
+                  <question-circle-filled />
                 </a-tooltip>
               </template>
 
@@ -409,7 +409,7 @@
                 文件目录
                 <a-tooltip>
                   <template slot="title"> 绑定指定目录可以在线管理，同时构建 ssh 发布目录也需要在此配置 </template>
-                  <a-icon type="question-circle" theme="filled" />
+                  <question-circle-filled />
                 </a-tooltip>
               </template>
               <a-textarea
@@ -439,7 +439,7 @@
                       <li>其他用户可以配置权限解除限制</li>
                     </ul>
                   </template>
-                  <a-icon type="question-circle" theme="filled" />
+                  <question-circle-filled />
                 </a-tooltip>
               </template>
               <a-textarea

@@ -54,7 +54,7 @@
                 </ul>
               </div>
             </template>
-            <a-icon type="question-circle" theme="filled" />
+            <question-circle-filled />
           </a-tooltip>
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
         </a-space>
@@ -166,7 +166,7 @@
             分发 ID
             <a-tooltip v-show="temp.type !== 'edit'">
               <template slot="title">分发 ID 等同于项目 ID</template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-input
@@ -295,7 +295,7 @@
                 时候需要保证项目能正常重启,并等待上一个项目启动完成才能关闭下一个项目,请根据自身项目启动时间来配置
                 <li>一般建议 10 秒以上</li>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-input-number
@@ -315,7 +315,7 @@
               <template slot="title">
                 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-row>
@@ -329,7 +329,7 @@
                   发布前停止是指在发布文件到项目文件时先将项目关闭，再进行文件替换。避免 windows
                   环境下出现文件被占用的情况
                 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
               发布前停止：
             </a-col>
@@ -350,7 +350,7 @@
                   <li>异步请求不能保证有序性</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-input v-model="temp.webhook" placeholder="分发过程请求,非必填，GET请求" />
@@ -372,7 +372,7 @@
             分发 ID
             <a-tooltip v-show="temp.type !== 'edit'">
               <template slot="title">分发 ID 等同于项目 ID</template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-input
@@ -434,7 +434,7 @@
                   <li><b>File</b> 项目为静态文件夹,没有项目状态以及控制等功能</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-select v-model="temp.runMode" placeholder="请选择运行方式">
@@ -454,7 +454,7 @@
                   <li>项目文件会存放到 <br />&nbsp;&nbsp;<b>项目白名单路径+项目文件夹</b></li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-input-group compact>
@@ -475,7 +475,7 @@
               <template slot="title">
                 <ul></ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
 
@@ -499,7 +499,7 @@
                 </p>
                 <p>配置详情请参考配置示例</p>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-tabs>
@@ -532,7 +532,7 @@
                   <li>可选择的列表和项目白名单目录是一致的，即相同配置</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-select v-model="temp.logPath" placeholder="请选择日志目录">
@@ -568,7 +568,7 @@
                 时候需要保证项目能正常重启,并等待上一个项目启动完成才能关闭下一个项目,请根据自身项目启动时间来配置
                 <li>一般建议 10 秒以上</li>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-input-number
@@ -588,7 +588,7 @@
               <template slot="title">
                 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-row>
@@ -601,7 +601,7 @@
                   发布前停止是指在发布文件到项目文件时先将项目关闭，再进行文件替换。避免 windows
                   环境下出现文件被占用的情况
                 </template>
-                <a-icon type="question-circle" theme="filled" />
+                <question-circle-filled />
               </a-tooltip>
               发布前停止：
             </a-col>
@@ -643,7 +643,7 @@
                 自启动
                 <a-tooltip v-show="temp.type !== 'edit'">
                   <template slot="title">插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template>
-                  <a-icon type="question-circle" theme="filled" />
+                  <question-circle-filled />
                 </a-tooltip>
               </template>
               <a-switch v-model="temp[`${nodeId}_autoStart`]" checked-children="开" un-checked-children="关" />
@@ -659,7 +659,7 @@
                       <li>type 的值有：stop、beforeStop、start、beforeRestart</li>
                     </ul>
                   </template>
-                  <a-icon type="question-circle" theme="filled" />
+                  <question-circle-filled />
                 </a-tooltip>
               </template>
               <a-input
@@ -678,7 +678,7 @@
                         <li>副本是指同一个项目在一个节点（服务器）中运行多份</li>
                       </ul>
                     </template>
-                    <a-icon type="question-circle" theme="filled" />
+                    <question-circle-filled />
                   </a-tooltip>
                 </template>
                 <!-- 副本信息 -->
@@ -745,7 +745,7 @@
                   <li>异步请求不能保证有序性</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-input v-model="temp.webhook" placeholder="分发过程请求,非必填，GET请求" />
@@ -801,7 +801,7 @@
               <template slot="title">
                 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
@@ -813,7 +813,7 @@
               <template slot="title">
                 如果上传的压缩文件是否自动解压 支持的压缩包类型有 tar.bz2, tar.gz, tar, bz2, zip, gz</template
               >
-              <a-icon type="question-circle" theme="filled" />
+              <question-circle-filled />
             </a-tooltip>
           </template>
           <a-switch v-model="temp.autoUnzip" checked-children="是" un-checked-children="否" />
