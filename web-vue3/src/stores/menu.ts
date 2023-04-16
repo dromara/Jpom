@@ -18,14 +18,16 @@ export interface IMenuState {
 }
 
 export const useMenuStore = defineStore('menu', {
-  state: (): IMenuState => ({
-    activeTabKey: localStorage.getItem(ACTIVE_TAB_KEY) || '',
-    tabList: localStorage.getItem(TAB_LIST_KEY) ? JSON.parse(localStorage.getItem(TAB_LIST_KEY)!) : [],
-    activeMenuKey: localStorage.getItem(ACTIVE_MENU_KEY) || '',
-    menuOpenKeys: [],
-    menus: [],
-    activeMenu: ''
-  }),
+  state: (): IMenuState => {
+    return {
+      activeTabKey: localStorage.getItem(ACTIVE_TAB_KEY) || '',
+      tabList: localStorage.getItem(TAB_LIST_KEY) ? JSON.parse(localStorage.getItem(TAB_LIST_KEY)!) : [],
+      activeMenuKey: localStorage.getItem(ACTIVE_MENU_KEY) || '',
+      menuOpenKeys: [],
+      menus: [],
+      activeMenu: ''
+    }
+  },
 
   actions: {
     // 加载系统菜单 action

@@ -5,48 +5,38 @@
         <a-dropdown :trigger="['contextmenu']">
           <span style="display: inline-table">{{ tab.title }}</span>
           <a-menu slot="overlay">
-            <a-menu-item
-              @click="
-                closeTabs({
-                  key: tab.key
-                })
-              "
-            >
+            <a-menu-item @click="
+              closeTabs({
+                key: tab.key
+              })
+            ">
               <a-button type="link" :disabled="nowTabList.length <= 1">关闭其他</a-button>
             </a-menu-item>
-            <a-menu-item
-              @click="
-                closeTabs({
-                  key: tab.key,
-                  position: 'left'
-                })
-              "
-            >
+            <a-menu-item @click="
+              closeTabs({
+                key: tab.key,
+                position: 'left'
+              })
+            ">
               <a-button type="link" :disabled="nowTabList.length <= 1 || index === 0">关闭左侧</a-button>
             </a-menu-item>
-            <a-menu-item
-              @click="
-                closeTabs({
-                  key: tab.key,
-                  position: 'right'
-                })
-              "
-            >
-              <a-button type="link" :disabled="nowTabList.length <= 1 || index === nowTabList.length - 1"
-                >关闭右侧</a-button
-              >
+            <a-menu-item @click="
+              closeTabs({
+                key: tab.key,
+                position: 'right'
+              })
+            ">
+              <a-button type="link" :disabled="nowTabList.length <= 1 || index === nowTabList.length - 1">关闭右侧</a-button>
             </a-menu-item>
           </a-menu>
         </a-dropdown>
       </template>
     </a-tab-pane>
-    <template slot="tabBarExtraContent"> <user-header :mode="props.mode" /> </template>
+    <template #rightExtra> <user-header :mode="props.mode" /> </template>
   </a-tabs>
 </template>
 <script lang="ts" setup>
-import UserHeader from './user-header'
-
-import { mapGetters } from 'vuex'
+import userHeader from './user-header.vue';
 
 const props = defineProps<{
   mode: string
