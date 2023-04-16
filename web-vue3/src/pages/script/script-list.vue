@@ -88,20 +88,22 @@
                 更多
                 <down-outlined />
               </a>
-              <a-menu #overlay>
-                <a-menu-item>
-                  <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
-                </a-menu-item>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item>
+                    <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+                  </a-menu-item>
 
-                <a-menu-item>
-                  <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-                </a-menu-item>
-                <a-menu-item>
-                  <a-button size="small" type="danger" :disabled="!record.nodeIds" @click="handleUnbind(record)"
-                    >解绑</a-button
-                  >
-                </a-menu-item>
-              </a-menu>
+                  <a-menu-item>
+                    <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" type="danger" :disabled="!record.nodeIds" @click="handleUnbind(record)"
+                      >解绑</a-button
+                    >
+                  </a-menu-item>
+                </a-menu>
+              </template>
             </a-dropdown>
           </template>
           <template v-else>

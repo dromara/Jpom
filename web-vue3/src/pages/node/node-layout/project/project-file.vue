@@ -44,31 +44,35 @@
                 <a-button size="small" type="primary" @click="(e) => e.preventDefault()"
                   ><a-icon type="upload" />上传</a-button
                 >
-                <a-menu #overlay>
-                  <a-menu-item @click="handleUpload">
-                    <a-space><a-icon type="file" />上传文件</a-space>
-                  </a-menu-item>
-                  <a-menu-item @click="handleZipUpload">
-                    <a-space><a-icon type="file-zip" />上传压缩包并自动解压</a-space>
-                  </a-menu-item>
-                </a-menu>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item @click="handleUpload">
+                      <a-space><a-icon type="file" />上传文件</a-space>
+                    </a-menu-item>
+                    <a-menu-item @click="handleZipUpload">
+                      <a-space><a-icon type="file-zip" />上传压缩包并自动解压</a-space>
+                    </a-menu-item>
+                  </a-menu>
+                </template>
               </a-dropdown>
               <a-dropdown :disabled="!Object.keys(this.tempNode).length">
                 <a-button size="small" type="primary" @click="(e) => e.preventDefault()">新建</a-button>
-                <a-menu #overlay>
-                  <a-menu-item @click="handleAddFile(1)">
-                    <a-space>
-                      <a-icon type="folder-add" />
-                      <a-space>新建目录</a-space>
-                    </a-space>
-                  </a-menu-item>
-                  <a-menu-item @click="handleAddFile(2)">
-                    <a-space>
-                      <a-icon type="file-add" />
-                      <a-space>新建空白文件</a-space>
-                    </a-space>
-                  </a-menu-item>
-                </a-menu>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item @click="handleAddFile(1)">
+                      <a-space>
+                        <a-icon type="folder-add" />
+                        <a-space>新建目录</a-space>
+                      </a-space>
+                    </a-menu-item>
+                    <a-menu-item @click="handleAddFile(2)">
+                      <a-space>
+                        <a-icon type="file-add" />
+                        <a-space>新建空白文件</a-space>
+                      </a-space>
+                    </a-menu-item>
+                  </a-menu>
+                </template>
               </a-dropdown>
               <a-tooltip
                 title="通过 URL 下载远程文件到项目文件夹,需要到节点系统配置->白名单配置中配置允许的 HOST 白名单"
@@ -91,16 +95,18 @@
           <a-tooltip #filename slot-scope="text, record" placement="topLeft" :title="text">
             <a-dropdown :trigger="['contextmenu']">
               <div>{{ text }}</div>
-              <a-menu #overlay>
-                <a-menu-item key="1">
-                  <a-button icon="bars" @click="goReadFile(record)" :disabled="!record.textFileEdit" type="link">
-                    跟踪文件
-                  </a-button>
-                </a-menu-item>
-                <a-menu-item key="2">
-                  <a-button icon="highlight" @click="handleRenameFile(record)" type="link"> 重命名 </a-button>
-                </a-menu-item>
-              </a-menu>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item key="1">
+                    <a-button icon="bars" @click="goReadFile(record)" :disabled="!record.textFileEdit" type="link">
+                      跟踪文件
+                    </a-button>
+                  </a-menu-item>
+                  <a-menu-item key="2">
+                    <a-button icon="highlight" @click="handleRenameFile(record)" type="link"> 重命名 </a-button>
+                  </a-menu-item>
+                </a-menu>
+              </template>
             </a-dropdown>
           </a-tooltip>
           <template #isDirectory slot-scope="text">

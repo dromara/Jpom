@@ -125,27 +125,29 @@
               更多
               <down-outlined />
             </a>
-            <a-menu #overlay>
-              <a-menu-item>
-                <a-button type="danger" size="small" :disabled="record.status !== 1" @click="handleCancel(record)"
-                  >取消分发</a-button
-                >
-              </a-menu-item>
-              <a-menu-item>
-                <a-button type="danger" size="small" @click="handleDelete(record)">{{
-                  record.outGivingProject ? '删除' : '释放'
-                }}</a-button>
-              </a-menu-item>
-              <a-menu-item v-if="record.outGivingProject">
-                <a-button type="danger" size="small" @click="handleDelete(record, 'thorough')"> 彻底删除</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button type="danger" size="small" @click="handleUnbind(record)">解绑</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button type="primary" size="small" @click="handleViewDispatchManager(record)">配置</a-button>
-              </a-menu-item>
-            </a-menu>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item>
+                  <a-button type="danger" size="small" :disabled="record.status !== 1" @click="handleCancel(record)"
+                    >取消分发</a-button
+                  >
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button type="danger" size="small" @click="handleDelete(record)">
+                    {{ record.outGivingProject ? '删除' : '释放' }}
+                  </a-button>
+                </a-menu-item>
+                <a-menu-item v-if="record.outGivingProject">
+                  <a-button type="danger" size="small" @click="handleDelete(record, 'thorough')"> 彻底删除</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button type="danger" size="small" @click="handleUnbind(record)">解绑</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button type="primary" size="small" @click="handleViewDispatchManager(record)">配置</a-button>
+                </a-menu-item>
+              </a-menu>
+            </template>
           </a-dropdown>
         </a-space>
       </template>

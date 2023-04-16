@@ -44,17 +44,19 @@
 
           <a-dropdown v-if="selectedRowKeys && this.selectedRowKeys.length">
             <a-button type="primary"> 批量操作 <down-outlined /> </a-button>
-            <a-menu #overlay>
-              <a-menu-item>
-                <a-button type="primary" @click="batchStart">批量启动</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button type="primary" @click="batchRestart">批量重启</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button type="danger" @click="batchStop">批量关闭</a-button>
-              </a-menu-item>
-            </a-menu>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item>
+                  <a-button type="primary" @click="batchStart">批量启动</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button type="primary" @click="batchRestart">批量重启</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button type="danger" @click="batchStop">批量关闭</a-button>
+                </a-menu-item>
+              </a-menu>
+            </template>
           </a-dropdown>
           <a-button v-else type="primary" :disabled="true"> 批量操作 <down-outlined /> </a-button>
 
@@ -136,46 +138,48 @@
               更多
               <down-outlined />
             </a>
-            <a-menu #overlay>
-              <a-menu-item>
-                <template v-if="noFileModes.includes(record.runMode)">
-                  <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
-                </template>
-                <template v-else>
-                  <a-tooltip title="文件类型没有触发器功能">
-                    <a-button size="small" type="primary" :disabled="true">触发器</a-button></a-tooltip
+            <template #overlay>
+              <a-menu>
+                <a-menu-item>
+                  <template v-if="noFileModes.includes(record.runMode)">
+                    <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+                  </template>
+                  <template v-else>
+                    <a-tooltip title="文件类型没有触发器功能">
+                      <a-button size="small" type="primary" :disabled="true">触发器</a-button></a-tooltip
+                    >
+                  </template>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button
+                    size="small"
+                    type="primary"
+                    :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
+                    @click="sortItemHander(record, index, 'top')"
+                    >置顶</a-button
                   >
-                </template>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button
-                  size="small"
-                  type="primary"
-                  :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
-                  @click="sortItemHander(record, index, 'top')"
-                  >置顶</a-button
-                >
-              </a-menu-item>
-              <a-menu-item>
-                <a-button
-                  size="small"
-                  type="primary"
-                  :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
-                  @click="sortItemHander(record, index, 'up')"
-                  >上移</a-button
-                >
-              </a-menu-item>
-              <a-menu-item>
-                <a-button
-                  size="small"
-                  type="primary"
-                  :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
-                  @click="sortItemHander(record, index, 'down')"
-                >
-                  下移
-                </a-button>
-              </a-menu-item>
-            </a-menu>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button
+                    size="small"
+                    type="primary"
+                    :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
+                    @click="sortItemHander(record, index, 'up')"
+                    >上移</a-button
+                  >
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button
+                    size="small"
+                    type="primary"
+                    :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
+                    @click="sortItemHander(record, index, 'down')"
+                  >
+                    下移
+                  </a-button>
+                </a-menu-item>
+              </a-menu>
+            </template>
           </a-dropdown>
         </a-space>
       </template>

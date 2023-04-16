@@ -36,16 +36,18 @@
           <a-button type="primary" @click="createCommand">新建命令</a-button>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <down-outlined /> </a>
-            <a-menu #overlay>
-              <a-menu-item>
-                <a-button
-                  type="primary"
-                  :disabled="!tableSelections || !tableSelections.length"
-                  @click="syncToWorkspaceShow"
-                  >工作空间同步</a-button
-                >
-              </a-menu-item>
-            </a-menu>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item>
+                  <a-button
+                    type="primary"
+                    :disabled="!tableSelections || !tableSelections.length"
+                    @click="syncToWorkspaceShow"
+                    >工作空间同步</a-button
+                  >
+                </a-menu-item>
+              </a-menu>
+            </template>
           </a-dropdown>
           <a-tooltip>
             <template #title>

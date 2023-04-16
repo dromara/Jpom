@@ -147,24 +147,26 @@
       <template #operation slot-scope="text, record">
         <a-space>
           <a-dropdown>
-            <a-button size="small" type="primary" @click="handleTerminal(record, false)"
-              >终端<a-icon type="down"
-            /></a-button>
-            <a-menu #overlay>
-              <a-menu-item key="1">
-                <a-button size="small" type="primary" icon="fullscreen" @click="handleTerminal(record, true)"
-                  >全屏终端</a-button
-                >
-              </a-menu-item>
-              <a-menu-item key="2">
-                <router-link
-                  target="_blank"
-                  :to="{ path: '/full-terminal', query: { id: record.id, wid: getWorkspaceId } }"
-                >
-                  <a-button size="small" type="primary" icon="fullscreen"> 新标签终端</a-button>
-                </router-link>
-              </a-menu-item>
-            </a-menu>
+            <a-button size="small" type="primary" @click="handleTerminal(record, false)">
+              终端<down-outlined />
+            </a-button>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item key="1">
+                  <a-button size="small" type="primary" icon="fullscreen" @click="handleTerminal(record, true)"
+                    >全屏终端</a-button
+                  >
+                </a-menu-item>
+                <a-menu-item key="2">
+                  <router-link
+                    target="_blank"
+                    :to="{ path: '/full-terminal', query: { id: record.id, wid: getWorkspaceId } }"
+                  >
+                    <a-button size="small" type="primary" icon="fullscreen"> 新标签终端</a-button>
+                  </router-link>
+                </a-menu-item>
+              </a-menu>
+            </template>
           </a-dropdown>
           <template v-if="record.fileDirs">
             <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
@@ -183,17 +185,19 @@
               更多
               <down-outlined />
             </a>
-            <a-menu #overlay>
-              <a-menu-item>
-                <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="primary" @click="handleViewLog(record)">终端日志</a-button>
-              </a-menu-item>
-            </a-menu>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item>
+                  <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button size="small" type="primary" @click="handleViewLog(record)">终端日志</a-button>
+                </a-menu-item>
+              </a-menu>
+            </template>
           </a-dropdown>
         </a-space>
       </template>

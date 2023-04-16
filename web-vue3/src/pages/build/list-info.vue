@@ -57,10 +57,12 @@
               <a-button type="primary" :disabled="true"> 批量操作 <down-outlined /> </a-button>
             </template>
             <a-dropdown v-else>
-              <a-menu #overlay>
-                <a-menu-item key="1" @click="batchBuild"> 批量构建 </a-menu-item>
-                <a-menu-item key="2" @click="batchCancel"> 批量取消 </a-menu-item>
-              </a-menu>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item key="1" @click="batchBuild"> 批量构建 </a-menu-item>
+                  <a-menu-item key="2" @click="batchCancel"> 批量取消 </a-menu-item>
+                </a-menu>
+              </template>
               <a-button type="primary"> 批量操作 <down-outlined /> </a-button>
             </a-dropdown>
           </template>
@@ -173,21 +175,23 @@
                           >停止
                         </a-button>
                         <a-dropdown v-else>
-                          <a-button size="small" type="primary" @click="handleConfirmStartBuild(item)"
-                            >构建<a-icon type="down"
-                          /></a-button>
-                          <a-menu #overlay>
-                            <a-menu-item key="1">
-                              <a-button size="small" type="primary" @click="reqStartBuild({ id: item.id }, true)"
-                                >直接构建</a-button
-                              >
-                            </a-menu-item>
-                            <a-menu-item key="2">
-                              <a-button size="small" type="primary" @click="reqStartBuild({ id: item.id }, false)"
-                                >后台构建</a-button
-                              >
-                            </a-menu-item>
-                          </a-menu>
+                          <a-button size="small" type="primary" @click="handleConfirmStartBuild(item)">
+                            构建<down-outlined />
+                          </a-button>
+                          <template #overlay>
+                            <a-menu>
+                              <a-menu-item key="1">
+                                <a-button size="small" type="primary" @click="reqStartBuild({ id: item.id }, true)"
+                                  >直接构建</a-button
+                                >
+                              </a-menu-item>
+                              <a-menu-item key="2">
+                                <a-button size="small" type="primary" @click="reqStartBuild({ id: item.id }, false)"
+                                  >后台构建</a-button
+                                >
+                              </a-menu-item>
+                            </a-menu>
+                          </template>
                         </a-dropdown>
 
                         <a-button size="small" type="primary" @click="handleEdit(item)">编辑</a-button>
@@ -316,21 +320,23 @@
                 >停止
               </a-button>
               <a-dropdown v-else>
-                <a-button size="small" type="primary" @click="handleConfirmStartBuild(record)"
-                  >构建<a-icon type="down"
-                /></a-button>
-                <a-menu #overlay>
-                  <a-menu-item key="1">
-                    <a-button size="small" type="primary" @click="reqStartBuild({ id: record.id }, true)"
-                      >直接构建</a-button
-                    >
-                  </a-menu-item>
-                  <a-menu-item key="2">
-                    <a-button size="small" type="primary" @click="reqStartBuild({ id: record.id }, false)"
-                      >后台构建</a-button
-                    >
-                  </a-menu-item>
-                </a-menu>
+                <a-button size="small" type="primary" @click="handleConfirmStartBuild(record)">
+                  构建<down-outlined />
+                </a-button>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item key="1">
+                      <a-button size="small" type="primary" @click="reqStartBuild({ id: record.id }, true)">
+                        直接构建
+                      </a-button>
+                    </a-menu-item>
+                    <a-menu-item key="2">
+                      <a-button size="small" type="primary" @click="reqStartBuild({ id: record.id }, false)"
+                        >后台构建</a-button
+                      >
+                    </a-menu-item>
+                  </a-menu>
+                </template>
               </a-dropdown>
               <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
               <a-dropdown>
@@ -338,67 +344,69 @@
                   更多
                   <down-outlined />
                 </a>
-                <a-menu #overlay>
-                  <a-menu-item>
-                    <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a-button
-                      size="small"
-                      :disabled="!record.resultHasFile"
-                      type="primary"
-                      @click="handleDownloadFile(record)"
-                      >下载产物</a-button
-                    >
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-                  </a-menu-item>
-
-                  <a-menu-item>
-                    <a-tooltip
-                      placement="leftBottom"
-                      title="清除代码(仓库目录)为删除服务器中存储仓库目录里面的所有东西,删除后下次构建将重新拉起仓库里面的文件,一般用于解决服务器中文件和远程仓库中文件有冲突时候使用。执行时间取决于源码目录大小和文件数量如超时请耐心等待，或稍后重试"
-                    >
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item>
+                      <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
+                    </a-menu-item>
+                    <a-menu-item>
                       <a-button
                         size="small"
-                        type="danger"
-                        :disabled="!record.sourceDirExist"
-                        @click="handleClear(record)"
-                        >清除代码
+                        :disabled="!record.resultHasFile"
+                        type="primary"
+                        @click="handleDownloadFile(record)"
+                        >下载产物</a-button
+                      >
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                    </a-menu-item>
+
+                    <a-menu-item>
+                      <a-tooltip
+                        placement="leftBottom"
+                        title="清除代码(仓库目录)为删除服务器中存储仓库目录里面的所有东西,删除后下次构建将重新拉起仓库里面的文件,一般用于解决服务器中文件和远程仓库中文件有冲突时候使用。执行时间取决于源码目录大小和文件数量如超时请耐心等待，或稍后重试"
+                      >
+                        <a-button
+                          size="small"
+                          type="danger"
+                          :disabled="!record.sourceDirExist"
+                          @click="handleClear(record)"
+                          >清除代码
+                        </a-button>
+                      </a-tooltip>
+                    </a-menu-item>
+                    <a-menu-divider />
+                    <a-menu-item>
+                      <a-button
+                        size="small"
+                        type="primary"
+                        :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
+                        @click="sortItemHander(record, index, 'top')"
+                        >置顶</a-button
+                      >
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-button
+                        size="small"
+                        type="primary"
+                        :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
+                        @click="sortItemHander(record, index, 'up')"
+                        >上移</a-button
+                      >
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-button
+                        size="small"
+                        type="primary"
+                        :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
+                        @click="sortItemHander(record, index, 'down')"
+                      >
+                        下移
                       </a-button>
-                    </a-tooltip>
-                  </a-menu-item>
-                  <a-menu-divider />
-                  <a-menu-item>
-                    <a-button
-                      size="small"
-                      type="primary"
-                      :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
-                      @click="sortItemHander(record, index, 'top')"
-                      >置顶</a-button
-                    >
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a-button
-                      size="small"
-                      type="primary"
-                      :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
-                      @click="sortItemHander(record, index, 'up')"
-                      >上移</a-button
-                    >
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a-button
-                      size="small"
-                      type="primary"
-                      :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
-                      @click="sortItemHander(record, index, 'down')"
-                    >
-                      下移
-                    </a-button>
-                  </a-menu-item>
-                </a-menu>
+                    </a-menu-item>
+                  </a-menu>
+                </template>
               </a-dropdown>
             </a-space>
           </template>

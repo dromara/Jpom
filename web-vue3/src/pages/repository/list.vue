@@ -70,36 +70,38 @@
               更多
               <down-outlined />
             </a>
-            <a-menu #overlay>
-              <a-menu-item>
-                <a-button
-                  size="small"
-                  type="primary"
-                  :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
-                  @click="sortItemHander(record, index, 'top')"
-                  >置顶</a-button
-                >
-              </a-menu-item>
-              <a-menu-item>
-                <a-button
-                  size="small"
-                  type="primary"
-                  :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
-                  @click="sortItemHander(record, index, 'up')"
-                  >上移</a-button
-                >
-              </a-menu-item>
-              <a-menu-item>
-                <a-button
-                  size="small"
-                  type="primary"
-                  :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
-                  @click="sortItemHander(record, index, 'down')"
-                >
-                  下移
-                </a-button>
-              </a-menu-item>
-            </a-menu>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item>
+                  <a-button
+                    size="small"
+                    type="primary"
+                    :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
+                    @click="sortItemHander(record, index, 'top')"
+                    >置顶</a-button
+                  >
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button
+                    size="small"
+                    type="primary"
+                    :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
+                    @click="sortItemHander(record, index, 'up')"
+                    >上移</a-button
+                  >
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button
+                    size="small"
+                    type="primary"
+                    :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
+                    @click="sortItemHander(record, index, 'down')"
+                  >
+                    下移
+                  </a-button>
+                </a-menu-item>
+              </a-menu>
+            </template>
           </a-dropdown>
         </a-space>
       </template>

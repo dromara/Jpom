@@ -48,11 +48,13 @@
           <a-button type="primary" @click="addMachine">添加机器</a-button>
 
           <a-dropdown v-if="layoutType === 'table'">
-            <a-menu #overlay>
-              <a-menu-item key="1" @click="syncToWorkspaceShow()"> 分配节点 </a-menu-item>
-              <a-menu-item key="2" @click="syncNodeWhiteConfig"> 同步白名单 </a-menu-item>
-              <a-menu-item key="3" @click="syncNodeConfig"> 同步系统配置 </a-menu-item>
-            </a-menu>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item key="1" @click="syncToWorkspaceShow()"> 分配节点 </a-menu-item>
+                <a-menu-item key="2" @click="syncNodeWhiteConfig"> 同步白名单 </a-menu-item>
+                <a-menu-item key="3" @click="syncNodeConfig"> 同步系统配置 </a-menu-item>
+              </a-menu>
+            </template>
             <a-button type="primary"> 批量操作 <down-outlined /> </a-button>
           </a-dropdown>
           <a-tooltip v-else title="表格视图才能使用同步配置功能">

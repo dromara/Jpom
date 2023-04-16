@@ -25,31 +25,35 @@
           <a-space>
             <a-dropdown :disabled="!this.tempNode.nextPath">
               <a-button size="small" type="primary" @click="(e) => e.preventDefault()">上传小文件</a-button>
-              <a-menu #overlay>
-                <a-menu-item @click="handleUpload">
-                  <a-space><a-icon type="file-add" />上传文件</a-space>
-                </a-menu-item>
-                <a-menu-item @click="handleUploadZip">
-                  <a-space><a-icon type="file-zip" />上传压缩文件（自动解压）</a-space>
-                </a-menu-item>
-              </a-menu>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item @click="handleUpload">
+                    <a-space><a-icon type="file-add" />上传文件</a-space>
+                  </a-menu-item>
+                  <a-menu-item @click="handleUploadZip">
+                    <a-space><a-icon type="file-zip" />上传压缩文件（自动解压）</a-space>
+                  </a-menu-item>
+                </a-menu>
+              </template>
             </a-dropdown>
             <a-dropdown :disabled="!this.tempNode.nextPath">
               <a-button size="small" type="primary" @click="(e) => e.preventDefault()">新建</a-button>
-              <a-menu #overlay>
-                <a-menu-item @click="handleAddFolder">
-                  <a-space>
-                    <a-icon type="folder-add" />
-                    <a-space>新建目录</a-space>
-                  </a-space>
-                </a-menu-item>
-                <a-menu-item @click="handleAddFile">
-                  <a-space>
-                    <a-icon type="file-add" />
-                    <a-space>新建空白文件</a-space>
-                  </a-space>
-                </a-menu-item>
-              </a-menu>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item @click="handleAddFolder">
+                    <a-space>
+                      <a-icon type="folder-add" />
+                      <a-space>新建目录</a-space>
+                    </a-space>
+                  </a-menu-item>
+                  <a-menu-item @click="handleAddFile">
+                    <a-space>
+                      <a-icon type="file-add" />
+                      <a-space>新建空白文件</a-space>
+                    </a-space>
+                  </a-menu-item>
+                </a-menu>
+              </template>
             </a-dropdown>
             <a-button size="small" :disabled="!this.tempNode.nextPath" type="primary" @click="loadFileList()"
               >刷新</a-button
@@ -79,11 +83,13 @@
         >
           <a-dropdown :trigger="['contextmenu']">
             <div>{{ text }}</div>
-            <a-menu #overlay>
-              <a-menu-item key="2">
-                <a-button icon="highlight" @click="handleRenameFile(record)" type="link"> 重命名 </a-button>
-              </a-menu-item>
-            </a-menu>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item key="2">
+                  <a-button icon="highlight" @click="handleRenameFile(record)" type="link"> 重命名 </a-button>
+                </a-menu-item>
+              </a-menu>
+            </template>
           </a-dropdown>
 
           <!-- <span>{{ text }}</span> -->
