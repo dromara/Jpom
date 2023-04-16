@@ -22,7 +22,7 @@
       <template v-if="$slots.suffixIcon && !suffixIcon" #suffixIcon>
         <slot name="suffixIcon"></slot>
       </template>
-      <div #dropdownRender slot-scope="menu">
+      <template #dropdownRender slot-scope="menu">
         <div style="padding: 8px 8px; cursor: pointer; display: flex" @mousedown="(e) => e.preventDefault()">
           <a-input-search
             enter-button="添加"
@@ -35,17 +35,19 @@
             :placeholder="inputPlaceholder"
             size="small"
           >
-            <a-tooltip #suffix v-if="$slots.inputTips">
-              <template #title>
-                <slot name="inputTips"></slot>
-              </template>
-              <question-circle-filled />
-            </a-tooltip>
+            <template #suffix>
+              <a-tooltip v-if="$slots.inputTips">
+                <template #title>
+                  <slot name="inputTips"></slot>
+                </template>
+                <question-circle-filled />
+              </a-tooltip>
+            </template>
           </a-input-search>
         </div>
         <a-divider style="margin: 4px 0" />
         <v-nodes :vnodes="menu" />
-      </div>
+      </template>
       <a-select-option v-if="selectPlaceholder" value="">{{ selectPlaceholder }}</a-select-option>
       <a-select-option v-for="item in optionList" :key="item">{{ item }} </a-select-option>
     </Select>
