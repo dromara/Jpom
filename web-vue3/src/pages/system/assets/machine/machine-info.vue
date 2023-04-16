@@ -1,17 +1,17 @@
 <template>
   <div>
     <a-tabs @change="changeTabs">
-      <template slot="tabBarExtraContent">
+      <template #tabBarExtraContent>
         <a-space>
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="pullNodeData" />
         </a-space>
       </template>
       <a-tab-pane key="info" tab="信息">
         <a-card size="small">
-          <template slot="title">
+          <template #title>
             {{ machineInfo && machineInfo.name }}
           </template>
-          <template slot="extra">
+          <template #extra>
             <a-tag
               v-if="machineInfo"
               :color="machineInfo && machineInfo.status === 1 ? 'green' : 'pink'"
@@ -29,7 +29,7 @@
               show-icon
             />
             <a-descriptions :column="4" :bordered="true">
-              <template slot="title"> </template>
+              <template #title> </template>
 
               <a-descriptions-item label="系统名" :span="2">{{
                 machineInfo && machineInfo.osName
@@ -50,7 +50,7 @@
                 <template v-if="machineInfo && machineInfo.ipv4List && machineInfo.ipv4List.length">
                   {{ machineInfo && machineInfo.ipv4List[0] }}
                   <a-popover title="所有的IPV4列表">
-                    <template slot="content">
+                    <template #content>
                       <p v-for="item in machineInfo && machineInfo.ipv4List" :key="item">{{ item }}</p>
                     </template>
                     <a-tag>
@@ -144,7 +144,7 @@
       <a-tab-pane key="stat" tab="统计趋势">
         <a-space direction="vertical" style="display: block">
           <a-card size="small" title="基础信息">
-            <template slot="extra">
+            <template #extra>
               <a-button size="small" v-if="historyChart" type="primary" @click="handleHistory"
                 ><a-icon type="area-chart" />历史监控图表</a-button
               >
@@ -153,7 +153,7 @@
             <div id="top-chart" class="chart">loading...</div>
           </a-card>
           <a-card size="small" title="网络流量信息">
-            <template slot="extra">
+            <template #extra>
               <a-button size="small" v-if="netHistoryChart" type="primary" @click="handleHistory('network-stat')"
                 ><a-icon type="area-chart" />历史监控图表</a-button
               >
@@ -162,7 +162,7 @@
             <div id="net-chart" class="chart">loading...</div>
           </a-card>
           <a-card size="small" title="机器延迟">
-            <template slot="extra">
+            <template #extra>
               <a-button size="small" v-if="networkDelayChart" type="primary" @click="handleHistory('networkDelay')"
                 ><a-icon type="area-chart" />历史监控图表</a-button
               >
@@ -190,7 +190,7 @@
                     selectPlaceholder="选择进程名"
                     suffixIcon=""
                   >
-                    <template slot="suffixIcon"> <a-icon type="down" /></template>
+                    <template #suffixIcon> <a-icon type="down" /></template>
                   </custom-select>
                   <a-tooltip title="查看的进程数量">
                     <a-input-number v-model="processSearch.processCount" :min="1" @change="loadNodeProcess" />
@@ -212,23 +212,23 @@
             rowKey="processId"
             :pagination="false"
           >
-            <a-tooltip slot="percentTooltip" slot-scope="text" placement="topLeft" :title="formatPercent(text)">
+            <a-tooltip #percentTooltip slot-scope="text" placement="topLeft" :title="formatPercent(text)">
               {{ formatPercent(text) }}
             </a-tooltip>
-            <a-tooltip slot="timeTooltip" slot-scope="text" placement="topLeft" :title="parseTime(text)">
+            <a-tooltip #timeTooltip slot-scope="text" placement="topLeft" :title="parseTime(text)">
               {{ parseTime(text) }}
             </a-tooltip>
-            <a-tooltip slot="durationTooltip" slot-scope="text" placement="topLeft" :title="formatDuration(text)">
+            <a-tooltip #durationTooltip slot-scope="text" placement="topLeft" :title="formatDuration(text)">
               {{ formatDuration(text, '', 2) }}
             </a-tooltip>
 
-            <a-tooltip slot="sizeTooltip" slot-scope="text" placement="topLeft" :title="renderSize(text)">
+            <a-tooltip #sizeTooltip slot-scope="text" placement="topLeft" :title="renderSize(text)">
               {{ renderSize(text) }}
             </a-tooltip>
-            <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+            <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
               {{ text }}
             </a-tooltip>
-            <template slot="operation" slot-scope="text, record">
+            <template #operation slot-scope="text, record">
               <a-button type="primary" size="small" @click="kill(record)">Kill</a-button>
             </template>
           </a-table>
@@ -244,17 +244,17 @@
           rowKey="uuid"
           :pagination="false"
         >
-          <a-tooltip slot="percentTooltip" slot-scope="text" placement="topLeft" :title="formatPercent(text)">
+          <a-tooltip #percentTooltip slot-scope="text" placement="topLeft" :title="formatPercent(text)">
             {{ formatPercent(text) }}
           </a-tooltip>
 
-          <a-tooltip slot="sizeTooltip" slot-scope="text" placement="topLeft" :title="renderSize(text)">
+          <a-tooltip #sizeTooltip slot-scope="text" placement="topLeft" :title="renderSize(text)">
             {{ renderSize(text) }}
           </a-tooltip>
-          <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+          <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
             {{ text }}
           </a-tooltip>
-          <template slot="operation" slot-scope="text, record">
+          <template #operation slot-scope="text, record">
             <a-button type="primary" size="small" @click="kill(record)">Kill</a-button>
           </template>
         </a-table>
@@ -268,28 +268,28 @@
           :rowKey="(record, index) => index"
           :pagination="false"
         >
-          <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+          <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
             {{ text }}
           </a-tooltip>
-          <a-tooltip slot="sizeTooltip" slot-scope="text" placement="topLeft" :title="renderSize(text)">
+          <a-tooltip #sizeTooltip slot-scope="text" placement="topLeft" :title="renderSize(text)">
             {{ renderSize(text) }}
           </a-tooltip>
-          <a-tooltip slot="durationTooltip" slot-scope="text" placement="topLeft" :title="formatDuration(text)">
+          <a-tooltip #durationTooltip slot-scope="text" placement="topLeft" :title="formatDuration(text)">
             {{ formatDuration(text, '', 2) }}
           </a-tooltip>
           <a-table
             size="middle"
-            slot="expandedRowRender"
+            #expandedRowRender
             slot-scope="item"
             :columns="hwDiskPartitionColumns"
             :rowKey="(record, index) => index"
             :data-source="item.partition"
             :pagination="false"
           >
-            <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+            <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
               {{ text }}
             </a-tooltip>
-            <a-tooltip slot="sizeTooltip" slot-scope="text" placement="topLeft" :title="renderSize(text)">
+            <a-tooltip #sizeTooltip slot-scope="text" placement="topLeft" :title="renderSize(text)">
               {{ renderSize(text) }}
             </a-tooltip>
           </a-table>

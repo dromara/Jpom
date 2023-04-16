@@ -4,7 +4,7 @@
       <a-collapse v-model="fastInstallActiveKey">
         <a-collapse-panel key="1" header="温馨提示">
           <a-alert message="温馨提示" type="warning">
-            <template slot="description">
+            <template #description>
               <ul>
                 <li>
                   复制下面任意一条命令到还未安装插件端的服务器中去执行,执行前需要放行<b>防火墙端口</b>,<b>安全组规则</b>等网络端口限制
@@ -47,7 +47,7 @@
                 "
               >
                 <a-alert type="info" :message="`命令内容(点击可以复制)`">
-                  <template slot="description">
+                  <template #description>
                     <span>{{ item.allText }} </span>
                     <a-icon type="copy" />
                   </template>
@@ -76,7 +76,7 @@
             type="info"
             :message="`命令内容(点击可以复制、命令路径请修改为您的服务器中的实际路径)`"
           >
-            <template slot="description">
+            <template #description>
               <span>{{ fastInstallInfo.bindCommand }} </span>
               <a-icon type="copy" />
             </template>
@@ -92,7 +92,7 @@
             closable
             @close="clearPullFastInstallResult(item.id)"
           >
-            <template slot="description">
+            <template #description>
               <a-space direction="vertical">
                 <div v-if="item.type === 'canUseIpEmpty'"><a-tag color="orange">不能和节点正常通讯</a-tag></div>
                 <div v-if="item.type === 'multiIp'"><a-tag color="green">多IP可以使用</a-tag></div>

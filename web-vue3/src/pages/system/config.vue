@@ -1,7 +1,7 @@
 <template>
   <a-tabs default-active-key="1" @change="tabChange">
     <a-tab-pane key="1">
-      <span slot="tab">
+      <span #tab>
         <a-icon type="setting" />
         服务端系统配置
       </span>
@@ -24,7 +24,7 @@
       </a-form>
     </a-tab-pane>
     <a-tab-pane key="2" class="ip-config-panel">
-      <span slot="tab">
+      <span #tab>
         <a-icon type="lock" />
         服务端IP白名单配置
       </span>
@@ -47,10 +47,10 @@
         :wrapper-col="{ span: 20 }"
       >
         <a-form-item prop="content">
-          <template slot="label">
+          <template #label>
             <a-space align="center">
               <a-tooltip>
-                <template slot="title">禁止访问的 IP 地址 </template>
+                <template #title>禁止访问的 IP 地址 </template>
                 <a-icon type="stop" theme="twoTone" />
                 IP黑名单
               </a-tooltip>
@@ -65,10 +65,10 @@
           />
         </a-form-item>
         <a-form-item prop="content">
-          <template slot="label">
+          <template #label>
             <a-space align="center">
               <a-tooltip>
-                <template slot="title"> 只允许访问的 IP 地址 </template>
+                <template #title> 只允许访问的 IP 地址 </template>
                 <a-icon type="check-circle" theme="twoTone" />
                 IP白名单
               </a-tooltip>
@@ -91,7 +91,7 @@
 
     <!-- 全局代理 -->
     <a-tab-pane key="6">
-      <span slot="tab">
+      <span #tab>
         <a-icon type="api" />
         全局代理
       </span>
@@ -114,7 +114,7 @@
             </a-form-item>
             <a-form-item label="代理" prop="httpProxy">
               <a-input style="width: 30vw" v-model="item.proxyAddress" placeholder="代理地址 (127.0.0.1:8888)">
-                <a-select slot="addonBefore" v-model="item.proxyType" style="width: 100px">
+                <a-select #addonBefore v-model="item.proxyType" style="width: 100px">
                   <a-select-option value="HTTP">HTTP</a-select-option>
                   <a-select-option value="SOCKS">SOCKS</a-select-option>
                   <a-select-option value="DIRECT">DIRECT</a-select-option>

@@ -10,7 +10,7 @@
       bordered
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             v-model="listQuery['%name%']"
@@ -28,23 +28,23 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
         </a-space>
       </template>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #name slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
       <a-switch
-        slot="status"
+        #status
         size="small"
         slot-scope="text"
         :checked="text"
         checked-children="开启"
         un-checked-children="关闭"
       />
-      <!-- <a-switch slot="autoRestart" slot-scope="text" :checked="text" checked-children="是" un-checked-children="否" /> -->
-      <!-- <a-switch slot="alarm" slot-scope="text" :checked="text" disabled checked-children="报警中" un-checked-children="未报警" /> -->
-      <a-tooltip slot="parent" slot-scope="text" placement="topLeft" :title="text">
+      <!-- <a-switch #autoRestart slot-scope="text" :checked="text" checked-children="是" un-checked-children="否" /> -->
+      <!-- <a-switch #alarm slot-scope="text" :checked="text" disabled checked-children="报警中" un-checked-children="未报警" /> -->
+      <a-tooltip #parent slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
           <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
@@ -101,10 +101,10 @@
           />
         </a-form-item>
         <a-form-item prop="notifyUser" class="jpom-monitor-notify">
-          <template slot="label">
+          <template #label>
             报警联系人
             <a-tooltip v-show="!temp.id">
-              <template slot="title">
+              <template #title>
                 如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。
               </template>
               <question-circle-filled />

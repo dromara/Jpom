@@ -13,15 +13,8 @@
       <template #title>
         <a-button type="primary" @click="handleFilter">刷新</a-button>
       </template>
-      <a-switch
-        slot="status"
-        slot-scope="text"
-        :checked="text"
-        disabled
-        checked-children="开"
-        un-checked-children="关"
-      />
-      <template slot="operation" slot-scope="text, record">
+      <a-switch #status slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关" />
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button type="primary" @click="handleConsole(record)">控制台</a-button>
 

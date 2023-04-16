@@ -22,7 +22,7 @@
       bordered
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
           <a-input v-model="listQuery['%tag%']" @pressEnter="loadData" placeholder="标签" class="search-input-item" />
@@ -31,10 +31,10 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="status" slot-scope="text, record">
+      <template #status slot-scope="text, record">
         <template v-if="record.machineDocker">
           <a-tag color="green" v-if="record.machineDocker.status === 1">正常</a-tag>
           <a-tooltip v-else :title="record.machineDocker.failureMsg">
@@ -47,7 +47,7 @@
         </a-tooltip>
       </template>
 
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <template v-if="record.machineDocker">
             <a-button
@@ -76,7 +76,13 @@
       </template>
     </a-table>
     <!-- 创建集群区 -->
-    <a-modal destroyOnClose v-model="editVisible" title="编辑 Docker 集群" @ok="handleEditOk" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      v-model:visible="editVisible"
+      title="编辑 Docker 集群"
+      @ok="handleEditOk"
+      :maskClosable="false"
+    >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="集群名称" prop="name">
           <a-input v-model="temp.name" placeholder="容器名称" />

@@ -10,7 +10,7 @@
       @change="changePage"
       :pagination="pagination"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             v-model="listQuery['%name%']"
@@ -36,16 +36,16 @@
           <a-button type="primary" @click="handleSqlUpload">导入备份</a-button>
         </a-space>
       </template>
-      <a-tooltip slot="name" slot-scope="text" :title="text">
+      <a-tooltip #name slot-scope="text" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="backupType" slot-scope="text" :title="text">
+      <a-tooltip #backupType slot-scope="text" :title="text">
         <span>{{ backupTypeMap[text] }}</span>
       </a-tooltip>
-      <template slot="baleTimeStamp" slot-scope="text">
+      <template #baleTimeStamp slot-scope="text">
         <a-tooltip :title="`${parseTime(text)}`"> {{ parseTime(text) }} </a-tooltip>
       </template>
-      <template slot="status" slot-scope="text, reocrd">
+      <template #status slot-scope="text, reocrd">
         <a-tooltip v-if="reocrd.fileExist" :title="`${backupStatusMap[text]} 点击复制文件路径`">
           <div
             v-clipboard:copy="reocrd.filePath"
@@ -74,20 +74,20 @@
       </template>
 
       <a-tooltip
-        slot="fileSize"
+        #fileSize
         slot-scope="text, reocrd"
         placement="topLeft"
         :title="renderSizeFormat(text) + ' ' + reocrd.sha1Sum"
       >
         <a-tag color="#108ee9">{{ renderSizeFormat(text) }}</a-tag>
       </a-tooltip>
-      <!-- <a-tooltip slot="filePath" slot-scope="text, record" placement="topLeft" :title="text + ' ' + (record.sha1Sum || '')">
+      <!-- <a-tooltip #filePath slot-scope="text, record" placement="topLeft" :title="text + ' ' + (record.sha1Sum || '')">
         <span
 
           >{{ text }}
         </span>
       </a-tooltip> -->
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button
             size="small"

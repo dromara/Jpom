@@ -10,7 +10,7 @@
       bordered
       rowKey="id"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             v-model="listQuery['%scriptName%']"
@@ -44,23 +44,23 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="scriptName" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #scriptName slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #modifyUser slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="triggerExecTypeMap" slot-scope="text">
+      <template #triggerExecTypeMap slot-scope="text">
         <span>{{ triggerExecTypeMap[text] || '未知' }}</span>
       </template>
-      <template slot="global" slot-scope="text">
+      <template #global slot-scope="text">
         <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
         <a-tag v-else>工作空间</a-tag>
       </template>
-      <a-tooltip slot="createTimeMillis" slot-scope="text, record" :title="`${parseTime(record.createTimeMillis)}`">
+      <a-tooltip #createTimeMillis slot-scope="text, record" :title="`${parseTime(record.createTimeMillis)}`">
         <span>{{ parseTime(record.createTimeMillis) }}</span>
       </a-tooltip>
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button type="primary" size="small" @click="viewLog(record)">查看日志</a-button>
 

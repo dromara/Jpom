@@ -2,7 +2,7 @@
   <div style="margin-top: -10px">
     <a-tabs :activeKey="activeKey" @change="tabCallback">
       <a-tab-pane v-for="item in logList" :key="item.id">
-        <span slot="tab">
+        <span #tab>
           <a-icon v-if="!logMap[item.id] || logMap[item.id].run" type="loading" />
           {{ item.sshName }}
         </span>

@@ -17,7 +17,7 @@
       bordered
       rowKey="id"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-space>
             <a-input
@@ -41,21 +41,21 @@
           </a-space>
         </a-space>
       </template>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-popover slot="name" slot-scope="text, item" title="证书描述">
-        <template slot="content">
+      <a-popover #name slot-scope="text, item" title="证书描述">
+        <template #content>
           <p>描述：{{ item.description }}</p>
         </template>
         <!-- {{ text }} -->
         {{ text }}
       </a-popover>
-      <template slot="fileExists" slot-scope="text">
+      <template #fileExists slot-scope="text">
         <a-tag v-if="text" color="green">存在</a-tag>
         <a-tag v-else color="red">丢失</a-tag>
       </template>
-      <template slot="global" slot-scope="text">
+      <template #global slot-scope="text">
         <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
         <a-tag v-else>工作空间</a-tag>
       </template>

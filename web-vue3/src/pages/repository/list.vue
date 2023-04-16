@@ -16,7 +16,7 @@
         }
       "
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             class="search-input-item"
@@ -42,26 +42,26 @@
           <a-button type="primary" @click="handleAddGitee">令牌导入</a-button>
         </a-space>
       </template>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <template slot="repoType" slot-scope="text">
+      <template #repoType slot-scope="text">
         <span v-if="text === 0">GIT</span>
         <span v-else-if="text === 1">SVN</span>
         <span v-else>未知</span>
       </template>
-      <template slot="protocol" slot-scope="text, record">
+      <template #protocol slot-scope="text, record">
         <span v-if="text === 0">HTTP(S)</span>
         <span v-else-if="text === 1">SSH</span>
         <!-- if no protocol value, get a default value from gitUrl -->
         <span v-else>{{ record.gitUrl.indexOf('http') > -1 ? 'HTTP(S)' : 'SSH' }}</span>
       </template>
-      <template slot="global" slot-scope="text">
+      <template #global slot-scope="text">
         <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
         <a-tag v-else>工作空间</a-tag>
       </template>
-      <template slot="operation" slot-scope="text, record, index">
+      <template #operation slot-scope="text, record, index">
         <a-space>
           <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
           <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
@@ -70,7 +70,7 @@
               更多
               <a-icon type="down" />
             </a>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item>
                 <a-button
                   size="small"
@@ -138,15 +138,15 @@
             <template #label>
               账号
               <a-tooltip v-if="!temp.id">
-                <template slot="title"> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                <template #title> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
                 <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input v-model="temp.userName" placeholder="登录用户">
-              <a-icon slot="prefix" type="user" />
+              <a-icon #prefix type="user" />
               <a-tooltip
                 v-if="temp.id"
-                slot="suffix"
+                #suffix
                 title=" 密码字段和密钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我"
               >
                 <a-button size="small" type="danger" @click="restHideField(temp)">清除</a-button>
@@ -157,24 +157,24 @@
             <template #label>
               密码
               <a-tooltip v-if="!temp.id">
-                <template slot="title"> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                <template #title> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
                 <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input-password v-if="temp.id === undefined" v-model="temp.password" placeholder="登录密码">
-              <a-icon slot="prefix" type="lock" />
+              <a-icon #prefix type="lock" />
             </a-input-password>
             <a-input-password v-if="temp.id !== undefined" v-model="temp.password" placeholder="此处不填不会修改密码">
-              <a-icon slot="prefix" type="lock" />
+              <a-icon #prefix type="lock" />
             </a-input-password>
           </a-form-item>
         </template>
         <a-form-item v-if="temp.repoType === 1 && temp.protocol === 1" label="账号" prop="userName">
           <a-input v-model="temp.userName" placeholder="svn ssh 必填登录用户">
-            <a-icon slot="prefix" type="user" />
+            <a-icon #prefix type="user" />
             <a-tooltip
               v-if="temp.id"
-              slot="suffix"
+              #suffix
               title=" 密码字段和密钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我"
             >
               <a-button size="small" type="danger" @click="restHideField(temp)">清除</a-button>
@@ -187,17 +187,17 @@
             <template #label>
               密码
               <a-tooltip v-if="!temp.id">
-                <template slot="title"> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                <template #title> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
                 <question-circle-filled />
               </a-tooltip>
             </template>
             <a-input-password v-model="temp.password" placeholder="证书密码">
-              <a-icon slot="prefix" type="lock" />
+              <a-icon #prefix type="lock" />
             </a-input-password>
           </a-form-item>
           <a-form-item label="私钥" prop="rsaPrv">
             <a-tooltip placement="topLeft">
-              <template slot="title">
+              <template #title>
                 <div>
                   <p style="color: #faa">
                     注意：目前对 SSH key 访问 git 仓库地址不支持使用 ssh-keygen -t rsa -C "邮箱" 方式生成的 SSH key
@@ -236,10 +236,10 @@
           </a-radio-group>
         </a-form-item>
         <!-- <a-form-item v-if="temp.id" prop="restHideField">
-          <template slot="label">
+          <template #label>
             隐藏字段
             <a-tooltip>
-              <template slot="title"> 密码字段和私钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我 </template>
+              <template #title> 密码字段和私钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我 </template>
               <question-circle-filled />
             </a-tooltip>
           </template>
@@ -273,11 +273,11 @@
         >
           <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder[giteeImportForm.type]}`">
             <!-- <a-input v-model="giteeImportForm.token" :placeholder="importTypePlaceholder[giteeImportForm.type]">
-              <a-select slot="addonBefore" style="width: 100px" @change="importChange" v-model="giteeImportForm.type">
+              <a-select #addonBefore style="width: 100px" @change="importChange" v-model="giteeImportForm.type">
                 <a-select-option :value="item" v-for="item in Object.keys(providerData)" :key="item"> {{ item }}</a-select-option>
               </a-select>
 
-              <a-button slot="addonAfter" size="small" type="primary" icon="search" @click="handleGiteeImportFormOk"></a-button>
+              <a-button #addonAfter size="small" type="primary" icon="search" @click="handleGiteeImportFormOk"></a-button>
             </a-input> -->
             <a-input-group compact>
               <a-select style="width: 10%" @change="importChange" v-model="giteeImportForm.type">
@@ -318,23 +318,23 @@
         @change="reposChange"
         :pagination="reposPagination"
       >
-        <template slot="private" slot-scope="text, record">
+        <template #private slot-scope="text, record">
           <a-switch size="small" :disabled="true" :checked="record.private" />
         </template>
-        <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip #name slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip slot="full_name" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip #full_name slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip slot="url" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip #url slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip slot="description" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip #description slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
 
-        <template slot="operation" slot-scope="text, record">
+        <template #operation slot-scope="text, record">
           <a-button type="primary" size="small" :disabled="record.exists" @click="handleGiteeRepoAdd(record)">{{
             record.exists ? '已存在' : '添加'
           }}</a-button>

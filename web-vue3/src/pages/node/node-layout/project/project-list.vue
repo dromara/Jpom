@@ -19,7 +19,7 @@
       bordered
       rowKey="id"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-select
             v-model="listQuery.group"
@@ -42,7 +42,7 @@
 
           <a-dropdown>
             <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item>
                 <a-button type="primary" @click="batchStart">批量启动</a-button>
               </a-menu-item>
@@ -57,7 +57,7 @@
 
           <a-button icon="download" type="primary" @click="handlerExportData()">导出</a-button>
           <a-dropdown>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item key="1">
                 <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button>
               </a-menu-item>
@@ -75,14 +75,14 @@
             </a-upload>
           </a-dropdown>
           <a-tooltip>
-            <template slot="title">
+            <template #title>
               <div>状态数据是异步获取有一定时间延迟</div>
             </template>
             <question-circle-filled />
           </a-tooltip>
         </a-space>
       </template>
-      <template slot="copyIcon" slot-scope="javaCopyItemList, record">
+      <template #copyIcon slot-scope="javaCopyItemList, record">
         <template v-if="javaCopyItemList">
           <div
             v-if="!expandedRowKeys.includes(record.id)"
@@ -102,7 +102,7 @@
         </template>
       </template>
       <a-tooltip
-        slot="name"
+        #name
         slot-scope="text, record"
         placement="topLeft"
         :title="`名称：${text}`"
@@ -113,13 +113,13 @@
         </a-button>
       </a-tooltip>
 
-      <a-tooltip slot="path" slot-scope="text, item" placement="topLeft" :title="item.whitelistDirectory + item.lib">
+      <a-tooltip #path slot-scope="text, item" placement="topLeft" :title="item.whitelistDirectory + item.lib">
         <span>{{ item.whitelistDirectory + item.lib }}</span>
       </a-tooltip>
-      <!-- <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
+      <!-- <a-tooltip #modifyUser slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip> -->
-      <template slot="status" slot-scope="text, record">
+      <template #status slot-scope="text, record">
         <template v-if="record.error">
           <a-tooltip :title="record.error">
             <a-icon type="warning" />
@@ -134,7 +134,7 @@
       </template>
 
       <a-tooltip
-        slot="port"
+        #port
         slot-scope="text, record"
         placement="topLeft"
         :title="`进程号：${(record.pids || [record.pid || '-']).join(',')} / 端口号：${record.port || '-'}`"
@@ -142,24 +142,17 @@
         <span>{{ record.port || '-' }}/{{ (record.pids || [record.pid || '-']).join(',') }}</span>
       </a-tooltip>
 
-      <template slot="expandedRowRender" slot-scope="record">
+      <template #expandedRowRender slot-scope="record">
         <a-table :columns="copyColumns" :data-source="record.javaCopyItemList" rowKey="id" :pagination="false">
-          <template slot="id" slot-scope="text">
+          <template #id slot-scope="text">
             {{ text }}
             <a-icon type="reload" @click="getRuningProjectCopyInfo(record)" />
           </template>
-          <template slot="name" slot-scope="text, record">
+          <template #name slot-scope="text, record">
             {{ text || record.id }}
           </template>
-          <a-switch
-            slot="status"
-            slot-scope="text"
-            :checked="text"
-            disabled
-            checked-children="开"
-            un-checked-children="关"
-          />
-          <template slot="operation" slot-scope="text, copyRecord">
+          <a-switch #status slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关" />
+          <template #operation slot-scope="text, copyRecord">
             <a-space>
               <a-button size="small" type="primary" @click="handleConsoleCopy(record, copyRecord)">控制台</a-button>
               <a-button size="small" type="danger" @click="handleDeleteCopy(record, copyRecord, 'thorough')"
@@ -170,7 +163,7 @@
         </a-table>
       </template>
 
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
           <a-tooltip
@@ -191,7 +184,7 @@
               更多
               <a-icon type="down" />
             </a>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item>
                 <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
               </a-menu-item>
@@ -258,7 +251,7 @@
                 }
               "
             >
-              <template slot="enterButton">
+              <template #enterButton>
                 <a-button type="primary"> 随机生成 </a-button>
               </template>
             </a-input-search>
@@ -285,10 +278,10 @@
           </a-row>
         </a-form-item>
         <a-form-item prop="runMode">
-          <template slot="label">
+          <template #label>
             运行方式
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 <ul>
                   <li><b>Dsl</b> 配合脚本模版实现自定义项目管理</li>
                   <li><b>ClassPath</b> java -classpath xxx 运行项目</li>
@@ -306,10 +299,10 @@
           </a-select>
         </a-form-item>
         <a-form-item prop="whitelistDirectory" class="jpom-node-project-whitelist">
-          <template slot="label">
+          <template #label>
             项目路径
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 <ul>
                   <li>白名单路径是指项目文件存放到服务中的文件夹</li>
                   <li>可以到节点管理中的【系统管理】=>【白名单配置】修改</li>
@@ -333,10 +326,10 @@
           </template>
         </a-form-item>
         <!-- <a-form-item prop="lib">
-          <template slot="label">
+          <template #label>
             项目文件夹
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 <ul></ul>
               </template>
               <question-circle-filled />
@@ -347,10 +340,10 @@
           <a-alert :message="filePath" type="success" />
         </a-form-item>
         <a-form-item v-show="temp.runMode === 'Dsl'" prop="dslContent">
-          <template slot="label">
+          <template #label>
             DSL 内容
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 <p>
                   以 yaml/yml 格式配置,scriptId
                   为项目路径下的脚本文件的相对路径或者脚本模版ID，可以到脚本模版编辑弹窗中查看 scriptId
@@ -385,10 +378,10 @@
           </a-tabs>
         </a-form-item>
         <a-form-item v-show="noFileModes.includes(temp.runMode)">
-          <template slot="label">
+          <template #label>
             日志目录
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 <ul>
                   <li>日志目录是指控制台日志存储目录</li>
                   <li>默认是在项目文件夹父级</li>
@@ -436,10 +429,10 @@
           <!-- 副本信息 -->
           <!-- <a-row> </a-row> -->
           <a-form-item>
-            <template slot="label">
+            <template #label>
               副本
               <a-tooltip v-show="temp.type !== 'edit'">
-                <template slot="title"> 副本是指同一个项目在一个节点（服务器）中运行多份 </template>
+                <template #title> 副本是指同一个项目在一个节点（服务器）中运行多份 </template>
                 <question-circle-filled />
               </a-tooltip>
             </template>
@@ -492,20 +485,20 @@
           </a-form-item>
         </div>
         <a-form-item prop="autoStart" v-show="noFileModes.includes(temp.runMode)">
-          <template slot="label">
+          <template #label>
             自启动
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template>
+              <template #title>插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template>
               <question-circle-filled />
             </a-tooltip>
           </template>
           <a-switch v-model="temp.autoStart" checked-children="开" un-checked-children="关" />
         </a-form-item>
         <a-form-item prop="token" v-show="noFileModes.includes(temp.runMode)" class="jpom-node-project-token">
-          <template slot="label">
+          <template #label>
             WebHooks
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 <ul>
                   <li>项目启动,停止,重启都将请求对应的地址</li>
                   <li>传入参数有：projectId、projectName、type、copyId、result</li>
@@ -597,11 +590,11 @@
       <replica v-if="drawerReplicaVisible" :node="node" :project="temp" />
     </a-drawer> -->
     <!-- 批量操作状态 -->
-    <a-modal destroyOnClose v-model="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
+    <a-modal destroyOnClose v-model:visible="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
       <a-list bordered :data-source="selectedRows">
-        <a-list-item slot="renderItem" slot-scope="item">
+        <a-list-item #renderItem slot-scope="item">
           <a-list-item-meta :description="item.email">
-            <a slot="title"> {{ item.name }}</a>
+            <a #title> {{ item.name }}</a>
           </a-list-item-meta>
           <div>{{ item.cause === undefined ? '未开始' : item.cause }}</div>
         </a-list-item>

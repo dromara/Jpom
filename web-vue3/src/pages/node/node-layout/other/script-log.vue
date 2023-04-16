@@ -10,7 +10,7 @@
       bordered
       rowKey="id"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
           <a-select
@@ -37,7 +37,7 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-tooltip>
-            <template slot="title">
+            <template #title>
               <div>
                 脚本模版是存储在节点(插件端),执行也都将在节点里面执行,服务端会定时去拉取执行日志,拉取频率为 100 条/分钟
               </div>
@@ -51,23 +51,23 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="scriptName" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #scriptName slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #modifyUser slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="triggerExecTypeMap" slot-scope="text">
+      <template #triggerExecTypeMap slot-scope="text">
         <span>{{ triggerExecTypeMap[text] || '未知' }}</span>
       </template>
-      <template slot="global" slot-scope="text">
+      <template #global slot-scope="text">
         <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
         <a-tag v-else>工作空间</a-tag>
       </template>
-      <a-tooltip slot="createTimeMillis" slot-scope="text, record" :title="`${parseTime(record.createTimeMillis)}`">
+      <a-tooltip #createTimeMillis slot-scope="text, record" :title="`${parseTime(record.createTimeMillis)}`">
         <span>{{ parseTime(record.createTimeMillis) }}</span>
       </a-tooltip>
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="viewLog(record)">查看日志</a-button>
 

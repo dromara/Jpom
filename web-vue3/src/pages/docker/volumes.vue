@@ -7,7 +7,7 @@
     bordered
     :rowKey="(record, index) => index"
   >
-    <template slot="title">
+    <template #title>
       <a-space>
         <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
 
@@ -20,12 +20,12 @@
       </a-space>
     </template>
 
-    <a-tooltip slot="CreatedAt" slot-scope="text" placement="topLeft" :title="text['CreatedAt']">
+    <a-tooltip #CreatedAt slot-scope="text" placement="topLeft" :title="text['CreatedAt']">
       <span>{{ parseTime(text['CreatedAt']) }}</span>
     </a-tooltip>
-    <template slot="name" slot-scope="text, record">
+    <template #name slot-scope="text, record">
       <a-popover title="卷标签" v-if="record.labels">
-        <template slot="content">
+        <template #content>
           <p v-for="(value, key) in record.labels" :key="key">{{ key }}<a-icon type="arrow-right" />{{ value }}</p>
         </template>
         <a-icon type="pushpin" />
@@ -35,18 +35,18 @@
         {{ text }}
       </a-tooltip>
     </template>
-    <!-- <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="renderSize(text) + ' ' + renderSize(record.virtualSize)">
+    <!-- <a-tooltip #name slot-scope="text, record" placement="topLeft" :title="renderSize(text) + ' ' + renderSize(record.virtualSize)">
       <span>{{ renderSize(text) }}</span>
     </a-tooltip> -->
 
-    <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+    <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
       <span>{{ text }}</span>
     </a-tooltip>
 
-    <a-tooltip slot="id" slot-scope="text" :title="text">
+    <a-tooltip #id slot-scope="text" :title="text">
       <span> {{ text.split(':')[1].slice(0, 12) }}</span>
     </a-tooltip>
-    <template slot="operation" slot-scope="text, record">
+    <template #operation slot-scope="text, record">
       <a-space>
         <a-tooltip title="删除">
           <a-button size="small" type="link" @click="doAction(record, 'remove')"><a-icon type="delete" /></a-button>

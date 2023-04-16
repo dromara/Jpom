@@ -3,9 +3,9 @@
     <a-form ref="editForm" :model="temp" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
       <a-form-item label="SMTP 服务器" prop="host">
         <a-auto-complete v-model="temp.host" placeholder="SMTP 服务器域名" option-label-prop="value">
-          <template slot="dataSource">
+          <template #dataSource>
             <a-select-opt-group v-for="group in hostDataSource" :key="group.title">
-              <span slot="label">
+              <span #label>
                 {{ group.title }}
               </span>
               <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value">
@@ -17,9 +17,9 @@
       </a-form-item>
       <a-form-item label="SMTP 端口" prop="port">
         <a-auto-complete v-model="temp.port" placeholder="SMTP 服务器端口" option-label-prop="value">
-          <template slot="dataSource">
+          <template #dataSource>
             <a-select-opt-group v-for="group in portDataSource" :key="group.title">
-              <span slot="label">
+              <span #label>
                 {{ group.title }}
               </span>
               <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value">
@@ -38,7 +38,7 @@
       <a-form-item label="邮箱账号" prop="from">
         <!-- <a-input v-model="temp.from" type="text" placeholder="发送方邮箱账号" /> -->
         <a-tooltip>
-          <template slot="title">
+          <template #title>
             支持配置发送方：遵循RFC-822标准 发件人可以是以下形式：
             <ul>
               <li>1. user@xxx.xx</li>
@@ -51,7 +51,7 @@
             option-label-prop="value"
             @search="handleFromSearch"
           >
-            <template slot="dataSource">
+            <template #dataSource>
               <a-select-option v-for="email in fromResult" :key="email">
                 {{ email }}
               </a-select-option>

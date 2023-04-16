@@ -35,7 +35,7 @@
         </div>
 
         <a-tooltip>
-          <template slot="title">
+          <template #title>
             <ul>
               <li>Ctrl-F / Cmd-F Start searching</li>
               <li>Ctrl-G / Cmd-G Find next</li>

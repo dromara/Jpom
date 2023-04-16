@@ -1,32 +1,40 @@
 <template>
   <a-tabs v-model="activeKey" class="my-tabs" hide-add type="editable-card" @edit="onEdit" @change="changeTab">
     <a-tab-pane v-for="(tab, index) in nowTabList" :key="tab.key" :closable="nowTabList.length > 1">
-      <template slot="tab">
+      <template #tab>
         <a-dropdown :trigger="['contextmenu']">
           <span style="display: inline-table">{{ tab.title }}</span>
-          <a-menu slot="overlay">
-            <a-menu-item @click="
-              closeTabs({
-                key: tab.key
-              })
-            ">
+          <a-menu #overlay>
+            <a-menu-item
+              @click="
+                closeTabs({
+                  key: tab.key
+                })
+              "
+            >
               <a-button type="link" :disabled="nowTabList.length <= 1">关闭其他</a-button>
             </a-menu-item>
-            <a-menu-item @click="
-              closeTabs({
-                key: tab.key,
-                position: 'left'
-              })
-            ">
+            <a-menu-item
+              @click="
+                closeTabs({
+                  key: tab.key,
+                  position: 'left'
+                })
+              "
+            >
               <a-button type="link" :disabled="nowTabList.length <= 1 || index === 0">关闭左侧</a-button>
             </a-menu-item>
-            <a-menu-item @click="
-              closeTabs({
-                key: tab.key,
-                position: 'right'
-              })
-            ">
-              <a-button type="link" :disabled="nowTabList.length <= 1 || index === nowTabList.length - 1">关闭右侧</a-button>
+            <a-menu-item
+              @click="
+                closeTabs({
+                  key: tab.key,
+                  position: 'right'
+                })
+              "
+            >
+              <a-button type="link" :disabled="nowTabList.length <= 1 || index === nowTabList.length - 1"
+                >关闭右侧</a-button
+              >
             </a-menu-item>
           </a-menu>
         </a-dropdown>
@@ -36,7 +44,7 @@
   </a-tabs>
 </template>
 <script lang="ts" setup>
-import userHeader from './user-header.vue';
+import userHeader from './user-header.vue'
 
 const props = defineProps<{
   mode: string

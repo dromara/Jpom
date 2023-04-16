@@ -10,7 +10,7 @@
       @change="changePage"
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             v-model="listQuery['%name%']"
@@ -25,7 +25,7 @@
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
           <a-tooltip>
-            <template slot="title">
+            <template #title>
               <ul>
                 <li>工作空间用于隔离数据,工作空间下面可以有不同数据,不同权限,不同菜单等来实现权限控制</li>
                 <li>工作空间环境变量用于构建命令相关</li>
@@ -35,13 +35,13 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="description" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #description slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #name slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
           <a-button size="small" type="primary" @click="configMeun(record)">菜单</a-button>
@@ -51,7 +51,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editVisible" title="编辑工作空间" @ok="handleEditOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model:visible="editVisible" title="编辑工作空间" @ok="handleEditOk" :maskClosable="false">
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item label="名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="工作空间名称" />
@@ -94,9 +94,9 @@
                 :replaceFields="replaceFields"
                 v-model="menusConfigData.serverMenuKeys"
               >
-                <a-icon slot="switcherIcon" type="down" />
+                <a-icon #switcherIcon type="down" />
 
-                <template slot="custom" slot-scope="{ dataRef }">
+                <template #custom slot-scope="{ dataRef }">
                   <a-icon :type="dataRef.icon_v3" />
                 </template>
               </a-tree>
@@ -112,9 +112,9 @@
                 :replaceFields="replaceFields"
                 v-model="menusConfigData.nodeMenuKeys"
               >
-                <a-icon slot="switcherIcon" type="down" />
+                <a-icon #switcherIcon type="down" />
 
-                <template slot="custom" slot-scope="{ dataRef }">
+                <template #custom slot-scope="{ dataRef }">
                   <a-icon :type="dataRef.icon_v3" />
                 </template>
               </a-tree>

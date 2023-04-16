@@ -49,7 +49,7 @@
                 }
               "
             >
-              <div slot="inputTips">
+              <div #inputTips>
                 支持通配符(AntPathMatcher)
                 <ul>
                   <li>? 匹配一个字符</li>
@@ -73,7 +73,7 @@
                 }
               "
             >
-              <div slot="inputTips">
+              <div #inputTips>
                 支持通配符(AntPathMatcher)
                 <ul>
                   <li>? 匹配一个字符</li>
@@ -88,12 +88,12 @@
 
       <a-collapse :activeKey="['0', '1', '2']" expandIconPosition="right">
         <a-collapse-panel key="0">
-          <template slot="header">
+          <template #header>
             <a-form-item prop="buildMode" style="margin-bottom: 0px">
-              <template slot="label">
+              <template #label>
                 <a-tooltip>
                   方式
-                  <template slot="title">
+                  <template #title>
                     <ul>
                       <li>本地构建是指直接在服务端中的服务器执行构建命令</li>
                       <li>容器构建是指使用 docker 容器执行构建,这样可以达到和宿主机环境隔离不用安装依赖环境</li>
@@ -119,10 +119,10 @@
           <div v-if="temp.buildMode === undefined" style="text-align: center">请选择构建方式</div>
 
           <a-form-item v-if="temp.buildMode === 0" prop="script">
-            <template slot="label">
+            <template #label>
               <a-tooltip>
                 构建命令
-                <template slot="title">
+                <template #title>
                   这里构建命令最终会在服务器上执行。
                   如果有多行命令那么将<b>逐行执行</b>，如果想要切换路径后执行命令则需要
                   <b>cd xxx && mvn clean package</b></template
@@ -131,7 +131,7 @@
               </a-tooltip>
             </template>
             <a-popover title="辅助操作">
-              <template slot="content">
+              <template #content>
                 <a-space direction="vertical">
                   <a-button
                     type="link"
@@ -165,10 +165,10 @@
             </a-popover>
           </a-form-item>
           <a-form-item v-if="temp.buildMode === 1" prop="script">
-            <template slot="label">
+            <template #label>
               <a-tooltip>
                 DSL 内容
-                <template slot="title">
+                <template #title>
                   <p>以 yaml/yml 格式配置</p>
                   <ul>
                     <li>配置需要声明使用具体的 docker 来执行构建相关操作(建议使用服务端所在服务器中的 docker)</li>
@@ -218,10 +218,10 @@
             </a-tabs>
           </a-form-item>
           <a-form-item v-if="temp.buildMode !== undefined" prop="resultDirFile" class="jpom-target-dir">
-            <template slot="label">
+            <template #label>
               <a-tooltip>
                 产物目录
-                <template slot="title">
+                <template #title>
                   <div>
                     可以理解为项目打包的目录。 如 Jpom 项目执行（构建命令）
                     <b>mvn clean package</b> 构建命令，构建产物相对路径为：<b
@@ -250,12 +250,12 @@
           </a-form-item>
         </a-collapse-panel>
         <a-collapse-panel key="1">
-          <template slot="header">
+          <template #header>
             <a-form-item prop="releaseMethod" style="margin-bottom: 0px">
-              <template slot="label">
+              <template #label>
                 <a-tooltip>
                   发布操作
-                  <template slot="title">
+                  <template #title>
                     <ul>
                       <li>发布操作是指,执行完构建命令后将构建产物目录中的文件用不同的方式发布(上传)到对应的地方</li>
                       <li>节点分发是指,一个项目部署在多个节点中使用节点分发一步完成多个节点中的项目发布操作</li>
@@ -293,7 +293,7 @@
                   <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id"
                     >{{ dispatch.name }}
                   </a-select-option>
-                  <a-icon slot="suffixIcon" type="reload" @click="loadDispatchList" />
+                  <a-icon #suffixIcon type="reload" @click="loadDispatchList" />
                 </a-select>
               </a-form-item>
               <a-form-item prop="projectSecondaryDirectory" label="二级目录">
@@ -308,7 +308,7 @@
             <template v-if="temp.releaseMethod === 2">
               <a-form-item label="发布项目" prop="releaseMethodDataIdList">
                 <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="请选择节点项目">
-                  <a-icon slot="suffixIcon" type="reload" @click="loadNodeProjectList" />
+                  <a-icon #suffixIcon type="reload" @click="loadNodeProjectList" />
                 </a-cascader>
               </a-form-item>
               <a-form-item label="发布后操作" prop="afterOpt">
@@ -323,10 +323,10 @@
             <!-- SSH -->
             <template v-if="temp.releaseMethod === 3">
               <a-form-item prop="releaseMethodDataId" help="如果 ssh 没有配置授权目录是不能选择的哟">
-                <template slot="label">
+                <template #label>
                   <a-tooltip>
                     发布的SSH
-                    <template slot="title"> 如果 ssh 没有配置授权目录是不能选择的哟 </template>
+                    <template #title> 如果 ssh 没有配置授权目录是不能选择的哟 </template>
                     <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
                   </a-tooltip>
                 </template>
@@ -383,10 +383,10 @@
 
             <a-form-item v-if="temp.releaseMethod === 3" prop="releaseBeforeCommand">
               <!-- sshCommand -->
-              <template slot="label">
+              <template #label>
                 <a-tooltip>
                   发布前命令
-                  <template slot="title">
+                  <template #title>
                     发布前执行的命令(非阻塞命令),一般是关闭项目命令
                     <ul>
                       <li>支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}</li>
@@ -407,10 +407,10 @@
             </a-form-item>
             <a-form-item v-if="temp.releaseMethod === 3 || temp.releaseMethod === 4" prop="releaseCommand">
               <!-- sshCommand LocalCommand -->
-              <template slot="label">
+              <template #label>
                 <a-tooltip>
                   发布后命令
-                  <template slot="title">
+                  <template #title>
                     发布后执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java
                     <ul>
                       <li>支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}</li>
@@ -431,10 +431,10 @@
             </a-form-item>
 
             <a-form-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" prop="clearOld">
-              <template slot="label">
+              <template #label>
                 <a-tooltip>
                   清空发布
-                  <template slot="title">
+                  <template #title>
                     清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件
                   </template>
                   <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
@@ -448,7 +448,7 @@
                   <a-col :span="4" style="text-align: right">
                     <a-tooltip>
                       差异发布：
-                      <template slot="title">
+                      <template #title>
                         差异发布是指对应构建产物和项目文件夹里面的文件是否存在差异,如果存在增量差异那么上传或者覆盖文件。
                         <ul>
                           <li>
@@ -467,7 +467,7 @@
                   <a-col :span="4" style="text-align: right">
                     <a-tooltip>
                       发布前停止：
-                      <template slot="title">
+                      <template #title>
                         发布前停止是指在发布文件到项目文件时先将项目关闭，再进行文件替换。避免 windows
                         环境下出现文件被占用的情况
                       </template>
@@ -490,7 +490,7 @@
                 <template #label>
                   <a-tooltip>
                     执行容器
-                    <template slot="title">
+                    <template #title>
                       使用哪个 docker 构建,填写 docker 标签（ 标签在 docker 编辑页面配置） 默认查询可用的第一个,如果 tag
                       查询出多个将依次构建</template
                     >
@@ -536,10 +536,10 @@
                 </a-row>
               </a-form-item>
               <a-form-item prop="swarmId">
-                <template slot="label">
+                <template #label>
                   <a-tooltip>
                     发布集群
-                    <template slot="title"> 目前使用的 docker swarm 集群，需要先创建 swarm 集群才能选择 </template>
+                    <template #title> 目前使用的 docker swarm 集群，需要先创建 swarm 集群才能选择 </template>
                     <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
                   </a-tooltip>
                 </template>
@@ -552,7 +552,7 @@
                 >
                   <a-select-option value="">不发布到 docker 集群</a-select-option>
                   <a-select-option v-for="item1 in dockerSwarmList" :key="item1.id">{{ item1.name }}</a-select-option>
-                  <a-icon slot="suffixIcon" type="reload" @click="loadDockerSwarmListAll" />
+                  <a-icon #suffixIcon type="reload" @click="loadDockerSwarmListAll" />
                 </a-select>
               </a-form-item>
               <a-form-item prop="pushToRepository" :label="` `" :colon="false">
@@ -561,7 +561,7 @@
                     <a-space>
                       <a-tooltip>
                         推送到仓库
-                        <template slot="title"> 镜像构建成功后是否需要推送到远程仓库 </template>
+                        <template #title> 镜像构建成功后是否需要推送到远程仓库 </template>
                         <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
                       </a-tooltip>
 
@@ -576,7 +576,7 @@
                     <a-space>
                       <a-tooltip>
                         版本递增
-                        <template slot="title">
+                        <template #title>
                           开启 dockerTag 版本递增后将在每次构建时自动将版本号最后一位数字同步为构建序号ID,
                           如：当前构建为第 100 次构建 testtag:1.0 -> testtag:1.100,testtag:1.0.release ->
                           testtag:1.100.release。如果没有匹配到数字将忽略递增操作
@@ -595,7 +595,7 @@
                     <a-space>
                       <a-tooltip>
                         no-cache
-                        <template slot="title">构建镜像的过程不使用缓存 </template>
+                        <template #title>构建镜像的过程不使用缓存 </template>
                         <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
                       </a-tooltip>
 
@@ -606,7 +606,7 @@
                     <a-space>
                       <a-tooltip>
                         更新镜像
-                        <template slot="title">构建镜像尝试去更新基础镜像的新版本 </template>
+                        <template #title>构建镜像尝试去更新基础镜像的新版本 </template>
                         <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
                       </a-tooltip>
 
@@ -620,10 +620,10 @@
                 </a-row>
               </a-form-item>
               <a-form-item prop="dockerSwarmServiceName" v-if="tempExtraData.dockerSwarmId">
-                <template slot="label">
+                <template #label>
                   <a-tooltip>
                     集群服务
-                    <template slot="title"> 需要选发布到集群中的对应的服务名，需要提前去集群中创建服务 </template>
+                    <template #title> 需要选发布到集群中的对应的服务名，需要提前去集群中创建服务 </template>
                     <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
                   </a-tooltip>
                 </template>
@@ -641,14 +641,14 @@
           </template>
         </a-collapse-panel>
         <a-collapse-panel key="2">
-          <template slot="header">
+          <template #header>
             <a-form-item label="其他配置" style="margin-bottom: 0px"></a-form-item>
           </template>
           <a-form-item prop="cacheBuild">
-            <template slot="label">
+            <template #label>
               <a-tooltip>
                 缓存构建目录
-                <template slot="title">
+                <template #title>
                   开启缓存构建目录将保留仓库文件,二次构建将 pull 代码,
                   不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存)
                   、特别说明如果缓存目录中缺失版本控制相关文件将自动删除后重新拉取代码</template
@@ -668,7 +668,7 @@
                 <a-space>
                   <a-tooltip>
                     保留产物：
-                    <template slot="title"> 保留产物是指对在构建完成后是否保留构建产物相关文件，用于回滚 </template>
+                    <template #title> 保留产物是指对在构建完成后是否保留构建产物相关文件，用于回滚 </template>
 
                     <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
                   </a-tooltip>
@@ -680,9 +680,7 @@
                 <a-space>
                   <a-tooltip>
                     差异构建：
-                    <template slot="title">
-                      差异构建是指构建时候是否判断仓库代码有变动，如果没有变动则不执行构建
-                    </template>
+                    <template #title> 差异构建是指构建时候是否判断仓库代码有变动，如果没有变动则不执行构建 </template>
 
                     <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
                   </a-tooltip>
@@ -697,7 +695,7 @@
                 <a-space>
                   <a-tooltip>
                     严格执行：
-                    <template slot="title">
+                    <template #title>
                       严格执行脚本（构建命令、事件脚本、本地发布脚本、容器构建命令）执行返回状态码必须是
                       0、否则将构建状态标记为失败
                     </template>
@@ -710,10 +708,10 @@
             </a-row>
           </a-form-item>
           <a-form-item prop="webhook">
-            <template slot="label">
+            <template #label>
               <a-tooltip>
                 WebHooks
-                <template slot="title">
+                <template #title>
                   <ul>
                     <li>构建过程请求对应的地址,开始构建,构建完成,开始发布,发布完成,构建异常,发布异常</li>
                     <li>传入参数有：buildId、buildName、type、statusMsg、triggerTime</li>
@@ -732,9 +730,9 @@
               placeholder="如果需要定时自动构建则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
               option-label-prop="value"
             >
-              <template slot="dataSource">
+              <template #dataSource>
                 <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
-                  <span slot="label">
+                  <span #label>
                     {{ group.title }}
                   </span>
                   <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value">
@@ -745,10 +743,10 @@
             </a-auto-complete>
           </a-form-item>
           <a-form-item prop="noticeScriptId">
-            <template slot="label">
+            <template #label>
               <a-tooltip>
                 事件脚本
-                <template slot="title">
+                <template #title>
                   <ul>
                     <li>构建过程执行对应的脚本,开始构建,构建完成,开始发布,发布完成,构建异常,发布异常</li>
                     <li>
@@ -777,7 +775,7 @@
                 }
               "
             >
-              <template slot="addonBefore" v-if="tempExtraData && this.tempExtraData.noticeScriptId">
+              <template #addonBefore v-if="tempExtraData && this.tempExtraData.noticeScriptId">
                 <span
                   @click="
                     () => {
@@ -794,10 +792,10 @@
             </a-select> -->
           </a-form-item>
           <a-form-item prop="attachEnv">
-            <template slot="label">
+            <template #label>
               <a-tooltip>
                 附加环境变量
-                <template slot="title">
+                <template #title>
                   <ul>
                     <li>附加环境变量是指读取仓库指定环境变量文件来添加到执行构建运行时</li>
                     <li>比如常见的 .env 文件</li>
@@ -810,10 +808,10 @@
             <a-input v-model="tempExtraData.attachEnv" placeholder="附加环境变量  .env 添加多个使用逗号分隔" />
           </a-form-item>
           <a-form-item prop="cacheBuild">
-            <template slot="label">
+            <template #label>
               <a-tooltip>
                 文件管理中心
-                <template slot="title">
+                <template #title>
                   如果开启同步到文件管理中心，在构建发布流程将自动执行同步到文件管理中心的操作。</template
                 >
                 <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
@@ -831,7 +829,7 @@
                 <a-space>
                   <a-tooltip>
                     发布隐藏文件
-                    <template slot="title"> 默认构建错误将自动忽略隐藏文件,开启此选项后可以正常发布隐藏文件 </template>
+                    <template #title> 默认构建错误将自动忽略隐藏文件,开启此选项后可以正常发布隐藏文件 </template>
 
                     <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
                   </a-tooltip>
@@ -851,16 +849,16 @@
                 }
               "
             >
-              <template slot="enterButton">
+              <template #enterButton>
                 <a-button type="primary"> 随机生成 </a-button>
               </template>
             </a-input-search>
           </a-form-item>
           <a-form-item prop="excludeReleaseAnt">
-            <template slot="label">
+            <template #label>
               <a-tooltip>
                 排除发布
-                <template slot="title">
+                <template #title>
                   <ul>
                     <li>使用 ANT 表达式来实现在过滤指定目录来实现发布排除指定目录</li>
                   </ul>
@@ -993,7 +991,7 @@
       >
         <a-collapse-panel v-for="(group, index) in buildScipts" :key="`${index}`" :header="group.title">
           <a-list size="small" bordered :data-source="group.children">
-            <a-list-item slot="renderItem" slot-scope="opt">
+            <a-list-item #renderItem slot-scope="opt">
               <a-space>
                 {{ opt.title }}
                 <a-icon

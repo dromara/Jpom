@@ -11,7 +11,7 @@
       bordered
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
@@ -20,7 +20,7 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
         </a-space></template
       >
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
           <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
@@ -41,20 +41,20 @@
           <a-input v-model="temp.name" :maxLength="50" placeholder="名称" />
         </a-form-item>
         <a-form-item prop="workspace">
-          <template slot="label">
+          <template #label>
             工作空间
             <a-tooltip v-if="!temp.id">
-              <template slot="title"> 配置工作空间权限,用户限制用户只能对应的工作空间里面操作对应的功能</template>
+              <template #title> 配置工作空间权限,用户限制用户只能对应的工作空间里面操作对应的功能</template>
               <question-circle-filled />
             </a-tooltip>
           </template>
           <transfer ref="transferRef" :tree-data="workspaceList" :editKey="temp.targetKeys" />
         </a-form-item>
         <a-form-item prop="prohibitExecute">
-          <template slot="label">
+          <template #label>
             禁用时段
             <a-tooltip v-if="!temp.id">
-              <template slot="title"> 配置后可以控制想要在某个时间段禁止用户操作某些功能，优先判断禁用时段</template>
+              <template #title> 配置后可以控制想要在某个时间段禁止用户操作某些功能，优先判断禁用时段</template>
               <question-circle-filled />
             </a-tooltip>
           </template>
@@ -115,10 +115,10 @@
           >
         </a-form-item>
         <a-form-item prop="allowExecute">
-          <template slot="label">
+          <template #label>
             允许时段
             <a-tooltip v-if="!temp.id">
-              <template slot="title">
+              <template #title>
                 优先判断禁用时段,再判断允许时段。配置允许时段后用户只能在对应的时段执行相应功能的操作</template
               >
               <question-circle-filled />

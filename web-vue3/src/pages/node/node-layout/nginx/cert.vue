@@ -11,21 +11,21 @@
       bordered
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-button type="primary" @click="loadData">刷新</a-button>
         </a-space>
       </template>
-      <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #id slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #name slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="domain" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #domain slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleDownload(record)">导出</a-button>
           <a-button size="small" type="primary" @click="handleTemplate(record)">模板</a-button>
@@ -35,7 +35,7 @@
     </a-table>
 
     <!-- 模板 -->
-    <a-modal destroyOnClose v-model="templateVisible" title="Cert 配置模板" :footer="null" :maskClosable="true">
+    <a-modal destroyOnClose v-model:visible="templateVisible" title="Cert 配置模板" :footer="null" :maskClosable="true">
       <pre class="config">
       ssl	on;
       listen	443 ssl;

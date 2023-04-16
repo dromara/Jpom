@@ -8,7 +8,7 @@
       :pagination="false"
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input v-model="listQuery['nodeId']" @pressEnter="loadData" placeholder="id" class="search-input-item" />
           <a-input
@@ -33,13 +33,13 @@
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="loadData" />
         </a-space>
       </template>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <!-- <a-popover :title="`状态信息：${TASK_STATE[text]}`" slot="desiredState" slot-scope="text, item" placement="topLeft"> -->
-      <a-popover slot="hostname" slot-scope="hostname, item" placement="topLeft" :title="`主机名：${hostname}`">
-        <template slot="content">
+      <!-- <a-popover :title="`状态信息：${TASK_STATE[text]}`" #desiredState slot-scope="text, item" placement="topLeft"> -->
+      <a-popover #hostname slot-scope="hostname, item" placement="topLeft" :title="`主机名：${hostname}`">
+        <template #content>
           <p>
             节点Id: <a-tag>{{ item.id }}</a-tag>
           </p>
@@ -62,7 +62,7 @@
       </a-popover>
 
       <a-tooltip
-        slot="status"
+        #status
         slot-scope="text, item"
         placement="topLeft"
         :title="`节点状态：${text} 节点可用性：${item.spec ? item.spec.availability || '' : ''}`"
@@ -80,7 +80,7 @@
       </a-tooltip>
       <!-- 角色显示 -->
       <a-tooltip
-        slot="role"
+        #role
         slot-scope="text, item"
         placement="topLeft"
         :title="`角色：${text} ${
@@ -93,11 +93,11 @@
           {{ text }}
         </a-tag>
       </a-tooltip>
-      <a-tooltip slot="address" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #address slot-scope="text" placement="topLeft" :title="text">
         {{ text }}
       </a-tooltip>
 
-      <a-tooltip slot="os" slot-scope="text, item" placement="topLeft" :title="text">
+      <a-tooltip #os slot-scope="text, item" placement="topLeft" :title="text">
         <span>
           <a-tag
             >{{ text }}-{{
@@ -107,7 +107,7 @@
         </span>
       </a-tooltip>
       <a-tooltip
-        slot="updatedAt"
+        #updatedAt
         slot-scope="text, item"
         placement="topLeft"
         :title="`修改时间：${text} 创建时间：${item.createdAt}`"
@@ -117,7 +117,7 @@
         </span>
       </a-tooltip>
 
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <template v-if="record.managerStatus && record.managerStatus.leader">
             <a-button size="small" type="primary" @click="handleEdit(record)">修改</a-button>
@@ -135,7 +135,7 @@
           </template> -->
           <!-- <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item> </a-menu-item>
               <a-menu-item>
                 <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
@@ -146,7 +146,7 @@
       </template>
     </a-table>
     <!-- 编辑节点 -->
-    <a-modal destroyOnClose v-model="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model:visible="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="角色" prop="role">
           <a-radio-group name="role" v-model="temp.role" :disabled="temp.leader">

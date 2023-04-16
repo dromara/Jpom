@@ -13,7 +13,7 @@
           rowKey="id"
           :row-selection="rowSelection"
         >
-          <template slot="title">
+          <template #title>
             <a-space>
               <a-input
                 class="search-input-item"
@@ -48,7 +48,7 @@
               >
               <a-button icon="download" type="primary" @click="handlerExportData()">导出</a-button>
               <a-dropdown>
-                <a-menu slot="overlay">
+                <a-menu #overlay>
                   <a-menu-item key="1">
                     <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button>
                   </a-menu-item>
@@ -66,7 +66,7 @@
                 </a-upload>
               </a-dropdown>
               <a-tooltip>
-                <template slot="title">
+                <template #title>
                   <div>
                     <ul>
                       <li>节点状态是异步获取有一定时间延迟</li>
@@ -79,16 +79,16 @@
               </a-tooltip>
             </a-space>
           </template>
-          <a-tooltip slot="name" slot-scope="text, item" :title="text">
+          <a-tooltip #name slot-scope="text, item" :title="text">
             <a-button style="padding: 0" type="link" size="small" @click="handleEdit(item)"> {{ text }}</a-button>
           </a-tooltip>
-          <a-tooltip slot="tooltip" slot-scope="text" :title="text"> {{ text }}</a-tooltip>
-          <a-tooltip slot="host" slot-scope="text, record" :title="`${text}:${record.port}`">
+          <a-tooltip #tooltip slot-scope="text" :title="text"> {{ text }}</a-tooltip>
+          <a-tooltip #host slot-scope="text, record" :title="`${text}:${record.port}`">
             {{ text }}:{{ record.port }}</a-tooltip
           >
 
-          <a-popover title="系统信息" slot="osName" slot-scope="text, record">
-            <template slot="content">
+          <a-popover title="系统信息" #osName slot-scope="text, record">
+            <template #content>
               <p>系统名：{{ record.osName }}</p>
               <p>系统版本：{{ record.osVersion }}</p>
               <p>CPU型号：{{ record.osCpuIdentifierName }}</p>
@@ -97,7 +97,7 @@
             </template>
             {{ text || '未知' }}
           </a-popover>
-          <template slot="nodeId" slot-scope="text, record">
+          <template #nodeId slot-scope="text, record">
             <div v-if="record.javaVersion">
               <a-tooltip
                 v-if="record.jpomAgentPid > 0"
@@ -111,18 +111,18 @@
 
             <a-tag color="orange" v-else>no java</a-tag>
           </template>
-          <template slot="status" slot-scope="text, record">
+          <template #status slot-scope="text, record">
             <a-tooltip :title="record.statusMsg">
               <a-tag :color="record.status === 1 ? 'green' : 'red'">{{
                 record.status === 1 ? '正常' : '无法连接'
               }}</a-tag>
             </a-tooltip>
           </template>
-          <a-tooltip slot="renderSize" slot-scope="text" placement="topLeft" :title="renderSize(text)">
+          <a-tooltip #renderSize slot-scope="text" placement="topLeft" :title="renderSize(text)">
             <span>{{ renderSize(text) }}</span>
           </a-tooltip>
           <a-tooltip
-            slot="osOccupyMemory"
+            #osOccupyMemory
             slot-scope="text, record"
             placement="topLeft"
             :title="`内存使用率：${formatPercent(record.osOccupyMemory)},总内存：${renderSize(record.osMoneyTotal)}`"
@@ -130,8 +130,8 @@
             <span>{{ formatPercent(record.osOccupyMemory) }}/{{ renderSize(record.osMoneyTotal) }}</span>
           </a-tooltip>
 
-          <a-popover title="硬盘信息" slot="osMaxOccupyDisk" slot-scope="text, record">
-            <template slot="content">
+          <a-popover title="硬盘信息" #osMaxOccupyDisk slot-scope="text, record">
+            <template #content>
               <p>硬盘总量：{{ renderSize(record.osMoneyTotal) }}</p>
               <p>硬盘最大的使用率：{{ formatPercent(record.osMaxOccupyDisk) }}</p>
               <p>使用率最大的分区：{{ record.osMaxOccupyDiskName }}</p>
@@ -140,7 +140,7 @@
           </a-popover>
 
           <a-tooltip
-            slot="osOccupyCpu"
+            #osOccupyCpu
             slot-scope="text, record"
             placement="topLeft"
             :title="`CPU使用率：${formatPercent2Number(record.osOccupyCpu)}%,CPU数：${record.osCpuCores}`"
@@ -148,13 +148,13 @@
             <span>{{ (formatPercent2Number(record.osOccupyCpu) || '-') + '%' }} / {{ record.osCpuCores }}</span>
           </a-tooltip>
 
-          <template slot="operation" slot-scope="text, record">
+          <template #operation slot-scope="text, record">
             <a-space>
               <a-dropdown>
                 <a-button size="small" type="primary" @click="handleTerminal(record, false)"
                   >终端<a-icon type="down"
                 /></a-button>
-                <a-menu slot="overlay">
+                <a-menu #overlay>
                   <a-menu-item key="1">
                     <a-button size="small" type="primary" icon="fullscreen" @click="handleTerminal(record, true)"
                       >全屏终端</a-button
@@ -171,7 +171,7 @@
                   更多
                   <a-icon type="down" />
                 </a>
-                <a-menu slot="overlay">
+                <a-menu #overlay>
                   <a-menu-item>
                     <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
                   </a-menu-item>
@@ -222,14 +222,14 @@
               <template #label>
                 用户名
                 <a-tooltip v-if="!temp.id">
-                  <template slot="title"> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                  <template #title> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
                   <question-circle-filled />
                 </a-tooltip>
               </template>
               <a-input v-model="temp.user" placeholder="用户">
                 <a-tooltip
                   v-if="temp.id"
-                  slot="suffix"
+                  #suffix
                   title=" 密码字段和密钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我"
                 >
                   <a-button size="small" type="danger" @click="handerRestHideField(temp)">清除</a-button>
@@ -247,7 +247,7 @@
               <template #label>
                 密码
                 <a-tooltip v-if="!temp.id">
-                  <template slot="title"> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                  <template #title> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
                   <question-circle-filled />
                 </a-tooltip>
               </template>
@@ -257,10 +257,10 @@
               />
             </a-form-item>
             <a-form-item v-if="temp.connectType === 'PUBKEY'" prop="privateKey">
-              <template slot="label">
+              <template #label>
                 私钥内容
                 <a-tooltip v-if="temp.type !== 'edit'" placement="topLeft">
-                  <template slot="title"
+                  <template #title
                     >不填将使用默认的 $HOME/.ssh 目录中的配置,使用优先级是：id_dsa>id_rsa>identity
                   </template>
                   <question-circle-filled />
@@ -365,7 +365,7 @@
           :maskClosable="false"
         >
           <a-list bordered :data-source="workspaceSshList">
-            <a-list-item slot="renderItem" slot-scope="item" style="display: block">
+            <a-list-item #renderItem slot-scope="item" style="display: block">
               <a-row>
                 <a-col :span="10">SSH名称：{{ item.name }}</a-col>
                 <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
@@ -405,10 +405,10 @@
             </a-form-item>
 
             <a-form-item prop="fileDirs">
-              <template slot="label">
+              <template #label>
                 文件目录
                 <a-tooltip>
-                  <template slot="title"> 绑定指定目录可以在线管理，同时构建 ssh 发布目录也需要在此配置 </template>
+                  <template #title> 绑定指定目录可以在线管理，同时构建 ssh 发布目录也需要在此配置 </template>
                   <question-circle-filled />
                 </a-tooltip>
               </template>
@@ -429,10 +429,10 @@
               />
             </a-form-item>
             <a-form-item prop="notAllowedCommand">
-              <template slot="label">
+              <template #label>
                 禁止命令
                 <a-tooltip>
-                  <template slot="title">
+                  <template #title>
                     限制禁止在在线终端执行的命令
                     <ul>
                       <li>超级管理员没有任何限制</li>

@@ -21,11 +21,11 @@
         bordered
         :rowKey="(record, index) => index"
       >
-        <template slot="title">
+        <template #title>
           <a-space>
             <a-dropdown :disabled="!this.tempNode.nextPath">
               <a-button size="small" type="primary" @click="(e) => e.preventDefault()">上传小文件</a-button>
-              <a-menu slot="overlay">
+              <a-menu #overlay>
                 <a-menu-item @click="handleUpload">
                   <a-space><a-icon type="file-add" />上传文件</a-space>
                 </a-menu-item>
@@ -36,7 +36,7 @@
             </a-dropdown>
             <a-dropdown :disabled="!this.tempNode.nextPath">
               <a-button size="small" type="primary" @click="(e) => e.preventDefault()">新建</a-button>
-              <a-menu slot="overlay">
+              <a-menu #overlay>
                 <a-menu-item @click="handleAddFolder">
                   <a-space>
                     <a-icon type="folder-add" />
@@ -72,14 +72,14 @@
           </a-space>
         </template>
         <a-tooltip
-          slot="name"
+          #name
           slot-scope="text, record"
           placement="topLeft"
           :title="` 名称：${text} 长名称：${record.longname}`"
         >
           <a-dropdown :trigger="['contextmenu']">
             <div>{{ text }}</div>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item key="2">
                 <a-button icon="highlight" @click="handleRenameFile(record)" type="link"> 重命名 </a-button>
               </a-menu-item>
@@ -89,20 +89,20 @@
           <!-- <span>{{ text }}</span> -->
         </a-tooltip>
         <a-tooltip
-          slot="dir"
+          #dir
           slot-scope="text, record"
           placement="topLeft"
           :title="`${record.link ? '链接' : text ? '目录' : '文件'}`"
         >
           <span>{{ record.link ? '链接' : text ? '目录' : '文件' }}</span>
         </a-tooltip>
-        <a-tooltip slot="size" slot-scope="text" placement="topLeft" :title="renderSize(text)">
+        <a-tooltip #size slot-scope="text" placement="topLeft" :title="renderSize(text)">
           <span>{{ renderSize(text) }}</span>
         </a-tooltip>
-        <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <template slot="operation" slot-scope="text, record">
+        <template #operation slot-scope="text, record">
           <a-space>
             <a-tooltip title="需要到 ssh 信息中配置允许编辑的文件后缀">
               <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)"

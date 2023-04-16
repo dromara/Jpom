@@ -14,7 +14,7 @@
         }
       "
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%id%']" placeholder="分发id" />
           <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="名称" />
@@ -40,7 +40,7 @@
           <a-button type="primary" @click="handleLink">添加关联项目</a-button>
           <a-button type="primary" @click="handleAdd">创建分发项目</a-button>
           <a-tooltip>
-            <template slot="title">
+            <template #title>
               <div>
                 节点分发是指,一个项目运行需要在多个节点(服务器)中运行,使用节点分发来统一管理这个项目(可以实现分布式项目管理功能)
               </div>
@@ -59,10 +59,10 @@
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
         </a-space>
       </template>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="name" slot-scope="text, record">
+      <template #name slot-scope="text, record">
         <a-tooltip placement="topLeft" :title="text">
           <a-button size="small" style="padding: 0px" type="link" icon="fullscreen" @click="handleViewStatus(record)">{{
             text
@@ -70,20 +70,20 @@
         </a-tooltip>
       </template>
 
-      <a-tooltip slot="status" slot-scope="text, record" placement="topLeft" :title="`${record.statusMsg || ''}`">
+      <a-tooltip #status slot-scope="text, record" placement="topLeft" :title="`${record.statusMsg || ''}`">
         <a-tag v-if="text === 2" color="green">{{ statusMap[text] || '未知' }}</a-tag>
         <a-tag v-else-if="text === 1 || text === 0" color="orange">{{ statusMap[text] || '未知' }}</a-tag>
         <a-tag v-else-if="text === 3 || text === 4" color="red">{{ statusMap[text] || '未知' }}</a-tag>
         <a-tag v-else>{{ statusMap[text] || '未知' }}</a-tag>
       </a-tooltip>
 
-      <a-tooltip slot="clearOld" slot-scope="text">
+      <a-tooltip #clearOld slot-scope="text">
         <a-switch size="small" checked-children="是" un-checked-children="否" disabled :checked="text"
       /></a-tooltip>
 
       <a-tooltip
         slot-scope="text"
-        slot="afterOpt"
+        #afterOpt
         :title="
           afterOptList.filter((item) => {
             return item.value === text
@@ -103,11 +103,11 @@
         }}</span>
       </a-tooltip>
 
-      <template slot="outGivingProject" slot-scope="text">
+      <template #outGivingProject slot-scope="text">
         <span v-if="text">独立</span>
         <span v-else>关联</span>
       </template>
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleDispatch(record)">分发文件</a-button>
 
@@ -125,7 +125,7 @@
               更多
               <a-icon type="down" />
             </a>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item>
                 <a-button type="danger" size="small" :disabled="record.status !== 1" @click="handleCancel(record)"
                   >取消分发</a-button
@@ -162,10 +162,10 @@
     >
       <a-form ref="linkDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item prop="id">
-          <template slot="label">
+          <template #label>
             分发 ID
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">分发 ID 等同于项目 ID</template>
+              <template #title>分发 ID 等同于项目 ID</template>
               <question-circle-filled />
             </a-tooltip>
           </template>
@@ -187,7 +187,7 @@
                 }
               "
             >
-              <template slot="enterButton">
+              <template #enterButton>
                 <a-button type="primary"> 随机生成 </a-button>
               </template>
             </a-input-search>
@@ -228,7 +228,7 @@
               }
             "
           >
-            <a-list-item slot="renderItem" slot-scope="item, index">
+            <a-list-item #renderItem slot-scope="item, index">
               <a-space>
                 <span>节点: </span>
                 <a-select
@@ -287,10 +287,10 @@
           </a-select>
         </a-form-item>
         <a-form-item prop="intervalTime" v-if="temp.afterOpt === 2 || temp.afterOpt === 3">
-          <template slot="label">
+          <template #label>
             间隔时间
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 在执行多节点分发时候使用 顺序重启、完整顺序重启
                 时候需要保证项目能正常重启,并等待上一个项目启动完成才能关闭下一个项目,请根据自身项目启动时间来配置
                 <li>一般建议 10 秒以上</li>
@@ -309,10 +309,10 @@
           <a-input v-model="temp.secondaryDirectory" placeholder="不填写则发布至项目的根目录" />
         </a-form-item>
         <a-form-item prop="clearOld">
-          <template slot="label">
+          <template #label>
             清空发布
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件
               </template>
               <question-circle-filled />
@@ -325,7 +325,7 @@
 
             <a-col :span="4" style="text-align: right">
               <a-tooltip v-if="temp.type !== 'edit'">
-                <template slot="title">
+                <template #title>
                   发布前停止是指在发布文件到项目文件时先将项目关闭，再进行文件替换。避免 windows
                   环境下出现文件被占用的情况
                 </template>
@@ -339,10 +339,10 @@
           </a-row>
         </a-form-item>
         <a-form-item prop="webhook">
-          <template slot="label">
+          <template #label>
             WebHooks
             <a-tooltip v-show="!temp.id">
-              <template slot="title">
+              <template #title>
                 <ul>
                   <li>分发过程请求对应的地址,开始分发,分发完成,分发失败,取消分发</li>
                   <li>传入参数有：outGivingId、outGivingName、status、statusMsg、executeTime</li>
@@ -368,10 +368,10 @@
     >
       <a-form ref="editDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item prop="id">
-          <template slot="label">
+          <template #label>
             分发 ID
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">分发 ID 等同于项目 ID</template>
+              <template #title>分发 ID 等同于项目 ID</template>
               <question-circle-filled />
             </a-tooltip>
           </template>
@@ -393,7 +393,7 @@
                 }
               "
             >
-              <template slot="enterButton">
+              <template #enterButton>
                 <a-button type="primary"> 随机生成 </a-button>
               </template>
             </a-input-search>
@@ -421,10 +421,10 @@
         </a-form-item>
 
         <a-form-item prop="runMode">
-          <template slot="label">
+          <template #label>
             运行方式
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 <ul>
                   <li><b>Dsl</b> 配合脚本模版实现自定义项目管理</li>
                   <li><b>ClassPath</b> java -classpath xxx 运行项目</li>
@@ -443,10 +443,10 @@
         </a-form-item>
 
         <a-form-item prop="whitelistDirectory" class="jpom-project-whitelist">
-          <template slot="label">
+          <template #label>
             项目路径
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 <ul>
                   <li>白名单路径是指项目文件存放到服务中的文件夹</li>
                   <li>可以到【节点分发】=>【分发白名单配置】修改</li>
@@ -469,10 +469,10 @@
           </a-input-group>
         </a-form-item>
         <!-- <a-form-item prop="lib">
-          <template slot="label">
+          <template #label>
             项目文件夹
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 <ul></ul>
               </template>
               <question-circle-filled />
@@ -484,10 +484,10 @@
           <a-alert :message="filePath" type="success" />
         </a-form-item>
         <a-form-item v-show="temp.runMode === 'Dsl'" prop="dslContent">
-          <template slot="label">
+          <template #label>
             DSL 内容
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 <p>
                   以 yaml/yml 格式配置,scriptId
                   为项目路径下的脚本文件的相对路径或者服务端脚本模版ID，可以到服务端脚本模版编辑弹窗中查看 scriptId
@@ -522,10 +522,10 @@
           </a-tabs>
         </a-form-item>
         <a-form-item v-show="noFileModes.includes(temp.runMode)">
-          <template slot="label">
+          <template #label>
             日志目录
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 <ul>
                   <li>日志目录是指控制台日志存储目录</li>
                   <li>默认是在项目文件夹父级</li>
@@ -560,10 +560,10 @@
           </a-select>
         </a-form-item>
         <a-form-item prop="intervalTime" v-if="temp.afterOpt === 2 || temp.afterOpt === 3">
-          <template slot="label">
+          <template #label>
             间隔时间
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 在执行多节点分发时候使用 顺序重启、完整顺序重启
                 时候需要保证项目能正常重启,并等待上一个项目启动完成才能关闭下一个项目,请根据自身项目启动时间来配置
                 <li>一般建议 10 秒以上</li>
@@ -582,10 +582,10 @@
           <a-input v-model="temp.secondaryDirectory" placeholder="不填写则发布至项目的根目录" />
         </a-form-item>
         <a-form-item prop="clearOld">
-          <template slot="label">
+          <template #label>
             清空发布
             <a-tooltip v-if="temp.type !== 'edit'">
-              <template slot="title">
+              <template #title>
                 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件
               </template>
               <question-circle-filled />
@@ -597,7 +597,7 @@
             </a-col>
             <a-col :span="4" style="text-align: right">
               <a-tooltip v-if="temp.type !== 'edit'">
-                <template slot="title">
+                <template #title>
                   发布前停止是指在发布文件到项目文件时先将项目关闭，再进行文件替换。避免 windows
                   环境下出现文件被占用的情况
                 </template>
@@ -639,20 +639,20 @@
               />
             </a-form-item>
             <a-form-item prop="autoStart" v-show="noFileModes.includes(temp.runMode)">
-              <template slot="label">
+              <template #label>
                 自启动
                 <a-tooltip v-show="temp.type !== 'edit'">
-                  <template slot="title">插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template>
+                  <template #title>插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template>
                   <question-circle-filled />
                 </a-tooltip>
               </template>
               <a-switch v-model="temp[`${nodeId}_autoStart`]" checked-children="开" un-checked-children="关" />
             </a-form-item>
             <a-form-item prop="token" v-show="noFileModes.includes(temp.runMode)">
-              <template slot="label">
+              <template #label>
                 WebHooks
                 <a-tooltip v-show="temp.type !== 'edit'">
-                  <template slot="title">
+                  <template #title>
                     <ul>
                       <li>项目启动,停止,重启都将请求对应的地址</li>
                       <li>传入参数有：projectId、projectName、type、copyId、result</li>
@@ -670,10 +670,10 @@
 
             <div v-if="javaModes.includes(temp.runMode)">
               <a-form-item>
-                <template slot="label">
+                <template #label>
                   副本
                   <a-tooltip v-show="temp.type !== 'edit'">
-                    <template slot="title">
+                    <template #title>
                       <ul>
                         <li>副本是指同一个项目在一个节点（服务器）中运行多份</li>
                       </ul>
@@ -734,10 +734,10 @@
           </a-collapse-panel>
         </a-collapse>
         <a-form-item prop="webhook">
-          <template slot="label">
+          <template #label>
             WebHooks
             <a-tooltip v-show="!temp.id">
-              <template slot="title">
+              <template #title>
                 <ul>
                   <li>分发过程请求对应的地址,开始分发,分发完成,分发失败,取消分发</li>
                   <li>传入参数有：outGivingId、outGivingName、status、statusMsg、executeTime</li>
@@ -795,10 +795,10 @@
           <a-switch v-model="temp.unzip" checked-children="是" un-checked-children="否" v-decorator="['unzip', { valuePropName: 'checked' }]" />
         </a-form-item> -->
         <a-form-item prop="clearOld">
-          <template slot="label">
+          <template #label>
             清空发布
             <a-tooltip>
-              <template slot="title">
+              <template #title>
                 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件
               </template>
               <question-circle-filled />
@@ -807,10 +807,10 @@
           <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
         </a-form-item>
         <a-form-item prop="unzip">
-          <template slot="label">
+          <template #label>
             是否解压
             <a-tooltip>
-              <template slot="title">
+              <template #title>
                 如果上传的压缩文件是否自动解压 支持的压缩包类型有 tar.bz2, tar.gz, tar, bz2, zip, gz</template
               >
               <question-circle-filled />

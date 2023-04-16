@@ -8,7 +8,7 @@
       :pagination="false"
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             v-model="listQuery['serviceId']"
@@ -53,21 +53,16 @@
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="loadData" />
         </a-space>
       </template>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <a-tooltip slot="address" slot-scope="text, item" placement="topLeft" :title="text">
+      <a-tooltip #address slot-scope="text, item" placement="topLeft" :title="text">
         <a-icon v-if="item.managerStatus && item.managerStatus.leader" type="cloud-server" />
         {{ text }}
       </a-tooltip>
-      <a-popover
-        :title="`状态信息：${TASK_STATE[text]}`"
-        slot="desiredState"
-        slot-scope="text, item"
-        placement="topLeft"
-      >
-        <template slot="content">
+      <a-popover :title="`状态信息：${TASK_STATE[text]}`" #desiredState slot-scope="text, item" placement="topLeft">
+        <template #content>
           <p>
             当前状态：<a-tag>{{ text }}-{{ TASK_STATE[text] }}</a-tag>
           </p>
@@ -89,7 +84,7 @@
         </a-tag>
       </a-popover>
 
-      <a-tooltip slot="os" slot-scope="text, item" placement="topLeft" :title="text">
+      <a-tooltip #os slot-scope="text, item" placement="topLeft" :title="text">
         <span>
           <a-tag
             >{{ text }}-{{
@@ -99,7 +94,7 @@
         </span>
       </a-tooltip>
       <a-tooltip
-        slot="updatedAt"
+        #updatedAt
         slot-scope="text, item"
         placement="topLeft"
         :title="`修改时间：${text} 创建时间：${item.createdAt}`"
@@ -109,7 +104,7 @@
         </span>
       </a-tooltip>
 
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <template>
             <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
@@ -118,7 +113,7 @@
       </template>
     </a-table>
     <!-- 编辑节点 -->
-    <a-modal destroyOnClose v-model="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model:visible="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="角色" prop="role">
           <a-radio-group name="role" v-model="temp.role">
@@ -136,7 +131,14 @@
       </a-form>
     </a-modal>
     <!-- 查看日志 -->
-    <a-modal destroyOnClose v-model="logVisible" title="查看日志" width="80vw" :footer="null" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      v-model:visible="logVisible"
+      title="查看日志"
+      width="80vw"
+      :footer="null"
+      :maskClosable="false"
+    >
       <pull-log v-if="logVisible" :id="id" :dataId="temp.id" type="taks" :urlPrefix="urlPrefix" />
     </a-modal>
   </div>

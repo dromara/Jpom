@@ -8,7 +8,7 @@
       :pagination="false"
       :rowKey="(record, index) => index"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input v-model="listQuery['serviceId']" @pressEnter="loadData" placeholder="id" class="search-input-item" />
           <a-input
@@ -23,15 +23,15 @@
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="loadData" />
         </a-space>
       </template>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="id" slot-scope="text, item" placement="topLeft" :title="text" @click="handleLog(item)">
+      <a-tooltip #id slot-scope="text, item" placement="topLeft" :title="text" @click="handleLog(item)">
         <span>{{ text }}</span>
       </a-tooltip>
 
       <a-tooltip
-        slot="status"
+        #status
         slot-scope="text, item"
         placement="topLeft"
         :title="`节点状态：${text} 节点可用性：${item.spec ? item.spec.availability || '' : ''}`"
@@ -43,7 +43,7 @@
       </a-tooltip>
       <!-- 角色显示 -->
       <a-tooltip
-        slot="role"
+        #role
         slot-scope="text, item"
         placement="topLeft"
         :title="`角色：${text} ${
@@ -56,12 +56,12 @@
           {{ text }}
         </a-tag>
       </a-tooltip>
-      <a-tooltip slot="address" slot-scope="text, item" placement="topLeft" :title="text">
+      <a-tooltip #address slot-scope="text, item" placement="topLeft" :title="text">
         <a-icon v-if="item.managerStatus && item.managerStatus.leader" type="cloud-server" />
         {{ text }}
       </a-tooltip>
 
-      <a-tooltip slot="os" slot-scope="text, item" placement="topLeft" :title="text">
+      <a-tooltip #os slot-scope="text, item" placement="topLeft" :title="text">
         <span>
           <a-tag
             >{{ text }}-{{
@@ -71,7 +71,7 @@
         </span>
       </a-tooltip>
       <a-tooltip
-        slot="updatedAt"
+        #updatedAt
         slot-scope="text, item"
         placement="topLeft"
         :title="`修改时间：${text} 创建时间：${item.createdAt}`"
@@ -80,7 +80,7 @@
       </a-tooltip>
 
       <a-tooltip
-        slot="replicas"
+        #replicas
         slot-scope="text, record"
         placement="topLeft"
         :title="`点击数字查看运行中的任务,点击图标查看关联的所有任务`"
@@ -90,7 +90,7 @@
         <a-icon type="read" @click="handleTask(record)" />
       </a-tooltip>
 
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleEdit(record)">修改</a-button>
           <a-button size="small" type="danger" @click="handleDel(record)">删除</a-button>
@@ -161,7 +161,7 @@
                         </a-col>
                         <a-col :span="8" :offset="1">
                           <a-input addon-before="容器" v-model="item.targetPort" placeholder="容器端口">
-                            <a-select slot="addonAfter" v-model="item.protocol" placeholder="端口协议">
+                            <a-select #addonAfter v-model="item.protocol" placeholder="端口协议">
                               <a-select-option value="TCP">TCP</a-select-option>
                               <a-select-option value="UDP">UDP</a-select-option>
                               <a-select-option value="SCTP">SCTP</a-select-option>
@@ -476,7 +476,14 @@
       </a-form>
     </a-modal>
     <!-- 查看任务 -->
-    <a-modal destroyOnClose v-model="taskVisible" title="查看任务" width="80vw" :footer="null" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      v-model:visible="taskVisible"
+      title="查看任务"
+      width="80vw"
+      :footer="null"
+      :maskClosable="false"
+    >
       <swarm-task
         v-if="taskVisible"
         :visible="taskVisible"
@@ -487,7 +494,14 @@
       />
     </a-modal>
     <!-- 查看日志 -->
-    <a-modal destroyOnClose v-model="logVisible" title="查看日志" width="80vw" :footer="null" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      v-model:visible="logVisible"
+      title="查看日志"
+      width="80vw"
+      :footer="null"
+      :maskClosable="false"
+    >
       <pull-log v-if="logVisible" :id="id" :dataId="temp.id" type="service" />
     </a-modal>
   </div>

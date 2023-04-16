@@ -72,7 +72,7 @@
                 />
               </div>
               <a-popover title="正则语法参考">
-                <template slot="content">
+                <template #content>
                   <ul>
                     <li><b>^.*\d+.*$</b> - 匹配包含数字的行</li>
                     <li><b>.*(a|b).*</b> - 匹配包含 a 或者 b 的行</li>
@@ -128,7 +128,7 @@
                 />
               </div>
               <a-popover title="搜索配置参考">
-                <template slot="content">
+                <template #content>
                   <ul>
                     <li><b>从尾搜索、文件前0行、文件后3行</b> - 在文件最后 3 行中搜索</li>
                     <li><b>从头搜索、文件前0行、文件后3行</b> - 在文件第 3 - 2147483647 行中搜索</li>
@@ -150,7 +150,7 @@
         <a-tabs v-if="temp.cacheData" v-model="activeTagKey" :tabBarStyle="{ marginBottom: 0 }">
           <template v-for="item in temp.projectList">
             <a-tab-pane forceRender v-if="nodeName[item.nodeId]" :key="`${item.nodeId},${item.projectId}`">
-              <template slot="tab">
+              <template #tab>
                 【{{ nodeName[item.nodeId] && nodeName[item.nodeId].name }}】
                 {{
                   nodeProjectList[item.nodeId] &&

@@ -2,7 +2,7 @@
   <div class="full-content">
     <template v-if="useSuggestions">
       <a-result title="当前工作空间还没有节点">
-        <template slot="subTitle"> 需要您在需要被管理的服务器中安装 agent ，并将 agent 信息添加到系统中 </template>
+        <template #subTitle> 需要您在需要被管理的服务器中安装 agent ，并将 agent 信息添加到系统中 </template>
         <template #extra>
           <a-button type="primary" @click="fastInstallNodeShow">快速安装 </a-button>
           <router-link to="/system/assets/machine-list">
@@ -24,7 +24,7 @@
     </template>
     <template v-else>
       <a-card :bodyStyle="{ padding: '10px' }">
-        <template slot="title">
+        <template #title>
           <a-space>
             <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="节点名称" />
 
@@ -66,7 +66,7 @@
               {{ layoutType === 'card' ? '卡片' : '表格' }}
             </a-button>
             <a-tooltip placement="bottom">
-              <template slot="title">
+              <template #title>
                 <div>
                   <ul>
                     <li>监控数据目前采用原生命令获取,和真实情况有一定差异可以当做参考依据</li>
@@ -103,13 +103,13 @@
           "
           :row-selection="rowSelection"
         >
-          <a-tooltip slot="url" slot-scope="text, record" placement="topLeft" :title="text">
+          <a-tooltip #url slot-scope="text, record" placement="topLeft" :title="text">
             <template v-if="record.machineNodeData">
               <span>{{ record.machineNodeData.jpomProtocol }}://{{ record.machineNodeData.jpomUrl }}</span>
             </template>
             <span v-else> - </span>
           </a-tooltip>
-          <template slot="name" slot-scope="text, record">
+          <template #name slot-scope="text, record">
             <template v-if="record.openStatus !== 1">
               <a-tooltip :title="`${text}`">
                 <span>{{ text }}</span>
@@ -124,7 +124,7 @@
             </template>
           </template>
           <a-tooltip
-            slot="status"
+            #status
             slot-scope="text, item"
             placement="topLeft"
             :title="`${statusMap[item.machineNodeData && item.machineNodeData.status] || '未知'} ${
@@ -141,14 +141,14 @@
             </template>
             <a-tag v-else>未启用</a-tag>
           </a-tooltip>
-          <a-tooltip slot="osName" slot-scope="text, item" placement="topLeft" :title="text">
+          <a-tooltip #osName slot-scope="text, item" placement="topLeft" :title="text">
             <span>{{ item.machineNodeData && item.machineNodeData.osName }}</span>
           </a-tooltip>
-          <a-tooltip slot="javaVersion" slot-scope="text, item" placement="topLeft" :title="text">
+          <a-tooltip #javaVersion slot-scope="text, item" placement="topLeft" :title="text">
             <span>{{ item.machineNodeData && item.machineNodeData.javaVersion }}</span>
           </a-tooltip>
           <a-tooltip
-            slot="jvmInfo"
+            #jvmInfo
             slot-scope="text, item"
             placement="topLeft"
             :title="`剩余内存：${renderSize(
@@ -160,19 +160,19 @@
               {{ renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory) }}</span
             >
           </a-tooltip>
-          <!-- <a-tooltip slot="freeMemory" slot-scope="text" placement="topLeft" :title="renderSize(text)">
+          <!-- <a-tooltip #freeMemory slot-scope="text" placement="topLeft" :title="renderSize(text)">
         <span>{{ renderSize(text) }}</span>
       </a-tooltip> -->
 
           <a-tooltip
-            slot="runTime"
+            #runTime
             slot-scope="text, item"
             placement="topLeft"
             :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime)"
           >
             <span>{{ formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 2) }}</span>
           </a-tooltip>
-          <template slot="projectCount" slot-scope="text, item">
+          <template #projectCount slot-scope="text, item">
             <div v-if="item.machineNodeData && item.machineNodeData.status === 1" @click="syncNode(item)">
               <a-tooltip placement="topLeft" title="节点中的所有项目数量,点击重新同步节点项目信息">
                 <a-tag>{{ item.machineNodeData.jpomProjectCount }} </a-tag>
@@ -181,7 +181,7 @@
             </div>
             <span v-else>-</span>
           </template>
-          <template slot="scriptCount" slot-scope="text, item">
+          <template #scriptCount slot-scope="text, item">
             <div v-if="item.machineNodeData && item.machineNodeData.status === 1" @click="syncNodeScript(item)">
               <a-tooltip placement="topLeft" title="节点中的所有脚本模版数量,点击重新同步脚本模版信息">
                 <a-tag>{{ item.machineNodeData.jpomScriptCount }} </a-tag>
@@ -191,7 +191,7 @@
             <span v-else>-</span>
           </template>
 
-          <template slot="operation" slot-scope="text, record, index">
+          <template #operation slot-scope="text, record, index">
             <a-space>
               <a-tooltip title="如果按钮不可用则表示当前节点已经关闭啦,需要去编辑中启用">
                 <a-button
@@ -214,7 +214,7 @@
                   更多
                   <a-icon type="down" />
                 </a>
-                <a-menu slot="overlay">
+                <a-menu #overlay>
                   <a-menu-item>
                     <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
                   </a-menu-item>
@@ -273,7 +273,7 @@
                 <a-col v-for="item in list" :key="item.id" :span="6">
                   <template>
                     <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
-                      <template slot="title">
+                      <template #title>
                         <a-row :gutter="[4, 0]">
                           <a-col
                             :span="17"
@@ -281,7 +281,7 @@
                             style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
                           >
                             <a-tooltip>
-                              <template slot="title">
+                              <template #title>
                                 点击进入节点管理
                                 <div>节点名称：{{ item.name }}</div>
                                 <div>节点地址：{{ item.url }}</div>
@@ -294,7 +294,7 @@
                           </a-col>
                           <a-col :span="7" style="text-align: right">
                             <a-tooltip>
-                              <template slot="title">
+                              <template #title>
                                 <div>
                                   当前状态：{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
                                 </div>
@@ -573,7 +573,7 @@
       :maskClosable="false"
     >
       <a-alert message="温馨提示" type="warning">
-        <template slot="description">
+        <template #description>
           <ul>
             <li>同步机制采用节点地址确定是同一个服务器（节点）</li>
             <li>当目标工作空间不存在对应的节点时候将自动创建一个新的节点（逻辑节点）</li>

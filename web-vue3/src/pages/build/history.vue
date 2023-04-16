@@ -11,7 +11,7 @@
       @change="change"
       :row-selection="rowSelection"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             allowClear
@@ -57,7 +57,7 @@
             批量删除
           </a-button>
           <a-tooltip>
-            <template slot="title">
+            <template #title>
               <div>构建历史是用于记录每次构建的信息,可以保留构建产物信息,构建日志。同时还可以快速回滚发布</div>
               <div>如果不需要保留较多构建历史信息可以到服务端修改构建相关配置参数</div>
               <div>构建历史可能占有较多硬盘空间,建议根据实际情况配置保留个数</div>
@@ -66,24 +66,24 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="tooltip" slot-scope="text" :title="text">
+      <a-tooltip #tooltip slot-scope="text" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="buildNumberId" slot-scope="text, record" :title="text + ' ( 点击查看日志 ) '">
+      <a-tooltip #buildNumberId slot-scope="text, record" :title="text + ' ( 点击查看日志 ) '">
         <a-tag color="#108ee9" @click="handleBuildLog(record)">#{{ text }}</a-tag>
       </a-tooltip>
-      <a-tooltip slot="status" slot-scope="text, item" :title="item.statusMsg || statusMap[text] || '未知'">
+      <a-tooltip #status slot-scope="text, item" :title="item.statusMsg || statusMap[text] || '未知'">
         <a-tag :color="statusColor[item.status]">{{ statusMap[text] || '未知' }}</a-tag>
       </a-tooltip>
-      <a-tooltip slot="releaseMethod" slot-scope="text" :title="releaseMethodMap[text]">
+      <a-tooltip #releaseMethod slot-scope="text" :title="releaseMethodMap[text]">
         <span>{{ releaseMethodMap[text] }}</span>
       </a-tooltip>
-      <a-tooltip slot="triggerBuildType" slot-scope="text" :title="triggerBuildTypeMap[text]">
+      <a-tooltip #triggerBuildType slot-scope="text" :title="triggerBuildTypeMap[text]">
         <span>{{ triggerBuildTypeMap[text] }}</span>
       </a-tooltip>
 
       <a-tooltip
-        slot="resultFileSize"
+        #resultFileSize
         slot-scope="text, record"
         :title="`产物文件大小：${renderSize(record.resultFileSize)}， 日志文件： ${renderSize(
           record.buildLogFileSize
@@ -94,7 +94,7 @@
       </a-tooltip>
 
       <a-tooltip
-        slot="endTime"
+        #endTime
         slot-scope="text, record"
         :title="`开始时间：${parseTime(record.startTime)}，${
           record.endTime ? '结束时间：' + parseTime(record.endTime) : ''
@@ -104,7 +104,7 @@
         <span v-else>-</span>
       </a-tooltip>
 
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-tooltip title="下载构建日志,如果按钮不可用表示日志文件不存在,一般是构建历史相关文件被删除">
             <a-button
@@ -136,7 +136,7 @@
               更多
               <a-icon type="down" />
             </a>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item>
                 <template v-if="record.releaseMethod !== 5">
                   <a-button

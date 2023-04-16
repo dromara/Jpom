@@ -24,7 +24,7 @@
       rowKey="id"
       :row-selection="rowSelection"
     >
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             class="search-input-item"
@@ -50,7 +50,7 @@
             >工作空间同步</a-button
           >
           <a-tooltip>
-            <template slot="title">
+            <template #title>
               <div>
                 <ul>
                   <li>关联节点数据是异步获取有一定时间延迟</li>
@@ -63,23 +63,23 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="tooltip" slot-scope="text" :title="text"> {{ text }}</a-tooltip>
+      <a-tooltip #tooltip slot-scope="text" :title="text"> {{ text }}</a-tooltip>
       <a-tooltip
-        slot="host"
+        #host
         slot-scope="text, record"
         :title="`${record.machineSsh && record.machineSsh.host}:${record.machineSsh && record.machineSsh.port}`"
       >
         {{ record.machineSsh && record.machineSsh.host }}:{{ record.machineSsh && record.machineSsh.port }}
       </a-tooltip>
-      <template slot="status" slot-scope="text, record">
+      <template #status slot-scope="text, record">
         <a-tooltip :title="record.machineSsh && record.machineSsh.statusMsg">
           <a-tag :color="record.machineSsh && record.machineSsh.status === 1 ? 'green' : 'red'">{{
             record.machineSsh && record.machineSsh.status === 1 ? '正常' : '无法连接'
           }}</a-tag>
         </a-tooltip>
       </template>
-      <a-popover title="系统信息" slot="osName" slot-scope="text, record">
-        <template slot="content">
+      <a-popover title="系统信息" #osName slot-scope="text, record">
+        <template #content>
           <p>系统名：{{ record.machineSsh && record.machineSsh.osName }}</p>
           <p>系统版本：{{ record.machineSsh && record.machineSsh.osVersion }}</p>
           <p>CPU型号：{{ record.machineSsh && record.machineSsh.osCpuIdentifierName }}</p>
@@ -89,7 +89,7 @@
         {{ text || '未知' }}
       </a-popover>
       <a-tooltip
-        slot="osOccupyMemory"
+        #osOccupyMemory
         slot-scope="text, record"
         placement="topLeft"
         :title="`内存使用率：${formatPercent(
@@ -104,7 +104,7 @@
       </a-tooltip>
 
       <a-tooltip
-        slot="osOccupyCpu"
+        #osOccupyCpu
         slot-scope="text, record"
         placement="topLeft"
         :title="`CPU使用率：${formatPercent2Number(record.machineSsh && record.machineSsh.osOccupyCpu)}%,CPU数：${
@@ -117,8 +117,8 @@
         >
       </a-tooltip>
 
-      <a-popover title="硬盘信息" slot="osMaxOccupyDisk" slot-scope="text, record">
-        <template slot="content">
+      <a-popover title="硬盘信息" #osMaxOccupyDisk slot-scope="text, record">
+        <template #content>
           <p>硬盘总量：{{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</p>
           <p>硬盘最大的使用率：{{ formatPercent(record.machineSsh && record.machineSsh.osMaxOccupyDisk) }}</p>
           <p>使用率最大的分区：{{ record.machineSsh && record.machineSsh.osMaxOccupyDiskName }}</p>
@@ -129,7 +129,7 @@
         >
       </a-popover>
 
-      <template slot="nodeId" slot-scope="text, record">
+      <template #nodeId slot-scope="text, record">
         <template v-if="record.linkNode">
           <a-tooltip placement="topLeft" :title="`节点名称：${record.linkNode.name}`">
             <a-button
@@ -144,13 +144,13 @@
         </template>
         <template v-else>-</template>
       </template>
-      <template slot="operation" slot-scope="text, record">
+      <template #operation slot-scope="text, record">
         <a-space>
           <a-dropdown>
             <a-button size="small" type="primary" @click="handleTerminal(record, false)"
               >终端<a-icon type="down"
             /></a-button>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item key="1">
                 <a-button size="small" type="primary" icon="fullscreen" @click="handleTerminal(record, true)"
                   >全屏终端</a-button
@@ -183,7 +183,7 @@
               更多
               <a-icon type="down" />
             </a>
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item>
                 <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
               </a-menu-item>
@@ -281,7 +281,7 @@
       :maskClosable="false"
     >
       <a-alert message="温馨提示" type="warning">
-        <template slot="description">
+        <template #description>
           <ul>
             <li>同步机制采用 IP+PORT+连接方式 确定是同一个服务器</li>
             <li>当目标工作空间不存在对应的 SSH 时候将自动创建一个新的 SSH</li>

@@ -1,7 +1,7 @@
 <template>
   <div class="full-content">
     <a-card :bodyStyle="{ padding: '10px' }">
-      <template slot="title">
+      <template #title>
         <a-space>
           <a-input
             class="search-input-item"
@@ -48,7 +48,7 @@
           <a-button type="primary" @click="addMachine">添加机器</a-button>
 
           <a-dropdown v-if="layoutType === 'table'">
-            <a-menu slot="overlay">
+            <a-menu #overlay>
               <a-menu-item key="1" @click="syncToWorkspaceShow()"> 分配节点 </a-menu-item>
               <a-menu-item key="2" @click="syncNodeWhiteConfig"> 同步白名单 </a-menu-item>
               <a-menu-item key="3" @click="syncNodeConfig"> 同步系统配置 </a-menu-item>
@@ -62,7 +62,7 @@
             {{ this.layoutType === 'card' ? '卡片' : '表格' }}
           </a-button>
           <a-tooltip>
-            <template slot="title">
+            <template #title>
               <ul>
                 <li>节点账号密码为插件端的账号密码,并非用户账号(管理员)密码</li>
                 <li>
@@ -84,11 +84,11 @@
               <a-col v-for="item in list" :key="item.id" :span="6">
                 <template>
                   <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
-                    <template slot="title">
+                    <template #title>
                       <a-row :gutter="[4, 0]">
                         <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
                           <a-tooltip>
-                            <template slot="title">
+                            <template #title>
                               <div>节点名称：{{ item.name }}</div>
                               <div>节点地址：{{ item.jpomUrl }}</div>
                             </template>
@@ -211,14 +211,14 @@
           @change="changePage"
           :row-selection="rowSelection"
         >
-          <a-tooltip slot="name" slot-scope="text, item" :title="text">
+          <a-tooltip #name slot-scope="text, item" :title="text">
             <a-button style="padding: 0" type="link" size="small" @click="showMachineInfo(item)"> {{ text }}</a-button>
           </a-tooltip>
-          <a-tooltip slot="tooltip" slot-scope="text" :title="text">
+          <a-tooltip #tooltip slot-scope="text" :title="text">
             <span>{{ text }}</span>
           </a-tooltip>
           <a-tooltip
-            slot="status"
+            #status
             slot-scope="text, item"
             :title="`当前状态：${statusMap[item.status]} ${item.statusMsg ? '状态消息：' + item.statusMsg : ''} `"
           >
@@ -226,14 +226,14 @@
               {{ statusMap[item.status] }}</a-tag
             >
           </a-tooltip>
-          <a-tooltip slot="duration" slot-scope="text" placement="topLeft" :title="formatDuration(text)">
+          <a-tooltip #duration slot-scope="text" placement="topLeft" :title="formatDuration(text)">
             <span>{{ formatDuration(text, '', 2) }}</span>
           </a-tooltip>
-          <a-tooltip slot="duration2" slot-scope="text" placement="topLeft" :title="formatDuration((text || 0) * 1000)">
+          <a-tooltip #duration2 slot-scope="text" placement="topLeft" :title="formatDuration((text || 0) * 1000)">
             <span>{{ formatDuration((text || 0) * 1000, '', 2) }}</span>
           </a-tooltip>
           <a-tooltip
-            slot="percent2Number"
+            #percent2Number
             slot-scope="text"
             placement="topLeft"
             :title="`${(text && formatPercent2Number(text) + '%') || '-'}`"
@@ -241,7 +241,7 @@
             <span>{{ (text && formatPercent2Number(text) + '%') || '-' }}</span>
           </a-tooltip>
 
-          <template slot="operation" slot-scope="text, record">
+          <template #operation slot-scope="text, record">
             <a-space>
               <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
               <a-button @click="syncToWorkspaceShow(record)" type="primary" size="small">分配</a-button>
@@ -251,7 +251,14 @@
       </template>
     </a-card>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editVisible" width="50%" title="编辑机器" @ok="handleEditOk" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      v-model:visible="editVisible"
+      width="50%"
+      title="编辑机器"
+      @ok="handleEditOk"
+      :maskClosable="false"
+    >
       <a-form ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 19 }">
         <a-form-item label="机器名称" prop="name">
           <a-input :maxLength="50" v-model="temp.name" placeholder="机器名称" />
@@ -268,10 +275,10 @@
         </a-form-item>
 
         <a-form-item prop="jpomUrl">
-          <template slot="label">
+          <template #label>
             节点地址
             <a-tooltip v-show="!temp.id">
-              <template slot="title"
+              <template #title
                 >节点地址为插件端的 IP:PORT 插件端端口默认为：2123
                 <ul>
                   <li>节点地址建议使用内网地址</li>
@@ -284,7 +291,7 @@
           <a-input v-model="temp.jpomUrl" placeholder="节点地址 (127.0.0.1:2123)">
             <a-select
               placeholder="协议类型"
-              slot="addonBefore"
+              #addonBefore
               v-model="temp.jpomProtocol"
               default-value="Http://"
               style="width: 160px"
@@ -299,10 +306,10 @@
           <a-input v-model="temp.jpomUsername" placeholder="节点账号,请查看节点启动输出的信息" />
         </a-form-item>
         <a-form-item :prop="`${temp.id ? 'loginPwd-update' : 'loginPwd'}`">
-          <template slot="label">
+          <template #label>
             节点密码
             <a-tooltip v-show="!temp.id">
-              <template slot="title">
+              <template #title>
                 节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json
                 文件查看（如果自定义配置了账号密码将没有此文件）
               </template>
@@ -331,7 +338,7 @@
             <a-form-item label="代理" prop="jpomHttpProxy">
               <a-input v-model="temp.jpomHttpProxy" placeholder="代理地址 (127.0.0.1:8888)">
                 <a-select
-                  slot="addonBefore"
+                  #addonBefore
                   v-model="temp.jpomHttpProxyType"
                   placeholder="选择代理类型"
                   default-value="HTTP"
@@ -380,7 +387,7 @@
       :maskClosable="false"
     >
       <!-- <a-alert message="温馨提示" type="warning">
-        <template slot="description"> </template>
+        <template #description> </template>
       </a-alert> -->
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
@@ -408,9 +415,16 @@
       <upgrade v-if="drawerUpgradeVisible" :machineId="temp.id" />
     </a-drawer>
     <!-- 查看机器关联节点 -->
-    <a-modal destroyOnClose v-model="viewLinkNode" width="50%" title="关联节点" :footer="null" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      v-model:visible="viewLinkNode"
+      width="50%"
+      title="关联节点"
+      :footer="null"
+      :maskClosable="false"
+    >
       <a-list bordered :data-source="nodeList">
-        <a-list-item slot="renderItem" slot-scope="item" style="display: block">
+        <a-list-item #renderItem slot-scope="item" style="display: block">
           <a-row>
             <a-col :span="10">节点名称：{{ item.name }}</a-col>
             <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>

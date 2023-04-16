@@ -2,7 +2,7 @@
   <div class="full-content">
     <div>
       <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
-        <template slot="title">
+        <template #title>
           <a-row>
             <a-space>
               <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="节点名称" />
@@ -22,7 +22,7 @@
                 <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
               </a-tooltip>
               <a-tooltip placement="bottom">
-                <template slot="title">
+                <template #title>
                   <div>
                     <ul>
                       <li>监控数据目前采用原生命令获取,和真实情况有一定差异可以当做参考依据</li>
@@ -50,11 +50,11 @@
               <a-col v-for="item in list" :key="item.id" :span="6">
                 <template>
                   <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
-                    <template slot="title">
+                    <template #title>
                       <a-row :gutter="[4, 0]">
                         <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
                           <a-tooltip>
-                            <template slot="title">
+                            <template #title>
                               <div>节点名称：{{ item.name }}</div>
                               <div>节点地址：{{ item.url }}</div>
                             </template>
@@ -63,7 +63,7 @@
                         </a-col>
                         <a-col :span="7" style="text-align: right">
                           <a-tooltip>
-                            <template slot="title">
+                            <template #title>
                               <div>当前状态：{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}</div>
                               <div>状态描述：{{ (item.machineNodeData && item.machineNodeData.statusMsg) || '' }}</div>
                             </template>

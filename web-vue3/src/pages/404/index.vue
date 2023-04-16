@@ -1,7 +1,7 @@
 <template>
   <a-card hoverable class="card">
     <a-card-meta>
-      <template slot="description">
+      <template #description>
         <a-result status="404" title="404" sub-title="Sorry, the page you visited does not exist.">
           <a-button type="primary" @click="goBack">
             <left-outlined />

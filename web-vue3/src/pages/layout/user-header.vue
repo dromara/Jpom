@@ -99,8 +99,8 @@
         <a-tab-pane :key="2" tab="两步验证">
           <a-row>
             <a-alert type="warning" v-if="mfaState.needVerify">
-              <template slot="message"> 提示 </template>
-              <template slot="description">
+              <template #message> 提示 </template>
+              <template #description>
                 <ul style="color: red">
                   <li>绑定成功后将不再显示,强烈建议保存此二维码或者下面的 MFA key</li>
                   <li>请使用应用扫码绑定令牌,然后输入验证码确认绑定才生效</li>
@@ -143,7 +143,7 @@
                       disabled
                       v-model="mfaState.mfaKey"
                     >
-                      <a-icon slot="prefix" type="copy" />
+                      <a-icon #prefix type="copy" />
                     </a-input>
                   </a-form-item>
                 </template>
@@ -200,7 +200,7 @@
         <a-form-item label="临时token" name="token">
           <a-input disabled v-model="userState.token" placeholder="Token">
             <a-tooltip
-              slot="suffix"
+              #suffix
               title="复制"
               v-clipboard:copy="userState.token"
               v-clipboard:success="
@@ -221,7 +221,7 @@
         <a-form-item label="长期token" name="md5Token">
           <a-input disabled v-model="userState.md5Token" placeholder="Token">
             <a-tooltip
-              slot="suffix"
+              #suffix
               title="复制"
               v-clipboard:copy="userState.md5Token"
               v-clipboard:success="
@@ -265,10 +265,10 @@
     </a-modal>
 
     <!-- 个性配置区 -->
-    <a-modal destroyOnClose v-model="customizeVisible" title="个性配置区" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model:visible="customizeVisible" title="个性配置区" :footer="null" :maskClosable="false">
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-alert banner>
-          <template slot="message"> 下列配置信息仅在当前浏览器生效,清空浏览器缓存配置将恢复默认 </template>
+          <template #message> 下列配置信息仅在当前浏览器生效,清空浏览器缓存配置将恢复默认 </template>
         </a-alert>
         <!-- <a-form-item label="页面导航" name="token">
           <a-space>
