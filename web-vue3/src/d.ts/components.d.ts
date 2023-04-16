@@ -70,6 +70,7 @@ declare module '@vue/runtime-core' {
     ATimeline: typeof import('ant-design-vue/es')['Timeline']
     ATimelineItem: typeof import('ant-design-vue/es')['TimelineItem']
     ATooltip: typeof import('ant-design-vue/es')['Tooltip']
+    ATree: typeof import('ant-design-vue/es')['Tree']
     AUpload: typeof import('ant-design-vue/es')['Upload']
     BarsOutlined: typeof import('@ant-design/icons-vue')['BarsOutlined']
     CodeEditor: typeof import('./../components/codeEditor/index.vue')['default']

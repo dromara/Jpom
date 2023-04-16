@@ -6,7 +6,7 @@ import router from './index'
 import { useMenuStore } from '@/stores/menu'
 import { useManagementMenuStore } from '@/stores/management-menu'
 import Qs from 'qs'
-import {RouteLocationNormalized,NavigationGuardNext} from "vue-router";
+import { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
 
 // 不需要鉴权的名单
 const whiteList: string[] = ['/login', '/install', '/system/ipAccess']
@@ -45,7 +45,7 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
     next()
     return
   }
-  let menuStore2 = to.meta?.mode === 'management' ? managementMenuStore : menuStore
+  const lastMenuStore = to.meta?.mode === 'management' ? managementMenuStore : menuStore
   // if (to.meta?.mode === 'management') {
   //   // 刷新菜单
   //   menuStore2 = managementMenuStore
@@ -53,12 +53,14 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
   //   // 刷新菜单
   //   menuStore2 = menuStore
   // }
-  menuStore2
+  // console.log(lastMenuStore, to.meta?.mode)
+  lastMenuStore
     .loadSystemMenus()
     .then(() => {
       // 存储 store
-      menuStore2.addTab({ key: to.name, path: to.path }).then((toMenu: any) => {
-        toMenu ? next(toMenu.path) : next()
+      lastMenuStore.addTab({ key: to.name, path: to.path }).then((toMenu: any) => {
+        // console.log(toMenu)
+        toMenu?.path ? next(toMenu.path) : next()
       })
     })
     .catch(() => {
