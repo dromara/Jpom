@@ -43,7 +43,7 @@
           </a-tooltip>
 
           <a-dropdown v-if="selectedRowKeys && this.selectedRowKeys.length">
-            <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
+            <a-button type="primary"> 批量操作 <down-outlined /> </a-button>
             <a-menu #overlay>
               <a-menu-item>
                 <a-button type="primary" @click="batchStart">批量启动</a-button>
@@ -56,7 +56,7 @@
               </a-menu-item>
             </a-menu>
           </a-dropdown>
-          <a-button v-else type="primary" :disabled="true"> 批量操作 <a-icon type="down" /> </a-button>
+          <a-button v-else type="primary" :disabled="true"> 批量操作 <down-outlined /> </a-button>
 
           <a-tooltip
             placement="topLeft"
@@ -134,7 +134,7 @@
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
-              <a-icon type="down" />
+              <down-outlined />
             </a>
             <a-menu #overlay>
               <a-menu-item>

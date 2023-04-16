@@ -134,7 +134,7 @@
             <a-button size="small" type="danger" v-if="!item.managerStatus.leader" @click="handleLeava(record)">剔除</a-button>
           </template> -->
           <!-- <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <down-outlined /> </a>
             <a-menu #overlay>
               <a-menu-item> </a-menu-item>
               <a-menu-item>
