@@ -1,13 +1,7 @@
 <template>
   <div>
-    <a-menu
-      v-if="userInfo && userInfo.systemUser"
-      theme="dark"
-      mode="inline"
-      v-model="mangerMenuOpenkeys"
-      @click="mangerMenuClick"
-      :openKeys="mangerMenuOpenkeys"
-    >
+    <a-menu v-if="userInfo && userInfo.systemUser" theme="dark" mode="inline" v-model="mangerMenuOpenkeys"
+      @click="mangerMenuClick" :openKeys="mangerMenuOpenkeys">
       <a-menu-item key="admin-manager">
         <template v-if="props.mode === 'normal'">
           <icon type="setting" :style="{ fontSize: '18px' }" />
@@ -20,17 +14,13 @@
       </a-menu-item>
     </a-menu>
     <a-menu theme="dark" mode="inline" v-model="selectedKeys" @openChange="openChange" :openKeys="getMenuOpenKeys2">
-      <a-sub-menu v-for="menu in props.mode == 'normal' ? getMenus : getManagementMenus" :key="menu.id">
+      <a-sub-menu v-for="menu in menus" :key="menu.id">
         <template #title>
           <icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
           <span>{{ menu.title }}</span>
         </template>
-        <a-menu-item
-          v-for="subMenu in menu.childs"
-          :key="subMenu.id"
-          :p="(subMenu.parent = menu)"
-          @click="handleClick(subMenu)"
-        >
+        <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" :p="(subMenu.parent = menu)"
+          @click="handleClick(subMenu)">
           <span>{{ subMenu.title }}</span>
         </a-menu-item>
       </a-sub-menu>
@@ -39,7 +29,9 @@
 </template>
 <script lang="ts" setup>
 import Icon from '@/components/Icon'
+import { useAppStore } from '@/stores/app'
 import { useGuideStore } from '@/stores/guide'
+import { useManagementMenuStore } from '@/stores/management-menu'
 import { useMenuStore } from '@/stores/menu'
 import { useUserStore } from '@/stores/user'
 
@@ -48,27 +40,30 @@ const props = defineProps<{
 }>()
 
 const menuStore = useMenuStore()
+const managementMenuStore = useManagementMenuStore()
 const userStore = useUserStore()
 const guideStore = useGuideStore()
+const appStore = useAppStore()
 
-const getMenus = computed(() => menuStore.getMenus)
-const getMenuOpenKeys2 = ref([])
-const getManagementMenus = ref([])
-// const getMenuOpenKeys2 = computed(() => {
-//   if (this.getCollapsed) {
-//     // 折叠的时候使用，用户点击的菜单
-//     return this.menuOpenKeys;
-//   }
-//   // 时候全局缓存的菜单
-//   return props.mode == "normal" ? this.getMenuOpenKeys : this.getManagementMenuOpenKeys;
-// })
+const lastMenuStore = props.mode == "normal" ? menuStore : managementMenuStore
 
 const route = useRoute()
 const router = useRouter()
 
 const menuOpenKeys = ref<string[]>([])
-const menuManagementOpenKeys = ref([])
 const mangerMenuOpenkeys = ref([])
+
+const menus = computed(() => lastMenuStore.getMenus)
+
+const getMenuOpenKeys2 = computed(() => {
+
+  if (appStore.getCollapsed) {
+    // 折叠的时候使用，用户点击的菜单
+    return menuOpenKeys.value;
+  }
+  // 时候全局缓存的菜单
+  return lastMenuStore.getMenuOpenKeys;
+})
 
 const { userInfo } = toRefs(userStore)
 
@@ -90,8 +85,8 @@ const openChange = (keys: string[]) => {
     keys = [keys[keys.length - 1]]
   }
   menuOpenKeys.value = keys
-  // menuStore[props.mode == "normal" ? "menuOpenKeys" : "menuManagementOpenKeys"] = keys
-  menuStore['menuOpenKeys'] = keys
+
+  lastMenuStore.menuOpenKeys = keys
 }
 
 // 点击菜单
@@ -116,39 +111,10 @@ const handleClick = (subMenu: any) => {
 }
 
 const selectedKeys = computed(() => {
-  // todo 后者需要替换成管理员menu manageMenuStore.getManagementActiveMenuKey
-  return props.mode == 'normal' ? [menuStore.getActiveMenuKey] : []
+  return lastMenuStore.getActiveMenuKey
 })
 
 onMounted(() => {
-  // const key = props.mode == "normal" ? "menuOpenKeys" : "menuManagementOpenKeys"
-  menuStore['menuOpenKeys'] = ([route.query.sPid] as string[]) || ['']
+  lastMenuStore.menuOpenKeys = ([route.query.sPid] as string[]) || ['']
 })
-
-// export default {
-
-// computed: {
-//   ...mapGetters(["getMenus", "getManagementMenus", "getActiveMenuKey", "getManagementActiveMenuKey", "getMenuOpenKeys", "getManagementMenuOpenKeys", "getCollapsed", "getGuideCache", "getUserInfo"]),
-//   selectedKeys: {
-//     get() {
-//       return props.mode == "normal" ? [this.getActiveMenuKey] : [this.getManagementActiveMenuKey];
-//     },
-//     set() { },
-//   },
-//   getMenuOpenKeys2() {
-//     if (this.getCollapsed) {
-//       // 折叠的时候使用，用户点击的菜单
-//       return this.menuOpenKeys;
-//     }
-//     // 时候全局缓存的菜单
-//     return props.mode == "normal" ? this.getMenuOpenKeys : this.getManagementMenuOpenKeys;
-//   },
-//   menuMultipleFlag() {
-//     return this.getGuideCache.menuMultipleFlag === undefined ? true : this.getGuideCache.menuMultipleFlag;
-//   },
-// },
-// created() {
-//
-// },
-// };
 </script>
