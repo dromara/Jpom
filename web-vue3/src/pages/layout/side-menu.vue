@@ -28,6 +28,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { useGuideStore } from '@/stores/guide';
 import { useMenuStore } from '@/stores/menu';
 import { useUserStore } from '@/stores/user';
 import { notification } from 'ant-design-vue';
@@ -40,6 +41,19 @@ const props = defineProps<{
 
 const menuStore = useMenuStore()
 const userStore = useUserStore()
+const guideStore = useGuideStore()
+
+const getMenus = computed(() => menuStore.getMenus)
+const getMenuOpenKeys2 = ref([])
+const getManagementMenus = ref([])
+// const getMenuOpenKeys2 = computed(() => {
+//   if (this.getCollapsed) {
+//     // 折叠的时候使用，用户点击的菜单
+//     return this.menuOpenKeys;
+//   }
+//   // 时候全局缓存的菜单
+//   return props.mode == "normal" ? this.getMenuOpenKeys : this.getManagementMenuOpenKeys;
+// })
 
 const route = useRoute()
 const router = useRouter()
@@ -60,14 +74,17 @@ const mangerMenuClick = () => {
     });
   })
 }
+
 // 菜单打开
 const openChange = (keys: string[]) => {
-  if (keys.length && !this.menuMultipleFlag) {
+  const menuMultipleFlag = guideStore.getGuideCache.menuMultipleFlag;
+  if (keys.length && !menuMultipleFlag) {
     // 保留一个打开
     keys = [keys[keys.length - 1]];
   }
   menuOpenKeys.value = keys;
-  menuStore[props.mode == "normal" ? "menuOpenKeys" : "menuManagementOpenKeys"] = keys
+  // menuStore[props.mode == "normal" ? "menuOpenKeys" : "menuManagementOpenKeys"] = keys
+  menuStore["menuOpenKeys"] = keys
 }
 
 
@@ -98,8 +115,8 @@ const selectedKeys = computed(() => {
 })
 
 onMounted(() => {
-  const key = props.mode == "normal" ? "menuOpenKeys" : "menuManagementOpenKeys"
-  menuStore[key] = route.query.sPid || ""
+  // const key = props.mode == "normal" ? "menuOpenKeys" : "menuManagementOpenKeys"
+  menuStore["menuOpenKeys"] = [route.query.sPid] as string[] || [""]
 })
 
 // export default {
