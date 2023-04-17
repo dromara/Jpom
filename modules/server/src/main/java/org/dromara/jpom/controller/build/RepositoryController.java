@@ -207,10 +207,10 @@ public class RepositoryController extends BaseServerController {
                 repoType = RepositoryModel.RepoType.Svn;
             }
             if (repoType == null) {
-                Assert.hasText(type, () -> StrUtil.format("第 {} 行 type 字段值错误（Git/Svn）", finalI + 1));
+                Assert.hasText("", () -> StrUtil.format("第 {} 行 type 字段值错误（Git/Svn）", finalI + 1));
             }
             String protocol = csvRow.getByName("protocol");
-            Assert.hasText(type, () -> StrUtil.format("第 {} 行 protocol 字段不能位空", finalI + 1));
+            Assert.hasText(protocol, () -> StrUtil.format("第 {} 行 protocol 字段不能位空", finalI + 1));
             GitProtocolEnum gitProtocolEnum = null;
             if ("http".equalsIgnoreCase(protocol) || "https".equalsIgnoreCase(protocol)) {
                 gitProtocolEnum = GitProtocolEnum.HTTP;
