@@ -31,7 +31,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
-import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.text.csv.*;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -49,7 +48,6 @@ import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.controller.build.repository.ImportRepoUtil;
-import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.model.enums.GitProtocolEnum;
@@ -123,8 +121,6 @@ public class RepositoryController extends BaseServerController {
 
     /**
      * export repository by csv
-     *
-     * @return json
      */
     @GetMapping(value = "/build/repository/export")
     @Feature(method = MethodFeature.DOWNLOAD)
@@ -206,9 +202,7 @@ public class RepositoryController extends BaseServerController {
             } else if ("Svn".equalsIgnoreCase(type)) {
                 repoType = RepositoryModel.RepoType.Svn;
             }
-            if (repoType == null) {
-                Assert.hasText("", () -> StrUtil.format("第 {} 行 type 字段值错误（Git/Svn）", finalI + 1));
-            }
+            Assert.notNull(repoType, () -> StrUtil.format("第 {} 行 type 字段值错误（Git/Svn）", finalI + 1));
             String protocol = csvRow.getByName("protocol");
             Assert.hasText(protocol, () -> StrUtil.format("第 {} 行 protocol 字段不能位空", finalI + 1));
             GitProtocolEnum gitProtocolEnum = null;
@@ -217,9 +211,7 @@ public class RepositoryController extends BaseServerController {
             } else if ("ssh".equalsIgnoreCase(protocol)) {
                 gitProtocolEnum = GitProtocolEnum.SSH;
             }
-            if (gitProtocolEnum == null) {
-                Assert.hasText("", () -> StrUtil.format("第 {} 行 protocol 字段值错误（http/http/ssh）", finalI + 1));
-            }
+            Assert.notNull(gitProtocolEnum, () -> StrUtil.format("第 {} 行 protocol 字段值错误（http/http/ssh）", finalI + 1));
             String share = csvRow.getByName("share");
             Assert.hasText(share, () -> StrUtil.format("第 {} 行 share 字段不能位空", finalI + 1));
             String privateRsa = csvRow.getByName("private rsa");
@@ -227,11 +219,11 @@ public class RepositoryController extends BaseServerController {
             String password = csvRow.getByName("password");
             Integer timeout = Convert.toInt(csvRow.getByName("timeout(s)"));
             RepositoryModel where = new RepositoryModel();
-            where.setName(name);
-            RepositoryModel repositoryModel = repositoryService.queryByBean(where);
             where.setProtocol(gitProtocolEnum.getCode());
-            where.setTimeout(timeout);
             where.setGitUrl(address);
+            RepositoryModel repositoryModel = repositoryService.queryByBean(where);
+            where.setName(name);
+            where.setTimeout(timeout);
             where.setPassword(password);
             where.setRsaPrv(privateRsa);
             where.setRepoType(repoType.getCode());
