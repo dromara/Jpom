@@ -1,4 +1,4 @@
-import axios from "./config";
+import axios, {loadRouterBase} from "./config";
 
 /**
  * 分页获取仓库列表
@@ -22,6 +22,34 @@ export function getRepositoryList(params) {
   });
 }
 
+/*
+ * 下载导入模板
+ *
+ */
+export function importTemplate(data) {
+  return loadRouterBase("/build/repository/import-template", data);
+}
+/**
+ * 导出CSV
+ * @param data
+ * @returns {string}
+ */
+export function exportData(data) {
+  return loadRouterBase("/build/repository/export", data);
+}
+// 导入数据
+export function importData(formData) {
+  return axios({
+    url: "/build/repository/import-data",
+    headers: {
+      "Content-Type": "multipart/form-data;charset=UTF-8",
+    },
+    method: "post",
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData,
+  });
+}
 /**
  * 获取仓库信息
  *

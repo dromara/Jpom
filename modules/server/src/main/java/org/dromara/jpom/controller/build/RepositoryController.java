@@ -23,9 +23,18 @@
 package org.dromara.jpom.controller.build;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.io.BomReader;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.net.NetUtil;
+import cn.hutool.core.text.csv.*;
+import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
@@ -40,6 +49,7 @@ import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.controller.build.repository.ImportRepoUtil;
+import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.model.enums.GitProtocolEnum;
@@ -55,11 +65,15 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -91,6 +105,164 @@ public class RepositoryController extends BaseServerController {
     public Object loadRepositoryList(HttpServletRequest request) {
         PageResultDto<RepositoryModel> pageResult = repositoryService.listPage(request);
         return JsonMessage.success("获取成功", pageResult);
+    }
+
+    /**
+     * 下载导入模板
+     */
+    @GetMapping(value = "/build/repository/import-template", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public void importTemplate(HttpServletResponse response) throws IOException {
+        String fileName = "仓库信息导入模板.csv";
+        this.setApplicationHeader(response, fileName);
+        //
+        CsvWriter writer = CsvUtil.getWriter(response.getWriter());
+        writer.writeLine("name", "address", "type", "protocol", "share", "private rsa", "username", "password", "timeout(s)");
+        writer.flush();
+    }
+
+    /**
+     * export repository by csv
+     *
+     * @return json
+     */
+    @GetMapping(value = "/build/repository/export")
+    @Feature(method = MethodFeature.DOWNLOAD)
+    public void exportRepositoryList(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String fileName = "导出的 仓库信息 数据 " + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
+        this.setApplicationHeader(response, fileName);
+        CsvWriter writer = CsvUtil.getWriter(response.getWriter());
+        int pageInt = 0;
+        Map<String, String> paramMap = ServletUtil.getParamMap(request);
+        writer.writeLine("name", "address", "type", "protocol", "share", "private rsa", "username", "password", "timeout(s)");
+        while (true) {
+            // 下一页
+            paramMap.put("page", String.valueOf(++pageInt));
+            PageResultDto<RepositoryModel> listPage = repositoryService.listPage(request, paramMap);
+            if (listPage.isEmpty()) {
+                break;
+            }
+            listPage.getResult()
+                .stream()
+                .map((Function<RepositoryModel, List<Object>>) repositoryModel -> CollUtil.newArrayList(
+                    repositoryModel.getName(),
+                    repositoryModel.getGitUrl(),
+                    EnumUtil.likeValueOf(RepositoryModel.RepoType.class, repositoryModel.getRepoType()),
+                    EnumUtil.likeValueOf(GitProtocolEnum.class, repositoryModel.getProtocol()),
+                    repositoryModel.getWorkspaceId(),
+                    repositoryModel.getRsaPrv(),
+                    repositoryModel.getUserName(),
+                    repositoryModel.getPassword(),
+                    repositoryModel.getTimeout()
+                ))
+                .map(objects -> objects.stream().map(StrUtil::toStringOrNull).toArray(String[]::new))
+                .forEach(writer::writeLine);
+            if (ObjectUtil.equal(listPage.getPage(), listPage.getTotalPage())) {
+                // 最后一页
+                break;
+            }
+        }
+        writer.flush();
+    }
+
+    /**
+     * 导入数据
+     *
+     * @return json
+     */
+    @PostMapping(value = "/build/repository/import-data", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.UPLOAD)
+    public JsonMessage<String> importData(MultipartFile file) throws IOException {
+        Assert.notNull(file, "没有上传文件");
+        String originalFilename = file.getOriginalFilename();
+        String extName = FileUtil.extName(originalFilename);
+        Assert.state(StrUtil.endWithIgnoreCase(extName, "csv"), "不允许的文件格式");
+        BomReader bomReader = IoUtil.getBomReader(file.getInputStream());
+        CsvReadConfig csvReadConfig = CsvReadConfig.defaultConfig();
+        csvReadConfig.setHeaderLineNo(0);
+        CsvReader reader = CsvUtil.getReader(bomReader, csvReadConfig);
+        CsvData csvData;
+        try {
+            csvData = reader.read();
+        } catch (Exception e) {
+            log.error("解析 csv 异常", e);
+            return new JsonMessage<>(405, "解析文件异常," + e.getMessage());
+        }
+        List<CsvRow> rows = csvData.getRows();
+        Assert.notEmpty(rows, "没有任何数据");
+        int addCount = 0, updateCount = 0;
+        for (int i = 0; i < rows.size(); i++) {
+            int finalI = i;
+            CsvRow csvRow = rows.get(i);
+            String name = csvRow.getByName("name");
+            Assert.hasText(name, () -> StrUtil.format("第 {} 行 name 字段不能位空", finalI + 1));
+            String address = csvRow.getByName("address");
+            Assert.hasText(address, () -> StrUtil.format("第 {} 行 address 字段不能位空", finalI + 1));
+            String type = csvRow.getByName("type");
+            Assert.hasText(type, () -> StrUtil.format("第 {} 行 type 字段不能位空", finalI + 1));
+            RepositoryModel.RepoType repoType = null;
+            if ("Git".equalsIgnoreCase(type)) {
+                repoType = RepositoryModel.RepoType.Git;
+            } else if ("Svn".equalsIgnoreCase(type)) {
+                repoType = RepositoryModel.RepoType.Svn;
+            }
+            if (repoType == null) {
+                Assert.hasText(type, () -> StrUtil.format("第 {} 行 type 字段值错误（Git/Svn）", finalI + 1));
+            }
+            String protocol = csvRow.getByName("protocol");
+            Assert.hasText(type, () -> StrUtil.format("第 {} 行 protocol 字段不能位空", finalI + 1));
+            GitProtocolEnum gitProtocolEnum = null;
+            if ("http".equalsIgnoreCase(protocol) || "https".equalsIgnoreCase(protocol)) {
+                gitProtocolEnum = GitProtocolEnum.HTTP;
+            } else if ("ssh".equalsIgnoreCase(protocol)) {
+                gitProtocolEnum = GitProtocolEnum.SSH;
+            }
+            if (gitProtocolEnum == null) {
+                Assert.hasText("", () -> StrUtil.format("第 {} 行 protocol 字段值错误（http/http/ssh）", finalI + 1));
+            }
+            String share = csvRow.getByName("share");
+            Assert.hasText(share, () -> StrUtil.format("第 {} 行 share 字段不能位空", finalI + 1));
+            String privateRsa = csvRow.getByName("private rsa");
+            String username = csvRow.getByName("username");
+            String password = csvRow.getByName("password");
+            Integer timeout = Convert.toInt(csvRow.getByName("timeout(s)"));
+            RepositoryModel where = new RepositoryModel();
+            where.setName(name);
+            RepositoryModel repositoryModel = repositoryService.queryByBean(where);
+            where.setProtocol(gitProtocolEnum.getCode());
+            where.setTimeout(timeout);
+            where.setGitUrl(address);
+            where.setPassword(password);
+            where.setRsaPrv(privateRsa);
+            where.setRepoType(repoType.getCode());
+            where.setUserName(username);
+            where.setWorkspaceId(share);
+            // 检查 rsa 私钥
+            boolean andUpdateSshKey = this.checkAndUpdateSshKey(where);
+            Assert.state(andUpdateSshKey, StrUtil.format("第 {} 行 rsa 私钥文件不存在或者有误", finalI + 1));
+            if (where.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
+                // 验证 git 仓库信息
+                try {
+                    IPlugin plugin = PluginFactory.getPlugin("git-clone");
+                    Map<String, Object> map = where.toMap();
+                    Tuple branchAndTagList = (Tuple) plugin.execute("branchAndTagList", map);
+                    //Tuple tuple = GitUtil.getBranchAndTagList(repositoryModelReq);
+                } catch (Exception e) {
+                    Assert.state(false, StrUtil.format("第 {} 行 仓库信息有误", finalI + 1));
+                    log.warn("获取仓库分支失败", e);
+                }
+            }
+            if (repositoryModel == null) {
+                // 添加
+                repositoryService.insert(where);
+                addCount++;
+            } else {
+                where.setId(repositoryModel.getId());
+                repositoryService.updateById(where);
+                updateCount++;
+            }
+        }
+        return JsonMessage.success("导入成功,添加 {} 条数据,修改 {} 条数据", addCount, updateCount);
     }
 
     /**
