@@ -30,6 +30,16 @@
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
           <a-button type="primary" @click="handleAddGitee">令牌导入</a-button>
+          <a-button type="primary" @click="handlerExportData">导出</a-button>
+          <a-dropdown>
+            <a-menu slot="overlay">
+              <a-menu-item key="1"> <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button> </a-menu-item>
+            </a-menu>
+
+            <a-upload name="file" accept=".csv" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
+              <a-button type="primary" icon="upload"> 导入 <a-icon type="down" /> </a-button>
+            </a-upload>
+          </a-dropdown>
         </a-space>
       </template>
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
@@ -285,7 +295,7 @@
   </div>
 </template>
 <script>
-import { providerInfo, authorizeRepos, deleteRepository, editRepository, getRepositoryList, restHideField, sortItem } from "@/api/repository";
+import {providerInfo, authorizeRepos, deleteRepository, editRepository, getRepositoryList, restHideField, sortItem, exportData, importTemplate, importData} from "@/api/repository";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 
 export default {
@@ -468,6 +478,25 @@ export default {
     },
     handleAddGitee() {
       this.giteeImportVisible = true;
+    },
+    // 下载导入模板
+    handlerImportTemplate() {
+      window.open(importTemplate(), "_blank");
+    },
+    handlerExportData() {
+      window.open(exportData({ ...this.listQuery }), '_blank')
+    },
+    beforeUpload(file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      importData(formData).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.loadData();
+        }
+      });
     },
     handleGiteeImportFormOk() {
       this.$refs["giteeImportForm"].validate((valid) => {
