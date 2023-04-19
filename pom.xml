@@ -164,9 +164,6 @@
 
     <profiles>
         <profile>
-            <id>install-plugin-profile</id>
-        </profile>
-        <profile>
             <id>release</id>
             <distributionManagement>
                 <snapshotRepository>
