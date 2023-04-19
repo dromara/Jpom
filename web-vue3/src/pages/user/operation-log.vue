@@ -97,12 +97,16 @@
     <a-modal destroyOnClose v-model:visible="detailVisible" width="600px" title="详情信息" :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">
         <a-list-item #renderItem slot-scope="item">
-          <div v-if="item.json">
-            <h4 #title>{{ item.title }}</h4>
+          <template v-if="item.json">
+            <template #title>
+              <h4>{{ item.title }}</h4>
+            </template>
             <json-viewer :value="item.value" :expand-depth="4" copyable sort></json-viewer>
-          </div>
+          </template>
           <a-list-item-meta v-else :description="item.description">
-            <h4 #title>{{ item.title }}</h4>
+            <template #title>
+              <h4>{{ item.title }}</h4>
+            </template>
           </a-list-item-meta>
         </a-list-item>
       </a-list>

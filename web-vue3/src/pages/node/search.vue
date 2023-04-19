@@ -241,7 +241,9 @@
       <a-list bordered :data-source="selectedRowKeys">
         <a-list-item #renderItem slot-scope="item">
           <a-list-item-meta :description="item.email">
-            <a #title> {{ projList[item].name }}</a>
+            <template #title>
+              <a> {{ projList[item].name }}</a>
+            </template>
           </a-list-item-meta>
           <div>
             <a-tooltip :title="`${projList[item].cause || '未开始'}`"
