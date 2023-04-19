@@ -178,7 +178,7 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/release.xml</descriptor>
                             </descriptors>
-                            <outputDirectory>target</outputDirectory>
+                            <outputDirectory>target/agent-package</outputDirectory>
                         </configuration>
                         <executions>
                             <execution>
@@ -207,7 +207,7 @@
                         <configuration>
                             <fileSets>
                                 <fileSet>
-                                    <directory>${project.build.directory}</directory>
+                                    <directory>${project.build.directory}/agent-package</directory>
                                     <includes>
                                         <include>*.zip</include>
                                         <include>*.tar.gz</include>
