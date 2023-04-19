@@ -262,12 +262,12 @@ docker run -d -p 2122:2122 \
 3. 执行 `npm run build` 进行 vue 项目打包
 4. 切换到项目根目录执行：`mvn clean package`
 5. 安装插件端
-	1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
+	1. 查看插件端安装包 modules/agent/target/agent-package/agent-x.x.x-release
 	2. 打包上传服务器运行（整个目录）
 	3. 启动插件端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
 	4. 默认运行端口：`2123`
 6. 安装服务端
-	1. 查看插件端安装包 modules/server/target/server-x.x.x-release
+	1. 查看插件端安装包 modules/server/target/server-package/server-x.x.x-release
 	2. 打包上传服务器运行（整个目录）
 	3. 启动服务端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
 	4. 服务端默认运行端口：`2122`，访问管理页面：`http://127.0.0.1:2122/`（非本机访问把 127.0.0.1 换成你的服务器 IP 地址）

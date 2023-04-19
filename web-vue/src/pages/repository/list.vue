@@ -599,6 +599,7 @@ export default {
         content: "真的要清除仓库隐藏字段信息么？（密码，私钥）",
         okText: "确认",
         cancelText: "取消",
+        zIndex: 1009,
         onOk: () => {
           // 恢复
           restHideField(record.id).then((res) => {

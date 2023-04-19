@@ -113,13 +113,4 @@ export default {
 .ant-spin-text {
   text-shadow: 0 0 black !important;
 }
-.ant-space {
-  flex-wrap: wrap;
-  gap: 10px 0;
-}
-.text-overflow-hidden {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 </style>
