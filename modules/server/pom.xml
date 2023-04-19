@@ -243,7 +243,7 @@
                             <descriptors>
                                 <descriptor>${basedir}/src/main/assembly/release.xml</descriptor>
                             </descriptors>
-                            <outputDirectory>target</outputDirectory>
+                            <outputDirectory>target/server-package</outputDirectory>
                         </configuration>
                         <executions>
                             <execution>
@@ -272,7 +272,7 @@
                         <configuration>
                             <fileSets>
                                 <fileSet>
-                                    <directory>${project.build.directory}</directory>
+                                    <directory>${project.build.directory}/server-package</directory>
                                     <includes>
                                         <include>*.zip</include>
                                         <include>*.tar.gz</include>
