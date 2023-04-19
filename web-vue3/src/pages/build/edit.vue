@@ -501,7 +501,7 @@
               </a-form-item>
 
               <a-tooltip
-                title="需要在仓库里面 dockerfile,如果多文件夹查看可以指定二级目录如果 springboot-test-jar:springboot-test-jar/Dockerfile"
+                title="需要在仓库里面 dockerfile,如果多文件夹查看可以指定二级目录（二级目录:Dockerfile文件位置,执行dockerfile 会跳转到二级目录位置）如 springboot-test-jar:springboot-test-jar/Dockerfile"
               >
                 <a-form-item prop="dockerfile" label="Dockerfile">
                   <a-input v-model="tempExtraData.dockerfile" placeholder="文件夹路径 需要在仓库里面 dockerfile" />

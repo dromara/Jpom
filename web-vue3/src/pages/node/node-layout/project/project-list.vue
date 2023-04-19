@@ -600,7 +600,9 @@
       <a-list bordered :data-source="selectedRows">
         <a-list-item #renderItem slot-scope="item">
           <a-list-item-meta :description="item.email">
-            <a #title> {{ item.name }}</a>
+            <template #title>
+              <a> {{ item.name }}</a>
+            </template>
           </a-list-item-meta>
           <div>{{ item.cause === undefined ? '未开始' : item.cause }}</div>
         </a-list-item>

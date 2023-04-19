@@ -17,7 +17,9 @@
           </template>
           <template v-else>loading</template>
         </template>
-        <a #extra href="#"></a>
+        <template #extra>
+          <a href="#"></a>
+        </template>
         <terminal v-if="sshData" :sshId="sshData.id" />
         <template v-else>
           <a-result status="404" title="不能操作" sub-title="没有对应的SSH">
