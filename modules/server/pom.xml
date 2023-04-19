@@ -234,6 +234,18 @@
                             </execution>
                         </executions>
                     </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+        <!--  生成安装包文件-->
+        <profile>
+            <id>install-assembly</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
@@ -243,7 +255,7 @@
                             <descriptors>
                                 <descriptor>${basedir}/src/main/assembly/release.xml</descriptor>
                             </descriptors>
-                            <outputDirectory>target/server-package</outputDirectory>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
                         <executions>
                             <execution>
@@ -272,7 +284,7 @@
                         <configuration>
                             <fileSets>
                                 <fileSet>
-                                    <directory>${project.build.directory}/server-package</directory>
+                                    <directory>${project.build.directory}</directory>
                                     <includes>
                                         <include>*.zip</include>
                                         <include>*.tar.gz</include>
@@ -286,25 +298,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <!--  安装插件引人-->
-        <profile>
-            <id>install-plugin-profile</id>
-        </profile>
-        <profile>
-            <id>release-plugin-profile</id>
-        </profile>
-
-        <!--  插件开发-->
-        <profile>
-            <id>develop-plugin-profile</id>
-            <dependencies>
-                <!--                <dependency>-->
-                <!--                    <groupId>org.dromara.jpom.jpom-plugin</groupId>-->
-                <!--                    <artifactId>netty</artifactId>-->
-                <!--                    <version>LATEST</version>-->
-                <!--                </dependency>-->
-            </dependencies>
         </profile>
     </profiles>
 </project>

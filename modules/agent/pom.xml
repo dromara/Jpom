@@ -169,6 +169,17 @@
                             </execution>
                         </executions>
                     </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!--  生成打包文件-->
+        <profile>
+            <id>install-assembly</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
@@ -178,7 +189,7 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/release.xml</descriptor>
                             </descriptors>
-                            <outputDirectory>target/agent-package</outputDirectory>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
                         <executions>
                             <execution>
@@ -207,7 +218,7 @@
                         <configuration>
                             <fileSets>
                                 <fileSet>
-                                    <directory>${project.build.directory}/agent-package</directory>
+                                    <directory>${project.build.directory}</directory>
                                     <includes>
                                         <include>*.zip</include>
                                         <include>*.tar.gz</include>
@@ -221,13 +232,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <!--  插件-->
-        <profile>
-            <id>install-plugin-profile</id>
-        </profile>
-        <profile>
-            <id>release-plugin-profile</id>
         </profile>
     </profiles>
 </project>
