@@ -56,7 +56,7 @@
                         </a-col>
                         <a-col :span="7" style="text-align: right" class="text-overflow-hidden">
                           <a-tooltip :title="`当前状态：${statusMap[item.status]} ${item.statusMsg ? '状态消息：' + item.statusMsg : ''} `">
-                            <a-tag :color="statusColor[item.status]" style="margin-right: 0px"> {{ statusMap[item.status] || "未知" }}</a-tag>
+                            <a-tag :color="statusColor[item.status]" style="margin-right: 0px"> {{ statusMap[item.status] || "未知状态" }}</a-tag>
                           </a-tooltip>
                         </a-col>
                       </a-row>
@@ -91,7 +91,7 @@
                     <a-row class="item-info">
                       <a-col :span="6" class="title text-overflow-hidden">构建ID:</a-col>
                       <a-col :span="18" class="content text-overflow-hidden">
-                        <span v-if="item.buildId <= 0"></span>
+                        <a-tag v-if="item.buildId <= 0">-</a-tag>
                         <a-tag v-else color="#108ee9" @click="handleBuildLog(item)">#{{ item.buildId }}</a-tag>
                       </a-col>
                     </a-row>
