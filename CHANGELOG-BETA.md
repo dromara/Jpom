@@ -1,5 +1,14 @@
 # 🚀 版本日志
 
+### 2.10.40.8-beta (2023-04-19)
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 仓库编辑清除密码按钮弹窗层级问题（感谢 [@轩辕豆豆](https://gitee.com/xuanyuandoudou) [Gitee issues I6VSCR](https://gitee.com/dromara/Jpom/issues/I6VSCR) ）
+2. 【server】修复 优化构建列表卡片布局存在未构建数据布局错乱问题（感谢 [@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues I6VUB7](https://gitee.com/dromara/Jpom/issues/I6VUB7) ）
+
+------
+
 ### 2.10.40.7-beta (2023-04-14)
 
 ### 🐞 解决BUG、优化功能
