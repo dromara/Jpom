@@ -311,7 +311,7 @@
               <template #title>
                 <ul>
                   <li>白名单路径是指项目文件存放到服务中的文件夹</li>
-                  <li>可以到节点管理中的【系统管理】=>【白名单配置】修改</li>
+                  <li>可以到节点管理中的【插件端配置】=>【白名单配置】修改</li>
                   <li>项目文件夹是项目实际存放的目录名称</li>
                   <li>项目文件会存放到 <br />&nbsp;&nbsp;<b>项目白名单路径+项目文件夹</b></li>
                 </ul>
@@ -832,7 +832,7 @@ export default {
             {
               title: '导航助手',
               element: document.querySelector('.jpom-node-project-whitelist'),
-              intro: '这里是选择节点设置的白名单目录，白名单的设置在侧边栏菜单<b>系统管理</b>里面。'
+              intro: '这里是选择节点设置的白名单目录，白名单的设置在侧边栏菜单<b>插件端配置</b>里面。'
             }
           ]
         }

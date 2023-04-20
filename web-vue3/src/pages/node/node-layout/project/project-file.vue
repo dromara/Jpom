@@ -137,7 +137,7 @@
                 </a-tooltip>
               </template>
               <template v-else>
-                <a-tooltip title="需要到 节点管理中的系统管理的白名单配置中配置允许编辑的文件后缀">
+                <a-tooltip title="需要到 节点管理中的【插件端配置】的白名单配置中配置允许编辑的文件后缀">
                   <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEditFile(record)"
                     >编辑</a-button
                   >

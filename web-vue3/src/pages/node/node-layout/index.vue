@@ -163,7 +163,7 @@ export default {
               title: '导航助手',
               element: document.querySelector('.whitelistDirectory'),
               intro:
-                '白名单目录是一个配置型菜单，里面配置的内容将会在</p><p><b>项目列表</b></br><b>Nginx 列表</b></br><b>证书管理</b></p> 【系统管理】->【白名单配置】。'
+                '白名单目录是一个配置型菜单，里面配置的内容将会在</p><p><b>项目列表</b></br><b>Nginx 列表</b></br><b>证书管理</b></p> 【插件端配置】->【白名单配置】。'
             }
           ]
         }
