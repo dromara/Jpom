@@ -25,3 +25,13 @@ export function initInstall(params) {
     data: params,
   });
 }
+
+export function loadingLogo() {
+  return axios({
+    url: "/logo-image",
+    method: "get",
+    headers: {
+      loading: "no",
+    },
+  });
+}

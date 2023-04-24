@@ -32,10 +32,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.text.csv.*;
-import cn.hutool.core.util.EnumUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -54,6 +51,7 @@ import org.dromara.jpom.model.enums.GitProtocolEnum;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
+import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.RepositoryService;
@@ -124,13 +122,14 @@ public class RepositoryController extends BaseServerController {
      */
     @GetMapping(value = "/build/repository/export")
     @Feature(method = MethodFeature.DOWNLOAD)
+    @SystemPermission
     public void exportRepositoryList(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String fileName = "导出的 仓库信息 数据 " + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
         this.setApplicationHeader(response, fileName);
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
         int pageInt = 0;
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
-        writer.writeLine("name", "address", "type", "protocol", "share", "private rsa", "username", "password", "timeout(s)");
+        writer.writeLine("name", "address", "type", "protocol", "private rsa", "username", "password", "timeout(s)", "global(share)");
         while (true) {
             // 下一页
             paramMap.put("page", String.valueOf(++pageInt));
@@ -145,11 +144,11 @@ public class RepositoryController extends BaseServerController {
                     repositoryModel.getGitUrl(),
                     EnumUtil.likeValueOf(RepositoryModel.RepoType.class, repositoryModel.getRepoType()),
                     EnumUtil.likeValueOf(GitProtocolEnum.class, repositoryModel.getProtocol()),
-                    repositoryModel.getWorkspaceId(),
                     repositoryModel.getRsaPrv(),
                     repositoryModel.getUserName(),
                     repositoryModel.getPassword(),
-                    repositoryModel.getTimeout()
+                    repositoryModel.getTimeout(),
+                    repositoryModel.global() ? "是" : "否"
                 ))
                 .map(objects -> objects.stream().map(StrUtil::toStringOrNull).toArray(String[]::new))
                 .forEach(writer::writeLine);
@@ -168,7 +167,8 @@ public class RepositoryController extends BaseServerController {
      */
     @PostMapping(value = "/build/repository/import-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<String> importData(MultipartFile file) throws IOException {
+    @SystemPermission
+    public JsonMessage<String> importData(MultipartFile file, HttpServletRequest request) throws IOException {
         Assert.notNull(file, "没有上传文件");
         String originalFilename = file.getOriginalFilename();
         String extName = FileUtil.extName(originalFilename);
@@ -212,23 +212,27 @@ public class RepositoryController extends BaseServerController {
                 gitProtocolEnum = GitProtocolEnum.SSH;
             }
             Assert.notNull(gitProtocolEnum, () -> StrUtil.format("第 {} 行 protocol 字段值错误（http/http/ssh）", finalI + 1));
-            String share = csvRow.getByName("share");
-            Assert.hasText(share, () -> StrUtil.format("第 {} 行 share 字段不能位空", finalI + 1));
             String privateRsa = csvRow.getByName("private rsa");
             String username = csvRow.getByName("username");
             String password = csvRow.getByName("password");
             Integer timeout = Convert.toInt(csvRow.getByName("timeout(s)"));
+            String globalStr = csvRow.getByName("global(share)");
+            boolean global = BooleanUtil.toBoolean(globalStr);
+            //
             RepositoryModel where = new RepositoryModel();
             where.setProtocol(gitProtocolEnum.getCode());
             where.setGitUrl(address);
+            // 工作空间
+            where.setWorkspaceId(global ? ServerConst.WORKSPACE_GLOBAL : repositoryService.getCheckUserWorkspace(request));
+            // 查询是否存在
             RepositoryModel repositoryModel = repositoryService.queryByBean(where);
+            //
             where.setName(name);
             where.setTimeout(timeout);
             where.setPassword(password);
             where.setRsaPrv(privateRsa);
             where.setRepoType(repoType.getCode());
             where.setUserName(username);
-            where.setWorkspaceId(share);
             // 检查 rsa 私钥
             boolean andUpdateSshKey = this.checkAndUpdateSshKey(where);
             Assert.state(andUpdateSshKey, StrUtil.format("第 {} 行 rsa 私钥文件不存在或者有误", finalI + 1));
@@ -240,8 +244,8 @@ public class RepositoryController extends BaseServerController {
                     Tuple branchAndTagList = (Tuple) plugin.execute("branchAndTagList", map);
                     //Tuple tuple = GitUtil.getBranchAndTagList(repositoryModelReq);
                 } catch (Exception e) {
-                    Assert.state(false, StrUtil.format("第 {} 行 仓库信息有误", finalI + 1));
                     log.warn("获取仓库分支失败", e);
+                    throw new IllegalStateException(StrUtil.format("第 {} 行 仓库信息有误", finalI + 1));
                 }
             }
             if (repositoryModel == null) {
