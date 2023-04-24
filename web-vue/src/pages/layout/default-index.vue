@@ -3,7 +3,7 @@
     <a-layout-sider v-model="collapsed" :trigger="null" collapsible :class="`${this.fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}`">
       <a-tooltip placement="right" title="点击可以折叠左侧菜单栏">
         <div class="logo" @click="changeCollapsed()">
-          <img :src="logoUrl" />
+          <img :src="logoUrl" alt="logo" />
           {{ this.subTitle }}
         </div>
       </a-tooltip>
@@ -26,7 +26,7 @@ import { mapGetters } from "vuex";
 import SideMenu from "./side-menu";
 // import UserHeader from "./user-header";
 import ContentTab from "./content-tab";
-import { checkSystem } from "@/api/install";
+import { checkSystem, loadingLogo } from "@/api/install";
 
 export default {
   props: {
@@ -43,7 +43,7 @@ export default {
     return {
       collapsed: false,
       subTitle: "项目管理",
-      logoUrl: "",
+      logoUrl: require(`@/assets/images/jpom.png`),
     };
   },
   computed: {
@@ -129,7 +129,7 @@ export default {
           if (res.data.subTitle) {
             this.subTitle = res.data.subTitle;
           }
-          this.logoUrl = ((res.data.routerBase || "") + "/logo_image").replace(new RegExp("//", "gm"), "/");
+          // this.logoUrl = ((res.data.routerBase || "") + "/logo_image").replace(new RegExp("//", "gm"), "/");
 
           // 禁用导航
           this.$store.dispatch("commitGuide", { disabledGuide: res.data.disabledGuide, extendPlugins: res.data.extendPlugins });
@@ -148,6 +148,12 @@ export default {
           this.$router.push("/system/ipAccess");
         } else if (res.code === 222) {
           this.$router.push("/install");
+        }
+      });
+
+      loadingLogo().then((res) => {
+        if (res.data) {
+          this.logoUrl = res.data;
         }
       });
     },

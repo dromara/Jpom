@@ -130,7 +130,7 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
         File[] files = dir.listFiles();
         Assert.notNull(files, "压缩包里没有任何文件");
         File keyFile = Arrays.stream(files).filter(file -> StrUtil.endWithAnyIgnoreCase(file.getName(), keyNameSuffixes)).findAny().orElse(null);
-        Assert.notNull(keyFile, "没有包里没有找到私钥文件");
+        Assert.notNull(keyFile, "压缩包里没有找到私钥文件");
         //
         try {
             List<File> fileList = Arrays.stream(files)

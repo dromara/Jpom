@@ -17,7 +17,7 @@ import { useGuideStore } from '@/stores/guide'
 const routerActivation = ref(true)
 const guideStore = useGuideStore().getGuideCache
 const scrollbarFlag = computed(() => {
-  return guideStore.scrollbarFlag === undefined ? true : guideStore.scrollbarFlag
+  return guideStore.scrollbarFlag ?? true
 })
 
 onMounted(() => {})
