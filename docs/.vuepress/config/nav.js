@@ -2,7 +2,9 @@ module.exports = [
   {
     text: '🔖首页', link: '/'
   },
-
+  {
+    text: '💻演示', link: '/pages/2e4ffc/'
+  },
   {
     text: '📖文档', link: '/pages/install/', items: [
       {text: '一键安装教程', link: '/pages/15b7a2/'},
