@@ -55,3 +55,4 @@ ADD,SCRIPT_EXECUTE_LOG,nodeName,String,50,,节点名称,false
 ADD,SCRIPT_INFO,workspaceName,String,50,,工作空间名称,false
 ADD,PROJECT_INFO,workspaceName,String,50,,工作空间名称,false
 ADD,SCRIPT_EXECUTE_LOG,workspaceName,String,50,,工作空间名称,false
+ALTER,REPOSITORY,password,String,255,,登录密码,true
