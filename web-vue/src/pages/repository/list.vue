@@ -29,7 +29,10 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-          <a-button type="primary" @click="handleAddGitee">令牌导入</a-button>
+          <a-tooltip>
+            <template slot="title">使用 Access Token 一次导入多个项目<br />点击<a target="_blank" href="https://jpom.top/pages/jpom-server-import-multi-repos/">文档链接</a>查看详情</template>
+            <a-button type="primary" @click="handleAddGitee"><a-icon type="question-circle" theme="filled" />令牌导入</a-button>
+          </a-tooltip>
           <a-button type="primary" @click="handlerExportData">导出</a-button>
           <a-dropdown>
             <a-menu slot="overlay">
