@@ -81,6 +81,9 @@
         <a-form-model-item label="镜像名称" prop="image">
           <a-input v-model="temp.image" placeholder="镜像名称" />
         </a-form-model-item>
+        <a-form-model-item label="hostname" prop="hostname">
+          <a-input v-model="temp.hostname" placeholder="主机名 hostname" />
+        </a-form-model-item>
         <a-form-model-item label="更多配置" prop="">
           <a-tabs>
             <a-tab-pane key="port" tab="端口">
@@ -533,6 +536,7 @@ export default {
       this.temp = {
         serviceId: record.id,
         name: spec.name,
+        hostname: spec.taskTemplate?.containerSpec?.hostname,
         mode: spec.mode?.mode,
         replicas: spec.mode?.replicated?.replicas,
         image: image,

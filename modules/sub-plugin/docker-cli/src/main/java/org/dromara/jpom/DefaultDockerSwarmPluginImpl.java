@@ -25,6 +25,7 @@ package org.dromara.jpom;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.unit.DataSize;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -325,7 +326,8 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
     private ContainerSpec buildContainerSpec(Map<String, Object> parameter, ContainerSpec oldContainerSpec) {
         String image = (String) parameter.get("image");
         ContainerSpec containerSpec = ObjectUtil.defaultIfNull(oldContainerSpec, new ContainerSpec());
-        //new ContainerSpec();
+        String hostname = (String) parameter.get("hostname");
+        Opt.ofBlankAble(hostname).ifPresent(containerSpec::withHostname);
         containerSpec.withImage(image);
         //
         Collection<Map<String, String>> args = (Collection) parameter.get("args");

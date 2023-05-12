@@ -273,7 +273,8 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
                 return labelMap;
             })
             .ifPresent(containerCmd::withLabels);
-
+        String hostname = (String) parameter.get("hostname");
+        Opt.ofBlankAble(hostname).ifPresent(containerCmd::withHostName);
         HostConfig hostConfig = HostConfig.newHostConfig();
         Opt.ofBlankAble(runtime).ifPresent(hostConfig::withRuntime);
         List<ExposedPort> exposedPortList = new ArrayList<>();

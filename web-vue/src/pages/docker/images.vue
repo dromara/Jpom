@@ -229,6 +229,9 @@
             </a-col>
           </a-row>
         </a-form-model-item>
+        <a-form-model-item label="hostname" prop="hostname">
+          <a-input v-model="temp.hostname" placeholder="主机名 hostname" />
+        </a-form-model-item>
         <a-form-model-item label="网络">
           <a-auto-complete v-model="temp.networkMode" placeholder="网络模式：bridge、container:<name|id>、host、container、none" option-label-prop="value">
             <template slot="dataSource">
@@ -555,6 +558,7 @@ export default {
           restartPolicy: this.temp.restartPolicy,
           labels: this.temp.labels,
           runtime: this.temp.runtime,
+          hostname: this.temp.hostname,
           storageOpt: {},
         };
         temp.volumes = (this.temp.volumes || [])
