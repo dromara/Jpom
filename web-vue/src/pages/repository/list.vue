@@ -29,7 +29,10 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-          <a-button type="primary" @click="handleAddGitee">令牌导入</a-button>
+          <a-tooltip>
+            <template slot="title">使用 Access Token 一次导入多个项目<br/>点击<a target="_blank" href="https://jpom.top/pages/jpom-server-import-multi-repos/">文档链接</a>查看详情</template>
+            <a-button type="primary" @click="handleAddGitee"><a-icon type="question-circle" theme="filled" />令牌导入</a-button>
+          </a-tooltip>
         </a-space>
       </template>
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
@@ -201,6 +204,9 @@
     </a-modal>
     <a-modal :zIndex="1009" destroyOnClose v-model="giteeImportVisible" title="通过私人令牌导入仓库" width="80%" :footer="null" :maskClosable="false">
       <a-form-model :label-col="{ span: 4 }" :rules="giteeImportFormRules" :model="giteeImportForm" ref="giteeImportForm" :wrapper-col="{ span: 20 }">
+        <a-form-model-item prop="tip" label="使用说明">
+          点击<a target="_blank" href="https://jpom.top/pages/jpom-server-import-multi-repos/">文档链接</a>查看详情
+        </a-form-model-item>
         <a-form-model-item prop="token" label="私人令牌" help="使用私人令牌，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。">
           <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder[giteeImportForm.type]}`">
             <!-- <a-input v-model="giteeImportForm.token" :placeholder="importTypePlaceholder[giteeImportForm.type]">
