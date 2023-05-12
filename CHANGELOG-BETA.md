@@ -12,6 +12,7 @@
 2. 【server】优化 增大验证码检测功能异常捕捉范围
 3. 【server】修复 令牌导入仓库令牌长度不足问题（感谢 [@Sherman Chu](https://github.com/yeliulee) [Github issues 45](https://github.com/dromara/Jpom/issues/45) ）
 4. 【server】修复 分发列表配置功能无法使用（感谢 [@Free](https://gitee.com/fjlyy321) [Gitee issues I716UI](https://gitee.com/dromara/Jpom/issues/I716UI) ）
+5. 【server】修复 构建卡片布局、构建详情中构建方式显示不正确（感谢@A）
 
 ------
 
