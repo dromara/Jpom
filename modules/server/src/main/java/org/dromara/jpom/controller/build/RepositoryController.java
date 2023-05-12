@@ -129,11 +129,11 @@ public class RepositoryController extends BaseServerController {
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
         int pageInt = 0;
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
-        writer.writeLine("name", "address", "type", "protocol", "private rsa", "username", "password", "timeout(s)", "global(share)");
+        writer.writeLine("name", "address", "type", "protocol", "private rsa", "username", "password", "timeout(s)");
         while (true) {
             // 下一页
             paramMap.put("page", String.valueOf(++pageInt));
-            PageResultDto<RepositoryModel> listPage = repositoryService.listPage(request, paramMap);
+            PageResultDto<RepositoryModel> listPage = repositoryService.listPage(paramMap, false);
             if (listPage.isEmpty()) {
                 break;
             }
@@ -147,8 +147,7 @@ public class RepositoryController extends BaseServerController {
                     repositoryModel.getRsaPrv(),
                     repositoryModel.getUserName(),
                     repositoryModel.getPassword(),
-                    repositoryModel.getTimeout(),
-                    repositoryModel.global() ? "是" : "否"
+                    repositoryModel.getTimeout()
                 ))
                 .map(objects -> objects.stream().map(StrUtil::toStringOrNull).toArray(String[]::new))
                 .forEach(writer::writeLine);
@@ -216,14 +215,13 @@ public class RepositoryController extends BaseServerController {
             String username = csvRow.getByName("username");
             String password = csvRow.getByName("password");
             Integer timeout = Convert.toInt(csvRow.getByName("timeout(s)"));
-            String globalStr = csvRow.getByName("global(share)");
-            boolean global = BooleanUtil.toBoolean(globalStr);
             //
+            String optWorkspaceId = repositoryService.covertGlobalWorkspace(request);
             RepositoryModel where = new RepositoryModel();
             where.setProtocol(gitProtocolEnum.getCode());
             where.setGitUrl(address);
             // 工作空间
-            where.setWorkspaceId(global ? ServerConst.WORKSPACE_GLOBAL : repositoryService.getCheckUserWorkspace(request));
+            where.setWorkspaceId(optWorkspaceId);
             // 查询是否存在
             RepositoryModel repositoryModel = repositoryService.queryByBean(where);
             //

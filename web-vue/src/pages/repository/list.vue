@@ -188,7 +188,7 @@
             <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="公钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"></a-textarea>
           </a-form-model-item>
         </template>
-        <a-form-model-item label="共享" prop="global">
+        <a-form-model-item label="共享" prop="global" v-if="this.workspaceId !== 'GLOBAL'">
           <a-radio-group v-model="temp.global">
             <a-radio :value="true"> 全局</a-radio>
             <a-radio :value="false"> 当前工作空间</a-radio>
@@ -295,7 +295,7 @@
   </div>
 </template>
 <script>
-import {providerInfo, authorizeRepos, deleteRepository, editRepository, getRepositoryList, restHideField, sortItem, exportData, importTemplate, importData} from "@/api/repository";
+import { providerInfo, authorizeRepos, deleteRepository, editRepository, getRepositoryList, restHideField, sortItem, exportData, importTemplate, importData } from "@/api/repository";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 
 export default {
@@ -304,6 +304,10 @@ export default {
     choose: {
       type: Boolean,
       default: false,
+    },
+    workspaceId: {
+      type: String,
+      default: "",
     },
   },
   data() {
@@ -442,13 +446,21 @@ export default {
   watch: {},
   created() {
     this.loadData();
+    providerInfo().then((response) => {
+      if (response.code === 200) {
+        this.providerData = response.data;
+      }
+    });
   },
   methods: {
     CHANGE_PAGE,
     // 加载数据
-    async loadData(pointerEvent) {
+    loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.loading = true;
+      if (this.workspaceId) {
+        this.listQuery = { ...this.listQuery, workspaceId: this.workspaceId };
+      }
       getRepositoryList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
@@ -456,10 +468,6 @@ export default {
         }
         this.loading = false;
       });
-      const response = await providerInfo();
-      if (response.code === 200) {
-        this.providerData = response.data;
-      }
     },
     importChange(value) {
       this.giteeImportForm.address = this.providerData[value].baseUrl;
@@ -484,11 +492,12 @@ export default {
       window.open(importTemplate(), "_blank");
     },
     handlerExportData() {
-      window.open(exportData({ ...this.listQuery }), '_blank')
+      window.open(exportData({ ...this.listQuery, workspaceId: this.workspaceId }), "_blank");
     },
     beforeUpload(file) {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("workspaceId", this.workspaceId);
       importData(formData).then((res) => {
         if (res.code === 200) {
           this.$notification.success({

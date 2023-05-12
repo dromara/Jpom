@@ -14,11 +14,16 @@
         "title": "SSH管理",
         "role": "system"
       },
-        {
-            "id": "machine_docker_info",
-            "title": "Docker管理",
-            "role": "system"
-        }
+      {
+        "id": "machine_docker_info",
+        "title": "Docker管理",
+        "role": "system"
+      },
+      {
+        "id": "global_repository",
+        "title": "共享仓库",
+        "role": "system"
+      }
     ]
   },
   {
