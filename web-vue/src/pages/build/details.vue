@@ -15,7 +15,7 @@
       </a-descriptions-item>
       <a-descriptions-item label="分组/标签"> {{ data.branchName }} {{ data.branchTagName }} </a-descriptions-item>
       <a-descriptions-item label="构建方式">
-        <template v-if="data.bubuildMode === 1">
+        <template v-if="data.buildMode === 1">
           <a-icon type="cloud" />
           容器构建
         </template>

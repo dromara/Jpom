@@ -99,7 +99,7 @@
                     <a-row class="item-info">
                       <a-col :span="6" class="title text-overflow-hidden">构建方式:</a-col>
                       <a-col :span="18" class="content text-overflow-hidden">
-                        <template v-if="item.bubuildMode === 1">
+                        <template v-if="item.buildMode === 1">
                           <a-icon type="cloud" />
                           容器构建
                         </template>
