@@ -4,6 +4,7 @@
     <a-table size="middle" :data-source="list" :columns="columns" :pagination="pagination" bordered :rowKey="(record, index) => index" @change="change">
       <template slot="title">
         <a-space>
+          <a-input v-model="listQuery['%modifyUser%']" @pressEnter="loadData" placeholder="用户id" class="search-input-item" />
           <a-input v-model="listQuery['%username%']" @pressEnter="loadData" placeholder="用户名" class="search-input-item" />
           <a-input v-model="listQuery['%ip%']" @pressEnter="loadData" placeholder="登录IP" class="search-input-item" />
           <a-range-picker class="search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />

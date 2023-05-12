@@ -46,6 +46,7 @@ const routeMenuMap = {
   machine_node_info: "/system/assets/machine-list",
   machine_ssh_info: "/system/assets/ssh-list",
   machine_docker_info: "/system/assets/docker-list",
+  global_repository: "/system/assets/repository-list",
   configWorkspaceEnv: "/script/env-list",
   cronTools: "/tools/cron",
   myWorkspaceList: "/my-workspace",

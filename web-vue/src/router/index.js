@@ -163,6 +163,11 @@ const management = [
     component: () => import("../pages/system/assets/docker/list"),
   },
   {
+    path: "/system/assets/repository-list",
+    name: "system-global-repository",
+    component: () => import("../pages/repository/global-repository"),
+  },
+  {
     path: "/user/permission-group",
     name: "permission-group",
     component: () => import("../pages/user/permission-group"),

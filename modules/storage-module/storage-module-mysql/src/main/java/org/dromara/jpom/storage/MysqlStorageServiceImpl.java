@@ -94,7 +94,7 @@ public class MysqlStorageServiceImpl implements IStorageService {
 
     @Override
     public void close() throws Exception {
-        log.info("h2 db destroy");
+        log.info("mysql db destroy");
         if (this.dsFactory != null) {
             dsFactory.destroy();
             this.dsFactory = null;

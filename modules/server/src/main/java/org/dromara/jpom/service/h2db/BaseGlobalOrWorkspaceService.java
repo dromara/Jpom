@@ -68,11 +68,11 @@ public abstract class BaseGlobalOrWorkspaceService<T extends BaseWorkspaceModel>
         return super.listPage(paramMap);
     }
 
-    public PageResultDto<T> listPage(HttpServletRequest request, Map<String, String> paramMap) {
-        String workspaceId = this.getCheckUserWorkspace(request);
-        paramMap.put("workspaceId:in", workspaceId + StrUtil.COMMA + ServerConst.WORKSPACE_GLOBAL);
-        return super.listPage(paramMap, false);
-    }
+//    public PageResultDto<T> listPage(HttpServletRequest request, Map<String, String> paramMap) {
+//        String workspaceId = this.getCheckUserWorkspace(request);
+//        paramMap.put("workspaceId:in", workspaceId + StrUtil.COMMA + ServerConst.WORKSPACE_GLOBAL);
+//        return super.listPage(paramMap, false);
+//    }
 
     @Override
     public List<T> listByWorkspace(HttpServletRequest request) {

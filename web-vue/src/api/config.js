@@ -218,7 +218,7 @@ export default request;
 //
 export function loadRouterBase(url, params) {
   const paramsObj = params || {};
-  paramsObj[CACHE_WORKSPACE_ID] = store.getters.getWorkspaceId;
+  paramsObj[CACHE_WORKSPACE_ID] = paramsObj[CACHE_WORKSPACE_ID] || store.getters.getWorkspaceId;
   const paramsQuery = Qs.stringify(paramsObj);
   return `${((window.routerBase || "") + url).replace(new RegExp("//", "gm"), "/")}?${paramsQuery}`;
 }

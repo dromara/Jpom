@@ -287,9 +287,9 @@ public class LoginControl extends BaseServerController implements InitializingBe
     @PostMapping(value = "oauth2/login", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
     public JsonMessage<UserLoginDto> oauth2Callback(@ValidatorItem String code,
-                                              @ValidatorItem String provide,
-                                              String state,
-                                              HttpServletRequest request) {
+                                                    @ValidatorItem String provide,
+                                                    String state,
+                                                    HttpServletRequest request) {
         AuthRequest authRequest = Oauth2Factory.get(provide);
         AuthCallback authCallback = new AuthCallback();
         authCallback.setCode(code);
@@ -437,7 +437,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
         try {
             this.createCaptcha();
             log.debug("当前服务器验证码可用");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.warn("当前服务器生成验证码异常,自动禁用验证码", e);
             webConfig.setDisabledCaptcha(true);
         }
