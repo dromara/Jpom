@@ -1234,7 +1234,7 @@ export default {
     handleDispatch(record) {
       getDispatchProject(record.id, true).then((res) => {
         if (res.code === 200) {
-          this.itemProjectList = res.data;
+          this.itemProjectList = res.data?.projectList;
           // itemProjectList
           this.temp = Object.assign({ type: "upload" }, record);
           this.dispatchVisible = true;
@@ -1533,9 +1533,9 @@ export default {
     handleViewDispatchManagerById(id) {
       getDispatchProject(id, true).then((res) => {
         if (res.code === 200) {
-          this.dispatchManagerList = res.data;
+          this.dispatchManagerList = res.data?.projectList;
           this.temp = {
-            dispatchManagerList: res.data,
+            dispatchManagerList: res.data?.projectList,
             id: id,
           };
           this.viewDispatchManager = true;
