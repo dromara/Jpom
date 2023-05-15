@@ -859,7 +859,7 @@ export default {
       uploading: false,
       itemProjectList: [],
       viewDispatchManager: false,
-      dispatchManagerList: [],
+
       drawerStatusVisible: false,
     };
   },
@@ -1533,7 +1533,6 @@ export default {
     handleViewDispatchManagerById(id) {
       getDispatchProject(id, true).then((res) => {
         if (res.code === 200) {
-          this.dispatchManagerList = res.data?.projectList;
           this.temp = {
             dispatchManagerList: res.data?.projectList,
             id: id,
