@@ -354,7 +354,7 @@ docker-compose -f docker-compose.yml up
 ## Linux 服务方式管理
 
 > 这里安装服务仅供参考，实际中可以根据需求自定义配置
-
+>
 > 在使用 `./bin/Service.sh install` 成功后
 >
 > systemctl {status | start | stop | restart} jpom-server
@@ -432,7 +432,7 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 
 为了保证项目代码的质量与规范，以及帮助你更快的了解项目的结构，请在贡献之前阅读：
 
-- [Jpom 贡献说明](https://gitee.com/dromara/Jpom/blob/master/CONTRIBUTING.md)
+- [Jpom 贡献说明](https://gitee.com/dromara/Jpom/blob/master/CODE_OF_CONDUCT.md)
 - [中英文排版规范](https://gitee.com/dromara/Jpom/blob/dev/typography-specification.md)
 
 ### 贡献步骤
@@ -482,7 +482,7 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
    （在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom.top/pages/praise/publicity/)
 3. 企业技术服务请单独与我们联系沟通服务方案
 4. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
-5. 参与贡献，请查看[贡献指南](#🔨贡献指南)。
+5. 参与贡献，请查看[贡献指南](#贡献指南)。
 
 感谢所有赞赏以及参与贡献的小伙伴，你们的支持是我们不断更新前进的动力！
 
