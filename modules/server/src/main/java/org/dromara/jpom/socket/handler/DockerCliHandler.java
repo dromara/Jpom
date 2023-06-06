@@ -125,7 +125,7 @@ public class DockerCliHandler extends BaseTerminalHandler {
     }
 
 
-    private class HandlerItem implements Runnable {
+    private class HandlerItem implements Runnable, AutoCloseable {
         private final WebSocketSession session;
         private final MachineDockerModel dockerInfoModel;
         private final Map<String, Object> map;
@@ -147,7 +147,15 @@ public class DockerCliHandler extends BaseTerminalHandler {
         @Override
         public void run() {
             map.put("containerId", containerId);
-            Consumer<String> logConsumer = s -> sendBinary(session, s);
+            Consumer<String> logConsumer = s -> {
+                if (StrUtil.startWith(s, "CALLBACK_EXECID:")) {
+                    // 终端id
+                    String execId = StrUtil.removePrefix(s, "CALLBACK_EXECID:");
+                    session.getAttributes().put("execId", execId);
+                    return;
+                }
+                sendBinary(session, s);
+            };
             map.put("charset", CharsetUtil.CHARSET_UTF_8);
             map.put("stdin", inputStream);
             map.put("logConsumer", logConsumer);
@@ -167,6 +175,21 @@ public class DockerCliHandler extends BaseTerminalHandler {
                 sendBinary(session, "执行异常:" + e.getMessage());
             }
         }
+
+        @Override
+        public void close() throws Exception {
+            Object execId = session.getAttributes().get("execId");
+            if (execId == null) {
+                return;
+            }
+            IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+            map.put("execId", execId.toString());
+            try {
+                plugin.execute("inspectExec", map);
+            } catch (Exception e) {
+                log.error("执行容器命令异常", e);
+            }
+        }
     }
 
     @Override
@@ -176,6 +199,7 @@ public class DockerCliHandler extends BaseTerminalHandler {
             IoUtil.close(handlerItem.inputStream);
             IoUtil.close(handlerItem.outputStream);
         }
+        IoUtil.close(handlerItem);
         IoUtil.close(session);
         HANDLER_ITEM_CONCURRENT_HASH_MAP.remove(session.getId());
         SocketSessionUtil.close(session);
