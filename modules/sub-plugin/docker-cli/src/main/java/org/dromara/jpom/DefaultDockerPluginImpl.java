@@ -434,13 +434,17 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
             InputStream stdin1 = (InputStream) parameter.get("stdin");
             //
             ExecCreateCmd execCreateCmd = dockerClient.execCreateCmd(containerId);
-            execCreateCmd.withAttachStdout(true).withAttachStdin(true).withAttachStderr(true).withTty(true).withCmd("/bin/sh");
+            execCreateCmd.withAttachStdout(true)
+                .withAttachStdin(true)
+                .withAttachStderr(true)
+                .withTty(true)
+                .withCmd("/bin/bash");
             ExecCreateCmdResponse exec = execCreateCmd.exec();
             //
             String execId = exec.getId();
             ExecStartCmd execStartCmd = dockerClient.execStartCmd(execId);
             execStartCmd.withDetach(false).withTty(true).withStdIn(stdin1);
-
+            logConsumer.accept(StrUtil.format("CALLBACK_EXECID:{}", execId));
             execStartCmd.exec(new InvocationBuilder.AsyncResultCallback<Frame>() {
                 @Override
                 public void onNext(Frame frame) {
@@ -453,6 +457,19 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         } finally {
             errorConsumer.accept("exit");
         }
+    }
+
+    /**
+     * 中断 终端
+     *
+     * @param parameter 参数
+     */
+    private void inspectExecCmd(Map<String, Object> parameter) {
+        DockerClient dockerClient = DockerUtil.get(parameter);
+        String execId = (String) parameter.get("execId");
+        //
+        InspectExecCmd inspectExecCmd = dockerClient.inspectExecCmd(execId);
+        inspectExecCmd.exec();
     }
 
     @SuppressWarnings("unchecked")
