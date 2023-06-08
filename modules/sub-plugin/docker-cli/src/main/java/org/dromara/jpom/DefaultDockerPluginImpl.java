@@ -460,7 +460,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
     }
 
     /**
-     * 中断 终端
+     * 检查 终端
      *
      * @param parameter 参数
      */
@@ -469,7 +469,22 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         String execId = (String) parameter.get("execId");
         //
         InspectExecCmd inspectExecCmd = dockerClient.inspectExecCmd(execId);
-        inspectExecCmd.exec();
+        inspectExecCmd.exec().isRunning();
+    }
+
+    /**
+     * 中断 终端
+     *
+     * @param parameter 参数
+     */
+    private void resizeExecCmd(Map<String, Object> parameter) {
+        DockerClient dockerClient = DockerUtil.get(parameter);
+        String execId = (String) parameter.get("execId");
+        //
+        ResizeExecCmd resizeExecCmd = dockerClient.resizeExecCmd(execId);
+        Integer sizeHeight = (Integer) parameter.get("sizeHeight");
+        Integer sizeWidth = (Integer) parameter.get("sizeWidth");
+        resizeExecCmd.withSize(sizeHeight, sizeWidth).exec();
     }
 
     @SuppressWarnings("unchecked")
