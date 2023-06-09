@@ -50,6 +50,11 @@ public class WorkspaceModel extends BaseUserModifyDbModel {
      */
     private String description;
 
+    /**
+     * 分组
+     */
+    private String group;
+
     public WorkspaceModel(String id) {
         this.setId(id);
     }

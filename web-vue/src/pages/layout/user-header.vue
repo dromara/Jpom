@@ -3,8 +3,8 @@
     <a-button-group>
       <a-button v-if="this.mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
-          <a-tooltip :title="selectWorkspace && myWorkspaceList.filter((item) => item.id === selectWorkspace)[0].name">
-            {{ selectWorkspace && myWorkspaceList.filter((item) => item.id === selectWorkspace)[0].name }}
+          <a-tooltip :title="`${selectWorkspace.name} 【分组名：${selectWorkspace.group}】`">
+            {{ selectWorkspace.name }}
           </a-tooltip>
         </div>
       </a-button>
@@ -21,13 +21,35 @@
               <template #title>
                 <a-button type="link" icon="swap">切换工作空间</a-button>
               </template>
-              <template v-for="(item, index) in myWorkspaceList">
-                <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace" @click="handleWorkspaceChange(item.id)" :key="index">
-                  <a-button type="link" :disabled="item.id === selectWorkspace">
-                    {{ item.name }}
-                  </a-button>
-                </a-menu-item>
-                <a-menu-divider v-if="index != -1" :key="`${item.id}-divider`" />
+              <template v-if="myWorkspaceList.length == 1">
+                <template v-for="(item, index) in myWorkspaceList">
+                  <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace.id" @click="handleWorkspaceChange(item.id)" :key="index">
+                    <a-button type="link" :disabled="item.id === selectWorkspace.id">
+                      {{ item.name }}
+                    </a-button>
+                  </a-menu-item>
+                  <a-menu-divider v-if="index != -1" :key="`${item.id}-divider`" />
+                </template>
+              </template>
+              <template v-if="myWorkspaceList.length > 1">
+                <template v-for="(item1, index1) in myWorkspaceList">
+                  <a-sub-menu :key="index1">
+                    <template #title>
+                      <a-button type="link">
+                        {{ item1.value }}
+                      </a-button>
+                    </template>
+                    <template v-for="(item, index) in item1.children">
+                      <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace.id" @click="handleWorkspaceChange(item.id)" :key="index">
+                        <a-button type="link" :disabled="item.id === selectWorkspace.id">
+                          {{ item.name }}
+                        </a-button>
+                      </a-menu-item>
+                      <a-menu-divider v-if="index != -1" :key="`${index}-divider`" />
+                    </template>
+                  </a-sub-menu>
+                  <a-menu-divider v-if="item1 != -1" :key="`${index1}-divider`" />
+                </template>
               </template>
             </a-sub-menu>
             <a-menu-divider />
@@ -289,7 +311,7 @@ import { bindMfa, closeMfa, editUserInfo, generateMfa, getUserInfo, myWorkspace,
 import QRCode from "qrcodejs2";
 import sha1 from "js-sha1";
 import Vue from "vue";
-import { MFA_APP_TIP_ARRAY } from "@/utils/const";
+import { MFA_APP_TIP_ARRAY, itemGroupBy } from "@/utils/const";
 import UserLog from "./user-log.vue";
 
 export default {
@@ -310,7 +332,8 @@ export default {
       temp: {},
       tempVue: null,
       myWorkspaceList: [],
-      selectWorkspace: "",
+      selectWorkspace: {},
+
       customizeVisible: false,
       // 表单校验规则
       rules: {
@@ -389,15 +412,19 @@ export default {
       if (this.mode === "normal") {
         myWorkspace().then((res) => {
           if (res.code == 200 && res.data) {
-            this.myWorkspaceList = res.data;
+            const tempArray = res.data;
+
+            this.myWorkspaceList = itemGroupBy(tempArray, "group", "value", "children");
+
             let wid = this.$route.query.wid;
             wid = wid ? wid : this.getWorkspaceId;
-            const existWorkspace = this.myWorkspaceList.filter((item) => item.id === wid);
-            if (existWorkspace.length) {
+            const existWorkspace = tempArray.find((item) => item.id === wid);
+
+            if (existWorkspace) {
               this.$router.push({
                 query: { ...this.$route.query, wid: wid },
               });
-              this.selectWorkspace = wid;
+              this.selectWorkspace = existWorkspace;
             } else {
               this.handleWorkspaceChange(res.data[0]?.id);
             }

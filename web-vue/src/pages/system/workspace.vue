@@ -42,6 +42,9 @@
         <a-form-model-item label="名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="工作空间名称" />
         </a-form-model-item>
+        <a-form-model-item label="机器分组" prop="group">
+          <custom-select v-model="temp.group" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder="选择分组名"> </custom-select>
+        </a-form-model-item>
 
         <a-form-model-item label="描述" prop="description">
           <a-input v-model="temp.description" :maxLength="200" type="textarea" :rows="5" placeholder="工作空间描述" />
@@ -85,13 +88,14 @@
   </div>
 </template>
 <script>
-import { deleteWorkspace, editWorkSpace, getWorkSpaceList, getMenusConfig, saveMenusConfig } from "@/api/workspace";
+import { deleteWorkspace, editWorkSpace, getWorkSpaceList, getMenusConfig, saveMenusConfig, getWorkSpaceGroupList } from "@/api/workspace";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import workspaceEnv from "./workspace-env.vue";
-
+import CustomSelect from "@/components/customSelect";
 export default {
   components: {
     workspaceEnv,
+    CustomSelect,
   },
   data() {
     return {
@@ -104,6 +108,7 @@ export default {
       columns: [
         { title: "名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "name" } },
         { title: "描述", dataIndex: "description", ellipsis: true, width: 200, scopedSlots: { customRender: "description" } },
+        { title: "分组名", dataIndex: "group", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         {
           title: "创建时间",
@@ -131,6 +136,7 @@ export default {
       configMenuVisible: false,
       replaceFields: { children: "childs", title: "title", key: "id" },
       menusConfigData: {},
+      groupList: [],
     };
   },
   computed: {
@@ -142,6 +148,14 @@ export default {
     this.loadData();
   },
   methods: {
+    // 获取所有的分组
+    loadGroupList() {
+      getWorkSpaceGroupList().then((res) => {
+        if (res.data) {
+          this.groupList = res.data;
+        }
+      });
+    },
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true;
@@ -167,11 +181,13 @@ export default {
       });
     },
     handleAdd() {
+      this.loadGroupList();
       this.temp = {};
       this.editVisible = true;
       this.$refs["editForm"] && this.$refs["editForm"].resetFields();
     },
     handleEdit(record) {
+      this.loadGroupList();
       this.temp = Object.assign({}, record);
       this.editVisible = true;
     },
