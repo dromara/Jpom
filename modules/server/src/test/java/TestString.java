@@ -47,6 +47,13 @@ import java.util.stream.Stream;
 public class TestString {
 
     @Test
+    public void testCtrlC() {
+        char c = 3;
+        String s = String.valueOf(c);
+        System.out.println(s);
+    }
+
+    @Test
     public void testCharset() {
         Charset utf8 = CharsetUtil.charset("utf8");
         Charset utf82 = CharsetUtil.charset("utf-8");
