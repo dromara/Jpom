@@ -26,6 +26,19 @@ export function getWorkSpaceList(params) {
 }
 
 /*
+ * 工作空间分组列表
+ * @param {*}
+ * } params
+ */
+export function getWorkSpaceGroupList(params) {
+  return axios({
+    url: "/system/workspace/list-group-all",
+    method: "get",
+    params: params,
+  });
+}
+
+/*
  * 工作空间列表（查询所有)
  * @param {*}
  * } params

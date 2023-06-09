@@ -43,7 +43,7 @@ public class UserWorkspaceModel {
      * 原始
      */
     private String originalName;
-
+    private String group;
     /**
      * 自定义排序规则
      */

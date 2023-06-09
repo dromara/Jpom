@@ -191,7 +191,10 @@
             <a-form-model-item label="超时时间(s)" prop="timeout">
               <a-input-number v-model="temp.timeout" :min="1" placeholder="单位秒,最小值 1 秒" style="width: 100%" />
             </a-form-model-item>
-            <a-form-model-item label="文件后缀" prop="suffix" help="此配置仅对服务端管理生效,工作空间的 ssh 配置需要单独配置">
+            <a-form-model-item label="文件后缀" prop="suffix">
+              <template slot="help"
+                >此配置仅对服务端管理生效, 工作空间的 ssh 配置需要单独配置（<span style="color: red">配置方式：SSH列表->操作栏中->关联按钮->对应工作空间->操作栏中->配置按钮</span>）。
+              </template>
               <a-input
                 v-model="temp.allowEditSuffix"
                 type="textarea"

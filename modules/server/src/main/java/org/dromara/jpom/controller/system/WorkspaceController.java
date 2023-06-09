@@ -86,12 +86,13 @@ public class WorkspaceController extends BaseServerController {
      */
     @PostMapping(value = "/edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> create(String id, @ValidatorItem String name, @ValidatorItem String description) {
+    public JsonMessage<Object> create(String id, @ValidatorItem String name, @ValidatorItem String description, String group) {
         this.checkInfo(id, name);
         //
         WorkspaceModel workspaceModel = new WorkspaceModel();
         workspaceModel.setName(name);
         workspaceModel.setDescription(description);
+        workspaceModel.setGroup(group);
         if (StrUtil.isEmpty(id)) {
             // 创建
             workspaceService.insert(workspaceModel);
@@ -122,6 +123,18 @@ public class WorkspaceController extends BaseServerController {
     public JsonMessage<PageResultDto<WorkspaceModel>> list() {
         PageResultDto<WorkspaceModel> listPage = workspaceService.listPage(getRequest());
         return JsonMessage.success("", listPage);
+    }
+
+    /**
+     * 查询所有的分组
+     *
+     * @return list
+     */
+    @GetMapping(value = "list-group-all", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<List<String>> listGroupAll() {
+        List<String> listGroup = workspaceService.listGroup();
+        return JsonMessage.success("", listGroup);
     }
 
     /**
