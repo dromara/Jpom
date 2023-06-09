@@ -248,7 +248,7 @@ export default {
         console.error(err);
         this.$notification.info({
           key: "log-read-close",
-          message: "会话已经关闭",
+          message: "会话已经关闭[tail-log]",
         });
         clearInterval(this.socketCache[id].heart);
       };

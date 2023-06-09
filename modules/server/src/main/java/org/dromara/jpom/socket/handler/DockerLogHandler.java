@@ -24,6 +24,7 @@ package org.dromara.jpom.socket.handler;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -45,6 +46,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -106,13 +108,21 @@ public class DockerLogHandler extends BaseProxyHandler {
             map.put("charset", CharsetUtil.CHARSET_UTF_8);
             map.put("consumer", consumer);
             map.put("timestamps", json.getBoolean("timestamps"));
-            IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-            try {
-                plugin.execute("logContainer", map);
-            } catch (Exception e) {
-                log.error("拉取 容器日志异常", e);
-                return "执行异常:" + e.getMessage();
-            }
+            ThreadUtil.execute(() -> {
+                attributes.put("thread", Thread.currentThread());
+                IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+                try {
+                    plugin.execute("logContainer", map);
+                } catch (Exception e) {
+                    log.error("拉取 容器日志异常", e);
+                    try {
+                        SocketSessionUtil.send(session, "执行异常:" + e.getMessage());
+                    } catch (IOException ex) {
+                        log.error("发消息异常", e);
+                    }
+                }
+                log.debug("docker log 线程结束：{} {}", dockerInfoModel.getName(), attributes.get("uuid"));
+            });
         } else {
             return null;
         }
@@ -133,6 +143,8 @@ public class DockerLogHandler extends BaseProxyHandler {
         } catch (Exception e) {
             log.error("关闭资源失败", e);
         }
+        Thread thread = (Thread) attributes.get("thread");
+        Optional.ofNullable(thread).ifPresent(Thread::interrupt);
         SocketSessionUtil.close(session);
     }
 }

@@ -164,7 +164,7 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err);
-        this.$message.warning("会话已经关闭");
+        this.$message.warning("会话已经关闭[project-console]");
         clearInterval(this.heart);
       };
       this.socket.onmessage = (msg) => {
@@ -173,10 +173,8 @@ export default {
           const res = JSON.parse(msg.data);
           if (res.op === "stop" || res.op === "start" || res.op === "restart" || res.op === "status") {
             this.optButtonLoading = false;
+            this.$message.info(res.msg);
             if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
               // 如果操作是启动或者停止
               if (res.op === "stop") {
                 this.project = { ...this.project, status: false };
@@ -187,9 +185,6 @@ export default {
                 this.project = { ...this.project, status: true };
               }
             } else {
-              this.$notification.error({
-                message: res.msg,
-              });
               this.project = { ...this.project, status: false };
             }
             // return;

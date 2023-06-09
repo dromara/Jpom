@@ -4,7 +4,9 @@
       <template v-slot="{ index, item }">
         <div class="item">
           <template v-if="!item.warp">
-            <span class="linenumber">{{ index + 1 }}</span> {{ item.text }} &nbsp;&nbsp;
+            <span class="linenumber">{{ index + 1 }}</span>
+            <span v-html="item.text"></span>
+            &nbsp;&nbsp;
           </template>
         </div>
         <!-- <code-editor
@@ -34,6 +36,9 @@ import ansiparse from "@/utils/parse-ansi";
 // import codeEditor from "@/components/codeEditor";
 import { RecycleScroller } from "vue-virtual-scroller";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
+import Prism from "prismjs";
+import "prismjs/components/prism-log";
+import "prismjs/themes/prism-okaidia.min.css";
 export default {
   components: {
     // codeEditor,
@@ -87,11 +92,6 @@ export default {
         result = result.concat([
           {
             id: "system-warp-end:1",
-            warp: true,
-          },
-          {
-            id: "system-warp-end:2",
-            text: "",
             warp: true,
           },
         ]);
@@ -162,16 +162,23 @@ export default {
       if (!data) {
         return;
       }
-      const tempArray = (Array.isArray(data) ? data : [data]).map((item) => {
-        return {
-          text: ansiparse(item)
-            .map((ansiItem) => {
-              return ansiItem.text;
-            })
-            .join(""),
-          id: this.idInc++,
-        };
-      });
+      const tempArray = (Array.isArray(data) ? data : [data])
+        .map((item) => {
+          return {
+            text: ansiparse(item)
+              .map((ansiItem) => {
+                return ansiItem.text;
+              })
+              .join(""),
+            id: this.idInc++,
+          };
+        })
+        .map((item) => {
+          return {
+            text: Prism.highlight(item.text, Prism.languages.log, "log"),
+            id: item.id,
+          };
+        });
       this.dataArray = [...this.dataArray, ...tempArray];
       // console.log(this.dataArray);
       if (this.config.logScroll) {
@@ -213,8 +220,8 @@ export default {
   color: #ffb86c;
   white-space: nowrap;
   overflow-x: scroll;
-  overflow-y: hidden;
-  padding-bottom: 10px;
+  /* overflow-y: hidden; */
+  /* padding-bottom: 10px; */
 }
 .item {
   padding: 0px 6px;
