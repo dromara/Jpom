@@ -67,6 +67,14 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> implements I
             .distinct().collect(Collectors.toList());
     }
 
+    /**
+     * 恢复字段
+     */
+    private void repairGroupFiled() {
+        String sql = "update " + getTableName() + " set `GROUP`=? where `GROUP` is null or `GROUP`=''";
+        super.execute(sql, Const.DEFAULT_GROUP_NAME);
+    }
+
     @Override
     public int statusRecover() {
         WorkspaceModel workspaceModel = super.getByKey(Const.WORKSPACE_DEFAULT_ID);
@@ -94,6 +102,8 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> implements I
             }
             total += execute;
         }
+        //
+        this.repairGroupFiled();
         return total;
     }
 }
