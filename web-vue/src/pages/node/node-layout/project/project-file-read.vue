@@ -95,7 +95,7 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err);
-        this.$message.warning("会话已经关闭");
+        this.$message.warning("会话已经关闭[tail-file]");
         clearInterval(this.heart);
       };
       this.socket.onmessage = (msg) => {

@@ -67,10 +67,8 @@ export default {
   },
   methods: {
     close() {
-      if (this.socket) {
-        this.socket.close();
-      }
       clearInterval(this.heart);
+      this.socket?.close();
     },
     // 初始化
     initWebSocket() {
@@ -80,9 +78,8 @@ export default {
       let tail = parseInt(this.tail);
       this.tail = isNaN(tail) ? 500 : tail;
       //
-      if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
-        this.socket = new WebSocket(this.socketUrl);
-      }
+      this.socket = new WebSocket(this.socketUrl);
+
       // 连接成功后
       this.socket.onopen = () => {
         this.sendMsg("showlog");
@@ -97,7 +94,7 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err);
-        this.$message.warning("会话已经关闭");
+        this.$message.warning("会话已经关闭[docker-log]");
         clearInterval(this.heart);
       };
       this.socket.onmessage = (msg) => {

@@ -26,7 +26,7 @@
     <!-- 对话框 -->
     <!-- <a-modal v-model="visible" title="系统提示" :footer="null">
       <a-space>
-        
+
         <a-button @click="visible = false">取消</a-button>
       </a-space>
     </a-modal> -->
@@ -165,7 +165,7 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err);
-        this.$message.warning("会话已经关闭");
+        this.$message.warning("会话已经关闭[system-log]");
         // clearInterval(this.heart);
       };
     },

@@ -18,6 +18,7 @@
     "js-sha1": "^0.6.0",
     "jshint": "^2.13.1",
     "markdown-it-vue": "^1.1.6",
+    "prismjs": "^1.29.0",
     "qrcodejs2": "^0.0.2",
     "qs": "^6.9.4",
     "spark-md5": "^3.0.2",
