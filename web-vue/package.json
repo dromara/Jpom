@@ -26,11 +26,12 @@
     "vue-codemirror": "^4.0.6",
     "vue-json-viewer": "^2.2.20",
     "vue-router": "^3.5.2",
+    "vue-virtual-scroller": "^1.1.2",
+    "vuedraggable": "^2.24.3",
     "vuex": "^3.5.1",
     "xterm": "^4.13.0",
     "xterm-addon-attach": "^0.6.0",
-    "xterm-addon-fit": "^0.5.0",
-    "vuedraggable": "^2.24.3"
+    "xterm-addon-fit": "^0.5.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.13",
@@ -43,9 +44,9 @@
     "eslint": "^6.8.0",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-vue": "^7.15.1",
-    "prettier": "^2.3.2",
     "less": "^3.0.4",
     "less-loader": "^5.0.0",
+    "prettier": "^2.3.2",
     "vue-template-compiler": "^2.6.14"
   },
   "eslintConfig": {

@@ -25,8 +25,8 @@
 
           <a-dropdown>
             <!-- <a type="link" class="ant-dropdown-link"> 更多<a-icon type="down" /> </a> -->
-            <a
-              class="ant-dropdown-link"
+            <a-button
+              size="small"
               @click="
                 (e) => {
                   e.preventDefault();
@@ -34,12 +34,12 @@
                 }
               "
             >
-              <a-tag>
-                文件大小: {{ project.logSize || "-" }}
-                <!-- 更多 -->
-                <a-icon type="fullscreen" />
-              </a-tag>
-            </a>
+              <!-- <a-tag> -->
+              日志大小: {{ project.logSize || "-" }}
+              <!-- 更多 -->
+              <a-icon type="fullscreen" />
+              <!-- </a-tag> -->
+            </a-button>
             <!-- <a-menu slot="overlay">
               <a-menu-item>
                 <a-button type="primary" size="small" :disabled="!project.logSize" @click="handleDownload">导出日志</a-button>
