@@ -12,6 +12,7 @@
       @change="
         (pagination, filters, sorter) => {
           this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
+          this.expandedRowKeys = [];
           this.loadData();
         }
       "
@@ -119,6 +120,7 @@
           <template slot="operation" slot-scope="text, copyRecord">
             <a-space>
               <a-button size="small" type="primary" @click="handleConsoleCopy(record, copyRecord)">控制台</a-button>
+              <a-button size="small" type="primary" @click="handleLogBack(record, copyRecord)">日志</a-button>
               <a-button size="small" type="danger" @click="handleDeleteCopy(record, copyRecord, 'thorough')">删除</a-button>
             </a-space>
           </template>
@@ -143,13 +145,13 @@
               <a-menu-item>
                 <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
               </a-menu-item>
-              <!-- <a-menu-item>
-                <a-button size="small" type="primary" @click="handleReplica(record)" v-if="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
-              </a-menu-item> -->
+              <a-menu-item v-if="noFileModes.includes(record.runMode)">
+                <a-button size="small" type="primary" @click="handleLogBack(record)">项目日志 </a-button>
+              </a-menu-item>
               <template v-if="record.outGivingProject">
                 <a-menu-item>
                   <a-tooltip title="节点分发项目需要到节点分发中去删除">
-                    <a-button size="small" type="danger" :disabled="true">删除</a-button>
+                    <a-button size="small" type="danger" :disabled="true">逻辑删除</a-button>
                   </a-tooltip>
                 </a-menu-item>
                 <a-menu-item>
@@ -163,7 +165,7 @@
               </template>
               <template v-else>
                 <a-menu-item>
-                  <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                  <a-button size="small" type="danger" @click="handleDelete(record)">逻辑删除</a-button>
                 </a-menu-item>
                 <a-menu-item>
                   <a-button size="small" type="danger" @click="handleDelete(record, 'thorough')">彻底删除</a-button>
@@ -441,6 +443,10 @@
         </a-list-item>
       </a-list>
     </a-modal>
+    <!-- 日志备份 -->
+    <a-modal destroyOnClose v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
+      <ProjectLog v-if="lobbackVisible" :nodeId="node.id" :copyId="temp.copyItem && temp.copyItem.id" :projectId="temp.projectId"></ProjectLog>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -449,6 +455,7 @@ import Console from "./project-console";
 import FileRead from "./project-file-read";
 import CustomSelect from "@/components/customSelect";
 // import Replica from "./project-replica";
+import ProjectLog from "./project-log.vue";
 import codeEditor from "@/components/codeEditor";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, randomStr, parseTime } from "@/utils/const";
 
@@ -487,6 +494,7 @@ export default {
     // Replica,
     codeEditor,
     FileRead,
+    ProjectLog,
   },
   data() {
     return {
@@ -515,8 +523,31 @@ export default {
       checkRecord: "",
       batchVisible: false,
       batchTitle: "",
-      columns: [
-        { title: "", dataIndex: "javaCopyItemList", align: "center", width: "40px", scopedSlots: { customRender: "copyIcon" } },
+
+      copyColumns: [
+        { title: "编号", dataIndex: "id", width: "80px", ellipsis: true, scopedSlots: { customRender: "id" } },
+        { title: "名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "进程 ID", dataIndex: "pid", width: 100, ellipsis: true, scopedSlots: { customRender: "pid" } },
+        { title: "端口号", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
+        { title: "最后修改时间", dataIndex: "modifyTime", width: "180px", ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: "150px" },
+      ],
+      rules: {
+        id: [{ required: true, message: "请输入项目ID", trigger: "blur" }],
+        name: [{ required: true, message: "请输入项目名称", trigger: "blur" }],
+        runMode: [{ required: true, message: "请选择项目运行方式", trigger: "blur" }],
+        whitelistDirectory: [{ required: true, message: "请选择项目白名单路径", trigger: "blur" }],
+        lib: [{ required: true, message: "请输入项目文件夹", trigger: "blur" }],
+      },
+      expandedRowKeys: [],
+      lobbackVisible: false,
+      showJavaCopyItemList: false,
+    };
+  },
+  computed: {
+    columns() {
+      const columns = [
         { title: "项目名称", dataIndex: "name", width: 150, sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "项目分组", dataIndex: "group", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "group" } },
         {
@@ -547,28 +578,12 @@ export default {
           width: "170px",
         },
         { title: "修改时间", sorter: true, dataIndex: "modifyTimeMillis", width: "170px", ellipsis: true, customRender: (text) => parseTime(text) },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, fixed: "right", align: "center", width: "180px" },
-      ],
-      copyColumns: [
-        { title: "编号", dataIndex: "id", width: "80px", ellipsis: true, scopedSlots: { customRender: "id" } },
-        { title: "名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "进程 ID", dataIndex: "pid", width: 100, ellipsis: true, scopedSlots: { customRender: "pid" } },
-        { title: "端口号", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "最后修改时间", dataIndex: "modifyTime", width: "180px", ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: "120px" },
-      ],
-      rules: {
-        id: [{ required: true, message: "请输入项目ID", trigger: "blur" }],
-        name: [{ required: true, message: "请输入项目名称", trigger: "blur" }],
-        runMode: [{ required: true, message: "请选择项目运行方式", trigger: "blur" }],
-        whitelistDirectory: [{ required: true, message: "请选择项目白名单路径", trigger: "blur" }],
-        lib: [{ required: true, message: "请输入项目文件夹", trigger: "blur" }],
-      },
-      expandedRowKeys: [],
-    };
-  },
-  computed: {
+      ];
+      this.showJavaCopyItemList && columns.unshift({ title: "", dataIndex: "javaCopyItemList", align: "center", width: "40px", scopedSlots: { customRender: "copyIcon" } });
+      !(this.expandedRowKeys && this.expandedRowKeys.length) &&
+        columns.push({ title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, fixed: "right", align: "center", width: "180px" });
+      return columns;
+    },
     filePath() {
       return (this.temp.whitelistDirectory || "") + (this.temp.lib || "");
     },
@@ -651,6 +666,9 @@ export default {
               }
             }
             return { ...item, javaCopyItemList: javaCopyItemList };
+          });
+          this.showJavaCopyItemList = !!this.list.find((item) => {
+            return !!item.javaCopyItemList;
           });
           // // 项目ID 字段更新
           // this.list = this.list.map((element) => {
@@ -837,7 +855,7 @@ export default {
       this.drawerTitle = `控制台(${this.temp.name})-${copyItem.id}`;
       this.drawerConsoleVisible = true;
       this.replicaTemp = copyItem;
-      console.log(record, copyItem);
+      // console.log(record, copyItem);
     },
     // 关闭控制台
     onConsoleClose() {
@@ -1234,6 +1252,11 @@ export default {
           this.loadData();
         }
       });
+    },
+    // 日志备份列表
+    handleLogBack(record, copyItem) {
+      this.temp = Object.assign({}, record, { copyItem: copyItem });
+      this.lobbackVisible = true;
     },
   },
 };
