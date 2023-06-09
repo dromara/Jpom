@@ -10,11 +10,11 @@
           <a-col v-if="this.extendBar" style="padding-left: 10px">
             <a-space>
               <a-tooltip title="清空当前缓冲区内容">
-                <a-button type="link" style="padding: 0" @click="clearLogCache" icon="delete"><span style="margin-left: 2px">清空</span></a-button>
+                <a-button type="primary" size="small" @click="clearLogCache" icon="delete">清空</a-button>
               </a-tooltip>
-              <a-tooltip title="内容超过边界自动换行">
+              <!-- <a-tooltip title="内容超过边界自动换行">
                 <a-switch v-model="temp.wordBreak" checked-children="自动换行" un-checked-children="不换行" @change="onChange" />
-              </a-tooltip>
+              </a-tooltip> -->
               <a-tooltip title="有新内容后是否自动滚动到底部">
                 <a-switch v-model="temp.logScroll" checked-children="自动滚动" un-checked-children="不滚动" @change="onChange" />
               </a-tooltip>
