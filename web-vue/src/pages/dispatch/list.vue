@@ -207,7 +207,7 @@
                 </a-select>
                 <span>项目: </span>
                 <a-select
-                  style="width: 150px"
+                  style="width: 350px"
                   :placeholder="item.placeholder"
                   :defaultValue="item.projectId ? item.projectId : undefined"
                   notFoundContent="此节点暂无项目"
@@ -225,7 +225,7 @@
                     "
                     :key="project.projectId"
                   >
-                    {{ project.outGivingProject ? "【独立分发】" : "" }} {{ project.name }}
+                    <a-tooltip :title="`${project.outGivingProject ? '【独立分发】' : ''} ${project.name}`"> {{ project.outGivingProject ? "【独立分发】" : "" }} {{ project.name }} </a-tooltip>
                   </a-select-option>
                 </a-select>
                 <a-button type="danger" @click="delDispachList(index)" icon="delete" size="small"></a-button>
