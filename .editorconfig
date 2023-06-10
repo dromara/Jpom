@@ -46,6 +46,12 @@ max_line_length = off
 [*.bat]
 end_of_line = crlf
 
+[*.sh]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+max_line_length = off
+
 [*.{vue,js,ts}]
 indent_style = space
 indent_size = 2
