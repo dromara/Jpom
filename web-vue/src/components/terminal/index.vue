@@ -45,6 +45,11 @@ export default {
         this.initSocket();
       }, 200);
     });
+    // 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+    window.onbeforeunload = () => {
+      this.socket?.close();
+      this.dispose();
+    };
   },
   beforeDestroy() {
     this.socket?.close();
@@ -129,7 +134,7 @@ export default {
       this.sendJson({ data: "resize", cols: this.cols, rows: this.rows, wp: this.wp, hp: this.hp });
       // 创建心跳，防止掉线
       this.heart = setInterval(() => {
-        let op = {
+        const op = {
           data: "jpom-heart",
         };
         this.sendJson(op);

@@ -64,6 +64,7 @@ export default {
       idInc: 0,
       visibleStartIndex: -1,
       itemHeight: 24,
+      inited: false,
       uniqueId: `component_${Math.random().toString(36).substring(2, 15)}`,
     };
   },
@@ -74,10 +75,28 @@ export default {
     },
     showList() {
       const element = document.querySelector(`#${this.uniqueId}`);
-
-      let result = [...this.dataArray];
+      let result;
+      if (this.inited) {
+        result = this.dataArray.length
+          ? [...this.dataArray]
+          : [
+              {
+                text: this.defText,
+                id: "0-def",
+              },
+            ];
+      } else {
+        // 还没有 dom 对象
+        result = [
+          {
+            text: "loading..................",
+            id: "0-def",
+          },
+        ];
+      }
       let warp = false;
       if (element) {
+        // 填充空白，避免无内容 页面背景太低
         const min = Math.ceil(element.clientHeight / this.itemHeight);
         const le = min - result.length;
         for (let i = 0; i < le; i++) {
@@ -89,6 +108,7 @@ export default {
         }
       }
       if (!warp) {
+        // 最后填充一行空白，避免无法看到滚动条
         result = result.concat([
           {
             id: "system-warp-end:1",
@@ -105,7 +125,15 @@ export default {
     //   set() {},
     // },
   },
-  mounted() {},
+  mounted() {
+    const timer = setInterval(() => {
+      const element = document.querySelector(`#${this.uniqueId}`);
+      if (element) {
+        this.inited = true;
+        clearInterval(timer);
+      }
+    }, 200);
+  },
   methods: {
     scrollToBottom() {
       const element = document.querySelector(`#${this.uniqueId}`);
@@ -122,9 +150,9 @@ export default {
           return setTimeout(cb, 10);
         };
       }
-      var scrollTop = element.scrollTop;
-      var step = function () {
-        var distance = position - scrollTop;
+      let scrollTop = element.scrollTop;
+      const step = function () {
+        const distance = position - scrollTop;
         scrollTop = scrollTop + distance / 5;
         if (Math.abs(distance) < 1) {
           element.scrollTop = position;
