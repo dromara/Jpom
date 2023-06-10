@@ -20,7 +20,7 @@
     </div> -->
     <!-- console -->
     <log-view :ref="`logView`" height="calc(100vh - 140px)">
-      <template slot="before"> <a-button type="primary" @click="goFile">文件管理</a-button></template>
+      <template slot="before"> <a-button type="primary" size="small" @click="goFile">文件管理</a-button></template>
     </log-view>
   </div>
 </template>

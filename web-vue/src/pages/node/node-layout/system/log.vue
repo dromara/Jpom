@@ -13,7 +13,7 @@
       <div>
         <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none" />
       </div> -->
-      <log-view :ref="`logView`" height="calc(100vh - 165px)" :extendBar="false">
+      <log-view :ref="`logView`" height="calc(100vh - 165px)">
         <template slot="before">
           <a-space>
             <a-button type="primary" size="small" @click="loadData">刷新</a-button>
@@ -149,7 +149,7 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err);
-        this.$message.warning("会话已经关闭[node-system-log]");
+        this.$message.warning("会话已经关闭[node-system-log] " + node.dataRef.path);
         // clearInterval(this.heart);
       };
     },

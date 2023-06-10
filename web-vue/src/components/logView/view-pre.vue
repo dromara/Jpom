@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div class="log-view-wrapper force-scrollbar">
     <RecycleScroller class="scroller" :id="uniqueId" :style="`min-height:${height};height:${height}`" key-field="id" :items="showList" :item-size="itemHeight" :emitUpdate="false">
       <template v-slot="{ index, item }">
         <div class="item">
@@ -227,14 +227,6 @@ export default {
 </script>
 
 <style scoped>
-.wrapper {
-  /* overflow: hidden; */
-  /* position: absolute; */
-  /* top: 0; */
-  /* bottom: 0; */
-  /* left: 0; */
-  /* right: 0; */
-}
 .scroller {
   height: 100%;
   width: 100%;
@@ -248,8 +240,8 @@ export default {
   color: #ffb86c;
   white-space: nowrap;
   overflow-x: scroll;
-  /* overflow-y: hidden; */
-  /* padding-bottom: 10px; */
+  /* 避免滚动条无法固定到底部 */
+  position: unset;
 }
 .item {
   padding: 0px 6px;
