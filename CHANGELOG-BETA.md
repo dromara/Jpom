@@ -10,6 +10,7 @@
 1. 【server】修复 查看 docker 容器日志 web socket 线程被阻塞问题
 2. 【server】优化 日志组件显示高亮、滚动条样式优化
 3. 【server】优化 web socket 会话关闭显示分类
+4. 【server】优化 页面滚动条样式
 
 ------
 

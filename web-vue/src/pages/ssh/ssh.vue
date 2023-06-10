@@ -137,6 +137,17 @@
     <!-- 编辑区 -->
     <a-modal destroyOnClose v-model="editSshVisible" width="600px" title="编辑 SSH" @ok="handleEditSshOk" :maskClosable="false">
       <a-form-model ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+        <template v-if="this.getUserInfo && this.getUserInfo.systemUser">
+          <a-alert type="info" show-icon>
+            <template slot="message">
+              <ul>
+                <li>此编辑仅能编辑当前 SSH 在此工作空间的名称信息</li>
+                <li>如果要配置 SSH 请到【系统管理】-> 【资产管理】-> 【SSH 管理】中去配置。</li>
+                <li>当前 SSH 的授权目录（文件目录、文件后缀、禁止命令）需要请到 【系统管理】-> 【资产管理】-> 【SSH 管理】-> 操作栏中->关联按钮->对应工作空间->操作栏中->配置按钮</li>
+              </ul>
+            </template>
+          </a-alert>
+        </template>
         <a-form-model-item label="SSH 名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="SSH 名称" />
         </a-form-model-item>
