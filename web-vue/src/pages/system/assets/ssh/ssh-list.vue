@@ -60,13 +60,28 @@
           </a-popover>
           <template slot="nodeId" slot-scope="text, record">
             <div v-if="record.javaVersion">
-              <a-tooltip v-if="record.jpomAgentPid > 0" placement="topLeft" :title="` ssh 中已经运行了插件端进程ID：${record.jpomAgentPid},java :  ${record.javaVersion}`">
-                <a-tag> {{ record.jpomAgentPid }}</a-tag>
-              </a-tooltip>
+              <a-popover title="java信息" v-if="record.jpomAgentPid > 0">
+                <template slot="content">
+                  <p>插件端进程ID：{{ record.jpomAgentPid }}</p>
+                  <p>java版本：{{ record.javaVersion }}</p>
+                </template>
+                <a-tag color="green"> {{ record.jpomAgentPid }}</a-tag>
+              </a-popover>
               <a-button v-else size="small" type="primary" @click="install(record)">安装节点</a-button>
             </div>
 
             <a-tag color="orange" v-else>no java</a-tag>
+          </template>
+          <template slot="dockerInfo" slot-scope="text, record">
+            <a-popover title="docker信息" v-if="record.dockerInfo">
+              <template slot="content">
+                <p>路径：{{ JSON.parse(record.dockerInfo).path }}</p>
+                <p>版本：{{ JSON.parse(record.dockerInfo).version }}</p>
+              </template>
+              <a-tag color="green">存在</a-tag>
+            </a-popover>
+
+            <a-tag v-else>不存在</a-tag>
           </template>
           <template slot="status" slot-scope="text, record">
             <a-tooltip :title="record.statusMsg">
@@ -192,8 +207,8 @@
               <a-input-number v-model="temp.timeout" :min="1" placeholder="单位秒,最小值 1 秒" style="width: 100%" />
             </a-form-model-item>
             <a-form-model-item label="文件后缀" prop="suffix">
-              <template slot="help"
-                >此配置仅对服务端管理生效, 工作空间的 ssh 配置需要单独配置（<span style="color: red">配置方式：SSH列表->操作栏中->关联按钮->对应工作空间->操作栏中->配置按钮</span>）。
+              <template slot="help">
+                此配置仅对服务端管理生效, 工作空间的 ssh 配置需要单独配置（<span style="color: red">配置方式：SSH列表->操作栏中->关联按钮->对应工作空间->操作栏中->配置按钮</span>）。
               </template>
               <a-input
                 v-model="temp.allowEditSuffix"
@@ -410,6 +425,13 @@ export default {
           title: "节点状态",
           dataIndex: "nodeId",
           scopedSlots: { customRender: "nodeId" },
+          width: "80px",
+          ellipsis: true,
+        },
+        {
+          title: "docker",
+          dataIndex: "dockerInfo",
+          scopedSlots: { customRender: "dockerInfo" },
           width: "80px",
           ellipsis: true,
         },

@@ -217,23 +217,23 @@ export default {
     });
     this.activeTagKey = this.temp.cacheData.useNodeId + "," + this.temp.cacheData.useProjectId;
     // console.log(cacheData);
+    // 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+    window.onbeforeunload = () => {
+      this.close();
+    };
   },
   beforeDestroy() {
-    Object.keys(this.socketCache).forEach((item) => {
-      clearInterval(this.socketCache[item].heart);
-    });
-  },
-  destroyed() {
-    Object.keys(this.socketCache).forEach((item) => {
-      clearInterval(this.socketCache[item].heart);
-    });
+    this.close();
   },
   methods: {
+    close() {
+      Object.keys(this.socketCache).forEach((item) => {
+        clearInterval(this.socketCache[item].heart);
+        this.socketCache[item].socket?.close();
+      });
+    },
     initWebSocket(id, url) {
-      let socket;
-      if (!socket || socket.readyState !== socket.OPEN || socket.readyState !== socket.CONNECTING) {
-        socket = new WebSocket(url);
-      }
+      const socket = new WebSocket(url);
 
       socket.onerror = (err) => {
         console.error(err);

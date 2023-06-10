@@ -57,3 +57,4 @@ ADD,PROJECT_INFO,workspaceName,String,50,,工作空间名称,false
 ADD,SCRIPT_EXECUTE_LOG,workspaceName,String,50,,工作空间名称,false
 ALTER,REPOSITORY,password,String,255,,登录密码,false
 ADD,WORKSPACE,group,String,50,,分组,false
+ADD,MACHINE_SSH_INFO,dockerInfo,String,255,,服务器中的 docker 信息,false

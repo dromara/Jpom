@@ -39,6 +39,7 @@ import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.keepbx.jpom.Type;
+import com.alibaba.fastjson2.JSONObject;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import lombok.Lombok;
@@ -295,6 +296,17 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
         }
         update.setJavaVersion(this.getFirstValue(map, "java version"));
         update.setJpomAgentPid(Convert.toInt(this.getFirstValue(map, "jpom agent pid")));
+        //
+        String dockerPath = this.getFirstValue(map, "docker path");
+        String dockerVersion = this.getFirstValue(map, "docker version");
+        if (StrUtil.isAllNotEmpty(dockerVersion, dockerPath)) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("version", dockerVersion);
+            jsonObject.put("path", dockerPath);
+            update.setDockerInfo(jsonObject.toString());
+        } else {
+            update.setDockerInfo(StrUtil.EMPTY);
+        }
         this.updateById(update);
     }
 

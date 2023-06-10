@@ -164,6 +164,10 @@ public class MachineSshModel extends BaseGroupNameModel implements ISshInfo {
      * java 版本
      */
     private String javaVersion;
+    /**
+     * 服务器中的 docker 信息
+     */
+    private String dockerInfo;
 
     public MachineSshModel(String id) {
         setId(id);

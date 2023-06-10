@@ -72,11 +72,13 @@ export default {
         this.introGuide();
       }, 500);
     });
+    // 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+    window.onbeforeunload = () => {
+      this.socket?.close();
+    };
   },
   beforeDestroy() {
-    if (this.socket) {
-      this.socket.close();
-    }
+    this.socket?.close();
   },
   methods: {
     // 页面引导
@@ -143,7 +145,7 @@ export default {
         fileName: node.dataRef.path,
       };
       this.temp = node.dataRef;
-      this.$refs.logView.clearLogCache();
+      this.$refs.logView?.clearLogCache();
 
       this.socket?.close();
 
@@ -154,7 +156,7 @@ export default {
       };
       this.socket.onmessage = (msg) => {
         // this.logContext += `${msg.data}\r\n`;
-        this.$refs.logView.appendLine(msg.data);
+        this.$refs.logView?.appendLine(msg.data);
       };
       this.socket.onerror = (err) => {
         console.error(err);

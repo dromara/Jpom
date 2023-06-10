@@ -105,14 +105,20 @@ export default {
   mounted() {
     this.loadProject();
     this.initWebSocket();
+    // 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+    window.onbeforeunload = () => {
+      this.close();
+    };
   },
   beforeDestroy() {
-    if (this.socket) {
-      this.socket.close();
-    }
-    clearInterval(this.heart);
+    this.close();
   },
   methods: {
+    close() {
+      this.socket?.close();
+
+      clearInterval(this.heart);
+    },
     // 加载项目
     loadProject() {
       const params = {

@@ -72,3 +72,9 @@ df -k | awk 'NR>1' | awk '/^\/dev/{print "disk info:"$1":"$2":"$3}'
 jpom_agent_pid=$(getPid "${JPOM_AGENT_PID_TAG}")
 echo "jpom agent pid:$jpom_agent_pid"
 echo "java version:$(command -v java)"
+
+docker_path=$(command -v docker)
+if [[ $docker_path != "" ]]; then
+  echo "docker path:$docker_path"
+  echo "docker version:$(docker -v)"
+fi
