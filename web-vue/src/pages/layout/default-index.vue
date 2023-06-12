@@ -42,8 +42,8 @@ export default {
   data() {
     return {
       collapsed: false,
-      subTitle: "项目管理",
-      logoUrl: require(`@/assets/images/jpom.png`),
+      subTitle: "项目运维",
+      logoUrl: require(`@/assets/images/jpom.svg`),
     };
   },
   computed: {
@@ -191,11 +191,11 @@ export default {
   font-weight: bold;
   overflow: hidden;
   padding: 0 16px;
+  text-align: center;
 }
 #app-layout .logo img {
   height: 26px;
   vertical-align: sub;
-  margin-right: 6px;
 }
 .app-header {
   display: flex;

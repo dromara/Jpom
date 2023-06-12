@@ -231,6 +231,7 @@ export default {
   background: #292a2b;
   color: #ffb86c;
   padding: 10px;
+  box-shadow: inset 0 0 10px 0 #e8e8e8;
 }
 .scroller {
   height: 100%;
