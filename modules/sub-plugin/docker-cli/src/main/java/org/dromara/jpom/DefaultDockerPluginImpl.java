@@ -560,6 +560,23 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         dockerClient.removeImageCmd(imageId).withForce(true).exec();
     }
 
+    private void batchRemoveCmd(Map<String, Object> parameter) {
+        DockerClient dockerClient = DockerUtil.get(parameter);
+
+        String[] imagesIds = (String[]) parameter.get("imagesIds");
+        int successCount = 0, failCount = 0;
+        // 已经使用的镜像禁止删除
+        for (String imageId : imagesIds) {
+            try {
+                dockerClient.removeImageCmd(imageId).withForce(false).exec();
+                successCount++;
+            } catch (Exception e) {
+
+            }
+        }
+        failCount = imagesIds.length - successCount;
+    }
+
     /**
      * 不包含 docker compose
      *

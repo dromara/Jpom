@@ -218,6 +218,18 @@ export function dockerImageRemove(urlPrefix, params) {
 }
 
 /**
+ * 批量删除镜像
+ * @param {JSON} params
+ */
+export function dockerImageBatchRemove(urlPrefix, params) {
+  return axios({
+    url: urlPrefix + "/images/batchRemove",
+    method: "get",
+    params: params,
+  });
+}
+
+/**
  * inspect 镜像
  * @param {JSON} params
  */
