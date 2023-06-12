@@ -46,7 +46,7 @@
             <span>{{ formatDuration(text, "", 2) }}</span>
           </a-tooltip>
           <template slot="status" slot-scope="text">
-            <a-tag :color="text === 1 ? 'green' : 'pink'" style="margin-right: 0px">
+            <a-tag :color="text === 1 ? 'green' : 'pink'" style="margin-right: 0">
               {{ statusMap[text] || "未知" }}
             </a-tag>
           </template>

@@ -80,7 +80,7 @@
         </template>
       </template>
       <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="`名称：${text}`" @click="handleEdit(record)">
-        <a-button type="link" style="padding: 0px" size="small"><a-icon v-if="record.outGivingProject" type="apartment" />{{ text }} </a-button>
+        <a-button type="link" style="padding: 0" size="small"><a-icon v-if="record.outGivingProject" type="apartment" />{{ text }} </a-button>
       </a-tooltip>
 
       <a-tooltip slot="path" slot-scope="text, item" placement="topLeft" :title="item.whitelistDirectory + item.lib">

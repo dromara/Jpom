@@ -72,7 +72,7 @@
             <p v-if="item.progressDesc">状态描述：{{ item.progressDesc }}</p>
           </template>
           <!-- {{ text }} -->
-          <a-button type="link" style="padding: 0px" @click="handleEdit(item)" size="small">{{ text }}</a-button>
+          <a-button type="link" style="padding: 0" @click="handleEdit(item)" size="small">{{ text }}</a-button>
         </a-popover>
 
         <a-tooltip #renderSize slot-scope="text" placement="topLeft" :title="renderSize(text)">

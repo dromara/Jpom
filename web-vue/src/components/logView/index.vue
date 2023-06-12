@@ -60,7 +60,7 @@ export default {
     },
     marginTop: {
       String,
-      default: "0px",
+      default: "0",
     },
     extendBar: {
       Boolean,

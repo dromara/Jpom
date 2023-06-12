@@ -86,7 +86,7 @@
       <a-collapse :activeKey="['0', '1', '2']" expandIconPosition="right">
         <a-collapse-panel key="0">
           <template slot="header">
-            <a-form-model-item prop="buildMode" style="margin-bottom: 0px">
+            <a-form-model-item prop="buildMode" style="margin-bottom: 0">
               <template slot="label">
                 <a-tooltip>
                   方式
@@ -214,7 +214,7 @@
         </a-collapse-panel>
         <a-collapse-panel key="1">
           <template slot="header">
-            <a-form-model-item prop="releaseMethod" style="margin-bottom: 0px">
+            <a-form-model-item prop="releaseMethod" style="margin-bottom: 0">
               <template slot="label">
                 <a-tooltip>
                   发布操作
@@ -522,7 +522,7 @@
         </a-collapse-panel>
         <a-collapse-panel key="2">
           <template slot="header">
-            <a-form-model-item label="其他配置" style="margin-bottom: 0px"></a-form-model-item>
+            <a-form-model-item label="其他配置" style="margin-bottom: 0"></a-form-model-item>
           </template>
           <a-form-model-item prop="cacheBuild">
             <template slot="label">

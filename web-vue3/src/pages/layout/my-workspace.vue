@@ -123,7 +123,7 @@ export default {
 </script>
 <style scoped>
 .box-shadow {
-  box-shadow: 0px 0px 10px 5px rgba(223, 222, 222, 0.5);
+  box-shadow: 0 0 10px 5px rgba(223, 222, 222, 0.5);
   border-radius: 5px;
 }
 

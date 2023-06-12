@@ -91,7 +91,7 @@
                     <template #title>
                       <a-row :gutter="[4, 0]">
                         <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
-                          <a-button type="link" style="padding: 0px" size="small" @click="handleDetails(item)">
+                          <a-button type="link" style="padding: 0" size="small" @click="handleDetails(item)">
                             <span> {{ item.name }}</span>
                           </a-button>
                         </a-col>
@@ -101,7 +101,7 @@
                               item.statusMsg ? '状态消息：' + item.statusMsg : ''
                             } `"
                           >
-                            <a-tag :color="statusColor[item.status]" style="margin-right: 0px">
+                            <a-tag :color="statusColor[item.status]" style="margin-right: 0">
                               {{ statusMap[item.status] || '未知' }}</a-tag
                             >
                           </a-tooltip>
@@ -265,7 +265,7 @@
             @click="handleDetails(record)"
             :title="`名称：${text} 点击查看详情`"
           >
-            <a-button type="link" style="padding: 0px" size="small"> <a-icon type="fullscreen" />{{ text }}</a-button>
+            <a-button type="link" style="padding: 0" size="small"> <a-icon type="fullscreen" />{{ text }}</a-button>
           </a-tooltip>
           <a-tooltip #branchName slot-scope="text, record" placement="topLeft">
             <template #title>

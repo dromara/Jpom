@@ -244,12 +244,12 @@ export default {
   position: unset;
 }
 .item {
-  padding: 0px 6px;
+  padding: 0 6px;
 }
 
 .linenumber {
   color: #e6e6e6;
-  padding: 0px 4px;
+  padding: 0 4px;
   opacity: 0.6;
   /* overflow: auto; */
   /* white-space: nowrap; */
