@@ -94,7 +94,7 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
     }
 
 
-    private Object[] buildParametersEnv(HttpServletRequest request) {
+    private Object[] buildParametersEnv(HttpServletRequest request, String body) {
         String contentType = request.getContentType();
         Object[] parametersEnv = new Object[4];
         parametersEnv[0] = "triggerContentType";
@@ -104,7 +104,8 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
             Map<String, String> paramMap = ServletUtil.getParamMap(request);
             parametersEnv[3] = JSONObject.toJSONString(paramMap);
         } else {
-            parametersEnv[3] = ServletUtil.getBody(request);
+            // github issues 48
+            parametersEnv[3] = body == null ? ServletUtil.getBody(request) : body;
         }
         return parametersEnv;
     }
@@ -130,7 +131,7 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
 
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
         // 构建外部参数
-        Object[] parametersEnv = this.buildParametersEnv(request);
+        Object[] parametersEnv = this.buildParametersEnv(request, null);
         Integer delay1 = Convert.toInt(delay, 0);
         if (Convert.toBool(useQueue, false)) {
             // 提交到队列暂存
@@ -175,10 +176,13 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
      */
     @PostMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<List<Object>> triggerBatch(HttpServletRequest request) {
+        String body = ServletUtil.getBody(request);
+        if (StrUtil.isEmpty(body)) {
+            return new JsonMessage<>(405, "请传入 body 参数");
+        }
         try {
-            String body = ServletUtil.getBody(request);
             // 构建外部参数
-            Object[] parametersEnv = this.buildParametersEnv(request);
+            Object[] parametersEnv = this.buildParametersEnv(request, body);
             JSONArray jsonArray = JSONArray.parseArray(body);
             List<Object> collect = jsonArray.stream().peek(o -> {
                 JSONObject jsonObject = (JSONObject) o;
@@ -329,9 +333,9 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
      * @return json
      */
     @PostMapping(value = ServerOpenApi.BUILD_TRIGGER_STATUS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> buildStatusPost() {
+    public JsonMessage<List<JSONObject>> buildStatusPost(HttpServletRequest request) {
         try {
-            String body = ServletUtil.getBody(getRequest());
+            String body = ServletUtil.getBody(request);
             JSONArray jsonArray = JSONArray.parseArray(body);
             List<JSONObject> collect = jsonArray.stream().map(o -> {
                 JSONObject data = (JSONObject) o;

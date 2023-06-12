@@ -6,7 +6,7 @@
           <template v-if="!item.warp">
             <span class="linenumber">{{ index + 1 }}</span>
             <span v-html="item.text"></span>
-            &nbsp;&nbsp;
+            &nbsp;
           </template>
         </div>
         <!-- <code-editor
@@ -227,6 +227,11 @@ export default {
 </script>
 
 <style scoped>
+.log-view-wrapper {
+  background: #292a2b;
+  color: #ffb86c;
+  padding: 10px;
+}
 .scroller {
   height: 100%;
   width: 100%;
@@ -236,20 +241,18 @@ export default {
   overflow-y: scroll;
 }
 /deep/ .vue-recycle-scroller__item-wrapper {
-  background: #292a2b;
-  color: #ffb86c;
   white-space: nowrap;
-  overflow-x: scroll;
+  /* overflow-x: scroll; */
   /* 避免滚动条无法固定到底部 */
   position: unset;
 }
 .item {
-  padding: 0 6px;
 }
 
 .linenumber {
   color: #e6e6e6;
-  padding: 0 4px;
+  padding-right: 4px;
+  /* border-right: 1px solid #e8e8e8; */
   opacity: 0.6;
   /* overflow: auto; */
   /* white-space: nowrap; */

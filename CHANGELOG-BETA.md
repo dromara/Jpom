@@ -5,6 +5,7 @@
 ### 🐣 新增功能
 
 1. 【server】新增 SSH 列表支持显示 docker 版本信息
+2. 【server】优化 Docker 镜像增加批量删除（已经被容器使用的镜像不会删除）
 
 ### 🐞 解决BUG、优化功能
 
@@ -14,7 +15,7 @@
 4. 【server】优化 页面滚动条样式
 5. 【server】优化 编辑关联分发，选择项目下拉框不能显示项目全名称（tooltip）（感谢@LYY）
 6. 【server】优化 监听页面关闭事件，主动关闭 websocket
-7. 【server】优化，Docker镜像增加批量删除，已经被容器使用的镜像不会删除
+7. 【server】修复 批量构建触发器无法正常使用（感谢 [@botboy](https://github.com/cheakin) [Github issues 48](https://github.com/dromara/Jpom/issues/48) ）
 
 ### ⚠️ 注意
 
