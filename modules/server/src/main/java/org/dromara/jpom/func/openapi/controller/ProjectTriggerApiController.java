@@ -46,6 +46,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -144,9 +145,9 @@ public class ProjectTriggerApiController extends BaseJpomController {
      * @return json
      */
     @PostMapping(value = ServerOpenApi.SERVER_PROJECT_TRIGGER_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> triggerBatch() {
+    public JsonMessage<List<JSONObject>> triggerBatch(HttpServletRequest request) {
         try {
-            String body = ServletUtil.getBody(getRequest());
+            String body = ServletUtil.getBody(request);
             JSONArray jsonArray = JSONArray.parseArray(body);
             List<JSONObject> collect = jsonArray.stream().map(o -> {
                 JSONObject jsonObject = (JSONObject) o;
