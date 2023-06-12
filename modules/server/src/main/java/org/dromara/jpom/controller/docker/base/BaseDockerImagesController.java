@@ -92,6 +92,21 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
         return JsonMessage.success("执行成功");
     }
 
+
+    /**
+     * @return json
+     */
+    @GetMapping(value = "batchRemove", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public JsonMessage<Object> batchRemove(@ValidatorItem String id, String[] imagesIds) throws Exception {
+
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = this.toDockerParameter(id);
+        parameter.put("imagesIds", imagesIds);
+        plugin.execute("batchRemove", parameter);
+        return JsonMessage.success("执行成功");
+    }
+
     /**
      * @return json
      */

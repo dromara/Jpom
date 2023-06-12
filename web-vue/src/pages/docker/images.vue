@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-table size="middle" :data-source="list" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table size="middle" :data-source="list" :columns="columns" :pagination="false" bordered rowKey="id" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
           <div>
@@ -12,6 +12,7 @@
             <a-switch checked-children="是" un-checked-children="否" v-model="listQuery['dangling']" />
           </div>
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+          <a-button type="danger" :disabled="!tableSelections || !tableSelections.length" @click="batchDelete">批量删除</a-button>
         </a-space>
         |
 
@@ -386,7 +387,7 @@
 </template>
 <script>
 import { parseTime, renderSize } from "@/utils/const";
-import { dockerImageCreateContainer, dockerImageInspect, dockerImagePullImage, dockerImageRemove, dockerImagesList } from "@/api/docker-api";
+import {dockerImageCreateContainer, dockerImageInspect, dockerImagePullImage, dockerImageRemove, dockerImagesList, dockerImageBatchRemove} from "@/api/docker-api";
 import PullImageLog from "@/pages/docker/pull-image-log";
 
 export default {
@@ -451,11 +452,20 @@ export default {
         },
       },
       buildVisible: false,
+      tableSelections: []
     };
   },
   computed: {
     reqDataId() {
       return this.id || this.machineDockerId;
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
+      };
     },
   },
   mounted() {
@@ -623,6 +633,30 @@ export default {
         }
       });
     },
+    batchDelete() {
+      let ids = this.tableSelections
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要批量删除选择的镜像吗？已经被容器使用的镜像无法删除！",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 组装参数
+          const params = {
+            id: this.reqDataId,
+            imagesIds: ids.join(','),
+          };
+          dockerImageBatchRemove(this.urlPrefix, params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.loadData();
+            }
+          });
+        },
+      });
+    }
   },
 };
 </script>
