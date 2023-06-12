@@ -6,6 +6,7 @@
 
 1. 【server】新增 SSH 列表支持显示 docker 版本信息
 2. 【server】优化 Docker 镜像增加批量删除（已经被容器使用的镜像不会删除）
+3. 【server】优化 启用 Jpom 新版专属 logo
 
 ### 🐞 解决BUG、优化功能
 
