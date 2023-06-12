@@ -1,6 +1,6 @@
 ---
 home: true
-heroImage: /images/jpom_logo.png
+heroImage: /images/logo/jpom_logo.svg
 heroText: 
 tagline: 🚀简而轻的低侵入式在线构建、自动部署、日常运维、项目运维监控软件
 actions:
@@ -337,7 +337,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/liteflow2.png')" alt="轻量，快速，稳定，可编排的组件式流程引擎">
 </a>
 <a class="friends-item" href="https://jpom.top/" target="_blank">
-	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/jpom.png')" alt="一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/jpom-logo.svg')" alt="一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件">
 </a>
 <a class="friends-item" href="https://gitee.com/dromara/TLog" target="_blank">
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/tlog2.png')" alt="一个轻量级的分布式日志标记追踪神器，10分钟即可接入，自动对日志打标签完成微服务的链路追踪">
