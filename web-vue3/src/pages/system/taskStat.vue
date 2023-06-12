@@ -12,7 +12,7 @@
       </a-tooltip>
       <a-tooltip #cron slot-scope="text" placement="topLeft" :title="text">
         <!-- <a-icon type="unordered-list" /> -->
-        <a-button type="link" style="padding: 0px" size="small" @click="toCronTaskList(text)">
+        <a-button type="link" style="padding: 0" size="small" @click="toCronTaskList(text)">
           {{ text }} <a-icon type="unordered-list" />
         </a-button>
       </a-tooltip>

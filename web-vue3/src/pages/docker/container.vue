@@ -483,7 +483,7 @@
       v-model="terminalVisible"
       width="80vw"
       :bodyStyle="{
-        padding: '0px 10px',
+        padding: '0 10px',
         paddingTop: '10px',
         marginRight: '10px',
         height: `70vh`

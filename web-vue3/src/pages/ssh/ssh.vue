@@ -253,7 +253,7 @@
       }"
       :width="terminalFullscreen ? '100vw' : '80vw'"
       :bodyStyle="{
-        padding: '0px 10px',
+        padding: '0 10px',
         paddingTop: '10px',
         marginRight: '10px',
         height: `${this.terminalFullscreen ? 'calc(100vh - 56px)' : '70vh'}`

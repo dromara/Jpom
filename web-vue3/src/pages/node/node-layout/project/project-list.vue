@@ -112,7 +112,7 @@
         :title="`名称：${text}`"
         @click="handleEdit(record)"
       >
-        <a-button type="link" style="padding: 0px" size="small"
+        <a-button type="link" style="padding: 0" size="small"
           ><a-icon v-if="record.outGivingProject" type="apartment" />{{ text }}
         </a-button>
       </a-tooltip>

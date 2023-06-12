@@ -12,7 +12,7 @@
             {{ machineInfo && machineInfo.name }}
           </template>
           <template slot="extra">
-            <a-tag v-if="machineInfo" :color="machineInfo && machineInfo.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
+            <a-tag v-if="machineInfo" :color="machineInfo && machineInfo.status === 1 ? 'green' : 'pink'" style="margin-right: 0">
               {{ statusMap[machineInfo && machineInfo.status] || "未知" }}
             </a-tag>
           </template>

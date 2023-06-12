@@ -67,7 +67,7 @@
                         </a-col>
                         <a-col :span="7" style="text-align: right" class="text-overflow-hidden">
                           <a-tooltip :title="`当前状态：${statusMap[item.status]} ${item.statusMsg ? '状态消息：' + item.statusMsg : ''} `">
-                            <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0px"> {{ statusMap[item.status] }}</a-tag>
+                            <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0"> {{ statusMap[item.status] }}</a-tag>
                           </a-tooltip>
                         </a-col>
                       </a-row>
@@ -77,9 +77,9 @@
                       <a-row class="item-info">
                         <a-col :span="6" class="title text-overflow-hidden">系统名称:</a-col>
                         <a-col :span="18" class="content text-overflow-hidden">
-                          <span style="color: #40a9ff; cursor: pointer" @click="showMachineInfo(item)">
+                          <a-button style="padding: 0; height: auto" type="link" size="small" @click="showMachineInfo(item)">
                             {{ item.osName }}
-                          </span>
+                          </a-button>
                         </a-col>
                       </a-row>
                     </a-tooltip>
@@ -103,9 +103,7 @@
                       <a-row class="item-info">
                         <a-col :span="6" class="title text-overflow-hidden">插件版本:</a-col>
                         <a-col :span="18" class="content text-overflow-hidden">
-                          <span v-if="item.jpomVersion" type="link" size="small" @click="showMachineUpgrade(item)" style="color: #40a9ff; cursor: pointer">
-                            {{ item.jpomVersion || "-" }}
-                          </span>
+                          <a-button v-if="item.jpomVersion" style="padding: 0; height: auto" type="link" size="small" @click="showMachineUpgrade(item)"> {{ item.jpomVersion || "-" }} </a-button>
                         </a-col>
                       </a-row>
                     </a-tooltip>
@@ -164,7 +162,7 @@
             <span>{{ text }}</span>
           </a-tooltip>
           <a-tooltip slot="status" slot-scope="text, item" :title="`当前状态：${statusMap[item.status]} ${item.statusMsg ? '状态消息：' + item.statusMsg : ''} `">
-            <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0px"> {{ statusMap[item.status] }}</a-tag>
+            <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0"> {{ statusMap[item.status] }}</a-tag>
           </a-tooltip>
           <a-tooltip slot="duration" slot-scope="text" placement="topLeft" :title="formatDuration(text)">
             <span>{{ formatDuration(text, "", 2) }}</span>

@@ -30,7 +30,7 @@
         </a-space>
       </template>
       <a-tooltip #nodeId slot-scope="text" placement="topLeft" :title="text">
-        <a-button type="link" style="padding: 0px" size="small" @click="toNode(text)">
+        <a-button type="link" style="padding: 0" size="small" @click="toNode(text)">
           <span>{{ nodeNameMap[text] || text }}</span>
           <a-icon type="fullscreen" />
         </a-button>

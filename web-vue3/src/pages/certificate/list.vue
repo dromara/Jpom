@@ -48,7 +48,7 @@
           <p>描述：{{ item.description }}</p>
         </template>
         <!-- {{ text }} -->
-        <a-button type="link" style="padding: 0px" @click="handleEdit(item)" size="small">{{ text }}</a-button>
+        <a-button type="link" style="padding: 0" @click="handleEdit(item)" size="small">{{ text }}</a-button>
       </a-popover>
       <template #fileExists slot-scope="text">
         <a-tag v-if="text" color="green">存在</a-tag>

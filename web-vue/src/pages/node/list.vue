@@ -97,7 +97,7 @@
             </template>
             <template v-else>
               <a-tooltip :title="`${text} 点击进入节点管理`" @click="handleNode(record)">
-                <a-button type="link" style="padding: 0px" size="small">
+                <a-button type="link" style="padding: 0" size="small">
                   <a-icon type="fullscreen" /><span>{{ text }}</span>
                 </a-button>
               </a-tooltip>
@@ -110,7 +110,7 @@
             :title="`${statusMap[item.machineNodeData && item.machineNodeData.status] || '未知'} ${item.machineNodeData && item.machineNodeData.statusMsg}`"
           >
             <template v-if="item.openStatus === 1">
-              <a-tag :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
+              <a-tag :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'" style="margin-right: 0">
                 {{ statusMap[item.machineNodeData && item.machineNodeData.status] || "未知" }}
               </a-tag>
             </template>
@@ -219,7 +219,7 @@
                                 <div>节点地址：{{ item.url }}</div>
                               </template>
 
-                              <a-button type="link" style="padding: 0px" size="small" @click="handleNode(item)">
+                              <a-button type="link" style="padding: 0" size="small" @click="handleNode(item)">
                                 <span> {{ item.name }}</span>
                               </a-button>
                             </a-tooltip>
@@ -230,7 +230,7 @@
                                 <div>当前状态：{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}</div>
                                 <div>状态描述：{{ (item.machineNodeData && item.machineNodeData.statusMsg) || "" }}</div>
                               </template>
-                              <a-tag :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
+                              <a-tag :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'" style="margin-right: 0">
                                 {{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
                               </a-tag>
                             </a-tooltip>
@@ -413,7 +413,7 @@
     <a-modal
       v-model="terminalVisible"
       :bodyStyle="{
-        padding: '0px 10px',
+        padding: '0 10px',
         paddingTop: '10px',
         marginRight: '10px',
         height: `70vh`,

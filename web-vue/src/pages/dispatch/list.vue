@@ -54,7 +54,7 @@
       </a-tooltip>
       <template slot="name" slot-scope="text, record">
         <a-tooltip placement="topLeft" :title="text">
-          <a-button size="small" style="padding: 0px" type="link" icon="fullscreen" @click="handleViewStatus(record)">{{ text }}</a-button>
+          <a-button size="small" style="padding: 0" type="link" icon="fullscreen" @click="handleViewStatus(record)">{{ text }}</a-button>
         </a-tooltip>
       </template>
 
@@ -1627,7 +1627,7 @@ export default {
 }
 
 .box-shadow {
-  box-shadow: 0px 0px 10px 5px rgba(223, 222, 222, 0.5);
+  box-shadow: 0 0 10px 5px rgba(223, 222, 222, 0.5);
   border-radius: 5px;
 }
 

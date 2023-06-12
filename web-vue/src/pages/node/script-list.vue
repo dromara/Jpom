@@ -39,7 +39,7 @@
 
       <a-tooltip slot="name" @click="handleEdit(record)" slot-scope="text, record" placement="topLeft" :title="text">
         <!-- <span>{{ text }}</span> -->
-        <a-button type="link" style="padding: 0px" size="small">{{ text }}</a-button>
+        <a-button type="link" style="padding: 0" size="small">{{ text }}</a-button>
       </a-tooltip>
       <template slot="global" slot-scope="text">
         <a-tag v-if="text === 'GLOBAL'">全局</a-tag>

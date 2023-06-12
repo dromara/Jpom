@@ -33,7 +33,7 @@
       </a-tooltip>
 
       <template slot="fileId" slot-scope="text, item">
-        <a-button type="link" style="padding: 0px" @click="handleViewFile(item)" size="small">{{ text }}</a-button>
+        <a-button type="link" style="padding: 0" @click="handleViewFile(item)" size="small">{{ text }}</a-button>
       </template>
 
       <template slot="status" slot-scope="text">

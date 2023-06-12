@@ -109,7 +109,7 @@
                               item.statusMsg ? '状态消息：' + item.statusMsg : ''
                             } `"
                           >
-                            <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
+                            <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0">
                               {{ statusMap[item.status] }}</a-tag
                             >
                           </a-tooltip>
@@ -147,15 +147,14 @@
                       <a-row class="item-info">
                         <a-col :span="6" class="title text-overflow-hidden">插件版本:</a-col>
                         <a-col :span="18" class="content text-overflow-hidden">
-                          <span
+                          <a-button
                             v-if="item.jpomVersion"
                             type="link"
                             size="small"
                             @click="showMachineUpgrade(item)"
-                            style="color: #40a9ff; cursor: pointer"
                           >
                             {{ item.jpomVersion || '-' }}
-                          </span>
+                          </a-button>
                         </a-col>
                       </a-row>
                     </a-tooltip>
@@ -228,7 +227,7 @@
             slot-scope="text, item"
             :title="`当前状态：${statusMap[item.status]} ${item.statusMsg ? '状态消息：' + item.statusMsg : ''} `"
           >
-            <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
+            <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0">
               {{ statusMap[item.status] }}</a-tag
             >
           </a-tooltip>

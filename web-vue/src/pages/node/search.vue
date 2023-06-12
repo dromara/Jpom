@@ -60,7 +60,7 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
-        <a-button type="link" style="padding: 0px" size="small" @click="toNode(text)">
+        <a-button type="link" style="padding: 0" size="small" @click="toNode(text)">
           <span>{{ nodeMap[text] }}</span>
           <a-icon type="fullscreen" />
         </a-button>
