@@ -1,6 +1,6 @@
 <p align="center">
 	<a href="https://jpom.top/"  target="_blank">
-	    <img src="https://jpom.top/images/jpom_logo.png" width="400" alt="logo">
+	    <img src="https://jpom.top/images/logo/jpom_logo.svg" width="400" alt="logo">
 	</a>
 </p>
 <p align="center">
