@@ -1,6 +1,6 @@
 ---
 home: true
-heroImage: /images/logo/jpom_logo.svg
+heroImage: /images/logo/jpom_logo_big.svg
 heroText: 
 tagline: 🚀简而轻的低侵入式在线构建、自动部署、日常运维、项目运维监控软件
 actions:
