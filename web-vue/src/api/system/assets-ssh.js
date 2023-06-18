@@ -6,7 +6,7 @@ export function machineSshListData(params) {
   return axios({
     url: "/system/assets/ssh/list-data",
     method: "post",
-    params: params,
+    data: params,
   });
 }
 
@@ -23,7 +23,7 @@ export function machineSshEdit(params) {
   return axios({
     url: "/system/assets/ssh/edit",
     method: "post",
-    params: params,
+    data: params,
   });
 }
 
@@ -32,7 +32,7 @@ export function machineSshDelete(params) {
   return axios({
     url: "/system/assets/ssh/delete",
     method: "post",
-    params: params,
+    data: params,
   });
 }
 
@@ -41,7 +41,7 @@ export function machineSshDistribute(params) {
   return axios({
     url: "/system/assets/ssh/distribute",
     method: "post",
-    params: params,
+    data: params,
   });
 }
 
@@ -67,7 +67,7 @@ export function machineSshSaveWorkspaceConfig(params) {
   return axios({
     url: "/system/assets/ssh/save-workspace-config",
     method: "post",
-    params: params,
+    data: params,
   });
 }
 

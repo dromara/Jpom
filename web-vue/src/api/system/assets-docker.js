@@ -114,7 +114,7 @@ export function machineDockerDistribute(params) {
   return axios({
     url: "/system/assets/docker/distribute",
     method: "post",
-    params: params,
+    data: params,
   });
 }
 
