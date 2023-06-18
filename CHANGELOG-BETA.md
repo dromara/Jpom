@@ -8,6 +8,7 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 SSH 编辑输入框出现部分关键词时保持报错（感谢 [@一只羊](https://gitee.com/hjdyzy) [Gitee issues I7E3UG](https://gitee.com/dromara/Jpom/issues/I7E3UG) ）
+2. 【server】优化 日志组件支持显示 \t 制表符
 
 ------
 

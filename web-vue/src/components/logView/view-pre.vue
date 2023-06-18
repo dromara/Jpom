@@ -203,7 +203,8 @@ export default {
         })
         .map((item) => {
           return {
-            text: Prism.highlight(item.text, Prism.languages.log, "log"),
+            // 制表符号 替换
+            text: Prism.highlight(item.text, Prism.languages.log, "log").replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;"),
             id: item.id,
           };
         });
