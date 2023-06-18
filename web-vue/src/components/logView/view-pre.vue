@@ -138,13 +138,22 @@ export default {
     scrollToBottom() {
       const element = document.querySelector(`#${this.uniqueId}`);
       if (element) {
+        this.scrollTo(element.scrollHeight - element.clientHeight);
+      }
+    },
+    scrollToTop() {
+      this.scrollTo(0);
+    },
+    scrollTo(h) {
+      const element = document.querySelector(`#${this.uniqueId}`);
+      if (element) {
         // console.log(element, element.scrollHeight);
-        element.scrollTop = element.scrollHeight - element.clientHeight;
+        element.scrollTop = h;
         // this.scrollTo(element, element.scrollHeight - element.clientHeight, 500);
         // element.scrollIntoView(false);
       }
     },
-    scrollTo(element, position) {
+    scrollTo2(element, position) {
       if (!window.requestAnimationFrame) {
         window.requestAnimationFrame = function (cb) {
           return setTimeout(cb, 10);
@@ -209,7 +218,7 @@ export default {
           };
         });
       this.dataArray = [...this.dataArray, ...tempArray];
-      // console.log(this.dataArray);
+      // console.log(this.dataArray.length, this.showList.length);
       if (this.config.logScroll) {
         setTimeout(() => {
           // 延迟触发滚动
@@ -222,6 +231,7 @@ export default {
 
     clearLogCache() {
       this.dataArray = [];
+      this.scrollToTop();
     },
   },
 };
