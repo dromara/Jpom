@@ -14,6 +14,7 @@
 
 <script>
 import zhCN from "ant-design-vue/lib/locale-provider/zh_CN";
+import enUS from "ant-design-vue/lib/locale-provider/en_US";
 import Vue from "vue";
 import { mapGetters } from "vuex";
 import store from "@/store/index";
@@ -22,7 +23,6 @@ export default {
   name: "App",
   data() {
     return {
-      locale: zhCN,
       routerActivation: true,
       globalLoadingProps: {
         spinning: false,
@@ -42,6 +42,16 @@ export default {
     ...mapGetters(["getGuideCache"]),
     scrollbarFlag() {
       return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
+    },
+    locale() {
+      switch (store.getters.getLocale) {
+        case "en":
+          return enUS;
+
+        case "zh":
+        default:
+          return zhCN;
+      }
     },
   },
   created() {
@@ -110,6 +120,7 @@ export default {
   right: 0;
   display: flex;
 }
+
 .ant-spin-text {
   text-shadow: 0 0 black !important;
 }

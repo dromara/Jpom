@@ -1,5 +1,7 @@
 <template>
   <div class="user-header">
+    <locale-changer style="padding-right: 20px" />
+
     <a-button-group>
       <a-button v-if="this.mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
@@ -10,11 +12,11 @@
       </a-button>
       <a-button type="primary" class="btn-group-item">
         <div class="user-name">
-          <a-tooltip :title="this.getUserInfo.name"> {{ getUserInfo.name }} </a-tooltip>
+          <a-tooltip :title="this.getUserInfo.name"> {{ getUserInfo.name }}</a-tooltip>
         </div>
       </a-button>
       <a-dropdown>
-        <a-button type="primary" class="jpom-user-operation btn-group-item" icon="down"> </a-button>
+        <a-button type="primary" class="jpom-user-operation btn-group-item" icon="down"></a-button>
         <a-menu slot="overlay">
           <template v-if="this.mode === 'normal'">
             <a-sub-menu>
@@ -55,23 +57,23 @@
             <a-menu-divider />
           </template>
           <a-menu-item @click="handleUpdatePwd">
-            <a-button type="link" icon="lock"> 安全管理 </a-button>
+            <a-button type="link" icon="lock"> 安全管理</a-button>
           </a-menu-item>
           <a-menu-divider />
           <a-menu-item @click="handleUpdateUser">
-            <a-button type="link" icon="profile"> 用户资料 </a-button>
+            <a-button type="link" icon="profile"> 用户资料</a-button>
           </a-menu-item>
           <a-menu-divider />
           <a-menu-item @click="handleUserlog">
-            <a-button type="link" icon="bars"> 操作日志 </a-button>
+            <a-button type="link" icon="bars"> 操作日志</a-button>
           </a-menu-item>
           <a-menu-divider />
           <a-menu-item @click="customize">
-            <a-button type="link" icon="skin"> 个性配置 </a-button>
+            <a-button type="link" icon="skin"> 个性配置</a-button>
           </a-menu-item>
           <a-menu-divider />
           <a-menu-item @click="logOut">
-            <a-button type="link" icon="logout"> 退出登录 </a-button>
+            <a-button type="link" icon="logout"> 退出登录</a-button>
           </a-menu-item>
         </a-menu>
       </a-dropdown>
@@ -103,7 +105,7 @@
         <a-tab-pane :key="2" tab="两步验证">
           <a-row>
             <a-alert type="warning" v-if="temp.needVerify">
-              <template slot="message"> 提示 </template>
+              <template slot="message"> 提示</template>
               <template slot="description">
                 <ul style="color: red">
                   <li>绑定成功后将不再显示,强烈建议保存此二维码或者下面的 MFA key</li>
@@ -258,7 +260,7 @@
     <a-modal destroyOnClose v-model="customizeVisible" title="个性配置区" :footer="null" :maskClosable="false">
       <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-alert banner>
-          <template slot="message"> 下列配置信息仅在当前浏览器生效,清空浏览器缓存配置将恢复默认 </template>
+          <template slot="message"> 下列配置信息仅在当前浏览器生效,清空浏览器缓存配置将恢复默认</template>
         </a-alert>
         <a-form-model-item label="页面导航" prop="token">
           <a-space>
@@ -295,7 +297,7 @@
       <a-space direction="vertical">
         <a-alert message="安全提醒" description="为了您的账号安全系统要求必须开启两步验证来确保账号的安全性" type="error" :closable="false" />
         <a-row align="middle" type="flex" justify="center">
-          <a-button type="danger" @click="toBindMfa"> 立即开启 </a-button>
+          <a-button type="danger" @click="toBindMfa"> 立即开启</a-button>
         </a-row>
       </a-space>
     </a-modal>
@@ -305,6 +307,7 @@
     </a-modal>
   </div>
 </template>
+
 <script>
 import { mapGetters } from "vuex";
 import { bindMfa, closeMfa, editUserInfo, generateMfa, getUserInfo, myWorkspace, sendEmailCode, updatePwd } from "@/api/user/user";
@@ -313,9 +316,11 @@ import sha1 from "js-sha1";
 import Vue from "vue";
 import { MFA_APP_TIP_ARRAY, itemGroupBy } from "@/utils/const";
 import UserLog from "./user-log.vue";
+import LocaleChanger from "@/components/locale/locale-changer.vue";
 
 export default {
   components: {
+    LocaleChanger,
     UserLog,
   },
   props: {
@@ -380,13 +385,13 @@ export default {
       return this.getGuideCache.close;
     },
     menuMultipleFlag() {
-      return this.getGuideCache.menuMultipleFlag === undefined ? true : this.getGuideCache.menuMultipleFlag;
+      return this.getGuideCache.menuMultipleFlag ?? true;
     },
     fullScreenFlag() {
-      return this.getGuideCache.fullScreenFlag === undefined ? true : this.getGuideCache.fullScreenFlag;
+      return this.getGuideCache.fullScreenFlag ?? true;
     },
     scrollbarFlag() {
-      return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
+      return this.getGuideCache.scrollbarFlag ?? true;
     },
   },
   inject: ["reload"],
@@ -741,10 +746,12 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .btn-group-item {
   padding: 0 5px;
 }
+
 .workspace-name {
   min-width: 30px;
   max-width: 200px;

@@ -4,6 +4,7 @@ import Vue from "vue";
 import user from "./modules/user";
 import app from "./modules/app";
 import guide from "./modules/guide";
+import locale from "./modules/locale";
 import menu from "./modules/menu";
 import managementMenu from "./modules/management-menu";
 
@@ -14,6 +15,7 @@ const store = new Vuex.Store({
     user,
     app,
     guide,
+    locale,
     menu,
     managementMenu,
   },

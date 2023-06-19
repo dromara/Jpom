@@ -1,4 +1,4 @@
-import axios, {loadRouterBase} from "./config";
+import axios, { loadRouterBase } from "./config";
 
 /**
  * 分页获取仓库列表

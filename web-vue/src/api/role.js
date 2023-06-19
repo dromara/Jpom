@@ -48,7 +48,7 @@
 //  * @param {
 //  *  id: 角色 ID
 //  *  dynamic: dynamic
-//  * } params 
+//  * } params
 //  */
 // export function getRoleDynamicList(params) {
 //   return axios({
@@ -64,7 +64,7 @@
 //  * @param {
 //  *  id: 角色 ID
 //  *  dynamic: dynamic
-//  * } params 
+//  * } params
 //  */
 // export function editRoleDynamic(params) {
 //   return axios({

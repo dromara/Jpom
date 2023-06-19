@@ -4,7 +4,7 @@
       <template slot="description">
         <a-result status="404" title="404" sub-title="Sorry, the page you visited does not exist.">
           <a-button type="primary" @click="goBack">
-            <a-icon type="left"/>
+            <a-icon type="left" />
             <span>Go Back</span>
           </a-button>
         </a-result>
@@ -15,17 +15,15 @@
 <script>
 export default {
   data() {
-    return {
-      
-    }
+    return {};
   },
   methods: {
     // 返回
     goBack() {
       this.$router.back(-1);
-    }
-  }
-}
+    },
+  },
+};
 </script>
 <style scoped>
 .card {
@@ -33,7 +31,7 @@ export default {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%,-50%);
+  transform: translate(-50%, -50%);
   text-align: center;
 }
 </style>
