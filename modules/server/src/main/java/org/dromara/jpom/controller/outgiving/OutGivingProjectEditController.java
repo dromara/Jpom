@@ -30,6 +30,7 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
@@ -52,6 +53,7 @@ import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.node.ProjectInfoCacheService;
+import org.dromara.jpom.service.outgiving.DbOutGivingLogService;
 import org.dromara.jpom.service.outgiving.OutGivingServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -80,15 +82,18 @@ public class OutGivingProjectEditController extends BaseServerController {
     private final OutGivingServer outGivingServer;
     private final ProjectInfoCacheService projectInfoCacheService;
     private final BuildInfoService buildService;
+    private final DbOutGivingLogService dbOutGivingLogService;
 
     public OutGivingProjectEditController(OutGivingWhitelistService outGivingWhitelistService,
                                           OutGivingServer outGivingServer,
                                           ProjectInfoCacheService projectInfoCacheService,
-                                          BuildInfoService buildService) {
+                                          BuildInfoService buildService,
+                                          DbOutGivingLogService dbOutGivingLogService) {
         this.outGivingWhitelistService = outGivingWhitelistService;
         this.outGivingServer = outGivingServer;
         this.projectInfoCacheService = projectInfoCacheService;
         this.buildService = buildService;
+        this.dbOutGivingLogService = dbOutGivingLogService;
     }
 
     /**
@@ -143,8 +148,13 @@ public class OutGivingProjectEditController extends BaseServerController {
             }
         }
 
-        outGivingServer.delByKey(id, request);
-        //
+        int byKey = outGivingServer.delByKey(id, request);
+        // 删除日志
+        if (byKey > 0) {
+            Entity where = new Entity();
+            where.set("outGivingId", id);
+            dbOutGivingLogService.del(where);
+        }
         return JsonMessage.success("删除成功");
     }
 
