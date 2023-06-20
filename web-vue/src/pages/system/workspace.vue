@@ -33,6 +33,7 @@
         <a-space>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
           <a-button size="small" type="primary" @click="configMeun(record)">菜单</a-button>
+          <a-button size="small" type="primary" @click="configWhiteDir(record)">分发配置</a-button>
           <a-button size="small" type="primary" @click="viewEnvVar(record)">变量</a-button>
           <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
@@ -40,7 +41,16 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal destroyOnClose v-model="editVisible" title="编辑工作空间" @ok="handleEditOk" :maskClosable="false">
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-alert message="温馨提醒" type="info" show-icon>
+        <template #description>
+          <ul>
+            <li>创建工作空间后还需要在对应工作空间中分别管理对应数据</li>
+            <li>如果要将工作空间分配给其他用户还需要到权限组管理</li>
+            <li>工作空间的菜单、环境变量、节点分发白名单需要逐一配置</li>
+          </ul>
+        </template>
+      </a-alert>
+      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }" style="padding-top: 15px">
         <a-form-model-item label="名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="工作空间名称" />
         </a-form-model-item>
@@ -87,6 +97,28 @@
         </a-row>
       </a-form-model>
     </a-modal>
+    <a-modal
+      destroyOnClose
+      v-model="configDir"
+      :title="`配置授权目录`"
+      :footer="null"
+      :maskClosable="false"
+      @cancel="
+        () => {
+          this.configDir = false;
+        }
+      "
+    >
+      <whiteList
+        v-if="configDir"
+        :workspaceId="temp.id"
+        @cancel="
+          () => {
+            this.configDir = false;
+          }
+        "
+      ></whiteList>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -94,10 +126,12 @@ import { deleteWorkspace, editWorkSpace, getWorkSpaceList, getMenusConfig, saveM
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import workspaceEnv from "./workspace-env.vue";
 import CustomSelect from "@/components/customSelect";
+import whiteList from "@/pages/dispatch/white-list.vue";
 export default {
   components: {
     workspaceEnv,
     CustomSelect,
+    whiteList,
   },
   data() {
     return {
@@ -127,7 +161,7 @@ export default {
           sorter: true,
           width: "170px",
         },
-        { title: "操作", dataIndex: "operation", fixed: "right", align: "center", scopedSlots: { customRender: "operation" }, width: "220px" },
+        { title: "操作", dataIndex: "operation", fixed: "right", align: "center", scopedSlots: { customRender: "operation" }, width: "300px" },
       ],
 
       // 表单校验规则
@@ -139,6 +173,7 @@ export default {
       replaceFields: { children: "childs", title: "title", key: "id" },
       menusConfigData: {},
       groupList: [],
+      configDir: false,
     };
   },
   computed: {
@@ -310,6 +345,11 @@ export default {
           this.configMenuVisible = false;
         }
       });
+    },
+    // 配置节点白名单
+    configWhiteDir(record) {
+      this.temp = Object.assign({}, record);
+      this.configDir = true;
     },
   },
 };

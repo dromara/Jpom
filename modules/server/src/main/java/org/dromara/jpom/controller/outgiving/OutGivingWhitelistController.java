@@ -28,6 +28,7 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.ReflectUtil;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JsonMessage;
+import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.model.data.ServerWhitelist;
 import org.dromara.jpom.permission.ClassFeature;
@@ -77,8 +78,8 @@ public class OutGivingWhitelistController extends BaseServerController {
      * @author Hotstrip
      */
     @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Map<String, Object>> whiteList() {
-        ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(getRequest());
+    public JsonMessage<Map<String, Object>> whiteList(HttpServletRequest request) {
+        ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(request);
         Field[] fields = ReflectUtil.getFields(ServerWhitelist.class);
         Map<String, Object> map = new HashMap<>(8);
         for (Field field : fields) {
@@ -105,10 +106,33 @@ public class OutGivingWhitelistController extends BaseServerController {
     public JsonMessage<String> whitelistDirectorySubmit(String outGiving,
                                                         String allowRemoteDownloadHost,
                                                         HttpServletRequest request) {
+        String workspaceId = nodeService.getCheckUserWorkspace(request);
+        return this.whitelistDirectorySubmit(outGiving, allowRemoteDownloadHost, workspaceId);
+    }
+
+    /**
+     * 保存节点白名单
+     *
+     * @param outGiving 数据
+     * @return json
+     */
+    @RequestMapping(value = "whitelist-directory-submit2", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @SystemPermission
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<String> whitelistDirectorySubmit2(String outGiving,
+                                                         String allowRemoteDownloadHost,
+                                                         @ValidatorItem String workspaceId) {
+        nodeService.checkUserWorkspace(workspaceId);
+        return this.whitelistDirectorySubmit(outGiving, allowRemoteDownloadHost, workspaceId);
+    }
+
+    private JsonMessage<String> whitelistDirectorySubmit(String outGiving,
+                                                         String allowRemoteDownloadHost,
+                                                         String workspaceId) {
         List<String> list = AgentWhitelist.parseToList(outGiving, true, "项目路径白名单不能为空");
         list = AgentWhitelist.covertToArray(list, "项目路径白名单不能位于Jpom目录下");
 
-        ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(request);
+        ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(workspaceId);
         serverWhitelist.setOutGiving(list);
         //
         List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "运行远程下载的 host 不能配置为空");
@@ -120,7 +144,7 @@ public class OutGivingWhitelistController extends BaseServerController {
         }
         serverWhitelist.setAllowRemoteDownloadHost(allowRemoteDownloadHostList == null ? null : CollUtil.newHashSet(allowRemoteDownloadHostList));
         //
-        String workspaceId = nodeService.getCheckUserWorkspace(request);
+
         String id = ServerWhitelist.workspaceId(workspaceId);
         systemParametersServer.upsert(id, serverWhitelist, id);
 
