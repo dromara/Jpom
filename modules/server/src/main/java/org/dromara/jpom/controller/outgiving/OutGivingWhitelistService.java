@@ -48,6 +48,10 @@ public class OutGivingWhitelistService {
 
     public ServerWhitelist getServerWhitelistData(HttpServletRequest request) {
         String workspaceId = nodeService.getCheckUserWorkspace(request);
+        return this.getServerWhitelistData(workspaceId);
+    }
+
+    public ServerWhitelist getServerWhitelistData(String workspaceId) {
         String id = ServerWhitelist.workspaceId(workspaceId);
         ServerWhitelist serverWhitelist = systemParametersServer.getConfigDefNewInstance(id, ServerWhitelist.class);
         if (serverWhitelist == null) {

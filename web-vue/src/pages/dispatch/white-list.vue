@@ -19,8 +19,14 @@
   </div>
 </template>
 <script>
-import { getDispatchWhiteList, editDispatchWhiteList } from "@/api/dispatch";
+import { getDispatchWhiteList, editDispatchWhiteList, editDispatchWhiteList2 } from "@/api/dispatch";
 export default {
+  props: {
+    workspaceId: {
+      type: String,
+      default: "",
+    },
+  },
   data() {
     return {
       temp: {},
@@ -33,7 +39,7 @@ export default {
   methods: {
     // load data
     loadData() {
-      getDispatchWhiteList().then((res) => {
+      getDispatchWhiteList({ workspaceId: this.workspaceId }).then((res) => {
         if (res.code === 200) {
           this.temp = res.data;
         }
@@ -43,17 +49,17 @@ export default {
     onSubmit() {
       // disabled submit button
       this.submitAble = true;
-
-      editDispatchWhiteList(this.temp).then((res) => {
+      const api = this.workspaceId ? editDispatchWhiteList2 : editDispatchWhiteList;
+      api({ ...this.temp, workspaceId: this.workspaceId }).then((res) => {
         if (res.code === 200) {
           // 成功
           this.$notification.success({
             message: res.msg,
           });
+          this.$emit("cancel");
         }
         // button recover
         this.submitAble = false;
-        this.$emit("cancel");
       });
     },
   },

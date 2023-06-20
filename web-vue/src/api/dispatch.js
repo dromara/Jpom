@@ -193,10 +193,11 @@ export function getDishPatchLogList(params) {
 }
 
 // 获取分发白名单数据
-export function getDispatchWhiteList() {
+export function getDispatchWhiteList(params) {
   return axios({
     url: "/outgiving/white-list",
     method: "post",
+    data: params,
   });
 }
 
@@ -207,6 +208,18 @@ export function getDispatchWhiteList() {
 export function editDispatchWhiteList(params) {
   return axios({
     url: "/outgiving/whitelistDirectory_submit",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
+ * 编辑分发白名单
+ * @param {*} params
+ */
+export function editDispatchWhiteList2(params) {
+  return axios({
+    url: "/outgiving/whitelist-directory-submit2",
     method: "post",
     data: params,
   });
