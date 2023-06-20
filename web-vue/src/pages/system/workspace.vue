@@ -5,7 +5,9 @@
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="工作空间名称" allowClear class="search-input-item" />
-
+          <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+            <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+          </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
@@ -42,7 +44,7 @@
         <a-form-model-item label="名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="工作空间名称" />
         </a-form-model-item>
-        <a-form-model-item label="机器分组" prop="group">
+        <a-form-model-item label="分组" prop="group">
           <custom-select v-model="temp.group" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder="选择分组名"> </custom-select>
         </a-form-model-item>
 
@@ -146,6 +148,7 @@ export default {
   },
   created() {
     this.loadData();
+    this.loadGroupList();
   },
   methods: {
     // 获取所有的分组
