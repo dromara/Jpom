@@ -160,9 +160,7 @@ public class MachineSshController extends BaseGroupNameController {
         sshModel.setGroupName(groupName);
         sshModel.setHost(host);
         // 如果密码传递不为空就设置值 因为上面已经判断了只有修改的情况下 password 才可能为空
-        if (StrUtil.isNotEmpty(password)) {
-            sshModel.setPassword(password);
-        }
+        Opt.ofBlankAble(password).ifPresent(sshModel::setPassword);
         if (StrUtil.startWith(privateKey, URLUtil.FILE_URL_PREFIX)) {
             String rsaPath = StrUtil.removePrefix(privateKey, URLUtil.FILE_URL_PREFIX);
             Assert.state(FileUtil.isFile(rsaPath), "配置的私钥文件不存在");
@@ -181,7 +179,7 @@ public class MachineSshController extends BaseGroupNameController {
             Charset.forName(charset);
             sshModel.setCharset(charset);
         } catch (Exception e) {
-            return new JsonMessage<>(405, "请填写正确的编码格式");
+            return new JsonMessage<>(405, "请填写正确的编码格式," + e.getMessage());
         }
         // 判断重复
         Entity entity = Entity.create();
@@ -189,9 +187,7 @@ public class MachineSshController extends BaseGroupNameController {
         entity.set("port", sshModel.getPort());
         entity.set("`user`", sshModel.getUser());
         entity.set("connectType", sshModel.getConnectType());
-        if (StrUtil.isNotEmpty(id)) {
-            entity.set("id", StrUtil.format(" <> {}", id));
-        }
+        Opt.ofBlankAble(id).ifPresent(s -> entity.set("id", StrUtil.format(" <> {}", s)));
         boolean exists = machineSshServer.exists(entity);
         Assert.state(!exists, "对应的SSH已经存在啦");
         try {
@@ -201,11 +197,7 @@ public class MachineSshController extends BaseGroupNameController {
             log.warn("ssh连接失败", e);
             return new JsonMessage<>(505, "ssh连接失败：" + e.getMessage());
         }
-        if (add) {
-            machineSshServer.insert(sshModel);
-        } else {
-            machineSshServer.updateById(sshModel);
-        }
+        int i = add ? machineSshServer.insert(sshModel) : machineSshServer.updateById(sshModel);
         return JsonMessage.success("操作成功");
     }
 

@@ -113,28 +113,29 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
     }
 
     @Override
-    public void insert(BuildHistoryLog buildHistoryLog) {
-        super.insert(buildHistoryLog);
+    public int insert(BuildHistoryLog buildHistoryLog) {
+        int count = super.insert(buildHistoryLog);
         // 清理单个
         int buildItemMaxHistoryCount = buildExtConfig.getItemMaxHistoryCount();
         super.autoLoopClear("startTime", buildItemMaxHistoryCount,
-                entity -> {
-                    entity.set("buildDataId", buildHistoryLog.getBuildDataId());
-                    // 清理单项构建历史保留个数只判断（构建结束、发布中、发布失败、发布失败）有效构建状态，避免无法保留有效构建历史
-                    entity.set("status", CollUtil.newArrayList(
-                            BuildStatus.Success.getCode(),
-                            BuildStatus.PubIng.getCode(),
-                            BuildStatus.PubSuccess.getCode(),
-                            BuildStatus.PubError.getCode()));
-                },
-                buildHistoryLog1 -> {
-                    JsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog1);
-                    if (!jsonMessage.success()) {
-                        log.warn("{} {} {}", buildHistoryLog1.getBuildName(), buildHistoryLog1.getBuildNumberId(), jsonMessage);
-                        return false;
-                    }
-                    return true;
-                });
+            entity -> {
+                entity.set("buildDataId", buildHistoryLog.getBuildDataId());
+                // 清理单项构建历史保留个数只判断（构建结束、发布中、发布失败、发布失败）有效构建状态，避免无法保留有效构建历史
+                entity.set("status", CollUtil.newArrayList(
+                    BuildStatus.Success.getCode(),
+                    BuildStatus.PubIng.getCode(),
+                    BuildStatus.PubSuccess.getCode(),
+                    BuildStatus.PubError.getCode()));
+            },
+            buildHistoryLog1 -> {
+                JsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog1);
+                if (!jsonMessage.success()) {
+                    log.warn("{} {} {}", buildHistoryLog1.getBuildName(), buildHistoryLog1.getBuildNumberId(), jsonMessage);
+                    return false;
+                }
+                return true;
+            });
+        return count;
     }
 
     @Override
@@ -147,15 +148,15 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
             return;
         }
         super.autoLoopClear("startTime", saveCount,
-                null,
-                buildHistoryLog1 -> {
-                    JsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog1);
-                    if (!jsonMessage.success()) {
-                        log.warn("{} {} {}", buildHistoryLog1.getBuildName(), buildHistoryLog1.getBuildNumberId(), jsonMessage);
-                        return false;
-                    }
-                    return true;
-                });
+            null,
+            buildHistoryLog1 -> {
+                JsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog1);
+                if (!jsonMessage.success()) {
+                    log.warn("{} {} {}", buildHistoryLog1.getBuildName(), buildHistoryLog1.getBuildNumberId(), jsonMessage);
+                    return false;
+                }
+                return true;
+            });
     }
 
     @Override

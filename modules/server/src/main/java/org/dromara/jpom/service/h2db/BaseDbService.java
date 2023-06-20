@@ -78,10 +78,11 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         new Order("modifyTimeMillis", Direction.DESC)
     };
 
-    public void insert(T t) {
+    public int insert(T t) {
         this.fillInsert(t);
-        super.insertDb(t);
+        int count = super.insertDb(t);
         this.executeClear();
+        return count;
     }
 
     /**

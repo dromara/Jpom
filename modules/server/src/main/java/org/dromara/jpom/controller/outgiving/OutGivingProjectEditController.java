@@ -144,6 +144,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         }
 
         outGivingServer.delByKey(id, request);
+        //
         return JsonMessage.success("删除成功");
     }
 
@@ -406,11 +407,11 @@ public class OutGivingProjectEditController extends BaseServerController {
         //
         String webhook = getParameter("webhook");
         webhook = Opt.ofBlankAble(webhook)
-                .map(s -> {
-                    Validator.validateMatchRegex(RegexPool.URL_HTTP, s, "WebHooks 地址不合法");
-                    return s;
-                })
-                .orElse(StrUtil.EMPTY);
+            .map(s -> {
+                Validator.validateMatchRegex(RegexPool.URL_HTTP, s, "WebHooks 地址不合法");
+                return s;
+            })
+            .orElse(StrUtil.EMPTY);
         outGivingModel.setWebhook(webhook);
         return tuples;
     }
