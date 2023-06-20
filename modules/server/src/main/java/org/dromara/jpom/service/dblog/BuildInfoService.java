@@ -90,9 +90,10 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
     }
 
     @Override
-    public void insert(BuildInfoModel buildInfoModel) {
-        super.insert(buildInfoModel);
+    public int insert(BuildInfoModel buildInfoModel) {
+        int count = super.insert(buildInfoModel);
         this.checkCron(buildInfoModel);
+        return count;
     }
 
     @Override

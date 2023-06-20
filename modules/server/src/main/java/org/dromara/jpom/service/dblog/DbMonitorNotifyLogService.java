@@ -39,11 +39,11 @@ public class DbMonitorNotifyLogService extends BaseWorkspaceService<MonitorNotif
 
 
     @Override
-    public void insert(MonitorNotifyLog monitorNotifyLog) {
+    public int insert(MonitorNotifyLog monitorNotifyLog) {
         try {
             BaseServerController.resetInfo(UserModel.EMPTY);
             //
-            super.insert(monitorNotifyLog);
+            return super.insert(monitorNotifyLog);
             //
         } finally {
             BaseServerController.removeEmpty();

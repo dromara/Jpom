@@ -95,11 +95,11 @@ public abstract class BaseDbCommonService<T> {
      *
      * @param t 数据
      */
-    protected final void insertDb(T t) {
+    protected final int insertDb(T t) {
         Db db = Db.use(this.getDataSource());
         try {
             Entity entity = this.dataBeanToEntity(t);
-            db.insert(entity);
+            return db.insert(entity);
         } catch (Exception e) {
             throw warpException(e);
         }

@@ -57,9 +57,10 @@ public class ScriptServer extends BaseGlobalOrWorkspaceService<ScriptModel> impl
     }
 
     @Override
-    public void insert(ScriptModel scriptModel) {
-        super.insert(scriptModel);
+    public int insert(ScriptModel scriptModel) {
+        int count = super.insert(scriptModel);
         this.checkCron(scriptModel);
+        return count;
     }
 
     @Override
