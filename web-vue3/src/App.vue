@@ -1,7 +1,7 @@
 <template>
-  <a-config-provider :locale="zhCN">
+  <a-config-provider :locale='locale'>
     <div :class="`${scrollbarFlag ? '' : 'hide-scrollbar'}`">
-      <router-view v-if="routerActivation" />
+      <router-view v-if='routerActivation' />
       <template>
         <a-back-top />
       </template>
@@ -9,18 +9,31 @@
   </a-config-provider>
 </template>
 
-<script setup lang="ts">
-import zhCN from 'ant-design-vue/es/locale/zh_CN'
+<script setup lang='ts'>
 import { useMenuStore } from '@/stores/menu'
 import { useGuideStore } from '@/stores/guide'
+import { useLocaleStore } from '@/stores/locale'
+import enUS from 'ant-design-vue/es/locale/en_US'
+import zhCN from 'ant-design-vue/es/locale/zh_CN'
 
+const localeStore = useLocaleStore()
 const routerActivation = ref(true)
 const guideStore = useGuideStore().getGuideCache
 const scrollbarFlag = computed(() => {
   return guideStore.scrollbarFlag ?? true
 })
+const locale = computed(() => {
+  switch (localeStore.getLocale) {
+    case 'en':
+      return enUS
+    case 'zh':
+    default:
+      return zhCN
+  }
+})
 
-onMounted(() => {})
+onMounted(() => {
+})
 
 const reload = () => {
   routerActivation.value = false
@@ -35,7 +48,7 @@ const reload = () => {
 provide('reload', reload)
 </script>
 
-<style lang="less">
+<style lang='less'>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
