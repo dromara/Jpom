@@ -10,6 +10,7 @@
 1. 【server】修复 SSH 编辑输入框出现部分关键词时保持报错（感谢 [@一只羊](https://gitee.com/hjdyzy) [Gitee issues I7E3UG](https://gitee.com/dromara/Jpom/issues/I7E3UG) ）
 2. 【server】优化 日志组件支持显示 \t 制表符、清空缓冲区滚动到顶部
 3. 【server】修复 彻底删除节点分发时未自动删除关联日志（感谢@ccx2480）
+4. 【server】修复 节点管理中脚本模板翻页无效（感谢 [@wangfubiao](https://gitee.com/wangfubiao) [Gitee issues I7F0RS](https://gitee.com/dromara/Jpom/issues/I7F0RS) ）
 
 ------
 

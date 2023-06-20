@@ -19,7 +19,7 @@
   </div>
 </template>
 <script>
-import { getDispatchWhiteList, editDispatchWhiteList } from "../../api/dispatch";
+import { getDispatchWhiteList, editDispatchWhiteList } from "@/api/dispatch";
 export default {
   data() {
     return {
