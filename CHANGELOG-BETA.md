@@ -12,6 +12,7 @@
 3. 【server】修复 彻底删除节点分发时未自动删除关联日志（感谢@ccx2480）
 4. 【server】修复 节点管理中脚本模板翻页无效（感谢 [@wangfubiao](https://gitee.com/wangfubiao) [Gitee issues I7F0RS](https://gitee.com/dromara/Jpom/issues/I7F0RS) ）
 5. 【server】优化 工作空间配置页面中新增节点分发白名单配置入口（感谢 [@陈旭](https://gitee.com/chenxu8989) [Gitee issues I7F0W0](https://gitee.com/dromara/Jpom/issues/I7F0W0) ）
+6. 【server】新增 Docker管理增加SSH连接
 
 ------
 
