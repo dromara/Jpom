@@ -97,7 +97,7 @@ export default {
     },
   },
   mounted() {
-    this.loadData();
+    // this.loadData();
     // console.log(Comparator);
   },
   methods: {
