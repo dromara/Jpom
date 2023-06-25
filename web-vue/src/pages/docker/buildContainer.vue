@@ -310,11 +310,10 @@
   </div>
 </template>
 <script>
-import { parseTime, renderSize } from "@/utils/const";
 import {dockerImageCreateContainer, dockerImageInspect} from "@/api/docker-api";
 export default {
   props: {
-    id: {
+    imageId: {
       type: String,
       default: "",
     },
@@ -340,15 +339,18 @@ export default {
   },
   computed: {
     reqDataId() {
-      return this.id || this.machineDockerId;
+      return this.imageId || this.machineDockerId;
     },
+  },
+  mounted() {
+    this.createContainer();
   },
   methods: {
     // 构建镜像
-    createContainer(record) {
+    createContainer() {
       dockerImageInspect(this.urlPrefix, {
         id: this.reqDataId,
-        imageId: record.id,
+        imageId: this.imageId,
       }).then((res) => {
         this.buildVisible = true;
         this.temp = {
@@ -359,9 +361,10 @@ export default {
             item.scheme = item.scheme || "tcp";
             return item;
           }),
-          image: (record.repoTags || []).join(","),
+          /**!!!!!!!! image how to get**/
+          image: [],
           autorun: true,
-          imageId: record.id,
+          imageId: this.imageId,
           env: [{}],
           storageOpt: [{}],
           commands: [{}],
