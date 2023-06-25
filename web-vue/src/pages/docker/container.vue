@@ -163,7 +163,7 @@
               <a-menu slot="overlay">
                 <a-menu-item>
                   <a-tooltip title="修改容器配置，重新运行">
-                    <a-button size="small" type="link" @click="doAction(record, 'rebuild')"><a-icon type="redo" />重建</a-button>
+                    <a-button size="small" type="link" @click="rebuild(record)"><a-icon type="redo" />重建</a-button>
                   </a-tooltip>
                 </a-menu-item>
                 <a-menu-item>
@@ -442,14 +442,30 @@
     >
       <editContainer ref="editContainer" :id="this.id" :machineDockerId="this.machineDockerId" :urlPrefix="this.urlPrefix" :containerId="temp.id"></editContainer>
     </a-modal>
+    <!-- rebuild container -->
+    <a-drawer
+      destroyOnClose
+      :visible="buildVisible"
+      @close="
+        () => {
+          this.buildVisible = false;
+        }
+      "
+      width="60vw"
+      title="构建容器"
+      :maskClosable="false"
+    >
+      <BuildContainer :imageId="this.temp.imageId" :machineDockerId="this.machineDockerId" :urlPrefix="this.urlPrefix" />
+    </a-drawer>
   </div>
 </template>
 <script>
 import { parseTime } from "@/utils/const";
-import { dockerContainerList, dockerContainerRemove, dockerContainerRestart, dockerContainerStart, dockerContainerStop, dockerContainerListCompose, dockerContainerRebuild } from "@/api/docker-api";
+import { dockerContainerList, dockerContainerRemove, dockerContainerRestart, dockerContainerStart, dockerContainerStop, dockerContainerListCompose, dockerImageInspect } from "@/api/docker-api";
 import LogView from "@/pages/docker/log-view";
 import Terminal from "@/pages/docker/terminal";
 import editContainer from "./editContainer.vue";
+import BuildContainer from "./buildContainer.vue";
 
 export default {
   name: "container",
@@ -457,6 +473,7 @@ export default {
     LogView,
     Terminal,
     editContainer,
+    BuildContainer
   },
   props: {
     id: {
@@ -538,15 +555,13 @@ export default {
         start: {
           msg: "您确定要启动当前容器吗？",
           api: dockerContainerStart,
-        },
-        rebuild: {
-          msg: "您确定要重建当前容器吗？",
-          api: dockerContainerRebuild,
         }
       },
       editVisible: false,
 
       countdownTime: Date.now(),
+
+      buildVisible: false,
     };
   },
   beforeDestroy() {},
@@ -639,6 +654,33 @@ export default {
       this.editVisible = true;
       // console.log(this.temp);
     },
+    // click rebuild button
+    rebuild(record) {
+      this.temp = Object.assign({}, record);
+      dockerImageInspect(this.urlPrefix, {
+        id: this.reqDataId,
+        imageId: record.imageId,
+      }).then((res) => {
+        this.buildVisible = true;
+
+        this.temp = {
+          volumes: [{}],
+          exposedPorts: (res.data?.config?.exposedPorts || [{}]).map((item) => {
+            item.disabled = item.port !== null;
+            item.ip = "0.0.0.0";
+            item.scheme = item.scheme || "tcp";
+            return item;
+          }),
+          image: (record.repoTags || []).join(","),
+          autorun: true,
+          imageId: record.id,
+          env: [{}],
+          storageOpt: [{}],
+          commands: [{}],
+        };
+        this.$refs["editForm"]?.resetFields();
+      });
+    }
   },
 };
 </script>
