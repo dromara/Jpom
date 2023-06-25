@@ -226,6 +226,7 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
             case "tcp":
             case "unix":
             case "npipe":
+            case "ssh":
                 return true;
             default:
                 return false;

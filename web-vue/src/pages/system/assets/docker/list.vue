@@ -118,14 +118,21 @@
         <a-form-model-item label="容器名称" prop="name">
           <a-input v-model="temp.name" placeholder="容器名称" />
         </a-form-model-item>
-        <a-form-model-item label="host" prop="host">
+        <a-form-model-item label="开启SSH访问" prop="enableSsh">
+          <a-switch v-model="temp.enableSsh" checked-children="开" un-checked-children="关" />
+        </a-form-model-item>
+        <a-form-model-item v-if="temp.enableSsh" label="SSH连接信息" prop="enableSsh">
+          <a-select v-model="temp.machineSshId" allowClear placeholder="SSH连接信息" class="search-input-item">
+            <a-select-option v-for="item in sshList" :key="item.id" :value="item.id">{{item.name}}({{item.host}})</a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <a-form-model-item v-if="!temp.enableSsh" label="host" prop="host">
           <a-input v-model="temp.host" placeholder="容器地址 tcp://127.0.0.1:2375" />
         </a-form-model-item>
 
         <a-form-model-item label="TLS 认证" prop="tlsVerify">
           <a-switch v-model="temp.tlsVerify" checked-children="开" un-checked-children="关" />
         </a-form-model-item>
-
         <a-form-model-item v-if="temp.tlsVerify" label="证书信息" prop="certInfo" help="可以通过证书管理中提前上传或者点击后面选择证书去选择/导入证书">
           <a-input-search
             v-model="temp.certInfo"
@@ -308,6 +315,7 @@ import {
   machineDockerDistribute,
   dockerListWorkspace,
 } from "@/api/system/assets-docker";
+import {machineSshListData} from '@/api/system/assets-ssh'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";
 import Console from "@/pages/docker/console";
@@ -318,7 +326,7 @@ export default {
   components: {
     Console,
     SwarmConsole,
-    certificate,
+    certificate
   },
   props: {},
   data() {
@@ -334,9 +342,10 @@ export default {
       initSwarmVisible: false,
       joinSwarmVisible: false,
       swarmList: [],
+      sshList: [],
       columns: [
-        { title: "名称", dataIndex: "name", width: 120, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "host", dataIndex: "host", width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "host", dataIndex: "host", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "docker版本", dataIndex: "dockerVersion", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
 
         { title: "状态", dataIndex: "status", ellipsis: true, align: "center", width: "100px", scopedSlots: { customRender: "status" } },
@@ -365,7 +374,7 @@ export default {
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
         name: [{ required: true, message: "请填写容器名称", trigger: "blur" }],
-        host: [{ required: true, message: "请填写容器地址", trigger: "blur" }],
+        // host: [{ required: true, message: "请填写容器地址", trigger: "blur" }],
 
         managerId: [{ required: true, message: "请选择要加入到哪个集群", trigger: "blur" }],
         role: [{ required: true, message: "请选择节点角色", trigger: "blur" }],
@@ -403,11 +412,19 @@ export default {
     },
   },
   mounted() {
+    this.sshListData()
     this.loadData();
   },
   methods: {
     //
     parseTime,
+    sshListData() {
+      machineSshListData().then((res) => {
+        if (res.code === 200) {
+          this.sshList = res.data.result
+        }
+      })
+    },
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true;
@@ -498,6 +515,13 @@ export default {
           return false;
         }
         const temp = Object.assign({}, this.temp);
+        if (temp.enableSsh && !temp.machineSshId) {
+          this.$message.warning('请选择SSH连接信息')
+          return false
+        } else if (!temp.host) {
+          this.$message.warning('请输入host')
+          return false
+        }
 
         editDocker(temp).then((res) => {
           if (res.code === 200) {

@@ -40,6 +40,7 @@
         <maven.compiler.target>8</maven.compiler.target>
 
         <docker-java-version>3.3.1</docker-java-version>
+        <jsch.version>0.2.7</jsch.version>
     </properties>
 
     <dependencies>
@@ -71,6 +72,24 @@
             <artifactId>docker-java-transport-httpclient5</artifactId>
             <version>${docker-java-version}</version>
         </dependency>
+        <!--Begin Docker SSH-->
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-transport-ssh</artifactId>
+            <version>${docker-java-version}</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/libs/docker-java-transport-ssh-3.2.2-SNAPSHOT.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.mwiede</groupId>
+            <artifactId>jsch</artifactId>
+            <version>${jsch.version}</version>
+        </dependency>
+        <!--End Docker SSH-->
     </dependencies>
 
     <build>

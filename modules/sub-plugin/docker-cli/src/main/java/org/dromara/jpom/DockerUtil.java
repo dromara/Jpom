@@ -28,6 +28,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.ssh.JschUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONObject;
@@ -40,9 +41,13 @@ import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import com.github.dockerjava.jsch.JschDockerHttpClient;
+import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 
 import java.io.File;
+import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -103,6 +108,7 @@ public class DockerUtil {
         String registryPassword = (String) parameter.get("registryPassword");
         String registryEmail = (String) parameter.get("registryEmail");
         String registryUrl = (String) parameter.get("registryUrl");
+        Session session = (Session) parameter.get("session");
         //
         DefaultDockerClientConfig.Builder defaultConfigBuilder = DefaultDockerClientConfig.createDefaultConfigBuilder();
         defaultConfigBuilder
@@ -116,20 +122,39 @@ public class DockerUtil {
         Opt.ofBlankAble(registryUsername).ifPresent(s -> defaultConfigBuilder.withRegistryUsername(registryUsername));
         Opt.ofBlankAble(registryPassword).ifPresent(s -> defaultConfigBuilder.withRegistryPassword(registryPassword));
 
-        DockerClientConfig config = defaultConfigBuilder.build();
-        //
-        ApacheDockerHttpClient.Builder builder = new ApacheDockerHttpClient.Builder()
-            .dockerHost(config.getDockerHost())
-            .sslConfig(config.getSSLConfig())
-            .maxConnections(100);
-        //
-        int timeout = Convert.toInt(parameter.get("timeout"), 0);
-        if (timeout > 0) {
-            builder.connectionTimeout(Duration.ofSeconds(timeout));
-            builder.responseTimeout(Duration.ofSeconds(timeout));
+        DockerClient dockerClient;
+        if (session != null) {
+            // 通过SSH连接Docker
+            try {
+                DockerClientConfig config = defaultConfigBuilder.build();
+                JschDockerHttpClient.Builder builder = new JschDockerHttpClient.Builder()
+                    .dockerHost(config.getDockerHost())
+                    .sslConfig(config.getSSLConfig());
+                int timeout = Convert.toInt(parameter.get("timeout"), 0);
+                if (timeout > 0) {
+                    builder.connectTimeout(timeout);
+                    builder.readTimeout(timeout);
+                }
+                JschDockerHttpClient httpClient = builder.build(session);
+                dockerClient = DockerClientImpl.getInstance(config, httpClient);
+            } catch (Exception e) {
+                log.error("SSH Docker初始化失败", e);
+                throw new RuntimeException(e);
+            }
+        } else {
+            DockerClientConfig config = defaultConfigBuilder.build();
+            ApacheDockerHttpClient.Builder builder = new ApacheDockerHttpClient.Builder()
+                .dockerHost(config.getDockerHost())
+                .sslConfig(config.getSSLConfig())
+                .maxConnections(100);
+            int timeout = Convert.toInt(parameter.get("timeout"), 0);
+            if (timeout > 0) {
+                builder.connectionTimeout(Duration.ofSeconds(timeout));
+                builder.responseTimeout(Duration.ofSeconds(timeout));
+            }
+            ApacheDockerHttpClient httpClient = builder.build();
+            dockerClient = DockerClientImpl.getInstance(config, httpClient);
         }
-        ApacheDockerHttpClient httpClient = builder.build();
-        DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient);
         if (StrUtil.isNotEmpty(registryUrl)) {
             AuthConfig authConfig = dockerClient.authConfig();
             AuthResponse authResponse = dockerClient.authCmd().withAuthConfig(authConfig).exec();
