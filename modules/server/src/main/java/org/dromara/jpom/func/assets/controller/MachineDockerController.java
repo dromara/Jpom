@@ -36,7 +36,9 @@ import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.func.BaseGroupNameController;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
+import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
+import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.func.cert.model.CertificateInfoModel;
 import org.dromara.jpom.func.cert.service.CertificateInfoService;
 import org.dromara.jpom.model.PageResultDto;
@@ -76,18 +78,21 @@ import java.util.*;
 public class MachineDockerController extends BaseGroupNameController {
     private final MachineDockerServer machineDockerServer;
     private final ServerConfig serverConfig;
+    private final MachineSshServer machineSshServer;
     private final DockerInfoService dockerInfoService;
     private final DockerSwarmInfoService dockerSwarmInfoService;
     private final WorkspaceService workspaceService;
     private final CertificateInfoService certificateInfoService;
 
-    public MachineDockerController(MachineDockerServer machineDockerServer,
+    public MachineDockerController(MachineSshServer machineSshServer,
+                                   MachineDockerServer machineDockerServer,
                                    DockerInfoService dockerInfoService,
                                    DockerSwarmInfoService dockerSwarmInfoService,
                                    WorkspaceService workspaceService,
                                    CertificateInfoService certificateInfoService,
                                    ServerConfig serverConfig) {
         super(machineDockerServer);
+        this.machineSshServer = machineSshServer;
         this.machineDockerServer = machineDockerServer;
         this.dockerInfoService = dockerInfoService;
         this.dockerSwarmInfoService = dockerSwarmInfoService;
@@ -142,6 +147,13 @@ public class MachineDockerController extends BaseGroupNameController {
         int heartbeatTimeout = getParameterInt("heartbeatTimeout", -1);
         String groupName = getParameter("groupName");
         String certInfo = getParameter("certInfo");
+        String enableSshStr = getParameter("enableSsh");
+        boolean enableSsh = Convert.toBool(enableSshStr, false);
+        String machineSshId = getParameter("machineSshId");
+        if (enableSsh) {
+            MachineSshModel model = machineSshServer.getByKey(machineSshId);
+            host = "ssh://" + model.getHost() + ":" + (model.getPort() == null ? 22 : model.getPort());
+        }
         boolean tlsVerify = Convert.toBool(tlsVerifyStr, false);
         //
         if (tlsVerify) {
@@ -167,6 +179,8 @@ public class MachineDockerController extends BaseGroupNameController {
         MachineDockerModel machineDockerModel = new MachineDockerModel();
         machineDockerModel.setHeartbeatTimeout(heartbeatTimeout);
         machineDockerModel.setHost(host);
+        machineDockerModel.setEnableSsh(enableSsh);
+        machineDockerModel.setMachineSshId(machineSshId);
         // 保存是会验证证书一定存在
         machineDockerModel.setCertExist(tlsVerify);
         machineDockerModel.setName(name);

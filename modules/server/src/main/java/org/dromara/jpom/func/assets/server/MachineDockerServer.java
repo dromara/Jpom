@@ -35,6 +35,7 @@ import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
+import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ILoadEvent;
@@ -66,6 +67,7 @@ import java.util.*;
 @Slf4j
 public class MachineDockerServer extends BaseDbService<MachineDockerModel> implements ILoadEvent, IAsyncLoad, Task {
     private static final String CRON_ID = "docker-monitor";
+    private final MachineSshServer machineSshServer;
     private final DockerInfoService dockerInfoService;
     private final DockerSwarmInfoService dockerSwarmInfoService;
 
@@ -74,8 +76,10 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     private CertificateInfoService certificateInfoService;
 
 
-    public MachineDockerServer(DockerInfoService dockerInfoService,
+    public MachineDockerServer(MachineSshServer machineSshServer,
+                               DockerInfoService dockerInfoService,
                                DockerSwarmInfoService dockerSwarmInfoService) {
+        this.machineSshServer = machineSshServer;
         this.dockerInfoService = dockerInfoService;
         this.dockerSwarmInfoService = dockerSwarmInfoService;
     }
@@ -404,6 +408,15 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
             File filePath = certificateInfoService.getFilePath(machineDockerModel.getCertInfo());
             Assert.notNull(filePath, "docker 证书文件丢失");
             parameter.put("dockerCertPath", filePath.getAbsolutePath());
+        }
+        if (Boolean.TRUE.equals(machineDockerModel.getEnableSsh()) && StrUtil.isNotEmpty(machineDockerModel.getMachineSshId())) {
+            // 添加SSH的操作Session
+            try {
+                Session session = machineSshServer.getSessionByModel(machineSshServer.getByKey(machineDockerModel.getMachineSshId()));
+                parameter.put("session", session);
+            } catch (Exception e) {
+                log.error("获取SSH Session失败", e);
+            }
         }
         return parameter;
     }
