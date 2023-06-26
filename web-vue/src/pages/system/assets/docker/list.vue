@@ -123,28 +123,35 @@
         </a-form-model-item>
         <a-form-model-item v-if="temp.enableSsh" label="SSH连接信息" prop="enableSsh">
           <a-select v-model="temp.machineSshId" allowClear placeholder="SSH连接信息" class="search-input-item">
-            <a-select-option v-for="item in sshList" :key="item.id" :value="item.id">{{item.name}}({{item.host}})</a-select-option>
+            <a-select-option :disabled="!item.dockerInfo" v-for="item in sshList" :key="item.id" :value="item.id">
+              <a-tooltip :title="`${item.name}(${item.host})`">
+                <template #title> {{ item.name }}({{ item.host }})[{{ item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version }}] </template>
+                {{ item.name }}({{ item.host }})[{{ item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version }}]</a-tooltip
+              >
+            </a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item v-if="!temp.enableSsh" label="host" prop="host">
-          <a-input v-model="temp.host" placeholder="容器地址 tcp://127.0.0.1:2375" />
-        </a-form-model-item>
+        <template v-if="!temp.enableSsh">
+          <a-form-model-item label="host" prop="host">
+            <a-input v-model="temp.host" placeholder="容器地址 tcp://127.0.0.1:2375" />
+          </a-form-model-item>
 
-        <a-form-model-item label="TLS 认证" prop="tlsVerify">
-          <a-switch v-model="temp.tlsVerify" checked-children="开" un-checked-children="关" />
-        </a-form-model-item>
-        <a-form-model-item v-if="temp.tlsVerify" label="证书信息" prop="certInfo" help="可以通过证书管理中提前上传或者点击后面选择证书去选择/导入证书">
-          <a-input-search
-            v-model="temp.certInfo"
-            placeholder="请输入证书信息或者选择证书信息,证书信息填写规则：序列号:证书类型"
-            enter-button="选择证书"
-            @search="
-              () => {
-                this.certificateVisible = true;
-              }
-            "
-          />
-        </a-form-model-item>
+          <a-form-model-item label="TLS 认证" prop="tlsVerify">
+            <a-switch v-model="temp.tlsVerify" checked-children="开" un-checked-children="关" />
+          </a-form-model-item>
+          <a-form-model-item v-if="temp.tlsVerify" label="证书信息" prop="certInfo" help="可以通过证书管理中提前上传或者点击后面选择证书去选择/导入证书">
+            <a-input-search
+              v-model="temp.certInfo"
+              placeholder="请输入证书信息或者选择证书信息,证书信息填写规则：序列号:证书类型"
+              enter-button="选择证书"
+              @search="
+                () => {
+                  this.certificateVisible = true;
+                }
+              "
+            />
+          </a-form-model-item>
+        </template>
 
         <a-collapse>
           <a-collapse-panel key="1" header="其他配置">
@@ -315,7 +322,7 @@ import {
   machineDockerDistribute,
   dockerListWorkspace,
 } from "@/api/system/assets-docker";
-import {machineSshListData} from '@/api/system/assets-ssh'
+import { machineSshListData } from "@/api/system/assets-ssh";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";
 import Console from "@/pages/docker/console";
@@ -326,7 +333,7 @@ export default {
   components: {
     Console,
     SwarmConsole,
-    certificate
+    certificate,
   },
   props: {},
   data() {
@@ -412,7 +419,7 @@ export default {
     },
   },
   mounted() {
-    this.sshListData()
+    this.sshListData();
     this.loadData();
   },
   methods: {
@@ -421,9 +428,9 @@ export default {
     sshListData() {
       machineSshListData().then((res) => {
         if (res.code === 200) {
-          this.sshList = res.data.result
+          this.sshList = res.data.result;
         }
-      })
+      });
     },
     // 加载数据
     loadData(pointerEvent) {
@@ -515,12 +522,16 @@ export default {
           return false;
         }
         const temp = Object.assign({}, this.temp);
-        if (temp.enableSsh && !temp.machineSshId) {
-          this.$message.warning('请选择SSH连接信息')
-          return false
-        } else if (!temp.host) {
-          this.$message.warning('请输入host')
-          return false
+        if (temp.enableSsh) {
+          if (!temp.machineSshId) {
+            this.$message.warning("请选择SSH连接信息");
+            return false;
+          }
+        } else {
+          if (!temp.host) {
+            this.$message.warning("请输入host");
+            return false;
+          }
         }
 
         editDocker(temp).then((res) => {

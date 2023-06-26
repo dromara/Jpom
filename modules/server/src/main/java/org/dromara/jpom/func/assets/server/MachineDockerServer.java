@@ -42,6 +42,7 @@ import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.cron.IAsyncLoad;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
+import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.cert.service.CertificateInfoService;
 import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.model.docker.DockerSwarmInfoMode;
@@ -58,6 +59,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * @author bwcx_jzy
@@ -411,12 +413,10 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
         }
         if (Boolean.TRUE.equals(machineDockerModel.getEnableSsh()) && StrUtil.isNotEmpty(machineDockerModel.getMachineSshId())) {
             // 添加SSH的操作Session
-            try {
-                Session session = machineSshServer.getSessionByModel(machineSshServer.getByKey(machineDockerModel.getMachineSshId()));
-                parameter.put("session", session);
-            } catch (Exception e) {
-                log.error("获取SSH Session失败", e);
-            }
+            MachineSshModel sshModel = machineSshServer.getByKey(machineDockerModel.getMachineSshId());
+            Assert.notNull(sshModel, "ssh 信息不存在啦");
+            parameter.put("dockerHost", StrUtil.format("ssh://{}@{}", sshModel.getUser(), sshModel.getHost()));
+            parameter.put("session", (Supplier<Session>) () -> machineSshServer.getSessionByModel(sshModel));
         }
         return parameter;
     }
