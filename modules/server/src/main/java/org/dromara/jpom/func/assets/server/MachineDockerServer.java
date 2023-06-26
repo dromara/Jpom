@@ -415,7 +415,8 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
             // 添加SSH的操作Session
             MachineSshModel sshModel = machineSshServer.getByKey(machineDockerModel.getMachineSshId());
             Assert.notNull(sshModel, "ssh 信息不存在啦");
-            parameter.put("dockerHost", StrUtil.format("ssh://{}@{}", sshModel.getUser(), sshModel.getHost()));
+            // 需要关闭之前的连接，避免阻塞
+            parameter.put("closeBefore", true);
             parameter.put("session", (Supplier<Session>) () -> machineSshServer.getSessionByModel(sshModel));
         }
         return parameter;
