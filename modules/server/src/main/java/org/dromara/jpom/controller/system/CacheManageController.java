@@ -26,7 +26,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.keepbx.jpom.event.ICacheTask;
 import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.build.BuildInfoManage;
+import org.dromara.jpom.build.BuildExecuteManage;
 import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JpomManifest;
@@ -104,7 +104,7 @@ public class CacheManageController extends BaseServerController implements ICach
         map.put("taskList", CronUtils.list());
         map.put("pluginSize", PluginFactory.size());
         map.put("shardingSize", BaseServerController.SHARDING_IDS.size());
-        map.put("buildKeys", BuildInfoManage.buildKeys());
+        map.put("buildKeys", BuildExecuteManage.buildKeys());
         map.put("syncFinisKeys", SyncFinisherUtil.keys());
         map.put("dateTime", DateTime.now().toString());
         map.put("timeZoneId", TimeZone.getDefault().getID());

@@ -13,6 +13,8 @@
 3. 【server】修复 彻底删除节点分发时未自动删除关联日志（感谢@ccx2480）
 4. 【server】修复 节点管理中脚本模板翻页无效（感谢 [@wangfubiao](https://gitee.com/wangfubiao) [Gitee issues I7F0RS](https://gitee.com/dromara/Jpom/issues/I7F0RS) ）
 5. 【server】优化 工作空间配置页面中新增节点分发白名单配置入口（感谢 [@陈旭](https://gitee.com/chenxu8989) [Gitee issues I7F0W0](https://gitee.com/dromara/Jpom/issues/I7F0W0) ）
+6. 【server】优化 构建附加环境变量支持解析 URL 参数格式
+   （感谢 [@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I7FROG](https://gitee.com/dromara/Jpom/issues/I7FROG) ）
 
 ------
 
@@ -85,7 +87,7 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】修复 在线更新无法正常使用 
+1. 【server】修复 在线更新无法正常使用
 
 ------
 
@@ -157,7 +159,6 @@
 
 ------
 
-
 ### 2.10.39.4-beta (2023-04-03)
 
 ### 🐞 解决BUG、优化功能
@@ -212,7 +213,6 @@
 
 ### 2.10.38.10-beta (2023-03-30)
 
-
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 节点脚本支持全局共享同步节点、节点管理查看脚本重复问题（感谢@奇奇）
@@ -248,7 +248,7 @@
 
 ### 🐣 新增功能
 
-1. 【server】新增 构建新增配置排除发布目录表达式（感谢@毛毛虫） 
+1. 【server】新增 构建新增配置排除发布目录表达式（感谢@毛毛虫）
 
 ### 🐞 解决BUG、优化功能
 

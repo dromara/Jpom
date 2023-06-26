@@ -161,7 +161,7 @@ public class BuildInfoManageController extends BaseServerController {
         if (checkStatus == null) {
             return JsonMessage.success("当前状态不在进行中," + nowStatus.getDesc());
         }
-        boolean status = BuildInfoManage.cancelTaskById(item.getId());
+        boolean status = BuildExecuteManage.cancelTaskById(item.getId());
         if (!status) {
             // 缓存中可能不存在数据,还是需要执行取消
             buildInfoService.updateStatus(id, BuildStatus.Cancel, "手动取消");

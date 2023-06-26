@@ -661,6 +661,7 @@
                     <li>附加环境变量是指读取仓库指定环境变量文件来添加到执行构建运行时</li>
                     <li>比如常见的 .env 文件</li>
                     <li>文件内容格式要求：env_name=xxxxx 不满足格式的行将自动忽略</li>
+                    <li>也支持 URL 参数格式：test_par=123abc&test_par2=abc21</li>
                   </ul>
                 </template>
                 <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
