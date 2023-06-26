@@ -100,17 +100,25 @@
         <a-space direction="vertical">
           <a-alert banner>
             <template slot="message">
-              <ul>
-                <li>系统使用 docker http 接口实现和 docker 通讯和管理，但是默认<b style="color: red">没有开启任何认证</b></li>
-                <li>
-                  这样使得
-                  <b style="color: red">docker 极不安全</b>
-                </li>
-                <li>如果端口暴露到公网很<b style="color: red"> 容易出现挖矿情况 </b></li>
-                <li>所以这里 我们<b style="color: red">强烈建议您使用 TLS 证书</b>（证书生成方式可以参考文档）来连接 docker 提升安全性</li>
-                <li>如果端口<b style="color: red">保证在内网中使用可以忽略 TLS 证书</b></li>
-                <li>注意：<b style="color: red">证书的允许的 IP 需要和 docker host 一致</b></li>
-              </ul>
+              <template v-if="temp.enableSsh">
+                <ul>
+                  <li>SSH 方式连接 docker 是通过终端实现，每次操作 docker 相关 api 需要登录一次终端</li>
+                  <li>docker 版本需要大于 18.09 才能使用 SSH 方式连接</li>
+                </ul>
+              </template>
+              <template v-else>
+                <ul>
+                  <li>系统使用 docker http 接口实现和 docker 通讯和管理，但是默认<b style="color: red">没有开启任何认证</b></li>
+                  <li>
+                    这样使得
+                    <b style="color: red">docker 极不安全</b>
+                  </li>
+                  <li>如果端口暴露到公网很<b style="color: red"> 容易出现挖矿情况 </b></li>
+                  <li>所以这里 我们<b style="color: red">强烈建议您使用 TLS 证书</b>（证书生成方式可以参考文档）来连接 docker 提升安全性</li>
+                  <li>如果端口<b style="color: red">保证在内网中使用可以忽略 TLS 证书</b></li>
+                  <li>注意：<b style="color: red">证书的允许的 IP 需要和 docker host 一致</b></li>
+                </ul>
+              </template>
             </template>
           </a-alert>
           <div></div>
@@ -126,7 +134,7 @@
             <a-select-option :disabled="!item.dockerInfo" v-for="item in sshList" :key="item.id" :value="item.id">
               <a-tooltip :title="`${item.name}(${item.host})`">
                 <template #title> {{ item.name }}({{ item.host }})[{{ item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version }}] </template>
-                {{ item.name }}({{ item.host }})[{{ item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version }}]</a-tooltip
+                {{ item.name }}({{ item.host }}) [{{ item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version }}]</a-tooltip
               >
             </a-select-option>
           </a-select>
