@@ -19,7 +19,7 @@ public class JschDockerHttpClientIT {
     public void pingViaDialer() throws IOException, JSchException {
 
         final JSch jSch = new JSch();
-        JSch.setLogger(new JschLogger());
+        JSch.setLogger(JschLogger.LOGGER);
 
 //        final String configFile = System.getProperty("user.home") + File.separator + ".ssh" + File.separator + "config";
 //        final File file = new File(configFile);
