@@ -15,6 +15,8 @@
 5. 【server】优化 工作空间配置页面中新增节点分发白名单配置入口（感谢 [@陈旭](https://gitee.com/chenxu8989) [Gitee issues I7F0W0](https://gitee.com/dromara/Jpom/issues/I7F0W0) ）
 6. 【server】优化 构建附加环境变量支持解析 URL 参数格式
    （感谢 [@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I7FROG](https://gitee.com/dromara/Jpom/issues/I7FROG) ）
+7. 【server】优化 构建支持单个配置保留天数和保留个数
+   （感谢 [@阿超](https://gitee.com/VampireAchao) [Gitee issues I7FOG2](https://gitee.com/dromara/Jpom/issues/I7FOG2) ）
 
 ------
 

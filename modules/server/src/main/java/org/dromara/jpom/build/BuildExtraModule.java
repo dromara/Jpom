@@ -191,6 +191,11 @@ public class BuildExtraModule extends BaseModel {
      */
     private Integer cloneDepth;
 
+    /**
+     * 构建历史保留个数
+     */
+    private Integer resultKeepCount;
+
     public boolean strictlyEnforce() {
         return strictlyEnforce != null && strictlyEnforce;
     }

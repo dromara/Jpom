@@ -23,11 +23,22 @@
 package org.dromara.jpom.service.dblog;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
+import cn.hutool.db.Page;
+import cn.hutool.db.sql.Direction;
+import cn.hutool.db.sql.Order;
+import cn.keepbx.jpom.event.ISystemTask;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.build.BuildExtraModule;
 import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.common.JsonMessage;
+import org.dromara.jpom.model.BaseDbModel;
+import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.log.BuildHistoryLog;
@@ -36,7 +47,10 @@ import org.dromara.jpom.system.extconf.BuildExtConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * 构建历史db
@@ -46,7 +60,7 @@ import java.util.Optional;
  */
 @Service
 @Slf4j
-public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryLog> {
+public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryLog> implements ISystemTask {
 
     private final BuildInfoService buildService;
     private final BuildExtConfig buildExtConfig;
@@ -99,7 +113,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
             }
         }
         int count = this.delByKey(buildHistoryLog.getId());
-        return new JsonMessage<>(200, "删除成功", count + "");
+        return new JsonMessage<>(200, "删除成功", String.valueOf(count));
     }
 
     @Override
@@ -116,26 +130,43 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
     public int insert(BuildHistoryLog buildHistoryLog) {
         int count = super.insert(buildHistoryLog);
         // 清理单个
+        BuildExtraModule build = BuildExtraModule.build(buildHistoryLog);
+        int resultKeepCount = ObjectUtil.defaultIfNull(build.getResultKeepCount(), 0);
         int buildItemMaxHistoryCount = buildExtConfig.getItemMaxHistoryCount();
-        super.autoLoopClear("startTime", buildItemMaxHistoryCount,
-            entity -> {
-                entity.set("buildDataId", buildHistoryLog.getBuildDataId());
-                // 清理单项构建历史保留个数只判断（构建结束、发布中、发布失败、发布失败）有效构建状态，避免无法保留有效构建历史
-                entity.set("status", CollUtil.newArrayList(
-                    BuildStatus.Success.getCode(),
-                    BuildStatus.PubIng.getCode(),
-                    BuildStatus.PubSuccess.getCode(),
-                    BuildStatus.PubError.getCode()));
-            },
-            buildHistoryLog1 -> {
-                JsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog1);
-                if (!jsonMessage.success()) {
-                    log.warn("{} {} {}", buildHistoryLog1.getBuildName(), buildHistoryLog1.getBuildNumberId(), jsonMessage);
-                    return false;
-                }
-                return true;
-            });
+        if (resultKeepCount > 0 || buildItemMaxHistoryCount > 0) {
+            // 至少有一个配置
+            int useCount;
+            if (resultKeepCount > 0 && buildItemMaxHistoryCount > 0) {
+                // 都配置过，使用最小值
+                useCount = Math.min(resultKeepCount, buildItemMaxHistoryCount);
+            } else {
+                // 只配置了一处，使用最大值
+                useCount = Math.max(resultKeepCount, buildItemMaxHistoryCount);
+            }
+            super.autoLoopClear("startTime", useCount, entity -> this.fillClearWhere(entity, buildHistoryLog.getBuildDataId()), this.predicate());
+        }
         return count;
+    }
+
+    private Predicate<BuildHistoryLog> predicate() {
+        return buildHistoryLog1 -> {
+            JsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog1);
+            if (!jsonMessage.success()) {
+                log.warn("{} {} {}", buildHistoryLog1.getBuildName(), buildHistoryLog1.getBuildNumberId(), jsonMessage);
+                return false;
+            }
+            return true;
+        };
+    }
+
+    private void fillClearWhere(Entity entity, String buildDataId) {
+        entity.set("buildDataId", buildDataId);
+        // 清理单项构建历史保留个数只判断（构建结束、发布中、发布失败、发布失败）有效构建状态，避免无法保留有效构建历史
+        entity.set("status", CollUtil.newArrayList(
+            BuildStatus.Success.getCode(),
+            BuildStatus.PubIng.getCode(),
+            BuildStatus.PubSuccess.getCode(),
+            BuildStatus.PubError.getCode()));
     }
 
     @Override
@@ -162,5 +193,41 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
     @Override
     protected String[] clearTimeColumns() {
         return super.clearTimeColumns();
+    }
+
+    @Override
+    public void executeTask() {
+        List<BuildInfoModel> buildInfoModels = buildService.hasResultKeep();
+        if (CollUtil.isEmpty(buildInfoModels)) {
+            return;
+        }
+        for (BuildInfoModel buildInfoModel : buildInfoModels) {
+            Integer resultKeepDay = buildInfoModel.getResultKeepDay();
+            if (resultKeepDay == null || resultKeepDay <= 0) {
+                continue;
+            }
+            log.debug("自动删除过期的构建历史相关文件：{} {}", buildInfoModel.getName(), resultKeepDay);
+            Entity entity = Entity.create();
+            this.fillClearWhere(entity, buildInfoModel.getId());
+            DateTime date = DateTime.now();
+            date = DateUtil.offsetDay(date, -resultKeepDay);
+            date = DateUtil.beginOfDay(date);
+            entity.set("startTime", "< " + date.getTime());
+            while (true) {
+                Page page = new Page(1, 50);
+                page.addOrder(new Order("startTime", Direction.DESC));
+                PageResultDto<BuildHistoryLog> pageResult = this.listPage(entity, page);
+                if (pageResult.isEmpty()) {
+                    break;
+                }
+                List<String> ids = pageResult.getResult()
+                    .stream()
+                    .filter(this.predicate())
+                    .map(BaseDbModel::getId)
+                    .collect(Collectors.toList());
+                //
+                this.delByKey(ids, null);
+            }
+        }
     }
 }
