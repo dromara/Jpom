@@ -461,6 +461,7 @@
         :machineDockerId="this.machineDockerId" 
         :urlPrefix="this.urlPrefix"
         :containerId="this.temp.id"
+        :containerData="this.temp"
         @cancelBtnClick="
           () => {
             this.buildVisible = false;

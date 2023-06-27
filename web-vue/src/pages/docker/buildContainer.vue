@@ -336,7 +336,11 @@ export default {
     containerId: {
       type: String,
       default: "",
-    }
+    },
+    containerData: {
+      type: Object,
+      default: () => ({}),
+    },
   },
   data() {
     return {
@@ -353,8 +357,19 @@ export default {
     reqDataId() {
       return this.id || this.machineDockerId;
     },
+    getLabels() {
+      if (!this.containerData.labels) {
+        return ""
+      }
+      let labels = ""
+      Object.keys(this.containerData.labels).map((key) => {
+        labels += `${key}=${this.containerData.labels[key]}&`
+      })
+      return labels.slice(0, -1);
+    },
   },
   mounted() {
+    console.log(this.containerData)
     this.createContainer();
   },
   methods: {
@@ -368,6 +383,32 @@ export default {
         // form image
         this.inspectImage();
       }
+    },
+    getPortsFromPorts(ports) {
+      const _ports = ports.map((item) => {
+        item.disabled = item.privatePort !== null;
+        item.port = item.privatePort;
+        return item;
+      })
+      return _ports.length > 0 ? _ports : null
+    },
+    getPortsFromExposedPorts(exposedPorts) {
+      const _ports = exposedPorts.map((item) => {
+        item.disabled = item.port !== null;
+        item.ip = "0.0.0.0";
+        item.scheme = item.scheme || "tcp";
+        return item;
+      })
+      return _ports.length > 0 ? _ports : null
+    },
+    getVolumesFromMounts(mounts) {
+      const _mounts = mounts.map((item) => {
+        item.disabled = item.destination !== null;
+        item.host = item.source;
+        item.container = item.destination;
+        return item;
+      })
+      return _mounts.length > 0 ? _mounts : null
     },
     // inspect container
     inspectContainer() {
@@ -383,17 +424,12 @@ export default {
         id: this.reqDataId,
         containerId: this.containerId,
       }).then(res => {
-        console.log(res.data)
         this.buildVisible = true;
         this.temp = {
           name: res.data.name,
-          volumes: [{}],
-          exposedPorts: (res.data?.config?.exposedPorts || [{}]).map((item) => {
-            item.disabled = item.port !== null;
-            item.ip = "0.0.0.0";
-            item.scheme = item.scheme || "tcp";
-            return item;
-          }),
+          labels: this.getLabels,
+          volumes: this.getVolumesFromMounts(this.containerData.mounts) || [{}],
+          exposedPorts: this.getPortsFromPorts(this.containerData.ports) || this.getPortsFromExposedPorts(res.data.config.exposedPorts) || [{}],
           autorun: true,
           imageId: this.imageId,
           env: [{}],
