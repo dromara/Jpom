@@ -369,7 +369,6 @@ export default {
     },
   },
   mounted() {
-    console.log(this.containerData)
     this.createContainer();
   },
   methods: {
