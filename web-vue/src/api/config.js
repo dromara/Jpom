@@ -3,7 +3,7 @@ import axios from "axios";
 import Qs from "qs";
 import store from "../store";
 import router from "../router";
-import { NO_NOTIFY_KEY, NO_LOADING_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID, LOADING_TIP } from "@/utils/const";
+import { NO_NOTIFY_KEY, NO_LOADING_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID, LOADING_TIP, LOCALE_Header } from "@/utils/const";
 import { refreshToken } from "./user/user";
 
 import { notification } from "ant-design-vue";
@@ -47,6 +47,9 @@ request.interceptors.request.use(
     }
     config.headers[TOKEN_HEADER_KEY] = store.getters.getToken || "";
     config.headers[CACHE_WORKSPACE_ID] = store.getters.getWorkspaceId;
+    // 后端 i18n
+    config.headers[LOCALE_Header] = store.getters.getLocale;
+
     return config;
   },
   (error) => {

@@ -37,6 +37,8 @@ export const NO_LOADING_KEY = 'loading'
 
 export const LOCALE_KEY = "locale"
 
+export const LOCALE_HEADER = "Locale"
+
 export const LOADING_TIP = 'loadingTip'
 
 const cachePageLimitKeyName = 'page_limit'

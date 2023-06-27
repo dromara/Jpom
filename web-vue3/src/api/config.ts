@@ -1,10 +1,11 @@
 import { IResponse } from '@/interface/request'
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
-import { NO_NOTIFY_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID } from '@/utils/const'
+import { NO_NOTIFY_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID, LOCALE_HEADER } from '@/utils/const'
 import { refreshToken } from './user/user'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { useMenuStore } from '@/stores/menu'
+import { useLocaleStore } from '@/stores/locale'
 
 const delTimeout: number = 20 * 1000
 const apiTimeout: number = Number(jpomWindow.apiTimeout === '<apiTimeout>' ? delTimeout : jpomWindow.apiTimeout)
@@ -28,10 +29,12 @@ const instance: AxiosInstance = axios.create({
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const appStore = useAppStore()
   const userStore = useUserStore()
+  const localeStore = useLocaleStore()
 
   const { headers } = config
   headers[TOKEN_HEADER_KEY] = userStore.token
   headers[CACHE_WORKSPACE_ID] = appStore.getWorkspaceId
+  headers[LOCALE_HEADER] = localeStore.getLocale
 
   if (routerBase) {
     // 防止 url 出现 //
