@@ -452,7 +452,7 @@
         }
       "
       width="60vw"
-      title="构建容器"
+      title="重建容器"
       :maskClosable="false"
     >
       <BuildContainer 
@@ -460,6 +460,10 @@
         :imageId="this.temp.imageId"
         :machineDockerId="this.machineDockerId" 
         :urlPrefix="this.urlPrefix"
+        @cancelBtnClick="
+          () => {
+            this.buildVisible = false;
+          }"
       />
     </a-drawer>
   </div>

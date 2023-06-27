@@ -296,7 +296,7 @@
             <a-button
               @click="
                 () => {
-                  this.buildVisible = false;
+                  this.$emit('cancelBtnClick');
                 }
               "
             >
@@ -338,7 +338,6 @@ export default {
           { pattern: /[a-zA-Z0-9][a-zA-Z0-9_.-]$/, message: "容器名称数字字母,且长度大于1", trigger: "blur" },
         ],
       },
-      buildVisible: false,
     }
   },
   computed: {
@@ -433,7 +432,6 @@ export default {
             this.$notification.success({
               message: res.msg,
             });
-            this.buildVisible = false;
           }
         });
       });
