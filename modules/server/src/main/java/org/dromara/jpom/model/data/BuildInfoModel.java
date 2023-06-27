@@ -23,6 +23,7 @@
 package org.dromara.jpom.model.data;
 
 import cn.hutool.core.annotation.PropIgnore;
+import cn.hutool.core.util.ObjectUtil;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -140,6 +141,14 @@ public class BuildInfoModel extends BaseGroupModel {
      * 别名码
      */
     private String aliasCode;
+    /**
+     * 产物保留天数
+     */
+    private Integer resultKeepDay;
+
+    public Integer getResultKeepDay() {
+        return ObjectUtil.defaultIfNull(this.resultKeepDay, 0);
+    }
 
     @Tolerate
     public BuildInfoModel() {

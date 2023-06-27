@@ -109,6 +109,8 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
     private String buildRemark;
     /**
      * 构建其他信息
+     *
+     * @see BuildExtraModule
      */
     private String extraData;
     /**

@@ -93,6 +93,7 @@ export function editBuild(params) {
     autoBuildCron: params.autoBuildCron,
     buildMode: params.buildMode,
     aliasCode: params.aliasCode,
+    resultKeepDay: params.resultKeepDay,
   };
   return axios({
     url: "/build/edit",
