@@ -38,7 +38,7 @@ import java.io.File;
  * @author bwcx_jzy
  * @since 2021/12/22
  */
-@TableName(value = "COMMAND_EXEC_LOG", name = "命令执行记录")
+@TableName(value = "COMMAND_EXEC_LOG", name = "命令执行记录", parents = CommandModel.class)
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class CommandExecLogModel extends BaseWorkspaceModel {

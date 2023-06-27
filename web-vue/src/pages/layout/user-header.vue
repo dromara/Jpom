@@ -73,6 +73,14 @@
           <a-menu-item @click="logOut">
             <a-button type="link" icon="logout"> 退出登录 </a-button>
           </a-menu-item>
+          <a-menu-divider />
+          <a-menu-item @click="logOutSwap">
+            <a-button type="link" icon="swap"> 切换账号 </a-button>
+          </a-menu-item>
+          <a-menu-divider />
+          <a-menu-item @click="logOutAll">
+            <a-button type="link" icon="reset"> 彻底退出 </a-button>
+          </a-menu-item>
         </a-menu>
       </a-dropdown>
     </a-button-group>
@@ -507,6 +515,56 @@ export default {
         this.$notification.success({
           message: "重置页面操作引导、导航成功",
         });
+      });
+    },
+    // 彻底退出登录
+    logOutAll() {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要彻底退出系统么？彻底退出将退出登录和清空浏览器缓存",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          return new Promise((resolve) => {
+            // 退出登录
+            this.$store.dispatch("logOut").then(() => {
+              this.$notification.success({
+                message: "退出登录成功",
+              });
+              localStorage.clear();
+              this.$router.replace({
+                path: "/login",
+                query: {},
+              });
+              resolve();
+            });
+          });
+        },
+      });
+    },
+    // 切换账号登录
+    logOutSwap() {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要退出并切换账号登录么？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          return new Promise((resolve) => {
+            // 退出登录
+            this.$store.dispatch("logOut").then(() => {
+              this.$notification.success({
+                message: "退出登录成功",
+              });
+              this.$store.dispatch("changeWorkspace", "");
+              this.$router.replace({
+                path: "/login",
+                query: {},
+              });
+              resolve();
+            });
+          });
+        },
       });
     },
     // 退出登录

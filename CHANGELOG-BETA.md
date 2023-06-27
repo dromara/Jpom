@@ -1,5 +1,17 @@
 # 🚀 版本日志
 
+### 2.10.42.2-beta
+
+### 🐣 新增功能
+
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】优化 删除工作空间前预检查关联数据存在情况（感谢 [@陈旭](https://gitee.com/chenxu8989) [Gitee issues I7F0ZN](https://gitee.com/dromara/Jpom/issues/I7F0ZN) ）
+2. 【server】优化 退出登录支持彻底退出、切换账号退出（感谢 [@wangfubiao](https://gitee.com/wangfubiao) [Gitee issues I7GA5Q](https://gitee.com/dromara/Jpom/issues/I7GA5Q) ）
+
+------
+
 ### 2.10.42.1-beta (2023-06-26)
 
 ### 🐣 新增功能
