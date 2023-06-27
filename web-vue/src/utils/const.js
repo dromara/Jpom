@@ -35,6 +35,8 @@ export const NO_LOADING_KEY = "loading";
 
 export const LOADING_TIP = "loadingTip";
 
+export const LOCALE_KEY = "locale";
+
 const cachePageLimitKeyName = "page_limit";
 
 export function getCachePageLimit() {

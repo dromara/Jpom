@@ -1,0 +1,33 @@
+project_id: "TODO"
+base_path: "."
+base_url: "https://api.crowdin.com"
+
+preserve_hierarchy: true
+
+files: [
+  {
+    "source": "web-vue/src/locales/zh/*.js",
+    "translation": "web-vue/src/locales/%two_letters_code%/%original_file_name%",
+    "ignore": [ "index.js" ],
+
+    "type": "js",
+
+    #
+    # Defines whether single quote should be escaped by another single quote or backslash in exported translations
+    # e.g. 0 or 1 or 2 or 3 (Default is 3)
+    # 0 - do not escape single quote;
+    # 1 - escape single quote by another single quote;
+    # 2 - escape single quote by backslash;
+    # 3 - escape single quote by another single quote only in strings containing variables ( {0} ).
+    #
+    "escape_quotes": 3,
+
+    #
+    # Defines whether any special characters (=, :, ! and #) should be escaped by backslash in exported translations.
+    # e.g. 0 or 1 (Default is 0)
+    # 0 - do not escape special characters
+    # 1 - escape special characters by a backslash
+    #
+    "escape_special_characters": 0
+  }
+]

@@ -25,6 +25,7 @@
       </g>
     </svg>
     <div class="switch" @click="handleToggleBg">{{ dynamicBg ? "关闭动态背景" : "开启动态背景" }}</div>
+    <locale-changer class="locale-changer" />
     <a-card class="login-card" hoverable>
       <a-card-meta :title="`${loginTitle}`" style="text-align: center" description="" />
       <br />
@@ -89,7 +90,9 @@ import { checkSystem } from "@/api/install";
 import sha1 from "js-sha1";
 
 import { mapGetters } from "vuex";
+import LocaleChanger from "@/components/locale/locale-changer.vue";
 export default {
+  components: { LocaleChanger },
   data() {
     return {
       loginForm: {
@@ -308,6 +311,16 @@ export default {
   align-items: center;
   position: relative;
   overflow: hidden;
+}
+.locale-changer {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  z-index: 999;
+  background-color: white;
+  opacity: 0.9;
+  border-radius: 4px;
+  padding: 5px 10px;
 }
 .switch {
   width: 128px;

@@ -82,6 +82,7 @@ declare module '@vue/runtime-core' {
     DownOutlined: typeof import('@ant-design/icons-vue')['DownOutlined']
     LayoutOutlined: typeof import('@ant-design/icons-vue')['LayoutOutlined']
     LoadingOutlined: typeof import('@ant-design/icons-vue')['LoadingOutlined']
+    LocaleChanger: typeof import('./../components/locale/locale-changer.vue')['default']
     LockOutlined: typeof import('@ant-design/icons-vue')['LockOutlined']
     LogoutOutlined: typeof import('@ant-design/icons-vue')['LogoutOutlined']
     LogView: typeof import('./../components/logView/index.vue')['default']

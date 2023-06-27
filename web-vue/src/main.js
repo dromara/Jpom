@@ -1,5 +1,6 @@
 import Vue from "vue";
 import App from "./App.vue";
+import i18n from "./locales";
 
 import "./components/lazy_antd";
 
@@ -64,5 +65,6 @@ Vue.use(VueClipBoard);
 new Vue({
   router,
   store,
+  i18n,
   render: (h) => h(App),
 }).$mount("#app");

@@ -1,65 +1,87 @@
 <template>
-  <div class="user-header">
-    <a-button-group>
-      <a-button v-if="mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
-        <div class="workspace-name">
+  <div class='user-header'>
+    <locale-changer/>
+
+    <a-button-group style='padding-left: 20px'>
+      <a-button v-if="mode === 'normal'" type='dashed' class='workspace jpom-workspace btn-group-item'>
+        <div class='workspace-name'>
           <a-tooltip
-            :title="selectWorkspace && myWorkspaceList.filter((item:any) => item.id === selectWorkspace)[0].name"
+            :title='selectWorkspace && myWorkspaceList.filter((item:any) => item.id === selectWorkspace)[0].name'
           >
             {{ selectWorkspace && myWorkspaceList.filter((item: any) => item.id === selectWorkspace)[0].name }}
           </a-tooltip>
         </div>
       </a-button>
-      <a-button type="primary" class="btn-group-item">
-        <div class="user-name">
-          <a-tooltip :title="userInfo.name"> {{ userInfo.name }} </a-tooltip>
+      <a-button type='primary' class='btn-group-item'>
+        <div class='user-name'>
+          <a-tooltip :title='userInfo.name'> {{ userInfo.name }}</a-tooltip>
         </div>
       </a-button>
       <a-dropdown>
-        <a-button type="primary" class="jpom-user-operation btn-group-item">
-          <template #icon> <DownOutlined /> </template>
+        <a-button type='primary' class='jpom-user-operation btn-group-item'>
+          <template #icon>
+            <DownOutlined />
+          </template>
         </a-button>
         <template #overlay>
           <a-menu>
             <template v-if="mode === 'normal'">
               <a-sub-menu>
                 <template #title>
-                  <a-button type="link"><swap-outlined />切换工作空间</a-button>
+                  <a-button type='link'>
+                    <swap-outlined />
+                    切换工作空间
+                  </a-button>
                 </template>
-                <template v-for="(item, index) in myWorkspaceList">
+                <template v-for='(item, index) in myWorkspaceList'>
                   <a-menu-item
-                    v-if="index != -1"
-                    :disabled="item.id === selectWorkspace"
-                    @click="handleWorkspaceChange(item.id)"
-                    :key="index"
+                    v-if='index != -1'
+                    :disabled='item.id === selectWorkspace'
+                    @click='handleWorkspaceChange(item.id)'
+                    :key='index'
                   >
-                    <a-button type="link" :disabled="item.id === selectWorkspace">
+                    <a-button type='link' :disabled='item.id === selectWorkspace'>
                       {{ item.name }}
                     </a-button>
                   </a-menu-item>
-                  <a-menu-divider v-if="index != -1" :key="`${item.id}-divider`" />
+                  <a-menu-divider v-if='index != -1' :key='`${item.id}-divider`' />
                 </template>
               </a-sub-menu>
               <a-menu-divider />
             </template>
-            <a-menu-item @click="handleUpdatePwd">
-              <a-button type="link"><lock-outlined /> 安全管理 </a-button>
+            <a-menu-item @click='handleUpdatePwd'>
+              <a-button type='link'>
+                <lock-outlined />
+                安全管理
+              </a-button>
             </a-menu-item>
             <a-menu-divider />
-            <a-menu-item @click="handleUpdateUser">
-              <a-button type="link"><profile-outlined /> 用户资料 </a-button>
+            <a-menu-item @click='handleUpdateUser'>
+              <a-button type='link'>
+                <profile-outlined />
+                用户资料
+              </a-button>
             </a-menu-item>
             <a-menu-divider />
-            <a-menu-item @click="handleUserlog">
-              <a-button type="link"> <bars-outlined /> 操作日志 </a-button>
+            <a-menu-item @click='handleUserlog'>
+              <a-button type='link'>
+                <bars-outlined />
+                操作日志
+              </a-button>
             </a-menu-item>
             <a-menu-divider />
-            <a-menu-item @click="customize">
-              <a-button type="link"><skin-outlined /> 个性配置 </a-button>
+            <a-menu-item @click='customize'>
+              <a-button type='link'>
+                <skin-outlined />
+                个性配置
+              </a-button>
             </a-menu-item>
             <a-menu-divider />
-            <a-menu-item @click="logOut">
-              <a-button type="link"><logout-outlined /> 退出登录 </a-button>
+            <a-menu-item @click='logOut'>
+              <a-button type='link'>
+                <logout-outlined />
+                退出登录
+              </a-button>
             </a-menu-item>
           </a-menu>
         </template>
@@ -69,66 +91,66 @@
     <!-- 修改密码区 -->
     <a-modal
       destroyOnClose
-      v-model:visible="updateNameVisible"
+      v-model:visible='updateNameVisible'
       :width="'60vw'"
-      title="安全管理"
-      :footer="null"
-      :maskClosable="false"
+      title='安全管理'
+      :footer='null'
+      :maskClosable='false'
     >
-      <a-tabs v-model="tabActiveKey" @change="tabChange">
-        <a-tab-pane :key="1" tab="修改密码">
-          <a-form :rules="pwdRules" :model="pwdState" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-            <a-form-item label="原密码" name="oldPwd">
-              <a-input-password v-model:value="pwdState.oldPwd" placeholder="请输入原密码" />
+      <a-tabs v-model='tabActiveKey' @change='tabChange'>
+        <a-tab-pane :key='1' tab='修改密码'>
+          <a-form :rules='pwdRules' :model='pwdState' :label-col='{ span: 6 }' :wrapper-col='{ span: 14 }'>
+            <a-form-item label='原密码' name='oldPwd'>
+              <a-input-password v-model:value='pwdState.oldPwd' placeholder='请输入原密码' />
             </a-form-item>
-            <a-form-item label="新密码" name="newPwd">
-              <a-input-password v-model:value="pwdState.newPwd" placeholder="请输入新密码" />
+            <a-form-item label='新密码' name='newPwd'>
+              <a-input-password v-model:value='pwdState.newPwd' placeholder='请输入新密码' />
             </a-form-item>
-            <a-form-item label="确认密码" name="confirmPwd">
-              <a-input-password v-model:value="pwdState.confirmPwd" placeholder="请输入确认密码" />
+            <a-form-item label='确认密码' name='confirmPwd'>
+              <a-input-password v-model:value='pwdState.confirmPwd' placeholder='请输入确认密码' />
             </a-form-item>
             <a-form-item>
-              <a-row type="flex" justify="center">
-                <a-col :span="2">
-                  <a-button type="primary" @click="handleUpdatePwdOk">确认重置</a-button>
+              <a-row type='flex' justify='center'>
+                <a-col :span='2'>
+                  <a-button type='primary' @click='handleUpdatePwdOk'>确认重置</a-button>
                 </a-col>
               </a-row>
             </a-form-item>
           </a-form>
         </a-tab-pane>
-        <a-tab-pane :key="2" tab="两步验证">
+        <a-tab-pane :key='2' tab='两步验证'>
           <a-row>
-            <a-alert type="warning" v-if="mfaState.needVerify">
-              <template #message> 提示 </template>
+            <a-alert type='warning' v-if='mfaState.needVerify'>
+              <template #message> 提示</template>
               <template #description>
-                <ul style="color: red">
+                <ul style='color: red'>
                   <li>绑定成功后将不再显示,强烈建议保存此二维码或者下面的 MFA key</li>
                   <li>请使用应用扫码绑定令牌,然后输入验证码确认绑定才生效</li>
                 </ul>
               </template>
             </a-alert>
-            <a-col :span="12">
+            <a-col :span='12'>
               <a-form
-                ref="mfaForm"
-                :model="mfaState"
-                :rules="mfaRules"
-                :label-col="{ span: 6 }"
-                :wrapper-col="{ span: 14 }"
+                ref='mfaForm'
+                :model='mfaState'
+                :rules='mfaRules'
+                :label-col='{ span: 6 }'
+                :wrapper-col='{ span: 14 }'
               >
-                <a-form-item label="当前状态" name="status">
-                  <a-switch checked-children="开启中" disabled un-checked-children="关闭中" v-model="mfaState.status" />
+                <a-form-item label='当前状态' name='status'>
+                  <a-switch checked-children='开启中' disabled un-checked-children='关闭中' v-model='mfaState.status' />
                 </a-form-item>
-                <template v-if="mfaState.needVerify">
-                  <a-form-item label="二维码">
+                <template v-if='mfaState.needVerify'>
+                  <a-form-item label='二维码'>
                     <a-row>
-                      <a-col :span="14">
-                        <div class="qrcode" ref="qrCodeUrl" id="qrCodeUrl"></div>
+                      <a-col :span='14'>
+                        <div class='qrcode' ref='qrCodeUrl' id='qrCodeUrl'></div>
                       </a-col>
                     </a-row>
                   </a-form-item>
-                  <a-form-item label="MFA key">
+                  <a-form-item label='MFA key'>
                     <a-input
-                      v-clipboard:copy="mfaState.mfaKey"
+                      v-clipboard:copy='mfaState.mfaKey'
                       v-clipboard:success="
                         () => {
                           // tempVue.prototype.$notification.success({ message: '复制成功' })
@@ -141,47 +163,47 @@
                       "
                       readOnly
                       disabled
-                      v-model="mfaState.mfaKey"
+                      v-model='mfaState.mfaKey'
                     >
-                      <a-icon #prefix type="copy" />
+                      <a-icon #prefix type='copy' />
                     </a-input>
                   </a-form-item>
                 </template>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
-                <a-form-item v-if="mfaState.needVerify" label="验证码" name="twoCode">
-                  <a-input v-model="mfaState.twoCode" ref="twoCode" placeholder="两步验证码" />
+                <a-form-item v-if='mfaState.needVerify' label='验证码' name='twoCode'>
+                  <a-input v-model='mfaState.twoCode' ref='twoCode' placeholder='两步验证码' />
                 </a-form-item>
-                <a-form-item v-if="mfaState.needVerify">
-                  <a-row type="flex" justify="center">
-                    <a-col :span="2">
-                      <a-button type="primary" html-type="submit" @click="handleBindMfa">确认绑定</a-button>
+                <a-form-item v-if='mfaState.needVerify'>
+                  <a-row type='flex' justify='center'>
+                    <a-col :span='2'>
+                      <a-button type='primary' html-type='submit' @click='handleBindMfa'>确认绑定</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
-                <a-form-item v-if="!mfaState.needVerify && mfaState.status" label="验证码" name="twoCode">
-                  <a-input v-model="mfaState.twoCode" ref="twoCode" placeholder="两步验证码" />
+                <a-form-item v-if='!mfaState.needVerify && mfaState.status' label='验证码' name='twoCode'>
+                  <a-input v-model='mfaState.twoCode' ref='twoCode' placeholder='两步验证码' />
                 </a-form-item>
-                <a-form-item v-if="!mfaState.needVerify && mfaState.status">
-                  <a-row type="flex" justify="center">
-                    <a-col :span="2">
-                      <a-button type="primary" html-type="submit" @click="closeMfaFn">确认关闭</a-button>
+                <a-form-item v-if='!mfaState.needVerify && mfaState.status'>
+                  <a-row type='flex' justify='center'>
+                    <a-col :span='2'>
+                      <a-button type='primary' html-type='submit' @click='closeMfaFn'>确认关闭</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
 
-                <a-form-item v-if="!mfaState.needVerify && !mfaState.status">
-                  <a-row type="flex" justify="center">
-                    <a-col :span="2">
-                      <a-button type="primary" @click="openMfaFn">开启 MFA</a-button>
+                <a-form-item v-if='!mfaState.needVerify && !mfaState.status'>
+                  <a-row type='flex' justify='center'>
+                    <a-col :span='2'>
+                      <a-button type='primary' @click='openMfaFn'>开启 MFA</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
               </a-form>
             </a-col>
-            <a-col :span="12">
-              <h3 id="两步验证应用">两步验证应用</h3>
-              <p v-for="(html, index) in MFA_APP_TIP_ARRAY" :key="index" v-html="html" />
+            <a-col :span='12'>
+              <h3 id='两步验证应用'>两步验证应用</h3>
+              <p v-for='(html, index) in MFA_APP_TIP_ARRAY' :key='index' v-html='html' />
             </a-col>
           </a-row>
         </a-tab-pane>
@@ -191,58 +213,58 @@
     <!-- 修改用户资料区 -->
     <a-modal
       destroyOnClose
-      v-model:visible="updateUserVisible"
-      title="修改用户资料"
-      @ok="handleUpdateUserOk"
-      :maskClosable="false"
+      v-model:visible='updateUserVisible'
+      title='修改用户资料'
+      @ok='handleUpdateUserOk'
+      :maskClosable='false'
     >
-      <a-form :rules="userRules" :model="temp" :label-col="{ span: 8 }" :wrapper-col="{ span: 15 }">
-        <a-form-item label="临时token" name="token">
+      <a-form :rules='userRules' :model='temp' :label-col='{ span: 8 }' :wrapper-col='{ span: 15 }'>
+        <a-form-item label='临时token' name='token'>
           <a-input-group compact>
-            <a-input v-model:value="userState.token" disabled style="width: calc(100% - 32px)"> </a-input>
-            <a-button style="padding: 4px 6px">
-              <a-typography-paragraph :copyable="{ text: userState.token }"></a-typography-paragraph>
+            <a-input v-model:value='userState.token' disabled style='width: calc(100% - 32px)'></a-input>
+            <a-button style='padding: 4px 6px'>
+              <a-typography-paragraph :copyable='{ text: userState.token }'></a-typography-paragraph>
             </a-button>
           </a-input-group>
         </a-form-item>
-        <a-form-item label="长期token" name="md5Token">
+        <a-form-item label='长期token' name='md5Token'>
           <a-input-group compact>
-            <a-input v-model:value="userState.md5Token" disabled style="width: calc(100% - 32px)"> </a-input>
-            <a-button style="padding: 4px 6px">
-              <a-typography-paragraph :copyable="{ text: userState.md5Token }"></a-typography-paragraph>
+            <a-input v-model:value='userState.md5Token' disabled style='width: calc(100% - 32px)'></a-input>
+            <a-button style='padding: 4px 6px'>
+              <a-typography-paragraph :copyable='{ text: userState.md5Token }'></a-typography-paragraph>
             </a-button>
           </a-input-group>
         </a-form-item>
-        <a-form-item label="昵称" name="name">
-          <a-input v-model="userState.name" placeholder="昵称" />
+        <a-form-item label='昵称' name='name'>
+          <a-input v-model='userState.name' placeholder='昵称' />
         </a-form-item>
-        <a-form-item label="邮箱地址" name="email">
-          <a-input v-model="userState.email" placeholder="邮箱地址" />
+        <a-form-item label='邮箱地址' name='email'>
+          <a-input v-model='userState.email' placeholder='邮箱地址' />
         </a-form-item>
-        <a-form-item v-show="showCode" label="邮箱验证码" name="code">
-          <a-row :gutter="8">
-            <a-col :span="15">
-              <a-input v-model="userState.code" placeholder="邮箱验证码" />
+        <a-form-item v-show='showCode' label='邮箱验证码' name='code'>
+          <a-row :gutter='8'>
+            <a-col :span='15'>
+              <a-input v-model='userState.code' placeholder='邮箱验证码' />
             </a-col>
-            <a-col :span="4">
-              <a-button type="primary" :disabled="!userState.email" @click="handleSendEmailCode">发送验证码</a-button>
+            <a-col :span='4'>
+              <a-button type='primary' :disabled='!userState.email' @click='handleSendEmailCode'>发送验证码</a-button>
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item label="钉钉通知地址" name="dingDing">
-          <a-input v-model="userState.dingDing" placeholder="钉钉通知地址" />
+        <a-form-item label='钉钉通知地址' name='dingDing'>
+          <a-input v-model='userState.dingDing' placeholder='钉钉通知地址' />
         </a-form-item>
-        <a-form-item label="企业微信通知地址" name="workWx">
-          <a-input v-model="userState.workWx" placeholder="企业微信通知地址" />
+        <a-form-item label='企业微信通知地址' name='workWx'>
+          <a-input v-model='userState.workWx' placeholder='企业微信通知地址' />
         </a-form-item>
       </a-form>
     </a-modal>
 
     <!-- 个性配置区 -->
-    <a-modal destroyOnClose v-model:visible="customizeVisible" title="个性配置区" :footer="null" :maskClosable="false">
-      <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+    <a-modal destroyOnClose v-model:visible='customizeVisible' title='个性配置区' :footer='null' :maskClosable='false'>
+      <a-form :model='temp' :label-col='{ span: 6 }' :wrapper-col='{ span: 14 }'>
         <a-alert banner>
-          <template #message> 下列配置信息仅在当前浏览器生效,清空浏览器缓存配置将恢复默认 </template>
+          <template #message> 下列配置信息仅在当前浏览器生效,清空浏览器缓存配置将恢复默认</template>
         </a-alert>
         <!-- <a-form-item label="页面导航" name="token">
           <a-space>
@@ -255,36 +277,36 @@
             </div>
           </a-space>
         </a-form-item> -->
-        <a-form-item label="菜单配置" name="token">
+        <a-form-item label='菜单配置' name='token'>
           <a-space>
             同时展开多个：
             <a-switch
-              checked-children="是"
-              @click="toggleMenuMultiple"
-              :checked="guideCache.menuMultipleFlag"
-              un-checked-children="否"
+              checked-children='是'
+              @click='toggleMenuMultiple'
+              :checked='guideCache.menuMultipleFlag'
+              un-checked-children='否'
             />
           </a-space>
         </a-form-item>
-        <a-form-item label="页面配置" name="token">
+        <a-form-item label='页面配置' name='token'>
           <a-space>
             自动撑开：
             <a-switch
-              checked-children="是"
-              @click="toggleFullScreenFlag"
-              :checked="guideCache.fullScreenFlag"
-              un-checked-children="否"
+              checked-children='是'
+              @click='toggleFullScreenFlag'
+              :checked='guideCache.fullScreenFlag'
+              un-checked-children='否'
             />
           </a-space>
         </a-form-item>
-        <a-form-item label="滚动条显示" name="token">
+        <a-form-item label='滚动条显示' name='token'>
           <a-space>
             全局配置：
             <a-switch
-              checked-children="显示"
-              @click="toggleScrollbarFlag"
-              :checked="guideCache.scrollbarFlag"
-              un-checked-children="不显示"
+              checked-children='显示'
+              @click='toggleScrollbarFlag'
+              :checked='guideCache.scrollbarFlag'
+              un-checked-children='不显示'
             />
           </a-space>
         </a-form-item>
@@ -293,39 +315,39 @@
     <!-- mfa 提示 -->
     <a-modal
       destroyOnClose
-      v-model="bindMfaTip"
-      title="安全提醒"
-      :footer="null"
-      :maskClosable="false"
-      :closable="false"
-      :keyboard="false"
+      v-model='bindMfaTip'
+      title='安全提醒'
+      :footer='null'
+      :maskClosable='false'
+      :closable='false'
+      :keyboard='false'
     >
-      <a-space direction="vertical">
+      <a-space direction='vertical'>
         <a-alert
-          message="安全提醒"
-          description="为了您的账号安全系统要求必须开启两步验证来确保账号的安全性"
-          type="error"
-          :closable="false"
+          message='安全提醒'
+          description='为了您的账号安全系统要求必须开启两步验证来确保账号的安全性'
+          type='error'
+          :closable='false'
         />
-        <a-row align="middle" type="flex" justify="center">
-          <a-button type="danger" @click="toBindMfa"> 立即开启 </a-button>
+        <a-row align='middle' type='flex' justify='center'>
+          <a-button type='danger' @click='toBindMfa'> 立即开启</a-button>
         </a-row>
       </a-space>
     </a-modal>
     <!-- 查看操作日志 -->
     <a-modal
       destroyOnClose
-      v-model="viewLogVisible"
+      v-model='viewLogVisible'
       :width="'90vw'"
-      title="操作日志"
-      :footer="null"
-      :maskClosable="false"
+      title='操作日志'
+      :footer='null'
+      :maskClosable='false'
     >
-      <user-log v-if="viewLogVisible"></user-log>
+      <user-log v-if='viewLogVisible'></user-log>
     </a-modal>
   </div>
 </template>
-<script lang="ts" setup>
+<script lang='ts' setup>
 // import { mapGetters } from "vuex";
 import {
   bindMfa,
@@ -345,6 +367,7 @@ import { Form } from 'ant-design-vue'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { useGuideStore } from '@/stores/guide'
+import LocaleChanger from '@/components/locale/locale-changer.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -713,10 +736,10 @@ const openMfaFn = () => {
     if (res.code === 200) {
       mfaState.status = true
       mfaState.mfaKey = res.data.mfaKey
-      ;(mfaState.url = res.data.url),
-        (mfaState.needVerify = true),
-        (mfaState.showSaveTip = true),
-        (mfaState.twoCode = '')
+      ;( mfaState.url = res.data.url ),
+        ( mfaState.needVerify = true ),
+        ( mfaState.showSaveTip = true ),
+        ( mfaState.twoCode = '' )
 
       // this.showQrCode()
       $notification.info({
@@ -750,7 +773,7 @@ onMounted(() => {
 })
 </script>
 
-<style scoped lang="less">
+<style scoped lang='less'>
 .btn-group-item {
   padding: 0 5px;
 }

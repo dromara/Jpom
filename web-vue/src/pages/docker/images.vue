@@ -387,7 +387,7 @@
 </template>
 <script>
 import { parseTime, renderSize } from "@/utils/const";
-import {dockerImageCreateContainer, dockerImageInspect, dockerImagePullImage, dockerImageRemove, dockerImagesList, dockerImageBatchRemove} from "@/api/docker-api";
+import { dockerImageCreateContainer, dockerImageInspect, dockerImagePullImage, dockerImageRemove, dockerImagesList, dockerImageBatchRemove } from "@/api/docker-api";
 import PullImageLog from "@/pages/docker/pull-image-log";
 
 export default {
@@ -452,7 +452,7 @@ export default {
         },
       },
       buildVisible: false,
-      tableSelections: []
+      tableSelections: [],
     };
   },
   computed: {
@@ -634,7 +634,7 @@ export default {
       });
     },
     batchDelete() {
-      let ids = this.tableSelections
+      let ids = this.tableSelections;
       this.$confirm({
         title: "系统提示",
         content: "真的要批量删除选择的镜像吗？已经被容器使用的镜像无法删除！",
@@ -644,7 +644,7 @@ export default {
           // 组装参数
           const params = {
             id: this.reqDataId,
-            imagesIds: ids.join(','),
+            imagesIds: ids.join(","),
           };
           dockerImageBatchRemove(this.urlPrefix, params).then((res) => {
             if (res.code === 200) {
@@ -656,7 +656,7 @@ export default {
           });
         },
       });
-    }
+    },
   },
 };
 </script>
