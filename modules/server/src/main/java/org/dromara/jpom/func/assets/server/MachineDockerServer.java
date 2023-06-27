@@ -35,12 +35,14 @@ import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
+import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.cron.IAsyncLoad;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
+import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.cert.service.CertificateInfoService;
 import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.model.docker.DockerSwarmInfoMode;
@@ -57,6 +59,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * @author bwcx_jzy
@@ -66,6 +69,7 @@ import java.util.*;
 @Slf4j
 public class MachineDockerServer extends BaseDbService<MachineDockerModel> implements ILoadEvent, IAsyncLoad, Task {
     private static final String CRON_ID = "docker-monitor";
+    private final MachineSshServer machineSshServer;
     private final DockerInfoService dockerInfoService;
     private final DockerSwarmInfoService dockerSwarmInfoService;
 
@@ -74,8 +78,10 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     private CertificateInfoService certificateInfoService;
 
 
-    public MachineDockerServer(DockerInfoService dockerInfoService,
+    public MachineDockerServer(MachineSshServer machineSshServer,
+                               DockerInfoService dockerInfoService,
                                DockerSwarmInfoService dockerSwarmInfoService) {
+        this.machineSshServer = machineSshServer;
         this.dockerInfoService = dockerInfoService;
         this.dockerSwarmInfoService = dockerSwarmInfoService;
     }
@@ -404,6 +410,14 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
             File filePath = certificateInfoService.getFilePath(machineDockerModel.getCertInfo());
             Assert.notNull(filePath, "docker 证书文件丢失");
             parameter.put("dockerCertPath", filePath.getAbsolutePath());
+        }
+        if (Boolean.TRUE.equals(machineDockerModel.getEnableSsh()) && StrUtil.isNotEmpty(machineDockerModel.getMachineSshId())) {
+            // 添加SSH的操作Session
+            MachineSshModel sshModel = machineSshServer.getByKey(machineDockerModel.getMachineSshId());
+            Assert.notNull(sshModel, "ssh 信息不存在啦");
+            // 需要关闭之前的连接，避免阻塞
+            parameter.put("closeBefore", true);
+            parameter.put("session", (Supplier<Session>) () -> machineSshServer.getSessionByModel(sshModel));
         }
         return parameter;
     }

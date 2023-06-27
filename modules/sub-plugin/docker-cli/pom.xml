@@ -29,7 +29,7 @@
     <parent>
         <artifactId>jpom-plugins-parent</artifactId>
         <groupId>org.dromara.jpom.plugins</groupId>
-        <version>2.10.41</version>
+        <version>2.10.42.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -40,6 +40,7 @@
         <maven.compiler.target>8</maven.compiler.target>
 
         <docker-java-version>3.3.1</docker-java-version>
+        <jsch.version>0.2.7</jsch.version>
     </properties>
 
     <dependencies>
@@ -70,6 +71,12 @@
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java-transport-httpclient5</artifactId>
             <version>${docker-java-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.dromara.jpom.plugins</groupId>
+            <artifactId>ssh-jsch</artifactId>
+            <version>${pom.version}</version>
         </dependency>
     </dependencies>
 

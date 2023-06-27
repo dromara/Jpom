@@ -148,7 +148,7 @@ public class BuildExecuteService {
             String e = this.checkStatus(buildInfoModel);
             Assert.isNull(e, () -> e);
             //
-            boolean containsKey = BuildInfoManage.BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId());
+            boolean containsKey = BuildExecuteManage.BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId());
             Assert.state(!containsKey, "当前构建还在进行中");
             //
             BuildExtraModule buildExtraModule = StringUtil.jsonConvert(buildInfoModel.getExtraData(), BuildExtraModule.class);
@@ -196,7 +196,7 @@ public class BuildExecuteService {
     private void runTask(TaskData taskData, BuildExtraModule buildExtraModule) {
         String logId = this.insertLog(buildExtraModule, taskData);
         //
-        BuildInfoManage.BuildInfoManageBuilder builder = BuildInfoManage.builder()
+        BuildExecuteManage.BuildExecuteManageBuilder builder = BuildExecuteManage.builder()
             .taskData(taskData)
             .logId(logId)
             .scriptServer(scriptServer)

@@ -156,6 +156,13 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
         return getTableName();
     }
 
+
+    public List<BuildInfoModel> hasResultKeep() {
+        //
+        String sql = "select * from " + super.getTableName() + " where resultKeepDay>0";
+        return super.queryList(sql);
+    }
+
     private static class CronTask implements Task {
 
         private final String buildId;
