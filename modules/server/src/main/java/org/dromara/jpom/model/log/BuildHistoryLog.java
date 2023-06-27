@@ -41,7 +41,7 @@ import org.dromara.jpom.model.enums.BuildStatus;
  * @since 2019/7/17
  **/
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "BUILDHISTORYLOG", name = "构建历史")
+@TableName(value = "BUILDHISTORYLOG", name = "构建历史", parents = BuildInfoModel.class)
 @Data
 public class BuildHistoryLog extends BaseWorkspaceModel {
     /**

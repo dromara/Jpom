@@ -33,7 +33,7 @@ import org.dromara.jpom.model.BaseWorkspaceModel;
  * @since 2023/3/18
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "FILE_RELEASE_TASK_LOG", name = "文件发布任务记录")
+@TableName(value = "FILE_RELEASE_TASK_LOG", name = "文件发布任务记录", parents = FileStorageModel.class)
 @Data
 @NoArgsConstructor
 public class FileReleaseTaskLogModel extends BaseWorkspaceModel {

@@ -26,6 +26,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseWorkspaceModel;
+import org.dromara.jpom.model.outgiving.OutGivingModel;
 import org.dromara.jpom.model.outgiving.OutGivingNodeProject;
 
 /**
@@ -35,7 +36,7 @@ import org.dromara.jpom.model.outgiving.OutGivingNodeProject;
  * @since 2019/7/19
  **/
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "OUTGIVINGLOG", name = "分发日志")
+@TableName(value = "OUTGIVINGLOG", name = "分发日志", parents = OutGivingModel.class, workspaceBind = 3)
 @Data
 public class OutGivingLog extends BaseWorkspaceModel {
     /**
