@@ -373,6 +373,15 @@ public abstract class BaseDbCommonService<T> {
         }
     }
 
+    public Number queryNumber(String sql, Object... params) {
+        try {
+            return Db.use(this.getDataSource()).queryNumber(sql, params);
+        } catch (Exception e) {
+            throw warpException(e);
+        }
+    }
+
+
     /**
      * sql 执行
      *
