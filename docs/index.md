@@ -369,7 +369,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 <a class="friends-item" href="https://www.jeesuite.com/" target="_blank">
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/mendmix.png')" alt="开源分布式云原生架构一站式解决方案">
 </a>
-<a class="friends-item" href="https://www.x-easypdf.cn" target="_blank">
+<a class="friends-item" href="https://gitee.com/dromara/koalas-rpc" target="_blank">
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/koalas-rpc2.png')" alt="企业生产级百亿日PV高可用可拓展的RPC框架。">
 </a>
 <a class="friends-item" href="https://dynamictp.cn/" target="_blank">
