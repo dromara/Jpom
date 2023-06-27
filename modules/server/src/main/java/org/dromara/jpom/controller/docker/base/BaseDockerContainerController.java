@@ -24,6 +24,7 @@ package org.dromara.jpom.controller.docker.base;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.JsonMessage;
@@ -207,5 +208,33 @@ public abstract class BaseDockerContainerController extends BaseDockerController
         parameter.putAll(jsonObject);
         JSONObject results = (JSONObject) plugin.execute("updateContainer", parameter);
         return JsonMessage.success("执行成功", results);
+    }
+
+    /**
+     * drop old container and create new container
+     * @return json
+     */
+    @PostMapping(value = "rebuild-container", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public JsonMessage<Object> reBuildContainer(@RequestBody JSONObject jsonObject) throws Exception {
+        String id = jsonObject.getString("id");
+        String containerId = jsonObject.getString("containerId");
+        Assert.hasText(id, "id 不能为空");
+        Assert.hasText(jsonObject.getString("imageId"), "镜像不能为空");
+        Assert.hasText(jsonObject.getString("name"), "容器名称不能为空");
+
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = this.toDockerParameter(id);
+
+        // drop old container
+        if (StrUtil.isNotEmpty(containerId)) {
+            parameter.put("containerId", containerId);
+            plugin.execute("removeContainer", parameter);
+        }
+
+        // create new container
+        parameter.putAll(jsonObject);
+        plugin.execute("createContainer", parameter);
+        return JsonMessage.success("重建成功");
     }
 }
