@@ -79,7 +79,7 @@
           </a-menu-item>
           <a-menu-divider />
           <a-menu-item @click="logOutAll">
-            <a-button type="link" icon="logout"> 彻底退出 </a-button>
+            <a-button type="link" icon="reset"> 彻底退出 </a-button>
           </a-menu-item>
         </a-menu>
       </a-dropdown>
