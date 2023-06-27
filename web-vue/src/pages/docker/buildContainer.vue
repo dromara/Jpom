@@ -310,7 +310,11 @@
   </div>
 </template>
 <script>
-import {dockerImageCreateContainer, dockerImageInspect} from "@/api/docker-api";
+import {
+  dockerImageCreateContainer, 
+  dockerImageInspect, 
+  dockerContainerRebuildContainer
+} from "@/api/docker-api";
 export default {
   props: {
     id: {
@@ -328,6 +332,10 @@ export default {
       type: String,
       default: "",
     },
+    containerId: {
+      type: String,
+      default: "",
+    }
   },
   data() {
     return {
@@ -427,13 +435,31 @@ export default {
         temp.commands = (this.temp.commands || []).map((item) => {
           return item.value || "";
         });
-        dockerImageCreateContainer(this.urlPrefix, temp).then((res) => {
-          if (res.code === 200) {
-            this.$notification.success({
-              message: res.msg,
-            });
-          }
-        });
+        // 判断 containerId
+        if (this.containerId) {
+          temp.containerId = this.containerId;
+          dockerContainerRebuildContainer(this.urlPrefix, temp).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+
+              // 通知父组件关闭弹窗
+              this.$emit('confirmBtnClick');
+            }
+          });
+        } else {
+          dockerImageCreateContainer(this.urlPrefix, temp).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              
+              // 通知父组件关闭弹窗
+              this.$emit('confirmBtnClick');
+            }
+          });
+        }
       });
     },
   }

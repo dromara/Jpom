@@ -460,9 +460,15 @@
         :imageId="this.temp.imageId"
         :machineDockerId="this.machineDockerId" 
         :urlPrefix="this.urlPrefix"
+        :containerId="this.temp.id"
         @cancelBtnClick="
           () => {
             this.buildVisible = false;
+          }"
+        @confirmBtnClick="
+          () => {
+            this.buildVisible = false;
+            this.loadData();
           }"
       />
     </a-drawer>
