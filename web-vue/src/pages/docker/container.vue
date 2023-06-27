@@ -167,9 +167,9 @@
                   </a-tooltip>
                 </a-menu-item>
                 <a-menu-item>
-                  <atooltip title="编辑容器的一些基础参数">
+                  <a-tooltip title="编辑容器的一些基础参数">
                     <a-button size="small" type="link" icon="edit" :disabled="record.state !== 'running'" @click="editContainer(record)">编辑</a-button>
-                  </atooltip>
+                  </a-tooltip>
                 </a-menu-item>
                 <a-menu-item>
                   <a-tooltip title="点击查看日志">
@@ -384,9 +384,9 @@
                 </a>
                 <a-menu slot="overlay">
                   <a-menu-item>
-                    <atooltip title="编辑容器的一些基础参数">
+                    <a-tooltip title="编辑容器的一些基础参数">
                       <a-button size="small" type="link" icon="edit" :disabled="record.state !== 'running'" @click="editContainer(record)">编辑</a-button>
-                    </atooltip>
+                    </a-tooltip>
                   </a-menu-item>
                   <a-menu-item>
                     <a-tooltip title="点击查看日志">
@@ -455,13 +455,18 @@
       title="构建容器"
       :maskClosable="false"
     >
-      <BuildContainer :imageId="this.temp.imageId" :machineDockerId="this.machineDockerId" :urlPrefix="this.urlPrefix" />
+      <BuildContainer 
+        :id="this.id" 
+        :imageId="this.temp.imageId"
+        :machineDockerId="this.machineDockerId" 
+        :urlPrefix="this.urlPrefix"
+      />
     </a-drawer>
   </div>
 </template>
 <script>
 import { parseTime } from "@/utils/const";
-import { dockerContainerList, dockerContainerRemove, dockerContainerRestart, dockerContainerStart, dockerContainerStop, dockerContainerListCompose, dockerImageInspect } from "@/api/docker-api";
+import { dockerContainerList, dockerContainerRemove, dockerContainerRestart, dockerContainerStart, dockerContainerStop, dockerContainerListCompose } from "@/api/docker-api";
 import LogView from "@/pages/docker/log-view";
 import Terminal from "@/pages/docker/terminal";
 import editContainer from "./editContainer.vue";
@@ -657,29 +662,7 @@ export default {
     // click rebuild button
     rebuild(record) {
       this.temp = Object.assign({}, record);
-      dockerImageInspect(this.urlPrefix, {
-        id: this.reqDataId,
-        imageId: record.imageId,
-      }).then((res) => {
-        this.buildVisible = true;
-
-        this.temp = {
-          volumes: [{}],
-          exposedPorts: (res.data?.config?.exposedPorts || [{}]).map((item) => {
-            item.disabled = item.port !== null;
-            item.ip = "0.0.0.0";
-            item.scheme = item.scheme || "tcp";
-            return item;
-          }),
-          image: (record.repoTags || []).join(","),
-          autorun: true,
-          imageId: record.id,
-          env: [{}],
-          storageOpt: [{}],
-          commands: [{}],
-        };
-        this.$refs["editForm"]?.resetFields();
-      });
+      this.buildVisible = true;
     }
   },
 };

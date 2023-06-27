@@ -313,6 +313,10 @@
 import {dockerImageCreateContainer, dockerImageInspect} from "@/api/docker-api";
 export default {
   props: {
+    id: {
+      type: String,
+      default: "",
+    },
     imageId: {
       type: String,
       default: "",
@@ -339,7 +343,7 @@ export default {
   },
   computed: {
     reqDataId() {
-      return this.imageId || this.machineDockerId;
+      return this.id || this.machineDockerId;
     },
   },
   mounted() {
@@ -361,8 +365,7 @@ export default {
             item.scheme = item.scheme || "tcp";
             return item;
           }),
-          /**!!!!!!!! image how to get**/
-          image: [],
+          image: (res.data.repoTags || []).join(","),
           autorun: true,
           imageId: this.imageId,
           env: [{}],
