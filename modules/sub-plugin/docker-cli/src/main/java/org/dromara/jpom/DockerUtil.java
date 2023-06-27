@@ -106,7 +106,7 @@ public class DockerUtil {
         String registryPassword = (String) parameter.get("registryPassword");
         String registryEmail = (String) parameter.get("registryEmail");
         String registryUrl = (String) parameter.get("registryUrl");
-        Supplier<Session> sessionSupplier = ( Supplier<Session>) parameter.get("session");
+        Supplier<Session> sessionSupplier = (Supplier<Session>) parameter.get("session");
         //
         DefaultDockerClientConfig.Builder defaultConfigBuilder = DefaultDockerClientConfig.createDefaultConfigBuilder();
         defaultConfigBuilder
@@ -121,18 +121,12 @@ public class DockerUtil {
         Opt.ofBlankAble(registryPassword).ifPresent(s -> defaultConfigBuilder.withRegistryPassword(registryPassword));
 
         DockerClient dockerClient;
+        DockerClientConfig config = defaultConfigBuilder.build();
         if (sessionSupplier != null) {
             // 通过SSH连接Docker
-            try {
-                DockerClientConfig config = defaultConfigBuilder.build();
-                JschDockerHttpClient httpClient = new JschDockerHttpClient(config.getDockerHost(), sessionSupplier);
-                dockerClient = DockerClientImpl.getInstance(config, httpClient);
-            } catch (Exception e) {
-                log.error("SSH Docker初始化失败", e);
-                throw new RuntimeException(e);
-            }
+            JschDockerHttpClient httpClient = new JschDockerHttpClient(config.getDockerHost(), sessionSupplier);
+            dockerClient = DockerClientImpl.getInstance(config, httpClient);
         } else {
-            DockerClientConfig config = defaultConfigBuilder.build();
             ApacheDockerHttpClient.Builder builder = new ApacheDockerHttpClient.Builder()
                 .dockerHost(config.getDockerHost())
                 .sslConfig(config.getSSLConfig())
