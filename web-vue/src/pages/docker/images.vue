@@ -80,6 +80,11 @@
           () => {
             this.buildVisible = false;
           }"
+        @confirmBtnClick="
+          () => {
+            this.buildVisible = false;
+            this.loadData();
+          }"
       />
     </a-drawer>
     <!-- 日志 -->
