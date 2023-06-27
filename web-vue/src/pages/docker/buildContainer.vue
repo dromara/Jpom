@@ -313,6 +313,7 @@
 import {
   dockerImageCreateContainer, 
   dockerImageInspect, 
+  dockerInspectContainer,
   dockerContainerRebuildContainer
 } from "@/api/docker-api";
 export default {
@@ -359,6 +360,52 @@ export default {
   methods: {
     // 构建镜像
     createContainer() {
+      // 判断 containerId
+      if (this.containerId) {
+        // form container
+        this.inspectContainer();
+      } else {
+        // form image
+        this.inspectImage();
+      }
+    },
+    // inspect container
+    inspectContainer() {
+      // 单独获取 image 信息
+      dockerImageInspect(this.urlPrefix, {
+        id: this.reqDataId,
+        imageId: this.imageId,
+      }).then((res) => {
+        this.temp.image = (res.data.repoTags || []).join(",")
+      })
+
+      dockerInspectContainer(this.urlPrefix, {
+        id: this.reqDataId,
+        containerId: this.containerId,
+      }).then(res => {
+        console.log(res.data)
+        this.buildVisible = true;
+        this.temp = {
+          name: res.data.name,
+          volumes: [{}],
+          exposedPorts: (res.data?.config?.exposedPorts || [{}]).map((item) => {
+            item.disabled = item.port !== null;
+            item.ip = "0.0.0.0";
+            item.scheme = item.scheme || "tcp";
+            return item;
+          }),
+          autorun: true,
+          imageId: this.imageId,
+          env: [{}],
+          storageOpt: [{}],
+          commands: [{}],
+          ...this.temp
+        };
+        this.$refs["editForm"]?.resetFields();
+      });
+    },
+    // inspect image
+    inspectImage() {
       dockerImageInspect(this.urlPrefix, {
         id: this.reqDataId,
         imageId: this.imageId,
