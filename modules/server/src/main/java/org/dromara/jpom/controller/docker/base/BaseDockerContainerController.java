@@ -27,6 +27,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.permission.Feature;
@@ -47,6 +48,7 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2022/2/7
  */
+@Slf4j
 public abstract class BaseDockerContainerController extends BaseDockerController {
 
 
@@ -212,6 +214,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
 
     /**
      * drop old container and create new container
+     *
      * @return json
      */
     @PostMapping(value = "rebuild-container", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -229,7 +232,11 @@ public abstract class BaseDockerContainerController extends BaseDockerController
         // drop old container
         if (StrUtil.isNotEmpty(containerId)) {
             parameter.put("containerId", containerId);
-            plugin.execute("removeContainer", parameter);
+            try {
+                plugin.execute("removeContainer", parameter);
+            } catch (com.github.dockerjava.api.exception.NotFoundException notFoundException) {
+                log.warn(notFoundException.getMessage());
+            }
         }
 
         // create new container

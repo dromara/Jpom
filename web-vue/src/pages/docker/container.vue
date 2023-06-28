@@ -384,6 +384,11 @@
                 </a>
                 <a-menu slot="overlay">
                   <a-menu-item>
+                    <a-tooltip title="修改容器配置，重新运行">
+                      <a-button size="small" type="link" @click="rebuild(record)"><a-icon type="redo" />重建</a-button>
+                    </a-tooltip>
+                  </a-menu-item>
+                  <a-menu-item>
                     <a-tooltip title="编辑容器的一些基础参数">
                       <a-button size="small" type="link" icon="edit" :disabled="record.state !== 'running'" @click="editContainer(record)">编辑</a-button>
                     </a-tooltip>
@@ -455,22 +460,24 @@
       title="重建容器"
       :maskClosable="false"
     >
-      <BuildContainer 
-        :id="this.id" 
+      <BuildContainer
+        :id="this.id"
         :imageId="this.temp.imageId"
-        :machineDockerId="this.machineDockerId" 
+        :machineDockerId="this.machineDockerId"
         :urlPrefix="this.urlPrefix"
         :containerId="this.temp.id"
         :containerData="this.temp"
         @cancelBtnClick="
           () => {
             this.buildVisible = false;
-          }"
+          }
+        "
         @confirmBtnClick="
           () => {
             this.buildVisible = false;
             this.loadData();
-          }"
+          }
+        "
       />
     </a-drawer>
   </div>
@@ -489,7 +496,7 @@ export default {
     LogView,
     Terminal,
     editContainer,
-    BuildContainer
+    BuildContainer,
   },
   props: {
     id: {
@@ -571,7 +578,7 @@ export default {
         start: {
           msg: "您确定要启动当前容器吗？",
           api: dockerContainerStart,
-        }
+        },
       },
       editVisible: false,
 
@@ -674,7 +681,7 @@ export default {
     rebuild(record) {
       this.temp = Object.assign({}, record);
       this.buildVisible = true;
-    }
+    },
   },
 };
 </script>

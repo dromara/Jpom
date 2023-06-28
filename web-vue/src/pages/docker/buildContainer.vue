@@ -1,5 +1,12 @@
 <template>
   <div>
+    <a-alert v-if="containerData && Object.keys(containerData).length" message="操作提示" type="warning" show-icon>
+      <template #description>
+        容器重建是指使用已经创建的容器参数重新创建一个相同的容器。
+        <div><b style="color: red">重启创建之前会自动将之前的容器删除掉</b>,如果未挂载容器数据目录请提前备份数据后再使用此功能。</div>
+        <div><b>此功能不能保证新建的容器和之前容器参数完全一致请慎重使用。</b></div>
+      </template>
+    </a-alert>
     <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
       <a-form-model-item label="基础镜像" prop="name">
         <a-row>
@@ -310,12 +317,7 @@
   </div>
 </template>
 <script>
-import {
-  dockerImageCreateContainer, 
-  dockerImageInspect, 
-  dockerInspectContainer,
-  dockerContainerRebuildContainer
-} from "@/api/docker-api";
+import { dockerImageCreateContainer, dockerImageInspect, dockerInspectContainer, dockerContainerRebuildContainer } from "@/api/docker-api";
 export default {
   props: {
     id: {
@@ -351,7 +353,7 @@ export default {
           { pattern: /[a-zA-Z0-9][a-zA-Z0-9_.-]$/, message: "容器名称数字字母,且长度大于1", trigger: "blur" },
         ],
       },
-    }
+    };
   },
   computed: {
     reqDataId() {
@@ -359,12 +361,12 @@ export default {
     },
     getLabels() {
       if (!this.containerData.labels) {
-        return ""
+        return "";
       }
-      let labels = ""
+      let labels = "";
       Object.keys(this.containerData.labels).map((key) => {
-        labels += `${key}=${this.containerData.labels[key]}&`
-      })
+        labels += `${key}=${this.containerData.labels[key]}&`;
+      });
       return labels.slice(0, -1);
     },
   },
@@ -388,8 +390,8 @@ export default {
         item.disabled = item.privatePort !== null;
         item.port = item.privatePort;
         return item;
-      })
-      return _ports.length > 0 ? _ports : null
+      });
+      return _ports.length > 0 ? _ports : null;
     },
     getPortsFromExposedPorts(exposedPorts) {
       const _ports = exposedPorts.map((item) => {
@@ -397,44 +399,80 @@ export default {
         item.ip = "0.0.0.0";
         item.scheme = item.scheme || "tcp";
         return item;
-      })
-      return _ports.length > 0 ? _ports : null
+      });
+      return _ports.length > 0 ? _ports : null;
     },
     getVolumesFromMounts(mounts) {
       const _mounts = mounts.map((item) => {
         item.disabled = item.destination !== null;
         item.host = item.source;
-        item.container = item.destination;
+        item.container = item.destination?.path;
         return item;
-      })
-      return _mounts.length > 0 ? _mounts : null
+      });
+      return _mounts.length > 0 ? _mounts : null;
+    },
+    getRestartPolicy(restartPolicy) {
+      if (!restartPolicy) {
+        return "";
+      }
+      const name = restartPolicy.name;
+      if (restartPolicy.maximumRetryCount) {
+        return name + ":" + restartPolicy.maximumRetryCount;
+      }
+      return name;
     },
     // inspect container
     inspectContainer() {
       // 单独获取 image 信息
+      this.temp = {};
       dockerImageInspect(this.urlPrefix, {
         id: this.reqDataId,
         imageId: this.imageId,
       }).then((res) => {
-        this.temp.image = (res.data.repoTags || []).join(",")
-      })
+        this.temp = { ...this.temp, image: (res.data.repoTags || []).join(",") };
+      });
 
       dockerInspectContainer(this.urlPrefix, {
         id: this.reqDataId,
         containerId: this.containerId,
-      }).then(res => {
+      }).then((res) => {
         this.buildVisible = true;
+        const storageOpt = res.data.hostConfig?.storageOpt || { "": "" };
+
         this.temp = {
-          name: res.data.name,
+          name: res.data?.name,
           labels: this.getLabels,
-          volumes: this.getVolumesFromMounts(this.containerData.mounts) || [{}],
+          volumes: this.getVolumesFromMounts(res.data?.mounts) || [{}],
           exposedPorts: this.getPortsFromPorts(this.containerData.ports) || this.getPortsFromExposedPorts(res.data.config.exposedPorts) || [{}],
           autorun: true,
           imageId: this.imageId,
-          env: [{}],
-          storageOpt: [{}],
-          commands: [{}],
-          ...this.temp
+          env: (res.data?.config?.env || [""]).map((item) => {
+            const i = item.indexOf("=");
+            if (i == -1) {
+              return {};
+            }
+            return {
+              key: item.substring(0, i),
+              value: item.substring(i + 1, item.length),
+            };
+          }) || [{}],
+          storageOpt: Object.keys(storageOpt).map((item) => {
+            return {
+              key: item,
+              value: storageOpt[item],
+            };
+          }),
+          commands: (res.data?.config?.cmd || [""]).map((item) => {
+            return {
+              value: item || "",
+            };
+          }) || [{}],
+          hostname: res.data?.config?.hostName,
+          restartPolicy: this.getRestartPolicy(res.data?.hostConfig?.restartPolicy),
+          networkMode: res.data?.hostConfig?.networkMode,
+          runtime: res.data?.hostConfig?.runtime,
+          privileged: res.data.hostConfig?.privileged || false,
+          ...this.temp,
         };
         this.$refs["editForm"]?.resetFields();
       });
@@ -447,6 +485,7 @@ export default {
       }).then((res) => {
         this.buildVisible = true;
         this.temp = {
+          name: (res.data?.repoTags[0] || "").split(":")[0] || "",
           volumes: [{}],
           exposedPorts: (res.data?.config?.exposedPorts || [{}]).map((item) => {
             item.disabled = item.port !== null;
@@ -454,7 +493,7 @@ export default {
             item.scheme = item.scheme || "tcp";
             return item;
           }),
-          image: (res.data.repoTags || []).join(","),
+          image: (res.data?.repoTags || []).join(","),
           autorun: true,
           imageId: this.imageId,
           env: [{}],
@@ -527,7 +566,7 @@ export default {
               });
 
               // 通知父组件关闭弹窗
-              this.$emit('confirmBtnClick');
+              this.$emit("confirmBtnClick");
             }
           });
         } else {
@@ -536,14 +575,14 @@ export default {
               this.$notification.success({
                 message: res.msg,
               });
-              
+
               // 通知父组件关闭弹窗
-              this.$emit('confirmBtnClick');
+              this.$emit("confirmBtnClick");
             }
           });
         }
       });
     },
-  }
-}
+  },
+};
 </script>
