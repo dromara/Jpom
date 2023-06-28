@@ -22,10 +22,12 @@
  */
 package org.dromara.jpom.common.interceptor;
 
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.net.Ipv4Util;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.model.data.SystemIpConfigModel;
 import org.dromara.jpom.service.system.SystemParametersServer;
@@ -44,6 +46,7 @@ import javax.servlet.http.HttpServletResponse;
  * @since 2021/4/18
  */
 @Configuration
+@Slf4j
 public class IpInterceptor implements HandlerMethodInterceptor {
 
     private static final int IP_ACCESS_CODE = 999;
@@ -55,7 +58,8 @@ public class IpInterceptor implements HandlerMethodInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
         String clientIp = ServletUtil.getClientIP(request);
-        if (StrUtil.equals(NetUtil.LOCAL_IP, clientIp)) {
+        if (StrUtil.equals(NetUtil.LOCAL_IP, clientIp) || !Validator.isIpv4(clientIp)) {
+            // 本地 或者 非 ipv4 直接放开
             return true;
         }
         SystemIpConfigModel config = systemParametersServer.getConfig(SystemIpConfigModel.ID, SystemIpConfigModel.class);
@@ -64,12 +68,17 @@ public class IpInterceptor implements HandlerMethodInterceptor {
         }
         // 判断不允许访问
         String prohibited = config.getProhibited();
-        if (StrUtil.isNotEmpty(prohibited) && this.checkIp(prohibited, clientIp, false)) {
-            ServletUtil.write(response, JsonMessage.getString(IP_ACCESS_CODE, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
-            return false;
-        }
-        String allowed = config.getAllowed();
-        if (StrUtil.isEmpty(allowed) || this.checkIp(allowed, clientIp, true)) {
+        try {
+            if (StrUtil.isNotEmpty(prohibited) && this.checkIp(prohibited, clientIp, false)) {
+                ServletUtil.write(response, JsonMessage.getString(IP_ACCESS_CODE, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
+                return false;
+            }
+            String allowed = config.getAllowed();
+            if (StrUtil.isEmpty(allowed) || this.checkIp(allowed, clientIp, true)) {
+                return true;
+            }
+        } catch (Exception e) {
+            log.warn("IP白名单拦截异常,请检查配置是否正确", e);
             return true;
         }
         ServletUtil.write(response, JsonMessage.getString(IP_ACCESS_CODE, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
