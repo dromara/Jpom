@@ -3,6 +3,7 @@
     <a-table size="middle" :data-source="list" :columns="columns" :pagination="false" bordered rowKey="id" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
+          <!-- <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" /> -->
           <div>
             显示所有
             <a-switch checked-children="是" un-checked-children="否" v-model="listQuery['showAll']" />
@@ -71,20 +72,22 @@
       title="构建容器"
       :maskClosable="false"
     >
-      <BuildContainer 
-        :id="this.id" 
+      <BuildContainer
+        :id="this.id"
         :imageId="this.temp.id"
-        :machineDockerId="this.machineDockerId" 
+        :machineDockerId="this.machineDockerId"
         :urlPrefix="this.urlPrefix"
         @cancelBtnClick="
           () => {
             this.buildVisible = false;
-          }"
+          }
+        "
         @confirmBtnClick="
           () => {
             this.buildVisible = false;
             this.loadData();
-          }"
+          }
+        "
       />
     </a-drawer>
     <!-- 日志 -->
@@ -95,7 +98,7 @@
 </template>
 <script>
 import { parseTime, renderSize } from "@/utils/const";
-import {dockerImageCreateContainer, dockerImagePullImage, dockerImageRemove, dockerImagesList, dockerImageBatchRemove} from "@/api/docker-api";
+import { dockerImageCreateContainer, dockerImagePullImage, dockerImageRemove, dockerImagesList, dockerImageBatchRemove } from "@/api/docker-api";
 import PullImageLog from "@/pages/docker/pull-image-log";
 import BuildContainer from "./buildContainer.vue";
 
@@ -162,7 +165,7 @@ export default {
         },
       },
       buildVisible: false,
-      tableSelections: []
+      tableSelections: [],
     };
   },
   computed: {
@@ -321,7 +324,7 @@ export default {
       });
     },
     batchDelete() {
-      let ids = this.tableSelections
+      let ids = this.tableSelections;
       this.$confirm({
         title: "系统提示",
         content: "真的要批量删除选择的镜像吗？已经被容器使用的镜像无法删除！",
@@ -331,7 +334,7 @@ export default {
           // 组装参数
           const params = {
             id: this.reqDataId,
-            imagesIds: ids.join(','),
+            imagesIds: ids.join(","),
           };
           dockerImageBatchRemove(this.urlPrefix, params).then((res) => {
             if (res.code === 200) {
@@ -343,7 +346,7 @@ export default {
           });
         },
       });
-    }
+    },
   },
 };
 </script>
