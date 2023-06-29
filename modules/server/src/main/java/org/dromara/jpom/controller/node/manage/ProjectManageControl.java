@@ -365,7 +365,7 @@ public class ProjectManageControl extends BaseServerController {
             }
         }
         projectInfoCacheService.syncExecuteNode(node);
-        return JsonMessage.success("导入成功,更新 {} 条数据,因为节点分发/项目副本忽略 {} 条数据", updateCount, ignoreCount);
+        return JsonMessage.success(String.format("导入成功,更新 {} 条数据,因为节点分发/项目副本忽略 {} 条数据", updateCount, ignoreCount));
     }
 
     private JSONObject loadProjectData(CsvRow csvRow, String workspaceId, NodeModel node) {
