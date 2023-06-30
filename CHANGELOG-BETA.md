@@ -11,6 +11,7 @@
 1. 【server】优化 删除工作空间前预检查关联数据存在情况（感谢 [@陈旭](https://gitee.com/chenxu8989) [Gitee issues I7F0ZN](https://gitee.com/dromara/Jpom/issues/I7F0ZN) ）
 2. 【server】优化 退出登录支持彻底退出、切换账号退出（感谢 [@wangfubiao](https://gitee.com/wangfubiao) [Gitee issues I7GA5Q](https://gitee.com/dromara/Jpom/issues/I7GA5Q) ）
 3. 【server】优化 IP 白名单验证忽略 IPV6 情况
+4. 【server】优化 服务端缓存管理支持查看黑名单 IP 详细信息（感谢@酱总）
 
 ------
 

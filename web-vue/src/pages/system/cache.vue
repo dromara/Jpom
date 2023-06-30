@@ -2,8 +2,12 @@
   <div class="full-content">
     <a-tabs default-active-key="1">
       <a-tab-pane key="1" tab="缓存信息">
-        <a-alert message="请勿手动删除数据目录下面文件,如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除" style="margin-top: 10px; margin-bottom: 40px" banner />
         <a-timeline>
+          <a-timeline-item style="color: red; font-weight: bold; font-size: 16px">
+            <p>请勿手动删除数据目录下面文件 !!!!</p>
+            <p>如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除 !!!!</p>
+          </a-timeline-item>
+
           <a-timeline-item>
             <span>
               服务端时间：{{ temp.dateTime }} <a-tag>{{ temp.timeZoneId }}</a-tag>
@@ -50,8 +54,19 @@
           </a-timeline-item>
           <a-timeline-item>
             <a-space>
-              <span>黑名单 IP 数量：{{ temp.ipSize }}</span>
-              <a-button size="small" type="primary" v-if="temp.ipSize" class="btn" @click="clear('serviceIpSize')">清空</a-button>
+              <a-popover title="黑名单 IP">
+                <template slot="content"
+                  ><a-list size="small" bordered :data-source="temp.errorIp">
+                    <a-list-item slot="renderItem" slot-scope="item">
+                      {{ item.key }} <a-tag>{{ item.obj }}次</a-tag> <a-tag>过期时间：{{ formatDuration(item.ttl, "") }}</a-tag>
+                    </a-list-item>
+                  </a-list>
+                </template>
+                <span>黑名单 IP 数量：</span>
+                {{ (temp.errorIp && temp.errorIp.length) || 0 }}
+                <a-icon type="unordered-list" />
+              </a-popover>
+              <a-button size="small" type="primary" v-if="temp.errorIp && temp.errorIp.length" class="btn" @click="clear('serviceIpSize')">清空</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item>
@@ -118,7 +133,7 @@
 <script>
 import { getServerCache, clearCache, clearErrorWorkspace } from "@/api/system";
 import TaskStat from "@/pages/system/taskStat";
-import { renderSize } from "@/utils/const";
+import { renderSize, formatDuration } from "@/utils/const";
 export default {
   components: {
     TaskStat,
@@ -135,6 +150,7 @@ export default {
   },
   methods: {
     renderSize,
+    formatDuration,
     // load data
     loadData() {
       getServerCache().then((res) => {
