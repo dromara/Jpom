@@ -19,7 +19,7 @@
           <template v-if="this.mode === 'normal'">
             <a-sub-menu>
               <template #title>
-                <a-button type="link" icon="swap">切换工作空间</a-button>
+                <a-button type="link" icon="retweet">切换工作空间</a-button>
               </template>
               <template v-if="myWorkspaceList.length == 1">
                 <template v-for="(item, index) in myWorkspaceList[0].children">
@@ -28,7 +28,7 @@
                       {{ item.name }}
                     </a-button>
                   </a-menu-item>
-                  <a-menu-divider v-if="index != -1" :key="`${item.id}-divider`" />
+                  <a-menu-divider v-if="index < myWorkspaceList.length" :key="`${item.id}-divider`" />
                 </template>
               </template>
               <template v-if="myWorkspaceList.length > 1">
@@ -45,10 +45,10 @@
                           {{ item.name }}
                         </a-button>
                       </a-menu-item>
-                      <a-menu-divider v-if="index != -1" :key="`${index1}-${index}-divider`" />
+                      <a-menu-divider v-if="index < item1.children.length - 1" :key="`${index1}-${index}-divider`" />
                     </template>
                   </a-sub-menu>
-                  <a-menu-divider v-if="item1 != -1" :key="`${index1}-divider`" />
+                  <a-menu-divider v-if="index1 < myWorkspaceList.length - 1" :key="`${index1}-divider`" />
                 </template>
               </template>
             </a-sub-menu>
@@ -79,7 +79,7 @@
           </a-menu-item>
           <a-menu-divider />
           <a-menu-item @click="logOutAll">
-            <a-button type="link" icon="reset"> 彻底退出 </a-button>
+            <a-button type="link" icon="rest"> 彻底退出 </a-button>
           </a-menu-item>
         </a-menu>
       </a-dropdown>
@@ -822,5 +822,12 @@ export default {
 
 /deep/ .ant-dropdown-menu-submenu-arrow {
   position: relative;
+}
+
+/deep/ .ant-dropdown-menu-item-divider,
+/deep/ .ant-dropdown-menu-submenu-title-divider,
+.ant-dropdown-menu-item-divider,
+.ant-dropdown-menu-submenu-title-divider {
+  margin: 0;
 }
 </style>
