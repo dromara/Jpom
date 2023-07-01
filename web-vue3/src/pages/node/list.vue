@@ -34,11 +34,10 @@
             <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
               <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
             </a-tooltip>
-            <a-button type="primary" @click="
-              () => {
-                fastInstallNode = true
-              }
-            ">快速安装
+            <a-button type="primary" @click="() => {
+              showFastInstall = true
+            }
+              ">快速安装
             </a-button>
             <a-dropdown v-if="layoutType === 'table'">
               <a-button type="primary" :disabled="!tableSelections || !tableSelections.length"
@@ -78,12 +77,11 @@
           </a-space>
         </template>
         <a-table v-if="layoutType === 'table'" :columns="columns" :data-source="list" bordered size="middle" rowKey="id"
-          :pagination="pagination" @change="
-            (pagination, filters, sorter) => {
-              listQuery.value = CHANGE_PAGE(listQuery.value, { pagination, sorter })
-              loadData()
-            }
-          " :row-selection="rowSelection">
+          :pagination="pagination" @change="(pagination, filters, sorter) => {
+            listQuery.value = CHANGE_PAGE(listQuery.value, { pagination, sorter })
+            loadData()
+          }
+            " :row-selection="rowSelection">
           <a-tooltip #url slot-scope="text, record" placement="topLeft" :title="text">
             <template v-if="record.machineNodeData">
               <span>{{ record.machineNodeData.jpomProtocol }}://{{ record.machineNodeData.jpomUrl }}</span>
@@ -290,30 +288,27 @@
                             }`">
                             <a-statistic title="延迟" :value="item.machineNodeData && item.machineNodeData.networkDelay"
                               valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
-                              :formatter="
-                                (v) => {
-                                  return (
-                                    formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) ||
-                                    '-'
-                                  )
-                                }
-                              " />
+                              :formatter="(v) => {
+                                return (
+                                  formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) ||
+                                  '-'
+                                )
+                              }
+                                " />
                           </a-tooltip>
                         </a-col>
                         <a-col :span="8">
-                          <a-tooltip :title="
-                            formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 1) || '-'
-                          ">
+                          <a-tooltip :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 1) || '-'
+                            ">
                             <a-statistic title="运行时间"
                               valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
-                              :formatter="
-                                (v) => {
-                                  return (
-                                    formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 2) ||
-                                    '-'
-                                  )
-                                }
-                              " />
+                              :formatter="(v) => {
+                                return (
+                                  formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 2) ||
+                                  '-'
+                                )
+                              }
+                                " />
                           </a-tooltip>
                         </a-col>
                         <a-col :span="8">
@@ -321,14 +316,13 @@
                             :title="`${parseTime(item.machineNodeData && item.machineNodeData.modifyTimeMillis)}`">
                             <a-statistic title="更新时间"
                               valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
-                              :formatter="
-                                (v) => {
-                                  return parseTime(
-                                    item.machineNodeData && item.machineNodeData.modifyTimeMillis,
-                                    '{h}:{i}:{s}'
-                                  )
-                                }
-                              " />
+                              :formatter="(v) => {
+                                return parseTime(
+                                  item.machineNodeData && item.machineNodeData.modifyTimeMillis,
+                                  '{h}:{i}:{s}'
+                                )
+                              }
+                                " />
                           </a-tooltip>
                         </a-col>
                       </a-row>
@@ -344,17 +338,15 @@
           <a-row type="flex" justify="center">
             <a-divider v-if="listQuery.total / listQuery.limit > 1" dashed />
             <a-col>
-              <a-pagination v-model="listQuery.page" :showTotal="
-                (total) => {
-                  return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery)
+              <a-pagination v-model="listQuery.page" :showTotal="(total) => {
+                return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery)
+              }
+                " :showSizeChanger="true" :pageSizeOptions="sizeOptions" :pageSize="listQuery.limit"
+                :total="listQuery.total" :hideOnSinglePage="true" @showSizeChange="(current, size) => {
+                  listQuery.value.limit = size
+                  loadData()
                 }
-              " :showSizeChanger="true" :pageSizeOptions="sizeOptions" :pageSize="listQuery.limit"
-                :total="listQuery.total" :hideOnSinglePage="true" @showSizeChange="
-                  (current, size) => {
-                    listQuery.value.limit = size
-                    loadData()
-                  }
-                " @change="loadData" show-less-items />
+                  " @change="loadData" show-less-items />
             </a-col>
           </a-row>
         </template>
@@ -375,11 +367,10 @@
         </a-form-item>
 
         <a-form-item label="节点状态" prop="openStatus">
-          <a-switch :checked="temp.openStatus == 1" @change="
-            (checked) => {
-              temp.openStatus = checked ? 1 : 0
-            }
-          " checked-children="启用" un-checked-children="停用" default-checked />
+          <a-switch :checked="temp.openStatus == 1" @change="(checked) => {
+            temp.openStatus = checked ? 1 : 0
+          }
+            " checked-children="启用" un-checked-children="停用" default-checked />
         </a-form-item>
         <a-form-item label="绑定 SSH " prop="sshId">
           <a-select show-search option-filter-prop="children" v-model="temp.sshId" placeholder="请选择SSH">
@@ -409,14 +400,13 @@
     </a-modal>
 
     <!-- 快速安装插件端 -->
-    <a-modal destroyOnClose v-model="fastInstallNode" width="80%" title="快速安装插件端" :footer="null" :maskClosable="false"
-      @cancel="
-        () => {
-          fastInstallNode.value = false
-          loadData()
-        }
-      ">
-      <fastInstall v-if="fastInstallNode"></fastInstall>
+    <a-modal destroyOnClose v-model:visible="showFastInstall" width="80%" title="快速安装插件端" :footer="null"
+      :maskClosable="false" @cancel="() => {
+        showFastInstall = false
+        loadData()
+      }
+        ">
+      <fastInstall v-if="showFastInstall"></fastInstall>
     </a-modal>
     <!-- 同步到其他工作空间 -->
     <a-modal destroyOnClose v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace"
@@ -591,7 +581,7 @@ const deadline = ref(0)
 const temp = ref({})
 const monitorVisible = ref(false)
 const drawerVisible = ref(false)
-const fastInstallNode = ref(false)
+const showFastInstall = ref(false)
 const syncToWorkspaceVisible = ref(false)
 
 const rules = {
@@ -941,7 +931,7 @@ const handleHistory = (record, type) => {
 }
 
 const fastInstallNodeShow = () => {
-  fastInstallNode.value = true
+  showFastInstall.value = true
 }
 
 // export default {

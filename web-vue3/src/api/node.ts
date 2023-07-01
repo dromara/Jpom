@@ -302,7 +302,7 @@ export function fastInstall() {
  * @param {JSON} params
  * @returns
  */
-export function pullFastInstallResult(params: any) {
+export function pullFastInstallResult(params?: any) {
   return axios({
     url: '/node/pull_fast_install_result.json',
     method: 'get',
