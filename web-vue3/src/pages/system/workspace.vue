@@ -37,7 +37,7 @@
             <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
             <a-button size="small" type="primary" @click="configMeun(record)">菜单</a-button>
             <a-button size="small" type="primary" @click="viewEnvVar(record)">变量</a-button>
-            <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+            <a-button size="small" type="danger" @click="handleDelete(record.id)">删除</a-button>
           </a-space>
         </template>
       </template>
@@ -59,12 +59,12 @@
     </a-modal>
 
     <!-- 环境变量 -->
-    <a-modal destroyOnClose v-model="envVarListVisible" :title="`${temp.name} 工作空间环境变量`" width="80vw" :footer="null"
+    <a-modal destroyOnClose v-model:visible="showEnvVarList" :title="`${temp?.name} 工作空间环境变量`" width="80vw" :footer="null"
       :maskClosable="false">
-      <workspaceEnv ref="workspaceEnv" :workspaceId="temp.id" />
+      <workspaceEnv ref="workspaceEnv" :workspaceId="temp?.id" />
     </a-modal>
     <!-- 工作空间菜单 -->
-    <a-modal destroyOnClose v-model="configMenuVisible" :title="`${temp.name} 工作空间菜单`" @ok="onSubmitMenus"
+    <a-modal destroyOnClose v-model:visible="showConfigMenu" :title="`${temp?.name} 工作空间菜单`" @ok="onSubmitMenus"
       :maskClosable="false">
       <a-form ref="editWhiteForm" :model="menusConfigData">
         <a-row type="flex" justify="center">
@@ -105,9 +105,8 @@ import workspaceEnv from './workspace-env.vue'
 import { ColumnsType } from 'ant-design-vue/es/table'
 const loading = ref(false)
 const list = ref([])
-const listQuery = reactive(Object.assign({}, PAGE_DEFAULT_LIST_QUERY))
-const envVarListVisible = ref(false)
-const temp = reactive({})
+const listQuery = ref(Object.assign({}, PAGE_DEFAULT_LIST_QUERY))
+
 
 const columns: ColumnsType = [
   { title: '名称', dataIndex: 'name', ellipsis: true, width: 200 },
@@ -146,8 +145,7 @@ const columns: ColumnsType = [
     width: '240px'
   }
 ]
-const configMenuVisible = ref(false)
-const menusConfigData = reactive({})
+
 const replaceFields = reactive({ children: 'childs', title: 'title', key: 'id' })
 
 
@@ -158,16 +156,23 @@ const pagination = computed(() => {
 
 function loadData(pointerEvent?: PointerEvent) {
   loading.value = true
-  listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : listQuery.page
-  getWorkSpaceList(listQuery).then((res) => {
+  listQuery.value.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : listQuery.value.page
+  getWorkSpaceList(listQuery.value).then((res) => {
     if (res.code === 200) {
       list.value = res.data.result
-      listQuery.total = res.data.total
+      listQuery.value.total = res.data.total
     }
   }).finally(() => {
     loading.value = false
   })
 }
+
+// 分页、排序、筛选变化时触发
+function changePage(pagination: any, filters: any, sorter: any) {
+  listQuery.value = CHANGE_PAGE(listQuery.value, { pagination, sorter })
+  loadData()
+}
+
 
 // 新增\编辑工作空间
 interface IWorkspaceFormData {
@@ -179,7 +184,6 @@ const workspaceForm = ref()
 const workSpaceFormType = ref<'add' | 'edit'>('add')
 const showWrokspaceForm = ref(false)
 const workspaceFormData = reactive<IWorkspaceFormData>({
-
   name: '',
   description: ''
 })
@@ -215,28 +219,22 @@ function handleEditOk() {
   })
 }
 
-function viewEnvVar(record) {
-  this.temp = Object.assign({}, record)
-  // this.envTemp = {
-  //   workspaceId: this.temp.id,
-  // };
-  // this.envVarListQuery.workspaceId = record.id;
-  this.envVarListVisible = true
-  nextTick(() => {
-    this.$refs.workspaceEnv.loadDataEnvVar()
-  })
+const temp = ref()
+
+// 显示环境变量
+const showEnvVarList = ref(false)
+function viewEnvVar(record: any) {
+
+  console.log(record)
+  temp.value = record
+  showEnvVarList.value = true
+  // nextTick(() => {
+  //   this.$refs.workspaceEnv.loadDataEnvVar()
+  // })
 }
 
-
-
-
-// 分页、排序、筛选变化时触发
-function changePage(pagination, filters, sorter) {
-  this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
-  this.loadData()
-}
 // 删除
-function handleDelete(record) {
+function handleDelete(id: string) {
   $confirm({
     title: '系统提示',
     content: '真的当前工作空间么,删除前需要将关联数据都删除后才能删除当前工作空间？',
@@ -244,19 +242,24 @@ function handleDelete(record) {
     cancelText: '取消',
     onOk: () => {
       // 删除
-      deleteWorkspace(record.id).then((res) => {
+      deleteWorkspace(id).then((res) => {
         if (res.code === 200) {
           $notification.success({
             message: res.msg
           })
-          this.loadData()
+          loadData()
         }
       })
     }
   })
 }
-function configMeun(record) {
-  this.temp = Object.assign({}, record)
+
+
+// 配置菜单
+const menusConfigData = ref()
+const showConfigMenu = ref(false)
+function configMeun(record: any) {
+  temp.value = record
 
   // 加载菜单配置信息
   // loadMenusConfig(id) {},
@@ -266,66 +269,68 @@ function configMeun(record) {
     if (res.code !== 200) {
       return
     }
-    this.menusConfigData = res.data
+    const serverMenus = res.data?.serverMenus.map((item: any) => {
+      item.scopedSlots = { icon: 'custom' }
+      item.childs?.map((sub: any) => {
+        sub.id = item.id + ':' + sub.id
+        return sub
+      })
+      return item
+    })
 
-    this.menusConfigData.serverMenus = this.menusConfigData?.serverMenus.map((item) => {
+    const nodeMenus = res.data?.nodeMenus.map((item: any) => {
       item.scopedSlots = { icon: 'custom' }
-      item.childs?.map((item2) => {
-        item2.id = item.id + ':' + item2.id
-        return item2
+      item.childs?.map((sub: any) => {
+        sub.id = item.id + ':' + sub.id
+        return sub
       })
       return item
     })
-    this.menusConfigData.nodeMenus = this.menusConfigData?.nodeMenus.map((item) => {
-      item.scopedSlots = { icon: 'custom' }
-      item.childs?.map((item2) => {
-        item2.id = item.id + ':' + item2.id
-        return item2
-      })
-      return item
-    })
-    if (!this.menusConfigData?.serverMenuKeys) {
-      //
-      const serverMenuKeys = []
-      this.menusConfigData.serverMenus.forEach((item) => {
+
+    menusConfigData.value = { ...res.data, serverMenus, nodeMenus }
+
+    if (!menusConfigData.value?.serverMenuKeys) {
+      const serverMenuKeys: any[] = []
+      serverMenus.forEach((item: any) => {
         serverMenuKeys.push(item.id)
         if (item.childs) {
-          item.childs.forEach((item2) => {
-            serverMenuKeys.push(item2.id)
+          item.childs.forEach((sub: any) => {
+            serverMenuKeys.push(sub.id)
           })
         }
       })
-      this.menusConfigData = { ...this.menusConfigData, serverMenuKeys: serverMenuKeys }
+      menusConfigData.value.serverMenuKeys = serverMenuKeys
     }
 
-    if (!this.menusConfigData?.nodeMenuKeys) {
+    if (!menusConfigData.value?.nodeMenuKeys) {
       //
-      const nodeMenuKeys = []
-      this.menusConfigData.nodeMenus.forEach((item) => {
+      const nodeMenuKeys: any[] = []
+      nodeMenus.forEach((item: any) => {
         nodeMenuKeys.push(item.id)
         if (item.childs) {
-          item.childs.forEach((item2) => {
-            nodeMenuKeys.push(item2.id)
+          item.childs.forEach((sub: any) => {
+            nodeMenuKeys.push(sub.id)
           })
         }
       })
-      this.menusConfigData = { ...this.menusConfigData, nodeMenuKeys: nodeMenuKeys }
+      menusConfigData.value.nodeMenuKeys = nodeMenuKeys
     }
-    this.configMenuVisible = true
+    showConfigMenu.value = true
   })
 }
+
 function onSubmitMenus() {
   saveMenusConfig({
-    serverMenuKeys: this.menusConfigData.serverMenuKeys.join(','),
-    nodeMenuKeys: this.menusConfigData.nodeMenuKeys.join(','),
-    workspaceId: this.temp.id
+    serverMenuKeys: menusConfigData.value.serverMenuKeys.join(','),
+    nodeMenuKeys: menusConfigData.value.nodeMenuKeys.join(','),
+    workspaceId: temp.value.id
   }).then((res) => {
     if (res.code === 200) {
       // 成功
       $notification.success({
         message: res.msg
       })
-      this.configMenuVisible = false
+      showConfigMenu.value = false
     }
   })
 }
