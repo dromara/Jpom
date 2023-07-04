@@ -135,6 +135,10 @@ spring:
       # 上传文件大小限制
       max-request-size: 2GB
       max-file-size: 1GB
+  messages:
+    basename: i18n.message
+    cache-duration: 3600
+    encoding: ISO-8859-1
   h2:
     console:
       # 是否开启 web 访问数据库（url: http://${ip}:${port}/h2-console）

@@ -44,10 +44,7 @@ import me.zhyd.oauth.model.AuthCallback;
 import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthRequest;
-import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
-import org.dromara.jpom.common.ServerConst;
-import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.*;
 import org.dromara.jpom.common.interceptor.LoginInterceptor;
 import org.dromara.jpom.common.interceptor.NotLogin;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -100,16 +97,19 @@ public class LoginControl extends BaseServerController implements InitializingBe
     private final ServerConfig.UserConfig userConfig;
     private final ServerConfig.WebConfig webConfig;
     private final UserLoginLogServer userLoginLogServer;
+    private final I18n i18n;
 
     public LoginControl(UserService userService,
                         UserBindWorkspaceService userBindWorkspaceService,
                         ServerConfig serverConfig,
-                        UserLoginLogServer userLoginLogServer) {
+                        UserLoginLogServer userLoginLogServer,
+                        I18n i18n) {
         this.userService = userService;
         this.userBindWorkspaceService = userBindWorkspaceService;
         this.userConfig = serverConfig.getUser();
         this.webConfig = serverConfig.getWeb();
         this.userLoginLogServer = userLoginLogServer;
+        this.i18n = i18n;
     }
 
     /**
@@ -228,7 +228,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
                     }
                     UserLoginDto userLoginDto = this.createToken(userModel);
                     userLoginLogServer.success(userModel, 0, false, request);
-                    return new JsonMessage<>(200, "登录成功", userLoginDto);
+                    return new JsonMessage<>(200, i18n.t("login.success"), userLoginDto);
                 } else {
                     updateModel = userModel.errorLock(userConfig.getAlwaysLoginError());
                     this.ipError();

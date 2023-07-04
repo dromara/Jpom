@@ -117,10 +117,6 @@ public class JsonMessage<T> extends BaseJsonMessage<T> {
         return success(msg, (T) null);
     }
 
-    public static <T> JsonMessage<T> success(String template, Object... args) {
-        return success(StrUtil.format(template, args), (T) null);
-    }
-
     public static <T> JsonMessage<T> success(String msg, T data) {
         return new JsonMessage<>(DEFAULT_SUCCESS_CODE, msg, data);
     }

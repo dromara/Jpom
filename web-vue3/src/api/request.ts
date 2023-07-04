@@ -1,11 +1,12 @@
 import { IResponse } from './../interface/request.d'
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
-import { NO_NOTIFY_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID } from '@/utils/const'
+import { NO_NOTIFY_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID, LOCALE_HEADER } from '@/utils/const'
 import { refreshToken } from './user/user'
 import { notification } from 'ant-design-vue'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { useMenuStore } from '@/stores/menu'
+import { useLocaleStore } from '@/stores/locale'
 
 const _window = window as any
 const delTimeout = 20 * 1000
@@ -30,10 +31,12 @@ const instance: AxiosInstance = axios.create({
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const { headers } = config
   const appStore = useAppStore()
+  const localeStore = useLocaleStore()
   const accessToken = localStorage.getItem('accessToken')
   headers['Authorization'] = accessToken ? 'Bearer ' + accessToken : ''
   headers[TOKEN_HEADER_KEY] = userStore.token
   headers[CACHE_WORKSPACE_ID] = appStore.getWorkspaceId
+  headers[LOCALE_HEADER] = localeStore.getLocale
 
   if (_window.routerBase) {
     // 防止 url 出现 //

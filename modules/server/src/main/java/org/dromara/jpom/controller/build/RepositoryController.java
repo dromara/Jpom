@@ -256,7 +256,8 @@ public class RepositoryController extends BaseServerController {
                 updateCount++;
             }
         }
-        return JsonMessage.success("导入成功,添加 {} 条数据,修改 {} 条数据", addCount, updateCount);
+        // TODO: replace with i18n.t(code, args...)
+        return JsonMessage.success(String.format("导入成功,添加 %d 条数据,修改 %d 条数据", addCount, updateCount));
     }
 
     /**

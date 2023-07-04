@@ -69,3 +69,7 @@ spring:
   mvc:
     throw-exception-if-no-handler-found: true
     log-request-details: true
+  messages:
+    basename: i18n.message
+    cache-duration: 3600
+    encoding: ISO-8859-1

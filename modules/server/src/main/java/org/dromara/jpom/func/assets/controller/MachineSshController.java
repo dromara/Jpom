@@ -457,6 +457,6 @@ public class MachineSshController extends BaseGroupNameController {
                 updateCount++;
             }
         }
-        return JsonMessage.success("导入成功,添加 {} 条数据,修改 {} 条数据", addCount, updateCount);
+        return JsonMessage.success(String.format("导入成功,添加 {} 条数据,修改 {} 条数据", addCount, updateCount));
     }
 }
