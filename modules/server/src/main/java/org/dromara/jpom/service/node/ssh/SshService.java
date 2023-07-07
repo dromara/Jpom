@@ -24,8 +24,11 @@ package org.dromara.jpom.service.node.ssh;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
@@ -34,6 +37,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
@@ -43,17 +47,23 @@ import org.dromara.jpom.service.h2db.BaseGroupService;
 import org.dromara.jpom.system.extconf.BuildExtConfig;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.MySftp;
+import org.dromara.jpom.util.WorkspaceThreadLocal;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * @author bwcx_jzy
@@ -112,6 +122,15 @@ public class SshService extends BaseGroupService<SshModel> {
      * @return session
      */
     public Session getSessionByModel(MachineSshModel sshModel) {
+        try {
+            RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
+            if (requestAttributes != null) {
+                String workspaceId = ServletUtil.getHeader((HttpServletRequest) requestAttributes, Const.WORKSPACE_ID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+                WorkspaceThreadLocal.setWorkspaceId(workspaceId);
+            }
+        } catch (Exception e) {
+            log.error("", e.toString());
+        }
         return machineSshServer.getSessionByModelNoFill(sshModel);
     }
 
@@ -273,5 +292,11 @@ public class SshService extends BaseGroupService<SshModel> {
                 }
             }
         };
+    }
+
+    public SshModel getByMachineSshId(String id) {
+        SshModel model = new SshModel();
+        model.setMachineSshId(id);
+        return queryByBean(model);
     }
 }

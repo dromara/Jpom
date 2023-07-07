@@ -136,12 +136,13 @@
                 <a-icon type="question-circle" theme="filled" />
               </a-tooltip>
             </template>
-            <a-input-password v-if="temp.id === undefined" v-model="temp.password" placeholder="登录密码">
+<!--            <a-input-password v-if="temp.id === undefined" v-model="temp.password" placeholder="登录密码">
               <a-icon slot="prefix" type="lock" />
             </a-input-password>
             <a-input-password v-if="temp.id !== undefined" v-model="temp.password" placeholder="此处不填不会修改密码">
               <a-icon slot="prefix" type="lock" />
-            </a-input-password>
+            </a-input-password>-->
+            <custom-input v-model="temp.password" :data="envVarList" suffixIcon="" inputPlaceholder="输入密码" :selectPlaceholder="`${!temp.id ? '登录密码' : '此处不填不会修改密码'}`"> </custom-input>
           </a-form-model-item>
         </template>
         <a-form-model-item v-if="temp.repoType === 1 && temp.protocol === 1" label="账号" prop="userName">
@@ -298,11 +299,13 @@
   </div>
 </template>
 <script>
+import CustomInput from "@/components/customInput";
 import { providerInfo, authorizeRepos, deleteRepository, editRepository, getRepositoryList, restHideField, sortItem, exportData, importTemplate, importData } from "@/api/repository";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
+import {getWorkspaceEnvAll} from "@/api/workspace";
 
 export default {
-  components: {},
+  components: {CustomInput},
   props: {
     choose: {
       type: Boolean,
@@ -426,6 +429,7 @@ export default {
         other: "请输入私人令牌",
       },
       tableSelections: [],
+      envVarList: []
     };
   },
   computed: {
@@ -454,9 +458,17 @@ export default {
         this.providerData = response.data;
       }
     });
+    this.getWorkEnvList();
   },
   methods: {
     CHANGE_PAGE,
+    getWorkEnvList() {
+      getWorkspaceEnvAll().then((res) => {
+        if (res.code === 200) {
+          this.envVarList = res.data;
+        }
+      });
+    },
     // 加载数据
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;

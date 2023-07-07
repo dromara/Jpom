@@ -106,4 +106,8 @@ public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVar
         }
         return workspaceEnvVarModel.getValue();
     }
+
+    public List<WorkspaceEnvVarModel> allList(HttpServletRequest request) {
+        return super.listByWorkspace(request);
+    }
 }

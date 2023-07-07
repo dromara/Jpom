@@ -88,6 +88,24 @@ public class WorkspaceEnvVarController extends BaseServerController {
     }
 
     /**
+     * 全部环境变量
+     *
+     * @return json
+     */
+    @PostMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<List<WorkspaceEnvVarModel>> allList(HttpServletRequest request) {
+        List<WorkspaceEnvVarModel> list = workspaceEnvVarService.allList(request);
+        list.forEach(workspaceEnvVarModel -> {
+            Integer privacy = workspaceEnvVarModel.getPrivacy();
+            if (privacy != null && privacy == 1) {
+                workspaceEnvVarModel.setValue(StrUtil.EMPTY);
+            }
+        });
+        return JsonMessage.success("", list);
+    }
+
+    /**
      * 编辑变量
      *
      * @param workspaceId 空间id

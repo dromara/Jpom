@@ -35,6 +35,7 @@ import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.docker.DockerInfoService;
+import org.dromara.jpom.util.WorkspaceThreadLocal;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,6 +56,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     @GetMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<JSONObject> info(@ValidatorItem String id) throws Exception {
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         JSONObject info = plugin.execute("info", parameter, JSONObject.class);
@@ -65,6 +67,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     @Feature(method = MethodFeature.DEL)
     @SystemPermission
     public JsonMessage<Object> prune(@ValidatorItem String id, @ValidatorItem String pruneType, String labels, String until, String dangling) throws Exception {
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("pruneType", pruneType);
@@ -83,6 +86,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<List<JSONObject>> list(@ValidatorItem String id) throws Exception {
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("name", getParameter("name"));
@@ -99,6 +103,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     @PostMapping(value = "list-compose", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<List<JSONObject>> listCompose(@ValidatorItem String id) throws Exception {
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("name", getParameter("name"));
@@ -115,6 +120,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     @GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public JsonMessage<Object> del(@ValidatorItem String id, String containerId) throws Exception {
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
@@ -128,7 +134,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     @GetMapping(value = "start", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public JsonMessage<Object> start(@ValidatorItem String id, String containerId) throws Exception {
-
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
@@ -143,6 +149,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     @GetMapping(value = "stop", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public JsonMessage<Object> stop(@ValidatorItem String id, String containerId) throws Exception {
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
@@ -157,7 +164,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     @GetMapping(value = "restart", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public JsonMessage<Object> restart(@ValidatorItem String id, String containerId) throws Exception {
-
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
@@ -171,7 +178,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     @GetMapping(value = "stats", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public JsonMessage<Map<String, JSONObject>> stats(@ValidatorItem String id, String containerId) throws Exception {
-
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
@@ -185,6 +192,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     @GetMapping(value = "inspect-container", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public JsonMessage<JSONObject> inspectContainer(@ValidatorItem String id, @ValidatorItem String containerId) throws Exception {
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
@@ -201,6 +209,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     @PostMapping(value = "update-container", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public JsonMessage<JSONObject> updateContainer(@RequestBody JSONObject jsonObject) throws Exception {
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         // @ValidatorItem String id, String containerId
         String id = jsonObject.getString("id");
         Assert.hasText(id, "id 不能为空");
@@ -220,6 +229,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     @PostMapping(value = "rebuild-container", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public JsonMessage<Object> reBuildContainer(@RequestBody JSONObject jsonObject) throws Exception {
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         String id = jsonObject.getString("id");
         String containerId = jsonObject.getString("containerId");
         Assert.hasText(id, "id 不能为空");
