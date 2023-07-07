@@ -62,6 +62,7 @@ import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.service.dblog.SshTerminalExecuteLogService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.service.system.WorkspaceService;
+import org.dromara.jpom.util.WorkspaceThreadLocal;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -191,6 +192,9 @@ public class MachineSshController extends BaseGroupNameController {
         boolean exists = machineSshServer.exists(entity);
         Assert.state(!exists, "对应的SSH已经存在啦");
         try {
+
+            String workspaceId = getWorkspaceId();
+            WorkspaceThreadLocal.setWorkspaceId(workspaceId);
             Session session = machineSshServer.getSessionByModel(sshModel);
             JschUtil.close(session);
         } catch (Exception e) {

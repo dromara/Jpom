@@ -57,6 +57,7 @@ import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.CompressionFileUtil;
 import org.dromara.jpom.plugins.JschUtils;
 import org.dromara.jpom.util.StringUtil;
+import org.dromara.jpom.util.WorkspaceThreadLocal;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -134,6 +135,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                          @ValidatorItem String nextPath,
                          @ValidatorItem String name,
                          HttpServletResponse response) throws IOException {
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         MachineSshModel machineSshModel = this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel1, itemConfig) -> machineSshModel1);
         if (machineSshModel == null) {
             ServletUtil.write(response, "ssh error 或者 没有配置此文件夹", MediaType.TEXT_HTML_VALUE);
@@ -159,6 +161,7 @@ public abstract class BaseSshFileController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<JSONArray> rootFileList(@ValidatorItem String id) {
         //
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPath(id, (machineSshModel, itemConfig) -> {
             JSONArray listDir = listRootDir(machineSshModel, itemConfig.fileDirs());
             return JsonMessage.success("ok", listDir);
@@ -171,6 +174,7 @@ public abstract class BaseSshFileController extends BaseServerController {
     public JsonMessage<JSONArray> listData(@ValidatorItem String id,
                                            @ValidatorItem String allowPathParent,
                                            @ValidatorItem String nextPath) {
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             try {
                 JSONArray listDir = listDir(machineSshModel, allowPathParent, nextPath, itemConfig);
@@ -187,6 +191,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                                             @ValidatorItem String allowPathParent,
                                             @ValidatorItem String nextPath,
                                             @ValidatorItem String name) {
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             //
@@ -205,6 +210,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                                               @ValidatorItem String nextPath,
                                               @ValidatorItem String name,
                                               @ValidatorItem String content) {
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             List<String> allowEditSuffix = itemConfig.allowEditSuffix();
@@ -415,6 +421,7 @@ public abstract class BaseSshFileController extends BaseServerController {
         // name 可能为空，为空情况是删除目录
         String name2 = StrUtil.emptyToDefault(name, StrUtil.EMPTY);
         Assert.state(!StrUtil.equals(name2, StrUtil.SLASH), "不能删除根目录");
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             Session session = null;
@@ -450,6 +457,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                                       @ValidatorItem String name,
                                       @ValidatorItem String newname) {
 
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             Session session = null;
@@ -499,6 +507,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                                       @ValidatorItem String nextPath,
                                       String unzip,
                                       MultipartFile file) {
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath);
@@ -568,6 +577,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                                              @ValidatorItem String nextPath,
                                              @ValidatorItem String name, String unFolder) {
         Assert.state(!StrUtil.contains(name, StrUtil.SLASH), "文件名不能包含/");
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             Session session = null;

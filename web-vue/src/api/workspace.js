@@ -89,6 +89,17 @@ export function getWorkspaceEnvList(params) {
     data: params,
   });
 }
+/*
+ * 工作空间环境变量全部列表
+ * @param {*}
+ * } params
+ */
+export function getWorkspaceEnvAll() {
+  return axios({
+    url: "/system/workspace_env/all",
+    method: "post"
+  });
+}
 
 /**
  *
