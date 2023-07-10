@@ -90,6 +90,7 @@ declare module '@vue/runtime-core' {
     LogView: typeof import('./../components/logView/index.vue')['default']
     ProfileOutlined: typeof import('@ant-design/icons-vue')['ProfileOutlined']
     QuestionCircleFilled: typeof import('@ant-design/icons-vue')['QuestionCircleFilled']
+    QuestionCircleOutlined: typeof import('@ant-design/icons-vue')['QuestionCircleOutlined']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SkinOutlined: typeof import('@ant-design/icons-vue')['SkinOutlined']
