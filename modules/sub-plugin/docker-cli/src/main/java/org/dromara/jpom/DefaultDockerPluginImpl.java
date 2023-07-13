@@ -41,6 +41,7 @@ import com.github.dockerjava.core.InvocationBuilder;
 import com.github.dockerjava.core.NameParser;
 import lombok.Lombok;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.util.Assert;
 
@@ -61,6 +62,7 @@ import java.util.stream.Collectors;
  * @since 2022/1/26
  */
 @PluginConfig(name = "docker-cli")
+@Slf4j
 public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
 
 
@@ -571,7 +573,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
                 dockerClient.removeImageCmd(imageId).withForce(false).exec();
                 successCount++;
             } catch (Exception e) {
-
+                log.warn("删除容器异常", e);
             }
         }
         failCount = imagesIds.length - successCount;

@@ -3,6 +3,7 @@
     <a-table size="middle" :data-source="list" :columns="columns" :pagination="false" bordered rowKey="id" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
+          <!-- <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" /> -->
           <div>
             显示所有
             <a-switch checked-children="是" un-checked-children="否" v-model="listQuery['showAll']" />
@@ -71,313 +72,23 @@
       title="构建容器"
       :maskClosable="false"
     >
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
-        <a-form-model-item label="基础镜像" prop="name">
-          <a-row>
-            <a-col :span="10">
-              <a-input v-model="temp.image" disabled placeholder="" />
-            </a-col>
-            <a-col :span="4" style="text-align: right">容器名称：</a-col>
-            <a-col :span="10">
-              <a-input v-model="temp.name" placeholder="容器名称" />
-            </a-col>
-          </a-row>
-        </a-form-model-item>
-
-        <a-form-model-item label="端口">
-          <a-row v-for="(item, index) in temp.exposedPorts" :key="index">
-            <a-col :span="21">
-              <a-space>
-                <a-input-group>
-                  <a-row>
-                    <a-col :span="8">
-                      <a-input addon-before="IP" placeholder="宿主机ip" v-model="item.ip"> </a-input>
-                    </a-col>
-                    <a-col :span="6" :offset="1">
-                      <a-input addon-before="端口" placeholder="端口" v-model="item.publicPort"> </a-input>
-                    </a-col>
-                    <a-col :span="8" :offset="1">
-                      <a-input addon-before="容器" :disabled="item.disabled" v-model="item.port" placeholder="容器端口">
-                        <a-select slot="addonAfter" :disabled="item.disabled" v-model="item.scheme" placeholder="端口协议">
-                          <a-select-option value="tcp">tcp</a-select-option>
-                          <a-select-option value="udp">udp</a-select-option>
-                          <a-select-option value="sctp">sctp</a-select-option>
-                        </a-select>
-                      </a-input>
-                    </a-col>
-                  </a-row>
-                </a-input-group>
-              </a-space>
-            </a-col>
-            <a-col :span="2" :offset="1">
-              <a-space>
-                <a-icon
-                  type="minus-circle"
-                  v-if="temp.exposedPorts && temp.exposedPorts.length > 1"
-                  @click="
-                    () => {
-                      temp.exposedPorts.splice(index, 1);
-                    }
-                  "
-                />
-
-                <a-icon
-                  type="plus-square"
-                  @click="
-                    () => {
-                      temp.exposedPorts.push({
-                        scheme: 'tcp',
-                        ip: '0.0.0.0',
-                      });
-                    }
-                  "
-                />
-              </a-space>
-            </a-col>
-          </a-row>
-        </a-form-model-item>
-
-        <a-form-model-item label="挂载卷">
-          <a-row v-for="(item, index) in temp.volumes" :key="index">
-            <a-col :span="10">
-              <a-input addon-before="宿主" v-model="item.host" placeholder="宿主机目录" />
-            </a-col>
-            <a-col :span="10" :offset="1">
-              <a-input addon-before="容器" :disabled="item.disabled" v-model="item.container" placeholder="容器目录" />
-            </a-col>
-            <a-col :span="2" :offset="1">
-              <a-space>
-                <a-icon
-                  type="minus-circle"
-                  v-if="temp.volumes && temp.volumes.length > 1"
-                  @click="
-                    () => {
-                      temp.volumes.splice(index, 1);
-                    }
-                  "
-                />
-
-                <a-icon
-                  type="plus-square"
-                  @click="
-                    () => {
-                      temp.volumes.push({});
-                    }
-                  "
-                />
-              </a-space>
-            </a-col>
-          </a-row>
-        </a-form-model-item>
-        <a-form-model-item label="环境变量">
-          <a-row v-for="(item, index) in temp.env" :key="index">
-            <a-col :span="10">
-              <a-input v-model="item.key" placeholder="变量名" />
-            </a-col>
-            <a-col :span="10" :offset="1">
-              <a-input v-model="item.value" placeholder="变量值" />
-            </a-col>
-            <a-col :span="2" :offset="1">
-              <a-space>
-                <a-icon
-                  type="minus-circle"
-                  v-if="temp.env && temp.env.length > 1"
-                  @click="
-                    () => {
-                      temp.env.splice(index, 1);
-                    }
-                  "
-                />
-
-                <a-icon
-                  type="plus-square"
-                  @click="
-                    () => {
-                      temp.env.push({});
-                    }
-                  "
-                />
-              </a-space>
-            </a-col>
-          </a-row>
-        </a-form-model-item>
-        <a-form-model-item label="命令">
-          <a-row v-for="(item, index) in temp.commands" :key="index">
-            <a-col :span="20">
-              <a-input addon-before="命令值" v-model="item.value" placeholder="填写运行命令" />
-            </a-col>
-
-            <a-col :span="2" :offset="1">
-              <a-space>
-                <a-icon
-                  type="minus-circle"
-                  v-if="temp.commands && temp.commands.length > 1"
-                  @click="
-                    () => {
-                      temp.commands.splice(index, 1);
-                    }
-                  "
-                />
-                <a-icon
-                  type="plus-square"
-                  @click="
-                    () => {
-                      temp.commands.push({});
-                    }
-                  "
-                />
-              </a-space>
-            </a-col>
-          </a-row>
-        </a-form-model-item>
-        <a-form-model-item label="hostname" prop="hostname">
-          <a-input v-model="temp.hostname" placeholder="主机名 hostname" />
-        </a-form-model-item>
-        <a-form-model-item label="网络">
-          <a-auto-complete v-model="temp.networkMode" placeholder="网络模式：bridge、container:<name|id>、host、container、none" option-label-prop="value">
-            <template slot="dataSource">
-              <a-select-option
-                v-for="dataItem in [
-                  {
-                    title: '为 docker bridge 上的容器创建一个新的网络堆栈',
-                    value: 'bridge',
-                  },
-                  {
-                    title: '这个容器没有网络',
-                    value: 'none',
-                  },
-                  {
-                    title: '重用另一个容器网络堆栈',
-                    value: 'container:<name|id>',
-                  },
-                  {
-                    title: '使用容器内的主机网络堆栈。 注意：主机模式赋予容器对本地系统服务（如 D-bus）的完全访问权限，因此被认为是不安全的。',
-                    value: 'host',
-                  },
-                ]"
-                :key="dataItem.value"
-              >
-                {{ dataItem.title }}
-              </a-select-option>
-            </template>
-          </a-auto-complete>
-        </a-form-model-item>
-        <a-form-model-item label="重启策略">
-          <a-auto-complete v-model="temp.restartPolicy" placeholder="重启策略：no、always、unless-stopped、on-failure" option-label-prop="value">
-            <template slot="dataSource">
-              <a-select-option
-                v-for="dataItem in [
-                  {
-                    title: '不自动重启',
-                    value: 'no',
-                  },
-                  {
-                    title: '无论返回什么退出代码，始终重新启动容器。',
-                    value: 'always',
-                  },
-                  {
-                    title: '如果容器以非零退出代码退出，则重新启动容器。可以指定次数：on-failure:2',
-                    value: 'on-failure:1',
-                  },
-                  {
-                    title: '重新启动容器，除非它已被停止',
-                    value: 'unless-stopped',
-                  },
-                ]"
-                :key="dataItem.value"
-              >
-                {{ dataItem.title }}
-              </a-select-option>
-            </template>
-          </a-auto-complete>
-        </a-form-model-item>
-        <a-form-model-item label="存储选项">
-          <a-row v-for="(item, index) in temp.storageOpt" :key="index">
-            <a-col :span="10">
-              <a-input v-model="item.key" placeholder="配置名 （如：size）" />
-            </a-col>
-            <a-col :span="10" :offset="1">
-              <a-input v-model="item.value" placeholder="配置值 （如：5g）" />
-            </a-col>
-            <a-col :span="2" :offset="1">
-              <a-space>
-                <a-icon
-                  type="minus-circle"
-                  v-if="temp.storageOpt && temp.storageOpt.length > 1"
-                  @click="
-                    () => {
-                      temp.storageOpt.splice(index, 1);
-                    }
-                  "
-                />
-
-                <a-icon
-                  type="plus-square"
-                  @click="
-                    () => {
-                      temp.storageOpt.push({});
-                    }
-                  "
-                />
-              </a-space>
-            </a-col>
-          </a-row>
-        </a-form-model-item>
-        <a-form-model-item label="runtime"> <a-input v-model="temp.runtime" placeholder="容器 runtime" /> </a-form-model-item>
-        <a-form-model-item label="容器标签"> <a-input v-model="temp.labels" placeholder="容器标签,如：key1=values1&keyvalue2" /> </a-form-model-item>
-        <a-form-model-item label="自动启动">
-          <a-row>
-            <a-col :span="4"><a-switch v-model="temp.autorun" checked-children="启动" un-checked-children="不启动" /></a-col>
-            <a-col :span="4" style="text-align: right">
-              <a-tooltip>
-                <template slot="title">
-                  <p>--privileged</p>
-                  <ul>
-                    privileged=true|false 介绍
-                    <li>true container内的root拥有真正的root权限。</li>
-                    <li>false container内的root只是外部的一个普通用户权限。默认false</li>
-                    <li>privileged启动的容器 可以看到很多host上的设备 可以执行mount。 可以在docker容器中启动docker容器。</li>
-                  </ul>
-                </template>
-
-                <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
-                特权：
-              </a-tooltip>
-            </a-col>
-            <a-col :span="4">
-              <a-switch v-model="temp.privileged" checked-children="是" un-checked-children="否" />
-            </a-col>
-          </a-row>
-        </a-form-model-item>
-        <div style="padding: 40px">
-          <div
-            :style="{
-              position: 'absolute',
-              right: 0,
-              bottom: 0,
-              width: '100%',
-              borderTop: '1px solid #e9e9e9',
-              padding: '10px 16px',
-              background: '#fff',
-              textAlign: 'right',
-              zIndex: 1,
-            }"
-          >
-            <a-space>
-              <a-button
-                @click="
-                  () => {
-                    this.buildVisible = false;
-                  }
-                "
-              >
-                取消
-              </a-button>
-              <a-button type="primary" @click="handleBuildOk"> 确认 </a-button>
-            </a-space>
-          </div>
-        </div>
-      </a-form-model>
+      <BuildContainer
+        :id="this.id"
+        :imageId="this.temp.id"
+        :machineDockerId="this.machineDockerId"
+        :urlPrefix="this.urlPrefix"
+        @cancelBtnClick="
+          () => {
+            this.buildVisible = false;
+          }
+        "
+        @confirmBtnClick="
+          () => {
+            this.buildVisible = false;
+            this.loadData();
+          }
+        "
+      />
     </a-drawer>
     <!-- 日志 -->
     <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="pull日志" :footer="null" :maskClosable="false">
@@ -387,12 +98,14 @@
 </template>
 <script>
 import { parseTime, renderSize } from "@/utils/const";
-import { dockerImageCreateContainer, dockerImageInspect, dockerImagePullImage, dockerImageRemove, dockerImagesList, dockerImageBatchRemove } from "@/api/docker-api";
+import { dockerImageCreateContainer, dockerImagePullImage, dockerImageRemove, dockerImagesList, dockerImageBatchRemove } from "@/api/docker-api";
 import PullImageLog from "@/pages/docker/pull-image-log";
+import BuildContainer from "./buildContainer.vue";
 
 export default {
   components: {
     PullImageLog,
+    BuildContainer,
   },
   props: {
     id: {
@@ -524,31 +237,8 @@ export default {
     },
     // 构建镜像
     createContainer(record) {
-      dockerImageInspect(this.urlPrefix, {
-        id: this.reqDataId,
-        imageId: record.id,
-      }).then((res) => {
-        this.buildVisible = true;
-        // const volumesObj = {}; // res.data?.config?.volumes || {};
-        // const keys = Object.keys(volumesObj);
-
-        this.temp = {
-          volumes: [{}],
-          exposedPorts: (res.data?.config?.exposedPorts || [{}]).map((item) => {
-            item.disabled = item.port !== null;
-            item.ip = "0.0.0.0";
-            item.scheme = item.scheme || "tcp";
-            return item;
-          }),
-          image: (record.repoTags || []).join(","),
-          autorun: true,
-          imageId: record.id,
-          env: [{}],
-          storageOpt: [{}],
-          commands: [{}],
-        };
-        this.$refs["editForm"]?.resetFields();
-      });
+      this.temp = Object.assign({}, record);
+      this.buildVisible = true;
     },
     // 创建容器
     handleBuildOk() {

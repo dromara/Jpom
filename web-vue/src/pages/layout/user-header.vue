@@ -21,7 +21,7 @@
           <template v-if="this.mode === 'normal'">
             <a-sub-menu>
               <template #title>
-                <a-button type="link" icon="swap">切换工作空间</a-button>
+                <a-button type="link" icon="retweet">切换工作空间</a-button>
               </template>
               <template v-if="myWorkspaceList.length == 1">
                 <template v-for="(item, index) in myWorkspaceList[0].children">
@@ -30,7 +30,7 @@
                       {{ item.name }}
                     </a-button>
                   </a-menu-item>
-                  <a-menu-divider v-if="index != -1" :key="`${item.id}-divider`" />
+                  <a-menu-divider v-if="index < myWorkspaceList.length" :key="`${item.id}-divider`" />
                 </template>
               </template>
               <template v-if="myWorkspaceList.length > 1">
@@ -47,10 +47,10 @@
                           {{ item.name }}
                         </a-button>
                       </a-menu-item>
-                      <a-menu-divider v-if="index != -1" :key="`${index1}-${index}-divider`" />
+                      <a-menu-divider v-if="index < item1.children.length - 1" :key="`${index1}-${index}-divider`" />
                     </template>
                   </a-sub-menu>
-                  <a-menu-divider v-if="item1 != -1" :key="`${index1}-divider`" />
+                  <a-menu-divider v-if="index1 < myWorkspaceList.length - 1" :key="`${index1}-divider`" />
                 </template>
               </template>
             </a-sub-menu>
@@ -74,6 +74,14 @@
           <a-menu-divider />
           <a-menu-item @click="logOut">
             <a-button type="link" icon="logout"> 退出登录</a-button>
+          </a-menu-item>
+          <a-menu-divider />
+          <a-menu-item @click="logOutSwap">
+            <a-button type="link" icon="swap"> 切换账号 </a-button>
+          </a-menu-item>
+          <a-menu-divider />
+          <a-menu-item @click="logOutAll">
+            <a-button type="link" icon="rest"> 彻底退出 </a-button>
           </a-menu-item>
         </a-menu>
       </a-dropdown>
@@ -514,6 +522,56 @@ export default {
         });
       });
     },
+    // 彻底退出登录
+    logOutAll() {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要彻底退出系统么？彻底退出将退出登录和清空浏览器缓存",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          return new Promise((resolve) => {
+            // 退出登录
+            this.$store.dispatch("logOut").then(() => {
+              this.$notification.success({
+                message: "退出登录成功",
+              });
+              localStorage.clear();
+              this.$router.replace({
+                path: "/login",
+                query: {},
+              });
+              resolve();
+            });
+          });
+        },
+      });
+    },
+    // 切换账号登录
+    logOutSwap() {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要退出并切换账号登录么？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          return new Promise((resolve) => {
+            // 退出登录
+            this.$store.dispatch("logOut").then(() => {
+              this.$notification.success({
+                message: "退出登录成功",
+              });
+              this.$store.dispatch("changeWorkspace", "");
+              this.$router.replace({
+                path: "/login",
+                query: {},
+              });
+              resolve();
+            });
+          });
+        },
+      });
+    },
     // 退出登录
     logOut() {
       this.$confirm({
@@ -771,5 +829,12 @@ export default {
 
 /deep/ .ant-dropdown-menu-submenu-arrow {
   position: relative;
+}
+
+/deep/ .ant-dropdown-menu-item-divider,
+/deep/ .ant-dropdown-menu-submenu-title-divider,
+.ant-dropdown-menu-item-divider,
+.ant-dropdown-menu-submenu-title-divider {
+  margin: 0;
 }
 </style>

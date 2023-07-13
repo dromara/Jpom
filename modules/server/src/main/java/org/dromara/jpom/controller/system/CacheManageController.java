@@ -22,6 +22,9 @@
  */
 package org.dromara.jpom.controller.system;
 
+import cn.hutool.cache.impl.CacheObj;
+import cn.hutool.cache.impl.LFUCache;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.keepbx.jpom.event.ICacheTask;
@@ -50,10 +53,9 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * 缓存管理
@@ -93,9 +95,12 @@ public class CacheManageController extends BaseServerController implements ICach
         Map<String, Object> map = new HashMap<>(10);
         map.put("cacheFileSize", this.tempFileSize);
         map.put("dataSize", this.dataSize);
-        int size = LoginControl.LFU_CACHE.size();
         map.put("oldJarsSize", this.oldJarsSize);
-        map.put("ipSize", size);
+        {
+            LFUCache<String, Integer> lfuCache = LoginControl.LFU_CACHE;
+            List<CacheObj<String, Integer>> list = CollUtil.newArrayList(lfuCache.cacheObjIterator());
+            map.put("errorIp", list);
+        }
         int oneLineCount = ServiceFileTailWatcher.getOneLineCount();
         map.put("readFileOnLineCount", oneLineCount);
 
@@ -120,8 +125,8 @@ public class CacheManageController extends BaseServerController implements ICach
      */
     @RequestMapping(value = "node_cache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String nodeCache() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Cache).toString();
+    public String nodeCache(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Cache).toString();
     }
 
     /**
@@ -132,7 +137,7 @@ public class CacheManageController extends BaseServerController implements ICach
      */
     @RequestMapping(value = "clearCache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
+    public JsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type, HttpServletRequest request) {
         switch (type) {
             case "serviceCacheFileSize": {
                 File tempPath = JpomApplication.getInstance().getTempPath();
@@ -150,7 +155,7 @@ public class CacheManageController extends BaseServerController implements ICach
                 break;
             }
             default:
-                return NodeForward.request(getNode(), getRequest(), NodeUrl.ClearCache);
+                return NodeForward.request(getNode(), request, NodeUrl.ClearCache);
 
         }
         return JsonMessage.success("清空成功");

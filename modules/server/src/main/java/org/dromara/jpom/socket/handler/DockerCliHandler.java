@@ -34,6 +34,7 @@ import com.alibaba.fastjson2.JSONValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
+import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
@@ -41,6 +42,7 @@ import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.dromara.jpom.util.StringUtil;
+import org.dromara.jpom.util.WorkspaceThreadLocal;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -71,10 +73,17 @@ public class DockerCliHandler extends BaseTerminalHandler {
         MachineDockerServer machineDockerServer = SpringUtil.getBean(MachineDockerServer.class);
         Map<String, Object> attributes = session.getAttributes();
         MachineDockerModel dockerInfoModel = (MachineDockerModel) attributes.get("machineDocker");
+        DockerInfoService dockerInfoService = SpringUtil.getBean(DockerInfoService.class);
         String containerId = (String) attributes.get("containerId");
         //
         HandlerItem handlerItem;
         try {
+            DockerInfoModel model = new DockerInfoModel();
+            model.setMachineDockerId(dockerInfoModel.getId());
+            model = dockerInfoService.queryByBean(model);
+            if (model != null) {
+                WorkspaceThreadLocal.setWorkspaceId(model.getWorkspaceId());
+            }
             Map<String, Object> parameter = machineDockerServer.toParameter(dockerInfoModel);
             handlerItem = new HandlerItem(session, dockerInfoModel, parameter, containerId);
             handlerItem.startRead();

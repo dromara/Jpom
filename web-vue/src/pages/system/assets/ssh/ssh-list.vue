@@ -187,7 +187,8 @@
                   <a-icon type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
-              <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" />
+<!--              <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" />-->
+              <custom-input v-model="temp.password" :data="envVarList" suffixIcon="" inputPlaceholder="输入密码" :selectPlaceholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`"> </custom-input>
             </a-form-model-item>
             <a-form-model-item v-if="temp.connectType === 'PUBKEY'" prop="privateKey">
               <template slot="label">
@@ -376,14 +377,15 @@ import {
 import { COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, CHANGE_PAGE, renderSize, formatPercent, formatDuration, formatPercent2Number } from "@/utils/const";
 import fastInstall from "@/pages/node/fast-install.vue";
 import CustomSelect from "@/components/customSelect";
+import CustomInput from "@/components/customInput";
 import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
 import OperationLog from "@/pages/system/assets/ssh/operation-log";
 import { deleteForeSsh } from "@/api/ssh";
-import { getWorkSpaceListAll } from "@/api/workspace";
+import {getWorkspaceEnvAll, getWorkSpaceListAll} from "@/api/workspace";
 
 export default {
-  components: { fastInstall, CustomSelect, Terminal, SshFile, OperationLog },
+  components: { fastInstall, CustomSelect, Terminal, SshFile, OperationLog, CustomInput},
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
@@ -405,6 +407,7 @@ export default {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       editSshVisible: false,
       temp: {},
+      tempPwd: '',
       options: [
         { label: "密码", value: "PASS" },
         { label: "证书", value: "PUBKEY" },
@@ -488,17 +491,26 @@ export default {
       syncToWorkspaceVisible: false,
       workspaceList: [],
       tableSelections: [],
+      envVarList: []
     };
   },
   created() {
     this.loadData();
     this.loadGroupList();
+    this.getWorkEnvList();
   },
   methods: {
     formatDuration,
     renderSize,
     formatPercent,
     formatPercent2Number,
+    getWorkEnvList() {
+      getWorkspaceEnvAll().then((res) => {
+        if (res.code === 200) {
+          this.envVarList = res.data;
+        }
+      });
+    },
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true;

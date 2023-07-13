@@ -112,11 +112,7 @@
       title="部署证书"
       width="50%"
       :maskClosable="false"
-      @ok="
-        () => {
-          this.$refs.releaseFile?.tryCommit();
-        }
-      "
+      @ok="releaseFileOk()"
     >
       <a-alert message="证书将打包成 zip 文件上传到对应的文件夹" type="info" show-icon />
       <releaseFile ref="releaseFile" v-if="releaseFileVisible" @commit="handleCommitTask"></releaseFile>
@@ -338,6 +334,10 @@ export default {
         }
       });
     },
+
+    releaseFileOk() {
+      this.$refs.releaseFile?.tryCommit();
+    }
   },
 };
 </script>
