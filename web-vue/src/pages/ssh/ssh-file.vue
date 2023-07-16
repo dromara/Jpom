@@ -79,7 +79,9 @@
             <a-tooltip title="需要到 ssh 信息中配置允许编辑的文件后缀">
               <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">编辑</a-button>
             </a-tooltip>
-
+            <a-tooltip title="修改文件权限">
+              <a-button size="small" type="primary" @click="handleEdit(record)">修改文件权限</a-button>
+            </a-tooltip>
             <a-button size="small" type="primary" :disabled="record.dir" @click="handleDownload(record)">下载</a-button>
             <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
           </a-space>
@@ -174,7 +176,7 @@ export default {
         { title: "文件大小", dataIndex: "size", width: 120, ellipsis: true, scopedSlots: { customRender: "size" } },
         { title: "权限", dataIndex: "permissions", width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "修改时间", dataIndex: "modifyTime", width: "170px", ellipsis: true },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "180px" },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "260px" },
       ],
       editFileVisible: false,
       addFileFolderVisible: false,
