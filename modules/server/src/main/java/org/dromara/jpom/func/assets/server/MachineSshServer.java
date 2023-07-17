@@ -60,7 +60,6 @@ import org.dromara.jpom.service.h2db.BaseDbService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.util.StringUtil;
-import org.dromara.jpom.util.WorkspaceThreadLocal;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -189,13 +188,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
     }
 
     private void checkList(List<MachineSshModel> monitorModels) {
-        monitorModels.forEach(monitorModel -> ThreadUtil.execute(() -> {
-            SshModel sshModel = sshService.getByMachineSshId(monitorModel.getId());
-            if (sshModel != null) {
-                WorkspaceThreadLocal.setWorkspaceId(sshModel.getWorkspaceId());
-            }
-            this.updateMonitor(monitorModel);
-        }));
+        monitorModels.forEach(monitorModel -> ThreadUtil.execute(() -> this.updateMonitor(monitorModel)));
     }
 
     private void updateMonitor(MachineSshModel machineSshModel) {
@@ -363,7 +356,13 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
      * @return session
      */
     public Session getSessionByModelNoFill(ISshInfo sshModel) {
-        String workspaceId = WorkspaceThreadLocal.getWorkspaceId();
+        String workspaceId = ServerConst.WORKSPACE_GLOBAL;
+        if (sshModel instanceof MachineSshModel) {
+            SshModel sshModel1 = sshService.getByMachineSshId(((MachineSshModel)sshModel).getId());
+            if (sshModel != null) {
+                workspaceId = sshModel1.getWorkspaceId();
+            }
+        }
         Assert.notNull(sshModel, "没有对应 SSH 信息");
         Session session = null;
         int timeout = sshModel.timeout();
@@ -373,9 +372,6 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
         // 转化密码字段
         IWorkspaceEnvPlugin plugin = (IWorkspaceEnvPlugin) PluginFactory.getPlugin(IWorkspaceEnvPlugin.PLUGIN_NAME);
         try {
-            if (StrUtil.isEmpty(workspaceId)) {
-                workspaceId = ServerConst.WORKSPACE_GLOBAL;
-            }
             user = plugin.convertRefEnvValue(workspaceId, user);
             password = plugin.convertRefEnvValue(workspaceId, password);
         } catch (Exception e) {
