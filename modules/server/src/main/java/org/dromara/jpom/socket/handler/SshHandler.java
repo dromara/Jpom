@@ -49,7 +49,6 @@ import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.dromara.jpom.util.StringUtil;
-import org.dromara.jpom.util.WorkspaceThreadLocal;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -111,7 +110,6 @@ public class SshHandler extends BaseTerminalHandler {
         HandlerItem handlerItem;
         try {
             //
-            WorkspaceThreadLocal.setWorkspaceId((String) attributes.getOrDefault("workspaceId", ServerConst.WORKSPACE_GLOBAL));
             handlerItem = new HandlerItem(session, machineSshModel, sshModel);
             handlerItem.startRead();
         } catch (Exception e) {
