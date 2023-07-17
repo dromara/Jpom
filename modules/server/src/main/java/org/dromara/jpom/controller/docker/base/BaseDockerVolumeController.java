@@ -30,7 +30,6 @@ import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.docker.DockerInfoService;
-import org.dromara.jpom.util.WorkspaceThreadLocal;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,7 +48,6 @@ public abstract class BaseDockerVolumeController extends BaseDockerController {
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<List<JSONObject>> list(@ValidatorItem String id) throws Exception {
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("name", getParameter("name"));
@@ -65,7 +63,6 @@ public abstract class BaseDockerVolumeController extends BaseDockerController {
     @GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public JsonMessage<Object> del(@ValidatorItem String id, String volumeName) throws Exception {
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("volumeName", volumeName);
