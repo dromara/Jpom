@@ -80,7 +80,7 @@
               <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">编辑</a-button>
             </a-tooltip>
             <a-tooltip title="修改文件权限">
-              <a-button size="small" type="primary" @click="handleEdit(record)">修改文件权限</a-button>
+              <a-button size="small" type="primary" @click="handleFilePermission(record)">修改文件权限</a-button>
             </a-tooltip>
             <a-button size="small" type="primary" :disabled="record.dir" @click="handleDownload(record)">下载</a-button>
             <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
@@ -127,6 +127,58 @@
             <a-button type="primary" :disabled="temp.fileFolderName.length === 0 || temp.fileFolderName === temp.oldFileFolderName" @click="renameFileFolder">确认</a-button>
           </a-row>
         </a-space>
+      </a-modal>
+
+      <!-- 修改文件权限 -->
+      <a-modal destroyOnClose v-model="editFilePermissionVisible" width="400px" :title="`修改文件权限`" :footer="null" :maskClosable="true">
+        <a-row>
+          <a-col :span="6"><span class="title">权限</span></a-col>
+          <a-col :span="6"><span class="title">所属用户</span></a-col>
+          <a-col :span="6"><span class="title">用户组</span></a-col>
+          <a-col :span="6"><span class="title">其他</span></a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="6">
+            <span>读</span>
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox />
+          </a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="6">
+            <span>写</span>
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox />
+          </a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="6">
+            <span>执行</span>
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox />
+          </a-col>
+        </a-row>
       </a-modal>
     </a-layout-content>
   </a-layout>
@@ -180,6 +232,7 @@ export default {
       ],
       editFileVisible: false,
       addFileFolderVisible: false,
+      editFilePermissionVisible: false,
     };
   },
   mounted() {
@@ -460,6 +513,11 @@ export default {
         }
       });
     },
+    // 修改文件权限
+    handleFilePermission(record) {
+      this.temp = Object.assign({}, record);
+      this.editFilePermissionVisible = true;
+    },
     // 下载
     handleDownload(record) {
       // 请求参数
@@ -583,5 +641,10 @@ export default {
   margin: 10px 10px 0;
   padding: 10px;
   background-color: #fff;
+}
+
+.title {
+  font-weight: 600;
+  font-size: larger;
 }
 </style>
