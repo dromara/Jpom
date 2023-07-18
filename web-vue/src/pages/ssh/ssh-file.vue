@@ -142,13 +142,13 @@
             <span>读</span>
           </a-col>
           <a-col :span="6">
-            <a-checkbox />
+            <a-checkbox v-model="permissions.owner.read" @change="renderFilePermissionsTips"/>
           </a-col>
           <a-col :span="6">
-            <a-checkbox />
+            <a-checkbox v-model="permissions.owner.write" @change="renderFilePermissionsTips"/>
           </a-col>
           <a-col :span="6">
-            <a-checkbox />
+            <a-checkbox v-model="permissions.owner.execute" @change="renderFilePermissionsTips"/>
           </a-col>
         </a-row>
         <a-row>
@@ -156,13 +156,13 @@
             <span>写</span>
           </a-col>
           <a-col :span="6">
-            <a-checkbox />
+            <a-checkbox v-model="permissions.group.read" @change="renderFilePermissionsTips"/>
           </a-col>
           <a-col :span="6">
-            <a-checkbox />
+            <a-checkbox v-model="permissions.group.write" @change="renderFilePermissionsTips"/>
           </a-col>
           <a-col :span="6">
-            <a-checkbox />
+            <a-checkbox v-model="permissions.group.execute" @change="renderFilePermissionsTips"/>
           </a-col>
         </a-row>
         <a-row>
@@ -170,21 +170,27 @@
             <span>执行</span>
           </a-col>
           <a-col :span="6">
-            <a-checkbox />
+            <a-checkbox v-model="permissions.others.read" @change="renderFilePermissionsTips"/>
           </a-col>
           <a-col :span="6">
-            <a-checkbox />
+            <a-checkbox v-model="permissions.others.write" @change="renderFilePermissionsTips"/>
           </a-col>
           <a-col :span="6">
-            <a-checkbox />
+            <a-checkbox v-model="permissions.others.execute" @change="renderFilePermissionsTips"/>
           </a-col>
+        </a-row>
+        <a-row type="flex" style="margin-top: 20px;">
+          <a-button type="primary" @click="updateFilePermissions">确认修改</a-button>
+        </a-row>
+        <a-row>
+          <a-alert style="margin-top: 20px;" :message="permissionTips" type="success" />
         </a-row>
       </a-modal>
     </a-layout-content>
   </a-layout>
 </template>
 <script>
-import { deleteFile, downloadFile, getFileList, getRootFileList, newFileFolder, readFile, renameFileFolder, updateFileData, uploadFile } from "@/api/ssh-file";
+import { deleteFile, downloadFile, getFileList, getRootFileList, newFileFolder, readFile, renameFileFolder, updateFileData, uploadFile, parsePermissions, calcFilePermissionValue } from "@/api/ssh-file";
 
 import codeEditor from "@/components/codeEditor";
 import { ZIP_ACCEPT, renderSize } from "@/utils/const";
@@ -223,7 +229,7 @@ export default {
         key: "key",
       },
       columns: [
-        { title: "文件名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "文件名称", dataIndex: "name", width: 100, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "文件类型", dataIndex: "dir", width: 100, ellipsis: true, scopedSlots: { customRender: "dir" } },
         { title: "文件大小", dataIndex: "size", width: 120, ellipsis: true, scopedSlots: { customRender: "size" } },
         { title: "权限", dataIndex: "permissions", width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
@@ -233,6 +239,12 @@ export default {
       editFileVisible: false,
       addFileFolderVisible: false,
       editFilePermissionVisible: false,
+      permissions: {
+        owner: { read: false, write: false, execute: false, },
+        group: { read: false, write: false, execute: false, },
+        others: { read: false, write: false, execute: false, },
+      },
+      permissionTips: '',
     };
   },
   mounted() {
@@ -516,8 +528,21 @@ export default {
     // 修改文件权限
     handleFilePermission(record) {
       this.temp = Object.assign({}, record);
+      this.permissions = parsePermissions(this.temp.permissions);
+      const permissionsValue = calcFilePermissionValue(this.permissions);
+      this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`
       this.editFilePermissionVisible = true;
     },
+    // 更新文件权限提示
+    renderFilePermissionsTips() {
+      const permissionsValue = calcFilePermissionValue(this.permissions);
+      this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`
+    },
+    // 确认修改文件权限
+    updateFilePermissions() {
+
+    },
+
     // 下载
     handleDownload(record) {
       // 请求参数
