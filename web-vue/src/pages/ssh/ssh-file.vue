@@ -145,10 +145,10 @@
             <a-checkbox v-model="permissions.owner.read" @change="renderFilePermissionsTips"/>
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.owner.write" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.group.read" @change="renderFilePermissionsTips"/>
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.owner.execute" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.others.read" @change="renderFilePermissionsTips"/>
           </a-col>
         </a-row>
         <a-row>
@@ -156,13 +156,13 @@
             <span>写</span>
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.group.read" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.owner.write" @change="renderFilePermissionsTips"/>
           </a-col>
           <a-col :span="6">
             <a-checkbox v-model="permissions.group.write" @change="renderFilePermissionsTips"/>
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.group.execute" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.others.write" @change="renderFilePermissionsTips"/>
           </a-col>
         </a-row>
         <a-row>
@@ -170,10 +170,10 @@
             <span>执行</span>
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.others.read" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.owner.execute" @change="renderFilePermissionsTips"/>
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.others.write" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.group.execute" @change="renderFilePermissionsTips"/>
           </a-col>
           <a-col :span="6">
             <a-checkbox v-model="permissions.others.execute" @change="renderFilePermissionsTips"/>
@@ -190,7 +190,7 @@
   </a-layout>
 </template>
 <script>
-import { deleteFile, downloadFile, getFileList, getRootFileList, newFileFolder, readFile, renameFileFolder, updateFileData, uploadFile, parsePermissions, calcFilePermissionValue } from "@/api/ssh-file";
+import { deleteFile, downloadFile, getFileList, getRootFileList, newFileFolder, readFile, renameFileFolder, updateFileData, uploadFile, parsePermissions, calcFilePermissionValue, changeFilePermission } from "@/api/ssh-file";
 
 import codeEditor from "@/components/codeEditor";
 import { ZIP_ACCEPT, renderSize } from "@/utils/const";
@@ -540,7 +540,23 @@ export default {
     },
     // 确认修改文件权限
     updateFilePermissions() {
-
+      // 请求参数
+      const params = {
+        id: this.reqDataId,
+        allowPathParent: this.temp.allowPathParent,
+        nextPath: this.temp.nextPath,
+        fileName: this.temp.name,
+        permissionValue: calcFilePermissionValue(this.permissions)
+      };
+      changeFilePermission(this.baseUrl, params).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.editFilePermissionVisible = false;
+          this.loadFileList();
+        }
+      });
     },
 
     // 下载
