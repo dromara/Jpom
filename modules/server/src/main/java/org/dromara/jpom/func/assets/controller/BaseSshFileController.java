@@ -37,10 +37,7 @@ import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpATTRS;
-import com.jcraft.jsch.SftpException;
+import com.jcraft.jsch.*;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
@@ -608,5 +605,42 @@ public abstract class BaseSshFileController extends BaseServerController {
                 JschUtil.close(session);
             }
         });
+    }
+
+    /**
+     * 修改文件权限
+     * @param id
+     * @param allowPathParent
+     * @param nextPath
+     * @param fileName
+     * @param permissionValue
+     * @return
+     */
+    @RequestMapping(value = "change_file_permission.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<JSONArray> changeFilePermissions(@ValidatorItem String id,
+                                                        @ValidatorItem String allowPathParent,
+                                                        @ValidatorItem String nextPath,
+                                                        @ValidatorItem String fileName,
+                                                        @ValidatorItem String permissionValue) {
+        MachineSshModel machineSshModel = this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel1, itemConfig) -> machineSshModel1);
+        if (machineSshModel == null) {
+            return new JsonMessage<>(400, "ssh error 或者 没有配置此文件夹");
+        }
+        Session session = sshService.getSessionByModel(machineSshModel);
+        Charset charset = machineSshModel.charset();
+        int timeout = machineSshModel.timeout();
+
+        String command = String.format("cd %s && chmod %s %s", nextPath, permissionValue, fileName);
+
+        List<String> result = new ArrayList<>();
+        try {
+            JschUtils.execCallbackLine(session, charset, timeout, command, StrUtil.EMPTY, result::add);
+        } catch (IOException e) {
+            log.error("ssh修改文件权限异常...command: {}", command, e);
+            return new JsonMessage<>(400, "操作失败 " + e.getMessage());
+        }
+
+        return JsonMessage.success("操作成功 " + CollUtil.join(result, StrUtil.LF));
     }
 }
