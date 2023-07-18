@@ -119,6 +119,26 @@ export function renameFileFolder(baseUrl, params) {
 }
 
 /**
+ * 修改文件权限
+ * @param {*} baseUrl 
+ * @param {
+ *  String id,
+ *  String allowPathParent,
+ *  String nextPath,
+ *  String fileName,
+ *  String permissionValue
+ * } params 
+ * @returns 
+ */
+export function changeFilePermission(baseUrl, params) {
+  return axios({
+    url: baseUrl + "change_file_permission.json",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
  * 权限字符串转权限对象
  * @param {String} str "lrwxr-xr-x"
  * @returns 
