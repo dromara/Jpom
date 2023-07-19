@@ -103,11 +103,17 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
         errorWorkspaceTable.clear();
         // 判断是否存在关联数据
         Set<String> workspaceIds = this.allowWorkspaceIds();
-        Set<Class<?>> classes = BaseWorkspaceModel.allClass();
+        Set<Class<?>> classes = BaseWorkspaceModel.allTableClass();
         for (Class<?> aClass : classes) {
             TableName tableName = aClass.getAnnotation(TableName.class);
-            if (tableName == null) {
-                continue;
+            int workspaceBind = tableName.workspaceBind();
+            if (workspaceBind == 3) {
+                // 父级不存在自动删除
+                Class<?> parents = tableName.parents();
+                Assert.state(parents != Void.class, "表信息配置错误," + aClass);
+                //
+                TableName tableName1 = parents.getAnnotation(TableName.class);
+                Assert.notNull(tableName1, "父级表信息配置错误," + aClass);
             }
             String sql = "select `workspaceId`,count(1) as allCount from " + tableName.value() + " group by `workspaceId`";
             List<Entity> query = workspaceService.query(sql);
@@ -129,10 +135,10 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
         // 判断是否存在关联数据
         List<WorkspaceModel> list = workspaceService.list();
         Set<String> workspaceIds = Optional.ofNullable(list)
-                .map(workspaceModels -> workspaceModels.stream()
-                        .map(BaseIdModel::getId)
-                        .collect(Collectors.toSet()))
-                .orElse(new HashSet<>());
+            .map(workspaceModels -> workspaceModels.stream()
+                .map(BaseIdModel::getId)
+                .collect(Collectors.toSet()))
+            .orElse(new HashSet<>());
         // 添加默认的全局工作空间 id
         workspaceIds.add(ServerConst.WORKSPACE_GLOBAL);
         return workspaceIds;

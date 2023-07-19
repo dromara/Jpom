@@ -2,6 +2,7 @@ project_id: 597731
 base_path: .
 base_url: https://api.crowdin.com
 preserve_hierarchy: true
+api_token_env: CROWDIN_PERSONAL_TOKEN
 
 files:
   - source: 'web-vue/src/locales/zh/*.js'

@@ -1,3 +1,11 @@
+import { number } from "echarts"
+
+export interface IPageQuery {
+  page: number
+  limit: number
+  total: number
+  [key: string]: any
+}
 export interface SystemType {
   disabledCaptcha: bollean
   disabledGuide: bollean

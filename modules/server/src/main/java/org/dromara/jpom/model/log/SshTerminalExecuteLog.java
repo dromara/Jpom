@@ -28,6 +28,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseWorkspaceModel;
+import org.dromara.jpom.model.data.SshModel;
 
 /**
  * ssh 终端执行日志
@@ -36,7 +37,7 @@ import org.dromara.jpom.model.BaseWorkspaceModel;
  * @since 2021/08/04
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "SSHTERMINALEXECUTELOG", name = "ssh 终端执行日志")
+@TableName(value = "SSHTERMINALEXECUTELOG", name = "ssh 终端执行日志", parents = SshModel.class)
 @Data
 @NoArgsConstructor
 public class SshTerminalExecuteLog extends BaseWorkspaceModel {

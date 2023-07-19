@@ -54,6 +54,7 @@ import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.service.docker.DockerSwarmInfoService;
 import org.dromara.jpom.service.system.WorkspaceService;
 import org.dromara.jpom.system.ServerConfig;
+import org.dromara.jpom.util.WorkspaceThreadLocal;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -199,6 +200,7 @@ public class MachineDockerController extends BaseGroupNameController {
 
     private void check(MachineDockerModel dockerInfoModel) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
+        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         Map<String, Object> parameter = machineDockerServer.toParameter(dockerInfoModel);
         parameter.put("closeBefore", true);
         String errorReason = (String) plugin.execute("ping", parameter);

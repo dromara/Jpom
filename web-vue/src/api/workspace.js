@@ -65,6 +65,19 @@ export function deleteWorkspace(id) {
 }
 
 /*
+ * 删除工作空间检查
+ * @param {String} id
+ * } params
+ */
+export function preDeleteWorkspace(id) {
+  return axios({
+    url: "/system/workspace/pre-check-delete",
+    method: "get",
+    params: { id: id },
+  });
+}
+
+/*
  * 工作空间环境变量列表
  * @param {*}
  * } params
@@ -74,6 +87,17 @@ export function getWorkspaceEnvList(params) {
     url: "/system/workspace_env/list",
     method: "post",
     data: params,
+  });
+}
+/*
+ * 工作空间环境变量全部列表
+ * @param {*}
+ * } params
+ */
+export function getWorkspaceEnvAll() {
+  return axios({
+    url: "/system/workspace_env/all",
+    method: "post"
   });
 }
 

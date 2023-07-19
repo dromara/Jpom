@@ -35,7 +35,11 @@
           <a-button size="small" type="primary" @click="configMeun(record)">菜单</a-button>
           <a-button size="small" type="primary" @click="configWhiteDir(record)">分发配置</a-button>
           <a-button size="small" type="primary" @click="viewEnvVar(record)">变量</a-button>
-          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+
+          <a-tooltip v-if="record.id === 'DEFAULT'" title="不能删除默认工作空间">
+            <a-button size="small" type="danger" :disabled="true">删除</a-button>
+          </a-tooltip>
+          <a-button v-else size="small" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
@@ -97,6 +101,7 @@
         </a-row>
       </a-form-model>
     </a-modal>
+    <!-- 配置授权目录 -->
     <a-modal
       destroyOnClose
       v-model="configDir"
@@ -119,10 +124,43 @@
         "
       ></whiteList>
     </a-modal>
+    <!-- 删除工作空间检查 -->
+    <a-modal
+      destroyOnClose
+      v-model="preDeleteVisible"
+      :title="`删除工作空间确认`"
+      :maskClosable="false"
+      @ok="handleDeleteOk"
+      @cancel="
+        () => {
+          this.preDeleteVisible = false;
+        }
+      "
+    >
+      <a-alert message="操作提示" type="error">
+        <template #description> 真的当前工作空间么,删除前需要将关联数据都删除后才能删除当前工作空间？</template>
+      </a-alert>
+
+      <a-tree :tree-data="treeData" default-expand-all :replaceFields="preDeleteReplaceFields" :showLine="true">
+        <template slot="title" slot-scope="{ dataRef }">
+          <a-icon type="check" v-if="dataRef.count === 0" style="color: green" />
+          <a-icon type="close" v-else style="color: red" />
+          {{ dataRef.name }}
+
+          <template v-if="dataRef.count > 0">
+            <a-tag color="pink"> 存在 {{ dataRef.count }} 条数据 </a-tag>
+
+            <a-tag v-if="dataRef.workspaceBind === 2" color="cyan">自动删除</a-tag>
+            <a-tag v-else-if="dataRef.workspaceBind === 3" color="blue">父级不存在自动删除</a-tag>
+            <a-tag v-else color="purple">手动删除</a-tag>
+          </template>
+        </template>
+      </a-tree>
+    </a-modal>
   </div>
 </template>
 <script>
-import { deleteWorkspace, editWorkSpace, getWorkSpaceList, getMenusConfig, saveMenusConfig, getWorkSpaceGroupList } from "@/api/workspace";
+import { deleteWorkspace, preDeleteWorkspace, editWorkSpace, getWorkSpaceList, getMenusConfig, saveMenusConfig, getWorkSpaceGroupList } from "@/api/workspace";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import workspaceEnv from "./workspace-env.vue";
 import CustomSelect from "@/components/customSelect";
@@ -174,6 +212,25 @@ export default {
       menusConfigData: {},
       groupList: [],
       configDir: false,
+      preDeleteVisible: false,
+      preDeleteReplaceFields: {
+        children: "children",
+        title: "name",
+        key: "id",
+      },
+      treeData: [
+        {
+          title: "parent 1",
+          key: "0-0",
+          slots: {
+            icon: "smile",
+          },
+          children: [
+            { title: "leaf", key: "0-0-0", slots: { icon: "meh" } },
+            { title: "leaf", key: "0-0-1", scopedSlots: { icon: "custom" } },
+          ],
+        },
+      ],
     };
   },
   computed: {
@@ -254,22 +311,23 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      this.$confirm({
-        title: "系统提示",
-        content: "真的当前工作空间么,删除前需要将关联数据都删除后才能删除当前工作空间？",
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          // 删除
-          deleteWorkspace(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.loadData();
-            }
+      this.temp = { ...record };
+
+      preDeleteWorkspace(this.temp.id).then((res) => {
+        this.treeData = res.data?.children || [];
+        this.preDeleteVisible = true;
+      });
+    },
+    handleDeleteOk() {
+      // 删除
+      deleteWorkspace(this.temp.id).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
           });
-        },
+          this.preDeleteVisible = false;
+          this.loadData();
+        }
       });
     },
     configMeun(record) {

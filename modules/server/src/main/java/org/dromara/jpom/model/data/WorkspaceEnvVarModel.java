@@ -34,7 +34,7 @@ import org.dromara.jpom.model.BaseWorkspaceModel;
  * @since 2021/12/10
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "WORKSPACE_ENV_VAR", name = "工作空间环境变量")
+@TableName(value = "WORKSPACE_ENV_VAR", name = "工作空间环境变量", workspaceBind = 2)
 @Data
 public class WorkspaceEnvVarModel extends BaseWorkspaceModel {
 
