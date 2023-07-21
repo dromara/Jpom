@@ -97,7 +97,7 @@ export function getWorkspaceEnvList(params) {
 export function getWorkspaceEnvAll() {
   return axios({
     url: "/system/workspace_env/all",
-    method: "post"
+    method: "post",
   });
 }
 

@@ -116,7 +116,7 @@ export default {
       },
       deep: true,
       immediate: true,
-      input: false
+      input: false,
     },
   },
 
@@ -126,9 +126,9 @@ export default {
     },
     selectChange(v) {
       if (!this.inputFocus) {
-        this.$emit("input", '$ref.wEnv.' + v);
+        this.$emit("input", "$ref.wEnv." + v);
         this.selectOpen = false;
-        this.$emit("change", '$ref.wEnv.' + v);
+        this.$emit("change", "$ref.wEnv." + v);
       } else {
         this.$emit("input", v);
         this.selectOpen = false;

@@ -136,7 +136,7 @@
                 <a-icon type="question-circle" theme="filled" />
               </a-tooltip>
             </template>
-<!--            <a-input-password v-if="temp.id === undefined" v-model="temp.password" placeholder="登录密码">
+            <!--            <a-input-password v-if="temp.id === undefined" v-model="temp.password" placeholder="登录密码">
               <a-icon slot="prefix" type="lock" />
             </a-input-password>
             <a-input-password v-if="temp.id !== undefined" v-model="temp.password" placeholder="此处不填不会修改密码">
@@ -302,10 +302,10 @@
 import CustomInput from "@/components/customInput";
 import { providerInfo, authorizeRepos, deleteRepository, editRepository, getRepositoryList, restHideField, sortItem, exportData, importTemplate, importData } from "@/api/repository";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
-import {getWorkspaceEnvAll} from "@/api/workspace";
+import { getWorkspaceEnvAll } from "@/api/workspace";
 
 export default {
-  components: {CustomInput},
+  components: { CustomInput },
   props: {
     choose: {
       type: Boolean,
@@ -429,7 +429,7 @@ export default {
         other: "请输入私人令牌",
       },
       tableSelections: [],
-      envVarList: []
+      envVarList: [],
     };
   },
   computed: {

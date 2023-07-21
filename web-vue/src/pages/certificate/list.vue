@@ -106,14 +106,7 @@
       </a-form-model>
     </a-modal>
     <!-- 发布文件 -->
-    <a-modal
-      destroyOnClose
-      v-model="releaseFileVisible"
-      title="部署证书"
-      width="50%"
-      :maskClosable="false"
-      @ok="releaseFileOk()"
-    >
+    <a-modal destroyOnClose v-model="releaseFileVisible" title="部署证书" width="50%" :maskClosable="false" @ok="releaseFileOk()">
       <a-alert message="证书将打包成 zip 文件上传到对应的文件夹" type="info" show-icon />
       <releaseFile ref="releaseFile" v-if="releaseFileVisible" @commit="handleCommitTask"></releaseFile>
     </a-modal>
@@ -337,7 +330,7 @@ export default {
 
     releaseFileOk() {
       this.$refs.releaseFile?.tryCommit();
-    }
+    },
   },
 };
 </script>

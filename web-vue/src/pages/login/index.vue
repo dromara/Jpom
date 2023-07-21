@@ -24,7 +24,7 @@
         <rect stroke="#CED4D9" x="108" y="1" width="9" height="9" rx="1"></rect>
       </g>
     </svg>
-    <div class="switch" @click="handleToggleBg">{{ dynamicBg ? "关闭动态背景" : "开启动态背景" }}</div>
+    <div class="switch" @click="handleToggleBg">{{ dynamicBg ? $t("account.login.dynamicBgOff") : $t("account.login.dynamicBgOn") }}</div>
     <locale-changer class="locale-changer" />
     <a-card class="login-card" hoverable>
       <a-card-meta :title="`${loginTitle}`" style="text-align: center" description="" />
@@ -32,15 +32,15 @@
       <template v-if="this.action === 'login'">
         <a-form-model ref="loginForm" :label-col="{ span: 0 }" :model="loginForm" :rules="rules" @submit="handleLogin">
           <a-form-model-item :wrapper-col="{ span: 24 }" prop="loginName">
-            <a-input v-model="loginForm.loginName" placeholder="用户名" />
+            <a-input v-model="loginForm.loginName" :placeholder="$t('account.common.username')" />
           </a-form-model-item>
           <a-form-model-item :wrapper-col="{ span: 24 }" prop="userPwd">
-            <a-input-password v-model="loginForm.userPwd" placeholder="密码" />
+            <a-input-password v-model="loginForm.userPwd" :placeholder="$t('account.common.password')" />
           </a-form-model-item>
           <a-form-model-item v-if="!this.disabledCaptcha" :wrapper-col="{ span: 24 }" prop="code">
             <a-row>
               <a-col :span="14">
-                <a-input v-model="loginForm.code" placeholder="验证码" />
+                <a-input v-model="loginForm.code" :placeholder="$t('account.common.captcha')" />
               </a-col>
               <a-col :offset="2" :span="8">
                 <div class="rand-code">
@@ -74,11 +74,11 @@
       </template>
       <template v-if="this.action === 'mfa'">
         <a-form-model ref="mfaDataForm" :label-col="{ span: 0 }" :model="mfaData" :rules="rules" @submit="handleMfa">
-          <a-form-model-item label="验证码" :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }" prop="mfaCode" help="需要验证 MFA">
+          <a-form-model-item :label="$t('account.common.captcha')" :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }" prop="mfaCode" help="需要验证 MFA">
             <a-input v-model="mfaData.mfaCode" placeholder="mfa 验证码" />
           </a-form-model-item>
 
-          <a-button type="primary" html-type="submit" class="btn-login"> 确认 </a-button>
+          <a-button type="primary" html-type="submit" class="btn-login"> {{ $t("common.confirm") }} </a-button>
         </a-form-model>
       </template>
     </a-card>

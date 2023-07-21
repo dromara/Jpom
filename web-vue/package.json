@@ -6,7 +6,8 @@
     "serve": "vue-cli-service --max-old-space-size=900 serve  --mode dev",
     "build": "vue-cli-service build --mode production",
     "local": "vue-cli-service serve --mode local",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "prettier": "prettier --write 'src/**/*.{js,vue}'"
   },
   "dependencies": {
     "@babel/plugin-proposal-optional-chaining": "^7.14.5",

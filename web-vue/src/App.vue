@@ -26,7 +26,7 @@ export default {
       routerActivation: true,
       globalLoadingProps: {
         spinning: false,
-        tip: "加载中",
+        tip: this.$t("common.loading"),
         size: "large",
         delayTime: 500,
       },

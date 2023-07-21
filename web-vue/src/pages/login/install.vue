@@ -1,5 +1,6 @@
 <template>
   <div class="init-wrapper">
+    <locale-changer class="locale-changer" />
     <svg width="100%" height="100%" viewBox="0 0 1440 500" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
       <g>
         <circle stroke="#13C2C2" cx="500" cy="-20" r="6"></circle>
@@ -27,10 +28,10 @@
     <a-card v-if="canInstall" class="card-box" :style="`${setpCurrent === 1 ? 'width: 60vw' : 'width: 550px'}`" hoverable :bodyStyle="{ padding: '24px 0' }">
       <template slot="title">
         <a-steps :current="setpCurrent">
-          <a-step title="初始化系统" status="process" description="设置一个超级管理员账号">
+          <a-step :title="$t('account.install.steps._1.title')" status="process" :description="$t('account.install.steps._1.desc')">
             <a-icon slot="icon" type="user" />
           </a-step>
-          <a-step title="启用两步验证" description="开启两步验证使账号更安全">
+          <a-step :title="$t('account.install.steps._2.title')" :description="$t('account.install.steps._2.desc')">
             <a-icon slot="icon" type="file-protect" />
           </a-step>
         </a-steps>
@@ -61,7 +62,7 @@
             <a-form-item>
               <a-row type="flex" justify="center">
                 <a-col :span="4">
-                  <a-button type="primary" html-type="submit" class="btn"> 创建账号 </a-button>
+                  <a-button type="primary" html-type="submit" class="btn"> {{ $t("account.install.title") }} </a-button>
                 </a-col>
               </a-row>
             </a-form-item>
@@ -164,8 +165,12 @@ import QRCode from "qrcodejs2";
 import sha1 from "js-sha1";
 import Vue from "vue";
 import { checkSystem } from "@/api/install";
+import LocaleChanger from "@/components/locale/locale-changer.vue";
 
 export default {
+  components: {
+    LocaleChanger,
+  },
   data() {
     return {
       loginForm: this.$form.createForm(this, { name: "login-form" }),
@@ -215,18 +220,18 @@ export default {
           hidePrev: true,
           steps: [
             {
-              title: "导航助手",
-              intro: "不要慌，出现这个页面表示您没有设置系统管理员信息，或者需要重置管理员信息",
+              title: this.$t("account.install.guide.title"),
+              intro: this.$t("account.install.guide.step1"),
             },
             {
-              title: "导航助手",
+              title: this.$t("account.install.guide.title"),
+              intro: this.$t("account.install.guide.step2"),
               element: document.querySelector(".login-card"),
-              intro: "此处需要填写的信息是用以管理系统的系统管理员的账户密码，一定要记住哦，它是登录的唯一凭证",
             },
             {
-              title: "导航助手",
+              title: this.$t("account.install.guide.title"),
+              intro: this.$t("account.install.guide.step3"),
               element: document.querySelector(".init-user-password"),
-              intro: "为了您的账户安全，设定的密码需要包含字母、数字、字符，且长度于6-18位之间",
             },
           ],
         },
@@ -368,6 +373,16 @@ export default {
 };
 </script>
 <style scoped>
+.locale-changer {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  z-index: 999;
+  background-color: white;
+  opacity: 0.9;
+  border-radius: 4px;
+  padding: 5px 10px;
+}
 .init-wrapper {
   width: 100vw;
   height: 100vh;
