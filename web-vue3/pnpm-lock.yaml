@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@ant-design/icons-vue':
     specifier: ^6.1.0
@@ -77,10 +81,10 @@ devDependencies:
     version: 5.55.0(eslint@8.36.0)(typescript@5.0.2)
   '@vitejs/plugin-vue':
     specifier: ^4.0.0
-    version: 4.0.0(vite@4.1.4)(vue@3.2.47)
+    version: 4.0.0(vite@4.1.5)(vue@3.2.47)
   '@vitejs/plugin-vue-jsx':
     specifier: ^3.0.1
-    version: 3.0.1(vite@4.1.4)(vue@3.2.47)
+    version: 3.0.1(vite@4.1.5)(vue@3.2.47)
   eslint:
     specifier: ^8.36.0
     version: 8.36.0
@@ -97,11 +101,11 @@ devDependencies:
     specifier: ^0.24.1
     version: 0.24.1(vue@3.2.47)
   vite:
-    specifier: ^4.1.0
-    version: 4.1.4(@types/node@18.15.3)(less@4.1.3)
+    specifier: ^4.1.5
+    version: 4.1.5(@types/node@18.15.3)(less@4.1.3)
   vite-plugin-html:
     specifier: ^3.2.0
-    version: 3.2.0(vite@4.1.4)
+    version: 3.2.0(vite@4.1.5)
 
 packages:
 
@@ -1031,7 +1035,7 @@ packages:
       eslint-visitor-keys: 3.3.0
     dev: true
 
-  /@vitejs/plugin-vue-jsx@3.0.1(vite@4.1.4)(vue@3.2.47):
+  /@vitejs/plugin-vue-jsx@3.0.1(vite@4.1.5)(vue@3.2.47):
     resolution: {integrity: sha512-+Jb7ggL48FSPS1uhPnJbJwWa9Sr90vQ+d0InW+AhBM22n+cfuYqJZDckBc+W3QSHe1WDvewMZfa4wZOtk5pRgw==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
@@ -1041,20 +1045,20 @@ packages:
       '@babel/core': 7.21.3
       '@babel/plugin-transform-typescript': 7.21.3(@babel/core@7.21.3)
       '@vue/babel-plugin-jsx': 1.1.1(@babel/core@7.21.3)
-      vite: 4.1.4(@types/node@18.15.3)(less@4.1.3)
+      vite: 4.1.5(@types/node@18.15.3)(less@4.1.3)
       vue: 3.2.47
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-  /@vitejs/plugin-vue@4.0.0(vite@4.1.4)(vue@3.2.47):
+  /@vitejs/plugin-vue@4.0.0(vite@4.1.5)(vue@3.2.47):
     resolution: {integrity: sha512-e0X4jErIxAB5oLtDqbHvHpJe/uWNkdpYV83AOG2xo2tEVSzCzewgJMtREZM30wXnM5ls90hxiOtAuVU6H5JgbA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
       vite: ^4.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 4.1.4(@types/node@18.15.3)(less@4.1.3)
+      vite: 4.1.5(@types/node@18.15.3)(less@4.1.3)
       vue: 3.2.47
     dev: true
 
@@ -2948,7 +2952,7 @@ packages:
       punycode: 2.3.0
     dev: true
 
-  /vite-plugin-html@3.2.0(vite@4.1.4):
+  /vite-plugin-html@3.2.0(vite@4.1.5):
     resolution: {integrity: sha512-2VLCeDiHmV/BqqNn5h2V+4280KRgQzCFN47cst3WiNK848klESPQnzuC3okH5XHtgwHH/6s1Ho/YV6yIO0pgoQ==}
     peerDependencies:
       vite: '>=2.0.0'
@@ -2965,11 +2969,11 @@ packages:
       html-minifier-terser: 6.1.0
       node-html-parser: 5.4.2
       pathe: 0.2.0
-      vite: 4.1.4(@types/node@18.15.3)(less@4.1.3)
+      vite: 4.1.5(@types/node@18.15.3)(less@4.1.3)
     dev: true
 
-  /vite@4.1.4(@types/node@18.15.3)(less@4.1.3):
-    resolution: {integrity: sha512-3knk/HsbSTKEin43zHu7jTwYWv81f8kgAL99G5NWBcA1LKvtvcVAC4JjBH1arBunO9kQka+1oGbrMKOjk4ZrBg==}
+  /vite@4.1.5(@types/node@18.15.3)(less@4.1.3):
+    resolution: {integrity: sha512-zJ0RiVkf61kpd7O+VtU6r766xgnTaIknP/lR6sJTZq3HtVJ3HGnTo5DaJhTUtYoTyS/CQwZ6yEVdc/lrmQT7dQ==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
     peerDependencies:
