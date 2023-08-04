@@ -4,11 +4,12 @@
 
 ### 🐣 新增功能
 
+1. 【server】优化 ssh 相关功能支持 openssh8+ （感谢 [@孤城落寞](https://gitee.com/gclm) [Gitee pr 193](https://gitee.com/dromara/Jpom/pulls/193) ）
 
 ### 🐞 解决BUG、优化功能
 
 1. 【server】优化 仓库账号、 SSH 证书密码支持选择环境变量
-2. 【server】升级 commons-compress、fastjson、hutool 版本
+2. 【all】升级 commons-compress、fastjson、hutool 版本
 3. 【server】优化 maven 依赖冲突
 
 ------
