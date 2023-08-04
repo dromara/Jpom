@@ -1,10 +1,10 @@
 <template>
   <div>
     <a-form-model ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
-      <a-form-model-item label="名称" prop="name">
+      <a-form-model-item :label="$t('common.name')" prop="name">
         <a-row>
           <a-col :span="10">
-            <a-input v-model="temp.name" :maxLength="50" placeholder="名称" />
+            <a-input v-model="temp.name" :maxLength="50" :placeholder="$t('common.name')" />
           </a-col>
           <a-col :span="4" style="text-align: right">分组名称：</a-col>
           <a-col :span="10">

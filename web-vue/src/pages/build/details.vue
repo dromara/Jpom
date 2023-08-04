@@ -2,82 +2,82 @@
   <div>
     <a-descriptions bordered size="small">
       <template #title>
-        <a-space
-          >{{ data.name }}
-          <a-tooltip title="点击刷新构建信息">
-            <a-button type="link" size="small" icon="reload" @click="refresh"> </a-button>
+        <a-space>
+          {{ data.name }}
+          <a-tooltip :title="$t('build.details.refreshTooltip')">
+            <a-button type="link" size="small" icon="reload" @click="refresh" />
           </a-tooltip>
         </a-space>
       </template>
 
-      <a-descriptions-item label="分组">
+      <a-descriptions-item :label="$t('common.group')">
         {{ data.group }}
       </a-descriptions-item>
-      <a-descriptions-item label="分组/标签"> {{ data.branchName }} {{ data.branchTagName }} </a-descriptions-item>
-      <a-descriptions-item label="构建方式">
+      <a-descriptions-item :label="$t('build.common.label')"> {{ data.branchName }} {{ data.branchTagName }} </a-descriptions-item>
+      <a-descriptions-item :label="$t('build.common.buildMethod')">
         <template v-if="data.buildMode === 1">
           <a-icon type="cloud" />
-          容器构建
+          {{ $t('build.common.containerBuild') }}
         </template>
         <template v-else>
           <a-icon type="code" />
-          本地构建
+          {{ $t('build.common.containerBuild') }}
         </template>
       </a-descriptions-item>
 
-      <a-descriptions-item label="最新构建ID">
-        <span v-if="data.buildId <= 0"></span>
+      <a-descriptions-item :label="$t('build.common.buildId')">
+        <span v-if="data.buildId <= 0" />
         <a-tag v-else color="#108ee9">#{{ data.buildId }}</a-tag>
       </a-descriptions-item>
-      <a-descriptions-item label="构建状态">
+      <a-descriptions-item :label="$t('build.common.buildStatus')">
         <a-tooltip :title="data.statusMsg">
-          <a-tag :color="statusColor[data.status]"> {{ statusMap[data.status] || "未知" }} <a-icon type="info-circle" v-if="data.statusMsg" /></a-tag>
+          <a-tag :color="statusColor[data.status]"> {{ statusMap[data.status] || $t('common.unknown') }} <a-icon type="info-circle" v-if="data.statusMsg" /></a-tag>
         </a-tooltip>
       </a-descriptions-item>
-      <a-descriptions-item label="发布方式">{{ releaseMethodMap[data.releaseMethod] }} </a-descriptions-item>
-      <a-descriptions-item label="定时构建"> {{ data.autoBuildCron }} </a-descriptions-item>
-      <a-descriptions-item label="别名码"> {{ data.aliasCode }} </a-descriptions-item>
-      <a-descriptions-item label="构建目录">
-        <a-tag>{{ data.sourceDirExist ? "存在" : "不存在" }}</a-tag>
+      <a-descriptions-item :label="$t('build.common.releaseMethod')">{{ releaseMethodMap[data.releaseMethod] }} </a-descriptions-item>
+      <a-descriptions-item :label="$t('build.common.autoBuildCron')"> {{ data.autoBuildCron }} </a-descriptions-item>
+      <a-descriptions-item :label="$t('build.common.aliasCode')"> {{ data.aliasCode }} </a-descriptions-item>
+      <a-descriptions-item :label="$t('build.common.buildDir')">
+        <a-tag>{{ data.sourceDirExist ? $t('common.exists') : $t('common.notExists') }}</a-tag>
       </a-descriptions-item>
-      <a-descriptions-item label="创建时间"> {{ parseTime(data.createTimeMillis) }} </a-descriptions-item>
-      <a-descriptions-item label="最后修改时间"> {{ parseTime(data.modifyTimeMillis) }}</a-descriptions-item>
-      <a-descriptions-item label="最后修改人">{{ data.modifyUser }}</a-descriptions-item>
-      <a-descriptions-item label="产物" :span="3"> {{ data.resultDirFile }} </a-descriptions-item>
-      <a-descriptions-item label="源仓库" :span="3" v-if="tempRepository">{{ `${tempRepository ? tempRepository.name + "[" + tempRepository.gitUrl + "]" : ""}` }}</a-descriptions-item>
-      <a-descriptions-item label="仓库lastcommit" :span="3">{{ data.repositoryLastCommitId }}</a-descriptions-item>
+      <a-descriptions-item :label="$t('common.createTime')"> {{ parseTime(data.createTimeMillis) }} </a-descriptions-item>
+      <a-descriptions-item :label="$t('common.lastModifiedTime')"> {{ parseTime(data.modifyTimeMillis) }}</a-descriptions-item>
+      <a-descriptions-item :label="$t('common.lastModifiedBy')">{{ data.modifyUser }}</a-descriptions-item>
+      <a-descriptions-item :label="$t('common.product')" :span="3"> {{ data.resultDirFile }} </a-descriptions-item>
+      <a-descriptions-item :label="$t('common.sourceRepository')" :span="3" v-if="tempRepository">{{ `${tempRepository ? tempRepository.name + "[" + tempRepository.gitUrl + "]" : ""}` }}</a-descriptions-item>
+      <a-descriptions-item :label="$t('common.repository') + 'last commit'" :span="3">{{ data.repositoryLastCommitId }}</a-descriptions-item>
     </a-descriptions>
 
     <a-row type="flex" justify="center">
-      <a-divider v-if="listQuery.total > 0" dashed>构建历史</a-divider>
+      <a-divider v-if="listQuery.total > 0" dashed>{{ $t('build.common.buildHistory') }}</a-divider>
       <a-timeline mode="alternate" style="width: 100%">
         <a-timeline-item v-for="item in this.historyList" :key="item.id" :color="statusColor[item.status]">
           <template slot="dot"> #{{ item.buildNumberId }}</template>
           <a-space direction="vertical" :size="1">
-            <div v-if="item.buildRemark">构建备注：{{ item.buildRemark }}</div>
+            <div v-if="item.buildRemark">{{ $t('build.common.buildRemark') }}{{ $t('common.colon') }}{{ item.buildRemark }}</div>
             <div>
-              <a-tooltip :title="item.statusMsg || statusMap[item.status] || '未知'">
-                状态：<a-tag :color="statusColor[item.status]">{{ statusMap[item.status] || "未知" }}</a-tag>
+              <a-tooltip :title="item.statusMsg || statusMap[item.status] || $t('common.unknown')">
+                {{ $t('common.status') }}{{ $t('common.colon') }}<a-tag :color="statusColor[item.status]">{{ statusMap[item.status] || $t('common.unknown') }}</a-tag>
               </a-tooltip>
             </div>
-            <div>时间：{{ parseTime(item.startTime) }} ~ {{ parseTime(item.endTime) }}</div>
-            <div>触发类型：{{ triggerBuildTypeMap[item.triggerBuildType] || "未知" }}</div>
-            <div>占用空间：{{ renderSize(item.resultFileSize) }}(产物)/{{ renderSize(item.buildLogFileSize) }}(日志)</div>
+            <div>{{ $t('common.time') }}{{ $t('common.colon') }}{{ parseTime(item.startTime) }} ~ {{ parseTime(item.endTime) }}</div>
+            <div>{{ $t('build.common.triggerType') }}{{ $t('common.colon') }}{{ triggerBuildTypeMap[item.triggerBuildType] || $t('common.unknown') }}</div>
+            <div>{{ $t('build.common.space') }}{{ $t('common.colon') }}{{ renderSize(item.resultFileSize) }}({{ $t('common.product') }})/{{ renderSize(item.buildLogFileSize) }}({{ $t('common.log') }})</div>
 
-            <div>构建耗时：{{ formatDuration((item.endTime || 0) - (item.startTime || 0), "", 2) }}</div>
+            <div>{{ $t('build.common.elapsedTime') }}{{ $t('common.colon') }}{{ formatDuration((item.endTime || 0) - (item.startTime || 0), "", 2) }}</div>
             <div>
-              发布方式：
-              <a-tag> {{ releaseMethodMap[item.releaseMethod] || "未知" }}</a-tag>
+              {{ $t('build.common.releaseMethod') }}{{ $t('common.colon') }}
+              <a-tag> {{ releaseMethodMap[item.releaseMethod] || $t('common.unknown') }}</a-tag>
             </div>
             <div>
-              操作：
+              {{ $t('common.operation') }}{{ $t('common.colon') }}
               <a-space>
-                <a-tooltip title="下载构建日志,如果按钮不可用表示日志文件不存在,一般是构建历史相关文件被删除">
-                  <a-button size="small" icon="download" type="primary" :disabled="!item.hasLog" @click="handleDownload(item)">日志</a-button>
+                <a-tooltip :title="$t('build.details.downloadNoLogTooltip')">
+                  <a-button size="small" icon="download" type="primary" :disabled="!item.hasLog" @click="handleDownload(item)">{{ $t('common.log') }}</a-button>
                 </a-tooltip>
 
-                <a-tooltip title="下载构建产物,如果按钮不可用表示产物文件不存在,一般是构建没有产生对应的文件或者构建历史相关文件被删除">
-                  <a-button size="small" icon="download" type="primary" :disabled="!item.hasFile" @click="handleFile(item)"> 产物 </a-button>
+                <a-tooltip :title="$t('build.details.downloadNoFileTooltip')">
+                  <a-button size="small" icon="download" type="primary" :disabled="!item.hasFile" @click="handleFile(item)">{{ $t('common.product') }}</a-button>
                 </a-tooltip>
               </a-space>
             </div>

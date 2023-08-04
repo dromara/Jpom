@@ -1,5 +1,6 @@
 import axios from "./config";
 import { loadRouterBase } from "./config";
+import i18n from "@/locales";
 
 /**
  * 备份列表
@@ -102,10 +103,10 @@ export function uploadBackupFile(formData) {
 }
 
 export const backupTypeArray = [
-  { key: 0, value: "全量备份", disabled: false },
-  { key: 1, value: "部分备份", disabled: false },
-  { key: 2, value: "导入备份", disabled: true },
-  { key: 3, value: "自动备份", disabled: true },
+  { key: 0, value: i18n.t('api.backup.full'), disabled: false },
+  { key: 1, value: i18n.t('api.backup.partial'), disabled: false },
+  { key: 2, value: i18n.t('api.backup.import'), disabled: true },
+  { key: 3, value: i18n.t('api.backup.auto'), disabled: true },
 ];
 
 export const arrayToMap = (arra) => {
@@ -119,7 +120,7 @@ export const arrayToMap = (arra) => {
 export const backupTypeMap = arrayToMap(backupTypeArray);
 
 export const backupStatusMap = {
-  0: "处理中",
-  1: "处理成功",
-  2: "处理失败",
+  0: i18n.t('api.backup.processing'),
+  1: i18n.t('api.backup.processSucceed'),
+  2: i18n.t('api.backup.processFailed'),
 };
