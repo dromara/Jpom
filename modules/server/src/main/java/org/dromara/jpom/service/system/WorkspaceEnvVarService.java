@@ -107,7 +107,16 @@ public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVar
         return workspaceEnvVarModel.getValue();
     }
 
-    public List<WorkspaceEnvVarModel> allList(HttpServletRequest request) {
-        return super.listByWorkspace(request);
+    @Override
+    public List<WorkspaceEnvVarModel> listByWorkspace(HttpServletRequest request) {
+        String workspaceIds = BaseWorkspaceService.getWorkspaceId(request);
+        List<String> split = StrUtil.splitTrim(workspaceIds, StrUtil.COMMA);
+        for (String workspaceId : split) {
+            checkUserWorkspace(workspaceId);
+        }
+        Entity entity = Entity.create();
+        entity.set("workspaceId", split);
+        List<Entity> entities = super.queryList(entity);
+        return super.entityToBeanList(entities);
     }
 }

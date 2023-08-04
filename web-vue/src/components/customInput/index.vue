@@ -1,6 +1,6 @@
 <template>
   <div>
-    <template v-if="inputData.indexOf(refTag) == -1">
+    <template v-if="inputData.indexOf(refTag) == -1 && type == 'password'">
       <a-input-password :placeholder="placeholder" v-model="inputData" @change="inputChange">
         <a-tooltip slot="addonBefore">
           <template #title>
@@ -58,6 +58,10 @@ export default {
     placeholder: {
       type: String,
       default: "请输入...",
+    },
+    type: {
+      type: String,
+      default: "password",
     },
   },
   watch: {
