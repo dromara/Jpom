@@ -104,14 +104,14 @@ export default {
       action: "login",
       randCode: "",
       dynamicBg: localStorage.getItem("dynamicBg") === "true",
-      loginTitle: "登录JPOM",
+      loginTitle: this.$t('account.login.title'),
       rules: {
-        loginName: [{ required: true, message: "请输入用户名" }],
-        userPwd: [{ required: true, message: "请输入密码" }],
-        code: [{ required: true, message: "请输入验证码" }],
+        loginName: [{ required: true, message: this.$t('account.login.name')}],
+        userPwd: [{ required: true, message: this.$t('account.login.pwd')}],
+        code: [{ required: true, message: this.$t('account.login.code')}],
         mfaCode: [
-          { required: true, message: "请输入两步验证码" },
-          { pattern: /^\d{6}$/, message: "验证码 6 为纯数字" },
+          { required: true, message: this.$t('account.login.mfaCodeEmpty') },
+          { pattern: /^\d{6}$/, message: this.$t('account.login.mfaCodeError') },
         ],
       },
       disabledCaptcha: false,
@@ -174,7 +174,7 @@ export default {
           const demo = res.data.demo;
           const h = this.$createElement;
           this.$notification.info({
-            message: "温馨提示",
+            message: this.$t('common.kindReminder'),
             description: h("div", null, [h("p", { domProps: { innerHTML: demo.msg } }, null)]),
           });
           this.loginForm.loginName = demo.user;
@@ -218,7 +218,7 @@ export default {
     toOauth2Url(provide) {
       oauth2Url({ provide: provide }).then((res) => {
         if (res.code === 200 && res.data) {
-          this.$message.loading({ content: "跳转到第三方系统中", key: "oauth2", duration: 0 });
+          this.$message.loading({ content: this.$t('common.goToThirdParty'), key: "oauth2", duration: 0 });
           location.href = res.data.toUrl;
         }
       });

@@ -9,4 +9,7 @@ export default {
   endGuide: "结束引导",
 
   login: "登录",
+
+  kindReminder: "温馨提示",
+  goToThirdParty: "跳转到第三方系统中"
 };

@@ -39,11 +39,11 @@
 
       <a-row type="flex" justify="center">
         <a-col :span="16" v-if="setpCurrent === 0">
-          <a-card-meta title="初始化系统账户" style="textalign: center" description="您需要创建一个账户用以后续登录管理系统,请牢记超级管理员账号密码" />
+          <a-card-meta :title="$t('account.install.init')" style="textalign: center" :description="$t('account.install.initDesc')" />
           <br />
           <a-form :form="loginForm" :label-col="{ span: 0 }" @submit="handleLogin" class="init-form">
             <a-form-item :wrapper-col="{ span: 24 }" class="init-user-name">
-              <a-input v-decorator="['userName', { rules: [{ required: true, message: '请输入账户名' }] }]" placeholder="账户名称" />
+              <a-input v-decorator="['userName', { rules: [{ required: true, message: $t('account.install.name') }] }]" :placeholder="$t('account.install.namePlaceholder')" />
             </a-form-item>
             <a-form-item :wrapper-col="{ span: 24 }" class="init-user-password">
               <a-input-password
@@ -51,12 +51,12 @@
                   'userPwd',
                   {
                     rules: [
-                      { required: true, message: '请输入密码' },
-                      { pattern: /^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,18}$/, message: '密码必须包含数字，字母，字符，且大于6位' },
+                      { required: true, message: $t('account.install.pwd') },
+                      { pattern: /^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,18}$/, message: $t('account.install.pwdMessage') },
                     ],
                   },
                 ]"
-                placeholder="密码（6-18位数字、字母、符号组合）"
+                :placeholder="$t('account.install.pwdPlaceholder')"
               />
             </a-form-item>
             <a-form-item>
