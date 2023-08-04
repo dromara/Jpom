@@ -1,169 +1,81 @@
 <template>
-  <div @mousedown="setSelectOpen(true)">
-    <Select
-      :getPopupContainer="
-        this.popupContainerParent
-          ? (triggerNode) => {
-              return triggerNode.parentNode || document.body;
-            }
-          : null
-      "
-      v-model="selected"
-      :style="selStyle"
-      :open="selectOpen"
-      :disabled="this.disabled"
-      @blur="setSelectOpen(false)"
-      showSearch
-      @focus="setSelectOpen(true)"
-      @change="selectChange"
-      :placeholder="selectPlaceholder"
-    >
-      <a-icon slot="suffixIcon" v-if="suffixIcon" :type="suffixIcon" @click="refreshSelect" />
-      <template v-if="$slots.suffixIcon && !suffixIcon" slot="suffixIcon">
-        <slot name="suffixIcon"></slot>
-      </template>
-      <div slot="dropdownRender" slot-scope="menu">
-        <div style="padding: 8px 8px; cursor: pointer; display: flex" @mousedown="(e) => e.preventDefault()">
-          <a-input-search
-            enter-button="确定"
-            v-model="selectInput"
-            :maxLength="maxLength"
-            @search="onSearch"
-            @blur="visibleInput(false)"
-            @focus="visibleInput(true)"
-            @click="(e) => e.target.focus()"
-            :placeholder="inputPlaceholder"
-            size="small"
-          >
-            <a-tooltip slot="suffix" v-if="$slots.inputTips">
-              <template slot="title">
-                <slot name="inputTips"></slot>
-              </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </a-input-search>
-        </div>
-        <a-divider style="margin: 4px 0" />
-        <v-nodes :vnodes="menu" />
-      </div>
-      <a-select-option v-if="selectPlaceholder" value="">{{ selectPlaceholder }}</a-select-option>
-      <a-select-option v-for="item in optionList" :key="item.id" :value="item.name">{{ item.name }} </a-select-option>
-    </Select>
+  <div>
+    <template v-if="inputData.indexOf(refTag) == -1">
+      <a-input-password :placeholder="placeholder" v-model="inputData" @change="inputChange">
+        <a-tooltip slot="addonBefore">
+          <template #title>
+            引用工作空间环境变量可以方便后面多处使用相同的密码统一修改
+
+            <ul v-if="!envList.length">
+              当前没有可以引用的环境变量
+            </ul>
+          </template>
+          <a-select placeholder="引用环境变量" style="width: 120px" @change="selectChange">
+            <a-select-option value="">不引用环境变量</a-select-option>
+            <a-select-option v-for="item in envList" :key="item.id" :value="item.name">{{ item.name }} </a-select-option>
+          </a-select>
+        </a-tooltip>
+      </a-input-password>
+    </template>
+    <template v-else>
+      <a-input :placeholder="placeholder" v-model="inputData" @change="inputChange">
+        <a-tooltip slot="addonBefore">
+          <template #title>
+            引用工作空间环境变量可以方便后面多处使用相同的密码统一修改
+            <ul v-if="!envList.length">
+              当前没有可以引用的环境变量
+            </ul>
+          </template>
+          <a-select placeholder="引用环境变量" style="width: 120px" @change="selectChange">
+            <a-select-option value="">引用环境变量</a-select-option>
+            <a-select-option v-for="item in envList" :key="item.id" :value="item.name">{{ item.name }} </a-select-option>
+          </a-select>
+        </a-tooltip>
+      </a-input>
+    </template>
   </div>
 </template>
 
 <script>
-import { Select } from "ant-design-vue";
-
 export default {
-  components: {
-    Select,
-    VNodes: {
-      functional: true,
-      render: (h, ctx) => ctx.props.vnodes,
-    },
-  },
+  components: {},
 
   data() {
     return {
-      selectInput: "",
-      selectOpen: false,
-      selectFocus: false,
-      inputFocus: false,
-      optionList: [],
-      selected: "",
+      inputData: "",
+      refTag: "$ref.wEnv.",
     };
   },
   props: {
-    // 继承原组件所有props
-    ...Select.props,
-    data: {
+    input: {
+      type: String,
+      default: "",
+    },
+    envList: {
       type: Array,
       default: () => [],
     },
-    inputPlaceholder: {
+    placeholder: {
       type: String,
       default: "请输入...",
     },
-    selectPlaceholder: {
-      type: String,
-      default: "请选择",
-    },
-    selStyle: { type: String, default: "" },
-    suffixIcon: {
-      type: String,
-      default: "reload",
-    },
-    maxLength: {
-      type: Number,
-      default: 200,
-    },
-    popupContainerParent: {
-      type: Boolean,
-      default: true,
-    },
   },
   watch: {
-    value: {
+    input: {
       handler(v) {
-        this.selected = v;
+        this.inputData = v;
       },
       immediate: true,
-    },
-    data: {
-      handler(v) {
-        this.optionList = v;
-      },
-      deep: true,
-      immediate: true,
-      input: false
     },
   },
 
   methods: {
-    refreshSelect() {
-      this.$emit("onRefreshSelect");
-    },
     selectChange(v) {
-      if (!this.inputFocus) {
-        this.$emit("input", '$ref.wEnv.' + v);
-        this.selectOpen = false;
-        this.$emit("change", '$ref.wEnv.' + v);
-      } else {
-        this.$emit("input", v);
-        this.selectOpen = false;
-        this.$emit("change", v);
-      }
+      const newV = v ? this.refTag + v : "";
+      this.$emit("change", newV);
     },
-    onSearch(v) {
-      if (!v) {
-        return;
-      }
-      let index = this.optionList.indexOf(v);
-      if (index === -1) {
-        // this.optionList = [...this.optionList, v];
-      }
-      this.selectInput = "";
-      this.selected = v;
-      //
-      this.selectChange(v);
-      this.$emit("addOption", this.optionList);
-    },
-    setSelectOpen(v) {
-      this.selectFocus = v;
-      if (this.inputFocus || this.selectFocus) {
-        this.selectOpen = true;
-        return;
-      }
-      this.selectOpen = false;
-    },
-    visibleInput(v) {
-      this.inputFocus = v;
-      if (this.inputFocus || this.selectFocus) {
-        this.selectOpen = true;
-        return;
-      }
-      this.selectOpen = false;
+    inputChange() {
+      this.$emit("change", this.inputData);
     },
   },
 };

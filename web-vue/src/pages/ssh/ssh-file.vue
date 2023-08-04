@@ -80,7 +80,7 @@
               <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">编辑</a-button>
             </a-tooltip>
             <a-tooltip title="修改文件权限">
-              <a-button size="small" type="primary" @click="handleFilePermission(record)">修改文件权限</a-button>
+              <a-button size="small" type="primary" @click="handleFilePermission(record)">权限</a-button>
             </a-tooltip>
             <a-button size="small" type="primary" :disabled="record.dir" @click="handleDownload(record)">下载</a-button>
             <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
@@ -142,13 +142,13 @@
             <span>读</span>
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.owner.read" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.owner.read" @change="renderFilePermissionsTips" />
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.group.read" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.group.read" @change="renderFilePermissionsTips" />
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.others.read" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.others.read" @change="renderFilePermissionsTips" />
           </a-col>
         </a-row>
         <a-row>
@@ -156,13 +156,13 @@
             <span>写</span>
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.owner.write" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.owner.write" @change="renderFilePermissionsTips" />
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.group.write" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.group.write" @change="renderFilePermissionsTips" />
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.others.write" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.others.write" @change="renderFilePermissionsTips" />
           </a-col>
         </a-row>
         <a-row>
@@ -170,27 +170,40 @@
             <span>执行</span>
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.owner.execute" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.owner.execute" @change="renderFilePermissionsTips" />
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.group.execute" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.group.execute" @change="renderFilePermissionsTips" />
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.others.execute" @change="renderFilePermissionsTips"/>
+            <a-checkbox v-model="permissions.others.execute" @change="renderFilePermissionsTips" />
           </a-col>
         </a-row>
-        <a-row type="flex" style="margin-top: 20px;">
+        <a-row type="flex" style="margin-top: 20px">
           <a-button type="primary" @click="updateFilePermissions">确认修改</a-button>
         </a-row>
         <a-row>
-          <a-alert style="margin-top: 20px;" :message="permissionTips" type="success" />
+          <a-alert style="margin-top: 20px" :message="permissionTips" type="success" />
         </a-row>
       </a-modal>
     </a-layout-content>
   </a-layout>
 </template>
 <script>
-import { deleteFile, downloadFile, getFileList, getRootFileList, newFileFolder, readFile, renameFileFolder, updateFileData, uploadFile, parsePermissions, calcFilePermissionValue, changeFilePermission } from "@/api/ssh-file";
+import {
+  deleteFile,
+  downloadFile,
+  getFileList,
+  getRootFileList,
+  newFileFolder,
+  readFile,
+  renameFileFolder,
+  updateFileData,
+  uploadFile,
+  parsePermissions,
+  calcFilePermissionValue,
+  changeFilePermission,
+} from "@/api/ssh-file";
 
 import codeEditor from "@/components/codeEditor";
 import { ZIP_ACCEPT, renderSize } from "@/utils/const";
@@ -240,11 +253,11 @@ export default {
       addFileFolderVisible: false,
       editFilePermissionVisible: false,
       permissions: {
-        owner: { read: false, write: false, execute: false, },
-        group: { read: false, write: false, execute: false, },
-        others: { read: false, write: false, execute: false, },
+        owner: { read: false, write: false, execute: false },
+        group: { read: false, write: false, execute: false },
+        others: { read: false, write: false, execute: false },
       },
-      permissionTips: '',
+      permissionTips: "",
     };
   },
   mounted() {
@@ -530,13 +543,13 @@ export default {
       this.temp = Object.assign({}, record);
       this.permissions = parsePermissions(this.temp.permissions);
       const permissionsValue = calcFilePermissionValue(this.permissions);
-      this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`
+      this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`;
       this.editFilePermissionVisible = true;
     },
     // 更新文件权限提示
     renderFilePermissionsTips() {
       const permissionsValue = calcFilePermissionValue(this.permissions);
-      this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`
+      this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`;
     },
     // 确认修改文件权限
     updateFilePermissions() {
@@ -546,7 +559,7 @@ export default {
         allowPathParent: this.temp.allowPathParent,
         nextPath: this.temp.nextPath,
         fileName: this.temp.name,
-        permissionValue: calcFilePermissionValue(this.permissions)
+        permissionValue: calcFilePermissionValue(this.permissions),
       };
       changeFilePermission(this.baseUrl, params).then((res) => {
         if (res.code === 200) {
