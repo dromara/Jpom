@@ -9,7 +9,7 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】升级 h2、SpringBoot 版本
-2. 【server】使用系统git时，初次clone无法克隆tag问题优化
+2. 【server】使用系统git时，无法克隆tag问题优化
 
 ------
 
