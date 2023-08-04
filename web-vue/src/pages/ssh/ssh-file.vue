@@ -79,7 +79,9 @@
             <a-tooltip title="需要到 ssh 信息中配置允许编辑的文件后缀">
               <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">编辑</a-button>
             </a-tooltip>
-
+            <a-tooltip title="修改文件权限">
+              <a-button size="small" type="primary" @click="handleFilePermission(record)">权限</a-button>
+            </a-tooltip>
             <a-button size="small" type="primary" :disabled="record.dir" @click="handleDownload(record)">下载</a-button>
             <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
           </a-space>
@@ -126,11 +128,82 @@
           </a-row>
         </a-space>
       </a-modal>
+
+      <!-- 修改文件权限 -->
+      <a-modal destroyOnClose v-model="editFilePermissionVisible" width="400px" :title="`修改文件权限`" :footer="null" :maskClosable="true">
+        <a-row>
+          <a-col :span="6"><span class="title">权限</span></a-col>
+          <a-col :span="6"><span class="title">所属用户</span></a-col>
+          <a-col :span="6"><span class="title">用户组</span></a-col>
+          <a-col :span="6"><span class="title">其他</span></a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="6">
+            <span>读</span>
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.owner.read" />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.group.read" />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.others.read" />
+          </a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="6">
+            <span>写</span>
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.owner.write" />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.group.write" />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.others.write" />
+          </a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="6">
+            <span>执行</span>
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.owner.execute" />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.group.execute" />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.others.execute" />
+          </a-col>
+        </a-row>
+        <a-row type="flex" style="margin-top: 20px">
+          <a-button type="primary" @click="updateFilePermissions">确认修改</a-button>
+        </a-row>
+        <!-- <a-row>
+          <a-alert style="margin-top: 20px" :message="permissionTips" type="success" />
+        </a-row> -->
+      </a-modal>
     </a-layout-content>
   </a-layout>
 </template>
 <script>
-import { deleteFile, downloadFile, getFileList, getRootFileList, newFileFolder, readFile, renameFileFolder, updateFileData, uploadFile } from "@/api/ssh-file";
+import {
+  deleteFile,
+  downloadFile,
+  getFileList,
+  getRootFileList,
+  newFileFolder,
+  readFile,
+  renameFileFolder,
+  updateFileData,
+  uploadFile,
+  parsePermissions,
+  calcFilePermissionValue,
+  changeFilePermission,
+} from "@/api/ssh-file";
 
 import codeEditor from "@/components/codeEditor";
 import { ZIP_ACCEPT, renderSize } from "@/utils/const";
@@ -169,15 +242,22 @@ export default {
         key: "key",
       },
       columns: [
-        { title: "文件名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "文件名称", dataIndex: "name", width: 100, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "文件类型", dataIndex: "dir", width: 100, ellipsis: true, scopedSlots: { customRender: "dir" } },
         { title: "文件大小", dataIndex: "size", width: 120, ellipsis: true, scopedSlots: { customRender: "size" } },
         { title: "权限", dataIndex: "permissions", width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "修改时间", dataIndex: "modifyTime", width: "170px", ellipsis: true },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "180px" },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "260px" },
       ],
       editFileVisible: false,
       addFileFolderVisible: false,
+      editFilePermissionVisible: false,
+      permissions: {
+        owner: { read: false, write: false, execute: false },
+        group: { read: false, write: false, execute: false },
+        others: { read: false, write: false, execute: false },
+      },
+      // permissionTips: "",
     };
   },
   mounted() {
@@ -458,6 +538,40 @@ export default {
         }
       });
     },
+    // 修改文件权限
+    handleFilePermission(record) {
+      this.temp = Object.assign({}, record);
+      this.permissions = parsePermissions(this.temp.permissions);
+      //const permissionsValue = calcFilePermissionValue(this.permissions);
+      //this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`;
+      this.editFilePermissionVisible = true;
+    },
+    // 更新文件权限提示
+    renderFilePermissionsTips() {
+      //const permissionsValue = calcFilePermissionValue(this.permissions);
+      //this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`;
+    },
+    // 确认修改文件权限
+    updateFilePermissions() {
+      // 请求参数
+      const params = {
+        id: this.reqDataId,
+        allowPathParent: this.temp.allowPathParent,
+        nextPath: this.temp.nextPath,
+        fileName: this.temp.name,
+        permissionValue: calcFilePermissionValue(this.permissions),
+      };
+      changeFilePermission(this.baseUrl, params).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.editFilePermissionVisible = false;
+          this.loadFileList();
+        }
+      });
+    },
+
     // 下载
     handleDownload(record) {
       // 请求参数
@@ -581,5 +695,10 @@ export default {
   margin: 10px 10px 0;
   padding: 10px;
   background-color: #fff;
+}
+
+.title {
+  font-weight: 600;
+  font-size: larger;
 }
 </style>

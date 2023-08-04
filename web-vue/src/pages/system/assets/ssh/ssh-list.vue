@@ -187,8 +187,17 @@
                   <a-icon type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
-              <!--              <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" />-->
-              <custom-input v-model="temp.password" :data="envVarList" suffixIcon="" inputPlaceholder="输入密码" :selectPlaceholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`">
+              <!-- <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" /> -->
+              <custom-input
+                :input="temp.password"
+                :envList="envVarList"
+                @change="
+                  (v) => {
+                    temp = { ...temp, password: v };
+                  }
+                "
+                :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`"
+              >
               </custom-input>
             </a-form-model-item>
             <a-form-model-item v-if="temp.connectType === 'PUBKEY'" prop="privateKey">
@@ -408,7 +417,7 @@ export default {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       editSshVisible: false,
       temp: {},
-      tempPwd: "",
+      // tempPwd: '',
       options: [
         { label: "密码", value: "PASS" },
         { label: "证书", value: "PUBKEY" },
@@ -506,7 +515,9 @@ export default {
     formatPercent,
     formatPercent2Number,
     getWorkEnvList() {
-      getWorkspaceEnvAll().then((res) => {
+      getWorkspaceEnvAll({
+        workspaceId: "GLOBAL",
+      }).then((res) => {
         if (res.code === 200) {
           this.envVarList = res.data;
         }

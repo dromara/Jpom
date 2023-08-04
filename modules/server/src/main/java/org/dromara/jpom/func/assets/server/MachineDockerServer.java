@@ -29,12 +29,10 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
-import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import com.jcraft.jsch.Session;
@@ -52,16 +50,12 @@ import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.service.docker.DockerSwarmInfoService;
 import org.dromara.jpom.service.h2db.BaseDbService;
-import org.dromara.jpom.util.WorkspaceThreadLocal;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
@@ -184,10 +178,6 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
         try {
             DockerInfoModel model = new DockerInfoModel();
             model.setMachineDockerId(dockerInfoModel.getId());
-            model = dockerInfoService.queryByBean(model);
-            if (model != null) {
-                WorkspaceThreadLocal.setWorkspaceId(model.getWorkspaceId());
-            }
             IPlugin pluginCheck = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
             Map<String, Object> parameter = this.toParameter(dockerInfoModel);
             //
@@ -418,15 +408,6 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
         parameter.put("registryEmail", machineDockerModel.getRegistryEmail());
         parameter.put("registryUrl", machineDockerModel.getRegistryUrl());
         parameter.put("timeout", machineDockerModel.getHeartbeatTimeout());
-        try {
-            RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
-            if (requestAttributes != null) {
-                String workspaceId = ServletUtil.getHeader((HttpServletRequest) requestAttributes, Const.WORKSPACE_ID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
-                WorkspaceThreadLocal.setWorkspaceId(workspaceId);
-            }
-        } catch (Exception e) {
-            log.error("", e.toString());
-        }
         if (machineDockerModel.getTlsVerify()) {
             File filePath = certificateInfoService.getFilePath(machineDockerModel.getCertInfo());
             Assert.notNull(filePath, "docker 证书文件丢失");
