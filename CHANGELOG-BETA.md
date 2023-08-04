@@ -4,12 +4,12 @@
 
 ### 🐣 新增功能
 
-1. 【server】新增 SSH 文件管理修改文件权限功能
+1. 【server】新增 SSH 文件管理修改文件权限功能（感谢 [@MichelleChung](https://gitee.com/michelle1028) [Gitee issues I6VDXS](https://gitee.com/dromara/Jpom/issues/I6VDXS) ）
 
 ### 🐞 解决BUG、优化功能
 
 1. 【server】升级 h2、SpringBoot 版本
-2. 【server】使用系统git时，无法克隆tag问题优化
+2. 【server】使用系统git时，无法克隆tag问题优化 （感谢@唐明）
 3. 【server】优化 SSH 和 代码仓库的密码从工作空间变量中读取
 
 ------
