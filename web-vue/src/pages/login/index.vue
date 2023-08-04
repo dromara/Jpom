@@ -51,7 +51,7 @@
             </a-row>
           </a-form-model-item>
           <a-form-model-item :wrapper-col="{ span: 24 }">
-            <a-button type="primary" html-type="submit" class="btn-login"> 登录 </a-button>
+            <a-button type="primary" html-type="submit" class="btn-login"> {{ $t('common.login') }} </a-button>
           </a-form-model-item>
           <template v-if="this.enabledOauth2Provides.length">
             <a-divider>{{ $t('account.login.thirdParty') }}</a-divider>

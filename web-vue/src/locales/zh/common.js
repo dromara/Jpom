@@ -7,4 +7,6 @@ export default {
   lastStep: "上一步",
   nextStep: "下一步",
   endGuide: "结束引导",
+
+  login: "登录",
 };
