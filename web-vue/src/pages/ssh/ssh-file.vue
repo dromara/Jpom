@@ -142,13 +142,13 @@
             <span>读</span>
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.owner.read" @change="renderFilePermissionsTips" />
+            <a-checkbox v-model="permissions.owner.read" />
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.group.read" @change="renderFilePermissionsTips" />
+            <a-checkbox v-model="permissions.group.read" />
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.others.read" @change="renderFilePermissionsTips" />
+            <a-checkbox v-model="permissions.others.read" />
           </a-col>
         </a-row>
         <a-row>
@@ -156,13 +156,13 @@
             <span>写</span>
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.owner.write" @change="renderFilePermissionsTips" />
+            <a-checkbox v-model="permissions.owner.write" />
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.group.write" @change="renderFilePermissionsTips" />
+            <a-checkbox v-model="permissions.group.write" />
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.others.write" @change="renderFilePermissionsTips" />
+            <a-checkbox v-model="permissions.others.write" />
           </a-col>
         </a-row>
         <a-row>
@@ -170,21 +170,21 @@
             <span>执行</span>
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.owner.execute" @change="renderFilePermissionsTips" />
+            <a-checkbox v-model="permissions.owner.execute" />
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.group.execute" @change="renderFilePermissionsTips" />
+            <a-checkbox v-model="permissions.group.execute" />
           </a-col>
           <a-col :span="6">
-            <a-checkbox v-model="permissions.others.execute" @change="renderFilePermissionsTips" />
+            <a-checkbox v-model="permissions.others.execute" />
           </a-col>
         </a-row>
         <a-row type="flex" style="margin-top: 20px">
           <a-button type="primary" @click="updateFilePermissions">确认修改</a-button>
         </a-row>
-        <a-row>
+        <!-- <a-row>
           <a-alert style="margin-top: 20px" :message="permissionTips" type="success" />
-        </a-row>
+        </a-row> -->
       </a-modal>
     </a-layout-content>
   </a-layout>
@@ -257,7 +257,7 @@ export default {
         group: { read: false, write: false, execute: false },
         others: { read: false, write: false, execute: false },
       },
-      permissionTips: "",
+      // permissionTips: "",
     };
   },
   mounted() {
@@ -542,14 +542,14 @@ export default {
     handleFilePermission(record) {
       this.temp = Object.assign({}, record);
       this.permissions = parsePermissions(this.temp.permissions);
-      const permissionsValue = calcFilePermissionValue(this.permissions);
-      this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`;
+      //const permissionsValue = calcFilePermissionValue(this.permissions);
+      //this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`;
       this.editFilePermissionVisible = true;
     },
     // 更新文件权限提示
     renderFilePermissionsTips() {
-      const permissionsValue = calcFilePermissionValue(this.permissions);
-      this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`;
+      //const permissionsValue = calcFilePermissionValue(this.permissions);
+      //this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`;
     },
     // 确认修改文件权限
     updateFilePermissions() {
