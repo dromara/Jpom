@@ -117,3 +117,88 @@ export function renameFileFolder(baseUrl, params) {
     data: params,
   });
 }
+
+/**
+ * 修改文件权限
+ * @param {*} baseUrl 
+ * @param {
+ *  String id,
+ *  String allowPathParent,
+ *  String nextPath,
+ *  String fileName,
+ *  String permissionValue
+ * } params 
+ * @returns 
+ */
+export function changeFilePermission(baseUrl, params) {
+  return axios({
+    url: baseUrl + "change_file_permission.json",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
+ * 权限字符串转权限对象
+ * @param {String} str "lrwxr-xr-x"
+ * @returns 
+ */
+export function parsePermissions(str) {
+  let permissions = {owner: {}, group: {}, others: {}};
+
+  let chars = str.split('');
+  permissions.owner.read = (chars[1] === "r");
+  permissions.owner.write = (chars[2] === "w");
+  permissions.owner.execute = (chars[3] === "x");
+
+  permissions.group.read = (chars[4] === "r");
+  permissions.group.write = (chars[5] === "w");
+  permissions.group.execute = (chars[6] === "x");
+
+  permissions.others.read = (chars[7] === "r");
+  permissions.others.write = (chars[8] === "w");
+  permissions.others.execute = (chars[9] === "x");
+
+  return permissions;
+}
+
+/**
+ * 文件权限字符串转权限值
+ * @param {
+ *  owner: { read: false, write: false, execute: false, },
+ *  group: { read: false, write: false, execute: false, },
+ *  others: { read: false, write: false, execute: false, },
+ * } permissions
+ * @returns 
+ */
+export function calcFilePermissionValue(permissions) {
+  let value = 0;
+  if (permissions.owner.read) {
+    value += 400;
+  }
+  if (permissions.owner.write) {
+    value += 200;
+  }
+  if (permissions.owner.execute) {
+    value += 100;
+  }
+  if (permissions.group.read) {
+    value += 40;
+  }
+  if (permissions.group.write) {
+    value += 20;
+  }
+  if (permissions.group.execute) {
+    value += 10;
+  }
+  if (permissions.others.read) {
+    value += 4;
+  }
+  if (permissions.others.write) {
+    value += 2;
+  }
+  if (permissions.others.execute) {
+    value += 1;
+  }
+  return value;
+}

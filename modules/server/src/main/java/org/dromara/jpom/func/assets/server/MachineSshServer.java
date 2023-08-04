@@ -359,7 +359,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
         String workspaceId = ServerConst.WORKSPACE_GLOBAL;
         if (sshModel instanceof MachineSshModel) {
             SshModel sshModel1 = sshService.getByMachineSshId(((MachineSshModel)sshModel).getId());
-            if (sshModel != null) {
+            if (sshModel1 != null) {
                 workspaceId = sshModel1.getWorkspaceId();
             }
         }
