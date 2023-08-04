@@ -609,6 +609,7 @@ public abstract class BaseSshFileController extends BaseServerController {
 
     /**
      * 修改文件权限
+     *
      * @param id
      * @param allowPathParent
      * @param nextPath
@@ -630,17 +631,16 @@ public abstract class BaseSshFileController extends BaseServerController {
         Session session = sshService.getSessionByModel(machineSshModel);
         Charset charset = machineSshModel.charset();
         int timeout = machineSshModel.timeout();
-
-        String command = String.format("cd %s && chmod %s %s", nextPath, permissionValue, fileName);
-
-        List<String> result = new ArrayList<>();
-        try {
-            JschUtils.execCallbackLine(session, charset, timeout, command, StrUtil.EMPTY, result::add);
-        } catch (IOException e) {
-            log.error("ssh修改文件权限异常...command: {}", command, e);
+        String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + fileName);
+        try (Sftp sftp = new Sftp(session, charset, timeout)) {
+            ChannelSftp client = sftp.getClient();
+            //
+            int permissions = Integer.parseInt(permissionValue, 8);
+            client.chmod(permissions, remotePath);
+        } catch (SftpException e) {
+            log.error("ssh修改文件权限异常...: {} {}", remotePath, permissionValue, e);
             return new JsonMessage<>(400, "操作失败 " + e.getMessage());
         }
-
-        return JsonMessage.success("操作成功 " + CollUtil.join(result, StrUtil.LF));
+        return JsonMessage.success("操作成功 ");
     }
 }
