@@ -101,6 +101,9 @@ public class BuildExecuteService {
      * @return 错误消息
      */
     public String checkStatus(BuildInfoModel buildInfoModel) {
+        if (buildInfoModel == null) {
+            return "不存在对应的构建信息";
+        }
         Integer status = buildInfoModel.getStatus();
         if (status == null) {
             return null;
