@@ -1,5 +1,6 @@
 import axios from "./config";
 import { loadRouterBase } from "./config";
+import i18n from "@/locales";
 
 /**
  * 构建列表
@@ -55,7 +56,7 @@ export function getBranchList(params) {
     timeout: 0,
     data: params,
     headers: {
-      loadingTip: "正在加载项目分支",
+      loadingTip: i18n.t("api.buildInfo.loadingBranchList"),
     },
   });
 }
@@ -274,16 +275,16 @@ export function sortItem(params) {
 }
 
 export const statusMap = {
-  1: "构建中",
-  2: "构建完成",
-  3: "构建失败",
-  4: "发布中",
-  5: "发布成功",
-  6: "发布失败",
-  7: "取消构建",
-  8: "构建中断",
-  9: "队列等待",
-  10: "异常关闭",
+  1: i18n.t("api.buildInfo.status.building"),
+  2: i18n.t("api.buildInfo.status.buildCompleted"),
+  3: i18n.t("api.buildInfo.status.buildFailed"),
+  4: i18n.t("api.buildInfo.status.publishing"),
+  5: i18n.t("api.buildInfo.status.publishSucceed"),
+  6: i18n.t("api.buildInfo.status.publishFailed"),
+  7: i18n.t("api.buildInfo.status.cancelBuild"),
+  8: i18n.t("api.buildInfo.status.buildInterrupted"),
+  9: i18n.t("api.buildInfo.status.queueWaiting"),
+  10: i18n.t("api.buildInfo.status.abnormalShutdown"),
 };
 export const statusColor = {
   1: "orange",
@@ -299,21 +300,21 @@ export const statusColor = {
 };
 
 export const releaseMethodMap = {
-  0: "不发布",
-  1: "节点分发",
-  2: "项目",
-  3: "SSH",
-  4: "本地命令",
-  5: "Docker镜像",
+  0: i18n.t("api.buildInfo.releaseMethod.noRelease"),
+  1: i18n.t("api.buildInfo.releaseMethod.nodeDistribution"),
+  2: i18n.t("api.buildInfo.releaseMethod.project"),
+  3: i18n.t("api.buildInfo.releaseMethod.ssh"),
+  4: i18n.t("api.buildInfo.releaseMethod.localCommand"),
+  5: i18n.t("api.buildInfo.releaseMethod.dockerImage"),
 };
 
 export const triggerBuildTypeMap = {
-  0: "手动",
-  1: "触发器",
-  2: "定时",
+  0: i18n.t("api.buildInfo.triggerBuildType.manual"),
+  1: i18n.t("api.buildInfo.triggerBuildType.trigger"),
+  2: i18n.t("api.buildInfo.triggerBuildType.cron"),
 };
 
 export const buildModeMap = {
-  0: "本地构建",
-  1: "容器构建",
+  0: i18n.t("api.buildInfo.buildMethod.local"),
+  1: i18n.t("api.buildInfo.buildMethod.container"),
 };

@@ -104,16 +104,7 @@ export default {
       action: "login",
       randCode: "",
       dynamicBg: localStorage.getItem("dynamicBg") === "true",
-      loginTitle: this.$t('account.login.title'),
-      rules: {
-        loginName: [{ required: true, message: this.$t('account.login.name')}],
-        userPwd: [{ required: true, message: this.$t('account.login.pwd')}],
-        code: [{ required: true, message: this.$t('account.login.code')}],
-        mfaCode: [
-          { required: true, message: this.$t('account.login.mfaCodeEmpty') },
-          { pattern: /^\d{6}$/, message: this.$t('account.login.mfaCodeError') },
-        ],
-      },
+      loginTitleOverride: null,
       disabledCaptcha: false,
       enabledOauth2Provides: [],
       maxkeyImg: require(`@/assets/images/maxkey.png`),
@@ -137,6 +128,20 @@ export default {
       }
       return {};
     },
+    rules: function () {
+      return {
+        loginName: [{ required: true, message: this.$t('account.login.name')}],
+        userPwd: [{ required: true, message: this.$t('account.login.pwd')}],
+        code: [{ required: true, message: this.$t('account.login.code')}],
+        mfaCode: [
+          { required: true, message: this.$t('account.login.mfaCodeEmpty') },
+          { pattern: /^\d{6}$/, message: this.$t('account.login.mfaCodeError') },
+        ],
+      };
+    },
+    loginTitle: function () {
+      return this.loginTitleOverride || this.$t('account.login.title');
+    },
   },
   methods: {
     // 检查是否需要初始化
@@ -153,7 +158,7 @@ export default {
           this.$router.push("/install");
         }
         if (res.data?.loginTitle) {
-          this.loginTitle = res.data.loginTitle;
+          this.loginTitleOverride = res.data.loginTitle;
         }
 
         this.checkOauth2();

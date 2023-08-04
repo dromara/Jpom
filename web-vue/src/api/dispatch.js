@@ -1,4 +1,5 @@
 import axios from "./config";
+import i18n from "@/locales";
 
 // 分发列表
 export function getDishPatchList(data, loading) {
@@ -257,31 +258,31 @@ export function saveDispatchProjectConfig(data) {
 }
 
 export const afterOptList = [
-  { title: "不做任何操作", value: 0 },
-  { title: "并发执行", value: 1 },
-  { title: "完整顺序执行(有执行失败将结束本次)", value: 2 },
-  { title: "顺序执行(有执行失败将继续)", value: 3 },
+  { title: i18n.t('api.dispatch.afterOptList.noOp'), value: 0 },
+  { title: i18n.t('api.dispatch.afterOptList.concurrentExecution'), value: 1 },
+  { title: i18n.t('api.dispatch.afterOptList.fullSequenceExecution'), value: 2 },
+  { title: i18n.t('api.dispatch.afterOptList.sequenceExecution'), value: 3 },
 ];
 
 export const afterOptListSimple = [
-  { title: "不做任何操作", value: 0 },
-  { title: "执行重启", value: 1 },
+  { title: i18n.t('api.dispatch.afterOptListSimple.noOp'), value: 0 },
+  { title: i18n.t('api.dispatch.afterOptListSimple.restart'), value: 1 },
 ];
 
 export const dispatchStatusMap = {
-  0: "未分发",
-  1: "分发中",
-  2: "分发成功",
-  3: "分发失败",
-  4: "系统取消分发",
-  5: "准备分发",
-  6: "手动取消分发",
+  0: i18n.t('api.dispatch.dispatchStatus.notDispatched'),
+  1: i18n.t('api.dispatch.dispatchStatus.dispatching'),
+  2: i18n.t('api.dispatch.dispatchStatus.dispatchSucceed'),
+  3: i18n.t('api.dispatch.dispatchStatus.dispatchFailed'),
+  4: i18n.t('api.dispatch.dispatchStatus.systemCancelDispatch'),
+  5: i18n.t('api.dispatch.dispatchStatus.readyDispatch'),
+  6: i18n.t('api.dispatch.dispatchStatus.manualCancelDispatch'),
 };
 
 export const statusMap = {
-  0: "未分发",
-  1: "分发中",
-  2: "分发结束",
-  3: "取消分发",
-  4: "分发失败",
+  0: i18n.t('api.dispatch.status.notDispatched'),
+  1: i18n.t('api.dispatch.status.dispatching'),
+  2: i18n.t('api.dispatch.status.dispatchFinished'),
+  3: i18n.t('api.dispatch.status.cancelDispatch'),
+  4: i18n.t('api.dispatch.status.dispatchFailed'),
 };

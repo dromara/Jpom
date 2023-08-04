@@ -6,7 +6,7 @@ export default {
   },
 
   login: {
-    title: "登录 Jpom",
+    title: "登录 JPOM",
     name: "请输入用户名",
     pwd: "请输入密码",
     code: "请输入验证码",
@@ -17,7 +17,6 @@ export default {
 
     thirdParty: "第三方登录",
     mfaCaptcha: "MFA 验证码",
-
   },
 
   install: {
