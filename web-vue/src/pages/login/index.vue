@@ -54,7 +54,7 @@
             <a-button type="primary" html-type="submit" class="btn-login"> 登录 </a-button>
           </a-form-model-item>
           <template v-if="this.enabledOauth2Provides.length">
-            <a-divider>第三方登录</a-divider>
+            <a-divider>{{ $t('account.login.thirdParty') }}</a-divider>
             <!-- <a-form-model-item :wrapper-col="{ span: 24 }"> </a-form-model-item> -->
             <a-form-model-item :wrapper-col="{ span: 24 }">
               <a-space :size="20">
@@ -75,7 +75,7 @@
       <template v-if="this.action === 'mfa'">
         <a-form-model ref="mfaDataForm" :label-col="{ span: 0 }" :model="mfaData" :rules="rules" @submit="handleMfa">
           <a-form-model-item :label="$t('account.common.captcha')" :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }" prop="mfaCode" help="需要验证 MFA">
-            <a-input v-model="mfaData.mfaCode" placeholder="mfa 验证码" />
+            <a-input v-model="mfaData.mfaCode" :placeholder="$t('account.login.mfaCaptcha')" />
           </a-form-model-item>
 
           <a-button type="primary" html-type="submit" class="btn-login"> {{ $t("common.confirm") }} </a-button>

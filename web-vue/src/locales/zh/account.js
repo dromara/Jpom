@@ -8,6 +8,9 @@ export default {
   login: {
     dynamicBgOn: "开启动态背景",
     dynamicBgOff: "关闭动态背景",
+
+    thirdParty: "第三方登录",
+    mfaCaptcha: "MFA 验证码",
   },
 
   install: {
