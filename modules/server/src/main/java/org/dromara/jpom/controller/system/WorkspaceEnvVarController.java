@@ -95,7 +95,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
     @PostMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<List<WorkspaceEnvVarModel>> allList(HttpServletRequest request) {
-        List<WorkspaceEnvVarModel> list = workspaceEnvVarService.allList(request);
+        List<WorkspaceEnvVarModel> list = workspaceEnvVarService.listByWorkspace(request);
         list.forEach(workspaceEnvVarModel -> {
             Integer privacy = workspaceEnvVarModel.getPrivacy();
             if (privacy != null && privacy == 1) {

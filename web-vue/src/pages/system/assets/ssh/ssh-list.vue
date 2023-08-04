@@ -515,7 +515,9 @@ export default {
     formatPercent,
     formatPercent2Number,
     getWorkEnvList() {
-      getWorkspaceEnvAll().then((res) => {
+      getWorkspaceEnvAll({
+        workspaceId: "GLOBAL",
+      }).then((res) => {
         if (res.code === 200) {
           this.envVarList = res.data;
         }
