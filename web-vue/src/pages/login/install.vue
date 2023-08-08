@@ -74,7 +74,7 @@
               <ul style="color: red">
                 <li> {{ $t("account.install.alert._1") }}</li>
                 <li>{{ $t("account.install.alert._2") }}</li>
-                <li>{{$t("account.install.alert._3")}}</li>
+                <li>{{ $t("account.install.alert._3") }}</li>
               </ul>
             </template>
           </a-alert>
@@ -101,12 +101,12 @@
                     v-clipboard:copy="mfaData.key"
                     v-clipboard:success="
                       () => {
-                        tempVue.prototype.$notification.success({ message: '复制成功' });
+                        tempVue.prototype.$notification.success({ message: $t('common.copySuccess') });
                       }
                     "
                     v-clipboard:error="
                       () => {
-                        tempVue.prototype.$notification.error({ message: '复制失败' });
+                        tempVue.prototype.$notification.error({ message: $t('common.copyError') });
                       }
                     "
                     readOnly
@@ -123,12 +123,12 @@
                       'twoCode',
                       {
                         rules: [
-                          { required: true, message: '请输入两步验证码' },
-                          { pattern: /^\d{6}$/, message: '验证码 6 为纯数字' },
+                          { required: true, message: $t('account.install.authentication.inputCaptcha') },
+                          { pattern: /^\d{6}$/, message: $t('account.install.authentication.informCaptcha') },
                         ],
                       },
                     ]"
-                    placeholder="两步验证码"
+                    :placeholder="$t('account.install.authentication.twoFactorCaptcha')"
                   />
                 </a-form-item>
 
@@ -136,8 +136,8 @@
                   <a-row type="flex" justify="center">
                     <a-col :span="10">
                       <a-space>
-                        <a-button type="primary" html-type="submit" class="btn"> 确认绑定</a-button>
-                        <a-button type="dashed" @click="ignoreBindMfa"> 忽略</a-button>
+                        <a-button type="primary" html-type="submit" class="btn"> {{ $t('common.confirmBind') }}</a-button>
+                        <a-button type="dashed" @click="ignoreBindMfa"> {{ $t('common.ignore') }}</a-button>
                       </a-space>
                     </a-col>
                   </a-row>
@@ -149,9 +149,9 @@
       </a-row>
     </a-card>
     <div v-else>
-      <a-result class="card-box" status="404" title="不能初始化" sub-title="当前系统已经初始化过啦,不能重复初始化">
+      <a-result class="card-box" status="404" :title="$t('account.install.cannotInit')" :sub-title="$t('account.install.subCannotInit')">
         <template #extra>
-          <a-button type="primary" @click="goHome"> 回到首页</a-button>
+          <a-button type="primary" @click="goHome"> {{ $t('common.goHome') }}</a-button>
         </template>
       </a-result>
     </div>
@@ -307,10 +307,10 @@ export default {
     // 忽略 mfa
     ignoreBindMfa() {
       this.$confirm({
-        title: "系统提示",
-        content: "确定要忽略绑定两步验证吗？强烈建议超级管理员开启两步验证来保证账号安全性",
-        okText: "确认",
-        cancelText: "取消",
+        title: this.$t("common.systemPrompt"),
+        content: this.$t("account.install.ignorePrompt"),
+        okText: this.$t("common.confirm"),
+        cancelText: this.$t("common.cancel"),
         onOk: () => {
           this.$router.push({path: "/"});
         },

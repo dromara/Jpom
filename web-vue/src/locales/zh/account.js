@@ -23,6 +23,10 @@ export default {
     title: "创建账号",
     init: "初始化系统账户",
     initDesc: "您需要创建一个账户用以后续登录管理系统,请牢记超级管理员账号密码",
+    cannotInit: "不能初始化",
+    subCannotInit: "当前系统已经初始化过啦,不能重复初始化",
+    ignorePrompt: "确定要忽略绑定两步验证吗？强烈建议超级管理员开启两步验证来保证账号安全性",
+
     name: "请输入账户名",
     namePlaceholder: "账户名称",
     pwd: "请输入密码",
@@ -55,7 +59,8 @@ export default {
     authentication: {
       twoFactorAuthenticationApp:"两步验证应用",
       inputCaptcha: "请输入两步验证码",
-      informCaptcha: "验证码为6位纯数字"
+      informCaptcha: "验证码为6位纯数字",
+      twoFactorCaptcha: "两步验证码"
     },
 
   },

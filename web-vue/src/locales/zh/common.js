@@ -39,11 +39,19 @@ export default {
   status: "状态",
 
   kindReminder: "温馨提示",
+  systemPrompt: "系统提示",
+  goHome: "回到首页",
   goToThirdParty: "跳转到第三方系统中",
 
 
   qrCode: "二维码",
 
   copySuccess: "复制成功",
-  copyError: "复制失败"
+  copyError: "复制失败",
+
+  confirmBind: "确认绑定",
+  ignore: "忽略",
+
+
+
 };
