@@ -1,6 +1,6 @@
 <template>
   <div class="init-wrapper">
-    <locale-changer class="locale-changer" />
+    <locale-changer class="locale-changer"/>
     <svg width="100%" height="100%" viewBox="0 0 1440 500" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
       <g>
         <circle stroke="#13C2C2" cx="500" cy="-20" r="6"></circle>
@@ -29,21 +29,21 @@
       <template slot="title">
         <a-steps :current="setpCurrent">
           <a-step :title="$t('account.install.steps._1.title')" status="process" :description="$t('account.install.steps._1.desc')">
-            <a-icon slot="icon" type="user" />
+            <a-icon slot="icon" type="user"/>
           </a-step>
           <a-step :title="$t('account.install.steps._2.title')" :description="$t('account.install.steps._2.desc')">
-            <a-icon slot="icon" type="file-protect" />
+            <a-icon slot="icon" type="file-protect"/>
           </a-step>
         </a-steps>
       </template>
 
       <a-row type="flex" justify="center">
         <a-col :span="16" v-if="setpCurrent === 0">
-          <a-card-meta :title="$t('account.install.init')" style="textalign: center" :description="$t('account.install.initDesc')" />
-          <br />
+          <a-card-meta :title="$t('account.install.init')" style="textalign: center" :description="$t('account.install.initDesc')"/>
+          <br/>
           <a-form :form="loginForm" :label-col="{ span: 0 }" @submit="handleLogin" class="init-form">
             <a-form-item :wrapper-col="{ span: 24 }" class="init-user-name">
-              <a-input v-decorator="['userName', { rules: [{ required: true, message: $t('account.install.name') }] }]" :placeholder="$t('account.install.namePlaceholder')" />
+              <a-input v-decorator="['userName', { rules: [{ required: true, message: $t('account.install.name') }] }]" :placeholder="$t('account.install.namePlaceholder')"/>
             </a-form-item>
             <a-form-item :wrapper-col="{ span: 24 }" class="init-user-password">
               <a-input-password
@@ -62,7 +62,7 @@
             <a-form-item>
               <a-row type="flex" justify="center">
                 <a-col :span="4">
-                  <a-button type="primary" html-type="submit" class="btn"> {{ $t("account.install.title") }} </a-button>
+                  <a-button type="primary" html-type="submit" class="btn"> {{ $t("account.install.title") }}</a-button>
                 </a-col>
               </a-row>
             </a-form-item>
@@ -72,24 +72,24 @@
           <a-alert banner>
             <template slot="message">
               <ul style="color: red">
-                <li>为了考虑系统安全我们强烈建议超级管理员开启两步验证来确保账号的安全性</li>
-                <li>绑定成功后将不再显示,强烈建议保存此二维码或者下面的 MFA key</li>
-                <li>请使用应用扫码绑定令牌,然后输入验证码确认绑定才生效</li>
+                <li> {{ $t("account.install.alert._1") }}</li>
+                <li>{{ $t("account.install.alert._2") }}</li>
+                <li>{{$t("account.install.alert._3")}}</li>
               </ul>
             </template>
           </a-alert>
-          <br />
+          <br/>
           <a-row>
             <a-col :span="12">
               <a-form-item>
-                <h3 id="两步验证应用">两步验证应用</h3>
-                <p v-for="(html, index) in MFA_APP_TIP_ARRAY" :key="index" v-html="html" />
+                <h3 :id="$t('account.authentication.twoFactorAuthenticationApp')">{{ $t('account.authentication.twoFactorAuthenticationApp') }}</h3>
+                <p v-for="(html, index) in MFA_APP_TIP_ARRAY" :key="index" v-html="html"/>
               </a-form-item>
             </a-col>
-            <a-divider type="vertical" />
+            <a-divider type="vertical"/>
             <a-col :span="12">
               <a-form :form="bindMfaForm" :label-col="{ span: 0 }" @submit="handleMfaSure" class="init-form">
-                <a-form-item label="二维码" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }" style="margin-bottom: 5px">
+                <a-form-item :label="$t('common.qrCode')" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }" style="margin-bottom: 5px">
                   <a-row>
                     <a-col :span="14">
                       <div class="qrcode" ref="qrCodeUrl" id="qrCodeUrl"></div>
@@ -113,11 +113,11 @@
                     disabled
                     v-model="mfaData.key"
                   >
-                    <a-icon slot="prefix" type="copy" />
+                    <a-icon slot="prefix" type="copy"/>
                   </a-input>
                 </a-form-item>
 
-                <a-form-item label="验证码" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
+                <a-form-item :label="$t('captcha')" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
                   <a-input
                     v-decorator="[
                       'twoCode',
@@ -136,8 +136,8 @@
                   <a-row type="flex" justify="center">
                     <a-col :span="10">
                       <a-space>
-                        <a-button type="primary" html-type="submit" class="btn"> 确认绑定 </a-button>
-                        <a-button type="dashed" @click="ignoreBindMfa"> 忽略 </a-button>
+                        <a-button type="primary" html-type="submit" class="btn"> 确认绑定</a-button>
+                        <a-button type="dashed" @click="ignoreBindMfa"> 忽略</a-button>
                       </a-space>
                     </a-col>
                   </a-row>
@@ -151,20 +151,20 @@
     <div v-else>
       <a-result class="card-box" status="404" title="不能初始化" sub-title="当前系统已经初始化过啦,不能重复初始化">
         <template #extra>
-          <a-button type="primary" @click="goHome"> 回到首页 </a-button>
+          <a-button type="primary" @click="goHome"> 回到首页</a-button>
         </template>
       </a-result>
     </div>
   </div>
 </template>
 <script>
-import { initInstall } from "@/api/install";
-import { bindMfa } from "@/api/user/user";
-import { MFA_APP_TIP_ARRAY } from "@/utils/const";
+import {initInstall} from "@/api/install";
+import {bindMfa} from "@/api/user/user";
+import {MFA_APP_TIP_ARRAY} from "@/utils/const";
 import QRCode from "qrcodejs2";
 import sha1 from "js-sha1";
 import Vue from "vue";
-import { checkSystem } from "@/api/install";
+import {checkSystem} from "@/api/install";
 import LocaleChanger from "@/components/locale/locale-changer.vue";
 
 export default {
@@ -173,8 +173,8 @@ export default {
   },
   data() {
     return {
-      loginForm: this.$form.createForm(this, { name: "login-form" }),
-      bindMfaForm: this.$form.createForm(this, { name: "bind-mfa-form" }),
+      loginForm: this.$form.createForm(this, {name: "login-form"}),
+      bindMfaForm: this.$form.createForm(this, {name: "bind-mfa-form"}),
       setpCurrent: 0,
       mfaData: {},
       tempVue: Vue,
@@ -271,12 +271,13 @@ export default {
               });
 
               // // 调用 store action 存储当前登录的用户名和 token
-              this.$store.dispatch("login", { token: tokenData.token, longTermToken: tokenData.longTermToken }).then(() => {
+              this.$store.dispatch("login", {token: tokenData.token, longTermToken: tokenData.longTermToken}).then(() => {
                 // 跳转主页面
                 //  this.$router.push({ path: "/" });
               });
               const firstWorkspace = tokenData.bindWorkspaceModels[0];
-              this.$store.dispatch("changeWorkspace", firstWorkspace.id).then(() => {});
+              this.$store.dispatch("changeWorkspace", firstWorkspace.id).then(() => {
+              });
             }
           });
         }
@@ -297,7 +298,7 @@ export default {
                 message: res.msg,
               });
               // 跳转主页面;
-              this.$router.push({ path: "/" });
+              this.$router.push({path: "/"});
             }
           });
         }
@@ -311,12 +312,12 @@ export default {
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
-          this.$router.push({ path: "/" });
+          this.$router.push({path: "/"});
         },
       });
     },
     goHome() {
-      this.$router.replace({ path: "/" });
+      this.$router.replace({path: "/"});
     },
     // /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*? +]).*$/
     // 验证密码安全强度
@@ -383,6 +384,7 @@ export default {
   border-radius: 4px;
   padding: 5px 10px;
 }
+
 .init-wrapper {
   width: 100vw;
   height: 100vh;
@@ -395,6 +397,7 @@ export default {
   font-size: 16px;
   /* color: #03e9f4; */
 }
+
 .card-box {
   position: absolute;
   left: 50%;
@@ -405,17 +408,21 @@ export default {
   border-radius: 6px;
   padding: 4px;
 }
+
 p {
   margin-bottom: 0;
   line-height: 30px;
 }
+
 .card-content {
   /* width: 300px; */
   /* text-align: center; */
 }
+
 .qrcode {
   margin-left: 15px;
 }
+
 /* .btn {
   width: 100%;
   margin-top: 20px;

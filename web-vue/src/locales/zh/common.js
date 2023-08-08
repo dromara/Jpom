@@ -1,6 +1,10 @@
 export default {
   colon: "：",
 
+  username: "用户名",
+  password: "密码",
+  captcha: "验证码",
+
   confirm: "确认",
   cancel: "取消",
 
@@ -35,5 +39,11 @@ export default {
   status: "状态",
 
   kindReminder: "温馨提示",
-  goToThirdParty: "跳转到第三方系统中"
+  goToThirdParty: "跳转到第三方系统中",
+
+
+  qrCode: "二维码",
+
+  copySuccess: "复制成功",
+  copyError: "复制失败"
 };

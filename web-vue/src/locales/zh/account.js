@@ -47,7 +47,16 @@ export default {
     },
 
     alert: {
-      _1: ""
-    }
+      _1: "为了考虑系统安全我们强烈建议超级管理员开启两步验证来确保账号的安全性",
+      _2: "绑定成功后将不再显示,强烈建议保存此二维码或者下面的 MFA key",
+      _3: "请使用应用扫码绑定令牌,然后输入验证码确认绑定才生效"
+    },
+
+    authentication: {
+      twoFactorAuthenticationApp:"两步验证应用",
+      inputCaptcha: "请输入两步验证码",
+      informCaptcha: "验证码为6位纯数字"
+    },
+
   },
 };
