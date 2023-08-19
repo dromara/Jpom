@@ -32,7 +32,7 @@ import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseEnum;
-import org.dromara.jpom.model.BaseWorkspaceModel;
+import org.dromara.jpom.model.BaseGroupModel;
 import org.dromara.jpom.model.enums.GitProtocolEnum;
 
 import java.util.HashMap;
@@ -45,7 +45,7 @@ import java.util.Map;
 @TableName(value = "REPOSITORY", name = "仓库信息")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class RepositoryModel extends BaseWorkspaceModel {
+public class RepositoryModel extends BaseGroupModel {
     /**
      * 名称
      */

@@ -37,7 +37,7 @@ import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.IStatusRecover;
 import org.dromara.jpom.service.ITriggerToken;
-import org.dromara.jpom.service.h2db.BaseGroupService;
+import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
 
@@ -52,7 +52,7 @@ import java.util.List;
  **/
 @Service
 @Slf4j
-public class BuildInfoService extends BaseGroupService<BuildInfoModel> implements ICron<BuildInfoModel>, IStatusRecover, ITriggerToken {
+public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> implements ICron<BuildInfoModel>, IStatusRecover, ITriggerToken {
 
     /**
      * 更新状态

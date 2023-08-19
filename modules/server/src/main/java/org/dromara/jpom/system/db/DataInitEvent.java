@@ -34,8 +34,7 @@ import org.dromara.jpom.model.BaseIdModel;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.service.IStatusRecover;
-import org.dromara.jpom.service.h2db.BaseGroupService;
-import org.dromara.jpom.service.h2db.BaseNodeGroupService;
+import org.dromara.jpom.service.h2db.BaseDbService;
 import org.dromara.jpom.service.h2db.BaseNodeService;
 import org.dromara.jpom.service.system.WorkspaceService;
 import org.springframework.context.ApplicationContext;
@@ -68,15 +67,12 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
 
     @Override
     public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
-        //
-        Map<String, BaseGroupService> groupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseGroupService.class);
-        for (BaseGroupService<?> value : groupServiceMap.values()) {
-            value.repairGroupFiled();
-        }
-        //
-        Map<String, BaseNodeGroupService> nodeGroupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseNodeGroupService.class);
-        for (BaseNodeGroupService<?> value : nodeGroupServiceMap.values()) {
-            value.repairGroupFiled();
+        // 分组
+        Map<String, BaseDbService> groupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseDbService.class);
+        for (BaseDbService<?> value : groupServiceMap.values()) {
+            if (value.isCanGroup()) {
+                value.repairGroupFiled();
+            }
         }
         // 状态恢复的数据
         Map<String, IStatusRecover> statusRecoverMap = SpringUtil.getApplicationContext().getBeansOfType(IStatusRecover.class);

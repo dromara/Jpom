@@ -39,7 +39,7 @@ import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.plugins.JschLogger;
-import org.dromara.jpom.service.h2db.BaseGroupService;
+import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.system.extconf.BuildExtConfig;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.MySftp;
@@ -61,7 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Service
 @Slf4j
-public class SshService extends BaseGroupService<SshModel> {
+public class SshService extends BaseWorkspaceService<SshModel> {
 
     @Resource
     @Lazy

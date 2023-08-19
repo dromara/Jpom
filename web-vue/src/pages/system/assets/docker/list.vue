@@ -373,7 +373,7 @@ export default {
         { title: "docker版本", dataIndex: "dockerVersion", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
 
         { title: "状态", dataIndex: "status", ellipsis: true, align: "center", width: "100px", scopedSlots: { customRender: "status" } },
-        { title: "TLS 认证", dataIndex: "tlsVerify", width: 100, align: "center", ellipsis: true, scopedSlots: { customRender: "tlsVerify" } },
+        { title: "TLS", dataIndex: "tlsVerify", width: "80px", align: "center", ellipsis: true, scopedSlots: { customRender: "tlsVerify" } },
         { title: "分组名", dataIndex: "groupName", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
         { title: "集群", dataIndex: "swarmId", ellipsis: true, scopedSlots: { customRender: "swarmId" } },
         // { title: "apiVersion", dataIndex: "apiVersion", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },

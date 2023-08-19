@@ -122,8 +122,8 @@ public class NodeEditController extends BaseServerController {
      */
     @GetMapping(value = "list_group_all.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<String>> listGroupAll() {
-        List<String> listGroup = nodeService.listGroup(getRequest());
+    public JsonMessage<List<String>> listGroupAll(HttpServletRequest request) {
+        List<String> listGroup = nodeService.listGroup(request);
         return JsonMessage.success("", listGroup);
     }
 

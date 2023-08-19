@@ -345,4 +345,15 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
         String updateSql = "update " + this.tableName + " set sortValue=? where id=? and workspaceId=?";
         this.execute(updateSql, up ? compareSortValue + 0.0001f : compareSortValue - 0.0001f, id, workspaceId);
     }
+
+    /**
+     * load date group by group name
+     *
+     * @return list
+     */
+    public List<String> listGroup(HttpServletRequest request) {
+        String workspaceId = getCheckUserWorkspace(request);
+        String sql = "select `GROUP` from " + getTableName() + " where workspaceId=? group by `GROUP`";
+        return super.listGroupByName(sql, "GROUP", workspaceId);
+    }
 }

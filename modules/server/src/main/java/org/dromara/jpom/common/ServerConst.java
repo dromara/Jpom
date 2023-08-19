@@ -28,8 +28,6 @@ package org.dromara.jpom.common;
  */
 public class ServerConst extends Const {
 
-    public static final String GROUP_STR = "group";
-
     /**
      * h2 数据库表名字段
      */
