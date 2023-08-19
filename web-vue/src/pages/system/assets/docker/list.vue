@@ -7,7 +7,9 @@
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
           <a-input v-model="listQuery['%host%']" @pressEnter="loadData" placeholder="host" class="search-input-item" />
           <a-input v-model="listQuery['%swarmId%']" @pressEnter="loadData" placeholder="集群ID" class="search-input-item" />
-
+          <a-select show-search option-filter-prop="children" v-model="listQuery.groupName" allowClear placeholder="分组" class="search-input-item">
+            <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+          </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           </a-tooltip>
@@ -125,6 +127,9 @@
         </a-space>
         <a-form-model-item label="容器名称" prop="name">
           <a-input v-model="temp.name" placeholder="容器名称" />
+        </a-form-model-item>
+        <a-form-model-item label="分组" prop="groupName">
+          <custom-select v-model="temp.groupName" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder="选择分组名"> </custom-select>
         </a-form-model-item>
         <a-form-model-item label="开启SSH访问" prop="enableSsh">
           <a-switch v-model="temp.enableSsh" checked-children="开" un-checked-children="关" />
@@ -329,6 +334,7 @@ import {
   dcokerSwarmLeaveForce,
   machineDockerDistribute,
   dockerListWorkspace,
+  dockerListGroup,
 } from "@/api/system/assets-docker";
 import { machineSshListData } from "@/api/system/assets-ssh";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
@@ -337,11 +343,13 @@ import Console from "@/pages/docker/console";
 import SwarmConsole from "@/pages/docker/swarm/console.vue";
 import { mapGetters } from "vuex";
 import certificate from "./certificate.vue";
+import CustomSelect from "@/components/customSelect";
 export default {
   components: {
     Console,
     SwarmConsole,
     certificate,
+    CustomSelect,
   },
   props: {},
   data() {
@@ -349,6 +357,7 @@ export default {
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
+      groupList: [],
       temp: {},
       editVisible: false,
       templateVisible: false,
@@ -365,6 +374,7 @@ export default {
 
         { title: "状态", dataIndex: "status", ellipsis: true, align: "center", width: "100px", scopedSlots: { customRender: "status" } },
         { title: "TLS 认证", dataIndex: "tlsVerify", width: 100, align: "center", ellipsis: true, scopedSlots: { customRender: "tlsVerify" } },
+        { title: "分组名", dataIndex: "groupName", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
         { title: "集群", dataIndex: "swarmId", ellipsis: true, scopedSlots: { customRender: "swarmId" } },
         // { title: "apiVersion", dataIndex: "apiVersion", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "最后修改人", dataIndex: "modifyUser", width: 120, ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
@@ -429,10 +439,19 @@ export default {
   mounted() {
     this.sshListData();
     this.loadData();
+    this.loadGroupList();
   },
   methods: {
     //
     parseTime,
+    // 获取所有的分组
+    loadGroupList() {
+      dockerListGroup().then((res) => {
+        if (res.data) {
+          this.groupList = res.data;
+        }
+      });
+    },
     sshListData() {
       machineSshListData().then((res) => {
         if (res.code === 200) {
@@ -550,6 +569,7 @@ export default {
             });
             this.editVisible = false;
             this.loadData();
+            this.loadGroupList();
           }
         });
       });
