@@ -310,6 +310,7 @@
                 <a-input-number style="width: 80%" :min="0" v-model="temp.update.parallelism" placeholder="并行度,同一时间升级的容器数量" />
               </a-form-model-item>
               <a-form-model-item label="延迟" prop="delay">
+                <template #help> <span style="padding-left: 20%">单位 ns 秒</span> </template>
                 <a-input-number style="width: 80%" :min="1" v-model="temp.update.delay" placeholder="延迟,容器升级间隔时间" />
               </a-form-model-item>
               <a-form-model-item label="失败率" prop="maxFailureRatio">
@@ -337,7 +338,8 @@
                 <a-input-number style="width: 80%" :min="0" v-model="temp.rollback.parallelism" placeholder="并行度,同一时间升级的容器数量" />
               </a-form-model-item>
               <a-form-model-item label="延迟" prop="delay">
-                <a-input-number style="width: 80%" :min="1" v-model="temp.rollback.delay" placeholder="延迟" />
+                <template #help> <span style="padding-left: 20%">单位 ns 秒</span> </template>
+                <a-input-number style="width: 80%" :min="1" v-model="temp.rollback.delay" placeholder="延迟,容器回滚间隔时间" />
               </a-form-model-item>
               <a-form-model-item label="失败率" prop="maxFailureRatio">
                 <a-input-number style="width: 80%" :min="0" v-model="temp.rollback.maxFailureRatio" placeholder="失败率,更新期间允许的失败率" />
