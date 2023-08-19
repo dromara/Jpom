@@ -22,8 +22,6 @@
  */
 package org.dromara.jpom.func;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Entity;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.model.BaseGroupNameModel;
@@ -34,8 +32,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -49,20 +45,12 @@ public abstract class BaseGroupNameController extends BaseServerController {
         this.dbService = dbService;
     }
 
+
     @GetMapping(value = "list-group", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<List<String>> listGroup() {
         String sql = "select `groupName` from " + dbService.getTableName() + " group by `groupName`";
-        List<Entity> list = dbService.query(sql);
-        // 筛选字段
-        List<String> collect = list.stream()
-            .map(entity -> {
-                Object obj = entity.get("groupName");
-                return StrUtil.toStringOrNull(obj);
-            })
-            .filter(Objects::nonNull)
-            .distinct()
-            .collect(Collectors.toList());
-        return JsonMessage.success("", collect);
+        List<String> list = dbService.listGroupByName(sql, "groupName");
+        return JsonMessage.success("", list);
     }
 }

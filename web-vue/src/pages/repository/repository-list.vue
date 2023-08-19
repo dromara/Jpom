@@ -24,6 +24,9 @@
             <a-select-option :value="'0'">GIT</a-select-option>
             <a-select-option :value="'1'">SVN</a-select-option>
           </a-select>
+          <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+            <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+          </a-select>
 
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
@@ -95,6 +98,9 @@
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="仓库名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="仓库名称" />
+        </a-form-model-item>
+        <a-form-model-item label="分组" prop="group">
+          <custom-select v-model="temp.group" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder="选择分组名"> </custom-select>
         </a-form-model-item>
         <a-form-model-item label="仓库地址" prop="gitUrl">
           <a-input-group compact>
@@ -335,12 +341,24 @@
 </template>
 <script>
 import CustomInput from "@/components/customInput";
-import { providerInfo, authorizeRepos, deleteRepository, editRepository, getRepositoryList, restHideField, sortItem, exportData, importTemplate, importData } from "@/api/repository";
+import {
+  providerInfo,
+  authorizeRepos,
+  deleteRepository,
+  editRepository,
+  getRepositoryList,
+  restHideField,
+  sortItem,
+  exportData,
+  importTemplate,
+  importData,
+  listRepositoryGroup,
+} from "@/api/repository";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import { getWorkspaceEnvAll } from "@/api/workspace";
-
+import CustomSelect from "@/components/customSelect";
 export default {
-  components: { CustomInput },
+  components: { CustomInput, CustomSelect },
   props: {
     choose: {
       type: Boolean,
@@ -361,6 +379,7 @@ export default {
       PAGE_DEFAULT_SIZW_OPTIONS: ["15", "20", "25", "30", "35", "40", "50"],
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, { limit: 15 }),
       list: [],
+      groupList: [],
       providerData: {
         gitee: {
           baseUrl: "https://gitee.com",
@@ -378,6 +397,7 @@ export default {
 
       columns: [
         { title: "仓库名称", dataIndex: "name", width: 200, sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "分组名", dataIndex: "group", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
         {
           title: "仓库地址",
           dataIndex: "gitUrl",
@@ -492,15 +512,25 @@ export default {
   watch: {},
   created() {
     this.loadData();
+    //
     providerInfo().then((response) => {
       if (response.code === 200) {
         this.providerData = response.data;
       }
     });
     this.getWorkEnvList();
+    this.loadGroupList();
   },
   methods: {
     CHANGE_PAGE,
+    // 分组数据
+    loadGroupList() {
+      listRepositoryGroup().then((res) => {
+        if (res.data) {
+          this.groupList = res.data;
+        }
+      });
+    },
     getWorkEnvList() {
       getWorkspaceEnvAll({
         workspaceId: this.workspaceId + (this.global ? ",GLOBAL" : ""),
@@ -628,6 +658,7 @@ export default {
             this.editVisible = false;
             this.loadData();
             this.$refs["editForm"].resetFields();
+            this.loadGroupList();
           }
         });
       });

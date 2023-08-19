@@ -38,6 +38,7 @@ import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.Const;
 import org.dromara.jpom.db.BaseDbCommonService;
 import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.model.BaseDbModel;
@@ -49,13 +50,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 数据库操作 通用 serve
@@ -70,6 +69,8 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     @Lazy
     private DbExtConfig extConfig;
 
+    private final boolean canGroup;
+    private final boolean canGroupName;
     /**
      * 默认排序规则
      */
@@ -77,6 +78,60 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         new Order("createTimeMillis", Direction.DESC),
         new Order("modifyTimeMillis", Direction.DESC)
     };
+
+    public BaseDbService() {
+        super();
+        this.canGroup = ReflectUtil.hasField(this.tClass, "group");
+        this.canGroupName = ReflectUtil.hasField(this.tClass, "groupName");
+    }
+
+    public boolean isCanGroup() {
+        return canGroup;
+    }
+
+    /**
+     * load date group by group name
+     *
+     * @return list
+     */
+    public List<String> listGroup() {
+        String sql = "select `GROUP` from " + getTableName() + " group by `GROUP`";
+        return this.listGroupByName(sql, "group");
+    }
+
+    /**
+     * 获取分组字段
+     *
+     * @param sql    sql 预计
+     * @param params 参数
+     * @return list
+     */
+    public List<String> listGroupByName(String sql, String fieldName, Object... params) {
+        Assert.state(this.canGroup || this.canGroupName, "当前数据表不支持排序");
+        List<Entity> list = super.query(sql, params);
+        // 筛选字段
+        return list.stream()
+            .flatMap(entity -> {
+                Object obj = entity.get(fieldName);
+                if (obj == null) {
+                    return null;
+                }
+                return Stream.of(String.valueOf(obj));
+            })
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toList());
+    }
+
+
+    /**
+     * 恢复字段
+     */
+    public void repairGroupFiled() {
+        Assert.state(this.canGroup, "当前数据表不支持排序");
+        String sql = "update " + getTableName() + " set `GROUP`=? where `GROUP` is null or `GROUP`=''";
+        super.execute(sql, Const.DEFAULT_GROUP_NAME);
+    }
 
     public int insert(T t) {
         this.fillInsert(t);
