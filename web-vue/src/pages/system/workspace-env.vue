@@ -18,6 +18,14 @@
           <a-input v-model="envVarListQuery['%description%']" placeholder="描述" @pressEnter="loadDataEnvVar" allowClear class="search-input-item" />
           <a-button type="primary" @click="loadDataEnvVar">搜索</a-button>
           <a-button type="primary" @click="addEnvVar">新增</a-button>
+          <a-tooltip>
+            <template slot="title">
+              <div>环境变量是指配置在系统中的一些固定参数值，用于脚本执行时候快速引用。</div>
+              <div>环境变量还可以用于仓库账号密码、ssh密码引用</div>
+              <div>注意：环境变量存在作用域：当前工作空间或者全局，不能跨工作空间引用</div>
+            </template>
+            <a-icon type="question-circle" theme="filled" />
+          </a-tooltip>
         </a-space>
       </template>
       <a-tooltip slot="value" slot-scope="text, item" placement="topLeft" :title="item.privacy === 1 ? '隐私字段' : text">

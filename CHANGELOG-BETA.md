@@ -11,6 +11,8 @@
 1. 【server】优化 仓库账号、 SSH 证书密码支持选择环境变量
 2. 【all】升级 commons-compress、fastjson、hutool 版本
 3. 【server】优化 maven 依赖冲突
+4. 【server】优化 文件发布-节点发布文件名使用真实名称（感谢@勤思·）
+5. 【server】优化 文件发布-ssh发布新增变量：FILE_NAME、FILE_EXT_NAME
 
 ------
 
