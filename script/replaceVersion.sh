@@ -68,6 +68,7 @@ if [[ "$tag" == "release" ]]; then
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/agent/Dockerfile"
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/script/docker.sh"
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/DockerfileRelease"
+	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/DockerfileReleaseJdk17"
 	# vue version
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/web-vue/package.json"
 	# 替换 docker 中的版本
@@ -76,6 +77,7 @@ if [[ "$tag" == "release" ]]; then
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/.workflow/MasterPipeline.yml"
 elif [ "$tag" == "beta" ]; then
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/DockerfileBeta"
+	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/DockerfileBetaJdk17"
 else
 	echo "不支持的模式 $tag" 2>&2
 	exit 2
