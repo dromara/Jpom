@@ -184,7 +184,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
             releaseTaskLogModel.setReleasePath(taskRoot.getReleasePath());
             this.insert(releaseTaskLogModel);
         }
-        this.startTask(taskRoot.getId(), file, env);
+        this.startTask(taskRoot.getId(), file, env, storageModel);
         return JsonMessage.success("创建成功");
     }
 
@@ -194,7 +194,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
      * @param taskId          任务id
      * @param storageSaveFile 文件
      */
-    private void startTask(String taskId, File storageSaveFile, Map<String, String> env) {
+    private void startTask(String taskId, File storageSaveFile, Map<String, String> env, FileStorageModel storageModel) {
         FileReleaseTaskLogModel taskRoot = this.getByKey(taskId);
         Assert.notNull(taskRoot, "没有找到父级任务");
         //
@@ -207,6 +207,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         Optional.ofNullable(env).ifPresent(environmentMapBuilder::putStr);
         environmentMapBuilder.put("TASK_ID", taskRoot.getTaskId());
         environmentMapBuilder.put("FILE_ID", taskRoot.getFileId());
+        environmentMapBuilder.put("FILE_NAME", storageModel.getName());
+        environmentMapBuilder.put("FILE_EXT_NAME", storageModel.getExtName());
         //
         String syncFinisherId = "file-release:" + taskId;
         StrictSyncFinisher strictSyncFinisher = SyncFinisherUtil.create(syncFinisherId, logModels.size());
@@ -214,7 +216,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         if (taskType == 0) {
             crateTaskSshWork(logModels, strictSyncFinisher, taskRoot, environmentMapBuilder, storageSaveFile);
         } else if (taskType == 1) {
-            crateTaskNodeWork(logModels, strictSyncFinisher, taskRoot, environmentMapBuilder, storageSaveFile);
+            // 节点
+            crateTaskNodeWork(logModels, strictSyncFinisher, taskRoot, environmentMapBuilder, storageSaveFile, storageModel);
         } else {
             throw new IllegalArgumentException("不支持的方式");
         }
@@ -274,7 +277,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                                    StrictSyncFinisher strictSyncFinisher,
                                    FileReleaseTaskLogModel taskRoot,
                                    EnvironmentMapBuilder environmentMapBuilder,
-                                   File storageSaveFile) {
+                                   File storageSaveFile,
+                                   FileStorageModel storageModel) {
         String taskId = taskRoot.getId();
         for (FileReleaseTaskLogModel model : values) {
             model.setAfterScript(taskRoot.getAfterScript());
@@ -302,7 +306,9 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     JSONObject data = new JSONObject();
                     data.put("path", releasePath);
                     Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
-                    JsonMessage<String> jsonMessage = NodeForward.requestSharding(item, NodeUrl.Manage_File_Upload_Sharding2, data, storageSaveFile,
+                    String name = storageModel.getName();
+                    name = StrUtil.wrapIfMissing(name, StrUtil.EMPTY, StrUtil.DOT + storageModel.getExtName());
+                    JsonMessage<String> jsonMessage = NodeForward.requestSharding(item, NodeUrl.Manage_File_Upload_Sharding2, data, storageSaveFile, name,
                         sliceData -> {
                             sliceData.putAll(data);
                             return NodeForward.request(item, NodeUrl.Manage_File_Sharding_Merge2, sliceData);
@@ -423,6 +429,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     logRecorder.system("{} start ftp upload", item.getName());
 
                     MySftp.ProgressMonitor sftpProgressMonitor = sshService.createProgressMonitor(logRecorder);
+                    // 不需要关闭资源，因为共用会话
                     MySftp sftp = new MySftp(session, charset, timeout, sftpProgressMonitor);
                     channelSftp = sftp.getClient();
                     String releasePath = model.getReleasePath();
