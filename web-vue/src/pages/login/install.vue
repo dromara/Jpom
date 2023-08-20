@@ -82,7 +82,7 @@
           <a-row>
             <a-col :span="12">
               <a-form-item>
-                <h3 :id="$t('account.authentication.twoFactorAuthenticationApp')">{{ $t('account.authentication.twoFactorAuthenticationApp') }}</h3>
+                <h3 :id="两步验证应用">{{ $t('account.authentication.twoFactorAuthenticationApp') }}</h3>
                 <p v-for="(html, index) in MFA_APP_TIP_ARRAY" :key="index" v-html="html"/>
               </a-form-item>
             </a-col>
@@ -117,7 +117,7 @@
                   </a-input>
                 </a-form-item>
 
-                <a-form-item :label="$t('captcha')" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
+                <a-form-item :label="$t('common.captcha')" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
                   <a-input
                     v-decorator="[
                       'twoCode',
