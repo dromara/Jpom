@@ -29,10 +29,11 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.crypto.KeyUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.controller.outgiving.OutGivingWhitelistService;
@@ -108,7 +109,7 @@ public class CertificateInfoController extends BaseServerController {
      */
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<CertificateInfoModel>> list(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<CertificateInfoModel>> list(HttpServletRequest request) {
         //
         PageResultDto<CertificateInfoModel> listPage = certificateInfoService.listPage(request);
         listPage.each(certificateInfoModel -> {
@@ -126,7 +127,7 @@ public class CertificateInfoController extends BaseServerController {
     @PostMapping(value = "list-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     @SystemPermission
-    public JsonMessage<PageResultDto<CertificateInfoModel>> listAll(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<CertificateInfoModel>> listAll(HttpServletRequest request) {
         //
         PageResultDto<CertificateInfoModel> listPage = certificateInfoService.listPageAll(request);
         listPage.each(certificateInfoModel -> {
@@ -138,7 +139,7 @@ public class CertificateInfoController extends BaseServerController {
 
     @PostMapping(value = "import-file", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<String> importFile(MultipartFile file, @ValidatorItem String type, String password) {
+    public IJsonMessage<String> importFile(MultipartFile file, @ValidatorItem String type, String password) {
         Assert.notNull(file, "没有上传文件");
         String filename = file.getOriginalFilename();
         Assert.notNull(filename, "没有文件名");
@@ -282,7 +283,7 @@ public class CertificateInfoController extends BaseServerController {
 
     @GetMapping(value = "del", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> del(@ValidatorItem String id, HttpServletRequest request) throws IOException {
+    public IJsonMessage<String> del(@ValidatorItem String id, HttpServletRequest request) throws IOException {
         CertificateInfoModel model = certificateInfoService.getByKeyAndGlobal(id, request);
         // 判断是否被 docker 使用
         MachineDockerModel machineDockerModel = new MachineDockerModel();
@@ -303,7 +304,7 @@ public class CertificateInfoController extends BaseServerController {
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> edit(@ValidatorItem String id,
+    public IJsonMessage<String> edit(@ValidatorItem String id,
                                     String description,
                                     HttpServletRequest request) throws IOException {
         // 验证权限
@@ -343,7 +344,7 @@ public class CertificateInfoController extends BaseServerController {
 
     @PostMapping(value = "deploy", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> addTask(@ValidatorItem String id,
+    public IJsonMessage<String> addTask(@ValidatorItem String id,
                                        @ValidatorItem String name,
                                        @ValidatorItem(value = ValidatorRule.NUMBERS) int taskType,
                                        @ValidatorItem String taskDataIds,

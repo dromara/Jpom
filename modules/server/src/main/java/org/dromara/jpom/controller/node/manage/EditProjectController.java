@@ -22,9 +22,10 @@
  */
 package org.dromara.jpom.controller.node.manage;
 
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -65,7 +66,7 @@ public class EditProjectController extends BaseServerController {
     }
 
     @RequestMapping(value = "getProjectData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> getProjectData(@ValidatorItem String id) {
+    public IJsonMessage<JSONObject> getProjectData(@ValidatorItem String id) {
         JSONObject projectInfo = projectInfoCacheService.getItem(getNode(), id);
         return JsonMessage.success("", projectInfo);
     }
@@ -78,7 +79,7 @@ public class EditProjectController extends BaseServerController {
      * @author Hotstrip
      */
     @RequestMapping(value = "project-access-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<String>> projectAccessList() {
+    public IJsonMessage<List<String>> projectAccessList() {
         List<String> jsonArray = whitelistDirectoryService.getProjectDirectory(getNode());
         return JsonMessage.success("success", jsonArray);
     }
@@ -91,7 +92,7 @@ public class EditProjectController extends BaseServerController {
      */
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> saveProject(String id, HttpServletRequest httpServletRequest) {
+    public IJsonMessage<String> saveProject(String id, HttpServletRequest httpServletRequest) {
         NodeModel node = getNode();
 
         //
@@ -110,7 +111,7 @@ public class EditProjectController extends BaseServerController {
      */
     @RequestMapping(value = "release-outgiving", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> releaseOutgiving(String id, HttpServletRequest request) {
+    public IJsonMessage<String> releaseOutgiving(String id, HttpServletRequest request) {
         NodeModel node = getNode();
 
         JsonMessage<String> jsonMessage = NodeForward.request(getNode(), request, NodeUrl.Manage_ReleaseOutGiving);

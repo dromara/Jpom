@@ -244,6 +244,19 @@ export function myWorkspace() {
 }
 
 /**
+ * 我的集群
+ *
+ * @returns
+ */
+export function clusterList() {
+  return axios({
+    url: "/user/cluster-list",
+    method: "get",
+    params: {},
+  });
+}
+
+/**
  * 保存我的工作空间
  *
  * @returns

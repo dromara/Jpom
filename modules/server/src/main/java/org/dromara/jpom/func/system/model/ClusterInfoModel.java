@@ -20,27 +20,47 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.dromara.jpom.model;
+package org.dromara.jpom.func.system.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseUserModifyDbModel;
 
 /**
- * 基础实体（带id）
- *
  * @author bwcx_jzy
- * @since 2022/01/24
+ * @since 2023/8/19
  */
 @EqualsAndHashCode(callSuper = true)
+@TableName(value = "CLUSTER_INFO", name = "集群信息")
 @Data
-public abstract class BaseIdModel extends BaseJsonModel {
-	/**
-	 * 主键
-	 */
-	private String id;
-
-	@Override
-	public String toString() {
-		return super.toString();
-	}
+public class ClusterInfoModel extends BaseUserModifyDbModel {
+    /**
+     * 集群Id
+     */
+    private String clusterId;
+    /**
+     * 集群名称
+     */
+    private String name;
+    /**
+     * 集群地址
+     */
+    private String url;
+    /**
+     * 集群关联的分组
+     */
+    private String linkGroup;
+    /**
+     * 最后心跳时间
+     */
+    private Long lastHeartbeat;
+    /**
+     * 主机名
+     */
+    private String localHostName;
+    /**
+     * jpom 版本
+     */
+    private String jpomVersion;
 }

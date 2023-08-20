@@ -30,10 +30,11 @@ import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.DslYmlDto;
@@ -162,7 +163,7 @@ public class ManageEditProjectController extends BaseAgentController {
 
 
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> saveProject(NodeProjectInfoModel projectInfo) {
+    public IJsonMessage<String> saveProject(NodeProjectInfoModel projectInfo) {
         // 预检查数据
         String strPreviewData = getParameter("previewData");
         boolean previewData = Convert.toBool(strPreviewData, false);
@@ -218,7 +219,7 @@ public class ManageEditProjectController extends BaseAgentController {
      * @param previewData 是否是预检查
      * @return 错误信息
      */
-    private JsonMessage<String> save(NodeProjectInfoModel projectInfo, NodeProjectInfoModel exits, boolean previewData) {
+    private IJsonMessage<String> save(NodeProjectInfoModel projectInfo, NodeProjectInfoModel exits, boolean previewData) {
         projectInfo.setWorkspaceId(getWorkspaceId());
 
         this.checkPath(projectInfo);
@@ -356,7 +357,7 @@ public class ManageEditProjectController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> deleteProject(String copyId, String thorough) {
+    public IJsonMessage<String> deleteProject(String copyId, String thorough) {
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
         if (nodeProjectInfoModel == null) {
             // 返回正常 200 状态码，考虑节点分发重复操作
@@ -420,7 +421,7 @@ public class ManageEditProjectController extends BaseAgentController {
     }
 
     @RequestMapping(value = "releaseOutGiving", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> releaseOutGiving() {
+    public IJsonMessage<Object> releaseOutGiving() {
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
         if (nodeProjectInfoModel != null) {
             nodeProjectInfoModel.setOutGivingProject(false);

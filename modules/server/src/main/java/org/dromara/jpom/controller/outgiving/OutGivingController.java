@@ -30,10 +30,11 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -96,7 +97,7 @@ public class OutGivingController extends BaseServerController {
      */
     @PostMapping(value = "dispatch-list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<OutGivingModel>> dispatchList(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<OutGivingModel>> dispatchList(HttpServletRequest request) {
         PageResultDto<OutGivingModel> pageResultDto = outGivingServer.listPage(request);
         return JsonMessage.success("success", pageResultDto);
     }
@@ -110,7 +111,7 @@ public class OutGivingController extends BaseServerController {
      */
     @GetMapping(value = "dispatch-list-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<OutGivingModel>> dispatchListAll(HttpServletRequest request) {
+    public IJsonMessage<List<OutGivingModel>> dispatchListAll(HttpServletRequest request) {
         List<OutGivingModel> outGivingModels = outGivingServer.listByWorkspace(request);
         return JsonMessage.success("", outGivingModels);
     }
@@ -118,7 +119,7 @@ public class OutGivingController extends BaseServerController {
 
     @RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> save(String type, @ValidatorItem String id, HttpServletRequest request) throws IOException {
+    public IJsonMessage<String> save(String type, @ValidatorItem String id, HttpServletRequest request) throws IOException {
         if ("add".equalsIgnoreCase(type)) {
             //
             String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
@@ -131,7 +132,7 @@ public class OutGivingController extends BaseServerController {
         }
     }
 
-    private JsonMessage<String> addOutGiving(String id, HttpServletRequest request) {
+    private IJsonMessage<String> addOutGiving(String id, HttpServletRequest request) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id);
         Assert.isNull(outGivingModel, "分发id已经存在啦,分发id需要全局唯一");
         //
@@ -143,7 +144,7 @@ public class OutGivingController extends BaseServerController {
         return JsonMessage.success("添加成功");
     }
 
-    private JsonMessage<String> updateGiving(String id, HttpServletRequest request) {
+    private IJsonMessage<String> updateGiving(String id, HttpServletRequest request) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
         Assert.notNull(outGivingModel, "没有找到对应的分发id");
         doData(outGivingModel, request);
@@ -231,7 +232,7 @@ public class OutGivingController extends BaseServerController {
      */
     @RequestMapping(value = "release_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> releaseDel(String id, HttpServletRequest request) {
+    public IJsonMessage<Object> releaseDel(String id, HttpServletRequest request) {
         // 判断构建
         boolean releaseMethod = buildService.checkReleaseMethod(id, request, BuildReleaseMethod.Outgiving);
         Assert.state(!releaseMethod, "当前分发存在构建项，不能删除");
@@ -268,7 +269,7 @@ public class OutGivingController extends BaseServerController {
      */
     @GetMapping(value = "unbind.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> unbind(String id, HttpServletRequest request) {
+    public IJsonMessage<Object> unbind(String id, HttpServletRequest request) {
         OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
         Assert.notNull(outGivingServerItem, "对应的分发不存在");
         // 判断构建

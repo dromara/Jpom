@@ -22,7 +22,7 @@
  */
 package org.dromara.jpom.model.system;
 
-import org.dromara.jpom.model.BaseJsonModel;
+import cn.keepbx.jpom.model.BaseJsonModel;
 
 /**
  * agent 端自动生成的密码实体

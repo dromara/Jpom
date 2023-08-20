@@ -22,7 +22,7 @@
  */
 package org.dromara.jpom.model.data;
 
-import org.dromara.jpom.model.BaseJsonModel;
+import cn.keepbx.jpom.model.BaseJsonModel;
 
 /**
  * @author bwcx_jzy

@@ -23,9 +23,9 @@
 package org.dromara.jpom.socket;
 
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.model.data.NodeScriptModel;
 import org.dromara.jpom.script.NodeScriptProcessBuilder;
 import org.dromara.jpom.service.script.NodeScriptServer;

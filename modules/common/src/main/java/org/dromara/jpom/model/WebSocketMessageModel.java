@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom.model;
 
+import cn.keepbx.jpom.model.BaseJsonModel;
 import com.alibaba.fastjson2.JSONObject;
 
 /**

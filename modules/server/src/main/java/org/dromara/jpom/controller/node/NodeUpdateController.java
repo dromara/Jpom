@@ -27,7 +27,9 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.Type;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +90,7 @@ public class NodeUpdateController extends BaseServerController {
      */
     @GetMapping(value = "download_remote.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
-    public JsonMessage<String> downloadRemote() throws IOException {
+    public IJsonMessage<String> downloadRemote() throws IOException {
         String saveDir = serverConfig.getAgentPath().getAbsolutePath();
         Tuple download = RemoteVersion.download(saveDir, Type.Agent, false);
         // 保存文件
@@ -104,7 +106,7 @@ public class NodeUpdateController extends BaseServerController {
      * @see AgentFileModel
      */
     @GetMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> checkVersion() {
+    public IJsonMessage<JSONObject> checkVersion() {
         cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
         AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class, agentFileModel1 -> {
             if (agentFileModel1 == null || !FileUtil.exist(agentFileModel1.getSavePath())) {
@@ -132,11 +134,11 @@ public class NodeUpdateController extends BaseServerController {
     @RequestMapping(value = "upload-agent-sharding", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
     @Feature(method = MethodFeature.UPLOAD, log = false)
-    public JsonMessage<String> uploadAgentSharding(MultipartFile file,
-                                                   String sliceId,
-                                                   Integer totalSlice,
-                                                   Integer nowSlice,
-                                                   String fileSumMd5) throws IOException {
+    public IJsonMessage<String> uploadAgentSharding(MultipartFile file,
+                                                    String sliceId,
+                                                    Integer totalSlice,
+                                                    Integer nowSlice,
+                                                    String fileSumMd5) throws IOException {
         File userTempPath = serverConfig.getUserTempPath();
         this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip");
         return JsonMessage.success("上传成功");
@@ -145,7 +147,7 @@ public class NodeUpdateController extends BaseServerController {
     @RequestMapping(value = "upload-agent-sharding-merge", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<String> uploadAgent(String sliceId,
+    public IJsonMessage<String> uploadAgent(String sliceId,
                                            Integer totalSlice,
                                            String fileSumMd5) throws IOException {
         File agentPath = serverConfig.getAgentPath();
@@ -188,7 +190,7 @@ public class NodeUpdateController extends BaseServerController {
     }
 
     @GetMapping(value = "fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> fastInstall() {
+    public IJsonMessage<JSONObject> fastInstall() {
         boolean beta = RemoteVersion.betaRelease();
         InputStream inputStream = ExtConfigBean.getConfigResourceInputStream(beta ? "/fast-install-beta.json" : "/fast-install-release.json");
         String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
@@ -207,7 +209,7 @@ public class NodeUpdateController extends BaseServerController {
     }
 
     @GetMapping(value = "pull_fast_install_result.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Collection<JSONObject>> pullFastInstallResult(String removeId) {
+    public IJsonMessage<Collection<JSONObject>> pullFastInstallResult(String removeId) {
         Collection<JSONObject> jsonObjects = NodeInfoController.listReceiveCache(removeId);
         jsonObjects = jsonObjects.stream().map(jsonObject -> {
             JSONObject clone = jsonObject.clone();
@@ -218,7 +220,7 @@ public class NodeUpdateController extends BaseServerController {
     }
 
     @GetMapping(value = "confirm_fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Collection<JSONObject>> confirmFastInstall(HttpServletRequest request,
+    public IJsonMessage<Collection<JSONObject>> confirmFastInstall(HttpServletRequest request,
                                                                   @ValidatorItem String id,
                                                                   @ValidatorItem String ip,
                                                                   int port) {

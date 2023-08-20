@@ -22,8 +22,9 @@
  */
 package org.dromara.jpom.func;
 
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.model.BaseGroupNameModel;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
@@ -48,9 +49,8 @@ public abstract class BaseGroupNameController extends BaseServerController {
 
     @GetMapping(value = "list-group", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<String>> listGroup() {
-        String sql = "select `groupName` from " + dbService.getTableName() + " group by `groupName`";
-        List<String> list = dbService.listGroupByName(sql, "groupName");
+    public IJsonMessage<List<String>> listGroup() {
+        List<String> list = dbService.listGroupName();
         return JsonMessage.success("", list);
     }
 }

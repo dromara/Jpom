@@ -31,11 +31,12 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.db.DbExtConfig;
@@ -112,7 +113,7 @@ public class BackupInfoController extends BaseServerController {
     @PostMapping(value = "/system/backup/delete")
     @Feature(method = MethodFeature.DEL)
     @SystemPermission(superUser = true)
-    public JsonMessage<String> deleteBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+    public IJsonMessage<String> deleteBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
         // 删除备份信息
         backupInfoService.delByKey(id);
         return new JsonMessage<>(200, "删除成功");
@@ -127,7 +128,7 @@ public class BackupInfoController extends BaseServerController {
      */
     @PostMapping(value = "/system/backup/restore")
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<String> restoreBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+    public IJsonMessage<String> restoreBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
         // 根据 id 查询备份信息
         BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
         Objects.requireNonNull(backupInfoModel, "备份数据不存在");
@@ -188,7 +189,7 @@ public class BackupInfoController extends BaseServerController {
      */
     @PostMapping(value = "/system/backup/create")
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> backup(@RequestBody Map<String, Object> map) {
+    public IJsonMessage<String> backup(@RequestBody Map<String, Object> map) {
         List<String> tableNameList = JSON.parseArray(JSON.toJSONString(map.get("tableNameList")), String.class);
         backupInfoService.backupToSql(tableNameList);
         return new JsonMessage<>(200, "操作成功，请稍后刷新查看备份状态");
@@ -202,7 +203,7 @@ public class BackupInfoController extends BaseServerController {
     @PostMapping(value = "/system/backup/upload")
     @Feature(method = MethodFeature.UPLOAD)
     @SystemPermission(superUser = true)
-    public JsonMessage<String> uploadBackupFile(MultipartFile file) throws IOException {
+    public IJsonMessage<String> uploadBackupFile(MultipartFile file) throws IOException {
         String originalFilename = file.getOriginalFilename();
         String extName = FileUtil.extName(originalFilename);
         Assert.state(StrUtil.containsAnyIgnoreCase(extName, "sql"), "不支持的文件类型：" + extName);
@@ -269,7 +270,7 @@ public class BackupInfoController extends BaseServerController {
      */
     @PostMapping(value = "/system/backup/table-name-list")
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<JSONObject>> loadTableNameList() {
+    public IJsonMessage<List<JSONObject>> loadTableNameList() {
         // 从数据库加载表名称列表
         List<String> tableNameList = backupInfoService.h2TableNameList();
         // 扫描程序，拿到表名称和别名

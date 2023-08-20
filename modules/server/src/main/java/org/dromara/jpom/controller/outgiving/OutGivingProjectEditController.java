@@ -31,11 +31,12 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -105,7 +106,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      */
     @RequestMapping(value = "save_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> save(@ValidatorItem String id, String type) {
+    public IJsonMessage<String> save(@ValidatorItem String id, String type) {
         if ("add".equalsIgnoreCase(type)) {
             //boolean general = StringUtil.isGeneral(id, 2, 20);
             //Assert.state(general, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
@@ -125,7 +126,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      */
     @RequestMapping(value = "delete_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> delete(String id, String thorough) {
+    public IJsonMessage<String> delete(String id, String thorough) {
         HttpServletRequest request = getRequest();
         OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
         Assert.notNull(outGivingModel, "没有对应的分发项目");
@@ -158,7 +159,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         return JsonMessage.success("删除成功");
     }
 
-    private JsonMessage<String> addOutGiving(String id) {
+    private IJsonMessage<String> addOutGiving(String id) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id);
         Assert.isNull(outGivingModel, "分发id已经存在啦");
 
@@ -169,18 +170,18 @@ public class OutGivingProjectEditController extends BaseServerController {
         List<Tuple> tuples = doData(outGivingModel, false);
 
         outGivingServer.insert(outGivingModel);
-        JsonMessage<String> error = saveNodeData(outGivingModel, tuples, false);
+        IJsonMessage<String> error = saveNodeData(outGivingModel, tuples, false);
         return Optional.ofNullable(error).orElseGet(() -> JsonMessage.success("添加成功"));
     }
 
 
-    private JsonMessage<String> updateGiving(String id) {
+    private IJsonMessage<String> updateGiving(String id) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id, getRequest());
         Assert.notNull(outGivingModel, "没有找到对应的分发id");
         List<Tuple> tuples = doData(outGivingModel, true);
 
         outGivingServer.updateById(outGivingModel);
-        JsonMessage<String> error = saveNodeData(outGivingModel, tuples, true);
+        IJsonMessage<String> error = saveNodeData(outGivingModel, tuples, true);
         return Optional.ofNullable(error).orElseGet(() -> JsonMessage.success("修改成功"));
     }
 

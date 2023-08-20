@@ -29,9 +29,14 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
+import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.Type;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.common.*;
+import org.dromara.jpom.common.BaseAgentController;
+import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.JpomManifest;
+import org.dromara.jpom.common.RemoteVersion;
 import org.dromara.jpom.system.AgentConfig;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -65,10 +70,10 @@ public class SystemUpdateController extends BaseAgentController {
     }
 
     @PostMapping(value = "upload-jar-sharding", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> uploadJarSharding(MultipartFile file, String sliceId,
-                                                 Integer totalSlice,
-                                                 Integer nowSlice,
-                                                 String fileSumMd5) throws IOException {
+    public IJsonMessage<String> uploadJarSharding(MultipartFile file, String sliceId,
+                                                  Integer totalSlice,
+                                                  Integer nowSlice,
+                                                  String fileSumMd5) throws IOException {
         //
         String tempPathName = agentConfig.getFixedTempPathName();
         this.uploadSharding(file, tempPathName, sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip");
@@ -76,7 +81,7 @@ public class SystemUpdateController extends BaseAgentController {
     }
 
     @PostMapping(value = "upload-jar-sharding-merge", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> uploadJarShardingMerge(String sliceId,
+    public IJsonMessage<String> uploadJarShardingMerge(String sliceId,
                                                       Integer totalSlice,
                                                       String fileSumMd5) throws IOException {
         //
@@ -102,7 +107,7 @@ public class SystemUpdateController extends BaseAgentController {
     }
 
     @PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> changeLog(String beta) {
+    public IJsonMessage<String> changeLog(String beta) {
         //
         boolean betaBool = Convert.toBool(beta, false);
         boolean betaRelease = RemoteVersion.betaRelease();
@@ -122,7 +127,7 @@ public class SystemUpdateController extends BaseAgentController {
      * @see RemoteVersion
      */
     @PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<cn.keepbx.jpom.RemoteVersion> checkVersion() {
+    public IJsonMessage<cn.keepbx.jpom.RemoteVersion> checkVersion() {
         cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
         return JsonMessage.success("", remoteVersion);
     }
@@ -134,7 +139,7 @@ public class SystemUpdateController extends BaseAgentController {
      * @see RemoteVersion
      */
     @PostMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> upgrade() throws IOException {
+    public IJsonMessage<Object> upgrade() throws IOException {
         RemoteVersion.upgrade(configBean.getTempPath().getAbsolutePath());
         return JsonMessage.success(Const.UPGRADE_MSG);
     }

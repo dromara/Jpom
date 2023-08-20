@@ -27,8 +27,9 @@ import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseJpomController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.service.WhitelistDirectoryService;
 import org.dromara.jpom.system.AgentConfig;
@@ -59,14 +60,14 @@ public class WhitelistDirectoryController extends BaseJpomController {
     }
 
     @RequestMapping(value = "whitelistDirectory_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<AgentWhitelist> whiteListDirectoryData() {
+    public IJsonMessage<AgentWhitelist> whiteListDirectoryData() {
         AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
         return JsonMessage.success("", agentWhitelist);
     }
 
 
     @PostMapping(value = "whitelistDirectory_submit", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> whitelistDirectorySubmit(String project, String nginx, String nginxPath,
+    public IJsonMessage<String> whitelistDirectorySubmit(String project, String nginx, String nginxPath,
                                                         String allowEditSuffix, String allowRemoteDownloadHost) {
         List<String> list = AgentWhitelist.parseToList(project, true, "项目路径白名单不能为空");
         //

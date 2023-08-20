@@ -30,13 +30,17 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
+import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.interceptor.PermissionInterceptor;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
+import org.dromara.jpom.func.system.model.ClusterInfoModel;
+import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.func.user.model.UserLoginLogModel;
 import org.dromara.jpom.func.user.server.UserLoginLogServer;
 import org.dromara.jpom.model.PageResultDto;
@@ -82,19 +86,22 @@ public class UserBasicInfoController extends BaseServerController {
     private final ServerConfig.UserConfig userConfig;
     private final UserLoginLogServer userLoginLogServer;
     private final DbUserOperateLogService dbUserOperateLogService;
+    private final ClusterInfoService clusterInfoService;
 
     public UserBasicInfoController(SystemParametersServer systemParametersServer,
                                    UserBindWorkspaceService userBindWorkspaceService,
                                    UserService userService,
                                    ServerConfig serverConfig,
                                    UserLoginLogServer userLoginLogServer,
-                                   DbUserOperateLogService dbUserOperateLogService) {
+                                   DbUserOperateLogService dbUserOperateLogService,
+                                   ClusterInfoService clusterInfoService) {
         this.systemParametersServer = systemParametersServer;
         this.userBindWorkspaceService = userBindWorkspaceService;
         this.userService = userService;
         this.userConfig = serverConfig.getUser();
         this.userLoginLogServer = userLoginLogServer;
         this.dbUserOperateLogService = dbUserOperateLogService;
+        this.clusterInfoService = clusterInfoService;
     }
 
 
@@ -106,7 +113,7 @@ public class UserBasicInfoController extends BaseServerController {
      * @author Hotstrip
      */
     @RequestMapping(value = "user-basic-info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Map<String, Object>> getUserBasicInfo() {
+    public IJsonMessage<Map<String, Object>> getUserBasicInfo() {
         UserModel userModel = getUser();
         userModel = userService.getByKey(userModel.getId(), false);
         // return basic info
@@ -125,9 +132,9 @@ public class UserBasicInfoController extends BaseServerController {
     }
 
     @RequestMapping(value = "save_basicInfo.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> saveBasicInfo(String email,
-                                             String dingDing, String workWx, String code,
-                                             @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = "2:10", msg = "昵称长度只能是2-10") String name) {
+    public IJsonMessage<String> saveBasicInfo(String email,
+                                              String dingDing, String workWx, String code,
+                                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = "2:10", msg = "昵称长度只能是2-10") String name) {
         UserModel user = getUser();
         UserModel userModel = userService.getByKey(user.getId());
         UserModel updateModel = new UserModel(user.getId());
@@ -162,7 +169,7 @@ public class UserBasicInfoController extends BaseServerController {
      * @return msg
      */
     @RequestMapping(value = "sendCode.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> sendCode(@ValidatorItem(value = ValidatorRule.EMAIL, msg = "邮箱格式不正确") String email) {
+    public IJsonMessage<String> sendCode(@ValidatorItem(value = ValidatorRule.EMAIL, msg = "邮箱格式不正确") String email) {
         MailAccountModel config = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
         Assert.notNull(config, "管理员还没有配置系统邮箱,请联系管理配置发件信息");
         int randomInt = RandomUtil.randomInt(1000, 9999);
@@ -182,7 +189,7 @@ public class UserBasicInfoController extends BaseServerController {
      * @return msg
      */
     @GetMapping(value = "my-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<UserWorkspaceModel>> myWorkspace() {
+    public IJsonMessage<List<UserWorkspaceModel>> myWorkspace() {
         UserModel user = getUser();
         List<WorkspaceModel> models = userBindWorkspaceService.listUserWorkspaceInfo(user);
         Assert.notEmpty(models, "当前账号没有绑定任何工作空间，请联系管理员处理");
@@ -220,7 +227,7 @@ public class UserBasicInfoController extends BaseServerController {
      * @return msg
      */
     @PostMapping(value = "save-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> saveWorkspace(@RequestBody List<UserWorkspaceModel> workspaceModels) {
+    public IJsonMessage<String> saveWorkspace(@RequestBody List<UserWorkspaceModel> workspaceModels) {
         Assert.notEmpty(workspaceModels, "没有选择任何工作空间");
         List<UserWorkspaceModel> collect = workspaceModels.stream()
             .filter(workspaceModel -> StrUtil.isNotEmpty(workspaceModel.getId()))
@@ -238,7 +245,7 @@ public class UserBasicInfoController extends BaseServerController {
      * @return json
      */
     @GetMapping(value = "close_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> closeMfa(@ValidatorItem String code) {
+    public IJsonMessage<Object> closeMfa(@ValidatorItem String code) {
         UserModel user = getUser();
         boolean mfaCode = userService.verifyMfaCode(user.getId(), code);
         Assert.state(mfaCode, "验证码不正确");
@@ -249,7 +256,7 @@ public class UserBasicInfoController extends BaseServerController {
     }
 
     @GetMapping(value = "generate_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> generateMfa() {
+    public IJsonMessage<JSONObject> generateMfa() {
         UserModel user = getUser();
         JSONObject jsonObject = new JSONObject();
         String tfaKey = TwoFactorAuthUtils.generateTFAKey();
@@ -266,7 +273,7 @@ public class UserBasicInfoController extends BaseServerController {
      * @return json
      */
     @GetMapping(value = "bind_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> bindMfa(String mfa, String twoCode) {
+    public IJsonMessage<Object> bindMfa(String mfa, String twoCode) {
         //
         UserModel user = getUser();
         boolean bindMfa = userService.hasBindMfa(user.getId());
@@ -287,7 +294,7 @@ public class UserBasicInfoController extends BaseServerController {
      */
     @RequestMapping(value = "list-login-log-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<UserLoginLogModel>> listLoginLogData(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<UserLoginLogModel>> listLoginLogData(HttpServletRequest request) {
         UserModel user = getUser();
         PageResultDto<UserLoginLogModel> pageResult = userLoginLogServer.listPageByUserId(request, user.getId());
         return JsonMessage.success("", pageResult);
@@ -300,9 +307,23 @@ public class UserBasicInfoController extends BaseServerController {
      */
     @RequestMapping(value = "list-operate-log-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<UserOperateLogV1>> listOperateLogData(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<UserOperateLogV1>> listOperateLogData(HttpServletRequest request) {
         UserModel user = getUser();
         PageResultDto<UserOperateLogV1> pageResult = dbUserOperateLogService.listPageByUserId(request, user.getId());
         return JsonMessage.success("", pageResult);
+    }
+
+    /**
+     * 查询集群列表
+     *
+     * @return json
+     */
+    @GetMapping(value = "cluster-list")
+    public IJsonMessage<JSONObject> clusterList() {
+        List<ClusterInfoModel> list = clusterInfoService.list();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("list", list);
+        jsonObject.put("currentId", JpomManifest.getInstance().getInstallId());
+        return JsonMessage.success("", jsonObject);
     }
 }

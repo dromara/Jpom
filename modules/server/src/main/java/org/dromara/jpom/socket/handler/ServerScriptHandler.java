@@ -24,10 +24,10 @@ package org.dromara.jpom.socket.handler;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.model.script.ScriptExecuteLogModel;
 import org.dromara.jpom.model.script.ScriptModel;
 import org.dromara.jpom.model.user.UserModel;

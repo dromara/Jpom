@@ -22,8 +22,9 @@
  */
 package org.dromara.jpom.func.assets.controller.docker;
 
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.controller.docker.base.BaseDockerSwarmInfoController;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
@@ -73,7 +74,7 @@ public class AssetsDockerSwarmInfoController extends BaseDockerSwarmInfoControll
      */
     @GetMapping(value = "list-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<MachineDockerModel>> listAll() {
+    public IJsonMessage<List<MachineDockerModel>> listAll() {
         MachineDockerModel machineDockerModel = new MachineDockerModel();
         machineDockerModel.setSwarmControlAvailable(true);
         // load list with all

@@ -23,8 +23,9 @@
 package org.dromara.jpom.func.assets.controller;
 
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -70,21 +71,21 @@ public class MachineNodeController extends BaseGroupNameController {
 
     @PostMapping(value = "list-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<MachineNodeModel>> listJson(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<MachineNodeModel>> listJson(HttpServletRequest request) {
         PageResultDto<MachineNodeModel> pageResultDto = machineNodeServer.listPage(request);
         return JsonMessage.success("", pageResultDto);
     }
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> save(HttpServletRequest request) {
+    public IJsonMessage<String> save(HttpServletRequest request) {
         machineNodeServer.update(request);
         return JsonMessage.success("操作成功");
     }
 
     @PostMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> delete(@ValidatorItem String id) {
+    public IJsonMessage<String> delete(@ValidatorItem String id) {
         long count = nodeService.countByMachine(id);
         Assert.state(count <= 0, "当前机器还关联" + count + "个节点不能删除");
         machineNodeServer.delByKey(id);
@@ -100,7 +101,7 @@ public class MachineNodeController extends BaseGroupNameController {
      */
     @PostMapping(value = "distribute", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> distribute(@ValidatorItem String ids, @ValidatorItem String workspaceId) {
+    public IJsonMessage<String> distribute(@ValidatorItem String ids, @ValidatorItem String workspaceId) {
         List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
         for (String id : list) {
             MachineNodeModel machineNodeModel = machineNodeServer.getByKey(id);
@@ -120,7 +121,7 @@ public class MachineNodeController extends BaseGroupNameController {
 
     @GetMapping(value = "list-node", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<NodeModel>> listData(@ValidatorItem String id) {
+    public IJsonMessage<List<NodeModel>> listData(@ValidatorItem String id) {
         MachineNodeModel machineNodeModel = machineNodeServer.getByKey(id);
         Assert.notNull(machineNodeModel, "没有对应的机器");
         NodeModel nodeModel = new NodeModel();
@@ -140,7 +141,7 @@ public class MachineNodeController extends BaseGroupNameController {
      */
     @GetMapping(value = "list-template-node", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<MachineNodeModel>> listTemplate() {
+    public IJsonMessage<List<MachineNodeModel>> listTemplate() {
         MachineNodeModel machineNodeModel = new MachineNodeModel();
         machineNodeModel.setTemplateNode(true);
         List<MachineNodeModel> modelList = machineNodeServer.listByBean(machineNodeModel);
@@ -155,7 +156,7 @@ public class MachineNodeController extends BaseGroupNameController {
      */
     @RequestMapping(value = "save-whitelist", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.SYSTEM_NODE_WHITELIST, method = MethodFeature.EDIT)
-    public JsonMessage<Object> saveWhitelist(@ValidatorItem(msg = "请选择分发的机器") String ids,
+    public IJsonMessage<Object> saveWhitelist(@ValidatorItem(msg = "请选择分发的机器") String ids,
                                              HttpServletRequest request) {
         //
         List<String> idList = StrUtil.splitTrim(ids, StrUtil.COMMA);
@@ -172,7 +173,7 @@ public class MachineNodeController extends BaseGroupNameController {
     @PostMapping(value = "save-node-config", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.SYSTEM_CONFIG, method = MethodFeature.EDIT)
     @SystemPermission(superUser = true)
-    public JsonMessage<Object> saveNodeConfig(@ValidatorItem(msg = "请选择分发的机器") String ids,
+    public IJsonMessage<Object> saveNodeConfig(@ValidatorItem(msg = "请选择分发的机器") String ids,
                                               String content,
                                               String restart) {
         List<String> idList = StrUtil.splitTrim(ids, StrUtil.COMMA);

@@ -24,10 +24,11 @@ package org.dromara.jpom.controller.manage.log;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.util.FileUtils;
@@ -52,7 +53,7 @@ import java.util.List;
 public class LogBackController extends BaseAgentController {
 
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> logSize(String id, String copyId) {
+    public IJsonMessage<JSONObject> logSize(String id, String copyId) {
         NodeProjectInfoModel nodeProjectInfoModel = getProjectInfoModel();
         JSONObject jsonObject = new JSONObject();
         //
@@ -67,7 +68,7 @@ public class LogBackController extends BaseAgentController {
     }
 
     @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> resetLog(String copyId) {
+    public IJsonMessage<String> resetLog(String copyId) {
         NodeProjectInfoModel pim = getProjectInfoModel();
         NodeProjectInfoModel.JavaCopyItem copyItem = pim.findCopyItem(copyId);
         try {
@@ -83,7 +84,7 @@ public class LogBackController extends BaseAgentController {
     }
 
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> clear(String name, String copyId) {
+    public IJsonMessage<String> clear(String name, String copyId) {
         Assert.hasText(name, "没有对应到文件");
         NodeProjectInfoModel pim = getProjectInfoModel();
         NodeProjectInfoModel.JavaCopyItem copyItem = pim.findCopyItem(copyId);
@@ -120,7 +121,7 @@ public class LogBackController extends BaseAgentController {
     }
 
     @RequestMapping(value = "logBack", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> console(String copyId) {
+    public IJsonMessage<JSONObject> console(String copyId) {
         // 查询项目路径
         NodeProjectInfoModel pim = getProjectInfoModel();
         NodeProjectInfoModel.JavaCopyItem copyItem = pim.findCopyItem(copyId);

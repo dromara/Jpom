@@ -22,9 +22,10 @@
  */
 package org.dromara.jpom.controller.node.manage.log;
 
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.permission.ClassFeature;
@@ -76,7 +77,7 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "log-back-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> logBackList() {
+    public IJsonMessage<JSONObject> logBackList() {
         JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, getRequest(), JSONObject.class);
         return JsonMessage.success("success", jsonObject);
     }
@@ -84,20 +85,20 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)
     @ResponseBody
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void download(HttpServletResponse response) {
-        NodeForward.requestDownload(getNode(), getRequest(), response, NodeUrl.Manage_Log_logBack_download);
+    public void download(HttpServletResponse response, HttpServletRequest request) {
+        NodeForward.requestDownload(getNode(), request, response, NodeUrl.Manage_Log_logBack_download);
     }
 
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.DEL)
-    public String clear() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_logBack_delete).toString();
+    public String clear(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_Log_logBack_delete).toString();
     }
 
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public JsonMessage<JSONObject> logSize(String id, String copyId) {
+    public IJsonMessage<JSONObject> logSize(String id, String copyId) {
 //        JSONObject info = projectInfoCacheService.getLogSize(getNode(), id, copyId);
         return NodeForward.request(getNode(), NodeUrl.Manage_Log_LogSize, "id", id, "copyId", copyId);
 //        return requestData.getData();

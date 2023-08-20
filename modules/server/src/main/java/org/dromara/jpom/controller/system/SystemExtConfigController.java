@@ -30,11 +30,12 @@ import cn.hutool.core.lang.tree.TreeNode;
 import cn.hutool.core.lang.tree.TreeUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
@@ -114,7 +115,7 @@ public class SystemExtConfigController extends BaseServerController {
 
     @GetMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<Tree<String>> list() throws Exception {
+    public IJsonMessage<Tree<String>> list() throws Exception {
         Map<String, TreeNode<String>> parentMap = new LinkedHashMap<>(10);
         // root 节点
         parentMap.put(StrUtil.SLASH, new TreeNode<>(StrUtil.SLASH, null, "根路径", 0));
@@ -192,7 +193,7 @@ public class SystemExtConfigController extends BaseServerController {
 
     @GetMapping(value = "get-item", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<Object> getItem(@ValidatorItem String name) {
+    public IJsonMessage<Object> getItem(@ValidatorItem String name) {
         InputStream resourceInputStream = ExtConfigBean.getConfigResourceInputStream(name);
         String s = IoUtil.readUtf8(resourceInputStream);
         return JsonMessage.success("", s);
@@ -200,7 +201,7 @@ public class SystemExtConfigController extends BaseServerController {
 
     @PostMapping(value = "save-item", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> saveItem(@ValidatorItem String name, @ValidatorItem String content) {
+    public IJsonMessage<Object> saveItem(@ValidatorItem String name, @ValidatorItem String content) {
         File configResourceFile = ExtConfigBean.getConfigResourceFile(name);
         Assert.notNull(configResourceFile, "不能编辑对应的配置文件");
         FileUtil.writeUtf8String(content, configResourceFile);
@@ -209,7 +210,7 @@ public class SystemExtConfigController extends BaseServerController {
 
     @GetMapping(value = "get-default-item", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<Object> getDefaultItem(@ValidatorItem String name) {
+    public IJsonMessage<Object> getDefaultItem(@ValidatorItem String name) {
         InputStream resourceInputStream = ExtConfigBean.getDefaultConfigResourceInputStream(name);
         String s = IoUtil.readUtf8(resourceInputStream);
         return JsonMessage.success("", s);
@@ -217,7 +218,7 @@ public class SystemExtConfigController extends BaseServerController {
 
     @GetMapping(value = "add-item", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> addItem(@ValidatorItem String name) {
+    public IJsonMessage<Object> addItem(@ValidatorItem String name) {
         boolean existConfigResource = ExtConfigBean.existConfigResource(name);
         Assert.state(!existConfigResource, "对应的配置文件已经存在啦");
         File resourceFile = ExtConfigBean.getConfigResourceFile(name);

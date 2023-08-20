@@ -24,9 +24,9 @@ package org.dromara.jpom.common.forward;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.system.AgentException;
 import org.dromara.jpom.transport.INodeInfo;
 import org.dromara.jpom.transport.TransformServer;

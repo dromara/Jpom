@@ -24,9 +24,10 @@ package org.dromara.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseAgentController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.socket.AgentFileTailWatcher;
@@ -56,7 +57,7 @@ public class LogManageController extends BaseAgentController {
 
 
     @RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> logData() {
+    public IJsonMessage<List<JSONObject>> logData() {
         List<JSONObject> data = DirTreeUtil.getTreeData(LogbackConfig.getPath());
         return JsonMessage.success("", data);
     }
@@ -64,7 +65,7 @@ public class LogManageController extends BaseAgentController {
 
     @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public JsonMessage<String> logData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
+    public IJsonMessage<String> logData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
         File file = FileUtil.file(LogbackConfig.getPath(), path);
         // 判断修改时间
         long modified = file.lastModified();
