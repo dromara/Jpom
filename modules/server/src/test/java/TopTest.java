@@ -62,7 +62,7 @@ public class TopTest {
             } else {
                 is = process.getErrorStream();
             }
-            result = IoUtil.read(is, CharsetUtil.GBK);
+            result = IoUtil.read(is, CharsetUtil.CHARSET_GBK);
             is.close();
             process.destroy();
         } catch (IOException | InterruptedException e) {

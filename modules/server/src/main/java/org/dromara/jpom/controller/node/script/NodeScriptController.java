@@ -25,7 +25,12 @@ package org.dromara.jpom.controller.node.script;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
-import org.dromara.jpom.common.*;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
+import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -75,7 +80,7 @@ public class NodeScriptController extends BaseServerController {
      * @author Hotstrip
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<PageResultDto<NodeScriptCacheModel>> scriptList(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<NodeScriptCacheModel>> scriptList(HttpServletRequest request) {
         PageResultDto<NodeScriptCacheModel> pageResultDto = nodeScriptServer.listPageNode(request);
         return JsonMessage.success("success", pageResultDto);
     }
@@ -88,7 +93,7 @@ public class NodeScriptController extends BaseServerController {
      * @author Hotstrip
      */
     @PostMapping(value = "list_all", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<PageResultDto<NodeScriptCacheModel>> listAll(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<NodeScriptCacheModel>> listAll(HttpServletRequest request) {
         PageResultDto<NodeScriptCacheModel> modelPageResultDto = nodeScriptServer.listPage(request);
         return JsonMessage.success("", modelPageResultDto);
     }
@@ -107,7 +112,7 @@ public class NodeScriptController extends BaseServerController {
      */
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> save(String autoExecCron, HttpServletRequest request) {
+    public IJsonMessage<Object> save(String autoExecCron, HttpServletRequest request) {
         NodeModel node = getNode();
         this.checkCron(autoExecCron);
         JsonMessage<Object> jsonMessage = NodeForward.request(node, request, NodeUrl.Script_Save, new String[]{}, "nodeId", node.getId());
@@ -119,7 +124,7 @@ public class NodeScriptController extends BaseServerController {
 
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> del(@ValidatorItem String id, HttpServletRequest request) {
+    public IJsonMessage<Object> del(@ValidatorItem String id, HttpServletRequest request) {
         NodeModel node = getNode();
         JsonMessage<Object> requestData = NodeForward.request(node, request, NodeUrl.Script_Del);
         if (requestData.success()) {
@@ -137,7 +142,7 @@ public class NodeScriptController extends BaseServerController {
      */
     @GetMapping(value = "sync", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> syncProject(HttpServletRequest request) {
+    public IJsonMessage<Object> syncProject(HttpServletRequest request) {
         //
         NodeModel node = getNode();
         int cache = nodeScriptServer.delCache(node.getId(), request);
@@ -153,7 +158,7 @@ public class NodeScriptController extends BaseServerController {
     @GetMapping(value = "clear_all", produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission(superUser = true)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> clearAll() {
+    public IJsonMessage<Object> clearAll() {
         Entity where = Entity.create();
         where.set("id", " <> id");
         int del = nodeScriptServer.del(where);
@@ -168,7 +173,7 @@ public class NodeScriptController extends BaseServerController {
      */
     @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
+    public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
         NodeScriptCacheModel item = nodeScriptServer.getByKeyAndGlobal(id, request);
         UserModel user = getUser();
         NodeScriptCacheModel updateInfo;

@@ -26,8 +26,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.ReflectUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.model.data.ServerWhitelist;
@@ -78,7 +79,7 @@ public class OutGivingWhitelistController extends BaseServerController {
      * @author Hotstrip
      */
     @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Map<String, Object>> whiteList(HttpServletRequest request) {
+    public IJsonMessage<Map<String, Object>> whiteList(HttpServletRequest request) {
         ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(request);
         Field[] fields = ReflectUtil.getFields(ServerWhitelist.class);
         Map<String, Object> map = new HashMap<>(8);
@@ -103,7 +104,7 @@ public class OutGivingWhitelistController extends BaseServerController {
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> whitelistDirectorySubmit(String outGiving,
+    public IJsonMessage<String> whitelistDirectorySubmit(String outGiving,
                                                         String allowRemoteDownloadHost,
                                                         HttpServletRequest request) {
         String workspaceId = nodeService.getCheckUserWorkspace(request);
@@ -119,14 +120,14 @@ public class OutGivingWhitelistController extends BaseServerController {
     @RequestMapping(value = "whitelist-directory-submit2", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> whitelistDirectorySubmit2(String outGiving,
+    public IJsonMessage<String> whitelistDirectorySubmit2(String outGiving,
                                                          String allowRemoteDownloadHost,
                                                          @ValidatorItem String workspaceId) {
         nodeService.checkUserWorkspace(workspaceId);
         return this.whitelistDirectorySubmit(outGiving, allowRemoteDownloadHost, workspaceId);
     }
 
-    private JsonMessage<String> whitelistDirectorySubmit(String outGiving,
+    private IJsonMessage<String> whitelistDirectorySubmit(String outGiving,
                                                          String allowRemoteDownloadHost,
                                                          String workspaceId) {
         List<String> list = AgentWhitelist.parseToList(outGiving, true, "项目路径白名单不能为空");

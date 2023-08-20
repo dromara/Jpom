@@ -23,7 +23,7 @@
 package org.dromara.jpom.model.system;
 
 import cn.hutool.core.util.StrUtil;
-import org.dromara.jpom.model.BaseJsonModel;
+import cn.keepbx.jpom.model.BaseJsonModel;
 
 /**
  * 网络端口信息实体

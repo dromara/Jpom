@@ -22,9 +22,10 @@
  */
 package org.dromara.jpom.controller.node.system.nginx;
 
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.permission.ClassFeature;
@@ -90,7 +91,7 @@ public class NginxController extends BaseServerController {
      */
     @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public JsonMessage<List<String>> loadWhiteList() {
+    public IJsonMessage<List<String>> loadWhiteList() {
         List<String> list = whitelistDirectoryService.getNgxDirectory(getNode());
         return JsonMessage.success("success", list);
     }
@@ -102,7 +103,7 @@ public class NginxController extends BaseServerController {
      */
     @RequestMapping(value = "load-config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public JsonMessage<JSONObject> loadConfig() {
+    public IJsonMessage<JSONObject> loadConfig() {
         JSONObject data = NodeForward.requestData(getNode(), NodeUrl.System_Nginx_item_data, getRequest(), JSONObject.class);
         return JsonMessage.success("success", data);
     }

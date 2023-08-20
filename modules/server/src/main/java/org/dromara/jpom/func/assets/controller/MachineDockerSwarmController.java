@@ -25,12 +25,13 @@ package org.dromara.jpom.func.assets.controller;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
@@ -75,7 +76,7 @@ public class MachineDockerSwarmController extends BaseServerController {
 
     @PostMapping(value = "init", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> init(@ValidatorItem String id) throws Exception {
+    public IJsonMessage<Object> init(@ValidatorItem String id) throws Exception {
         MachineDockerModel dockerInfoModel1 = machineDockerServer.getByKey(id, false);
         Assert.notNull(dockerInfoModel1, "对应的 docker 不存在");
         IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
@@ -102,7 +103,7 @@ public class MachineDockerSwarmController extends BaseServerController {
      */
     @PostMapping(value = "join", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> join(@ValidatorItem String managerId,
+    public IJsonMessage<Object> join(@ValidatorItem String managerId,
                                     @ValidatorItem String id,
                                     @ValidatorItem String remoteAddr,
                                     @ValidatorItem String role) throws Exception {
@@ -163,7 +164,7 @@ public class MachineDockerSwarmController extends BaseServerController {
      */
     @GetMapping(value = "leave-force", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> leaveForce(@ValidatorItem String id) throws Exception {
+    public IJsonMessage<String> leaveForce(@ValidatorItem String id) throws Exception {
         //
         MachineDockerModel dockerInfoModel = machineDockerServer.getByKey(id, false);
         Assert.notNull(dockerInfoModel, "不存在对应的 docker");
@@ -206,7 +207,7 @@ public class MachineDockerSwarmController extends BaseServerController {
      */
     @GetMapping(value = "leave-node", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> leave(@ValidatorItem String id, @ValidatorItem String nodeId) throws Exception {
+    public IJsonMessage<String> leave(@ValidatorItem String id, @ValidatorItem String nodeId) throws Exception {
         MachineDockerModel dockerModel = machineDockerServer.getByKey(id, false);
         Assert.notNull(dockerModel, "没有对应的 docker");
         // 找到对应 docker 集群 node id 关联的数据

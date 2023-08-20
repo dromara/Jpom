@@ -32,12 +32,13 @@ import cn.hutool.core.util.*;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.JschUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
@@ -56,7 +57,10 @@ import org.dromara.jpom.service.system.WorkspaceEnvVarService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.system.extconf.BuildExtConfig;
 import org.dromara.jpom.transport.*;
-import org.dromara.jpom.util.*;
+import org.dromara.jpom.util.LogRecorder;
+import org.dromara.jpom.util.MySftp;
+import org.dromara.jpom.util.StrictSyncFinisher;
+import org.dromara.jpom.util.SyncFinisherUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -132,15 +136,15 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
      * @param request      请求
      * @return json
      */
-    public JsonMessage<String> addTask(String fileId,
-                                       String name,
-                                       int taskType,
-                                       String taskDataIds,
-                                       String releasePath,
-                                       String beforeScript,
-                                       String afterScript,
-                                       Map<String, String> env,
-                                       HttpServletRequest request) {
+    public IJsonMessage<String> addTask(String fileId,
+                                        String name,
+                                        int taskType,
+                                        String taskDataIds,
+                                        String releasePath,
+                                        String beforeScript,
+                                        String afterScript,
+                                        Map<String, String> env,
+                                        HttpServletRequest request) {
         FileStorageModel storageModel = fileStorageService.getByKey(fileId, request);
         Assert.notNull(storageModel, "不存在对应的文件");
         File storageSavePath = serverConfig.fileStorageSavePath();

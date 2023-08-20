@@ -31,14 +31,17 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.func.system.model.ClusterInfoModel;
+import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.WorkspaceModel;
@@ -72,13 +75,16 @@ public class WorkspaceController extends BaseServerController {
     private final WorkspaceService workspaceService;
     private final UserBindWorkspaceService userBindWorkspaceService;
     private final SystemParametersServer systemParametersServer;
+    private final ClusterInfoService clusterInfoService;
 
     public WorkspaceController(WorkspaceService workspaceService,
                                UserBindWorkspaceService userBindWorkspaceService,
-                               SystemParametersServer systemParametersServer) {
+                               SystemParametersServer systemParametersServer,
+                               ClusterInfoService clusterInfoService) {
         this.workspaceService = workspaceService;
         this.userBindWorkspaceService = userBindWorkspaceService;
         this.systemParametersServer = systemParametersServer;
+        this.clusterInfoService = clusterInfoService;
     }
 
     /**
@@ -90,13 +96,21 @@ public class WorkspaceController extends BaseServerController {
      */
     @PostMapping(value = "/edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> create(String id, @ValidatorItem String name, @ValidatorItem String description, String group) {
+    public IJsonMessage<String> create(String id,
+                                       @ValidatorItem String name,
+                                       @ValidatorItem String description,
+                                       String group,
+                                       @ValidatorItem(msg = "请选择集群") String clusterInfoId) {
+        //
+        ClusterInfoModel clusterInfoModel = clusterInfoService.getByKey(clusterInfoId);
+        Assert.notNull(clusterInfoModel, "对应的集群不存在");
         this.checkInfo(id, name);
         //
         WorkspaceModel workspaceModel = new WorkspaceModel();
         workspaceModel.setName(name);
         workspaceModel.setDescription(description);
         workspaceModel.setGroup(group);
+        workspaceModel.setClusterInfoId(clusterInfoModel.getId());
         if (StrUtil.isEmpty(id)) {
             // 创建
             workspaceService.insert(workspaceModel);
@@ -124,7 +138,7 @@ public class WorkspaceController extends BaseServerController {
      */
     @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<WorkspaceModel>> list() {
+    public IJsonMessage<PageResultDto<WorkspaceModel>> list() {
         PageResultDto<WorkspaceModel> listPage = workspaceService.listPage(getRequest());
         return JsonMessage.success("", listPage);
     }
@@ -136,7 +150,7 @@ public class WorkspaceController extends BaseServerController {
      */
     @GetMapping(value = "list-group-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<String>> listGroupAll() {
+    public IJsonMessage<List<String>> listGroupAll() {
         List<String> listGroup = workspaceService.listGroup();
         return JsonMessage.success("", listGroup);
     }
@@ -148,7 +162,7 @@ public class WorkspaceController extends BaseServerController {
      */
     @GetMapping(value = "/list_all")
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<WorkspaceModel>> listAll() {
+    public IJsonMessage<List<WorkspaceModel>> listAll() {
         List<WorkspaceModel> list = workspaceService.list();
         return JsonMessage.success("", list);
     }
@@ -162,7 +176,7 @@ public class WorkspaceController extends BaseServerController {
     @GetMapping(value = "pre-check-delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     @SystemPermission(superUser = true)
-    public JsonMessage<Tree<String>> preCheckDelete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+    public IJsonMessage<Tree<String>> preCheckDelete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
         //
         Assert.state(!StrUtil.equals(id, Const.WORKSPACE_DEFAULT_ID), "不能删除默认工作空间");
         // 判断是否存在关联数据
@@ -206,7 +220,7 @@ public class WorkspaceController extends BaseServerController {
     @GetMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     @SystemPermission(superUser = true)
-    public JsonMessage<String> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+    public IJsonMessage<String> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
         //
         Assert.state(!StrUtil.equals(id, Const.WORKSPACE_DEFAULT_ID), "不能删除默认工作空间");
         // 判断是否存在关联数据
@@ -270,7 +284,7 @@ public class WorkspaceController extends BaseServerController {
      */
     @RequestMapping(value = "get_menus_config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> getMenusConfig(String workspaceId) {
+    public IJsonMessage<JSONObject> getMenusConfig(String workspaceId) {
         WorkspaceModel workspaceModel = workspaceService.getByKey(workspaceId);
         Assert.notNull(workspaceModel, "不存在对应的工作空间");
         JSONObject config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("menus_config_{}", workspaceId), JSONObject.class);
@@ -283,7 +297,7 @@ public class WorkspaceController extends BaseServerController {
 
     @PostMapping(value = "save_menus_config.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> saveMenusConfig(String serverMenuKeys, String nodeMenuKeys, String workspaceId) {
+    public IJsonMessage<Object> saveMenusConfig(String serverMenuKeys, String nodeMenuKeys, String workspaceId) {
         WorkspaceModel workspaceModel = workspaceService.getByKey(workspaceId);
         Assert.notNull(workspaceModel, "不存在对应的工作空间");
         //

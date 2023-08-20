@@ -62,6 +62,7 @@ public class TestIp {
 
     @Test
     public void test1() {
-
+        String localHostName = NetUtil.getLocalHostName();
+        System.out.println(localHostName);
     }
 }

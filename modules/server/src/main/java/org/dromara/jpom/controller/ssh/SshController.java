@@ -23,9 +23,10 @@
 package org.dromara.jpom.controller.ssh;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
@@ -79,7 +80,7 @@ public class SshController extends BaseServerController {
 
     @PostMapping(value = "list_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<SshModel>> listData(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<SshModel>> listData(HttpServletRequest request) {
         PageResultDto<SshModel> pageResultDto = sshService.listPage(request);
         pageResultDto.each(sshModel -> {
             sshModel.setMachineSsh(machineSshServer.getByKey(sshModel.getMachineSshId()));
@@ -91,14 +92,14 @@ public class SshController extends BaseServerController {
 
     @GetMapping(value = "list_data_all.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<SshModel>> listDataAll(HttpServletRequest request) {
+    public IJsonMessage<List<SshModel>> listDataAll(HttpServletRequest request) {
         List<SshModel> list = sshService.listByWorkspace(request);
         return new JsonMessage<>(200, "", list);
     }
 
     @GetMapping(value = "get-item.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<SshModel> getItem(@ValidatorItem String id, HttpServletRequest request) {
+    public IJsonMessage<SshModel> getItem(@ValidatorItem String id, HttpServletRequest request) {
         SshModel byKey = sshService.getByKey(id, request);
         Assert.notNull(byKey, "对应的 ssh 不存在");
         return new JsonMessage<>(200, "", byKey);
@@ -111,7 +112,7 @@ public class SshController extends BaseServerController {
      */
     @GetMapping(value = "list-group-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<String>> listGroupAll(HttpServletRequest request) {
+    public IJsonMessage<List<String>> listGroupAll(HttpServletRequest request) {
         List<String> listGroup = sshService.listGroup(request);
         return JsonMessage.success("", listGroup);
     }
@@ -127,7 +128,7 @@ public class SshController extends BaseServerController {
      */
     @PostMapping(value = "save.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
+    public IJsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
                                     String id,
                                     String group,
                                     HttpServletRequest request) {
@@ -142,7 +143,7 @@ public class SshController extends BaseServerController {
 
     @PostMapping(value = "del.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> del(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id, HttpServletRequest request) {
+    public IJsonMessage<Object> del(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id, HttpServletRequest request) {
         boolean checkSsh = buildInfoService.checkReleaseMethodByLike(id, request, BuildReleaseMethod.Ssh);
         Assert.state(!checkSsh, "当前ssh存在构建项，不能删除");
         // 判断是否绑定节点
@@ -158,7 +159,7 @@ public class SshController extends BaseServerController {
     @PostMapping(value = "del-fore", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     @SystemPermission
-    public JsonMessage<Object> delFore(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
+    public IJsonMessage<Object> delFore(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
         boolean checkSsh = buildInfoService.checkReleaseMethodByLike(id, BuildReleaseMethod.Ssh);
         Assert.state(!checkSsh, "当前ssh存在构建项，不能删除");
         // 判断是否绑定节点
@@ -178,7 +179,7 @@ public class SshController extends BaseServerController {
      */
     @PostMapping(value = "log_list_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.SSH_TERMINAL_LOG, method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<SshTerminalExecuteLog>> logListData(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<SshTerminalExecuteLog>> logListData(HttpServletRequest request) {
         PageResultDto<SshTerminalExecuteLog> pageResult = sshTerminalExecuteLogService.listPage(request);
         return JsonMessage.success("获取成功", pageResult);
     }
@@ -193,7 +194,7 @@ public class SshController extends BaseServerController {
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public JsonMessage<Object> syncToWorkspace(@ValidatorItem String ids,
+    public IJsonMessage<Object> syncToWorkspace(@ValidatorItem String ids,
                                                @ValidatorItem String toWorkspaceId,
                                                HttpServletRequest request) {
         String nowWorkspaceId = nodeService.getCheckUserWorkspace(request);

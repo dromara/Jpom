@@ -24,11 +24,12 @@ package org.dromara.jpom.controller;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.interceptor.LoginInterceptor;
 import org.dromara.jpom.common.interceptor.NotLogin;
 import org.dromara.jpom.common.validator.ValidatorConfig;
@@ -84,7 +85,7 @@ public class InstallController extends BaseServerController {
      */
     @PostMapping(value = "install_submit.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<JSONObject> installSubmit(
+    public IJsonMessage<JSONObject> installSubmit(
         @ValidatorConfig(value = {
             @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "登录名不能为空"),
             @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = UserModel.USER_NAME_MIN_LEN + ":" + Const.ID_MAX_LEN, msg = "登录名长度范围" + UserModel.USER_NAME_MIN_LEN + "-" + Const.ID_MAX_LEN),

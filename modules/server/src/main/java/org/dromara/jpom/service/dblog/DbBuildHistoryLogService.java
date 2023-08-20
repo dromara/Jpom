@@ -32,11 +32,12 @@ import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
+import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.event.ISystemTask;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.build.BuildExtraModule;
 import org.dromara.jpom.build.BuildUtil;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.model.BaseDbModel;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.BuildInfoModel;
@@ -95,7 +96,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
      * @param buildHistoryLog 构建记录
      * @return json
      */
-    public JsonMessage<String> deleteLogAndFile(BuildHistoryLog buildHistoryLog) {
+    public IJsonMessage<String> deleteLogAndFile(BuildHistoryLog buildHistoryLog) {
         if (buildHistoryLog == null) {
             return JsonMessage.success("没有对应构建记录,忽略删除");
         }
@@ -150,7 +151,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
 
     private Predicate<BuildHistoryLog> predicate() {
         return buildHistoryLog1 -> {
-            JsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog1);
+            IJsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog1);
             if (!jsonMessage.success()) {
                 log.warn("{} {} {}", buildHistoryLog1.getBuildName(), buildHistoryLog1.getBuildNumberId(), jsonMessage);
                 return false;
@@ -181,7 +182,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
         super.autoLoopClear("startTime", saveCount,
             null,
             buildHistoryLog1 -> {
-                JsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog1);
+                IJsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog1);
                 if (!jsonMessage.success()) {
                     log.warn("{} {} {}", buildHistoryLog1.getBuildName(), buildHistoryLog1.getBuildNumberId(), jsonMessage);
                     return false;

@@ -26,9 +26,10 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
@@ -84,7 +85,7 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "getMonitorList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<MonitorModel>> getMonitorList() {
+    public IJsonMessage<PageResultDto<MonitorModel>> getMonitorList() {
         PageResultDto<MonitorModel> pageResultDto = monitorService.listPage(getRequest());
         return JsonMessage.success("", pageResultDto);
     }
@@ -97,7 +98,7 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id) throws SQLException {
+    public IJsonMessage<Object> deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id) throws SQLException {
         //
         HttpServletRequest request = getRequest();
         int delByKey = monitorService.delByKey(id, request);
@@ -119,7 +120,7 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> updateMonitor(String id,
+    public IJsonMessage<Object> updateMonitor(String id,
                                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空") String name,
                                              @ValidatorItem(msg = "请配置监控周期") String execCron,
                                              String notifyUser, String webhook) {

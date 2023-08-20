@@ -25,8 +25,13 @@ package org.dromara.jpom.controller.node;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.*;
+import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
@@ -75,7 +80,7 @@ public class NodeProjectInfoController extends BaseServerController {
      * 加载节点项目列表
      */
     @PostMapping(value = "node_project_list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<PageResultDto<ProjectInfoCacheModel>> nodeProjectList() {
+    public IJsonMessage<PageResultDto<ProjectInfoCacheModel>> nodeProjectList() {
         PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPageNode(getRequest());
         return JsonMessage.success("success", resultDto);
     }
@@ -89,7 +94,7 @@ public class NodeProjectInfoController extends BaseServerController {
      * @author Hotstrip
      */
     @PostMapping(value = "project_list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<PageResultDto<ProjectInfoCacheModel>> projectList() {
+    public IJsonMessage<PageResultDto<ProjectInfoCacheModel>> projectList() {
         PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPage(getRequest());
         return JsonMessage.success("success", resultDto);
     }
@@ -102,7 +107,7 @@ public class NodeProjectInfoController extends BaseServerController {
      * @author Hotstrip
      */
     @GetMapping(value = "project_list_all", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<ProjectInfoCacheModel>> projectListAll() {
+    public IJsonMessage<List<ProjectInfoCacheModel>> projectListAll() {
         List<ProjectInfoCacheModel> projectInfoCacheModels = projectInfoCacheService.listByWorkspace(getRequest());
         return JsonMessage.success("", projectInfoCacheModels);
     }
@@ -114,7 +119,7 @@ public class NodeProjectInfoController extends BaseServerController {
      */
     @GetMapping(value = "list-project-group-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<String>> listGroupAll(HttpServletRequest request) {
+    public IJsonMessage<List<String>> listGroupAll(HttpServletRequest request) {
         List<String> listGroup = projectInfoCacheService.listGroup(request);
         return JsonMessage.success("", listGroup);
     }
@@ -126,7 +131,7 @@ public class NodeProjectInfoController extends BaseServerController {
      */
     @GetMapping(value = "sync_project", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
-    public JsonMessage<Object> syncProject(String nodeId) {
+    public IJsonMessage<Object> syncProject(String nodeId) {
         NodeModel nodeModel = nodeService.getByKey(nodeId);
         Assert.notNull(nodeModel, "对应的节点不存在");
         int count = projectInfoCacheService.delCache(nodeId, getRequest());
@@ -142,7 +147,7 @@ public class NodeProjectInfoController extends BaseServerController {
     @GetMapping(value = "clear_all_project", produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission(superUser = true)
     @Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
-    public JsonMessage<Object> clearAll() {
+    public IJsonMessage<Object> clearAll() {
         Entity where = Entity.create();
         where.set("id", " <> id");
         int del = projectInfoCacheService.del(where);
@@ -159,7 +164,7 @@ public class NodeProjectInfoController extends BaseServerController {
      */
     @GetMapping(value = "project-sort-item", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId) {
+    public IJsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId) {
         HttpServletRequest request = getRequest();
         if (StrUtil.equalsIgnoreCase(method, "top")) {
             projectInfoCacheService.sortToTop(id, request);
@@ -181,7 +186,7 @@ public class NodeProjectInfoController extends BaseServerController {
      */
     @RequestMapping(value = "project-trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
+    public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
         ProjectInfoCacheModel item = projectInfoCacheService.getByKey(id, getRequest());
         UserModel user = getUser();
         ProjectInfoCacheModel updateItem;

@@ -24,7 +24,12 @@ package org.dromara.jpom.controller.build;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import org.dromara.jpom.common.*;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
+import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.ClassFeature;
@@ -67,7 +72,7 @@ public class BuildInfoTriggerController extends BaseServerController {
      */
     @RequestMapping(value = "/build/trigger/url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
+    public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
         BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
         UserModel user = getUser();
         BuildInfoModel updateInfo;

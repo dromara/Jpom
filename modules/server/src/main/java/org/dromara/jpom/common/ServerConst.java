@@ -73,4 +73,6 @@ public class ServerConst extends Const {
     public static final int ACCOUNT_LOCKED = 802;
     public static final String LOGIN_TIP = "登录信息已失效,重新登录";
     public static final String ACCOUNT_LOCKED_TIP = "账号已经被禁用,不能使用";
+
+    public static final String CHECK_SYSTEM = "check-system";
 }

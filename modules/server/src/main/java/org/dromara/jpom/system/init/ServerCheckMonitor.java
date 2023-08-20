@@ -23,12 +23,11 @@
 package org.dromara.jpom.system.init;
 
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.event.ISystemTask;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ILoadEvent;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.RemoteVersion;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
@@ -54,6 +53,18 @@ import java.util.List;
 @Slf4j
 public class ServerCheckMonitor implements ILoadEvent, ISystemTask {
 
+    private final NodeService nodeService;
+    private final NodeScriptServer nodeScriptServer;
+    private final NodeScriptExecuteLogServer nodeScriptExecuteLogServer;
+
+    public ServerCheckMonitor(NodeService nodeService,
+                              NodeScriptServer nodeScriptServer,
+                              NodeScriptExecuteLogServer nodeScriptExecuteLogServer) {
+        this.nodeService = nodeService;
+        this.nodeScriptServer = nodeScriptServer;
+        this.nodeScriptExecuteLogServer = nodeScriptExecuteLogServer;
+    }
+
     /**
      * 同步 节点的脚本模版日志
      *
@@ -61,7 +72,7 @@ public class ServerCheckMonitor implements ILoadEvent, ISystemTask {
      */
     private void pullScriptLogItem(NodeModel nodeModel) {
         try {
-            NodeScriptExecuteLogServer nodeScriptExecuteLogServer = SpringUtil.getBean(NodeScriptExecuteLogServer.class);
+            //NodeScriptExecuteLogServer nodeScriptExecuteLogServer = SpringUtil.getBean(NodeScriptExecuteLogServer.class);
             Collection<String> strings = nodeScriptExecuteLogServer.syncExecuteNodeInc(nodeModel);
             if (strings == null) {
                 return;
@@ -82,8 +93,8 @@ public class ServerCheckMonitor implements ILoadEvent, ISystemTask {
     public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         // 拉取 脚本模版日志
         CronUtils.upsert("pull_script_log", "0 0/1 * * * ?", () -> {
-            NodeService nodeService = SpringUtil.getBean(NodeService.class);
-            NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
+            //NodeService nodeService = SpringUtil.getBean(NodeService.class);
+            //NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
             List<String> nodeIds = nodeScriptServer.hasScriptNode();
             if (nodeIds == null) {
                 return;

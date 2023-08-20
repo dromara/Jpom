@@ -25,10 +25,11 @@ package org.dromara.jpom.controller.docker.base;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
@@ -54,7 +55,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
 
     @GetMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> info(@ValidatorItem String id) throws Exception {
+    public IJsonMessage<JSONObject> info(@ValidatorItem String id) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         JSONObject info = plugin.execute("info", parameter, JSONObject.class);
@@ -64,7 +65,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     @PostMapping(value = "prune", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     @SystemPermission
-    public JsonMessage<Object> prune(@ValidatorItem String id, @ValidatorItem String pruneType, String labels, String until, String dangling) throws Exception {
+    public IJsonMessage<Object> prune(@ValidatorItem String id, @ValidatorItem String pruneType, String labels, String until, String dangling) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("pruneType", pruneType);
@@ -82,7 +83,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
      */
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<JSONObject>> list(@ValidatorItem String id) throws Exception {
+    public IJsonMessage<List<JSONObject>> list(@ValidatorItem String id) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("name", getParameter("name"));
@@ -98,7 +99,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
      */
     @PostMapping(value = "list-compose", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<JSONObject>> listCompose(@ValidatorItem String id) throws Exception {
+    public IJsonMessage<List<JSONObject>> listCompose(@ValidatorItem String id) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("name", getParameter("name"));
@@ -114,7 +115,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
      */
     @GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> del(@ValidatorItem String id, String containerId) throws Exception {
+    public IJsonMessage<Object> del(@ValidatorItem String id, String containerId) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
@@ -127,7 +128,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
      */
     @GetMapping(value = "start", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<Object> start(@ValidatorItem String id, String containerId) throws Exception {
+    public IJsonMessage<Object> start(@ValidatorItem String id, String containerId) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
@@ -141,7 +142,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
      */
     @GetMapping(value = "stop", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<Object> stop(@ValidatorItem String id, String containerId) throws Exception {
+    public IJsonMessage<Object> stop(@ValidatorItem String id, String containerId) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
@@ -155,7 +156,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
      */
     @GetMapping(value = "restart", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<Object> restart(@ValidatorItem String id, String containerId) throws Exception {
+    public IJsonMessage<Object> restart(@ValidatorItem String id, String containerId) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
@@ -168,7 +169,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
      */
     @GetMapping(value = "stats", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<Map<String, JSONObject>> stats(@ValidatorItem String id, String containerId) throws Exception {
+    public IJsonMessage<Map<String, JSONObject>> stats(@ValidatorItem String id, String containerId) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
@@ -181,7 +182,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
      */
     @GetMapping(value = "inspect-container", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<JSONObject> inspectContainer(@ValidatorItem String id, @ValidatorItem String containerId) throws Exception {
+    public IJsonMessage<JSONObject> inspectContainer(@ValidatorItem String id, @ValidatorItem String containerId) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
@@ -197,7 +198,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
      */
     @PostMapping(value = "update-container", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<JSONObject> updateContainer(@RequestBody JSONObject jsonObject) throws Exception {
+    public IJsonMessage<JSONObject> updateContainer(@RequestBody JSONObject jsonObject) throws Exception {
         // @ValidatorItem String id, String containerId
         String id = jsonObject.getString("id");
         Assert.hasText(id, "id 不能为空");
@@ -216,7 +217,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
      */
     @PostMapping(value = "rebuild-container", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<Object> reBuildContainer(@RequestBody JSONObject jsonObject) throws Exception {
+    public IJsonMessage<Object> reBuildContainer(@RequestBody JSONObject jsonObject) throws Exception {
         String id = jsonObject.getString("id");
         String containerId = jsonObject.getString("containerId");
         Assert.hasText(id, "id 不能为空");

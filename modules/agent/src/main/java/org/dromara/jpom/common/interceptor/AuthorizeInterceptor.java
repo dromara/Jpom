@@ -24,8 +24,8 @@ package org.dromara.jpom.common.interceptor;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.system.AgentAuthorize;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;

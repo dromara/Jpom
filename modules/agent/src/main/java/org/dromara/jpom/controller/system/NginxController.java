@@ -28,6 +28,8 @@ import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.github.odiszapc.nginxparser.NgxBlock;
@@ -36,7 +38,6 @@ import com.github.odiszapc.nginxparser.NgxEntry;
 import com.github.odiszapc.nginxparser.NgxParam;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.commander.AbstractSystemCommander;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -84,7 +85,7 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> list(String whitePath, String name, String showAll) {
+    public IJsonMessage<List<JSONObject>> list(String whitePath, String name, String showAll) {
         boolean checkNgxDirectory = whitelistDirectoryService.checkNgxDirectory(whitePath);
         Assert.state(checkNgxDirectory, "文件路径错误,非白名单路径");
         if (StrUtil.isEmpty(name)) {
@@ -98,7 +99,7 @@ public class NginxController extends BaseAgentController {
      * nginx列表
      */
     @RequestMapping(value = "tree.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONArray> tree() {
+    public IJsonMessage<JSONArray> tree() {
         JSONArray array = nginxService.tree();
         return JsonMessage.success("", array);
     }
@@ -111,7 +112,7 @@ public class NginxController extends BaseAgentController {
      * @return 页面
      */
     @RequestMapping(value = "item_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> itemData(String path, String name) {
+    public IJsonMessage<JSONObject> itemData(String path, String name) {
         boolean ngxDirectory = whitelistDirectoryService.checkNgxDirectory(path);
         Assert.state(ngxDirectory, "文件路径错误,非白名单路径");
         String realPath = AgentWhitelist.convertRealPath(path);
@@ -142,7 +143,7 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> updateNgx(String name, String whitePath, String genre, @ValidatorItem(msg = "请填写配置信息") String context) {
+    public IJsonMessage<String> updateNgx(String name, String whitePath, String genre, @ValidatorItem(msg = "请填写配置信息") String context) {
         this.checkName(name);
         //
         boolean ngxDirectory = whitelistDirectoryService.checkNgxDirectory(whitePath);
@@ -243,7 +244,7 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> delete(String path, String name, String type, String from) {
+    public IJsonMessage<String> delete(String path, String name, String type, String from) {
         if (!whitelistDirectoryService.checkNgxDirectory(path)) {
             return new JsonMessage<>(400, "非法操作");
         }
@@ -284,7 +285,7 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> status() {
+    public IJsonMessage<JSONObject> status() {
         String name = nginxService.getServiceName();
         if (StrUtil.isEmpty(name)) {
             return new JsonMessage<>(500, "服务名错误");
@@ -303,7 +304,7 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "updateConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> updateConf(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "服务名称错误") String name) {
+    public IJsonMessage<Object> updateConf(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "服务名称错误") String name) {
         JSONObject ngxConf = nginxService.getNgxConf();
         ngxConf.put("name", name);
         nginxService.save(ngxConf);
@@ -316,7 +317,7 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> config() {
+    public IJsonMessage<JSONObject> config() {
         JSONObject ngxConf = nginxService.getNgxConf();
         return JsonMessage.success("", ngxConf);
     }
@@ -327,7 +328,7 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "open", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> open() {
+    public IJsonMessage<Object> open() {
         String name = nginxService.getServiceName();
         String result = AbstractSystemCommander.getInstance().startService(name);
         return JsonMessage.success("nginx服务已启动 " + result);
@@ -339,7 +340,7 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "close", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> close() {
+    public IJsonMessage<Object> close() {
         String name = nginxService.getServiceName();
         String result = AbstractSystemCommander.getInstance().stopService(name);
         return JsonMessage.success("nginx服务已停止 " + result);
@@ -391,7 +392,7 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> reload() {
+    public IJsonMessage<String> reload() {
         String checkResult = this.checkNginx();
         if (StrUtil.isNotEmpty(checkResult) && !StrUtil.containsIgnoreCase(checkResult, "successful")) {
             return new JsonMessage<>(400, checkResult);

@@ -1,10 +1,20 @@
 <template>
   <div class="user-header">
     <a-button-group>
+      <!-- 工作空间信息 -->
       <a-button v-if="this.mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
-          <a-tooltip :title="`${selectWorkspace.name} 【分组名：${selectWorkspace.group}】`">
+          <a-tooltip :title="`工作空间名称：${selectWorkspace.name} 【分组名：${selectWorkspace.group}】`">
+            <a-icon type="switcher" />
             {{ selectWorkspace.name }}
+          </a-tooltip>
+        </div>
+      </a-button>
+      <a-button v-if="this.mode === 'management'" type="dashed">
+        <div class="workspace-name">
+          <a-tooltip :title="`集群名称：${this.selectCluster && this.selectCluster.name}`">
+            <a-icon type="cluster" />
+            {{ this.selectCluster && this.selectCluster.name }}
           </a-tooltip>
         </div>
       </a-button>
@@ -16,6 +26,7 @@
       <a-dropdown>
         <a-button type="primary" class="jpom-user-operation btn-group-item" icon="down"> </a-button>
         <a-menu slot="overlay">
+          <!-- 工作空间信息 -->
           <template v-if="this.mode === 'normal'">
             <a-sub-menu>
               <template #title>
@@ -53,6 +64,22 @@
               </template>
             </a-sub-menu>
             <a-menu-divider />
+          </template>
+          <!-- 集群信息 -->
+          <template v-if="this.mode === 'management'">
+            <a-sub-menu>
+              <template #title>
+                <a-button type="link" icon="retweet">切换集群</a-button>
+              </template>
+              <template v-for="(item, index) in myClusterList">
+                <a-menu-item v-if="index != -1" :disabled="item.id === selectCluster.id || !item.url" @click="handleWorkspaceChange(item.id)" :key="index">
+                  <a-button type="link" :disabled="item.id === selectCluster.id || !item.url">
+                    {{ item.name }}
+                  </a-button>
+                </a-menu-item>
+                <a-menu-divider v-if="index < myClusterList.length" :key="`${item.id}-divider`" />
+              </template>
+            </a-sub-menu>
           </template>
           <a-menu-item @click="handleUpdatePwd">
             <a-button type="link" icon="lock"> 安全管理 </a-button>
@@ -315,7 +342,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { bindMfa, closeMfa, editUserInfo, generateMfa, getUserInfo, myWorkspace, sendEmailCode, updatePwd } from "@/api/user/user";
+import { bindMfa, closeMfa, editUserInfo, generateMfa, getUserInfo, myWorkspace, sendEmailCode, updatePwd, clusterList } from "@/api/user/user";
 import QRCode from "qrcodejs2";
 import sha1 from "js-sha1";
 import Vue from "vue";
@@ -340,8 +367,9 @@ export default {
       temp: {},
       tempVue: null,
       myWorkspaceList: [],
+      myClusterList: [],
+      currentClusterId: "",
       selectWorkspace: {},
-
       customizeVisible: false,
       // 表单校验规则
       rules: {
@@ -396,6 +424,14 @@ export default {
     scrollbarFlag() {
       return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
     },
+    selectCluster: {
+      get: function () {
+        const temp = this.myClusterList.find((item) => {
+          return item.id === this.currentClusterId;
+        });
+        return temp;
+      },
+    },
   },
   inject: ["reload"],
   created() {
@@ -418,6 +454,7 @@ export default {
     },
     init() {
       if (this.mode === "normal") {
+        // 获取工作空间
         myWorkspace().then((res) => {
           if (res.code == 200 && res.data) {
             const tempArray = res.data;
@@ -439,6 +476,13 @@ export default {
           }
         });
       }
+      // 获取集群
+      clusterList().then((res) => {
+        if (res.code == 200 && res.data) {
+          this.myClusterList = res.data.list || [];
+          this.currentClusterId = res.data.currentId;
+        }
+      });
       this.checkMfa();
     },
     checkMfa() {

@@ -24,9 +24,10 @@ package org.dromara.jpom.controller.manage;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.commander.CommandOpResult;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.system.AgentConfig;
@@ -55,18 +56,18 @@ public class FileManageController extends BaseAgentController {
     }
 
     @RequestMapping(value = "upload-sharding", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<CommandOpResult> uploadSharding(MultipartFile file,
-                                                       String sliceId,
-                                                       Integer totalSlice,
-                                                       Integer nowSlice,
-                                                       String fileSumMd5) throws Exception {
+    public IJsonMessage<CommandOpResult> uploadSharding(MultipartFile file,
+                                                        String sliceId,
+                                                        Integer totalSlice,
+                                                        Integer nowSlice,
+                                                        String fileSumMd5) throws Exception {
         String tempPathName = agentConfig.getFixedTempPathName();
         this.uploadSharding(file, tempPathName, sliceId, totalSlice, nowSlice, fileSumMd5);
         return JsonMessage.success("上传成功");
     }
 
     @RequestMapping(value = "sharding-merge", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<CommandOpResult> shardingMerge(String type,
+    public IJsonMessage<CommandOpResult> shardingMerge(String type,
                                                       @ValidatorItem String path,
                                                       Integer stripComponents,
                                                       String sliceId,

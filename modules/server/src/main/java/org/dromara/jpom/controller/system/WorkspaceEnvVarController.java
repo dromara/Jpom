@@ -27,9 +27,10 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
@@ -76,7 +77,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
      */
     @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<WorkspaceEnvVarModel>> list(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<WorkspaceEnvVarModel>> list(HttpServletRequest request) {
         PageResultDto<WorkspaceEnvVarModel> listPage = workspaceEnvVarService.listPage(request);
         listPage.each(workspaceEnvVarModel -> {
             Integer privacy = workspaceEnvVarModel.getPrivacy();
@@ -94,7 +95,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
      */
     @PostMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<WorkspaceEnvVarModel>> allList(HttpServletRequest request) {
+    public IJsonMessage<List<WorkspaceEnvVarModel>> allList(HttpServletRequest request) {
         List<WorkspaceEnvVarModel> list = workspaceEnvVarService.listByWorkspace(request);
         list.forEach(workspaceEnvVarModel -> {
             Integer privacy = workspaceEnvVarModel.getPrivacy();
@@ -116,7 +117,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
      */
     @PostMapping(value = "/edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> edit(String id,
+    public IJsonMessage<Object> edit(String id,
                                     @ValidatorItem String workspaceId,
                                     @ValidatorItem String name,
                                     String value,
@@ -231,7 +232,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
      */
     @GetMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id,
+    public IJsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id,
                                       @ValidatorItem String workspaceId) {
         if (!getUser().isSystemUser()) {
             Assert.state(!StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL), "全局工作空间变量请到系统管理修改");

@@ -26,8 +26,9 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.model.BaseEnum;
@@ -127,7 +128,7 @@ public class BuildExecuteService {
      * @param parametersEnv    外部环境变量
      * @return json
      */
-    public JsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay, int triggerBuildType, String buildRemark, Object... parametersEnv) {
+    public IJsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay, int triggerBuildType, String buildRemark, Object... parametersEnv) {
         return this.start(buildInfoId, userModel, delay, triggerBuildType, buildRemark, null, parametersEnv);
     }
 
@@ -143,7 +144,7 @@ public class BuildExecuteService {
      * @param parametersEnv       外部环境变量
      * @return json
      */
-    public JsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay,
+    public IJsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay,
                                       int triggerBuildType, String buildRemark, String checkRepositoryDiff,
                                       Object... parametersEnv) {
         synchronized (buildInfoId.intern()) {

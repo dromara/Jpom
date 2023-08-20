@@ -26,9 +26,10 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorConfig;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -132,7 +133,7 @@ public class BuildInfoHistoryController extends BaseServerController {
 
     @RequestMapping(value = "/build/history/history_list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<BuildHistoryLog>> historyList() {
+    public IJsonMessage<PageResultDto<BuildHistoryLog>> historyList() {
         PageResultDto<BuildHistoryLog> pageResultTemp = dbBuildHistoryLogService.listPage(getRequest());
         pageResultTemp.each(buildHistoryLog -> {
             File file = BuildUtil.getHistoryPackageFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
@@ -152,11 +153,11 @@ public class BuildInfoHistoryController extends BaseServerController {
      */
     @RequestMapping(value = "/build/history/delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
+    public IJsonMessage<String> delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
         List<String> strings = StrUtil.splitTrim(logId, StrUtil.COMMA);
         for (String itemId : strings) {
             BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(itemId, getRequest());
-            JsonMessage<String> jsonMessage = dbBuildHistoryLogService.deleteLogAndFile(buildHistoryLog);
+            IJsonMessage<String> jsonMessage = dbBuildHistoryLogService.deleteLogAndFile(buildHistoryLog);
             if (!jsonMessage.success()) {
                 return jsonMessage;
             }

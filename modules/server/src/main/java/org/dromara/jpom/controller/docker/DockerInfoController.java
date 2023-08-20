@@ -24,11 +24,12 @@ package org.dromara.jpom.controller.docker;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
@@ -74,7 +75,7 @@ public class DockerInfoController extends BaseServerController {
      */
     @GetMapping(value = "api-versions", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<JSONObject>> apiVersions() throws Exception {
+    public IJsonMessage<List<JSONObject>> apiVersions() throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
         List<JSONObject> data = (List<JSONObject>) plugin.execute("apiVersions");
         return JsonMessage.success("", data);
@@ -85,7 +86,7 @@ public class DockerInfoController extends BaseServerController {
      */
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<DockerInfoModel>> list(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<DockerInfoModel>> list(HttpServletRequest request) {
         // load list with page
         PageResultDto<DockerInfoModel> resultDto = dockerInfoService.listPage(request);
         resultDto.each(dockerInfoModel -> {
@@ -100,7 +101,7 @@ public class DockerInfoController extends BaseServerController {
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> edit(@ValidatorItem String id, @ValidatorItem String name, String tags, HttpServletRequest request) throws Exception {
+    public IJsonMessage<Object> edit(@ValidatorItem String id, @ValidatorItem String name, String tags, HttpServletRequest request) throws Exception {
         DockerInfoModel dockerInfoModel = new DockerInfoModel();
         dockerInfoModel.setId(id);
         dockerInfoModel.setName(name);
@@ -116,7 +117,7 @@ public class DockerInfoController extends BaseServerController {
 
     @GetMapping(value = "del", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> del(@ValidatorItem String id, HttpServletRequest request) throws Exception {
+    public IJsonMessage<Object> del(@ValidatorItem String id, HttpServletRequest request) throws Exception {
         dockerInfoService.delByKey(id, request);
         return JsonMessage.success("删除成功");
     }
@@ -132,7 +133,7 @@ public class DockerInfoController extends BaseServerController {
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public JsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
+    public IJsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
         String nowWorkspaceId = dockerInfoService.getCheckUserWorkspace(getRequest());
         //
         dockerInfoService.checkUserWorkspace(toWorkspaceId);

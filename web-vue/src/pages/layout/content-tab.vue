@@ -1,5 +1,5 @@
 <template>
-  <a-tabs v-model="activeKey" class="my-tabs" hide-add type="editable-card" @edit="onEdit" @change="changeTab">
+  <a-tabs v-model="activeKey" size="small" class="my-tabs" hide-add type="editable-card" @edit="onEdit" @change="changeTab">
     <a-tab-pane v-for="(tab, index) in nowTabList" :key="tab.key" :closable="nowTabList.length > 1">
       <template slot="tab">
         <a-dropdown :trigger="['contextmenu']">
@@ -112,9 +112,13 @@ export default {
 </script>
 <style scoped>
 .my-tabs {
-  flex: auto;
+  /* flex: auto; */
   /* margin-right: 20px; */
-  align-self: center;
-  height: 40px;
+  /* align-self: center; */
+  /* height: 40px; */
+}
+
+/deep/ .ant-tabs-bar {
+  margin: 0;
 }
 </style>

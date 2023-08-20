@@ -28,10 +28,11 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.db.Entity;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.func.BaseGroupNameController;
@@ -103,14 +104,14 @@ public class MachineDockerController extends BaseGroupNameController {
 
     @PostMapping(value = "list-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<MachineDockerModel>> listJson(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<MachineDockerModel>> listJson(HttpServletRequest request) {
         PageResultDto<MachineDockerModel> pageResultDto = machineDockerServer.listPage(request);
         return JsonMessage.success("", pageResultDto);
     }
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> edit(String id) throws Exception {
+    public IJsonMessage<Object> edit(String id) throws Exception {
         MachineDockerModel dockerInfoModel = this.takeOverModel();
         if (StrUtil.isEmpty(id)) {
             // 创建
@@ -223,7 +224,7 @@ public class MachineDockerController extends BaseGroupNameController {
 
     @GetMapping(value = "try-local-docker", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> tryLocalDocker(HttpServletRequest request) {
+    public IJsonMessage<String> tryLocalDocker(HttpServletRequest request) {
         try {
             IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
             String dockerHost = (String) plugin.execute("testLocal", new HashMap<>(1));
@@ -247,7 +248,7 @@ public class MachineDockerController extends BaseGroupNameController {
 
     @GetMapping(value = "del", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> del(@ValidatorItem String id) throws Exception {
+    public IJsonMessage<Object> del(@ValidatorItem String id) throws Exception {
         //
         {
             DockerInfoModel dockerInfoModel = new DockerInfoModel();
@@ -279,7 +280,7 @@ public class MachineDockerController extends BaseGroupNameController {
      */
     @PostMapping(value = "distribute", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> distribute(@ValidatorItem String ids, @ValidatorItem String workspaceId, String type) {
+    public IJsonMessage<String> distribute(@ValidatorItem String ids, @ValidatorItem String workspaceId, String type) {
         List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
         for (String id : list) {
             MachineDockerModel machineDockerModel = machineDockerServer.getByKey(id);
@@ -318,7 +319,7 @@ public class MachineDockerController extends BaseGroupNameController {
 
     @GetMapping(value = "list-workspace-docker", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> listWorkspaceSsh(@ValidatorItem String id) {
+    public IJsonMessage<JSONObject> listWorkspaceSsh(@ValidatorItem String id) {
         MachineDockerModel machineDockerModel = machineDockerServer.getByKey(id);
         Assert.notNull(machineDockerModel, "没有对应的 docker");
         JSONObject jsonObject = new JSONObject();
@@ -358,7 +359,7 @@ public class MachineDockerController extends BaseGroupNameController {
      */
     @PostMapping(value = "import-tls", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<String> importTls(MultipartFile file) throws Exception {
+    public IJsonMessage<String> importTls(MultipartFile file) throws Exception {
         Assert.notNull(file, "没有上传文件");
         // 保存路径
         File tempPath = FileUtil.file(serverConfig.getUserTempPath(), "docker", IdUtil.fastSimpleUUID());

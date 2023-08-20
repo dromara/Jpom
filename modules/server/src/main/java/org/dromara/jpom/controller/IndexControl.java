@@ -35,12 +35,14 @@ import cn.hutool.core.util.*;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
 import cn.hutool.system.SystemUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
+import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.interceptor.NotLogin;
@@ -164,7 +166,7 @@ public class IndexControl extends BaseServerController {
      */
     @RequestMapping(value = "logo-image", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<String> logoImage(HttpServletResponse response) {
+    public IJsonMessage<String> logoImage(HttpServletResponse response) {
         String logoFile = webConfig.getLogoFile();
         String imageSrc = this.loadImageSrc(response, logoFile, "classpath:/logo/jpom.png", "jpg", "png", "gif");
         return JsonMessage.success("", imageSrc);
@@ -247,8 +249,8 @@ public class IndexControl extends BaseServerController {
      * @apiSuccess (222) {Object}  data 系统还没有超级管理员需要初始化
      */
     @NotLogin
-    @RequestMapping(value = "check-system", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> checkSystem(HttpServletRequest request) {
+    @RequestMapping(value = ServerConst.CHECK_SYSTEM, produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<JSONObject> checkSystem(HttpServletRequest request) {
         JSONObject data = new JSONObject();
         data.put("routerBase", UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH));
         //
@@ -258,6 +260,7 @@ public class IndexControl extends BaseServerController {
         data.put("disabledGuide", webConfig.isDisabledGuide());
         //data.put("disabledCaptcha", webConfig.isDisabledCaptcha());
         data.put("notificationPlacement", webConfig.getNotificationPlacement());
+        data.put("installId", JpomManifest.getInstance().getInstallId());
         // 用于判断是否属于容器部署
         boolean inDocker = StrUtil.isNotEmpty(SystemUtil.get("JPOM_PKG"));
         List<String> extendPlugins = new ArrayList<>();
@@ -292,7 +295,7 @@ public class IndexControl extends BaseServerController {
      * @apiSuccess {JSON}  data 菜单相关字段
      */
     @RequestMapping(value = "menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<Object>> menusData(HttpServletRequest request) {
+    public IJsonMessage<List<Object>> menusData(HttpServletRequest request) {
         NodeModel nodeModel = tryGetNode();
         UserModel userModel = getUserModel();
         String workspaceId = nodeService.getCheckUserWorkspace(request);
@@ -342,7 +345,7 @@ public class IndexControl extends BaseServerController {
      */
     @RequestMapping(value = "system_menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
-    public JsonMessage<List<Object>> systemMenusData(HttpServletRequest request) {
+    public IJsonMessage<List<Object>> systemMenusData(HttpServletRequest request) {
         UserModel userModel = getUserModel();
         // 菜单
         InputStream inputStream = ResourceUtil.getStream("classpath:/menus/system.json");
@@ -417,7 +420,7 @@ public class IndexControl extends BaseServerController {
      * @return json
      */
     @GetMapping(value = "generate-sharding-id", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> generateShardingId() {
+    public IJsonMessage<String> generateShardingId() {
         Cache<String, String> shardingIds = BaseServerController.SHARDING_IDS;
         int size = shardingIds.size();
         Assert.state(size <= 100, "分片id最大同时使用 100 个");

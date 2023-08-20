@@ -33,11 +33,12 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.HttpUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.common.commander.CommandOpResult;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -94,7 +95,7 @@ public class ProjectFileControl extends BaseAgentController {
     }
 
     @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> getFileList(String id, String path) {
+    public IJsonMessage<List<JSONObject>> getFileList(String id, String path) {
         // 查询项目路径
         NodeProjectInfoModel pim = projectInfoService.getItem(id);
         Assert.notNull(pim, "查询失败：项目不存在");
@@ -125,7 +126,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "diff_file", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> diffFile(@RequestBody DiffFileVo diffFileVo) {
+    public IJsonMessage<JSONObject> diffFile(@RequestBody DiffFileVo diffFileVo) {
         String id = diffFileVo.getId();
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel(id);
         //
@@ -215,7 +216,7 @@ public class ProjectFileControl extends BaseAgentController {
     }
 
     @RequestMapping(value = "upload-sharding", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<CommandOpResult> uploadSharding(MultipartFile file,
+    public IJsonMessage<CommandOpResult> uploadSharding(MultipartFile file,
                                                        String sliceId,
                                                        Integer totalSlice,
                                                        Integer nowSlice,
@@ -227,7 +228,7 @@ public class ProjectFileControl extends BaseAgentController {
     }
 
     @RequestMapping(value = "sharding-merge", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<CommandOpResult> shardingMerge(String type,
+    public IJsonMessage<CommandOpResult> shardingMerge(String type,
                                                       String levelName,
                                                       Integer stripComponents,
                                                       String sliceId,
@@ -251,7 +252,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @return 结果
      * @throws Exception 异常
      */
-    private JsonMessage<CommandOpResult> upload(File file, String type, String levelName, Integer stripComponents, String after) throws Exception {
+    private IJsonMessage<CommandOpResult> upload(File file, String type, String levelName, Integer stripComponents, String after) throws Exception {
         NodeProjectInfoModel pim = getProjectInfoModel();
         File lib = StrUtil.isEmpty(levelName) ? new File(pim.allLib()) : FileUtil.file(pim.allLib(), levelName);
         // 备份文件
@@ -346,7 +347,7 @@ public class ProjectFileControl extends BaseAgentController {
     }
 
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> deleteFile(String filename, String type, String levelName) {
+    public IJsonMessage<String> deleteFile(String filename, String type, String levelName) {
         NodeProjectInfoModel pim = getProjectInfoModel();
         File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, StrUtil.SLASH));
         // 备份文件
@@ -380,7 +381,7 @@ public class ProjectFileControl extends BaseAgentController {
 
 
     @RequestMapping(value = "batch_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> batchDelete(@RequestBody DiffFileVo diffFileVo) {
+    public IJsonMessage<String> batchDelete(@RequestBody DiffFileVo diffFileVo) {
         String id = diffFileVo.getId();
         String dir = diffFileVo.getDir();
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel(id);
@@ -414,7 +415,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "read_file", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> readFile(String filePath, String filename) {
+    public IJsonMessage<String> readFile(String filePath, String filename) {
         NodeProjectInfoModel pim = getProjectInfoModel();
         filePath = StrUtil.emptyToDefault(filePath, File.separator);
         // 判断文件后缀
@@ -434,7 +435,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "update_config_file", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> updateConfigFile(String filePath, String filename, String fileText) {
+    public IJsonMessage<Object> updateConfigFile(String filePath, String filename, String fileText) {
         NodeProjectInfoModel pim = getProjectInfoModel();
         filePath = StrUtil.emptyToDefault(filePath, File.separator);
         // 判断文件后缀
@@ -492,7 +493,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> remoteDownload(String id, String url, String levelName, String unzip, Integer stripComponents) {
+    public IJsonMessage<String> remoteDownload(String id, String url, String levelName, String unzip, Integer stripComponents) {
         Assert.hasText(url, "请输入正确的远程地址");
 
 
@@ -542,7 +543,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "new_file_folder.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> newFileFolder(String id, String levelName, @ValidatorItem String filename, String unFolder) {
+    public IJsonMessage<Object> newFileFolder(String id, String levelName, @ValidatorItem String filename, String unFolder) {
         NodeProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
         Assert.notNull(projectInfoModel, "没有对应到项目");
         File file = FileUtil.file(projectInfoModel.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
@@ -569,7 +570,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "rename.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> rename(String id, String levelName, @ValidatorItem String filename, String newname) {
+    public IJsonMessage<Object> rename(String id, String levelName, @ValidatorItem String filename, String newname) {
         NodeProjectInfoModel projectInfoModel = getProjectInfoModel();
         File file = FileUtil.file(projectInfoModel.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
         File newFile = FileUtil.file(projectInfoModel.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), newname);

@@ -22,8 +22,8 @@
  */
 package org.dromara.jpom.controller;
 
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.JsonMessage;
 import org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorController;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpStatus;

@@ -22,8 +22,9 @@
  */
 package org.dromara.jpom.controller.user;
 
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.log.UserOperateLogV1;
 import org.dromara.jpom.permission.ClassFeature;
@@ -63,7 +64,7 @@ public class UserOptLogController extends BaseServerController {
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<UserOperateLogV1>> listData(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<UserOperateLogV1>> listData(HttpServletRequest request) {
         PageResultDto<UserOperateLogV1> pageResult = dbUserOperateLogService.listPage(request);
         return JsonMessage.success("", pageResult);
     }

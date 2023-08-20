@@ -23,10 +23,11 @@
 package org.dromara.jpom.controller.outgiving;
 
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.outgiving.LogReadModel;
 import org.dromara.jpom.permission.ClassFeature;
@@ -65,7 +66,7 @@ public class LogReadController extends BaseServerController {
      */
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<LogReadModel>> list() {
+    public IJsonMessage<PageResultDto<LogReadModel>> list() {
         PageResultDto<LogReadModel> pageResultDto = logReadServer.listPage(getRequest());
         return JsonMessage.success("success", pageResultDto);
     }
@@ -78,7 +79,7 @@ public class LogReadController extends BaseServerController {
      */
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> del(String id) {
+    public IJsonMessage<String> del(String id) {
         HttpServletRequest request = getRequest();
         int byKey = logReadServer.delByKey(id, request);
         return JsonMessage.success("操作成功");
@@ -94,7 +95,7 @@ public class LogReadController extends BaseServerController {
      */
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> save(@RequestBody JSONObject jsonObject) {
+    public IJsonMessage<String> save(@RequestBody JSONObject jsonObject) {
         Assert.notNull(jsonObject, "请传入参数");
         String id = jsonObject.getString("id");
         String name = jsonObject.getString("name");
@@ -135,7 +136,7 @@ public class LogReadController extends BaseServerController {
      */
     @RequestMapping(value = "update-cache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> updateCache(@RequestBody JSONObject jsonObject) {
+    public IJsonMessage<String> updateCache(@RequestBody JSONObject jsonObject) {
         Assert.notNull(jsonObject, "请传入参数");
         String id = jsonObject.getString("id");
         Assert.hasText(id, "请传入参数");

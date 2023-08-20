@@ -23,15 +23,18 @@
 package org.dromara.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.Const;
 import org.dromara.jpom.model.AgentFileModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.socket.ServiceFileTailWatcher;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -48,13 +51,18 @@ import java.util.Optional;
 @Configuration
 @ConfigurationProperties("jpom")
 @Data
-public class ServerConfig extends BaseExtConfig {
+public class ServerConfig extends BaseExtConfig implements InitializingBean {
 
     private final JpomApplication configBean;
 
     public ServerConfig(JpomApplication configBean) {
         this.configBean = configBean;
     }
+
+    /**
+     * 集群 配置信息
+     */
+    private ClusterConfig cluster;
 
     /**
      * 系统配置参数
@@ -151,6 +159,27 @@ public class ServerConfig extends BaseExtConfig {
         File file = FileUtil.file(getAgentPath(), AgentFileModel.ZIP_NAME);
         FileUtil.mkParentDirs(file);
         return file;
+    }
+
+    /**
+     * 获取当前集群 Id
+     *
+     * @return 集群Id
+     */
+    public ClusterConfig getCluster() {
+        return Optional.ofNullable(this.cluster).orElseGet(() -> {
+            this.cluster = new ClusterConfig();
+            return this.cluster;
+        });
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        ClusterConfig clusterConfig = this.getCluster();
+        String clusterId1 = clusterConfig.getId();
+        if (!Validator.isGeneral(clusterId1, 1, 20)) {
+            throw new JpomRuntimeException("请配置正确的集群Id,【jpom.clusterId】");
+        }
     }
 
     @Data
@@ -356,8 +385,34 @@ public class ServerConfig extends BaseExtConfig {
         return FileUtil.file(fileStorage.getSavePah());
     }
 
+    /**
+     * 文件管理存储
+     */
     @Data
     public static class FileStorageConfig {
         private String savePah;
+    }
+
+    /**
+     * 集群信息
+     */
+    @Data
+    public static class ClusterConfig {
+        /**
+         * 集群Id，默认为 default 不区分大小写，只能是字母或者数字，长度小于 20
+         */
+        private String id;
+        /**
+         * 检查节点心跳间隔时间,最小值 5 秒
+         */
+        private int heartSecond = 30;
+
+        public int getHeartSecond() {
+            return Math.max(this.heartSecond, 5);
+        }
+
+        public String getId() {
+            return StrUtil.emptyToDefault(this.id, Const.WORKSPACE_DEFAULT_ID).toUpperCase();
+        }
     }
 }

@@ -28,11 +28,12 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.data.NodeScriptExecLogModel;
@@ -76,17 +77,17 @@ public class ScriptController extends BaseAgentController {
     }
 
     @RequestMapping(value = "list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<NodeScriptModel>> list() {
+    public IJsonMessage<List<NodeScriptModel>> list() {
         return JsonMessage.success("", nodeScriptServer.list());
     }
 
     @RequestMapping(value = "item.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<NodeScriptModel> item(String id) {
+    public IJsonMessage<NodeScriptModel> item(String id) {
         return JsonMessage.success("", nodeScriptServer.getItem(id));
     }
 
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> save(NodeScriptModel nodeScriptModel, String type, String global, String nodeId) {
+    public IJsonMessage<Object> save(NodeScriptModel nodeScriptModel, String type, String global, String nodeId) {
         Assert.notNull(nodeScriptModel, "没有数据");
         Assert.hasText(nodeScriptModel.getContext(), "内容为空");
         //
@@ -141,7 +142,7 @@ public class ScriptController extends BaseAgentController {
     }
 
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> del(String id) {
+    public IJsonMessage<Object> del(String id) {
         nodeScriptServer.deleteItem(id);
         return JsonMessage.success("删除成功");
     }
@@ -155,7 +156,7 @@ public class ScriptController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> getNowLog(@ValidatorItem() String id,
+    public IJsonMessage<JSONObject> getNowLog(@ValidatorItem() String id,
                                              @ValidatorItem() String executeId,
                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
         NodeScriptModel item = nodeScriptServer.getItem(id);
@@ -177,7 +178,7 @@ public class ScriptController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "del_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> delLog(@ValidatorItem() String id,
+    public IJsonMessage<Object> delLog(@ValidatorItem() String id,
                                       @ValidatorItem() String executeId) {
         NodeScriptModel item = nodeScriptServer.getItem(id);
         if (item == null) {
@@ -199,7 +200,7 @@ public class ScriptController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "exec", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> exec(@ValidatorItem() String id, String args, String params) {
+    public IJsonMessage<String> exec(@ValidatorItem() String id, String args, String params) {
         NodeScriptModel item = nodeScriptServer.getItem(id);
         Assert.notNull(item, "对应脚本已经不存在啦");
         String nowUserName = getNowUserName();
@@ -229,7 +230,7 @@ public class ScriptController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "pull_exec_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<NodeScriptExecLogModel>> pullExecLog(@ValidatorItem int pullCount) {
+    public IJsonMessage<List<NodeScriptExecLogModel>> pullExecLog(@ValidatorItem int pullCount) {
         Assert.state(pullCount > 0, "pull count error");
         List<NodeScriptExecLogModel> list = nodeScriptExecLogServer.list();
         list = CollUtil.sub(list, 0, pullCount);
@@ -246,7 +247,7 @@ public class ScriptController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "del_exec_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> delExecLog(@RequestBody JSONObject jsonObject) {
+    public IJsonMessage<Object> delExecLog(@RequestBody JSONObject jsonObject) {
         JSONArray ids = jsonObject.getJSONArray("ids");
         if (ids != null) {
             for (Object id : ids) {

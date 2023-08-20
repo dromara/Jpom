@@ -27,10 +27,11 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.script.ProjectFileBackupUtil;
@@ -69,7 +70,7 @@ public class ProjectFileBackupController extends BaseAgentController {
      * @return list
      */
     @RequestMapping(value = "list-backup", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> listBackup(String id) {
+    public IJsonMessage<JSONObject> listBackup(String id) {
         //
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel(id);
         // 合并
@@ -100,7 +101,7 @@ public class ProjectFileBackupController extends BaseAgentController {
      * @return list
      */
     @RequestMapping(value = "backup-item-files", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> backupItemFiles(String id, String path, @ValidatorItem String backupId) {
+    public IJsonMessage<List<JSONObject>> backupItemFiles(String id, String path, @ValidatorItem String backupId) {
         // 查询项目路径
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
         File lib = ProjectFileBackupUtil.pathProjectBackup(projectInfoModel, backupId);
@@ -149,7 +150,7 @@ public class ProjectFileBackupController extends BaseAgentController {
      * @return msg
      */
     @RequestMapping(value = "backup-delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> deleteFile(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName) {
+    public IJsonMessage<Object> deleteFile(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName) {
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
         File lib = ProjectFileBackupUtil.pathProjectBackup(projectInfoModel, backupId);
         File file = FileUtil.file(lib, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
@@ -168,7 +169,7 @@ public class ProjectFileBackupController extends BaseAgentController {
      * @return msg
      */
     @RequestMapping(value = "backup-recover", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> recoverFile(String id, @ValidatorItem String backupId, String type, String filename, String levelName) {
+    public IJsonMessage<Object> recoverFile(String id, @ValidatorItem String backupId, String type, String filename, String levelName) {
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
         File backupPath = ProjectFileBackupUtil.pathProjectBackup(projectInfoModel, backupId);
         String projectPath = projectInfoModel.allLib();

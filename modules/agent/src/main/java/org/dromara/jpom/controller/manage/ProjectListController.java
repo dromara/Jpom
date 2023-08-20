@@ -23,9 +23,10 @@
 package org.dromara.jpom.controller.manage;
 
 import cn.hutool.core.io.FileUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
@@ -57,7 +58,7 @@ public class ProjectListController extends BaseAgentController {
      * @see NodeProjectInfoModel
      */
     @RequestMapping(value = "getProjectItem", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<NodeProjectInfoModel> getProjectItem(String id) {
+    public IJsonMessage<NodeProjectInfoModel> getProjectItem(String id) {
         NodeProjectInfoModel nodeProjectInfoModel = projectInfoService.getItem(id);
         if (nodeProjectInfoModel != null) {
             RunMode runMode = nodeProjectInfoModel.getRunMode();
@@ -88,7 +89,7 @@ public class ProjectListController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<NodeProjectInfoModel>> getProjectInfo() {
+    public IJsonMessage<List<NodeProjectInfoModel>> getProjectInfo() {
         try {
             // 查询数据
             List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
@@ -103,7 +104,7 @@ public class ProjectListController extends BaseAgentController {
      * 展示项目页面
      */
     @RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<NodeProjectInfoModel.JavaCopyItem>> projectCopyList(String id) {
+    public IJsonMessage<List<NodeProjectInfoModel.JavaCopyItem>> projectCopyList(String id) {
         NodeProjectInfoModel nodeProjectInfoModel = projectInfoService.getItem(id);
         Assert.notNull(nodeProjectInfoModel, "没有对应项目");
 

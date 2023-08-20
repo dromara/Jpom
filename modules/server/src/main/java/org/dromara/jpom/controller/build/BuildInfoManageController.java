@@ -26,11 +26,12 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import org.dromara.jpom.build.*;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorConfig;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -105,7 +106,7 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<Integer> start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+    public IJsonMessage<Integer> start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
                                       String buildRemark,
                                       String resultDirFile,
                                       String branchName,
@@ -152,7 +153,7 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/cancel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<String> cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
+    public IJsonMessage<String> cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
         BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
         Objects.requireNonNull(item, "没有对应数据");
         String checkStatus = buildExecuteService.checkStatus(item);
@@ -177,7 +178,7 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/reRelease", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<Object> reRelease(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId,
+    public IJsonMessage<Object> reRelease(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId,
                                          HttpServletRequest request) {
         String workspaceId = dbBuildHistoryLogService.getCheckUserWorkspace(request);
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, false, entity -> entity.set("workspaceId", workspaceId));
@@ -222,7 +223,7 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/get-now-log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+    public IJsonMessage<JSONObject> getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
         BuildInfoModel item = buildInfoService.getByKey(id, getRequest());

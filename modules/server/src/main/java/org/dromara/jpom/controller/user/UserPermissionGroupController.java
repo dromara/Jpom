@@ -28,11 +28,12 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.user.UserPermissionGroupBean;
@@ -80,7 +81,7 @@ public class UserPermissionGroupController extends BaseServerController {
      */
     @RequestMapping(value = "get-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<UserPermissionGroupBean>> getUserList() {
+    public IJsonMessage<PageResultDto<UserPermissionGroupBean>> getUserList() {
         PageResultDto<UserPermissionGroupBean> userModelPageResultDto = userPermissionGroupServer.listPage(getRequest());
         return new JsonMessage<>(200, "", userModelPageResultDto);
     }
@@ -92,7 +93,7 @@ public class UserPermissionGroupController extends BaseServerController {
      */
     @GetMapping(value = "get-list-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<UserPermissionGroupBean>> getListAll() {
+    public IJsonMessage<List<UserPermissionGroupBean>> getListAll() {
         List<UserPermissionGroupBean> list = userPermissionGroupServer.list();
         return new JsonMessage<>(200, "", list);
     }
@@ -104,7 +105,7 @@ public class UserPermissionGroupController extends BaseServerController {
      */
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> edit(String id,
+    public IJsonMessage<String> edit(String id,
                                     @ValidatorItem String name,
                                     String description,
                                     String prohibitExecute,
@@ -189,7 +190,7 @@ public class UserPermissionGroupController extends BaseServerController {
      */
     @GetMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> delete(String id) {
+    public IJsonMessage<Object> delete(String id) {
         UserPermissionGroupBean groupBean = userPermissionGroupServer.getByKey(id);
         Assert.notNull(groupBean, "数据不存在");
         // 判断是否绑定用户

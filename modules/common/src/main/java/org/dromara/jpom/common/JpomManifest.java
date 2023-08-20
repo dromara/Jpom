@@ -38,6 +38,7 @@ import cn.hutool.system.JavaInfo;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.Type;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;

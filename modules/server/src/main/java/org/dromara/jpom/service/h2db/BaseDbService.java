@@ -68,8 +68,13 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     @Autowired
     @Lazy
     private DbExtConfig extConfig;
-
+    /**
+     * 旧版本分组
+     */
     private final boolean canGroup;
+    /**
+     * 新版本分组字段
+     */
     private final boolean canGroupName;
     /**
      * 默认排序规则
@@ -99,6 +104,17 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         return this.listGroupByName(sql, "group");
     }
 
+
+    /**
+     * load date group by group name
+     *
+     * @return list
+     */
+    public List<String> listGroupName() {
+        String sql = "select `groupName` from " + this.getTableName() + " group by `groupName`";
+        return this.listGroupByName(sql, "groupName");
+    }
+
     /**
      * 获取分组字段
      *
@@ -107,7 +123,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return list
      */
     public List<String> listGroupByName(String sql, String fieldName, Object... params) {
-        Assert.state(this.canGroup || this.canGroupName, "当前数据表不支持排序");
+        Assert.state(this.canGroup || this.canGroupName, "当前数据表不支持分组");
         List<Entity> list = super.query(sql, params);
         // 筛选字段
         return list.stream()
@@ -128,7 +144,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * 恢复字段
      */
     public void repairGroupFiled() {
-        Assert.state(this.canGroup, "当前数据表不支持排序");
+        Assert.state(this.canGroup, "当前数据表不支持分组");
         String sql = "update " + getTableName() + " set `GROUP`=? where `GROUP` is null or `GROUP`=''";
         super.execute(sql, Const.DEFAULT_GROUP_NAME);
     }

@@ -23,9 +23,9 @@
 package org.dromara.jpom.model.data;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.keepbx.jpom.model.BaseJsonModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.dromara.jpom.model.BaseJsonModel;
 
 /**
  * 系统邮箱配置

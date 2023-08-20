@@ -23,10 +23,11 @@
 package org.dromara.jpom.controller.monitor;
 
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSON;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.model.data.MailAccountModel;
 import org.dromara.jpom.monitor.EmailUtil;
 import org.dromara.jpom.permission.ClassFeature;
@@ -71,7 +72,7 @@ public class SystemMailConfigController extends BaseServerController {
      */
     @PostMapping(value = "mail-config-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<MailAccountModel> mailConfigData() {
+    public IJsonMessage<MailAccountModel> mailConfigData() {
         MailAccountModel item = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
         if (item != null) {
             item.setPass(null);
@@ -81,7 +82,7 @@ public class SystemMailConfigController extends BaseServerController {
 
     @PostMapping(value = "mailConfig_save.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> listData(MailAccountModel mailAccountModel) throws Exception {
+    public IJsonMessage<Object> listData(MailAccountModel mailAccountModel) throws Exception {
         Assert.notNull(mailAccountModel, "请填写信息,并检查是否填写合法");
         Assert.hasText(mailAccountModel.getHost(), "请填写host");
         Assert.hasText(mailAccountModel.getUser(), "请填写user");
