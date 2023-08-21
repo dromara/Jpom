@@ -32,6 +32,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
 import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.event.IAsyncLoad;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -55,7 +56,6 @@ import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.dromara.jpom.system.JpomRuntimeException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -79,7 +79,7 @@ import java.util.stream.Collectors;
 @RestController
 @NotLogin
 @Slf4j
-public class BuildTriggerApiController extends BaseJpomController implements InitializingBean, Runnable {
+public class BuildTriggerApiController extends BaseJpomController implements IAsyncLoad, Runnable {
 
     private final BuildInfoService buildInfoService;
     private final BuildExecuteService buildExecuteService;
@@ -409,7 +409,7 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void startLoad() {
         ScheduledExecutorService scheduler = JpomApplication.getScheduledExecutorService();
         scheduler.scheduleWithFixedDelay(this, 0, 5, TimeUnit.SECONDS);
     }
