@@ -4,7 +4,44 @@
     <!-- 目录树 -->
     <a-layout-sider theme="light" class="sider" width="25%">
       <a-row class="dir-container">
-        <a-button size="small" type="primary" @click="loadData()">刷新</a-button>
+        <a-space>
+          <a-button size="small" type="primary" @click="loadData()">刷新</a-button>
+          <a-dropdown>
+            <a-menu slot="overlay">
+              <a-menu-item
+                @click="
+                  () => {
+                    changeSort(item.key, sortMethod.asc);
+                  }
+                "
+                v-for="item in sortMethodList"
+                :key="item.key"
+                >{{ item.name }}</a-menu-item
+              >
+            </a-menu>
+
+            <a-button
+              size="small"
+              type="primary"
+              @click="
+                () => {
+                  changeSort(sortMethod.key, !sortMethod.asc);
+                }
+              "
+            >
+              {{
+                sortMethodList.find((item) => {
+                  return item.key === sortMethod.key;
+                }) &&
+                sortMethodList.find((item) => {
+                  return item.key === sortMethod.key;
+                }).name
+              }}排序
+              <a-icon type="sort-ascending" v-if="sortMethod.asc" />
+              <a-icon type="sort-descending" v-else />
+            </a-button>
+          </a-dropdown>
+        </a-space>
       </a-row>
       <a-empty v-if="treeList.length === 0" />
       <a-directory-tree :treeData="treeList" :replaceFields="replaceFields" @select="onSelect"> </a-directory-tree>
@@ -206,7 +243,7 @@ import {
 } from "@/api/ssh-file";
 
 import codeEditor from "@/components/codeEditor";
-import { ZIP_ACCEPT, renderSize } from "@/utils/const";
+import { ZIP_ACCEPT, renderSize, parseTime } from "@/utils/const";
 
 export default {
   props: {
@@ -242,12 +279,12 @@ export default {
         key: "key",
       },
       columns: [
-        { title: "文件名称", dataIndex: "name", width: 100, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "文件类型", dataIndex: "dir", width: 100, ellipsis: true, scopedSlots: { customRender: "dir" } },
-        { title: "文件大小", dataIndex: "size", width: 120, ellipsis: true, scopedSlots: { customRender: "size" } },
+        { title: "文件名称", dataIndex: "name", width: 200, ellipsis: true, scopedSlots: { customRender: "name" }, sorter: (a, b) => (a.name || "").localeCompare(b.name || "") },
+        { title: "文件类型", dataIndex: "dir", width: "100px", ellipsis: true, scopedSlots: { customRender: "dir" } },
+        { title: "文件大小", dataIndex: "size", width: 120, ellipsis: true, scopedSlots: { customRender: "size" }, sorter: (a, b) => Number(a.size) - new Number(b.size) },
         { title: "权限", dataIndex: "permissions", width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "修改时间", dataIndex: "modifyTime", width: "170px", ellipsis: true },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "260px" },
+        { title: "修改时间", dataIndex: "modifyTime", width: "170px", ellipsis: true, customRender: (text) => parseTime(text), sorter: (a, b) => Number(a.modifyTime) - new Number(b.modifyTime) },
+        { title: "操作", dataIndex: "operation", align: "center", fixed: "right", scopedSlots: { customRender: "operation" }, width: "220px" },
       ],
       editFileVisible: false,
       addFileFolderVisible: false,
@@ -258,10 +295,29 @@ export default {
         others: { read: false, write: false, execute: false },
       },
       // permissionTips: "",
+      sortMethodList: [
+        {
+          name: "文件名",
+          key: "name",
+        },
+        {
+          name: "修改时间",
+          key: "modifyTime",
+        },
+      ],
+      sortMethod: {
+        key: "name",
+        asc: true,
+      },
     };
   },
   mounted() {
     this.listShowDir = Boolean(localStorage.getItem("ssh-list-show-dir"));
+    try {
+      this.sortMethod = JSON.parse(localStorage.getItem("ssh-list-sort") || JSON.stringify(this.sortMethod));
+    } catch (e) {
+      console.error(e);
+    }
     this.loadData();
   },
   computed: {
@@ -282,23 +338,35 @@ export default {
     },
   },
   methods: {
+    changeSort(key, asc) {
+      this.sortMethod = { key: key, asc: asc };
+      localStorage.setItem("ssh-list-sort", JSON.stringify(this.sortMethod));
+      this.loadData();
+    },
     renderSize,
     // 加载数据
     loadData() {
       this.loading = true;
       getRootFileList(this.baseUrl, this.reqDataId).then((res) => {
         if (res.code === 200) {
-          this.treeList = res.data.map((element) => {
-            return {
-              key: element.id,
-              name: element.allowPathParent,
-              allowPathParent: element.allowPathParent,
-              nextPath: "/",
-              isLeaf: false,
-              // 配置的白名单目录可能不存在
-              disabled: !!element.error,
-            };
-          });
+          this.treeList = res.data
+            .map((element) => {
+              return {
+                key: element.id,
+                name: element.allowPathParent,
+                allowPathParent: element.allowPathParent,
+                nextPath: "/",
+                isLeaf: false,
+                // 配置的白名单目录可能不存在
+                disabled: !!element.error,
+                modifyTime: element.modifyTime,
+              };
+            })
+            .sort((a, b) => {
+              const aV = a[this.sortMethod.key] || "";
+              const bV = b[this.sortMethod.key] || "";
+              return this.sortMethod.asc ? bV.localeCompare(aV) : aV.localeCompare(bV);
+            });
         }
         this.loading = false;
       });
@@ -344,6 +412,7 @@ export default {
                   isLeaf: !element.dir,
                   // 可能有错误
                   disabled: !!element.error,
+                  modifyTime: element.modifyTime,
                 });
               } else {
                 // 设置文件表格
@@ -354,7 +423,11 @@ export default {
               }
             });
             // 设置目录树
-            node.dataRef.children = children;
+            node.dataRef.children = children.sort((a, b) => {
+              const aV = a[this.sortMethod.key] || "";
+              const bV = b[this.sortMethod.key] || "";
+              return this.sortMethod.asc ? bV.localeCompare(aV) : aV.localeCompare(bV);
+            });
             this.treeList = [...this.treeList];
           }
           this.loading = false;

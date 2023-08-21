@@ -112,7 +112,7 @@ export default {
 </script>
 <style scoped>
 .my-tabs {
-  /* flex: auto; */
+  flex: auto;
   /* margin-right: 20px; */
   /* align-self: center; */
   /* height: 40px; */
