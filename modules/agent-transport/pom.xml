@@ -36,6 +36,7 @@
     <modules>
         <module>agent-transport-common</module>
         <module>agent-transport-http</module>
+        <module>agent-transport-netty</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
     <version>2.10.42.4</version>

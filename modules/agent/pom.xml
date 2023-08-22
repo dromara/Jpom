@@ -44,7 +44,6 @@
         <oshi.version>6.4.0</oshi.version>
     </properties>
     <dependencies>
-
         <dependency>
             <groupId>org.dromara.jpom</groupId>
             <artifactId>common</artifactId>
@@ -80,7 +79,11 @@
             <artifactId>encrypt</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.dromara.jpom.agent-transport</groupId>
+            <artifactId>agent-transport-netty</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
