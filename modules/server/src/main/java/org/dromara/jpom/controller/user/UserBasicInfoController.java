@@ -201,6 +201,7 @@ public class UserBasicInfoController extends BaseServerController {
                 userWorkspaceModel.setName(workspaceModel.getName());
                 userWorkspaceModel.setGroup(workspaceModel.getGroup());
                 userWorkspaceModel.setOriginalName(workspaceModel.getName());
+                userWorkspaceModel.setClusterInfoId(workspaceModel.getClusterInfoId());
                 Long createTimeMillis = workspaceModel.getCreateTimeMillis();
                 userWorkspaceModel.setSort((int) (ObjectUtil.defaultIfNull(createTimeMillis, 0L) / 1000L));
                 return userWorkspaceModel;
