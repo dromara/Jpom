@@ -44,6 +44,8 @@ import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.cert.service.CertificateInfoService;
+import org.dromara.jpom.func.system.model.ClusterInfoModel;
+import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.model.docker.DockerSwarmInfoMode;
 import org.dromara.jpom.plugin.PluginFactory;
@@ -72,6 +74,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     private final MachineSshServer machineSshServer;
     private final DockerInfoService dockerInfoService;
     private final DockerSwarmInfoService dockerSwarmInfoService;
+    private final ClusterInfoService clusterInfoService;
 
     @Resource
     @Lazy
@@ -80,10 +83,12 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
 
     public MachineDockerServer(MachineSshServer machineSshServer,
                                DockerInfoService dockerInfoService,
-                               DockerSwarmInfoService dockerSwarmInfoService) {
+                               DockerSwarmInfoService dockerSwarmInfoService,
+                               ClusterInfoService clusterInfoService) {
         this.machineSshServer = machineSshServer;
         this.dockerInfoService = dockerInfoService;
         this.dockerSwarmInfoService = dockerSwarmInfoService;
+        this.clusterInfoService = clusterInfoService;
     }
 
     @Override
@@ -158,7 +163,17 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
 
     @Override
     public void execute() {
-        List<MachineDockerModel> list = this.list(false);
+        // 查询对应分组的数据
+        ClusterInfoModel current = clusterInfoService.getCurrent();
+        String linkGroup = current.getLinkGroup();
+        List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
+        if (CollUtil.isEmpty(linkGroups)) {
+            log.warn("当前集群还未绑定分组,不能监控 Docker 资产信息");
+            return;
+        }
+        Entity entity = new Entity();
+        entity.set("groupName", linkGroups);
+        List<MachineDockerModel> list = this.listByEntity(entity, false);
         if (CollUtil.isEmpty(list)) {
             return;
         }

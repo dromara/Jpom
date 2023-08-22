@@ -22,9 +22,9 @@
  */
 package org.dromara.jpom.func.system.controller;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.net.url.UrlBuilder;
+import cn.hutool.core.stream.CollectorUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.Method;
@@ -35,16 +35,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
-import org.dromara.jpom.func.assets.server.MachineDockerServer;
-import org.dromara.jpom.func.assets.server.MachineNodeServer;
-import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.func.system.model.ClusterInfoModel;
 import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.model.PageResultDto;
+import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
+import org.dromara.jpom.service.system.WorkspaceService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,9 +52,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author bwcx_jzy
@@ -69,18 +70,12 @@ import java.util.stream.Collectors;
 public class ClusterInfoController {
 
     private final ClusterInfoService clusterInfoService;
-    private final MachineDockerServer machineDockerServer;
-    private final MachineNodeServer machineNodeServer;
-    private final MachineSshServer machineSshServer;
+    private final WorkspaceService workspaceService;
 
     public ClusterInfoController(ClusterInfoService clusterInfoService,
-                                 MachineDockerServer dockerServer,
-                                 MachineNodeServer machineNodeServer,
-                                 MachineSshServer machineSshServer) {
+                                 WorkspaceService workspaceService) {
         this.clusterInfoService = clusterInfoService;
-        this.machineDockerServer = dockerServer;
-        this.machineNodeServer = machineNodeServer;
-        this.machineSshServer = machineSshServer;
+        this.workspaceService = workspaceService;
     }
 
     /**
@@ -95,6 +90,12 @@ public class ClusterInfoController {
         return JsonMessage.success("", listPage);
     }
 
+    @GetMapping(value = "list-all", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<List<ClusterInfoModel>> listAll() {
+        List<ClusterInfoModel> list = clusterInfoService.list();
+        return JsonMessage.success("", list);
+    }
 
     /**
      * 查询所有可以管理的分组名
@@ -103,20 +104,37 @@ public class ClusterInfoController {
      */
     @GetMapping(value = "list-link-groups")
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<List<String>> listLinkGroups() {
-        List<String> nodeGroup = machineNodeServer.listGroupName();
-        List<String> sshGroup = machineSshServer.listGroupName();
-        List<String> dockerGroup = machineDockerServer.listGroupName();
+    public IJsonMessage<JSONObject> listLinkGroups() {
         //
-        List<String> all = new ArrayList<>();
-        CollUtil.addAll(all, nodeGroup);
-        CollUtil.addAll(all, sshGroup);
-        CollUtil.addAll(all, dockerGroup);
+        List<String> all = clusterInfoService.listLinkGroups();
+        // 查询集群已经绑定的分组
+        List<ClusterInfoModel> list = clusterInfoService.list();
+        Map<String, List<JSONObject>> map = list.stream()
+            .map(clusterInfoModel -> {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("name", clusterInfoModel.getName());
+                jsonObject.put("id", clusterInfoModel.getId());
+                jsonObject.put("linkGroup", clusterInfoModel.getLinkGroup());
+                return jsonObject;
+            })
+            .flatMap((Function<JSONObject, Stream<JSONObject>>) jsonObject -> {
+                String string = jsonObject.getString("linkGroup");
+                List<String> list1 = StrUtil.splitTrim(string, StrUtil.COMMA);
+                return list1.stream()
+                    .map(s -> {
+                        JSONObject clone = jsonObject.clone();
+                        clone.remove("linkGroup");
+                        clone.put("group", s);
+                        return clone;
+                    });
+            })
+            .collect(CollectorUtil.groupingBy(o -> o.getString("group"), Collectors.toList()));
         //
-        all = all.stream()
-            .distinct()
-            .collect(Collectors.toList());
-        return JsonMessage.success("", all);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("linkGroups", all);
+        jsonObject.put("groupMap", map);
+
+        return JsonMessage.success("", jsonObject);
     }
 
     /**
@@ -183,6 +201,12 @@ public class ClusterInfoController {
         ClusterInfoModel infoModel = clusterInfoService.getByKey(id);
         Assert.notNull(infoModel, "对应的集群不存在");
         Assert.state(!clusterInfoService.online(infoModel), "不能删除在线的集群");
+        // 如果还有工作空间绑定,不能删除集群
+        WorkspaceModel workspaceModel = new WorkspaceModel();
+        workspaceModel.setClusterInfoId(infoModel.getId());
+        long count = workspaceService.count(workspaceModel);
+        Assert.state(count == 0, "当前集群还被工作空间绑定不能删除");
+        //
         clusterInfoService.delByKey(id);
         return JsonMessage.success("删除成功");
     }

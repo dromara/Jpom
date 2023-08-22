@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :columns="columns" size="middle" :pagination="pagination" bordered @change="changePage" :rowKey="(record, index) => index">
       <template slot="title">
@@ -7,6 +7,9 @@
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="工作空间名称" allowClear class="search-input-item" />
           <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+          </a-select>
+          <a-select show-search option-filter-prop="children" v-model="listQuery.clusterInfoId" allowClear placeholder="集群" class="search-input-item">
+            <a-select-option v-for="item in clusterList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
@@ -29,6 +32,30 @@
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <a-tooltip
+        slot="clusterInfoId"
+        slot-scope="text"
+        placement="topLeft"
+        :title="
+          (clusterList.find((item) => {
+            return item.id === text;
+          }) &&
+            clusterList.find((item) => {
+              return item.id === text;
+            }).name) ||
+          ''
+        "
+      >
+        <span>{{
+          clusterList.find((item) => {
+            return item.id === text;
+          }) &&
+          clusterList.find((item) => {
+            return item.id === text;
+          }).name
+        }}</span>
+      </a-tooltip>
+
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -57,6 +84,11 @@
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }" style="padding-top: 15px">
         <a-form-model-item label="名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="工作空间名称" />
+        </a-form-model-item>
+        <a-form-model-item label="绑定集群" prop="clusterInfoId">
+          <a-select show-search option-filter-prop="children" v-model="temp.clusterInfoId" allowClear placeholder="绑定集群">
+            <a-select-option v-for="item in clusterList" :key="item.id">{{ item.name }}</a-select-option>
+          </a-select>
         </a-form-model-item>
         <a-form-model-item label="分组" prop="group">
           <custom-select v-model="temp.group" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder="选择分组名"> </custom-select>
@@ -162,6 +194,7 @@
 <script>
 import { deleteWorkspace, preDeleteWorkspace, editWorkSpace, getWorkSpaceList, getMenusConfig, saveMenusConfig, getWorkSpaceGroupList } from "@/api/workspace";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
+import { listClusterAll } from "@/api/system/cluster";
 import workspaceEnv from "./workspace-env.vue";
 import CustomSelect from "@/components/customSelect";
 import whiteList from "@/pages/dispatch/white-list.vue";
@@ -183,6 +216,7 @@ export default {
         { title: "名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "name" } },
         { title: "描述", dataIndex: "description", ellipsis: true, width: 200, scopedSlots: { customRender: "description" } },
         { title: "分组名", dataIndex: "group", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
+        { title: "集群", dataIndex: "clusterInfoId", ellipsis: true, width: "100px", scopedSlots: { customRender: "clusterInfoId" } },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         {
           title: "创建时间",
@@ -206,6 +240,7 @@ export default {
       rules: {
         name: [{ required: true, message: "请输入工作空间名称", trigger: "blur" }],
         description: [{ required: true, message: "请输入工作空间描述", trigger: "blur" }],
+        clusterInfoId: [{ required: true, message: "请输入选择绑定的集群", trigger: "blur" }],
       },
       configMenuVisible: false,
       replaceFields: { children: "childs", title: "title", key: "id" },
@@ -218,19 +253,8 @@ export default {
         title: "name",
         key: "id",
       },
-      treeData: [
-        {
-          title: "parent 1",
-          key: "0-0",
-          slots: {
-            icon: "smile",
-          },
-          children: [
-            { title: "leaf", key: "0-0-0", slots: { icon: "meh" } },
-            { title: "leaf", key: "0-0-1", scopedSlots: { icon: "custom" } },
-          ],
-        },
-      ],
+      treeData: [],
+      clusterList: [],
     };
   },
   computed: {
@@ -241,8 +265,20 @@ export default {
   created() {
     this.loadData();
     this.loadGroupList();
+    this.loadClusterList();
   },
   methods: {
+    // 获取所有集群
+    loadClusterList() {
+      return new Promise((resolve) => {
+        listClusterAll().then((res) => {
+          if (res.data && res.code === 200) {
+            this.clusterList = res.data || [];
+            resolve();
+          }
+        });
+      });
+    },
     // 获取所有的分组
     loadGroupList() {
       getWorkSpaceGroupList().then((res) => {
@@ -278,13 +314,25 @@ export default {
     handleAdd() {
       this.loadGroupList();
       this.temp = {};
-      this.editVisible = true;
       this.$refs["editForm"] && this.$refs["editForm"].resetFields();
+      this.loadClusterList().then(() => {
+        if (this.clusterList.length === 1) {
+          this.temp = { ...this.temp, clusterInfoId: this.clusterList[0].id };
+        }
+        this.editVisible = true;
+      });
     },
     handleEdit(record) {
       this.loadGroupList();
-      this.temp = Object.assign({}, record);
-      this.editVisible = true;
+      this.$refs["editForm"] && this.$refs["editForm"].resetFields();
+      this.loadClusterList().then(() => {
+        const defData = {};
+        if (this.clusterList.length === 1) {
+          defData.clusterInfoId = this.clusterList[0].id;
+        }
+        this.temp = Object.assign({}, record, defData);
+        this.editVisible = true;
+      });
     },
     handleEditOk() {
       this.$refs["editForm"].validate((valid) => {
@@ -297,7 +345,7 @@ export default {
             this.$notification.success({
               message: res.msg,
             });
-            this.$refs["editForm"].resetFields();
+            // this.$refs["editForm"].resetFields();
             this.editVisible = false;
             this.loadData();
           }

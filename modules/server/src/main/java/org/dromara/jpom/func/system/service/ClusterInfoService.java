@@ -27,20 +27,28 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.event.IAsyncLoad;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.cron.CronUtils;
+import org.dromara.jpom.func.assets.server.MachineDockerServer;
+import org.dromara.jpom.func.assets.server.MachineNodeServer;
+import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.func.system.model.ClusterInfoModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.h2db.BaseDbService;
+import org.dromara.jpom.service.system.WorkspaceService;
 import org.dromara.jpom.system.ServerConfig;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -54,8 +62,23 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
     private final ServerConfig.ClusterConfig clusterConfig;
     private static final String TASK_ID = "system_monitor_cluster";
 
-    public ClusterInfoService(ServerConfig serverConfig) {
+    private final WorkspaceService workspaceService;
+
+    public ClusterInfoService(ServerConfig serverConfig,
+                              WorkspaceService workspaceService) {
         this.clusterConfig = serverConfig.getCluster();
+        this.workspaceService = workspaceService;
+    }
+
+    /**
+     * 获取当前集群
+     *
+     * @return 集群信息
+     */
+    public ClusterInfoModel getCurrent() {
+        ClusterInfoModel clusterInfoModel = this.getByKey(JpomManifest.getInstance().getInstallId());
+        Assert.notNull(clusterInfoModel, "当前集群不存在");
+        return clusterInfoModel;
     }
 
     @Override
@@ -79,6 +102,8 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
             if (byKey == null) {
                 // 初始安装
                 this.insert(this.createDefault(installId));
+                // 自动绑定默认数据
+                this.bindDefault(installId);
                 return;
             }
             // 更新数据
@@ -86,7 +111,7 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
             clusterInfoModel.setId(byKey.getId());
             if (!StrUtil.equals(byKey.getClusterId(), clusterConfig.getId())) {
                 log.warn("集群ID 发生变化：{} -> {}", byKey.getClusterId(), clusterConfig.getId());
-                clusterInfoModel.setClusterId(clusterInfoModel.getClusterId());
+                clusterInfoModel.setClusterId(clusterConfig.getId());
             }
             clusterInfoModel.setLocalHostName(NetUtil.getLocalHostName());
             clusterInfoModel.setLastHeartbeat(SystemClock.now());
@@ -111,6 +136,54 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
     }
 
     /**
+     * 自动帮忙集群相关的默认数据
+     *
+     * @param installId 安装Id
+     */
+    private void bindDefault(String installId) {
+        long count = this.count();
+        if (count != 1) {
+            log.debug("系统中存在多个集群,不需要自动绑定数据");
+            return;
+        }
+        // 所以工作空间自动绑定集群Id
+        String sql = "update " + workspaceService.getTableName() + " set clusterInfoId=?";
+        workspaceService.execute(sql, installId);
+        // 获取所有的资产分组
+        List<String> list = this.listLinkGroups();
+        String join = CollUtil.join(list, StrUtil.COMMA);
+        //
+        ClusterInfoModel clusterInfoModel = new ClusterInfoModel();
+        clusterInfoModel.setId(installId);
+        clusterInfoModel.setLinkGroup(join);
+        this.updateById(clusterInfoModel);
+    }
+
+    /**
+     * 查询集群可以管理的分组名
+     *
+     * @return list
+     */
+    public List<String> listLinkGroups() {
+        MachineDockerServer machineDockerServer = SpringUtil.getBean(MachineDockerServer.class);
+        MachineNodeServer machineNodeServer = SpringUtil.getBean(MachineNodeServer.class);
+        MachineSshServer machineSshServer = SpringUtil.getBean(MachineSshServer.class);
+        List<String> nodeGroup = machineNodeServer.listGroupName();
+        List<String> sshGroup = machineSshServer.listGroupName();
+        List<String> dockerGroup = machineDockerServer.listGroupName();
+        //
+        List<String> all = new ArrayList<>();
+        CollUtil.addAll(all, nodeGroup);
+        CollUtil.addAll(all, sshGroup);
+        CollUtil.addAll(all, dockerGroup);
+        //
+        all = all.stream()
+            .distinct()
+            .collect(Collectors.toList());
+        return all;
+    }
+
+    /**
      * 创建默认的集群数据
      *
      * @param installId 系统安装 id
@@ -119,7 +192,7 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
     private ClusterInfoModel createDefault(String installId) {
         ClusterInfoModel clusterInfoModel = new ClusterInfoModel();
         clusterInfoModel.setId(installId);
-        clusterInfoModel.setName("默认");
+        clusterInfoModel.setName("默认集群");
         clusterInfoModel.setCreateUser(UserModel.SYSTEM_ADMIN);
         clusterInfoModel.setClusterId(clusterConfig.getId());
         clusterInfoModel.setLastHeartbeat(SystemClock.now());

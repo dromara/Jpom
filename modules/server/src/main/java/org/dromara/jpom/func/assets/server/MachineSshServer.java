@@ -51,6 +51,7 @@ import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
+import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.plugin.IWorkspaceEnvPlugin;
 import org.dromara.jpom.plugin.PluginFactory;
@@ -84,9 +85,12 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
     private SshService sshService;
 
     private final JpomApplication jpomApplication;
+    private final ClusterInfoService clusterInfoService;
 
-    public MachineSshServer(JpomApplication jpomApplication) {
+    public MachineSshServer(JpomApplication jpomApplication,
+                            ClusterInfoService clusterInfoService) {
         this.jpomApplication = jpomApplication;
+        this.clusterInfoService = clusterInfoService;
     }
 
     @Override
@@ -180,7 +184,15 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
 
     @Override
     public void execute() {
-        List<MachineSshModel> list = this.list(false);
+        String linkGroup = clusterInfoService.getCurrent().getLinkGroup();
+        List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
+        if (CollUtil.isEmpty(linkGroups)) {
+            log.warn("当前集群还未绑定分组,不能监控 SSH 资产信息");
+            return;
+        }
+        Entity entity = new Entity();
+        entity.set("groupName", linkGroups);
+        List<MachineSshModel> list = this.listByEntity(entity, false);
         if (CollUtil.isEmpty(list)) {
             return;
         }
@@ -336,7 +348,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
      * 获取 ssh 回话
      * GLOBAL
      *
-     * @param sshModel    sshModel
+     * @param sshModel sshModel
      * @return session
      */
     public Session getSessionByModel(MachineSshModel sshModel) {
@@ -352,13 +364,13 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
      * 获取 ssh 回话
      * GLOBAL
      *
-     * @param sshModel    sshModel
+     * @param sshModel sshModel
      * @return session
      */
     public Session getSessionByModelNoFill(ISshInfo sshModel) {
         String workspaceId = ServerConst.WORKSPACE_GLOBAL;
         if (sshModel instanceof MachineSshModel) {
-            SshModel sshModel1 = sshService.getByMachineSshId(((MachineSshModel)sshModel).getId());
+            SshModel sshModel1 = sshService.getByMachineSshId(((MachineSshModel) sshModel).getId());
             if (sshModel1 != null) {
                 workspaceId = sshModel1.getWorkspaceId();
             }
@@ -407,7 +419,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
                 Assert.notNull(rsaFile, "用户目录没有找到私钥信息");
             } else {
                 //这里的实现，用于把 private key 写入到一个临时文件中，此方式不太采取
-                File tempPath = JpomApplication.getInstance().getTempPath();
+                File tempPath = jpomApplication.getTempPath();
                 String sshFile = StrUtil.emptyToDefault(sshModel.id(), IdUtil.fastSimpleUUID());
                 rsaFile = FileUtil.file(tempPath, "ssh", sshFile);
                 FileUtil.writeString(privateKey, rsaFile, CharsetUtil.UTF_8);
