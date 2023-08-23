@@ -18,6 +18,7 @@
                 }).name
               }}
             </template>
+            <template v-if="!this.inClusterUrl"><a-icon type="swap" @click="handleClusterChange(selectCluster)" /> </template>
           </a-tooltip>
         </div>
       </a-button>
@@ -462,6 +463,14 @@ export default {
         });
         return temp;
       },
+    },
+    inClusterUrl() {
+      const data = this.selectCluster;
+      if (!data || !data.url) {
+        // 没有配置集群地址
+        return true;
+      }
+      return window.location.href.indexOf(data && data.url) === 0;
     },
   },
   inject: ["reload"],
