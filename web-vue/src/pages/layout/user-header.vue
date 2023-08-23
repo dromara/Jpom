@@ -773,7 +773,7 @@ export default {
       const cluster = this.myClusterList.find((item2) => {
         return item2.id === item.clusterInfoId;
       });
-      if (cluster && item.url && location.href.indexOf(cluster.url) !== 0) {
+      if (cluster && cluster.url && location.href.indexOf(cluster.url) !== 0) {
         let url = `${cluster.url}/#/${this.$route.fullPath}`.replace(/[\\/]+[\\/]/g, "/").replace(":/", "://");
         url = url.replace(`wid=${this.selectWorkspace.id}`, `wid=${item.id}`);
         // console.log(location.href.indexOf(cluster.url), url);
