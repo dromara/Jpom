@@ -32,16 +32,20 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.text.csv.*;
-import cn.hutool.core.util.*;
+import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.controller.build.repository.ImportRepoUtil;
@@ -104,6 +108,19 @@ public class RepositoryController extends BaseServerController {
     }
 
     /**
+     * load build list with params
+     *
+     * @return json
+     */
+    @GetMapping(value = "/build/repository/list-group", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<List<String>> getBuildGroupAll() {
+        // load list with page
+        List<String> group = repositoryService.listGroup();
+        return JsonMessage.success("", group);
+    }
+
+    /**
      * 下载导入模板
      */
     @GetMapping(value = "/build/repository/import-template", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -129,7 +146,7 @@ public class RepositoryController extends BaseServerController {
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
         int pageInt = 0;
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
-        writer.writeLine("name", "address", "type", "protocol", "private rsa", "username", "password", "timeout(s)");
+        writer.writeLine("name", "group", "address", "type", "protocol", "private rsa", "username", "password", "timeout(s)");
         while (true) {
             // 下一页
             paramMap.put("page", String.valueOf(++pageInt));
@@ -141,6 +158,7 @@ public class RepositoryController extends BaseServerController {
                 .stream()
                 .map((Function<RepositoryModel, List<Object>>) repositoryModel -> CollUtil.newArrayList(
                     repositoryModel.getName(),
+                    repositoryModel.getGroup(),
                     repositoryModel.getGitUrl(),
                     EnumUtil.likeValueOf(RepositoryModel.RepoType.class, repositoryModel.getRepoType()),
                     EnumUtil.likeValueOf(GitProtocolEnum.class, repositoryModel.getProtocol()),
@@ -167,7 +185,7 @@ public class RepositoryController extends BaseServerController {
     @PostMapping(value = "/build/repository/import-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
     @SystemPermission
-    public JsonMessage<String> importData(MultipartFile file, HttpServletRequest request) throws IOException {
+    public IJsonMessage<String> importData(MultipartFile file, HttpServletRequest request) throws IOException {
         Assert.notNull(file, "没有上传文件");
         String originalFilename = file.getOriginalFilename();
         String extName = FileUtil.extName(originalFilename);
@@ -191,6 +209,7 @@ public class RepositoryController extends BaseServerController {
             CsvRow csvRow = rows.get(i);
             String name = csvRow.getByName("name");
             Assert.hasText(name, () -> StrUtil.format("第 {} 行 name 字段不能位空", finalI + 1));
+            String group = csvRow.getByName("group");
             String address = csvRow.getByName("address");
             Assert.hasText(address, () -> StrUtil.format("第 {} 行 address 字段不能位空", finalI + 1));
             String type = csvRow.getByName("type");
@@ -226,6 +245,7 @@ public class RepositoryController extends BaseServerController {
             RepositoryModel repositoryModel = repositoryService.queryByBean(where);
             //
             where.setName(name);
+            where.setGroup(group);
             where.setTimeout(timeout);
             where.setPassword(password);
             where.setRsaPrv(privateRsa);
@@ -266,15 +286,22 @@ public class RepositoryController extends BaseServerController {
      */
     @GetMapping(value = "/build/repository/get")
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<RepositoryModel> loadRepositoryGet(String id, HttpServletRequest request) {
+    public IJsonMessage<RepositoryModel> loadRepositoryGet(String id, HttpServletRequest request) {
         RepositoryModel repositoryModel = repositoryService.getByKey(id, request);
         Assert.notNull(repositoryModel, "没有对应的仓库");
         return JsonMessage.success("", repositoryModel);
     }
 
+    /**
+     * 过滤前端多余避免核心字段被更新
+     *
+     * @param repositoryModelReq 仓库对象
+     * @return 可以更新的对象
+     */
     private RepositoryModel convertRequest(RepositoryModel repositoryModelReq) {
         RepositoryModel repositoryModel = new RepositoryModel();
         repositoryModel.setName(repositoryModelReq.getName());
+        repositoryModel.setGroup(repositoryModelReq.getGroup());
         repositoryModel.setUserName(repositoryModelReq.getUserName());
         repositoryModel.setId(repositoryModelReq.getId());
         repositoryModel.setProtocol(repositoryModelReq.getProtocol());
@@ -295,7 +322,7 @@ public class RepositoryController extends BaseServerController {
      */
     @PostMapping(value = "/build/repository/edit")
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> editRepository(RepositoryModel req, HttpServletRequest request) {
+    public IJsonMessage<String> editRepository(RepositoryModel req, HttpServletRequest request) {
         RepositoryModel repositoryModelReq = this.convertRequest(req);
         repositoryModelReq.setWorkspaceId(repositoryService.covertGlobalWorkspace(request));
         this.checkInfo(repositoryModelReq, request);
@@ -341,7 +368,7 @@ public class RepositoryController extends BaseServerController {
      */
     @PostMapping(value = "/build/repository/rest_hide_field")
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> restHideField(@ValidatorItem String id, HttpServletRequest request) {
+    public IJsonMessage<String> restHideField(@ValidatorItem String id, HttpServletRequest request) {
         RepositoryModel byKeyAndGlobal = repositoryService.getByKeyAndGlobal(id, request);
         RepositoryModel repositoryModel = new RepositoryModel();
         repositoryModel.setId(byKeyAndGlobal.getId());
@@ -354,14 +381,14 @@ public class RepositoryController extends BaseServerController {
 
     @GetMapping(value = "/build/repository/provider_info")
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<Map<String, Map<String, Object>>> providerInfo() {
+    public IJsonMessage<Map<String, Map<String, Object>>> providerInfo() {
         Map<String, Map<String, Object>> providerList = ImportRepoUtil.getProviderList();
         return JsonMessage.success(HttpStatus.OK.name(), providerList);
     }
 
     @GetMapping(value = "/build/repository/authorize_repos")
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<JSONObject>> authorizeRepos(HttpServletRequest request,
+    public IJsonMessage<PageResultDto<JSONObject>> authorizeRepos(HttpServletRequest request,
                                                                  @ValidatorItem String token,
                                                                  String address,
                                                                  @ValidatorItem String type,
@@ -510,7 +537,7 @@ public class RepositoryController extends BaseServerController {
      */
     @GetMapping(value = "/build/repository/sort-item", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> sortItem(@ValidatorItem String id,
+    public IJsonMessage<String> sortItem(@ValidatorItem String id,
                                         @ValidatorItem String method,
                                         String compareId, HttpServletRequest request) {
         if (StrUtil.equalsIgnoreCase(method, "top")) {

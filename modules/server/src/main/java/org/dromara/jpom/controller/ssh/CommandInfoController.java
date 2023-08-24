@@ -24,8 +24,13 @@ package org.dromara.jpom.controller.ssh;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
-import org.dromara.jpom.common.*;
+import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
@@ -81,7 +86,7 @@ public class CommandInfoController extends BaseServerController {
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<CommandModel>> page() {
+    public IJsonMessage<PageResultDto<CommandModel>> page() {
         PageResultDto<CommandModel> page = commandService.listPage(getRequest());
         return JsonMessage.success("", page);
     }
@@ -104,7 +109,7 @@ public class CommandInfoController extends BaseServerController {
      */
     @RequestMapping(value = "edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> edit(@RequestBody JSONObject data, HttpServletRequest request) {
+    public IJsonMessage<Object> edit(@RequestBody JSONObject data, HttpServletRequest request) {
         String name = data.getString("name");
         String command = data.getString("command");
         String desc = data.getString("desc");
@@ -144,7 +149,7 @@ public class CommandInfoController extends BaseServerController {
      */
     @RequestMapping(value = "del", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> del(String id) {
+    public IJsonMessage<Object> del(String id) {
         File logFileDir = CommandExecLogModel.logFileDir(id);
         boolean fastDel = CommandUtil.systemFastDel(logFileDir);
         Assert.state(!fastDel, "清理日志文件失败");
@@ -169,7 +174,7 @@ public class CommandInfoController extends BaseServerController {
      */
     @RequestMapping(value = "batch", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<String> batch(String id,
+    public IJsonMessage<String> batch(String id,
                                      String params,
                                      @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "运行节点不能为空") String nodes) throws IOException {
         Assert.hasText(id, "请选择执行的命令");
@@ -188,7 +193,7 @@ public class CommandInfoController extends BaseServerController {
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public JsonMessage<Object> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
+    public IJsonMessage<Object> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
         String nowWorkspaceId = nodeService.getCheckUserWorkspace(getRequest());
         //
         commandService.checkUserWorkspace(toWorkspaceId);
@@ -204,7 +209,7 @@ public class CommandInfoController extends BaseServerController {
      */
     @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
+    public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
         CommandModel item = commandService.getByKey(id, getRequest());
         UserModel user = getUser();
         CommandModel updateInfo;

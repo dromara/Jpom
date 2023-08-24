@@ -35,6 +35,7 @@ import org.dromara.jpom.model.BaseMachineModel;
  *
  * @author bwcx_jzy
  * @since 2019/4/16
+ * @see MachineNodeModel
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "NODE_INFO", name = "节点信息")

@@ -24,9 +24,10 @@ package org.dromara.jpom.controller.user;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.user.UserBindWorkspaceModel;
@@ -71,9 +72,9 @@ public class UserInfoController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "updatePwd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> updatePwd(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String oldPwd,
-                                         @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String newPwd,
-                                         HttpSession session) {
+    public IJsonMessage<String> updatePwd(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String oldPwd,
+                                          @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String newPwd,
+                                          HttpSession session) {
         Assert.state(!StrUtil.equals(oldPwd, newPwd), "新旧密码一致");
         UserModel userName = getUser();
         Assert.state(!userName.isDemoUser(), "当前账户为演示账号，不支持修改密码");
@@ -98,7 +99,7 @@ public class UserInfoController extends BaseServerController {
      * @return json
      */
     @GetMapping(value = "workspace_list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<UserBindWorkspaceModel>> workspaceList(@ValidatorItem String userId) {
+    public IJsonMessage<List<UserBindWorkspaceModel>> workspaceList(@ValidatorItem String userId) {
         List<UserBindWorkspaceModel> workspaceModels = userBindWorkspaceService.listUserWorkspace(userId);
         return JsonMessage.success("", workspaceModels);
     }

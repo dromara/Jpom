@@ -82,7 +82,7 @@
     "childs": [
       {
         "id": "workspace",
-        "title": "工作空间",
+        "title": "工作空间&集群",
         "role": "system"
       },
       {

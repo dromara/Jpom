@@ -22,8 +22,9 @@
  */
 package org.dromara.jpom.controller.node.manage.file;
 
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.controller.outgiving.OutGivingWhitelistService;
@@ -75,7 +76,7 @@ public class ProjectFileControl extends BaseServerController {
      */
     @RequestMapping(value = "upload-sharding", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.UPLOAD, log = false)
-    public JsonMessage<String> uploadSharding(String sliceId) {
+    public IJsonMessage<String> uploadSharding(String sliceId) {
         Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
         return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Manage_File_Upload_Sharding);
     }
@@ -87,7 +88,7 @@ public class ProjectFileControl extends BaseServerController {
      */
     @RequestMapping(value = "sharding-merge", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.UPLOAD)
-    public JsonMessage<String> shardingMerge(String sliceId, HttpServletRequest request) {
+    public IJsonMessage<String> shardingMerge(String sliceId, HttpServletRequest request) {
         Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
         JsonMessage<String> message = NodeForward.request(getNode(), request, NodeUrl.Manage_File_Sharding_Merge);
         // 判断-删除分片id

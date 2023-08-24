@@ -22,10 +22,8 @@
  */
 package org.dromara.jpom.service.system;
 
-import cn.hutool.db.Entity;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
@@ -33,11 +31,7 @@ import org.dromara.jpom.service.IStatusRecover;
 import org.dromara.jpom.service.h2db.BaseDbService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author bwcx_jzy
@@ -46,34 +40,6 @@ import java.util.stream.Stream;
 @Service
 @Slf4j
 public class WorkspaceService extends BaseDbService<WorkspaceModel> implements IStatusRecover {
-
-    /**
-     * load date group by group name
-     *
-     * @return list
-     */
-    public List<String> listGroup() {
-        String sql = "select `GROUP` from " + getTableName() + "  group by `GROUP`";
-        List<Entity> list = super.query(sql);
-        // 筛选字段
-        return list.stream()
-            .flatMap(entity -> {
-                Object obj = entity.get(ServerConst.GROUP_STR);
-                if (obj == null) {
-                    return null;
-                }
-                return Stream.of(String.valueOf(obj));
-            }).filter(Objects::nonNull)
-            .distinct().collect(Collectors.toList());
-    }
-
-    /**
-     * 恢复字段
-     */
-    private void repairGroupFiled() {
-        String sql = "update " + getTableName() + " set `GROUP`=? where `GROUP` is null or `GROUP`=''";
-        super.execute(sql, Const.DEFAULT_GROUP_NAME);
-    }
 
     @Override
     public int statusRecover() {
@@ -102,8 +68,6 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> implements I
             }
             total += execute;
         }
-        //
-        this.repairGroupFiled();
         return total;
     }
 }

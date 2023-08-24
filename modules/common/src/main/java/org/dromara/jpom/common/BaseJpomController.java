@@ -350,4 +350,7 @@ public abstract class BaseJpomController {
         response.setContentType(contentType);
     }
 
+    protected String getWorkspaceId() {
+        return ServletUtil.getHeader(getRequest(), Const.WORKSPACE_ID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+    }
 }

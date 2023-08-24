@@ -34,6 +34,8 @@ import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Lombok;
@@ -41,7 +43,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.db.StorageServiceFactory;
@@ -106,8 +107,8 @@ public class SystemConfigController extends BaseServerController {
      */
     @RequestMapping(value = "config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> configData(String machineId, HttpServletRequest request) {
-        JsonMessage<JSONObject> message = this.tryRequestNode(machineId, request, NodeUrl.SystemGetConfig);
+    public IJsonMessage<JSONObject> configData(String machineId, HttpServletRequest request) {
+        IJsonMessage<JSONObject> message = this.tryRequestNode(machineId, request, NodeUrl.SystemGetConfig);
         return Optional.ofNullable(message).orElseGet(() -> {
             JSONObject jsonObject = new JSONObject();
             Resource resource = ExtConfigBean.getResource();
@@ -125,7 +126,7 @@ public class SystemConfigController extends BaseServerController {
     @PostMapping(value = "save_config.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission(superUser = true)
-    public JsonMessage<String> saveConfig(String machineId, String content, String restart, HttpServletRequest request) throws SQLException, IOException {
+    public IJsonMessage<String> saveConfig(String machineId, String content, String restart, HttpServletRequest request) throws SQLException, IOException {
         JsonMessage<String> jsonMessage = this.tryRequestNode(machineId, request, NodeUrl.SystemSaveConfig);
         if (jsonMessage != null) {
             return jsonMessage;
@@ -191,7 +192,7 @@ public class SystemConfigController extends BaseServerController {
      */
     @RequestMapping(value = "ip-config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.SYSTEM_CONFIG_IP, method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> ipConfigData() {
+    public IJsonMessage<JSONObject> ipConfigData() {
         SystemIpConfigModel config = systemParametersServer.getConfig(SystemIpConfigModel.ID, SystemIpConfigModel.class);
         JSONObject jsonObject = new JSONObject();
         if (config != null) {
@@ -205,7 +206,7 @@ public class SystemConfigController extends BaseServerController {
 
     @RequestMapping(value = "save_ip_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.SYSTEM_CONFIG_IP, method = MethodFeature.EDIT)
-    public JsonMessage<Object> saveIpConfig(String allowed, String prohibited) {
+    public IJsonMessage<Object> saveIpConfig(String allowed, String prohibited) {
         SystemIpConfigModel systemIpConfigModel = new SystemIpConfigModel();
         String allowed1 = StrUtil.emptyToDefault(allowed, StrUtil.EMPTY);
         this.checkIpV4(allowed1);
@@ -269,7 +270,7 @@ public class SystemConfigController extends BaseServerController {
      */
     @GetMapping(value = "get_proxy_config", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONArray> getPoxyConfig() {
+    public IJsonMessage<JSONArray> getPoxyConfig() {
         JSONArray array = systemParametersServer.getConfigDefNewInstance(ProxySelectorConfig.KEY, JSONArray.class);
         return JsonMessage.success("", array);
     }
@@ -281,7 +282,7 @@ public class SystemConfigController extends BaseServerController {
      * @return json
      */
     @PostMapping(value = "save_proxy_config", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> saveProxyConfig(@RequestBody List<ProxySelectorConfig.ProxyConfigItem> proxys) {
+    public IJsonMessage<Object> saveProxyConfig(@RequestBody List<ProxySelectorConfig.ProxyConfigItem> proxys) {
         proxys = ObjectUtil.defaultIfNull(proxys, Collections.emptyList());
         for (ProxySelectorConfig.ProxyConfigItem proxy : proxys) {
             if (StrUtil.isNotEmpty(proxy.getProxyAddress())) {

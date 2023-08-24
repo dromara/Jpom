@@ -25,6 +25,7 @@ package org.dromara.jpom.common;
 import cn.hutool.cache.Cache;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.interceptor.LoginInterceptor;

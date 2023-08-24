@@ -23,9 +23,10 @@
 package org.dromara.jpom.controller.script;
 
 import cn.hutool.core.io.FileUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
@@ -74,7 +75,7 @@ public class ScriptLogController extends BaseServerController {
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<ScriptExecuteLogModel>> scriptList(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<ScriptExecuteLogModel>> scriptList(HttpServletRequest request) {
         PageResultDto<ScriptExecuteLogModel> pageResultDto = scriptExecuteLogServer.listPage(request);
         return JsonMessage.success("success", pageResultDto);
     }
@@ -88,7 +89,7 @@ public class ScriptLogController extends BaseServerController {
      */
     @RequestMapping(value = "del_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> delLog(@ValidatorItem() String id,
+    public IJsonMessage<Object> delLog(@ValidatorItem() String id,
                                       @ValidatorItem() String executeId,
                                       HttpServletRequest request) {
         ScriptModel item = scriptServer.getByKeyAndGlobal(id, request);
@@ -110,7 +111,7 @@ public class ScriptLogController extends BaseServerController {
      */
     @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> getNowLog(@ValidatorItem() String id,
+    public IJsonMessage<JSONObject> getNowLog(@ValidatorItem() String id,
                                              @ValidatorItem() String executeId,
                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line,
                                              HttpServletRequest request) {

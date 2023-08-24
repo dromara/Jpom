@@ -30,11 +30,11 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.system.SystemUtil;
+import cn.keepbx.jpom.cron.ICron;
 import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.cron.CronUtils;
-import org.dromara.jpom.cron.ICron;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.CommandExecLogModel;
@@ -46,7 +46,10 @@ import org.dromara.jpom.script.CommandParam;
 import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
-import org.dromara.jpom.util.*;
+import org.dromara.jpom.util.LogRecorder;
+import org.dromara.jpom.util.StrictSyncFinisher;
+import org.dromara.jpom.util.StringUtil;
+import org.dromara.jpom.util.SyncFinisherUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -82,9 +85,10 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
     }
 
     @Override
-    public void insert(CommandModel commandModel) {
-        super.insert(commandModel);
+    public int insert(CommandModel commandModel) {
+        int count = super.insert(commandModel);
         this.checkCron(commandModel);
+        return count;
     }
 
     @Override
@@ -311,34 +315,34 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
      */
     public void syncToWorkspace(String ids, String nowWorkspaceId, String workspaceId) {
         StrUtil.splitTrim(ids, StrUtil.COMMA)
-                .forEach(id -> {
-                    CommandModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
-                    Assert.notNull(data, "没有对应的ssh脚本信息");
-                    //
-                    CommandModel where = new CommandModel();
-                    where.setWorkspaceId(workspaceId);
-                    where.setName(data.getName());
-                    CommandModel exits = super.queryByBean(where);
-                    if (exits == null) {
-                        // 不存在则添加 信息
-                        data.setId(null);
-                        data.setWorkspaceId(workspaceId);
-                        data.setCreateTimeMillis(null);
-                        data.setModifyTimeMillis(null);
-                        data.setSshIds(null);
-                        data.setModifyUser(null);
-                        super.insert(data);
-                    } else {
-                        // 修改信息
-                        CommandModel update = new CommandModel();
-                        update.setId(exits.getId());
-                        update.setCommand(data.getCommand());
-                        update.setDesc(data.getDesc());
-                        update.setDefParams(data.getDefParams());
-                        update.setAutoExecCron(data.getAutoExecCron());
-                        super.updateById(update);
-                    }
-                });
+            .forEach(id -> {
+                CommandModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
+                Assert.notNull(data, "没有对应的ssh脚本信息");
+                //
+                CommandModel where = new CommandModel();
+                where.setWorkspaceId(workspaceId);
+                where.setName(data.getName());
+                CommandModel exits = super.queryByBean(where);
+                if (exits == null) {
+                    // 不存在则添加 信息
+                    data.setId(null);
+                    data.setWorkspaceId(workspaceId);
+                    data.setCreateTimeMillis(null);
+                    data.setModifyTimeMillis(null);
+                    data.setSshIds(null);
+                    data.setModifyUser(null);
+                    super.insert(data);
+                } else {
+                    // 修改信息
+                    CommandModel update = new CommandModel();
+                    update.setId(exits.getId());
+                    update.setCommand(data.getCommand());
+                    update.setDesc(data.getDesc());
+                    update.setDefParams(data.getDefParams());
+                    update.setAutoExecCron(data.getAutoExecCron());
+                    super.updateById(update);
+                }
+            });
     }
 
 }

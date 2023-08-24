@@ -26,11 +26,12 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.JpomManifest;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.RemoteVersion;
 import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.common.commander.AbstractSystemCommander;
@@ -78,7 +79,7 @@ public class IndexController extends BaseAgentController {
     }
 
     @RequestMapping(value = "info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> info() {
+    public IJsonMessage<JSONObject> info() {
 
         JpomManifest instance = JpomManifest.getInstance();
         cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
@@ -97,7 +98,7 @@ public class IndexController extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "get-stat-info", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> getDirectTop() {
+    public IJsonMessage<JSONObject> getDirectTop() {
         JSONObject jsonObject = new JSONObject();
         JSONObject topInfo = OshiUtils.getSimpleInfo();
         jsonObject.put("simpleStatus", topInfo);
@@ -132,7 +133,7 @@ public class IndexController extends BaseAgentController {
 
 
     @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> getProcessList(String processName, Integer count) {
+    public IJsonMessage<List<JSONObject>> getProcessList(String processName, Integer count) {
         processName = StrUtil.emptyToDefault(processName, "java");
         List<JSONObject> processes = OshiUtils.getProcesses(processName, Convert.toInt(count, 20));
         processes = processes.stream()
@@ -148,7 +149,7 @@ public class IndexController extends BaseAgentController {
 
 
     @PostMapping(value = "kill.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> kill(int pid) {
+    public IJsonMessage<String> kill(int pid) {
         long jpomAgentId = JpomManifest.getInstance().getPid();
         Assert.state(!StrUtil.equals(StrUtil.toString(jpomAgentId), StrUtil.toString(pid)), "不支持在线关闭 Agent 进程");
         String result = AbstractSystemCommander.getInstance().kill(null, pid);
@@ -159,19 +160,19 @@ public class IndexController extends BaseAgentController {
     }
 
     @PostMapping(value = "disk-info", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> diskInfo() {
+    public IJsonMessage<List<JSONObject>> diskInfo() {
         List<JSONObject> list = OshiUtils.fileStores();
         return JsonMessage.success("", list);
     }
 
     @PostMapping(value = "hw-disk--info", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> hwDiskInfo() {
+    public IJsonMessage<List<JSONObject>> hwDiskInfo() {
         List<JSONObject> list = OshiUtils.diskStores();
         return JsonMessage.success("", list);
     }
 
     @PostMapping(value = "network-interfaces", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> networkInterfaces() {
+    public IJsonMessage<List<JSONObject>> networkInterfaces() {
         List<JSONObject> list = OshiUtils.networkInterfaces();
         return JsonMessage.success("", list);
     }

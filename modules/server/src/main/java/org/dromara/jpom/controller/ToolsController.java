@@ -26,7 +26,8 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.pattern.CronPatternUtil;
-import org.dromara.jpom.common.JsonMessage;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,7 +47,7 @@ import java.util.stream.Collectors;
 public class ToolsController {
 
     @GetMapping(value = "cron", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<Long>> cron(@ValidatorItem String cron, @ValidatorItem int count, String date, boolean isMatchSecond) {
+    public IJsonMessage<List<Long>> cron(@ValidatorItem String cron, @ValidatorItem int count, String date, boolean isMatchSecond) {
         Date startDate = null;
         Date endDate = null;
         if (StrUtil.isNotEmpty(date)) {

@@ -79,7 +79,8 @@ public class InitDb implements DisposableBean, ILoadEvent {
      */
     private File recoverSqlFile;
 
-    public InitDb(DbExtConfig dbExtConfig, BackupInfoService backupInfoService) {
+    public InitDb(DbExtConfig dbExtConfig,
+                  BackupInfoService backupInfoService) {
         this.dbExtConfig = dbExtConfig;
         this.backupInfoService = backupInfoService;
     }

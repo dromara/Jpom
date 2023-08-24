@@ -23,8 +23,9 @@
 package org.dromara.jpom.controller.node.system;
 
 import cn.hutool.core.util.ReflectUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.model.data.AgentWhitelist;
@@ -73,7 +74,7 @@ public class WhitelistDirectoryController extends BaseServerController {
      */
     @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
-    public JsonMessage<Map<String, String>> whiteList(String machineId) {
+    public IJsonMessage<Map<String, String>> whiteList(String machineId) {
         NodeModel nodeModel = tryGetNode();
         AgentWhitelist agentWhitelist;
         if (nodeModel != null) {
@@ -110,7 +111,7 @@ public class WhitelistDirectoryController extends BaseServerController {
      */
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
-    public JsonMessage<String> whitelistDirectorySubmit(HttpServletRequest request, String machineId) {
+    public IJsonMessage<String> whitelistDirectorySubmit(HttpServletRequest request, String machineId) {
         JsonMessage<String> objectJsonMessage = this.tryRequestNode(machineId, request, NodeUrl.WhitelistDirectory_Submit);
         Assert.notNull(objectJsonMessage, "请选择节点");
         return objectJsonMessage;

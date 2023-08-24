@@ -54,21 +54,23 @@ export default {
   },
   methods: {
     reload() {
-      this.routerActivation = false;
-      // 刷新菜单
-      store
-        .dispatch("restLoadSystemMenus")
-        .then(() => {
-          //
-        })
-        .catch(() => {
-          // 跳转到登录页面
-          this.$router.push({
-            path: "/login",
+      return new Promise(() => {
+        this.routerActivation = false;
+        // 刷新菜单
+        store
+          .dispatch("restLoadSystemMenus")
+          .then(() => {
+            //
+          })
+          .catch(() => {
+            // 跳转到登录页面
+            this.$router.push({
+              path: "/login",
+            });
           });
+        this.$nextTick(() => {
+          this.routerActivation = true;
         });
-      this.$nextTick(() => {
-        this.routerActivation = true;
       });
     },
   },

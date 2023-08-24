@@ -22,15 +22,19 @@
  */
 package org.dromara.jpom.controller.system;
 
+import cn.hutool.cache.impl.CacheObj;
+import cn.hutool.cache.impl.LFUCache;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.event.ICacheTask;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.build.BuildInfoManage;
+import org.dromara.jpom.build.BuildExecuteManage;
 import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JpomManifest;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -43,6 +47,7 @@ import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.socket.ServiceFileTailWatcher;
+import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.system.db.DataInitEvent;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.SyncFinisherUtil;
@@ -50,8 +55,10 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -73,11 +80,14 @@ public class CacheManageController extends BaseServerController implements ICach
 
     private final JpomApplication jpomApplication;
     private final DataInitEvent dataInitEvent;
+    private final ServerConfig.ClusterConfig clusterConfig;
 
     public CacheManageController(JpomApplication jpomApplication,
-                                 DataInitEvent dataInitEvent) {
+                                 DataInitEvent dataInitEvent,
+                                 ServerConfig serverConfig) {
         this.jpomApplication = jpomApplication;
         this.dataInitEvent = dataInitEvent;
+        this.clusterConfig = serverConfig.getCluster();
     }
 
     /**
@@ -89,28 +99,31 @@ public class CacheManageController extends BaseServerController implements ICach
      */
     @PostMapping(value = "server-cache", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<Map<String, Object>> serverCache() {
+    public IJsonMessage<Map<String, Object>> serverCache() {
         Map<String, Object> map = new HashMap<>(10);
         map.put("cacheFileSize", this.tempFileSize);
         map.put("dataSize", this.dataSize);
-        int size = LoginControl.LFU_CACHE.size();
         map.put("oldJarsSize", this.oldJarsSize);
-        map.put("ipSize", size);
+        {
+            LFUCache<String, Integer> lfuCache = LoginControl.LFU_CACHE;
+            List<CacheObj<String, Integer>> list = CollUtil.newArrayList(lfuCache.cacheObjIterator());
+            map.put("errorIp", list);
+        }
         int oneLineCount = ServiceFileTailWatcher.getOneLineCount();
         map.put("readFileOnLineCount", oneLineCount);
-
         map.put("cacheBuildFileSize", BuildUtil.buildCacheSize);
-
         map.put("taskList", CronUtils.list());
         map.put("pluginSize", PluginFactory.size());
         map.put("shardingSize", BaseServerController.SHARDING_IDS.size());
-        map.put("buildKeys", BuildInfoManage.buildKeys());
+        map.put("buildKeys", BuildExecuteManage.buildKeys());
         map.put("syncFinisKeys", SyncFinisherUtil.keys());
         map.put("dateTime", DateTime.now().toString());
         map.put("timeZoneId", TimeZone.getDefault().getID());
         map.put("errorWorkspace", dataInitEvent.getErrorWorkspaceTable());
+        map.put("clusterId", clusterConfig.getId());
+        map.put("installId", JpomManifest.getInstance().getInstallId());
         //
-        return JsonMessage.success("ok", map);
+        return JsonMessage.success("", map);
     }
 
     /**
@@ -120,8 +133,8 @@ public class CacheManageController extends BaseServerController implements ICach
      */
     @RequestMapping(value = "node_cache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String nodeCache() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Cache).toString();
+    public String nodeCache(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Cache).toString();
     }
 
     /**
@@ -132,7 +145,7 @@ public class CacheManageController extends BaseServerController implements ICach
      */
     @RequestMapping(value = "clearCache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
+    public IJsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type, HttpServletRequest request) {
         switch (type) {
             case "serviceCacheFileSize": {
                 File tempPath = JpomApplication.getInstance().getTempPath();
@@ -150,7 +163,7 @@ public class CacheManageController extends BaseServerController implements ICach
                 break;
             }
             default:
-                return NodeForward.request(getNode(), getRequest(), NodeUrl.ClearCache);
+                return NodeForward.request(getNode(), request, NodeUrl.ClearCache);
 
         }
         return JsonMessage.success("清空成功");
@@ -164,7 +177,7 @@ public class CacheManageController extends BaseServerController implements ICach
      */
     @GetMapping(value = "clear-error-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> clearErrorWorkspace(@ValidatorItem String tableName) {
+    public IJsonMessage<String> clearErrorWorkspace(@ValidatorItem String tableName) {
         dataInitEvent.clearErrorWorkspace(tableName);
         return JsonMessage.success("清理成功");
     }

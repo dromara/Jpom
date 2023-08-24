@@ -24,9 +24,10 @@ package org.dromara.jpom.controller.ssh;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
@@ -69,7 +70,7 @@ public class CommandLogController extends BaseServerController {
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<CommandExecLogModel>> page() {
+    public IJsonMessage<PageResultDto<CommandExecLogModel>> page() {
         PageResultDto<CommandExecLogModel> page = commandExecLogService.listPage(getRequest());
         return JsonMessage.success("", page);
     }
@@ -86,7 +87,7 @@ public class CommandLogController extends BaseServerController {
      */
     @RequestMapping(value = "del", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> del(String id) {
+    public IJsonMessage<String> del(String id) {
         CommandExecLogModel execLogModel = commandExecLogService.getByKey(id);
         Assert.notNull(execLogModel, "没有对应的记录");
         File logFile = execLogModel.logFile();
@@ -121,7 +122,7 @@ public class CommandLogController extends BaseServerController {
      */
     @GetMapping(value = "batch_list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<CommandExecLogModel>> batchList(@ValidatorItem String commandId, @ValidatorItem String batchId) {
+    public IJsonMessage<List<CommandExecLogModel>> batchList(@ValidatorItem String commandId, @ValidatorItem String batchId) {
         CommandExecLogModel commandExecLogModel = new CommandExecLogModel();
         commandExecLogModel.setCommandId(commandId);
         commandExecLogModel.setBatchId(batchId);
@@ -145,7 +146,7 @@ public class CommandLogController extends BaseServerController {
      */
     @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> log(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+    public IJsonMessage<JSONObject> log(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
                                        @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
         CommandExecLogModel item = commandExecLogService.getByKey(id, getRequest());
         Assert.notNull(item, "没有对应数据");

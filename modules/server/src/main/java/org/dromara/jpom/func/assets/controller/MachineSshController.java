@@ -40,9 +40,10 @@ import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.JschUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.interceptor.PermissionInterceptor;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -109,7 +110,7 @@ public class MachineSshController extends BaseGroupNameController {
 
     @PostMapping(value = "list-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<MachineSshModel>> listJson(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<MachineSshModel>> listJson(HttpServletRequest request) {
         PageResultDto<MachineSshModel> pageResultDto = machineSshServer.listPage(request);
         return JsonMessage.success("", pageResultDto);
     }
@@ -131,7 +132,7 @@ public class MachineSshController extends BaseGroupNameController {
      */
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
+    public IJsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "host不能为空") String host,
                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "user不能为空") String user,
                                     String password,
@@ -160,9 +161,7 @@ public class MachineSshController extends BaseGroupNameController {
         sshModel.setGroupName(groupName);
         sshModel.setHost(host);
         // 如果密码传递不为空就设置值 因为上面已经判断了只有修改的情况下 password 才可能为空
-        if (StrUtil.isNotEmpty(password)) {
-            sshModel.setPassword(password);
-        }
+        Opt.ofBlankAble(password).ifPresent(sshModel::setPassword);
         if (StrUtil.startWith(privateKey, URLUtil.FILE_URL_PREFIX)) {
             String rsaPath = StrUtil.removePrefix(privateKey, URLUtil.FILE_URL_PREFIX);
             Assert.state(FileUtil.isFile(rsaPath), "配置的私钥文件不存在");
@@ -181,7 +180,7 @@ public class MachineSshController extends BaseGroupNameController {
             Charset.forName(charset);
             sshModel.setCharset(charset);
         } catch (Exception e) {
-            return new JsonMessage<>(405, "请填写正确的编码格式");
+            return new JsonMessage<>(405, "请填写正确的编码格式," + e.getMessage());
         }
         // 判断重复
         Entity entity = Entity.create();
@@ -189,30 +188,26 @@ public class MachineSshController extends BaseGroupNameController {
         entity.set("port", sshModel.getPort());
         entity.set("`user`", sshModel.getUser());
         entity.set("connectType", sshModel.getConnectType());
-        if (StrUtil.isNotEmpty(id)) {
-            entity.set("id", StrUtil.format(" <> {}", id));
-        }
+        Opt.ofBlankAble(id).ifPresent(s -> entity.set("id", StrUtil.format(" <> {}", s)));
         boolean exists = machineSshServer.exists(entity);
         Assert.state(!exists, "对应的SSH已经存在啦");
         try {
+
+            String workspaceId = getWorkspaceId();
             Session session = machineSshServer.getSessionByModel(sshModel);
             JschUtil.close(session);
         } catch (Exception e) {
             log.warn("ssh连接失败", e);
             return new JsonMessage<>(505, "ssh连接失败：" + e.getMessage());
         }
-        if (add) {
-            machineSshServer.insert(sshModel);
-        } else {
-            machineSshServer.updateById(sshModel);
-        }
+        int i = add ? machineSshServer.insert(sshModel) : machineSshServer.updateById(sshModel);
         return JsonMessage.success("操作成功");
     }
 
 
     @PostMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> delete(@ValidatorItem String id) {
+    public IJsonMessage<String> delete(@ValidatorItem String id) {
         long count = sshService.countByMachine(id);
         Assert.state(count <= 0, "当前机器SSH还关联" + count + "个ssh不能删除");
         machineSshServer.delByKey(id);
@@ -226,7 +221,7 @@ public class MachineSshController extends BaseGroupNameController {
      */
     @PostMapping(value = "log-list-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.SSH_TERMINAL_LOG, method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<SshTerminalExecuteLog>> logListData(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<SshTerminalExecuteLog>> logListData(HttpServletRequest request) {
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
         PageResultDto<SshTerminalExecuteLog> pageResult = sshTerminalExecuteLogService.listPage(paramMap);
         return JsonMessage.success("获取成功", pageResult);
@@ -234,7 +229,7 @@ public class MachineSshController extends BaseGroupNameController {
 
     @GetMapping(value = "list-workspace-ssh", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<SshModel>> listWorkspaceSsh(@ValidatorItem String id) {
+    public IJsonMessage<List<SshModel>> listWorkspaceSsh(@ValidatorItem String id) {
         MachineSshModel machineSshModel = machineSshServer.getByKey(id);
         Assert.notNull(machineSshModel, "没有对应的机器");
         SshModel sshModel = new SshModel();
@@ -257,7 +252,7 @@ public class MachineSshController extends BaseGroupNameController {
      */
     @PostMapping(value = "save-workspace-config", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> saveWorkspaceConfig(
+    public IJsonMessage<String> saveWorkspaceConfig(
         String fileDirs,
         @ValidatorItem String id,
         String notAllowedCommand,
@@ -295,7 +290,7 @@ public class MachineSshController extends BaseGroupNameController {
      */
     @PostMapping(value = "distribute", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> distribute(@ValidatorItem String ids, @ValidatorItem String workspaceId) {
+    public IJsonMessage<String> distribute(@ValidatorItem String ids, @ValidatorItem String workspaceId) {
         List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
         for (String id : list) {
             MachineSshModel machineSshModel = machineSshServer.getByKey(id);
@@ -320,7 +315,7 @@ public class MachineSshController extends BaseGroupNameController {
      */
     @PostMapping(value = "rest-hide-field", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> restHideField(@ValidatorItem String id) {
+    public IJsonMessage<String> restHideField(@ValidatorItem String id) {
         MachineSshModel machineSshModel = new MachineSshModel();
         machineSshModel.setId(id);
         machineSshModel.setPassword(StrUtil.EMPTY);
@@ -396,7 +391,7 @@ public class MachineSshController extends BaseGroupNameController {
      */
     @PostMapping(value = "import-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<String> importData(MultipartFile file) throws IOException {
+    public IJsonMessage<String> importData(MultipartFile file) throws IOException {
         Assert.notNull(file, "没有上传文件");
         String originalFilename = file.getOriginalFilename();
         String extName = FileUtil.extName(originalFilename);

@@ -60,6 +60,14 @@ export function deleteDcoker(params) {
   });
 }
 
+export function dockerListGroup(params) {
+  return axios({
+    url: "/system/assets/docker/list-group",
+    method: "get",
+    params: params,
+  });
+}
+
 export function initDockerSwarm(data) {
   return axios({
     url: "/system/assets/docker/init",
@@ -114,7 +122,7 @@ export function machineDockerDistribute(params) {
   return axios({
     url: "/system/assets/docker/distribute",
     method: "post",
-    params: params,
+    data: params,
   });
 }
 

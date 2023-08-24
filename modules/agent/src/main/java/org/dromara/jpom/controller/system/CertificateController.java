@@ -25,9 +25,10 @@ package org.dromara.jpom.controller.system;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.data.CertModel;
 import org.dromara.jpom.service.system.CertService;
@@ -65,7 +66,7 @@ public class CertificateController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<CertModel>> getCertList() {
+    public IJsonMessage<List<CertModel>> getCertList() {
         List<CertModel> array = certService.list();
         return JsonMessage.success("", array);
     }
@@ -77,7 +78,7 @@ public class CertificateController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> delete(@ValidatorItem String id) {
+    public IJsonMessage<String> delete(@ValidatorItem String id) {
         certService.deleteItem(id);
         return JsonMessage.success("删除成功");
     }

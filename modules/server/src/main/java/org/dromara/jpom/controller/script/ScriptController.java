@@ -25,8 +25,13 @@ package org.dromara.jpom.controller.script;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
-import org.dromara.jpom.common.*;
+import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -91,7 +96,7 @@ public class ScriptController extends BaseServerController {
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<ScriptModel>> scriptList() {
+    public IJsonMessage<PageResultDto<ScriptModel>> scriptList() {
         PageResultDto<ScriptModel> pageResultDto = scriptServer.listPage(getRequest());
         return JsonMessage.success("success", pageResultDto);
     }
@@ -103,14 +108,14 @@ public class ScriptController extends BaseServerController {
      */
     @GetMapping(value = "list-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<ScriptModel>> scriptListAll(HttpServletRequest request) {
+    public IJsonMessage<List<ScriptModel>> scriptListAll(HttpServletRequest request) {
         List<ScriptModel> pageResultDto = scriptServer.listByWorkspace(request);
         return JsonMessage.success("success", pageResultDto);
     }
 
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> save(String id,
+    public IJsonMessage<String> save(String id,
                                     @ValidatorItem String context,
                                     @ValidatorItem String name,
                                     String autoExecCron,
@@ -184,7 +189,7 @@ public class ScriptController extends BaseServerController {
 
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> del(String id, HttpServletRequest request) {
+    public IJsonMessage<String> del(String id, HttpServletRequest request) {
         ScriptModel server = scriptServer.getByKeyAndGlobal(id, request);
         if (server != null) {
             File file = server.scriptPath();
@@ -203,7 +208,7 @@ public class ScriptController extends BaseServerController {
 
     @GetMapping(value = "get", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> get(String id, HttpServletRequest request) {
+    public IJsonMessage<JSONObject> get(String id, HttpServletRequest request) {
         String workspaceId = scriptServer.getCheckUserWorkspace(request);
         ScriptModel server = scriptServer.getByKeyAndGlobal(id, request);
         Assert.notNull(server, "没有对应的脚本");
@@ -246,7 +251,7 @@ public class ScriptController extends BaseServerController {
     @RequestMapping(value = "unbind.json", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     @SystemPermission
-    public JsonMessage<String> unbind(@ValidatorItem String id, HttpServletRequest request) {
+    public IJsonMessage<String> unbind(@ValidatorItem String id, HttpServletRequest request) {
         ScriptModel update = new ScriptModel();
         update.setId(id);
         update.setNodeIds(StrUtil.EMPTY);
@@ -264,7 +269,7 @@ public class ScriptController extends BaseServerController {
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public JsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
+    public IJsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
         String nowWorkspaceId = nodeService.getCheckUserWorkspace(getRequest());
         //
         scriptServer.checkUserWorkspace(toWorkspaceId);
@@ -280,7 +285,7 @@ public class ScriptController extends BaseServerController {
      */
     @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
+    public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
         ScriptModel item = scriptServer.getByKey(id, request);
         UserModel user = getUser();
         ScriptModel updateInfo;

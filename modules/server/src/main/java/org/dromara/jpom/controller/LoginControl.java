@@ -38,6 +38,8 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
 import cn.hutool.jwt.JWT;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthCallback;
@@ -45,7 +47,6 @@ import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthRequest;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.interceptor.LoginInterceptor;
@@ -117,7 +118,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
      */
     @RequestMapping(value = "rand-code", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<String> randCode() {
+    public IJsonMessage<String> randCode() {
         if (webConfig.isDisabledCaptcha()) {
             return new JsonMessage<>(400, "验证码已禁用");
         }
@@ -178,7 +179,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
      */
     @PostMapping(value = "userLogin", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<Object> userLogin(@ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息") String loginName,
+    public IJsonMessage<Object> userLogin(@ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息") String loginName,
                                          @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息") String userPwd,
                                          String code,
                                          HttpServletRequest request) {
@@ -251,7 +252,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
      */
     @GetMapping(value = "oauth2-url", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<JSONObject> oauth2LoginUrl(HttpServletRequest request, @ValidatorItem String provide) {
+    public IJsonMessage<JSONObject> oauth2LoginUrl(HttpServletRequest request, @ValidatorItem String provide) {
         AuthRequest authRequest = Oauth2Factory.get(provide);
         String authorize = authRequest.authorize(null);
         JSONObject jsonObject = new JSONObject();
@@ -286,7 +287,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
      */
     @PostMapping(value = "oauth2/login", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<UserLoginDto> oauth2Callback(@ValidatorItem String code,
+    public IJsonMessage<UserLoginDto> oauth2Callback(@ValidatorItem String code,
                                                     @ValidatorItem String provide,
                                                     String state,
                                                     HttpServletRequest request) {
@@ -355,7 +356,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
 
     @GetMapping(value = "mfa_verify", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<UserLoginDto> mfaVerify(String token, String code, HttpServletRequest request) {
+    public IJsonMessage<UserLoginDto> mfaVerify(String token, String code, HttpServletRequest request) {
         String userId = MFA_TOKEN.get(token);
         if (StrUtil.isEmpty(userId)) {
             return new JsonMessage<>(201, "登录信息已经过期请重新登录");
@@ -377,7 +378,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
      */
     @RequestMapping(value = "logout2", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<Object> logout(HttpSession session) {
+    public IJsonMessage<Object> logout(HttpSession session) {
         session.invalidate();
         return JsonMessage.success("退出成功");
     }
@@ -389,7 +390,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
      */
     @RequestMapping(value = "renewal", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<UserLoginDto> renewalToken(HttpServletRequest request) {
+    public IJsonMessage<UserLoginDto> renewalToken(HttpServletRequest request) {
         String token = request.getHeader(ServerOpenApi.HTTP_HEAD_AUTHORIZATION);
         if (StrUtil.isEmpty(token)) {
             return new JsonMessage<>(ServerConst.AUTHORIZE_TIME_OUT_CODE, "刷新token失败");
@@ -415,7 +416,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
      */
     @GetMapping(value = "login-config", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<JSONObject> demoInfo() {
+    public IJsonMessage<JSONObject> demoInfo() {
         String userDemoTip = userConfig.getDemoTip();
         userDemoTip = StringUtil.convertFileStr(userDemoTip, StrUtil.EMPTY);
 

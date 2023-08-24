@@ -1,0 +1,85 @@
+version: '3.8'
+services:
+  server:
+    env_file:
+      - env-beta.env
+    image: jpomdocker/jpom:server-${JPOM_VERSION}
+    build:
+      dockerfile: ./modules/server/Dockerfile
+      context: .
+      args:
+        JPOM_VERSION: ${JPOM_VERSION}
+    environment:
+      "JPOM_SERVER_TEMP_TOKEN": ${SERVER_TOKEN}
+      "jpom.cluster.id": server00
+    volumes:
+      - jpom-server-data:/usr/local/jpom-server/data
+      - jpom-server-logs:/usr/local/jpom-server/logs
+      - jpom-server-conf:/usr/local/jpom-server/conf
+    ports:
+      - "2122:2122"
+    hostname: server
+  server01:
+    env_file:
+      - env-beta.env
+    image: jpomdocker/jpom:server-${JPOM_VERSION}
+    build:
+      dockerfile: ./modules/server/Dockerfile
+      context: .
+      args:
+        JPOM_VERSION: ${JPOM_VERSION}
+    environment:
+      "JPOM_SERVER_TEMP_TOKEN": ${SERVER_TOKEN}
+      "jpom.cluster.id": server01
+    volumes:
+      - jpom-server01-data:/usr/local/jpom-server/data
+      - jpom-server01-logs:/usr/local/jpom-server/logs
+      - jpom-server01-conf:/usr/local/jpom-server/conf
+    ports:
+      - "2120:2122"
+    hostname: server01
+  agent01:
+    env_file:
+      - env-beta.env
+    image: jpomdocker/jpom:agent-${JPOM_VERSION}
+    build:
+      dockerfile: ./modules/agent/Dockerfile
+      context: .
+      args:
+        JPOM_VERSION: ${JPOM_VERSION}
+        RUN_ARG: --auto-push-to-server 'http://server:2122/api/node/receive_push?token=${SERVER_TOKEN}&workspaceId=DEFAULT'
+
+    volumes:
+      - jpom-agent01:/usr/local/jpom-agent
+    ports:
+      - "2123:2123"
+    depends_on:
+      - server
+    hostname: agent01
+  agent02:
+    env_file:
+      - env-beta.env
+    image: jpomdocker/jpom:agent-${JPOM_VERSION}
+    build:
+      dockerfile: ./modules/agent/Dockerfile
+      context: .
+      args:
+        JPOM_VERSION: ${JPOM_VERSION}
+        RUN_ARG: --auto-push-to-server 'http://server01:2122/api/node/receive_push?token=${SERVER_TOKEN}&workspaceId=DEFAULT'
+
+    volumes:
+      - jpom-agent02:/usr/local/jpom-agent
+    ports:
+      - "2124:2123"
+    depends_on:
+      - server01
+    hostname: agent02
+volumes:
+  jpom-agent01:
+  jpom-agent02:
+  jpom-server-data:
+  jpom-server-logs:
+  jpom-server-conf:
+  jpom-server01-data:
+  jpom-server01-logs:
+  jpom-server01-conf:

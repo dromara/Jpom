@@ -33,16 +33,21 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.keepbx.jpom.event.IAsyncLoad;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.common.*;
+import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.ILoadEvent;
+import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.cron.CronUtils;
-import org.dromara.jpom.cron.IAsyncLoad;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.model.MachineNodeStatLogModel;
+import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.h2db.BaseDbService;
@@ -60,7 +65,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -75,13 +79,18 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     private final NodeService nodeService;
     private final ServerConfig.NodeConfig nodeConfig;
     private final MachineNodeStatLogServer machineNodeStatLogServer;
+    private final ClusterInfoService clusterInfoService;
+
+    private static final String TASK_ID = "system_monitor_node";
 
     public MachineNodeServer(NodeService nodeService,
                              ServerConfig serverConfig,
-                             MachineNodeStatLogServer machineNodeStatLogServer) {
+                             MachineNodeStatLogServer machineNodeStatLogServer,
+                             ClusterInfoService clusterInfoService) {
         this.nodeService = nodeService;
         this.nodeConfig = serverConfig.getNode();
         this.machineNodeStatLogServer = machineNodeStatLogServer;
+        this.clusterInfoService = clusterInfoService;
     }
 
     @Override
@@ -182,26 +191,33 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     public void startLoad() {
         // 启动心跳检测
         int heartSecond = nodeConfig.getHeartSecond();
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> new Thread(runnable, "Jpom Node Monitor"));
-        scheduler.scheduleAtFixedRate(this, 0, heartSecond, TimeUnit.SECONDS);
-        JpomApplication.register("node_monitor", scheduler);
+        ScheduledExecutorService scheduler = JpomApplication.getScheduledExecutorService();
+        scheduler.scheduleWithFixedDelay(this, 0, heartSecond, TimeUnit.SECONDS);
     }
 
     @Override
     public void run() {
-        String id = "system_monitor_node";
+        String linkGroup = clusterInfoService.getCurrent().getLinkGroup();
+        List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
+        if (CollUtil.isEmpty(linkGroups)) {
+            log.warn("当前集群还未绑定分组,不能监控集群节点资产信息");
+            return;
+        }
+        Entity entity = new Entity();
+        entity.set("groupName", linkGroups);
+        entity.set("transportMode", 0);
         int heartSecond = nodeConfig.getHeartSecond();
         try {
-            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(id, StrUtil.format("{} 秒执行一次", heartSecond));
+            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format("{} 秒执行一次", heartSecond));
             taskStat.onStart();
-            MachineNodeModel machineNodeModel = new MachineNodeModel();
-            machineNodeModel.setTransportMode(0);
-            List<MachineNodeModel> machineNodeModels = this.listByBean(machineNodeModel);
+            //MachineNodeModel machineNodeModel = new MachineNodeModel();
+            //machineNodeModel.setTransportMode(0);
+            List<MachineNodeModel> machineNodeModels = this.listByEntity(entity);
             this.checkList(machineNodeModels);
             taskStat.onSucceeded();
         } catch (Throwable throwable) {
-            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(id, StrUtil.format("{} 秒执行一次", heartSecond));
-            taskStat.onFailed(id, throwable);
+            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format("{} 秒执行一次", heartSecond));
+            taskStat.onFailed(TASK_ID, throwable);
         }
     }
 

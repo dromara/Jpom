@@ -1,0 +1,12 @@
+tableName,name,type,len,defaultValue,notNull,primaryKey,comment,tableComment
+CLUSTER_INFO,id,String,50,,true,true,id,机器节点信息
+CLUSTER_INFO,createTimeMillis,Long,,,false,false,数据创建时间,
+CLUSTER_INFO,modifyTimeMillis,Long,,,false,false,数据修改时间,
+CLUSTER_INFO,modifyUser,String,50,,false,false,修改人,
+CLUSTER_INFO,name,String,50,,true,false,集群名称,
+CLUSTER_INFO,clusterId,String,50,,true,false,集群Id,
+CLUSTER_INFO,url,String,255,,false,false,集群地址,
+CLUSTER_INFO,linkGroup,String,500,,false,false,集群地址,
+CLUSTER_INFO,lastHeartbeat,Long,,,false,false,最后心跳,
+CLUSTER_INFO,localHostName,String,255,,false,false,主机名,
+CLUSTER_INFO,jpomVersion,String,255,,false,false,jpom版本,

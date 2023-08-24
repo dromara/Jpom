@@ -29,7 +29,9 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
+import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.Type;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
@@ -93,8 +95,8 @@ public class SystemUpdateController extends BaseServerController implements ILoa
 
     @PostMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> info(HttpServletRequest request, String machineId) {
-        JsonMessage<JSONObject> message = this.tryRequestNode(machineId, request, NodeUrl.Info);
+    public IJsonMessage<JSONObject> info(HttpServletRequest request, String machineId) {
+        IJsonMessage<JSONObject> message = this.tryRequestNode(machineId, request, NodeUrl.Info);
         return Optional.ofNullable(message).orElseGet(() -> {
             JpomManifest instance = JpomManifest.getInstance();
             cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
@@ -109,7 +111,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
 
     @GetMapping(value = "change-beta-release", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<String> changeBetaRelease(String beta) {
+    public IJsonMessage<String> changeBetaRelease(String beta) {
         boolean betaBool = this.changeBetaRelease2(beta);
         RemoteVersion.loadRemoteInfo();
         return JsonMessage.success(betaBool ? "成功加入 beta 计划" : "关闭 beta 计划成功");
@@ -128,7 +130,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
      * @return changelog md
      */
     @PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> changeLog(HttpServletRequest request, String machineId) {
+    public IJsonMessage<String> changeLog(HttpServletRequest request, String machineId) {
         boolean betaRelease = RemoteVersion.betaRelease();
         JsonMessage<String> message = this.tryRequestNode(machineId, request, NodeUrl.CHANGE_LOG, "beta", String.valueOf(betaRelease));
         if (message != null) {
@@ -147,7 +149,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
 
     @PostMapping(value = "upload-jar-sharding", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE, log = false)
-    public JsonMessage<String> uploadJarSharding(MultipartFile file,
+    public IJsonMessage<String> uploadJarSharding(MultipartFile file,
                                                  String machineId,
                                                  String sliceId,
                                                  Integer totalSlice,
@@ -171,7 +173,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
 
     @PostMapping(value = "upload-jar-sharding-merge", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<String> uploadJar(String sliceId,
+    public IJsonMessage<String> uploadJar(String sliceId,
                                          Integer totalSlice,
                                          String fileSumMd5,
                                          HttpServletRequest request,
@@ -212,9 +214,9 @@ public class SystemUpdateController extends BaseServerController implements ILoa
      * @see RemoteVersion
      */
     @PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<cn.keepbx.jpom.RemoteVersion> checkVersion(HttpServletRequest request,
+    public IJsonMessage<cn.keepbx.jpom.RemoteVersion> checkVersion(HttpServletRequest request,
                                                    String machineId) {
-        JsonMessage<cn.keepbx.jpom.RemoteVersion> message = this.tryRequestNode(machineId, request, NodeUrl.CHECK_VERSION);
+        IJsonMessage<cn.keepbx.jpom.RemoteVersion> message = this.tryRequestNode(machineId, request, NodeUrl.CHECK_VERSION);
         return Optional.ofNullable(message).orElseGet(() -> {
             cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
             return JsonMessage.success("", remoteVersion);
@@ -229,10 +231,10 @@ public class SystemUpdateController extends BaseServerController implements ILoa
      */
     @GetMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DOWNLOAD)
-    public JsonMessage<String> upgrade(HttpServletRequest request,
+    public IJsonMessage<String> upgrade(HttpServletRequest request,
                                        String machineId) throws IOException {
 
-        JsonMessage<String> message = this.tryRequestNode(machineId, request, NodeUrl.REMOTE_UPGRADE);
+        IJsonMessage<String> message = this.tryRequestNode(machineId, request, NodeUrl.REMOTE_UPGRADE);
         return Optional.ofNullable(message).orElseGet(() -> {
             try {
                 RemoteVersion.upgrade(JpomApplication.getInstance().getTempPath().getAbsolutePath(), objects -> backupInfoService.autoBackup());

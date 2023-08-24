@@ -173,9 +173,7 @@ export default {
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.loading = true;
-      getScriptList({
-        nodeId: this.node.id,
-      }).then((res) => {
+      getScriptList({ ...this.listQuery, nodeId: this.node.id }).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
           this.listQuery.total = res.data.total;

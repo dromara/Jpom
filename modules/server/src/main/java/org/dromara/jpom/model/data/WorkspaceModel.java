@@ -49,11 +49,16 @@ public class WorkspaceModel extends BaseUserModifyDbModel {
      * 描述
      */
     private String description;
-
     /**
      * 分组
      */
     private String group;
+    /**
+     * 集群信息Id
+     *
+     * @see org.dromara.jpom.func.system.model.ClusterInfoModel
+     */
+    private String clusterInfoId;
 
     public WorkspaceModel(String id) {
         this.setId(id);

@@ -22,7 +22,8 @@
  */
 package org.dromara.jpom.system;
 
-import org.dromara.jpom.common.JsonMessage;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 
 /**
  * 授权错误
@@ -38,7 +39,7 @@ public class AuthorizeException extends RuntimeException {
         this.jsonMessage = jsonMessage;
     }
 
-    public JsonMessage<String> getJsonMessage() {
+    public IJsonMessage<String> getJsonMessage() {
         return jsonMessage;
     }
 }

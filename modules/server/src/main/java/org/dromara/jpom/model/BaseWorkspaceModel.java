@@ -28,9 +28,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.data.WorkspaceModel;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 工作空间 数据
@@ -65,8 +67,19 @@ public abstract class BaseWorkspaceModel extends BaseUserModifyDbModel {
      * @return set
      */
     public static Set<Class<?>> allClass() {
-        Set<Class<?>> classes1 = ClassUtil.scanPackageBySuper("org.dromara.jpom", BaseWorkspaceModel.class);
-        return classes1;
+        return ClassUtil.scanPackageBySuper("org.dromara.jpom", BaseWorkspaceModel.class);
+    }
+
+    /**
+     * 所有实现过的 class
+     *
+     * @return set
+     */
+    public static Set<Class<?>> allTableClass() {
+        Set<Class<?>> classes1 = allClass();
+        return classes1.stream()
+            .filter(aClass -> aClass.isAnnotationPresent(TableName.class))
+            .collect(Collectors.toSet());
     }
 
 }

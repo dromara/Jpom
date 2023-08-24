@@ -26,12 +26,13 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.springframework.boot.env.YamlPropertySourceLoader;
@@ -58,7 +59,7 @@ import java.nio.charset.StandardCharsets;
 public class SystemConfigController extends BaseAgentController {
 
     @RequestMapping(value = "getConfig.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> config() throws IOException {
+    public IJsonMessage<JSONObject> config() throws IOException {
         Resource resource = ExtConfigBean.getResource();
         String content = IoUtil.read(resource.getInputStream(), CharsetUtil.CHARSET_UTF_8);
         JSONObject json = new JSONObject();
@@ -68,7 +69,7 @@ public class SystemConfigController extends BaseAgentController {
     }
 
     @RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> saveConfig(@ValidatorItem(msg = "内容不能为空") String content, String restart) throws IOException {
+    public IJsonMessage<String> saveConfig(@ValidatorItem(msg = "内容不能为空") String content, String restart) throws IOException {
         try {
             YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
             // @author hjk 前端编辑器允许使用tab键，并设定为2个空格，再转换为yml时要把tab键换成2个空格

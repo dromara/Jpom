@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.SshModel;
-import org.dromara.jpom.service.h2db.BaseGroupService;
+import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -47,7 +47,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class NodeService extends BaseGroupService<NodeModel> {
+public class NodeService extends BaseWorkspaceService<NodeModel> {
 
     private final SshService sshService;
 

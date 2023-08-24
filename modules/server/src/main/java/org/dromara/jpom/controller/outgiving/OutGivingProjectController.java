@@ -28,17 +28,18 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.BaseIdModel;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.BaseEnum;
-import org.dromara.jpom.model.BaseIdModel;
 import org.dromara.jpom.model.BaseNodeModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.ServerWhitelist;
@@ -102,8 +103,8 @@ public class OutGivingProjectController extends BaseServerController {
     }
 
     @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id,
-                                               HttpServletRequest request) {
+    public IJsonMessage<JSONObject> getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id,
+                                                HttpServletRequest request) {
         String workspaceId = outGivingServer.getCheckUserWorkspace(request);
         OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
         Objects.requireNonNull(outGivingServerItem, "没有数据");
@@ -119,33 +120,33 @@ public class OutGivingProjectController extends BaseServerController {
 
 
         List<JSONObject> collect = outGivingNodeProjectList
-                .stream()
-                .map(outGivingNodeProject -> {
-                    NodeModel nodeModel = nodeMap.get(outGivingNodeProject.getNodeId());
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("sortValue", outGivingNodeProject.getSortValue());
-                    jsonObject.put("disabled", outGivingNodeProject.getDisabled());
-                    jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
-                    jsonObject.put("projectId", outGivingNodeProject.getProjectId());
-                    jsonObject.put("nodeName", nodeModel.getName());
-                    String fullId = BaseNodeModel.fullId(workspaceId, outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId());
-                    jsonObject.put("id", fullId);
-                    ProjectInfoCacheModel projectInfoCacheModel = projectMap.get(fullId);
-                    if (projectInfoCacheModel != null) {
-                        jsonObject.put("cacheProjectName", projectInfoCacheModel.getName());
-                    }
+            .stream()
+            .map(outGivingNodeProject -> {
+                NodeModel nodeModel = nodeMap.get(outGivingNodeProject.getNodeId());
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("sortValue", outGivingNodeProject.getSortValue());
+                jsonObject.put("disabled", outGivingNodeProject.getDisabled());
+                jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
+                jsonObject.put("projectId", outGivingNodeProject.getProjectId());
+                jsonObject.put("nodeName", nodeModel.getName());
+                String fullId = BaseNodeModel.fullId(workspaceId, outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId());
+                jsonObject.put("id", fullId);
+                ProjectInfoCacheModel projectInfoCacheModel = projectMap.get(fullId);
+                if (projectInfoCacheModel != null) {
+                    jsonObject.put("cacheProjectName", projectInfoCacheModel.getName());
+                }
 
-                    OutGivingLog outGivingLog = dbOutGivingLogService.getByProject(id, outGivingNodeProject);
-                    if (outGivingLog != null) {
-                        jsonObject.put("outGivingStatus", outGivingLog.getStatus());
-                        jsonObject.put("outGivingResult", outGivingLog.getResult());
-                        jsonObject.put("lastTime", outGivingLog.getCreateTimeMillis());
-                        jsonObject.put("fileSize", outGivingLog.getFileSize());
-                        jsonObject.put("progressSize", outGivingLog.getProgressSize());
-                    }
-                    return jsonObject;
-                })
-                .collect(Collectors.toList());
+                OutGivingLog outGivingLog = dbOutGivingLogService.getByProject(id, outGivingNodeProject);
+                if (outGivingLog != null) {
+                    jsonObject.put("outGivingStatus", outGivingLog.getStatus());
+                    jsonObject.put("outGivingResult", outGivingLog.getResult());
+                    jsonObject.put("lastTime", outGivingLog.getCreateTimeMillis());
+                    jsonObject.put("fileSize", outGivingLog.getFileSize());
+                    jsonObject.put("progressSize", outGivingLog.getProgressSize());
+                }
+                return jsonObject;
+            })
+            .collect(Collectors.toList());
         JSONObject data = new JSONObject();
         data.put("data", outGivingServerItem);
         data.put("projectList", collect);
@@ -175,7 +176,7 @@ public class OutGivingProjectController extends BaseServerController {
      */
     @RequestMapping(value = "upload-sharding", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD, log = false)
-    public JsonMessage<Object> uploadSharding(String id,
+    public IJsonMessage<Object> uploadSharding(String id,
                                               MultipartFile file,
                                               String sliceId,
                                               Integer totalSlice,
@@ -201,7 +202,7 @@ public class OutGivingProjectController extends BaseServerController {
      */
     @RequestMapping(value = "upload-sharding-merge", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<Object> upload(String id, String afterOpt, String clearOld, String autoUnzip,
+    public IJsonMessage<Object> upload(String id, String afterOpt, String clearOld, String autoUnzip,
                                       String secondaryDirectory, String stripComponents,
                                       String selectProject,
                                       String sliceId,
@@ -232,11 +233,11 @@ public class OutGivingProjectController extends BaseServerController {
         int stripComponentsValue = Convert.toInt(stripComponents, 0);
         // 开启
         OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
-                .id(outGivingModel.getId())
-                .file(dest)
-                .userModel(getUser())
-                .unzip(unzip)
-                .stripComponents(stripComponentsValue);
+            .id(outGivingModel.getId())
+            .file(dest)
+            .userModel(getUser())
+            .unzip(unzip)
+            .stripComponents(stripComponentsValue);
         outGivingRunBuilder.build().startRun(selectProject);
         return JsonMessage.success("上传成功,开始分发!");
     }
@@ -261,7 +262,7 @@ public class OutGivingProjectController extends BaseServerController {
      */
     @PostMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
-    public JsonMessage<String> remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip,
+    public IJsonMessage<String> remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip,
                                               String secondaryDirectory,
                                               String stripComponents,
                                               String selectProject,
@@ -288,18 +289,18 @@ public class OutGivingProjectController extends BaseServerController {
         int stripComponentsValue = Convert.toInt(stripComponents, 0);
         // 开启
         OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
-                .id(outGivingModel.getId())
-                .file(downloadFile)
-                .userModel(getUser())
-                .unzip(unzip)
-                .stripComponents(stripComponentsValue);
+            .id(outGivingModel.getId())
+            .file(downloadFile)
+            .userModel(getUser())
+            .unzip(unzip)
+            .stripComponents(stripComponentsValue);
         outGivingRunBuilder.build().startRun(selectProject);
         return JsonMessage.success("下载成功,开始分发!");
     }
 
     @PostMapping(value = "cancel", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<String> cancel(@ValidatorItem String id) {
+    public IJsonMessage<String> cancel(@ValidatorItem String id) {
         OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status == OutGivingModel.Status.ING, "当前状态不是分发中"));
         OutGivingRun.cancel(outGivingModel.getId(), getUser());
         //
@@ -308,7 +309,7 @@ public class OutGivingProjectController extends BaseServerController {
 
     @PostMapping(value = "config-project", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> configProject(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
+    public IJsonMessage<String> configProject(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
         Assert.notNull(jsonObject, "没有任何信息");
         String id = jsonObject.getString("id");
         List<OutGivingNodeProject> list = jsonObject.getList("data", OutGivingNodeProject.class);
@@ -334,7 +335,7 @@ public class OutGivingProjectController extends BaseServerController {
 
     @GetMapping(value = "remove-project", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> removeProject(@ValidatorItem String id,
+    public IJsonMessage<String> removeProject(@ValidatorItem String id,
                                              @ValidatorItem String nodeId,
                                              @ValidatorItem String projectId,
                                              HttpServletRequest request) {
@@ -345,8 +346,8 @@ public class OutGivingProjectController extends BaseServerController {
         //
         Assert.state(outGivingNodeProjects.size() > 1, "当前分发只有一个项目啦,删除整个分发即可");
         outGivingNodeProjects = outGivingNodeProjects.stream()
-                .filter(nodeProject -> !StrUtil.equals(nodeProject.getProjectId(), projectId) || !StrUtil.equals(nodeProject.getNodeId(), nodeId))
-                .collect(Collectors.toList());
+            .filter(nodeProject -> !StrUtil.equals(nodeProject.getProjectId(), projectId) || !StrUtil.equals(nodeProject.getNodeId(), nodeId))
+            .collect(Collectors.toList());
         // 更新
         OutGivingModel update = new OutGivingModel();
         update.setId(outGivingModel.getId());

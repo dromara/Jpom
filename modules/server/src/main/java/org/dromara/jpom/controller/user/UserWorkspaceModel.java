@@ -23,6 +23,7 @@
 package org.dromara.jpom.controller.user;
 
 import lombok.Data;
+import org.dromara.jpom.func.system.model.ClusterInfoModel;
 
 /**
  * 用户工作空间配置
@@ -48,4 +49,10 @@ public class UserWorkspaceModel {
      * 自定义排序规则
      */
     private Integer sort;
+    /**
+     * 集群Id
+     *
+     * @see ClusterInfoModel#getId()
+     */
+    private String clusterInfoId;
 }

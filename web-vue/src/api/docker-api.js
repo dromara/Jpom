@@ -327,3 +327,18 @@ export function syncToWorkspace(params) {
     params: params,
   });
 }
+
+/**
+ * 容器 重建容器
+ * @param {JSON} params
+ */
+export function dockerContainerRebuildContainer(urlPrefix, params) {
+  return axios({
+    url: urlPrefix + "/container/rebuild-container",
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: params,
+  });
+}

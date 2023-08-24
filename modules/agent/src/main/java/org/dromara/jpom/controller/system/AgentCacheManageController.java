@@ -24,12 +24,13 @@ package org.dromara.jpom.controller.system;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.event.ICacheTask;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.JpomManifest;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -79,7 +80,7 @@ public class AgentCacheManageController extends BaseAgentController implements I
      * @return json
      */
     @PostMapping(value = "cache", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> cache() {
+    public IJsonMessage<JSONObject> cache() {
         JSONObject jsonObject = new JSONObject();
         //
         jsonObject.put("fileSize", this.tempFileSize);
@@ -112,7 +113,7 @@ public class AgentCacheManageController extends BaseAgentController implements I
      * @return json
      */
     @RequestMapping(value = "clearCache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
+    public IJsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
         switch (type) {
             case "pidPort":
                 AbstractProjectCommander.PID_PORT.clear();

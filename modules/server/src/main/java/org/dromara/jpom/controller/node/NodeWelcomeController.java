@@ -29,9 +29,10 @@ import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
@@ -68,7 +69,7 @@ public class NodeWelcomeController extends BaseServerController {
     }
 
     @PostMapping(value = "node_monitor_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<MachineNodeStatLogModel>> nodeMonitorJson(String machineId) {
+    public IJsonMessage<List<MachineNodeStatLogModel>> nodeMonitorJson(String machineId) {
         NodeModel node = tryGetNode();
         List<MachineNodeStatLogModel> list = this.getList(node, machineId);
         Assert.notEmpty(list, "没有查询到任何数据");
@@ -104,7 +105,7 @@ public class NodeWelcomeController extends BaseServerController {
     }
 
     @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> getProcessList(HttpServletRequest request, String machineId) {
+    public IJsonMessage<List<JSONObject>> getProcessList(HttpServletRequest request, String machineId) {
         NodeModel node = tryGetNode();
         if (node != null) {
             return NodeForward.request(node, request, NodeUrl.ProcessList);
@@ -116,7 +117,7 @@ public class NodeWelcomeController extends BaseServerController {
 
     @RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
-    public JsonMessage<String> kill(HttpServletRequest request, String machineId) {
+    public IJsonMessage<String> kill(HttpServletRequest request, String machineId) {
         NodeModel node = tryGetNode();
         if (node != null) {
             return NodeForward.request(node, request, NodeUrl.Kill);
@@ -127,7 +128,7 @@ public class NodeWelcomeController extends BaseServerController {
     }
 
     @GetMapping(value = "machine-info", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> machineInfo(String machineId) {
+    public IJsonMessage<JSONObject> machineInfo(String machineId) {
         NodeModel nodeModel = tryGetNode();
         String useMachineId = Optional.ofNullable(nodeModel).map(BaseMachineModel::getMachineId).orElse(machineId);
         MachineNodeModel model = machineNodeServer.getByKey(useMachineId);
@@ -139,7 +140,7 @@ public class NodeWelcomeController extends BaseServerController {
     }
 
     @GetMapping(value = "disk-info", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> diskInfo(HttpServletRequest request, String machineId) {
+    public IJsonMessage<List<JSONObject>> diskInfo(HttpServletRequest request, String machineId) {
         NodeModel node = tryGetNode();
         if (node != null) {
             return NodeForward.request(node, request, NodeUrl.DiskInfo);
@@ -150,7 +151,7 @@ public class NodeWelcomeController extends BaseServerController {
     }
 
     @GetMapping(value = "hw-disk-info", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> hwDiskInfo(HttpServletRequest request, String machineId) {
+    public IJsonMessage<List<JSONObject>> hwDiskInfo(HttpServletRequest request, String machineId) {
         NodeModel node = tryGetNode();
         if (node != null) {
             return NodeForward.request(node, request, NodeUrl.HwDiskInfo);
@@ -161,7 +162,7 @@ public class NodeWelcomeController extends BaseServerController {
     }
 
     @GetMapping(value = "network-interfaces", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> networkInterfaces(HttpServletRequest request, String machineId) {
+    public IJsonMessage<List<JSONObject>> networkInterfaces(HttpServletRequest request, String machineId) {
         NodeModel node = tryGetNode();
         if (node != null) {
             return NodeForward.request(node, request, NodeUrl.NetworkInterfaces);

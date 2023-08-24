@@ -29,7 +29,7 @@ import org.dromara.jpom.model.BaseWorkspaceModel;
  * @author bwcx_jzy
  * @since 2022/1/19
  */
-@TableName(value = "SERVER_SCRIPT_EXECUTE_LOG", name = "脚本模版执行记录")
+@TableName(value = "SERVER_SCRIPT_EXECUTE_LOG", name = "脚本模版执行记录", parents = ScriptModel.class)
 public class ScriptExecuteLogModel extends BaseWorkspaceModel {
 
     /**

@@ -34,6 +34,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.keepbx.jpom.model.BaseIdModel;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
@@ -41,10 +43,8 @@ import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
-import org.dromara.jpom.model.BaseIdModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.system.AgentException;
@@ -309,7 +309,20 @@ public class NodeForward {
      */
     public static <T> JsonMessage<T> requestSharding(NodeModel nodeModel, NodeUrl nodeUrl, JSONObject jsonObject, File file, Function<JSONObject, JsonMessage<T>> doneCallback, BiConsumer<Long, Long> streamProgress) throws IOException {
         INodeInfo nodeInfo = parseNodeInfo(nodeModel);
-        return requestSharding(nodeInfo, nodeModel.getWorkspaceId(), nodeUrl, jsonObject, file, doneCallback, streamProgress);
+        return requestSharding(nodeInfo, nodeModel.getWorkspaceId(), nodeUrl, jsonObject, file, File::getName, doneCallback, streamProgress);
+    }
+
+    /**
+     * 普通消息转发
+     *
+     * @param nodeModel  节点
+     * @param nodeUrl    节点的url
+     * @param jsonObject 数据
+     * @return JSON
+     */
+    public static <T> JsonMessage<T> requestSharding(NodeModel nodeModel, NodeUrl nodeUrl, JSONObject jsonObject, File file, String fileName, Function<JSONObject, JsonMessage<T>> doneCallback, BiConsumer<Long, Long> streamProgress) throws IOException {
+        INodeInfo nodeInfo = parseNodeInfo(nodeModel);
+        return requestSharding(nodeInfo, nodeModel.getWorkspaceId(), nodeUrl, jsonObject, file, file1 -> fileName, doneCallback, streamProgress);
     }
 
     /**
@@ -322,7 +335,7 @@ public class NodeForward {
      */
     public static <T> JsonMessage<T> requestSharding(MachineNodeModel machineNodeModel, NodeUrl nodeUrl, JSONObject jsonObject, File file, Function<JSONObject, JsonMessage<T>> doneCallback, BiConsumer<Long, Long> streamProgress) throws IOException {
         INodeInfo nodeInfo = coverNodeInfo(machineNodeModel);
-        return requestSharding(nodeInfo, StrUtil.EMPTY, nodeUrl, jsonObject, file, doneCallback, streamProgress);
+        return requestSharding(nodeInfo, StrUtil.EMPTY, nodeUrl, jsonObject, file, File::getName, doneCallback, streamProgress);
     }
 
     /**
@@ -335,12 +348,12 @@ public class NodeForward {
      * @param jsonObject     数据
      * @return JSON
      */
-    private static <T> JsonMessage<T> requestSharding(INodeInfo nodeInfo, String workspaceId, NodeUrl nodeUrl, JSONObject jsonObject, File file, Function<JSONObject, JsonMessage<T>> doneCallback, BiConsumer<Long, Long> streamProgress) throws IOException {
+    private static <T> JsonMessage<T> requestSharding(INodeInfo nodeInfo, String workspaceId, NodeUrl nodeUrl, JSONObject jsonObject, File file, Function<File, String> fileNameFn, Function<JSONObject, JsonMessage<T>> doneCallback, BiConsumer<Long, Long> streamProgress) throws IOException {
         IUrlItem urlItem = parseUrlItem(nodeInfo, workspaceId, nodeUrl, DataContentType.FORM_URLENCODED);
         ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
         ServerConfig.NodeConfig nodeConfig = serverConfig.getNode();
         long length = file.length();
-        String fileName = file.getName();
+        String fileName = fileNameFn.apply(file);
         Assert.state(length > 0, "空文件不能上传");
         String md5 = SecureUtil.md5(file);
         int fileSliceSize = nodeConfig.getUploadFileSliceSize();

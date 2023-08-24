@@ -293,11 +293,7 @@
         title="发布文件"
         width="50%"
         :maskClosable="false"
-        @ok="
-          () => {
-            this.$refs.releaseFile?.tryCommit();
-          }
-        "
+        @ok="releaseFileOk()"
       >
         <releaseFile ref="releaseFile" v-if="releaseFileVisible" @commit="handleCommitTask"></releaseFile>
       </a-modal>
@@ -669,6 +665,10 @@ export default {
         }
       });
     },
+    
+    releaseFileOk() {
+      this.$refs.releaseFile?.tryCommit();
+    }
   },
 };
 </script>

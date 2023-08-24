@@ -1,10 +1,32 @@
 <template>
   <div class="user-header">
     <a-button-group>
+      <!-- 工作空间信息 -->
       <a-button v-if="this.mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
-          <a-tooltip :title="`${selectWorkspace.name} 【分组名：${selectWorkspace.group}】`">
+          <a-tooltip :title="`工作空间名称：${selectWorkspace.name} 【分组名：${selectWorkspace.group}】`">
+            <a-icon type="switcher" />
             {{ selectWorkspace.name }}
+            <template v-if="myClusterList.length > 1 && selectWorkspace.clusterInfoId">
+              /
+              {{
+                myClusterList.find((item) => {
+                  return item.id === selectWorkspace.clusterInfoId;
+                }) &&
+                myClusterList.find((item) => {
+                  return item.id === selectWorkspace.clusterInfoId;
+                }).name
+              }}
+            </template>
+            <template v-if="!this.inClusterUrl"><a-icon type="swap" @click="handleClusterChange(selectCluster)" /> </template>
+          </a-tooltip>
+        </div>
+      </a-button>
+      <a-button v-if="this.mode === 'management'" type="dashed">
+        <div class="workspace-name">
+          <a-tooltip :title="`集群名称：${this.selectCluster && this.selectCluster.name}`">
+            <a-icon type="cluster" />
+            {{ this.selectCluster && this.selectCluster.name }}
           </a-tooltip>
         </div>
       </a-button>
@@ -16,19 +38,30 @@
       <a-dropdown>
         <a-button type="primary" class="jpom-user-operation btn-group-item" icon="down"> </a-button>
         <a-menu slot="overlay">
+          <!-- 工作空间信息 -->
           <template v-if="this.mode === 'normal'">
             <a-sub-menu>
               <template #title>
-                <a-button type="link" icon="swap">切换工作空间</a-button>
+                <a-button type="link" icon="retweet">切换工作空间</a-button>
               </template>
               <template v-if="myWorkspaceList.length == 1">
                 <template v-for="(item, index) in myWorkspaceList[0].children">
-                  <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace.id" @click="handleWorkspaceChange(item.id)" :key="index">
+                  <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace.id" @click="handleWorkspaceChange(item)" :key="index">
                     <a-button type="link" :disabled="item.id === selectWorkspace.id">
                       {{ item.name }}
+                      <template v-if="myClusterList.length > 1 && item.clusterInfoId">
+                        【{{
+                          myClusterList.find((item2) => {
+                            return item2.id === item.clusterInfoId;
+                          }) &&
+                          myClusterList.find((item2) => {
+                            return item2.id === item.clusterInfoId;
+                          }).name
+                        }}】
+                      </template>
                     </a-button>
                   </a-menu-item>
-                  <a-menu-divider v-if="index != -1" :key="`${item.id}-divider`" />
+                  <a-menu-divider v-if="index < myWorkspaceList.length" :key="`${item.id}-divider`" />
                 </template>
               </template>
               <template v-if="myWorkspaceList.length > 1">
@@ -40,19 +73,45 @@
                       </a-button>
                     </template>
                     <template v-for="(item, index) in item1.children">
-                      <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace.id" @click="handleWorkspaceChange(item.id)" :key="index">
+                      <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace.id" @click="handleWorkspaceChange(item)" :key="index">
                         <a-button type="link" :disabled="item.id === selectWorkspace.id">
                           {{ item.name }}
+                          <template v-if="myClusterList.length > 1 && item.clusterInfoId">
+                            【{{
+                              myClusterList.find((item2) => {
+                                return item2.id === item.clusterInfoId;
+                              }) &&
+                              myClusterList.find((item2) => {
+                                return item2.id === item.clusterInfoId;
+                              }).name
+                            }}】
+                          </template>
                         </a-button>
                       </a-menu-item>
-                      <a-menu-divider v-if="index != -1" :key="`${index1}-${index}-divider`" />
+                      <a-menu-divider v-if="index < item1.children.length - 1" :key="`${index1}-${index}-divider`" />
                     </template>
                   </a-sub-menu>
-                  <a-menu-divider v-if="item1 != -1" :key="`${index1}-divider`" />
+                  <a-menu-divider v-if="index1 < myWorkspaceList.length - 1" :key="`${index1}-divider`" />
                 </template>
               </template>
             </a-sub-menu>
             <a-menu-divider />
+          </template>
+          <!-- 集群信息 -->
+          <template v-if="this.mode === 'management'">
+            <a-sub-menu>
+              <template #title>
+                <a-button type="link" icon="retweet">切换集群</a-button>
+              </template>
+              <template v-for="(item, index) in myClusterList">
+                <a-menu-item v-if="index != -1" :disabled="item.id === selectCluster.id || !item.url" @click="handleClusterChange(item)" :key="index">
+                  <a-button type="link" :disabled="item.id === selectCluster.id || !item.url">
+                    {{ item.name }}
+                  </a-button>
+                </a-menu-item>
+                <a-menu-divider v-if="index < myClusterList.length" :key="`${item.id}-divider`" />
+              </template>
+            </a-sub-menu>
           </template>
           <a-menu-item @click="handleUpdatePwd">
             <a-button type="link" icon="lock"> 安全管理 </a-button>
@@ -72,6 +131,14 @@
           <a-menu-divider />
           <a-menu-item @click="logOut">
             <a-button type="link" icon="logout"> 退出登录 </a-button>
+          </a-menu-item>
+          <a-menu-divider />
+          <a-menu-item @click="logOutSwap">
+            <a-button type="link" icon="swap"> 切换账号 </a-button>
+          </a-menu-item>
+          <a-menu-divider />
+          <a-menu-item @click="logOutAll">
+            <a-button type="link" icon="rest"> 彻底退出 </a-button>
           </a-menu-item>
         </a-menu>
       </a-dropdown>
@@ -307,7 +374,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { bindMfa, closeMfa, editUserInfo, generateMfa, getUserInfo, myWorkspace, sendEmailCode, updatePwd } from "@/api/user/user";
+import { bindMfa, closeMfa, editUserInfo, generateMfa, getUserInfo, myWorkspace, sendEmailCode, updatePwd, clusterList } from "@/api/user/user";
 import QRCode from "qrcodejs2";
 import sha1 from "js-sha1";
 import Vue from "vue";
@@ -332,8 +399,9 @@ export default {
       temp: {},
       tempVue: null,
       myWorkspaceList: [],
+      myClusterList: [],
+      currentClusterId: "",
       selectWorkspace: {},
-
       customizeVisible: false,
       // 表单校验规则
       rules: {
@@ -388,6 +456,22 @@ export default {
     scrollbarFlag() {
       return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
     },
+    selectCluster: {
+      get: function () {
+        const temp = this.myClusterList.find((item) => {
+          return item.id === this.currentClusterId;
+        });
+        return temp;
+      },
+    },
+    inClusterUrl() {
+      const data = this.selectCluster;
+      if (!data || !data.url) {
+        // 没有配置集群地址
+        return true;
+      }
+      return window.location.href.indexOf(data && data.url) === 0;
+    },
   },
   inject: ["reload"],
   created() {
@@ -410,6 +494,7 @@ export default {
     },
     init() {
       if (this.mode === "normal") {
+        // 获取工作空间
         myWorkspace().then((res) => {
           if (res.code == 200 && res.data) {
             const tempArray = res.data;
@@ -426,11 +511,18 @@ export default {
               });
               this.selectWorkspace = existWorkspace;
             } else {
-              this.handleWorkspaceChange(res.data[0]?.id);
+              this.handleWorkspaceChange(res.data[0]);
             }
           }
         });
       }
+      // 获取集群
+      clusterList().then((res) => {
+        if (res.code == 200 && res.data) {
+          this.myClusterList = res.data.list || [];
+          this.currentClusterId = res.data.currentId;
+        }
+      });
       this.checkMfa();
     },
     checkMfa() {
@@ -507,6 +599,56 @@ export default {
         this.$notification.success({
           message: "重置页面操作引导、导航成功",
         });
+      });
+    },
+    // 彻底退出登录
+    logOutAll() {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要彻底退出系统么？彻底退出将退出登录和清空浏览器缓存",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          return new Promise((resolve) => {
+            // 退出登录
+            this.$store.dispatch("logOut").then(() => {
+              this.$notification.success({
+                message: "退出登录成功",
+              });
+              localStorage.clear();
+              this.$router.replace({
+                path: "/login",
+                query: {},
+              });
+              resolve();
+            });
+          });
+        },
+      });
+    },
+    // 切换账号登录
+    logOutSwap() {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要退出并切换账号登录么？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          return new Promise((resolve) => {
+            // 退出登录
+            this.$store.dispatch("logOut").then(() => {
+              this.$notification.success({
+                message: "退出登录成功",
+              });
+              this.$store.dispatch("changeWorkspace", "");
+              this.$router.replace({
+                path: "/login",
+                query: {},
+              });
+              resolve();
+            });
+          });
+        },
       });
     },
     // 退出登录
@@ -626,15 +768,32 @@ export default {
         });
       });
     },
-    handleWorkspaceChange(value) {
-      this.$store.dispatch("changeWorkspace", value);
-      this.$router
-        .push({
-          query: { ...this.$route.query, wid: value },
-        })
-        .then(() => {
-          this.reload();
-        });
+    // 工作空间切换
+    handleWorkspaceChange(item) {
+      const cluster = this.myClusterList.find((item2) => {
+        return item2.id === item.clusterInfoId;
+      });
+      if (cluster && location.href.indexOf(cluster.url) !== 0) {
+        let url = `${cluster.url}/#/${this.$route.fullPath}`.replace(/[\\/]+[\\/]/g, "/").replace(":/", "://");
+        url = url.replace(`wid=${this.selectWorkspace.id}`, `wid=${item.id}`);
+        // console.log(location.href.indexOf(cluster.url), url);
+        location.href = url;
+      } else {
+        this.$store.dispatch("changeWorkspace", item.id);
+        this.$router
+          .push({
+            query: { ...this.$route.query, wid: item.id },
+          })
+          .then(() => {
+            this.reload();
+          });
+      }
+    },
+    // 集群切换
+    handleClusterChange(item) {
+      const url = `${item.url}/#/${this.$route.fullPath}`.replace(/[\\/]+[\\/]/g, "/").replace(":/", "://");
+      // console.log(url);
+      location.href = url;
     },
     tabChange(key) {
       if (key === 1) {
@@ -764,5 +923,12 @@ export default {
 
 /deep/ .ant-dropdown-menu-submenu-arrow {
   position: relative;
+}
+
+/deep/ .ant-dropdown-menu-item-divider,
+/deep/ .ant-dropdown-menu-submenu-title-divider,
+.ant-dropdown-menu-item-divider,
+.ant-dropdown-menu-submenu-title-divider {
+  margin: 0;
 }
 </style>

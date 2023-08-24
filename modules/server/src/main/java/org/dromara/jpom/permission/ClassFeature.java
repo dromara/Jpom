@@ -29,6 +29,7 @@ import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.func.cert.service.CertificateInfoService;
 import org.dromara.jpom.func.files.service.FileReleaseTaskService;
 import org.dromara.jpom.func.files.service.FileStorageService;
+import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.func.user.server.UserLoginLogServer;
 import org.dromara.jpom.service.dblog.*;
 import org.dromara.jpom.service.docker.DockerInfoService;
@@ -113,6 +114,7 @@ public enum ClassFeature {
     SYSTEM_BACKUP("数据库备份", BackupInfoService.class),
     SYSTEM_WORKSPACE("工作空间", WorkspaceService.class),
     SYSTEM_WORKSPACE_ENV("环境变量", WorkspaceEnvVarService.class),
+    CLUSTER_INFO("集群管理", ClusterInfoService.class),
 
     SCRIPT("脚本模板", ScriptServer.class),
     SCRIPT_LOG("脚本模板日志", ScriptExecuteLogServer.class),

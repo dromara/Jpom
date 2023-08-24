@@ -26,16 +26,15 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.event.ICacheTask;
+import cn.keepbx.jpom.model.BaseIdModel;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.db.TableName;
-import org.dromara.jpom.model.BaseIdModel;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.service.IStatusRecover;
-import org.dromara.jpom.service.h2db.BaseGroupService;
-import org.dromara.jpom.service.h2db.BaseNodeGroupService;
+import org.dromara.jpom.service.h2db.BaseDbService;
 import org.dromara.jpom.service.h2db.BaseNodeService;
 import org.dromara.jpom.service.system.WorkspaceService;
 import org.springframework.context.ApplicationContext;
@@ -68,15 +67,12 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
 
     @Override
     public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
-        //
-        Map<String, BaseGroupService> groupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseGroupService.class);
-        for (BaseGroupService<?> value : groupServiceMap.values()) {
-            value.repairGroupFiled();
-        }
-        //
-        Map<String, BaseNodeGroupService> nodeGroupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseNodeGroupService.class);
-        for (BaseNodeGroupService<?> value : nodeGroupServiceMap.values()) {
-            value.repairGroupFiled();
+        // 分组
+        Map<String, BaseDbService> groupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseDbService.class);
+        for (BaseDbService<?> value : groupServiceMap.values()) {
+            if (value.isCanGroup()) {
+                value.repairGroupFiled();
+            }
         }
         // 状态恢复的数据
         Map<String, IStatusRecover> statusRecoverMap = SpringUtil.getApplicationContext().getBeansOfType(IStatusRecover.class);
@@ -103,11 +99,17 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
         errorWorkspaceTable.clear();
         // 判断是否存在关联数据
         Set<String> workspaceIds = this.allowWorkspaceIds();
-        Set<Class<?>> classes = BaseWorkspaceModel.allClass();
+        Set<Class<?>> classes = BaseWorkspaceModel.allTableClass();
         for (Class<?> aClass : classes) {
             TableName tableName = aClass.getAnnotation(TableName.class);
-            if (tableName == null) {
-                continue;
+            int workspaceBind = tableName.workspaceBind();
+            if (workspaceBind == 3) {
+                // 父级不存在自动删除
+                Class<?> parents = tableName.parents();
+                Assert.state(parents != Void.class, "表信息配置错误," + aClass);
+                //
+                TableName tableName1 = parents.getAnnotation(TableName.class);
+                Assert.notNull(tableName1, "父级表信息配置错误," + aClass);
             }
             String sql = "select `workspaceId`,count(1) as allCount from " + tableName.value() + " group by `workspaceId`";
             List<Entity> query = workspaceService.query(sql);
@@ -129,10 +131,10 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
         // 判断是否存在关联数据
         List<WorkspaceModel> list = workspaceService.list();
         Set<String> workspaceIds = Optional.ofNullable(list)
-                .map(workspaceModels -> workspaceModels.stream()
-                        .map(BaseIdModel::getId)
-                        .collect(Collectors.toSet()))
-                .orElse(new HashSet<>());
+            .map(workspaceModels -> workspaceModels.stream()
+                .map(BaseIdModel::getId)
+                .collect(Collectors.toSet()))
+            .orElse(new HashSet<>());
         // 添加默认的全局工作空间 id
         workspaceIds.add(ServerConst.WORKSPACE_GLOBAL);
         return workspaceIds;

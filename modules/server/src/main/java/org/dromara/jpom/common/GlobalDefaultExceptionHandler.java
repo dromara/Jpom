@@ -22,6 +22,8 @@
  */
 package org.dromara.jpom.common;
 
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.system.AgentException;
 import org.dromara.jpom.system.AuthorizeException;
@@ -46,7 +48,7 @@ public class GlobalDefaultExceptionHandler extends BaseExceptionHandler {
      * @param e 异常
      */
     @ExceptionHandler({AuthorizeException.class})
-    public JsonMessage<String> delExceptionHandler(AuthorizeException e) {
+    public IJsonMessage<String> delExceptionHandler(AuthorizeException e) {
         return e.getJsonMessage();
     }
 
@@ -61,7 +63,7 @@ public class GlobalDefaultExceptionHandler extends BaseExceptionHandler {
      * @since 2021-08-01
      */
     @ExceptionHandler({AgentException.class})
-    public JsonMessage<String> agentExceptionHandler(HttpServletRequest request, AgentException e) {
+    public IJsonMessage<String> agentExceptionHandler(HttpServletRequest request, AgentException e) {
         Throwable cause = e.getCause();
         if (cause != null) {
             log.error("controller {}", request.getRequestURI(), cause);
