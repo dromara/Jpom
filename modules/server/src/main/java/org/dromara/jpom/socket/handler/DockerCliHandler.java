@@ -34,6 +34,7 @@ import com.alibaba.fastjson2.JSONValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
+import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
@@ -71,10 +72,14 @@ public class DockerCliHandler extends BaseTerminalHandler {
         MachineDockerServer machineDockerServer = SpringUtil.getBean(MachineDockerServer.class);
         Map<String, Object> attributes = session.getAttributes();
         MachineDockerModel dockerInfoModel = (MachineDockerModel) attributes.get("machineDocker");
+        DockerInfoService dockerInfoService = SpringUtil.getBean(DockerInfoService.class);
         String containerId = (String) attributes.get("containerId");
         //
         HandlerItem handlerItem;
         try {
+            DockerInfoModel model = new DockerInfoModel();
+            model.setMachineDockerId(dockerInfoModel.getId());
+            model = dockerInfoService.queryByBean(model);
             Map<String, Object> parameter = machineDockerServer.toParameter(dockerInfoModel);
             handlerItem = new HandlerItem(session, dockerInfoModel, parameter, containerId);
             handlerItem.startRead();

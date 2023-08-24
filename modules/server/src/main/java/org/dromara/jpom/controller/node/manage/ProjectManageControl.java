@@ -34,11 +34,12 @@ import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -108,7 +109,7 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<Object> projectCopyList() {
+    public IJsonMessage<Object> projectCopyList() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_ProjectCopyList);
     }
 
@@ -118,7 +119,7 @@ public class ProjectManageControl extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> getProjectPort() {
+    public IJsonMessage<JSONObject> getProjectPort() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectPort);
     }
 
@@ -128,7 +129,7 @@ public class ProjectManageControl extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> getProjectCopyPort() {
+    public IJsonMessage<JSONObject> getProjectCopyPort() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectCopyPort);
     }
 
@@ -140,7 +141,7 @@ public class ProjectManageControl extends BaseServerController {
      */
     @PostMapping(value = "get_project_info", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<ProjectInfoCacheModel>> getProjectInfo() {
+    public IJsonMessage<PageResultDto<ProjectInfoCacheModel>> getProjectInfo() {
         PageResultDto<ProjectInfoCacheModel> modelPageResultDto = projectInfoCacheService.listPage(getRequest());
 //		JSONArray jsonArray = projectInfoService.listAll(nodeModel, getRequest());
         return JsonMessage.success("", modelPageResultDto);
@@ -154,7 +155,7 @@ public class ProjectManageControl extends BaseServerController {
      */
     @PostMapping(value = "deleteProject", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id, String copyId) {
+    public IJsonMessage<String> deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id, String copyId) {
         NodeModel nodeModel = getNode();
         HttpServletRequest servletRequest = getRequest();
         if (StrUtil.isEmpty(copyId)) {
@@ -192,7 +193,7 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<Object> restart() {
+    public IJsonMessage<Object> restart() {
         NodeModel nodeModel = getNode();
         return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_Restart);
     }
@@ -207,7 +208,7 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<Object> start() {
+    public IJsonMessage<Object> start() {
         NodeModel nodeModel = getNode();
         return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_Start);
     }
@@ -222,7 +223,7 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<Object> stop() {
+    public IJsonMessage<Object> stop() {
         NodeModel nodeModel = getNode();
         return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_Stop);
     }
@@ -321,7 +322,7 @@ public class ProjectManageControl extends BaseServerController {
      */
     @PostMapping(value = "import-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<String> importData(MultipartFile file, HttpServletRequest request) throws IOException {
+    public IJsonMessage<String> importData(MultipartFile file, HttpServletRequest request) throws IOException {
         Assert.notNull(file, "没有上传文件");
         String workspaceId = projectInfoCacheService.getCheckUserWorkspace(request);
         NodeModel node = getNode();

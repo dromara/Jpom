@@ -661,6 +661,7 @@
                     <li>附加环境变量是指读取仓库指定环境变量文件来添加到执行构建运行时</li>
                     <li>比如常见的 .env 文件</li>
                     <li>文件内容格式要求：env_name=xxxxx 不满足格式的行将自动忽略</li>
+                    <li>也支持 URL 参数格式：test_par=123abc&test_par2=abc21</li>
                   </ul>
                 </template>
                 <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
@@ -680,7 +681,7 @@
               <a-col :span="4">
                 <a-switch v-model="tempExtraData.syncFileStorage" checked-children="同步" un-checked-children="不同步" />
               </a-col>
-              <a-col :span="7" style="text-align: right">
+              <a-col :span="6" style="text-align: right">
                 <a-space>
                   <a-tooltip>
                     发布隐藏文件
@@ -689,6 +690,33 @@
                     <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
                   </a-tooltip>
                   <a-switch v-model="tempExtraData.releaseHideFile" checked-children="是" un-checked-children="否" />
+                </a-space>
+              </a-col>
+
+              <a-col :span="7" style="text-align: right">
+                <a-space>
+                  <a-tooltip>
+                    保留天数
+                    <template slot="title">
+                      构建产物保留天数，小于等于 0 为跟随全局保留配置。注意自动清理仅会清理记录状态为：（构建结束、发布中、发布失败、发布失败）的数据避免一些异常构建影响保留个数
+                    </template>
+                    <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
+                  </a-tooltip>
+                  <a-input-number v-model="temp.resultKeepDay" :min="0" />
+                </a-space>
+              </a-col>
+
+              <a-col :span="7" style="text-align: right">
+                <a-space>
+                  <a-tooltip>
+                    保留个数
+                    <template slot="title">
+                      构建产物保留个数，小于等于 0 为跟随全局保留配置（如果数值大于 0
+                      将和全局配置对比最小值来参考）。注意自动清理仅会清理记录状态为：（构建结束、发布中、发布失败、发布失败）的数据避免一些异常构建影响保留个数。 将在创建新的构建记录时候检查保留个数
+                    </template>
+                    <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
+                  </a-tooltip>
+                  <a-input-number v-model="tempExtraData.resultKeepCount" :min="0" />
                 </a-space>
               </a-col>
             </a-row>
@@ -1069,7 +1097,7 @@ export default {
     },
     // 添加
     handleAdd() {
-      this.temp = {};
+      this.temp = { resultKeepDay: 0 };
       this.branchList = [];
       // this.tempRepository = {};
       // this.loadRepositoryList();
@@ -1082,6 +1110,7 @@ export default {
       this.tempExtraData = {
         cacheBuild: true,
         saveBuildFile: true,
+        resultKeepCount: 0,
       };
       this.$refs["editBuildForm"]?.resetFields();
     },
@@ -1100,6 +1129,9 @@ export default {
       }
       if (this.tempExtraData.saveBuildFile === undefined) {
         this.tempExtraData.saveBuildFile = true;
+      }
+      if (this.tempExtraData.resultKeepCount === undefined) {
+        this.tempExtraData.resultKeepCount = 0;
       }
 
       // 设置发布方式的数据

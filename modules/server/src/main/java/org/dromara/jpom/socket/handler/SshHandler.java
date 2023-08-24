@@ -37,6 +37,7 @@ import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.model.user.UserModel;
@@ -108,6 +109,7 @@ public class SshHandler extends BaseTerminalHandler {
         //
         HandlerItem handlerItem;
         try {
+            //
             handlerItem = new HandlerItem(session, machineSshModel, sshModel);
             handlerItem.startRead();
         } catch (Exception e) {

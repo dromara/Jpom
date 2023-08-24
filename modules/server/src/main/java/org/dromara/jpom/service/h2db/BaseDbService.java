@@ -38,6 +38,7 @@ import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.Const;
 import org.dromara.jpom.db.BaseDbCommonService;
 import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.model.BaseDbModel;
@@ -49,13 +50,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 数据库操作 通用 serve
@@ -69,7 +68,14 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     @Autowired
     @Lazy
     private DbExtConfig extConfig;
-
+    /**
+     * 旧版本分组
+     */
+    private final boolean canGroup;
+    /**
+     * 新版本分组字段
+     */
+    private final boolean canGroupName;
     /**
      * 默认排序规则
      */
@@ -78,10 +84,76 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         new Order("modifyTimeMillis", Direction.DESC)
     };
 
-    public void insert(T t) {
+    public BaseDbService() {
+        super();
+        this.canGroup = ReflectUtil.hasField(this.tClass, "group");
+        this.canGroupName = ReflectUtil.hasField(this.tClass, "groupName");
+    }
+
+    public boolean isCanGroup() {
+        return canGroup;
+    }
+
+    /**
+     * load date group by group name
+     *
+     * @return list
+     */
+    public List<String> listGroup() {
+        String sql = "select `GROUP` from " + getTableName() + " group by `GROUP`";
+        return this.listGroupByName(sql, "group");
+    }
+
+
+    /**
+     * load date group by group name
+     *
+     * @return list
+     */
+    public List<String> listGroupName() {
+        String sql = "select `groupName` from " + this.getTableName() + " group by `groupName`";
+        return this.listGroupByName(sql, "groupName");
+    }
+
+    /**
+     * 获取分组字段
+     *
+     * @param sql    sql 预计
+     * @param params 参数
+     * @return list
+     */
+    public List<String> listGroupByName(String sql, String fieldName, Object... params) {
+        Assert.state(this.canGroup || this.canGroupName, "当前数据表不支持分组");
+        List<Entity> list = super.query(sql, params);
+        // 筛选字段
+        return list.stream()
+            .flatMap(entity -> {
+                Object obj = entity.get(fieldName);
+                if (obj == null) {
+                    return null;
+                }
+                return Stream.of(String.valueOf(obj));
+            })
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toList());
+    }
+
+
+    /**
+     * 恢复字段
+     */
+    public void repairGroupFiled() {
+        Assert.state(this.canGroup, "当前数据表不支持分组");
+        String sql = "update " + getTableName() + " set `GROUP`=? where `GROUP` is null or `GROUP`=''";
+        super.execute(sql, Const.DEFAULT_GROUP_NAME);
+    }
+
+    public int insert(T t) {
         this.fillInsert(t);
-        super.insertDb(t);
+        int count = super.insertDb(t);
         this.executeClear();
+        return count;
     }
 
     /**
@@ -283,6 +355,18 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     public List<T> listByEntity(Entity where) {
         List<Entity> entity = this.queryList(where);
         return this.entityToBeanList(entity);
+    }
+
+    /**
+     * 查询 list
+     *
+     * @param where 条件
+     * @param fill  是否填充
+     * @return data
+     */
+    public List<T> listByEntity(Entity where, boolean fill) {
+        List<Entity> entity = this.queryList(where);
+        return this.entityToBeanList(entity, fill);
     }
 
     /**

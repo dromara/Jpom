@@ -24,9 +24,10 @@ package org.dromara.jpom.func.files.controller;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.controller.outgiving.OutGivingWhitelistService;
@@ -75,7 +76,7 @@ public class FileReleaseTaskController extends BaseServerController {
 
     @PostMapping(value = "add-task", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> addTask(@ValidatorItem String fileId,
+    public IJsonMessage<String> addTask(@ValidatorItem String fileId,
                                        @ValidatorItem String name,
                                        @ValidatorItem(value = ValidatorRule.NUMBERS) int taskType,
                                        @ValidatorItem String taskDataIds,
@@ -98,14 +99,14 @@ public class FileReleaseTaskController extends BaseServerController {
 
     @PostMapping(value = "re-task", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> reTask(@ValidatorItem String fileId,
-                                      @ValidatorItem String name,
-                                      @ValidatorItem(value = ValidatorRule.NUMBERS) int taskType,
-                                      @ValidatorItem String taskDataIds,
-                                      @ValidatorItem String parentTaskId,
-                                      String beforeScript,
-                                      String afterScript,
-                                      HttpServletRequest request) {
+    public IJsonMessage<String> reTask(@ValidatorItem String fileId,
+                                       @ValidatorItem String name,
+                                       @ValidatorItem(value = ValidatorRule.NUMBERS) int taskType,
+                                       @ValidatorItem String taskDataIds,
+                                       @ValidatorItem String parentTaskId,
+                                       String beforeScript,
+                                       String afterScript,
+                                       HttpServletRequest request) {
         FileReleaseTaskLogModel parentTask = fileReleaseTaskService.getByKey(parentTaskId, request);
         Assert.notNull(parentTask, "父任务不存在");
         return fileReleaseTaskService.addTask(fileId, name, taskType, taskDataIds, parentTask.getReleasePath(), beforeScript, afterScript, null, request);
@@ -118,7 +119,7 @@ public class FileReleaseTaskController extends BaseServerController {
      */
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<FileReleaseTaskLogModel>> list(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<FileReleaseTaskLogModel>> list(HttpServletRequest request) {
         //
         PageResultDto<FileReleaseTaskLogModel> listPage = fileReleaseTaskService.listPage(request);
         return JsonMessage.success("", listPage);
@@ -132,7 +133,7 @@ public class FileReleaseTaskController extends BaseServerController {
      */
     @GetMapping(value = "cancel-task", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> hasFile(@ValidatorItem String id, HttpServletRequest request) {
+    public IJsonMessage<String> hasFile(@ValidatorItem String id, HttpServletRequest request) {
         FileReleaseTaskLogModel taskLogModel = fileReleaseTaskService.getByKey(id, request);
         Assert.notNull(taskLogModel, "不存在对应的任务");
         fileReleaseTaskService.cancelTask(taskLogModel.getId());
@@ -147,7 +148,7 @@ public class FileReleaseTaskController extends BaseServerController {
      */
     @GetMapping(value = "details", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> details(@ValidatorItem String id, HttpServletRequest request) {
+    public IJsonMessage<JSONObject> details(@ValidatorItem String id, HttpServletRequest request) {
         FileReleaseTaskLogModel taskLogModel = fileReleaseTaskService.getByKey(id, request);
         Assert.notNull(taskLogModel, "不存在对应的任务");
         JSONObject jsonObject = new JSONObject();
@@ -167,7 +168,7 @@ public class FileReleaseTaskController extends BaseServerController {
      */
     @GetMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> delete(@ValidatorItem String id, HttpServletRequest request) {
+    public IJsonMessage<JSONObject> delete(@ValidatorItem String id, HttpServletRequest request) {
         FileReleaseTaskLogModel taskLogModel = fileReleaseTaskService.getByKey(id, request);
         Assert.notNull(taskLogModel, "不存在对应的任务");
 
@@ -200,7 +201,7 @@ public class FileReleaseTaskController extends BaseServerController {
      */
     @GetMapping(value = "log-list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> log(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+    public IJsonMessage<JSONObject> log(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
                                        @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line,
                                        HttpServletRequest request) {
         FileReleaseTaskLogModel item = fileReleaseTaskService.getByKey(id, request);

@@ -56,4 +56,22 @@ public @interface TableName {
      * @return 默认所有模式
      */
     DbExtConfig.Mode[] modes() default {};
+
+    /**
+     * 父级
+     *
+     * @return class
+     */
+    Class<?> parents() default Void.class;
+
+    /**
+     * 绑定关系
+     * <p>
+     * 1 严格模式，需要手动删除
+     * 2 删除工作空间时自动删除
+     * 3 父级数据为空时可以自动删除
+     *
+     * @return 数据绑定关系
+     */
+    int workspaceBind() default 1;
 }

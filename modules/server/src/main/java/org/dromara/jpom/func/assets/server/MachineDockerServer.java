@@ -33,15 +33,19 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
+import cn.keepbx.jpom.event.IAsyncLoad;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
+import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.cron.CronUtils;
-import org.dromara.jpom.cron.IAsyncLoad;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
+import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.cert.service.CertificateInfoService;
+import org.dromara.jpom.func.system.model.ClusterInfoModel;
+import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.model.docker.DockerSwarmInfoMode;
 import org.dromara.jpom.plugin.PluginFactory;
@@ -57,6 +61,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * @author bwcx_jzy
@@ -66,18 +71,24 @@ import java.util.*;
 @Slf4j
 public class MachineDockerServer extends BaseDbService<MachineDockerModel> implements ILoadEvent, IAsyncLoad, Task {
     private static final String CRON_ID = "docker-monitor";
+    private final MachineSshServer machineSshServer;
     private final DockerInfoService dockerInfoService;
     private final DockerSwarmInfoService dockerSwarmInfoService;
+    private final ClusterInfoService clusterInfoService;
 
     @Resource
     @Lazy
     private CertificateInfoService certificateInfoService;
 
 
-    public MachineDockerServer(DockerInfoService dockerInfoService,
-                               DockerSwarmInfoService dockerSwarmInfoService) {
+    public MachineDockerServer(MachineSshServer machineSshServer,
+                               DockerInfoService dockerInfoService,
+                               DockerSwarmInfoService dockerSwarmInfoService,
+                               ClusterInfoService clusterInfoService) {
+        this.machineSshServer = machineSshServer;
         this.dockerInfoService = dockerInfoService;
         this.dockerSwarmInfoService = dockerSwarmInfoService;
+        this.clusterInfoService = clusterInfoService;
     }
 
     @Override
@@ -152,7 +163,17 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
 
     @Override
     public void execute() {
-        List<MachineDockerModel> list = this.list(false);
+        // 查询对应分组的数据
+        ClusterInfoModel current = clusterInfoService.getCurrent();
+        String linkGroup = current.getLinkGroup();
+        List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
+        if (CollUtil.isEmpty(linkGroups)) {
+            log.warn("当前集群还未绑定分组,不能监控 Docker 资产信息");
+            return;
+        }
+        Entity entity = new Entity();
+        entity.set("groupName", linkGroups);
+        List<MachineDockerModel> list = this.listByEntity(entity, false);
         if (CollUtil.isEmpty(list)) {
             return;
         }
@@ -170,6 +191,8 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
      */
     public boolean updateMonitor(MachineDockerModel dockerInfoModel) {
         try {
+            DockerInfoModel model = new DockerInfoModel();
+            model.setMachineDockerId(dockerInfoModel.getId());
             IPlugin pluginCheck = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
             Map<String, Object> parameter = this.toParameter(dockerInfoModel);
             //
@@ -404,6 +427,14 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
             File filePath = certificateInfoService.getFilePath(machineDockerModel.getCertInfo());
             Assert.notNull(filePath, "docker 证书文件丢失");
             parameter.put("dockerCertPath", filePath.getAbsolutePath());
+        }
+        if (Boolean.TRUE.equals(machineDockerModel.getEnableSsh()) && StrUtil.isNotEmpty(machineDockerModel.getMachineSshId())) {
+            // 添加SSH的操作Session
+            MachineSshModel sshModel = machineSshServer.getByKey(machineDockerModel.getMachineSshId());
+            Assert.notNull(sshModel, "ssh 信息不存在啦");
+            // 需要关闭之前的连接，避免阻塞
+            parameter.put("closeBefore", true);
+            parameter.put("session", (Supplier<Session>) () -> machineSshServer.getSessionByModel(sshModel));
         }
         return parameter;
     }

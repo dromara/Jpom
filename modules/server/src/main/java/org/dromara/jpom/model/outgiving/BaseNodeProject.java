@@ -22,9 +22,9 @@
  */
 package org.dromara.jpom.model.outgiving;
 
+import cn.keepbx.jpom.model.BaseJsonModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.dromara.jpom.model.BaseJsonModel;
 
 /**
  * @author bwcx_jzy

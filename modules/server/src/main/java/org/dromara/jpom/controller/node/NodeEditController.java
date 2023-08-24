@@ -23,8 +23,9 @@
 package org.dromara.jpom.controller.node;
 
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
@@ -90,7 +91,7 @@ public class NodeEditController extends BaseServerController {
 
     @PostMapping(value = "list_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<NodeModel>> listJson(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<NodeModel>> listJson(HttpServletRequest request) {
         PageResultDto<NodeModel> nodeModelPageResultDto = nodeService.listPage(request);
         nodeModelPageResultDto.each(nodeModel -> nodeModel.setMachineNodeData(machineNodeServer.getByKey(nodeModel.getMachineId())));
         return JsonMessage.success("", nodeModelPageResultDto);
@@ -98,14 +99,14 @@ public class NodeEditController extends BaseServerController {
 
     @GetMapping(value = "list_data_all.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<NodeModel>> listDataAll() {
+    public IJsonMessage<List<NodeModel>> listDataAll() {
         List<NodeModel> list = nodeService.listByWorkspace(getRequest());
         return JsonMessage.success("", list);
     }
 
     @GetMapping(value = "list_data_by_workspace_id.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<NodeModel>> listDataAll(@ValidatorItem String workspaceId) {
+    public IJsonMessage<List<NodeModel>> listDataAll(@ValidatorItem String workspaceId) {
         nodeService.checkUserWorkspace(workspaceId);
         NodeModel nodeModel = new NodeModel();
         if (!StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL)) {
@@ -122,14 +123,14 @@ public class NodeEditController extends BaseServerController {
      */
     @GetMapping(value = "list_group_all.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<String>> listGroupAll() {
-        List<String> listGroup = nodeService.listGroup(getRequest());
+    public IJsonMessage<List<String>> listGroupAll(HttpServletRequest request) {
+        List<String> listGroup = nodeService.listGroup(request);
         return JsonMessage.success("", listGroup);
     }
 
     @PostMapping(value = "save.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> save(HttpServletRequest request) {
+    public IJsonMessage<String> save(HttpServletRequest request) {
         nodeService.update(request);
         return JsonMessage.success("操作成功");
     }
@@ -143,7 +144,7 @@ public class NodeEditController extends BaseServerController {
      */
     @PostMapping(value = "del.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> del(@ValidatorItem String id) {
+    public IJsonMessage<String> del(@ValidatorItem String id) {
         HttpServletRequest request = getRequest();
         this.checkDataBind(id, request, "删除");
         //
@@ -197,7 +198,7 @@ public class NodeEditController extends BaseServerController {
      */
     @GetMapping(value = "unbind.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> unbind(String id) {
+    public IJsonMessage<String> unbind(String id) {
         HttpServletRequest request = getRequest();
         this.checkDataBind(id, request, "解绑");
         //
@@ -218,7 +219,7 @@ public class NodeEditController extends BaseServerController {
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public JsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
+    public IJsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
         String nowWorkspaceId = nodeService.getCheckUserWorkspace(getRequest());
         //
         nodeService.checkUserWorkspace(toWorkspaceId);
@@ -236,7 +237,7 @@ public class NodeEditController extends BaseServerController {
      */
     @GetMapping(value = "sort-item", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId) {
+    public IJsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId) {
         HttpServletRequest request = getRequest();
         if (StrUtil.equalsIgnoreCase(method, "top")) {
             nodeService.sortToTop(id, request);

@@ -23,11 +23,12 @@
 package org.dromara.jpom.controller.manage;
 
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.common.commander.CommandOpResult;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -68,7 +69,7 @@ public class ProjectStatusController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> getProjectStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String getCopy) {
+    public IJsonMessage<JSONObject> getProjectStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String getCopy) {
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
         Assert.notNull(nodeProjectInfoModel, "项目id不存在");
         JSONObject jsonObject = new JSONObject();
@@ -110,7 +111,7 @@ public class ProjectStatusController extends BaseAgentController {
      * @return obj
      */
     @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> getProjectPort(String ids) {
+    public IJsonMessage<JSONObject> getProjectPort(String ids) {
         Assert.hasText(ids, "没有要获取的信息");
         JSONArray jsonArray = JSONArray.parseArray(ids);
         JSONObject jsonObject = new JSONObject();
@@ -155,7 +156,7 @@ public class ProjectStatusController extends BaseAgentController {
      * @return obj
      */
     @RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> getProjectPort(String id, String copyIds) {
+    public IJsonMessage<JSONObject> getProjectPort(String id, String copyIds) {
         if (StrUtil.isEmpty(copyIds) || StrUtil.isEmpty(id)) {
             return new JsonMessage<>(400, "参数异常");
         }
@@ -195,7 +196,7 @@ public class ProjectStatusController extends BaseAgentController {
     }
 
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<CommandOpResult> restart(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
+    public IJsonMessage<CommandOpResult> restart(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
         NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
@@ -213,7 +214,7 @@ public class ProjectStatusController extends BaseAgentController {
 
 
     @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<CommandOpResult> stop(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
+    public IJsonMessage<CommandOpResult> stop(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
         NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
@@ -229,7 +230,7 @@ public class ProjectStatusController extends BaseAgentController {
 
 
     @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<CommandOpResult> start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
+    public IJsonMessage<CommandOpResult> start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
         NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);

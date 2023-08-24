@@ -22,15 +22,15 @@
  */
 package org.dromara.jpom.service.node;
 
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.node.ProjectInfoCacheModel;
 import org.dromara.jpom.service.ITriggerToken;
-import org.dromara.jpom.service.h2db.BaseNodeGroupService;
+import org.dromara.jpom.service.h2db.BaseNodeService;
 import org.dromara.jpom.service.system.WorkspaceService;
 import org.springframework.stereotype.Service;
 
@@ -39,8 +39,7 @@ import org.springframework.stereotype.Service;
  * @since 2021/12/5
  */
 @Service
-public class ProjectInfoCacheService extends BaseNodeGroupService<ProjectInfoCacheModel> implements ITriggerToken {
-
+public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoCacheModel> implements ITriggerToken {
 
     public ProjectInfoCacheService(NodeService nodeService,
                                    WorkspaceService workspaceService) {

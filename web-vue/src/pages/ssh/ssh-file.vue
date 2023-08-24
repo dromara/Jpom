@@ -4,7 +4,44 @@
     <!-- 目录树 -->
     <a-layout-sider theme="light" class="sider" width="25%">
       <a-row class="dir-container">
-        <a-button size="small" type="primary" @click="loadData()">刷新</a-button>
+        <a-space>
+          <a-button size="small" type="primary" @click="loadData()">刷新</a-button>
+          <a-dropdown>
+            <a-menu slot="overlay">
+              <a-menu-item
+                @click="
+                  () => {
+                    changeSort(item.key, sortMethod.asc);
+                  }
+                "
+                v-for="item in sortMethodList"
+                :key="item.key"
+                >{{ item.name }}</a-menu-item
+              >
+            </a-menu>
+
+            <a-button
+              size="small"
+              type="primary"
+              @click="
+                () => {
+                  changeSort(sortMethod.key, !sortMethod.asc);
+                }
+              "
+            >
+              {{
+                sortMethodList.find((item) => {
+                  return item.key === sortMethod.key;
+                }) &&
+                sortMethodList.find((item) => {
+                  return item.key === sortMethod.key;
+                }).name
+              }}排序
+              <a-icon type="sort-ascending" v-if="sortMethod.asc" />
+              <a-icon type="sort-descending" v-else />
+            </a-button>
+          </a-dropdown>
+        </a-space>
       </a-row>
       <a-empty v-if="treeList.length === 0" />
       <a-directory-tree :treeData="treeList" :replaceFields="replaceFields" @select="onSelect"> </a-directory-tree>
@@ -79,7 +116,9 @@
             <a-tooltip title="需要到 ssh 信息中配置允许编辑的文件后缀">
               <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">编辑</a-button>
             </a-tooltip>
-
+            <a-tooltip title="修改文件权限">
+              <a-button size="small" type="primary" @click="handleFilePermission(record)">权限</a-button>
+            </a-tooltip>
             <a-button size="small" type="primary" :disabled="record.dir" @click="handleDownload(record)">下载</a-button>
             <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
           </a-space>
@@ -126,14 +165,85 @@
           </a-row>
         </a-space>
       </a-modal>
+
+      <!-- 修改文件权限 -->
+      <a-modal destroyOnClose v-model="editFilePermissionVisible" width="400px" :title="`修改文件权限`" :footer="null" :maskClosable="true">
+        <a-row>
+          <a-col :span="6"><span class="title">权限</span></a-col>
+          <a-col :span="6"><span class="title">所属用户</span></a-col>
+          <a-col :span="6"><span class="title">用户组</span></a-col>
+          <a-col :span="6"><span class="title">其他</span></a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="6">
+            <span>读</span>
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.owner.read" />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.group.read" />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.others.read" />
+          </a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="6">
+            <span>写</span>
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.owner.write" />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.group.write" />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.others.write" />
+          </a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="6">
+            <span>执行</span>
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.owner.execute" />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.group.execute" />
+          </a-col>
+          <a-col :span="6">
+            <a-checkbox v-model="permissions.others.execute" />
+          </a-col>
+        </a-row>
+        <a-row type="flex" style="margin-top: 20px">
+          <a-button type="primary" @click="updateFilePermissions">确认修改</a-button>
+        </a-row>
+        <!-- <a-row>
+          <a-alert style="margin-top: 20px" :message="permissionTips" type="success" />
+        </a-row> -->
+      </a-modal>
     </a-layout-content>
   </a-layout>
 </template>
 <script>
-import { deleteFile, downloadFile, getFileList, getRootFileList, newFileFolder, readFile, renameFileFolder, updateFileData, uploadFile } from "@/api/ssh-file";
+import {
+  deleteFile,
+  downloadFile,
+  getFileList,
+  getRootFileList,
+  newFileFolder,
+  readFile,
+  renameFileFolder,
+  updateFileData,
+  uploadFile,
+  parsePermissions,
+  calcFilePermissionValue,
+  changeFilePermission,
+} from "@/api/ssh-file";
 
 import codeEditor from "@/components/codeEditor";
-import { ZIP_ACCEPT, renderSize } from "@/utils/const";
+import { ZIP_ACCEPT, renderSize, parseTime } from "@/utils/const";
 
 export default {
   props: {
@@ -169,19 +279,45 @@ export default {
         key: "key",
       },
       columns: [
-        { title: "文件名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "文件类型", dataIndex: "dir", width: 100, ellipsis: true, scopedSlots: { customRender: "dir" } },
-        { title: "文件大小", dataIndex: "size", width: 120, ellipsis: true, scopedSlots: { customRender: "size" } },
+        { title: "文件名称", dataIndex: "name", width: 200, ellipsis: true, scopedSlots: { customRender: "name" }, sorter: (a, b) => (a.name || "").localeCompare(b.name || "") },
+        { title: "文件类型", dataIndex: "dir", width: "100px", ellipsis: true, scopedSlots: { customRender: "dir" } },
+        { title: "文件大小", dataIndex: "size", width: 120, ellipsis: true, scopedSlots: { customRender: "size" }, sorter: (a, b) => Number(a.size) - new Number(b.size) },
         { title: "权限", dataIndex: "permissions", width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "修改时间", dataIndex: "modifyTime", width: "170px", ellipsis: true },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "180px" },
+        { title: "修改时间", dataIndex: "modifyTime", width: "170px", ellipsis: true, customRender: (text) => parseTime(text), sorter: (a, b) => Number(a.modifyTime) - new Number(b.modifyTime) },
+        { title: "操作", dataIndex: "operation", align: "center", fixed: "right", scopedSlots: { customRender: "operation" }, width: "220px" },
       ],
       editFileVisible: false,
       addFileFolderVisible: false,
+      editFilePermissionVisible: false,
+      permissions: {
+        owner: { read: false, write: false, execute: false },
+        group: { read: false, write: false, execute: false },
+        others: { read: false, write: false, execute: false },
+      },
+      // permissionTips: "",
+      sortMethodList: [
+        {
+          name: "文件名",
+          key: "name",
+        },
+        {
+          name: "修改时间",
+          key: "modifyTime",
+        },
+      ],
+      sortMethod: {
+        key: "name",
+        asc: true,
+      },
     };
   },
   mounted() {
     this.listShowDir = Boolean(localStorage.getItem("ssh-list-show-dir"));
+    try {
+      this.sortMethod = JSON.parse(localStorage.getItem("ssh-list-sort") || JSON.stringify(this.sortMethod));
+    } catch (e) {
+      console.error(e);
+    }
     this.loadData();
   },
   computed: {
@@ -202,23 +338,35 @@ export default {
     },
   },
   methods: {
+    changeSort(key, asc) {
+      this.sortMethod = { key: key, asc: asc };
+      localStorage.setItem("ssh-list-sort", JSON.stringify(this.sortMethod));
+      this.loadData();
+    },
     renderSize,
     // 加载数据
     loadData() {
       this.loading = true;
       getRootFileList(this.baseUrl, this.reqDataId).then((res) => {
         if (res.code === 200) {
-          this.treeList = res.data.map((element) => {
-            return {
-              key: element.id,
-              name: element.allowPathParent,
-              allowPathParent: element.allowPathParent,
-              nextPath: "/",
-              isLeaf: false,
-              // 配置的白名单目录可能不存在
-              disabled: !!element.error,
-            };
-          });
+          this.treeList = res.data
+            .map((element) => {
+              return {
+                key: element.id,
+                name: element.allowPathParent,
+                allowPathParent: element.allowPathParent,
+                nextPath: "/",
+                isLeaf: false,
+                // 配置的白名单目录可能不存在
+                disabled: !!element.error,
+                modifyTime: element.modifyTime,
+              };
+            })
+            .sort((a, b) => {
+              const aV = a[this.sortMethod.key] || "";
+              const bV = b[this.sortMethod.key] || "";
+              return this.sortMethod.asc ? bV.localeCompare(aV) : aV.localeCompare(bV);
+            });
         }
         this.loading = false;
       });
@@ -264,6 +412,7 @@ export default {
                   isLeaf: !element.dir,
                   // 可能有错误
                   disabled: !!element.error,
+                  modifyTime: element.modifyTime,
                 });
               } else {
                 // 设置文件表格
@@ -274,7 +423,11 @@ export default {
               }
             });
             // 设置目录树
-            node.dataRef.children = children;
+            node.dataRef.children = children.sort((a, b) => {
+              const aV = a[this.sortMethod.key] || "";
+              const bV = b[this.sortMethod.key] || "";
+              return this.sortMethod.asc ? bV.localeCompare(aV) : aV.localeCompare(bV);
+            });
             this.treeList = [...this.treeList];
           }
           this.loading = false;
@@ -458,6 +611,40 @@ export default {
         }
       });
     },
+    // 修改文件权限
+    handleFilePermission(record) {
+      this.temp = Object.assign({}, record);
+      this.permissions = parsePermissions(this.temp.permissions);
+      //const permissionsValue = calcFilePermissionValue(this.permissions);
+      //this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`;
+      this.editFilePermissionVisible = true;
+    },
+    // 更新文件权限提示
+    renderFilePermissionsTips() {
+      //const permissionsValue = calcFilePermissionValue(this.permissions);
+      //this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`;
+    },
+    // 确认修改文件权限
+    updateFilePermissions() {
+      // 请求参数
+      const params = {
+        id: this.reqDataId,
+        allowPathParent: this.temp.allowPathParent,
+        nextPath: this.temp.nextPath,
+        fileName: this.temp.name,
+        permissionValue: calcFilePermissionValue(this.permissions),
+      };
+      changeFilePermission(this.baseUrl, params).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.editFilePermissionVisible = false;
+          this.loadFileList();
+        }
+      });
+    },
+
     // 下载
     handleDownload(record) {
       // 请求参数
@@ -581,5 +768,10 @@ export default {
   margin: 10px 10px 0;
   padding: 10px;
   background-color: #fff;
+}
+
+.title {
+  font-weight: 600;
+  font-size: larger;
 }
 </style>

@@ -1,52 +1,47 @@
 <template>
-  <a-layout class="node-layout" ref="nodeLayout" id="nodeLayout" :class="` ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
-    <!-- 侧边栏 节点管理菜单 -->
-    <a-layout-sider theme="light" :class="`node-sider jpom-node-sider ${this.fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}  ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
-      <a-menu
-        theme="light"
-        mode="inline"
-        @openChange="openChange"
-        :default-selected-keys="selectedKeys"
-        :openKeys="openKey"
-        :class="`${this.fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'} ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`"
-      >
-        <template v-for="(menu, index) in nodeMenuList">
-          <a-sub-menu v-if="menu.childs" :key="menu.id" :class="menu.id">
-            <span slot="title">
+  <div>
+    <a-layout class="node-layout" ref="nodeLayout" id="nodeLayout" :class="` ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
+      <!-- 侧边栏 节点管理菜单 -->
+      <a-layout-sider theme="light" :class="`node-sider jpom-node-sider ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
+        <a-menu theme="light" mode="inline" @openChange="openChange" :default-selected-keys="selectedKeys" :openKeys="openKey" :class="`${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
+          <template v-for="(menu, index) in nodeMenuList">
+            <a-sub-menu v-if="menu.childs" :key="menu.id" :class="menu.id">
+              <span slot="title">
+                <a-icon :type="menu.icon_v3" />
+                <span>{{ menu.title }}</span>
+              </span>
+              <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" @click="handleMenuClick(subMenu.id, subMenu.pId)" :class="subMenu.id">
+                <span>{{ subMenu.title }}</span>
+              </a-menu-item>
+            </a-sub-menu>
+            <a-menu-item v-else :key="menu.id + index" @click="handleMenuClick(menu.id)">
               <a-icon :type="menu.icon_v3" />
               <span>{{ menu.title }}</span>
-            </span>
-            <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" @click="handleMenuClick(subMenu.id, subMenu.pId)" :class="subMenu.id">
-              <span>{{ subMenu.title }}</span>
             </a-menu-item>
-          </a-sub-menu>
-          <a-menu-item v-else :key="menu.id + index" @click="handleMenuClick(menu.id)">
-            <a-icon :type="menu.icon_v3" />
-            <span>{{ menu.title }}</span>
-          </a-menu-item>
-        </template>
-      </a-menu>
-    </a-layout-sider>
-    <!-- 节点管理的各个组件 -->
-    <!-- class="layout-content jpom-node-content drawer-layout-content" -->
+          </template>
+        </a-menu>
+      </a-layout-sider>
+      <!-- 节点管理的各个组件 -->
+      <!-- class="layout-content jpom-node-content drawer-layout-content" -->
 
-    <a-layout-content :class="`layout-content jpom-node-content ${this.fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'} ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
-      <welcome v-if="currentId === 'welcome'" :node="node" />
-      <project-list v-if="currentId === 'manageList'" :node="node" />
+      <a-layout-content :class="`layout-content jpom-node-content ${this.fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'} ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
+        <welcome v-if="currentId === 'welcome'" :node="node" />
+        <project-list v-if="currentId === 'manageList'" :node="node" />
 
-      <recover v-if="currentId === 'projectRecover'" :node="node" />
+        <recover v-if="currentId === 'projectRecover'" :node="node" />
 
-      <script-template v-if="currentId === 'script'" :node="node" />
-      <script-log v-if="currentId === 'script-log'" :nodeId="node.id" />
-      <nginx-list v-if="currentId === 'nginxList'" :node="node" />
-      <cert v-if="currentId === 'certificate'" :node="node" />
-      <white-list v-if="currentId === 'whitelistDirectory'" :node="node" />
-      <cache v-if="currentId === 'cacheManage'" :node="node" />
-      <log v-if="currentId === 'logManage'" :node="node" />
+        <script-template v-if="currentId === 'script'" :node="node" />
+        <script-log v-if="currentId === 'script-log'" :nodeId="node.id" />
+        <nginx-list v-if="currentId === 'nginxList'" :node="node" />
+        <cert v-if="currentId === 'certificate'" :node="node" />
+        <white-list v-if="currentId === 'whitelistDirectory'" :node="node" />
+        <cache v-if="currentId === 'cacheManage'" :node="node" />
+        <log v-if="currentId === 'logManage'" :node="node" />
 
-      <config-file v-if="currentId === 'sysConfig'" :node="node" />
-    </a-layout-content>
-  </a-layout>
+        <config-file v-if="currentId === 'sysConfig'" :node="node" />
+      </a-layout-content>
+    </a-layout>
+  </div>
 </template>
 <script>
 import { getNodeMenu } from "@/api/menu";
@@ -192,6 +187,15 @@ export default {
 };
 </script>
 <style scoped>
+.node-sider {
+  border-right: 1px solid #e8e8e8;
+}
+
+/deep/ .ant-menu-inline,
+/deep/ .ant-menu-vertical,
+/deep/ .ant-menu-vertical-left {
+  border: 0;
+}
 .sider-scroll {
   min-height: calc(100vh -85px);
   overflow-y: auto;

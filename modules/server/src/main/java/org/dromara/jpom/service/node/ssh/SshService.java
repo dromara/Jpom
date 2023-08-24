@@ -29,13 +29,17 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
-import com.jcraft.jsch.*;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.model.data.SshModel;
-import org.dromara.jpom.service.h2db.BaseGroupService;
+import org.dromara.jpom.plugins.JschLogger;
+import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.system.extconf.BuildExtConfig;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.MySftp;
@@ -57,7 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Service
 @Slf4j
-public class SshService extends BaseGroupService<SshModel> implements Logger {
+public class SshService extends BaseWorkspaceService<SshModel> {
 
     @Resource
     @Lazy
@@ -66,7 +70,7 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
 
     public SshService(BuildExtConfig buildExtConfig) {
         this.buildExtConfig = buildExtConfig;
-        JSch.setLogger(this);
+        JSch.setLogger(JschLogger.LOGGER);
     }
 
     @Override
@@ -183,74 +187,31 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
      */
     public void syncToWorkspace(String ids, String nowWorkspaceId, String workspaceId) {
         StrUtil.splitTrim(ids, StrUtil.COMMA)
-                .forEach(id -> {
-                    SshModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
-                    Assert.notNull(data, "没有对应的ssh信息");
-                    //
-                    SshModel where = new SshModel();
-                    where.setWorkspaceId(workspaceId);
-                    where.setMachineSsh(data.getMachineSsh());
-                    SshModel sshModel = super.queryByBean(where);
-                    Assert.isNull(sshModel, "对应的工作空间已经存在当前 SSH 啦");
-                    // 不存在则添加 信息
-                    data.setId(null);
-                    data.setWorkspaceId(workspaceId);
-                    data.setCreateTimeMillis(null);
-                    data.setModifyTimeMillis(null);
-                    data.setModifyUser(null);
-                    data.setHost(null);
-                    data.setUser(null);
-                    data.setPassword(null);
-                    data.setPort(null);
-                    data.setConnectType(null);
-                    data.setCharset(null);
-                    data.setPrivateKey(null);
-                    data.setTimeout(null);
-                    super.insert(data);
-                });
-    }
-
-    @Override
-    public boolean isEnabled(int level) {
-        switch (level) {
-            case DEBUG:
-                return log.isDebugEnabled();
-            case INFO:
-                return log.isInfoEnabled();
-            case WARN:
-                return log.isWarnEnabled();
-            case ERROR:
-            case FATAL:
-                return log.isErrorEnabled();
-            default:
-                log.warn("未知的 jsch 日志级别：{}", level);
-                return false;
-        }
-    }
-
-    @Override
-    public void log(int level, String message) {
-        switch (level) {
-            case DEBUG:
-                // info 日志太多 记录维 debug
-            case INFO:
-                log.debug(message);
-                break;
-            case WARN:
-                if (StrUtil.isWrap(message, "Permanently added", "to the list of known hosts.")) {
-                    // 避免过多日志
-                    log.debug(message);
-                } else {
-                    log.warn(message);
-                }
-                break;
-            case ERROR:
-            case FATAL:
-                log.error(message);
-                break;
-            default:
-                log.warn("未知的 jsch 日志级别：{} {}", level, message);
-        }
+            .forEach(id -> {
+                SshModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
+                Assert.notNull(data, "没有对应的ssh信息");
+                //
+                SshModel where = new SshModel();
+                where.setWorkspaceId(workspaceId);
+                where.setMachineSsh(data.getMachineSsh());
+                SshModel sshModel = super.queryByBean(where);
+                Assert.isNull(sshModel, "对应的工作空间已经存在当前 SSH 啦");
+                // 不存在则添加 信息
+                data.setId(null);
+                data.setWorkspaceId(workspaceId);
+                data.setCreateTimeMillis(null);
+                data.setModifyTimeMillis(null);
+                data.setModifyUser(null);
+                data.setHost(null);
+                data.setUser(null);
+                data.setPassword(null);
+                data.setPort(null);
+                data.setConnectType(null);
+                data.setCharset(null);
+                data.setPrivateKey(null);
+                data.setTimeout(null);
+                super.insert(data);
+            });
     }
 
     public long countByMachine(String machineSshId) {
@@ -306,11 +267,17 @@ public class SshService extends BaseGroupService<SshModel> implements Logger {
                 if (progressRangeList.add(progressRange)) {
                     //  total, progressSize
                     logRecorder.system("上传文件进度:{} {}/{} {} ", desc,
-                            FileUtil.readableFileSize(now), FileUtil.readableFileSize(max),
-                            NumberUtil.formatPercent(((float) now / max), 0)
+                        FileUtil.readableFileSize(now), FileUtil.readableFileSize(max),
+                        NumberUtil.formatPercent(((float) now / max), 0)
                     );
                 }
             }
         };
+    }
+
+    public SshModel getByMachineSshId(String id) {
+        SshModel model = new SshModel();
+        model.setMachineSshId(id);
+        return queryByBean(model);
     }
 }

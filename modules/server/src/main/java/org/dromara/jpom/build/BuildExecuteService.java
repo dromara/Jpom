@@ -26,8 +26,9 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.model.BaseEnum;
@@ -101,6 +102,9 @@ public class BuildExecuteService {
      * @return 错误消息
      */
     public String checkStatus(BuildInfoModel buildInfoModel) {
+        if (buildInfoModel == null) {
+            return "不存在对应的构建信息";
+        }
         Integer status = buildInfoModel.getStatus();
         if (status == null) {
             return null;
@@ -124,7 +128,7 @@ public class BuildExecuteService {
      * @param parametersEnv    外部环境变量
      * @return json
      */
-    public JsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay, int triggerBuildType, String buildRemark, Object... parametersEnv) {
+    public IJsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay, int triggerBuildType, String buildRemark, Object... parametersEnv) {
         return this.start(buildInfoId, userModel, delay, triggerBuildType, buildRemark, null, parametersEnv);
     }
 
@@ -140,7 +144,7 @@ public class BuildExecuteService {
      * @param parametersEnv       外部环境变量
      * @return json
      */
-    public JsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay,
+    public IJsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay,
                                       int triggerBuildType, String buildRemark, String checkRepositoryDiff,
                                       Object... parametersEnv) {
         synchronized (buildInfoId.intern()) {
@@ -148,7 +152,7 @@ public class BuildExecuteService {
             String e = this.checkStatus(buildInfoModel);
             Assert.isNull(e, () -> e);
             //
-            boolean containsKey = BuildInfoManage.BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId());
+            boolean containsKey = BuildExecuteManage.BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId());
             Assert.state(!containsKey, "当前构建还在进行中");
             //
             BuildExtraModule buildExtraModule = StringUtil.jsonConvert(buildInfoModel.getExtraData(), BuildExtraModule.class);
@@ -196,7 +200,7 @@ public class BuildExecuteService {
     private void runTask(TaskData taskData, BuildExtraModule buildExtraModule) {
         String logId = this.insertLog(buildExtraModule, taskData);
         //
-        BuildInfoManage.BuildInfoManageBuilder builder = BuildInfoManage.builder()
+        BuildExecuteManage.BuildExecuteManageBuilder builder = BuildExecuteManage.builder()
             .taskData(taskData)
             .logId(logId)
             .scriptServer(scriptServer)

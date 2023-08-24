@@ -25,10 +25,11 @@ package org.dromara.jpom.controller.monitor;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
@@ -68,7 +69,7 @@ public class MonitorUserOptListController extends BaseServerController {
 
     @RequestMapping(value = "list_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<MonitorUserOptModel>> getMonitorList() {
+    public IJsonMessage<PageResultDto<MonitorUserOptModel>> getMonitorList() {
         PageResultDto<MonitorUserOptModel> pageResultDto = monitorUserOptService.listPage(getRequest());
         return JsonMessage.success("", pageResultDto);
     }
@@ -80,7 +81,7 @@ public class MonitorUserOptListController extends BaseServerController {
      */
     @RequestMapping(value = "type_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> getOperateTypeList() {
+    public IJsonMessage<JSONObject> getOperateTypeList() {
         JSONObject jsonObject = new JSONObject();
         //
         List<JSONObject> classFeatureList = Arrays.stream(ClassFeature.values())
@@ -116,7 +117,7 @@ public class MonitorUserOptListController extends BaseServerController {
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id) {
+    public IJsonMessage<Object> deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id) {
         //
         monitorUserOptService.delByKey(id, getRequest());
         return JsonMessage.success("删除成功");
@@ -133,7 +134,7 @@ public class MonitorUserOptListController extends BaseServerController {
      */
     @RequestMapping(value = "update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> updateMonitor(String id,
+    public IJsonMessage<Object> updateMonitor(String id,
                                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空") String name,
                                              String notifyUser,
                                              String monitorUser,
@@ -208,7 +209,7 @@ public class MonitorUserOptListController extends BaseServerController {
      */
     @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> changeStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id不能为空") String id,
+    public IJsonMessage<Object> changeStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id不能为空") String id,
                                             String status) {
         MonitorUserOptModel monitorModel = monitorUserOptService.getByKey(id);
         Assert.notNull(monitorModel, "不存在监控项啦");

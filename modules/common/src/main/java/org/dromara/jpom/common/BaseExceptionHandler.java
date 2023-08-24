@@ -24,6 +24,8 @@ package org.dromara.jpom.common;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.exceptions.ValidateException;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.controller.BaseMyErrorController;
 import org.dromara.jpom.system.JpomRuntimeException;
@@ -57,7 +59,7 @@ public abstract class BaseExceptionHandler {
      */
     @ExceptionHandler({JpomRuntimeException.class, RuntimeException.class, Exception.class})
     @ResponseBody
-    public JsonMessage<String> defExceptionHandler(HttpServletRequest request, Exception e) {
+    public IJsonMessage<String> defExceptionHandler(HttpServletRequest request, Exception e) {
         if (e instanceof JpomRuntimeException) {
             log.error("global handle exception: {} {}", request.getRequestURI(), e.getMessage(), e.getCause());
             return new JsonMessage<>(500, e.getMessage());
@@ -73,7 +75,7 @@ public abstract class BaseExceptionHandler {
 
     @ExceptionHandler({NullPointerException.class})
     @ResponseBody
-    public JsonMessage<String> defNullPointerExceptionHandler(HttpServletRequest request, Exception e) {
+    public IJsonMessage<String> defNullPointerExceptionHandler(HttpServletRequest request, Exception e) {
         log.error("global NullPointerException: {}", request.getRequestURI(), e);
         return new JsonMessage<>(500, "程序错误,空指针");
     }
@@ -86,7 +88,7 @@ public abstract class BaseExceptionHandler {
      */
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class, ValidateException.class})
     @ResponseBody
-    public JsonMessage<String> paramExceptionHandler(HttpServletRequest request, Exception e) {
+    public IJsonMessage<String> paramExceptionHandler(HttpServletRequest request, Exception e) {
         if (log.isDebugEnabled()) {
             log.debug("controller  {}", request.getRequestURI(), e);
         } else {
@@ -98,20 +100,20 @@ public abstract class BaseExceptionHandler {
 
     @ExceptionHandler({HttpMessageNotReadableException.class, HttpMessageConversionException.class})
     @ResponseBody
-    public JsonMessage<String> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+    public IJsonMessage<String> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         log.warn("参数解析异常:{}", e.getMessage());
         return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), "传入的参数格式不正确");
     }
 
     @ExceptionHandler({HttpRequestMethodNotSupportedException.class, HttpMediaTypeNotSupportedException.class})
     @ResponseBody
-    public JsonMessage<String> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+    public IJsonMessage<String> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         return new JsonMessage<>(HttpStatus.METHOD_NOT_ALLOWED.value(), "不被支持的请求方式", e.getMessage());
     }
 
     @ExceptionHandler({NoHandlerFoundException.class})
     @ResponseBody
-    public JsonMessage<String> handleNoHandlerFoundException(NoHandlerFoundException e) {
+    public IJsonMessage<String> handleNoHandlerFoundException(NoHandlerFoundException e) {
         return new JsonMessage<>(HttpStatus.NOT_FOUND.value(), "没有找到对应的资源", e.getMessage());
     }
 
@@ -122,21 +124,21 @@ public abstract class BaseExceptionHandler {
      */
     @ExceptionHandler({MaxUploadSizeExceededException.class})
     @ResponseBody
-    public JsonMessage<String> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+    public IJsonMessage<String> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
         log.error("上传文件大小超出限制", e);
         return new JsonMessage<>(HttpStatus.NOT_ACCEPTABLE.value(), BaseMyErrorController.FILE_MAX_SIZE_MSG, e.getMessage());
     }
 
     @ExceptionHandler({ConstructorException.class})
     @ResponseBody
-    public JsonMessage<String> handleConstructorException(ConstructorException e) {
+    public IJsonMessage<String> handleConstructorException(ConstructorException e) {
         log.warn("yml 配置内容错误", e);
         return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), "yml 配置内容格式有误请检查后重新操作（请检查是否有非法字段）：" + e.getMessage());
     }
 
     @ExceptionHandler({ScannerException.class})
     @ResponseBody
-    public JsonMessage<String> handleScannerException(ScannerException e) {
+    public IJsonMessage<String> handleScannerException(ScannerException e) {
         log.warn("ScannerException", e);
         return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), "yml 配置内容格式有误请检查后重新操作（不要使用 \\t(TAB) 缩进）：" + e.getMessage());
     }

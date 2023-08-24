@@ -1,6 +1,12 @@
 jpom:
   # jpom 数据存储路径, 如果调试模式运行默认路径为【${user.home}/jpom/】,安装运行默认为jar包文件的父级
   path:
+  #  集群配置
+  cluster:
+    # 集群Id，默认为 default 不区分大小写，只能是字母或者数字，长度小于 20
+    id: default
+    # 心跳监控时间 （需要大于零） 单位秒 最小配置 5 秒
+    heart-second: 30
   node:
     # 节点心跳监控时间 （需要大于零） 单位秒 最小配置 5秒
     heart-second: 30

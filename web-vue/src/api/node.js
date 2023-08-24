@@ -5,7 +5,7 @@ export function getNodeList(params) {
   return axios({
     url: "/node/list_data.json",
     method: "post",
-    params: params,
+    data: params,
   });
 }
 
@@ -57,7 +57,7 @@ export function getNodeProjectList(params) {
   return axios({
     url: "/node/node_project_list",
     method: "post",
-    params: params,
+    data: params,
   });
 }
 
@@ -66,7 +66,7 @@ export function getProjectList(params) {
   return axios({
     url: "/node/project_list",
     method: "post",
-    params: params,
+    data: params,
   });
 }
 

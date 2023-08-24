@@ -125,6 +125,17 @@ public class MachineDockerModel extends BaseGroupNameModel {
      */
     private Boolean swarmControlAvailable;
 
+    /**
+     * 开启 SSH 访问
+     */
+    private Boolean enableSsh;
+
+    /**
+     * SSH Id
+     */
+    private String machineSshId;
+
+
     public void setFailureMsg(String failureMsg) {
         this.failureMsg = StrUtil.maxLength(failureMsg, 240);
     }

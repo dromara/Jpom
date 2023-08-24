@@ -25,10 +25,10 @@ package org.dromara.jpom.service.script;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.keepbx.jpom.cron.ICron;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.cron.CronUtils;
-import org.dromara.jpom.cron.ICron;
 import org.dromara.jpom.model.script.ScriptExecuteLogModel;
 import org.dromara.jpom.model.script.ScriptModel;
 import org.dromara.jpom.model.user.UserModel;
@@ -57,9 +57,10 @@ public class ScriptServer extends BaseGlobalOrWorkspaceService<ScriptModel> impl
     }
 
     @Override
-    public void insert(ScriptModel scriptModel) {
-        super.insert(scriptModel);
+    public int insert(ScriptModel scriptModel) {
+        int count = super.insert(scriptModel);
         this.checkCron(scriptModel);
+        return count;
     }
 
     @Override

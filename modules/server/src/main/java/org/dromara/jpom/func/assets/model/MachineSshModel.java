@@ -108,7 +108,7 @@ public class MachineSshModel extends BaseGroupNameModel implements ISshInfo {
     private String hostName;
 
     public void setHostName(String hostName) {
-        this.osName = StrUtil.maxLength(hostName, 240);
+        this.hostName = StrUtil.maxLength(hostName, 240);
     }
 
     /**

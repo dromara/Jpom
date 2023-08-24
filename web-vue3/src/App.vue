@@ -20,7 +20,7 @@ const scrollbarFlag = computed(() => {
   return guideStore.scrollbarFlag ?? true
 })
 
-onMounted(() => {})
+onMounted(() => { })
 
 const reload = () => {
   routerActivation.value = false
@@ -70,6 +70,10 @@ provide('reload', reload)
 
 .ant-spin-text {
   text-shadow: 0 0 black !important;
+}
+
+.search-wrapper {
+  margin-bottom: 20px;
 }
 </style>
 

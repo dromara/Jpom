@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom.model;
 
+import cn.keepbx.jpom.model.BaseIdModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

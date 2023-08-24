@@ -24,7 +24,8 @@ package org.dromara.jpom.controller.system;
 
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.extra.servlet.ServletUtil;
-import org.dromara.jpom.common.JsonMessage;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.oauth2.BaseOauth2Config;
 import org.dromara.jpom.oauth2.Oauth2Factory;
 import org.dromara.jpom.permission.ClassFeature;
@@ -59,7 +60,7 @@ public class OauthConfigController {
 
     @GetMapping(value = "oauth2", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<BaseOauth2Config> oauth2(String provide) {
+    public IJsonMessage<BaseOauth2Config> oauth2(String provide) {
         Tuple tuple = BaseOauth2Config.getDbKey(provide);
         Assert.notNull(tuple, "没有对应的类型");
         BaseOauth2Config configDefNewInstance = systemParametersServer.getConfigDefNewInstance(tuple.get(0), tuple.get(1));
@@ -68,7 +69,7 @@ public class OauthConfigController {
 
     @PostMapping(value = "oauth2-save", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> saveOauth2(HttpServletRequest request, String provide) {
+    public IJsonMessage<Object> saveOauth2(HttpServletRequest request, String provide) {
         Tuple tuple = BaseOauth2Config.getDbKey(provide);
         Assert.notNull(tuple, "没有对应的类型");
         Class<BaseOauth2Config> oauth2ConfigClass = tuple.get(1);

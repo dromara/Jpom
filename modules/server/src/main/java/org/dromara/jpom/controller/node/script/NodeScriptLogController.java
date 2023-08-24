@@ -24,8 +24,9 @@ package org.dromara.jpom.controller.node.script;
 
 
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -65,7 +66,7 @@ public class NodeScriptLogController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<PageResultDto<NodeScriptExecuteLogCacheModel>> scriptList() {
+    public IJsonMessage<PageResultDto<NodeScriptExecuteLogCacheModel>> scriptList() {
         PageResultDto<NodeScriptExecuteLogCacheModel> pageResultDto = nodeScriptExecuteLogServer.listPageNode(getRequest());
         return JsonMessage.success("", pageResultDto);
     }
@@ -91,7 +92,7 @@ public class NodeScriptLogController extends BaseServerController {
      */
     @RequestMapping(value = "del", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> del(@ValidatorItem String id, String executeId, HttpServletRequest request) {
+    public IJsonMessage<Object> del(@ValidatorItem String id, String executeId, HttpServletRequest request) {
         NodeModel node = getNode();
         NodeScriptExecuteLogCacheModel executeLogModel = nodeScriptExecuteLogServer.getByKey(executeId, request);
         Assert.notNull(executeLogModel, "没有对应的执行日志");

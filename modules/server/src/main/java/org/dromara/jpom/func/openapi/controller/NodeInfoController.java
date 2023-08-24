@@ -27,11 +27,12 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JpomManifest;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.interceptor.NotLogin;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -81,13 +82,13 @@ public class NodeInfoController extends BaseServerController {
      */
     @RequestMapping(value = ServerOpenApi.RECEIVE_PUSH, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<JSONObject> receivePush(@ValidatorItem(msg = "token empty") String token,
-                                               @ValidatorItem(msg = "ips empty") String ips,
-                                               @ValidatorItem(msg = "loginName empty") String loginName,
-                                               @ValidatorItem(msg = "loginPwd empty") String loginPwd,
-                                               @ValidatorItem(msg = "workspaceId empty") String workspaceId,
-                                               @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "port error") int port,
-                                               String ping) {
+    public IJsonMessage<JSONObject> receivePush(@ValidatorItem(msg = "token empty") String token,
+                                                @ValidatorItem(msg = "ips empty") String ips,
+                                                @ValidatorItem(msg = "loginName empty") String loginName,
+                                                @ValidatorItem(msg = "loginPwd empty") String loginPwd,
+                                                @ValidatorItem(msg = "workspaceId empty") String workspaceId,
+                                                @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "port error") int port,
+                                                String ping) {
         Assert.state(StrUtil.equals(token, JpomManifest.getInstance().randomIdSign()), "token error");
         boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
         Assert.state(exists, "workspaceId error");

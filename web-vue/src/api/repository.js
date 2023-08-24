@@ -1,4 +1,4 @@
-import axios, {loadRouterBase} from "./config";
+import axios, { loadRouterBase } from "./config";
 
 /**
  * 分页获取仓库列表
@@ -58,6 +58,19 @@ export function importData(formData) {
 export function getRepositoryInfo(params) {
   return axios({
     url: "/build/repository/get",
+    method: "get",
+    params,
+  });
+}
+
+/**
+ * 获取仓库信息
+ *
+ * @return {axios} 请求结果 axios 对象
+ */
+export function listRepositoryGroup(params) {
+  return axios({
+    url: "/build/repository/list-group",
     method: "get",
     params,
   });

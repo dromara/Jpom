@@ -1,5 +1,92 @@
 # 🚀 版本日志
 
+### 2.10.42.5-beta
+
+### 🐣 新增功能
+
+1. 【server】新增 集群化管理工作空间（感谢@定格、[@paobu](https://gitee.com/iniushi) [Gitee issues I7UG5V](https://gitee.com/dromara/Jpom/issues/I7UG5V)）
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 资产管理 SSH 管理系统名称显示未知问题（感谢@勤思·）
+2. 【server】优化 资产管理 Docker 管理支持配置分组
+3. 【server】优化 仓库管理支持配置分组
+4. 【server】优化 SSH 文件夹支持前端排序（感谢@勤思·）
+
+------
+
+### 2.10.42.4-beta (2023-08-19)
+
+### 🐣 新增功能
+
+1. 【server】优化 ssh 相关功能支持 openssh8+
+   （感谢 [@孤城落寞](https://gitee.com/gclm) [Gitee pr 193](https://gitee.com/dromara/Jpom/pulls/193) ）
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】优化 仓库账号、 SSH 证书密码支持选择环境变量
+2. 【all】升级 commons-compress、fastjson、hutool 版本
+3. 【server】优化 maven 依赖冲突
+4. 【server】优化 文件发布-节点发布文件名使用真实名称（感谢@勤思·）
+5. 【server】优化 文件发布-ssh发布新增变量：FILE_NAME、FILE_EXT_NAME
+
+------
+
+### 2.10.42.3-beta (2023-08-04)
+
+### 🐣 新增功能
+
+1. 【server】新增 SSH
+   文件管理修改文件权限功能（感谢 [@MichelleChung](https://gitee.com/michelle1028) [Gitee issues I6VDXS](https://gitee.com/dromara/Jpom/issues/I6VDXS) ）
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】升级 h2、SpringBoot 版本
+2. 【server】使用系统git时，无法克隆tag问题优化 （感谢@唐明）
+3. 【server】优化 SSH 和 代码仓库的密码从工作空间变量中读取
+
+------
+
+### 2.10.42.2-beta (2023-07-04)
+
+### 🐣 新增功能
+
+1. 【server】新增 Docker 容器重建功能，即删除原有的容器，重新创建一个新的容器
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】优化
+   删除工作空间前预检查关联数据存在情况（感谢 [@陈旭](https://gitee.com/chenxu8989) [Gitee issues I7F0ZN](https://gitee.com/dromara/Jpom/issues/I7F0ZN) ）
+2. 【server】优化
+   退出登录支持彻底退出、切换账号退出（感谢 [@wangfubiao](https://gitee.com/wangfubiao) [Gitee issues I7GA5Q](https://gitee.com/dromara/Jpom/issues/I7GA5Q) ）
+3. 【server】优化 IP 白名单验证忽略 IPV6 情况
+4. 【server】优化 服务端缓存管理支持查看黑名单 IP 详细信息（感谢@酱总）
+
+------
+
+### 2.10.42.1-beta (2023-06-26)
+
+### 🐣 新增功能
+
+1. 【server】新增 Docker 管理增加 SSH 连接
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 SSH
+   编辑输入框出现部分关键词时保持报错（感谢 [@一只羊](https://gitee.com/hjdyzy) [Gitee issues I7E3UG](https://gitee.com/dromara/Jpom/issues/I7E3UG) ）
+2. 【server】优化 日志组件支持显示 \t 制表符、清空缓冲区滚动到顶部
+3. 【server】修复 彻底删除节点分发时未自动删除关联日志（感谢@ccx2480）
+4. 【server】修复
+   节点管理中脚本模板翻页无效（感谢 [@wangfubiao](https://gitee.com/wangfubiao) [Gitee issues I7F0RS](https://gitee.com/dromara/Jpom/issues/I7F0RS) ）
+5. 【server】优化
+   工作空间配置页面中新增节点分发白名单配置入口（感谢 [@陈旭](https://gitee.com/chenxu8989) [Gitee issues I7F0W0](https://gitee.com/dromara/Jpom/issues/I7F0W0) ）
+6. 【server】优化 构建附加环境变量支持解析 URL 参数格式
+   （感谢 [@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I7FROG](https://gitee.com/dromara/Jpom/issues/I7FROG) ）
+7. 【server】优化 构建支持单个配置保留天数和保留个数
+   （感谢 [@阿超](https://gitee.com/VampireAchao) [Gitee issues I7FOG2](https://gitee.com/dromara/Jpom/issues/I7FOG2) ）
+
+------
+
 ### 2.10.41.3-beta (2023-06-12)
 
 ### 🐣 新增功能
@@ -16,7 +103,8 @@
 4. 【server】优化 页面滚动条样式
 5. 【server】优化 编辑关联分发，选择项目下拉框不能显示项目全名称（tooltip）（感谢@LYY）
 6. 【server】优化 监听页面关闭事件，主动关闭 websocket
-7. 【server】修复 批量构建触发器无法正常使用（感谢 [@botboy](https://github.com/cheakin) [Github issues 48](https://github.com/dromara/Jpom/issues/48) ）
+7. 【server】修复
+   批量构建触发器无法正常使用（感谢 [@botboy](https://github.com/cheakin) [Github issues 48](https://github.com/dromara/Jpom/issues/48) ）
 
 ### ⚠️ 注意
 
@@ -50,8 +138,10 @@
 
 1. 【server】优化 资产管理支持管理共享仓库
 2. 【server】优化 增大验证码检测功能异常捕捉范围
-3. 【server】修复 令牌导入仓库令牌长度不足问题（感谢 [@Sherman Chu](https://github.com/yeliulee) [Github issues 45](https://github.com/dromara/Jpom/issues/45) ）
-4. 【server】修复 分发列表配置功能无法使用（感谢 [@Free](https://gitee.com/fjlyy321) [Gitee issues I716UI](https://gitee.com/dromara/Jpom/issues/I716UI) ）
+3. 【server】修复
+   令牌导入仓库令牌长度不足问题（感谢 [@Sherman Chu](https://github.com/yeliulee) [Github issues 45](https://github.com/dromara/Jpom/issues/45) ）
+4. 【server】修复
+   分发列表配置功能无法使用（感谢 [@Free](https://gitee.com/fjlyy321) [Gitee issues I716UI](https://gitee.com/dromara/Jpom/issues/I716UI) ）
 5. 【server】修复 构建卡片布局、构建详情中构建方式显示不正确（感谢@A）
 
 ------
@@ -60,8 +150,10 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】修复 仓库编辑清除密码按钮弹窗层级问题（感谢 [@轩辕豆豆](https://gitee.com/xuanyuandoudou) [Gitee issues I6VSCR](https://gitee.com/dromara/Jpom/issues/I6VSCR) ）
-2. 【server】修复 优化构建列表卡片布局存在未构建数据布局错乱问题（感谢 [@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues I6VUB7](https://gitee.com/dromara/Jpom/issues/I6VUB7) ）
+1. 【server】修复
+   仓库编辑清除密码按钮弹窗层级问题（感谢 [@轩辕豆豆](https://gitee.com/xuanyuandoudou) [Gitee issues I6VSCR](https://gitee.com/dromara/Jpom/issues/I6VSCR) ）
+2. 【server】修复
+   优化构建列表卡片布局存在未构建数据布局错乱问题（感谢 [@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues I6VUB7](https://gitee.com/dromara/Jpom/issues/I6VUB7) ）
 
 ------
 
@@ -69,7 +161,7 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】修复 在线更新无法正常使用 
+1. 【server】修复 在线更新无法正常使用
 
 ------
 
@@ -77,7 +169,8 @@
 
 ### 🐣 新增功能
 
-1. 【server】新增 容器构建中对 gradle 插件的支持（感谢 [@xiaozhi](https://gitee.com/XiaoZhiGongChengShi) [Gitee pr 188](https://gitee.com/dromara/Jpom/pulls/188) ）
+1. 【server】新增 容器构建中对 gradle
+   插件的支持（感谢 [@xiaozhi](https://gitee.com/XiaoZhiGongChengShi) [Gitee pr 188](https://gitee.com/dromara/Jpom/pulls/188) ）
 
 ### 🐞 解决BUG、优化功能
 
@@ -97,7 +190,8 @@
 
 1. 【server】修复 清空浏览器缓存未跳转到登录页面
 2. 【server】优化 构建拉取 git 仓库支持使用服务器中的 git 插件，实现配置克隆深度参数
-3. 【server】修复 删除节点脚本报错（感谢 [@xiaozhi](https://gitee.com/XiaoZhiGongChengShi) [Gitee issues I6USMY](https://gitee.com/dromara/Jpom/issues/I6USMY) ）
+3. 【server】修复
+   删除节点脚本报错（感谢 [@xiaozhi](https://gitee.com/XiaoZhiGongChengShi) [Gitee issues I6USMY](https://gitee.com/dromara/Jpom/issues/I6USMY) ）
 
 ------
 
@@ -140,7 +234,6 @@
 1. 【server】修复 日志搜索控制台无法正常使用（感谢@左手生活，右手浪漫）
 
 ------
-
 
 ### 2.10.39.4-beta (2023-04-03)
 
@@ -196,7 +289,6 @@
 
 ### 2.10.38.10-beta (2023-03-30)
 
-
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 节点脚本支持全局共享同步节点、节点管理查看脚本重复问题（感谢@奇奇）
@@ -232,7 +324,7 @@
 
 ### 🐣 新增功能
 
-1. 【server】新增 构建新增配置排除发布目录表达式（感谢@毛毛虫） 
+1. 【server】新增 构建新增配置排除发布目录表达式（感谢@毛毛虫）
 
 ### 🐞 解决BUG、优化功能
 
@@ -298,7 +390,8 @@
 
 ### 🐣 新增功能
 
-1. 【server】新增 支持 oauth2 登录 （感谢 [@MaxKeyTop](https://gitee.com/maxkeytop_admin) [Gitee pr 183](https://gitee.com/dromara/Jpom/pulls/183) ）
+1. 【server】新增 支持 oauth2 登录
+   （感谢 [@MaxKeyTop](https://gitee.com/maxkeytop_admin) [Gitee pr 183](https://gitee.com/dromara/Jpom/pulls/183) ）
 
 ### 🐞 解决BUG、优化功能
 

@@ -25,7 +25,7 @@ package org.dromara.jpom.service.outgiving;
 import org.dromara.jpom.model.outgiving.OutGivingModel;
 import org.dromara.jpom.model.outgiving.OutGivingNodeProject;
 import org.dromara.jpom.service.IStatusRecover;
-import org.dromara.jpom.service.h2db.BaseGroupService;
+import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -39,7 +39,7 @@ import java.util.List;
  * @since 2019/4/21
  */
 @Service
-public class OutGivingServer extends BaseGroupService<OutGivingModel> implements IStatusRecover {
+public class OutGivingServer extends BaseWorkspaceService<OutGivingModel> implements IStatusRecover {
 
 
     public void checkNodeProject(String nodeId, String projectId, HttpServletRequest request) {

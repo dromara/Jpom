@@ -47,9 +47,7 @@ import org.springframework.context.annotation.Configuration;
 import java.io.File;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 /**
@@ -227,6 +225,12 @@ public class JpomApplication implements DisposableBean, InitializingBean {
                 log.error("重启自身异常", e);
             }
         });
+    }
+
+    public static ScheduledExecutorService getScheduledExecutorService() {
+        return (ScheduledExecutorService) LINK_EXECUTOR_SERVICE.computeIfAbsent("jpom-system-task",
+            s -> Executors.newScheduledThreadPool(4,
+                r -> new Thread(r, "jpom-system-task")));
     }
 
     /**

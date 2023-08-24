@@ -24,11 +24,12 @@ package org.dromara.jpom.func.openapi.controller;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseJpomController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
@@ -81,7 +82,7 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
      * @return json
      */
     @RequestMapping(value = ServerOpenApi.NODE_SCRIPT_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token) {
+    public IJsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token) {
         NodeScriptCacheModel item = nodeScriptServer.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
@@ -133,7 +134,7 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
      * @return json
      */
     @PostMapping(value = ServerOpenApi.NODE_SCRIPT_TRIGGER_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<Object>> triggerBatch(HttpServletRequest request) {
+    public IJsonMessage<List<Object>> triggerBatch(HttpServletRequest request) {
         try {
             String body = ServletUtil.getBody(request);
             JSONArray jsonArray = JSONArray.parseArray(body);

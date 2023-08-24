@@ -32,12 +32,13 @@ import cn.hutool.core.util.*;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.JschUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
@@ -56,7 +57,10 @@ import org.dromara.jpom.service.system.WorkspaceEnvVarService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.system.extconf.BuildExtConfig;
 import org.dromara.jpom.transport.*;
-import org.dromara.jpom.util.*;
+import org.dromara.jpom.util.LogRecorder;
+import org.dromara.jpom.util.MySftp;
+import org.dromara.jpom.util.StrictSyncFinisher;
+import org.dromara.jpom.util.SyncFinisherUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -132,15 +136,15 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
      * @param request      请求
      * @return json
      */
-    public JsonMessage<String> addTask(String fileId,
-                                       String name,
-                                       int taskType,
-                                       String taskDataIds,
-                                       String releasePath,
-                                       String beforeScript,
-                                       String afterScript,
-                                       Map<String, String> env,
-                                       HttpServletRequest request) {
+    public IJsonMessage<String> addTask(String fileId,
+                                        String name,
+                                        int taskType,
+                                        String taskDataIds,
+                                        String releasePath,
+                                        String beforeScript,
+                                        String afterScript,
+                                        Map<String, String> env,
+                                        HttpServletRequest request) {
         FileStorageModel storageModel = fileStorageService.getByKey(fileId, request);
         Assert.notNull(storageModel, "不存在对应的文件");
         File storageSavePath = serverConfig.fileStorageSavePath();
@@ -184,7 +188,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
             releaseTaskLogModel.setReleasePath(taskRoot.getReleasePath());
             this.insert(releaseTaskLogModel);
         }
-        this.startTask(taskRoot.getId(), file, env);
+        this.startTask(taskRoot.getId(), file, env, storageModel);
         return JsonMessage.success("创建成功");
     }
 
@@ -194,7 +198,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
      * @param taskId          任务id
      * @param storageSaveFile 文件
      */
-    private void startTask(String taskId, File storageSaveFile, Map<String, String> env) {
+    private void startTask(String taskId, File storageSaveFile, Map<String, String> env, FileStorageModel storageModel) {
         FileReleaseTaskLogModel taskRoot = this.getByKey(taskId);
         Assert.notNull(taskRoot, "没有找到父级任务");
         //
@@ -207,6 +211,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         Optional.ofNullable(env).ifPresent(environmentMapBuilder::putStr);
         environmentMapBuilder.put("TASK_ID", taskRoot.getTaskId());
         environmentMapBuilder.put("FILE_ID", taskRoot.getFileId());
+        environmentMapBuilder.put("FILE_NAME", storageModel.getName());
+        environmentMapBuilder.put("FILE_EXT_NAME", storageModel.getExtName());
         //
         String syncFinisherId = "file-release:" + taskId;
         StrictSyncFinisher strictSyncFinisher = SyncFinisherUtil.create(syncFinisherId, logModels.size());
@@ -214,7 +220,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         if (taskType == 0) {
             crateTaskSshWork(logModels, strictSyncFinisher, taskRoot, environmentMapBuilder, storageSaveFile);
         } else if (taskType == 1) {
-            crateTaskNodeWork(logModels, strictSyncFinisher, taskRoot, environmentMapBuilder, storageSaveFile);
+            // 节点
+            crateTaskNodeWork(logModels, strictSyncFinisher, taskRoot, environmentMapBuilder, storageSaveFile, storageModel);
         } else {
             throw new IllegalArgumentException("不支持的方式");
         }
@@ -274,7 +281,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                                    StrictSyncFinisher strictSyncFinisher,
                                    FileReleaseTaskLogModel taskRoot,
                                    EnvironmentMapBuilder environmentMapBuilder,
-                                   File storageSaveFile) {
+                                   File storageSaveFile,
+                                   FileStorageModel storageModel) {
         String taskId = taskRoot.getId();
         for (FileReleaseTaskLogModel model : values) {
             model.setAfterScript(taskRoot.getAfterScript());
@@ -302,7 +310,9 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     JSONObject data = new JSONObject();
                     data.put("path", releasePath);
                     Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
-                    JsonMessage<String> jsonMessage = NodeForward.requestSharding(item, NodeUrl.Manage_File_Upload_Sharding2, data, storageSaveFile,
+                    String name = storageModel.getName();
+                    name = StrUtil.wrapIfMissing(name, StrUtil.EMPTY, StrUtil.DOT + storageModel.getExtName());
+                    JsonMessage<String> jsonMessage = NodeForward.requestSharding(item, NodeUrl.Manage_File_Upload_Sharding2, data, storageSaveFile, name,
                         sliceData -> {
                             sliceData.putAll(data);
                             return NodeForward.request(item, NodeUrl.Manage_File_Sharding_Merge2, sliceData);
@@ -423,6 +433,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     logRecorder.system("{} start ftp upload", item.getName());
 
                     MySftp.ProgressMonitor sftpProgressMonitor = sshService.createProgressMonitor(logRecorder);
+                    // 不需要关闭资源，因为共用会话
                     MySftp sftp = new MySftp(session, charset, timeout, sftpProgressMonitor);
                     channelSftp = sftp.getClient();
                     String releasePath = model.getReleasePath();

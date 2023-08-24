@@ -31,6 +31,8 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
@@ -39,7 +41,6 @@ import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.build.DockerYmlDsl;
 import org.dromara.jpom.build.ResultDirFileAction;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -123,7 +124,7 @@ public class BuildInfoController extends BaseServerController {
      */
     @RequestMapping(value = "/build/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<BuildInfoModel>> getBuildList(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<BuildInfoModel>> getBuildList(HttpServletRequest request) {
         // load list with page
         PageResultDto<BuildInfoModel> page = buildInfoService.listPage(request);
         page.each(buildInfoModel -> {
@@ -144,7 +145,7 @@ public class BuildInfoController extends BaseServerController {
      */
     @GetMapping(value = "/build/get", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<BuildInfoModel> getBuildListAll(String id, HttpServletRequest request) {
+    public IJsonMessage<BuildInfoModel> getBuildListAll(String id, HttpServletRequest request) {
         // load list with page
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
         Assert.notNull(buildInfoModel, "不存在对应的构建");
@@ -164,7 +165,7 @@ public class BuildInfoController extends BaseServerController {
      */
     @GetMapping(value = "/build/list_group_all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<String>> getBuildGroupAll(HttpServletRequest request) {
+    public IJsonMessage<List<String>> getBuildGroupAll(HttpServletRequest request) {
         // load list with page
         List<String> group = buildInfoService.listGroup(request);
         return JsonMessage.success("", group);
@@ -188,7 +189,7 @@ public class BuildInfoController extends BaseServerController {
      */
     @RequestMapping(value = "/build/edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> updateBuild(String id,
+    public IJsonMessage<String> updateBuild(String id,
                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建名称不能为空") String name,
                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库信息不能为空") String repositoryId,
                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空,长度1-200", range = "1:200") String resultDirFile,
@@ -198,6 +199,7 @@ public class BuildInfoController extends BaseServerController {
                                            String extraData, String group,
                                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "构建方式不正确") int buildMode,
                                            String aliasCode,
+                                           @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "请填写正确的保留天数") Integer resultKeepDay,
                                            HttpServletRequest request) {
         // 根据 repositoryId 查询仓库信息
         RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, request);
@@ -246,6 +248,7 @@ public class BuildInfoController extends BaseServerController {
         buildInfoModel.setResultDirFile(resultDirFile);
         buildInfoModel.setScript(script);
         buildInfoModel.setGroup(group);
+        buildInfoModel.setResultKeepDay(resultKeepDay);
         buildInfoModel.setBuildMode(buildMode);
         // 发布方式
         BuildReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildReleaseMethod.class, releaseMethod);
@@ -437,7 +440,7 @@ public class BuildInfoController extends BaseServerController {
      */
     @RequestMapping(value = "/build/branch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> branchList(
+    public IJsonMessage<JSONObject> branchList(
         @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空") String repositoryId) throws Exception {
         // 根据 repositoryId 查询仓库信息
         RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, false);
@@ -464,7 +467,7 @@ public class BuildInfoController extends BaseServerController {
      */
     @PostMapping(value = "/build/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id, HttpServletRequest request) {
+    public IJsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id, HttpServletRequest request) {
         // 查询构建信息
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
         Objects.requireNonNull(buildInfoModel, "没有对应数据");
@@ -493,7 +496,7 @@ public class BuildInfoController extends BaseServerController {
      */
     @PostMapping(value = "/build/clean-source", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<Object> cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id, HttpServletRequest request) {
+    public IJsonMessage<Object> cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id, HttpServletRequest request) {
         // 查询构建信息
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
         Objects.requireNonNull(buildInfoModel, "没有对应数据");
@@ -515,7 +518,7 @@ public class BuildInfoController extends BaseServerController {
      */
     @GetMapping(value = "/build/sort-item", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId, HttpServletRequest request) {
+    public IJsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId, HttpServletRequest request) {
         if (StrUtil.equalsIgnoreCase(method, "top")) {
             buildInfoService.sortToTop(id, request);
         } else if (StrUtil.equalsIgnoreCase(method, "up")) {

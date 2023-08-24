@@ -162,9 +162,14 @@
               </a>
               <a-menu slot="overlay">
                 <a-menu-item>
-                  <atooltip title="编辑容器的一些基础参数">
+                  <a-tooltip title="修改容器配置，重新运行">
+                    <a-button size="small" type="link" @click="rebuild(record)"><a-icon type="redo" />重建</a-button>
+                  </a-tooltip>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-tooltip title="编辑容器的一些基础参数">
                     <a-button size="small" type="link" icon="edit" :disabled="record.state !== 'running'" @click="editContainer(record)">编辑</a-button>
-                  </atooltip>
+                  </a-tooltip>
                 </a-menu-item>
                 <a-menu-item>
                   <a-tooltip title="点击查看日志">
@@ -379,9 +384,14 @@
                 </a>
                 <a-menu slot="overlay">
                   <a-menu-item>
-                    <atooltip title="编辑容器的一些基础参数">
+                    <a-tooltip title="修改容器配置，重新运行">
+                      <a-button size="small" type="link" @click="rebuild(record)"><a-icon type="redo" />重建</a-button>
+                    </a-tooltip>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-tooltip title="编辑容器的一些基础参数">
                       <a-button size="small" type="link" icon="edit" :disabled="record.state !== 'running'" @click="editContainer(record)">编辑</a-button>
-                    </atooltip>
+                    </a-tooltip>
                   </a-menu-item>
                   <a-menu-item>
                     <a-tooltip title="点击查看日志">
@@ -437,6 +447,39 @@
     >
       <editContainer ref="editContainer" :id="this.id" :machineDockerId="this.machineDockerId" :urlPrefix="this.urlPrefix" :containerId="temp.id"></editContainer>
     </a-modal>
+    <!-- rebuild container -->
+    <a-drawer
+      destroyOnClose
+      :visible="buildVisible"
+      @close="
+        () => {
+          this.buildVisible = false;
+        }
+      "
+      width="60vw"
+      title="重建容器"
+      :maskClosable="false"
+    >
+      <BuildContainer
+        :id="this.id"
+        :imageId="this.temp.imageId"
+        :machineDockerId="this.machineDockerId"
+        :urlPrefix="this.urlPrefix"
+        :containerId="this.temp.id"
+        :containerData="this.temp"
+        @cancelBtnClick="
+          () => {
+            this.buildVisible = false;
+          }
+        "
+        @confirmBtnClick="
+          () => {
+            this.buildVisible = false;
+            this.loadData();
+          }
+        "
+      />
+    </a-drawer>
   </div>
 </template>
 <script>
@@ -445,6 +488,7 @@ import { dockerContainerList, dockerContainerRemove, dockerContainerRestart, doc
 import LogView from "@/pages/docker/log-view";
 import Terminal from "@/pages/docker/terminal";
 import editContainer from "./editContainer.vue";
+import BuildContainer from "./buildContainer.vue";
 
 export default {
   name: "container",
@@ -452,6 +496,7 @@ export default {
     LogView,
     Terminal,
     editContainer,
+    BuildContainer,
   },
   props: {
     id: {
@@ -538,6 +583,8 @@ export default {
       editVisible: false,
 
       countdownTime: Date.now(),
+
+      buildVisible: false,
     };
   },
   beforeDestroy() {},
@@ -629,6 +676,11 @@ export default {
       this.temp = Object.assign({}, record);
       this.editVisible = true;
       // console.log(this.temp);
+    },
+    // click rebuild button
+    rebuild(record) {
+      this.temp = Object.assign({}, record);
+      this.buildVisible = true;
     },
   },
 };

@@ -28,7 +28,12 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
-import org.dromara.jpom.common.*;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
+import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.controller.outgiving.OutGivingWhitelistService;
 import org.dromara.jpom.func.files.model.FileStorageModel;
@@ -86,7 +91,7 @@ public class FileStorageController extends BaseServerController {
      */
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<FileStorageModel>> list(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<FileStorageModel>> list(HttpServletRequest request) {
         File storageSavePath = serverConfig.fileStorageSavePath();
         //
         PageResultDto<FileStorageModel> listPage = fileStorageService.listPage(request);
@@ -105,7 +110,7 @@ public class FileStorageController extends BaseServerController {
      */
     @GetMapping(value = "has-file", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<FileStorageModel> hasFile(@ValidatorItem String fileSumMd5) {
+    public IJsonMessage<FileStorageModel> hasFile(@ValidatorItem String fileSumMd5) {
         FileStorageModel storageModel = fileStorageService.getByKey(fileSumMd5);
         return JsonMessage.success("", storageModel);
     }
@@ -123,7 +128,7 @@ public class FileStorageController extends BaseServerController {
      */
     @PostMapping(value = "upload-sharding", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD, log = false)
-    public JsonMessage<String> uploadSharding(MultipartFile file,
+    public IJsonMessage<String> uploadSharding(MultipartFile file,
                                               String sliceId,
                                               Integer totalSlice,
                                               Integer nowSlice,
@@ -144,7 +149,7 @@ public class FileStorageController extends BaseServerController {
      */
     @PostMapping(value = "upload-sharding-merge", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<String> uploadMerge(String sliceId,
+    public IJsonMessage<String> uploadMerge(String sliceId,
                                            Integer totalSlice,
                                            String fileSumMd5,
                                            Integer keepDay,
@@ -189,7 +194,7 @@ public class FileStorageController extends BaseServerController {
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> edit(@ValidatorItem String id,
+    public IJsonMessage<String> edit(@ValidatorItem String id,
                                     @ValidatorItem String name,
                                     Integer keepDay,
                                     String description,
@@ -213,7 +218,7 @@ public class FileStorageController extends BaseServerController {
 
     @GetMapping(value = "del", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> del(String id, String ids, HttpServletRequest request) throws IOException {
+    public IJsonMessage<String> del(String id, String ids, HttpServletRequest request) throws IOException {
         this.delItem(id, request);
         List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
         for (String s : list) {
@@ -251,7 +256,7 @@ public class FileStorageController extends BaseServerController {
      */
     @PostMapping(value = "remote-download", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
-    public JsonMessage<String> download(
+    public IJsonMessage<String> download(
         @ValidatorItem String url,
         Integer keepDay,
         String description,
@@ -275,7 +280,7 @@ public class FileStorageController extends BaseServerController {
      */
     @GetMapping(value = "trigger-url", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Map<String, String>> getTriggerUrl(@ValidatorItem String id, String rest, HttpServletRequest request) {
+    public IJsonMessage<Map<String, String>> getTriggerUrl(@ValidatorItem String id, String rest, HttpServletRequest request) {
         UserModel user = getUser();
         // 查询当前工作空间
         FileStorageModel item = fileStorageService.getByKey(id, request);

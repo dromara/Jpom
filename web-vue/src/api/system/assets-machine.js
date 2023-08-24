@@ -5,7 +5,7 @@ export function machineListData(params) {
   return axios({
     url: "/system/assets/machine/list-data",
     method: "post",
-    params: params,
+    data: params,
   });
 }
 
@@ -22,7 +22,7 @@ export function machineEdit(params) {
   return axios({
     url: "/system/assets/machine/edit",
     method: "post",
-    params: params,
+    data: params,
   });
 }
 
@@ -31,7 +31,7 @@ export function machineDelete(params) {
   return axios({
     url: "/system/assets/machine/delete",
     method: "post",
-    params: params,
+    data: params,
   });
 }
 
@@ -40,7 +40,7 @@ export function machineDistribute(params) {
   return axios({
     url: "/system/assets/machine/distribute",
     method: "post",
-    params: params,
+    data: params,
   });
 }
 

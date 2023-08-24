@@ -25,8 +25,9 @@ package org.dromara.jpom.controller.docker;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.controller.docker.base.BaseDockerSwarmInfoController;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
@@ -80,7 +81,7 @@ public class DockerSwarmInfoController extends BaseDockerSwarmInfoController {
      */
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<DockerSwarmInfoMode>> list(HttpServletRequest request) {
+    public IJsonMessage<PageResultDto<DockerSwarmInfoMode>> list(HttpServletRequest request) {
         // load list with page
         PageResultDto<DockerSwarmInfoMode> resultDto = dockerSwarmInfoService.listPage(request);
         resultDto.each(dockerSwarmInfoMode -> {
@@ -96,7 +97,7 @@ public class DockerSwarmInfoController extends BaseDockerSwarmInfoController {
      */
     @GetMapping(value = "list-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<DockerSwarmInfoMode>> listAll(HttpServletRequest request) {
+    public IJsonMessage<List<DockerSwarmInfoMode>> listAll(HttpServletRequest request) {
         // load list with all
         List<DockerSwarmInfoMode> swarmInfoModes = dockerSwarmInfoService.listByWorkspace(request);
         return JsonMessage.success("", swarmInfoModes);
@@ -104,7 +105,7 @@ public class DockerSwarmInfoController extends BaseDockerSwarmInfoController {
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> edit(@ValidatorItem String id,
+    public IJsonMessage<Object> edit(@ValidatorItem String id,
                                     @ValidatorItem String name,
                                     @ValidatorItem String tag,
                                     HttpServletRequest request) throws Exception {
@@ -149,7 +150,7 @@ public class DockerSwarmInfoController extends BaseDockerSwarmInfoController {
 
     @GetMapping(value = "del", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> del(@ValidatorItem String id, HttpServletRequest request) throws Exception {
+    public IJsonMessage<Object> del(@ValidatorItem String id, HttpServletRequest request) throws Exception {
         dockerSwarmInfoService.delByKey(id, request);
         return JsonMessage.success("删除成功");
     }

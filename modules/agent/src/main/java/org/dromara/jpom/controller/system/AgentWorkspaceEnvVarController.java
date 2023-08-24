@@ -23,8 +23,9 @@
 package org.dromara.jpom.controller.system;
 
 import cn.hutool.core.map.MapUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseAgentController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.system.WorkspaceEnvVarModel;
 import org.dromara.jpom.service.system.AgentWorkspaceEnvVarService;
@@ -56,10 +57,10 @@ public class AgentWorkspaceEnvVarController extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> updateWorkspaceEnvVar(@ValidatorItem String name,
-                                                     @ValidatorItem String value,
-                                                     @ValidatorItem String description,
-                                                     Integer privacy) {
+    public IJsonMessage<Object> updateWorkspaceEnvVar(@ValidatorItem String name,
+                                                      @ValidatorItem String value,
+                                                      @ValidatorItem String description,
+                                                      Integer privacy) {
         String workspaceId = getWorkspaceId();
         synchronized (AgentWorkspaceEnvVarController.class) {
             WorkspaceEnvVarModel.WorkspaceEnvVarItemModel workspaceEnvVarModel = new WorkspaceEnvVarModel.WorkspaceEnvVarItemModel();
@@ -91,7 +92,7 @@ public class AgentWorkspaceEnvVarController extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> delete(@ValidatorItem String name) {
+    public IJsonMessage<Object> delete(@ValidatorItem String name) {
         String workspaceId = getWorkspaceId();
         synchronized (AgentWorkspaceEnvVarController.class) {
             //

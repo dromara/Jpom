@@ -26,18 +26,18 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.keepbx.jpom.cron.ICron;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.build.BuildExecuteService;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.cron.CronUtils;
-import org.dromara.jpom.cron.ICron;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.IStatusRecover;
 import org.dromara.jpom.service.ITriggerToken;
-import org.dromara.jpom.service.h2db.BaseGroupService;
+import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
 
@@ -52,7 +52,7 @@ import java.util.List;
  **/
 @Service
 @Slf4j
-public class BuildInfoService extends BaseGroupService<BuildInfoModel> implements ICron<BuildInfoModel>, IStatusRecover, ITriggerToken {
+public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> implements ICron<BuildInfoModel>, IStatusRecover, ITriggerToken {
 
     /**
      * 更新状态
@@ -90,9 +90,10 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
     }
 
     @Override
-    public void insert(BuildInfoModel buildInfoModel) {
-        super.insert(buildInfoModel);
+    public int insert(BuildInfoModel buildInfoModel) {
+        int count = super.insert(buildInfoModel);
         this.checkCron(buildInfoModel);
+        return count;
     }
 
     @Override
@@ -153,6 +154,13 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
     @Override
     public String typeName() {
         return getTableName();
+    }
+
+
+    public List<BuildInfoModel> hasResultKeep() {
+        //
+        String sql = "select * from " + super.getTableName() + " where resultKeepDay>0";
+        return super.queryList(sql);
     }
 
     private static class CronTask implements Task {

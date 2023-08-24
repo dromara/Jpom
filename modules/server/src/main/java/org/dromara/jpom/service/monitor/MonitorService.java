@@ -22,9 +22,9 @@
  */
 package org.dromara.jpom.service.monitor;
 
+import cn.keepbx.jpom.cron.ICron;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.cron.CronUtils;
-import org.dromara.jpom.cron.ICron;
 import org.dromara.jpom.model.data.MonitorModel;
 import org.dromara.jpom.monitor.MonitorItem;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
@@ -44,9 +44,10 @@ import java.util.List;
 public class MonitorService extends BaseWorkspaceService<MonitorModel> implements ICron<MonitorModel> {
 
     @Override
-    public void insert(MonitorModel monitorModel) {
-        super.insert(monitorModel);
+    public int insert(MonitorModel monitorModel) {
+        int count = super.insert(monitorModel);
         this.checkCron(monitorModel);
+        return count;
     }
 
     @Override
@@ -134,24 +135,24 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> implement
     }
 
 
-	/*public boolean checkProject(String nodeId, String projectId) {
-		List<MonitorModel> list = list();
-		if (list == null || list.isEmpty()) {
-			return false;
-		}
-		for (MonitorModel monitorModel : list) {
-			List<MonitorModel.NodeProject> projects = monitorModel.projects();
-			if (projects != null) {
-				for (MonitorModel.NodeProject project : projects) {
-					if (project.getNode().equals(nodeId)) {
-						List<String> projects1 = project.getProjects();
-						if (projects1 != null && projects1.contains(projectId)) {
-							return true;
-						}
-					}
-				}
-			}
-		}
-		return false;
-	}*/
+    /*public boolean checkProject(String nodeId, String projectId) {
+        List<MonitorModel> list = list();
+        if (list == null || list.isEmpty()) {
+            return false;
+        }
+        for (MonitorModel monitorModel : list) {
+            List<MonitorModel.NodeProject> projects = monitorModel.projects();
+            if (projects != null) {
+                for (MonitorModel.NodeProject project : projects) {
+                    if (project.getNode().equals(nodeId)) {
+                        List<String> projects1 = project.getProjects();
+                        if (projects1 != null && projects1.contains(projectId)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }*/
 }

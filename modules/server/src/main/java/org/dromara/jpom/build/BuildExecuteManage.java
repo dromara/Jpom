@@ -31,12 +31,11 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.file.FileCopier;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.thread.ExecutorBuilder;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.EnumUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.*;
+import cn.keepbx.jpom.model.BaseIdModel;
 import cn.keepbx.jpom.plugins.IPlugin;
 import lombok.Builder;
 import lombok.Lombok;
@@ -46,7 +45,6 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.files.service.FileStorageService;
-import org.dromara.jpom.model.BaseIdModel;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.model.docker.DockerInfoModel;
@@ -86,7 +84,7 @@ import java.util.stream.Collectors;
  */
 @Builder
 @Slf4j
-public class BuildInfoManage implements Runnable {
+public class BuildExecuteManage implements Runnable {
 
     /**
      * 构建线程池
@@ -97,7 +95,7 @@ public class BuildInfoManage implements Runnable {
     /**
      * 缓存构建中
      */
-    public static final Map<String, BuildInfoManage> BUILD_MANAGE_MAP = new ConcurrentHashMap<>();
+    public static final Map<String, BuildExecuteManage> BUILD_MANAGE_MAP = new ConcurrentHashMap<>();
 
     private final TaskData taskData;
     private final BuildExtraModule buildExtraModule;
@@ -148,10 +146,10 @@ public class BuildInfoManage implements Runnable {
         executorBuilder.setHandler(new ThreadPoolExecutor.DiscardPolicy() {
             @Override
             public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
-                if (r instanceof BuildInfoManage) {
+                if (r instanceof BuildExecuteManage) {
                     // 取消任务
-                    BuildInfoManage buildInfoManage = (BuildInfoManage) r;
-                    buildInfoManage.rejectedExecution();
+                    BuildExecuteManage buildExecuteManage = (BuildExecuteManage) r;
+                    buildExecuteManage.rejectedExecution();
                 } else {
                     log.warn("构建线程池拒绝了未知任务：{}", r.getClass());
                 }
@@ -518,7 +516,15 @@ public class BuildInfoManage implements Runnable {
         // env file
         String attachEnv = this.buildExtraModule.getAttachEnv();
         Opt.ofBlankAble(attachEnv).ifPresent(s -> {
-            logRecorder.system("读取附件变量：{}", attachEnv);
+            UrlQuery of = UrlQuery.of(attachEnv, CharsetUtil.CHARSET_UTF_8);
+            Map<CharSequence, CharSequence> queryMap = of.getQueryMap();
+            logRecorder.system("读取附件变量：{} {}", attachEnv, CollUtil.size(queryMap));
+            //
+            Optional.ofNullable(queryMap).ifPresent(map -> {
+                for (Map.Entry<CharSequence, CharSequence> entry : map.entrySet()) {
+                    taskData.environmentMapBuilder.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+                }
+            });
             Map<String, String> envFileMap = FileUtils.readEnvFile(this.gitFile, s);
             taskData.environmentMapBuilder.putStr(envFileMap);
         });
@@ -702,7 +708,7 @@ public class BuildInfoManage implements Runnable {
 
             @Override
             public String execute() {
-                return BuildInfoManage.this.startReady();
+                return BuildExecuteManage.this.startReady();
             }
         });
         suppliers.put("pull", new IProcessItem() {
@@ -713,7 +719,7 @@ public class BuildInfoManage implements Runnable {
 
             @Override
             public String execute() {
-                return BuildInfoManage.this.pullAndCacheBuildEnv();
+                return BuildExecuteManage.this.pullAndCacheBuildEnv();
             }
         });
         suppliers.put("executeCommand", new IProcessItem() {
@@ -724,7 +730,7 @@ public class BuildInfoManage implements Runnable {
 
             @Override
             public String execute() {
-                return BuildInfoManage.this.executeCommand();
+                return BuildExecuteManage.this.executeCommand();
             }
         });
         suppliers.put("packageFile", new IProcessItem() {
@@ -735,7 +741,7 @@ public class BuildInfoManage implements Runnable {
 
             @Override
             public String execute() {
-                return BuildInfoManage.this.packageFile();
+                return BuildExecuteManage.this.packageFile();
             }
         });
         suppliers.put("release", new IProcessItem() {
@@ -746,7 +752,7 @@ public class BuildInfoManage implements Runnable {
 
             @Override
             public String execute() {
-                return BuildInfoManage.this.release();
+                return BuildExecuteManage.this.release();
             }
         });
         suppliers.put("finish", new IProcessItem() {
@@ -757,7 +763,7 @@ public class BuildInfoManage implements Runnable {
 
             @Override
             public String execute() {
-                return BuildInfoManage.this.finish();
+                return BuildExecuteManage.this.finish();
             }
         });
         return suppliers;
@@ -991,8 +997,8 @@ public class BuildInfoManage implements Runnable {
      * @return bool
      */
     public static boolean cancelTaskById(String id) {
-        return Optional.ofNullable(BuildInfoManage.BUILD_MANAGE_MAP.get(id)).map(buildInfoManage1 -> {
-            buildInfoManage1.cancelTask("手动取消任务");
+        return Optional.ofNullable(BuildExecuteManage.BUILD_MANAGE_MAP.get(id)).map(buildExecuteManage1 -> {
+            buildExecuteManage1.cancelTask("手动取消任务");
             return true;
         }).orElse(false);
     }

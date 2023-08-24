@@ -24,8 +24,6 @@ package org.dromara.jpom.func.assets.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
@@ -35,6 +33,8 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.jcraft.jsch.ChannelSftp;
@@ -44,18 +44,17 @@ import com.jcraft.jsch.SftpException;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
+import org.dromara.jpom.plugins.JschUtils;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.CompressionFileUtil;
-import org.dromara.jpom.plugins.JschUtils;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -157,7 +156,7 @@ public abstract class BaseSshFileController extends BaseServerController {
      */
     @RequestMapping(value = "root_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONArray> rootFileList(@ValidatorItem String id) {
+    public IJsonMessage<JSONArray> rootFileList(@ValidatorItem String id) {
         //
         return this.checkConfigPath(id, (machineSshModel, itemConfig) -> {
             JSONArray listDir = listRootDir(machineSshModel, itemConfig.fileDirs());
@@ -168,9 +167,9 @@ public abstract class BaseSshFileController extends BaseServerController {
 
     @RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONArray> listData(@ValidatorItem String id,
-                                           @ValidatorItem String allowPathParent,
-                                           @ValidatorItem String nextPath) {
+    public IJsonMessage<JSONArray> listData(@ValidatorItem String id,
+                                            @ValidatorItem String allowPathParent,
+                                            @ValidatorItem String nextPath) {
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             try {
                 JSONArray listDir = listDir(machineSshModel, allowPathParent, nextPath, itemConfig);
@@ -183,10 +182,10 @@ public abstract class BaseSshFileController extends BaseServerController {
 
     @RequestMapping(value = "read_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<String> readFileData(@ValidatorItem String id,
-                                            @ValidatorItem String allowPathParent,
-                                            @ValidatorItem String nextPath,
-                                            @ValidatorItem String name) {
+    public IJsonMessage<String> readFileData(@ValidatorItem String id,
+                                             @ValidatorItem String allowPathParent,
+                                             @ValidatorItem String nextPath,
+                                             @ValidatorItem String name) {
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             //
@@ -200,11 +199,11 @@ public abstract class BaseSshFileController extends BaseServerController {
 
     @RequestMapping(value = "update_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> updateFileData(@ValidatorItem String id,
-                                              @ValidatorItem String allowPathParent,
-                                              @ValidatorItem String nextPath,
-                                              @ValidatorItem String name,
-                                              @ValidatorItem String content) {
+    public IJsonMessage<String> updateFileData(@ValidatorItem String id,
+                                               @ValidatorItem String allowPathParent,
+                                               @ValidatorItem String nextPath,
+                                               @ValidatorItem String name,
+                                               @ValidatorItem String content) {
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             List<String> allowEditSuffix = itemConfig.allowEditSuffix();
@@ -344,8 +343,8 @@ public abstract class BaseSshFileController extends BaseServerController {
                 jsonObject.put("id", SecureUtil.sha1(allPath + StrUtil.SLASH + filename));
                 SftpATTRS attrs = lsEntry.getAttrs();
                 int mTime = attrs.getMTime();
-                String format = DateUtil.format(DateUtil.date(mTime * 1000L), DatePattern.NORM_DATETIME_MINUTE_PATTERN);
-                jsonObject.put("modifyTime", format);
+                //String format = DateUtil.format(DateUtil.date(mTime * 1000L), DatePattern.NORM_DATETIME_MINUTE_PATTERN);
+                jsonObject.put("modifyTime", mTime * 1000L);
                 if (attrs.isDir()) {
                     jsonObject.put("dir", true);
                 } else {
@@ -408,10 +407,10 @@ public abstract class BaseSshFileController extends BaseServerController {
 
     @RequestMapping(value = "delete.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> delete(@ValidatorItem String id,
-                                      @ValidatorItem String allowPathParent,
-                                      @ValidatorItem String nextPath,
-                                      String name) {
+    public IJsonMessage<String> delete(@ValidatorItem String id,
+                                       @ValidatorItem String allowPathParent,
+                                       @ValidatorItem String nextPath,
+                                       String name) {
         // name 可能为空，为空情况是删除目录
         String name2 = StrUtil.emptyToDefault(name, StrUtil.EMPTY);
         Assert.state(!StrUtil.equals(name2, StrUtil.SLASH), "不能删除根目录");
@@ -444,11 +443,11 @@ public abstract class BaseSshFileController extends BaseServerController {
 
     @RequestMapping(value = "rename.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> rename(@ValidatorItem String id,
-                                      @ValidatorItem String allowPathParent,
-                                      @ValidatorItem String nextPath,
-                                      @ValidatorItem String name,
-                                      @ValidatorItem String newname) {
+    public IJsonMessage<String> rename(@ValidatorItem String id,
+                                       @ValidatorItem String allowPathParent,
+                                       @ValidatorItem String nextPath,
+                                       @ValidatorItem String name,
+                                       @ValidatorItem String newname) {
 
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
@@ -494,11 +493,11 @@ public abstract class BaseSshFileController extends BaseServerController {
 
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<String> upload(@ValidatorItem String id,
-                                      @ValidatorItem String allowPathParent,
-                                      @ValidatorItem String nextPath,
-                                      String unzip,
-                                      MultipartFile file) {
+    public IJsonMessage<String> upload(@ValidatorItem String id,
+                                       @ValidatorItem String allowPathParent,
+                                       @ValidatorItem String nextPath,
+                                       String unzip,
+                                       MultipartFile file) {
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath);
@@ -563,10 +562,10 @@ public abstract class BaseSshFileController extends BaseServerController {
      */
     @RequestMapping(value = "new_file_folder.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<String> newFileFolder(String id,
-                                             @ValidatorItem String allowPathParent,
-                                             @ValidatorItem String nextPath,
-                                             @ValidatorItem String name, String unFolder) {
+    public IJsonMessage<String> newFileFolder(String id,
+                                              @ValidatorItem String allowPathParent,
+                                              @ValidatorItem String nextPath,
+                                              @ValidatorItem String name, String unFolder) {
         Assert.state(!StrUtil.contains(name, StrUtil.SLASH), "文件名不能包含/");
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
@@ -608,5 +607,42 @@ public abstract class BaseSshFileController extends BaseServerController {
                 JschUtil.close(session);
             }
         });
+    }
+
+    /**
+     * 修改文件权限
+     *
+     * @param id
+     * @param allowPathParent
+     * @param nextPath
+     * @param fileName
+     * @param permissionValue
+     * @return
+     */
+    @RequestMapping(value = "change_file_permission.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public IJsonMessage<JSONArray> changeFilePermissions(@ValidatorItem String id,
+                                                         @ValidatorItem String allowPathParent,
+                                                         @ValidatorItem String nextPath,
+                                                         @ValidatorItem String fileName,
+                                                         @ValidatorItem String permissionValue) {
+        MachineSshModel machineSshModel = this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel1, itemConfig) -> machineSshModel1);
+        if (machineSshModel == null) {
+            return new JsonMessage<>(400, "ssh error 或者 没有配置此文件夹");
+        }
+        Session session = sshService.getSessionByModel(machineSshModel);
+        Charset charset = machineSshModel.charset();
+        int timeout = machineSshModel.timeout();
+        String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + fileName);
+        try (Sftp sftp = new Sftp(session, charset, timeout)) {
+            ChannelSftp client = sftp.getClient();
+            //
+            int permissions = Integer.parseInt(permissionValue, 8);
+            client.chmod(permissions, remotePath);
+        } catch (SftpException e) {
+            log.error("ssh修改文件权限异常...: {} {}", remotePath, permissionValue, e);
+            return new JsonMessage<>(400, "操作失败 " + e.getMessage());
+        }
+        return JsonMessage.success("操作成功 ");
     }
 }

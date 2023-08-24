@@ -31,6 +31,9 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.event.IAsyncLoad;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
@@ -41,7 +44,6 @@ import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.build.ResultDirFileAction;
 import org.dromara.jpom.common.BaseJpomController;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.interceptor.NotLogin;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -54,7 +56,6 @@ import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.dromara.jpom.system.JpomRuntimeException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -65,7 +66,10 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -75,7 +79,7 @@ import java.util.stream.Collectors;
 @RestController
 @NotLogin
 @Slf4j
-public class BuildTriggerApiController extends BaseJpomController implements InitializingBean, Runnable {
+public class BuildTriggerApiController extends BaseJpomController implements IAsyncLoad, Runnable {
 
     private final BuildInfoService buildInfoService;
     private final BuildExecuteService buildExecuteService;
@@ -119,10 +123,10 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
      * @return json
      */
     @RequestMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD2, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Integer> trigger2(@PathVariable String id, @PathVariable String token,
-                                         HttpServletRequest request,
-                                         String delay,
-                                         String buildRemark, String useQueue) {
+    public IJsonMessage<Integer> trigger2(@PathVariable String id, @PathVariable String token,
+                                          HttpServletRequest request,
+                                          String delay,
+                                          String buildRemark, String useQueue) {
         BuildInfoModel item = buildInfoService.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         UserModel userModel = this.triggerTokenLogServer.getUserByToken(token, buildInfoService.typeName());
@@ -175,7 +179,7 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
      * @return json
      */
     @PostMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<Object>> triggerBatch(HttpServletRequest request) {
+    public IJsonMessage<List<Object>> triggerBatch(HttpServletRequest request) {
         String body = ServletUtil.getBody(request);
         if (StrUtil.isEmpty(body)) {
             return new JsonMessage<>(405, "请传入 body 参数");
@@ -227,7 +231,7 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
                 } else {
                     BaseServerController.resetInfo(userModel);
                     //
-                    JsonMessage<Integer> start = buildExecuteService.start(id, userModel, delay, 1, buildRemark, parametersEnv);
+                    IJsonMessage<Integer> start = buildExecuteService.start(id, userModel, delay, 1, buildRemark, parametersEnv);
                     jsonObject.put("msg", start.getMsg());
                     jsonObject.put("buildId", start.getData());
                 }
@@ -289,7 +293,7 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
      * @return json
      */
     @GetMapping(value = ServerOpenApi.BUILD_TRIGGER_STATUS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> buildStatusGet(@ValidatorItem String id, @ValidatorItem String token) {
+    public IJsonMessage<JSONObject> buildStatusGet(@ValidatorItem String id, @ValidatorItem String token) {
         JSONObject statusData = this.getStatusData(id, token);
         return JsonMessage.success("", statusData);
     }
@@ -333,7 +337,7 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
      * @return json
      */
     @PostMapping(value = ServerOpenApi.BUILD_TRIGGER_STATUS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> buildStatusPost(HttpServletRequest request) {
+    public IJsonMessage<List<JSONObject>> buildStatusPost(HttpServletRequest request) {
         try {
             String body = ServletUtil.getBody(request);
             JSONArray jsonArray = JSONArray.parseArray(body);
@@ -405,10 +409,9 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> new Thread(runnable, "Jpom Build Trigger Queue"));
-        scheduler.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
-        JpomApplication.register("build_trigger_queue", scheduler);
+    public void startLoad() {
+        ScheduledExecutorService scheduler = JpomApplication.getScheduledExecutorService();
+        scheduler.scheduleWithFixedDelay(this, 0, 5, TimeUnit.SECONDS);
     }
 
     @Override
@@ -460,7 +463,7 @@ public class BuildTriggerApiController extends BaseJpomController implements Ini
                 }
                 try {
                     BaseServerController.resetInfo(cache.userModel);
-                    JsonMessage<Integer> message = buildExecuteService.start(cache.id, cache.userModel, cache.delay, 1, cache.buildRemark, cache.parametersEnv);
+                    IJsonMessage<Integer> message = buildExecuteService.start(cache.id, cache.userModel, cache.delay, 1, cache.buildRemark, cache.parametersEnv);
                     log.info("构建触发器队列执行结果：{}", message);
                 } catch (Exception e) {
                     log.error("创建构建任务异常", e);

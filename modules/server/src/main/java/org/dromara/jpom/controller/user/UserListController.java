@@ -27,10 +27,11 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.keepbx.jpom.IJsonMessage;
+import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.JsonMessage;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.user.UserModel;
@@ -73,7 +74,7 @@ public class UserListController extends BaseServerController {
      */
     @RequestMapping(value = "get_user_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<UserModel>> getUserList() {
+    public IJsonMessage<PageResultDto<UserModel>> getUserList() {
         PageResultDto<UserModel> userModelPageResultDto = userService.listPage(getRequest());
         userModelPageResultDto.each(userModel -> {
             boolean bindMfa = userService.hasBindMfa(userModel.getId());
@@ -93,7 +94,7 @@ public class UserListController extends BaseServerController {
      */
     @RequestMapping(value = "get_user_list_all", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<UserModel>> getUserListAll() {
+    public IJsonMessage<List<UserModel>> getUserListAll() {
         List<UserModel> list = userService.list();
         return JsonMessage.success("success", list);
     }
@@ -106,7 +107,7 @@ public class UserListController extends BaseServerController {
      */
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<JSONObject> addUser(String type) {
+    public IJsonMessage<JSONObject> addUser(String type) {
         //
         boolean create = StrUtil.equals(type, "add");
         UserModel userModel = this.parseUser(create);
@@ -200,7 +201,7 @@ public class UserListController extends BaseServerController {
      */
     @RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> deleteUser(String id) {
+    public IJsonMessage<Object> deleteUser(String id) {
         UserModel userName = getUser();
         Assert.state(!StrUtil.equals(userName.getId(), id), "不能删除自己");
 
@@ -226,7 +227,7 @@ public class UserListController extends BaseServerController {
      */
     @GetMapping(value = "unlock", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> unlock(@ValidatorItem String id) {
+    public IJsonMessage<Object> unlock(@ValidatorItem String id) {
         UserModel update = UserModel.unLock(id);
         userService.updateById(update);
         return JsonMessage.success("解锁成功");
@@ -241,7 +242,7 @@ public class UserListController extends BaseServerController {
     @GetMapping(value = "close_user_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission(superUser = true)
-    public JsonMessage<Object> closeMfa(@ValidatorItem String id) {
+    public IJsonMessage<Object> closeMfa(@ValidatorItem String id) {
         UserModel update = new UserModel(id);
         update.setTwoFactorAuthKey(StrUtil.EMPTY);
         userService.updateById(update);
@@ -256,7 +257,7 @@ public class UserListController extends BaseServerController {
      */
     @GetMapping(value = "rest-user-pwd", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<JSONObject> restUserPwd(@ValidatorItem String id) {
+    public IJsonMessage<JSONObject> restUserPwd(@ValidatorItem String id) {
         UserModel userModel = userService.getByKey(id);
         Assert.notNull(userModel, "账号不存在");
         Assert.state(!userModel.isSuperSystemUser(), "超级管理员不能通过此方式重置密码");
