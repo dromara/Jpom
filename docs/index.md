@@ -143,10 +143,53 @@ notices: # 可选的
   link: https://www.xiaonuo.vip
   bgColor: '#1373CC'
   textColor: '#ffffff'
+- name: zyplayer-doc
+  desc: 可私有化部署的文档与知识库管理平台
+  avatar: /images/friends/ad/zyplayer-doc-logo.png
+  link: https://doc.zyplayer.com/#/integrate/zyplayer-doc?utm=jpom
+  bgColor: '#13cc9b'
+  textColor: '#ffffff'
 ```
 :::
 
 <br/>
+
+<style>
+  .page-wwads{
+    width:100%!important;
+    min-height: 0!important;
+    margin: 0;
+  }
+  .page-wwads .wwads-img img{
+    width:80px!important;
+  }
+  .page-wwads .wwads-poweredby{
+    width: 40px;
+    position: absolute;
+    right: 25px;
+    bottom: 3px;
+  }
+  .wwads-content .wwads-text, .page-wwads .wwads-text{
+    height: 100%;
+    padding-top: 5px;
+    display: block;
+  }
+</style>
+
+<div class="wwads-cn wwads-horizontal wwads-sticky" data-id="188" ></div>
+<style>
+.become-sponsor-join{
+  padding: 8px 20px;
+  display: inline-block;
+  color: #E01E5A;
+  border-radius: 30px;
+  box-sizing: border-box;
+  border: 2px solid #E01E5A;
+}
+</style>
+<p align="center">
+  <a class="become-sponsor-join" href="/pages/589c8e/">成为赞助者</a>
+</p>
 
 ## 😭 日常开发中，您是否有以下痛点？
 
@@ -315,8 +358,6 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 
 <div>
 <img class="no-zoom" style="height:200px;display: inline-block;" :src="$withBase('/images/zsxq.jpg')" alt="扫码加入知识星球，了解学习更多知识">
-
-<div class="wwads-cn wwads-horizontal wwads-sticky" data-id="188" style="max-width:600px;display: inline-block;margin-top: 0px;"></div>
 
 </div>
 
