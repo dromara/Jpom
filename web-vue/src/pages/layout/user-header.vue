@@ -773,7 +773,7 @@ export default {
       const cluster = this.myClusterList.find((item2) => {
         return item2.id === item.clusterInfoId;
       });
-      if (cluster && location.href.indexOf(cluster.url) !== 0) {
+      if (cluster && cluster.url && location.href.indexOf(cluster.url) !== 0) {
         let url = `${cluster.url}/#/${this.$route.fullPath}`.replace(/[\\/]+[\\/]/g, "/").replace(":/", "://");
         url = url.replace(`wid=${this.selectWorkspace.id}`, `wid=${item.id}`);
         // console.log(location.href.indexOf(cluster.url), url);
@@ -791,9 +791,15 @@ export default {
     },
     // 集群切换
     handleClusterChange(item) {
-      const url = `${item.url}/#/${this.$route.fullPath}`.replace(/[\\/]+[\\/]/g, "/").replace(":/", "://");
-      // console.log(url);
-      location.href = url;
+      if (item.url) {
+        const url = `${item.url}/#/${this.$route.fullPath}`.replace(/[\\/]+[\\/]/g, "/").replace(":/", "://");
+        // console.log(url);
+        location.href = url;
+      } else {
+        this.$notification.error({
+          message: "还未配置集群地址,不能切换集群",
+        });
+      }
     },
     tabChange(key) {
       if (key === 1) {
