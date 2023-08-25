@@ -147,8 +147,8 @@ notices: # 可选的
   desc: 可私有化部署的文档与知识库管理平台
   avatar: /images/friends/ad/zyplayer-doc-logo.png
   link: https://doc.zyplayer.com/#/integrate/zyplayer-doc?utm=jpom
-  bgColor: '#13cc9b'
-  textColor: '#ffffff'
+  bgColor: '#c6ddff'
+  textColor: '#000000'
 ```
 :::
 

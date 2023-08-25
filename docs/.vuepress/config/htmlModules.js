@@ -43,7 +43,7 @@ module.exports = {
     <a href="https://www.xiaonuo.vip" target="_blank">
       <img class="no-zoom" height="60" width="224" src="/images/friends/ad/snowy-banner.jpg">
     </a>
-     <a href="https://doc.zyplayer.com/#/integrate/zyplayer-doc?utm=jpom" target="_blank" style="background-color: #13cc9b;color: #ffffff">
+     <a href="https://doc.zyplayer.com/#/integrate/zyplayer-doc?utm=jpom" target="_blank" style="background-color: #c6ddff;color: #ffffff">
       <img class="no-zoom" height="60" width="224" src="/images/friends/ad/zyplayer-doc-banner.png">
     </a>
     <div>
