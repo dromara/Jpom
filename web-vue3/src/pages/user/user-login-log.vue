@@ -5,7 +5,7 @@
         <a-input v-model="listQuery['%username%']" @pressEnter="loadData" placeholder="用户名" class="search-input-item" />
         <a-input v-model="listQuery['%ip%']" @pressEnter="loadData" placeholder="登录IP" class="search-input-item" />
         <a-range-picker class="search-input-item" style="width: 220px;" :show-time="{ format: 'HH:mm:ss' }"
-          format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
+          format="YYYY-MM-DD HH:mm:ss" @change="onChangeTime" />
         <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
           <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
         </a-tooltip>
@@ -99,7 +99,7 @@ const change = (pagination: any, filters: any, sorter: any) => {
   loadData();
 };
 
-const onchangeTime = (value, dateString) => {
+const onChangeTime = (value, dateString) => {
   listQuery.value.createTimeMillis = `${dateString[0]} ~ ${dateString[1]}`;
 };
 
