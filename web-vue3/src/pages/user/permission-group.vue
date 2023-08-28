@@ -12,8 +12,12 @@
     <!-- 数据表格 -->
     <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" @change="changePage" bordered
       rowKey="id">
-      <template #bodyCell="{ column, record }">
-        <template v-if="column.dataIndex === 'operation'">
+      <template #bodyCell="{ column, text, record }">
+        <template v-if="column.dataIndex === 'modifyTimeMillis'">
+          {{ parseTime(text) }}
+        </template>
+
+        <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
             <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
@@ -144,14 +148,15 @@ import { getMonitorOperateTypeList } from '@/api/monitor'
 import moment from 'moment'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import Transfer from '@/components/compositionTransfer/composition-transfer.vue'
-import { FormInstance } from 'ant-design-vue'
+import { FormInstance, message } from 'ant-design-vue'
 import { MinusCircleFilled } from '@ant-design/icons-vue'
+import { IPageQuery } from '@/interface/common'
 
 const loading = ref(false);
 const list = ref([]);
 
 
-const listQuery = reactive(Object.assign({}, PAGE_DEFAULT_LIST_QUERY));
+const listQuery = ref<IPageQuery>({ ...PAGE_DEFAULT_LIST_QUERY });
 const columns = [
   { title: '名称', dataIndex: 'name', ellipsis: true },
   { title: '描述', dataIndex: 'description', ellipsis: true },
@@ -161,7 +166,6 @@ const columns = [
     dataIndex: 'modifyTimeMillis',
     sorter: true,
     ellipsis: true,
-    customRender: ({ text }) => parseTime(text),
     width: 170
   },
   {
@@ -175,26 +179,26 @@ const rules = {
   name: [{ required: true, message: '请输入权限组名称', trigger: 'blur' }]
 };
 
-const pagination = COMPUTED_PAGINATION(listQuery);
+const pagination = COMPUTED_PAGINATION(listQuery.value);
 
 const loadData = (pointerEvent?: any) => {
   loading.value = true;
-  listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : listQuery.page;
-  getList(listQuery).then((res) => {
+  listQuery.value.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : listQuery.value.page;
+  getList(listQuery.value).then((res) => {
     if (res.code === 200) {
       list.value = res.data.result;
-      listQuery.total = res.data.total;
+      listQuery.value.total = res.data.total;
     }
     loading.value = false;
   });
 };
 
 
-const changePage = (pagination, filters, sorter) => {
-  listQuery = CHANGE_PAGE(listQuery, { pagination, sorter });
+
+const change = (pagination: any, filters: any, sorter: any) => {
+  listQuery.value = CHANGE_PAGE(listQuery.value, { pagination, sorter });
   loadData();
 };
-
 
 
 // 获取操作类型
@@ -337,9 +341,7 @@ const handleEditUserOk = () => {
     delete tempCopy.allowExecuteArray;
 
     if (!emitKeys || emitKeys.length <= 0) {
-      $notification.error({
-        message: '请选择工作空间'
-      });
+      message.error('请选择工作空间');
       return false;
     }
 
@@ -348,9 +350,7 @@ const handleEditUserOk = () => {
 
     editPermissionGroup(tempCopy).then((res) => {
       if (res.code === 200) {
-        $notification.success({
-          message: res.msg
-        });
+        message.success(res.msg);
         editForm.value?.resetFields();
         editVisible.value = false;
         loadData();
@@ -368,9 +368,7 @@ const handleDelete = (record: any) => {
     onOk: () => {
       deletePermissionGroup(record.id).then((res) => {
         if (res.code === 200) {
-          $notification.success({
-            message: res.msg
-          });
+          message.success(res.msg);
           loadData();
         }
       });
