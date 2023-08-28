@@ -1,42 +1,23 @@
 <template>
-  <a-transfer
-    :data-source="dataSource"
-    :target-keys="targetKeys"
-    :render="(item) => item.title"
-    :show-select-all="false"
-    @change="onChange"
-  >
-    <template #children slot-scope="{ props: { direction, selectedKeys }, on: { itemSelect } }">
+  <a-transfer :data-source="dataSource" v-model:target-keys="targetKeys" :render="(item) => item.title"
+    :show-select-all="false" @change="onChange">
+    <template #children="{ direction, selectedKeys, onItemSelect }">
       <template v-if="direction === 'left'">
-        <a-tree
-          v-if="leftTreeData.length"
-          blockNode
-          checkable
-          :tree-data="leftTreeData"
-          :checked-keys="leftCheckedKey"
-          @check="
-            (_, props) => {
-              handleLeftChecked(_, props, [...selectedKeys, ...targetKeys], itemSelect)
-            }
-          "
-        />
+        <a-tree v-if="leftTreeData.length" blockNode checkable :tree-data="leftTreeData" :checked-keys="leftCheckedKey"
+          @check="(_, props) => {
+            handleLeftChecked(_, props, [...selectedKeys, ...targetKeys], onItemSelect)
+          }
+            " />
         <a-empty v-else>
           <template #description>暂无数据</template>
         </a-empty>
       </template>
       <template v-else-if="direction === 'right'">
-        <a-tree
-          v-if="rightTreeData.length"
-          blockNode
-          checkable
-          :tree-data="rightTreeData"
-          :checked-keys="rightCheckedKey"
-          @check="
-            (_, props) => {
-              handleRightChecked(_, props, [...selectedKeys, ...targetKeys], itemSelect)
-            }
-          "
-        />
+        <a-tree v-if="rightTreeData.length" blockNode checkable :tree-data="rightTreeData" :checked-keys="rightCheckedKey"
+          @check="(_, props) => {
+            handleRightChecked(_, props, [...selectedKeys, ...targetKeys], onItemSelect)
+          }
+            " />
         <a-empty v-else>
           <template #description>暂无数据</template>
         </a-empty>
@@ -63,6 +44,7 @@ export default {
   },
   data() {
     return {
+
       targetKeys: [], // 显示在右侧框数据的 key 集合
       dataSource: [], // 数据源，其中的数据将会被渲染到左边一栏
 
