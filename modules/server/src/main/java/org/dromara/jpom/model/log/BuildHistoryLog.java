@@ -58,7 +58,7 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
     private String resultDirFile;
 
     /**
-     * 触发构建类型 触发类型{0，手动，1 触发器,2 自动触发}
+     * 触发构建类型 触发类型{0，手动，1 触发器,2 自动触发,3 手动回滚}
      */
     private Integer triggerBuildType;
 
@@ -85,6 +85,10 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
      * @see BuildInfoModel#getBuildId()
      */
     private Integer buildNumberId;
+    /**
+     * 来自的构建编号，回滚时存在
+     */
+    private Integer fromBuildNumberId;
     /**
      * 状态
      *
