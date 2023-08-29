@@ -63,3 +63,4 @@ ADD,MACHINE_DOCKER_INFO,machineSshId,String,255,,SSH连接信息,false
 ADD,BUILD_INFO,resultKeepDay,Integer,,,产物保留天数,false
 ADD,REPOSITORY,group,String,50,,分组,false
 ADD,WORKSPACE,clusterInfoId,String,50,,绑定集群id,false
+ADD,BUILDHISTORYLOG,fromBuildNumberId,Integer,,,来自的构建编号，回滚时存在

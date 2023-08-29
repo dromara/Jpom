@@ -311,6 +311,7 @@ export const triggerBuildTypeMap = {
   0: "手动",
   1: "触发器",
   2: "定时",
+  3: "手动回滚",
 };
 
 export const buildModeMap = {

@@ -32,6 +32,7 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.spring.SpringUtil;
@@ -102,6 +103,10 @@ public class ReleaseManage {
 
     private final UserModel userModel;
     private final Integer buildNumberId;
+    /**
+     * 回滚来源的构建 id
+     */
+    private Integer fromBuildNumberId;
     private final BuildExtraModule buildExtraModule;
     private final String logId;
     private final BuildExecuteService buildExecuteService;
@@ -115,10 +120,14 @@ public class ReleaseManage {
     private File resultFile;
 
 
+    private Integer getRealBuildNumberId() {
+        return ObjectUtil.defaultIfNull(this.fromBuildNumberId, this.buildNumberId);
+    }
+
     private void init() {
         if (this.logRecorder == null) {
             // 回滚的时候需要重新创建对象
-            File logFile = BuildUtil.getLogFile(buildExtraModule.getId(), buildNumberId);
+            File logFile = BuildUtil.getLogFile(buildExtraModule.getId(), this.buildNumberId);
             this.logRecorder = LogRecorder.builder().file(logFile).build();
         }
         Assert.notNull(buildEnv, "没有找到任何环境变量");
@@ -134,7 +143,7 @@ public class ReleaseManage {
      */
     public String start(Consumer<Long> consumer, BuildInfoModel buildInfoModel) throws Exception {
         this.init();
-        this.resultFile = buildExtraModule.resultDirFile(this.buildNumberId);
+        this.resultFile = buildExtraModule.resultDirFile(this.getRealBuildNumberId());
         this.buildEnv.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
         this.buildEnv.put("BUILD_RESULT_DIR_FILE", buildExtraModule.getResultDirFile());
         //
@@ -151,7 +160,7 @@ public class ReleaseManage {
         Boolean syncFileStorage = this.buildExtraModule.getSyncFileStorage();
         if (syncFileStorage != null && syncFileStorage) {
             logRecorder.system("开始同步到文件管理中心");
-            File dirPackage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.buildNumberId, this.resultFile, (unZip, file) -> file);
+            File dirPackage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, (unZip, file) -> file);
             String successMd5 = fileStorageService.addFile(dirPackage, 1,
                 buildInfoModel.getWorkspaceId(),
                 "构建来源," + buildInfoModel.getName(),
@@ -237,7 +246,7 @@ public class ReleaseManage {
             File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
             FileUtil.copyContent(sourceFile, tempPath, true);
             // 将产物文件 copy 到本地仓库目录
-            File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildNumberId, StrUtil.SLASH);
+            File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.getRealBuildNumberId(), StrUtil.SLASH);
             FileUtil.copyContent(historyPackageFile, tempPath, true);
             // env file
             Map<String, String> envMap = buildEnv.environment();
@@ -547,7 +556,7 @@ public class ReleaseManage {
             this.diffSyncProject(nodeModel, projectId, afterOpt, clearOld);
             return;
         }
-        JsonMessage<String> jsonMessage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.buildNumberId, this.resultFile, (unZip, zipFile) -> {
+        JsonMessage<String> jsonMessage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, (unZip, zipFile) -> {
             String name = zipFile.getName();
             Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
             return OutGivingRun.fileUpload(zipFile,
@@ -580,7 +589,7 @@ public class ReleaseManage {
         String projectSecondaryDirectory = this.buildExtraModule.getProjectSecondaryDirectory();
         //
         String selectProject = buildEnv.get("dispatchSelectProject");
-        Future<OutGivingModel.Status> statusFuture = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.buildNumberId, this.resultFile, (unZip, zipFile) -> {
+        Future<OutGivingModel.Status> statusFuture = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, (unZip, zipFile) -> {
             OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
                 .id(releaseMethodDataId)
                 .file(zipFile)
@@ -608,6 +617,8 @@ public class ReleaseManage {
         try {
             BaseServerController.resetInfo(userModel);
             this.init();
+            //
+            buildEnv.eachStr(s -> logRecorder.system(s));
             logRecorder.system("开始回滚：{}", DateTime.now());
             //
             String errorMsg = this.start(null, item);
