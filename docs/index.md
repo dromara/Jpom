@@ -487,5 +487,10 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
         <img :src="$withBase('/images/friends/baomidou.svg')" class="no-zoom friends-item-img hover-alt"  alt="MyBatis-Plus 🚀为简化开发而生">
     </a>
 </div>
+<div class="friends-item" >
+    <a href="https://springdoc.cn/?from=jpom" target="_blank">
+        <img :src="$withBase('/images/friends/springdoc.cn.png')" class="no-zoom friends-item-img hover-alt"  alt="spring 中文网">
+    </a>
+</div>
 <br/>
 <br/>
