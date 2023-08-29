@@ -160,16 +160,15 @@ public class SystemGitProcess extends AbstractGitProcess {
         File saveFile = getSaveFile();
         {
             // 更新
-            printWriter.println("git pull");
             CommandUtil.exec(saveFile, null, line -> {
                 printWriter.println(line);
                 printWriter.flush();
             }, "git", "pull");
-            printWriter.println("git submodule update --init --remote -f --recursive");
-			CommandUtil.exec(saveFile, null, line -> {
-				printWriter.println(line);
-				printWriter.flush();
-			}, "git", "submodule", "update", "--init", "--remote", "-f", "--recursive");
+
+            CommandUtil.exec(saveFile, null, line -> {
+                printWriter.println(line);
+                printWriter.flush();
+            }, "git", "submodule", "update", "--init", "--remote", "-f", "--recursive");
         }
         // 获取提交日志
         String[] command = {"git", "log", "-1", branchOrTag};

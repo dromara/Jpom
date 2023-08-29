@@ -62,7 +62,7 @@
         <a-button v-if="item.url" type="link" @click="openUrl(item.url)" size="small">
           {{ text }}
         </a-button>
-        <span v-else>{{ text }}</span>
+        <span v-else>{{ item.statusMsg }}</span>
         <!-- -->
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
@@ -144,7 +144,7 @@ export default {
       rules: {
         name: [{ required: true, message: "请输入集群名称", trigger: "blur" }],
         linkGroups: [{ required: true, message: "请输入选择关联分组", trigger: "blur" }],
-        url: [{ required: true, message: "请输入集群访问地址", trigger: "blur" }],
+        // url: [{ required: true, message: "请输入集群访问地址", trigger: "blur" }],
       },
       editVisible: false,
       temp: {},

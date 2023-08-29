@@ -2,10 +2,16 @@
 
 ### 2.10.44.1-beta
 
+### 🐣 新增功能
+
+1. 【server】新增 支持 git submodules
+   （感谢 [@Croce](https://gitee.com/Croce) [Gitee pr 195](https://gitee.com/dromara/Jpom/pulls/195) ）
+
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 新增资产无法正常监控问题（感谢@乔、@MichelleChung、@Pluto）
 2. 【server】优化 编辑集群地址不验证，调整到心跳检测验证（感谢@黄纲）
+3. 【server】优化 构建新增环境变量：BUILD_ORIGINAL_RESULT_DIR_FILE、BUILD_RESULT_DIR_FILE（发布流程）(感谢@黄纲)
 
 ------
 
@@ -21,7 +27,8 @@
 
 ### 🐣 新增功能
 
-1. 【server】新增 集群化管理工作空间（感谢@定格、[@paobu](https://gitee.com/iniushi) [Gitee issues I7UG5V](https://gitee.com/dromara/Jpom/issues/I7UG5V)）
+1. 【server】新增
+   集群化管理工作空间（感谢@定格、[@paobu](https://gitee.com/iniushi) [Gitee issues I7UG5V](https://gitee.com/dromara/Jpom/issues/I7UG5V)）
 
 ### 🐞 解决BUG、优化功能
 

@@ -154,7 +154,7 @@ public class JGitUtil {
         String url = (String) parameter.get("url");
         CloneCommand command = cloneCommand.setURI(url)
             .setDirectory(file)
-			.setCloneSubmodules(true);
+            .setCloneSubmodules(true);
         // 设置凭证
         setCredentials(command, parameter);
         return command.call();
@@ -381,7 +381,6 @@ public class JGitUtil {
         // 放弃本地修改
         git.checkout().setName(branchName).setForced(true).setProgressMonitor(progressMonitor).call();
         //
-		println(printWriter, "\ngit pull");
         PullCommand pull = git.pull();
         //
         setCredentials(pull, parameter);
@@ -389,7 +388,7 @@ public class JGitUtil {
         PullResult call = pull
             .setRemoteBranchName(branchName)
             .setProgressMonitor(progressMonitor)
-			.setRecurseSubmodules(FetchRecurseSubmodulesMode.YES)
+            .setRecurseSubmodules(FetchRecurseSubmodulesMode.YES)
             .call();
         // 输出拉取结果
         if (call != null) {
@@ -410,16 +409,15 @@ public class JGitUtil {
             //				println(printWriter, "fetchResult {}", fetchResult);
             //			}
         }
-		//
-		println(printWriter, "\ngit submodule update --init --remote --recursive");
-		SubmoduleUpdateCommand subUpdate = git.submoduleUpdate();
-		setCredentials(subUpdate, parameter);
-		Collection<String> rst = subUpdate
-				.setProgressMonitor(progressMonitor)
-				.setFetch(true)
-				.setStrategy(MergeStrategy.THEIRS)
-				.call();
-		println(printWriter, rst.stream().collect(Collectors.joining("\n")));
+        //
+        SubmoduleUpdateCommand subUpdate = git.submoduleUpdate();
+        setCredentials(subUpdate, parameter);
+        Collection<String> rst = subUpdate
+            .setProgressMonitor(progressMonitor)
+            .setFetch(true)
+            .setStrategy(MergeStrategy.THEIRS)
+            .call();
+        println(printWriter, String.join("\n", rst));
         return call;
     }
 
