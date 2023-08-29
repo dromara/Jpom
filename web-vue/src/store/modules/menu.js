@@ -7,6 +7,7 @@ import { ACTIVE_TAB_KEY, TAB_LIST_KEY, ACTIVE_MENU_KEY } from "@/utils/const";
 
 import { getMenu } from "@/api/menu";
 import routeMenuMap from "@/router/route-menu";
+let tryLoadCount = 0;
 
 const app = {
   state: {
@@ -78,7 +79,10 @@ const app = {
             }
           })
           .catch((error) => {
-            reject(error);
+            // 避免服务不可用形成死循环
+            if (tryLoadCount++ <= 10) {
+              reject(error);
+            }
           });
       });
     },

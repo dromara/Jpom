@@ -184,14 +184,16 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
 
     @Override
     public void execute() {
-        String linkGroup = clusterInfoService.getCurrent().getLinkGroup();
-        List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
-        if (CollUtil.isEmpty(linkGroups)) {
-            log.warn("当前集群还未绑定分组,不能监控 SSH 资产信息");
-            return;
-        }
         Entity entity = new Entity();
-        entity.set("groupName", linkGroups);
+        if (clusterInfoService.isMultiServer()) {
+            String linkGroup = clusterInfoService.getCurrent().getLinkGroup();
+            List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
+            if (CollUtil.isEmpty(linkGroups)) {
+                log.warn("当前集群还未绑定分组,不能监控 SSH 资产信息");
+                return;
+            }
+            entity.set("groupName", linkGroups);
+        }
         List<MachineSshModel> list = this.listByEntity(entity, false);
         if (CollUtil.isEmpty(list)) {
             return;

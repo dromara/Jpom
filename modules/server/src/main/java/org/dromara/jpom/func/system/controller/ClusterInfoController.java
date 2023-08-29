@@ -22,17 +22,14 @@
  */
 package org.dromara.jpom.func.system.controller;
 
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Validator;
-import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.stream.CollectorUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.Method;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.func.system.model.ClusterInfoModel;
@@ -147,32 +144,9 @@ public class ClusterInfoController {
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> edit(@ValidatorItem(msg = "数据 id 不能为空") String id,
                                      @ValidatorItem(msg = "请填写集群名称") String name,
-                                     @ValidatorItem(msg = "请填写集群访问地址") String url,
+                                     String url,
                                      @ValidatorItem(msg = "请选择关联分组") String linkGroup) {
-        Validator.validateUrl(url, "请填写正确的 url");
-        //
-        UrlBuilder urlBuilder = UrlBuilder.ofHttp(url);
-        urlBuilder.addPath(ServerConst.CHECK_SYSTEM);
-        HttpRequest httpRequest = HttpRequest.of(urlBuilder).method(Method.GET);
-        try {
-            JSONObject jsonObject = httpRequest.thenFunction(httpResponse -> {
-                String body = httpResponse.body();
-                return JSONObject.parseObject(body);
-            });
-            int code = jsonObject.getIntValue(JsonMessage.CODE);
-            Assert.state(code == JsonMessage.DEFAULT_SUCCESS_CODE, () -> {
-                String msg = jsonObject.getString(JsonMessage.MSG);
-                msg = StrUtil.emptyToDefault(msg, jsonObject.toString());
-                return "集群状态码异常：" + code + " " + msg;
-            });
-            //
-            JSONObject data = jsonObject.getJSONObject("data");
-            Assert.notNull(data, "集群响应信息不正确,请确认集群地址是正确的服务端地址");
-            Assert.state(data.containsKey("routerBase") && data.containsKey("extendPlugins"), "填写的集群地址不正确");
-        } catch (Exception e) {
-            log.error("检查集群信息异常", e);
-            throw new IllegalArgumentException("填写的集群地址检查异常,请确认集群地址是正确的服务端地址," + e.getMessage());
-        }
+        Opt.ofBlankAble(url).ifPresent(s -> Validator.validateUrl(s, "请填写正确的 url"));
         //
         List<String> list = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
         Assert.notEmpty(list, "请选择关联的分组");

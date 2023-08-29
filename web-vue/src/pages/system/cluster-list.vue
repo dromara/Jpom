@@ -58,7 +58,7 @@
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="url" slot-scope="text, item" :title="`集群名称：${item.name}/地址：${item.url}`">
+      <a-tooltip slot="url" slot-scope="text, item" :title="`集群名称：${item.name}/地址：${item.url}/状态消息：${item.statusMsg}`">
         <a-button v-if="item.url" type="link" @click="openUrl(item.url)" size="small">
           {{ text }}
         </a-button>

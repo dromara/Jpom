@@ -25,13 +25,19 @@ package org.dromara.jpom.func.system.service;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.net.NetUtil;
+import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.Method;
 import cn.keepbx.jpom.event.IAsyncLoad;
+import cn.keepbx.jpom.model.JsonMessage;
+import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.JpomManifest;
+import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
@@ -63,6 +69,10 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
     private static final String TASK_ID = "system_monitor_cluster";
 
     private final WorkspaceService workspaceService;
+    /**
+     * 是否为多集群
+     */
+    private boolean multiServer = false;
 
     public ClusterInfoService(ServerConfig serverConfig,
                               WorkspaceService workspaceService) {
@@ -81,12 +91,23 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
         return clusterInfoModel;
     }
 
+    /**
+     * 是否为多服务，集群模式
+     *
+     * @return true
+     */
+    public boolean isMultiServer() {
+        return multiServer;
+    }
+
     @Override
     public void startLoad() {
         // 启动心跳检测
         int heartSecond = clusterConfig.getHeartSecond();
         ScheduledExecutorService scheduler = JpomApplication.getScheduledExecutorService();
         scheduler.scheduleWithFixedDelay(this, 0, heartSecond, TimeUnit.SECONDS);
+        // 判断是否为多集群模式
+        this.multiServer = this.count() > 1;
     }
 
     @Override
@@ -95,6 +116,8 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
         try {
             CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format("{} 秒执行一次", heartSecond));
             taskStat.onStart();
+            // 判断是否为多集群模式
+            this.multiServer = this.count() > 1;
             //
             JpomManifest jpomManifest = JpomManifest.getInstance();
             String installId = jpomManifest.getInstallId();
@@ -116,6 +139,18 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
             clusterInfoModel.setLocalHostName(NetUtil.getLocalHostName());
             clusterInfoModel.setLastHeartbeat(SystemClock.now());
             clusterInfoModel.setJpomVersion(jpomManifest.getVersion());
+            // 测试
+            try {
+                String url = byKey.getUrl();
+                if (StrUtil.isEmpty(url)) {
+                    clusterInfoModel.setStatusMsg("未配置地址");
+                } else {
+                    this.testUrl(url);
+                    clusterInfoModel.setStatusMsg("OK");
+                }
+            } catch (Exception e) {
+                clusterInfoModel.setStatusMsg(e.getMessage());
+            }
             this.updateById(clusterInfoModel);
             // 检查是否重复
             Entity entity = Entity.create();
@@ -132,6 +167,32 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
         } catch (Throwable throwable) {
             CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format("{} 秒执行一次", heartSecond));
             taskStat.onFailed(TASK_ID, throwable);
+        }
+    }
+
+    private void testUrl(String url) {
+        //
+        UrlBuilder urlBuilder = UrlBuilder.ofHttp(url);
+        urlBuilder.addPath(ServerConst.CHECK_SYSTEM);
+        HttpRequest httpRequest = HttpRequest.of(urlBuilder).timeout(30 * 1000).method(Method.GET);
+        try {
+            JSONObject jsonObject = httpRequest.thenFunction(httpResponse -> {
+                String body = httpResponse.body();
+                return JSONObject.parseObject(body);
+            });
+            int code = jsonObject.getIntValue(JsonMessage.CODE);
+            Assert.state(code == JsonMessage.DEFAULT_SUCCESS_CODE, () -> {
+                String msg = jsonObject.getString(JsonMessage.MSG);
+                msg = StrUtil.emptyToDefault(msg, jsonObject.toString());
+                return "集群状态码异常：" + code + " " + msg;
+            });
+            //
+            JSONObject data = jsonObject.getJSONObject("data");
+            Assert.notNull(data, "集群响应信息不正确,请确认集群地址是正确的服务端地址");
+            Assert.state(data.containsKey("routerBase") && data.containsKey("extendPlugins"), "填写的集群地址不正确");
+        } catch (Exception e) {
+            log.error("检查集群信息异常", e);
+            throw new IllegalArgumentException("填写的集群地址检查异常,请确认集群地址是正确的服务端地址," + e.getMessage());
         }
     }
 
