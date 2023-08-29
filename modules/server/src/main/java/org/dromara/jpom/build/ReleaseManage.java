@@ -136,6 +136,7 @@ public class ReleaseManage {
         this.init();
         this.resultFile = buildExtraModule.resultDirFile(this.buildNumberId);
         this.buildEnv.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
+        this.buildEnv.put("BUILD_RESULT_DIR_FILE", buildExtraModule.getResultDirFile());
         //
         this.updateStatus(BuildStatus.PubIng, "开始发布中");
         if (FileUtil.isEmpty(this.resultFile)) {
@@ -144,7 +145,7 @@ public class ReleaseManage {
             return info;
         }
         long resultFileSize = FileUtil.size(this.resultFile);
-        logRecorder.system("开始执行发布,需要发布的文件大小：{}", FileUtil.readableFileSize(resultFileSize));
+        logRecorder.system("开始执行发布，需要发布的文件大小：{}", FileUtil.readableFileSize(resultFileSize));
         Optional.ofNullable(consumer).ifPresent(consumer1 -> consumer1.accept(resultFileSize));
         // 先同步到文件管理中心
         Boolean syncFileStorage = this.buildExtraModule.getSyncFileStorage();
@@ -157,9 +158,9 @@ public class ReleaseManage {
                 // 默认的别名码为构建id
                 StrUtil.emptyToDefault(buildInfoModel.getAliasCode(), buildInfoModel.getId()));
             if (successMd5 != null) {
-                logRecorder.system("构建产物文件成功同步到文件管理中心,{}", successMd5);
+                logRecorder.system("构建产物文件成功同步到文件管理中心，{}", successMd5);
             } else {
-                logRecorder.systemWarning("构建产物文件同步到文件管理中心失败,当前文件已经存文件管理中心存在啦");
+                logRecorder.systemWarning("构建产物文件同步到文件管理中心失败，当前文件已经存文件管理中心存在啦");
             }
         }
         //
@@ -180,7 +181,7 @@ public class ReleaseManage {
         } else if (releaseMethod == BuildReleaseMethod.No.getCode()) {
             return null;
         } else {
-            String format = StrUtil.format("没有实现的发布分发:{}", releaseMethod);
+            String format = StrUtil.format("没有实现的发布分发：{}", releaseMethod);
             logRecorder.systemError(format);
             return format;
         }
@@ -275,7 +276,7 @@ public class ReleaseManage {
             if (pushToRepository != null && pushToRepository) {
                 List<String> repositoryList = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
                 for (String repositoryItem : repositoryList) {
-                    logRecorder.system("start push to repository in({}),{} {}", map.get("name"), StrUtil.emptyToDefault((String) map.get("registryUrl"), StrUtil.EMPTY), repositoryItem);
+                    logRecorder.system("start push to repository in({}),{} {}{}", map.get("name"), StrUtil.emptyToDefault((String) map.get("registryUrl"), StrUtil.EMPTY), repositoryItem, System.lineSeparator());
                     //
                     map.put("repository", repositoryItem);
                     Consumer<String> logConsumer = s -> logRecorder.info(s);
@@ -316,7 +317,7 @@ public class ReleaseManage {
     }
 
     private void doDockerImage(DockerInfoModel dockerInfoModel, Map<String, String> envMap, File dockerfile, File baseDir, String dockerTag, BuildExtraModule extraModule) {
-        logRecorder.system("{} start build image {}", dockerInfoModel.getName(), dockerTag);
+        logRecorder.system("{} start build image {}{}", dockerInfoModel.getName(), dockerTag, System.lineSeparator());
         Map<String, Object> map = machineDockerServer.dockerParameter(dockerInfoModel);
         //.toParameter();
         map.put("Dockerfile", dockerfile);
@@ -348,7 +349,7 @@ public class ReleaseManage {
             logRecorder.systemError("没有需要执行的命令");
             return null;
         }
-        logRecorder.system("{} start exec", DateUtil.now());
+        logRecorder.system("{} start exec{}", DateUtil.now(), System.lineSeparator());
 
         File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
         Map<String, String> envFileMap = buildEnv.environment();
@@ -409,7 +410,7 @@ public class ReleaseManage {
             if (StrUtil.isEmpty(releasePath)) {
                 logRecorder.systemWarning("发布目录为空");
             } else {
-                logRecorder.system("{} {} start ftp upload", DateUtil.now(), item.getName());
+                logRecorder.system("{} {} start ftp upload{}", DateUtil.now(), item.getName(), System.lineSeparator());
                 MySftp.ProgressMonitor sftpProgressMonitor = sshService.createProgressMonitor(logRecorder);
                 MySftp sftp = new MySftp(session, charset, timeout, sftpProgressMonitor);
                 channelSftp = sftp.getClient();
@@ -482,9 +483,9 @@ public class ReleaseManage {
         int delSize = CollUtil.size(del);
         int diffSize = CollUtil.size(diff);
         if (clearOld) {
-            logRecorder.system("对比文件结果,产物文件 {} 个、需要上传 {} 个、需要删除 {} 个", CollUtil.size(collect), CollUtil.size(diff), delSize);
+            logRecorder.system("对比文件结果，产物文件 {} 个、需要上传 {} 个、需要删除 {} 个", CollUtil.size(collect), CollUtil.size(diff), delSize);
         } else {
-            logRecorder.system("对比文件结果,产物文件 {} 个、需要上传 {} 个", CollUtil.size(collect), CollUtil.size(diff));
+            logRecorder.system("对比文件结果，产物文件 {} 个、需要上传 {} 个", CollUtil.size(collect), CollUtil.size(diff));
         }
         // 清空发布才先执行删除
         if (delSize > 0 && clearOld) {
@@ -510,7 +511,7 @@ public class ReleaseManage {
                     int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
                     if (progressRangeList.add(progressRange)) {
                         //  total, progressSize
-                        logRecorder.system("上传文件进度:{}[{}/{}] {}/{} {} ", file.getName(),
+                        logRecorder.system("上传文件进度：{}[{}/{}] {}/{} {} ", file.getName(),
                             (finalI + 1), diffSize,
                             FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
                             NumberUtil.formatPercent(((float) progressSize / total), 0)
@@ -558,7 +559,7 @@ public class ReleaseManage {
                     double progressPercentage = Math.floor(((float) progressSize / total) * 100);
                     int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
                     if (progressRangeList.add(progressRange)) {
-                        logRecorder.system("上传文件进度:{} {}/{} {}", name,
+                        logRecorder.system("上传文件进度：{} {}/{} {}", name,
                             FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
                             NumberUtil.formatPercent(((float) progressSize / total), 0));
                     }
@@ -593,7 +594,7 @@ public class ReleaseManage {
             return outGivingRunBuilder.build().startRun(selectProject);
         });
         //OutGivingRun.startRun(releaseMethodDataId, zipFile, userModel, unZip, 0);
-        logRecorder.system("开始执行分发包啦,请到分发中查看详情状态");
+        logRecorder.system("开始执行分发包啦，请到分发中查看详情状态");
         OutGivingModel.Status status = statusFuture.get();
         logRecorder.system("分发结果：{}", status.getDesc());
     }
@@ -607,7 +608,7 @@ public class ReleaseManage {
         try {
             BaseServerController.resetInfo(userModel);
             this.init();
-            logRecorder.system("开始回滚:{}", DateTime.now());
+            logRecorder.system("开始回滚：{}", DateTime.now());
             //
             String errorMsg = this.start(null, item);
             logRecorder.system("执行回滚结束：{}", StrUtil.emptyToDefault(errorMsg, "ok"));
