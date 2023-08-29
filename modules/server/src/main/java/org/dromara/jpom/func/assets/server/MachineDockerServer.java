@@ -163,16 +163,18 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
 
     @Override
     public void execute() {
-        // 查询对应分组的数据
-        ClusterInfoModel current = clusterInfoService.getCurrent();
-        String linkGroup = current.getLinkGroup();
-        List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
-        if (CollUtil.isEmpty(linkGroups)) {
-            log.warn("当前集群还未绑定分组,不能监控 Docker 资产信息");
-            return;
-        }
         Entity entity = new Entity();
-        entity.set("groupName", linkGroups);
+        if (clusterInfoService.isMultiServer()) {
+            // 查询对应分组的数据
+            ClusterInfoModel current = clusterInfoService.getCurrent();
+            String linkGroup = current.getLinkGroup();
+            List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
+            if (CollUtil.isEmpty(linkGroups)) {
+                log.warn("当前集群还未绑定分组,不能监控 Docker 资产信息");
+                return;
+            }
+            entity.set("groupName", linkGroups);
+        }
         List<MachineDockerModel> list = this.listByEntity(entity, false);
         if (CollUtil.isEmpty(list)) {
             return;

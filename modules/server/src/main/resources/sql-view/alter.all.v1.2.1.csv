@@ -1,0 +1,2 @@
+alterType,tableName,name,type,len,defaultValue,comment,notNull
+ADD,CLUSTER_INFO,statusMsg,TEXT,,,状态消息

@@ -63,4 +63,8 @@ public class ClusterInfoModel extends BaseUserModifyDbModel {
      * jpom 版本
      */
     private String jpomVersion;
+    /**
+     * 集群地址状态消息
+     */
+    private String statusMsg;
 }

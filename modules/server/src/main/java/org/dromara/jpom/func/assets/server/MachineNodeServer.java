@@ -197,14 +197,16 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
 
     @Override
     public void run() {
-        String linkGroup = clusterInfoService.getCurrent().getLinkGroup();
-        List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
-        if (CollUtil.isEmpty(linkGroups)) {
-            log.warn("当前集群还未绑定分组,不能监控集群节点资产信息");
-            return;
-        }
         Entity entity = new Entity();
-        entity.set("groupName", linkGroups);
+        if (clusterInfoService.isMultiServer()) {
+            String linkGroup = clusterInfoService.getCurrent().getLinkGroup();
+            List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
+            if (CollUtil.isEmpty(linkGroups)) {
+                log.warn("当前集群还未绑定分组,不能监控集群节点资产信息");
+                return;
+            }
+            entity.set("groupName", linkGroups);
+        }
         entity.set("transportMode", 0);
         int heartSecond = nodeConfig.getHeartSecond();
         try {
