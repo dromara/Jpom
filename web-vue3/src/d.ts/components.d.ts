@@ -101,7 +101,9 @@ declare module '@vue/runtime-core' {
     TableOutlined: typeof import('@ant-design/icons-vue')['TableOutlined']
     Terminal: typeof import('./../components/terminal/index.vue')['default']
     Upgrade: typeof import('./../components/upgrade/index.vue')['default']
+    UploadOutlined: typeof import('@ant-design/icons-vue')['UploadOutlined']
     UserOutlined: typeof import('@ant-design/icons-vue')['UserOutlined']
     ViewPre: typeof import('./../components/logView/view-pre.vue')['default']
+    WarningOutlined: typeof import('@ant-design/icons-vue')['WarningOutlined']
   }
 }
