@@ -387,7 +387,8 @@ public class BuildExecuteManage implements Runnable {
         taskData.environmentMapBuilder.put("BUILD_ID", this.buildExtraModule.getId());
         taskData.environmentMapBuilder.put("BUILD_NAME", this.buildExtraModule.getName());
         taskData.environmentMapBuilder.put("BUILD_SOURCE_FILE", FileUtil.getAbsolutePath(this.gitFile));
-        taskData.environmentMapBuilder.put("BUILD_NUMBER_ID", this.taskData.buildInfoModel.getBuildId() + "");
+        taskData.environmentMapBuilder.put("BUILD_NUMBER_ID", String.valueOf(this.taskData.buildInfoModel.getBuildId()));
+        taskData.environmentMapBuilder.put("BUILD_ORIGINAL_RESULT_DIR_FILE", buildInfoModel.getResultDirFile());
         // 配置的分支名称，可能存在模糊匹配的情况
         taskData.environmentMapBuilder.put("BUILD_CONFIG_BRANCH_NAME", this.taskData.buildInfoModel.getBranchName());
         return null;
