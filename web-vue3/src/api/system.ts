@@ -89,7 +89,7 @@ export function clearErrorWorkspace(params: any) {
  * 加载配置数据
  * @param {String} nodeId 节点 ID，若为空表示加载 Server 端配置
  */
-export function getConfigData(data: any) {
+export function getConfigData(data?: any) {
   return axios({
     url: '/system/config-data',
     method: 'post',
@@ -189,7 +189,7 @@ export function editMailConfig(params: any) {
  * 系统程序信息
  * @param {String} nodeId 节点 ID
  */
-export function systemInfo(data: any) {
+export function systemInfo(data?: any) {
   return axios({
     url: '/system/info',
     method: 'post',
