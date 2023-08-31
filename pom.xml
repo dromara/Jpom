@@ -66,6 +66,7 @@
         <fastjson2.version>2.0.39</fastjson2.version>
         <fastjson-version>2.0.39</fastjson-version>
         <jna-version>5.12.1</jna-version>
+        <mwiede.jsch-version>0.2.11</mwiede.jsch-version>
     </properties>
     <dependencies>
         <dependency>
@@ -105,6 +106,18 @@
                 <groupId>com.alibaba.fastjson2</groupId>
                 <artifactId>fastjson2</artifactId>
                 <version>${fastjson2.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>1.75</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.mwiede</groupId>
+                <artifactId>jsch</artifactId>
+                <version>${mwiede.jsch-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
