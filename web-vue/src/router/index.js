@@ -283,6 +283,11 @@ const router = new Router({
       component: () => import("../pages/ssh/full-terminal"),
     },
     {
+      path: "/ssh-tabs",
+      name: "ssh-tabs",
+      component: () => import("../pages/ssh/ssh-tabs"),
+    },
+    {
       path: "*",
       name: "404",
       component: () => import("../pages/404"),
