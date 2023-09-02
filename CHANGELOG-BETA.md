@@ -5,6 +5,7 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 资产管理共享仓库新建归属到工作空间问题（感谢@沈钊）
+2. 【server】升级 springboot 、oshi、docker-java、jgit
 
 ------
 
