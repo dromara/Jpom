@@ -9,7 +9,7 @@ import Qs from "qs";
 
 // 不需要鉴权的名单
 const whiteList = ["/login", "/install", "/system/ipAccess"];
-const noTabs = ["/full-terminal"];
+const noTabs = ["/full-terminal", "/ssh-tabs"];
 
 router.beforeEach((to, from, next) => {
   // 检测白名单
