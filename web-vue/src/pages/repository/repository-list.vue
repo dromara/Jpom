@@ -568,6 +568,10 @@ export default {
         repoType: 0,
         protocol: 0,
       };
+      if (!this.global) {
+        this.temp = { ...this.temp, workspaceId: "GLOBAL", global: true };
+      }
+
       this.editVisible = true;
     },
     handleAddGitee() {
@@ -614,14 +618,18 @@ export default {
       this.handleGiteeImportFormOk();
     },
     handleGiteeRepoAdd(record) {
-      editRepository({
+      let data = {
         repoType: 0,
         protocol: 0,
         userName: record.username,
         password: this.giteeImportForm.token,
         name: record.name,
         gitUrl: record.url,
-      }).then((res) => {
+      };
+      if (!this.global) {
+        data = { ...data, workspaceId: "GLOBAL", global: true };
+      }
+      editRepository(data).then((res) => {
         if (res.code === 200) {
           // 成功
           this.$notification.success({
