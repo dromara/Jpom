@@ -12,8 +12,16 @@ export default {
     notExists: "不存在",
     unknown: "未知",
 
+    normal:"正常",
+    abnormal:"异常",
+
+    success:"成功",
+    fail:"失败",
+
     operation: "操作",
     loading: "加载中",
+    more:"详情",
+    moreInf:"详情信息",
 
     lastStep: "上一步",
     nextStep: "下一步",
@@ -56,8 +64,13 @@ export default {
     confirmBind: "确认绑定",
     ignore: "忽略",
 
+    toChoose:"待选择",
+    chosen:"已选择",
+
     open: "开启",
     close: "关闭",
+    on:"开",
+    off:"关",
     yes: "是",
     no: "否",
     alarm: "报警中",
@@ -67,14 +80,27 @@ export default {
     edit: "编辑",
     delete: "删除",
 
-    toChoose:"待选择",
-    chosen:"已选择",
+    title:"标题",
+    content:"内容",
+    notifyObject:"通知对象",
+    notifyError:"通知异常",
 
     monitorName: "监控名称",
     openStatus: "开启状态",
     autoRestart: "自动重启",
     alarmStatus: "报警状态",
+    notifyStatus:"通知状态",
     execCron: "监控周期",
     monitorProj: "监控项目",
-    editMonitor: "编辑监控"
+    editMonitor: "编辑监控",
+    alarmTitle:"报警标题",
+    nodeId:"节点名称",
+    projectId:"项目ID",
+    notifyStyle:"报警方式",
+    alarmTime:"报警时间",
+    monitorUser:"监控用户",
+    monitorOpt:"监控功能",
+    monitorOperation:"监控操作",
+    notifyUser: "报警联系人",
+
 };

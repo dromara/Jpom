@@ -5,20 +5,20 @@
     <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" bordered :rowKey="(record, index) => index" @change="change">
       <template slot="title">
         <a-space>
-          <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+          <a-select v-model="listQuery.nodeId" allowClear :placeholder=$t('monitor.log.selectNode') class="search-input-item">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
-          <a-select v-model="listQuery.status" allowClear placeholder="报警状态" class="search-input-item">
-            <a-select-option :value="1">正常</a-select-option>
-            <a-select-option :value="0">异常</a-select-option>
+          <a-select v-model="listQuery.status" allowClear :placeholder=$t('common.alarmStatus') class="search-input-item">
+            <a-select-option :value="1">{{$t('common.normal')}}</a-select-option>
+            <a-select-option :value="0">{{ $t('common.abnoral') }}</a-select-option>
           </a-select>
-          <a-select v-model="listQuery.notifyStatus" allowClear placeholder="通知状态" class="search-input-item">
-            <a-select-option :value="1">成功</a-select-option>
-            <a-select-option :value="0">失败</a-select-option>
+          <a-select v-model="listQuery.notifyStatus" allowClear :placeholder=$t('common.notifyStatus') class="search-input-item">
+            <a-select-option :value="1">{{$t('common.success')}}</a-select-option>
+            <a-select-option :value="0">{{$t('common.fail')}}</a-select-option>
           </a-select>
           <a-range-picker class="search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
+          <a-tooltip :title=$t('monitor.list.goBackP1')>
+            <a-button :loading="loading" type="primary" @click="loadData">{{$t('common.search')}}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -28,17 +28,17 @@
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <span slot="status" slot-scope="text">{{ text ? "正常" : "异常" }}</span>
+      <span slot="status" slot-scope="text">{{ text ? $t('common.normal') : $t('common.abnormal') }}</span>
       <template slot="notifyStyle" slot-scope="text">
-        {{ notifyStyle[text] || "未知" }}
+        {{ notifyStyle[text] || $t('common.unknown') }}
       </template>
-      <span slot="notifyStatus" slot-scope="text">{{ text ? "成功" : "失败" }}</span>
+      <span slot="notifyStatus" slot-scope="text">{{ text ? $t('common.success') : $t('common.fail') }}</span>
       <template slot="operation" slot-scope="text, record">
-        <a-button size="small" type="primary" @click="handleDetail(record)">详情</a-button>
+        <a-button size="small" type="primary" @click="handleDetail(record)">{{$t('common.more')}}</a-button>
       </template>
     </a-table>
     <!-- 详情区 -->
-    <a-modal destroyOnClose v-model="detailVisible" width="600px" title="详情信息" :footer="null">
+    <a-modal destroyOnClose v-model="detailVisible" width="600px" :title=$t('common.moreInf') :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">
         <a-list-item slot="renderItem" slot-scope="item">
           <a-list-item-meta :description="item.description">
@@ -66,21 +66,21 @@ export default {
       notifyStyle,
       detailData: [],
       columns: [
-        { title: "报警标题", dataIndex: "title", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "节点名称", dataIndex: "nodeId", width: 100, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
-        { title: "项目 ID", dataIndex: "projectId", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "报警状态", dataIndex: "status", width: 100, align: "center", ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "报警方式", dataIndex: "notifyStyle", width: 100, align: "center", ellipsis: true, scopedSlots: { customRender: "notifyStyle" } },
+        { title: this.$t('common.alarmTitle'), dataIndex: "title", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: this.$t('common.nodeId'), dataIndex: "nodeId", width: 100, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
+        { title: this.$t('common.projectId'), dataIndex: "projectId", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: this.$t('common.alarmStatus'), dataIndex: "status", width: 100, align: "center", ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: this.$t('common.notifyStyle'), dataIndex: "notifyStyle", width: 100, align: "center", ellipsis: true, scopedSlots: { customRender: "notifyStyle" } },
         {
-          title: "报警时间",
+          title: this.$t('common.alarmTime'),
           dataIndex: "createTime",
           customRender: (text) => {
             return parseTime(text);
           },
           width: 170,
         },
-        { title: "通知状态", dataIndex: "notifyStatus", width: 100, ellipsis: true, scopedSlots: { customRender: "notifyStatus" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 80 },
+        { title: this.$t('common.notifyStatus'), dataIndex: "notifyStatus", width: 100, ellipsis: true, scopedSlots: { customRender: "notifyStatus" } },
+        { title: this.$t('common.operation'), dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 80 },
       ],
     };
   },
@@ -139,11 +139,11 @@ export default {
       this.detailData = [];
       this.detailVisible = true;
       this.temp = Object.assign({}, record);
-      this.detailData.push({ title: "标题", description: this.temp.title });
-      this.detailData.push({ title: "内容", description: this.temp.content });
-      this.detailData.push({ title: "通知对象", description: this.temp.notifyObject });
+      this.detailData.push({ title: $t('common.title'), description: this.temp.title });
+      this.detailData.push({ title: $t('common.content'), description: this.temp.content });
+      this.detailData.push({ title: this.$t('common.notifyObject'), description: this.temp.notifyObject });
       if (!this.temp.notifyStatus) {
-        this.detailData.push({ title: "通知异常", description: this.temp.notifyError });
+        this.detailData.push({ title: this.$t('common.notifyError'), description: this.temp.notifyError });
       }
     },
   },
