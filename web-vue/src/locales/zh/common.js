@@ -84,6 +84,8 @@ export default {
     query:"查询",
     add: "新增",
     edit: "编辑",
+    look:'查看',
+
     delete: "删除",
     import:"导出",
     template:"模板",
@@ -131,4 +133,13 @@ export default {
     stop:"停止",
     commandParams:"命令参数",
     addParams:"添加参数",
+    goBackP1:"按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页",
+    global:"全局",
+    workSpace:"工作空间",
+    defaultParam:"默认参数",
+    share:"共享",
+    currentWorkSpace:"当前工作空间",
+    timedExec:"定时执行",
+    description:"描述",
+    detail:"详细描述",
 };

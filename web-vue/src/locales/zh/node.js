@@ -44,11 +44,13 @@ export default {
 
             },
             script_log:{
-
+                clearCache:"清除服务端缓存节点所有的脚步模版信息并重新同步",
+                serverSync:'服务端分发同步的脚本不能直接删除,需要到服务端去操作',
+                editScript:"编辑 Script",
+                serverSyncMessage:"服务端同步的脚本不能在此修改",
+                scriptName:"Script 名称",
+                scriptContent:"Script 内容"
             },
-            script_log_view:{
-
-            }
         }
     }
 }
