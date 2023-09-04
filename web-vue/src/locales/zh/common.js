@@ -29,6 +29,7 @@ export default {
 
     name: "名称",
     login: "登录",
+    domain:"域名",
 
     noData: "暂无数据",
 
@@ -50,9 +51,13 @@ export default {
     group: "分组",
     status: "状态",
 
+    effectiveTime:"生效时间",
+    expirationTime:"到期时间",
+
     kindReminder: "温馨提示",
     systemPrompt: "系统提示",
     goHome: "回到首页",
+    refresh:"刷新",
 
     goToThirdParty: "跳转到第三方系统中",
 
@@ -76,9 +81,12 @@ export default {
     alarm: "报警中",
     noAlarm: "未报警",
     search: "搜索",
+    query:"查询",
     add: "新增",
     edit: "编辑",
     delete: "删除",
+    import:"导出",
+    template:"模板",
 
     title:"标题",
     content:"内容",
@@ -103,4 +111,24 @@ export default {
     monitorOperation:"监控操作",
     notifyUser: "报警联系人",
 
+    showAll:"显示所有",
+    showNorm:"显示正常",
+    addConfig:"新增配置",
+    able:"运行中",
+    disable:"未运行",
+    moreOper:"更多操作",
+    deleteConfirm:"删除确认",
+    restore:"还原",
+    tempDelete:"临时删除",
+    permDelete:"永久删除",
+    restoreConfig:"还原配置",
+    fileName:"文件名称",
+    configContent:"配置内容",
+    serviceName:"服务名称",
+    temp:"临时",
+    perm:"永久",
+    execute:"执行",
+    stop:"停止",
+    commandParams:"命令参数",
+    addParams:"添加参数",
 };

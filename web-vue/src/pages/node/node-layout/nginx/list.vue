@@ -1,7 +1,7 @@
 <template>
   <!-- 布局 -->
   <div>
-    <a-alert message="当前功能将择机下架，请提前使用 DSL 项目管理来代替 nginx 管理" banner />
+    <a-alert :message=$t('node.node_layout.nginx.list.alert') banner />
     <a-layout class="file-layout node-full-content">
       <!-- 目录树 -->
       <a-layout-sider theme="light" class="nginx-sider" width="25%">
@@ -14,42 +14,42 @@
           <template slot="title">
             <a-space>
               <div>
-                查询：
-                <a-switch v-model="listData.showAll" checked-children="显示所有" un-checked-children="显示正常" />
+                {{$t('common.query')}}
+                <a-switch v-model="listData.showAll" :checked-children=$t('common.showAll') :un-checked-children=$t('common.showNorm') />
               </div>
-              <a-button size="small" type="primary" @click="handleFilter">刷新</a-button>
-              <a-button size="small" type="primary" @click="handleAdd">新增配置</a-button>
+              <a-button size="small" type="primary" @click="handleFilter">{{ $t('common.refresh') }}</a-button>
+              <a-button size="small" type="primary" @click="handleAdd">{{ $t('common.addConfig') }}</a-button>
               ｜
-              <a-switch v-model="nginxData.status" checked-children="运行中" un-checked-children="未运行" disabled />
+              <a-switch v-model="nginxData.status" :checked-children=$t('common.able') :un-checked-children=$t('common.disable') disabled />
               <a-dropdown>
                 <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-                  更多操作
+                  {{$t('common.moreOper')}}
                   <a-icon type="down" />
                 </a>
                 <a-menu slot="overlay">
                   <a-menu-item>
-                    <a-button type="primary" @click="handleEditNginx">编辑 Nginx 服务</a-button>
+                    <a-button type="primary" @click="handleEditNginx">{{$t('node.node_layout.nginx.list.editNginx')}}</a-button>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button :disabled="nginxData.status" type="primary" @click="handleNginxCommand('open')">启动 Nginx</a-button>
+                    <a-button :disabled="nginxData.status" type="primary" @click="handleNginxCommand('open')">{{$t('node.node_layout.nginx.list.openNginx')}}</a-button>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('reload')">重新加载 Nginx</a-button>
+                    <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('reload')">{{$t('node.node_layout.nginx.list.reloadNginx')}}</a-button>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('close')">停止 Nginx</a-button>
+                    <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('close')">{{$t('node.node_layout.nginx.list.closeNginx')}}</a-button>
                   </a-menu-item>
                 </a-menu>
               </a-dropdown>
               <a-tooltip>
                 <template slot="title">
-                  <div>nginx 管理是指在想编辑配置文件，并自动重新加载(reload)</div>
+                  <div>{{$t('node.node_layout.nginx.list.nginxManage')}}</div>
 
                   <div>
                     <ul>
-                      <li>linux 服务器默认执行 nginx -s reload 、service xxxx start、service xxxx top</li>
-                      <li>linux 服务器如果为编译安装则需要将 nginx 服务名称配置到 nginx执行文件的绝对路径，如 <b>/usr/local/nginx/sbin/nginx</b></li>
-                      <li>windows 服务器是需要提前安装 nginx 并配置服务,默认执行 net start xxxx、net stop xxxx、net、sc query xxxx</li>
+                      <li>{{$t('node.node_layout.nginx.list.li_1')}}</li>
+                      <li>{{$t('node.node_layout.nginx.list.li_2')}} <b>/usr/local/nginx/sbin/nginx</b></li>
+                      <li>{{$t('node.node_layout.nginx.list.li_3')}}</li>
                     </ul>
                   </div>
                 </template>
@@ -57,7 +57,7 @@
               </a-tooltip>
             </a-space>
           </template>
-          <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="`名称：${text}  server 节点数 ${record.serverCount}`">
+          <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title=$t('node.node_layout.nginx.list.handleEdit')>
             <div @click="handleEdit(record)" :style="`${record.name.endsWith('.conf') ? 'color: blue' : ''}`">
               <a-icon v-if="record.name.endsWith('.conf')" type="edit" />
               <a-icon v-else type="eye" />
@@ -78,44 +78,44 @@
           </a-tooltip>
           <template slot="operation" slot-scope="text, record">
             <!-- <a-button type="primary" @click="handleEdit(record)">编辑</a-button> -->
-            <a-popover title="删除确认" v-if="record.name.endsWith('.conf')">
+            <a-popover :title=$t('common.deleteConfirm') v-if="record.name.endsWith('.conf')">
               <template slot="content">
-                <p><a-button size="small" type="danger" @click="handleDelete(record, 'temp', 'none')">临时删除</a-button></p>
-                <p><a-button size="small" type="danger" @click="handleDelete(record, 'real', 'none')">永久删除</a-button></p>
+                <p><a-button size="small" type="danger" @click="handleDelete(record, 'temp', 'none')">{{ $t('common.tempDelete') }}</a-button></p>
+                <p><a-button size="small" type="danger" @click="handleDelete(record, 'real', 'none')">{{ $t('common.permDelete')}}</a-button></p>
               </template>
-              <a-button size="small" type="danger">删除</a-button>
+              <a-button size="small" type="danger">{{$t('common.delete')}}</a-button>
             </a-popover>
-            <a-popover title="还原" v-else>
+            <a-popover :title=$t('common.restore') v-else>
               <template slot="content">
-                <p><a-button size="small" type="danger" @click="handleDelete(record, 'temp', 'back')">还原配置</a-button></p>
-                <p><a-button size="small" type="danger" @click="handleDelete(record, 'real', 'back')">永久删除</a-button></p>
+                <p><a-button size="small" type="danger" @click="handleDelete(record, 'temp', 'back')">{{ $t('common.restoreConfig')}}</a-button></p>
+                <p><a-button size="small" type="danger" @click="handleDelete(record, 'real', 'back')">{{ $t('common.permDelete')}}</a-button></p>
               </template>
-              <a-button size="small" type="danger">还原</a-button>
+              <a-button size="small" type="danger">{{$t('common.restore')}}</a-button>
             </a-popover>
           </template>
         </a-table>
         <!-- 编辑区 -->
-        <a-modal destroyOnClose v-model="editNginxVisible" title="编辑 Nginx 配置文件" @ok="handleEditNginxOk" :maskClosable="false" width="70vw">
+        <a-modal destroyOnClose v-model="editNginxVisible" :title=$t('node.node_layout.nginx.list.editNginxConfig') @ok="handleEditNginxOk" :maskClosable="false" width="70vw">
           <a-form-model ref="editNginxForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 18 }">
-            <a-form-model-item label="白名单路径" prop="whitePath">
-              <a-select v-model="temp.whitePath" placeholder="请选择白名单路径">
+            <a-form-model-item :label=$t('node.node_layout.nginx.list.whitePath') prop="whitePath">
+              <a-select v-model="temp.whitePath" :placeholder=$t('node.node_layout.nginx.list.chooseWhitePath')>
                 <a-select-option v-for="element in whiteList" :key="element">{{ element }}</a-select-option>
               </a-select>
             </a-form-model-item>
-            <a-form-model-item label="文件名称" prop="name">
-              <a-input v-model="temp.name" placeholder="需要以 .conf 结尾" />
+            <a-form-model-item :label=$t('common.fileName') prop="name">
+              <a-input v-model="temp.name" :placeholder=$t('node.node_layout.nginx.list.fileNameMessage') />
             </a-form-model-item>
-            <a-form-model-item label="配置内容" prop="context">
+            <a-form-model-item :label=$t('common.configContent') prop="context">
               <code-editor v-model="temp.context" :options="{ mode: 'nginx' }" style="resize: none; height: 40vh"></code-editor>
               <!-- <a-input v-model="temp.context" type="textarea" :rows="10" style="resize: none; height: 40vh" placeholder="配置内容" /> -->
             </a-form-model-item>
           </a-form-model>
         </a-modal>
         <!-- 编辑 Nginx 服务名 -->
-        <a-modal destroyOnClose v-model="editNginxNameVisible" title="编辑 Nginx 服务名称" @ok="handleEditNginxNameOk" :maskClosable="false" width="500px">
+        <a-modal destroyOnClose v-model="editNginxNameVisible" :title=$t('node.node_layout.nginx.list.editMessage') @ok="handleEditNginxNameOk" :maskClosable="false" width="500px">
           <a-form-model ref="editNginxNameForm" :rules="rules" :model="nginxData" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
-            <a-form-model-item label="服务名称" prop="name">
-              <a-input v-model="nginxData.name" placeholder="请输入 Nginx 服务名称" />
+            <a-form-model-item :label=$t('common.serviceName') prop="name">
+              <a-input v-model="nginxData.name" :placeholder=$t('node.node_layout.nginx.list.serviceNameMessage') />
             </a-form-model-item>
           </a-form-model>
         </a-modal>
@@ -157,13 +157,13 @@ export default {
         title: "title",
       },
       columns: [
-        { title: "文件名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: this.$t('common.fileName'), dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         // { title: "文件类型", dataIndex: "isDirectory", width: 100, ellipsis: true, scopedSlots: { customRender: "isDirectory" } },
         // { title: "数量", dataIndex: "serverCount", width: 80, ellipsis: true },
-        { title: "域名", dataIndex: "serverName", width: 140, ellipsis: true, scopedSlots: { customRender: "serverName" } },
+        { title: this.$t('common.domain'), dataIndex: "serverName", width: 140, ellipsis: true, scopedSlots: { customRender: "serverName" } },
         { title: "location", dataIndex: "location", width: 140, ellipsis: true, scopedSlots: { customRender: "location" } },
-        { title: "修改时间", dataIndex: "time", width: 140, ellipsis: true, scopedSlots: { customRender: "time" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 60 },
+        { title: this.$t('common.modifyTime'), dataIndex: "time", width: 140, ellipsis: true, scopedSlots: { customRender: "time" } },
+        { title: this.$t('common.operation'), dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 60 },
       ],
       rules: {
         name: [{ required: true, message: "Please input name", trigger: "blur" }],
@@ -316,15 +316,15 @@ export default {
     handleDelete(record, type, from) {
       let msg;
       if (from === "back") {
-        msg = "真的要" + (type === "real" ? "永久删除文件么？" : "还原配置文件么？");
+        msg = this.$t('node.node_layout.nginx.list.reallyWant') + (type === "real" ? this.$t('node.node_layout.nginx.list.ifPermDelete') : this.$t('node.node_layout.nginx.list.ifRestoreConfig'));
       } else {
-        msg = "真的要" + (type === "real" ? "永久" : "临时") + "删除文件么？";
+        msg = this.$t('node.node_layout.nginx.list.reallyWant') + (type === "real" ? this.$t('common.perm') : this.$t('common.temp')) + this.$t('node.node_layout.nginx.list.ifDelete');
       }
       this.$confirm({
-        title: "系统提示",
+        title: this.$t('common.systemPrompt'),
         content: msg,
-        okText: "确认",
-        cancelText: "取消",
+        okText: this.$t('common.confirm'),
+        cancelText: this.$t('common.cancel'),
         onOk: () => {
           // 请求参数
           const params = {

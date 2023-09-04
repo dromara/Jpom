@@ -8,17 +8,17 @@
       <log-view :ref="`logView`" height="calc(100vh - 140px)">
         <template slot="before">
           <a-space>
-            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">执行</a-button>
-            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">停止</a-button>
+            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">{{$t('common.execute')}}</a-button>
+            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">{{$t('common.stop')}}</a-button>
           </a-space>
         </template>
       </log-view>
     </div>
 
     <!--远程下载  -->
-    <a-modal destroyOnClose v-model="editArgs" title="添加运行参数" @ok="startExecution" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editArgs" :title=$t('node.node_layout.other.script_console.addArgs') @ok="startExecution" :maskClosable="false">
       <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" ref="ruleForm">
-        <a-form-model-item label="命令参数" :help="`${commandParams.length ? '所有参数将拼接成字符串以空格分隔形式执行脚本,需要注意参数顺序和未填写值的参数将自动忽略' : ''}`">
+        <a-form-model-item :label=$t('common.commandParams') :help="`${commandParams.length ? $t('node.node_layout.other.script_console.paramsHelp') : ''}`">
           <a-row v-for="(item, index) in commandParams" :key="item.key">
             <a-col :span="22">
               <a-input :addon-before="`参数${index + 1}值`" v-model="item.value" :placeholder="`参数值 ${item.desc ? ',' + item.desc : ''}`">
@@ -38,7 +38,7 @@
               </a-row>
             </a-col>
           </a-row>
-          <a-button type="primary" size="small" @click="() => commandParams.push({})">添加参数</a-button>
+          <a-button type="primary" size="small" @click="() => commandParams.push({})">{{$t('common.addParams')}}</a-button>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -119,7 +119,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err);
         this.$notification.error({
-          message: "web socket 错误,请检查是否开启 ws 代理",
+          message: this.$t('node.node_layout.other.script_console.socketErrMessage'),
         });
         clearInterval(this.heart);
         this.btnLoading = true;
@@ -127,7 +127,7 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err);
-        this.$message.warning("会话已经关闭[node-script-consloe]");
+        this.$message.warning(this.$t('node.node_layout.other.script_console.socketOncloseMessage'));
         clearInterval(this.heart);
         this.btnLoading = true;
       };
