@@ -11,7 +11,7 @@
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">{{ $t('common.add') }}</a-button>
 
-          <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息并重新同步">
+          <a-tooltip placement="topLeft" :title=$t('node.node_layout.other.script_list.clearCache')>
             <a-icon @click="sync()" type="sync" spin/>
           </a-tooltip>
         </a-space>
@@ -32,7 +32,7 @@
             {{ record.scriptType === "server-sync" ? $t('common.look') : $t('common.edit') }}
           </a-button>
           <a-tooltip
-              :title="`${record.scriptType === 'server-sync' ? '服务端分发同步的脚本不能直接删除,需要到服务端去操作' : $t('common.delete')}`">
+              :title="`${record.scriptType === 'server-sync' ? $t('node.node_layout.other.script_list.serverSync') : $t('common.delete')}`">
             <a-button size="small" :disabled="record.scriptType === 'server-sync'" type="danger"
                       @click="handleDelete(record)">{{ $t('common.delete') }}
             </a-button>
@@ -41,18 +41,18 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk"
+    <a-modal destroyOnClose v-model="editScriptVisible" :title=$t('node.node_layout.other.script_list.editScript') @ok="handleEditScriptOk"
              :maskClosable="false" width="80vw">
       <a-form-model ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }"
                     :wrapper-col="{ span: 18 }">
-        <a-alert v-if="this.temp.scriptType === 'server-sync'" message="服务端同步的脚本不能在此修改" banner/>
+        <a-alert v-if="this.temp.scriptType === 'server-sync'" :message=$t('node.node_layout.other.script_list.serverSyncMessage') banner/>
         <a-form-model-item v-if="temp.id" label="ScriptId" prop="id">
           <a-input v-model="temp.id" disabled readOnly/>
         </a-form-model-item>
-        <a-form-model-item label="Script 名称" prop="name">
+        <a-form-model-item :label=$t('node.node_layout.other.script_list.scriptName') prop="name">
           <a-input :maxLength="50" v-model="temp.name" :placeholder="名称"/>
         </a-form-model-item>
-        <a-form-model-item label="Script 内容" prop="context">
+        <a-form-model-item :label=$t('node.node_layout.other.script_list.scriptContent') prop="context">
           <div style="height: 40vh; overflow-y: scroll">
             <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
           </div>
@@ -90,7 +90,7 @@
         </a-form-model-item>
         <a-form-model-item :label=$t('common.timedExec') prop="autoExecCron">
           <a-auto-complete v-model="temp.autoExecCron"
-                           placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
+                           :placeholder=$t('node.node_layout.other.script_list.inputCron')
                            option-label-prop="value">
             <template slot="dataSource">
               <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
@@ -173,14 +173,14 @@ export default {
           customRender: (text) => parseTime(text),
         },
         {
-          title: "创建人",
+          title: this.$t('common.creator'),
           dataIndex: "createUser",
           ellipsis: true,
           scopedSlots: {customRender: "tooltip"},
           width: "120px"
         },
         {
-          title: "修改人",
+          title: this.$t('common.modifyUser'),
           dataIndex: "modifyUser",
           ellipsis: true,
           scopedSlots: {customRender: "modifyUser"},
@@ -188,7 +188,7 @@ export default {
         },
         // { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, width: 150, scopedSlots: { customRender: "lastRunUser" } },
         {
-          title: "操作",
+          title: this.$t('common.operation'),
           dataIndex: "operation",
           align: "center",
           scopedSlots: {customRender: "operation"},
@@ -197,8 +197,8 @@ export default {
         },
       ],
       rules: {
-        name: [{required: true, message: "请输入脚本名称", trigger: "blur"}],
-        context: [{required: true, message: "请输入脚本内容", trigger: "blur"}],
+        name: [{required: true, message: this.$t('node.node_layout.other.script_list.inputScriptName'), trigger: "blur"}],
+        context: [{required: true, message: this.$t('node.node_layout.other.script_list.inputScriptContent'), trigger: "blur"}],
       },
       commandParams: [],
     };
@@ -250,7 +250,7 @@ export default {
     handleEditScriptOk() {
       if (this.temp.scriptType === "server-sync") {
         this.$notification.warning({
-          message: "服务端同步的脚本不能在此修改",
+          message: this.$t('node.node_layout.other.script_list.syncCantMod'),
         });
         return;
       }
@@ -258,7 +258,7 @@ export default {
         for (let i = 0; i < this.commandParams.length; i++) {
           if (!this.commandParams[i].desc) {
             this.$notification.error({
-              message: "请填写第" + (i + 1) + "个参数的描述",
+              message: this.$t('node.node_layout.other.script_list.inputParamDesc1') + (i + 1) + this.$t('node.node_layout.other.script_list.inputParamDesc2'),
             });
             return false;
           }
@@ -290,10 +290,10 @@ export default {
     },
     handleDelete(record) {
       this.$confirm({
-        title: "系统提示",
-        content: "真的要删除脚本么？",
-        okText: "确认",
-        cancelText: "取消",
+        title: this.$t('common.systemPrompt'),
+        content: this.$t('node.node_layout.other.script_list.ifDeleteScript'),
+        okText: this.$t('common.confirm'),
+        cancelText: this.$t('common.cancel'),
         onOk: () => {
           // 组装参数
           const params = {

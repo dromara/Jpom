@@ -45,8 +45,10 @@ export default {
     lastModifiedBy: "最后修改人",
     modifyTime: "修改时间",
     modifyUser: "修改人",
+    creator:"创建人",
     introGuide:"导航助手",
     contact:"联系人",
+    operator:"执行人",
 
     group: "分组",
     status: "状态",
@@ -142,4 +144,6 @@ export default {
     timedExec:"定时执行",
     description:"描述",
     detail:"详细描述",
+    triggerExecType:"触发类型",
+    executeArea:"执行域",
 };

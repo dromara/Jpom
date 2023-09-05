@@ -41,15 +41,26 @@ export default {
 
             },
             script_list:{
-
-            },
-            script_log:{
                 clearCache:"清除服务端缓存节点所有的脚步模版信息并重新同步",
                 serverSync:'服务端分发同步的脚本不能直接删除,需要到服务端去操作',
                 editScript:"编辑 Script",
                 serverSyncMessage:"服务端同步的脚本不能在此修改",
                 scriptName:"Script 名称",
-                scriptContent:"Script 内容"
+                scriptContent:"Script 内容",
+                inputCron:"如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）",
+                inputScriptName:"请输入脚本名称",
+                inputScriptContent:"请输入脚本内容",
+                syncCantMod:"服务端同步的脚本不能在此修改",
+                ifDeleteScript:"真的要删除脚本么？",
+                inputParamDesc1:"请填写第",
+                inputParamDesc2:"个参数的描述"
+            },
+            script_log:{
+                execStart:"执行时间开始",
+                execEnd:"执行时间结束",
+                scriptContent:"脚本模版是存储在节点(插件端),执行也都将在节点里面执行,服务端会定时去拉取执行日志,拉取频率为 100 条/分钟",
+                timeDelay:"数据可能出现一定时间延迟",
+                ifDeleteRec:"真的要删除执行记录么？",
             },
         }
     }
