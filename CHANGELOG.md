@@ -1,5 +1,24 @@
 # 🚀 版本日志
 
+### 2.10.44 (2023-09-06)
+
+### 🐣 新增功能
+
+1. 【server】新增 支持 git submodules
+   （感谢 [@Croce](https://gitee.com/Croce) [Gitee pr 195](https://gitee.com/dromara/Jpom/pulls/195) ）
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 资产管理共享仓库新建归属到工作空间问题（感谢@沈钊）
+2. 【server】升级 springboot 、oshi、docker-java、jgit
+3. 【server】升级 mwiede.jsch 版本
+4. 【server】优化 构建回滚创建新的构建记录（感谢[@Smith](https://gitee.com/autools) [Gitee issues I7VEJA](https://gitee.com/dromara/Jpom/issues/I7VEJA)）
+5. 【server】修复 新增资产无法正常监控问题（感谢@乔、@MichelleChung、@Pluto）
+6. 【server】优化 编辑集群地址不验证，调整到心跳检测验证（感谢@黄纲）
+7. 【server】优化 构建新增环境变量：BUILD_ORIGINAL_RESULT_DIR_FILE、BUILD_RESULT_DIR_FILE（发布流程）(感谢@黄纲)
+
+------
+
 ### 2.10.43 (2023-08-25)
 
 ### 🐞 解决BUG、优化功能
