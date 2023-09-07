@@ -30,7 +30,7 @@ VOLUME ["/root/.m2"]
 ARG TEMP_VERSION=""
 ARG JPOM_VERSION
 ENV USE_JPOM_VERSION=${JPOM_VERSION}${TEMP_VERSION}
-RUN --mount=type=cache,target=/root/.m2 sh ./script/replaceVersion.sh ${USE_JPOM_VERSION}
+RUN --mount=type=cache,target=/root/.m2 sh ./script/replaceVersion.sh ${USE_JPOM_VERSION} "release"
 
 RUN --mount=type=cache,target=/root/.m2 mvn -B -e -T 1C clean package -pl modules/agent -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
 

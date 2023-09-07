@@ -30,7 +30,9 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="buildNumberId" slot-scope="text, record" :title="text + ' ( 点击查看日志 ) '">
-        <a-tag color="#108ee9" @click="handleBuildLog(record)">#{{ text }}</a-tag>
+        <a-tag color="#108ee9" @click="handleBuildLog(record)">
+          #{{ text }}<template v-if="record.fromBuildNumberId">&lt;-{{ record.fromBuildNumberId }}</template>
+        </a-tag>
       </a-tooltip>
       <a-tooltip slot="status" slot-scope="text, item" :title="item.statusMsg || statusMap[text] || '未知'">
         <a-tag :color="statusColor[item.status]">{{ statusMap[text] || "未知" }}</a-tag>
@@ -43,8 +45,9 @@
       </a-tooltip>
 
       <a-tooltip slot="resultFileSize" slot-scope="text, record" :title="`产物文件大小：${renderSize(record.resultFileSize)}， 日志文件： ${renderSize(record.buildLogFileSize)}`">
-        <span>{{ renderSize(record.resultFileSize) }}</span>
-        <!-- <div>{{ parseTime(record.endTime) }}</div> -->
+        <span v-if="record.resultFileSize">{{ renderSize(record.resultFileSize) }}</span>
+        <span v-else-if="record.buildLogFileSize">{{ renderSize(record.buildLogFileSize) }}</span>
+        <span v-else>-</span>
       </a-tooltip>
 
       <a-tooltip slot="endTime" slot-scope="text, record" :title="`开始时间：${parseTime(record.startTime)}，${record.endTime ? '结束时间：' + parseTime(record.endTime) : ''}`">
@@ -103,8 +106,8 @@ export default {
   },
   data() {
     return {
-      releaseMethodMap: releaseMethodMap,
-      triggerBuildTypeMap: triggerBuildTypeMap,
+      releaseMethodMap,
+      triggerBuildTypeMap,
       loading: false,
       list: [],
 
@@ -145,7 +148,7 @@ export default {
           width: "170px",
         },
         { title: "发布方式", dataIndex: "releaseMethod", width: "100px", ellipsis: true, scopedSlots: { customRender: "releaseMethod" } },
-        { title: "构建人", dataIndex: "modifyUser", width: "130px", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
+        { title: "操作人", dataIndex: "modifyUser", width: "130px", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: "200px", align: "center", fixed: "right" },
       ],
     };
@@ -223,6 +226,12 @@ export default {
                 message: res.msg,
               });
               this.loadData();
+              // 弹窗
+              this.temp = {
+                id: record.buildDataId,
+                buildId: res.data,
+              };
+              this.buildLogVisible = true;
             }
           });
         },

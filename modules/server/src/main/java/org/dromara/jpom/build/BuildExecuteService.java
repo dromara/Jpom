@@ -25,9 +25,12 @@ package org.dromara.jpom.build;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.files.service.FileStorageService;
@@ -46,10 +49,13 @@ import org.dromara.jpom.service.script.ScriptExecuteLogServer;
 import org.dromara.jpom.service.script.ScriptServer;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
 import org.dromara.jpom.system.extconf.BuildExtConfig;
+import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.io.File;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -145,8 +151,8 @@ public class BuildExecuteService {
      * @return json
      */
     public IJsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay,
-                                      int triggerBuildType, String buildRemark, String checkRepositoryDiff,
-                                      Object... parametersEnv) {
+                                       int triggerBuildType, String buildRemark, String checkRepositoryDiff,
+                                       Object... parametersEnv) {
         synchronized (buildInfoId.intern()) {
             BuildInfoModel buildInfoModel = buildService.getByKey(buildInfoId);
             String e = this.checkStatus(buildInfoModel);
@@ -157,23 +163,14 @@ public class BuildExecuteService {
             //
             BuildExtraModule buildExtraModule = StringUtil.jsonConvert(buildInfoModel.getExtraData(), BuildExtraModule.class);
             Assert.notNull(buildExtraModule, "构建信息缺失");
-            // set buildId field
-            int buildId = ObjectUtil.defaultIfNull(buildInfoModel.getBuildId(), 0);
-            {
-                BuildInfoModel buildInfoModel1 = new BuildInfoModel();
-                buildInfoModel1.setBuildId(buildId + 1);
-                buildInfoModel1.setId(buildInfoId);
-                buildInfoModel.setBuildId(buildInfoModel1.getBuildId());
-                buildService.updateById(buildInfoModel1);
-            }
             // load repository
             RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId(), false);
             Assert.notNull(repositoryModel, "仓库信息不存在");
             EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.getEnv(buildInfoModel.getWorkspaceId());
             // 解析外部变量
-            environmentMapBuilder.putObjectArray(parametersEnv);
-            //
-            environmentMapBuilder.putStr(StringUtil.parseEnvStr(buildInfoModel.getBuildEnvParameter()));
+            environmentMapBuilder.putObjectArray(parametersEnv).putStr(StringUtil.parseEnvStr(buildInfoModel.getBuildEnvParameter()));
+            // set buildId field
+            buildInfoModel.setBuildId(this.nextBuildId(buildInfoModel));
             //
             TaskData.TaskDataBuilder taskBuilder = TaskData.builder()
                 .buildInfoModel(buildInfoModel)
@@ -189,6 +186,80 @@ public class BuildExecuteService {
             String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
             return JsonMessage.success(msg, buildInfoModel.getBuildId());
         }
+    }
+
+    /**
+     * 回滚
+     *
+     * @param oldLog    构建历史
+     * @param item      构建项
+     * @param userModel 用户信息
+     */
+    public int rollback(BuildHistoryLog oldLog, BuildInfoModel item, UserModel userModel) {
+        synchronized (item.getId().intern()) {
+            String e = this.checkStatus(item);
+            Assert.isNull(e, () -> e);
+            Integer fromBuildNumberId = ObjectUtil.defaultIfNull(oldLog.getFromBuildNumberId(), oldLog.getBuildNumberId());
+            int buildId = this.nextBuildId(item);
+            item.setBuildId(buildId);
+            // 创建新的构建记录
+            BuildHistoryLog buildHistoryLog = oldLog.toJson().to(BuildHistoryLog.class);
+            buildHistoryLog.setId(null);
+            buildHistoryLog.setCreateUser(null);
+            buildHistoryLog.setCreateTimeMillis(null);
+            buildHistoryLog.setModifyUser(null);
+            buildHistoryLog.setModifyTimeMillis(null);
+            buildHistoryLog.setResultFileSize(null);
+            BuildStatus pubIng = BuildStatus.PubIng;
+            buildHistoryLog.setStatus(pubIng.getCode());
+            buildHistoryLog.setTriggerBuildType(3);
+            buildHistoryLog.setBuildNumberId(buildId);
+            buildHistoryLog.setFromBuildNumberId(fromBuildNumberId);
+            buildHistoryLog.setStartTime(SystemClock.now());
+            buildHistoryLog.setEndTime(null);
+            dbBuildHistoryLogService.insert(buildHistoryLog);
+            //
+            buildService.updateStatus(buildHistoryLog.getBuildDataId(), pubIng, "开始回滚执行");
+
+            BuildExtraModule buildExtraModule = BuildExtraModule.build(buildHistoryLog);
+            //
+            String buildEnvCache = buildHistoryLog.getBuildEnvCache();
+            JSONObject jsonObject = Opt.ofBlankAble(buildEnvCache).map(JSONObject::parseObject).orElse(new JSONObject());
+            Map<String, EnvironmentMapBuilder.Item> map = jsonObject.to(new TypeReference<Map<String, EnvironmentMapBuilder.Item>>() {
+            });
+            EnvironmentMapBuilder environmentMapBuilder = EnvironmentMapBuilder.builder(map);
+            //
+            ReleaseManage manage = ReleaseManage.builder()
+                .buildExtraModule(buildExtraModule)
+                .logId(buildHistoryLog.getId())
+                .userModel(userModel)
+                .machineDockerServer(machineDockerServer)
+                .dockerInfoService(dockerInfoService)
+                .fileStorageService(fileStorageService)
+                .buildExtConfig(buildExtConfig)
+                .buildNumberId(buildHistoryLog.getBuildNumberId())
+                .fromBuildNumberId(fromBuildNumberId)
+                .buildExecuteService(this)
+                .buildEnv(environmentMapBuilder)
+                .build();
+            File logFile = BuildUtil.getLogFile(item.getId(), buildId);
+            LogRecorder logRecorder = LogRecorder.builder().file(logFile).build();
+            //
+            logRecorder.system("开始准备回滚：{} -> {}", fromBuildNumberId, buildId);
+            //
+            ThreadUtil.execute(() -> manage.rollback(item));
+            return buildId;
+        }
+    }
+
+    private int nextBuildId(BuildInfoModel buildInfoModel) {
+        // set buildId field
+        int buildId = ObjectUtil.defaultIfNull(buildInfoModel.getBuildId(), 0);
+        BuildInfoModel update = new BuildInfoModel();
+        update.setBuildId(buildId + 1);
+        update.setId(buildInfoModel.getId());
+        buildService.updateById(update);
+        return update.getBuildId();
     }
 
     /**
@@ -235,13 +306,14 @@ public class BuildExecuteService {
         buildHistoryLog.setResultDirFile(buildInfoModel.getResultDirFile());
         buildHistoryLog.setReleaseMethod(buildExtraModule.getReleaseMethod());
         //
-        buildHistoryLog.setStatus(BuildStatus.WaitExec.getCode());
+        BuildStatus waitExec = BuildStatus.WaitExec;
+        buildHistoryLog.setStatus(waitExec.getCode());
         buildHistoryLog.setStartTime(SystemClock.now());
         buildHistoryLog.setBuildRemark(taskData.buildRemark);
         buildHistoryLog.setExtraData(buildInfoModel.getExtraData());
         dbBuildHistoryLogService.insert(buildHistoryLog);
         //
-        buildService.updateStatus(buildHistoryLog.getBuildDataId(), BuildStatus.WaitExec, "开始排队等待执行");
+        buildService.updateStatus(buildHistoryLog.getBuildDataId(), waitExec, "开始排队等待执行");
         return buildHistoryLog.getId();
     }
 

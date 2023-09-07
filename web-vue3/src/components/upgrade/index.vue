@@ -21,7 +21,7 @@
             v-model="temp.joinBetaRelease"
           />
           <template v-if="temp.joinBetaRelease">
-            <a-button type="link" @click="handleChangeBetaRelease(false)">关闭 beat计划</a-button>
+            <a-button type="link" @click="handleChangeBetaRelease(false)">关闭 beta 计划</a-button>
           </template>
           <template v-else>
             <a-tooltip>

@@ -39,6 +39,14 @@ export function listLinkGroups(params) {
   });
 }
 
+export function listClusterAll(params) {
+  return axios({
+    url: "/cluster/list-all",
+    method: "get",
+    params: params,
+  });
+}
+
 export function editCluster(params) {
   return axios({
     url: "/cluster/edit",

@@ -24,21 +24,19 @@ package org.dromara.jpom.controller.build;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.TypeReference;
-import org.dromara.jpom.build.*;
+import org.dromara.jpom.build.BuildExecuteManage;
+import org.dromara.jpom.build.BuildExecuteService;
+import org.dromara.jpom.build.BuildUtil;
+import org.dromara.jpom.build.ResultDirFileAction;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.validator.ValidatorConfig;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
-import org.dromara.jpom.func.assets.server.MachineDockerServer;
-import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.model.BaseEnum;
-import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.log.BuildHistoryLog;
@@ -48,8 +46,6 @@ import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
-import org.dromara.jpom.service.docker.DockerInfoService;
-import org.dromara.jpom.system.extconf.BuildExtConfig;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -59,7 +55,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -77,25 +72,13 @@ public class BuildInfoManageController extends BaseServerController {
     private final BuildInfoService buildInfoService;
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
     private final BuildExecuteService buildExecuteService;
-    private final DockerInfoService dockerInfoService;
-    private final MachineDockerServer machineDockerServer;
-    private final FileStorageService fileStorageService;
-    private final BuildExtConfig buildExtConfig;
 
     public BuildInfoManageController(BuildInfoService buildInfoService,
                                      DbBuildHistoryLogService dbBuildHistoryLogService,
-                                     BuildExecuteService buildExecuteService,
-                                     DockerInfoService dockerInfoService,
-                                     MachineDockerServer machineDockerServer,
-                                     FileStorageService fileStorageService,
-                                     BuildExtConfig buildExtConfig) {
+                                     BuildExecuteService buildExecuteService) {
         this.buildInfoService = buildInfoService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.buildExecuteService = buildExecuteService;
-        this.dockerInfoService = dockerInfoService;
-        this.machineDockerServer = machineDockerServer;
-        this.fileStorageService = fileStorageService;
-        this.buildExtConfig = buildExtConfig;
     }
 
     /**
@@ -107,14 +90,14 @@ public class BuildInfoManageController extends BaseServerController {
     @RequestMapping(value = "/build/manage/start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public IJsonMessage<Integer> start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-                                      String buildRemark,
-                                      String resultDirFile,
-                                      String branchName,
-                                      String branchTagName,
-                                      String checkRepositoryDiff,
-                                      String projectSecondaryDirectory,
-                                      String buildEnvParameter,
-                                      String dispatchSelectProject) {
+                                       String buildRemark,
+                                       String resultDirFile,
+                                       String branchName,
+                                       String branchTagName,
+                                       String checkRepositoryDiff,
+                                       String projectSecondaryDirectory,
+                                       String buildEnvParameter,
+                                       String dispatchSelectProject) {
         BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
         Assert.notNull(item, "没有对应数据");
         // 更新数据
@@ -178,39 +161,15 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/reRelease", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<Object> reRelease(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId,
-                                         HttpServletRequest request) {
+    public IJsonMessage<Integer> reRelease(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId,
+                                           HttpServletRequest request) {
         String workspaceId = dbBuildHistoryLogService.getCheckUserWorkspace(request);
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, false, entity -> entity.set("workspaceId", workspaceId));
         Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
         BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId(), request);
         Objects.requireNonNull(item, "没有对应数据");
-        String e = buildExecuteService.checkStatus(item);
-        Assert.isNull(e, () -> e);
-        UserModel userModel = getUser();
-        BuildExtraModule buildExtraModule = BuildExtraModule.build(buildHistoryLog);
-        //
-        String buildEnvCache = buildHistoryLog.getBuildEnvCache();
-        JSONObject jsonObject = Opt.ofBlankAble(buildEnvCache).map(JSONObject::parseObject).orElse(new JSONObject());
-        Map<String, EnvironmentMapBuilder.Item> map = jsonObject.to(new TypeReference<Map<String, EnvironmentMapBuilder.Item>>() {
-        });
-        EnvironmentMapBuilder environmentMapBuilder = EnvironmentMapBuilder.builder(map);
-        //
-        ReleaseManage manage = ReleaseManage.builder()
-            .buildExtraModule(buildExtraModule)
-            .logId(buildHistoryLog.getId())
-            .userModel(userModel)
-            .machineDockerServer(machineDockerServer)
-            .dockerInfoService(dockerInfoService)
-            .fileStorageService(fileStorageService)
-            .buildExtConfig(buildExtConfig)
-            .buildNumberId(buildHistoryLog.getBuildNumberId())
-            .buildExecuteService(buildExecuteService)
-            .buildEnv(environmentMapBuilder)
-            .build();
-        //
-        ThreadUtil.execute(() -> manage.rollback(item));
-        return JsonMessage.success("重新发布中");
+        int buildId = buildExecuteService.rollback(buildHistoryLog, item, getUser());
+        return JsonMessage.success("重新发布中", buildId);
     }
 
     /**
@@ -224,8 +183,8 @@ public class BuildInfoManageController extends BaseServerController {
     @RequestMapping(value = "/build/manage/get-now-log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
-                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
+                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
+                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
         BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
         Assert.notNull(item, "没有对应数据");
         Assert.state(buildId <= item.getBuildId(), "还没有对应的构建记录");

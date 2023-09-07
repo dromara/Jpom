@@ -44,6 +44,8 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.SubmoduleConfig.FetchRecurseSubmodulesMode;
+import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.*;
@@ -133,7 +135,7 @@ public class JGitUtil {
      */
     private static Git reClone(Map<String, Object> parameter, String branchName, String tagName, File file, PrintWriter printWriter) throws GitAPIException, IOException {
         println(printWriter, StrUtil.EMPTY);
-        println(printWriter, "Automatically re-clones repositories");
+        println(printWriter, "JGit: Automatically re-clones repositories");
         if (!FileUtil.clean(file)) {
             FileUtil.del(file.toPath());
         }
@@ -151,7 +153,8 @@ public class JGitUtil {
         }
         String url = (String) parameter.get("url");
         CloneCommand command = cloneCommand.setURI(url)
-            .setDirectory(file);
+            .setDirectory(file)
+            .setCloneSubmodules(true);
         // 设置凭证
         setCredentials(command, parameter);
         return command.call();
@@ -377,7 +380,7 @@ public class JGitUtil {
         SmallTextProgressMonitor progressMonitor = new SmallTextProgressMonitor(printWriter, progressRatio);
         // 放弃本地修改
         git.checkout().setName(branchName).setForced(true).setProgressMonitor(progressMonitor).call();
-
+        //
         PullCommand pull = git.pull();
         //
         setCredentials(pull, parameter);
@@ -385,6 +388,7 @@ public class JGitUtil {
         PullResult call = pull
             .setRemoteBranchName(branchName)
             .setProgressMonitor(progressMonitor)
+            .setRecurseSubmodules(FetchRecurseSubmodulesMode.YES)
             .call();
         // 输出拉取结果
         if (call != null) {
@@ -405,6 +409,15 @@ public class JGitUtil {
             //				println(printWriter, "fetchResult {}", fetchResult);
             //			}
         }
+        //
+        SubmoduleUpdateCommand subUpdate = git.submoduleUpdate();
+        setCredentials(subUpdate, parameter);
+        Collection<String> rst = subUpdate
+            .setProgressMonitor(progressMonitor)
+            .setFetch(true)
+            .setStrategy(MergeStrategy.THEIRS)
+            .call();
+        println(printWriter, String.join("\n", rst));
         return call;
     }
 

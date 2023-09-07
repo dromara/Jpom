@@ -40,7 +40,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.14</version>
+        <version>2.7.15</version>
         <relativePath/>
     </parent>
     <groupId>org.dromara.jpom</groupId>
@@ -50,14 +50,13 @@
         简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件
     </description>
     <inceptionYear>2017</inceptionYear>
-    <version>2.10.42.4</version>
+    <version>2.10.44</version>
     <url>https://gitee.com/dromara/Jpom</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <!--当前程序兼容 jpom 最新版本号-->
         <jpom-min-version>2.10.0</jpom-min-version>
-        <spring-boot.version>2.7.10</spring-boot.version>
 
         <!-- 跳过测试 -->
         <skipTests>true</skipTests>
@@ -67,6 +66,7 @@
         <fastjson2.version>2.0.39</fastjson2.version>
         <fastjson-version>2.0.39</fastjson-version>
         <jna-version>5.12.1</jna-version>
+        <mwiede.jsch-version>0.2.11</mwiede.jsch-version>
     </properties>
     <dependencies>
         <dependency>
@@ -106,6 +106,18 @@
                 <groupId>com.alibaba.fastjson2</groupId>
                 <artifactId>fastjson2</artifactId>
                 <version>${fastjson2.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>1.75</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.mwiede</groupId>
+                <artifactId>jsch</artifactId>
+                <version>${mwiede.jsch-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

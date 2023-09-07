@@ -7,6 +7,18 @@
           <a-tooltip :title="`工作空间名称：${selectWorkspace.name} 【分组名：${selectWorkspace.group}】`">
             <a-icon type="switcher" />
             {{ selectWorkspace.name }}
+            <template v-if="myClusterList.length > 1 && selectWorkspace.clusterInfoId">
+              /
+              {{
+                myClusterList.find((item) => {
+                  return item.id === selectWorkspace.clusterInfoId;
+                }) &&
+                myClusterList.find((item) => {
+                  return item.id === selectWorkspace.clusterInfoId;
+                }).name
+              }}
+            </template>
+            <template v-if="!this.inClusterUrl"><a-icon type="swap" @click="handleClusterChange(selectCluster)" /> </template>
           </a-tooltip>
         </div>
       </a-button>
@@ -34,9 +46,19 @@
               </template>
               <template v-if="myWorkspaceList.length == 1">
                 <template v-for="(item, index) in myWorkspaceList[0].children">
-                  <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace.id" @click="handleWorkspaceChange(item.id)" :key="index">
+                  <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace.id" @click="handleWorkspaceChange(item)" :key="index">
                     <a-button type="link" :disabled="item.id === selectWorkspace.id">
                       {{ item.name }}
+                      <template v-if="myClusterList.length > 1 && item.clusterInfoId">
+                        【{{
+                          myClusterList.find((item2) => {
+                            return item2.id === item.clusterInfoId;
+                          }) &&
+                          myClusterList.find((item2) => {
+                            return item2.id === item.clusterInfoId;
+                          }).name
+                        }}】
+                      </template>
                     </a-button>
                   </a-menu-item>
                   <a-menu-divider v-if="index < myWorkspaceList.length" :key="`${item.id}-divider`" />
@@ -51,9 +73,19 @@
                       </a-button>
                     </template>
                     <template v-for="(item, index) in item1.children">
-                      <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace.id" @click="handleWorkspaceChange(item.id)" :key="index">
+                      <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace.id" @click="handleWorkspaceChange(item)" :key="index">
                         <a-button type="link" :disabled="item.id === selectWorkspace.id">
                           {{ item.name }}
+                          <template v-if="myClusterList.length > 1 && item.clusterInfoId">
+                            【{{
+                              myClusterList.find((item2) => {
+                                return item2.id === item.clusterInfoId;
+                              }) &&
+                              myClusterList.find((item2) => {
+                                return item2.id === item.clusterInfoId;
+                              }).name
+                            }}】
+                          </template>
                         </a-button>
                       </a-menu-item>
                       <a-menu-divider v-if="index < item1.children.length - 1" :key="`${index1}-${index}-divider`" />
@@ -72,7 +104,7 @@
                 <a-button type="link" icon="retweet">切换集群</a-button>
               </template>
               <template v-for="(item, index) in myClusterList">
-                <a-menu-item v-if="index != -1" :disabled="item.id === selectCluster.id || !item.url" @click="handleWorkspaceChange(item.id)" :key="index">
+                <a-menu-item v-if="index != -1" :disabled="item.id === selectCluster.id || !item.url" @click="handleClusterChange(item)" :key="index">
                   <a-button type="link" :disabled="item.id === selectCluster.id || !item.url">
                     {{ item.name }}
                   </a-button>
@@ -432,6 +464,14 @@ export default {
         return temp;
       },
     },
+    inClusterUrl() {
+      const data = this.selectCluster;
+      if (!data || !data.url) {
+        // 没有配置集群地址
+        return true;
+      }
+      return window.location.href.indexOf(data && data.url) === 0;
+    },
   },
   inject: ["reload"],
   created() {
@@ -471,7 +511,7 @@ export default {
               });
               this.selectWorkspace = existWorkspace;
             } else {
-              this.handleWorkspaceChange(res.data[0]?.id);
+              this.handleWorkspaceChange(res.data[0]);
             }
           }
         });
@@ -728,15 +768,38 @@ export default {
         });
       });
     },
-    handleWorkspaceChange(value) {
-      this.$store.dispatch("changeWorkspace", value);
-      this.$router
-        .push({
-          query: { ...this.$route.query, wid: value },
-        })
-        .then(() => {
-          this.reload();
+    // 工作空间切换
+    handleWorkspaceChange(item) {
+      const cluster = this.myClusterList.find((item2) => {
+        return item2.id === item.clusterInfoId;
+      });
+      if (cluster && cluster.url && location.href.indexOf(cluster.url) !== 0) {
+        let url = `${cluster.url}/#/${this.$route.fullPath}`.replace(/[\\/]+[\\/]/g, "/").replace(":/", "://");
+        url = url.replace(`wid=${this.selectWorkspace.id}`, `wid=${item.id}`);
+        // console.log(location.href.indexOf(cluster.url), url);
+        location.href = url;
+      } else {
+        this.$store.dispatch("changeWorkspace", item.id);
+        this.$router
+          .push({
+            query: { ...this.$route.query, wid: item.id },
+          })
+          .then(() => {
+            this.reload();
+          });
+      }
+    },
+    // 集群切换
+    handleClusterChange(item) {
+      if (item.url) {
+        const url = `${item.url}/#/${this.$route.fullPath}`.replace(/[\\/]+[\\/]/g, "/").replace(":/", "://");
+        // console.log(url);
+        location.href = url;
+      } else {
+        this.$notification.error({
+          message: "还未配置集群地址,不能切换集群",
         });
+      }
     },
     tabChange(key) {
       if (key === 1) {

@@ -358,6 +358,18 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     }
 
     /**
+     * 查询 list
+     *
+     * @param where 条件
+     * @param fill  是否填充
+     * @return data
+     */
+    public List<T> listByEntity(Entity where, boolean fill) {
+        List<Entity> entity = this.queryList(where);
+        return this.entityToBeanList(entity, fill);
+    }
+
+    /**
      * 查询列表
      *
      * @param data   数据

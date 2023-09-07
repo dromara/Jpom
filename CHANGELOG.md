@@ -1,5 +1,79 @@
 # 🚀 版本日志
 
+### 2.10.44 (2023-09-06)
+
+### 🐣 新增功能
+
+1. 【server】新增 支持 git submodules
+   （感谢 [@Croce](https://gitee.com/Croce) [Gitee pr 195](https://gitee.com/dromara/Jpom/pulls/195) ）
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 资产管理共享仓库新建归属到工作空间问题（感谢@沈钊）
+2. 【server】升级 springboot 、oshi、docker-java、jgit
+3. 【server】升级 mwiede.jsch 版本
+4. 【server】优化 构建回滚创建新的构建记录（感谢[@Smith](https://gitee.com/autools) [Gitee issues I7VEJA](https://gitee.com/dromara/Jpom/issues/I7VEJA)）
+5. 【server】修复 新增资产无法正常监控问题（感谢@乔、@MichelleChung、@Pluto）
+6. 【server】优化 编辑集群地址不验证，调整到心跳检测验证（感谢@黄纲）
+7. 【server】优化 构建新增环境变量：BUILD_ORIGINAL_RESULT_DIR_FILE、BUILD_RESULT_DIR_FILE（发布流程）(感谢@黄纲)
+
+------
+
+### 2.10.43 (2023-08-25)
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 未配置集群地址时无法切换工作空间（感谢@黄纲）
+
+------
+
+### 2.10.42 (2023-08-24)
+
+### 🐣 新增功能
+
+1. 【server】新增 集群化管理工作空间（感谢@定格、[@paobu](https://gitee.com/iniushi) [Gitee issues I7UG5V](https://gitee.com/dromara/Jpom/issues/I7UG5V)）
+2. 【server】优化 ssh 相关功能支持 openssh8+
+   （感谢 [@孤城落寞](https://gitee.com/gclm) [Gitee pr 193](https://gitee.com/dromara/Jpom/pulls/193) ）
+3. 【server】新增 SSH
+   文件管理修改文件权限功能（感谢 [@MichelleChung](https://gitee.com/michelle1028) [Gitee issues I6VDXS](https://gitee.com/dromara/Jpom/issues/I6VDXS) ）
+4. 【server】新增 Docker 容器重建功能，即删除原有的容器，重新创建一个新的容器
+5. 【server】新增 Docker 管理增加 SSH 连接
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 资产管理 SSH 管理系统名称显示未知问题（感谢@勤思·）
+2. 【server】优化 资产管理 Docker 管理支持配置分组
+3. 【server】优化 仓库管理支持配置分组
+4. 【server】优化 SSH 文件夹支持前端排序（感谢@勤思·）
+5. 【server】优化 仓库账号、 SSH 证书密码支持选择环境变量
+6. 【all】升级 commons-compress、fastjson、hutool 版本
+7. 【server】优化 maven 依赖冲突
+8. 【server】优化 文件发布-节点发布文件名使用真实名称（感谢@勤思·）
+9. 【server】优化 文件发布-ssh发布新增变量：FILE_NAME、FILE_EXT_NAME
+10. 【server】升级 h2、SpringBoot 版本
+11. 【server】使用系统git时，无法克隆tag问题优化 （感谢@唐明）
+12. 【server】优化 SSH 和 代码仓库的密码从工作空间变量中读取
+13. 【server】优化
+	删除工作空间前预检查关联数据存在情况（感谢 [@陈旭](https://gitee.com/chenxu8989) [Gitee issues I7F0ZN](https://gitee.com/dromara/Jpom/issues/I7F0ZN) ）
+14. 【server】优化
+	退出登录支持彻底退出、切换账号退出（感谢 [@wangfubiao](https://gitee.com/wangfubiao) [Gitee issues I7GA5Q](https://gitee.com/dromara/Jpom/issues/I7GA5Q) ）
+15. 【server】优化 IP 白名单验证忽略 IPV6 情况
+16. 【server】优化 服务端缓存管理支持查看黑名单 IP 详细信息（感谢@酱总）
+17. 【server】修复 SSH
+	编辑输入框出现部分关键词时保持报错（感谢 [@一只羊](https://gitee.com/hjdyzy) [Gitee issues I7E3UG](https://gitee.com/dromara/Jpom/issues/I7E3UG) ）
+18. 【server】优化 日志组件支持显示 \t 制表符、清空缓冲区滚动到顶部
+19. 【server】修复 彻底删除节点分发时未自动删除关联日志（感谢@ccx2480）
+20. 【server】修复
+	节点管理中脚本模板翻页无效（感谢 [@wangfubiao](https://gitee.com/wangfubiao) [Gitee issues I7F0RS](https://gitee.com/dromara/Jpom/issues/I7F0RS) ）
+21. 【server】优化
+	工作空间配置页面中新增节点分发白名单配置入口（感谢 [@陈旭](https://gitee.com/chenxu8989) [Gitee issues I7F0W0](https://gitee.com/dromara/Jpom/issues/I7F0W0) ）
+22. 【server】优化 构建附加环境变量支持解析 URL 参数格式
+	（感谢 [@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I7FROG](https://gitee.com/dromara/Jpom/issues/I7FROG) ）
+23. 【server】优化 构建支持单个配置保留天数和保留个数
+	（感谢 [@阿超](https://gitee.com/VampireAchao) [Gitee issues I7FOG2](https://gitee.com/dromara/Jpom/issues/I7FOG2) ）
+
+------
+
 ### 2.10.41 (2023-06-16)
 
 ### 🐣 新增功能

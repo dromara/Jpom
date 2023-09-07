@@ -164,6 +164,11 @@ public class SystemGitProcess extends AbstractGitProcess {
                 printWriter.println(line);
                 printWriter.flush();
             }, "git", "pull");
+
+            CommandUtil.exec(saveFile, null, line -> {
+                printWriter.println(line);
+                printWriter.flush();
+            }, "git", "submodule", "update", "--init", "--remote", "-f", "--recursive");
         }
         // 获取提交日志
         String[] command = {"git", "log", "-1", branchOrTag};
@@ -181,7 +186,7 @@ public class SystemGitProcess extends AbstractGitProcess {
     }
 
     private void reClone(PrintWriter printWriter, String branchOrTag) throws IOException {
-        printWriter.println("Automatically re-clones repositories");
+        printWriter.println("SystemGit: Automatically re-clones repositories");
         // 先删除本地目录
         File savePath = getSaveFile();
         if (!FileUtil.clean(savePath)) {
@@ -205,7 +210,7 @@ public class SystemGitProcess extends AbstractGitProcess {
                 return null;
             }).ifPresent(integer -> env.put("GIT_HTTP_TIMEOUT", String.valueOf(integer)));
         //
-        String[] command = new String[]{"git", "clone", depthStr, "-b", branchOrTag, this.getCovertUrl(), savePath.getAbsolutePath()};
+        String[] command = new String[]{"git", "clone", "--recursive", depthStr, "-b", branchOrTag, this.getCovertUrl(), savePath.getAbsolutePath()};
         FileUtil.mkdir(savePath);
         CommandUtil.exec(savePath, env, line -> {
             printWriter.println(line);

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@ant-design/icons-vue": "^6.1.0",
+    "@codemirror/lang-javascript": "^6.2.1",
     "ant-design-vue": "^3.2.15",
     "axios": "^1.3.4",
     "codemirror": "^6.0.1",
@@ -28,11 +29,12 @@
     "vue": "^3.2.45",
     "vue-codemirror": "^6.1.1",
     "vue-router": "^4.1.6",
+    "vue3-json-viewer": "^2.2.2",
+    "vuedraggable": "^2.24.3",
     "vuex": "^4.1.0",
     "xterm": "^5.1.0",
     "xterm-addon-attach": "^0.8.0",
-    "xterm-addon-fit": "^0.7.0",
-    "vuedraggable": "^2.24.3"
+    "xterm-addon-fit": "^0.7.0"
   },
   "devDependencies": {
     "@types/node": "^18.15.3",
