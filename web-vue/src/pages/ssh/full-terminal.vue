@@ -10,7 +10,9 @@
         <template #title>
           <template v-if="sshData">
             <a-space>
-              <div>{{ sshData.name }} ({{ sshData.host }})</div>
+              <div>
+                {{ sshData.name }} <template v-if="sshData.host">({{ sshData.host }})</template>
+              </div>
 
               <a-button size="small" type="primary" :disabled="!sshData.fileDirs" @click="handleFile()">文件</a-button>
             </a-space>
