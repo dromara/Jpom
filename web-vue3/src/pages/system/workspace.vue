@@ -28,11 +28,11 @@
           <a-tooltip>{{ text }}</a-tooltip>
         </template>
 
-        <template v-if="column.dataIndex === 'description'">
+        <template v-else-if="column.dataIndex === 'description'">
           <a-tooltip>{{ text }}</a-tooltip>
         </template>
 
-        <template v-if="column.dataIndex === 'operation'">
+        <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
             <a-button size="small" type="primary" @click="configMeun(record)">菜单</a-button>
