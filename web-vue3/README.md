@@ -47,12 +47,12 @@ pnpm build # 打包
 │   ├── router # 路由配置
 │   ├── stores # 状态管理器
 │   │   └── index.ts
-│   ├── pages
+│   ├── pages # 页面
 │   │   ├── login
 │   │   └── user
-│   ├── utils 
+│   ├── utils # 工具文件
 │   │   └── index.ts
-│   ├── api 
+│   ├── api # 接口文件
 │   │   └── api.ts
 │   ├── app.vue
 │   ├── main.ts
