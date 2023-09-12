@@ -32,12 +32,15 @@ const routeMenuMap: Record<string, string> = {
   permission_group: '/user/permission-group',
   user_log: '/operation/log',
   user_login_log: '/user/login-log',
-  monitorConfigEmail: '/system/mail',
   cacheManage: '/system/cache',
   logManage: '/system/log',
   update: '/system/upgrade',
+  // 配置管理
   sysConfig: '/system/config',
+  authConfig: '/system/oauth-config',
+  monitorConfigEmail: '/system/mail',
   systemExtConfig: '/system/ext-config',
+
   projectSearch: '/node/search',
   // 数据库备份
   backup: '/system/backup',
