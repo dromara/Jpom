@@ -5,6 +5,7 @@
 ### 🐣 新增功能
 
 1. 【server】新增 SSH 新增独立管理面板（感谢[@超人那个超i](https://gitee.com/chao_a) [Gitee issues I7UFEX](https://gitee.com/dromara/Jpom/issues/I7UFEX)）
+2. 【agent】新增 DSL 项目支持配置脚本环境变量（感谢[@陈旭](https://gitee.com/chenxu8989) [Gitee issues I80PTK](https://gitee.com/dromara/Jpom/issues/I80PTK)）
 
 ### 🐞 解决BUG、优化功能
 
