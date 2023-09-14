@@ -62,7 +62,7 @@
         <skipTests>true</skipTests>
         <maven.test.skip>true</maven.test.skip>
         <!--        <maven.javadoc.skip>true</maven.javadoc.skip>-->
-        <hutool.version>5.8.21</hutool.version>
+        <hutool.version>5.8.22</hutool.version>
         <fastjson2.version>2.0.39</fastjson2.version>
         <fastjson-version>2.0.39</fastjson-version>
         <jna-version>5.12.1</jna-version>
