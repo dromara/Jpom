@@ -252,6 +252,7 @@ public class ManageEditProjectController extends BaseAgentController {
             exits.setRunMode(runMode);
             exits.setToken(projectInfo.getToken());
             exits.setDslContent(projectInfo.getDslContent());
+            exits.setDslEnv(projectInfo.getDslEnv());
             // 检查是否非法删除副本集
             List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = exits.getJavaCopyItemList();
             List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList1 = projectInfo.getJavaCopyItemList();

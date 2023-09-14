@@ -524,6 +524,9 @@
               </template>
               <a-switch v-model="temp[`${nodeId}_autoStart`]" checked-children="开" un-checked-children="关" />
             </a-form-model-item>
+            <a-form-model-item prop="dslEnv" label="DSL环境变量">
+              <a-input v-model="temp[`${nodeId}_dslEnv`]" placeholder="DSL环境变量,如：key1=values1&keyvalue2" />
+            </a-form-model-item>
             <a-form-model-item prop="token" v-show="noFileModes.includes(temp.runMode)">
               <template slot="label">
                 WebHooks
@@ -1141,7 +1144,7 @@ export default {
             this.temp[`${ele.nodeId}_token`] = res.data.token || "";
             this.temp[`${ele.nodeId}_args`] = res.data.args || "";
             this.temp[`${ele.nodeId}_autoStart`] = res.data.autoStart;
-
+            this.temp[`${ele.nodeId}_dslEnv`] = res.data.dslEnv || "";
             // 添加 javaCopyItemList
             this.temp[`${ele.nodeId}_javaCopyItemList`] = res.data.javaCopyItemList || [];
             this.temp = { ...this.temp };

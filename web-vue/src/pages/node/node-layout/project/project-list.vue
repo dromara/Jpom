@@ -383,6 +383,9 @@
           </template>
           <a-switch v-model="temp.autoStart" checked-children="开" un-checked-children="关" />
         </a-form-model-item>
+        <a-form-model-item v-if="temp.runMode === 'Dsl'" prop="dslEnv" label="DSL环境变量">
+          <a-input v-model="temp.dslEnv" placeholder="DSL环境变量,如：key1=values1&keyvalue2" />
+        </a-form-model-item>
         <a-form-model-item prop="token" v-show="noFileModes.includes(temp.runMode)" class="jpom-node-project-token">
           <template slot="label">
             WebHooks
