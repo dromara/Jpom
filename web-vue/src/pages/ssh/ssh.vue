@@ -20,6 +20,7 @@
           </a-tooltip>
 
           <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
+          <a-button type="primary" @click="toSshTabs">管理面板</a-button>
           <a-tooltip>
             <template slot="title">
               <div>
@@ -473,7 +474,16 @@ export default {
       //   },
       // });
     },
-
+    toSshTabs() {
+      const newpage = this.$router.resolve({
+        name: "ssh-tabs",
+        path: "/ssh-tabs",
+        query: {
+          wid: this.getWorkspaceId,
+        },
+      });
+      window.open(newpage.href, "_blank");
+    },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });

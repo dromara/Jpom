@@ -2,6 +2,10 @@
 
 ### 2.10.45.1-beta
 
+### 🐣 新增功能
+
+1. 【server】新增 SSH 新增独立管理面板（感谢[@超人那个超i](https://gitee.com/chao_a) [Gitee issues I7UFEX](https://gitee.com/dromara/Jpom/issues/I7UFEX)）
+
 ### 🐞 解决BUG、优化功能
 
 1. 【server】优化 构建详情页面支持快捷回滚、查看构建日志（感谢[@縁來只爲伱](https://gitee.com/taochach) [Gitee issues I7YSNH](https://gitee.com/dromara/Jpom/issues/I7YSNH)）

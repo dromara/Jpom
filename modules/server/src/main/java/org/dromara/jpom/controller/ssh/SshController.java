@@ -23,6 +23,11 @@
 package org.dromara.jpom.controller.ssh;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.tree.Tree;
+import cn.hutool.core.lang.tree.TreeNode;
+import cn.hutool.core.lang.tree.TreeUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +55,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -97,6 +105,32 @@ public class SshController extends BaseServerController {
         return new JsonMessage<>(200, "", list);
     }
 
+    @GetMapping(value = "list-tree", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<Tree<String>> listTree(HttpServletRequest request) {
+        List<SshModel> list = sshService.listByWorkspace(request);
+        Map<String, TreeNode<String>> groupNode = new HashMap<>(4);
+        List<TreeNode<String>> treeNodes = list.stream()
+            .map(sshModel -> {
+                String group = sshModel.getGroup();
+                String groupId = SecureUtil.sha1(StrUtil.emptyToDefault(group, StrUtil.EMPTY));
+                String groupId2 = StrUtil.format("g_{}", groupId);
+                groupNode.computeIfAbsent(groupId, s -> new TreeNode<>(groupId2, StrUtil.SLASH, group, 0));
+                //
+                TreeNode<String> treeNode = new TreeNode<>(sshModel.getId(), groupId2, sshModel.getName(), 0);
+                Map<String, Object> extra = new HashMap<>();
+                extra.put("fileDirs", sshModel.getFileDirs());
+                extra.put("isLeaf", true);
+                treeNode.setExtra(extra);
+                return treeNode;
+            })
+            .collect(Collectors.toList());
+        //
+        treeNodes.addAll(groupNode.values());
+        Tree<String> tree = TreeUtil.buildSingle(treeNodes, StrUtil.SLASH);
+        return new JsonMessage<>(200, "", tree);
+    }
+
     @GetMapping(value = "get-item.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<SshModel> getItem(@ValidatorItem String id, HttpServletRequest request) {
@@ -129,9 +163,9 @@ public class SshController extends BaseServerController {
     @PostMapping(value = "save.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
-                                    String id,
-                                    String group,
-                                    HttpServletRequest request) {
+                                     String id,
+                                     String group,
+                                     HttpServletRequest request) {
         SshModel sshModel = new SshModel();
         sshModel.setName(name);
         sshModel.setGroup(group);
@@ -195,8 +229,8 @@ public class SshController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
     public IJsonMessage<Object> syncToWorkspace(@ValidatorItem String ids,
-                                               @ValidatorItem String toWorkspaceId,
-                                               HttpServletRequest request) {
+                                                @ValidatorItem String toWorkspaceId,
+                                                HttpServletRequest request) {
         String nowWorkspaceId = nodeService.getCheckUserWorkspace(request);
         //
         sshService.checkUserWorkspace(toWorkspaceId);

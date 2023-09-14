@@ -17,6 +17,14 @@ export function getSshGroupAll() {
   });
 }
 
+// ssh list tree
+export function getSshListTree() {
+  return axios({
+    url: "/node/ssh/list-tree",
+    method: "get",
+  });
+}
+
 // 查询单个 ssh
 export function getItem(params) {
   return axios({
