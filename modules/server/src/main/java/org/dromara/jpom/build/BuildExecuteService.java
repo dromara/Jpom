@@ -29,8 +29,6 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.files.service.FileStorageService;
@@ -55,7 +53,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.io.File;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -223,11 +220,7 @@ public class BuildExecuteService {
 
             BuildExtraModule buildExtraModule = BuildExtraModule.build(buildHistoryLog);
             //
-            String buildEnvCache = buildHistoryLog.getBuildEnvCache();
-            JSONObject jsonObject = Opt.ofBlankAble(buildEnvCache).map(JSONObject::parseObject).orElse(new JSONObject());
-            Map<String, EnvironmentMapBuilder.Item> map = jsonObject.to(new TypeReference<Map<String, EnvironmentMapBuilder.Item>>() {
-            });
-            EnvironmentMapBuilder environmentMapBuilder = EnvironmentMapBuilder.builder(map);
+            EnvironmentMapBuilder environmentMapBuilder = buildHistoryLog.toEnvironmentMapBuilder();
             //
             ReleaseManage manage = ReleaseManage.builder()
                 .buildExtraModule(buildExtraModule)

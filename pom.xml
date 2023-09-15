@@ -63,10 +63,11 @@
         <maven.test.skip>true</maven.test.skip>
         <!--        <maven.javadoc.skip>true</maven.javadoc.skip>-->
         <hutool.version>5.8.22</hutool.version>
-        <fastjson2.version>2.0.39</fastjson2.version>
-        <fastjson-version>2.0.39</fastjson-version>
+        <fastjson2.version>2.0.40</fastjson2.version>
+        <fastjson-version>2.0.40</fastjson-version>
         <jna-version>5.12.1</jna-version>
         <mwiede.jsch-version>0.2.11</mwiede.jsch-version>
+        <oshi.version>6.4.5</oshi.version>
     </properties>
     <dependencies>
         <dependency>

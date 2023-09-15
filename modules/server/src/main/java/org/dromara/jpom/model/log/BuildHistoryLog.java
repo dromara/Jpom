@@ -23,15 +23,21 @@
 package org.dromara.jpom.model.log;
 
 import cn.hutool.core.annotation.PropIgnore;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.TypeReference;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.build.BuildExtraModule;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseWorkspaceModel;
+import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.enums.BuildStatus;
+
+import java.util.Map;
 
 /**
  * 构建历史记录
@@ -143,6 +149,14 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 
     public void setBuildRemark(String buildRemark) {
         this.buildRemark = StrUtil.maxLength(buildRemark, 240);
+    }
+
+    public EnvironmentMapBuilder toEnvironmentMapBuilder() {
+        String buildEnvCache = this.getBuildEnvCache();
+        JSONObject jsonObject = Opt.ofBlankAble(buildEnvCache).map(JSONObject::parseObject).orElse(new JSONObject());
+        Map<String, EnvironmentMapBuilder.Item> map = jsonObject.to(new TypeReference<Map<String, EnvironmentMapBuilder.Item>>() {
+        });
+        return EnvironmentMapBuilder.builder(map);
     }
 
 //	public void fillLogValue(BuildExtraModule buildExtraModule) {

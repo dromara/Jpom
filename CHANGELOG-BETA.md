@@ -10,8 +10,9 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】优化 构建详情页面支持快捷回滚、查看构建日志（感谢[@縁來只爲伱](https://gitee.com/taochach) [Gitee issues I7YSNH](https://gitee.com/dromara/Jpom/issues/I7YSNH)）
-2. 【all】升级 hutool
+2. 【all】升级 hutool、commons-compress
 3. 【agent】修复 重启项目偶发 NPE（监听日志关闭事件）（感谢[@caiqy](https://gitee.com/caiqiaoyu) [Gitee issues I7Z2U6](https://gitee.com/dromara/Jpom/issues/I7Z2U6)）
+4. 【server】优化 构建支持配置环境变量实现产物打包为 `tar.gz` (**USE_TAR_GZ=1**)
 
 ------
 

@@ -160,7 +160,8 @@ public class ReleaseManage {
         Boolean syncFileStorage = this.buildExtraModule.getSyncFileStorage();
         if (syncFileStorage != null && syncFileStorage) {
             logRecorder.system("开始同步到文件管理中心");
-            File dirPackage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, (unZip, file) -> file);
+            boolean tarGz = this.buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
+            File dirPackage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, file) -> file);
             String successMd5 = fileStorageService.addFile(dirPackage, 1,
                 buildInfoModel.getWorkspaceId(),
                 "构建来源," + buildInfoModel.getName(),
@@ -556,7 +557,8 @@ public class ReleaseManage {
             this.diffSyncProject(nodeModel, projectId, afterOpt, clearOld);
             return;
         }
-        JsonMessage<String> jsonMessage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, (unZip, zipFile) -> {
+        boolean tarGz = this.buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
+        JsonMessage<String> jsonMessage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, zipFile) -> {
             String name = zipFile.getName();
             Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
             return OutGivingRun.fileUpload(zipFile,
@@ -589,7 +591,8 @@ public class ReleaseManage {
         String projectSecondaryDirectory = this.buildExtraModule.getProjectSecondaryDirectory();
         //
         String selectProject = buildEnv.get("dispatchSelectProject");
-        Future<OutGivingModel.Status> statusFuture = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, (unZip, zipFile) -> {
+        boolean tarGz = buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
+        Future<OutGivingModel.Status> statusFuture = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, zipFile) -> {
             OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
                 .id(releaseMethodDataId)
                 .file(zipFile)
