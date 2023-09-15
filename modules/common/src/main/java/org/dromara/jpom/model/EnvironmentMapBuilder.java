@@ -23,6 +23,7 @@
 package org.dromara.jpom.model;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.AllArgsConstructor;
@@ -144,6 +145,20 @@ public class EnvironmentMapBuilder {
             return item.value;
         }
         return null;
+    }
+
+    /**
+     * 获取环境变量的执行
+     *
+     * @param key 变量名
+     * @return 值
+     */
+    public boolean getBool(String key, boolean defaultValue) {
+        String value = this.get(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        return BooleanUtil.toBoolean(value);
     }
 
     public String toDataJsonStr() {

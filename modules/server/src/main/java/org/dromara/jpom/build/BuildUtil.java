@@ -27,6 +27,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.extra.compress.CompressUtil;
+import cn.hutool.extra.compress.archiver.Archiver;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.model.data.BuildInfoModel;
@@ -34,6 +36,7 @@ import org.dromara.jpom.model.data.RepositoryModel;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.function.BiFunction;
 
 /**
@@ -45,6 +48,8 @@ import java.util.function.BiFunction;
 public class BuildUtil {
 
     public static Long buildCacheSize = 0L;
+
+    public static final String USE_TAR_GZ = "USE_TAR_GZ";
 
     /**
      * 刷新存储文件大小
@@ -132,9 +137,9 @@ public class BuildUtil {
      */
     public static File getHistoryPackageZipFile(String buildModelId, int buildId) {
         return FileUtil.file(getBuildDataFile(buildModelId),
-                "history",
-                BuildInfoModel.getBuildIdStr(buildId),
-                "zip");
+            "history",
+            BuildInfoModel.getBuildIdStr(buildId),
+            "zip");
     }
 
     /**
@@ -149,9 +154,9 @@ public class BuildUtil {
             return null;
         }
         return FileUtil.file(getBuildDataFile(buildModelId),
-                "history",
-                BuildInfoModel.getBuildIdStr(buildId),
-                "info.log");
+            "history",
+            BuildInfoModel.getBuildIdStr(buildId),
+            "info.log");
     }
 
     /**
@@ -160,7 +165,7 @@ public class BuildUtil {
      * @param file file
      * @return 压缩包文件
      */
-    private static File isDirPackage(String id, int buildNumberId, File file) {
+    private static File isDirPackage(String id, int buildNumberId, File file, boolean tarGz) {
         Assert.state(file != null && file.exists(), "产物文件不存在");
         if (file.isFile()) {
             return null;
@@ -171,21 +176,30 @@ public class BuildUtil {
         name = StrUtil.emptyToDefault(name, "result");
         // 保存目录存放值 history 路径
         File packageFile = BuildUtil.getHistoryPackageZipFile(id, buildNumberId);
-        File zipFile = FileUtil.file(packageFile, name + ".zip");
+        File zipFile = tarGz ? FileUtil.file(packageFile, name + ".tar.gz") : FileUtil.file(packageFile, name + ".zip");
         // 不存在则打包
-        ZipUtil.zip(file.getAbsolutePath(), zipFile.getAbsolutePath());
+        if (tarGz) {
+            try (Archiver archiver = CompressUtil.createArchiver(Charset.defaultCharset(), "tar.gz", zipFile)) {
+                archiver.add(file);
+            }
+        } else {
+            ZipUtil.zip(file.getAbsolutePath(), zipFile.getAbsolutePath());
+        }
         return zipFile;
     }
 
     /**
      * 如果为文件夹自动打包为zip ,反之返回null
      *
-     * @param file     file
-     * @param consumer 文件回调
+     * @param file          file
+     * @param id            构建Id
+     * @param buildNumberId 构建序号
+     * @param tarGz         是否打包 为 tar
+     * @param consumer      文件回调
      * @return 执行结果
      */
-    public static <T> T loadDirPackage(String id, int buildNumberId, File file, BiFunction<Boolean, File, T> consumer) {
-        File dirPackage = isDirPackage(id, buildNumberId, file);
+    public static <T> T loadDirPackage(String id, int buildNumberId, File file, boolean tarGz, BiFunction<Boolean, File, T> consumer) {
+        File dirPackage = isDirPackage(id, buildNumberId, file, tarGz);
         if (dirPackage == null) {
             return consumer.apply(false, file);
         } else {

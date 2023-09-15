@@ -40,8 +40,6 @@
         <start-class>org.dromara.jpom.JpomAgentApplication</start-class>
         <!--当前程序兼容 jpom 最新版本号-->
         <jpom-min-version>1.0.0</jpom-min-version>
-
-        <oshi.version>6.4.5</oshi.version>
     </properties>
     <dependencies>
 
