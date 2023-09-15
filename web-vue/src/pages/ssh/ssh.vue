@@ -193,7 +193,9 @@
       :footer="null"
       :maskClosable="false"
     >
-      <terminal v-if="terminalVisible" :sshId="temp.id" />
+      <div :style="`height: ${this.terminalFullscreen ? 'calc(100vh - 56px - 20px)' : 'calc(70vh - 20px)'}`">
+        <terminal v-if="terminalVisible" :sshId="temp.id" />
+      </div>
     </a-modal>
     <!-- 操作日志 -->
     <a-modal destroyOnClose v-model="viewOperationLog" title="操作日志" width="80vw" :footer="null" :maskClosable="false">
