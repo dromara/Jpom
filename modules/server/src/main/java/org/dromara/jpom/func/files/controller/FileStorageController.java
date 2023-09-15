@@ -129,10 +129,10 @@ public class FileStorageController extends BaseServerController {
     @PostMapping(value = "upload-sharding", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD, log = false)
     public IJsonMessage<String> uploadSharding(MultipartFile file,
-                                              String sliceId,
-                                              Integer totalSlice,
-                                              Integer nowSlice,
-                                              String fileSumMd5) throws IOException {
+                                               String sliceId,
+                                               Integer totalSlice,
+                                               Integer nowSlice,
+                                               String fileSumMd5) throws IOException {
         File userTempPath = serverConfig.getUserTempPath();
         this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumMd5);
         return JsonMessage.success("上传成功");
@@ -150,12 +150,12 @@ public class FileStorageController extends BaseServerController {
     @PostMapping(value = "upload-sharding-merge", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
     public IJsonMessage<String> uploadMerge(String sliceId,
-                                           Integer totalSlice,
-                                           String fileSumMd5,
-                                           Integer keepDay,
-                                           String description,
-                                           String aliasCode,
-                                           HttpServletRequest request) throws IOException {
+                                            Integer totalSlice,
+                                            String fileSumMd5,
+                                            Integer keepDay,
+                                            String description,
+                                            String aliasCode,
+                                            HttpServletRequest request) throws IOException {
         Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, "别名码只能是英文、数字"));
         File storageSavePath = serverConfig.fileStorageSavePath();
         // 验证文件
@@ -195,11 +195,11 @@ public class FileStorageController extends BaseServerController {
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> edit(@ValidatorItem String id,
-                                    @ValidatorItem String name,
-                                    Integer keepDay,
-                                    String description,
-                                    String aliasCode,
-                                    HttpServletRequest request) throws IOException {
+                                     @ValidatorItem String name,
+                                     Integer keepDay,
+                                     String description,
+                                     String aliasCode,
+                                     HttpServletRequest request) throws IOException {
         Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, "别名码只能是英文、数字"));
         FileStorageModel storageModel = fileStorageService.getByKeyAndGlobal(id, request);
 
@@ -293,6 +293,8 @@ public class FileStorageController extends BaseServerController {
             updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), fileStorageService.typeName(),
                 item.getId(), user.getId()));
             fileStorageService.updateById(updateInfo);
+            // 避免无法查看发片下载地址
+            updateInfo.setAliasCode(item.getAliasCode());
         } else {
             updateInfo = item;
         }
