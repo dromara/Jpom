@@ -14,12 +14,7 @@
       <a-timeline-item v-if="!this.nodeId && !this.machineId">
         <span class="layui-elem-quote">beta计划：</span>
         <a-space>
-          <a-switch
-            checked-children="加入"
-            un-checked-children="未加入"
-            :disabled="true"
-            v-model="temp.joinBetaRelease"
-          />
+          <a-switch checked-children="加入" un-checked-children="未加入" :disabled="true" v-model="temp.joinBetaRelease" />
           <template v-if="temp.joinBetaRelease">
             <a-button type="link" @click="handleChangeBetaRelease(false)">关闭 beta 计划</a-button>
           </template>
@@ -38,9 +33,8 @@
       <a-timeline-item>
         <span class="layui-elem-quote">当前版本号：{{ temp.version }} </span>
         <template v-if="temp.upgrade !== undefined">
-          <a-tag v-if="temp.upgrade" color="pink" @click="upgrageVerion"
-            >新版本：{{ temp.newVersion }} {{ temp.newBeta ? '/beta' : '' }} <a-icon type="download"
-          /></a-tag>
+          <a-tag v-if="temp.upgrade" color="pink" @click="upgrageVerion">新版本：{{ temp.newVersion }} {{ temp.newBeta ?
+            '/beta' : '' }} <a-icon type="download" /></a-tag>
           <a-tag v-else color="orange" @click="checkVersion">
             <a-icon type="rocket" />
           </a-tag>
@@ -50,19 +44,12 @@
         <span class="layui-elem-quote">已经运行时间：{{ formatDuration(temp.upTime) }}</span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote"
-          >端口号：<a-tag>{{ temp.port }}</a-tag></span
-        >
+        <span class="layui-elem-quote">端口号：<a-tag>{{ temp.port }}</a-tag></span>
         <span class="layui-elem-quote">&nbsp;&nbsp;</span>
-        <span class="layui-elem-quote"
-          >进程号：<a-tag>{{ temp.pid }}</a-tag></span
-        >
+        <span class="layui-elem-quote">进程号：<a-tag>{{ temp.pid }}</a-tag></span>
       </a-timeline-item>
       <a-timeline-item>
-        <a-alert
-          message="请勿手动删除数据目录下面文件,如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除"
-          type="warning"
-        />
+        <a-alert message="请勿手动删除数据目录下面文件,如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除" type="warning" />
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote">
@@ -79,13 +66,8 @@
     <a-row>
       <a-col span="22">
         <a-space direction="vertical" style="display: block">
-          <a-upload
-            :file-list="fileList"
-            :remove="handleRemove"
-            :disabled="!!percentage"
-            :before-upload="beforeUpload"
-            accept=".jar,.zip"
-          >
+          <a-upload :file-list="fileList" :remove="handleRemove" :disabled="!!percentage" :before-upload="beforeUpload"
+            accept=".jar,.zip">
             <a-icon type="loading" v-if="percentage" />
             <a-button icon="upload" v-else>选择升级文件</a-button>
           </a-upload>
@@ -94,15 +76,13 @@
               <a-progress :percent="percentage"></a-progress>
             </a-col>
           </a-row>
-          <a-button type="primary" :disabled="fileList.length === 0 || !!percentage" @click="startUpload"
-            >上传升级包</a-button
-          >
+          <a-button type="primary" :disabled="fileList.length === 0 || !!percentage" @click="startUpload">上传升级包</a-button>
         </a-space>
       </a-col>
     </a-row>
 
     <a-divider dashed />
-    <markdown-it-vue class="md-body" :content="changelog" :options="markdownOptions" />
+    <!-- <markdown-it-vue class="md-body" :content="changelog" :options="markdownOptions" /> -->
   </div>
 </template>
 <script>
@@ -115,9 +95,8 @@ import {
   uploadUpgradeFileMerge,
   changBetaRelease
 } from '@/api/system'
-// import Vue from 'vue'
-import MarkdownItVue from 'markdown-it-vue'
-import 'markdown-it-vue/dist/markdown-it-vue.css'
+// import MarkdownItVue from 'markdown-it-vue'
+// import 'markdown-it-vue/dist/markdown-it-vue.css'
 import {
   RESTART_UPGRADE_WAIT_TIME_COUNT,
   parseTime,
@@ -131,7 +110,7 @@ import { executionRequest } from '@/api/external'
 export default {
   name: 'Upgrade',
   components: {
-    MarkdownItVue
+    // MarkdownItVue
   },
   props: {
     nodeId: {
@@ -167,7 +146,7 @@ export default {
   mounted() {
     this.loadData()
   },
-  beforeDestroy() {},
+  beforeDestroy() { },
   methods: {
     uploadPieces,
     formatDuration,
@@ -471,10 +450,10 @@ export default {
     handleChangeBetaRelease(beta) {
       const html = beta
         ? "确认要加入 beta 计划吗？<ul style='color:red;'>" +
-          '<li><b> 加入 beta 计划可以及时获取到最新的功能、一些优化功能、最快修复 bug 的版本，但是 beta 版也可能在部分新功能上存在不稳定的情况。</b></li>' +
-          '<li><b>您需要根据您业务情况来评估是否可以加入 beta。</b></li>' +
-          '<li>在使用 beta 版过程中遇到问题可以随时反馈给我们，我们会尽快为您解答。</li>' +
-          ' </ul>'
+        '<li><b> 加入 beta 计划可以及时获取到最新的功能、一些优化功能、最快修复 bug 的版本，但是 beta 版也可能在部分新功能上存在不稳定的情况。</b></li>' +
+        '<li><b>您需要根据您业务情况来评估是否可以加入 beta。</b></li>' +
+        '<li>在使用 beta 版过程中遇到问题可以随时反馈给我们，我们会尽快为您解答。</li>' +
+        ' </ul>'
         : '确认要关闭 beta 计划吗？'
       const h = this.$createElement
       $confirm({
