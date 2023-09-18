@@ -6,15 +6,32 @@
     </a-layout-sider>
     <a-layout-content :style="{ padding: '0 5px', height: `calc(100vh - 10px)` }">
       <a-tabs v-if="selectPanes.length" v-model="activeKey" type="editable-card" hide-add @edit="onEdit" @change="change">
-        <a-tab-pane v-for="pane in selectPanes" :key="pane.id" :tab="pane.name" :closable="true">
-          <div v-if="pane.open" :style="{ height: `calc(100vh - 70px) ` }">
-            <terminal :sshId="pane.id" />
+        <template slot="tabBarExtraContent">
+          <a-button type="primary" :disabled="!activeKey" @click="changeFileVisible(activeKey, true)"> 文件管理 </a-button>
+        </template>
+        <a-tab-pane v-for="pane in selectPanes" :key="pane.id" :tab="pane.name" :closable="true" :ref="`pene-${pane.id}`">
+          <div :id="`paneDom${pane.id}`">
+            <div v-if="pane.open" :style="{ height: `calc(100vh - 70px) ` }">
+              <terminal :sshId="pane.id" />
+            </div>
+            <a-result v-else status="warning" title="未开启当前终端">
+              <template #extra>
+                <a-button type="primary" @click="open(pane.id)"> 打开终端 </a-button>
+              </template>
+            </a-result>
+            <!-- 文件管理 -->
+            <a-drawer
+              v-if="pane.openFile"
+              :getContainer="`#paneDom${pane.id}`"
+              :title="`${pane.name}文件管理`"
+              placement="right"
+              width="90vw"
+              :visible="pane.fileVisible"
+              @close="changeFileVisible(pane.id, false)"
+            >
+              <ssh-file v-if="pane.openFile" :sshId="pane.id" />
+            </a-drawer>
           </div>
-          <a-result v-else status="warning" title="未开启当前终端">
-            <template #extra>
-              <a-button type="primary" @click="open(pane.id)"> 打开终端 </a-button>
-            </template>
-          </a-result>
         </a-tab-pane>
       </a-tabs>
       <a-empty v-else description="未选择ssh"></a-empty>
@@ -25,9 +42,12 @@
 import { mapGetters } from "vuex";
 import { getSshListTree } from "@/api/ssh";
 import terminal from "./terminal";
+import SshFile from "@/pages/ssh/ssh-file";
+
 export default {
   components: {
     terminal,
+    SshFile,
   },
   data() {
     return {
@@ -141,6 +161,18 @@ export default {
           selectPanes: this.selectPanes,
         })
       );
+    },
+    // 文件管理状态切换
+    changeFileVisible(activeKey, value) {
+      this.selectPanes = this.selectPanes.map((item) => {
+        if (item.id === activeKey) {
+          item.fileVisible = value;
+          if (value && !item.openFile) {
+            item.openFile = true;
+          }
+        }
+        return item;
+      });
     },
   },
 };
