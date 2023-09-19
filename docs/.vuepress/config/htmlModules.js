@@ -34,9 +34,6 @@ module.exports = {
    </div>
 `,
   sidebarT: `
-    <a href="https://datayi.cn/w/nPN4JJe9" target="_blank">
-      <img class="no-zoom" height="60" width="224" src="/images/friends/ad/postcat.gif">
-    </a>
     <a href="https://gitee.com/dromara/MaxKey" target="_blank">
       <img class="no-zoom" height="60" width="224" src="/images/friends/ad/maxkey-banner.png">
     </a>
