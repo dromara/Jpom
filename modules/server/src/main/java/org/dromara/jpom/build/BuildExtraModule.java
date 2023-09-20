@@ -195,6 +195,10 @@ public class BuildExtraModule extends BaseModel {
      * 构建历史保留个数
      */
     private Integer resultKeepCount;
+    /**
+     * 文件中心保留天数
+     */
+    private Integer fileStorageKeepDay;
 
     public boolean strictlyEnforce() {
         return strictlyEnforce != null && strictlyEnforce;
