@@ -66,7 +66,7 @@ public class NettyTransportServer implements TransportServer {
             }
             return null;
         } catch (Exception e) {
-            log.error("", e);
+            log.error("{}", e.toString());
             return null;
         }
     }
