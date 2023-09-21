@@ -22,52 +22,37 @@
  */
 package org.dromara.jpom.transport;
 
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.function.Consumer;
 
 /**
+ * 插件端消息传输服务
+ *
  * @author bwcx_jzy
- * @since 2022/12/23
+ * @since 2022/12/18
  */
-public interface IUrlItem {
+@Slf4j
+public class NettyTransportServer implements TransportServer {
 
-    /**
-     * 请求路径
-     *
-     * @return path
-     */
-    String path();
+    @Override
+    public String execute(INodeInfo nodeInfo, IUrlItem urlItem, Object data) {
+        System.err.println(urlItem.messageClass());
+        return null;
+    }
 
-    /**
-     * 请求超时时间
-     * 单位秒
-     *
-     * @return 超时时间
-     */
-    Integer timeout();
+    @Override
+    public void download(INodeInfo nodeInfo, IUrlItem urlItem, Object data, Consumer<DownloadCallback> consumer) {
+        throw new RuntimeException("not support download.");
+    }
 
-    /**
-     * 当前工作空间id
-     *
-     * @return 工作空间
-     */
-    String workspaceId();
+    @Override
+    public IProxyWebSocket websocket(INodeInfo nodeInfo, IUrlItem urlItem, Object... parameters) {
+        throw new RuntimeException("not support websocket.");
+    }
 
-    /**
-     * 请求类型
-     *
-     * @return contentType
-     */
-    DataContentType contentType();
-
-    /**
-     * 请求头
-     *
-     * @return 请求头
-     */
-    Map<String, String> header();
-
-    /**
-     * 获取对应的消息
-     */
-    Class<?> messageClass();
+    @Override
+    public boolean support(Integer transportMode) {
+        return transportMode.equals(1);
+    }
 }

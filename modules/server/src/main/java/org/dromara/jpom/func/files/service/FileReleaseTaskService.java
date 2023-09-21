@@ -359,7 +359,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     private void runNodeScript(String content, NodeModel model, LogRecorder logRecorder, String id, EnvironmentMapBuilder environmentMapBuilder, String path) throws IOException {
         INodeInfo nodeInfo = NodeForward.parseNodeInfo(model);
         IUrlItem urlItem = NodeForward.parseUrlItem(nodeInfo, model.getWorkspaceId(), NodeUrl.FreeScriptRun, DataContentType.FORM_URLENCODED);
-        try (IProxyWebSocket proxySession = TransportServerFactory.get().websocket(nodeInfo, urlItem)) {
+        try (IProxyWebSocket proxySession = TransportServerFactory.get(nodeInfo).websocket(nodeInfo, urlItem)) {
             proxySession.onMessage(s -> {
                 if (StrUtil.equals(s, "JPOM_SYSTEM_TAG:" + id)) {
                     try {

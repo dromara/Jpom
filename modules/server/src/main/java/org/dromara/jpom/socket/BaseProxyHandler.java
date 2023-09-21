@@ -89,7 +89,7 @@ public abstract class BaseProxyHandler extends BaseHandler {
             INodeInfo nodeInfo = NodeForward.parseNodeInfo(nodeModel);
             IUrlItem urlItem = NodeForward.parseUrlItem(nodeInfo, nodeModel.getWorkspaceId(), this.nodeUrl, DataContentType.FORM_URLENCODED);
 
-            IProxyWebSocket proxySession = TransportServerFactory.get().websocket(nodeInfo, urlItem, parameters);
+            IProxyWebSocket proxySession = TransportServerFactory.get(nodeInfo).websocket(nodeInfo, urlItem, parameters);
             proxySession.onMessage(s -> sendMsg(session, s));
             if (!proxySession.connectBlocking()) {
                 this.sendMsg(session, "插件端连接失败");

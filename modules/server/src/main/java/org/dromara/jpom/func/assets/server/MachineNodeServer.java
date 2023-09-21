@@ -229,6 +229,9 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             return;
         }
         machineNodeModels.forEach(machineNodeModel -> {
+            if (machineNodeModel.getTransportMode().equals(1)) {
+                return;
+            }
             // 超时时间统一，避免长时间无响应
             machineNodeModel.setJpomTimeout(30);
             //
@@ -268,11 +271,14 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
      * @param machineNode 机器数据
      * @param data        统计数据
      */
-    private void saveStatInfo(MachineNodeModel machineNode, JSONObject data) {
+    public void saveStatInfo(MachineNodeModel machineNode, JSONObject data) {
         MachineNodeModel machineNodeModel = new MachineNodeModel();
         machineNodeModel.setId(machineNode.getId());
         machineNodeModel.setStatus(1);
         machineNodeModel.setStatusMsg("ok");
+        if (data.containsKey("installId")) {
+            machineNodeModel.setTransportMode(1);
+        }
         int networkDelay = data.getIntValue("networkDelay");
         int systemSleep = data.getIntValue("systemSleep");
         // 减去系统固定休眠时间
@@ -340,7 +346,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
      * @param status      状态
      * @param msg         状态消息
      */
-    private void updateStatus(MachineNodeModel machineNode, int status, String msg) {
+    public void updateStatus(MachineNodeModel machineNode, int status, String msg) {
         MachineNodeModel machineNodeModel = new MachineNodeModel();
         machineNodeModel.setId(machineNode.getId());
         machineNodeModel.setStatus(status);

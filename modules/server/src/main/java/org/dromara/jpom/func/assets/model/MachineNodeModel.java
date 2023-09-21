@@ -267,4 +267,9 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
         // 需要兼容旧数据
         return ObjectUtil.defaultIfNull(this.getTransportEncryption(), 0);
     }
+
+    @Override
+    public Integer transportMode() {
+        return ObjectUtil.defaultIfNull(this.getTransportMode(), 0);
+    }
 }

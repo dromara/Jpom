@@ -7,6 +7,7 @@ import io.netty.channel.EventLoop;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.dromara.jpom.transport.event.ClientStatusEvent;
 import org.dromara.jpom.transport.properties.NettyProperties;
 import org.dromara.jpom.transport.netty.service.ChannelServiceManager;
 import org.dromara.jpom.transport.netty.service.NettyCustomer;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.event.ApplicationEventMulticaster;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -38,6 +40,8 @@ public abstract class NettyClient implements CommandLineRunner, Closeable, Chann
 
     private List<ChannelInitializerClient> supports;
 
+    private ApplicationEventMulticaster eventMulticaster;
+
     @Override
     public void run(String... args) throws Exception {
         Bootstrap bootstrap = new Bootstrap();
@@ -52,6 +56,11 @@ public abstract class NettyClient implements CommandLineRunner, Closeable, Chann
     @Autowired
     public void setSupports(List<ChannelInitializerClient> supports) {
         this.supports = supports;
+    }
+
+    @Autowired
+    public void setEventMulticaster(ApplicationEventMulticaster eventMulticaster) {
+        this.eventMulticaster = eventMulticaster;
     }
 
     @Override
@@ -89,9 +98,11 @@ public abstract class NettyClient implements CommandLineRunner, Closeable, Chann
             if (futureListener.cause() != null) {
                 log.error("Failed to connect to server" + futureListener.cause() + " -> We will try connect after 10s");
                 futureListener.channel().eventLoop().schedule(() -> doConnect(new Bootstrap(), eventLoop), 10, TimeUnit.SECONDS);
+                eventMulticaster.multicastEvent(new ClientStatusEvent(this, ClientStatusEvent.Status.DISCONNECT_SUCCESS));
             } else {
                 NettyCustomer.add(futureListener.channel());
                 log.info("启动 {} client，连接server成功, host: {}, port: {}", nettyProperties.getTcp(), nettyProperties.getHost(), nettyProperties.getPort());
+                eventMulticaster.multicastEvent(new ClientStatusEvent(this, ClientStatusEvent.Status.CONNECT_SUCCESS));
             }
         });
     }

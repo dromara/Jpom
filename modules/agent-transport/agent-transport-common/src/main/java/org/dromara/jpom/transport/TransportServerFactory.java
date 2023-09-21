@@ -22,9 +22,15 @@
  */
 package org.dromara.jpom.transport;
 
+import cn.hutool.core.annotation.AnnotationUtil;
 import cn.hutool.core.lang.Singleton;
 import cn.hutool.core.util.ServiceLoaderUtil;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author bwcx_jzy
@@ -33,13 +39,29 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TransportServerFactory {
 
+    private static final Map<Integer, TransportServer> MAP = new ConcurrentHashMap<>();
+
     /**
      * 获得单例的 TransportServer
      *
      * @return 单例的 TransportServer
      */
+    @Deprecated
     public static TransportServer get() {
-        return Singleton.get(TransportServer.class.getName(), TransportServerFactory::doCreate);
+        return Singleton.get(TransportServer.class.getName(), TransportServerFactory.doCreate(null));
+    }
+
+    /**
+     * 获得单例的 TransportServer
+     *
+     * @return 单例的 TransportServer
+     */
+    public static synchronized TransportServer get(INodeInfo nodeInfo) {
+        if (MAP.containsKey(nodeInfo.transportMode())) {
+            return MAP.get(nodeInfo.transportMode());
+        }
+        TransportServer transportServer = TransportServerFactory.doCreate(nodeInfo);
+        return MAP.put(nodeInfo.transportMode(), transportServer);
     }
 
     /**
@@ -49,7 +71,7 @@ public class TransportServerFactory {
      * @return {@code TransportServer}
      */
     public static TransportServer of() {
-        final TransportServer transportServer = doCreate();
+        final TransportServer transportServer = doCreate(null);
         log.debug("Use [{}] Agent Transport As Default.", transportServer.getClass().getSimpleName());
         return transportServer;
     }
@@ -61,10 +83,17 @@ public class TransportServerFactory {
      *
      * @return {@code EngineFactory}
      */
-    private static TransportServer doCreate() {
-        final TransportServer engine = ServiceLoaderUtil.loadFirstAvailable(TransportServer.class);
+    private static TransportServer doCreate(INodeInfo nodeInfo) {
+        /*final TransportServer engine = ServiceLoaderUtil.loadFirstAvailable(TransportServer.class);
         if (null != engine) {
             return engine;
+        }*/
+        List<TransportServer> list = ServiceLoaderUtil.loadList(TransportServer.class);
+        if (!list.isEmpty()) {
+            Optional<TransportServer> optional = list.stream().filter(it -> it.support(nodeInfo.transportMode())).findFirst();
+            if (optional.isPresent()) {
+                return optional.get();
+            }
         }
 
         throw new RuntimeException("No jpom agent transport jar found ! Please add one of it to your project !");

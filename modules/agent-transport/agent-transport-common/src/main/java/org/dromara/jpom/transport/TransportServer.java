@@ -102,4 +102,11 @@ public interface TransportServer {
      * @return websocket
      */
     IProxyWebSocket websocket(INodeInfo nodeInfo, IUrlItem urlItem, Object... parameters);
+
+    /**
+     * 传输方式
+     * @param transportMode 0 服务器拉取，1 节点机器推送
+     * @return true支持
+     */
+    boolean support(Integer transportMode);
 }

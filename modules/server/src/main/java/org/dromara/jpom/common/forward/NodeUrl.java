@@ -23,6 +23,8 @@
 package org.dromara.jpom.common.forward;
 
 import lombok.Getter;
+import org.dromara.jpom.transport.protocol.Message;
+import org.dromara.jpom.transport.protocol.ProcessListMessage;
 
 /**
  * agent 端的请求地址枚举
@@ -48,7 +50,7 @@ public enum NodeUrl {
 
     NetworkInterfaces("/network-interfaces"),
 
-    ProcessList("/processList", -1),
+    ProcessList("/processList", -1, ProcessListMessage.class),
     /**
      * socket 连接  ，第一节项目id 第二节用户信息
      */
@@ -262,6 +264,7 @@ public enum NodeUrl {
     private final String url;
     private int timeout;
     private boolean fileTimeout = false;
+    private Class<? extends Message> message;
 
     NodeUrl(String url, int timeout) {
         this.url = url;
@@ -275,5 +278,22 @@ public enum NodeUrl {
 
     NodeUrl(String url) {
         this.url = url;
+    }
+
+    NodeUrl(String url, Class<? extends Message> message) {
+        this.url = url;
+        this.message = message;
+    }
+
+    NodeUrl(String url, int timeout, Class<? extends Message> message) {
+        this.url = url;
+        this.timeout = timeout;
+        this.message = message;
+    }
+
+    NodeUrl(String url, boolean fileTimeout, Class<? extends Message> message) {
+        this.url = url;
+        this.fileTimeout = fileTimeout;
+        this.message = message;
     }
 }

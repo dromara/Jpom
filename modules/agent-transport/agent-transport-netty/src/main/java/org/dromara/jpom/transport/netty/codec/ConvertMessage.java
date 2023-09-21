@@ -29,6 +29,10 @@ public class ConvertMessage {
             return new TextMessage(headerMap, new String(content, StandardCharsets.UTF_8));
         } else if (messageCmd == MessageCmd.FILE) {
             return new FileMessage(headerMap, content);
+        } else if (messageCmd == MessageCmd.AGENT_STAT_INFO) {
+            return new PushStatInfoMessage(headerMap, new String(content, StandardCharsets.UTF_8));
+        } else if (messageCmd == MessageCmd.PROCESS_LIST) {
+            return new ProcessListMessage(headerMap, new String(content, StandardCharsets.UTF_8));
         }
         return new NoneMessage(headerMap, content);
     }

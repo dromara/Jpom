@@ -83,4 +83,10 @@ public interface INodeInfo {
      * @return 传输加密方式 0 不加密 1 BASE64 2 AES
      */
     Integer transportEncryption();
+
+    /**
+     * 传输方式。
+     * @return 0 服务器拉取，1 节点机器推送
+     */
+    Integer transportMode();
 }

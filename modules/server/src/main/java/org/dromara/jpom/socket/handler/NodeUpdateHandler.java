@@ -124,7 +124,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 INodeInfo nodeInfo = NodeForward.coverNodeInfo(model);
                 IUrlItem urlItem = NodeForward.parseUrlItem(model, StrUtil.EMPTY, NodeUrl.NodeUpdate, DataContentType.FORM_URLENCODED);
 
-                IProxyWebSocket proxySession = TransportServerFactory.get().websocket(nodeInfo, urlItem);
+                IProxyWebSocket proxySession = TransportServerFactory.get(nodeInfo).websocket(nodeInfo, urlItem);
                 proxySession.onMessage(msg -> sendMsg(session, msg));
                 return proxySession;
             });

@@ -28,6 +28,7 @@ import org.dromara.jpom.common.Const;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.transport.DataContentType;
 import org.dromara.jpom.transport.IUrlItem;
+import org.dromara.jpom.transport.protocol.Message;
 
 import java.util.Map;
 import java.util.Optional;
@@ -42,6 +43,7 @@ public class DefaultUrlItem implements IUrlItem {
     private final String workspaceId;
     private final DataContentType dataContentType;
     private final Map<String, String> header;
+    private final Class<? extends Message> message;
 
     public DefaultUrlItem(NodeUrl nodeUrl, Integer timeout, String workspaceId, DataContentType dataContentType, Map<String, String> header) {
         this.nodeUrl = nodeUrl;
@@ -49,6 +51,7 @@ public class DefaultUrlItem implements IUrlItem {
         this.workspaceId = workspaceId;
         this.dataContentType = dataContentType;
         this.header = header;
+        this.message = nodeUrl.getMessage();
     }
 
     @Override
@@ -96,5 +99,10 @@ public class DefaultUrlItem implements IUrlItem {
     @Override
     public Map<String, String> header() {
         return header;
+    }
+
+    @Override
+    public Class<?> messageClass() {
+        return message;
     }
 }

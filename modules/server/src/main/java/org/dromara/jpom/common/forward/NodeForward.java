@@ -224,7 +224,7 @@ public class NodeForward {
         };
         return createUrlItem(nodeModel, nodeUrl,
             (nodeInfo, urlItem) ->
-                TransportServerFactory.get().executeToType(nodeInfo, urlItem, map, tTypeReference)
+                TransportServerFactory.get(nodeInfo).executeToType(nodeInfo, urlItem, map, tTypeReference)
         );
     }
 
@@ -266,7 +266,7 @@ public class NodeForward {
         INodeInfo nodeInfo1 = coverNodeInfo(machineNodeModel);
         return createUrlItem(nodeInfo1, StrUtil.EMPTY, nodeUrl,
             (nodeInfo, urlItem) ->
-                TransportServerFactory.get().executeToType(nodeInfo, urlItem, map, tTypeReference)
+                TransportServerFactory.get(nodeInfo1).executeToType(nodeInfo, urlItem, map, tTypeReference)
         );
     }
 
@@ -281,7 +281,7 @@ public class NodeForward {
     public static <T> JsonMessage<T> request(NodeModel nodeModel, NodeUrl nodeUrl, JSONObject jsonObject) {
         TypeReference<JsonMessage<T>> tTypeReference = new TypeReference<JsonMessage<T>>() {
         };
-        return createUrlItem(nodeModel, nodeUrl, (nodeInfo, urlItem) -> TransportServerFactory.get().executeToType(nodeInfo, urlItem, jsonObject, tTypeReference));
+        return createUrlItem(nodeModel, nodeUrl, (nodeInfo, urlItem) -> TransportServerFactory.get(nodeInfo).executeToType(nodeInfo, urlItem, jsonObject, tTypeReference));
     }
 
     /**
@@ -296,7 +296,7 @@ public class NodeForward {
         TypeReference<JsonMessage<T>> typeReference = new TypeReference<JsonMessage<T>>() {
         };
         INodeInfo nodeInfo = coverNodeInfo(machineNodeModel);
-        return createUrlItem(nodeInfo, StrUtil.EMPTY, nodeUrl, (nodeInfo1, urlItem) -> TransportServerFactory.get().executeToType(nodeInfo1, urlItem, jsonObject, typeReference));
+        return createUrlItem(nodeInfo, StrUtil.EMPTY, nodeUrl, (nodeInfo1, urlItem) -> TransportServerFactory.get(nodeInfo).executeToType(nodeInfo1, urlItem, jsonObject, typeReference));
     }
 
     /**
@@ -374,7 +374,7 @@ public class NodeForward {
         sliceData.put("sliceId", IdUtil.fastSimpleUUID());
         sliceData.put("totalSlice", total);
         sliceData.put("fileSumMd5", md5);
-        TransportServer transportServer = TransportServerFactory.get();
+        TransportServer transportServer = TransportServerFactory.get(nodeInfo);
         TypeReference<JsonMessage<T>> typeReference = new TypeReference<JsonMessage<T>>() {
         };
         // 需要计算 并发数和最大任务数，如果任务数小于并发数则使用任务数
@@ -496,7 +496,7 @@ public class NodeForward {
             parametersMap.put(parameters[i].toString(), parameters[i + 1]);
         }
         IUrlItem iUrlItem = parseUrlItem(nodeInfo, workspaceId, nodeUrl);
-        return TransportServerFactory.get().executeToType(nodeInfo, iUrlItem, parametersMap, new TypeReference<JsonMessage<T>>() {
+        return TransportServerFactory.get(nodeInfo).executeToType(nodeInfo, iUrlItem, parametersMap, new TypeReference<JsonMessage<T>>() {
         });
     }
 
@@ -513,7 +513,7 @@ public class NodeForward {
         TypeReference<JsonMessage<T>> tTypeReference = new TypeReference<JsonMessage<T>>() {
         };
         return createUrlItem(nodeModel, nodeUrl, DataContentType.JSON,
-            (nodeInfo, urlItem) -> TransportServerFactory.get().executeToType(nodeInfo, urlItem, jsonData, tTypeReference));
+            (nodeInfo, urlItem) -> TransportServerFactory.get(nodeInfo).executeToType(nodeInfo, urlItem, jsonData, tTypeReference));
 
     }
 
@@ -560,7 +560,7 @@ public class NodeForward {
     private static <T> T requestData(INodeInfo nodeInfo1, String workspaceId, NodeUrl nodeUrl, HttpServletRequest request, Class<T> tClass) {
         Map<String, String> map = Optional.ofNullable(request).map(ServletUtil::getParamMap).orElse(null);
         IUrlItem iUrlItem = parseUrlItem(nodeInfo1, workspaceId, nodeUrl);
-        return TransportServerFactory.get().executeToTypeOnlyData(nodeInfo1, iUrlItem, map, tClass);
+        return TransportServerFactory.get(nodeInfo1).executeToTypeOnlyData(nodeInfo1, iUrlItem, map, tClass);
     }
 
 
@@ -615,7 +615,7 @@ public class NodeForward {
         });
         TypeReference<JsonMessage<String>> tTypeReference = new TypeReference<JsonMessage<String>>() {
         };
-        return TransportServerFactory.get().executeToType(nodeInfo, iUrlItem, params, tTypeReference);
+        return TransportServerFactory.get(nodeInfo).executeToType(nodeInfo, iUrlItem, params, tTypeReference);
 
     }
 
@@ -631,7 +631,7 @@ public class NodeForward {
         //
         Map<String, String> params = ServletUtil.getParamMap(request);
         createUrlItem(nodeModel, nodeUrl, (nodeInfo, urlItem) -> {
-            TransportServerFactory.get().download(nodeInfo, urlItem, params, downloadCallback -> {
+            TransportServerFactory.get(nodeInfo).download(nodeInfo, urlItem, params, downloadCallback -> {
                 Opt.ofBlankAble(downloadCallback.getContentDisposition())
                     .ifPresent(s -> response.setHeader(HttpHeaders.CONTENT_DISPOSITION, s));
                 response.setContentType(downloadCallback.getContentType());

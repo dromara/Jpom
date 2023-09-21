@@ -11,7 +11,9 @@ public enum MessageCmd {
     HEARTBEAT(1, "heartbeat"),
     REGISTER(2, "register"),
     TEXT(3, "text"),
-    FILE(4, "file");
+    FILE(4, "file"),
+    AGENT_STAT_INFO(5, "agent_stat_info"),
+    PROCESS_LIST(6, "process_list");
 
     private final int cmd;
 

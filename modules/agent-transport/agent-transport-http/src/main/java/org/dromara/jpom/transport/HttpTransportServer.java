@@ -47,7 +47,6 @@ import java.util.function.Consumer;
 @Slf4j
 public class HttpTransportServer implements TransportServer {
 
-
     private HttpRequest createRequest(INodeInfo nodeInfo, IUrlItem urlItem, Method method) {
         String url = StrUtil.format("{}://{}/", nodeInfo.scheme(), nodeInfo.url());
         UrlBuilder urlBuilder = UrlBuilder.of(url).addPath(urlItem.path());
@@ -183,5 +182,10 @@ public class HttpTransportServer implements TransportServer {
         }
         Integer timeout = urlItem.timeout();
         return new ServletWebSocketClientHandler(uriTemplate, timeout);
+    }
+
+    @Override
+    public boolean support(Integer transportMode) {
+        return transportMode == null || transportMode.equals(0);
     }
 }

@@ -1,5 +1,6 @@
 package org.dromara.jpom.transport.event;
 
+import lombok.Getter;
 import org.dromara.jpom.transport.netty.service.ChannelService;
 import org.dromara.jpom.transport.protocol.Message;
 import org.springframework.context.ApplicationEvent;
@@ -10,6 +11,7 @@ import org.springframework.context.ApplicationEvent;
  * @author Hong
  * @since 2023/08/22
  */
+@Getter
 public class MessageEvent<T extends Message> extends ApplicationEvent {
 
     private final String channelName;
@@ -28,19 +30,4 @@ public class MessageEvent<T extends Message> extends ApplicationEvent {
         this.channelName = channelName;
     }
 
-    public String getMessageId() {
-        return messageId;
-    }
-
-    public T getMessage() {
-        return message;
-    }
-
-    public ChannelService getChannelService() {
-        return channelService;
-    }
-
-    public String getChannelName() {
-        return channelName;
-    }
 }
