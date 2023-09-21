@@ -4,6 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import org.dromara.jpom.transport.MessageSubscribers;
 import org.dromara.jpom.transport.netty.ChannelSupport;
 import org.dromara.jpom.transport.protocol.Message;
 import org.dromara.jpom.transport.protocol.RegisterMessage;
@@ -14,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 /**
  * Netty消费者/客户端
@@ -49,19 +51,26 @@ public class NettyProducer implements ChannelService {
         }
     }
 
-    public static void write(Message message, String ...name) {
+    public static boolean write(Message message, String ...name) {
         Optional<JpomChannel> optional = customer.stream().filter(it -> name != null && Arrays.stream(name).anyMatch(it::support)).findFirst();
         if (optional.isPresent()) {
             boolean flag = optional.get().write(message);
             log.info("写入消息下发队列状态：{}", flag);
+            return flag;
         }
+        return false;
     }
 
-    public static void writeAll(Message message) {
+    public static boolean writeAll(Message message) {
+        boolean success = false;
         for (JpomChannel jpomChannel : customer) {
             boolean flag = jpomChannel.write(message);
             log.info("写入消息下发队列状态：{}", flag);
+            if (flag) {
+                success = true;
+            }
         }
+        return success;
     }
 
     public static void register(RegisterMessage message, Channel channel) {
@@ -96,5 +105,26 @@ public class NettyProducer implements ChannelService {
     @Override
     public void writeAndFlushAll(Message message) {
         writeAll(message);
+    }
+
+    @Override
+    public void writeAndFlush(Message message, Consumer<Message> consumer) {
+        if (write(message, "")) {
+            MessageSubscribers.addConsumer(message.messageId(), consumer);
+        }
+    }
+
+    @Override
+    public void writeAndFlush(Message message, Consumer<Message> consumer, String... name) {
+        if (write(message, name)) {
+            MessageSubscribers.addConsumer(message.messageId(), consumer);
+        }
+    }
+
+    @Override
+    public void writeAndFlushAll(Message message, Consumer<Message> consumer) {
+        if (writeAll(message)) {
+            MessageSubscribers.addConsumer(message.messageId(), consumer);
+        }
     }
 }

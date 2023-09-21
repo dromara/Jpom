@@ -2,6 +2,7 @@ package org.dromara.jpom.transport.netty.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.dromara.jpom.transport.MessageSubscribers;
 import org.dromara.jpom.transport.event.MessageEvent;
 import org.dromara.jpom.transport.netty.service.ChannelServiceManager;
 import org.dromara.jpom.transport.netty.service.NettyProducer;
@@ -50,6 +51,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<Message> {
                     return;
                 }
             }
+            MessageSubscribers.startConsume(message);
             eventMulticaster.multicastEvent(new MessageEvent<>(this, message, ChannelServiceManager.INSTANCE, channelName));
         }
     }
