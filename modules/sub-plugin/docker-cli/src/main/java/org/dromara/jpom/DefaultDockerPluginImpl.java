@@ -26,6 +26,7 @@ import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.exceptions.InvocationTargetRuntimeException;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
@@ -368,9 +369,10 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
      * 构建镜像
      *
      * @param parameter 参数
+     * @return 构建是否成功
      */
     @SuppressWarnings("unchecked")
-    private void buildImageCmd(Map<String, Object> parameter) {
+    private boolean buildImageCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
         Consumer<String> logConsumer = (Consumer<String>) parameter.get("logConsumer");
         File dockerfile = (File) parameter.get("Dockerfile");
@@ -381,7 +383,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         Object noCache = parameter.get("noCache");
         String labels = (String) parameter.get("labels");
         Map<String, String> env = (Map<String, String>) parameter.get("env");
-
+        InvocationBuilder.AsyncResultCallback<BuildResponseItem> callback = null;
         try {
             AuthConfigurations authConfigurations = new AuthConfigurations();
             authConfigurations.addConfig(dockerClient.authConfig());
@@ -412,16 +414,22 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
             //
             Optional.ofNullable(pull).map(Convert::toBool).ifPresent(buildImageCmd::withPull);
             Optional.ofNullable(noCache).map(Convert::toBool).ifPresent(buildImageCmd::withNoCache);
-
-            buildImageCmd.exec(new InvocationBuilder.AsyncResultCallback<BuildResponseItem>() {
+            //
+            final boolean[] hasError = {false};
+            callback = buildImageCmd.exec(new InvocationBuilder.AsyncResultCallback<BuildResponseItem>() {
                 @Override
                 public void onNext(BuildResponseItem object) {
                     String responseItem = DockerUtil.parseResponseItem(object);
                     logConsumer.accept(responseItem);
+                    hasError[0] = hasError[0] || object.isErrorIndicated();
                 }
             }).awaitCompletion();
+            return !hasError[0];
         } catch (InterruptedException e) {
             logConsumer.accept("容器 build 被中断:" + e);
+            return false;
+        } finally {
+            IoUtil.close(callback);
         }
     }
 
@@ -430,6 +438,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         DockerClient dockerClient = DockerUtil.get(parameter);
         Consumer<String> logConsumer = (Consumer<String>) parameter.get("logConsumer");
         Consumer<String> errorConsumer = (Consumer<String>) parameter.get("errorConsumer");
+        InvocationBuilder.AsyncResultCallback<Frame> callback = null;
         try {
             String containerId = (String) parameter.get("containerId");
             Charset charset = (Charset) parameter.get("charset");
@@ -447,7 +456,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
             ExecStartCmd execStartCmd = dockerClient.execStartCmd(execId);
             execStartCmd.withDetach(false).withTty(true).withStdIn(stdin1);
             logConsumer.accept(StrUtil.format("CALLBACK_EXECID:{}", execId));
-            execStartCmd.exec(new InvocationBuilder.AsyncResultCallback<Frame>() {
+            callback = execStartCmd.exec(new InvocationBuilder.AsyncResultCallback<Frame>() {
                 @Override
                 public void onNext(Frame frame) {
                     String s = new String(frame.getPayload(), charset);
@@ -458,6 +467,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
             errorConsumer.accept("容器cli被中断:" + e);
         } finally {
             errorConsumer.accept("exit");
+            IoUtil.close(callback);
         }
     }
 

@@ -1,6 +1,10 @@
 <template>
   <div>
-    <log-view :ref="`logView`" height="70vh" marginTop="-10px" />
+    <log-view :ref="`logView`" height="70vh" marginTop="-10px">
+      <template #before>
+        <a-tag>{{ temp && temp.buildId }}</a-tag>
+      </template>
+    </log-view>
   </div>
 </template>
 <script>

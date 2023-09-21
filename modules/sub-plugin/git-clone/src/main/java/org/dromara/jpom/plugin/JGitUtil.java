@@ -315,23 +315,31 @@ public class JGitUtil {
             if (branchListRef == null) {
                 return null;
             }
-            List<String> branchList = branchListRef.stream().map(ref -> {
-                String name = ref.getName();
-                if (name.startsWith(Constants.R_HEADS)) {
-                    return name.substring((Constants.R_HEADS).length());
-                }
-                return null;
-            }).filter(Objects::nonNull).sorted((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1)).collect(Collectors.toList());
+            List<String> branchList = branchListRef.stream()
+                .map(ref -> {
+                    String name = ref.getName();
+                    if (name.startsWith(Constants.R_HEADS)) {
+                        return name.substring((Constants.R_HEADS).length());
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .sorted((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1))
+                .collect(Collectors.toList());
 
             // list tag
             List<Ref> tagListRef = refMap.get(Constants.R_TAGS);
-            List<String> tagList = tagListRef == null ? new ArrayList<>() : tagListRef.stream().map(ref -> {
-                String name = ref.getName();
-                if (name.startsWith(Constants.R_TAGS)) {
-                    return name.substring((Constants.R_TAGS).length());
-                }
-                return null;
-            }).filter(Objects::nonNull).sorted((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1)).collect(Collectors.toList());
+            List<String> tagList = tagListRef == null ? new ArrayList<>() : tagListRef.stream()
+                .map(ref -> {
+                    String name = ref.getName();
+                    if (name.startsWith(Constants.R_TAGS)) {
+                        return name.substring((Constants.R_TAGS).length());
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .sorted((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1))
+                .collect(Collectors.toList());
             return new Tuple(branchList, tagList);
         } catch (Exception t) {
             checkTransportException(t, null, null);

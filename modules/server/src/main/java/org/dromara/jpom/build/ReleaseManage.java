@@ -160,7 +160,8 @@ public class ReleaseManage {
         Boolean syncFileStorage = this.buildExtraModule.getSyncFileStorage();
         if (syncFileStorage != null && syncFileStorage) {
             logRecorder.system("开始同步到文件管理中心");
-            File dirPackage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, (unZip, file) -> file);
+            boolean tarGz = this.buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
+            File dirPackage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, file) -> file);
             String successMd5 = fileStorageService.addFile(dirPackage, 1,
                 buildInfoModel.getWorkspaceId(),
                 "构建来源," + buildInfoModel.getName(),
@@ -209,34 +210,36 @@ public class ReleaseManage {
             return dockerTag;
         }
         List<String> list = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
-        return list.stream().map(s -> {
-            List<String> tag = StrUtil.splitTrim(s, StrUtil.COLON);
-            String version = CollUtil.getLast(tag);
-            List<String> versionList = StrUtil.splitTrim(version, StrUtil.DOT);
-            int tagSize = CollUtil.size(tag);
-            if (tagSize <= 1 || CollUtil.size(versionList) <= 1) {
-                logRecorder.systemWarning("version number incrementing error, no match for . or :");
-                return s;
-            }
-            boolean match = false;
-            for (int i = versionList.size() - 1; i >= 0; i--) {
-                String versionParting = versionList.get(i);
-                int versionPartingInt = Convert.toInt(versionParting, Integer.MIN_VALUE);
-                if (versionPartingInt != Integer.MIN_VALUE) {
-                    versionList.set(i, this.buildNumberId + StrUtil.EMPTY);
-                    match = true;
-                    break;
+        return list.stream()
+            .map(s -> {
+                List<String> tag = StrUtil.splitTrim(s, StrUtil.COLON);
+                String version = CollUtil.getLast(tag);
+                List<String> versionList = StrUtil.splitTrim(version, StrUtil.DOT);
+                int tagSize = CollUtil.size(tag);
+                if (tagSize <= 1 || CollUtil.size(versionList) <= 1) {
+                    logRecorder.systemWarning("version number incrementing error, no match for . or :");
+                    return s;
                 }
-            }
-            tag.set(tagSize - 1, CollUtil.join(versionList, StrUtil.DOT));
-            String newVersion = CollUtil.join(tag, StrUtil.COLON);
-            if (match) {
-                logRecorder.system("dockerTag version number incrementing {} -> {}", s, newVersion);
-            } else {
-                logRecorder.systemWarning("version number incrementing error,No numeric version number {} ", s);
-            }
-            return newVersion;
-        }).collect(Collectors.joining(StrUtil.COMMA));
+                boolean match = false;
+                for (int i = versionList.size() - 1; i >= 0; i--) {
+                    String versionParting = versionList.get(i);
+                    int versionPartingInt = Convert.toInt(versionParting, Integer.MIN_VALUE);
+                    if (versionPartingInt != Integer.MIN_VALUE) {
+                        versionList.set(i, this.buildNumberId + StrUtil.EMPTY);
+                        match = true;
+                        break;
+                    }
+                }
+                tag.set(tagSize - 1, CollUtil.join(versionList, StrUtil.DOT));
+                String newVersion = CollUtil.join(tag, StrUtil.COLON);
+                if (match) {
+                    logRecorder.system("dockerTag version number incrementing {} -> {}", s, newVersion);
+                } else {
+                    logRecorder.systemWarning("version number incrementing error,No numeric version number {} ", s);
+                }
+                return newVersion;
+            })
+            .collect(Collectors.joining(StrUtil.COMMA));
     }
 
     private String doDockerImage() {
@@ -278,7 +281,13 @@ public class ReleaseManage {
             }
             //String dockerBuildArgs = this.buildExtraModule.getDockerBuildArgs();
             for (DockerInfoModel infoModel : dockerInfoModels) {
-                this.doDockerImage(infoModel, envMap, dockerfile, baseDir, dockerTag, this.buildExtraModule);
+                boolean done = this.doDockerImage(infoModel, envMap, dockerfile, baseDir, dockerTag, this.buildExtraModule);
+                if (!done) {
+                    logRecorder.systemWarning("容器构建异常：{} -> {}", infoModel.getName(), dockerTag);
+                    if (buildExtraModule.strictlyEnforce()) {
+                        return "严格模式下镜像构建失败,终止任务";
+                    }
+                }
             }
             // 推送 - 只选择一个 docker 服务来推送到远程仓库
             Boolean pushToRepository = this.buildExtraModule.getPushToRepository();
@@ -325,7 +334,7 @@ public class ReleaseManage {
         }
     }
 
-    private void doDockerImage(DockerInfoModel dockerInfoModel, Map<String, String> envMap, File dockerfile, File baseDir, String dockerTag, BuildExtraModule extraModule) {
+    private boolean doDockerImage(DockerInfoModel dockerInfoModel, Map<String, String> envMap, File dockerfile, File baseDir, String dockerTag, BuildExtraModule extraModule) {
         logRecorder.system("{} start build image {}{}", dockerInfoModel.getName(), dockerTag, System.lineSeparator());
         Map<String, Object> map = machineDockerServer.dockerParameter(dockerInfoModel);
         //.toParameter();
@@ -342,9 +351,10 @@ public class ReleaseManage {
         map.put("logConsumer", logConsumer);
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         try {
-            plugin.execute("buildImage", map);
+            return (boolean) plugin.execute("buildImage", map);
         } catch (Exception e) {
-            logRecorder.error("构建镜像调用容器异常", e);
+            logRecorder.systemError("构建镜像调用容器异常", e);
+            return false;
         }
     }
 
@@ -556,7 +566,8 @@ public class ReleaseManage {
             this.diffSyncProject(nodeModel, projectId, afterOpt, clearOld);
             return;
         }
-        JsonMessage<String> jsonMessage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, (unZip, zipFile) -> {
+        boolean tarGz = this.buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
+        JsonMessage<String> jsonMessage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, zipFile) -> {
             String name = zipFile.getName();
             Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
             return OutGivingRun.fileUpload(zipFile,
@@ -589,7 +600,8 @@ public class ReleaseManage {
         String projectSecondaryDirectory = this.buildExtraModule.getProjectSecondaryDirectory();
         //
         String selectProject = buildEnv.get("dispatchSelectProject");
-        Future<OutGivingModel.Status> statusFuture = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, (unZip, zipFile) -> {
+        boolean tarGz = buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
+        Future<OutGivingModel.Status> statusFuture = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, zipFile) -> {
             OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
                 .id(releaseMethodDataId)
                 .file(zipFile)

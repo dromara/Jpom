@@ -28,7 +28,11 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
+import cn.hutool.core.lang.Opt;
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
@@ -52,6 +56,7 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 /**
@@ -250,7 +255,20 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         //
         AgentWorkspaceEnvVarService workspaceService = SpringUtil.getBean(AgentWorkspaceEnvVarService.class);
         EnvironmentMapBuilder environmentMapBuilder = workspaceService.getEnv(nodeProjectInfoModel.getWorkspaceId());
-
+        // 项目配置的环境变量
+        String dslEnv = nodeProjectInfoModel.getDslEnv();
+        Opt.ofBlankAble(dslEnv)
+            .map(s -> UrlQuery.of(s, CharsetUtil.CHARSET_UTF_8))
+            .map(UrlQuery::getQueryMap)
+            .map(map -> {
+                Map<String, String> map1 = MapUtil.newHashMap();
+                for (Map.Entry<CharSequence, CharSequence> entry : map.entrySet()) {
+                    map1.put(StrUtil.toString(entry.getKey()), StrUtil.toString(entry.getValue()));
+                }
+                return map1;
+            })
+            .ifPresent(environmentMapBuilder::putStr);
+        //
         environmentMapBuilder
             .putStr(scriptProcess.getScriptEnv())
             .put("PROJECT_ID", nodeProjectInfoModel.getId())
