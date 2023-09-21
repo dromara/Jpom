@@ -159,14 +159,22 @@ public class ReleaseManage {
         // 先同步到文件管理中心
         Boolean syncFileStorage = this.buildExtraModule.getSyncFileStorage();
         if (syncFileStorage != null && syncFileStorage) {
-            logRecorder.system("开始同步到文件管理中心");
+            // 处理保留天数
+            Integer fileStorageKeepDay =
+                Optional.ofNullable(this.buildExtraModule.getFileStorageKeepDay())
+                    .map(integer -> Convert.toInt(buildExtraModule.getFileStorageKeepDay()))
+                    .filter(integer -> integer > 0)
+                    .orElse(null);
+            String keepMsg = fileStorageKeepDay == null ? StrUtil.EMPTY : StrUtil.format("，保留天数：{}", fileStorageKeepDay);
+            logRecorder.system("开始同步到文件管理中心{}", keepMsg);
             boolean tarGz = this.buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
             File dirPackage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, file) -> file);
             String successMd5 = fileStorageService.addFile(dirPackage, 1,
                 buildInfoModel.getWorkspaceId(),
                 "构建来源," + buildInfoModel.getName(),
                 // 默认的别名码为构建id
-                StrUtil.emptyToDefault(buildInfoModel.getAliasCode(), buildInfoModel.getId()));
+                StrUtil.emptyToDefault(buildInfoModel.getAliasCode(), buildInfoModel.getId()),
+                fileStorageKeepDay);
             if (successMd5 != null) {
                 logRecorder.system("构建产物文件成功同步到文件管理中心，{}", successMd5);
             } else {
