@@ -19,11 +19,11 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
-public class PushStatInfoHandler implements ApplicationListener<MessageEvent<Message>> {
+public class MessageHandler implements ApplicationListener<MessageEvent<Message>> {
 
     @Resource
     private MachineNodeServer machineNodeServer;
-    private Map<String, Long> lastUpdateTime = new HashMap<>();
+    private final Map<String, Long> lastUpdateTime = new HashMap<>();
 
     @Override
     public void onApplicationEvent(MessageEvent<Message> event) {

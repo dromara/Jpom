@@ -23,8 +23,8 @@
 package org.dromara.jpom.common.forward;
 
 import lombok.Getter;
-import org.dromara.jpom.transport.protocol.Message;
-import org.dromara.jpom.transport.protocol.ProcessListMessage;
+import org.dromara.jpom.transport.protocol.*;
+import sun.nio.ch.Net;
 
 /**
  * agent 端的请求地址枚举
@@ -45,10 +45,10 @@ public enum NodeUrl {
     GetStatInfo("/get-stat-info"),
     exportTop("/exportTop"),
     Kill("/kill.json"),
-    DiskInfo("/disk-info"),
-    HwDiskInfo("/hw-disk--info"),
+    DiskInfo("/disk-info", DiskInfoMessage.class),
+    HwDiskInfo("/hw-disk--info", HwDiskInfoMessage.class),
 
-    NetworkInterfaces("/network-interfaces"),
+    NetworkInterfaces("/network-interfaces", NetworkInterfacesMessage.class),
 
     ProcessList("/processList", -1, ProcessListMessage.class),
     /**

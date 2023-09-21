@@ -19,6 +19,7 @@ public class MessageToByteBuf {
     public static ByteBuf toByteBuf(Message message) {
         ByteBuf messageBuf = Unpooled.buffer();
         messageBuf.writeInt(message.cmd().getCmd());
+        message.header().put("id", message.messageId());
         byte[] header = getHeader(message.header());
         messageBuf.writeInt(header.length);
         messageBuf.writeBytes(header, 0, header.length);

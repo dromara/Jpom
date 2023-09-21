@@ -34,7 +34,6 @@ public class ByteBufToMessage {
         byte[] content = new byte[bodyLength];
         byteBuf.readBytes(content);
         Map<String, String> headerMap = getHeader(header);
-
         return ConvertMessage.convert(cmd, headerMap, content);
     }
 

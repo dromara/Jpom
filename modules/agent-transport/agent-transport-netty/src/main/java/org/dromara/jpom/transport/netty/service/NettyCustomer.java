@@ -66,22 +66,25 @@ public class NettyCustomer implements ChannelService {
 
     @Override
     public void writeAndFlush(Message message, Consumer<Message> consumer) {
-        if (write(message)) {
-            MessageSubscribers.addConsumer(message.messageId(), consumer);
+        MessageSubscribers.addConsumer(message.messageId(), consumer);
+        if (!write(message)) {
+            MessageSubscribers.removeConsumer(message.messageId());
         }
     }
 
     @Override
     public void writeAndFlush(Message message, Consumer<Message> consumer, String... name) {
-        if (write(message)) {
-            MessageSubscribers.addConsumer(message.messageId(), consumer);
+        MessageSubscribers.addConsumer(message.messageId(), consumer);
+        if (!write(message)) {
+            MessageSubscribers.removeConsumer(message.messageId());
         }
     }
 
     @Override
     public void writeAndFlushAll(Message message, Consumer<Message> consumer) {
-        if (write(message)) {
-            MessageSubscribers.addConsumer(message.messageId(), consumer);
+        MessageSubscribers.addConsumer(message.messageId(), consumer);
+        if (!write(message)) {
+            MessageSubscribers.removeConsumer(message.messageId());
         }
     }
 }

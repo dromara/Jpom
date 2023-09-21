@@ -260,7 +260,8 @@ public class NodeForward {
                 }
                 return map2;
             })
-            .orElse(null);
+            .orElse(new HashMap<>());
+        map.put("installId", machineNodeModel.getInstallId());
         TypeReference<JsonMessage<T>> tTypeReference = new TypeReference<JsonMessage<T>>() {
         };
         INodeInfo nodeInfo1 = coverNodeInfo(machineNodeModel);

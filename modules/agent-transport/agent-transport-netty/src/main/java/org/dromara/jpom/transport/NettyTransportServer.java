@@ -22,8 +22,16 @@
  */
 package org.dromara.jpom.transport;
 
+import com.alibaba.fastjson2.JSON;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.transport.netty.service.ChannelServiceManager;
+import org.dromara.jpom.transport.protocol.*;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -35,10 +43,32 @@ import java.util.function.Consumer;
 @Slf4j
 public class NettyTransportServer implements TransportServer {
 
+
     @Override
     public String execute(INodeInfo nodeInfo, IUrlItem urlItem, Object data) {
-        System.err.println(urlItem.messageClass());
-        return null;
+        try {
+            if (urlItem.messageClass() == ProcessListMessage.class) {
+                CompletableFuture<String> future = new CompletableFuture<>();
+                ChannelServiceManager.INSTANCE.writeAndFlush(new ProcessListMessage(new HashMap<>(), JSON.toJSONString(data)), message -> future.complete(((ProcessListMessage) message).text()), ((Map<String, String>) data).getOrDefault("installId", ""));
+                return future.get(10, TimeUnit.SECONDS);
+            } else if (urlItem.messageClass() == DiskInfoMessage.class) {
+                CompletableFuture<String> future = new CompletableFuture<>();
+                ChannelServiceManager.INSTANCE.writeAndFlush(new DiskInfoMessage(new HashMap<>(), JSON.toJSONString(data)), message -> future.complete(((DiskInfoMessage) message).text()), ((Map<String, String>) data).getOrDefault("installId", ""));
+                return future.get(10, TimeUnit.SECONDS);
+            } else if (urlItem.messageClass() == HwDiskInfoMessage.class) {
+                CompletableFuture<String> future = new CompletableFuture<>();
+                ChannelServiceManager.INSTANCE.writeAndFlush(new HwDiskInfoMessage(new HashMap<>(), JSON.toJSONString(data)), message -> future.complete(((HwDiskInfoMessage) message).text()), ((Map<String, String>) data).getOrDefault("installId", ""));
+                return future.get(10, TimeUnit.SECONDS);
+            } else if (urlItem.messageClass() == NetworkInterfacesMessage.class) {
+                CompletableFuture<String> future = new CompletableFuture<>();
+                ChannelServiceManager.INSTANCE.writeAndFlush(new NetworkInterfacesMessage(new HashMap<>(), JSON.toJSONString(data)), message -> future.complete(((NetworkInterfacesMessage) message).text()), ((Map<String, String>) data).getOrDefault("installId", ""));
+                return future.get(10, TimeUnit.SECONDS);
+            }
+            return null;
+        } catch (Exception e) {
+            log.error("", e);
+            return null;
+        }
     }
 
     @Override

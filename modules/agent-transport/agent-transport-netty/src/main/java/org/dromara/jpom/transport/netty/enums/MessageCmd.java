@@ -13,7 +13,10 @@ public enum MessageCmd {
     TEXT(3, "text"),
     FILE(4, "file"),
     AGENT_STAT_INFO(5, "agent_stat_info"),
-    PROCESS_LIST(6, "process_list");
+    PROCESS_LIST(6, "process_list"),
+    DISK_INFO(7, "disk_info"),
+    HW_DISK_INFO(8, "hw_disk_info"),
+    NETWORK_INTERFACES(9, "network_interfaces");
 
     private final int cmd;
 

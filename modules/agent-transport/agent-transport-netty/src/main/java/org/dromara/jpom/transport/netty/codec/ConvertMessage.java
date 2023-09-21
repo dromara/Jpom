@@ -33,6 +33,12 @@ public class ConvertMessage {
             return new PushStatInfoMessage(headerMap, new String(content, StandardCharsets.UTF_8));
         } else if (messageCmd == MessageCmd.PROCESS_LIST) {
             return new ProcessListMessage(headerMap, new String(content, StandardCharsets.UTF_8));
+        } else if (messageCmd == MessageCmd.DISK_INFO) {
+            return new DiskInfoMessage(headerMap, new String(content, StandardCharsets.UTF_8));
+        } else if (messageCmd == MessageCmd.HW_DISK_INFO) {
+            return new HwDiskInfoMessage(headerMap, new String(content, StandardCharsets.UTF_8));
+        } else if (messageCmd == MessageCmd.NETWORK_INTERFACES) {
+            return new NetworkInterfacesMessage(headerMap, new String(content, StandardCharsets.UTF_8));
         }
         return new NoneMessage(headerMap, content);
     }
