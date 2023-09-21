@@ -3,9 +3,8 @@ package org.dromara.jpom.transport.netty.handler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleStateEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.transport.protocol.HeartbeatMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Netty心跳
@@ -13,9 +12,8 @@ import org.slf4j.LoggerFactory;
  * @author Hong
  * @since 2023/08/22
  */
+@Slf4j
 public class HeartbeatHandler extends SimpleChannelInboundHandler<HeartbeatMessage> {
-
-    private static final Logger log = LoggerFactory.getLogger(HeartbeatHandler.class);
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {

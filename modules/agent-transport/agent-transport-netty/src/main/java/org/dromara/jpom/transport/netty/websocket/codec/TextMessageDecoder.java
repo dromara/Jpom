@@ -5,9 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.transport.netty.codec.MapToMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -18,10 +17,10 @@ import java.util.Map;
  * @author Hong
  * @since 2023/08/22
  */
+@Slf4j
 public class TextMessageDecoder extends MessageToMessageDecoder<TextWebSocketFrame> {
 
-    private static final ObjectMapper json =new ObjectMapper();
-    private static final Logger log = LoggerFactory.getLogger(TextMessageDecoder.class);
+    private static final ObjectMapper json = new ObjectMapper();
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, TextWebSocketFrame webSocketFrame, List<Object> list) throws Exception {

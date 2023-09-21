@@ -7,12 +7,11 @@ import io.netty.channel.EventLoop;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.transport.event.ClientStatusEvent;
-import org.dromara.jpom.transport.properties.NettyProperties;
 import org.dromara.jpom.transport.netty.service.ChannelServiceManager;
 import org.dromara.jpom.transport.netty.service.NettyCustomer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.dromara.jpom.transport.properties.NettyProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.event.ApplicationEventMulticaster;
@@ -30,9 +29,9 @@ import java.util.concurrent.TimeUnit;
  * @author Hong
  * @since 2023/08/22
  */
+@Slf4j
 public abstract class NettyClient implements CommandLineRunner, Closeable, ChannelClient {
 
-    private static final Logger log = LoggerFactory.getLogger(NettyClient.class);
 
     private final EventLoopGroup group = new NioEventLoopGroup();
 

@@ -2,13 +2,15 @@ package org.dromara.jpom.transport.netty.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.transport.MessageSubscribers;
 import org.dromara.jpom.transport.event.MessageEvent;
 import org.dromara.jpom.transport.netty.service.ChannelServiceManager;
 import org.dromara.jpom.transport.netty.service.NettyProducer;
-import org.dromara.jpom.transport.protocol.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.dromara.jpom.transport.protocol.HeartbeatMessage;
+import org.dromara.jpom.transport.protocol.Message;
+import org.dromara.jpom.transport.protocol.NoneMessage;
+import org.dromara.jpom.transport.protocol.RegisterMessage;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.util.StringUtils;
 
@@ -18,9 +20,9 @@ import org.springframework.util.StringUtils;
  * @author Hong
  * @since 2023/08/22
  */
+@Slf4j
 public class MessageHandler extends SimpleChannelInboundHandler<Message> {
 
-    private static final Logger log = LoggerFactory.getLogger(MessageHandler.class);
 
     private final ApplicationEventMulticaster eventMulticaster;
 

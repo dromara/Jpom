@@ -3,10 +3,9 @@ package org.dromara.jpom.transport.netty.handler.client;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.transport.netty.ChannelClient;
 import org.dromara.jpom.transport.netty.service.NettyCustomer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Netty重连
@@ -14,9 +13,9 @@ import org.slf4j.LoggerFactory;
  * @author Hong
  * @since 2023/08/22
  */
+@Slf4j
 public class ClientReconnectHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger log = LoggerFactory.getLogger(ClientReconnectHandler.class);
 
     private final ChannelClient channelClient;
 

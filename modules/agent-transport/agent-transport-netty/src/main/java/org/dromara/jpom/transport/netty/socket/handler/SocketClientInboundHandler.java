@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
  */
 public class SocketClientInboundHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger log = LoggerFactory.getLogger(SocketClientInboundHandler.class);
 
     /**
      * 创建ChannelGroup对象存储所有连接的用户

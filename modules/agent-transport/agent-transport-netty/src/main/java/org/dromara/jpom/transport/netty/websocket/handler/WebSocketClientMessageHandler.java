@@ -8,8 +8,6 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import org.dromara.jpom.transport.netty.service.NettyCustomer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * WebSocket 协议握手处理
@@ -20,7 +18,6 @@ import org.slf4j.LoggerFactory;
 @ChannelHandler.Sharable
 public class WebSocketClientMessageHandler extends SimpleChannelInboundHandler<Object> {
 
-    private static final Logger log = LoggerFactory.getLogger(WebSocketClientMessageHandler.class);
 
     private final WebSocketClientHandshaker handshaker;
     private ChannelPromise handshakeFuture;

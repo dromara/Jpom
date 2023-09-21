@@ -6,11 +6,10 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import org.dromara.jpom.transport.properties.NettyProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.transport.netty.service.ChannelServiceManager;
 import org.dromara.jpom.transport.netty.service.NettyProducer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.dromara.jpom.transport.properties.NettyProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 
@@ -26,14 +25,18 @@ import java.util.Optional;
  * @author Hong
  * @since 2023/08/22
  */
+@Slf4j
 public abstract class NettyServer implements CommandLineRunner, Closeable {
 
-    private static final Logger log = LoggerFactory.getLogger(NettyServer.class);
 
-    /** boss 线程组用于处理连接工作 **/
+    /**
+     * boss 线程组用于处理连接工作
+     **/
     private final EventLoopGroup boss = new NioEventLoopGroup();
 
-    /** work 线程组用于数据处理 **/
+    /**
+     * work 线程组用于数据处理
+     **/
     private final EventLoopGroup work = new NioEventLoopGroup();
 
     private NettyProperties nettyProperties;

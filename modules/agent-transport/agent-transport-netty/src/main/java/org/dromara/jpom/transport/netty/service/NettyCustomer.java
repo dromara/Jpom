@@ -4,10 +4,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.transport.MessageSubscribers;
 import org.dromara.jpom.transport.protocol.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.function.Consumer;
 
@@ -17,9 +16,8 @@ import java.util.function.Consumer;
  * @author Hong
  * @since 2023/08/22
  */
+@Slf4j
 public class NettyCustomer implements ChannelService {
-
-    private static final Logger log = LoggerFactory.getLogger(NettyCustomer.class);
 
     private static final ChannelGroup DEFAULT_CLIENT = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
