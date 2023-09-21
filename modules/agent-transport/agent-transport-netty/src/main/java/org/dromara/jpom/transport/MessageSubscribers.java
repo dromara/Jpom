@@ -8,9 +8,10 @@ import java.util.function.Consumer;
 
 /**
  * 消息订阅器
- * <br>
- * Created by Hong 2023/9/21
- **/
+ *
+ * @author Hong
+ * @since 2023/09/21
+ */
 public class MessageSubscribers {
 
     private final static Map<String, Consumer<Message>> MAP = new ConcurrentHashMap<>();

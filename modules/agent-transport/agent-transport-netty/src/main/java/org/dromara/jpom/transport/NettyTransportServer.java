@@ -25,20 +25,22 @@ package org.dromara.jpom.transport;
 import com.alibaba.fastjson2.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.transport.netty.service.ChannelServiceManager;
-import org.dromara.jpom.transport.protocol.*;
+import org.dromara.jpom.transport.protocol.DiskInfoMessage;
+import org.dromara.jpom.transport.protocol.HwDiskInfoMessage;
+import org.dromara.jpom.transport.protocol.NetworkInterfacesMessage;
+import org.dromara.jpom.transport.protocol.ProcessListMessage;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- * 插件端消息传输服务
+ * Socket消息传输
  *
- * @author bwcx_jzy
- * @since 2022/12/18
+ * @author Hong
+ * @since 2023/09/21
  */
 @Slf4j
 public class NettyTransportServer implements TransportServer {
