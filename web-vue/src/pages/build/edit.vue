@@ -662,6 +662,7 @@
                     <li>比如常见的 .env 文件</li>
                     <li>文件内容格式要求：env_name=xxxxx 不满足格式的行将自动忽略</li>
                     <li>也支持 URL 参数格式：test_par=123abc&test_par2=abc21</li>
+                    <li>支持配置系统参数：<b>USE_TAR_GZ=1</b> 表示构建产物为文件夹时将打包为 <b>tar.gz</b> 压缩包进行发布</li>
                   </ul>
                 </template>
                 <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
@@ -722,20 +723,33 @@
             </a-row>
           </a-form-model-item>
           <a-form-model-item label="别名码" prop="aliasCode" help="如果产物同步到文件中心,当前值会共享">
-            <a-input-search
-              :maxLength="50"
-              v-model="temp.aliasCode"
-              placeholder="请输入别名码"
-              @search="
-                () => {
-                  this.temp = { ...this.temp, aliasCode: randomStr(6) };
-                }
-              "
-            >
-              <template slot="enterButton">
-                <a-button type="primary"> 随机生成 </a-button>
-              </template>
-            </a-input-search>
+            <a-row>
+              <a-col :span="10">
+                <a-input-search
+                  :maxLength="50"
+                  v-model="temp.aliasCode"
+                  placeholder="请输入别名码"
+                  @search="
+                    () => {
+                      this.temp = { ...this.temp, aliasCode: randomStr(6) };
+                    }
+                  "
+                >
+                  <template slot="enterButton">
+                    <a-button type="primary"> 随机生成 </a-button>
+                  </template>
+                </a-input-search>
+              </a-col>
+              <a-col :span="1" style="text-align: right"></a-col>
+              <a-col :span="10">
+                <a-tooltip>
+                  保留天数：
+                  <template slot="title"> 构建产物同步到文件中心保留天数 </template>
+                  <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
+                </a-tooltip>
+                <a-input-number v-model="tempExtraData.fileStorageKeepDay" :min="0" />
+              </a-col>
+            </a-row>
           </a-form-model-item>
           <a-form-model-item prop="excludeReleaseAnt">
             <template slot="label">
@@ -1111,6 +1125,7 @@ export default {
         cacheBuild: true,
         saveBuildFile: true,
         resultKeepCount: 0,
+        fileStorageKeepDay: 0,
       };
       this.$refs["editBuildForm"]?.resetFields();
     },
@@ -1132,6 +1147,9 @@ export default {
       }
       if (this.tempExtraData.resultKeepCount === undefined) {
         this.tempExtraData.resultKeepCount = 0;
+      }
+      if (this.tempExtraData.fileStorageKeepDay === undefined) {
+        this.tempExtraData.fileStorageKeepDay = 0;
       }
 
       // 设置发布方式的数据

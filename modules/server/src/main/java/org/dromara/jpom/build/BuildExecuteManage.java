@@ -818,6 +818,7 @@ public class BuildExecuteManage implements Runnable {
         }
 
         try {
+            boolean stop = false;
             for (Map.Entry<String, IProcessItem> stringSupplierEntry : processItemMap.entrySet()) {
                 processName = stringSupplierEntry.getKey();
                 IProcessItem processItem = stringSupplierEntry.getValue();
@@ -830,19 +831,23 @@ public class BuildExecuteManage implements Runnable {
                     logRecorder.system("执行中断 {} 流程,原因事件脚本中断", processItem.name());
                     this.asyncWebHooks("stop", "process", processName, "statusMsg", interruptMsg);
                     buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Interrupt, interruptMsg);
+                    stop = true;
                     break;
                 }
                 String errorMsg = processItem.execute();
                 if (errorMsg != null) {
                     // 有条件结束构建流程
-                    logRecorder.system("执行异常 {} 流程", processItem.name());
+                    logRecorder.systemError("执行异常[{}]流程：{}", processItem.name(), errorMsg);
                     this.asyncWebHooks("stop", "process", processName, "statusMsg", errorMsg);
                     buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error, errorMsg);
+                    stop = true;
                     break;
                 }
                 logRecorder.system("执行结束 {}流程,耗时：{}", processItem.name(), DateUtil.formatBetween(SystemClock.now() - processItemStartTime));
             }
-            this.asyncWebHooks("success");
+            if (!stop) { // 没有执行 stop
+                this.asyncWebHooks("success");
+            }
         } catch (DiyInterruptException diyInterruptException) {
             // 主动中断
             this.asyncWebHooks("stop", "process", processName);
@@ -857,7 +862,7 @@ public class BuildExecuteManage implements Runnable {
             this.asyncWebHooks("error", "process", processName, "statusMsg", e.getMessage());
         } finally {
             this.clearResources();
-            logRecorder.system("构建结束 累计耗时:{}", DateUtil.formatBetween(SystemClock.now() - startTime));
+            logRecorder.system("构建结束-累计耗时:{}", DateUtil.formatBetween(SystemClock.now() - startTime));
             this.asyncWebHooks("done");
             BaseServerController.removeAll();
         }
@@ -976,7 +981,7 @@ public class BuildExecuteManage implements Runnable {
             logRecorder.system("执行 {} 类型脚本的退出码是：{}", type, waitFor);
             // 判断是否为严格执行
             if (buildExtraModule.strictlyEnforce() && waitFor != 0) {
-                logRecorder.systemError("严格执行模式，事件脚本返回状态码异常");
+                //logRecorder.systemError("严格执行模式，事件脚本返回状态码异常");
                 return "严格执行模式，事件脚本返回状态码异常," + waitFor;
             }
             if (StrUtil.startWithIgnoreCase(lastMsg[0], "interrupt " + type)) {

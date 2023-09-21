@@ -104,7 +104,10 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      * @see DslYmlDto
      */
     private String dslContent;
-
+    /**
+     * dsl 环境变量
+     */
+    private String dslEnv;
 
     public List<JavaCopyItem> getJavaCopyItemList() {
         return javaCopyItemList;

@@ -5,7 +5,7 @@
         <a-button type="primary" @click="initSocket">重连 </a-button>
       </template>
     </a-result>
-    <div class="flex-100" id="xterm" v-else></div>
+    <div class="flex-100" style="flex-direction: row-reverse; justify-content: center" :id="domId" v-else></div>
   </div>
 </template>
 <script>
@@ -36,9 +36,14 @@ export default {
       wp: 0,
       hp: 0,
       disconnect: false,
+      domId: "xterm",
     };
   },
   computed: {},
+  created() {
+    this.domId = (this.$options._parentVnode?.tag || "" + "-" + this.$options._componentTag || "") + "-" + new Date().getTime();
+  },
+
   mounted() {
     this.$nextTick(() => {
       setTimeout(() => {
@@ -89,8 +94,8 @@ export default {
       // // this.hp = ;
       // this.wp = 100;
       //;
-      this.rows = document.querySelector("#xterm").offsetHeight / 16;
-      this.cols = document.querySelector("#xterm").offsetWidth / 8;
+      this.rows = document.querySelector("#" + this.domId).offsetHeight / 16;
+      this.cols = document.querySelector("#" + this.domId).offsetWidth / 8;
       this.hp = this.rows * 8;
       this.wp = this.cols * 8;
       //
@@ -115,7 +120,7 @@ export default {
       // const fitAddon = new FitAddon();
       this.terminal.loadAddon(attachAddon);
       // this.terminal.loadAddon(fitAddon);
-      this.terminal.open(document.getElementById("xterm"));
+      this.terminal.open(document.getElementById(this.domId));
       this.terminal.focus();
       // fitAddon.fit();
       //
