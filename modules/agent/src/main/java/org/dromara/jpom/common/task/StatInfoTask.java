@@ -51,6 +51,7 @@ public class StatInfoTask {
     private final ChannelService channelService;
     private final ProjectInfoService projectInfoService;
     private final NodeScriptServer nodeScriptServer;
+    private long count = 0;
 
     public StatInfoTask(ChannelService channelService, ProjectInfoService projectInfoService, NodeScriptServer nodeScriptServer) {
         this.channelService = channelService;
@@ -60,6 +61,10 @@ public class StatInfoTask {
 
     @Scheduled(fixedDelay = 20, timeUnit = TimeUnit.SECONDS)
     public void pushStatInfo() {
+        if (count <= 2) {
+            // 启动后开始的前3次不执行，避免未注册指定后服务器断开连接
+            return;
+        }
         JSONObject jsonObject = new JSONObject();
         JSONObject topInfo = OshiUtils.getSimpleInfo();
         jsonObject.put("simpleStatus", topInfo);
@@ -73,6 +78,7 @@ public class StatInfoTask {
         jsonObject.put("jpomInfo", jpomInfo);
         jsonObject.put("installId", jpomInfo.getJSONObject("jpomManifest").getString("installId"));
         channelService.writeAndFlush(new PushStatInfoMessage(new HashMap<>(0), jsonObject.toJSONString()));
+        count++;
     }
 
     private JSONObject getJpomInfo() {
