@@ -38,6 +38,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -49,9 +50,12 @@ import java.util.stream.Collectors;
 @Component
 public class MessageHandler implements ApplicationListener<MessageEvent<Message>> {
 
+    private Map<Message, Long> MAP = new ConcurrentHashMap<>();
+
     @Override
     public void onApplicationEvent(MessageEvent<Message> event) {
         Message message = event.getMessage();
+        MAP.put(message, System.currentTimeMillis());
         if (message instanceof ProcessListMessage) {
             JSONObject jsonData = JSON.parseObject(((ProcessListMessage) message).text());
             String processName = jsonData.getString("processName");
@@ -84,6 +88,8 @@ public class MessageHandler implements ApplicationListener<MessageEvent<Message>
             List<JSONObject> list = OshiUtils.networkInterfaces();
             event.getChannelService().writeAndFlush(new NetworkInterfacesMessage(header, JSON.toJSONString(JsonMessage.success("", list))));
         }
+        log.debug("{}, 执行时长：{}", message.messageId(), (System.currentTimeMillis() - MAP.get(message)));
+        MAP.remove(message);
     }
 
 }

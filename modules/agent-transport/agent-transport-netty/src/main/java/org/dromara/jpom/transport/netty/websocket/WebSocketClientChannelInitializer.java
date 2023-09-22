@@ -85,7 +85,7 @@ public class WebSocketClientChannelInitializer extends ChannelInitializer<Socket
 
     @Override
     public void sync() throws InterruptedException {
-        // handler.getHandshakeFuture().sync();
+
     }
 
     @Autowired
