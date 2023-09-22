@@ -5,8 +5,6 @@ import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.*;
 import org.dromara.jpom.transport.properties.WebSocketProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
@@ -20,7 +18,6 @@ import static io.netty.handler.codec.http.HttpResponseStatus.*;
 @ChannelHandler.Sharable
 public class WebSocketServerMessageHandler extends SimpleChannelInboundHandler<Object> {
 
-    private static final Logger log = LoggerFactory.getLogger(WebSocketServerMessageHandler.class);
     private WebSocketServerHandshaker handshaker;
 
     private final WebSocketProperties webSocketProperties;

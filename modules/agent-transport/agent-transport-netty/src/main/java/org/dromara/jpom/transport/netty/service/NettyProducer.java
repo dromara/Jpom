@@ -4,12 +4,11 @@ import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.transport.MessageSubscribers;
 import org.dromara.jpom.transport.netty.ChannelSupport;
 import org.dromara.jpom.transport.protocol.Message;
 import org.dromara.jpom.transport.protocol.RegisterMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,9 +22,9 @@ import java.util.function.Consumer;
  * @author Hong
  * @since 2023/08/22
  */
+@Slf4j
 public class NettyProducer implements ChannelService {
 
-    private static final Logger log = LoggerFactory.getLogger(NettyProducer.class);
 
     private static final ChannelGroup DEFAULT_CLIENT = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
@@ -47,11 +46,12 @@ public class NettyProducer implements ChannelService {
             channel.close();
         }
         for (JpomChannel channelCustomer : customer) {
-            channelCustomer.removeChannel(channel);;
+            channelCustomer.removeChannel(channel);
+            ;
         }
     }
 
-    public static boolean write(Message message, String ...name) {
+    public static boolean write(Message message, String... name) {
         Optional<JpomChannel> optional = customer.stream().filter(it -> name != null && Arrays.stream(name).anyMatch(it::support)).findFirst();
         if (optional.isPresent()) {
             boolean flag = optional.get().write(message);
@@ -74,7 +74,7 @@ public class NettyProducer implements ChannelService {
     }
 
     public static void register(RegisterMessage message, Channel channel) {
-        Optional<JpomChannel> optional = customer.stream().filter(it -> ((ChannelSupport)it).support(message.getName())).findFirst();
+        Optional<JpomChannel> optional = customer.stream().filter(it -> ((ChannelSupport) it).support(message.getName())).findFirst();
         if (optional.isPresent()) {
             optional.get().addChannel(message, channel);
         } else {
