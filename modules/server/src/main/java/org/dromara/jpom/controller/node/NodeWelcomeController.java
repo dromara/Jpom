@@ -108,7 +108,8 @@ public class NodeWelcomeController extends BaseServerController {
     public IJsonMessage<List<JSONObject>> getProcessList(HttpServletRequest request, String machineId) {
         NodeModel node = tryGetNode();
         if (node != null) {
-            return NodeForward.request(node, request, NodeUrl.ProcessList);
+            MachineNodeModel model = machineNodeServer.getByKey(node.getMachineId());
+            return NodeForward.request(model, request, NodeUrl.ProcessList);
         }
         MachineNodeModel model = machineNodeServer.getByKey(machineId);
         Assert.notNull(model, "没有找到对应的机器");
@@ -143,7 +144,8 @@ public class NodeWelcomeController extends BaseServerController {
     public IJsonMessage<List<JSONObject>> diskInfo(HttpServletRequest request, String machineId) {
         NodeModel node = tryGetNode();
         if (node != null) {
-            return NodeForward.request(node, request, NodeUrl.DiskInfo);
+            MachineNodeModel model = machineNodeServer.getByKey(node.getMachineId());
+            return NodeForward.request(model, request, NodeUrl.DiskInfo);
         }
         MachineNodeModel model = machineNodeServer.getByKey(machineId);
         Assert.notNull(model, "没有找到对应的机器");
@@ -154,7 +156,8 @@ public class NodeWelcomeController extends BaseServerController {
     public IJsonMessage<List<JSONObject>> hwDiskInfo(HttpServletRequest request, String machineId) {
         NodeModel node = tryGetNode();
         if (node != null) {
-            return NodeForward.request(node, request, NodeUrl.HwDiskInfo);
+            MachineNodeModel model = machineNodeServer.getByKey(node.getMachineId());
+            return NodeForward.request(model, request, NodeUrl.HwDiskInfo);
         }
         MachineNodeModel model = machineNodeServer.getByKey(machineId);
         Assert.notNull(model, "没有找到对应的机器");
@@ -165,7 +168,8 @@ public class NodeWelcomeController extends BaseServerController {
     public IJsonMessage<List<JSONObject>> networkInterfaces(HttpServletRequest request, String machineId) {
         NodeModel node = tryGetNode();
         if (node != null) {
-            return NodeForward.request(node, request, NodeUrl.NetworkInterfaces);
+            MachineNodeModel model = machineNodeServer.getByKey(node.getMachineId());
+            return NodeForward.request(model, request, NodeUrl.NetworkInterfaces);
         }
         MachineNodeModel model = machineNodeServer.getByKey(machineId);
         Assert.notNull(model, "没有找到对应的机器");

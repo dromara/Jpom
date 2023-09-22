@@ -6,6 +6,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * 文本消息
+ * @author Hong
+ * @since 2023/09/22
+**/
 public class TextMessage implements Message {
 
     private final String id;

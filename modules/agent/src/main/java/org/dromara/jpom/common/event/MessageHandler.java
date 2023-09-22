@@ -40,6 +40,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 消息接收处理
+ * @author Hong
+ * @since 2023/09/22
+**/
 @Slf4j
 @Component
 public class MessageHandler implements ApplicationListener<MessageEvent<Message>> {

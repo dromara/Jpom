@@ -8,6 +8,11 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * 文文件字节流消息
+ * @author Hong
+ * @since 2023/09/22
+**/
 public class FileMessage implements Message {
 
     private final String id;

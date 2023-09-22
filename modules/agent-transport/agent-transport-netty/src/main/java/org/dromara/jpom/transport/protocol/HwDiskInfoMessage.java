@@ -6,6 +6,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * 硬件硬盘消息
+ * @author Hong
+ * @since 2023/09/22
+**/
 public class HwDiskInfoMessage implements Message {
     private final String id;
     private final MessageCmd cmd;

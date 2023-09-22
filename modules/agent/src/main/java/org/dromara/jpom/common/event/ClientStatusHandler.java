@@ -36,15 +36,18 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * 客户端连接状态事件处理
+ * @author Hong
+ * @since 2023/09/22
+**/
 @Component
 public class ClientStatusHandler implements ApplicationListener<ClientStatusEvent> {
 
     private final ChannelService channelService;
-    private final NettyProperties nettyProperties;
 
-    public ClientStatusHandler(ChannelService channelService, NettyProperties nettyProperties) {
+    public ClientStatusHandler(ChannelService channelService) {
         this.channelService = channelService;
-        this.nettyProperties = nettyProperties;
     }
 
     @Override

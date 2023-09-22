@@ -1,5 +1,10 @@
 package org.dromara.jpom.transport.protocol.extend;
 
+/**
+ * 注册设备信息
+ * @author Hong
+ * @since 2023/09/22
+**/
 public class RegisterDeviceImpl implements RegisterDevice {
 
     private String name;

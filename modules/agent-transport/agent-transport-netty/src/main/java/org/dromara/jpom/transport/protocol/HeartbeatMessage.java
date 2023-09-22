@@ -6,6 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * 心跳消息
+ * @author Hong
+ * @since 2023/09/22
+**/
 public class HeartbeatMessage implements Message {
 
     private final String id;

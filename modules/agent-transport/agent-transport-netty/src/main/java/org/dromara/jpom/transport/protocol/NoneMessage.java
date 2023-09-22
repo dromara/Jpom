@@ -5,6 +5,11 @@ import org.dromara.jpom.transport.netty.enums.MessageCmd;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * 未知消息
+ * @author Hong
+ * @since 2023/09/22
+**/
 public class NoneMessage implements Message {
 
     private final String id;
