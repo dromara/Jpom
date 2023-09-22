@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.dromara.jpom.common;
+package org.dromara.jpom.common.client;
 
 import org.dromara.jpom.transport.netty.NettyClient;
 import org.springframework.stereotype.Component;
@@ -32,5 +32,9 @@ import org.springframework.stereotype.Component;
  * @since 2023/08/22
  */
 @Component
-public class Netty extends NettyClient {
+public class NettyClient2 extends NettyClient {
+    @Override
+    protected String clientName() {
+        return "client2";
+    }
 }

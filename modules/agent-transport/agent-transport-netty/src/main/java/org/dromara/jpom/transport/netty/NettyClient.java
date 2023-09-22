@@ -41,6 +41,12 @@ public abstract class NettyClient implements CommandLineRunner, Closeable, Chann
 
     private ApplicationEventMulticaster eventMulticaster;
 
+    /**
+     * 客户端名字
+     * @return 名字
+     */
+    protected abstract String clientName();
+
     @Override
     public void run(String... args) throws Exception {
         Bootstrap bootstrap = new Bootstrap();
@@ -100,7 +106,7 @@ public abstract class NettyClient implements CommandLineRunner, Closeable, Chann
                 eventMulticaster.multicastEvent(new ClientStatusEvent(this, ClientStatusEvent.Status.DISCONNECT_SUCCESS));
             } else {
                 NettyCustomer.add(futureListener.channel());
-                log.info("启动 {} client，连接server成功, host: {}, port: {}", nettyProperties.getTcp(), nettyProperties.getHost(), nettyProperties.getPort());
+                log.info("启动 {} {}，连接server成功, host: {}, port: {}", nettyProperties.getTcp(), clientName(), nettyProperties.getHost(), nettyProperties.getPort());
                 eventMulticaster.multicastEvent(new ClientStatusEvent(this, ClientStatusEvent.Status.CONNECT_SUCCESS));
             }
         });
