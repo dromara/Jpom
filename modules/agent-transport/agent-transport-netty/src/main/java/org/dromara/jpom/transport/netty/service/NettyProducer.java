@@ -47,7 +47,6 @@ public class NettyProducer implements ChannelService {
         }
         for (JpomChannel channelCustomer : customer) {
             channelCustomer.removeChannel(channel);
-            ;
         }
     }
 
@@ -73,7 +72,7 @@ public class NettyProducer implements ChannelService {
         return success;
     }
 
-    public static void register(RegisterMessage message, Channel channel) {
+    public synchronized static void register(RegisterMessage message, Channel channel) {
         Optional<JpomChannel> optional = customer.stream().filter(it -> ((ChannelSupport) it).support(message.getName())).findFirst();
         if (optional.isPresent()) {
             optional.get().addChannel(message, channel);
