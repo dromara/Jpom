@@ -35,10 +35,12 @@
             <artifactId>fastjson2</artifactId>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
+            <artifactId>netty-codec-http</artifactId>
         </dependency>
+
     </dependencies>
 
 </project>
