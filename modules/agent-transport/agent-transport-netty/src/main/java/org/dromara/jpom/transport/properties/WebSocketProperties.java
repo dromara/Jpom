@@ -1,5 +1,7 @@
 package org.dromara.jpom.transport.properties;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
  * @author Hong
  * @since 2023/08/22
  */
+@Getter
+@Setter
 @Configuration
 @ConfigurationProperties(prefix = "jpom.web-socket")
 public class WebSocketProperties {
@@ -16,20 +20,4 @@ public class WebSocketProperties {
     private String protocol = "ws";
 
     private String path = "/ws";
-
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
 }

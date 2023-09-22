@@ -1,5 +1,7 @@
 package org.dromara.jpom.transport.properties;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
  * @author Hong
  * @since 2023/08/22
  */
+@Getter
+@Setter
 @Configuration
 @ConfigurationProperties(prefix = "jpom.netty")
 public class NettyProperties {
@@ -18,28 +22,4 @@ public class NettyProperties {
     private String host = "localhost";
 
     private int port = 2023;
-
-    public String getTcp() {
-        return tcp;
-    }
-
-    public void setTcp(String tcp) {
-        this.tcp = tcp;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
 }

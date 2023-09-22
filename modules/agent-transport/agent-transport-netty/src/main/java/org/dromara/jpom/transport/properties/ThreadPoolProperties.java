@@ -1,5 +1,7 @@
 package org.dromara.jpom.transport.properties;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,6 +14,8 @@ import java.time.temporal.ChronoUnit;
  * @author Hong
  * @since 2023/08/22
  */
+@Getter
+@Setter
 @Configuration
 @ConfigurationProperties(prefix = "jpom.thread-pool")
 public class ThreadPoolProperties {
@@ -23,36 +27,4 @@ public class ThreadPoolProperties {
     private Duration keepAliveTime = Duration.of(1, ChronoUnit.MINUTES);
 
     private int queueCapacity = 10000;
-
-    public int getCoreSize() {
-        return coreSize;
-    }
-
-    public void setCoreSize(int coreSize) {
-        this.coreSize = coreSize;
-    }
-
-    public int getMaxSize() {
-        return maxSize;
-    }
-
-    public void setMaxSize(int maxSize) {
-        this.maxSize = maxSize;
-    }
-
-    public Duration getKeepAliveTime() {
-        return keepAliveTime;
-    }
-
-    public void setKeepAliveTime(Duration keepAliveTime) {
-        this.keepAliveTime = keepAliveTime;
-    }
-
-    public int getQueueCapacity() {
-        return queueCapacity;
-    }
-
-    public void setQueueCapacity(int queueCapacity) {
-        this.queueCapacity = queueCapacity;
-    }
 }
