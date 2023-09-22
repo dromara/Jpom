@@ -7,6 +7,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.transport.netty.service.NettyCustomer;
 
 /**
@@ -15,6 +16,7 @@ import org.dromara.jpom.transport.netty.service.NettyCustomer;
  * @author Hong
  * @since 2023/08/22
  */
+@Slf4j
 @ChannelHandler.Sharable
 public class WebSocketClientMessageHandler extends SimpleChannelInboundHandler<Object> {
 
@@ -57,15 +59,11 @@ public class WebSocketClientMessageHandler extends SimpleChannelInboundHandler<O
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
+        log.error("{}", cause.getMessage());
         if (!handshakeFuture.isDone()) {
             handshakeFuture.setFailure(cause);
         }
         ctx.close();
         NettyCustomer.remove(ctx.channel());
-    }
-
-    public ChannelPromise getHandshakeFuture() {
-        return handshakeFuture;
     }
 }
