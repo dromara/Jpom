@@ -42,7 +42,6 @@ public class WebSocketClientChannelInitializer extends ChannelInitializer<Socket
 
     private NettyProperties nettyProperties;
     private WebSocketProperties webSocketProperties;
-    private WebSocketClientMessageHandler handler;
     private ChannelClient channelClient;
     private ApplicationEventMulticaster eventMulticaster;
 
@@ -50,7 +49,7 @@ public class WebSocketClientChannelInitializer extends ChannelInitializer<Socket
     protected void initChannel(SocketChannel socketChannel) throws Exception {
         ChannelPipeline pipeline = socketChannel.pipeline();
         URI websocketURI = new URI(webSocketProperties.getProtocol() + "://" + nettyProperties.getHost() + ":" + nettyProperties.getPort() + webSocketProperties.getPath());
-        handler = new WebSocketClientMessageHandler(WebSocketClientHandshakerFactory.newHandshaker(websocketURI, WebSocketVersion.V13, null, false, new DefaultHttpHeaders()));
+        WebSocketClientMessageHandler handler = new WebSocketClientMessageHandler(WebSocketClientHandshakerFactory.newHandshaker(websocketURI, WebSocketVersion.V13, null, false, new DefaultHttpHeaders()));
         pipeline
                 //添加HTTP编码解码器
                 .addLast(new HttpClientCodec())
@@ -86,7 +85,7 @@ public class WebSocketClientChannelInitializer extends ChannelInitializer<Socket
 
     @Override
     public void sync() throws InterruptedException {
-        handler.getHandshakeFuture().sync();
+        // handler.getHandshakeFuture().sync();
     }
 
     @Autowired
