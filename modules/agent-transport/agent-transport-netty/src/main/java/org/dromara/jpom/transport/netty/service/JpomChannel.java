@@ -26,7 +26,9 @@ public class JpomChannel implements ChannelSupport {
     }
 
     public void addChannel(RegisterMessage message, Channel channel) {
-        channelItems.add(new ChannelItem(message, channel));
+        if (channelItems.stream().noneMatch(it -> it.channel.equals(channel))) {
+            channelItems.add(new ChannelItem(message, channel));
+        }
     }
 
     public void removeChannel(Channel channel) {
