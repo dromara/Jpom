@@ -103,11 +103,11 @@ public abstract class NettyClient implements CommandLineRunner, Closeable, Chann
             if (futureListener.cause() != null) {
                 log.error("Failed to connect to server" + futureListener.cause() + " -> We will try connect after 10s");
                 futureListener.channel().eventLoop().schedule(() -> doConnect(new Bootstrap(), eventLoop), 10, TimeUnit.SECONDS);
-                eventMulticaster.multicastEvent(new ClientStatusEvent(this, ClientStatusEvent.Status.DISCONNECT_SUCCESS));
+                eventMulticaster.multicastEvent(new ClientStatusEvent(clientName(), ClientStatusEvent.Status.DISCONNECT_SUCCESS));
             } else {
                 NettyCustomer.add(futureListener.channel());
                 log.info("启动 {} {}，连接server成功, host: {}, port: {}", nettyProperties.getTcp(), clientName(), nettyProperties.getHost(), nettyProperties.getPort());
-                eventMulticaster.multicastEvent(new ClientStatusEvent(this, ClientStatusEvent.Status.CONNECT_SUCCESS));
+                eventMulticaster.multicastEvent(new ClientStatusEvent(clientName(), ClientStatusEvent.Status.CONNECT_SUCCESS));
             }
         });
     }

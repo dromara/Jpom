@@ -39,7 +39,7 @@ public class NettyCustomer implements ChannelService {
     }
 
     public static boolean write(Message message) {
-        log.info("写入消息下发队列");
+        log.info("写入消息下发队列:{}", message.cmd());
         return DEFAULT_CLIENT.writeAndFlush(message).isSuccess();
     }
 
