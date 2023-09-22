@@ -48,6 +48,10 @@ public class NettyTransportServer implements TransportServer {
 
     @Override
     public String execute(INodeInfo nodeInfo, IUrlItem urlItem, Object data) {
+        if (urlItem.messageClass() == null) {
+            log.error("messageClass is null.");
+            return null;
+        }
         try {
             if (urlItem.messageClass() == ProcessListMessage.class) {
                 CompletableFuture<String> future = new CompletableFuture<>();
