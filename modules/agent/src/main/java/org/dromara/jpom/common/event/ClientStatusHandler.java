@@ -39,9 +39,10 @@ import java.util.Map;
 
 /**
  * 客户端连接状态事件处理
+ *
  * @author Hong
  * @since 2023/09/22
-**/
+ **/
 @Component
 public class ClientStatusHandler implements ApplicationListener<ClientStatusEvent> {
 
@@ -54,8 +55,8 @@ public class ClientStatusHandler implements ApplicationListener<ClientStatusEven
 
     @Override
     public synchronized void onApplicationEvent(ClientStatusEvent event) {
-        if (Boolean.FALSE.equals(REGISTER_MAP.getOrDefault(event.getSource(), false))) {
-            if (event.getStatus() == ClientStatusEvent.Status.CONNECT_SUCCESS) {
+        if (event.getStatus() == ClientStatusEvent.Status.CONNECT_SUCCESS) {
+            if (Boolean.FALSE.equals(REGISTER_MAP.getOrDefault(event.getSource(), false))) {
                 RegisterDeviceImpl registerDevice = new RegisterDeviceImpl();
                 JSONObject systemInfo = OshiUtils.getSystemInfo();
                 JpomManifest instance = JpomManifest.getInstance();
@@ -66,6 +67,8 @@ public class ClientStatusHandler implements ApplicationListener<ClientStatusEven
                 channelService.writeAndFlush(new RegisterMessage(new HashMap<>(0), registerDevice));
                 REGISTER_MAP.put(event.getSource(), true);
             }
+        } else if (event.getStatus() == ClientStatusEvent.Status.DISCONNECT_SUCCESS) {
+            REGISTER_MAP.remove(event.getSource());
         }
     }
 }
