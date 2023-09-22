@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 客户端连接状态事件处理
@@ -45,22 +46,26 @@ import java.util.List;
 public class ClientStatusHandler implements ApplicationListener<ClientStatusEvent> {
 
     private final ChannelService channelService;
+    private final Map<Object, Boolean> REGISTER_MAP = new HashMap<>();
 
     public ClientStatusHandler(ChannelService channelService) {
         this.channelService = channelService;
     }
 
     @Override
-    public void onApplicationEvent(ClientStatusEvent event) {
-        if (event.getStatus() == ClientStatusEvent.Status.CONNECT_SUCCESS) {
-            RegisterDeviceImpl registerDevice = new RegisterDeviceImpl();
-            JSONObject systemInfo = OshiUtils.getSystemInfo();
-            JpomManifest instance = JpomManifest.getInstance();
-            registerDevice.setHost(String.join(",", (List) systemInfo.getJSONArray("hostIpv4s")));
-            registerDevice.setName(instance.getInstallId());
-            registerDevice.setPort(instance.getPort());
-            registerDevice.setVersion(instance.getVersion());
-            channelService.writeAndFlush(new RegisterMessage(new HashMap<>(0), registerDevice));
+    public synchronized void onApplicationEvent(ClientStatusEvent event) {
+        if (Boolean.FALSE.equals(REGISTER_MAP.getOrDefault(event.getSource(), false))) {
+            if (event.getStatus() == ClientStatusEvent.Status.CONNECT_SUCCESS) {
+                RegisterDeviceImpl registerDevice = new RegisterDeviceImpl();
+                JSONObject systemInfo = OshiUtils.getSystemInfo();
+                JpomManifest instance = JpomManifest.getInstance();
+                registerDevice.setHost(String.join(",", (List) systemInfo.getJSONArray("hostIpv4s")));
+                registerDevice.setName(instance.getInstallId());
+                registerDevice.setPort(instance.getPort());
+                registerDevice.setVersion(instance.getVersion());
+                channelService.writeAndFlush(new RegisterMessage(new HashMap<>(0), registerDevice));
+                REGISTER_MAP.put(event.getSource(), true);
+            }
         }
     }
 }
