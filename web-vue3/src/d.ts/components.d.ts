@@ -86,6 +86,7 @@ declare module '@vue/runtime-core' {
     CompositionTransfer: typeof import('./../components/compositionTransfer/composition-transfer.vue')['default']
     CopyOutlined: typeof import('@ant-design/icons-vue')['CopyOutlined']
     CustomSelect: typeof import('./../components/customSelect/index.vue')['default']
+    DeleteOutlined: typeof import('@ant-design/icons-vue')['DeleteOutlined']
     DownloadOutlined: typeof import('@ant-design/icons-vue')['DownloadOutlined']
     DownOutlined: typeof import('@ant-design/icons-vue')['DownOutlined']
     LayoutOutlined: typeof import('@ant-design/icons-vue')['LayoutOutlined']
