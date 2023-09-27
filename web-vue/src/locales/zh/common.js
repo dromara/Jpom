@@ -167,4 +167,5 @@ export default {
     blank:"空白",
     rename:"重命名",
     save:"保存",
+    return:"返回",
 };
