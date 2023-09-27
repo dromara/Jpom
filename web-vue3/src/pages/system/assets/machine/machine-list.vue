@@ -27,7 +27,7 @@
           <a-dropdown v-if="layoutType === 'table'">
             <template #overlay>
               <a-menu>
-                <a-menu-item key="1" @click="syncToWorkspaceShow()"> 分配节点 </a-menu-item>
+                <a-menu-item key="1" @click="syncToWorkspaceShow"> 分配节点 </a-menu-item>
                 <a-menu-item key="2" @click="syncNodeWhiteConfig"> 同步白名单 </a-menu-item>
                 <a-menu-item key="3" @click="syncNodeConfig"> 同步系统配置 </a-menu-item>
               </a-menu>
@@ -38,7 +38,7 @@
             <a-button :disabled="true" type="primary"> 批量操作 <down-outlined /> </a-button>
           </a-tooltip>
           <a-button type="primary" @click="changeLayout">
-            {{ this.layoutType === 'card' ? '卡片' : '表格' }}
+            {{ layoutType === 'card' ? '卡片' : '表格' }}
             <template #icon>
               <layout-outlined v-if="layoutType === 'card'" />
               <table-outlined v-else />
@@ -147,13 +147,13 @@
         <a-row type="flex" justify="center">
           <a-divider v-if="listQuery.total / listQuery.limit > 1" dashed />
           <a-col>
-            <a-pagination v-model="listQuery.page" :showTotal="(total) => {
-                return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery)
+            <a-pagination v-model="listQuery.page" :showTotal="(total: number) => {
+                return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery.value)
               }
               " :showSizeChanger="true" :pageSizeOptions="sizeOptions" :pageSize="listQuery.limit"
               :total="listQuery.total" :hideOnSinglePage="true" @showSizeChange="(current, size) => {
-                  this.listQuery.limit = size
-                  this.getMachineList()
+                  listQuery.value.limit = size
+                  getMachineList()
                 }
                 " @change="getMachineList" show-less-items />
           </a-col>
@@ -282,7 +282,7 @@
     <!-- 机器信息组件 -->
     <a-drawer destroyOnClose title="机器详情" placement="right"
       :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="drawerVisible" @close="() => {
-          this.drawerVisible = false
+          drawerVisible.value = false
         }
         ">
       <!-- 机器信息组件 -->
@@ -307,7 +307,7 @@
     <a-drawer destroyOnClose :title="`${temp.name} 插件版本信息`" placement="right"
       :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="drawerUpgradeVisible"
       @close="() => {
-          this.drawerUpgradeVisible = false
+          drawerUpgradeVisible.value = false
         }
         ">
       <!-- 在线升级 -->
@@ -376,7 +376,7 @@
         banner />
       <a-form ref="editNodeConfigForm" :model="temp">
         <a-form-item label="模版节点">
-          <a-select show-search @change="(id) => loadNodeConfig(id)" option-filter-prop="children" placeholder="请选择模版节点"
+          <a-select show-search @change="(id: any) => loadNodeConfig(id)" option-filter-prop="children" placeholder="请选择模版节点"
             v-model="temp.templateNodeId">
             <a-select-option v-for="item in templateNodeList" :key="item.id" :value="item.id">
               {{ item.name }}
@@ -392,7 +392,7 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import {
   machineListData,
   machineListGroup,
@@ -415,458 +415,434 @@ import {
   formatPercent2Number,
   getCachePageLimit
 } from '@/utils/const'
-import CustomSelect from '@/components/customSelect'
+// import CustomSelect from '@/components/customSelect'
 // import { mapGetters } from 'vuex'
 import machineInfo from './machine-info.vue'
 import { getWorkSpaceListAll } from '@/api/workspace'
 // import Upgrade from "@/pages/node/node-layout/system/upgrade.vue";
-import upgrade from '@/components/upgrade'
+import upgrade from '@/components/upgrade/index.vue'
 import { getWhiteList } from '@/api/node-system'
 import { getConfigData } from '@/api/system'
-import codeEditor from '@/components/codeEditor'
+// import codeEditor from '@/components/codeEditor'
 
-export default {
-  components: {
-    CustomSelect,
-    machineInfo,
-    upgrade,
-    codeEditor
+import { IPageQuery } from '@/interface/common'
+
+const listQuery = ref<IPageQuery>({ ...PAGE_DEFAULT_LIST_QUERY })
+const sizeOptions = ['8', '12', '16', '20', '24']
+const list = ref([])
+const groupList = ref([])
+const loading = ref(true)
+const editVisible = ref(false)
+const syncToWorkspaceVisible = ref(false)
+const temp = ref<any>({})
+const rules = {
+  name: [{ required: true, message: '请输入机器的名称', trigger: 'blur' }]
+}
+const drawerVisible = ref(false)
+const drawerUpgradeVisible = ref(false)
+const workspaceList = ref([])
+const viewLinkNode = ref(false)
+const nodeList = ref([])
+const layoutType =  ref('')
+const columns = ref([
+  { title: '名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: { customRender: 'name' } },
+  { title: '系统名', dataIndex: 'osName', width: 150, ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+  {
+    title: '主机名',
+    dataIndex: 'hostName',
+    width: 150,
+    ellipsis: true,
+    scopedSlots: { customRender: 'tooltip' }
   },
-  data() {
-    return {
-      statusMap,
-      listQuery: Object.assign({ order: 'descend', order_field: 'networkDelay' }, PAGE_DEFAULT_LIST_QUERY, {}),
-      sizeOptions: ['8', '12', '16', '20', '24'],
-      list: [],
-      groupList: [],
-      loading: true,
-      editVisible: false,
-      syncToWorkspaceVisible: false,
-      temp: {},
-      rules: {
-        name: [{ required: true, message: '请输入机器的名称', trigger: 'blur' }]
-      },
-      drawerVisible: false,
-      drawerUpgradeVisible: false,
-      workspaceList: [],
-      viewLinkNode: false,
-      nodeList: [],
-      layoutType: null,
-      columns: [
-        { title: '名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: { customRender: 'name' } },
-        { title: '系统名', dataIndex: 'osName', width: 150, ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        {
-          title: '主机名',
-          dataIndex: 'hostName',
-          width: 150,
-          ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
-        },
-        {
-          title: '节点地址',
-          dataIndex: 'jpomUrl',
-          width: 150,
-          sorter: true,
-          ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
-        },
-        {
-          title: '分组名',
-          dataIndex: 'groupName',
-          ellipsis: true,
-          width: '100px',
-          scopedSlots: { customRender: 'tooltip' }
-        },
-        {
-          title: '状态',
-          dataIndex: 'status',
-          align: 'center',
-          width: '100px',
-          ellipsis: true,
-          scopedSlots: { customRender: 'status' }
-        },
-        {
-          title: '开机时间',
-          sorter: true,
-          dataIndex: 'osSystemUptime',
-          width: 150,
-          ellipsis: true,
-          scopedSlots: { customRender: 'duration2' }
-        },
-        {
-          title: 'CPU占用',
-          sorter: true,
-          align: 'center',
-          dataIndex: 'osOccupyCpu',
-          width: '100px',
-          ellipsis: true,
-          scopedSlots: { customRender: 'percent2Number' }
-        },
-        {
-          title: '内存占用',
-          sorter: true,
-          align: 'center',
-          dataIndex: 'osOccupyMemory',
-          width: '100px',
-          ellipsis: true,
-          scopedSlots: { customRender: 'percent2Number' }
-        },
-        {
-          title: '硬盘占用',
-          sorter: true,
-          align: 'center',
-          dataIndex: 'osOccupyDisk',
-          width: '100px',
-          ellipsis: true,
-          scopedSlots: { customRender: 'percent2Number' }
-        },
-        {
-          title: '插件版本号',
-          dataIndex: 'jpomVersion',
-          width: '100px',
-          ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
-        },
-        {
-          title: '模板节点',
-          dataIndex: 'templateNode',
-          width: '90px',
-          align: 'center',
-          ellipsis: true,
-          customRender: (text) => {
-            return text ? '是' : '否'
-          }
-        },
-        {
-          title: '创建时间',
-          dataIndex: 'createTimeMillis',
-          ellipsis: true,
-          sorter: true,
-          customRender: (text) => parseTime(text),
-          width: '170px'
-        },
-        {
-          title: '修改时间',
-          dataIndex: 'modifyTimeMillis',
-          customRender: (text) => parseTime(text),
-          sorter: true,
-          width: '170px'
-        },
-        {
-          title: '操作',
-          dataIndex: 'operation',
-          width: '120px',
-          fixed: 'right',
-          scopedSlots: { customRender: 'operation' },
-          align: 'center'
-        }
-      ],
-      tableSelections: [],
-      whiteConfigVisible: false,
-      nodeConfigVisible: false,
-      templateNodeList: []
+  {
+    title: '节点地址',
+    dataIndex: 'jpomUrl',
+    width: 150,
+    sorter: true,
+    ellipsis: true,
+    scopedSlots: { customRender: 'tooltip' }
+  },
+  {
+    title: '分组名',
+    dataIndex: 'groupName',
+    ellipsis: true,
+    width: '100px',
+    scopedSlots: { customRender: 'tooltip' }
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    align: 'center',
+    width: '100px',
+    ellipsis: true,
+    scopedSlots: { customRender: 'status' }
+  },
+  {
+    title: '开机时间',
+    sorter: true,
+    dataIndex: 'osSystemUptime',
+    width: 150,
+    ellipsis: true,
+    scopedSlots: { customRender: 'duration2' }
+  },
+  {
+    title: 'CPU占用',
+    sorter: true,
+    align: 'center',
+    dataIndex: 'osOccupyCpu',
+    width: '100px',
+    ellipsis: true,
+    scopedSlots: { customRender: 'percent2Number' }
+  },
+  {
+    title: '内存占用',
+    sorter: true,
+    align: 'center',
+    dataIndex: 'osOccupyMemory',
+    width: '100px',
+    ellipsis: true,
+    scopedSlots: { customRender: 'percent2Number' }
+  },
+  {
+    title: '硬盘占用',
+    sorter: true,
+    align: 'center',
+    dataIndex: 'osOccupyDisk',
+    width: '100px',
+    ellipsis: true,
+    scopedSlots: { customRender: 'percent2Number' }
+  },
+  {
+    title: '插件版本号',
+    dataIndex: 'jpomVersion',
+    width: '100px',
+    ellipsis: true,
+    scopedSlots: { customRender: 'tooltip' }
+  },
+  {
+    title: '模板节点',
+    dataIndex: 'templateNode',
+    width: '90px',
+    align: 'center',
+    ellipsis: true,
+    customRender: (text: any) => {
+      return text ? '是' : '否'
     }
   },
-  computed: {
-    // ...mapGetters(['getCollapsed']),
-    pagination() {
-      return COMPUTED_PAGINATION(this.listQuery)
-    },
-    rowSelection() {
-      return {
-        onChange: (selectedRowKeys) => {
-          this.tableSelections = selectedRowKeys
-        },
-        selectedRowKeys: this.tableSelections
-      }
-    }
+  {
+    title: '创建时间',
+    dataIndex: 'createTimeMillis',
+    ellipsis: true,
+    sorter: true,
+    customRender: (text: any) => parseTime(text),
+    width: '170px'
   },
-  mounted() {
-    this.loadGroupList()
-    this.changeLayout()
+  {
+    title: '修改时间',
+    dataIndex: 'modifyTimeMillis',
+    customRender: (text: any) => parseTime(text),
+    sorter: true,
+    width: '170px'
   },
-  methods: {
-    parseTime,
-    formatDuration,
-    formatPercent2Number,
-    PAGE_DEFAULT_SHOW_TOTAL,
-    // 获取所有的分组
-    loadGroupList() {
-      machineListGroup().then((res) => {
-        if (res.data) {
-          this.groupList = res.data
-        }
-      })
-    },
-    getMachineList(pointerEvent) {
-      this.loading = true
-      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
-      machineListData(this.listQuery).then((res) => {
-        if (res.code === 200) {
-          this.list = res.data.result
-          this.listQuery.total = res.data.total
-        }
-        this.loading = false
-      })
-    },
-    // 分页、排序、筛选变化时触发
-    changePage(pagination, filters, sorter) {
-      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
-      this.getMachineList()
-    },
-    addMachine() {
-      this.temp = {}
-      this.editVisible = true
-    },
-    // 修改
-    handleEdit(record) {
-      this.temp = Object.assign({}, record)
-      delete this.temp.statusMsg
-      this.editVisible = true
-    },
-    // 提交节点数据
-    handleEditOk() {
-      // 检验表单
-      this.$refs['editNodeForm'].validate((valid) => {
-        if (!valid) {
-          return false
-        }
-        // 提交数据
-        machineEdit(this.temp).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            $notification.success({
-              message: res.msg
-            })
-            this.$refs['editNodeForm'].resetFields()
-            this.editVisible = false
-            this.loadGroupList()
-            this.getMachineList()
-          }
-        })
-      })
-    },
-    showMachineInfo(item) {
-      this.temp = { ...item }
-      this.drawerVisible = true
-    },
-    // 删除机器
-    deleteMachineInfo(item) {
-      $confirm({
-        title: '系统提示',
-        content: '真的要删除机器么？删除会检查数据关联性',
-        okText: '确认',
-        cancelText: '取消',
-        onOk: () => {
-          // 删除
-          machineDelete({
-            id: item.id
-          }).then((res) => {
-            if (res.code === 200) {
-              $notification.success({
-                message: res.msg
-              })
-              this.getMachineList()
-            }
-          })
-        }
-      })
-    },
-    // 加载工作空间数据
-    loadWorkSpaceListAll() {
-      getWorkSpaceListAll().then((res) => {
-        if (res.code === 200) {
-          this.workspaceList = res.data
-        }
-      })
-    },
-    // 同步到其他工作情况
-    syncToWorkspaceShow(item) {
-      this.syncToWorkspaceVisible = true
-      this.loadWorkSpaceListAll()
-      if (item) {
-        this.temp = {
-          ids: item.id
-        }
-      }
-    },
-    handleSyncToWorkspace() {
-      if (!this.temp.workspaceId) {
-        $notification.warn({
-          message: '请选择工作空间'
-        })
-        return false
-      }
-      if (!this.temp.ids) {
-        this.temp = { ...this.temp, ids: this.tableSelections.join(',') }
-        this.tableSelections = []
-      }
-      // 同步
-      machineDistribute(this.temp).then((res) => {
-        if (res.code == 200) {
-          $notification.success({
-            message: res.msg
-          })
+  {
+    title: '操作',
+    dataIndex: 'operation',
+    width: '120px',
+    fixed: 'right',
+    scopedSlots: { customRender: 'operation' },
+    align: 'center'
+  }
+])
+const tableSelections = ref([])
+const whiteConfigVisible = ref(false)
+const nodeConfigVisible = ref(false)
+const templateNodeList = ref<any>([])
 
-          this.syncToWorkspaceVisible = false
-          return false
-        }
-      })
-    },
-    // 显示节点版本信息
-    showMachineUpgrade(item) {
-      this.temp = { ...item }
-      this.drawerUpgradeVisible = true
-    },
-    // 查看机器关联的节点
-    viewMachineNode(item) {
-      machineListNode({
+const pagination = COMPUTED_PAGINATION(listQuery.value)
+const rowSelection = {
+  onChange: (selectedRowKeys: any) => {
+    tableSelections.value = selectedRowKeys
+  },
+  selectedRowKeys: tableSelections.value
+}
+const editNodeForm = ref()
+const router = useRouter()
+const route = useRoute()
+
+onMounted(() => {
+  loadGroupList()
+  changeLayout()
+})
+
+const loadGroupList = () => {
+  machineListGroup().then((res: any) => {
+    if (res.data) {
+      groupList.value = res.data
+    }
+  })
+}
+const changeLayout = () => {
+  if (!layoutType.value) {
+    const tableLayout = localStorage.getItem('tableLayout')
+    // 默认表格
+    layoutType.value = tableLayout === 'card' ? 'card' : 'table'
+  } else {
+    layoutType.value = layoutType.value === 'card' ? 'table' : 'card'
+    localStorage.setItem('tableLayout', layoutType.value)
+  }
+  listQuery.value = { ...listQuery.value, limit: layoutType.value === 'card' ? 8 : getCachePageLimit() }
+  getMachineList()
+}
+const getMachineList = (pointerEvent: any = {}) => {
+  loading.value = true
+  listQuery.value.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : listQuery.value.page
+  machineListData(listQuery.value).then((res) => {
+    if (res.code === 200) {
+      list.value = res.data.result
+      listQuery.value.total = res.data.total
+    }
+    loading.value = false
+  })
+}
+// 分页、排序、筛选变化时触发
+const changePage = (pagination: any, filters: any, sorter: any) => {
+  listQuery.value = CHANGE_PAGE(listQuery.value, { pagination, sorter })
+  getMachineList()
+}
+const addMachine = () => {
+  temp.value = {}
+  editVisible.value = true
+}
+// 修改
+const handleEdit = (record: any) => {
+  temp.value = Object.assign({}, record)
+  delete temp.value.statusMsg
+  editVisible.value = true
+}
+// 提交节点数据
+const handleEditOk = () => {
+  // 检验表单
+  editNodeForm.value.validate((valid: boolean) => {
+    if (!valid) {
+      return false
+    }
+    // 提交数据
+    machineEdit(temp.value).then((res) => {
+      if (res.code === 200) {
+        // 成功
+        $notification.success({
+          message: res.msg
+        })
+        editNodeForm.value.resetFields()
+        editVisible.value = false
+        loadGroupList()
+        getMachineList()
+      }
+    })
+  })
+}
+const showMachineInfo = (item: any) => {
+  temp.value = { ...item }
+  drawerVisible.value = true
+}
+// 删除机器
+const deleteMachineInfo = (item: any) => {
+  $confirm({
+    title: '系统提示',
+    content: '真的要删除机器么？删除会检查数据关联性',
+    okText: '确认',
+    cancelText: '取消',
+    onOk: () => {
+      // 删除
+      machineDelete({
         id: item.id
       }).then((res) => {
         if (res.code === 200) {
-          this.viewLinkNode = true
-          this.nodeList = res.data
+          $notification.success({
+            message: res.msg
+          })
+          getMachineList()
         }
       })
-    },
-    toNode(nodeId, name, wid) {
-      const newpage = this.$router.resolve({
-        name: 'node_' + nodeId,
-        path: '/node/list',
-        query: {
-          ...this.$route.query,
-          nodeId: nodeId,
-          pId: 'manage',
-          id: 'manageList',
-          wid: wid,
-          searchNodeName: name
-        }
+    }
+  })
+}
+// 加载工作空间数据
+const loadWorkSpaceListAll = () => {
+  getWorkSpaceListAll().then((res) => {
+    if (res.code === 200) {
+      workspaceList.value = res.data
+    }
+  })
+}
+// 同步到其他工作情况
+const syncToWorkspaceShow = (item: any = {}) => {
+  syncToWorkspaceVisible.value = true
+  loadWorkSpaceListAll()
+  if (item) {
+    temp.value = {
+      ids: item.id
+    }
+  }
+}
+const handleSyncToWorkspace = () => {
+  if (!temp.value.workspaceId) {
+    $notification.warn({
+      message: '请选择工作空间'
+    })
+    return false
+  }
+  if (!temp.value.ids) {
+    temp.value = { ...temp.value, ids: tableSelections.value.join(',') }
+    tableSelections.value = []
+  }
+  // 同步
+  machineDistribute(temp.value).then((res) => {
+    if (res.code == 200) {
+      $notification.success({
+        message: res.msg
       })
-      window.open(newpage.href, '_blank')
-    },
-    // 切换视图
-    changeLayout() {
-      if (!this.layoutType) {
-        const layoutType = localStorage.getItem('tableLayout')
-        // 默认表格
-        this.layoutType = layoutType === 'card' ? 'card' : 'table'
-      } else {
-        this.layoutType = this.layoutType === 'card' ? 'table' : 'card'
-        localStorage.setItem('tableLayout', this.layoutType)
-      }
-      this.listQuery = { ...this.listQuery, limit: this.layoutType === 'card' ? 8 : getCachePageLimit() }
-      this.getMachineList()
-    },
-    syncNodeWhiteConfig() {
-      if (!this.tableSelections || this.tableSelections.length <= 0) {
-        $notification.warn({
-          message: '请选择要同步白名单的机器节点'
-        })
-        return
-      }
-      machineListTemplateNode().then((res) => {
-        //
-        if (res.code === 200) {
-          if (res.data && res.data.length) {
-            this.whiteConfigVisible = true
-            this.templateNodeList = res.data
-            this.temp = { ...this.temp, templateNodeId: this.templateNodeList[0].id }
-            this.loadWhitelistData(this.temp.templateNodeId)
-          } else {
-            $notification.warn({
-              message: '还没有配置模板节点'
-            })
-          }
-        }
-      })
-    },
 
-    // 加载节点白名单分发配置
-    loadWhitelistData(id) {
-      getWhiteList({
-        machineId: id
-      }).then((res) => {
-        if (res.code === 200 && res.data) {
-          this.temp = Object.assign({}, this.temp, res.data)
-          // { ...thie.temp,res.data };
-        }
+      syncToWorkspaceVisible.value = false
+      return false
+    }
+  })
+}
+// 显示节点版本信息
+const showMachineUpgrade = (item: any) => {
+  temp.value = { ...item }
+  drawerUpgradeVisible.value = true
+}
+// 查看机器关联的节点
+const viewMachineNode = (item: any) => {
+  machineListNode({
+    id: item.id
+  }).then((res) => {
+    if (res.code === 200) {
+      viewLinkNode.value = true
+      nodeList.value = res.data
+    }
+  })
+}
+const toNode = (nodeId: string, name: string, wid: string) => {
+  const newpage = router.resolve({
+    name: 'node_' + nodeId,
+    path: '/node/list',
+    query: {
+      ...route.query,
+      nodeId: nodeId,
+      pId: 'manage',
+      id: 'manageList',
+      wid: wid,
+      searchNodeName: name
+    }
+  })
+  window.open(newpage.href, '_blank')
+}
+const syncNodeWhiteConfig = () => {
+  if (!tableSelections.value || tableSelections.value.length <= 0) {
+    $notification.warn({
+      message: '请选择要同步白名单的机器节点'
+    })
+    return
+  }
+  machineListTemplateNode().then((res) => {
+    if (res.code === 200) {
+      if (res.data && res.data.length) {
+        whiteConfigVisible.value = true
+        templateNodeList.value = res.data
+        temp.value = { ...temp.value, templateNodeId: templateNodeList.value[0].id }
+        loadWhitelistData(temp.value.templateNodeId)
+      } else {
+        $notification.warn({
+          message: '还没有配置模板节点'
+        })
+      }
+    }
+  })
+}
+// 加载节点白名单分发配置
+const loadWhitelistData = (id: string) => {
+  getWhiteList({
+    machineId: id
+  }).then((res) => {
+    if (res.code === 200 && res.data) {
+      temp.value = Object.assign({}, temp.value, res.data)
+    }
+  })
+}
+const onSubmitWhitelist = () => {
+  saveWhitelist({
+    ...temp.value,
+    ids: tableSelections.value.join(',')
+  }).then((res) => {
+    if (res.code === 200) {
+      // 成功
+      $notification.success({
+        message: res.msg
       })
-    },
-    onSubmitWhitelist() {
-      saveWhitelist({
-        ...this.temp,
-        ids: this.tableSelections.join(',')
+      tableSelections.value = []
+      whiteConfigVisible.value = false
+    }
+  })
+}
+const syncNodeConfig = () => {
+  if (!tableSelections.value || tableSelections.value.length <= 0) {
+    $notification.warn({
+      message: '请选择要同步系统配置的机器节点'
+    })
+    return
+  }
+  machineListTemplateNode().then((res) => {
+    if (res.code === 200) {
+      if (res.data && res.data.length) {
+        nodeConfigVisible.value = true
+        templateNodeList.value = res.data
+        temp.value = { ...temp.value, templateNodeId: templateNodeList.value[0].id }
+        loadNodeConfig(temp.value.templateNodeId)
+      } else {
+        $notification.warn({
+          message: '还没有配置模板节点'
+        })
+      }
+    }
+  })
+}
+
+// 修改模版节点
+const loadNodeConfig = (id: string) => {
+  getConfigData({ machineId: id }).then((res) => {
+    if (res.code === 200) {
+      temp.value = { ...temp.value, content: res.data.content }
+    }
+  })
+}
+// submit
+const onNodeSubmit = (restart: boolean) => {
+  $confirm({
+    title: '系统提示',
+    content: restart
+      ? '真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！ 保存成功后请及时关注重启状态！！'
+      : '真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！',
+    okText: '确认',
+    cancelText: '取消',
+    onOk: () => {
+      saveNodeConfig({
+        ...temp.value,
+        restart: restart,
+        ids: tableSelections.value.join(',')
       }).then((res) => {
         if (res.code === 200) {
           // 成功
           $notification.success({
             message: res.msg
           })
-          this.tableSelections = []
-          this.whiteConfigVisible = false
-        }
-      })
-    },
-    syncNodeConfig() {
-      if (!this.tableSelections || this.tableSelections.length <= 0) {
-        $notification.warn({
-          message: '请选择要同步系统配置的机器节点'
-        })
-        return
-      }
-      machineListTemplateNode().then((res) => {
-        //
-        if (res.code === 200) {
-          if (res.data && res.data.length) {
-            this.nodeConfigVisible = true
-            this.templateNodeList = res.data
-            this.temp = { ...this.temp, templateNodeId: this.templateNodeList[0].id }
-            this.loadNodeConfig(this.temp.templateNodeId)
-          } else {
-            $notification.warn({
-              message: '还没有配置模板节点'
-            })
-          }
-        }
-      })
-    },
-
-    // 修改模版节点
-    loadNodeConfig(id) {
-      getConfigData({ machineId: id }).then((res) => {
-        if (res.code === 200) {
-          this.temp = { ...this.temp, content: res.data.content }
-        }
-      })
-    },
-    // submit
-    onNodeSubmit(restart) {
-      $confirm({
-        title: '系统提示',
-        content: restart
-          ? '真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！ 保存成功后请及时关注重启状态！！'
-          : '真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！',
-        okText: '确认',
-        cancelText: '取消',
-        onOk: () => {
-          saveNodeConfig({
-            ...this.temp,
-            restart: restart,
-            ids: this.tableSelections.join(',')
-          }).then((res) => {
-            if (res.code === 200) {
-              // 成功
-              $notification.success({
-                message: res.msg
-              })
-              this.nodeConfigVisible = false
-              this.tableSelections = []
-            }
-          })
+          nodeConfigVisible.value = false
+          tableSelections.value = []
         }
       })
     }
-  }
+  })
 }
 </script>
 
