@@ -17,11 +17,11 @@
     <log-view :ref="`logView`" height="calc(100vh - 140px)">
       <template slot="before">
         <a-space>
-          <a-button size="small" :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start">启动</a-button>
-          <a-button size="small" :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
-          <a-button size="small" :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="stop">停止</a-button>
+          <a-button size="small" :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start">{{$t('common.start')}}</a-button>
+          <a-button size="small" :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="restart">{{$t('common.restart')}}</a-button>
+          <a-button size="small" :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="stop">{{$t('common.stop')}}</a-button>
 
-          <a-button size="small" v-if="!copyId" type="primary" @click="goFile">文件管理</a-button>
+          <a-button size="small" v-if="!copyId" type="primary" @click="goFile">{{$t('common.fileMan')}}</a-button>
 
           <a-dropdown>
             <!-- <a type="link" class="ant-dropdown-link"> 更多<a-icon type="down" /> </a> -->
@@ -35,7 +35,7 @@
               "
             >
               <!-- <a-tag> -->
-              日志大小: {{ project.logSize || "-" }}
+              {{$t('common.log')+$t('common.size')}}: {{ project.logSize || "-" }}
               <!-- 更多 -->
               <a-icon type="fullscreen" />
               <!-- </a-tag> -->
@@ -53,7 +53,7 @@
       </template>
     </log-view>
     <!-- 日志备份 -->
-    <a-modal destroyOnClose v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="lobbackVisible" :title=$t('common.logBackupList') width="850px" :footer="null" :maskClosable="false">
       <ProjectLog v-if="lobbackVisible" :nodeId="this.nodeId" :copyId="this.copyId" :projectId="this.projectId"></ProjectLog>
     </a-modal>
   </div>
@@ -135,12 +135,12 @@ export default {
                 this.project = { ...this.project, log: finds[0].log, logBack: finds[0].logBack };
               } else {
                 this.$notification.error({
-                  message: "没有找到副本",
+                  message: this.$t('node.node_layout.project.console.noCopyFound'),
                 });
               }
             } else {
               this.$notification.error({
-                message: "没有副本",
+                message: this.$t('node.node_layout.project.console.noCopy'),
               });
             }
           }
@@ -163,14 +163,14 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err);
         this.$notification.error({
-          message: "web socket 错误,请检查是否开启 ws 代理",
+          message: this.$t('node.node_layout.project.console.socketErr'),
         });
         clearInterval(this.heart);
       };
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err);
-        this.$message.warning("会话已经关闭[project-console]");
+        this.$message.warning(this.$t('node.node_layout.project.console.sessionClosed'));
         clearInterval(this.heart);
       };
       this.socket.onmessage = (msg) => {
@@ -243,10 +243,10 @@ export default {
     // 重启
     restart() {
       this.$confirm({
-        title: "系统提示",
-        content: "真的要重启项目么？",
-        okText: "确认",
-        cancelText: "取消",
+        title: this.$t('common.systemPrompt'),
+        content: this.$t('node.node_layout.project.console.ifRestart'),
+        okText: this.$t('common.confirm'),
+        cancelText: this.$t('common.cancel'),
         onOk: () => {
           this.sendMsg("restart");
         },
@@ -255,10 +255,10 @@ export default {
     // 停止
     stop() {
       this.$confirm({
-        title: "系统提示",
-        content: "真的要停止项目么？",
-        okText: "确认",
-        cancelText: "取消",
+        title: this.$t('common.systemPrompt'),
+        content: this.$t('node.node_layout.project.console.ifStop'),
+        okText: this.$t('common.confirm'),
+        cancelText: this.$t('common.cancel'),
         onOk: () => {
           this.sendMsg("stop");
         },

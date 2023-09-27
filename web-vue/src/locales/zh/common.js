@@ -32,8 +32,9 @@ export default {
     domain:"域名",
 
     noData: "暂无数据",
-
+    size:"大小",
     log: "日志",
+    logBackupList:"日志备份列表",
     product: "产物",
     source: "源",
     repository: "仓库",
@@ -60,6 +61,7 @@ export default {
     systemPrompt: "系统提示",
     goHome: "回到首页",
     refresh:"刷新",
+    catalog:"目录",
 
     goToThirdParty: "跳转到第三方系统中",
 
@@ -94,6 +96,7 @@ export default {
 
     title:"标题",
     content:"内容",
+
     notifyObject:"通知对象",
     notifyError:"通知异常",
 
@@ -127,12 +130,20 @@ export default {
     permDelete:"永久删除",
     restoreConfig:"还原配置",
     fileName:"文件名称",
+    fileMan:"文件管理",
+    fileType:"文件类型",
+    fileSize:"文件大小",
     configContent:"配置内容",
     serviceName:"服务名称",
     temp:"临时",
     perm:"永久",
     execute:"执行",
     stop:"停止",
+    start:"启动",
+    restart:"重启",
+    begin:"开始",
+
+
     commandParams:"命令参数",
     addParams:"添加参数",
     goBackP1:"按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页",
@@ -146,4 +157,14 @@ export default {
     detail:"详细描述",
     triggerExecType:"触发类型",
     executeArea:"执行域",
+    console:"控制台",
+    backup:"备份",
+    list:"列表",
+    upload:"上传",
+    download:"下载",
+    file:"文件",
+    new:"新建",
+    blank:"空白",
+    rename:"重命名",
+    save:"保存",
 };
