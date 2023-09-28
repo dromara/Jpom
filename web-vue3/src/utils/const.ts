@@ -37,8 +37,8 @@ export const LOADING_TIP = "loadingTip";
 
 const cachePageLimitKeyName = "page_limit";
 
-export function getCachePageLimit() {
-  return parseInt(localStorage.getItem(cachePageLimitKeyName) || 10);
+export function getCachePageLimit(): number {
+  return parseInt(localStorage.getItem(cachePageLimitKeyName) || '10');
 }
 
 /**
@@ -51,11 +51,11 @@ export const PAGE_DEFAULT_SIZW_OPTIONS = ["5", "10", "15", "20", "25", "30", "35
  * @param {Number} total 总记录数
  * @returns String
  */
-export function PAGE_DEFAULT_SHOW_TOTAL(total) {
+export function PAGE_DEFAULT_SHOW_TOTAL(total: number) {
   return `总计 ${total} 条`;
 }
 
-export const PAGE_DEFAULT_LIST_QUERY = { page: 1, limit: isNaN(getCachePageLimit) ? 10 : getCachePageLimit, total: 0 };
+export const PAGE_DEFAULT_LIST_QUERY: any = { page: 1, limit: isNaN(getCachePageLimit()) ? 10 : getCachePageLimit, total: 0 };
 
 /**
  * 计算分页数据
@@ -63,7 +63,7 @@ export const PAGE_DEFAULT_LIST_QUERY = { page: 1, limit: isNaN(getCachePageLimit
  * @param {Array} pageSizeOptions 分页选择条选项
  * @returns
  */
-export function COMPUTED_PAGINATION(queryParam, pageSizeOptions) {
+export function COMPUTED_PAGINATION(queryParam: any, pageSizeOptions = PAGE_DEFAULT_SIZW_OPTIONS) {
   // console.log(queryParam);
   const limit = queryParam.limit || PAGE_DEFAULT_LIST_QUERY.limit;
   const total = queryParam.total || 0;
@@ -77,7 +77,7 @@ export function COMPUTED_PAGINATION(queryParam, pageSizeOptions) {
     showLessItems: true,
     // 只有在分页条数在 小于 2 的时候隐藏，避免设置太大无法切回
     hideOnSinglePage: limit <= 20,
-    showTotal: (total) => {
+    showTotal: (total: number) => {
       return PAGE_DEFAULT_SHOW_TOTAL(total);
     },
   };
@@ -321,7 +321,7 @@ export function randomStr(len = 2) {
  * @param {*} time
  * @param {*} cFormat
  */
-export function parseTime(time, cFormat) {
+export function parseTime(time, cFormat = "{y}-{m}-{d} {h}:{i}:{s}") {
   if (arguments.length === 0) {
     return "-";
   }
@@ -453,7 +453,7 @@ export function itemGroupBy(arr, groupKey, key, dataKey) {
  * @param {String} levelCount 格式化个数
  * @returns
  */
-export function formatDuration(ms, seg, levelCount) {
+export function formatDuration(ms: any, seg: string = '', levelCount: number = 5) {
   let msNum = Number(ms);
   if (isNaN(msNum)) {
     return ms;
@@ -498,7 +498,7 @@ export function formatPercent2(point, keep = 2) {
 }
 
 //小数转换为分数(小数先转换成number类型，再乘以100，并且保留2位小数)
-export function formatPercent2Number(point, keep = 2) {
+export function formatPercent2Number(point: any, keep = 2) {
   if (null == point) {
     return 0;
   }

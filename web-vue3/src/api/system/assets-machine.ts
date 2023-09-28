@@ -9,7 +9,7 @@ export function machineListData(params: any) {
   })
 }
 
-export function machineListGroup(params: any) {
+export function machineListGroup(params: any = {}) {
   return axios({
     url: '/system/assets/machine/list-group',
     method: 'get',
@@ -60,7 +60,7 @@ export function machineListNode(params: any) {
   })
 }
 
-export function machineListTemplateNode(params: any) {
+export function machineListTemplateNode(params: any = {}) {
   return axios({
     url: '/system/assets/machine/list-template-node',
     method: 'get',
