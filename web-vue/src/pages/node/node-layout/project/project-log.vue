@@ -2,17 +2,17 @@
   <div>
     <div ref="model-filter" class="filter">
       <a-space direction="vertical">
-        <a-tag>控制台日志只是启动项目输出的日志信息,并非项目日志。可以关闭控制台日志备份功能：<b>jpom.project.log.auto-backup-to-file: false</b></a-tag>
+        <a-tag>{{$t('node.node_layout.project.log.closeBackupFunc')}}<b>jpom.project.log.auto-backup-to-file: false</b></a-tag>
 
         <a-tag color="orange" v-if="project.logPath">
-          控制台日志路径: {{ project.logPath }}
+          {{$t('node.node_layout.project.log.consoleLogDir')}} {{ project.logPath }}
           <template v-if="project.logSize">
-            当前日志文件大小：{{ project.logSize }}
-            <a-button @click="handleDownload" type="link" icon="download" size="small"> 导出 </a-button>
+            {{$t('node.node_layout.project.log.currentLogSize')}}{{ project.logSize }}
+            <a-button @click="handleDownload" type="link" icon="download" size="small"> {{$t('common.export')}} </a-button>
           </template>
         </a-tag>
 
-        <a-tag color="orange" v-if="project.logBackPath">控制台日志备份路径: {{ project.logBackPath }}</a-tag>
+        <a-tag color="orange" v-if="project.logBackPath">{{$t('node.node_layout.project.log.consoleBackupDir')}} {{ project.logBackPath }}</a-tag>
       </a-space>
     </div>
     <!-- 数据表格 -->
@@ -25,8 +25,8 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleDownloadLogback(record)">下载</a-button>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button type="primary" @click="handleDownloadLogback(record)">{{$t('common.download')}}</a-button>
+          <a-button type="danger" @click="handleDelete(record)">{{$t('common.delete')}}</a-button>
         </a-space>
       </template>
     </a-table>
@@ -52,10 +52,10 @@ export default {
       project: {},
       logBackList: [],
       columns: [
-        { title: "文件名称", dataIndex: "filename", width: 150, ellipsis: true, scopedSlots: { customRender: "filename" } },
-        { title: "修改时间", dataIndex: "modifyTime", width: 150, ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
-        { title: "文件大小", dataIndex: "fileSize", width: 100, ellipsis: true, scopedSlots: { customRender: "fileSize" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 130 },
+        { title: this.$t('common.fileName'), dataIndex: "filename", width: 150, ellipsis: true, scopedSlots: { customRender: "filename" } },
+        { title: this.$t('common.modifyTime'), dataIndex: "modifyTime", width: 150, ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
+        { title: this.$t('common.fileSize'), dataIndex: "fileSize", width: 100, ellipsis: true, scopedSlots: { customRender: "fileSize" } },
+        { title: this.$t('common.operation'), dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 130 },
       ],
     };
   },
@@ -95,7 +95,7 @@ export default {
     // 下载日志文件
     handleDownload() {
       this.$notification.info({
-        message: "正在下载，请稍等...",
+        message: this.$t('node.node_layout.project.file.downloading'),
       });
       // 请求参数
       const params = {
@@ -109,7 +109,7 @@ export default {
     // 下载日志备份文件
     handleDownloadLogback(record) {
       this.$notification.info({
-        message: "正在下载，请稍等...",
+        message: this.$t('node.node_layout.project.file.downloading'),
       });
       // 请求参数
       const params = {
@@ -124,10 +124,10 @@ export default {
     // 删除日志备份文件
     handleDelete(record) {
       this.$confirm({
-        title: "系统提示",
-        content: "真的要删除文件么？",
-        okText: "确认",
-        cancelText: "取消",
+        title: this.$t('common.systemPrompt'),
+        content: this.$t('common.deleteFile'),
+        okText: this.$t('common.confirm'),
+        cancelText: this.$t('common.cancel'),
         onOk: () => {
           // 请求参数
           const params = {

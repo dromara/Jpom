@@ -129,10 +129,30 @@ export default {
                 convClosed:"会话已经关闭[tail-file]",
 
             },
-            list: {},
-            log: {},
-            replica: {},
-            recover_list: {}
+            list: {
+                chooseGroup:"请选择分组",
+                timeDelay:"状态数据是异步获取有一定时间延迟",
+                noActualEffect:"当项目存在副本集时此列将可以用于查看副本集功能，其他情况此列没有实际作用",
+                operateAtConsole:"状态操作请到控制台中控制",
+            },
+            log: {
+                deleteFile:"真的要删除文件么？",
+                closeBackupFunc:"控制台日志只是启动项目输出的日志信息,并非项目日志。可以关闭控制台日志备份功能：",
+                consoleLogDir:"控制台日志路径：",
+                currentLogSize:"当前日志文件大小：",
+                consoleBackupDir:"控制台日志备份路径：",
+            },
+            replica: {
+                deleteCopy:"真的要删除副本项目么？",
+                copyId:"副本编号",
+                processId:"进程 ID",
+
+            },
+            recover_list: {
+                JVMParam:"JVM 参数",
+                argsArg:"args 参数",
+                buildSig:"Build 标识",
+            }
         }
     }
 }

@@ -35,6 +35,7 @@ export default {
     size:"大小",
     log: "日志",
     logBackupList:"日志备份列表",
+    logCatalog:"日志目录",
     product: "产物",
     source: "源",
     repository: "仓库",
@@ -67,6 +68,7 @@ export default {
 
     qrCode: "二维码",
 
+    copy:"复制",
     copySuccess: "复制成功",
     copyError: "复制失败",
 
@@ -91,7 +93,8 @@ export default {
     look:'查看',
 
     delete: "删除",
-    import:"导出",
+    export:"导出",
+    import:"导入",
     template:"模板",
 
     title:"标题",
@@ -111,6 +114,12 @@ export default {
     alarmTitle:"报警标题",
     nodeId:"节点名称",
     projectId:"项目ID",
+    projectName:"项目名称",
+    projectCatalog:"项目目录",
+    proInfo:"项目信息",
+    proDir:"项目路径",
+    proType:"项目类型",
+    proLog:"项目日志",
     notifyStyle:"报警方式",
     alarmTime:"报警时间",
     monitorUser:"监控用户",
@@ -168,4 +177,12 @@ export default {
     rename:"重命名",
     save:"保存",
     return:"返回",
+    portId:"端口号",
+    batchOper:"批量操作",
+    batchStart:"批量启动",
+    baichRestart:"批量重启",
+    batchClose:"批量关闭",
+    logicDelete:"逻辑删除",
+    completeDelete:"彻底删除",
+
 };

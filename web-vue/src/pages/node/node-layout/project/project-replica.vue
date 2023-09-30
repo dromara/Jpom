@@ -4,14 +4,14 @@
     <!-- 表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
       <template #title>
-        <a-button type="primary" @click="handleFilter">刷新</a-button>
+        <a-button type="primary" @click="handleFilter">{{ $t('common.refresh') }}</a-button>
       </template>
-      <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关" />
+      <a-switch slot="status" slot-scope="text" :checked="text" disabled :checked-children=this.$t('common.on') :un-checked-children=this.$t('common.off') />
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleConsole(record)">控制台</a-button>
+          <a-button type="primary" @click="handleConsole(record)">{{ $t('common.console') }}</a-button>
 
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button type="danger" @click="handleDelete(record)">{{ $t('common.delete') }}</a-button>
         </a-space>
       </template>
     </a-table>
@@ -46,12 +46,12 @@ export default {
       drawerConsoleVisible: false,
 
       columns: [
-        { title: "副本编号", dataIndex: "id", width: 150, ellipsis: true, scopedSlots: { customRender: "id" } },
-        { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "进程 ID", dataIndex: "pid", width: 100, ellipsis: true, scopedSlots: { customRender: "pid" } },
-        { title: "端口号", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "最后修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 220 },
+        { title: this.$t('node.node_layout.project.replica.copyId'), dataIndex: "id", width: 150, ellipsis: true, scopedSlots: { customRender: "id" } },
+        { title: this.$t('common.status'), dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: this.$t('node.node_layout.project.replica.processId'), dataIndex: "pid", width: 100, ellipsis: true, scopedSlots: { customRender: "pid" } },
+        { title: this.$t('common.portId'), dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
+        { title: this.$t('common.lastModifiedTime'), dataIndex: "modifyTime", width: 180, ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
+        { title: this.$t('common.operation'), dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 220 },
       ],
     };
   },
@@ -115,10 +115,10 @@ export default {
     // 删除
     handleDelete(record) {
       this.$confirm({
-        title: "系统提示",
-        content: "真的要删除副本项目么？",
-        okText: "确认",
-        cancelText: "取消",
+        title: this.$t('common.systemPrompt'),
+        content: this.$t('node.node_layout.project.replica.deleteCopy'),
+        okText: this.$t('common.confirm'),
+        cancelText: this.$t('common.cancel'),
         onOk: () => {
           // 删除
           const params = {
