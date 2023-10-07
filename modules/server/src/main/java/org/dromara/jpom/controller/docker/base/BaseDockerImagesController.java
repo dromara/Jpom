@@ -37,7 +37,6 @@ import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.util.FileUtils;
 import org.dromara.jpom.util.LogRecorder;
-import org.dromara.jpom.util.WorkspaceThreadLocal;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -68,7 +67,6 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<List<JSONObject>> list(@ValidatorItem String id) throws Exception {
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("name", getParameter("name"));
@@ -86,7 +84,6 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
     @GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public JsonMessage<Object> del(@ValidatorItem String id, String imageId) throws Exception {
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("imageId", imageId);
@@ -102,7 +99,6 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
     @GetMapping(value = "batchRemove", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public JsonMessage<Object> batchRemove(@ValidatorItem String id, String[] imagesIds) throws Exception {
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("imagesIds", imagesIds);
@@ -117,7 +113,6 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
     @GetMapping(value = "inspect", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<JSONObject> inspect(@ValidatorItem String id, String imageId) throws Exception {
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("imageId", imageId);
@@ -132,7 +127,6 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
     @GetMapping(value = "pull-image", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public JsonMessage<String> pullImage(@ValidatorItem String id, String repository) {
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("repository", repository);
@@ -180,7 +174,6 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
     @PostMapping(value = "create-container", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public JsonMessage<Object> createContainer(@RequestBody JSONObject jsonObject) throws Exception {
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         String id = jsonObject.getString("id");
         Assert.hasText(id, "id 不能为空");
         Assert.hasText(jsonObject.getString("imageId"), "镜像不能为空");

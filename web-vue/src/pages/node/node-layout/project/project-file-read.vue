@@ -20,7 +20,7 @@
     </div> -->
     <!-- console -->
     <log-view :ref="`logView`" height="calc(100vh - 140px)">
-      <template slot="before"> <a-button type="primary" size="small" @click="goFile">文件管理</a-button></template>
+      <template slot="before"> <a-button type="primary" size="small" @click="goFile">{{ $t('common.fileMan') }}</a-button></template>
     </log-view>
   </div>
 </template>
@@ -94,14 +94,14 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err);
         this.$notification.error({
-          message: "web socket 错误,请检查是否开启 ws 代理",
+          message: this.$t('node.node_layout.project.file_read.inspectWsAgency'),
         });
         clearInterval(this.heart);
       };
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err);
-        this.$message.warning("会话已经关闭[tail-file]");
+        this.$message.warning(this.$t('node.node_layout.project.file_read.convClosed'));
         clearInterval(this.heart);
       };
       this.socket.onmessage = (msg) => {

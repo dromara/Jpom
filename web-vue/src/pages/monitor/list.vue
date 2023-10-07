@@ -4,54 +4,54 @@
     <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" @change="changePage" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="监控名称" class="search-input-item" />
-          <a-select v-model="listQuery.status" allowClear placeholder="开启状态" class="search-input-item">
-            <a-select-option :value="1">开启</a-select-option>
-            <a-select-option :value="0">关闭</a-select-option>
+          <a-input v-model="listQuery['%name%']" @pressEnter="loadData" :placeholder="$t('common.monitorName')" class="search-input-item" />
+          <a-select v-model="listQuery.status" allowClear :placeholder="$t('common.openStatus')" class="search-input-item">
+            <a-select-option :value="1">{{$t('common.open')}}</a-select-option>
+            <a-select-option :value="0">{{$t('common.close')}}</a-select-option>
           </a-select>
-          <a-select v-model="listQuery.autoRestart" allowClear placeholder="自动重启" class="search-input-item">
-            <a-select-option :value="1">是</a-select-option>
-            <a-select-option :value="0">否</a-select-option>
+          <a-select v-model="listQuery.autoRestart" allowClear :placeholder="$t('common.autoRestart')" class="search-input-item">
+            <a-select-option :value="1">{{$t('common.yes')}}</a-select-option>
+            <a-select-option :value="0">{{$t('common.no')}}</a-select-option>
           </a-select>
-          <a-select v-model="listQuery.alarm" allowClear placeholder="报警状态" class="search-input-item">
-            <a-select-option :value="1">报警中</a-select-option>
-            <a-select-option :value="0">未报警</a-select-option>
+          <a-select v-model="listQuery.alarm" allowClear :placeholder="$t('common.alarmStatus')" class="search-input-item">
+            <a-select-option :value="1">{{$t('common.alarm')}}</a-select-option>
+            <a-select-option :value="0">{{$t('common.noAlarm')}}</a-select-option>
           </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$t('monitor.list.goBackP1')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{$t('common.search')}}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">新增</a-button>
+          <a-button type="primary" @click="handleAdd">{{$t('common.add')}}</a-button>
         </a-space>
       </template>
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-switch slot="status" size="small" slot-scope="text" :checked="text" disabled checked-children="开启" un-checked-children="关闭" />
-      <a-switch slot="autoRestart" size="small" slot-scope="text" :checked="text" disabled checked-children="是" un-checked-children="否" />
-      <a-switch slot="alarm" size="small" slot-scope="text" :checked="text" disabled checked-children="报警中" un-checked-children="未报警" />
+      <a-switch slot="status" size="small" slot-scope="text" :checked="text" disabled :checked-children="$t('common.open')" :un-checked-children="$t('common.close')" />
+      <a-switch slot="autoRestart" size="small" slot-scope="text" :checked="text" disabled :checked-children="$t('common.yes')" :un-checked-children="$t('common.no')" />
+      <a-switch slot="alarm" size="small" slot-scope="text" :checked="text" disabled :checked-children="$t('common.alarm')" :un-checked-children="$t('common.noAlarm')" />
       <a-tooltip slot="parent" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
-          <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
+          <a-button type="primary" size="small" @click="handleEdit(record)">{{$t('common.edit')}}</a-button>
+          <a-button type="danger" size="small" @click="handleDelete(record)">{{$t('common.delete')}}</a-button>
         </a-space>
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editMonitorVisible" width="60%" title="编辑监控" @ok="handleEditMonitorOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editMonitorVisible" width="60%" :title="$t('common.editMonitor')" @ok="handleEditMonitorOk" :maskClosable="false">
       <a-form-model ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item label="监控名称" prop="name">
-          <a-input v-model="temp.name" :maxLength="50" placeholder="监控名称" />
+        <a-form-model-item :label="$t('common.monitorName')" prop="name">
+          <a-input v-model="temp.name" :maxLength="50" :placeholder="$t('common.monitorName')" />
         </a-form-model-item>
 
-        <a-form-model-item label="开启状态" prop="status">
+        <a-form-model-item :label="$t('common.openStatus')" prop="status">
           <a-space size="large">
-            <a-switch v-model="temp.status" checked-children="开" un-checked-children="关" />
+            <a-switch v-model="temp.status" :checked-children="$t('common.open')" :un-checked-children="$t('common.close')" />
             <div>
-              自动重启:
-              <a-switch v-model="temp.autoRestart" checked-children="开" un-checked-children="关" />
+              {{ $t('common.autoRestart') }}
+              <a-switch v-model="temp.autoRestart" :checked-children="$t('common.open')" :un-checked-children="$t('common.close')" />
             </div>
           </a-space>
         </a-form-model-item>
@@ -69,8 +69,8 @@
           </a-radio-group>
         </a-form-model-item> -->
 
-        <a-form-model-item label="监控周期" prop="execCron">
-          <a-auto-complete v-model="temp.execCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
+        <a-form-model-item :label="$t('common.execCron')" prop="execCron">
+          <a-auto-complete v-model="temp.execCron" :placeholder="$t('monitor.list.autoRun')" option-label-prop="value">
             <template slot="dataSource">
               <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
                 <span slot="label">
@@ -81,8 +81,8 @@
             </template>
           </a-auto-complete>
         </a-form-model-item>
-        <a-form-model-item label="监控项目" prop="projects">
-          <a-select option-label-prop="label" v-model="projectKeys" mode="multiple" placeholder="选择要监控的项目,file 类型项目不可以监控" show-search option-filter-prop="children">
+        <a-form-model-item :label="$t('common.monitorProj')" prop="projects">
+          <a-select option-label-prop="label" v-model="projectKeys" mode="multiple" :placeholder="$t('monitor.list.selectToMonitor')" show-search option-filter-prop="children">
             <a-select-opt-group :label="nodeMap[nodeItem.node].name" v-for="nodeItem in nodeProjectGroupList" :key="nodeItem.node">
               <a-select-option :label="`${project.name} - ${project.runMode}`" v-for="project in nodeItem.projects" :disabled="!noFileModes.includes(project.runMode)" :key="project.id">
                 【{{ project.nodeName }}】{{ project.name }} - {{ project.runMode }}
@@ -92,16 +92,16 @@
         </a-form-model-item>
         <a-form-model-item prop="notifyUser" class="jpom-notify">
           <template slot="label">
-            联系人
+            {{$t('common.contact')}}
             <a-tooltip v-show="!temp.id">
-              <template slot="title"> 如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。 </template>
+              <template slot="title"> {{$t('monitor.list.remindSetEmail')}} </template>
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-transfer
             :data-source="userList"
             :lazy="false"
-            :titles="['待选择', '已选择']"
+            :titles="[$t('common.toChoose'), $t('common.chosen')]"
             show-search
             :list-style="{
               width: '18vw',
@@ -118,15 +118,15 @@
             <a-tooltip v-show="!temp.id">
               <template slot="title">
                 <ul>
-                  <li>发生报警时候请求</li>
-                  <li>传入参数有：monitorId、monitorName、nodeId、nodeName、projectId、projectName、title、content、runStatus</li>
-                  <li>runStatus 值为 true 表示项目当前为运行中(异常恢复),false 表示项目当前未运行(发生异常)</li>
+                  <li>{{$t('monitor.list.reqAtAlarm')}}</li>
+                  <li>{{$t('monitor.list.passParam')}}</li>
+                  <li>{{$t('monitor.list.judge')}}</li>
                 </ul>
               </template>
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-input v-model="temp.webhook" placeholder="接收报警消息,非必填，GET请求" />
+          <a-input v-model="temp.webhook" :placeholder="$t('monitor.list.receiveAlarm')" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -158,14 +158,14 @@ export default {
       temp: {},
       editMonitorVisible: false,
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "监控周期", dataIndex: "execCron", ellipsis: true, scopedSlots: { customRender: "execCron" } },
-        { title: "开启状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" }, width: 120 },
-        { title: "自动重启", dataIndex: "autoRestart", ellipsis: true, scopedSlots: { customRender: "autoRestart" }, width: 120 },
-        { title: "报警状态", dataIndex: "alarm", ellipsis: true, scopedSlots: { customRender: "alarm" }, width: 120 },
-        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, align: "center", scopedSlots: { customRender: "modifyUser" }, width: 120 },
+        { title: this.$t('common.name'), dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: this.$t('common.execCron'), dataIndex: "execCron", ellipsis: true, scopedSlots: { customRender: "execCron" } },
+        { title: this.$t('common.openStatus'), dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" }, width: 120 },
+        { title: this.$t('autoRestart'), dataIndex: "autoRestart", ellipsis: true, scopedSlots: { customRender: "autoRestart" }, width: 120 },
+        { title: this.$t('common.alarmStatus'), dataIndex: "alarm", ellipsis: true, scopedSlots: { customRender: "alarm" }, width: 120 },
+        { title: this.$t('common.modifyUser'), dataIndex: "modifyUser", ellipsis: true, align: "center", scopedSlots: { customRender: "modifyUser" }, width: 120 },
         {
-          title: "修改时间",
+          title: this.$t('common.modifyTime'),
           dataIndex: "modifyTimeMillis",
           sorter: true,
           customRender: (text) => {
@@ -176,7 +176,7 @@ export default {
           },
           width: 180,
         },
-        { title: "操作", dataIndex: "operation", ellipsis: true, scopedSlots: { customRender: "operation" }, width: 120 },
+        { title: this.$t('common.operation'), dataIndex: "operation", ellipsis: true, scopedSlots: { customRender: "operation" }, width: 120 },
       ],
       rules: {
         name: [{ required: true, message: "Please input monitor name", trigger: "blur" }],
@@ -201,9 +201,9 @@ export default {
           hidePrev: true,
           steps: [
             {
-              title: "导航助手",
+              title: this.$t('common.introGuide'),
               element: document.querySelector(".jpom-notify"),
-              intro: "如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。",
+              intro: this.$t('monitor.list.intro'),
             },
           ],
         },
@@ -250,7 +250,7 @@ export default {
 
             this.nodeProjectList = res.data.map((item) => {
               let nodeInfo = res1.data.filter((nodeItem) => nodeItem.id === item.nodeId);
-              item.nodeName = nodeInfo.length > 0 ? nodeInfo[0].name : "未知";
+              item.nodeName = nodeInfo.length > 0 ? nodeInfo[0].name : this.$t('common.unknown');
               return item;
             });
             this.nodeProjectGroupList = itemGroupBy(this.nodeProjectList, "nodeId", "node", "projects");
@@ -350,7 +350,7 @@ export default {
 
         if (targetKeysTemp.length <= 0 && !this.temp.webhook) {
           this.$notification.warn({
-            message: "请选择一位报警联系人或者填写webhook",
+            message: $t('monitor.list.webhookWarn'),
           });
           return false;
         }
@@ -378,10 +378,10 @@ export default {
     // 删除
     handleDelete(record) {
       this.$confirm({
-        title: "系统提示",
-        content: "真的要删除监控么？",
-        okText: "确认",
-        cancelText: "取消",
+        title: this.$t('common.systemPrompt'),
+        content: this.$t('monitor.list.deleteMonitor'),
+        okText: this.$t('common.confirm'),
+        cancelText: this.$t('common.cancel'),
         onOk: () => {
           // 删除
           deleteMonitor(record.id).then((res) => {

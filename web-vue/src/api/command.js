@@ -1,4 +1,5 @@
 import axios, { loadRouterBase } from "./config";
+import i18n from "@/locales";
 
 // 命令列表
 export function getCommandList(params) {
@@ -109,14 +110,14 @@ export function getTriggerUrl(data) {
 }
 
 export const statusMap = {
-  0: "执行中",
-  1: "执行结束",
-  2: "执行错误",
-  3: "会话异常",
+  0: i18n.t("api.command.status.executing"),
+  1: i18n.t("api.command.status.executeCompleted"),
+  2: i18n.t("api.command.status.executeError"),
+  3: i18n.t("api.command.status.sessionException"),
 };
 
 export const triggerExecTypeMap = {
-  0: "手动",
-  1: "自动",
-  2: "触发器",
+  0: i18n.t("api.command.triggerExecType.manual"),
+  1: i18n.t("api.command.triggerExecType.auto"),
+  2: i18n.t("api.command.triggerExecType.trigger"),
 };

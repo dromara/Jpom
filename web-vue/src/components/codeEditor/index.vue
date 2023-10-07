@@ -306,7 +306,6 @@ export default {
       }
     } catch (e) {
       console.log("初始化codemirror出错：" + e);
-      // this.$message.error("初始化codemirror出错：" + e);
     }
   },
   created() {},

@@ -1,17 +1,18 @@
 <template>
   <div class="node-full-content">
     <!-- 数据表格 -->
-    <a-table size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
+    <a-table size="middle" :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered
+             rowKey="id">
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-input v-model="listQuery['%name%']" :placeholder=$t('common.name') allowClear class="search-input-item"/>
+          <a-tooltip :title=$t('common.goBackP1')>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('common.search') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">新增</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('common.add') }}</a-button>
 
-          <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息并重新同步">
-            <a-icon @click="sync()" type="sync" spin />
+          <a-tooltip placement="topLeft" :title=$t('node.node_layout.other.script_list.clearCache')>
+            <a-icon @click="sync()" type="sync" spin/>
           </a-tooltip>
         </a-space>
       </template>
@@ -19,31 +20,39 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="global" slot-scope="text">
-        <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
-        <a-tag v-else>工作空间</a-tag>
+        <a-tag v-if="text === 'GLOBAL'">{{ $t('common.global') }}</a-tag>
+        <a-tag v-else>{{ $t('common.workSpace') }}</a-tag>
       </template>
 
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
-          <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button>
-          <a-tooltip :title="`${record.scriptType === 'server-sync' ? '服务端分发同步的脚本不能直接删除,需要到服务端去操作' : '删除'}`">
-            <a-button size="small" :disabled="record.scriptType === 'server-sync'" type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button size="small" type="primary" @click="handleExec(record)">{{ $t('common.execute') }}</a-button>
+          <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`"
+                    @click="handleEdit(record)">
+            {{ record.scriptType === "server-sync" ? $t('common.look') : $t('common.edit') }}
+          </a-button>
+          <a-tooltip
+              :title="`${record.scriptType === 'server-sync' ? $t('node.node_layout.other.script_list.serverSync') : $t('common.delete')}`">
+            <a-button size="small" :disabled="record.scriptType === 'server-sync'" type="danger"
+                      @click="handleDelete(record)">{{ $t('common.delete') }}
+            </a-button>
           </a-tooltip>
         </a-space>
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="80vw">
-      <a-form-model ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 18 }">
-        <a-alert v-if="this.temp.scriptType === 'server-sync'" message="服务端同步的脚本不能在此修改" banner />
+    <a-modal destroyOnClose v-model="editScriptVisible" :title=$t('node.node_layout.other.script_list.editScript') @ok="handleEditScriptOk"
+             :maskClosable="false" width="80vw">
+      <a-form-model ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }"
+                    :wrapper-col="{ span: 18 }">
+        <a-alert v-if="this.temp.scriptType === 'server-sync'" :message=$t('node.node_layout.other.script_list.serverSyncMessage') banner/>
         <a-form-model-item v-if="temp.id" label="ScriptId" prop="id">
-          <a-input v-model="temp.id" disabled readOnly />
+          <a-input v-model="temp.id" disabled readOnly/>
         </a-form-model-item>
-        <a-form-model-item label="Script 名称" prop="name">
-          <a-input :maxLength="50" v-model="temp.name" placeholder="名称" />
+        <a-form-model-item :label=$t('node.node_layout.other.script_list.scriptName') prop="name">
+          <a-input :maxLength="50" v-model="temp.name" :placeholder="名称"/>
         </a-form-model-item>
-        <a-form-model-item label="Script 内容" prop="context">
+        <a-form-model-item :label=$t('node.node_layout.other.script_list.scriptContent') prop="context">
           <div style="height: 40vh; overflow-y: scroll">
             <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
           </div>
@@ -51,60 +60,70 @@
         <!-- <a-form-model-item label="默认参数" prop="defArgs">
           <a-input v-model="temp.defArgs" placeholder="默认参数" />
         </a-form-model-item> -->
-        <a-form-model-item label="默认参数">
+        <a-form-model-item :label=$t('common.defaultParam')>
           <div v-for="(item, index) in commandParams" :key="item.key">
             <a-row type="flex" justify="center" align="middle">
               <a-col :span="22">
-                <a-input :addon-before="`参数${index + 1}描述`" v-model="item.desc" placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义" />
-                <a-input :addon-before="`参数${index + 1}值`" v-model="item.value" placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值" />
+                <a-input :addon-before="`参数${index + 1}描述`" v-model="item.desc"
+                         placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义"/>
+                <a-input :addon-before="`参数${index + 1}值`" v-model="item.value"
+                         placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值"/>
               </a-col>
               <a-col :span="2">
                 <a-row type="flex" justify="center" align="middle">
                   <a-col>
-                    <a-icon @click="() => commandParams.splice(index, 1)" type="minus-circle" style="color: #ff0000" />
+                    <a-icon @click="() => commandParams.splice(index, 1)" type="minus-circle" style="color: #ff0000"/>
                   </a-col>
                 </a-row>
               </a-col>
             </a-row>
-            <a-divider style="margin: 5px 0" />
+            <a-divider style="margin: 5px 0"/>
           </div>
 
-          <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
+          <a-button type="primary" @click="() => commandParams.push({})">{{ $t('common.addParams') }}</a-button>
         </a-form-model-item>
-        <a-form-model-item label="共享" prop="global">
+        <a-form-model-item :label=$t('common.share') prop="global">
           <a-radio-group v-model="temp.global">
-            <a-radio :value="true"> 全局</a-radio>
-            <a-radio :value="false"> 当前工作空间</a-radio>
+            <a-radio :value="true"> {{ $t('common.global') }}</a-radio>
+            <a-radio :value="false"> {{ $t('common.currentWorkSpace') }}</a-radio>
           </a-radio-group>
         </a-form-model-item>
-        <a-form-model-item label="定时执行" prop="autoExecCron">
-          <a-auto-complete v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
+        <a-form-model-item :label=$t('common.timedExec') prop="autoExecCron">
+          <a-auto-complete v-model="temp.autoExecCron"
+                           :placeholder=$t('node.node_layout.other.script_list.inputCron')
+                           option-label-prop="value">
             <template slot="dataSource">
               <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
                 <span slot="label">
                   {{ group.title }}
                 </span>
-                <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value"> {{ opt.title }} {{ opt.value }} </a-select-option>
+                <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value"> {{ opt.title }}
+                  {{ opt.value }}
+                </a-select-option>
               </a-select-opt-group>
             </template>
           </a-auto-complete>
         </a-form-model-item>
-        <a-form-model-item label="描述" prop="description">
-          <a-input :maxLength="200" v-model="temp.description" type="textarea" :rows="3" style="resize: none" placeholder="详细描述" />
+        <a-form-model-item :label=$t('common.description') prop="description">
+          <a-input :maxLength="200" v-model="temp.description" type="textarea" :rows="3" style="resize: none"
+                   :placeholder="详细描述"/>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
     <!-- 脚本控制台组件 -->
-    <a-drawer destroyOnClose :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <script-console v-if="drawerConsoleVisible" :nodeId="node.id" :defArgs="temp.defArgs" :id="temp.id" :scriptId="temp.scriptId" />
+    <a-drawer destroyOnClose :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible"
+              @close="onConsoleClose">
+      <script-console v-if="drawerConsoleVisible" :nodeId="node.id" :defArgs="temp.defArgs" :id="temp.id"
+                      :scriptId="temp.scriptId"/>
     </a-drawer>
   </div>
 </template>
 <script>
-import { getScriptList, editScript, deleteScript, itemScript, syncScript } from "@/api/node-other";
+import {getScriptList, editScript, deleteScript, itemScript, syncScript} from "@/api/node-other";
 import codeEditor from "@/components/codeEditor";
 import ScriptConsole from "./script-console";
-import { CRON_DATA_SOURCE, COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
+import {CRON_DATA_SOURCE, COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY, parseTime} from "@/utils/const";
+
 export default {
   components: {
     ScriptConsole,
@@ -127,12 +146,18 @@ export default {
       drawerConsoleVisible: false,
 
       columns: [
-        { title: "Script ID", dataIndex: "scriptId", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "tooltip" } },
-        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, width: "120px", scopedSlots: { customRender: "autoExecCron" } },
-        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
+        {title: "Script ID", dataIndex: "scriptId", width: 150, ellipsis: true, scopedSlots: {customRender: "tooltip"}},
+        {title: this.$t('common.name'), dataIndex: "name", ellipsis: true, width: 200, scopedSlots: {customRender: "tooltip"}},
         {
-          title: "创建时间",
+          title: this.$t('common.timedExec'),
+          dataIndex: "autoExecCron",
+          ellipsis: true,
+          width: "120px",
+          scopedSlots: {customRender: "autoExecCron"}
+        },
+        {title: this.$t('common.share'), dataIndex: "workspaceId", ellipsis: true, scopedSlots: {customRender: "global"}, width: "90px"},
+        {
+          title: this.$t('common.createTime'),
           dataIndex: "createTimeMillis",
           ellipsis: true,
           sorter: true,
@@ -140,21 +165,40 @@ export default {
           width: "170px",
         },
         {
-          title: "修改时间",
+          title: this.$t('common.modifyTime'),
           dataIndex: "modifyTimeMillis",
           width: "170px",
           ellipsis: true,
           sorter: true,
           customRender: (text) => parseTime(text),
         },
-        { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
-        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: "120px" },
+        {
+          title: this.$t('common.creator'),
+          dataIndex: "createUser",
+          ellipsis: true,
+          scopedSlots: {customRender: "tooltip"},
+          width: "120px"
+        },
+        {
+          title: this.$t('common.modifyUser'),
+          dataIndex: "modifyUser",
+          ellipsis: true,
+          scopedSlots: {customRender: "modifyUser"},
+          width: "120px"
+        },
         // { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, width: 150, scopedSlots: { customRender: "lastRunUser" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "180px" },
+        {
+          title: this.$t('common.operation'),
+          dataIndex: "operation",
+          align: "center",
+          scopedSlots: {customRender: "operation"},
+          fixed: "right",
+          width: "180px"
+        },
       ],
       rules: {
-        name: [{ required: true, message: "请输入脚本名称", trigger: "blur" }],
-        context: [{ required: true, message: "请输入脚本内容", trigger: "blur" }],
+        name: [{required: true, message: this.$t('node.node_layout.other.script_list.inputScriptName'), trigger: "blur"}],
+        context: [{required: true, message: this.$t('node.node_layout.other.script_list.inputScriptContent'), trigger: "blur"}],
       },
       commandParams: [],
     };
@@ -173,7 +217,7 @@ export default {
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.loading = true;
-      getScriptList({ ...this.listQuery, nodeId: this.node.id }).then((res) => {
+      getScriptList({...this.listQuery, nodeId: this.node.id}).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
           this.listQuery.total = res.data.total;
@@ -196,7 +240,7 @@ export default {
         id: record.scriptId,
         nodeId: this.node.id,
       }).then((res) => {
-        this.temp = Object.assign({}, res.data, { global: res.data.workspaceId === "GLOBAL", workspaceId: "" });
+        this.temp = Object.assign({}, res.data, {global: res.data.workspaceId === "GLOBAL", workspaceId: ""});
         this.commandParams = this.temp.defArgs ? JSON.parse(this.temp.defArgs) : [];
         //
         this.editScriptVisible = true;
@@ -206,7 +250,7 @@ export default {
     handleEditScriptOk() {
       if (this.temp.scriptType === "server-sync") {
         this.$notification.warning({
-          message: "服务端同步的脚本不能在此修改",
+          message: this.$t('node.node_layout.other.script_list.syncCantMod'),
         });
         return;
       }
@@ -214,7 +258,7 @@ export default {
         for (let i = 0; i < this.commandParams.length; i++) {
           if (!this.commandParams[i].desc) {
             this.$notification.error({
-              message: "请填写第" + (i + 1) + "个参数的描述",
+              message: this.$t('node.node_layout.other.script_list.inputParamDesc1') + (i + 1) + this.$t('node.node_layout.other.script_list.inputParamDesc2'),
             });
             return false;
           }
@@ -246,10 +290,10 @@ export default {
     },
     handleDelete(record) {
       this.$confirm({
-        title: "系统提示",
-        content: "真的要删除脚本么？",
-        okText: "确认",
-        cancelText: "取消",
+        title: this.$t('common.systemPrompt'),
+        content: this.$t('node.node_layout.other.script_list.ifDeleteScript'),
+        okText: this.$t('common.confirm'),
+        cancelText: this.$t('common.cancel'),
         onOk: () => {
           // 组装参数
           const params = {
@@ -281,7 +325,7 @@ export default {
 
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
+      this.listQuery = CHANGE_PAGE(this.listQuery, {pagination, sorter});
       this.loadData();
     },
     sync() {

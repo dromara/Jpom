@@ -22,47 +22,47 @@
     >
       <template slot="title">
         <a-space>
-          <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="search-input-item" @change="loadData">
+          <a-select v-model="listQuery.group" allowClear :placeholder=this.$t('common.chooseGroup') class="search-input-item" @change="loadData">
             <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
           </a-select>
-          <a-input class="search-input-item" v-model="listQuery['%projectId%']" placeholder="项目ID" />
-          <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="项目名称" />
-          <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="search-input-item">
+          <a-input class="search-input-item" v-model="listQuery['%projectId%']" :placeholder=this.$t('common.projectId') />
+          <a-input class="search-input-item" v-model="listQuery['%name%']" :placeholder=this.$t('common.projectName') />
+          <a-select v-model="listQuery.runMode" allowClear :placeholder=this.$t('common.proType') class="search-input-item">
             <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
           </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-tooltip :title=$t('common.goBackP1')>
+            <a-button type="primary" :loading="loading" @click="loadData">{{$t('common.search')}}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">新增</a-button>
+          <a-button type="primary" @click="handleAdd">{{$t('common.add')}}</a-button>
 
           <a-dropdown>
-            <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
+            <a-button type="primary"> {{ $t('common.batchOper') }} <a-icon type="down" /> </a-button>
             <a-menu slot="overlay">
               <a-menu-item>
-                <a-button type="primary" @click="batchStart">批量启动</a-button>
+                <a-button type="primary" @click="batchStart">{{$t('common.batchStart')}}</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="primary" @click="batchRestart">批量重启</a-button>
+                <a-button type="primary" @click="batchRestart">{{ $t('common.batchRestart') }}</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="danger" @click="batchStop">批量关闭</a-button>
+                <a-button type="danger" @click="batchStop">{{$t('common.batchClose')}}</a-button>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
 
-          <a-button icon="download" type="primary" @click="handlerExportData()">导出</a-button>
+          <a-button icon="download" type="primary" @click="handlerExportData()">{{$t('common.export')}}</a-button>
           <a-dropdown>
             <a-menu slot="overlay">
-              <a-menu-item key="1"> <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button> </a-menu-item>
+              <a-menu-item key="1"> <a-button type="primary" @click="handlerImportTemplate()">{{ $t('common.download')+$t('common.import')+$t('common.template') }}</a-button> </a-menu-item>
             </a-menu>
 
             <a-upload name="file" accept=".csv" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
-              <a-button type="primary" icon="upload"> 导入 <a-icon type="down" /> </a-button>
+              <a-button type="primary" icon="upload"> {{ $t('common.import') }} <a-icon type="down" /> </a-button>
             </a-upload>
           </a-dropdown>
           <a-tooltip>
             <template slot="title">
-              <div>状态数据是异步获取有一定时间延迟</div>
+              <div>{{ $t('node.node_layout.project.list.timeDelay') }}</div>
             </template>
             <a-icon type="question-circle" theme="filled" />
           </a-tooltip>
@@ -74,7 +74,7 @@
           <div v-else class="ant-table-row-expand-icon ant-table-row-expanded" @click="handleExpand(record, false)"></div>
         </template>
         <template v-else>
-          <a-tooltip title="当项目存在副本集时此列将可以用于查看副本集功能，其他情况此列没有实际作用">
+          <a-tooltip :title=$t('node.node_layout.project.list.noActualEffect')>
             <a-icon type="minus-circle" />
           </a-tooltip>
         </template>
@@ -96,8 +96,8 @@
           </a-tooltip>
         </template>
         <template v-else>
-          <a-tooltip v-if="noFileModes.includes(record.runMode)" title="状态操作请到控制台中控制">
-            <a-switch :checked="text" disabled checked-children="开" un-checked-children="关" />
+          <a-tooltip v-if="noFileModes.includes(record.runMode)" :title=$t('node.node_layout.project.list.operationAtConsole')>
+            <a-switch :checked="text" disabled :checked-children=$t('common.on') :un-checked-children=$t('common.off') />
           </a-tooltip>
           <span v-else>-</span>
         </template>
@@ -116,12 +116,12 @@
           <template slot="name" slot-scope="text, record">
             {{ text || record.id }}
           </template>
-          <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关" />
+          <a-switch slot="status" slot-scope="text" :checked="text" disabled :checked-children=$t('common.on') :un-checked-children=$t('common.off') />
           <template slot="operation" slot-scope="text, copyRecord">
             <a-space>
-              <a-button size="small" type="primary" @click="handleConsoleCopy(record, copyRecord)">控制台</a-button>
-              <a-button size="small" type="primary" @click="handleLogBack(record, copyRecord)">日志</a-button>
-              <a-button size="small" type="danger" @click="handleDeleteCopy(record, copyRecord, 'thorough')">删除</a-button>
+              <a-button size="small" type="primary" @click="handleConsoleCopy(record, copyRecord)">{{$t('common.console')}}</a-button>
+              <a-button size="small" type="primary" @click="handleLogBack(record, copyRecord)">{{$t('common.log')}}</a-button>
+              <a-button size="small" type="danger" @click="handleDeleteCopy(record, copyRecord, 'thorough')">{{$t('common.delete')}}</a-button>
             </a-space>
           </template>
         </a-table>
@@ -129,7 +129,7 @@
 
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
+          <a-button size="small" type="primary" @click="handleFile(record)">{{$t('common.file')}}</a-button>
           <a-tooltip :title="`${noFileModes.includes(record.runMode) ? '到控制台去管理项目状态' : 'File 类型项目不能使用控制台功能'}`">
             <a-button size="small" type="primary" @click="handleConsole(record)" :disabled="!noFileModes.includes(record.runMode)">控制台</a-button>
           </a-tooltip>
@@ -140,13 +140,13 @@
             </a>
             <a-menu slot="overlay">
               <a-menu-item>
-                <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+                <a-button size="small" type="primary" @click="handleEdit(record)">{{$t('common.edit')}}</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
+                <a-button size="small" type="primary" @click="copyItem(record)">{{$t('common.copy')}}</a-button>
               </a-menu-item>
               <a-menu-item v-if="noFileModes.includes(record.runMode)">
-                <a-button size="small" type="primary" @click="handleLogBack(record)">项目日志 </a-button>
+                <a-button size="small" type="primary" @click="handleLogBack(record)">{{$t('common.proLog')}}</a-button>
               </a-menu-item>
               <template v-if="record.outGivingProject">
                 <a-menu-item>

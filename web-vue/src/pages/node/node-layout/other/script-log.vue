@@ -4,8 +4,8 @@
     <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
-          <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
+          <a-input v-model="listQuery['%name%']" :placeholder=$t('common.name') allowClear class="search-input-item" />
+          <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear :placeholder=$t('common.triggerExecType') class="search-input-item">
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-range-picker
@@ -14,19 +14,19 @@
             inputReadOnly
             class="search-input-item"
             :show-time="{ format: 'HH:mm:ss' }"
-            :placeholder="['执行时间开始', '执行时间结束']"
+            :placeholder="[$t('node.node_layout.other.script_log.execStart'), $t('node.node_layout.other.script_log.execEnd')]"
             format="YYYY-MM-DD HH:mm:ss"
             valueFormat="YYYY-MM-DD HH:mm:ss"
           />
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-tooltip :title=$t('common.goBackP1')>
+            <a-button type="primary" :loading="loading" @click="loadData">{{$t('common.search')}}</a-button>
           </a-tooltip>
           <a-tooltip>
             <template slot="title">
-              <div>脚本模版是存储在节点(插件端),执行也都将在节点里面执行,服务端会定时去拉取执行日志,拉取频率为 100 条/分钟</div>
+              <div>{{$t('node.node_layout.other.script_log.scriptContent')}}</div>
               <div>
                 <ul>
-                  <li>数据可能出现一定时间延迟</li>
+                  <li>{{$t('node.node_layout.other.script_log.timeDelay')}}</li>
                 </ul>
               </div>
             </template>
@@ -41,25 +41,25 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="triggerExecTypeMap" slot-scope="text">
-        <span>{{ triggerExecTypeMap[text] || "未知" }}</span>
+        <span>{{ triggerExecTypeMap[text] || $t('common.unknown') }}</span>
       </template>
       <template slot="global" slot-scope="text">
-        <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
-        <a-tag v-else>工作空间</a-tag>
+        <a-tag v-if="text === 'GLOBAL'">{{$t('common.global')}}</a-tag>
+        <a-tag v-else>{{$t('common.workSpace')}}</a-tag>
       </template>
       <a-tooltip slot="createTimeMillis" slot-scope="text, record" :title="`${parseTime(record.createTimeMillis)}`">
         <span>{{ parseTime(record.createTimeMillis) }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button size="small" type="primary" @click="viewLog(record)">查看日志</a-button>
+          <a-button size="small" type="primary" @click="viewLog(record)">{{$t('common.look')+$t('common.log')}}</a-button>
 
-          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button size="small" type="danger" @click="handleDelete(record)">{{$t('common.delete')}}</a-button>
         </a-space>
       </template>
     </a-table>
     <!-- 日志 -->
-    <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" :title=$t('common.execute')+$t('common.log') :footer="null" :maskClosable="false">
       <script-log-view v-if="logVisible" :temp="temp" />
     </a-modal>
   </div>
@@ -97,12 +97,12 @@ export default {
       temp: {},
       logVisible: false,
       columns: [
-        { title: "名称", dataIndex: "scriptName", ellipsis: true, width: 100, scopedSlots: { customRender: "scriptName" } },
-        { title: "执行时间", dataIndex: "createTimeMillis", ellipsis: true, width: "160px", scopedSlots: { customRender: "createTimeMillis" } },
-        { title: "触发类型", dataIndex: "triggerExecType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerExecTypeMap" } },
-        { title: "执行域", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
-        { title: "执行人", dataIndex: "modifyUser", ellipsis: true, width: 100, scopedSlots: { customRender: "modifyUser" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "140px" },
+        { title: this.$t('common.name'), dataIndex: "scriptName", ellipsis: true, width: 100, scopedSlots: { customRender: "scriptName" } },
+        { title: this.$t('common.execute')+this.$t('common.time'), dataIndex: "createTimeMillis", ellipsis: true, width: "160px", scopedSlots: { customRender: "createTimeMillis" } },
+        { title: this.$t('common.triggerExecType'), dataIndex: "triggerExecType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerExecTypeMap" } },
+        { title: this.$t('common.executeArea'), dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
+        { title: this.$t('common.operator'), dataIndex: "modifyUser", ellipsis: true, width: 100, scopedSlots: { customRender: "modifyUser" } },
+        { title: this.$t('common.operation'), dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "140px" },
       ],
     };
   },
@@ -137,10 +137,10 @@ export default {
     },
     handleDelete(record) {
       this.$confirm({
-        title: "系统提示",
-        content: "真的要删除执行记录么？",
-        okText: "确认",
-        cancelText: "取消",
+        title: this.$t('common.systemPrompt'),
+        content: this.$t('node.node_layout.other.script_log.ifDeleteRec'),
+        okText: this.$t('common.confirm'),
+        cancelText: this.$t('common.cancel'),
         onOk: () => {
           // 组装参数
           const params = {

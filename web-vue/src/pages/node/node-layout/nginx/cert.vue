@@ -1,11 +1,11 @@
 <template>
   <div class="node-full-content">
-    <a-alert message="当前功能将择机下架，请提前使用服务端证书管理来统一实现证书分发" banner />
+    <a-alert :message=$t('node.node_layout.nginx.cert.alert') banner />
     <!-- 数据表格 -->
     <a-table :data-source="list" size="middle" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <a-button type="primary" @click="loadData">刷新</a-button>
+          <a-button type="primary" @click="loadData">{{ $t('common.refresh') }}</a-button>
         </a-space>
       </template>
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
@@ -19,15 +19,15 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button size="small" type="primary" @click="handleDownload(record)">导出</a-button>
-          <a-button size="small" type="primary" @click="handleTemplate(record)">模板</a-button>
-          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button size="small" type="primary" @click="handleDownload(record)">{{$t('common.import')}}</a-button>
+          <a-button size="small" type="primary" @click="handleTemplate(record)">{{$t('common.template')}}</a-button>
+          <a-button size="small" type="danger" @click="handleDelete(record)">{{$t('common.delete')}}</a-button>
         </a-space>
       </template>
     </a-table>
 
     <!-- 模板 -->
-    <a-modal destroyOnClose v-model="templateVisible" title="Cert 配置模板" :footer="null" :maskClosable="true">
+    <a-modal destroyOnClose v-model="templateVisible" :title=$t('node.node_layout.nginx.cert.configTemp') :footer="null" :maskClosable="true">
       <pre class="config">
       ssl	on;
       listen	443 ssl;
@@ -65,10 +65,10 @@ export default {
       templateVisible: false,
       columns: [
         { title: "ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "域名", dataIndex: "domain", ellipsis: true, scopedSlots: { customRender: "domain" } },
+        { title: this.$t('common.name'), dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: this.$t('common.domain'), dataIndex: "domain", ellipsis: true, scopedSlots: { customRender: "domain" } },
         {
-          title: "生效时间",
+          title: this.$t('common.effectiveTime'),
           dataIndex: "effectiveTime",
           customRender: (text) => {
             if (!text) {
@@ -79,7 +79,7 @@ export default {
           width: 180,
         },
         {
-          title: "到期时间",
+          title: this.$t('common.expirationTime'),
           dataIndex: "expirationTime",
           customRender: (text) => {
             if (!text) {
@@ -89,7 +89,7 @@ export default {
           },
           width: 180,
         },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 220 },
+        { title: this.$t('common.operation'), dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 220 },
       ],
       rules: {
         id: [{ required: true, message: "Please input ID", trigger: "blur" }],
@@ -120,10 +120,10 @@ export default {
     // 删除
     handleDelete(record) {
       this.$confirm({
-        title: "系统提示",
-        content: "真的要删除该记录么？",
-        okText: "确认",
-        cancelText: "取消",
+        title: this.$t('common.systemPrompt'),
+        content: this.$t('node.node_layout.nginx.cert.deleteContent'),
+        okText: this.$t('common.confirm'),
+        cancelText: this.$t('common.cancel'),
         onOk: () => {
           // 组装参数
           const params = {
@@ -144,7 +144,7 @@ export default {
     // 下载证书文件
     handleDownload(record) {
       this.$notification.info({
-        message: "正在下载，请稍等...",
+        message: this.$t('node.node_layout.nginx.cert.downloadContent'),
       });
       // 请求参数
       const params = {

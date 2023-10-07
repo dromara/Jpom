@@ -42,7 +42,6 @@ import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.dromara.jpom.util.StringUtil;
-import org.dromara.jpom.util.WorkspaceThreadLocal;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -81,9 +80,6 @@ public class DockerCliHandler extends BaseTerminalHandler {
             DockerInfoModel model = new DockerInfoModel();
             model.setMachineDockerId(dockerInfoModel.getId());
             model = dockerInfoService.queryByBean(model);
-            if (model != null) {
-                WorkspaceThreadLocal.setWorkspaceId(model.getWorkspaceId());
-            }
             Map<String, Object> parameter = machineDockerServer.toParameter(dockerInfoModel);
             handlerItem = new HandlerItem(session, dockerInfoModel, parameter, containerId);
             handlerItem.startRead();

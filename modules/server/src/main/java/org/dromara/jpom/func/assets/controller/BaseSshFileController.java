@@ -37,10 +37,7 @@ import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpATTRS;
-import com.jcraft.jsch.SftpException;
+import com.jcraft.jsch.*;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
@@ -51,13 +48,12 @@ import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
+import org.dromara.jpom.plugins.JschUtils;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.CompressionFileUtil;
-import org.dromara.jpom.plugins.JschUtils;
 import org.dromara.jpom.util.StringUtil;
-import org.dromara.jpom.util.WorkspaceThreadLocal;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -135,7 +131,6 @@ public abstract class BaseSshFileController extends BaseServerController {
                          @ValidatorItem String nextPath,
                          @ValidatorItem String name,
                          HttpServletResponse response) throws IOException {
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         MachineSshModel machineSshModel = this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel1, itemConfig) -> machineSshModel1);
         if (machineSshModel == null) {
             ServletUtil.write(response, "ssh error 或者 没有配置此文件夹", MediaType.TEXT_HTML_VALUE);
@@ -161,7 +156,6 @@ public abstract class BaseSshFileController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<JSONArray> rootFileList(@ValidatorItem String id) {
         //
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPath(id, (machineSshModel, itemConfig) -> {
             JSONArray listDir = listRootDir(machineSshModel, itemConfig.fileDirs());
             return JsonMessage.success("ok", listDir);
@@ -174,7 +168,6 @@ public abstract class BaseSshFileController extends BaseServerController {
     public JsonMessage<JSONArray> listData(@ValidatorItem String id,
                                            @ValidatorItem String allowPathParent,
                                            @ValidatorItem String nextPath) {
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             try {
                 JSONArray listDir = listDir(machineSshModel, allowPathParent, nextPath, itemConfig);
@@ -191,7 +184,6 @@ public abstract class BaseSshFileController extends BaseServerController {
                                             @ValidatorItem String allowPathParent,
                                             @ValidatorItem String nextPath,
                                             @ValidatorItem String name) {
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             //
@@ -210,7 +202,6 @@ public abstract class BaseSshFileController extends BaseServerController {
                                               @ValidatorItem String nextPath,
                                               @ValidatorItem String name,
                                               @ValidatorItem String content) {
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             List<String> allowEditSuffix = itemConfig.allowEditSuffix();
@@ -421,7 +412,6 @@ public abstract class BaseSshFileController extends BaseServerController {
         // name 可能为空，为空情况是删除目录
         String name2 = StrUtil.emptyToDefault(name, StrUtil.EMPTY);
         Assert.state(!StrUtil.equals(name2, StrUtil.SLASH), "不能删除根目录");
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             Session session = null;
@@ -457,7 +447,6 @@ public abstract class BaseSshFileController extends BaseServerController {
                                       @ValidatorItem String name,
                                       @ValidatorItem String newname) {
 
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             Session session = null;
@@ -507,7 +496,6 @@ public abstract class BaseSshFileController extends BaseServerController {
                                       @ValidatorItem String nextPath,
                                       String unzip,
                                       MultipartFile file) {
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath);
@@ -577,7 +565,6 @@ public abstract class BaseSshFileController extends BaseServerController {
                                              @ValidatorItem String nextPath,
                                              @ValidatorItem String name, String unFolder) {
         Assert.state(!StrUtil.contains(name, StrUtil.SLASH), "文件名不能包含/");
-        WorkspaceThreadLocal.setWorkspaceId(getWorkspaceId());
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             Session session = null;
@@ -618,5 +605,42 @@ public abstract class BaseSshFileController extends BaseServerController {
                 JschUtil.close(session);
             }
         });
+    }
+
+    /**
+     * 修改文件权限
+     *
+     * @param id
+     * @param allowPathParent
+     * @param nextPath
+     * @param fileName
+     * @param permissionValue
+     * @return
+     */
+    @RequestMapping(value = "change_file_permission.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<JSONArray> changeFilePermissions(@ValidatorItem String id,
+                                                        @ValidatorItem String allowPathParent,
+                                                        @ValidatorItem String nextPath,
+                                                        @ValidatorItem String fileName,
+                                                        @ValidatorItem String permissionValue) {
+        MachineSshModel machineSshModel = this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel1, itemConfig) -> machineSshModel1);
+        if (machineSshModel == null) {
+            return new JsonMessage<>(400, "ssh error 或者 没有配置此文件夹");
+        }
+        Session session = sshService.getSessionByModel(machineSshModel);
+        Charset charset = machineSshModel.charset();
+        int timeout = machineSshModel.timeout();
+        String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + fileName);
+        try (Sftp sftp = new Sftp(session, charset, timeout)) {
+            ChannelSftp client = sftp.getClient();
+            //
+            int permissions = Integer.parseInt(permissionValue, 8);
+            client.chmod(permissions, remotePath);
+        } catch (SftpException e) {
+            log.error("ssh修改文件权限异常...: {} {}", remotePath, permissionValue, e);
+            return new JsonMessage<>(400, "操作失败 " + e.getMessage());
+        }
+        return JsonMessage.success("操作成功 ");
     }
 }

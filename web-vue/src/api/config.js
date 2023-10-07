@@ -5,6 +5,7 @@ import store from "../store";
 import router from "../router";
 import { NO_NOTIFY_KEY, NO_LOADING_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID, LOADING_TIP, LOCALE_Header } from "@/utils/const";
 import { refreshToken } from "./user/user";
+import i18n from "@/locales";
 
 import { notification } from "ant-design-vue";
 
@@ -32,7 +33,7 @@ request.interceptors.request.use(
     if (!config.headers[NO_LOADING_KEY]) {
       Vue.prototype.$setLoading({
         spinning: true,
-        tip: config.headers[LOADING_TIP] || "加载数据中，请稍候...",
+        tip: config.headers[LOADING_TIP] || i18n.t('api.config.requestInterceptor.loading'),
       });
       startTime = new Date().getTime();
     }
@@ -79,7 +80,7 @@ request.interceptors.response.use(
       Vue.prototype.$setLoading(false);
       notification.error({
         message: "Network Error No response",
-        description: "网络开了小差！请重试...:" + error,
+        description: i18n.t('api.config.responseInterceptor.networkError') + error,
       });
       return Promise.reject(error);
     }
@@ -93,7 +94,7 @@ request.interceptors.response.use(
       if (!status) {
         notification.error({
           message: "Network Error",
-          description: "网络开了小差！请重试...:" + error,
+          description: i18n.t('api.config.responseInterceptor.networkError') + error,
         });
       } else {
         notification.error({
@@ -136,8 +137,8 @@ function wrapResult(response) {
   // 禁止访问
   if (res.code === 999) {
     notification.error({
-      message: "禁止访问",
-      description: "禁止访问,当前IP限制访问",
+      message: i18n.t('api.config.wrapResult.forbidden'),
+      description: i18n.t('api.config.wrapResult.forbiddenDesc'),
     });
     router.push("/system/ipAccess");
     return false;
@@ -148,7 +149,7 @@ function wrapResult(response) {
     // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
     if (!response.config.headers[NO_NOTIFY_KEY]) {
       notification.error({
-        message: "提示信息 " + (pro ? "" : response.config.url),
+        message: i18n.t("api.config.prompt") + (pro ? "" : response.config.url),
         description: res.msg,
       });
       console.error(response.config.url, res);
@@ -160,7 +161,7 @@ function wrapResult(response) {
 
 function toLogin(res, response, timeout = 100) {
   notification.warn({
-    message: "提示信息 " + (pro ? "" : response.config.url),
+    message: i18n.t("api.config.prompt") + (pro ? "" : response.config.url),
     description: res.msg,
   });
   console.error(response.config.url, res);
@@ -192,8 +193,8 @@ function checkJWTToken(res, response) {
   if (res.code === 801) {
     notification.close();
     notification.info({
-      message: "登录信息过期，尝试自动续签...",
-      description: "如果不需要自动续签，请修改配置文件。该续签将不会影响页面。",
+      message: i18n.t('api.config.jwt.renew'),
+      description: i18n.t('api.config.jwt.renewDesc'),
     });
     // 续签且重试请求
     return redoRequest(response.config);

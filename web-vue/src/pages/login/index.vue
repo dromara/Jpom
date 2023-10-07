@@ -24,7 +24,7 @@
         <rect stroke="#CED4D9" x="108" y="1" width="9" height="9" rx="1"></rect>
       </g>
     </svg>
-    <div class="switch" @click="handleToggleBg">{{ dynamicBg ? "关闭动态背景" : "开启动态背景" }}</div>
+    <div class="switch" @click="handleToggleBg">{{ dynamicBg ? $t("account.login.dynamicBgOff") : $t("account.login.dynamicBgOn") }}</div>
     <locale-changer class="locale-changer" />
     <a-card class="login-card" hoverable>
       <a-card-meta :title="`${loginTitle}`" style="text-align: center" description="" />
@@ -32,15 +32,15 @@
       <template v-if="this.action === 'login'">
         <a-form-model ref="loginForm" :label-col="{ span: 0 }" :model="loginForm" :rules="rules" @submit="handleLogin">
           <a-form-model-item :wrapper-col="{ span: 24 }" prop="loginName">
-            <a-input v-model="loginForm.loginName" placeholder="用户名" />
+            <a-input v-model="loginForm.loginName" :placeholder="$t('account.common.username')" />
           </a-form-model-item>
           <a-form-model-item :wrapper-col="{ span: 24 }" prop="userPwd">
-            <a-input-password v-model="loginForm.userPwd" placeholder="密码" />
+            <a-input-password v-model="loginForm.userPwd" :placeholder="$t('account.common.password')" />
           </a-form-model-item>
           <a-form-model-item v-if="!this.disabledCaptcha" :wrapper-col="{ span: 24 }" prop="code">
             <a-row>
               <a-col :span="14">
-                <a-input v-model="loginForm.code" placeholder="验证码" />
+                <a-input v-model="loginForm.code" :placeholder="$t('account.common.captcha')" />
               </a-col>
               <a-col :offset="2" :span="8">
                 <div class="rand-code">
@@ -51,10 +51,10 @@
             </a-row>
           </a-form-model-item>
           <a-form-model-item :wrapper-col="{ span: 24 }">
-            <a-button type="primary" html-type="submit" class="btn-login"> 登录 </a-button>
+            <a-button type="primary" html-type="submit" class="btn-login"> {{ $t('common.login') }} </a-button>
           </a-form-model-item>
           <template v-if="this.enabledOauth2Provides.length">
-            <a-divider>第三方登录</a-divider>
+            <a-divider>{{ $t('account.login.thirdParty') }}</a-divider>
             <!-- <a-form-model-item :wrapper-col="{ span: 24 }"> </a-form-model-item> -->
             <a-form-model-item :wrapper-col="{ span: 24 }">
               <a-space :size="20">
@@ -74,11 +74,11 @@
       </template>
       <template v-if="this.action === 'mfa'">
         <a-form-model ref="mfaDataForm" :label-col="{ span: 0 }" :model="mfaData" :rules="rules" @submit="handleMfa">
-          <a-form-model-item label="验证码" :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }" prop="mfaCode" help="需要验证 MFA">
-            <a-input v-model="mfaData.mfaCode" placeholder="mfa 验证码" />
+          <a-form-model-item :label="$t('account.common.captcha')" :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }" prop="mfaCode" help="需要验证 MFA">
+            <a-input v-model="mfaData.mfaCode" :placeholder="$t('account.login.mfaCaptcha')" />
           </a-form-model-item>
 
-          <a-button type="primary" html-type="submit" class="btn-login"> 确认 </a-button>
+          <a-button type="primary" html-type="submit" class="btn-login"> {{ $t("common.confirm") }} </a-button>
         </a-form-model>
       </template>
     </a-card>
@@ -104,16 +104,7 @@ export default {
       action: "login",
       randCode: "",
       dynamicBg: localStorage.getItem("dynamicBg") === "true",
-      loginTitle: "登录JPOM",
-      rules: {
-        loginName: [{ required: true, message: "请输入用户名" }],
-        userPwd: [{ required: true, message: "请输入密码" }],
-        code: [{ required: true, message: "请输入验证码" }],
-        mfaCode: [
-          { required: true, message: "请输入两步验证码" },
-          { pattern: /^\d{6}$/, message: "验证码 6 为纯数字" },
-        ],
-      },
+      loginTitleOverride: null,
       disabledCaptcha: false,
       enabledOauth2Provides: [],
       maxkeyImg: require(`@/assets/images/maxkey.png`),
@@ -137,6 +128,20 @@ export default {
       }
       return {};
     },
+    rules: function () {
+      return {
+        loginName: [{ required: true, message: this.$t('account.login.name')}],
+        userPwd: [{ required: true, message: this.$t('account.login.pwd')}],
+        code: [{ required: true, message: this.$t('account.login.code')}],
+        mfaCode: [
+          { required: true, message: this.$t('account.login.mfaCodeEmpty') },
+          { pattern: /^\d{6}$/, message: this.$t('account.login.mfaCodeError') },
+        ],
+      };
+    },
+    loginTitle: function () {
+      return this.loginTitleOverride || this.$t('account.login.title');
+    },
   },
   methods: {
     // 检查是否需要初始化
@@ -153,7 +158,7 @@ export default {
           this.$router.push("/install");
         }
         if (res.data?.loginTitle) {
-          this.loginTitle = res.data.loginTitle;
+          this.loginTitleOverride = res.data.loginTitle;
         }
 
         this.checkOauth2();
@@ -174,7 +179,7 @@ export default {
           const demo = res.data.demo;
           const h = this.$createElement;
           this.$notification.info({
-            message: "温馨提示",
+            message: this.$t('common.kindReminder'),
             description: h("div", null, [h("p", { domProps: { innerHTML: demo.msg } }, null)]),
           });
           this.loginForm.loginName = demo.user;
@@ -218,7 +223,7 @@ export default {
     toOauth2Url(provide) {
       oauth2Url({ provide: provide }).then((res) => {
         if (res.code === 200 && res.data) {
-          this.$message.loading({ content: "跳转到第三方系统中", key: "oauth2", duration: 0 });
+          this.$message.loading({ content: this.$t('common.goToThirdParty'), key: "oauth2", duration: 0 });
           location.href = res.data.toUrl;
         }
       });

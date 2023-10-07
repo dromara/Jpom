@@ -1,5 +1,6 @@
 <template>
   <div class="init-wrapper">
+    <locale-changer class="locale-changer"/>
     <svg width="100%" height="100%" viewBox="0 0 1440 500" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
       <g>
         <circle stroke="#13C2C2" cx="500" cy="-20" r="6"></circle>
@@ -27,22 +28,22 @@
     <a-card v-if="canInstall" class="card-box" :style="`${setpCurrent === 1 ? 'width: 60vw' : 'width: 550px'}`" hoverable :bodyStyle="{ padding: '24px 0' }">
       <template slot="title">
         <a-steps :current="setpCurrent">
-          <a-step title="初始化系统" status="process" description="设置一个超级管理员账号">
-            <a-icon slot="icon" type="user" />
+          <a-step :title="$t('account.install.steps._1.title')" status="process" :description="$t('account.install.steps._1.desc')">
+            <a-icon slot="icon" type="user"/>
           </a-step>
-          <a-step title="启用两步验证" description="开启两步验证使账号更安全">
-            <a-icon slot="icon" type="file-protect" />
+          <a-step :title="$t('account.install.steps._2.title')" :description="$t('account.install.steps._2.desc')">
+            <a-icon slot="icon" type="file-protect"/>
           </a-step>
         </a-steps>
       </template>
 
       <a-row type="flex" justify="center">
         <a-col :span="16" v-if="setpCurrent === 0">
-          <a-card-meta title="初始化系统账户" style="textalign: center" description="您需要创建一个账户用以后续登录管理系统,请牢记超级管理员账号密码" />
-          <br />
+          <a-card-meta :title="$t('account.install.init')" style="textalign: center" :description="$t('account.install.initDesc')"/>
+          <br/>
           <a-form :form="loginForm" :label-col="{ span: 0 }" @submit="handleLogin" class="init-form">
             <a-form-item :wrapper-col="{ span: 24 }" class="init-user-name">
-              <a-input v-decorator="['userName', { rules: [{ required: true, message: '请输入账户名' }] }]" placeholder="账户名称" />
+              <a-input v-decorator="['userName', { rules: [{ required: true, message: $t('account.install.name') }] }]" :placeholder="$t('account.install.namePlaceholder')"/>
             </a-form-item>
             <a-form-item :wrapper-col="{ span: 24 }" class="init-user-password">
               <a-input-password
@@ -50,18 +51,18 @@
                   'userPwd',
                   {
                     rules: [
-                      { required: true, message: '请输入密码' },
-                      { pattern: /^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,18}$/, message: '密码必须包含数字，字母，字符，且大于6位' },
+                      { required: true, message: $t('account.install.pwd') },
+                      { pattern: /^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,18}$/, message: $t('account.install.pwdMessage') },
                     ],
                   },
                 ]"
-                placeholder="密码（6-18位数字、字母、符号组合）"
+                :placeholder="$t('account.install.pwdPlaceholder')"
               />
             </a-form-item>
             <a-form-item>
               <a-row type="flex" justify="center">
                 <a-col :span="4">
-                  <a-button type="primary" html-type="submit" class="btn"> 创建账号 </a-button>
+                  <a-button type="primary" html-type="submit" class="btn"> {{ $t("account.install.title") }}</a-button>
                 </a-col>
               </a-row>
             </a-form-item>
@@ -71,24 +72,24 @@
           <a-alert banner>
             <template slot="message">
               <ul style="color: red">
-                <li>为了考虑系统安全我们强烈建议超级管理员开启两步验证来确保账号的安全性</li>
-                <li>绑定成功后将不再显示,强烈建议保存此二维码或者下面的 MFA key</li>
-                <li>请使用应用扫码绑定令牌,然后输入验证码确认绑定才生效</li>
+                <li> {{ $t("account.install.alert._1") }}</li>
+                <li>{{ $t("account.install.alert._2") }}</li>
+                <li>{{ $t("account.install.alert._3") }}</li>
               </ul>
             </template>
           </a-alert>
-          <br />
+          <br/>
           <a-row>
             <a-col :span="12">
               <a-form-item>
-                <h3 id="两步验证应用">两步验证应用</h3>
-                <p v-for="(html, index) in MFA_APP_TIP_ARRAY" :key="index" v-html="html" />
+                <h3 :id="两步验证应用">{{ $t('account.authentication.twoFactorAuthenticationApp') }}</h3>
+                <p v-for="(html, index) in MFA_APP_TIP_ARRAY" :key="index" v-html="html"/>
               </a-form-item>
             </a-col>
-            <a-divider type="vertical" />
+            <a-divider type="vertical"/>
             <a-col :span="12">
               <a-form :form="bindMfaForm" :label-col="{ span: 0 }" @submit="handleMfaSure" class="init-form">
-                <a-form-item label="二维码" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }" style="margin-bottom: 5px">
+                <a-form-item :label="$t('common.qrCode')" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }" style="margin-bottom: 5px">
                   <a-row>
                     <a-col :span="14">
                       <div class="qrcode" ref="qrCodeUrl" id="qrCodeUrl"></div>
@@ -100,34 +101,34 @@
                     v-clipboard:copy="mfaData.key"
                     v-clipboard:success="
                       () => {
-                        tempVue.prototype.$notification.success({ message: '复制成功' });
+                        tempVue.prototype.$notification.success({ message: $t('common.copySuccess') });
                       }
                     "
                     v-clipboard:error="
                       () => {
-                        tempVue.prototype.$notification.error({ message: '复制失败' });
+                        tempVue.prototype.$notification.error({ message: $t('common.copyError') });
                       }
                     "
                     readOnly
                     disabled
                     v-model="mfaData.key"
                   >
-                    <a-icon slot="prefix" type="copy" />
+                    <a-icon slot="prefix" type="copy"/>
                   </a-input>
                 </a-form-item>
 
-                <a-form-item label="验证码" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
+                <a-form-item :label="$t('common.captcha')" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
                   <a-input
                     v-decorator="[
                       'twoCode',
                       {
                         rules: [
-                          { required: true, message: '请输入两步验证码' },
-                          { pattern: /^\d{6}$/, message: '验证码 6 为纯数字' },
+                          { required: true, message: $t('account.install.authentication.inputCaptcha') },
+                          { pattern: /^\d{6}$/, message: $t('account.install.authentication.informCaptcha') },
                         ],
                       },
                     ]"
-                    placeholder="两步验证码"
+                    :placeholder="$t('account.install.authentication.twoFactorCaptcha')"
                   />
                 </a-form-item>
 
@@ -135,8 +136,8 @@
                   <a-row type="flex" justify="center">
                     <a-col :span="10">
                       <a-space>
-                        <a-button type="primary" html-type="submit" class="btn"> 确认绑定 </a-button>
-                        <a-button type="dashed" @click="ignoreBindMfa"> 忽略 </a-button>
+                        <a-button type="primary" html-type="submit" class="btn"> {{ $t('common.confirmBind') }}</a-button>
+                        <a-button type="dashed" @click="ignoreBindMfa"> {{ $t('common.ignore') }}</a-button>
                       </a-space>
                     </a-col>
                   </a-row>
@@ -148,28 +149,32 @@
       </a-row>
     </a-card>
     <div v-else>
-      <a-result class="card-box" status="404" title="不能初始化" sub-title="当前系统已经初始化过啦,不能重复初始化">
+      <a-result class="card-box" status="404" :title="$t('account.install.cannotInit')" :sub-title="$t('account.install.subCannotInit')">
         <template #extra>
-          <a-button type="primary" @click="goHome"> 回到首页 </a-button>
+          <a-button type="primary" @click="goHome"> {{ $t('common.goHome') }}</a-button>
         </template>
       </a-result>
     </div>
   </div>
 </template>
 <script>
-import { initInstall } from "@/api/install";
-import { bindMfa } from "@/api/user/user";
-import { MFA_APP_TIP_ARRAY } from "@/utils/const";
+import {initInstall} from "@/api/install";
+import {bindMfa} from "@/api/user/user";
+import {MFA_APP_TIP_ARRAY} from "@/utils/const";
 import QRCode from "qrcodejs2";
 import sha1 from "js-sha1";
 import Vue from "vue";
-import { checkSystem } from "@/api/install";
+import {checkSystem} from "@/api/install";
+import LocaleChanger from "@/components/locale/locale-changer.vue";
 
 export default {
+  components: {
+    LocaleChanger,
+  },
   data() {
     return {
-      loginForm: this.$form.createForm(this, { name: "login-form" }),
-      bindMfaForm: this.$form.createForm(this, { name: "bind-mfa-form" }),
+      loginForm: this.$form.createForm(this, {name: "login-form"}),
+      bindMfaForm: this.$form.createForm(this, {name: "bind-mfa-form"}),
       setpCurrent: 0,
       mfaData: {},
       tempVue: Vue,
@@ -215,18 +220,18 @@ export default {
           hidePrev: true,
           steps: [
             {
-              title: "导航助手",
-              intro: "不要慌，出现这个页面表示您没有设置系统管理员信息，或者需要重置管理员信息",
+              title: this.$t("account.install.guide.title"),
+              intro: this.$t("account.install.guide.step1"),
             },
             {
-              title: "导航助手",
+              title: this.$t("account.install.guide.title"),
+              intro: this.$t("account.install.guide.step2"),
               element: document.querySelector(".login-card"),
-              intro: "此处需要填写的信息是用以管理系统的系统管理员的账户密码，一定要记住哦，它是登录的唯一凭证",
             },
             {
-              title: "导航助手",
+              title: this.$t("account.install.guide.title"),
+              intro: this.$t("account.install.guide.step3"),
               element: document.querySelector(".init-user-password"),
-              intro: "为了您的账户安全，设定的密码需要包含字母、数字、字符，且长度于6-18位之间",
             },
           ],
         },
@@ -266,12 +271,13 @@ export default {
               });
 
               // // 调用 store action 存储当前登录的用户名和 token
-              this.$store.dispatch("login", { token: tokenData.token, longTermToken: tokenData.longTermToken }).then(() => {
+              this.$store.dispatch("login", {token: tokenData.token, longTermToken: tokenData.longTermToken}).then(() => {
                 // 跳转主页面
                 //  this.$router.push({ path: "/" });
               });
               const firstWorkspace = tokenData.bindWorkspaceModels[0];
-              this.$store.dispatch("changeWorkspace", firstWorkspace.id).then(() => {});
+              this.$store.dispatch("changeWorkspace", firstWorkspace.id).then(() => {
+              });
             }
           });
         }
@@ -292,7 +298,7 @@ export default {
                 message: res.msg,
               });
               // 跳转主页面;
-              this.$router.push({ path: "/" });
+              this.$router.push({path: "/"});
             }
           });
         }
@@ -301,17 +307,17 @@ export default {
     // 忽略 mfa
     ignoreBindMfa() {
       this.$confirm({
-        title: "系统提示",
-        content: "确定要忽略绑定两步验证吗？强烈建议超级管理员开启两步验证来保证账号安全性",
-        okText: "确认",
-        cancelText: "取消",
+        title: this.$t("common.systemPrompt"),
+        content: this.$t("account.install.ignorePrompt"),
+        okText: this.$t("common.confirm"),
+        cancelText: this.$t("common.cancel"),
         onOk: () => {
-          this.$router.push({ path: "/" });
+          this.$router.push({path: "/"});
         },
       });
     },
     goHome() {
-      this.$router.replace({ path: "/" });
+      this.$router.replace({path: "/"});
     },
     // /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*? +]).*$/
     // 验证密码安全强度
@@ -368,6 +374,17 @@ export default {
 };
 </script>
 <style scoped>
+.locale-changer {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  z-index: 999;
+  background-color: white;
+  opacity: 0.9;
+  border-radius: 4px;
+  padding: 5px 10px;
+}
+
 .init-wrapper {
   width: 100vw;
   height: 100vh;
@@ -380,6 +397,7 @@ export default {
   font-size: 16px;
   /* color: #03e9f4; */
 }
+
 .card-box {
   position: absolute;
   left: 50%;
@@ -390,17 +408,21 @@ export default {
   border-radius: 6px;
   padding: 4px;
 }
+
 p {
   margin-bottom: 0;
   line-height: 30px;
 }
+
 .card-content {
   /* width: 300px; */
   /* text-align: center; */
 }
+
 .qrcode {
   margin-left: 15px;
 }
+
 /* .btn {
   width: 100%;
   margin-top: 20px;

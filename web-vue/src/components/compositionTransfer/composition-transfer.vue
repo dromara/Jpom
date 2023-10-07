@@ -15,7 +15,7 @@
           "
         />
         <a-empty v-else>
-          <template #description>暂无数据</template>
+          <template #description>{{ $t('common.noData') }}</template>
         </a-empty>
       </template>
       <template v-else-if="direction === 'right'">
@@ -32,7 +32,7 @@
           "
         />
         <a-empty v-else>
-          <template #description>暂无数据</template>
+          <template #description>{{ $t('common.noData')  }}</template>
         </a-empty>
       </template>
     </template>

@@ -1,13 +1,13 @@
 import Vue from "vue";
 import App from "./App.vue";
-import i18n from "./locales";
+import i18n from "@/locales";
 
 import "./components/lazy_antd";
 
 import "./assets/reset.less";
+
 const introJs = require("intro.js");
 import "intro.js/introjs.css";
-// import 'intro.js/themes/introjs-flattener.css';
 import "@/assets/intro-custom-themes.css";
 
 import router from "./router";
@@ -21,10 +21,9 @@ window.routerBase = window.routerBase === "<routerBase>" ? "" : window.routerBas
 // introJs 按钮中文
 const intro = introJs();
 intro.setOptions({
-  prevLabel: "上一步",
-  nextLabel: "下一步",
-  // skipLabel: "跳过",
-  doneLabel: "结束引导",
+  prevLabel: i18n.t("common.lastStep"),
+  nextLabel: i18n.t("common.nextStep"),
+  doneLabel: i18n.t("common.endGuide"),
 });
 
 Vue.config.productionTip = false;
@@ -55,7 +54,6 @@ Vue.prototype.$setLoading = function (props) {
   }
   props.spinning = props.spinning || closeAll;
   props.loadingCount = closeAll ? 0 : props.loadingCount;
-  //console.log(props);
   props.wrapperClassName = props.spinning ? "globalLoading" : "";
   this.$app.globalLoadingProps = { ...this.$app.globalLoadingProps, ...props };
 };

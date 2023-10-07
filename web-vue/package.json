@@ -6,7 +6,8 @@
     "serve": "vue-cli-service --max-old-space-size=900 serve  --mode dev",
     "build": "vue-cli-service build --mode production",
     "local": "vue-cli-service serve --mode local",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "prettier": "prettier --write 'src/**/*.{js,vue}'"
   },
   "dependencies": {
     "@babel/plugin-proposal-optional-chaining": "^7.14.5",
@@ -20,7 +21,7 @@
     "markdown-it-vue": "^1.1.6",
     "prismjs": "^1.29.0",
     "qrcodejs2": "^0.0.2",
-    "qs": "^6.9.4",
+    "qs": "^6.9.7",
     "spark-md5": "^3.0.2",
     "vue": "^2.6.14",
     "vue-clipboard2": "^0.3.3",
