@@ -26,7 +26,7 @@
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <a-tooltip slot="nodeName" slot-scope="text, record" placement="topLeft" :title="text">
+      <a-tooltip slot="nodeName" slot-scope="text, record" placement="topLeft" :title="nodeList.filter((item) => item.id === record.nodeId) && nodeList.filter((item) => item.id === record.nodeId)[0] && nodeList.filter((item) => item.id === record.nodeId)[0].name">
         <span>{{
           nodeList.filter((item) => item.id === record.nodeId) && nodeList.filter((item) => item.id === record.nodeId)[0] && nodeList.filter((item) => item.id === record.nodeId)[0].name
         }}</span>
