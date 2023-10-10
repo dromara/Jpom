@@ -119,7 +119,7 @@
           <a-tooltip slot="osName" slot-scope="text, item" placement="topLeft" :title="text">
             <span>{{ item.machineNodeData && item.machineNodeData.osName }}</span>
           </a-tooltip>
-          <a-tooltip slot="javaVersion" slot-scope="text, item" placement="topLeft" :title="text">
+          <a-tooltip slot="javaVersion" slot-scope="text, item" placement="topLeft" :title="item.machineNodeData && item.machineNodeData.javaVersion">
             <span>{{ item.machineNodeData && item.machineNodeData.javaVersion }}</span>
           </a-tooltip>
           <a-tooltip
