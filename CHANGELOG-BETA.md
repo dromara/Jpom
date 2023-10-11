@@ -7,6 +7,7 @@
 1. 【server】优化 构建产物同步到文件中心支持独立配置保留天数（感谢[@zhangxin2477](https://gitee.com/zhangxin1229) [Gitee issues I82G2F](https://gitee.com/dromara/Jpom/issues/I82G2F)）
 2. 【server】优化 不能删除超级管理员账号
 3. 【agent】修复 Agent.sh 脚本的缺少方法问题（感谢[@Siwen Yu](https://github.com/yusiwen) [Github issues 64](https://github.com/dromara/Jpom/issues/64)）
+4. 【server】优化 系统管理查看操作日志显示全部工作空间
 
 ------
 

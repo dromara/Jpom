@@ -292,8 +292,8 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
     public PageResultDto<UserOperateLogV1> listPage(HttpServletRequest request) {
         // 验证工作空间权限
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
-        String workspaceId = this.getCheckUserWorkspace(request);
-        paramMap.put("workspaceId:in", workspaceId + StrUtil.COMMA + StrUtil.EMPTY);
+        //String workspaceId = this.getCheckUserWorkspace(request);
+        //paramMap.put("workspaceId:in", workspaceId + StrUtil.COMMA + StrUtil.EMPTY);
         return super.listPage(paramMap);
     }
 
