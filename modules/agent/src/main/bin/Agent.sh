@@ -40,6 +40,22 @@ command_exists() {
 	command -v "$@" >/dev/null 2>&1
 }
 
+function errorExit() {
+	echo "$1" 2>&2
+	if [ "${mode}" == "-s" ]; then
+		logStdout "$1"
+	fi
+	exit 1
+}
+
+function logStdout() {
+	#		out stdout
+	if [ ! -f "$Log" ]; then
+		touch "$Log"
+	fi
+	echo "$1" >"$Log"
+}
+
 base=${bin_abs_path}/..
 
 conf_path="${base}/conf"

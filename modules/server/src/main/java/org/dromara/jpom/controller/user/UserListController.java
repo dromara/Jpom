@@ -211,6 +211,7 @@ public class UserListController extends BaseServerController {
             // 如果是系统管理员，判断个数
             Assert.state(userService.systemUserCount() > 1, "系统中的系统管理员账号数量必须存在一个以上");
         }
+        Assert.state(!userModel.isSuperSystemUser(), "不能删除超级管理员");
         // 非系统管理员不支持删除演示账号
         Assert.state(!userModel.isRealDemoUser(), "演示账号不支持删除");
         userService.delByKey(id);
