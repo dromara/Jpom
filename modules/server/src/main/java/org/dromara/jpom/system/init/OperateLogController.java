@@ -236,7 +236,7 @@ public class OperateLogController implements AopLogInterface {
                 userOperateLogV1.setResultMsg(ExceptionUtil.stacktraceToString(throwable));
                 userOperateLogV1.setOptStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             } else {
-                String json = value.toString();
+                String json = JSONObject.toJSONString(value);
                 userOperateLogV1.setResultMsg(json);
                 try {
                     JsonMessage<?> jsonMessage = JSONObject.parseObject(json, JsonMessage.class);
