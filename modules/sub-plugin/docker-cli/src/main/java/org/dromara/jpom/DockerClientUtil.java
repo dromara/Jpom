@@ -23,7 +23,6 @@
 package org.dromara.jpom;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
@@ -38,7 +37,6 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -119,10 +117,9 @@ public class DockerClientUtil {
                 archiveEntryName = StrUtil.subAfter(archiveEntryName, StrUtil.SLASH, false);
                 // 可能中包含文件 使用原名称
                 archiveEntryName = StrUtil.emptyToDefault(archiveEntryName, tarArchiveEntry.getName());
-                //logRecorder.info("tarArchiveEntry's name: {}", archiveEntryName);
                 File currentFile = FileUtil.file(resultFileOut, archiveEntryName);
                 FileUtil.mkParentDirs(currentFile);
-                IoUtil.copy(tarStream, Files.newOutputStream(currentFile.toPath()));
+                FileUtil.writeFromStream(tarStream, currentFile, false);
             }
         } catch (NotFoundException notFoundException) {
             logRecorder.systemWarning("容器中没有找到执行结果文件: {}", notFoundException.getMessage());
