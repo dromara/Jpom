@@ -44,7 +44,7 @@ module.exports = {
       <img class="no-zoom" height="60" width="224"  style="background-color: #c6ddff;color: #ffffff" src="/images/friends/ad/zyplayer-doc-banner.png">
     </a>
      <a href="https://gitee.com/qingqinkj/mdp-lcode-ui-web" target="_blank" >
-      <img class="no-zoom" height="60" width="224" src="/images/friends/ad/mdp-banner.png">
+      <img class="no-zoom" height="60" width="224" src="/images/friends/ad/mdp-banner2.png">
     </a>
     <div>
     <span style='color: gray;font-size: smaller;'></span>
