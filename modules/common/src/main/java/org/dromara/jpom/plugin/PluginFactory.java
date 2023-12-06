@@ -27,6 +27,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.JarClassLoader;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.util.ClassLoaderUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
@@ -47,7 +48,6 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.net.URLClassLoader;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
@@ -61,7 +61,7 @@ import java.util.stream.Collectors;
 public class PluginFactory implements ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<ApplicationEvent> {
 
     //    private static final List<FeatureCallback> FEATURE_CALLBACKS = new ArrayList<>();
-    private static final Map<String, List<PluginItemWrap>> PLUGIN_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, List<PluginItemWrap>> PLUGIN_MAP = new SafeConcurrentHashMap<>();
 
 //    /**
 //     * 添加回调事件

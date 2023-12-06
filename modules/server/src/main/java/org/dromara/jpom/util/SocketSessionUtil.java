@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom.util;
 
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.socket.TextMessage;
@@ -31,7 +32,6 @@ import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorato
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * socket 会话对象
@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class SocketSessionUtil {
 
-    private static final Map<String, WebSocketSession> SOCKET_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, WebSocketSession> SOCKET_MAP = new SafeConcurrentHashMap<>();
 
     public static void send(WebSocketSession session, String msg) throws IOException {
         send(session, new TextMessage(msg));

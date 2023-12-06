@@ -27,6 +27,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.unit.DataSize;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.Type;
@@ -59,7 +60,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -72,7 +72,7 @@ import java.util.concurrent.ConcurrentMap;
 @Slf4j
 public class NodeUpdateHandler extends BaseProxyHandler {
 
-    private final ConcurrentMap<String, IProxyWebSocket> clientMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, IProxyWebSocket> clientMap = new SafeConcurrentHashMap<>();
 
     private static final int CHECK_COUNT = 120;
 

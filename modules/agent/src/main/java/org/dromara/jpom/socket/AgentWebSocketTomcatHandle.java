@@ -24,6 +24,7 @@ package org.dromara.jpom.socket;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,6 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 系统日志
@@ -54,7 +54,7 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
 
     private static AgentConfig.SystemConfig systemConfig;
 
-    private static final Map<String, File> CACHE_FILE = new ConcurrentHashMap<>();
+    private static final Map<String, File> CACHE_FILE = new SafeConcurrentHashMap<>();
 
     @Autowired
     public void init(AgentConfig agentConfig) {

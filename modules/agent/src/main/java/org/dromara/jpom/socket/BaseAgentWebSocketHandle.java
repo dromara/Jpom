@@ -24,6 +24,7 @@ package org.dromara.jpom.socket;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.spring.SpringUtil;
@@ -51,7 +52,7 @@ import static javax.websocket.CloseReason.CloseCodes.CANNOT_ACCEPT;
 @Slf4j
 public abstract class BaseAgentWebSocketHandle {
 
-    private static final ConcurrentHashMap<String, String> USER = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, String> USER = new SafeConcurrentHashMap<>();
 
     protected String getParameters(Session session, String name) {
         Map<String, List<String>> requestParameterMap = session.getRequestParameterMap();

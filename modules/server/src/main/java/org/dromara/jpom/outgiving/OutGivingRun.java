@@ -27,6 +27,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -60,7 +61,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -76,7 +76,7 @@ import java.util.stream.Collectors;
 @Builder
 public class OutGivingRun {
 
-    private static final Map<String, Map<String, String>> LOG_CACHE_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, Map<String, String>> LOG_CACHE_MAP = new SafeConcurrentHashMap<>();
 
 //      * @param id              分发id
 //     * @param file            文件

@@ -27,6 +27,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONFactory;
@@ -47,7 +48,6 @@ import org.dromara.jpom.ssh.JschDockerHttpClient;
 import java.io.File;
 import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
@@ -64,8 +64,8 @@ public class DockerUtil {
         JSON.config(JSONWriter.Feature.WriteEnumsUsingName);
     }
 
-    private static final Map<String, DockerClient> DOCKER_CLIENT_MAP = new ConcurrentHashMap<>();
-    private static final Map<String, AutoCloseable> CACHE_CLOSET = new ConcurrentHashMap<>();
+    private static final Map<String, DockerClient> DOCKER_CLIENT_MAP = new SafeConcurrentHashMap<>();
+    private static final Map<String, AutoCloseable> CACHE_CLOSET = new SafeConcurrentHashMap<>();
 
     /**
      * dockerfile 文件名称
