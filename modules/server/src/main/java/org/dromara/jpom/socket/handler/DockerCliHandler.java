@@ -24,6 +24,7 @@ package org.dromara.jpom.socket.handler;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
@@ -63,7 +64,7 @@ import java.util.function.Consumer;
 @Slf4j
 public class DockerCliHandler extends BaseTerminalHandler {
 
-    private static final ConcurrentHashMap<String, HandlerItem> HANDLER_ITEM_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, HandlerItem> HANDLER_ITEM_CONCURRENT_HASH_MAP = new SafeConcurrentHashMap<>();
 
 
     @Override

@@ -31,6 +31,7 @@ import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.text.StrPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
@@ -61,7 +62,6 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.jar.Attributes;
@@ -85,7 +85,7 @@ public abstract class AbstractProjectCommander {
     /**
      * 进程Id 获取端口号
      */
-    public static final Map<Integer, CacheObject<String>> PID_PORT = new ConcurrentHashMap<>();
+    public static final Map<Integer, CacheObject<String>> PID_PORT = new SafeConcurrentHashMap<>();
 
     private final Charset fileCharset;
 

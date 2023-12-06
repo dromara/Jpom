@@ -26,6 +26,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.stream.CollectorUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
@@ -89,7 +90,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     private final ServerConfig serverConfig;
     private final FileStorageService fileStorageService;
 
-    private final Map<String, String> cancelTag = new ConcurrentHashMap<>();
+    private final Map<String, String> cancelTag = new SafeConcurrentHashMap<>();
 
     public FileReleaseTaskService(SshService sshService,
                                   JpomApplication jpomApplication,

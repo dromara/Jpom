@@ -26,6 +26,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.model.JsonMessage;
@@ -51,7 +52,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 自由脚本socket
@@ -64,7 +64,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class AgentFreeWebSocketScriptHandle extends BaseAgentWebSocketHandle {
 
-    private final static Map<String, ScriptProcess> CACHE = new ConcurrentHashMap<>();
+    private final static Map<String, ScriptProcess> CACHE = new SafeConcurrentHashMap<>();
 
     @Autowired
     public void init() {

@@ -31,6 +31,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.file.FileCopier;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.thread.ExecutorBuilder;
 import cn.hutool.core.thread.ThreadUtil;
@@ -72,7 +73,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -95,7 +95,7 @@ public class BuildExecuteManage implements Runnable {
     /**
      * 缓存构建中
      */
-    public static final Map<String, BuildExecuteManage> BUILD_MANAGE_MAP = new ConcurrentHashMap<>();
+    public static final Map<String, BuildExecuteManage> BUILD_MANAGE_MAP = new SafeConcurrentHashMap<>();
 
     private final TaskData taskData;
     private final BuildExtraModule buildExtraModule;

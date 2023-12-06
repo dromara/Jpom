@@ -24,6 +24,7 @@ package org.dromara.jpom;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
@@ -47,7 +48,10 @@ import org.springframework.context.annotation.Configuration;
 import java.io.File;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -76,7 +80,7 @@ public class JpomApplication implements DisposableBean, InitializingBean {
 
     private static volatile JpomApplication jpomApplication;
 
-    private static final Map<String, ExecutorService> LINK_EXECUTOR_SERVICE = new ConcurrentHashMap<>();
+    private static final Map<String, ExecutorService> LINK_EXECUTOR_SERVICE = new SafeConcurrentHashMap<>();
 
     /**
      * 单利模式

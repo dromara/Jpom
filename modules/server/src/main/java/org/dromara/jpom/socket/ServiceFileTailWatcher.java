@@ -23,6 +23,7 @@
 package org.dromara.jpom.socket;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.util.BaseFileTailWatcher;
 import org.dromara.jpom.util.SocketSessionUtil;
@@ -43,7 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
-    private static final ConcurrentHashMap<File, ServiceFileTailWatcher<WebSocketSession>> CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<File, ServiceFileTailWatcher<WebSocketSession>> CONCURRENT_HASH_MAP = new SafeConcurrentHashMap<>();
 
     private static Charset charset;
 

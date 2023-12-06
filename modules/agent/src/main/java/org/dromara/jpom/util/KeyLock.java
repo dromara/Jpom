@@ -22,7 +22,8 @@
  */
 package org.dromara.jpom.util;
 
-import java.util.concurrent.ConcurrentHashMap;
+import cn.hutool.core.map.SafeConcurrentHashMap;
+
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,7 +38,7 @@ public class KeyLock<K> {
     /**
      * 保存所有锁定的KEY及其信号量
      */
-    private final ConcurrentMap<K, LockInfo> map = new ConcurrentHashMap<>();
+    private final ConcurrentMap<K, LockInfo> map = new SafeConcurrentHashMap<>();
 
     /**
      * 获取锁的数量

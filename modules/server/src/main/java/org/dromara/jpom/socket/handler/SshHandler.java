@@ -26,6 +26,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.NioUtil;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
@@ -37,7 +38,6 @@ import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.model.user.UserModel;
@@ -71,7 +71,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class SshHandler extends BaseTerminalHandler {
 
-    private static final ConcurrentHashMap<String, HandlerItem> HANDLER_ITEM_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, HandlerItem> HANDLER_ITEM_CONCURRENT_HASH_MAP = new SafeConcurrentHashMap<>();
     private static SshTerminalExecuteLogService sshTerminalExecuteLogService;
     private static UserBindWorkspaceService userBindWorkspaceService;
     private static SshService sshService;

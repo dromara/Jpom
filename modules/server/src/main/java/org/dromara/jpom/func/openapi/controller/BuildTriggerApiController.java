@@ -27,6 +27,7 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -66,7 +67,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -87,7 +87,7 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
     /**
      * 等待执行构建的队列
      */
-    private final Map<String, Queue<BuildCache>> waitQueue = new ConcurrentHashMap<>();
+    private final Map<String, Queue<BuildCache>> waitQueue = new SafeConcurrentHashMap<>();
 
     public BuildTriggerApiController(BuildInfoService buildInfoService,
                                      BuildExecuteService buildExecuteService,

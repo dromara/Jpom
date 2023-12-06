@@ -23,6 +23,7 @@
 package org.dromara.jpom.oauth2;
 
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.request.AuthRequest;
 import org.dromara.jpom.common.ILoadEvent;
@@ -33,7 +34,6 @@ import org.springframework.util.Assert;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author bwcx_jzy
@@ -43,8 +43,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class Oauth2Factory implements ILoadEvent {
 
-    private static final Map<String, AuthRequest> AUTH_REQUEST = new ConcurrentHashMap<>();
-    private static final Map<String, BaseOauth2Config> AUTH_CONFIG = new ConcurrentHashMap<>();
+    private static final Map<String, AuthRequest> AUTH_REQUEST = new SafeConcurrentHashMap<>();
+    private static final Map<String, BaseOauth2Config> AUTH_CONFIG = new SafeConcurrentHashMap<>();
 
     private final SystemParametersServer systemParametersServer;
 

@@ -23,13 +23,13 @@
 package org.dromara.jpom.util;
 
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.util.RuntimeUtil;
 import org.springframework.util.Assert;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 线程同步器 工具类
@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class SyncFinisherUtil {
 
-    private static final Map<String, StrictSyncFinisher> SYNC_FINISHER_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, StrictSyncFinisher> SYNC_FINISHER_MAP = new SafeConcurrentHashMap<>();
 
     /**
      * 任务列表

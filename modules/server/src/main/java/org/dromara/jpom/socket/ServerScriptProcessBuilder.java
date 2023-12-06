@@ -26,6 +26,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
@@ -60,7 +61,7 @@ public class ServerScriptProcessBuilder extends BaseRunScript implements Runnabl
     /**
      * 执行中的缓存
      */
-    private static final ConcurrentHashMap<String, ServerScriptProcessBuilder> FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, ServerScriptProcessBuilder> FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP = new SafeConcurrentHashMap<>();
 
     private final ProcessBuilder processBuilder;
     private final Set<WebSocketSession> sessions = new HashSet<>();
