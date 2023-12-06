@@ -286,6 +286,7 @@
                                 <fileSet>
                                     <directory>${project.build.directory}</directory>
                                     <includes>
+                                        <include>*.jar</include>
                                         <include>*.zip</include>
                                         <include>*.tar.gz</include>
                                     </includes>
