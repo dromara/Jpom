@@ -1,5 +1,14 @@
 # 🚀 版本日志
 
+### 2.10.46.2-beta
+
+### 🐞 解决BUG、优化功能
+
+1. 【all】优化 oncurrentHashMap 修改为线程安全的 hutoll[SafeConcurrentHashMap]（感谢@在时间里流浪）
+2. 【all】升级 mwiede.jsch、oshi、fastjson、hutool、spring-boot、docker-java
+
+------
+
 ### 2.10.46.1-beta (2023-10-20)
 
 ### 🐞 解决BUG、优化功能
