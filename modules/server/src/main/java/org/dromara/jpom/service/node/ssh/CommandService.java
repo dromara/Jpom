@@ -279,7 +279,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
             int exitCode = JschUtils.execCallbackLine(session, charset, timeout, commands, commandParamsLine, logRecorder::info);
             logRecorder.system("执行退出码：{}", exitCode);
             // 更新状态
-            this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.DONE);
+            this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.DONE, exitCode);
         } catch (Exception e) {
             log.error("执行命令错误", e);
             // 更新状态
@@ -299,8 +299,20 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
      * @param status 状态
      */
     private void updateStatus(String id, CommandExecLogModel.Status status) {
+        this.updateStatus(id, status, null);
+    }
+
+    /**
+     * 修改执行状态
+     *
+     * @param id       ID
+     * @param status   状态
+     * @param exitCode 退出码
+     */
+    private void updateStatus(String id, CommandExecLogModel.Status status, Integer exitCode) {
         CommandExecLogModel commandExecLogModel = new CommandExecLogModel();
         commandExecLogModel.setId(id);
+        commandExecLogModel.setExitCode(exitCode);
         commandExecLogModel.setStatus(status.getCode());
         commandExecLogService.updateById(commandExecLogModel);
     }

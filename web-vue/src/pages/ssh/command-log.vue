@@ -28,6 +28,10 @@
       <template slot="triggerExecTypeMap" slot-scope="text">
         <span>{{ triggerExecTypeMap[text] || "未知" }}</span>
       </template>
+      <template slot="exitCode" slot-scope="text">
+        <a-tag v-if="text == 0" color="green">成功</a-tag>
+        <a-tag v-else color="orange">{{ text || "-" }}</a-tag>
+      </template>
 
       <template slot="operation" slot-scope="text, record">
         <a-space>
@@ -66,6 +70,7 @@ export default {
         { title: "ssh 名称", dataIndex: "sshName", ellipsis: true, scopedSlots: { customRender: "sshName" } },
         { title: "命令名称", dataIndex: "commandName", ellipsis: true, scopedSlots: { customRender: "commandName" } },
         { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "退出码", dataIndex: "exitCode", width: 100, ellipsis: true, scopedSlots: { customRender: "exitCode" } },
         { title: "触发类型", dataIndex: "triggerExecType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerExecTypeMap" } },
         {
           title: "执行时间",

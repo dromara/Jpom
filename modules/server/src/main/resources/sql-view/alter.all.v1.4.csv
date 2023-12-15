@@ -1,0 +1,2 @@
+alterType,tableName,name,type,len,defaultValue,comment,notNull
+ADD,COMMAND_EXEC_LOG,exitCode,Integer,,,集群的创建时间
