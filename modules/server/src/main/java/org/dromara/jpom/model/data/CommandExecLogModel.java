@@ -89,6 +89,11 @@ public class CommandExecLogModel extends BaseWorkspaceModel {
     @PropIgnore
     private Boolean hasLog;
 
+    /**
+     * 退出码
+     */
+    private Integer exitCode;
+
     public File logFile() {
         return FileUtil.file(CommandExecLogModel.logFileDir(this.getCommandId()), batchId, this.getId() + ".log");
     }
