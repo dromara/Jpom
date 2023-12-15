@@ -361,10 +361,10 @@ public class CommandUtil {
         processBuilder.redirectErrorStream(true);
         processBuilder.command(command);
         Optional.ofNullable(baseDir).ifPresent(processBuilder::directory);
+        Map<String, String> environment = processBuilder.environment();
         // 新增逻辑,将env和environment里value==null替换成空字符,防止putAll出现空指针报错
         env.replaceAll((k,v)-> Optional.ofNullable(v).orElse(StrUtil.EMPTY));
         environment.replaceAll((k,v)-> Optional.ofNullable(v).orElse(StrUtil.EMPTY));
-        Map<String, String> environment = processBuilder.environment();
         // 环境变量
         Optional.ofNullable(env).ifPresent(environment::putAll);
         //
