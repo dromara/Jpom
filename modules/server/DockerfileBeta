@@ -29,7 +29,7 @@ LABEL maintainer="bwcx-jzy <bwcx_jzy@163.com>"
 LABEL documentation="https://jpom.top"
 
 ENV JPOM_HOME	/usr/local/jpom-server
-ENV JPOM_PKG_VERSION	2.10.46.1
+ENV JPOM_PKG_VERSION	2.10.46.2
 ENV JPOM_PKG	server-${JPOM_PKG_VERSION}-release.tar.gz
 ENV SHA1_NAME server-${JPOM_PKG_VERSION}-release.tar.gz.sha1
 
