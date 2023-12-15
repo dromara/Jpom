@@ -55,7 +55,6 @@ import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -254,9 +253,8 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
      * @param commandExecLogModel 执行记录
      * @param sshModel            ssh
      * @param commandParamsLine   参数
-     * @throws IOException io
      */
-    private void execute(CommandModel commandModel, CommandExecLogModel commandExecLogModel, SshModel sshModel, String commandParamsLine) throws IOException {
+    private void execute(CommandModel commandModel, CommandExecLogModel commandExecLogModel, SshModel sshModel, String commandParamsLine) {
         File file = commandExecLogModel.logFile();
         LogRecorder logRecorder = LogRecorder.builder().file(file).charset(CharsetUtil.CHARSET_UTF_8).build();
         if (sshModel == null) {
@@ -278,7 +276,8 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
             int timeout = machineSshModel.timeout();
             //
             session = sshService.getSessionByModel(machineSshModel);
-            JschUtils.execCallbackLine(session, charset, timeout, commands, commandParamsLine, logRecorder::info);
+            int exitCode = JschUtils.execCallbackLine(session, charset, timeout, commands, commandParamsLine, logRecorder::info);
+            logRecorder.system("执行退出码：{}", exitCode);
             // 更新状态
             this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.DONE);
         } catch (Exception e) {
