@@ -1,10 +1,10 @@
 # 🚀 版本日志
 
-### 2.10.46.2-beta
+### 2.10.46.2-beta (2023-12-15)
 
 ### 🐞 解决BUG、优化功能
 
-1. 【all】优化 oncurrentHashMap 修改为线程安全的 hutoll[SafeConcurrentHashMap]（感谢@在时间里流浪）
+1. 【all】优化 ConcurrentHashMap 修改为线程安全的 hutoll[SafeConcurrentHashMap]（感谢@在时间里流浪）
 2. 【all】升级 mwiede.jsch、oshi、fastjson、hutool、spring-boot、docker-java
 3. 【server】优化 SSH 脚本在部分场景阻塞卡死（ChannelType.EXEC 不添加超时时间）
 4. 【server】优化 SSH 脚本执行输出退出码
