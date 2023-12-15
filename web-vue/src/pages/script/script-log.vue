@@ -8,6 +8,9 @@
           <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
+          <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="状态" class="search-input-item">
+            <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
+          </a-select>
           <a-range-picker
             v-model="listQuery['createTimeMillis']"
             allowClear
@@ -39,6 +42,13 @@
       <a-tooltip slot="createTimeMillis" slot-scope="text, record" :title="`${parseTime(record.createTimeMillis)}`">
         <span>{{ parseTime(record.createTimeMillis) }}</span>
       </a-tooltip>
+      <template slot="exitCode" slot-scope="text">
+        <a-tag v-if="text == 0" color="green">成功</a-tag>
+        <a-tag v-else color="orange">{{ text || "-" }}</a-tag>
+      </template>
+      <template slot="status" slot-scope="text">
+        <span>{{ statusMap[text] || "" }}</span>
+      </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button type="primary" size="small" @click="viewLog(record)">查看日志</a-button>
@@ -56,6 +66,7 @@
 <script>
 import { getScriptLogList, scriptDel, triggerExecTypeMap } from "@/api/server-script";
 import ScriptLogView from "@/pages/script/script-log-view";
+import { statusMap } from "@/api/command";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 
 export default {
@@ -73,6 +84,7 @@ export default {
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       triggerExecTypeMap: triggerExecTypeMap,
+      statusMap,
       list: [],
       temp: {},
       logVisible: false,
@@ -80,7 +92,9 @@ export default {
         { title: "名称", dataIndex: "scriptName", width: 100, ellipsis: true, scopedSlots: { customRender: "scriptName" } },
         { title: "执行时间", dataIndex: "createTimeMillis", sorter: true, ellipsis: true, width: "160px", scopedSlots: { customRender: "createTimeMillis" } },
         { title: "触发类型", dataIndex: "triggerExecType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerExecTypeMap" } },
+        { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "执行域", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
+        { title: "退出码", dataIndex: "exitCode", width: 100, ellipsis: true, scopedSlots: { customRender: "exitCode" } },
         { title: "执行人", dataIndex: "modifyUser", ellipsis: true, width: "100px", scopedSlots: { customRender: "modifyUser" } },
         { title: "操作", dataIndex: "operation", align: "center", fixed: "right", scopedSlots: { customRender: "operation" }, width: "150px" },
       ],

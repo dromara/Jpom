@@ -22,14 +22,19 @@
  */
 package org.dromara.jpom.model.script;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseWorkspaceModel;
+import org.dromara.jpom.model.data.CommandExecLogModel;
 
 /**
  * @author bwcx_jzy
  * @since 2022/1/19
  */
+@EqualsAndHashCode(callSuper = true)
 @TableName(value = "SERVER_SCRIPT_EXECUTE_LOG", name = "脚本模版执行记录", parents = ScriptModel.class)
+@Data
 public class ScriptExecuteLogModel extends BaseWorkspaceModel {
 
     /**
@@ -45,27 +50,13 @@ public class ScriptExecuteLogModel extends BaseWorkspaceModel {
      */
     private Integer triggerExecType;
 
-    public String getScriptId() {
-        return scriptId;
-    }
+    /**
+     * 退出码
+     */
+    private Integer exitCode;
 
-    public void setScriptId(String scriptId) {
-        this.scriptId = scriptId;
-    }
-
-    public String getScriptName() {
-        return scriptName;
-    }
-
-    public void setScriptName(String scriptName) {
-        this.scriptName = scriptName;
-    }
-
-    public Integer getTriggerExecType() {
-        return triggerExecType;
-    }
-
-    public void setTriggerExecType(Integer triggerExecType) {
-        this.triggerExecType = triggerExecType;
-    }
+    /**
+     * @see CommandExecLogModel.Status
+     */
+    private Integer status;
 }

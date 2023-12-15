@@ -11,6 +11,7 @@
 5. 【server】优化 解决构建流程,环境变量env里出现value==null出现null报错
    （感谢 [@周冰](https://gitee.com/NineAsk) [Gitee pr 197](https://gitee.com/dromara/Jpom/pulls/197) ）
 6. 【server】优化 SSH 脚本执行记录退出码
+7. 【server】优化 服务端脚本执行记录新增执行状态和退出码
 
 ------
 

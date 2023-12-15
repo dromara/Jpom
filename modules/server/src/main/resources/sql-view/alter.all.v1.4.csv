@@ -1,2 +1,4 @@
 alterType,tableName,name,type,len,defaultValue,comment,notNull
-ADD,COMMAND_EXEC_LOG,exitCode,Integer,,,集群的创建时间
+ADD,COMMAND_EXEC_LOG,exitCode,Integer,,,退出码
+ADD,SERVER_SCRIPT_EXECUTE_LOG,exitCode,Integer,,,退出码
+ADD,SERVER_SCRIPT_EXECUTE_LOG,status,TINYINT,,,执行状态

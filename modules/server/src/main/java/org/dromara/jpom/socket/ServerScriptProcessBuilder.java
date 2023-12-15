@@ -36,9 +36,11 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
+import org.dromara.jpom.model.data.CommandExecLogModel;
 import org.dromara.jpom.model.script.ScriptModel;
 import org.dromara.jpom.script.BaseRunScript;
 import org.dromara.jpom.script.CommandParam;
+import org.dromara.jpom.service.script.ScriptExecuteLogServer;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.util.CommandUtil;
@@ -69,6 +71,7 @@ public class ServerScriptProcessBuilder extends BaseRunScript implements Runnabl
     private final File scriptFile;
 
     private final EnvironmentMapBuilder environmentMapBuilder;
+    private ScriptExecuteLogServer scriptExecuteLogServer;
 
     private ServerScriptProcessBuilder(ScriptModel nodeScriptModel, String executeId, String args, Map<String, String> paramMap) {
         super(nodeScriptModel.logFile(executeId), CharsetUtil.CHARSET_UTF_8);
@@ -90,6 +93,10 @@ public class ServerScriptProcessBuilder extends BaseRunScript implements Runnabl
         Map<String, String> environment = processBuilder.environment();
         environment.putAll(environmentMapBuilder.environment());
         processBuilder.directory(scriptFile.getParentFile());
+        //
+        if (scriptExecuteLogServer == null) {
+            scriptExecuteLogServer = SpringUtil.getBean(ScriptExecuteLogServer.class);
+        }
     }
 
     /**
@@ -183,12 +190,14 @@ public class ServerScriptProcessBuilder extends BaseRunScript implements Runnabl
     public void run() {
         //初始化ProcessBuilder对象
         try {
+            scriptExecuteLogServer.updateStatus(executeId, CommandExecLogModel.Status.ING);
             this.environmentMapBuilder.eachStr(this::info);
             process = processBuilder.start();
             inputStream = process.getInputStream();
             IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) ServerScriptProcessBuilder.this::info);
             int waitFor = process.waitFor();
             this.system("执行结束:{}", waitFor);
+            scriptExecuteLogServer.updateStatus(executeId, CommandExecLogModel.Status.DONE, waitFor);
             //
             JsonMessage<String> jsonMessage = new JsonMessage<>(200, "执行完毕:" + waitFor);
             JSONObject jsonObject = jsonMessage.toJson();
@@ -197,6 +206,7 @@ public class ServerScriptProcessBuilder extends BaseRunScript implements Runnabl
             this.end(jsonObject.toString());
         } catch (Exception e) {
             log.error("执行异常", e);
+            scriptExecuteLogServer.updateStatus(executeId, CommandExecLogModel.Status.ERROR);
             this.system("执行异常", e.getMessage());
             this.end("执行异常：" + e.getMessage());
         } finally {
