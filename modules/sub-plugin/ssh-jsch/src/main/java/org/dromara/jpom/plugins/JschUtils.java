@@ -45,7 +45,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * hutool 默认封装的 SSH 工具，仅支持传入 SSL Private Key File，不支持  Private Key Content。
@@ -224,9 +224,9 @@ public class JschUtils {
      * @param command  命令
      * @throws IOException io
      */
-    public static void uploadCommandCallback(Session session, Charset charset, int timeout, Consumer<String> function, String command) throws IOException {
+    public static int uploadCommandCallback(Session session, Charset charset, int timeout, Function<String, Integer> function, String command) throws IOException {
         if (StrUtil.isEmpty(command)) {
-            return;
+            return -100;
         }
         ChannelSftp channel = null;
         try {
@@ -247,7 +247,7 @@ public class JschUtils {
             // 执行命令
             try {
                 String commandSh = "bash " + destFile;
-                function.accept(commandSh);
+                return function.apply(commandSh);
             } finally {
                 try {
                     // 删除 ssh 中临时文件
@@ -290,9 +290,9 @@ public class JschUtils {
      * @param commandParamsLine 执行参数
      * @throws IOException io
      */
-    public static void execCallbackLine(Session session, Charset charset, int timeout, String command, String commandParamsLine, LineHandler lineHandler) throws IOException {
+    public static int execCallbackLine(Session session, Charset charset, int timeout, String command, String commandParamsLine, LineHandler lineHandler) throws IOException {
         //
-        execCallbackLine(session, charset, timeout, command, commandParamsLine, lineHandler, lineHandler);
+        return execCallbackLine(session, charset, timeout, command, commandParamsLine, lineHandler, lineHandler);
     }
 
     /**
@@ -307,30 +307,31 @@ public class JschUtils {
      * @param commandParamsLine 执行参数
      * @throws IOException io
      */
-    public static void execCallbackLine(Session session, Charset charset, int timeout, String command, String commandParamsLine, LineHandler normal, LineHandler error) throws IOException {
+    public static int execCallbackLine(Session session, Charset charset, int timeout, String command, String commandParamsLine, LineHandler normal, LineHandler error) throws IOException {
         //
-        JschUtils.uploadCommandCallback(session, charset, timeout, (s) -> {
+        return JschUtils.uploadCommandCallback(session, charset, timeout, (s) -> {
             ChannelExec channel = (ChannelExec) JschUtil.createChannel(session, ChannelType.EXEC);
             channel.setCommand(StrUtil.bytes(s + StrUtil.SPACE + commandParamsLine, charset));
             channel.setInputStream(null);
-            try {
-                try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-                    channel.setErrStream(outputStream, true);
-                    channel.connect(timeout);
-                    try (InputStream in = channel.getInputStream()) {
-                        IoUtil.readLines(in, charset, normal);
-                    }
-                    // 输出错误信息
-                    int size = outputStream.size();
-                    if (size > 0) {
-                        error.handle(outputStream.toString(charset.name()));
-                    }
-                } finally {
-                    JschUtil.close(channel);
+            try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+                channel.setErrStream(outputStream, true);
+                // 不添加超时，添加超时后可能存在阻塞
+                channel.connect();
+                try (InputStream in = channel.getInputStream()) {
+                    IoUtil.readLines(in, charset, normal);
                 }
+                // 输出错误信息
+                int size = outputStream.size();
+                if (size > 0) {
+                    error.handle(outputStream.toString(charset.name()));
+                }
+                return channel.getExitStatus();
             } catch (Exception e) {
                 throw Lombok.sneakyThrow(e);
+            } finally {
+                JschUtil.close(channel);
             }
+
         }, command);
     }
 }
