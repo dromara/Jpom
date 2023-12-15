@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom.service.script;
 
+import org.dromara.jpom.model.data.CommandExecLogModel;
 import org.dromara.jpom.model.script.ScriptExecuteLogModel;
 import org.dromara.jpom.model.script.ScriptModel;
 import org.dromara.jpom.service.h2db.BaseGlobalOrWorkspaceService;
@@ -64,6 +65,31 @@ public class ScriptExecuteLogServer extends BaseGlobalOrWorkspaceService<ScriptE
         scriptExecuteLogModel.setWorkspaceId(workspaceId);
         super.insert(scriptExecuteLogModel);
         return scriptExecuteLogModel;
+    }
+
+    /**
+     * 修改执行状态
+     *
+     * @param id     ID
+     * @param status 状态
+     */
+    public void updateStatus(String id, CommandExecLogModel.Status status) {
+        this.updateStatus(id, status, null);
+    }
+
+    /**
+     * 修改执行状态
+     *
+     * @param id       ID
+     * @param status   状态
+     * @param exitCode 退出码
+     */
+    public void updateStatus(String id, CommandExecLogModel.Status status, Integer exitCode) {
+        ScriptExecuteLogModel model = new ScriptExecuteLogModel();
+        model.setId(id);
+        model.setExitCode(exitCode);
+        model.setStatus(status.getCode());
+        this.updateById(model);
     }
 
 
