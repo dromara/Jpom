@@ -26,8 +26,8 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.system.SystemUtil;
@@ -39,6 +39,8 @@ import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.*;
 import org.dromara.jpom.util.LogRecorder;
+import org.dromara.jpom.util.StringUtil;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -52,8 +54,6 @@ import java.util.stream.Collectors;
  * @since 2022/2/7
  */
 public class DockerBuild implements AutoCloseable {
-
-    private static final String[] DEPEND_PLUGIN = new String[]{"java", "maven", "node", "go", "python3", "gradle"};
 
     private final Map<String, Object> parameter;
     private final DockerClient dockerClient;
@@ -266,9 +266,9 @@ public class DockerBuild implements AutoCloseable {
                 } else if ("maven".equals(uses)) {
                     stepsScript.append(mavenScript(step));
                 } else if ("cache".equals(uses)) {
+                    // 缓存插件
                     String[] cacheScript = cacheScript(step, buildId);
                     stepsScript.append(cacheScript[0]);
-                    //
                     afterScriptList.add(cacheScript[1]);
                 } else if ("go".equals(uses)) {
                     stepsScript.append(goScript(step));
@@ -276,6 +276,9 @@ public class DockerBuild implements AutoCloseable {
                     stepsScript.append(gradleScript(step));
                 } else if ("python3".equals(uses)) {
                     stepsScript.append(python3Script(step));
+                } else {
+                    // 其他自定义插件
+                    stepsScript.append(otherScript(step, uses));
                 }
             }
             if (step.containsKey("run")) {
@@ -288,6 +291,29 @@ public class DockerBuild implements AutoCloseable {
         afterScriptList.forEach(stepsScript::append);
         stepsScript.append("echo \"<<<<<<< Build End >>>>>>>\"\n");
         return stepsScript.toString();
+    }
+
+    /**
+     * 格式化其他插件端 脚本
+     *
+     * @param step 步骤
+     * @param name 插件名
+     * @return 结果
+     */
+    private String otherScript(Map<String, Object> step, String name) {
+        String path = String.format("/opt/jpom_%s", name);
+        StringBuilder script = new StringBuilder("# " + name + "Script\n");
+        Map<String, String> map = new HashMap<>();
+        map.put("JPOM_PLUGIN_PATH", path);
+        for (Map.Entry<String, Object> entry : step.entrySet()) {
+            String key = entry.getKey();
+            String value = ObjectUtil.toString(entry.getValue());
+            value = StringUtil.formatStrByMap(value, map);
+            script.append(String.format("echo \"export %s=%s\" >> /etc/profile\n", key, value));
+        }
+        script.append(String.format("echo \"export PATH=%s/bin:$PATH\" >> /etc/profile\n", path));
+        script.append("source /etc/profile \n");
+        return script.toString();
     }
 
 
@@ -371,9 +397,7 @@ public class DockerBuild implements AutoCloseable {
             tags.add(image);
             try {
                 File file = plugin.getResourceToFile(String.format("runs/%s/" + DockerUtil.DOCKER_FILE, runsOn), tempDir);
-                if (file == null) {
-                    throw new IllegalArgumentException("当前还不支持：" + runsOn);
-                }
+                Assert.notNull(file, "当前还不支持：" + runsOn);
                 dockerClient.buildImageCmd(file)
                     .withTags(tags)
                     .exec(new ResultCallback.Adapter<BuildResponseItem>() {
@@ -472,7 +496,7 @@ public class DockerBuild implements AutoCloseable {
         return steps.stream()
             .filter(map -> {
                 String uses = (String) map.get("uses");
-                return ArrayUtil.contains(DEPEND_PLUGIN, uses);
+                return StrUtil.isNotEmpty(uses);
             })
             .map(map -> this.dependPluginCheck(dockerClient, image, map, buildId, tempDir, logRecorder))
             .collect(Collectors.toList());
@@ -520,8 +544,12 @@ public class DockerBuild implements AutoCloseable {
      */
     private Mount dependPluginCheck(DockerClient dockerClient, String image, Map<String, Object> usesMap, String buildId, File tempDir, LogRecorder logRecorder) {
         String pluginName = (String) usesMap.get("uses");
-        String version = String.valueOf(usesMap.get("version"));
-        String name = String.format("jpom_%s_%s", pluginName, version);
+        // 兼容没有版本号
+        String version = Optional.ofNullable(usesMap.get("version"))
+            .map(StrUtil::toStringOrNull)
+            .map(s -> "_" + s)
+            .orElse(StrUtil.EMPTY);
+        String name = String.format("jpom_%s%s", pluginName, version);
         if (!DockerBuild.hasDependPlugin(dockerClient, pluginName, version)) {
             HashMap<String, String> labels = MapUtil.of("jpom_build_" + buildId, buildId);
             labels.put("jpom_build_cache", "true");
@@ -542,13 +570,12 @@ public class DockerBuild implements AutoCloseable {
                 .withName(name)
                 .withEnv(pluginName.toUpperCase() + "_VERSION=" + version)
                 .withLabels(labels)
-                .withEntrypoint("/bin/bash", "/tmp/install.sh").exec();
+                .withEntrypoint("/bin/bash", "/tmp/install.sh")
+                .exec();
             String containerId = createContainerResponse.getId();
             // 将脚本 复制到容器
             File pluginInstallResource = plugin.getResourceToFile("uses/" + pluginName + "/install.sh", tempDir);
-            if (pluginInstallResource == null) {
-                throw new IllegalArgumentException("当前不支持：" + pluginName);
-            }
+            Assert.notNull(pluginInstallResource, "当前不支持：" + pluginName);
             dockerClient.copyArchiveToContainerCmd(containerId)
                 .withHostResource(pluginInstallResource.getAbsolutePath())
                 .withRemotePath("/tmp/")

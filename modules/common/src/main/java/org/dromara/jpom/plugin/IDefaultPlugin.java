@@ -42,6 +42,6 @@ public interface IDefaultPlugin extends IPlugin, AutoCloseable {
      * @return InputStream
      */
     default InputStream getConfigResourceInputStream(String name) {
-        return ExtConfigBean.getConfigResourceInputStream(name);
+        return ExtConfigBean.tryGetConfigResourceInputStream(name);
     }
 }
