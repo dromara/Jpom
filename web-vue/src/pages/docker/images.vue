@@ -52,7 +52,9 @@
           <a-tooltip title="更新镜像">
             <a-button size="small" type="link" :disabled="!record.repoTags" @click="tryPull(record)"><a-icon type="cloud-download" /></a-button>
           </a-tooltip>
-
+          <a-tooltip title="导出镜像">
+            <a-button size="small" icon="download" type="link" @click="saveImage(record.id.split(':')[1])"></a-button>
+          </a-tooltip>
           <a-tooltip title="删除镜像">
             <a-button size="small" type="link" @click="doAction(record, 'remove')"><a-icon type="delete" /></a-button>
           </a-tooltip>
@@ -98,7 +100,7 @@
 </template>
 <script>
 import { parseTime, renderSize } from "@/utils/const";
-import { dockerImageCreateContainer, dockerImagePullImage, dockerImageRemove, dockerImagesList, dockerImageBatchRemove } from "@/api/docker-api";
+import { dockerImageCreateContainer, dockerImagePullImage, dockerImageRemove, dockerImagesList, dockerImageBatchRemove, dockerImageSaveImage } from "@/api/docker-api";
 import PullImageLog from "@/pages/docker/pull-image-log";
 import BuildContainer from "./buildContainer.vue";
 
@@ -138,7 +140,7 @@ export default {
         ],
       },
       columns: [
-        { title: "序号", width: 80, ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
+        { title: "序号", width: "80px", ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
         { title: "名称", dataIndex: "repoTags", ellipsis: true, scopedSlots: { customRender: "repoTags" } },
         { title: "镜像ID", dataIndex: "id", ellipsis: true, width: 140, align: "center", scopedSlots: { customRender: "id" } },
         { title: "父级ID", dataIndex: "parentId", ellipsis: true, width: 140, align: "center", scopedSlots: { customRender: "id" } },
@@ -156,7 +158,7 @@ export default {
           width: 180,
         },
 
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 120 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: "160px" },
       ],
       action: {
         remove: {
@@ -323,6 +325,15 @@ export default {
         }
       });
     },
+    // 导出镜像
+    saveImage(imageId) {
+      const url = dockerImageSaveImage(this.urlPrefix, {
+        id: this.reqDataId,
+        imageId: imageId,
+      });
+      window.open(url, "_blank");
+    },
+    // 分配
     batchDelete() {
       let ids = this.tableSelections;
       this.$confirm({

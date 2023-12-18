@@ -23,12 +23,15 @@
 package org.dromara.jpom.controller.docker.base;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.permission.Feature;
@@ -44,7 +47,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -53,6 +58,7 @@ import java.util.function.Consumer;
  * @author bwcx_jzy
  * @since 2022/2/7
  */
+@Slf4j
 public abstract class BaseDockerImagesController extends BaseDockerController {
 
     protected final ServerConfig serverConfig;
@@ -151,6 +157,31 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
     }
 
     /**
+     *
+     */
+    @GetMapping(value = "save-image", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public void saveImage(@ValidatorItem String id, String imageId, HttpServletResponse response) {
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = this.toDockerParameter(id);
+        parameter.put("imageId", imageId);
+        //
+        try {
+            Tuple saveImage = (Tuple) plugin.execute("saveImage", parameter);
+            if (saveImage == null) {
+                ServletUtil.write(response, new JsonMessage<>(405, "镜像不存在").toString(), MediaType.APPLICATION_JSON_VALUE);
+                return;
+            }
+            InputStream inputStream = saveImage.get(0);
+            String name = saveImage.get(1);
+            ServletUtil.write(response, inputStream, MediaType.APPLICATION_OCTET_STREAM_VALUE, name);
+        } catch (Exception e) {
+            log.error("导出镜像异常", e);
+            ServletUtil.write(response, new JsonMessage<>(500, "导出镜像异常").toString(), MediaType.APPLICATION_JSON_VALUE);
+        }
+    }
+
+    /**
      * 获取拉取的日志
      *
      * @param id   id
@@ -160,7 +191,7 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
     @GetMapping(value = "pull-image-log", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
+                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
         File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-log", id + ".log");
         if (!file.exists()) {
             return new JsonMessage<>(201, "还没有日志文件");

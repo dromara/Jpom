@@ -1,4 +1,5 @@
 import axios from "./config";
+import { loadRouterBase } from "./config";
 
 /**
  * 容器列表
@@ -266,6 +267,14 @@ export function dockerImagePullImage(urlPrefix, params) {
     method: "get",
     params: params,
   });
+}
+
+/**
+ * 导出镜像
+ * @param {JSON} params
+ */
+export function dockerImageSaveImage(urlPrefix, params) {
+  return loadRouterBase(urlPrefix + "/images/save-image", params);
 }
 
 /**

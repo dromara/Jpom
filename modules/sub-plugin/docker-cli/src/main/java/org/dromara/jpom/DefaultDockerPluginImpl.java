@@ -710,4 +710,31 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         String uuid = (String) parameter.get("uuid");
         DockerUtil.close(uuid);
     }
+
+    /**
+     * 导出镜像
+     *
+     * @param parameter 参数
+     * @return 镜像流
+     */
+    private Tuple saveImageCmd(Map<String, Object> parameter) {
+        try {
+            String imageId = (String) parameter.get("imageId");
+            DockerClient dockerClient = DockerUtil.get(parameter);
+            //
+            InspectImageResponse imageResponse = dockerClient.inspectImageCmd(imageId).exec();
+            List<String> repoTags = imageResponse.getRepoTags();
+            String arch = imageResponse.getArch();
+            String nameTag = CollUtil.getFirst(repoTags);
+            // xxx/xxx 只保留最后的名称
+            String name = CollUtil.getLast(StrUtil.splitTrim(nameTag, StrUtil.SLASH));
+            // els-app:1.0.106 冒号替换
+            name = StrUtil.replace(name, StrUtil.COLON, StrUtil.DASHED);
+            InputStream inputStream = dockerClient.saveImageCmd(nameTag).exec();
+            return new Tuple(inputStream, name + "-" + arch + ".tar");
+        } catch (com.github.dockerjava.api.exception.NotFoundException e) {
+            log.debug("{}", e.getMessage());
+            return null;
+        }
+    }
 }
