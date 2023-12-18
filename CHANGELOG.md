@@ -1,5 +1,21 @@
 # 🚀 版本日志
 
+### 2.10.46 (2023-12-18)
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 容器构建下载产物未关闭文件流占用句柄问题（感谢@在时间里流浪）
+2. 【all】优化 ConcurrentHashMap 修改为线程安全的 hutoll[SafeConcurrentHashMap]（感谢@在时间里流浪）
+3. 【all】升级 mwiede.jsch、oshi、fastjson、hutool、spring-boot、docker-java
+4. 【server】优化 SSH 脚本在部分场景阻塞卡死（ChannelType.EXEC 不添加超时时间）
+5. 【server】优化 SSH 脚本执行输出退出码
+6. 【server】优化 解决构建流程,环境变量env里出现value==null出现null报错
+   （感谢 [@周冰](https://gitee.com/NineAsk) [Gitee pr 197](https://gitee.com/dromara/Jpom/pulls/197) ）
+7. 【server】优化 SSH 脚本执行记录退出码
+8. 【server】优化 服务端脚本执行记录新增执行状态和退出码
+
+------
+
 ### 2.10.45 (2023-10-17)
 
 ### 🐣 新增功能
