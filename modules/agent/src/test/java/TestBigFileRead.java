@@ -105,22 +105,16 @@ public class TestBigFileRead {
 
     @Test
     public void testHutool2() throws IOException {
-        FileUtil.readLines(testFile, CharsetUtil.CHARSET_UTF_8, new LineHandler() {
-            @Override
-            public void handle(String line) {
+        FileUtil.readLines(testFile, CharsetUtil.CHARSET_UTF_8, (LineHandler) line -> {
 
-            }
         });
     }
 
     @Test
     public void testHutool3() throws IOException {
         RandomAccessFile randomAccessFile = FileUtil.createRandomAccessFile(testFile, FileMode.rw);
-        FileUtil.readLines(randomAccessFile, CharsetUtil.CHARSET_UTF_8, new LineHandler() {
-            @Override
-            public void handle(String line) {
-                //  System.out.println(line);
-            }
+        FileUtil.readLines(randomAccessFile, CharsetUtil.CHARSET_UTF_8, line -> {
+            //  System.out.println(line);
         });
     }
 

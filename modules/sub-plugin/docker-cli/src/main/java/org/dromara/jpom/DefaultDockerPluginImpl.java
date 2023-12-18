@@ -523,7 +523,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         ListVolumesCmd listVolumesCmd = dockerClient.listVolumesCmd();
         Boolean dangling = Convert.toBool(parameter.get("dangling"), false);
         if (dangling) {
-            listVolumesCmd.withDanglingFilter(dangling);
+            listVolumesCmd.withDanglingFilter(true);
         }
         String name = (String) parameter.get("name");
         if (StrUtil.isNotEmpty(name)) {

@@ -64,17 +64,15 @@ public class TestJarLoader {
                     classAnnotationMap.put(c, classAnnos);
                     Method[] classMethods = c.getDeclaredMethods();
                     Map<Method, Annotation[]> methodAnnoMap = new HashMap<Method, Annotation[]>();
-                    for (int i = 0; i < classMethods.length; i++) {
-                        Annotation[] a = classMethods[i].getDeclaredAnnotations();
-                        methodAnnoMap.put(classMethods[i], a);
+                    for (Method classMethod : classMethods) {
+                        Annotation[] a = classMethod.getDeclaredAnnotations();
+                        methodAnnoMap.put(classMethod, a);
                     }
                     classMethodAnnoMap.put(c, methodAnnoMap);
                 }
             }
             System.out.println(classes.size());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }

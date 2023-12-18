@@ -418,7 +418,7 @@ public abstract class AbstractProjectCommander {
         String lib = nodeProjectInfoModel.allLib();
         File fileLib = new File(lib);
         File[] files = fileLib.listFiles();
-        if (files == null || files.length <= 0) {
+        if (files == null || files.length == 0) {
             return "项目目录没有任何文件,请先到项目文件管理中上传文件";
         }
         //
@@ -435,7 +435,7 @@ public abstract class AbstractProjectCommander {
             }
         } else if (runMode == RunMode.Jar || runMode == RunMode.JarWar) {
             List<File> fileList = NodeProjectInfoModel.listJars(nodeProjectInfoModel);
-            if (fileList.size() <= 0) {
+            if (fileList.isEmpty()) {
                 return String.format("没有%s包,请先到文件管理中上传程序的%s", runMode.name(), runMode.name());
             }
             File jarFile = fileList.get(0);

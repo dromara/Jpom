@@ -68,7 +68,7 @@ public class NginxService extends BaseDataService {
         //
         File normalize = FileUtil.file(realPath, fileName);
         File[] files = FileUtil.ls(normalize.getAbsolutePath());
-        if (files == null || files.length <= 0) {
+        if (files == null || files.length == 0) {
             return null;
         }
         String[] suffixes = Convert.toBool(showAll, false) ? new String[]{".conf", ".conf_back"} : new String[]{".conf"};
@@ -148,7 +148,7 @@ public class NginxService extends BaseDataService {
         }
         String absolutePath = parentFile.getAbsolutePath();
         File[] files = FileUtil.ls(absolutePath);
-        if (files == null || files.length <= 0) {
+        if (files == null || files.length == 0) {
             return null;
         }
         JSONObject object = new JSONObject();

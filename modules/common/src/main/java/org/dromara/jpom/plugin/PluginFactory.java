@@ -126,7 +126,7 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
                     continue;
                 }
                 File[] listFiles = lib.listFiles((dir, name) -> StrUtil.endWith(name, FileUtil.JAR_FILE_EXT, true));
-                if (listFiles == null || listFiles.length <= 0) {
+                if (listFiles == null || listFiles.length == 0) {
                     continue;
                 }
                 addPlugin(file.getName(), lib);

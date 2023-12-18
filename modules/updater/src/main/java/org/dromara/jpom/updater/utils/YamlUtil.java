@@ -122,7 +122,7 @@ public class YamlUtil {
             yaml.dump(properties, new FileWriter(f));
             return true;
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
         return false;
     }

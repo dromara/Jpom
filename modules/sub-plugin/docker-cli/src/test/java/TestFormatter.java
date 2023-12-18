@@ -33,7 +33,7 @@ public class TestFormatter {
 
     @Test
     public void test() {
-        System.out.println(String.format("${a}", "1"));
+        System.out.printf("${a}%n", "1");
         Formatter formatter = new Formatter();
         System.out.println(formatter.format("${a}", "1"));
     }
