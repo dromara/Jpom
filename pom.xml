@@ -35,7 +35,6 @@
         <module>modules/sub-plugin</module>
         <module>modules/agent-transport</module>
         <module>modules/storage-module</module>
-        <module>modules/updater</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
