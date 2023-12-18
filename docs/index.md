@@ -46,7 +46,7 @@ features: # 可选的
 
 # 文章列表显示方式: detailed 默认，显示详细版文章列表（包括作者、分类、标签、摘要、分页等）| simple => 显示简约版文章列表（仅标题和日期）| none 不显示文章列表
 postList: none
-notices: # 可选的
+notices-2: # 可选的
   - id: jpom-2.10.38
     title: 📢 Jpom v2.10.38 发布！
     content: '<div><p>2023-03-31</p><ul><li>支持 oauth2 登录（maxkey、gitee、github）</li><li>脚本、仓库支持全局共享</li><li>文件管理发布支持发布到节点指定目录 </li></ul></div><p style="text-align: right;"><a href="/pages/changelog/new/">查看详情</a>&nbsp;&nbsp;<a href="/pages/all-downloads/">下载安装包</a></p>'
@@ -374,7 +374,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/sa-token.png')" alt="一个轻量级 java 权限认证框架，让鉴权变得简单、优雅！">
 </a>
 <a class="friends-item" href="https://liteflow.yomahub.com/" target="_blank">
-	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/liteflow2.png')" alt="轻量，快速，稳定，可编排的组件式流程引擎">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/liteflow-logo.png')" alt="轻量，快速，稳定，可编排的组件式流程引擎">
 </a>
 <a class="friends-item" href="https://jpom.top/" target="_blank">
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/jpom-logo.svg')" alt="一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件">
