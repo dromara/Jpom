@@ -737,4 +737,16 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
             return null;
         }
     }
+
+    /**
+     * 导入镜像
+     *
+     * @param parameter 参数
+     */
+    private void loadImageCmd(Map<String, Object> parameter) {
+        DockerClient dockerClient = DockerUtil.get(parameter);
+        InputStream inputStream = (InputStream) parameter.get("stream");
+        //
+        dockerClient.loadImageCmd(inputStream).exec();
+    }
 }

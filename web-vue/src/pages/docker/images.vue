@@ -14,13 +14,19 @@
           </div>
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           <a-button type="danger" :disabled="!tableSelections || !tableSelections.length" @click="batchDelete">批量删除</a-button>
-        </a-space>
-        |
 
-        <a-input-search v-model="pullImageName" @search="pullImage" style="width: 260px" placeholder="要拉取的镜像名称" class="search-input-item">
-          <a-button slot="enterButton"> <a-icon type="cloud-download" /> </a-button>
-        </a-input-search>
-        <!-- <a-button type="primary" @click="pullImage">拉取</a-button> -->
+          |
+
+          <a-input-search v-model="pullImageName" @search="pullImage" style="width: 260px" placeholder="要拉取的镜像名称" class="search-input-item">
+            <a-button slot="enterButton"> <a-icon type="cloud-download" /> </a-button>
+          </a-input-search>
+          <!-- <a-button type="primary" @click="pullImage">拉取</a-button> -->
+
+          <a-upload name="file" accept=".tar" action="" :disabled="!!percentage" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
+            <a-icon type="loading" v-if="percentage" />
+            <a-button type="primary" v-else icon="upload"> 导入 </a-button>
+          </a-upload>
+        </a-space>
       </template>
 
       <a-tooltip slot="repoTags" slot-scope="text" placement="topLeft" :title="(text || []).join(',')">
@@ -100,7 +106,7 @@
 </template>
 <script>
 import { parseTime, renderSize } from "@/utils/const";
-import { dockerImageCreateContainer, dockerImagePullImage, dockerImageRemove, dockerImagesList, dockerImageBatchRemove, dockerImageSaveImage } from "@/api/docker-api";
+import { dockerImageCreateContainer, dockerImagePullImage, dockerImageRemove, dockerImagesList, dockerImageBatchRemove, dockerImageSaveImage, dockerImageLoadImage } from "@/api/docker-api";
 import PullImageLog from "@/pages/docker/pull-image-log";
 import BuildContainer from "./buildContainer.vue";
 
@@ -168,6 +174,7 @@ export default {
       },
       buildVisible: false,
       tableSelections: [],
+      percentage: 0,
     };
   },
   computed: {
@@ -357,6 +364,26 @@ export default {
           });
         },
       });
+    },
+    // 导入镜像
+    beforeUpload(file) {
+      this.percentage = 1;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("id", this.reqDataId);
+      // 上传文件
+      dockerImageLoadImage(this.urlPrefix, formData)
+        .then((res) => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg,
+            });
+            this.loadData();
+          }
+        })
+        .finally(() => {
+          this.percentage = 0;
+        });
     },
   },
 };

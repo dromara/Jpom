@@ -26,6 +26,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
@@ -46,6 +47,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -179,6 +181,24 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
             log.error("导出镜像异常", e);
             ServletUtil.write(response, new JsonMessage<>(500, "导出镜像异常").toString(), MediaType.APPLICATION_JSON_VALUE);
         }
+    }
+
+    /**
+     *
+     */
+    @PostMapping(value = "load-image", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public IJsonMessage<String> loadImage(@ValidatorItem String id,
+                                          MultipartFile file) throws Exception {
+        String originalFilename = file.getOriginalFilename();
+        String extName = FileUtil.extName(originalFilename);
+        Assert.state(StrUtil.equalsIgnoreCase(extName, "tar"), "只支持tar文件");
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = this.toDockerParameter(id);
+        parameter.put("stream", file.getInputStream());
+        //
+        plugin.execute("loadImage", parameter);
+        return new JsonMessage<>(200, "导入成功");
     }
 
     /**

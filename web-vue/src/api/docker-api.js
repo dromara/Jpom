@@ -278,6 +278,27 @@ export function dockerImageSaveImage(urlPrefix, params) {
 }
 
 /**
+ * 导入镜像到容器 节点
+ * @param {
+ *  file: 文件 multipart/form-data,
+ *  id: 容器ID,
+ *
+ * } formData
+ */
+export function dockerImageLoadImage(baseUrl, formData) {
+  return axios({
+    url: baseUrl + "/images/load-image",
+    headers: {
+      "Content-Type": "multipart/form-data;charset=UTF-8",
+    },
+    method: "post",
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData,
+  });
+}
+
+/**
  * 拉取镜像日志
  * @param {JSON} params
  */
