@@ -380,7 +380,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/jpom-logo.svg')" alt="一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件">
 </a>
 <a class="friends-item" href="https://gitee.com/dromara/TLog" target="_blank">
-	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/tlog2.png')" alt="一个轻量级的分布式日志标记追踪神器，10分钟即可接入，自动对日志打标签完成微服务的链路追踪">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/tlog-logo.png')" alt="一个轻量级的分布式日志标记追踪神器，10分钟即可接入，自动对日志打标签完成微服务的链路追踪">
 </a>
 <a class="friends-item" href="https://easy-es.cn/" target="_blank">
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/easy-es2.png')" alt="🚀傻瓜级ElasticSearch搜索引擎ORM框架">
