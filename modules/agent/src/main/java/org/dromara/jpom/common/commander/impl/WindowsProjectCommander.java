@@ -98,7 +98,7 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
         }
         String result = CommandUtil.execSystemCommand(cmd);
         List<String> netList = StrSplitter.splitTrim(result, StrUtil.LF, true);
-        if (netList == null || netList.size() <= 0) {
+        if (netList == null || netList.isEmpty()) {
             return null;
         }
         List<NetstatModel> array = new ArrayList<>();

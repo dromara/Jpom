@@ -45,7 +45,7 @@ public enum JpomTypeEnum {
      */
     UNKNOWN("Unknown");
 
-    String desc;
+    final String desc;
 
     JpomTypeEnum(String desc) {
         this.desc = desc;

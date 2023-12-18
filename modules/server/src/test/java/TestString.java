@@ -182,7 +182,7 @@ public class TestString {
     @Test
     public void testArrayList() {
         ArrayList<Integer> integers = CollUtil.newArrayList(1, 2);
-        System.out.println(CollUtil.sub(integers, 0 + 1, integers.size()));
+        System.out.println(CollUtil.sub(integers, 1, integers.size()));
     }
 
     @Test

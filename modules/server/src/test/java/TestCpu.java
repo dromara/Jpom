@@ -49,8 +49,8 @@ public class TestCpu {
         // 剩余的物理内存
         long freePhysicalMemorySize = osmxb.getFreePhysicalMemorySize();
 
-        Double compare = (1 - freePhysicalMemorySize * 1.0 / totalvirtualMemory) * 100;
-        return "内存已使用:" + compare.intValue() + "%";
+        double compare = (1 - freePhysicalMemorySize * 1.0 / totalvirtualMemory) * 100;
+        return "内存已使用:" + (int) compare + "%";
     }
 
     public static String getCpuRatio() {
@@ -102,16 +102,16 @@ public class TestCpu {
                 String s1 = substring(line, kmtidx, rocidx - 1).trim();
                 String s2 = substring(line, umtidx, wocidx - 1).trim();
                 if (caption.equals("System Idle Process") || caption.equals("System")) {
-                    if (s1.length() > 0)
-                        idletime += Long.valueOf(s1);
-                    if (s2.length() > 0)
-                        idletime += Long.valueOf(s2);
+                    if (!s1.isEmpty())
+                        idletime += Long.parseLong(s1);
+                    if (!s2.isEmpty())
+                        idletime += Long.parseLong(s2);
                     continue;
                 }
-                if (s1.length() > 0)
-                    kneltime += Long.valueOf(s1);
-                if (s2.length() > 0)
-                    usertime += Long.valueOf(s2);
+                if (!s1.isEmpty())
+                    kneltime += Long.parseLong(s1);
+                if (!s2.isEmpty())
+                    usertime += Long.parseLong(s2);
             }
             retn[0] = idletime;
             retn[1] = kneltime + usertime;

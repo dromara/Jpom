@@ -210,7 +210,7 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      */
     public static String getClassPathLib(NodeProjectInfoModel nodeProjectInfoModel) {
         List<File> files = listJars(nodeProjectInfoModel);
-        if (files.size() <= 0) {
+        if (files.size() == 0) {
             return "";
         }
         // 获取lib下面的所有jar包

@@ -63,7 +63,7 @@ public class TestStr {
 
     @Test
     public void test2() {
-        System.out.println(String.format("%.2f", (float) 1 / (float) 2 * 100));
+        System.out.printf("%.2f%n", (float) 1 / (float) 2 * 100);
         System.out.println(NumberUtil.div(1, 2));
     }
 

@@ -134,9 +134,7 @@ public class Test {
 	public void tset() {
 		ListImagesCmd listImagesCmd = dockerClient.listImagesCmd();
 		List<Image> exec = listImagesCmd.exec();
-		exec.forEach(image -> {
-			System.out.println(image);
-		});
+		exec.forEach(System.out::println);
 	}
 
 	@org.junit.Test
