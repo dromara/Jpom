@@ -25,6 +25,7 @@ package org.dromara.jpom.build;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
@@ -35,6 +36,7 @@ import cn.keepbx.jpom.plugins.IPlugin;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.IDockerConfigPlugin;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.plugin.PluginFactory;
@@ -43,6 +45,7 @@ import org.dromara.jpom.util.StringUtil;
 import org.springframework.util.Assert;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -96,17 +99,30 @@ public class DockerYmlDsl extends BaseJsonModel {
      */
     private Map<String, String> env;
 
-    public void check(DockerInfoService dockerInfoService, MachineDockerServer machineDockerServer, String workspaceId) {
+    /**
+     * 验证信息是否正确
+     *
+     * @param dockerInfoService   容器server
+     * @param machineDockerServer 机器server
+     * @param workspaceId         工作空间id
+     * @param plugin              插件
+     */
+    public void check(DockerInfoService dockerInfoService,
+                      MachineDockerServer machineDockerServer,
+                      String workspaceId,
+                      IDockerConfigPlugin plugin) {
         Assert.hasText(runsOn, "请填写runsOn。");
         Validator.validateMatchRegex(StringUtil.GENERAL_STR, runsOn, "runsOn 镜像名称不合法");
         Assert.state(CollUtil.isNotEmpty(steps), "请填写 steps");
-        stepsCheck(dockerInfoService, machineDockerServer, workspaceId);
+        this.stepsCheck(dockerInfoService, machineDockerServer, workspaceId, plugin);
     }
 
     /**
      * 检查 steps
      */
-    private void stepsCheck(DockerInfoService dockerInfoService, MachineDockerServer machineDockerServer, String workspaceId) {
+    private void stepsCheck(DockerInfoService dockerInfoService, MachineDockerServer machineDockerServer,
+                            String workspaceId,
+                            IDockerConfigPlugin plugin) {
         Set<String> usesSet = new HashSet<>();
         boolean containsRun = false;
         for (Map<String, Object> step : steps) {
@@ -117,10 +133,8 @@ public class DockerYmlDsl extends BaseJsonModel {
                 Assert.isInstanceOf(Map.class, step.get("env"), "env 必须是 map 类型");
             }
             if (step.containsKey("uses")) {
-                List<String> supportedPlugins = ListUtil.of("node", "java", "maven", "cache", "go", "python3", "gradle");
                 Assert.isInstanceOf(String.class, step.get("uses"), "uses 只支持 String 类型");
                 String uses = (String) step.get("uses");
-                Assert.isTrue(supportedPlugins.contains(uses), String.format("目前仅支持的插件: %s", supportedPlugins));
                 if ("node".equals(uses)) {
                     nodePluginCheck(step);
                 } else if ("java".equals(uses)) {
@@ -135,6 +149,16 @@ public class DockerYmlDsl extends BaseJsonModel {
                     goPluginCheck(step);
                 } else if ("python3".equals(uses)) {
                     python3PluginCheck(step);
+                } else {
+                    // 其他自定义插件
+                    File tmpDir = FileUtil.file(FileUtil.getTmpDir(), "check-users");
+                    File pluginInstallResource = null;
+                    try {
+                        pluginInstallResource = plugin.getResourceToFile("uses/" + uses + "/install.sh", tmpDir);
+                        Assert.notNull(pluginInstallResource, "当前还不支持" + uses + "插件");
+                    } finally {
+                        FileUtil.del(pluginInstallResource);
+                    }
                 }
                 usesSet.add(uses);
             }

@@ -56,6 +56,9 @@ public interface IDockerConfigPlugin extends IDefaultPlugin {
      */
     default File getResourceToFile(String name, File tempDir) {
         InputStream stream = this.getConfigResourceInputStream(name);
+        if (stream == null) {
+            return null;
+        }
         File tempFile = DockerUtil.createTemp(name, tempDir);
         FileUtil.writeFromStream(stream, tempFile);
         return tempFile;

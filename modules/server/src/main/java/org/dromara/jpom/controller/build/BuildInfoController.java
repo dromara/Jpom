@@ -36,6 +36,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import org.dromara.jpom.IDockerConfigPlugin;
 import org.dromara.jpom.build.BuildExecuteService;
 import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.build.DockerYmlDsl;
@@ -190,17 +191,17 @@ public class BuildInfoController extends BaseServerController {
     @RequestMapping(value = "/build/edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> updateBuild(String id,
-                                           @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建名称不能为空") String name,
-                                           @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库信息不能为空") String repositoryId,
-                                           @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空,长度1-200", range = "1:200") String resultDirFile,
-                                           @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空") String script,
-                                           @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
-                                           String branchName, String branchTagName, String webhook, String autoBuildCron,
-                                           String extraData, String group,
-                                           @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "构建方式不正确") int buildMode,
-                                           String aliasCode,
-                                           @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "请填写正确的保留天数") Integer resultKeepDay,
-                                           HttpServletRequest request) {
+                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建名称不能为空") String name,
+                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库信息不能为空") String repositoryId,
+                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空,长度1-200", range = "1:200") String resultDirFile,
+                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空") String script,
+                                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
+                                            String branchName, String branchTagName, String webhook, String autoBuildCron,
+                                            String extraData, String group,
+                                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "构建方式不正确") int buildMode,
+                                            String aliasCode,
+                                            @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "请填写正确的保留天数") Integer resultKeepDay,
+                                            HttpServletRequest request) {
         // 根据 repositoryId 查询仓库信息
         RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, request);
         Assert.notNull(repositoryModel, "无效的仓库信息");
@@ -300,7 +301,9 @@ public class BuildInfoController extends BaseServerController {
     private void checkDocker(String script, HttpServletRequest request) {
         String workspaceId = buildInfoService.getCheckUserWorkspace(request);
         DockerYmlDsl build = DockerYmlDsl.build(script);
-        build.check(dockerInfoService, machineDockerServer, workspaceId);
+        //
+        IDockerConfigPlugin plugin = (IDockerConfigPlugin) PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        build.check(dockerInfoService, machineDockerServer, workspaceId, plugin);
         //
         String fromTag = build.getFromTag();
         if (StrUtil.isNotEmpty(fromTag)) {
