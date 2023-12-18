@@ -439,6 +439,9 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 <a class="friends-item" href="https://gitee.com/dromara/go-view" target="_blank">
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/goview-logo.png')" alt="让每一位开源爱好者，体会到开源的快乐。">
 </a>
+<a class="friends-item" href="https://akali.yomahub.com/" target="_blank">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/akali-logo.png')" alt="轻量级本地化热点检测/降级框架">
+</a>
 </p>
 
 ## 🧲友情链接
