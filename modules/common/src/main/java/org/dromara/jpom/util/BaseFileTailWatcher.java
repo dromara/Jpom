@@ -118,7 +118,7 @@ public abstract class BaseFileTailWatcher<T> {
             return false;
         }
         if (this.socketSessions.add(session)) {
-            this.send(session, StrUtil.format("监听{}日志成功,目前共有{}人正在查看", name, this.socketSessions.size()));
+            this.send(session, StrUtil.format("监听{}日志成功,目前共有{}个会话正在查看", name, this.socketSessions.size()));
             // 开发发送头信息
             for (String s : limitQueue) {
                 this.send(session, s);
