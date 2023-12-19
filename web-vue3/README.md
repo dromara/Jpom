@@ -1,4 +1,4 @@
-## 项目介绍
+## 项目介绍（未开发完成请勿使用）
 
 本项目采用 [Vue3](https://cn.vuejs.org/guide/introduction.html#what-is-vue) + [Vite](https://vitejs.dev/) + [TypeScript](https://www.typescriptlang.org/) + [Antdv](https://antdv.com/docs/vue/getting-started-cn) + [Pinia](https://pinia.vuejs.org/)构建。
 
