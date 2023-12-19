@@ -372,13 +372,9 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return build.runProcess(opt);
     }
 
+    @EqualsAndHashCode(callSuper = true)
     @Data
     public static class JavaCopyItem extends BaseJsonModel {
-        /**
-         * 父级项目id
-         */
-        @Deprecated
-        private String parendId;
         /**
          * 名称
          */
@@ -426,40 +422,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
                 return id;
             }
             return StrUtil.format("{}:{}", id, copyId);
-        }
-
-        @Deprecated
-        public String getParendId() {
-            return parendId;
-        }
-
-        @Deprecated
-        public void setParendId(String parentId) {
-            this.parendId = parentId;
-            this.parentId = parentId;
-        }
-
-        public String getParentId() {
-            return StrUtil.emptyToDefault(this.parentId, this.parendId);
-        }
-
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            JavaCopyItem that = (JavaCopyItem) o;
-            return Objects.equals(parendId, that.parendId) &&
-                Objects.equals(id, that.id);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(parendId, id, jvm, args, modifyTime);
         }
     }
 }

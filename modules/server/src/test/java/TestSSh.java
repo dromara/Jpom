@@ -51,9 +51,7 @@ public class TestSSh {
         channel.setPty(true);
         channel.connect();
         InputStream in = channel.getInputStream();
-        ThreadUtil.execute(() -> {
-            IoUtil.readLines(in, CharsetUtil.CHARSET_UTF_8, (LineHandler) System.out::println);
-        });
+        ThreadUtil.execute(() -> IoUtil.readLines(in, CharsetUtil.CHARSET_UTF_8, (LineHandler) System.out::println));
         ThreadUtil.execute(() -> {
             try {
                 IoUtil.readLines(channel.getExtInputStream(), CharsetUtil.CHARSET_UTF_8, (LineHandler) System.out::println);
@@ -108,12 +106,7 @@ public class TestSSh {
 //        });
         InputStream inputStream = channel.getInputStream();
         channel.connect();
-        IoUtil.readLines(inputStream, CharsetUtil.CHARSET_UTF_8, new LineHandler() {
-            @Override
-            public void handle(String line) {
-                System.out.println(line);
-            }
-        });
+        IoUtil.readLines(inputStream, CharsetUtil.CHARSET_UTF_8, (LineHandler) System.out::println);
         int exitStatus = channel.getExitStatus();
         System.out.println(exitStatus);
         channel.disconnect();

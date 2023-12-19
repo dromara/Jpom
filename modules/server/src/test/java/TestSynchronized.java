@@ -41,12 +41,8 @@ public class TestSynchronized {
             User u1 = new User(50);
             User u2 = new User(50);
             log.info("第 - {} - 次", i);
-            Thread thread = new Thread(() -> {
-                u1.hit(u2);
-            }, "A");
-            Thread thread1 = new Thread(() -> {
-                u2.hit(u1);
-            }, "B");
+            Thread thread = new Thread(() -> u1.hit(u2), "A");
+            Thread thread1 = new Thread(() -> u2.hit(u1), "B");
             thread1.start();
             thread.start();
 

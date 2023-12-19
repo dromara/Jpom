@@ -41,9 +41,9 @@ public class TestJarLoader {
         ZipEntry zipEntry = jarFile1.getEntry("BOOT-INF/classes/cn/keepbx/jpom/common/interceptor/NotAuthorize.class");
         System.out.println(zipEntry);
         String path = "D:\\Idea\\Jpom\\modules\\agent\\target\\agent-2.4.2.jar";//外部jar包的路径
-        Set<Class<?>> classes = new LinkedHashSet<Class<?>>();//所有的Class对象
-        Map<Class<?>, Annotation[]> classAnnotationMap = new HashMap<Class<?>, Annotation[]>();//每个Class对象上的注释对象
-        Map<Class<?>, Map<Method, Annotation[]>> classMethodAnnoMap = new HashMap<Class<?>, Map<Method, Annotation[]>>();//每个Class对象中每个方法上的注释对象
+        Set<Class<?>> classes = new LinkedHashSet<>();//所有的Class对象
+        Map<Class<?>, Annotation[]> classAnnotationMap = new HashMap<>();//每个Class对象上的注释对象
+        Map<Class<?>, Map<Method, Annotation[]>> classMethodAnnoMap = new HashMap<>();//每个Class对象中每个方法上的注释对象
         try {
             JarFile jarFile = new JarFile(new File(path));
             URL url = new URL("file:" + path);
@@ -63,7 +63,7 @@ public class TestJarLoader {
                     Annotation[] classAnnos = c.getDeclaredAnnotations();
                     classAnnotationMap.put(c, classAnnos);
                     Method[] classMethods = c.getDeclaredMethods();
-                    Map<Method, Annotation[]> methodAnnoMap = new HashMap<Method, Annotation[]>();
+                    Map<Method, Annotation[]> methodAnnoMap = new HashMap<>();
                     for (Method classMethod : classMethods) {
                         Annotation[] a = classMethod.getDeclaredAnnotations();
                         methodAnnoMap.put(classMethod, a);
