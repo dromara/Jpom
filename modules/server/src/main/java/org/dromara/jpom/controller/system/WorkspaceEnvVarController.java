@@ -23,8 +23,10 @@
 package org.dromara.jpom.controller.system;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.keepbx.jpom.IJsonMessage;
@@ -32,6 +34,8 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -39,20 +43,21 @@ import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.WorkspaceEnvVarModel;
+import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
+import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author bwcx_jzy
@@ -65,9 +70,12 @@ import java.util.List;
 public class WorkspaceEnvVarController extends BaseServerController {
 
     private final WorkspaceEnvVarService workspaceEnvVarService;
+    private final TriggerTokenLogServer triggerTokenLogServer;
 
-    public WorkspaceEnvVarController(WorkspaceEnvVarService workspaceEnvVarService) {
+    public WorkspaceEnvVarController(WorkspaceEnvVarService workspaceEnvVarService,
+                                     TriggerTokenLogServer triggerTokenLogServer) {
         this.workspaceEnvVarService = workspaceEnvVarService;
+        this.triggerTokenLogServer = triggerTokenLogServer;
     }
 
     /**
@@ -118,12 +126,12 @@ public class WorkspaceEnvVarController extends BaseServerController {
     @PostMapping(value = "/edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Object> edit(String id,
-                                    @ValidatorItem String workspaceId,
-                                    @ValidatorItem String name,
-                                    String value,
-                                    @ValidatorItem String description,
-                                    String privacy,
-                                    String nodeIds) {
+                                     @ValidatorItem String workspaceId,
+                                     @ValidatorItem String name,
+                                     String value,
+                                     @ValidatorItem String description,
+                                     String privacy,
+                                     String nodeIds) {
         if (!getUser().isSystemUser()) {
             Assert.state(!StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL), "全局工作空间变量请到系统管理修改");
         }
@@ -233,7 +241,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
     @GetMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id,
-                                      @ValidatorItem String workspaceId) {
+                                       @ValidatorItem String workspaceId) {
         if (!getUser().isSystemUser()) {
             Assert.state(!StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL), "全局工作空间变量请到系统管理修改");
         }
@@ -247,5 +255,49 @@ public class WorkspaceEnvVarController extends BaseServerController {
         // 删除信息
         workspaceEnvVarService.delByKey(id);
         return JsonMessage.success("删除成功");
+    }
+
+    /**
+     * get a trigger url
+     *
+     * @param id id
+     * @return json
+     */
+    @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public IJsonMessage<Map<String, String>> getTriggerUrl(@ValidatorItem String id, @ValidatorItem String workspaceId, String rest) {
+        workspaceEnvVarService.checkUserWorkspace(workspaceId);
+        WorkspaceEnvVarModel item = workspaceEnvVarService.getByKey(id);
+        Assert.notNull(item, "没有对应的环境变量");
+        Assert.state(StrUtil.equals(workspaceId, item.getWorkspaceId()), "选择工作空间错误");
+        //
+        Assert.state(ObjectUtil.defaultIfNull(item.getPrivacy(), -1) == 0, "隐私变量不能生成触发器");
+        UserModel user = getUser();
+        WorkspaceEnvVarModel updateInfo;
+        if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
+            updateInfo = new WorkspaceEnvVarModel();
+            updateInfo.setId(id);
+            updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), workspaceEnvVarService.typeName(),
+                item.getId(), user.getId()));
+            workspaceEnvVarService.updateById(updateInfo);
+        } else {
+            updateInfo = item;
+        }
+        Map<String, String> map = this.getBuildToken(updateInfo);
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+    }
+
+    private Map<String, String> getBuildToken(WorkspaceEnvVarModel item) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
+        String url = ServerOpenApi.SERVER_ENV_VAR_TRIGGER_URL.
+            replace("{id}", item.getId()).
+            replace("{token}", item.getTriggerToken());
+        String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
+        Map<String, String> map = new HashMap<>(10);
+        map.put("triggerUrl", FileUtil.normalize(triggerBuildUrl));
+
+        map.put("id", item.getId());
+        map.put("token", item.getTriggerToken());
+        return map;
     }
 }

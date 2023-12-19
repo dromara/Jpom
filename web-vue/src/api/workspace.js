@@ -127,6 +127,14 @@ export function deleteWorkspaceEnv(params) {
   });
 }
 
+export function getTriggerUrlWorkspaceEnv(params) {
+  return axios({
+    url: "/system/workspace_env/trigger-url",
+    method: "post",
+    params: params,
+  });
+}
+
 /**
  * 加载 菜单配置信息
  */

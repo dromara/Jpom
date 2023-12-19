@@ -31,6 +31,7 @@ import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.WorkspaceEnvVarModel;
+import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +44,7 @@ import java.util.Map;
  * @since 2021/12/10
  */
 @Service
-public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVarModel> {
+public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVarModel> implements ITriggerToken {
 
 
     /**
@@ -118,5 +119,10 @@ public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVar
         entity.set("workspaceId", split);
         List<Entity> entities = super.queryList(entity);
         return super.entityToBeanList(entities);
+    }
+
+    @Override
+    public String typeName() {
+        return getTableName();
     }
 }
