@@ -47,6 +47,7 @@ import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.model.data.BuildInfoModel;
+import org.dromara.jpom.model.data.CommandExecLogModel;
 import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
@@ -940,6 +941,25 @@ public class BuildExecuteManage implements Runnable {
         if (StrUtil.isEmpty(noticeScriptId)) {
             return null;
         }
+        List<String> list = StrUtil.splitTrim(noticeScriptId, StrUtil.COMMA);
+        for (String noticeScriptIdItem : list) {
+            String error = this.noticeScript(noticeScriptIdItem, type, map);
+            if (error != null) {
+                return error;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 执行事件脚本
+     *
+     * @param noticeScriptId 脚本id
+     * @param type           事件类型
+     * @param map            相关参数
+     * @return 是否还继续整个构建流程
+     */
+    private String noticeScript(String noticeScriptId, String type, Map<String, Object> map) {
         ScriptModel scriptModel = scriptServer.getByKey(noticeScriptId);
         if (scriptModel == null) {
             logRecorder.systemWarning("事件脚本不存在:{} {}", type, noticeScriptId);
@@ -953,7 +973,7 @@ public class BuildExecuteManage implements Runnable {
         logRecorder.system("开始执行事件脚本： {}", type);
         // 环境变量
         Map<String, String> environment = taskData.environmentMapBuilder.environment(map);
-        ScriptExecuteLogModel logModel = scriptExecuteLogServer.create(scriptModel, 1, this.taskData.buildInfoModel.getWorkspaceId());
+        ScriptExecuteLogModel logModel = scriptExecuteLogServer.create(scriptModel, 3, this.taskData.buildInfoModel.getWorkspaceId());
         File logFile = scriptModel.logFile(logModel.getId());
         File scriptFile = null;
         LogRecorder scriptLog = LogRecorder.builder().file(logFile).build();
@@ -961,6 +981,7 @@ public class BuildExecuteManage implements Runnable {
         try {
             // 创建执行器
             scriptFile = scriptModel.scriptFile();
+            scriptExecuteLogServer.updateStatus(logModel.getId(), CommandExecLogModel.Status.ING);
             int waitFor = JpomApplication.getInstance().execScript(scriptModel.getContext(), file -> {
                 try {
                     // 输出环境变量
@@ -975,10 +996,12 @@ public class BuildExecuteManage implements Runnable {
                         lastMsg[0] = s;
                     });
                 } catch (IOException | InterruptedException e) {
+                    scriptExecuteLogServer.updateStatus(logModel.getId(), CommandExecLogModel.Status.ERROR);
                     throw Lombok.sneakyThrow(e);
                 }
             });
             logRecorder.system("执行 {} 类型脚本的退出码是：{}", type, waitFor);
+            scriptExecuteLogServer.updateStatus(logModel.getId(), CommandExecLogModel.Status.DONE, waitFor);
             // 判断是否为严格执行
             if (buildExtraModule.strictlyEnforce() && waitFor != 0) {
                 //logRecorder.systemError("严格执行模式，事件脚本返回状态码异常");

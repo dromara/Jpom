@@ -83,7 +83,7 @@ export default {
     return {
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-      triggerExecTypeMap: triggerExecTypeMap,
+      triggerExecTypeMap,
       statusMap,
       list: [],
       temp: {},

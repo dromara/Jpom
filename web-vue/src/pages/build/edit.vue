@@ -848,7 +848,9 @@
     >
       <scriptPage
         v-if="chooseScriptVisible"
-        choose="radio"
+        :choose="this.chooseScriptVisible === 1 ? 'checkbox' : 'radio'"
+        :choose-val="this.chooseScriptVisible === 1 ? this.tempExtraData.noticeScriptId : this.temp.script.indexOf('$ref.script.') != -1 ? this.temp.script.replace('$ref.script.') : ''"
+        mode="choose"
         @confirm="
           (id) => {
             if (this.chooseScriptVisible === 1) {

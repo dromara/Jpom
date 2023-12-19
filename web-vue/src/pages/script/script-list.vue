@@ -12,7 +12,7 @@
             <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="createScript">新建脚本</a-button>
-          <a-button type="primary" v-if="this.choose === 'checkbox'" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
+          <a-button type="primary" v-if="mode === 'manage'" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
           <a-tooltip>
             <template slot="title">
               <div>脚本模版是存储在服务端中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
@@ -42,7 +42,7 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <template v-if="choose === 'checkbox'">
+          <template v-if="mode === 'manage'">
             <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
             <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
             <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
@@ -251,7 +251,7 @@
     >
       <script-log v-if="drawerLogVisible" :scriptId="temp.id" />
     </a-drawer>
-    <div style="padding-top: 50px" v-if="this.choose === 'radio'">
+    <div style="padding-top: 50px" v-if="mode === 'choose'">
       <div
         :style="{
           position: 'absolute',
@@ -303,6 +303,15 @@ export default {
       default: "checkbox",
       // "radio" ,"checkbox"
     },
+    mode: {
+      // choose、manage
+      type: String,
+      default: "manage",
+    },
+    chooseVal: {
+      type: String,
+      default: "",
+    },
   },
   data() {
     return {
@@ -341,7 +350,7 @@ export default {
         { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
         { title: "最后执行人", dataIndex: "lastRunUser", ellipsis: true, width: "120px", scopedSlots: { customRender: "tooltip" } },
-        this.choose === "checkbox"
+        this.mode === "manage"
           ? { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "240px" }
           : { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "100px" },
       ],
@@ -370,6 +379,14 @@ export default {
         selectedRowKeys: this.tableSelections,
         type: this.choose,
       };
+    },
+  },
+  watch: {
+    chooseVal: {
+      handler(v) {
+        this.tableSelections = (v || "").split(",");
+      },
+      immediate: true,
     },
   },
   created() {
@@ -623,11 +640,14 @@ export default {
         });
         return;
       }
-      const selectData = this.list.filter((item) => {
-        return item.id === this.tableSelections[0];
-      })[0];
-
-      this.$emit("confirm", `${selectData.id}`);
+      if (this.choose === "checkbox") {
+        this.$emit("confirm", this.tableSelections.join(","));
+      } else {
+        const selectData = this.list.filter((item) => {
+          return item.id === this.tableSelections[0];
+        })[0];
+        this.$emit("confirm", `${selectData.id}`);
+      }
     },
   },
 };
