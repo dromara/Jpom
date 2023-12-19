@@ -45,6 +45,7 @@
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleEnvEdit(record)">编辑</a-button>
+          <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
           <a-button size="small" type="danger" @click="handleEnvDelete(record)">删除</a-button>
         </a-space>
       </template>
@@ -98,13 +99,99 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 触发器 -->
+    <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
+      <a-form-model ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+        <a-tabs default-active-key="1">
+          <template slot="tabBarExtraContent">
+            <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
+              <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
+            </a-tooltip>
+          </template>
+          <a-tab-pane key="1" tab="获取">
+            <a-space style="display: block" direction="vertical" align="baseline">
+              <a-alert message="温馨提示" type="warning">
+                <template slot="description">
+                  <ul>
+                    <li>接口响应 ContentType 均为：text/plain</li>
+                    <li>操作成功接口 HTTP 状态码为 200</li>
+                    <li>修改接口 HTTP 状态码为 200 并且响应内容为：success 才能确定操作成功反之均可能失败</li>
+                    <li>PUT 方式请求接口参数传入到请求体 ContentType 请使用：text/plain</li>
+                  </ul>
+                </template>
+              </a-alert>
+              <a-alert
+                v-clipboard:copy="temp.triggerUrl"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`获取变量值地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
+              <a-alert
+                v-clipboard:copy="temp.triggerUrlPost"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`修改变量值地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>POST</a-tag> <span>{{ temp.triggerUrlPost }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
+              <a-alert
+                v-clipboard:copy="temp.triggerUrl"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`修改变量值地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>PUT</a-tag> <span>{{ temp.triggerUrl }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
+            </a-space>
+          </a-tab-pane>
+        </a-tabs>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
-import { deleteWorkspaceEnv, editWorkspaceEnv, getWorkspaceEnvList } from "@/api/workspace";
+import { deleteWorkspaceEnv, editWorkspaceEnv, getWorkspaceEnvList, getTriggerUrlWorkspaceEnv } from "@/api/workspace";
 import { getNodeListByWorkspace } from "@/api/node";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
-
+import Vue from "vue";
 export default {
   props: {
     workspaceId: {
@@ -124,6 +211,7 @@ export default {
       envVarListQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       editEnvVisible: false,
       envTemp: {},
+      temp: {},
       envVarColumns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "值", dataIndex: "value", ellipsis: true, scopedSlots: { customRender: "value" } },
@@ -140,7 +228,7 @@ export default {
           sorter: true,
           width: "180px",
         },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 120 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "200px" },
       ],
       // 表单校验规则
       rulesEnv: {
@@ -148,6 +236,8 @@ export default {
         description: [{ required: true, message: "请输入变量描述", trigger: "blur" }],
         value: [{ required: true, message: "请输入变量值", trigger: "blur" }],
       },
+      triggerVisible: false,
+      tempVue: null,
     };
   },
   computed: {
@@ -242,6 +332,40 @@ export default {
       this.envVarListQuery = CHANGE_PAGE(this.envVarListQuery, { pagination, sorter });
 
       this.loadDataEnvVar();
+    },
+    // 触发器
+    handleTrigger(record) {
+      this.temp = Object.assign({}, record);
+      this.tempVue = Vue;
+      getTriggerUrlWorkspaceEnv({
+        id: record.id,
+        workspaceId: record.workspaceId,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.fillTriggerResult(res);
+          this.triggerVisible = true;
+        }
+      });
+    },
+    // 重置触发器
+    resetTrigger() {
+      getTriggerUrlWorkspaceEnv({
+        id: this.temp.id,
+        rest: "rest",
+        workspaceId: this.temp.workspaceId,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.fillTriggerResult(res);
+        }
+      });
+    },
+    fillTriggerResult(res) {
+      this.temp.triggerUrl = `${location.protocol}//${location.host}${res.data.triggerUrl}`;
+      this.temp.triggerUrlPost = `${this.temp.triggerUrl}?value=xxxxx`;
+      this.temp = { ...this.temp };
     },
   },
 };

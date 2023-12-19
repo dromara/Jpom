@@ -110,4 +110,9 @@ public class ServerOpenApi {
      * 项目触发器,批量触发
      */
     public static final String SERVER_PROJECT_TRIGGER_BATCH = API + "project_batch";
+
+    /**
+     * 环境变量, 第一级脚本id,第二级token
+     */
+    public static final String SERVER_ENV_VAR_TRIGGER_URL = API + "env-var/{id}/{token}";
 }
