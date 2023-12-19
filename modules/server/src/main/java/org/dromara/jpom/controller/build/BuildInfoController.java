@@ -281,8 +281,11 @@ public class BuildInfoController extends BaseServerController {
         // 验证服务端脚本
         String noticeScriptId = jsonObject.getString("noticeScriptId");
         if (StrUtil.isNotEmpty(noticeScriptId)) {
-            ScriptModel scriptModel = scriptServer.getByKey(noticeScriptId, request);
-            Assert.notNull(scriptModel, "不存在对应的服务端脚本,请重新选择");
+            List<String> list = StrUtil.splitTrim(noticeScriptId, StrUtil.COMMA);
+            for (String noticeScriptIdItem : list) {
+                ScriptModel scriptModel = scriptServer.getByKey(noticeScriptIdItem, request);
+                Assert.notNull(scriptModel, "不存在对应的服务端脚本,请重新选择");
+            }
         }
         buildInfoModel.setExtraData(jsonObject.toJSONString());
 

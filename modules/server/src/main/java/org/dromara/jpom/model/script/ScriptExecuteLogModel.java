@@ -46,7 +46,7 @@ public class ScriptExecuteLogModel extends BaseWorkspaceModel {
      */
     private String scriptName;
     /**
-     * 触发类型 {0，手动，1 自动触发}
+     * 触发类型 {0，手动，1 自动触发，2 触发器，3 构建事件}
      */
     private Integer triggerExecType;
 

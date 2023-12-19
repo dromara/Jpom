@@ -27,7 +27,7 @@ export function editScript(params) {
 /**
  * 删除 Script
  * @param {id} params
- 
+
  * params.id 编辑修改时判断 ID
  */
 export function deleteScript(params) {
@@ -41,7 +41,7 @@ export function deleteScript(params) {
 /**
  * 解绑 Script
  * @param {id} params
- 
+
  * params.id 编辑修改时判断 ID
  */
 export function unbindScript(params) {
@@ -114,4 +114,5 @@ export const triggerExecTypeMap = {
   0: "手动",
   1: "自动",
   2: "触发器",
+  3: "构建事件",
 };
