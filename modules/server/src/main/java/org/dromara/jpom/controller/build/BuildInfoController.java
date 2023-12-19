@@ -432,9 +432,7 @@ public class BuildInfoController extends BaseServerController {
     private void checkProjectSecondaryDirectory(JSONObject jsonObject) {
         //
         String projectSecondaryDirectory = jsonObject.getString("projectSecondaryDirectory");
-        Opt.ofBlankAble(projectSecondaryDirectory).ifPresent(s -> {
-            FileUtils.checkSlip(s, e -> new IllegalArgumentException("二级目录不能越级：" + e.getMessage()));
-        });
+        Opt.ofBlankAble(projectSecondaryDirectory).ifPresent(s -> FileUtils.checkSlip(s, e -> new IllegalArgumentException("二级目录不能越级：" + e.getMessage())));
     }
 
     /**

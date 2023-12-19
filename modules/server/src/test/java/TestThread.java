@@ -58,12 +58,9 @@ public class TestThread implements Callable<String> {
 
         for (int i = 0; i < 5; i++) {
             int finalI = i;
-            executorService.submit(new Callable<Object>() {
-                @Override
-                public Object call() throws Exception {
-                    System.out.println(finalI);
-                    return finalI;
-                }
+            executorService.submit((Callable<Object>) () -> {
+                System.out.println(finalI);
+                return finalI;
             });
         }
 

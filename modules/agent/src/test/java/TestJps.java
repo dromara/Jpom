@@ -84,12 +84,7 @@ public class TestJps {
 //		System.out.println(ReUtil.get(regex, execSystemCommand, 0));
 //		System.out.println("----");
 		final Pattern pattern = PatternPool.get(regex, Pattern.DOTALL);
-		ReUtil.get(pattern, execSystemCommand, new Consumer<Matcher>() {
-			@Override
-			public void accept(Matcher matcher) {
-				System.out.println(matcher.group());
-			}
-		});
+		ReUtil.get(pattern, execSystemCommand, matcher -> System.out.println(matcher.group()));
 //		System.out.println(allGroups);
 		Map<String, String> allGroupNames = ReUtil.getAllGroupNames(pattern, execSystemCommand);
 		for (Map.Entry<String, String> stringStringEntry : allGroupNames.entrySet()) {

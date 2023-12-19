@@ -120,12 +120,7 @@ public class TestBigFileRead {
 
     @Test
     public void testTail() throws IOException {
-        FileUtil.tail(testFile, CharsetUtil.CHARSET_UTF_8, new LineHandler() {
-            @Override
-            public void handle(String line) {
-                System.out.println(line);
-            }
-        });
+        FileUtil.tail(testFile, CharsetUtil.CHARSET_UTF_8, System.out::println);
     }
 
     @Test

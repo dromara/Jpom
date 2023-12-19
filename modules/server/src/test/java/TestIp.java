@@ -40,13 +40,10 @@ public class TestIp {
         System.out.println(NetUtil.getLocalhostStr());
 //		System.out.println(NetUtil.getLocalhost().getHostAddress());
         System.out.println("------");
-        final LinkedHashSet<InetAddress> localAddressList = NetUtil.localAddressList(new Filter<NetworkInterface>() {
-            @Override
-            public boolean accept(NetworkInterface networkInterface) {
-                System.out.println(networkInterface.isVirtual());
-                System.out.println(networkInterface.getIndex());
-                return true;
-            }
+        final LinkedHashSet<InetAddress> localAddressList = NetUtil.localAddressList(networkInterface -> {
+            System.out.println(networkInterface.isVirtual());
+            System.out.println(networkInterface.getIndex());
+            return true;
         }, address -> {
             // 非loopback地址，指127.*.*.*的地址
             return !address.isLoopbackAddress()
