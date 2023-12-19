@@ -4,7 +4,7 @@
 
 ### 🐣 新增功能
 
-1. 【server】新增 容器构建支持自定义插件
+1. 【server】新增 容器构建支持自定义插件（感谢[@远方](https://gitee.com/WaHaHaqqww) [Gitee issues I8PEWI](https://gitee.com/dromara/Jpom/issues/I8PEWI)）
 2. 【server】新增 容器管理新增导出、导入镜像
 3. 【server】新增 环境变量支持触发器获取、修改
 
@@ -12,7 +12,7 @@
 
 1. 【server】升级 数据库 h2 版本
 2. 【server】修复 构建事件脚本未修改执行状态和退出码问题
-3. 【server】优化 构建事件脚本支持多选（感谢@loyal）
+3. 【server】优化 构建事件脚本支持多选（顺序执行其中有一个中断将结束执行后续脚本）（感谢@loyal）
 4. 【server】优化 服务端脚本触发类型新增构建事件
 
 ### ⚠️ 注意

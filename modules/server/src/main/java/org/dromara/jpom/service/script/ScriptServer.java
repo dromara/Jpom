@@ -114,7 +114,7 @@ public class ScriptServer extends BaseGlobalOrWorkspaceService<ScriptModel> impl
         StrUtil.splitTrim(ids, StrUtil.COMMA)
             .forEach(id -> {
                 ScriptModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
-                Assert.notNull(data, "没有对应到脚本信息");
+                Assert.notNull(data, "没有对应到脚本信息或者选择全局脚本");
                 //
                 ScriptModel where = new ScriptModel();
                 where.setWorkspaceId(workspaceId);
