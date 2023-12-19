@@ -326,11 +326,11 @@ export default {
       drawerTitle: "",
       drawerConsoleVisible: false,
       columns: [
-        { title: "id", dataIndex: "id", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
-        { title: "名称", dataIndex: "name", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
-        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
+        { title: "id", dataIndex: "id", ellipsis: true, sorter: true, width: 150, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, sorter: true, width: 150, scopedSlots: { customRender: "tooltip" } },
+        { title: "共享", dataIndex: "workspaceId", sorter: true, ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
         { title: "描述", dataIndex: "description", ellipsis: true, width: 300, scopedSlots: { customRender: "tooltip" } },
-        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
+        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, sorter: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
@@ -384,7 +384,11 @@ export default {
   watch: {
     chooseVal: {
       handler(v) {
-        this.tableSelections = (v || "").split(",");
+        if (v) {
+          this.tableSelections = v.split(",");
+        } else {
+          this.tableSelections = [];
+        }
       },
       immediate: true,
     },
