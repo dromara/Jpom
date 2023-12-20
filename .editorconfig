@@ -42,6 +42,8 @@ max_line_length = off
 insert_final_newline = false
 trim_trailing_whitespace = false
 max_line_length = off
+indent_style = space
+indent_size = 2
 
 [*.bat]
 end_of_line = crlf
