@@ -38,7 +38,14 @@
 
       <a-row type="flex" justify="center">
         <a-col :span="16" v-if="setpCurrent === 0">
-          <a-card-meta title="初始化系统账户" style="textalign: center" description="您需要创建一个账户用以后续登录管理系统,请牢记超级管理员账号密码" />
+          <a-card-meta title="初始化系统账户" style="textalign: center">
+            <template #description>
+              <ol>
+                <li>您需要创建一个账户用以后续登录管理系统,请牢记超级管理员账号密码</li>
+                <li>不建议使用常用名称如 admin、root、manager等常用用户名，避免被其他用户有意或者无意操作造成登录失败次数过多从而超级管理员账号被异常锁定</li>
+              </ol>
+            </template>
+          </a-card-meta>
           <br />
           <a-form :form="loginForm" :label-col="{ span: 0 }" @submit="handleLogin" class="init-form">
             <a-form-item :wrapper-col="{ span: 24 }" class="init-user-name">
