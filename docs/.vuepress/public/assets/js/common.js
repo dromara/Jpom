@@ -59,6 +59,11 @@ $(function () {
 // function called if wwads is blocked
 // https://github.com/bytegravity/whitelist-wwads
   function ABDetected() {
+    if (location.hostname === '127.0.0.1') {
+      // 本地环境不显示
+      return
+    }
+    console.error("_AdBlockInit")
     var adBlockDetected_div = document.createElement("div");
     document.body.appendChild(adBlockDetected_div);
     var navbar = document.querySelector(".navbar");
@@ -83,7 +88,6 @@ $(function () {
     setTimeout(function () {
       if (window._AdBlockInit === undefined) {
         ABDetected();
-        console.error("_AdBlockInit")
       }
     }, 3000);
   });

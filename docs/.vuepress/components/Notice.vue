@@ -20,14 +20,9 @@ export default {
     },
     data: {
       type: Array,
-      default: [
-        {
-          id: null,
-          title: "最新公告",
-          content: "演示示例",
-          isHtmlContent: false,
-        },
-      ],
+      default: function (){
+        return []
+      },
     },
   },
   mounted() {

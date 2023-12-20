@@ -4,11 +4,8 @@ heroImage: /images/logo/jpom_logo_big.svg
 heroText: 
 tagline: 🚀简而轻的低侵入式在线构建、自动部署、日常运维、项目运维监控软件
 actions:
-  - actionText: 🛠️一键安装
-    actionLink: /pages/15b7a2/
-  - actionText: 🧩容器安装
-    actionLink: /pages/c846d3/
-    actionClass: action-button-diy 
+  - actionText: 🛠️开始安装
+    actionLink: /pages/install/
   - actionText: ⚡️赞赏 Jpom
     actionLink: /pages/praise/
     actionClass: action-button-diy
