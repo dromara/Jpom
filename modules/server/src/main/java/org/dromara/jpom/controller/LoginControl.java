@@ -152,7 +152,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
     }
 
     /**
-     * 当登录的ip 错误次数达到配置的10倍以上锁定当前ip
+     * 当登录的ip 错误次数达到配置以上锁定当前ip
      *
      * @return true
      */

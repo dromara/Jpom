@@ -182,6 +182,7 @@ public class UserModel extends BaseUserModifyDbModel {
     /**
      * 登录失败，重新计算锁定时间
      *
+     * @param alwaysLoginError 运行登录失败次数
      * @return 返回的信息需要更新到数据库
      */
     public UserModel errorLock(int alwaysLoginError) {
