@@ -1,5 +1,5 @@
 import axios from "./config";
-
+import { loadRouterBase } from "./config";
 /**
  * 容器列表
  * @param {JSON} params
@@ -153,10 +153,16 @@ export function dockerSwarmServicesPullLog(urlPrefix, params) {
   });
 }
 
+export function dockerSwarmServicesDownloaLog(urlPrefix, id) {
+  return loadRouterBase(urlPrefix + "/docker/swarm-service/download-log", {
+    id: id,
+  });
+}
+
 /**
  * <!-- Note: detail description about taskState, please @see https://docs.docker.com/engine/swarm/how-swarm-mode-works/swarm-task-states/ -->
           <!-- reference Java class: com.github.dockerjava.api.model.TaskState -->
-          
+
             <!-- NEW: The task was initialized. -->
             <a-select-option key="NEW">新建状态</a-select-option>
             <a-select-option key="ALLOCATED">已分配</a-select-option>

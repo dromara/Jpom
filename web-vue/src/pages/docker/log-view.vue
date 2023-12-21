@@ -15,6 +15,9 @@
             <a-switch v-model="timestamps" checked-children="显示" un-checked-children="不显示" />
           </div>
           <a-button type="primary" icon="reload" size="small" @click="initWebSocket"> 刷新 </a-button>
+          |
+          <a-button type="primary" icon="download" :disabled="!this.logId" size="small" @click="download"> 下载 </a-button>
+          |
         </a-space>
       </template>
     </log-view>
@@ -23,6 +26,7 @@
 <script>
 import { mapGetters } from "vuex";
 import { getWebSocketUrl } from "@/utils/const";
+import { dockerContainerDownloaLog } from "@/api/docker-api";
 
 import LogView from "@/components/logView";
 
@@ -40,12 +44,16 @@ export default {
       type: String,
       default: "",
     },
+    urlPrefix: {
+      type: String,
+    },
   },
   data() {
     return {
       socket: null,
       tail: 500,
       timestamps: false,
+      logId: "",
     };
   },
   computed: {
@@ -100,19 +108,18 @@ export default {
         clearInterval(this.heart);
       };
       this.socket.onmessage = (msg) => {
-        // if (msg.data.indexOf("code") > -1 && msg.data.indexOf("msg") > -1) {
-        //   const res = JSON.parse(msg.data);
-        //   if (res.code === 200) {
-        //     this.$notification.success({
-        //       message: res.msg,
-        //     });
-        //   } else {
-        //     this.$notification.error({
-        //       message: res.msg,
-        //     });
-        //   }
-        //   return;
-        // }
+        if (msg.data.indexOf("code") > -1 && msg.data.indexOf("msg") > -1) {
+          try {
+            const res = JSON.parse(msg.data);
+            if (res.code === 200 && res.msg === "JPOM_MSG_UUID") {
+              this.logId = res.data;
+              return;
+            }
+          } catch (e) {
+            console.error(e);
+          }
+          //   return;
+        }
         const msgLine = msg.data || "";
         this.$refs.logView.appendLine(msgLine.substring(0, msgLine.lastIndexOf("\n")));
         clearInterval(this.heart);
@@ -131,6 +138,10 @@ export default {
         timestamps: this.timestamps,
       };
       this.socket.send(JSON.stringify(data));
+    },
+    // 下载
+    download() {
+      window.open(dockerContainerDownloaLog(this.urlPrefix, this.logId), "_blank");
     },
   },
 };

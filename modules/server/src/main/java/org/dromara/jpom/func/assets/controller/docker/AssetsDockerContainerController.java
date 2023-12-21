@@ -27,6 +27,7 @@ import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
+import org.dromara.jpom.system.ServerConfig;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,7 +45,9 @@ public class AssetsDockerContainerController extends BaseDockerContainerControll
 
     private final MachineDockerServer machineDockerServer;
 
-    public AssetsDockerContainerController(MachineDockerServer machineDockerServer) {
+    public AssetsDockerContainerController(MachineDockerServer machineDockerServer,
+                                           ServerConfig ServerConfig) {
+        super(ServerConfig);
         this.machineDockerServer = machineDockerServer;
     }
 

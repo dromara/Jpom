@@ -547,6 +547,7 @@ public class BuildExecuteManage implements Runnable {
         Assert.notNull(map, fromTag + " 没有可用的 docker server");
         taskData.dockerParameter = new HashMap<>(map);
         logRecorder.system("use docker {}", map.get("name"));
+        logRecorder.info("");
         String workingDir = "/home/jpom/";
 
         map.put("runsOn", dockerYmlDsl.getRunsOn());

@@ -29,6 +29,7 @@ import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.service.docker.DockerInfoService;
+import org.dromara.jpom.system.ServerConfig;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,7 +49,9 @@ public class DockerContainerController extends BaseDockerContainerController {
     private final MachineDockerServer machineDockerServer;
 
     public DockerContainerController(DockerInfoService dockerInfoService,
-                                     MachineDockerServer machineDockerServer) {
+                                     MachineDockerServer machineDockerServer,
+                                     ServerConfig serverConfig) {
+        super(serverConfig);
         this.dockerInfoService = dockerInfoService;
         this.machineDockerServer = machineDockerServer;
     }

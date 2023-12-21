@@ -31,6 +31,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
@@ -51,6 +52,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
@@ -212,5 +214,22 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
             LOG_CACHE.put(id, userIds);
         }
         return JsonMessage.success("ok", data);
+    }
+
+    /**
+     * 下载拉取的日志
+     *
+     * @param id id
+     */
+    @GetMapping(value = "download-log")
+    @Feature(method = MethodFeature.DOWNLOAD)
+    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+                            HttpServletResponse response) {
+        File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-swarm-log", id + ".log");
+        if (!file.exists()) {
+            ServletUtil.write(response, new JsonMessage<>(201, "还没有日志文件").toString(), MediaType.APPLICATION_JSON_VALUE);
+            return;
+        }
+        ServletUtil.write(response, file);
     }
 }

@@ -14,6 +14,9 @@
             <a-switch v-model="timestamps" checked-children="显示" un-checked-children="不显示" />
           </div>
           <a-button type="primary" icon="reload" size="small" @click="init"> 刷新 </a-button>
+          |
+          <a-button type="primary" icon="download" :disabled="!this.logId" size="small" @click="download"> 下载 </a-button>
+          |
         </a-space>
       </template>
     </log-view>
@@ -21,7 +24,7 @@
 </template>
 <script>
 import LogView from "@/components/logView";
-import { dockerSwarmServicesPullLog, dockerSwarmServicesStartLog } from "@/api/docker-swarm";
+import { dockerSwarmServicesPullLog, dockerSwarmServicesStartLog, dockerSwarmServicesDownloaLog } from "@/api/docker-swarm";
 export default {
   components: {
     LogView,
@@ -102,6 +105,10 @@ export default {
         // 继续拉取日志
         if (next) this.nextPull();
       });
+    },
+    // 下载
+    download() {
+      window.open(dockerSwarmServicesDownloaLog(this.urlPrefix, this.logId), "_blank");
     },
   },
 };
