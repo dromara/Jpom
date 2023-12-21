@@ -433,7 +433,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/maxkey3.png')" alt="业界领先的身份管理和认证产品">
 </a>
 <a class="friends-item" href="https://plugins.sheng90.wang/fast-request/" target="_blank">
-	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/fast-request.gif')" alt="Idea 版 Postman，为简化调试API而生">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/fastrequest-logo.png')" alt="Idea 版 Postman，为简化调试API而生">
 </a>
 <a class="friends-item" href="https://async.sizegang.cn/" target="_blank">
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/gobrsasync-logo.png')" alt="🔥 配置极简功能强大的异步任务动态编排框架">
