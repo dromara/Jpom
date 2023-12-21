@@ -172,34 +172,17 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
             return new ArrayList<>();
         }
         RunMode runMode = nodeProjectInfoModel.getRunMode();
-        return Arrays.stream(files).filter(File::isFile).filter(file -> {
-            if (runMode == RunMode.ClassPath || runMode == RunMode.Jar || runMode == RunMode.JavaExtDirsCp) {
-                return StrUtil.endWith(file.getName(), FileUtil.JAR_FILE_EXT, true);
-            } else if (runMode == RunMode.JarWar) {
-                return StrUtil.endWith(file.getName(), "war", true);
-            }
-            return false;
-        }).collect(Collectors.toList());
-        //		List<File> files1 = new ArrayList<>();
-        //		if (files != null) {
-        //			for (File file : files) {
-        //				if (!file.isFile()) {
-        //					continue;
-        //				}
-        //
-        //				if (runMode == RunMode.ClassPath || runMode == RunMode.Jar || runMode == RunMode.JavaExtDirsCp) {
-        //					if (!StrUtil.endWith(file.getName(), FileUtil.JAR_FILE_EXT, true)) {
-        //						continue;
-        //					}
-        //				} else if (runMode == RunMode.JarWar) {
-        //					if (!StrUtil.endWith(file.getName(), "war", true)) {
-        //						continue;
-        //					}
-        //				}
-        //				files1.add(file);
-        //			}
-        //		}
-        //		return files1;
+        return Arrays.stream(files)
+            .filter(File::isFile)
+            .filter(file -> {
+                if (runMode == RunMode.ClassPath || runMode == RunMode.Jar || runMode == RunMode.JavaExtDirsCp) {
+                    return StrUtil.endWith(file.getName(), FileUtil.JAR_FILE_EXT, true);
+                } else if (runMode == RunMode.JarWar) {
+                    return StrUtil.endWith(file.getName(), "war", true);
+                }
+                return false;
+            })
+            .collect(Collectors.toList());
     }
 
     /**
@@ -210,7 +193,7 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      */
     public static String getClassPathLib(NodeProjectInfoModel nodeProjectInfoModel) {
         List<File> files = listJars(nodeProjectInfoModel);
-        if (files.size() == 0) {
+        if (CollUtil.isEmpty(files)) {
             return "";
         }
         // 获取lib下面的所有jar包

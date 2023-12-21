@@ -436,7 +436,7 @@ public abstract class AbstractProjectCommander {
         } else if (runMode == RunMode.Jar || runMode == RunMode.JarWar) {
             List<File> fileList = NodeProjectInfoModel.listJars(nodeProjectInfoModel);
             if (fileList.isEmpty()) {
-                return String.format("没有%s包,请先到文件管理中上传程序的%s", runMode.name(), runMode.name());
+                return String.format("一级目录没有%s包,请先到文件管理中上传程序的%s", runMode.name(), runMode.name());
             }
             File jarFile = fileList.get(0);
             String checkJar = checkJar(jarFile);
