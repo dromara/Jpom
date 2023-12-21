@@ -442,7 +442,7 @@ export default {
         { title: "服务Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "名称", dataIndex: "spec.name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "运行模式", dataIndex: "spec.mode.mode", ellipsis: true, width: 120, scopedSlots: { customRender: "tooltip" } },
-        { title: "网络模式", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 120, scopedSlots: { customRender: "tooltip" } },
+        // { title: "网络模式", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 120, scopedSlots: { customRender: "tooltip" } },
         { title: "副本数", dataIndex: "spec.mode.replicated.replicas", align: "center", width: 90, ellipsis: true, scopedSlots: { customRender: "replicas" } },
         { title: "解析模式", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
 
@@ -454,7 +454,7 @@ export default {
           scopedSlots: { customRender: "updatedAt" },
           width: "170px",
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 120 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "120px" },
       ],
       countdownTime: Date.now(),
     };
