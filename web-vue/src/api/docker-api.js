@@ -194,6 +194,12 @@ export function dockerUpdateContainer(urlPrefix, params) {
   });
 }
 
+export function dockerContainerDownloaLog(urlPrefix, id) {
+  return loadRouterBase(urlPrefix + "/container/download-log", {
+    id: id,
+  });
+}
+
 /**
  * 容器中的镜像列表
  * @param {JSON} params

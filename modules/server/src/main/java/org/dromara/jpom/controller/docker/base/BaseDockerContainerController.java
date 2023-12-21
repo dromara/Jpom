@@ -25,23 +25,28 @@ package org.dromara.jpom.controller.docker.base;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.validator.ValidatorItem;
+import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.docker.DockerInfoService;
+import org.dromara.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +56,11 @@ import java.util.Map;
  */
 @Slf4j
 public abstract class BaseDockerContainerController extends BaseDockerController {
+    protected final ServerConfig serverConfig;
 
+    protected BaseDockerContainerController(ServerConfig serverConfig) {
+        this.serverConfig = serverConfig;
+    }
 
     @GetMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
@@ -241,5 +250,22 @@ public abstract class BaseDockerContainerController extends BaseDockerController
         parameter.putAll(jsonObject);
         plugin.execute("createContainer", parameter);
         return JsonMessage.success("重建成功");
+    }
+
+    /**
+     * 下载拉取的日志
+     *
+     * @param id id
+     */
+    @GetMapping(value = "download-log")
+    @Feature(method = MethodFeature.DOWNLOAD)
+    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+                            HttpServletResponse response) {
+        File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-log", id + ".log");
+        if (!file.exists()) {
+            ServletUtil.write(response, new JsonMessage<>(201, "还没有日志文件").toString(), MediaType.APPLICATION_JSON_VALUE);
+            return;
+        }
+        ServletUtil.write(response, file);
     }
 }

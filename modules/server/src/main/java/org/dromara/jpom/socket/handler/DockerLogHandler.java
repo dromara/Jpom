@@ -23,17 +23,20 @@
 package org.dromara.jpom.socket.handler;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
+import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
@@ -41,9 +44,12 @@ import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.socket.BaseProxyHandler;
 import org.dromara.jpom.socket.ConsoleCommandOp;
+import org.dromara.jpom.system.ServerConfig;
+import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
@@ -88,22 +94,31 @@ public class DockerLogHandler extends BaseProxyHandler {
         }
         if (consoleCommandOp == ConsoleCommandOp.showlog) {
             MachineDockerServer machineDockerServer = SpringUtil.getBean(MachineDockerServer.class);
+            ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
             super.logOpt(this.getClass(), attributes, json);
             String containerId = json.getString("containerId");
             Map<String, Object> map = machineDockerServer.toParameter(dockerInfoModel);
             map.put("containerId", containerId);
             int tail = json.getIntValue("tail");
+            UserModel userModel = (UserModel) attributes.get("userInfo");
+            if (userModel == null) {
+                return "用户不存在";
+            }
             if (tail > 0) {
                 map.put("tail", tail);
             }
+            String uuid = IdUtil.fastSimpleUUID();
+            File file = FileUtil.file(serverConfig.getUserTempPath(userModel.getId()), "docker-log", uuid + ".log");
+            LogRecorder logRecorder = LogRecorder.builder().file(file).build();
             Consumer<String> consumer = s -> {
                 try {
+                    logRecorder.append(s);
                     SocketSessionUtil.send(session, s);
                 } catch (IOException e) {
                     log.error("发消息异常", e);
                 }
             };
-            attributes.put("uuid", IdUtil.fastSimpleUUID());
+            attributes.put("uuid", uuid);
             map.put("uuid", attributes.get("uuid"));
             map.put("charset", CharsetUtil.CHARSET_UTF_8);
             map.put("consumer", consumer);
@@ -123,6 +138,7 @@ public class DockerLogHandler extends BaseProxyHandler {
                 }
                 log.debug("docker log 线程结束：{} {}", dockerInfoModel.getName(), attributes.get("uuid"));
             });
+            SocketSessionUtil.send(session, JsonMessage.getString(200, "JPOM_MSG_UUID", uuid));
         } else {
             return null;
         }
@@ -143,6 +159,13 @@ public class DockerLogHandler extends BaseProxyHandler {
         } catch (Exception e) {
             log.error("关闭资源失败", e);
         }
+        // 删除日志缓存
+        UserModel userModel = (UserModel) attributes.get("userInfo");
+        Optional.ofNullable(userModel).ifPresent(userModel1 -> {
+            ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
+            File file = FileUtil.file(serverConfig.getUserTempPath(userModel1.getId()), "docker-log", uuid + ".log");
+            FileUtil.del(file);
+        });
         Thread thread = (Thread) attributes.get("thread");
         Optional.ofNullable(thread).ifPresent(Thread::interrupt);
         SocketSessionUtil.close(session);

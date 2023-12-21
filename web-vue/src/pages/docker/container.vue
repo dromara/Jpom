@@ -412,7 +412,7 @@
     </template>
     <!-- 日志 -->
     <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
-      <log-view v-if="logVisible" :id="this.id" :machineDockerId="this.machineDockerId" :containerId="temp.id" />
+      <log-view v-if="logVisible" :id="this.id" :urlPrefix="this.urlPrefix" :machineDockerId="this.machineDockerId" :containerId="temp.id" />
     </a-modal>
     <!-- Terminal -->
     <a-modal
