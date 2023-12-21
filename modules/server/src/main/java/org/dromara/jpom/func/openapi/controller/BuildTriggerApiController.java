@@ -442,35 +442,37 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
             }
         }
         int size = waitQueue.size();
-        log.debug("需要处理构建微队列数：{}", size);
-        // 遍历队列中的数据
-        waitQueue.forEach((buildId, buildCaches) -> {
-            synchronized (buildId.intern()) {
-                log.debug("需要处理的 {} 构建队列数：{}", buildId, buildCaches.size());
-                BuildInfoModel item = buildInfoService.getByKey(buildId);
-                if (item == null) {
-                    log.error("构建数据不存在：{},任务自动丢弃:{}", buildId, buildCaches.poll());
-                    return;
+        if (size > 0) {
+            log.debug("需要处理构建微队列数：{}", size);
+            // 遍历队列中的数据
+            waitQueue.forEach((buildId, buildCaches) -> {
+                synchronized (buildId.intern()) {
+                    log.debug("需要处理的 {} 构建队列数：{}", buildId, buildCaches.size());
+                    BuildInfoModel item = buildInfoService.getByKey(buildId);
+                    if (item == null) {
+                        log.error("构建数据不存在：{},任务自动丢弃:{}", buildId, buildCaches.poll());
+                        return;
+                    }
+                    String statusMsg = buildExecuteService.checkStatus(item);
+                    if (statusMsg != null) {
+                        log.debug("构建任务继续等待:{} {}", buildId, statusMsg);
+                        return;
+                    }
+                    BuildCache cache = buildCaches.poll();
+                    if (cache == null) {
+                        return;
+                    }
+                    try {
+                        BaseServerController.resetInfo(cache.userModel);
+                        IJsonMessage<Integer> message = buildExecuteService.start(cache.id, cache.userModel, cache.delay, 1, cache.buildRemark, cache.parametersEnv);
+                        log.info("构建触发器队列执行结果：{}", message);
+                    } catch (Exception e) {
+                        log.error("创建构建任务异常", e);
+                        // 重新添加任务
+                        buildCaches.add(cache);
+                    }
                 }
-                String statusMsg = buildExecuteService.checkStatus(item);
-                if (statusMsg != null) {
-                    log.debug("构建任务继续等待:{} {}", buildId, statusMsg);
-                    return;
-                }
-                BuildCache cache = buildCaches.poll();
-                if (cache == null) {
-                    return;
-                }
-                try {
-                    BaseServerController.resetInfo(cache.userModel);
-                    IJsonMessage<Integer> message = buildExecuteService.start(cache.id, cache.userModel, cache.delay, 1, cache.buildRemark, cache.parametersEnv);
-                    log.info("构建触发器队列执行结果：{}", message);
-                } catch (Exception e) {
-                    log.error("创建构建任务异常", e);
-                    // 重新添加任务
-                    buildCaches.add(cache);
-                }
-            }
-        });
+            });
+        }
     }
 }
