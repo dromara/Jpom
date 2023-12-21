@@ -236,6 +236,16 @@ notices-2: # 可选的
 
 <br/>
 
+## Jpom 发现史
+
+Jpom 从 2017 年诞生、2019 年发布第一个版本。
+
+从最开始仅支持`单机管理`以及数据采用 `JSON 文件存储`到多`节点管理`、`支持 H2/Mysql 数据库`、`容器构建`等。
+
+至今已经经历 `150+` 版本迭代欢迎您使用，为 Jpom 发展提出宝贵意见，我们也更欢迎您参与进来共同为开源做出一份贡献。
+
+<img :src="$withBase('/images/time-line.png')" alt="jpom-func-arch">
+
 ## 快速体验
 
 ### 一键安装插件端 [详细的安装说明文档](/pages/install/)
@@ -271,6 +281,10 @@ bash install.sh Agent jdk
 ```
   </code-block>
 </code-group>
+
+::: tip 说明
+插件端是可选项，实际根据您使用情况来决定是否需要安装。详细说明请看[详细的安装说明文档](/pages/install/)
+:::
 
 
 ### 一键安装服务端 [详细的安装说明文档](/pages/install/)
@@ -330,7 +344,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 ## 🏡代码托管
 
 - [Gitee ![star](https://gitee.com/dromara/Jpom/badge/star.svg?theme=gvp)](https://gitee.com/dromara/Jpom/)
-- [Github](https://github.com/dromara/Jpom)
+- [Github![star](https://img.shields.io/github/stars/dromara/Jpom.svg?style=social)](https://github.com/dromara/Jpom)
 
 <br/>
 
