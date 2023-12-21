@@ -1,6 +1,22 @@
 <template>
   <div>
-    <log-view :ref="`logView`" height="70vh" marginTop="-10px" />
+    <log-view :ref="`logView`" height="70vh" marginTop="-10px">
+      <template slot="before">
+        <a-space>
+          <a-tooltip title="为避免显示内容太多而造成浏览器卡顿,读取日志最后多少行日志。修改后需要回车才能重新读取，小于 1 则读取所有">
+            读取行数：
+            <a-input-number v-model="tail" placeholder="读取行数">
+              <!-- <template slot="addonAfter"> </template> -->
+            </a-input-number>
+          </a-tooltip>
+          <div>
+            时间戳：
+            <a-switch v-model="timestamps" checked-children="显示" un-checked-children="不显示" />
+          </div>
+          <a-button type="primary" icon="reload" size="small" @click="init"> 刷新 </a-button>
+        </a-space>
+      </template>
+    </log-view>
   </div>
 </template>
 <script>
@@ -29,6 +45,8 @@ export default {
       logTimer: null,
       logId: "",
       line: 1,
+      tail: 500,
+      timestamps: false,
     };
   },
   beforeDestroy() {
@@ -40,10 +58,16 @@ export default {
   },
   methods: {
     init() {
+      this.logTimer && clearTimeout(this.logTimer);
+      this.$refs.logView.clearLogCache();
+      this.line = 1;
+      //
       dockerSwarmServicesStartLog(this.urlPrefix, {
         type: this.type,
         dataId: this.dataId,
         id: this.id,
+        tail: this.tail,
+        timestamps: this.timestamps,
       }).then((res) => {
         if (res.code === 200) {
           this.logId = res.data;

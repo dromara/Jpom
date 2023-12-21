@@ -125,11 +125,14 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 
             Charset charset = (Charset) parameter.get("charset");
             Integer tail = (Integer) parameter.get("tail");
-
             // 获取日志
-            if (tail != null && tail > 1) {
+            if (tail != null && tail > 0) {
                 logSwarmObjectCmd.withTail(tail);
             }
+            //String since = (String) parameter.get("since");
+            //            Opt.ofBlankAble(since).ifPresent(s -> logSwarmObjectCmd.withSince(s));
+            Boolean timestamps = Convert.toBool(parameter.get("timestamps"));
+            logSwarmObjectCmd.withTimestamps(timestamps);
             ResultCallback.Adapter<Frame> exec = logSwarmObjectCmd
                 .withDetails(true)
                 .withStderr(true)
@@ -254,8 +257,9 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
             UpdateConfig rollbackConfig = this.buildUpdateConfig(rollback);
             serviceSpec.withRollbackConfig(rollbackConfig);
         }
-        String version = (String) parameter.get("version");
+
         if (StrUtil.isNotEmpty(serviceId)) {
+            Object version = parameter.get("version");
             UpdateServiceCmd updateServiceCmd = dockerClient.updateServiceCmd(serviceId, serviceSpec);
             updateServiceCmd.withVersion(Convert.toLong(version, 0L));
             updateServiceCmd.exec();

@@ -149,7 +149,12 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
      */
     @GetMapping(value = "start-log", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<String> pullImage(@ValidatorItem String id, @ValidatorItem String type, @ValidatorItem String dataId) throws Exception {
+    public IJsonMessage<String> pullImage(@ValidatorItem String id,
+                                          @ValidatorItem String type,
+                                          @ValidatorItem String dataId,
+                                          Integer tail,
+                                          String since,
+                                          Boolean timestamps) {
         IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put(StrUtil.equalsIgnoreCase(type, "service") ? "serviceId" : "taskId", dataId);
@@ -159,10 +164,16 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
         LogRecorder logRecorder = LogRecorder.builder().file(file).build();
 
         logRecorder.system("start pull {}", dataId);
+        logRecorder.info("");
         Consumer<String> logConsumer = logRecorder::append;
         parameter.put("charset", CharsetUtil.CHARSET_UTF_8);
         parameter.put("consumer", logConsumer);
-        parameter.put("tail", 50);
+        //
+        tail = ObjectUtil.defaultIfNull(tail, 50);
+        tail = Math.max(tail, 1);
+        parameter.put("tail", tail);
+        //parameter.put("since", since);
+        parameter.put("timestamps", timestamps);
         // 操作id
         parameter.put("uuid", uuid);
         ThreadUtil.execute(() -> {
@@ -195,9 +206,11 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
         }
         JSONObject data = FileUtils.readLogFile(file, line);
         // 更新缓存，避免超时被清空
-        Set<String> userIds = ObjectUtil.defaultIfNull(LOG_CACHE.get(id), new HashSet<>());
-        userIds.add(getUser().getId());
-        LOG_CACHE.put(id, userIds);
+        synchronized (BaseDockerSwarmServiceController.class) {
+            Set<String> userIds = ObjectUtil.defaultIfNull(LOG_CACHE.get(id), new HashSet<>());
+            userIds.add(getUser().getId());
+            LOG_CACHE.put(id, userIds);
+        }
         return JsonMessage.success("ok", data);
     }
 }

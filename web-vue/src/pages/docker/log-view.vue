@@ -15,8 +15,6 @@
             <a-switch v-model="timestamps" checked-children="显示" un-checked-children="不显示" />
           </div>
           <a-button type="primary" icon="reload" size="small" @click="initWebSocket"> 刷新 </a-button>
-
-          |
         </a-space>
       </template>
     </log-view>

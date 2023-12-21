@@ -94,23 +94,23 @@
 11. 【server】使用系统git时，无法克隆tag问题优化 （感谢@唐明）
 12. 【server】优化 SSH 和 代码仓库的密码从工作空间变量中读取
 13. 【server】优化
-	删除工作空间前预检查关联数据存在情况（感谢 [@陈旭](https://gitee.com/chenxu8989) [Gitee issues I7F0ZN](https://gitee.com/dromara/Jpom/issues/I7F0ZN) ）
+    删除工作空间前预检查关联数据存在情况（感谢 [@陈旭](https://gitee.com/chenxu8989) [Gitee issues I7F0ZN](https://gitee.com/dromara/Jpom/issues/I7F0ZN) ）
 14. 【server】优化
-	退出登录支持彻底退出、切换账号退出（感谢 [@wangfubiao](https://gitee.com/wangfubiao) [Gitee issues I7GA5Q](https://gitee.com/dromara/Jpom/issues/I7GA5Q) ）
+    退出登录支持彻底退出、切换账号退出（感谢 [@wangfubiao](https://gitee.com/wangfubiao) [Gitee issues I7GA5Q](https://gitee.com/dromara/Jpom/issues/I7GA5Q) ）
 15. 【server】优化 IP 白名单验证忽略 IPV6 情况
 16. 【server】优化 服务端缓存管理支持查看黑名单 IP 详细信息（感谢@酱总）
 17. 【server】修复 SSH
-	编辑输入框出现部分关键词时保持报错（感谢 [@一只羊](https://gitee.com/hjdyzy) [Gitee issues I7E3UG](https://gitee.com/dromara/Jpom/issues/I7E3UG) ）
+    编辑输入框出现部分关键词时保持报错（感谢 [@一只羊](https://gitee.com/hjdyzy) [Gitee issues I7E3UG](https://gitee.com/dromara/Jpom/issues/I7E3UG) ）
 18. 【server】优化 日志组件支持显示 \t 制表符、清空缓冲区滚动到顶部
 19. 【server】修复 彻底删除节点分发时未自动删除关联日志（感谢@ccx2480）
 20. 【server】修复
-	节点管理中脚本模板翻页无效（感谢 [@wangfubiao](https://gitee.com/wangfubiao) [Gitee issues I7F0RS](https://gitee.com/dromara/Jpom/issues/I7F0RS) ）
+    节点管理中脚本模板翻页无效（感谢 [@wangfubiao](https://gitee.com/wangfubiao) [Gitee issues I7F0RS](https://gitee.com/dromara/Jpom/issues/I7F0RS) ）
 21. 【server】优化
-	工作空间配置页面中新增节点分发白名单配置入口（感谢 [@陈旭](https://gitee.com/chenxu8989) [Gitee issues I7F0W0](https://gitee.com/dromara/Jpom/issues/I7F0W0) ）
+    工作空间配置页面中新增节点分发白名单配置入口（感谢 [@陈旭](https://gitee.com/chenxu8989) [Gitee issues I7F0W0](https://gitee.com/dromara/Jpom/issues/I7F0W0) ）
 22. 【server】优化 构建附加环境变量支持解析 URL 参数格式
-	（感谢 [@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I7FROG](https://gitee.com/dromara/Jpom/issues/I7FROG) ）
+    （感谢 [@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I7FROG](https://gitee.com/dromara/Jpom/issues/I7FROG) ）
 23. 【server】优化 构建支持单个配置保留天数和保留个数
-	（感谢 [@阿超](https://gitee.com/VampireAchao) [Gitee issues I7FOG2](https://gitee.com/dromara/Jpom/issues/I7FOG2) ）
+    （感谢 [@阿超](https://gitee.com/VampireAchao) [Gitee issues I7FOG2](https://gitee.com/dromara/Jpom/issues/I7FOG2) ）
 
 ------
 
@@ -272,10 +272,10 @@
 2. 【server】优化 脚本列表显示脚本 ID，方便快速查看复制
    （感谢 [@大灰灰大](https://gitee.com/linjianhui) [Gitee issues I6OUDT](https://gitee.com/dromara/Jpom/issues/I6OUDT) ）
 3. 【server】优化 文件管理列表显示，小屏幕部分字段被隐藏（感谢@tinsang）
-4. 【server】优化 docker 拉取镜像自动解析 tag，避免拉取所有镜像，如果没有配置 tag 默认使用 latest（感谢@Again...                       .）
+4. 【server】优化 docker 拉取镜像自动解析 tag，避免拉取所有镜像，如果没有配置 tag 默认使用 latest（感谢@Again... .）
 5. 【server】修复 数据库迁移到 mysql 报错（字段不存在）（感谢@轩辕豆豆）
 6. 【server】修复 节点统计页面错乱问题
-  （感谢 [@轩辕豆豆](https://gitee.com/xuanyuandoudou) [Gitee issues I6OYSU](https://gitee.com/dromara/Jpom/issues/I6OYSU) ）
+   （感谢 [@轩辕豆豆](https://gitee.com/xuanyuandoudou) [Gitee issues I6OYSU](https://gitee.com/dromara/Jpom/issues/I6OYSU) ）
 
 ------
 
@@ -949,8 +949,8 @@ curl -LfsSo Service.sh https://gitee.com/dromara/Jpom/raw/master/modules/agent/s
 1. 插件端需要同步升级，否则节点分发项目无法显示项目名称
 2. 插件端需要同步升级，否则会出现部分接口 404 或者参数不正确的情况
 3. 建议升级验证上传项目文件无问题后，将插件端上传文件大小限制配置属性大改小
-    1. spring.servlet.multipart.max-file-size=5MB
-    2. spring.servlet.multipart.max-request-size=20MB
+  1. spring.servlet.multipart.max-file-size=5MB
+  2. spring.servlet.multipart.max-request-size=20MB
 
 **如果需要使用 mysql 存储，则需要修改配置**
 
