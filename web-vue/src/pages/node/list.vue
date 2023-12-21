@@ -621,35 +621,37 @@ export default {
     // 加载数据
     loadData(pointerEvent) {
       return new Promise((resolve) => {
-        this.list = [];
         this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
         this.loading = true;
-        getNodeList(this.listQuery).then((res) => {
-          if (res.code === 200) {
-            this.list =
-              res.data.result &&
-              res.data.result.map((item) => {
-                // console.log(item);
-                item.occupyCpu = formatPercent2Number(item.machineNodeData?.osOccupyCpu);
+        getNodeList(this.listQuery)
+          .then((res) => {
+            if (res.code === 200) {
+              this.list =
+                res.data.result &&
+                res.data.result.map((item) => {
+                  // console.log(item);
+                  item.occupyCpu = formatPercent2Number(item.machineNodeData?.osOccupyCpu);
 
-                item.occupyDisk = formatPercent2Number(item.machineNodeData?.osOccupyDisk);
-                item.occupyMemory = formatPercent2Number(item.machineNodeData?.osOccupyMemory);
-                return item;
+                  item.occupyDisk = formatPercent2Number(item.machineNodeData?.osOccupyDisk);
+                  item.occupyMemory = formatPercent2Number(item.machineNodeData?.osOccupyMemory);
+                  return item;
+                });
+              this.listQuery.total = res.data.total;
+              let nodeId = this.$route.query.nodeId;
+              this.list.map((item) => {
+                if (nodeId === item.id) {
+                  this.handleNode(item);
+                }
               });
-            this.listQuery.total = res.data.total;
-            let nodeId = this.$route.query.nodeId;
-            this.list.map((item) => {
-              if (nodeId === item.id) {
-                this.handleNode(item);
-              }
-            });
 
-            resolve();
-            this.refreshInterval = 30;
-            this.deadline = Date.now() + this.refreshInterval * 1000;
-          }
-          this.loading = false;
-        });
+              resolve();
+              this.refreshInterval = 30;
+              this.deadline = Date.now() + this.refreshInterval * 1000;
+            }
+          })
+          .finally(() => {
+            this.loading = false;
+          });
       });
     },
 

@@ -124,29 +124,32 @@
     <a-modal destroyOnClose v-model="showUserPwd" title="用户密码提示" :maskClosable="false" :footer="null">
       <a-result status="success" :title="this.temp.title">
         <template #subTitle>
-          账号新密码为：
-          <b
-            style="color: red; font-size: 20px"
-            v-clipboard:copy="temp.randomPwd"
-            v-clipboard:success="
-              () => {
-                tempVue.prototype.$notification.success({
-                  message: '复制成功',
-                });
-              }
-            "
-            v-clipboard:error="
-              () => {
-                tempVue.prototype.$notification.error({
-                  message: '复制失败',
-                });
-              }
-            "
-          >
-            {{ temp.randomPwd }}
-            <a-icon type="copy" />
-          </b>
-          请将此密码复制告知该用户
+          <div>
+            账号新密码为：
+            <b
+              style="color: red; font-size: 20px"
+              v-clipboard:copy="temp.randomPwd"
+              v-clipboard:success="
+                () => {
+                  tempVue.prototype.$notification.success({
+                    message: '复制成功',
+                  });
+                }
+              "
+              v-clipboard:error="
+                () => {
+                  tempVue.prototype.$notification.error({
+                    message: '复制失败',
+                  });
+                }
+              "
+            >
+              {{ temp.randomPwd }}
+              <a-icon type="copy" />
+            </b>
+            请将此密码复制告知该用户
+          </div>
+          <div style="color: red">密码只会出现一次，关闭窗口后无法再次查看密码</div>
         </template>
       </a-result>
     </a-modal>

@@ -6,6 +6,9 @@ export function getNodeList(params) {
     url: "/node/list_data.json",
     method: "post",
     data: params,
+    headers: {
+      loading: "no",
+    },
   });
 }
 
