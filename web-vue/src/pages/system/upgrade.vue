@@ -280,20 +280,24 @@ export default {
     },
     getNodeList() {
       this.loading = true;
-      machineListData(this.listQuery).then((res) => {
-        if (res.code === 200) {
-          this.list = res.data.result;
-          this.listQuery.total = res.data.total;
-          let ids = this.list.map((item) => {
-            return item.id;
-          });
-          if (ids.length > 0) {
-            this.initWebsocket(ids);
+      machineListData(this.listQuery)
+        .then((res) => {
+          if (res.code === 200) {
+            this.list = res.data.result;
+            this.listQuery.total = res.data.total;
+            let ids = this.list.map((item) => {
+              return item.id;
+            });
+            if (ids.length > 0) {
+              this.initWebsocket(ids);
+            }
           }
-        }
-        this.loading = false;
-        this.updateList();
-      });
+
+          this.updateList();
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
     // getNodeListResult(data) {
     //   this.list = data;
