@@ -25,6 +25,7 @@ package org.dromara.jpom;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -498,6 +499,11 @@ public class DockerBuild implements AutoCloseable {
                 String uses = (String) map.get("uses");
                 return StrUtil.isNotEmpty(uses);
             })
+            .filter(map -> {
+                // 缓存插件不检查挂载
+                String uses = (String) map.get("uses");
+                return !StrUtil.equals("cache", uses);
+            })
             .map(map -> this.dependPluginCheck(dockerClient, image, map, buildId, tempDir, logRecorder))
             .collect(Collectors.toList());
     }
@@ -511,20 +517,24 @@ public class DockerBuild implements AutoCloseable {
     public static boolean hasDependPlugin(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
         String pluginName = (String) parameter.get("pluginName");
-        String version = (String) parameter.get("version");
-        return hasDependPlugin(dockerClient, pluginName, version);
+        String version = Optional.ofNullable(parameter.get("version"))
+            .map(StrUtil::toStringOrNull)
+            .map(s -> "_" + s)
+            .orElse(StrUtil.EMPTY);
+        String name = String.format("jpom_%s%s", pluginName, version);
+        return hasDependPlugin(dockerClient, name);
     }
 
     /**
      * 依赖插件检查，判断是否存在对应的 依赖插件
      *
      * @param dockerClient docker 客户端连接
+     * @param pluginName   插件端名称
      * @return mount
      */
-    public static boolean hasDependPlugin(DockerClient dockerClient, String pluginName, String version) {
-        String name = String.format("jpom_%s_%s", pluginName, version);
+    public static boolean hasDependPlugin(DockerClient dockerClient, String pluginName) {
         try {
-            dockerClient.inspectVolumeCmd(name).exec();
+            dockerClient.inspectVolumeCmd(pluginName).exec();
             return true;
         } catch (NotFoundException e) {
             return false;
@@ -547,10 +557,11 @@ public class DockerBuild implements AutoCloseable {
         // 兼容没有版本号
         String version = Optional.ofNullable(usesMap.get("version"))
             .map(StrUtil::toStringOrNull)
-            .map(s -> "_" + s)
             .orElse(StrUtil.EMPTY);
-        String name = String.format("jpom_%s%s", pluginName, version);
-        if (!DockerBuild.hasDependPlugin(dockerClient, pluginName, version)) {
+        // 拼接 _
+        String version2 = Opt.ofBlankAble(version).map(s -> "_" + s).get();
+        String name = String.format("jpom_%s%s", pluginName, version2);
+        if (!DockerBuild.hasDependPlugin(dockerClient, name)) {
             HashMap<String, String> labels = MapUtil.of("jpom_build_" + buildId, buildId);
             labels.put("jpom_build_cache", "true");
             //
