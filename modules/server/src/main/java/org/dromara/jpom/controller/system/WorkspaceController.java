@@ -254,7 +254,7 @@ public class WorkspaceController extends BaseServerController {
         }
         // 判断用户绑定关系
         boolean workspace = userBindWorkspaceService.existsWorkspace(id);
-        Assert.state(!workspace, "当前工作空间下还绑定着用户信息");
+        Assert.state(!workspace, "当前工作空间下还绑定着用户（权限组）信息");
         // 最后执行自动删除
         StringBuilder autoDelete = new StringBuilder(StrUtil.EMPTY);
         for (Class<?> aClass : autoDeleteClass) {
