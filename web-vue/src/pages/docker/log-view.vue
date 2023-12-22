@@ -1,7 +1,7 @@
 <template>
   <!-- console -->
   <div>
-    <log-view ref="logView" seg="" height="60vh" marginTop="-10px">
+    <log-view ref="logView" titleName="容器日志" :visible="visible">
       <template slot="before">
         <a-space>
           <a-tooltip title="为避免显示内容太多而造成浏览器卡顿,读取日志最后多少行日志。修改后需要回车才能重新读取，小于 1 则读取所有">
@@ -46,6 +46,10 @@ export default {
     },
     urlPrefix: {
       type: String,
+    },
+    visible: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {

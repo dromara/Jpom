@@ -99,9 +99,20 @@
       />
     </a-drawer>
     <!-- 日志 -->
-    <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="pull日志" :footer="null" :maskClosable="false">
-      <pull-image-Log v-if="logVisible" :id="temp.id" :machineDockerId="this.machineDockerId" :urlPrefix="this.urlPrefix" />
-    </a-modal>
+
+    <pull-image-Log
+      v-if="logVisible > 0"
+      :id="temp.id"
+      :visible="logVisible != 0"
+      :key="logVisible"
+      @close="
+        () => {
+          logVisible = 0;
+        }
+      "
+      :machineDockerId="this.machineDockerId"
+      :urlPrefix="this.urlPrefix"
+    />
   </div>
 </template>
 <script>
@@ -135,7 +146,7 @@ export default {
       listQuery: {
         showAll: false,
       },
-      logVisible: false,
+      logVisible: 0,
       pullImageName: "",
       renderSize,
       temp: {},
@@ -325,7 +336,7 @@ export default {
         repository: this.pullImageName,
       }).then((res) => {
         if (res.code === 200) {
-          this.logVisible = true;
+          this.logVisible = new Date() * Math.random();
           this.temp = {
             id: res.data,
           };

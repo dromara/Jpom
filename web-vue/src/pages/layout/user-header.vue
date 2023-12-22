@@ -327,7 +327,7 @@
         <a-alert banner>
           <template slot="message"> 下列配置信息仅在当前浏览器生效,清空浏览器缓存配置将恢复默认 </template>
         </a-alert>
-        <a-form-model-item label="页面导航" prop="token">
+        <a-form-model-item label="页面导航" prop="guideStatus">
           <a-space>
             <a-switch checked-children="开" @click="toggleGuide" :checked="!this.guideStatus" :disabled="this.getDisabledGuide" un-checked-children="关" />
 
@@ -337,22 +337,28 @@
             </div>
           </a-space>
         </a-form-model-item>
-        <a-form-model-item label="菜单配置" prop="token">
+        <a-form-model-item label="菜单配置" prop="menuMultipleFlag">
           <a-space>
             同时展开多个：
             <a-switch checked-children="是" @click="toggleMenuMultiple" :checked="this.menuMultipleFlag" un-checked-children="否" />
           </a-space>
         </a-form-model-item>
-        <a-form-model-item label="页面配置" prop="token">
+        <a-form-model-item label="页面配置" prop="fullScreenFlag">
           <a-space>
             自动撑开：
             <a-switch checked-children="是" @click="toggleFullScreenFlag" :checked="this.fullScreenFlag" un-checked-children="否" />
           </a-space>
         </a-form-model-item>
-        <a-form-model-item label="滚动条显示" prop="token">
+        <a-form-model-item label="滚动条显示" prop="scrollbarFlag">
           <a-space>
             全局配置：
             <a-switch checked-children="显示" @click="toggleScrollbarFlag" :checked="this.scrollbarFlag" un-checked-children="不显示" />
+          </a-space>
+        </a-form-model-item>
+        <a-form-model-item label="全屏日志" prop="fullscreenViewLog">
+          <a-space>
+            全屏查看日志：
+            <a-switch checked-children="全屏" @click="toggleFullscreenViewLog" :checked="this.fullscreenViewLog" un-checked-children="非全屏" />
           </a-space>
         </a-form-model-item>
       </a-form-model>
@@ -455,6 +461,9 @@ export default {
     },
     scrollbarFlag() {
       return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
+    },
+    fullscreenViewLog() {
+      return !!this.getGuideCache.fullscreenViewLog;
     },
     selectCluster: {
       get: function () {
@@ -590,6 +599,20 @@ export default {
         } else {
           this.$notification.success({
             message: "隐藏滚动条。纵向滚动方式提醒：滚轮，横行滚动方式：Shift+滚轮",
+          });
+        }
+      });
+    },
+    // 切换全屏查看日志
+    toggleFullscreenViewLog() {
+      this.$store.dispatch("toggleFullscreenViewLog").then((fullscreenViewLog) => {
+        if (fullscreenViewLog) {
+          this.$notification.success({
+            message: "日志弹窗会全屏打开",
+          });
+        } else {
+          this.$notification.success({
+            message: "日志弹窗会非全屏打开",
           });
         }
       });

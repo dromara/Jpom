@@ -16,6 +16,7 @@
       </a-tooltip>
       <a-tooltip slot="id" slot-scope="text, item" placement="topLeft" :title="text" @click="handleLog(item)">
         <span>{{ text }}</span>
+        <a-icon type="eye" />
       </a-tooltip>
 
       <a-tooltip slot="status" slot-scope="text, item" placement="topLeft" :title="`节点状态：${text} 节点可用性：${item.spec ? item.spec.availability || '' : ''}`">
@@ -392,9 +393,21 @@
       <swarm-task v-if="taskVisible" :visible="taskVisible" :taskState="this.temp.state" :id="this.id" :serviceId="this.temp.id" :urlPrefix="this.urlPrefix" />
     </a-modal>
     <!-- 查看日志 -->
-    <a-modal destroyOnClose v-model="logVisible" title="查看日志" width="80vw" :footer="null" :maskClosable="false">
-      <pull-log v-if="logVisible" :id="this.id" :dataId="this.temp.id" type="service" />
-    </a-modal>
+
+    <pull-log
+      v-if="logVisible > 0"
+      :key="logVisible"
+      :visible="logVisible != 0"
+      @close="
+        () => {
+          logVisible = 0;
+        }
+      "
+      :id="this.id"
+      :dataId="this.temp.id"
+      type="service"
+      :urlPrefix="this.urlPrefix"
+    />
   </div>
 </template>
 
@@ -430,7 +443,7 @@ export default {
       editVisible: false,
       initSwarmVisible: false,
       taskVisible: false,
-      logVisible: false,
+      logVisible: 0,
 
       rules: {
         name: [{ required: true, message: "服务名称必填", trigger: "blur" }],
@@ -459,8 +472,9 @@ export default {
       countdownTime: Date.now(),
     };
   },
-  computed: {},
+
   beforeDestroy() {},
+  computed: {},
   mounted() {
     this.loadData();
   },
@@ -488,7 +502,7 @@ export default {
     },
     // 日志
     handleLog(record) {
-      this.logVisible = true;
+      this.logVisible = new Date() * Math.random();
       this.temp = record;
     },
     //  创建服务

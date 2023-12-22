@@ -109,8 +109,8 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<Object> projectCopyList() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_ProjectCopyList);
+    public IJsonMessage<Object> projectCopyList(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_ProjectCopyList);
     }
 
     /**
@@ -119,8 +119,8 @@ public class ProjectManageControl extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> getProjectPort() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectPort);
+    public IJsonMessage<JSONObject> getProjectPort(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_GetProjectPort);
     }
 
     /**
@@ -129,8 +129,8 @@ public class ProjectManageControl extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> getProjectCopyPort() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectCopyPort);
+    public IJsonMessage<JSONObject> getProjectCopyPort(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_GetProjectCopyPort);
     }
 
 
@@ -141,9 +141,8 @@ public class ProjectManageControl extends BaseServerController {
      */
     @PostMapping(value = "get_project_info", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<ProjectInfoCacheModel>> getProjectInfo() {
-        PageResultDto<ProjectInfoCacheModel> modelPageResultDto = projectInfoCacheService.listPage(getRequest());
-//		JSONArray jsonArray = projectInfoService.listAll(nodeModel, getRequest());
+    public IJsonMessage<PageResultDto<ProjectInfoCacheModel>> getProjectInfo(HttpServletRequest request) {
+        PageResultDto<ProjectInfoCacheModel> modelPageResultDto = projectInfoCacheService.listPage(request);
         return JsonMessage.success("", modelPageResultDto);
     }
 
@@ -155,33 +154,31 @@ public class ProjectManageControl extends BaseServerController {
      */
     @PostMapping(value = "deleteProject", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<String> deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id, String copyId) {
+    public IJsonMessage<String> deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id,
+                                              String copyId,
+                                              HttpServletRequest request) {
         NodeModel nodeModel = getNode();
-        HttpServletRequest servletRequest = getRequest();
         if (StrUtil.isEmpty(copyId)) {
             // 检查节点分发
-            outGivingServer.checkNodeProject(nodeModel.getId(), id, servletRequest);
+            outGivingServer.checkNodeProject(nodeModel.getId(), id, request);
             // 检查日志阅读
-            logReadServer.checkNodeProject(nodeModel.getId(), id, servletRequest);
-            //
-            List<MonitorModel> monitorModels = monitorService.listByWorkspace(servletRequest);
+            logReadServer.checkNodeProject(nodeModel.getId(), id, request);
+            // 项目监控
+            List<MonitorModel> monitorModels = monitorService.listByWorkspace(request);
             if (monitorModels != null) {
                 boolean match = monitorModels.stream().anyMatch(monitorModel -> monitorModel.checkNodeProject(nodeModel.getId(), id));
-//				if (monitorService.checkProject(nodeModel.getId(), id)) {
-//					return JsonMessage.getString(405, );
-//				}
                 Assert.state(!match, "当前项目存在监控项，不能直接删除");
             }
-
-            boolean releaseMethod = buildService.checkReleaseMethod(nodeModel.getId() + StrUtil.COLON + id, servletRequest, BuildReleaseMethod.Project);
+            // 构建
+            boolean releaseMethod = buildService.checkReleaseMethod(nodeModel.getId() + StrUtil.COLON + id, request, BuildReleaseMethod.Project);
             Assert.state(!releaseMethod, "当前项目存在构建项，不能直接删除");
         }
-        JsonMessage<String> request = NodeForward.request(nodeModel, servletRequest, NodeUrl.Manage_DeleteProject);
-        if (request.success()) {
+        JsonMessage<String> jsonMessage = NodeForward.request(nodeModel, request, NodeUrl.Manage_DeleteProject);
+        if (jsonMessage.success()) {
             //
             projectInfoCacheService.syncExecuteNode(nodeModel);
         }
-        return request;
+        return jsonMessage;
     }
 
     /**
@@ -193,9 +190,9 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<Object> restart() {
+    public IJsonMessage<Object> restart(HttpServletRequest request) {
         NodeModel nodeModel = getNode();
-        return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_Restart);
+        return NodeForward.request(nodeModel, request, NodeUrl.Manage_Restart);
     }
 
 
@@ -208,9 +205,9 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<Object> start() {
+    public IJsonMessage<Object> start(HttpServletRequest request) {
         NodeModel nodeModel = getNode();
-        return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_Start);
+        return NodeForward.request(nodeModel, request, NodeUrl.Manage_Start);
     }
 
 
@@ -223,9 +220,9 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<Object> stop() {
+    public IJsonMessage<Object> stop(HttpServletRequest request) {
         NodeModel nodeModel = getNode();
-        return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_Stop);
+        return NodeForward.request(nodeModel, request, NodeUrl.Manage_Stop);
     }
 
 
@@ -240,12 +237,12 @@ public class ProjectManageControl extends BaseServerController {
         //
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
         writer.writeLine("id", "name", "groupName", "whitelistDirectory", "path", "logPath", "runMode",
-                "mainClass",
-                "jvm", "args",
-                "javaExtDirsCp",
-                "dslContent",
-                "webHooks",
-                "autoStart");
+            "mainClass",
+            "jvm", "args",
+            "javaExtDirsCp",
+            "dslContent",
+            "webHooks",
+            "autoStart");
         writer.flush();
     }
 
@@ -264,11 +261,11 @@ public class ProjectManageControl extends BaseServerController {
         CsvWriter writer = CsvUtil.getWriter(response.getWriter(), csvWriteConfig);
         int pageInt = 0;
         writer.writeLine("id", "name", "groupName", "whitelistDirectory", "path", "logPath", "runMode",
-                "mainClass",
-                "jvm", "args", "javaExtDirsCp",
-                "dslContent",
-                "webHooks",
-                "autoStart", "outGivingProject");
+            "mainClass",
+            "jvm", "args", "javaExtDirsCp",
+            "dslContent",
+            "webHooks",
+            "autoStart", "outGivingProject");
         while (true) {
             Map<String, String> paramMap = ServletUtil.getParamMap(request);
             // 下一页
@@ -278,26 +275,26 @@ public class ProjectManageControl extends BaseServerController {
                 break;
             }
             listPage.getResult()
-                    .stream()
-                    .map((Function<ProjectInfoCacheModel, List<Object>>) projectInfoCacheModel -> CollUtil.newArrayList(
-                            projectInfoCacheModel.getProjectId(),
-                            projectInfoCacheModel.getName(),
-                            projectInfoCacheModel.getGroup(),
-                            projectInfoCacheModel.getWhitelistDirectory(),
-                            projectInfoCacheModel.getLib(),
-                            projectInfoCacheModel.getLogPath(),
-                            projectInfoCacheModel.getRunMode(),
-                            projectInfoCacheModel.getMainClass(),
-                            encodeCsv(projectInfoCacheModel.getJvm()),
-                            encodeCsv(projectInfoCacheModel.getArgs()),
-                            encodeCsv(projectInfoCacheModel.getJavaExtDirsCp()),
-                            encodeCsv(projectInfoCacheModel.getDslContent()),
-                            projectInfoCacheModel.getToken(),
-                            projectInfoCacheModel.getAutoStart(),
-                            projectInfoCacheModel.getOutGivingProject()
-                    ))
-                    .map(objects -> objects.stream().map(StrUtil::toStringOrNull).toArray(String[]::new))
-                    .forEach(writer::writeLine);
+                .stream()
+                .map((Function<ProjectInfoCacheModel, List<Object>>) projectInfoCacheModel -> CollUtil.newArrayList(
+                    projectInfoCacheModel.getProjectId(),
+                    projectInfoCacheModel.getName(),
+                    projectInfoCacheModel.getGroup(),
+                    projectInfoCacheModel.getWhitelistDirectory(),
+                    projectInfoCacheModel.getLib(),
+                    projectInfoCacheModel.getLogPath(),
+                    projectInfoCacheModel.getRunMode(),
+                    projectInfoCacheModel.getMainClass(),
+                    encodeCsv(projectInfoCacheModel.getJvm()),
+                    encodeCsv(projectInfoCacheModel.getArgs()),
+                    encodeCsv(projectInfoCacheModel.getJavaExtDirsCp()),
+                    encodeCsv(projectInfoCacheModel.getDslContent()),
+                    projectInfoCacheModel.getToken(),
+                    projectInfoCacheModel.getAutoStart(),
+                    projectInfoCacheModel.getOutGivingProject()
+                ))
+                .map(objects -> objects.stream().map(StrUtil::toStringOrNull).toArray(String[]::new))
+                .forEach(writer::writeLine);
             if (ObjectUtil.equal(listPage.getPage(), listPage.getTotalPage())) {
                 // 最后一页
                 break;

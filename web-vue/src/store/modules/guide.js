@@ -60,6 +60,15 @@ const app = {
         resolve(cache.close);
       });
     },
+    //   切换全屏查看日志
+    toggleFullscreenViewLog({ commit, rootGetters }) {
+      return new Promise((resolve) => {
+        const cache = rootGetters.getGuideCache;
+        cache.fullscreenViewLog = !cache.fullscreenViewLog;
+        commit("setGuideCache", cache);
+        resolve(cache.fullscreenViewLog);
+      });
+    },
     commitGuide({ commit }, value) {
       commit("commitGuide", value);
     },
@@ -100,14 +109,7 @@ const app = {
   },
   getters: {
     getGuideCache(state) {
-      const cacheStr = state.guideCache || "";
-      let cahce;
-      try {
-        cahce = JSON.parse(cacheStr);
-      } catch (e) {
-        cahce = {};
-      }
-      return cahce;
+      return cacheToJson(state);
     },
     getDisabledGuide(state) {
       return state.disabledGuide;
@@ -115,7 +117,54 @@ const app = {
     getExtendPlugins(state) {
       return state.extendPlugins || [];
     },
+    // 计算弹窗全屏样式
+    getFullscreenViewLogStyle(state) {
+      const cache = cacheToJson(state);
+      if (cache.fullscreenViewLog) {
+        // 全屏
+        return {
+          dialogStyle: {
+            maxWidth: "100vw",
+            top: 0,
+            paddingBottom: 0,
+          },
+          bodyStyle: {
+            padding: "0 10px",
+            paddingTop: "10px",
+            marginRight: "10px",
+            height: "calc(100vh - 68px)",
+          },
+          width: "100vw",
+        };
+      }
+      // 非全屏
+      return {
+        dialogStyle: {
+          maxWidth: "100vw",
+          top: false,
+          paddingBottom: 0,
+        },
+        bodyStyle: {
+          padding: "0 10px",
+          paddingTop: "10px",
+          marginRight: "10px",
+          height: "70vh",
+        },
+        width: "80vw",
+      };
+    },
   },
 };
+
+function cacheToJson(state) {
+  const cacheStr = state.guideCache || "";
+  let cahce;
+  try {
+    cahce = JSON.parse(cacheStr);
+  } catch (e) {
+    cahce = {};
+  }
+  return cahce;
+}
 
 export default app;

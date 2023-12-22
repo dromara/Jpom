@@ -87,9 +87,21 @@
       </a-form-model>
     </a-modal>
     <!-- 查看日志 -->
-    <a-modal destroyOnClose v-model="logVisible" title="查看日志" width="80vw" :footer="null" :maskClosable="false">
-      <pull-log v-if="logVisible" :id="this.id" :dataId="this.temp.id" type="taks" :urlPrefix="this.urlPrefix" />
-    </a-modal>
+
+    <pull-log
+      v-if="logVisible > 0"
+      :key="logVisible"
+      :visible="logVisible != 0"
+      @close="
+        () => {
+          logVisible = 0;
+        }
+      "
+      :id="this.id"
+      :dataId="this.temp.id"
+      type="taks"
+      :urlPrefix="this.urlPrefix"
+    />
   </div>
 </template>
 
@@ -126,7 +138,7 @@ export default {
       editVisible: false,
       initSwarmVisible: false,
       autoUpdateTime: null,
-      logVisible: false,
+      logVisible: 0,
       rules: {
         role: [{ required: true, message: "请选择节点角色", trigger: "blur" }],
         availability: [{ required: true, message: "请选择节点状态", trigger: "blur" }],
@@ -196,7 +208,7 @@ export default {
     },
     // 日志
     handleLog(record) {
-      this.logVisible = true;
+      this.logVisible = new Date() * Math.random();
       this.temp = record;
     },
     handleEdit(record) {

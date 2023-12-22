@@ -217,6 +217,9 @@ export default {
             id: item.id,
           };
         });
+      if (!tempArray.length) {
+        return;
+      }
       this.dataArray = [...this.dataArray, ...tempArray];
       // console.log(this.dataArray.length, this.showList.length);
       if (this.config.logScroll) {

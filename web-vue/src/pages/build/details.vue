@@ -123,9 +123,17 @@
     </a-row>
 
     <!-- 构建日志 -->
-    <a-modal destroyOnClose :width="'80vw'" v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false" @cancel="closeBuildLogModel">
-      <build-log v-if="buildLogVisible" :temp="temp" />
-    </a-modal>
+    <build-log
+      v-if="buildLogVisible > 0"
+      :temp="temp"
+      :visible="buildLogVisible != 0"
+      :key="buildLogVisible"
+      @close="
+        () => {
+          buildLogVisible = 0;
+        }
+      "
+    />
   </div>
 </template>
 
@@ -134,6 +142,7 @@ import { getBuildGet, releaseMethodMap, statusMap, geteBuildHistory, statusColor
 import { parseTime, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, renderSize, formatDuration } from "@/utils/const";
 import { getRepositoryInfo } from "@/api/repository";
 import BuildLog from "./log";
+
 export default {
   props: {
     id: {
@@ -154,9 +163,10 @@ export default {
       listQuery: Object.assign({ buildDataId: this.id }, PAGE_DEFAULT_LIST_QUERY),
       historyList: [],
       tempRepository: null,
-      buildLogVisible: false,
+      buildLogVisible: 0,
     };
   },
+  computed: {},
   created() {
     this.refresh();
   },
@@ -215,7 +225,7 @@ export default {
         id: record.buildDataId,
         buildId: record.buildNumberId,
       };
-      this.buildLogVisible = true;
+      this.buildLogVisible = new Date() * Math.random();
     },
     // 回滚
     handleRollback(record) {
@@ -237,14 +247,12 @@ export default {
                 id: record.buildDataId,
                 buildId: res.data,
               };
-              this.buildLogVisible = true;
+              this.buildLogVisible = new Date() * Math.random();
             }
           });
         },
       });
     },
-    // 关闭日志对话框
-    closeBuildLogModel() {},
   },
 };
 </script>

@@ -1,24 +1,35 @@
 <template>
-  <div :style="`margin-top:${this.marginTop}`">
-    <div class="log-filter">
+  <a-modal
+    destroyOnClose
+    :width="getFullscreenViewLogStyle.width"
+    :dialogStyle="getFullscreenViewLogStyle.dialogStyle"
+    :bodyStyle="getFullscreenViewLogStyle.bodyStyle"
+    v-model="visibleModel"
+    :footer="null"
+    :maskClosable="false"
+    @cancel="close"
+  >
+    <template #title>
       <template>
-        <a-row type="flex" align="middle">
-          <a-col>
-            <slot name="before"></slot>
-          </a-col>
+        <a-page-header :title="titleName" :backIcon="false">
+          <template #subTitle>
+            <a-row type="flex" align="middle">
+              <a-col>
+                <slot name="before"></slot>
+              </a-col>
 
-          <a-col v-if="this.extendBar" style="padding-left: 10px">
-            <a-space>
-              <a-tooltip title="清空当前缓冲区内容">
-                <a-button type="primary" size="small" @click="clearLogCache" icon="delete">清空</a-button>
-              </a-tooltip>
-              <!-- <a-tooltip title="内容超过边界自动换行">
+              <a-col v-if="extendBar" style="padding-left: 10px">
+                <a-space>
+                  <a-tooltip title="清空当前缓冲区内容">
+                    <a-button type="primary" size="small" @click="clearLogCache" icon="delete">清空</a-button>
+                  </a-tooltip>
+                  <!-- <a-tooltip title="内容超过边界自动换行">
                 <a-switch v-model="temp.wordBreak" checked-children="自动换行" un-checked-children="不换行" @change="onChange" />
               </a-tooltip> -->
-              <a-tooltip title="有新内容后是否自动滚动到底部">
-                <a-switch v-model="temp.logScroll" checked-children="自动滚动" un-checked-children="不滚动" @change="onChange" />
-              </a-tooltip>
-              <!-- <a-dropdown>
+                  <a-tooltip title="有新内容后是否自动滚动到底部">
+                    <a-switch v-model="temp.logScroll" checked-children="自动滚动" un-checked-children="不滚动" @change="onChange" />
+                  </a-tooltip>
+                  <!-- <a-dropdown>
                 <a-button type="link" style="padding: 0" icon="setting"> 设置 <a-icon type="down" /></a-button>
                 <a-menu slot="overlay">
                   <a-menu-item key="0"> </a-menu-item>
@@ -26,19 +37,21 @@
                   <a-menu-item key="3"> </a-menu-item>
                 </a-menu>
               </a-dropdown> -->
-            </a-space>
-          </a-col>
-        </a-row>
+                </a-space>
+              </a-col>
+            </a-row>
+          </template>
+        </a-page-header>
       </template>
-    </div>
-    <!-- <pre class="log-view" :id="`${this.id}`" :style="`height:${this.height}`">{{ defText }}</pre> -->
-    <viewPre ref="viewPre" :height="this.height" :config="this.temp"></viewPre>
-  </div>
+    </template>
+
+    <viewPre ref="viewPre" :height="`calc(${getFullscreenViewLogStyle.bodyStyle.height} - 50px)`" :config="this.temp"></viewPre>
+  </a-modal>
 </template>
 
 <script>
 import viewPre from "./view-pre";
-
+import { mapGetters } from "vuex";
 export default {
   name: "LogView",
   components: {
@@ -49,14 +62,15 @@ export default {
     // },
   },
   computed: {
+    ...mapGetters(["getFullscreenViewLogStyle"]),
     regModifier() {
       return this.regModifiers.join("");
     },
   },
   props: {
-    height: {
+    titleName: {
       String,
-      default: "50vh",
+      default: "",
     },
     marginTop: {
       String,
@@ -66,6 +80,10 @@ export default {
       Boolean,
       default: true,
     },
+    visible: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -74,12 +92,16 @@ export default {
         // 自动换行
         wordBreak: false,
       },
+      visibleModel: false,
     };
   },
+  created() {
+    this.visibleModel = this.visible;
+  },
   mounted() {
-    const cacehJson = localStorage.getItem("log-view-cache") || "{}";
+    const cacheJson = localStorage.getItem("log-view-cache") || "{}";
     try {
-      const cacheData = JSON.parse(cacehJson);
+      const cacheData = JSON.parse(cacheJson);
       this.temp = Object.assign({}, this.temp, cacheData);
     } catch (e) {
       console.error(e);
@@ -87,13 +109,17 @@ export default {
   },
   methods: {
     appendLine(data) {
-      this.$refs.viewPre.appendLine(data);
+      this.$refs.viewPre?.appendLine(data);
     },
     clearLogCache() {
-      this.$refs.viewPre.clearLogCache();
+      this.$refs.viewPre?.clearLogCache();
     },
     onChange() {
       localStorage.setItem("log-view-cache", JSON.stringify(this.temp));
+    },
+    close() {
+      this.visibleModel = false;
+      this.$emit("close");
     },
   },
 };
@@ -112,5 +138,9 @@ export default {
 /deep/ .ant-checkbox-group-item {
   display: flex;
   align-items: center;
+}
+
+/deep/ .ant-page-header {
+  padding: 0;
 }
 </style>
