@@ -406,5 +406,24 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
             }
             return StrUtil.format("{}:{}", id, copyId);
         }
+
+        /**
+         * 请勿随意修改此方法，用户判断副本是否相同（编辑接口需要使用到）
+         *
+         * @param o 尝试
+         * @return bool
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            JavaCopyItem that = (JavaCopyItem) o;
+            return Objects.equals(parentId, that.parentId) &&
+                Objects.equals(id, that.id);
+        }
     }
 }

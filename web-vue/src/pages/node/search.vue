@@ -1,7 +1,7 @@
 <template>
   <div class="full-content">
     <template v-if="this.useSuggestions">
-      <a-result title="当前工作空间还没有项目" sub-title="可以创建节点分发或者到节点管理创建项目"> </a-result>
+      <a-result title="当前工作空间还没有项目并且也没有任何节点" sub-title="需要您先添加资产机器再分配机器节点（逻辑节点）到当前工作空间"> </a-result>
     </template>
     <a-table v-else :data-source="projList" :columns="columns" size="middle" bordered :pagination="pagination" @change="changePage" :row-selection="rowSelection" :rowKey="(record, index) => index">
       <template slot="title">
@@ -41,11 +41,11 @@
             <a-button type="danger" @click="delAll()" icon="delete"> 删除缓存 </a-button>
           </a-tooltip>
 
+          <a-button type="primary" @click="openAdd">创建项目</a-button>
           <a-tooltip>
             <template slot="title">
               <div>
                 <ul>
-                  <li>项目是存储在节点中的、创建需要到节点管理里面去操作</li>
                   <li>状态数据是异步获取有一定时间延迟</li>
                   <li>在单页列表里面 file 类型项目将自动排序到最后</li>
                 </ul>
@@ -56,8 +56,10 @@
         </a-space>
       </template>
       <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="text">
-        <a-icon v-if="record.outGivingProject" type="apartment" />
-        <span>{{ text }}</span>
+        <a-button type="link" style="padding: 0" size="small" @click="openEdit(record)">
+          <a-icon v-if="record.outGivingProject" type="apartment" />
+          <span>{{ text }}</span>
+        </a-button>
       </a-tooltip>
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
         <a-button type="link" style="padding: 0" size="small" @click="toNode(text)">
@@ -224,6 +226,40 @@
         </a-tabs>
       </a-form-model>
     </a-modal>
+    <!-- 编辑区 -->
+    <a-modal
+      destroyOnClose
+      v-model="editProjectVisible"
+      width="60vw"
+      title="编辑项目"
+      @ok="
+        () => {
+          this.$refs.edit.handleOk();
+        }
+      "
+      :maskClosable="false"
+    >
+      <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+        <a-form-model-item label="选择节点">
+          <a-select v-model="temp.nodeId" :disabled="!!temp.nodeId" allowClear placeholder="请选择节点">
+            <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+      </a-form-model>
+
+      <project-edit
+        v-if="temp.nodeId"
+        ref="edit"
+        @close="
+          () => {
+            editProjectVisible = false;
+            loadData();
+          }
+        "
+        :nodeId="temp.nodeId"
+        :projectId="temp.id"
+      />
+    </a-modal>
   </div>
 </template>
 <script>
@@ -233,6 +269,7 @@ import File from "@/pages/node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, concurrentExecution, itemGroupBy, parseTime } from "@/utils/const";
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
+import ProjectEdit from "@/pages/node/node-layout/project/project-edit";
 import Vue from "vue";
 import { mapGetters } from "vuex";
 
@@ -241,6 +278,7 @@ export default {
     File,
     Console,
     FileRead,
+    ProjectEdit,
   },
   data() {
     return {
@@ -306,6 +344,7 @@ export default {
         { desc: "停止项目", value: "stop" },
         { desc: "重启项目", value: "restart" },
       ],
+      editProjectVisible: false,
     };
   },
   computed: {
@@ -333,24 +372,28 @@ export default {
         // 没有登录或者不是超级管理员
         return false;
       }
-      if (this.listQuery.page !== 1 || this.listQuery.total > 0) {
-        // 不是第一页 或者总记录数大于 0
+      if (Object.keys(this.nodeMap).length) {
         return false;
       }
-      // 判断是否存在搜索条件
-      const nowKeys = Object.keys(this.listQuery);
-      const defaultKeys = Object.keys(PAGE_DEFAULT_LIST_QUERY);
-      const dictOrigin = nowKeys.filter((item) => !defaultKeys.includes(item));
-      return dictOrigin.length === 0;
+      return true;
+      // if (this.listQuery.page !== 1 || this.listQuery.total > 0) {
+      //   // 不是第一页 或者总记录数大于 0
+      //   return false;
+      // }
+      // // 判断是否存在搜索条件
+      // const nowKeys = Object.keys(this.listQuery);
+      // const defaultKeys = Object.keys(PAGE_DEFAULT_LIST_QUERY);
+      // const dictOrigin = nowKeys.filter((item) => !defaultKeys.includes(item));
+      // return dictOrigin.length === 0;
     },
   },
   mounted() {
-    this.getNodeProjectData();
     getNodeListAll().then((res) => {
       if (res.code === 200) {
         res.data.forEach((item) => {
           this.nodeMap = { ...this.nodeMap, [item.id]: item.name };
         });
+        this.getNodeProjectData();
       }
     });
   },
@@ -757,6 +800,20 @@ export default {
         },
       });
       window.open(newpage.href, "_blank");
+    },
+    // 打开编辑
+    openEdit(data) {
+      this.temp = {
+        id: data.projectId,
+        nodeId: data.nodeId,
+      };
+
+      this.editProjectVisible = true;
+    },
+    // 打开编辑
+    openAdd() {
+      this.temp = {};
+      this.editProjectVisible = true;
     },
   },
 };
