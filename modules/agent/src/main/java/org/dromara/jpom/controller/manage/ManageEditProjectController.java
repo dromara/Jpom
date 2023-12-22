@@ -430,4 +430,17 @@ public class ManageEditProjectController extends BaseAgentController {
         }
         return JsonMessage.success("释放成功");
     }
+
+    @RequestMapping(value = "change-workspace-id", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<Object> changeWorkspaceId(String newWorkspaceId, String newNodeId) {
+        Assert.hasText(newWorkspaceId, "请选择要修改的工作空间");
+        Assert.hasText(newWorkspaceId, "请选择要修改的节");
+        NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
+        if (nodeProjectInfoModel != null) {
+            nodeProjectInfoModel.setNodeId(newNodeId);
+            nodeProjectInfoModel.setWorkspaceId(newWorkspaceId);
+            projectInfoService.updateItem(nodeProjectInfoModel);
+        }
+        return JsonMessage.success("修改成功");
+    }
 }

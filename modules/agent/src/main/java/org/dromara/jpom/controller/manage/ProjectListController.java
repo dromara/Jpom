@@ -78,8 +78,6 @@ public class ProjectListController extends BaseAgentController {
                 }
             }
         }
-
-
         return JsonMessage.success("", nodeProjectInfoModel);
     }
 

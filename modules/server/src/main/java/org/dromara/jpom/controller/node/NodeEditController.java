@@ -26,7 +26,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
@@ -99,20 +98,8 @@ public class NodeEditController extends BaseServerController {
 
     @GetMapping(value = "list_data_all.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<List<NodeModel>> listDataAll() {
-        List<NodeModel> list = nodeService.listByWorkspace(getRequest());
-        return JsonMessage.success("", list);
-    }
-
-    @GetMapping(value = "list_data_by_workspace_id.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<List<NodeModel>> listDataAll(@ValidatorItem String workspaceId) {
-        nodeService.checkUserWorkspace(workspaceId);
-        NodeModel nodeModel = new NodeModel();
-        if (!StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL)) {
-            nodeModel.setWorkspaceId(workspaceId);
-        }
-        List<NodeModel> list = nodeService.listByBean(nodeModel);
+    public IJsonMessage<List<NodeModel>> listDataAll(HttpServletRequest request) {
+        List<NodeModel> list = nodeService.listByWorkspace(request);
         return JsonMessage.success("", list);
     }
 

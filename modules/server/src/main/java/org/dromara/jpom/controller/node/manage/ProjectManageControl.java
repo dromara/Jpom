@@ -28,11 +28,13 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.BomReader;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.StrPool;
 import cn.hutool.core.text.csv.*;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
@@ -47,8 +49,10 @@ import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.BaseNodeModel;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.RunMode;
+import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.data.MonitorModel;
 import org.dromara.jpom.model.data.NodeModel;
+import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.node.ProjectInfoCacheModel;
 import org.dromara.jpom.permission.ClassFeature;
@@ -56,6 +60,8 @@ import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.NodeDataPermission;
 import org.dromara.jpom.service.dblog.BuildInfoService;
+import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
+import org.dromara.jpom.service.dblog.RepositoryService;
 import org.dromara.jpom.service.monitor.MonitorService;
 import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.dromara.jpom.service.outgiving.LogReadServer;
@@ -68,9 +74,12 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 项目管理
@@ -88,19 +97,24 @@ public class ProjectManageControl extends BaseServerController {
     private final LogReadServer logReadServer;
     private final MonitorService monitorService;
     private final BuildInfoService buildService;
-
+    private final RepositoryService repositoryService;
     private final ProjectInfoCacheService projectInfoCacheService;
+    private final DbBuildHistoryLogService dbBuildHistoryLogService;
 
     public ProjectManageControl(OutGivingServer outGivingServer,
                                 LogReadServer logReadServer,
                                 MonitorService monitorService,
                                 BuildInfoService buildService,
-                                ProjectInfoCacheService projectInfoCacheService) {
+                                RepositoryService repositoryService,
+                                ProjectInfoCacheService projectInfoCacheService,
+                                DbBuildHistoryLogService dbBuildHistoryLogService) {
         this.outGivingServer = outGivingServer;
         this.logReadServer = logReadServer;
         this.monitorService = monitorService;
         this.buildService = buildService;
+        this.repositoryService = repositoryService;
         this.projectInfoCacheService = projectInfoCacheService;
+        this.dbBuildHistoryLogService = dbBuildHistoryLogService;
     }
 
 
@@ -160,9 +174,9 @@ public class ProjectManageControl extends BaseServerController {
         NodeModel nodeModel = getNode();
         if (StrUtil.isEmpty(copyId)) {
             // 检查节点分发
-            outGivingServer.checkNodeProject(nodeModel.getId(), id, request);
+            outGivingServer.checkNodeProject(nodeModel.getId(), id, request, "当前项目存在节点分发，不能直接删除");
             // 检查日志阅读
-            logReadServer.checkNodeProject(nodeModel.getId(), id, request);
+            logReadServer.checkNodeProject(nodeModel.getId(), id, request, "当前项目存在日志阅读，不能直接删除");
             // 项目监控
             List<MonitorModel> monitorModels = monitorService.listByWorkspace(request);
             if (monitorModels != null) {
@@ -179,6 +193,163 @@ public class ProjectManageControl extends BaseServerController {
             projectInfoCacheService.syncExecuteNode(nodeModel);
         }
         return jsonMessage;
+    }
+
+    /**
+     * 查看项目关联在线构建的数据
+     *
+     * @param projectData 项目数据
+     * @param request     请求
+     * @return list
+     */
+    private List<Tuple> checkBuild(ProjectInfoCacheModel projectData, HttpServletRequest request) {
+        // 构建
+        List<BuildInfoModel> buildInfoModels = buildService.listReleaseMethod(projectData.getNodeId() + StrUtil.COLON + projectData.getProjectId(), request, BuildReleaseMethod.Project);
+        if (buildInfoModels != null) {
+            return buildInfoModels.stream()
+                .map(buildInfoModel -> {
+                    // 判断共享仓库
+                    RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId());
+                    Assert.notNull(repositoryModel, "仓库不存在");
+                    if (repositoryModel.global()) {
+                        // 忽略判断
+                        return null;
+                    }
+                    // 判断仓库关联的构建
+                    BuildInfoModel buildInfoModel1 = new BuildInfoModel();
+                    buildInfoModel1.setRepositoryId(buildInfoModel.getRepositoryId());
+                    List<BuildInfoModel> infoModels = buildService.listByBean(buildInfoModel1);
+                    if (CollUtil.size(infoModels) > 1) {
+                        // 判断如果使用通过一个仓库
+                        long count = infoModels.stream()
+                            .filter(buildInfoModel2 -> !StrUtil.equals(repositoryModel.getId(), buildInfoModel2.getRepositoryId()))
+                            .count();
+                        Assert.state(count <= 0, "当前【项目】关联的【在线构建】关联的【仓库】被多个【在线构建】绑定暂不支持迁移");
+                    }
+                    return new Tuple(buildInfoModel, repositoryModel);
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * 迁移项目关联在线构建的数据
+     *
+     * @param list          构建数据
+     * @param toWorkspaceId 迁移到哪个工作空间
+     * @return list
+     */
+    private String migrateBuild(List<Tuple> list, String toWorkspaceId, String toNodeId, ProjectInfoCacheModel projectData) {
+        return list.stream()
+            .map(tuple -> {
+                BuildInfoModel infoModel = tuple.get(0);
+                RepositoryModel repository = tuple.get(1);
+                // 修改仓库所属工作空间
+                String repositoryId = infoModel.getRepositoryId();
+                RepositoryModel repositoryModel = new RepositoryModel();
+                repositoryModel.setId(repositoryId);
+                repositoryModel.setWorkspaceId(toWorkspaceId);
+                repositoryService.updateById(repositoryModel);
+                //
+                BuildInfoModel buildInfoModel = new BuildInfoModel();
+                buildInfoModel.setId(infoModel.getId());
+                buildInfoModel.setWorkspaceId(toWorkspaceId);
+                // 修改发布的关联数据
+                buildInfoModel.setReleaseMethodDataId(toNodeId + StrUtil.COLON + projectData.getProjectId());
+                buildService.updateById(buildInfoModel);
+                // 修改构建记录
+                dbBuildHistoryLogService.update(
+                    Entity.create().set("workspaceId", toWorkspaceId),
+                    Entity.create().set("buildDataId", infoModel.getId())
+                );
+                return StrUtil.format("自动迁移关联的构建：{} 和 仓库：{}", infoModel.getName(), repository.getName());
+            }).
+            collect(Collectors.joining(" | "));
+    }
+
+    /**
+     * 迁移工作空间
+     *
+     * @param id id
+     * @return json
+     */
+    @PostMapping(value = "migrate-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public IJsonMessage<String> migrateWorkspace(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id,
+                                                 @ValidatorItem(value = ValidatorRule.NOT_BLANK) String toWorkspaceId,
+                                                 @ValidatorItem(value = ValidatorRule.NOT_BLANK) String toNodeId,
+                                                 HttpServletRequest request) {
+        ProjectInfoCacheModel projectData = projectInfoCacheService.getByKey(id, request);
+        Assert.notNull(projectData, "项目不存在");
+
+        Assert.state(!StrUtil.equals(toWorkspaceId, projectData.getWorkspaceId()) || !StrUtil.equals(projectData.getNodeId(), toNodeId), "目标工作空间与当前工作空间一致并且目标节点与当前节点一致");
+        projectInfoCacheService.checkUserWorkspace(toWorkspaceId);
+        //
+        NodeModel nowNode = nodeService.getByKey(projectData.getNodeId());
+        Assert.notNull(nowNode, "当前对应的节点不存在");
+        NodeModel toNodeModel = nodeService.getByKey(toNodeId);
+        Assert.notNull(toNodeModel, "对应的节点不存在");
+        Assert.state(StrUtil.equals(toWorkspaceId, toNodeModel.getWorkspaceId()), "要迁移到的目标工作空间和节点不一致");
+        // 检查节点分发
+        outGivingServer.checkNodeProject(projectData.getNodeId(), projectData.getProjectId(), request, "当前项目存在节点分发，不能直接迁移");
+        // 检查日志阅读
+        logReadServer.checkNodeProject(projectData.getNodeId(), projectData.getProjectId(), request, "当前项目存在日志阅读，不能直接迁移");
+        // 项目监控
+        List<MonitorModel> monitorModels = monitorService.listByWorkspace(request);
+        if (monitorModels != null) {
+            boolean match = monitorModels.stream().anyMatch(monitorModel -> monitorModel.checkNodeProject(projectData.getNodeId(), id));
+            Assert.state(!match, "当前项目存在监控项，不能直接迁移");
+        }
+        // 检查构建
+        List<Tuple> buildInfoModels = this.checkBuild(projectData, request);
+        JsonMessage<String> result;
+        if (StrUtil.equals(nowNode.getMachineId(), toNodeModel.getMachineId())) {
+            // 相同机器
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("newWorkspaceId", toWorkspaceId);
+            jsonObject.put("newNodeId", toNodeId);
+            jsonObject.put("id", projectData.getProjectId());
+            JsonMessage<String> jsonMessage = NodeForward.request(nowNode, NodeUrl.Manage_ChangeWorkspaceId, jsonObject);
+            if (!jsonMessage.success()) {
+                return new JsonMessage<>(406, nowNode.getName() + "节点迁移项目失败" + jsonMessage.getMsg());
+            }
+            result = jsonMessage;
+        } else {
+            JSONObject item = projectInfoCacheService.getItem(nowNode, projectData.getProjectId());
+            Assert.notNull(item, "项目数据丢失");
+            item = projectInfoCacheService.convertToRequestData(item);
+            item.put("nodeId", toNodeId);
+            item.put("workspaceId", toWorkspaceId);
+            item.put("previewData", true);
+            // 发起预检查数据
+            JsonMessage<String> jsonMessage = NodeForward.request(toNodeModel, NodeUrl.Manage_SaveProject, item);
+            if (!jsonMessage.success()) {
+                return new JsonMessage<>(406, toNodeModel.getName() + "节点与检查项目失败" + jsonMessage.getMsg());
+            }
+            item.remove("previewData");
+            jsonMessage = NodeForward.request(toNodeModel, NodeUrl.Manage_SaveProject, item);
+            if (!jsonMessage.success()) {
+                return new JsonMessage<>(406, toNodeModel.getName() + "节点同步项目失败" + jsonMessage.getMsg());
+            }
+            // 删除之前节点项目
+            JSONObject delData = new JSONObject();
+            delData.put("id", projectData.getProjectId());
+            // 非强制
+            delData.put("thorough", "");
+            JsonMessage<String> delJsonMeg = NodeForward.request(nowNode, NodeUrl.Manage_DeleteProject, delData);
+            if (!delJsonMeg.success()) {
+                return new JsonMessage<>(406, nowNode.getName() + "节点删除项目失败" + delJsonMeg.getMsg());
+            }
+            result = jsonMessage;
+        }
+        // 迁移构建
+        String buildMsg = this.migrateBuild(buildInfoModels, toWorkspaceId, toNodeId, projectData);
+        // 刷新缓存
+        projectInfoCacheService.syncExecuteNode(nowNode);
+        projectInfoCacheService.syncExecuteNode(toNodeModel);
+        return new JsonMessage<>(200, "项目迁移成功：" + result.getMsg() + " | " + buildMsg);
     }
 
     /**

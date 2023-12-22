@@ -42,12 +42,12 @@ import java.util.List;
 public class OutGivingServer extends BaseWorkspaceService<OutGivingModel> implements IStatusRecover {
 
 
-    public void checkNodeProject(String nodeId, String projectId, HttpServletRequest request) {
+    public void checkNodeProject(String nodeId, String projectId, HttpServletRequest request, String msg) {
         // 检查节点分发
         List<OutGivingModel> outGivingModels = super.listByWorkspace(request);
         if (outGivingModels != null) {
             boolean match = outGivingModels.stream().anyMatch(outGivingModel -> outGivingModel.checkContains(nodeId, projectId));
-            Assert.state(!match, "当前项目存在节点分发，不能直接删除");
+            Assert.state(!match, msg);
         }
     }
 

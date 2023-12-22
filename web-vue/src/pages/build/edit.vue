@@ -1160,9 +1160,10 @@ export default {
           this.tempExtraData.releaseMethodDataId_1 = this.tempExtraData.releaseMethodDataId;
         }
         if (record.releaseMethod === 2) {
+          // 数据迁移后修改原始字段
           this.temp = {
             ...this.temp,
-            releaseMethodDataIdList: this.tempExtraData.releaseMethodDataId.split(":"),
+            releaseMethodDataIdList: (record.releaseMethodDataId || this.tempExtraData.releaseMethodDataId).split(":"),
           };
         }
         if (record.releaseMethod === 3) {

@@ -79,6 +79,7 @@ public enum NodeUrl {
     Manage_DeleteProject("/manage/deleteProject"),
 
     Manage_ReleaseOutGiving("/manage/releaseOutGiving"),
+    Manage_ChangeWorkspaceId("/manage/change-workspace-id"),
 
     Manage_GetProjectInfo("/manage/getProjectInfo"),
 

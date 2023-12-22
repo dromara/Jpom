@@ -38,12 +38,12 @@ import java.util.List;
 public class LogReadServer extends BaseWorkspaceService<LogReadModel> {
 
 
-    public void checkNodeProject(String nodeId, String projectId, HttpServletRequest request) {
+    public void checkNodeProject(String nodeId, String projectId, HttpServletRequest request, String msg) {
         // 检查节点分发
         List<LogReadModel> outGivingModels = super.listByWorkspace(request);
         if (outGivingModels != null) {
             boolean match = outGivingModels.stream().anyMatch(outGivingModel -> outGivingModel.checkContains(nodeId, projectId));
-            Assert.state(!match, "当前项目存在日志阅读，不能直接删除");
+            Assert.state(!match, msg);
         }
     }
 
