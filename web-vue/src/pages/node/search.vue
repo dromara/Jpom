@@ -53,6 +53,7 @@
             </template>
             <a-icon type="question-circle" theme="filled" />
           </a-tooltip>
+          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
         </a-space>
       </template>
       <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="text">
@@ -127,6 +128,15 @@
                   下移
                 </a-button>
               </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="danger" @click="handleDelete(record)">逻辑删除</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="danger" @click="handleDelete(record, 'thorough')">彻底删除</a-button>
+              </a-menu-item>
+              <!-- <a-menu-item>
+                <a-button size="small" type="danger" @click="migrateWorkspace(record)">迁移工作空间</a-button>
+              </a-menu-item> -->
             </a-menu>
           </a-dropdown>
         </a-space>
@@ -253,7 +263,8 @@
         @close="
           () => {
             editProjectVisible = false;
-            loadData();
+            this.getNodeProjectData();
+            this.loadGroupList();
           }
         "
         :nodeId="temp.nodeId"
@@ -264,7 +275,7 @@
 </template>
 <script>
 import { delAllProjectCache, getNodeListAll, getProjectList, sortItemProject } from "@/api/node";
-import { getRuningProjectInfo, noFileModes, restartProject, runModeList, startProject, stopProject, getProjectTriggerUrl, getProjectGroupAll } from "@/api/node-project";
+import { getRuningProjectInfo, noFileModes, restartProject, runModeList, startProject, stopProject, getProjectTriggerUrl, getProjectGroupAll, deleteProject } from "@/api/node-project";
 import File from "@/pages/node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, concurrentExecution, itemGroupBy, parseTime } from "@/utils/const";
@@ -345,6 +356,8 @@ export default {
         { desc: "重启项目", value: "restart" },
       ],
       editProjectVisible: false,
+      countdownTime: Date.now(),
+      refreshInterval: 5,
     };
   },
   computed: {
@@ -396,28 +409,43 @@ export default {
         this.getNodeProjectData();
       }
     });
+    this.countdownTime = Date.now() + this.refreshInterval * 1000;
+    //
+    this.loadGroupList();
   },
   methods: {
-    getNodeProjectData(pointerEvent) {
+    silenceLoadData() {
+      if (this.$attrs.routerUrl !== this.$route.path) {
+        // 重新计算倒计时
+        this.countdownTime = Date.now() + this.refreshInterval * 1000;
+        return;
+      }
+      this.getNodeProjectData(null, false);
+    },
+    getNodeProjectData(pointerEvent, loading) {
       this.loading = true;
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
-      getProjectList(this.listQuery).then((res) => {
-        if (res.code === 200) {
-          let resultList = res.data.result;
+      getProjectList(this.listQuery, loading)
+        .then((res) => {
+          if (res.code === 200) {
+            const resultList = res.data.result;
 
-          let tempList = resultList.filter((item) => item.runMode !== "File");
-          let fileList = resultList.filter((item) => item.runMode === "File");
-          this.projList = tempList.concat(fileList);
+            const tempList = resultList.filter((item) => item.runMode !== "File");
+            const fileList = resultList.filter((item) => item.runMode === "File");
+            this.projList = tempList.concat(fileList);
 
-          this.listQuery.total = res.data.total;
+            this.listQuery.total = res.data.total;
 
-          let nodeProjects = itemGroupBy(this.projList, "nodeId");
-          this.getRuningProjectInfo(nodeProjects);
-          //
-          this.loadGroupList();
-        }
-        this.loading = false;
-      });
+            const nodeProjects = itemGroupBy(this.projList, "nodeId");
+            this.getRuningProjectInfo(nodeProjects);
+
+            // 重新计算倒计时
+            this.countdownTime = Date.now() + this.refreshInterval * 1000;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
     loadGroupList() {
       getProjectGroupAll().then((res) => {
@@ -815,7 +843,44 @@ export default {
       this.temp = {};
       this.editProjectVisible = true;
     },
+    // 删除
+    handleDelete(record, thorough) {
+      this.$confirm({
+        title: "系统提示",
+        content: thorough
+          ? "真的要彻底删除项目么？彻底项目会自动删除项目相关文件奥(包含项目日志，日志备份，项目文件)"
+          : "真的要删除项目么？删除项目不会删除项目相关文件奥,建议先清理项目相关文件再删除项目",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          const params = {
+            nodeId: record.nodeId,
+            id: record.projectId,
+            thorough: thorough,
+          };
+          deleteProject(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+
+              this.getNodeProjectData();
+            }
+          });
+        },
+      });
+    },
   },
 };
 </script>
-<style scoped></style>
+<style scoped>
+/deep/ .ant-statistic div {
+  display: inline-block;
+}
+
+/deep/ .ant-statistic-content-value,
+/deep/ .ant-statistic-content {
+  font-size: 16px;
+}
+</style>
