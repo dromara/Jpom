@@ -385,9 +385,17 @@
     </a-drawer>
 
     <!-- 构建日志 -->
-    <a-modal destroyOnClose width="80vw" v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false" @cancel="closeBuildLogModel">
-      <build-log v-if="buildLogVisible" :temp="temp" />
-    </a-modal>
+    <build-log
+      v-if="buildLogVisible > 0"
+      :temp="temp"
+      :visible="buildLogVisible != 0"
+      :key="buildLogVisible"
+      @close="
+        () => {
+          buildLogVisible = 0;
+        }
+      "
+    />
     <!-- 构建确认 -->
     <a-modal destroyOnClose width="40vw" v-model="buildConfirmVisible" title="构建确认弹窗" @ok="handleStartBuild" :maskClosable="false">
       <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
@@ -515,7 +523,7 @@ export default {
       // 页面控制变量
       editBuildVisible: 0,
 
-      buildLogVisible: false,
+      buildLogVisible: 0,
       buildConfirmVisible: false,
       columns: [
         { title: "名称", dataIndex: "name", sorter: true, width: 200, ellipsis: true, scopedSlots: { customRender: "name" } },
@@ -834,7 +842,7 @@ export default {
         id: record.id,
         buildId: record.buildId,
       };
-      this.buildLogVisible = true;
+      this.buildLogVisible = new Date() * Math.random();
     },
     // 关闭日志对话框
     closeBuildLogModel() {

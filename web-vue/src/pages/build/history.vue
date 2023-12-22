@@ -90,9 +90,17 @@
       </template>
     </a-table>
     <!-- 构建日志 -->
-    <a-modal destroyOnClose :width="'80vw'" v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false" @cancel="closeBuildLogModel">
-      <build-log v-if="buildLogVisible" :temp="temp" />
-    </a-modal>
+    <build-log
+      v-if="buildLogVisible > 0"
+      :temp="temp"
+      :visible="buildLogVisible != 0"
+      :key="buildLogVisible"
+      @close="
+        () => {
+          buildLogVisible = 0;
+        }
+      "
+    />
   </div>
 </template>
 <script>
@@ -116,7 +124,7 @@ export default {
       statusMap,
       statusColor,
       temp: {},
-      buildLogVisible: false,
+      buildLogVisible: 0,
       tableSelections: [],
       columns: [
         { title: "构建名称", dataIndex: "buildName", width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
@@ -231,7 +239,7 @@ export default {
                 id: record.buildDataId,
                 buildId: res.data,
               };
-              this.buildLogVisible = true;
+              this.buildLogVisible = new Date() * Math.random();
             }
           });
         },
@@ -290,7 +298,7 @@ export default {
         id: record.buildDataId,
         buildId: record.buildNumberId,
       };
-      this.buildLogVisible = true;
+      this.buildLogVisible = new Date() * Math.random();
     },
     // 关闭日志对话框
     closeBuildLogModel() {

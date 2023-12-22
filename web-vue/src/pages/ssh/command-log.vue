@@ -42,8 +42,17 @@
       </template>
     </a-table>
     <!-- 构建日志 -->
-    <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
-      <command-log v-if="logVisible" :temp="temp" />
+    <a-modal
+      destroyOnClose
+      :width="getFullscreenViewLogStyle.width"
+      :dialogStyle="getFullscreenViewLogStyle.dialogStyle"
+      :bodyStyle="getFullscreenViewLogStyle.bodyStyle"
+      v-model="logVisible"
+      title="执行日志"
+      :footer="null"
+      :maskClosable="false"
+    >
+      <command-log :height="getFullscreenViewLogStyle.bodyStyle.height" v-if="logVisible" :temp="temp" />
     </a-modal>
   </div>
 </template>
@@ -52,7 +61,7 @@
 import { deleteCommandLog, downloadLog, getCommandLogList, statusMap, triggerExecTypeMap } from "@/api/command";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import CommandLog from "./command-view-log";
-
+import { mapGetters } from "vuex";
 export default {
   components: {
     CommandLog,
@@ -104,6 +113,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(["getFullscreenViewLogStyle"]),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
     },

@@ -411,9 +411,22 @@
       </a-table>
     </template>
     <!-- 日志 -->
-    <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
-      <log-view v-if="logVisible" :id="this.id" :urlPrefix="this.urlPrefix" :machineDockerId="this.machineDockerId" :containerId="temp.id" />
-    </a-modal>
+
+    <log-view
+      v-if="logVisible > 0"
+      :visible="logVisible != 0"
+      :key="logVisible"
+      @close="
+        () => {
+          logVisible = 0;
+        }
+      "
+      :id="this.id"
+      :urlPrefix="this.urlPrefix"
+      :machineDockerId="this.machineDockerId"
+      :containerId="temp.id"
+    />
+
     <!-- Terminal -->
     <a-modal
       v-model="terminalVisible"
@@ -528,7 +541,7 @@ export default {
         showAll: true,
       },
       terminalVisible: false,
-      logVisible: false,
+      logVisible: 0,
       temp: {},
 
       columns: [
@@ -664,7 +677,7 @@ export default {
       });
     },
     viewLog(record) {
-      this.logVisible = true;
+      this.logVisible = new Date() * Math.random();
       this.temp = record;
     },
     // 进入终端

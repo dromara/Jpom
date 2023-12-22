@@ -7,14 +7,14 @@
           {{ item.sshName }}
         </span>
         <!-- <a-input :id="`build-log-textarea-${item.id}`" v-model="logMap[item.id].logText" type="textarea" class="console" readOnly style="resize: none; height: 60vh" /> -->
-        <log-view :ref="`logView-${item.id}`" height="60vh" />
+        <log-view :ref="`logView-${item.id}`" :height="`calc(${height} - 130px)`" />
       </a-tab-pane>
     </a-tabs>
   </div>
 </template>
 <script>
 import { getCommandLogBarchList, getCommandLogInfo } from "@/api/command";
-import LogView from "@/components/logView";
+import LogView from "@/components/logView/index2";
 export default {
   components: {
     LogView,
@@ -22,6 +22,10 @@ export default {
   props: {
     temp: {
       type: Object,
+    },
+    height: {
+      type: String,
+      default: "60vh",
     },
   },
   data() {

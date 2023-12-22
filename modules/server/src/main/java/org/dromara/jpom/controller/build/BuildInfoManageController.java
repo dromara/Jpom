@@ -208,6 +208,9 @@ public class BuildInfoManageController extends BaseServerController {
         // 运行中
         Integer status = queryByBean.getStatus();
         data.put("run", buildExecuteService.checkStatus(item) != null);
+        data.put("logId", queryByBean.getId());
+        data.put("status", status);
+        data.put("statusMsg", queryByBean.getStatusMsg());
         // 构建中
         //data.put("buildRun", status == BuildStatus.Ing.getCode());
         return JsonMessage.success("ok", data);

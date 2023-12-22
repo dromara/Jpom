@@ -1,6 +1,6 @@
 <template>
   <div>
-    <log-view :ref="`logView`" height="70vh" marginTop="-10px" />
+    <log-view titleName="执行日志" :ref="`logView`" :visible="visible" />
   </div>
 </template>
 <script>
@@ -13,6 +13,10 @@ export default {
   props: {
     temp: {
       type: Object,
+    },
+    visible: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {

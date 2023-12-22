@@ -58,9 +58,18 @@
       </template>
     </a-table>
     <!-- 日志 -->
-    <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
-      <script-log-view v-if="logVisible" :temp="temp" />
-    </a-modal>
+
+    <script-log-view
+      v-if="logVisible > 0"
+      :visible="logVisible != 0"
+      :key="logVisible"
+      @close="
+        () => {
+          logVisible = 0;
+        }
+      "
+      :temp="temp"
+    />
   </div>
 </template>
 <script>
@@ -87,7 +96,7 @@ export default {
       statusMap,
       list: [],
       temp: {},
-      logVisible: false,
+      logVisible: 0,
       columns: [
         { title: "名称", dataIndex: "scriptName", width: 100, ellipsis: true, scopedSlots: { customRender: "scriptName" } },
         { title: "执行时间", dataIndex: "createTimeMillis", sorter: true, ellipsis: true, width: "160px", scopedSlots: { customRender: "createTimeMillis" } },
@@ -124,7 +133,7 @@ export default {
     },
     parseTime,
     viewLog(record) {
-      this.logVisible = true;
+      this.logVisible = new Date() * Math.random();
       this.temp = record;
     },
     handleDelete(record) {

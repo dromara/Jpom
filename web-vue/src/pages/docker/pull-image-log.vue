@@ -1,6 +1,6 @@
 <template>
   <div>
-    <log-view :ref="`logView`" height="70vh" marginTop="-10px" />
+    <log-view titleName="pull日志" :visible="visible" :ref="`logView`" />
   </div>
 </template>
 <script>
@@ -20,6 +20,10 @@ export default {
     },
     urlPrefix: {
       type: String,
+    },
+    visible: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
