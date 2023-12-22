@@ -213,10 +213,6 @@ public class ProjectManageControl extends BaseServerController {
                     // 判断共享仓库
                     RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId());
                     Assert.notNull(repositoryModel, "仓库不存在");
-                    if (repositoryModel.global()) {
-                        // 忽略判断
-                        return null;
-                    }
                     if (StrUtil.equals(repositoryModel.getWorkspaceId(), toWorkspaceId)) {
                         // 迁移前后是同一个工作空间
                         return null;
@@ -256,12 +252,14 @@ public class ProjectManageControl extends BaseServerController {
             .map(tuple -> {
                 BuildInfoModel infoModel = tuple.get(0);
                 RepositoryModel repository = tuple.get(1);
-                // 修改仓库所属工作空间
-                String repositoryId = infoModel.getRepositoryId();
-                RepositoryModel repositoryModel = new RepositoryModel();
-                repositoryModel.setId(repositoryId);
-                repositoryModel.setWorkspaceId(toWorkspaceId);
-                repositoryService.updateById(repositoryModel);
+                if (!repository.global()) {
+                    // 非全局仓库才 修改仓库所属工作空间
+                    String repositoryId = infoModel.getRepositoryId();
+                    RepositoryModel repositoryModel = new RepositoryModel();
+                    repositoryModel.setId(repositoryId);
+                    repositoryModel.setWorkspaceId(toWorkspaceId);
+                    repositoryService.updateById(repositoryModel);
+                }
                 //
                 BuildInfoModel buildInfoModel = new BuildInfoModel();
                 buildInfoModel.setId(infoModel.getId());
@@ -274,7 +272,10 @@ public class ProjectManageControl extends BaseServerController {
                     Entity.create().set("workspaceId", toWorkspaceId),
                     Entity.create().set("buildDataId", infoModel.getId())
                 );
-                return StrUtil.format("自动迁移关联的构建：{} 和 仓库：{}", infoModel.getName(), repository.getName());
+                if (!repository.global()) {
+                    return StrUtil.format("自动迁移关联的构建：{} 和 仓库：{}", infoModel.getName(), repository.getName());
+                }
+                return StrUtil.format("自动迁移关联的构建：{}", infoModel.getName());
             }).
             collect(Collectors.joining(" | "));
     }

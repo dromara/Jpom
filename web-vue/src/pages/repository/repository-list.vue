@@ -70,7 +70,9 @@
       <template slot="operation" slot-scope="text, record, index">
         <a-space>
           <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
+          <a-button type="primary" v-if="global" size="small" @click="viewBuild(record)">关联</a-button>
           <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
+
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
@@ -309,6 +311,7 @@
         </template>
       </a-table>
     </a-modal>
+    <!-- 选择仓库确认区域 -->
     <div style="padding-top: 50px" v-if="this.choose">
       <div
         :style="{
@@ -337,6 +340,10 @@
         </a-space>
       </div>
     </div>
+    <!-- 关联构建 -->
+    <a-modal destroyOnClose v-model="viewBuildVisible" width="80vw" title="关联构建" :maskClosable="false" :footer="null">
+      <component :is="buildListComponent" v-if="buildListComponent" :repositoryId="temp.id" :fullContent="false" />
+    </a-modal>
   </div>
 </template>
 <script>
@@ -371,6 +378,10 @@ export default {
     global: {
       type: Boolean,
       default: false,
+    },
+    chooseVal: {
+      type: String,
+      default: "",
     },
   },
   data() {
@@ -444,7 +455,7 @@ export default {
           dataIndex: "operation",
           fixed: "right",
           align: "center",
-          width: "180px",
+          width: this.global ? "220px" : "180px",
           scopedSlots: { customRender: "operation" },
         },
       ],
@@ -489,6 +500,8 @@ export default {
       },
       tableSelections: [],
       envVarList: [],
+      buildListComponent: null,
+      viewBuildVisible: false,
     };
   },
   computed: {
@@ -520,6 +533,11 @@ export default {
     });
     this.getWorkEnvList();
     this.loadGroupList();
+    // 异步加载组件
+    this.buildListComponent = () => import("@/pages/build/list-info");
+    if (this.chooseVal) {
+      this.tableSelections = [this.chooseVal];
+    }
   },
   methods: {
     CHANGE_PAGE,
@@ -768,6 +786,11 @@ export default {
       })[0];
 
       this.$emit("confirm", `${selectData.id}`);
+    },
+    // 查看关联构建
+    viewBuild(data) {
+      this.temp = { id: data.id };
+      this.viewBuildVisible = true;
     },
   },
 };

@@ -818,6 +818,7 @@
       <repository
         v-if="repositoryisible"
         :choose="true"
+        :chooseVal="this.tempRepository?.id"
         @confirm="
           (repositoryId) => {
             this.temp = { ...this.temp, repositoryId: repositoryId, branchName: '', branchTagName: '' };
