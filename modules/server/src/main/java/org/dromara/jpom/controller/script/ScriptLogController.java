@@ -23,6 +23,7 @@
 package org.dromara.jpom.controller.script;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
@@ -90,11 +91,17 @@ public class ScriptLogController extends BaseServerController {
     @RequestMapping(value = "del_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<Object> delLog(@ValidatorItem() String id,
-                                      @ValidatorItem() String executeId,
-                                      HttpServletRequest request) {
-        ScriptModel item = scriptServer.getByKeyAndGlobal(id, request);
-        Assert.notNull(item, "没有对应数据");
-        File logFile = item.logFile(executeId);
+                                       @ValidatorItem() String executeId,
+                                       HttpServletRequest request) {
+        ScriptModel item = null;
+        try {
+            item = scriptServer.getByKeyAndGlobal(id, request, "ignore");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            if (!StrUtil.equals("ignore", e.getMessage())) {
+                throw e;
+            }
+        }
+        File logFile = item == null ? ScriptModel.logFile(id, executeId) : item.logFile(executeId);
         boolean fastDel = CommandUtil.systemFastDel(logFile);
         Assert.state(!fastDel, "删除日志文件失败");
         scriptExecuteLogServer.delByKey(executeId);
@@ -112,9 +119,9 @@ public class ScriptLogController extends BaseServerController {
     @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> getNowLog(@ValidatorItem() String id,
-                                             @ValidatorItem() String executeId,
-                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line,
-                                             HttpServletRequest request) {
+                                              @ValidatorItem() String executeId,
+                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line,
+                                              HttpServletRequest request) {
         ScriptModel item = scriptServer.getByKey(id, request);
         Assert.notNull(item, "没有对应数据");
         File logFile = item.logFile(executeId);

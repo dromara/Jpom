@@ -341,7 +341,7 @@
       </div>
     </div>
     <!-- 关联构建 -->
-    <a-modal destroyOnClose v-model="viewBuildVisible" width="80vw" title="关联构建" :maskClosable="false" :footer="null">
+    <a-modal destroyOnClose v-model="viewBuildVisible" width="80vw" title="当前工作空间关联构建" :maskClosable="false" :footer="null">
       <component :is="buildListComponent" v-if="buildListComponent" :repositoryId="temp.id" :fullContent="false" />
     </a-modal>
   </div>
