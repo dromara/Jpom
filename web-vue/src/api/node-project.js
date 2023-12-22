@@ -144,6 +144,14 @@ export function deleteProject(params) {
   });
 }
 
+export function migrateWorkspace(params) {
+  return axios({
+    url: "/node/manage/migrate-workspace",
+    method: "post",
+    data: params,
+  });
+}
+
 export function releaseOutgiving(params) {
   return axios({
     url: "/node/manage/release-outgiving",

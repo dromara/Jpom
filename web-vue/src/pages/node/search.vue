@@ -134,9 +134,9 @@
               <a-menu-item>
                 <a-button size="small" type="danger" @click="handleDelete(record, 'thorough')">彻底删除</a-button>
               </a-menu-item>
-              <!-- <a-menu-item>
+              <a-menu-item>
                 <a-button size="small" type="danger" @click="migrateWorkspace(record)">迁移工作空间</a-button>
-              </a-menu-item> -->
+              </a-menu-item>
             </a-menu>
           </a-dropdown>
         </a-space>
@@ -271,11 +271,66 @@
         :projectId="temp.id"
       />
     </a-modal>
+    <!-- 迁移到其他工作空间 -->
+    <a-modal destroyOnClose v-model="migrateWorkspaceVisible" width="50vw" title="迁移到其他工作空间" @ok="migrateWorkspaceOk" :maskClosable="false">
+      <a-space style="display: block" direction="vertical">
+        <a-alert message="温馨提示" type="warning">
+          <template slot="description">
+            项目可能支持关联如下数据：
+            <ul>
+              <li>
+                在线构建（构建关联仓库、构建历史）
+
+                <ol>
+                  <li>如果关联的构建关联的仓库被多个构建绑定（使用）不能迁移</li>
+                  <li>仓库自动迁移后可能会重复存在请手动解决</li>
+                </ol>
+              </li>
+              <li>节点分发【暂不支持迁移】</li>
+              <li>项目监控 【暂不支持迁移】</li>
+              <li>日志阅读 【暂不支持迁移】</li>
+            </ul>
+          </template>
+        </a-alert>
+        <a-alert message="风险提醒" type="error">
+          <template slot="description">
+            <ul>
+              <li>如果垮机器（资产机器）迁移之前机器中的项目数据仅是逻辑删除（项目文件和日志均会保留）</li>
+              <li>迁移操作不具有事务性质，如果流程被中断可以产生冗余数据！！！！</li>
+            </ul>
+          </template>
+        </a-alert>
+      </a-space>
+      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+        <a-form-model-item> </a-form-model-item>
+        <a-form-model-item label="选择工作空间" prop="workspaceId">
+          <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间" @change="loadMigrateWorkspaceNodeList">
+            <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <a-form-model-item label="选择逻辑节点" prop="nodeId">
+          <a-select show-search option-filter-prop="children" v-model="temp.nodeId" placeholder="请选择逻辑节点">
+            <a-select-option v-for="item in migrateWorkspaceNodeList" :key="item.id">{{ item.name }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
 import { delAllProjectCache, getNodeListAll, getProjectList, sortItemProject } from "@/api/node";
-import { getRuningProjectInfo, noFileModes, restartProject, runModeList, startProject, stopProject, getProjectTriggerUrl, getProjectGroupAll, deleteProject } from "@/api/node-project";
+import {
+  getRuningProjectInfo,
+  noFileModes,
+  restartProject,
+  runModeList,
+  startProject,
+  stopProject,
+  getProjectTriggerUrl,
+  getProjectGroupAll,
+  deleteProject,
+  migrateWorkspace,
+} from "@/api/node-project";
 import File from "@/pages/node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, concurrentExecution, itemGroupBy, parseTime } from "@/utils/const";
@@ -283,6 +338,7 @@ import FileRead from "@/pages/node/node-layout/project/project-file-read";
 import ProjectEdit from "@/pages/node/node-layout/project/project-edit";
 import Vue from "vue";
 import { mapGetters } from "vuex";
+import { getWorkSpaceListAll } from "@/api/workspace";
 
 export default {
   components: {
@@ -358,6 +414,9 @@ export default {
       editProjectVisible: false,
       countdownTime: Date.now(),
       refreshInterval: 5,
+      migrateWorkspaceVisible: false,
+      workspaceList: [],
+      migrateWorkspaceNodeList: [],
     };
   },
   computed: {
@@ -869,6 +928,63 @@ export default {
             }
           });
         },
+      });
+    },
+    // 加载工作空间数据
+    loadWorkSpaceListAll() {
+      getWorkSpaceListAll().then((res) => {
+        if (res.code === 200) {
+          this.workspaceList = res.data;
+        }
+      });
+    },
+    // 迁移到其他工作空间
+    migrateWorkspace(record) {
+      this.temp = { id: record.id, originalWorkspaceId: record.workspaceId, originalNodeId: record.nodeId };
+      // delete this.temp.workspaceId;
+
+      this.migrateWorkspaceVisible = true;
+      this.loadWorkSpaceListAll();
+    },
+    // 获取节点
+    loadMigrateWorkspaceNodeList() {
+      if (!this.temp.workspaceId) {
+        return;
+      }
+      getNodeListAll({
+        workspaceId: this.temp.workspaceId,
+      }).then((res) => {
+        this.migrateWorkspaceNodeList = res.data || [];
+      });
+    },
+    //
+    migrateWorkspaceOk() {
+      if (!this.temp.workspaceId) {
+        this.$notification.warn({
+          message: "请选择工作空间",
+        });
+        return false;
+      }
+      if (!this.temp.nodeId) {
+        this.$notification.warn({
+          message: "请选择逻辑节点",
+        });
+        return false;
+      }
+      // 同步
+      migrateWorkspace({
+        id: this.temp.id,
+        toWorkspaceId: this.temp.workspaceId,
+        toNodeId: this.temp.nodeId,
+      }).then((res) => {
+        if (res.code == 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.migrateWorkspaceVisible = false;
+          this.getNodeProjectData();
+          return false;
+        }
       });
     },
   },

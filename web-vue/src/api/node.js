@@ -13,19 +13,11 @@ export function getNodeList(params) {
 }
 
 // node 列表 all
-export function getNodeListAll() {
+export function getNodeListAll(params) {
   return axios({
     url: "/node/list_data_all.json",
     method: "get",
-  });
-}
-
-// node 列表 根据 工作空间ID
-export function getNodeListByWorkspace(params) {
-  return axios({
-    url: "/node/list_data_by_workspace_id.json",
-    method: "get",
-    params: params,
+    params,
   });
 }
 

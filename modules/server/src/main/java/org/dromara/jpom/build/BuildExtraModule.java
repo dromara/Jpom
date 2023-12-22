@@ -225,6 +225,7 @@ public class BuildExtraModule extends BaseModel {
         this.setName(buildInfoModel.getName());
         this.setReleaseMethod(buildInfoModel.getReleaseMethod());
         this.setResultDirFile(buildInfoModel.getResultDirFile());
+        this.setReleaseMethodDataId(buildInfoModel.getReleaseMethodDataId());
         this.setWorkspaceId(buildInfoModel.getWorkspaceId());
     }
 

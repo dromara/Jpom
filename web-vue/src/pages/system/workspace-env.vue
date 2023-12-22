@@ -189,7 +189,7 @@
 </template>
 <script>
 import { deleteWorkspaceEnv, editWorkspaceEnv, getWorkspaceEnvList, getTriggerUrlWorkspaceEnv } from "@/api/workspace";
-import { getNodeListByWorkspace } from "@/api/node";
+import { getNodeListAll } from "@/api/node";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import Vue from "vue";
 export default {
@@ -322,7 +322,7 @@ export default {
     },
     // 获取所有节点
     getAllNodeList(workspaceId) {
-      getNodeListByWorkspace({
+      getNodeListAll({
         workspaceId: workspaceId,
       }).then((res) => {
         this.nodeList = res.data || [];

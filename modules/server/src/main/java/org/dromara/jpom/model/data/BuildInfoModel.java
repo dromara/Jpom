@@ -33,6 +33,7 @@ import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseGroupModel;
 import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.log.BuildHistoryLog;
+import org.dromara.jpom.util.StringUtil;
 
 /**
  * new BuildModel class, for replace old BuildModel
@@ -152,6 +153,22 @@ public class BuildInfoModel extends BaseGroupModel {
 
     @Tolerate
     public BuildInfoModel() {
+    }
+
+    /**
+     * 获取构建的扩展数据
+     *
+     * @return extraData
+     */
+    public BuildExtraModule extraData() {
+        BuildExtraModule buildExtraModule = StringUtil.jsonConvert(this.getExtraData(), BuildExtraModule.class);
+        if (buildExtraModule != null) {
+            if (this.releaseMethodDataId != null) {
+                // 兼容数据迁移
+                buildExtraModule.setReleaseMethodDataId(this.releaseMethodDataId);
+            }
+        }
+        return buildExtraModule;
     }
 
     public static String getBuildIdStr(int buildId) {

@@ -158,7 +158,7 @@ public class BuildExecuteService {
             boolean containsKey = BuildExecuteManage.BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId());
             Assert.state(!containsKey, "当前构建还在进行中");
             //
-            BuildExtraModule buildExtraModule = StringUtil.jsonConvert(buildInfoModel.getExtraData(), BuildExtraModule.class);
+            BuildExtraModule buildExtraModule = buildInfoModel.extraData();
             Assert.notNull(buildExtraModule, "构建信息缺失");
             // load repository
             RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId(), false);
@@ -303,7 +303,8 @@ public class BuildExecuteService {
         buildHistoryLog.setStatus(waitExec.getCode());
         buildHistoryLog.setStartTime(SystemClock.now());
         buildHistoryLog.setBuildRemark(taskData.buildRemark);
-        buildHistoryLog.setExtraData(buildInfoModel.getExtraData());
+        // 缓存数据 - 保证数据一直
+        buildHistoryLog.setExtraData(buildExtraModule.toJson().toString());
         dbBuildHistoryLogService.insert(buildHistoryLog);
         //
         buildService.updateStatus(buildHistoryLog.getBuildDataId(), waitExec, "开始排队等待执行");

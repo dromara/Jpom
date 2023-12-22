@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom.service.node;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -33,6 +34,8 @@ import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseNodeService;
 import org.dromara.jpom.service.system.WorkspaceService;
 import org.springframework.stereotype.Service;
+
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -59,6 +62,14 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoCacheMod
         return request.getData();
     }
 
+    /**
+     * 查询项目是否存在
+     *
+     * @param workspaceId 工作空间ID
+     * @param nodeId      节点id
+     * @param id          项目id
+     * @return true 存在
+     */
     public boolean exists(String workspaceId, String nodeId, String id) {
         ProjectInfoCacheModel projectInfoCacheModel = new ProjectInfoCacheModel();
         projectInfoCacheModel.setWorkspaceId(workspaceId);
@@ -67,6 +78,13 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoCacheMod
         return super.exists(projectInfoCacheModel);
     }
 
+    /**
+     * 查询项目是否存在
+     *
+     * @param nodeId 节点id
+     * @param id     项目id
+     * @return true 存在
+     */
     public boolean exists(String nodeId, String id) {
         NodeModel nodeModel = nodeService.getByKey(nodeId);
         if (nodeModel == null) {
@@ -75,10 +93,32 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoCacheMod
         return this.exists(nodeModel.getWorkspaceId(), nodeId, id);
     }
 
-//    public JSONObject getLogSize(NodeModel nodeModel, String id, String copyId) {
-//
-////        return requestData;
-//    }
+    /**
+     * 将响应的数据转为请求的数据
+     *
+     * @param item 数据
+     * @return data
+     */
+    public JSONObject convertToRequestData(JSONObject item) {
+        JSONArray javaCopyItemList = item.getJSONArray("javaCopyItemList");
+        if (CollUtil.isNotEmpty(javaCopyItemList)) {
+            String javaCopyIds = javaCopyItemList.stream().map(o -> {
+                JSONObject javaCopyItem = (JSONObject) o;
+                String id = javaCopyItem.getString("id");
+                String name = javaCopyItem.getString("name");
+                String jvm = javaCopyItem.getString("jvm");
+                String args = javaCopyItem.getString("args");
+                //
+                item.put("jvm_" + id, jvm);
+                item.put("args_" + id, args);
+                item.put("name_" + id, name);
+                return id;
+            }).collect(Collectors.joining(","));
+            item.put("javaCopyIds", javaCopyIds);
+            item.remove("javaCopyItemList");
+        }
+        return item;
+    }
 
 
     @Override

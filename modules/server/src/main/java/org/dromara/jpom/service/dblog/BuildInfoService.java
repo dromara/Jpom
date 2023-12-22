@@ -248,4 +248,21 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> imple
         buildInfoModel.setReleaseMethod(releaseMethod.getCode());
         return super.exists(buildInfoModel);
     }
+
+    /**
+     * 查询发布关联的构建
+     *
+     * @param dataId        数据ID
+     * @param request       请求对象
+     * @param releaseMethod 发布方法
+     * @return list
+     */
+    public List<BuildInfoModel> listReleaseMethod(String dataId, HttpServletRequest request, BuildReleaseMethod releaseMethod) {
+        BuildInfoModel buildInfoModel = new BuildInfoModel();
+        String workspaceId = this.getCheckUserWorkspace(request);
+        buildInfoModel.setWorkspaceId(workspaceId);
+        buildInfoModel.setReleaseMethodDataId(dataId);
+        buildInfoModel.setReleaseMethod(releaseMethod.getCode());
+        return super.listByBean(buildInfoModel);
+    }
 }
