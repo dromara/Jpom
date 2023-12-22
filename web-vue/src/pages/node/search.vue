@@ -77,17 +77,24 @@
       </a-tooltip>
 
       <template slot="status" slot-scope="text, record">
-        <template v-if="projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.error">
-          <a-tooltip :title="projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.error">
+        <template v-if="projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].error">
+          <a-tooltip :title="projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].error">
             <a-icon type="warning" />
           </a-tooltip>
         </template>
         <template v-else>
           <a-tooltip
             v-if="noFileModes.includes(record.runMode)"
-            :title="`状态操作请到控制台中控制   ${(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.statusMsg) || ''}`"
+            :title="`状态操作请到控制台中控制   ${
+              (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].statusMsg) || ''
+            }`"
           >
-            <a-switch :checked="projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.pid > 0" disabled checked-children="开" un-checked-children="关" />
+            <a-switch
+              :checked="projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].pid > 0"
+              disabled
+              checked-children="开"
+              un-checked-children="关"
+            />
           </a-tooltip>
           <span v-else>-</span>
         </template>
@@ -98,16 +105,16 @@
         slot-scope="text, record"
         placement="topLeft"
         :title="`进程号：${(
-          (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.pids) || [
-            (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.pid) || '-',
+          (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].pids) || [
+            (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].pid) || '-',
           ]
-        ).join(',')} / 端口号：${(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.port) || '-'}`"
+        ).join(',')} / 端口号：${(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].port) || '-'}`"
       >
         <span
-          >{{ (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.port) || "-" }}/{{
+          >{{ (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].port) || "-" }}/{{
             (
-              (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.pids) || [
-                (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.pid) || "-",
+              (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].pids) || [
+                (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].pid) || "-",
               ]
             ).join(",")
           }}</span
