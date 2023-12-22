@@ -177,238 +177,29 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editProjectVisible" width="60vw" title="编辑项目" @ok="handleEditProjectOk" :maskClosable="false">
-      <a-form-model ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item label="项目 ID" prop="id">
-          <a-input :maxLength="50" v-model="temp.id" v-if="temp.type === 'edit'" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
-          <template v-else>
-            <a-input-search
-              :maxLength="50"
-              v-model="temp.id"
-              placeholder="创建之后不能修改"
-              @search="
-                () => {
-                  this.temp = { ...this.temp, id: randomStr(6) };
-                }
-              "
-            >
-              <template slot="enterButton">
-                <a-button type="primary"> 随机生成 </a-button>
-              </template>
-            </a-input-search>
-          </template>
-        </a-form-model-item>
-
-        <a-form-model-item label="项目名称" prop="name">
-          <a-row>
-            <a-col :span="10">
-              <a-input v-model="temp.name" :maxLength="50" placeholder="项目名称" />
-            </a-col>
-            <a-col :span="4" style="text-align: right">分组名称：</a-col>
-            <a-col :span="10">
-              <custom-select suffixIcon="" :maxLength="50" v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder="选择分组"> </custom-select>
-            </a-col>
-          </a-row>
-        </a-form-model-item>
-        <a-form-model-item prop="runMode">
-          <template slot="label">
-            运行方式
-            <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
-                <ul>
-                  <li><b>Dsl</b> 配合脚本模版实现自定义项目管理</li>
-                  <li><b>ClassPath</b> java -classpath xxx 运行项目</li>
-                  <li><b>Jar</b> java -jar xxx 运行项目</li>
-                  <li><b>JarWar</b> java -jar Springboot war 运行项目</li>
-                  <li><b>JavaExtDirsCp</b> java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS 运行项目</li>
-                  <li><b>File</b> 项目为静态文件夹,没有项目状态以及控制等功能</li>
-                </ul>
-              </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-select v-model="temp.runMode" placeholder="请选择运行方式">
-            <a-select-option v-for="runMode in runModeList" :key="runMode">{{ runMode }}</a-select-option>
-          </a-select>
-        </a-form-model-item>
-        <a-form-model-item prop="whitelistDirectory" class="jpom-node-project-whitelist">
-          <template slot="label">
-            项目路径
-            <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
-                <ul>
-                  <li>白名单路径是指项目文件存放到服务中的文件夹</li>
-                  <li>可以到节点管理中的【插件端配置】=>【白名单配置】修改</li>
-                  <li>项目文件夹是项目实际存放的目录名称</li>
-                  <li>项目文件会存放到 <br />&nbsp;&nbsp;<b>项目白名单路径+项目文件夹</b></li>
-                </ul>
-              </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-input-group compact>
-            <a-select style="width: 50%" v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
-              <a-select-option v-for="access in accessList" :key="access">
-                <a-tooltip :title="access">{{ access }}</a-tooltip>
-              </a-select-option>
-            </a-select>
-            <a-input style="width: 50%" v-model="temp.lib" placeholder="项目存储的文件夹" />
-          </a-input-group>
-          <template #extra>
-            <!-- <span class="lib-exist" v-show="temp.libExist">{{ temp.libExistMsg }}</span> -->
-          </template>
-        </a-form-model-item>
-        <!-- <a-form-model-item prop="lib">
-          <template slot="label">
-            项目文件夹
-            <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
-                <ul></ul>
-              </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-        </a-form-model-item> -->
-        <a-form-model-item v-show="filePath !== ''" label="项目完整目录">
-          <a-alert :message="filePath" type="success" />
-        </a-form-model-item>
-        <a-form-model-item v-show="temp.runMode === 'Dsl'" prop="dslContent">
-          <template slot="label">
-            DSL 内容
-            <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
-                <p>以 yaml/yml 格式配置,scriptId 为项目路径下的脚本文件的相对路径或者脚本模版ID，可以到脚本模版编辑弹窗中查看 scriptId</p>
-                <p>脚本里面支持的变量有：${PROJECT_ID}、${PROJECT_NAME}、${PROJECT_PATH}</p>
-                <p><b>status</b> 流程执行完脚本后，输出的内容最后一行必须为：running:$pid <b>$pid 为当前项目实际的进程ID</b>。如果输出最后一行不是预期格式项目状态将是未运行</p>
-                <p>配置详情请参考配置示例</p>
-              </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-tabs>
-            <a-tab-pane key="1" tab="DSL 配置">
-              <div style="height: 40vh; overflow-y: scroll">
-                <code-editor v-model="temp.dslContent" :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"></code-editor>
-              </div>
-            </a-tab-pane>
-            <a-tab-pane key="2" tab="配置示例">
-              <div style="height: 40vh; overflow-y: scroll">
-                <code-editor v-model="PROJECT_DSL_DEFATUL" :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef', readOnly: true }"></code-editor>
-              </div>
-            </a-tab-pane>
-          </a-tabs>
-        </a-form-model-item>
-        <a-form-model-item v-show="noFileModes.includes(temp.runMode)">
-          <template slot="label">
-            日志目录
-            <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
-                <ul>
-                  <li>日志目录是指控制台日志存储目录</li>
-                  <li>默认是在项目文件夹父级</li>
-                  <li>可选择的列表和项目白名单目录是一致的，即相同配置</li>
-                </ul>
-              </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-select v-model="temp.logPath" placeholder="请选择项目白名单路径">
-            <a-select-option key="" value="">默认是在项目文件夹父级</a-select-option>
-            <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
-          </a-select>
-        </a-form-model-item>
-
-        <a-form-model-item label="Main Class" prop="mainClass" v-show="javaModes.includes(temp.runMode) && temp.runMode !== 'Jar'">
-          <a-input v-model="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)" />
-        </a-form-model-item>
-        <a-form-model-item label="JavaExtDirsCp" prop="javaExtDirsCp" v-show="javaModes.includes(temp.runMode) && temp.runMode === 'JavaExtDirsCp'">
-          <a-input v-model="temp.javaExtDirsCp" placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】" />
-        </a-form-model-item>
-        <a-form-model-item label="JVM 参数" prop="jvm" v-show="javaModes.includes(temp.runMode)">
-          <a-textarea v-model="temp.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
-        </a-form-model-item>
-        <a-form-model-item label="args 参数" prop="args" v-show="javaModes.includes(temp.runMode)">
-          <a-textarea v-model="temp.args" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
-        </a-form-model-item>
-        <div v-if="javaModes.includes(temp.runMode)">
-          <!-- 副本信息 -->
-          <!-- <a-row> </a-row> -->
-          <a-form-model-item>
-            <template slot="label">
-              副本
-              <a-tooltip v-show="temp.type !== 'edit'">
-                <template slot="title"> 副本是指同一个项目在一个节点（服务器）中运行多份 </template>
-                <a-icon type="question-circle" theme="filled" />
-              </a-tooltip>
-            </template>
-            <a-collapse v-if="temp.javaCopyItemList && temp.javaCopyItemList.length">
-              <a-collapse-panel v-for="replica in temp.javaCopyItemList" :key="replica.id">
-                <template #header>
-                  <a-row>
-                    <a-col :span="4"> 副本 {{ replica.id }} </a-col>
-                    <a-col :span="10">
-                      <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除">
-                        <a-button size="small" :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(replica)">删除</a-button>
-                      </a-tooltip>
-                    </a-col>
-                  </a-row>
-                </template>
-                <a-form-model-item :label="`名称`" prop="replicaName">
-                  <a-input v-model="replica.name" class="replica-area" placeholder="副本名称" />
-                </a-form-model-item>
-                <a-form-model-item :label="`JVM 参数`" prop="jvm">
-                  <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
-                </a-form-model-item>
-                <a-form-model-item :label="`args 参数`" prop="args">
-                  <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
-                </a-form-model-item>
-                <!-- <a-form-model-item> -->
-
-                <!-- </a-form-model-item> -->
-              </a-collapse-panel>
-            </a-collapse>
-            <!-- 添加副本 -->
-            <a-form-model-item>
-              <a-button size="small" type="primary" @click="handleAddReplica">添加副本</a-button>
-            </a-form-model-item>
-          </a-form-model-item>
-        </div>
-        <a-form-model-item prop="autoStart" v-show="noFileModes.includes(temp.runMode)">
-          <template slot="label">
-            自启动
-            <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-switch v-model="temp.autoStart" checked-children="开" un-checked-children="关" />
-        </a-form-model-item>
-        <a-form-model-item v-if="temp.runMode === 'Dsl'" prop="dslEnv" label="DSL环境变量">
-          <a-input v-model="temp.dslEnv" placeholder="DSL环境变量,如：key1=values1&keyvalue2" />
-        </a-form-model-item>
-        <a-form-model-item prop="token" v-show="noFileModes.includes(temp.runMode)" class="jpom-node-project-token">
-          <template slot="label">
-            WebHooks
-            <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
-                <ul>
-                  <li>项目启动,停止,重启都将请求对应的地址</li>
-                  <li>传入参数有：projectId、projectName、type、copyId、result</li>
-                  <li>type 的值有：stop、beforeStop、start、beforeRestart、fileChange</li>
-                </ul>
-              </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-input v-model="temp.token" placeholder="项目启动,停止,重启都将请求对应的地址,非必填，GET请求" />
-        </a-form-model-item>
-        <a-form-model-item v-if="temp.log" v-show="temp.type === 'edit' && javaModes.includes(temp.runMode)" label="日志路径" prop="log">
-          <a-alert :message="temp.log" type="success" />
-        </a-form-model-item>
-        <a-form-model-item v-if="temp.runCommand" v-show="temp.type === 'edit' && javaModes.includes(temp.runMode)" label="运行命令" prop="runCommand">
-          <a-alert :message="temp.runCommand || '无'" type="success" />
-        </a-form-model-item>
-      </a-form-model>
+    <a-modal
+      destroyOnClose
+      v-model="editProjectVisible"
+      width="60vw"
+      title="编辑项目"
+      @ok="
+        () => {
+          this.$refs.edit.handleOk();
+        }
+      "
+      :maskClosable="false"
+    >
+      <project-edit
+        ref="edit"
+        @close="
+          () => {
+            editProjectVisible = false;
+            loadData();
+          }
+        "
+        :nodeId="temp.nodeId"
+        :projectId="temp.id"
+      />
     </a-modal>
     <!-- 项目文件组件 -->
     <a-drawer destroyOnClose :title="drawerTitle" placement="right" width="85vw" :visible="drawerFileVisible" @close="onFileClose">
@@ -456,17 +247,14 @@
 import File from "./project-file";
 import Console from "./project-console";
 import FileRead from "./project-file-read";
-import CustomSelect from "@/components/customSelect";
-// import Replica from "./project-replica";
+
+import ProjectEdit from "./project-edit";
 import ProjectLog from "./project-log.vue";
-import codeEditor from "@/components/codeEditor";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, randomStr, parseTime } from "@/utils/const";
+
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, parseTime } from "@/utils/const";
 
 import {
   deleteProject,
-  editProject,
-  getProjectAccessList,
-  getProjectData,
   getProjectList,
   getRuningProjectCopyInfo,
   getRuningProjectInfo,
@@ -493,9 +281,9 @@ export default {
   components: {
     File,
     Console,
-    CustomSelect,
-    // Replica,
-    codeEditor,
+
+    ProjectEdit,
+
     FileRead,
     ProjectLog,
   },
@@ -503,11 +291,11 @@ export default {
     return {
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-      accessList: [],
+
       groupList: [],
-      runModeList: runModeList,
-      javaModes: javaModes,
-      noFileModes: noFileModes,
+      runModeList,
+      javaModes,
+      noFileModes,
       PROJECT_DSL_DEFATUL,
       list: [],
       temp: {},
@@ -536,13 +324,7 @@ export default {
         { title: "最后修改时间", dataIndex: "modifyTime", width: "180px", ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: "150px" },
       ],
-      rules: {
-        id: [{ required: true, message: "请输入项目ID", trigger: "blur" }],
-        name: [{ required: true, message: "请输入项目名称", trigger: "blur" }],
-        runMode: [{ required: true, message: "请选择项目运行方式", trigger: "blur" }],
-        whitelistDirectory: [{ required: true, message: "请选择项目白名单路径", trigger: "blur" }],
-        lib: [{ required: true, message: "请输入项目文件夹", trigger: "blur" }],
-      },
+
       expandedRowKeys: [],
       lobbackVisible: false,
       showJavaCopyItemList: false,
@@ -609,32 +391,9 @@ export default {
   },
   methods: {
     parseTime,
-    randomStr,
+
     CHANGE_PAGE,
-    // 页面引导
-    introGuide() {
-      this.$store.dispatch("tryOpenGuide", {
-        key: "project",
-        options: {
-          hidePrev: true,
-          steps: [
-            {
-              title: "导航助手",
-              element: document.querySelector(".jpom-node-project-whitelist"),
-              intro: "这里是选择节点设置的白名单目录，白名单的设置在侧边栏菜单<b>插件端配置</b>里面。",
-            },
-          ],
-        },
-      });
-    },
-    // 加载项目白名单列表
-    loadAccesList() {
-      getProjectAccessList(this.node.id).then((res) => {
-        if (res.code === 200) {
-          this.accessList = res.data;
-        }
-      });
-    },
+
     loadGroupList() {
       getProjectGroupAll().then((res) => {
         if (res.data) {
@@ -724,18 +483,11 @@ export default {
     // 添加
     handleAdd() {
       this.temp = {
-        type: "add",
-        logPath: "",
-        javaCopyItemList: [],
+        id: "",
+        nodeId: this.node.id,
       };
-      this.loadAccesList();
 
       this.editProjectVisible = true;
-      this.$nextTick(() => {
-        setTimeout(() => {
-          this.introGuide();
-        }, 500);
-      });
     },
     // 复制
     copyItem(record) {
@@ -750,88 +502,14 @@ export default {
     },
     // 编辑
     handleEdit(record) {
-      const params = {
+      this.temp = {
         id: record.projectId,
         nodeId: this.node.id,
       };
-      this.loadAccesList();
 
-      getProjectData(params).then((res) => {
-        if (res.code === 200) {
-          this.temp = {
-            ...res.data,
-            type: "edit",
-          };
-          if (!this.temp.javaCopyItemList) {
-            this.temp = {
-              ...this.temp,
-              javaCopyItemList: [],
-            };
-          }
-          this.editProjectVisible = true;
-        }
-      });
+      this.editProjectVisible = true;
     },
-    // 添加副本
-    handleAddReplica() {
-      let repliccaId = randomStr();
-      this.temp.javaCopyItemList.push({
-        id: repliccaId,
-        jvm: "",
-        args: "",
-        name: "",
-        deleteAble: true,
-      });
-    },
-    // 移除副本
-    handleDeleteReplica(reeplica) {
-      const index = this.temp.javaCopyItemList.findIndex((element) => element.id === reeplica.id);
-      const newList = this.temp.javaCopyItemList.slice();
-      newList.splice(index, 1);
-      this.temp.javaCopyItemList = newList;
-    },
-    // 提交
-    handleEditProjectOk() {
-      if (this.temp.outGivingProject) {
-        this.$notification.warning({
-          message: "独立的项目分发请到分发管理中去修改",
-        });
-        return;
-      }
-      // 检验表单
-      this.$refs["editProjectForm"].validate((valid) => {
-        if (!valid) {
-          return false;
-        }
-        const params = {
-          ...this.temp,
-          nodeId: this.node.id,
-        };
-        // 额外参数
-        const replicaParams = {};
 
-        let javaCopyIds = this.temp.javaCopyItemList
-          .map((element) => {
-            //javaCopyIds += `${element.id},`;
-            replicaParams[`jvm_${element.id}`] = element.jvm;
-            replicaParams[`args_${element.id}`] = element.args;
-            replicaParams[`name_${element.id}`] = element.name;
-            return element.id;
-          })
-          .join(",");
-        replicaParams["javaCopyIds"] = javaCopyIds;
-        editProject(params, replicaParams).then((res) => {
-          if (res.code === 200) {
-            this.$notification.success({
-              message: res.msg,
-            });
-            this.$refs["editProjectForm"].resetFields();
-            this.editProjectVisible = false;
-            this.loadData();
-          }
-        });
-      });
-    },
     // 文件管理
     handleFile(record) {
       this.checkRecord = record;
@@ -1264,18 +942,3 @@ export default {
   },
 };
 </script>
-<style scoped>
-.replica-area {
-  width: 80%;
-}
-
-/* .replica-btn-del {
-  position: absolute;
-  right: 120px;
-  top: 74px;
-} */
-
-/* .lib-exist {
-  color: #faad14;
-} */
-</style>
