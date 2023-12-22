@@ -39,10 +39,10 @@ module.exports = [
       {
         text: ' 🚩用户', link: '/pages/user/'
       },
+      {
+        text: '🤝企业服务', link: '/pages/enterprise-service/'
+      }
     ]
-  },
-  {
-    text: '🤝企业服务', link: '/pages/enterprise-service/'
   },
 
   {

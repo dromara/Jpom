@@ -9,8 +9,8 @@ actions:
   - actionText: ⚡️赞赏 Jpom
     actionLink: /pages/praise/
     actionClass: action-button-diy
-  - actionText: 🤝企业服务
-    actionLink: /pages/enterprise-service/
+  - actionText: 🤝了解 Jpom
+    actionLink: /pages/readme/
     actionClass: action-button-diy
 bannerBg: none # auto => 网格纹背景(有bodyBgImg时无背景)，默认 | none => 无 | '大图地址' | background: 自定义背景样式       提示：如发现文本颜色不适应你的背景时可以到palette.styl修改$bannerTextColor变量
 

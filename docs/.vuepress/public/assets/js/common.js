@@ -59,7 +59,7 @@ $(function () {
 // function called if wwads is blocked
 // https://github.com/bytegravity/whitelist-wwads
   function ABDetected() {
-    if (location.hostname === '127.0.0.1') {
+    if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') {
       // 本地环境不显示
       return
     }
