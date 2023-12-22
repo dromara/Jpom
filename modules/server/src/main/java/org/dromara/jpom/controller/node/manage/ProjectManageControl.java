@@ -198,13 +198,15 @@ public class ProjectManageControl extends BaseServerController {
     /**
      * 查看项目关联在线构建的数据
      *
-     * @param projectData 项目数据
-     * @param request     请求
+     * @param projectData   项目数据
+     * @param request       请求
+     * @param toWorkspaceId 工作空间ID
      * @return list
      */
-    private List<Tuple> checkBuild(ProjectInfoCacheModel projectData, HttpServletRequest request) {
+    private List<Tuple> checkBuild(ProjectInfoCacheModel projectData, String toWorkspaceId, HttpServletRequest request) {
         // 构建
-        List<BuildInfoModel> buildInfoModels = buildService.listReleaseMethod(projectData.getNodeId() + StrUtil.COLON + projectData.getProjectId(), request, BuildReleaseMethod.Project);
+        String dataId = projectData.getNodeId() + StrUtil.COLON + projectData.getProjectId();
+        List<BuildInfoModel> buildInfoModels = buildService.listReleaseMethod(dataId, request, BuildReleaseMethod.Project);
         if (buildInfoModels != null) {
             return buildInfoModels.stream()
                 .map(buildInfoModel -> {
@@ -215,16 +217,24 @@ public class ProjectManageControl extends BaseServerController {
                         // 忽略判断
                         return null;
                     }
+                    if (StrUtil.equals(repositoryModel.getWorkspaceId(), toWorkspaceId)) {
+                        // 迁移前后是同一个工作空间
+                        return null;
+                    }
                     // 判断仓库关联的构建
                     BuildInfoModel buildInfoModel1 = new BuildInfoModel();
                     buildInfoModel1.setRepositoryId(buildInfoModel.getRepositoryId());
+                    buildInfoModel1.setWorkspaceId(projectData.getWorkspaceId());
                     List<BuildInfoModel> infoModels = buildService.listByBean(buildInfoModel1);
                     if (CollUtil.size(infoModels) > 1) {
                         // 判断如果使用通过一个仓库
                         long count = infoModels.stream()
-                            .filter(buildInfoModel2 -> !StrUtil.equals(repositoryModel.getId(), buildInfoModel2.getRepositoryId()))
+                            .filter(buildInfoModel2 -> {
+                                // 发布方式和数据id 不一样
+                                return !StrUtil.equals(buildInfoModel2.getReleaseMethodDataId(), dataId);
+                            })
                             .count();
-                        Assert.state(count <= 0, "当前【项目】关联的【在线构建】关联的【仓库】被多个【在线构建】绑定暂不支持迁移");
+                        Assert.state(count <= 0, "当前【项目】关联的【在线构建】关联的【仓库(" + repositoryModel.getName() + ")】被 " + count + "个不同发布方式的【在线构建】绑定暂不支持迁移");
                     }
                     return new Tuple(buildInfoModel, repositoryModel);
                 })
@@ -303,7 +313,7 @@ public class ProjectManageControl extends BaseServerController {
             Assert.state(!match, "当前项目存在监控项，不能直接迁移");
         }
         // 检查构建
-        List<Tuple> buildInfoModels = this.checkBuild(projectData, request);
+        List<Tuple> buildInfoModels = this.checkBuild(projectData, toWorkspaceId, request);
         JsonMessage<String> result;
         if (StrUtil.equals(nowNode.getMachineId(), toNodeModel.getMachineId())) {
             // 相同机器

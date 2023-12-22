@@ -506,6 +506,11 @@ export default {
     detailsPage,
     triggerPage,
   },
+  props: {
+    // id: {
+    //   type: String,
+    // },
+  },
   data() {
     return {
       sizeOptions: ["8", "12", "16", "20", "24"],
