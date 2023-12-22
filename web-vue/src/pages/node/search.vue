@@ -77,21 +77,41 @@
       </a-tooltip>
 
       <template slot="status" slot-scope="text, record">
-        <template v-if="record.error">
-          <a-tooltip :title="record.error">
+        <template v-if="projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.error">
+          <a-tooltip :title="projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.error">
             <a-icon type="warning" />
           </a-tooltip>
         </template>
         <template v-else>
-          <a-tooltip v-if="noFileModes.includes(record.runMode)" title="状态操作请到控制台中控制">
-            <a-switch :checked="text" disabled checked-children="开" un-checked-children="关" />
+          <a-tooltip
+            v-if="noFileModes.includes(record.runMode)"
+            :title="`状态操作请到控制台中控制   ${(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.statusMsg) || ''}`"
+          >
+            <a-switch :checked="projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.pid > 0" disabled checked-children="开" un-checked-children="关" />
           </a-tooltip>
           <span v-else>-</span>
         </template>
       </template>
 
-      <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${(record.pids || [record.pid || '-']).join(',')} / 端口号：${record.port}`">
-        <span>{{ record.port || "-" }}/{{ (record.pids || [record.pid || "-"]).join(",") }}</span>
+      <a-tooltip
+        slot="port"
+        slot-scope="text, record"
+        placement="topLeft"
+        :title="`进程号：${(
+          (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.pids) || [
+            (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.pid) || '-',
+          ]
+        ).join(',')} / 端口号：${(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.port) || '-'}`"
+      >
+        <span
+          >{{ (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.port) || "-" }}/{{
+            (
+              (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.pids) || [
+                (projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId]?.pid) || "-",
+              ]
+            ).join(",")
+          }}</span
+        >
       </a-tooltip>
       <template slot="operation" slot-scope="text, record, index">
         <a-space>
@@ -350,6 +370,7 @@ export default {
   data() {
     return {
       projList: [],
+      projectStatusMap: {},
       groupList: [],
       runModeList: runModeList,
       selectedRowKeys: [],
@@ -539,41 +560,32 @@ export default {
             getRuningProjectInfo(tempParams, "noTip")
               .then((res2) => {
                 if (res2.code === 200) {
-                  this.projList = this.projList.map((element) => {
-                    if (res2.data[element.projectId] && element.nodeId === data.type) {
-                      element.port = res2.data[element.projectId].port;
-                      element.pid = res2.data[element.projectId].pid;
-                      element.pids = res2.data[element.projectId].pids;
-                      element.status = element.pid > 0;
-                      element.error = res2.data[element.projectId].error;
-                    }
-                    return element;
-                  });
+                  this.projectStatusMap = { ...this.projectStatusMap, [data.type]: res2.data };
                   resolve();
                 } else {
-                  this.projList = this.projList.map((element) => {
-                    if (element.nodeId === data.type) {
-                      element.port = 0;
-                      element.pid = 0;
-                      element.status = false;
-                      element.error = res2.msg;
-                    }
-                    return element;
+                  const data2 = {};
+                  this.projList.forEach((item) => {
+                    data2[item.projectId] = {
+                      port: 0,
+                      pid: 0,
+                      error: res2.msg,
+                    };
                   });
+                  this.projectStatusMap = { ...this.projectStatusMap, [data.type]: data2 };
                   reject();
                 }
                 // this.getRuningProjectInfo(nodeProjects, i + 1);
               })
               .catch(() => {
-                this.projList = this.projList.map((element) => {
-                  if (element.nodeId === data.type) {
-                    element.port = 0;
-                    element.pid = 0;
-                    element.status = false;
-                    element.error = "网络异常";
-                  }
-                  return element;
+                const data2 = {};
+                this.projList.forEach((item) => {
+                  data2[item.projectId] = {
+                    port: 0,
+                    pid: 0,
+                    error: "网络异常",
+                  };
                 });
+                this.projectStatusMap = { ...this.projectStatusMap, [data.type]: data2 };
                 reject();
               });
           });
