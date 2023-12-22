@@ -65,11 +65,14 @@ export function getNodeProjectList(params) {
 }
 
 // 节点 + 项目列表
-export function getProjectList(params) {
+export function getProjectList(params, loading) {
   return axios({
     url: "/node/project_list",
     method: "post",
     data: params,
+    headers: {
+      loading: loading === false ? "no" : "",
+    },
   });
 }
 
