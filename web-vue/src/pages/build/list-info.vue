@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div :class="`${fullContent ? 'full-content' : ''}`">
     <!-- 表格 -->
     <a-card :bodyStyle="{ padding: '10px' }">
       <template slot="title">
@@ -507,9 +507,14 @@ export default {
     triggerPage,
   },
   props: {
-    // id: {
-    //   type: String,
-    // },
+    repositoryId: {
+      type: String,
+      default: "",
+    },
+    fullContent: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
@@ -642,6 +647,7 @@ export default {
     // 加载数据
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
+      this.listQuery.repositoryId = this.repositoryId;
       this.loading = true;
       getBuildList(this.listQuery).then((res) => {
         if (res.code === 200) {

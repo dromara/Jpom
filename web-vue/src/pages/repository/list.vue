@@ -1,5 +1,5 @@
 <template>
-  <repository :workspaceId="this.getWorkspaceId" :global="true" :choose="choose" @confirm="confirm"> </repository>
+  <repository :workspaceId="this.getWorkspaceId" :global="true" :choose="choose" :chooseVal="chooseVal" @confirm="confirm"> </repository>
 </template>
 <script>
 import repository from "./repository-list.vue";
@@ -9,6 +9,10 @@ export default {
     choose: {
       type: Boolean,
       default: false,
+    },
+    chooseVal: {
+      type: String,
+      default: "",
     },
   },
   components: { repository },
