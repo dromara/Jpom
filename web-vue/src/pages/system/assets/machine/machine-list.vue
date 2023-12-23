@@ -77,8 +77,8 @@
                       <a-row class="item-info">
                         <a-col :span="6" class="title text-overflow-hidden">系统名称:</a-col>
                         <a-col :span="18" class="content text-overflow-hidden">
-                          <a-button style="padding: 0; height: auto" type="link" size="small" @click="showMachineInfo(item)">
-                            {{ item.osName }}
+                          <a-button :disabled="!item.osName" style="padding: 0; height: auto" type="link" size="small" @click="showMachineInfo(item)">
+                            {{ item.osName || "-" }}
                           </a-button>
                         </a-col>
                       </a-row>
@@ -87,7 +87,7 @@
                       <a-row class="item-info">
                         <a-col :span="6" class="title text-overflow-hidden">系统版本:</a-col>
                         <a-col :span="18" class="content text-overflow-hidden">
-                          {{ item.osVersion }}
+                          {{ item.osVersion || "-" }}
                         </a-col>
                       </a-row>
                     </a-tooltip>
@@ -95,7 +95,7 @@
                       <a-row class="item-info">
                         <a-col :span="6" class="title text-overflow-hidden">系统负载:</a-col>
                         <a-col :span="18" class="content text-overflow-hidden">
-                          {{ item.osLoadAverage }}
+                          {{ item.osLoadAverage || "-" }}
                         </a-col>
                       </a-row>
                     </a-tooltip>
@@ -103,7 +103,7 @@
                       <a-row class="item-info">
                         <a-col :span="6" class="title text-overflow-hidden">插件版本:</a-col>
                         <a-col :span="18" class="content text-overflow-hidden">
-                          <a-button v-if="item.jpomVersion" style="padding: 0; height: auto" type="link" size="small" @click="showMachineUpgrade(item)"> {{ item.jpomVersion || "-" }} </a-button>
+                          <a-button :disabled="!item.jpomVersion" style="padding: 0; height: auto" type="link" size="small" @click="showMachineUpgrade(item)"> {{ item.jpomVersion || "-" }} </a-button>
                         </a-col>
                       </a-row>
                     </a-tooltip>

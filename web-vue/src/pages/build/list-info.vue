@@ -665,14 +665,19 @@ export default {
         this.countdownTime = Date.now() + this.refreshInterval * 1000;
         return;
       }
-      getBuildList(this.listQuery, false).then((res) => {
-        if (res.code === 200) {
-          this.list = res.data.result;
-          this.listQuery.total = res.data.total;
-          // 重新计算倒计时
-          this.countdownTime = Date.now() + this.refreshInterval * 1000;
-        }
-      });
+      this.loading = true;
+      getBuildList(this.listQuery, false)
+        .then((res) => {
+          if (res.code === 200) {
+            this.list = res.data.result;
+            this.listQuery.total = res.data.total;
+            // 重新计算倒计时
+            this.countdownTime = Date.now() + this.refreshInterval * 1000;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
 
     // 添加
