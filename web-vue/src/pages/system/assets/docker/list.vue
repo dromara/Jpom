@@ -368,8 +368,8 @@ export default {
       swarmList: [],
       sshList: [],
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "host", dataIndex: "host", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" }, width: 150 },
+        { title: "host", dataIndex: "host", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: 150 },
         { title: "docker版本", dataIndex: "dockerVersion", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
 
         { title: "状态", dataIndex: "status", ellipsis: true, align: "center", width: "100px", scopedSlots: { customRender: "status" } },

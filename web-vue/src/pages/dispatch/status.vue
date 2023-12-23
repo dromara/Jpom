@@ -12,7 +12,7 @@
             <a-tag v-else>{{ statusMap[data.status] || "未知" }}</a-tag>
           </div>
           <div>状态描述：{{ data.statusMsg || "-" }}</div>
-          <a-button type="primary" :loading="childLoading" @click="loadData">刷新</a-button>
+          <a-button type="primary" size="small" :loading="childLoading" @click="loadData">刷新</a-button>
 
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
         </a-space>
@@ -107,8 +107,7 @@ export default {
   },
   data() {
     return {
-      loading: false,
-      childLoading: false,
+      childLoading: true,
       statusMap,
       dispatchStatusMap,
 
@@ -180,6 +179,7 @@ export default {
     },
     // 静默
     silenceLoadData() {
+      this.childLoading = true;
       this.handleReloadById().then(() => {
         // 重新计算倒计时
         this.countdownTime = Date.now() + this.refreshInterval * 1000;
@@ -206,13 +206,14 @@ export default {
               const nodeProjects = itemGroupBy(projectList, "nodeId");
               this.getRuningProjectInfo(nodeProjects);
             }
-            this.childLoading = false;
             resolve();
           })
           .catch(() => {
+            resolve();
+          })
+          .finally(() => {
             // 取消加载中
             this.childLoading = false;
-            resolve();
           });
       });
     },

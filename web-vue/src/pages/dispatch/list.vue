@@ -31,8 +31,8 @@
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleLink">添加关联项目</a-button>
-          <a-button type="primary" @click="handleAdd">创建分发项目</a-button>
+          <a-button type="primary" @click="handleLink">添加关联</a-button>
+          <a-button type="primary" @click="handleAdd">创建分发</a-button>
           <a-tooltip>
             <template slot="title">
               <div>节点分发是指,一个项目运行需要在多个节点(服务器)中运行,使用节点分发来统一管理这个项目(可以实现分布式项目管理功能)</div>
