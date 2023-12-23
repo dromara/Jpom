@@ -217,20 +217,22 @@ public class ProjectManageControl extends BaseServerController {
                         // 迁移前后是同一个工作空间
                         return null;
                     }
-                    // 判断仓库关联的构建
-                    BuildInfoModel buildInfoModel1 = new BuildInfoModel();
-                    buildInfoModel1.setRepositoryId(buildInfoModel.getRepositoryId());
-                    buildInfoModel1.setWorkspaceId(projectData.getWorkspaceId());
-                    List<BuildInfoModel> infoModels = buildService.listByBean(buildInfoModel1);
-                    if (CollUtil.size(infoModels) > 1) {
-                        // 判断如果使用通过一个仓库
-                        long count = infoModels.stream()
-                            .filter(buildInfoModel2 -> {
-                                // 发布方式和数据id 不一样
-                                return !StrUtil.equals(buildInfoModel2.getReleaseMethodDataId(), dataId);
-                            })
-                            .count();
-                        Assert.state(count <= 0, "当前【项目】关联的【在线构建】关联的【仓库(" + repositoryModel.getName() + ")】被 " + count + "个不同发布方式的【在线构建】绑定暂不支持迁移");
+                    // 非全局仓库判断仓库关联的构建
+                    if (!repositoryModel.global()) {
+                        BuildInfoModel buildInfoModel1 = new BuildInfoModel();
+                        buildInfoModel1.setRepositoryId(buildInfoModel.getRepositoryId());
+                        buildInfoModel1.setWorkspaceId(projectData.getWorkspaceId());
+                        List<BuildInfoModel> infoModels = buildService.listByBean(buildInfoModel1);
+                        if (CollUtil.size(infoModels) > 1) {
+                            // 判断如果使用通过一个仓库
+                            long count = infoModels.stream()
+                                .filter(buildInfoModel2 -> {
+                                    // 发布方式和数据id 不一样
+                                    return !StrUtil.equals(buildInfoModel2.getReleaseMethodDataId(), dataId);
+                                })
+                                .count();
+                            Assert.state(count <= 0, "当前【项目】关联的【在线构建】关联的【仓库(" + repositoryModel.getName() + ")】被其他 " + count + "个不同发布方式的【在线构建】绑定暂不支持迁移");
+                        }
                     }
                     return new Tuple(buildInfoModel, repositoryModel);
                 })
