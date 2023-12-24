@@ -183,7 +183,7 @@ notices-2: # 可选的
 }
 </style>
 <p align="center">
-  <a class="become-sponsor-join" href="/pages/589c8e/">成为赞助者</a>
+  <a class="become-sponsor-join" href="/pages/589c8e/">成为赞助商</a>
 </p>
 
 ## 😭 日常开发中，您是否有以下痛点？
@@ -243,7 +243,7 @@ Jpom 从 2017 年诞生、2019 年发布第一个版本。
 
 至今已经经历 `150+` 版本迭代欢迎您使用，为 Jpom 发展提出宝贵意见，我们也更欢迎您参与进来共同为开源做出一份贡献。
 
-<img :src="$withBase('/images/time-line.png')" alt="jpom-func-arch">
+<img class="no-zoom" :src="$withBase('/images/time-line.png')" alt="jpom-func-arch">
 
 ## 快速体验
 
@@ -359,7 +359,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 
 ## 🍭架构图
 
-<img :src="$withBase('/images/jpom-func-arch.jpg')" style="zoom: 120%" alt="jpom-func-arch">
+<img class="no-zoom" :src="$withBase('/images/jpom-func-arch.jpg')" style="zoom: 120%" alt="jpom-func-arch">
 
 <br/>
 

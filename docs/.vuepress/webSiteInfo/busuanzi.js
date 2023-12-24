@@ -84,7 +84,7 @@ bszTag = {
   texts: function (n) {
     this.bszs.map(function (t) {
       var e = document.getElementById("busuanzi_value_" + t);
-      e && (e.innerHTML = n[t]);
+      e && (e.innerHTML = renderSize(n[t]));
     });
   },
   hides: function () {
@@ -101,15 +101,55 @@ bszTag = {
   },
 };
 
-
 // 修复Node同构代码的问题
 // if (typeof document !== "undefined") {
 //   fetch();
 // }
 
+/**
+ * 格式化文件大小
+ * @param {*} value
+ * @param defaultValue
+ * @returns
+ */
+export function renderSize(value, defaultValue = "-") {
+  return formatUnits(
+    value,
+    1000,
+    ["B", "K", "M", "G", "T", "P", "E", "Z", "Y"],
+    defaultValue
+  );
+}
+
+/**
+ * 格式化文件大小
+ * @param {*} value
+ * @param defaultValue
+ * @returns
+ */
+export function formatUnits(value, base, unitArr, defaultValue = "-") {
+  if (null == value || value === "") {
+    return defaultValue;
+  }
+
+  var index = 0;
+  var srcsize = parseFloat(value);
+  if (srcsize <= 0) {
+    return defaultValue;
+  }
+  // console.log(value, srcsize);
+  index = Math.floor(Math.log(srcsize) / Math.log(base));
+  var size = srcsize / Math.pow(base, index);
+  size = size.toFixed(2); //保留的小数位数
+  return size + unitArr[index];
+}
+
 export default () => {
   bszTag && bszTag.hides();
-  bszCaller.fetch("//busuanzi.ibruce.info/busuanzi?jsonpCallback=BusuanziCallback", function (t) {
-    bszTag.texts(t), bszTag.shows();
-  })
+  bszCaller.fetch(
+    "//busuanzi.ibruce.info/busuanzi?jsonpCallback=BusuanziCallback",
+    function (t) {
+      bszTag.texts(t), bszTag.shows();
+    }
+  );
 };

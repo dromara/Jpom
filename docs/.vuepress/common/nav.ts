@@ -15,14 +15,27 @@ export default [
       { text: "Docker 容器安装教程", link: "/pages/c846d3/" },
       { text: "离线安装教程", link: "/pages/af288b/" },
       {
-        text: "v2.9.X迁移到v2.10.X指南",
-        link: "/pages/upgrade/2.9.x-to-2.10.x/",
+        text: "大版本升级",
+        items: [
+          {
+            text: "v2.9.X迁移到v2.10.X指南",
+            link: "/pages/upgrade/2.9.x-to-2.10.x/",
+          },
+          {
+            text: "v2.8.X迁移到v2.9.X指南",
+            link: "/pages/upgrade/2.8.x-to-2.9.x/",
+          },
+          { text: "数据库迁移到 mysql", link: "/pages/4cfb46/" },
+        ],
       },
       {
-        text: "v2.8.X迁移到v2.9.X指南",
-        link: "/pages/upgrade/2.8.x-to-2.9.x/",
+        text: "索引",
+        items: [
+          { text: "分类", link: "/categories/" },
+          { text: "标签", link: "/tags/" },
+          { text: "归档", link: "/archives/" },
+        ],
       },
-      { text: "数据库迁移到 mysql", link: "/pages/4cfb46/" },
     ],
   },
   {

@@ -7,7 +7,7 @@ export default <UserPlugins>[
   [
     {
       name: "custom-plugins",
-      globalUIComponents: ["PageInfo", "BlockToggle", "GlobalTip"], // 2.x 版本 globalUIComponents 改名为 clientAppRootComponentFiles
+      globalUIComponents: ["PageInfo", "BlockToggle"], // 2.x 版本 globalUIComponents 改名为 clientAppRootComponentFiles
     },
   ],
   // 本地插件
@@ -190,9 +190,9 @@ export default <UserPlugins>[
     "dynamic-title",
     {
       showIcon: "/favicon.ico",
-      showText: "ヾ(≧▽≦*)o欢迎回来！",
+      showText: "欢迎回来！继续阅读",
       hideIcon: "/failure.ico",
-      hideText: "ಥ_ಥ不要走呀！",
+      hideText: "不要走呀！还没有读完呢",
       recoverTime: 2000, //  持续时间
     },
   ],
