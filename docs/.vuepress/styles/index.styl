@@ -1,32 +1,12 @@
-.home-wrapper .banner .banner-conent .hero h1{
-  font-size 2.8rem!important
-}
-
-// 文档中适配
-table
-  width auto
-.page >*:not(.footer),.card-box
-  box-shadow: none!important
-
-.page
-  @media (min-width $contentWidth + 80)
-    padding-top $navbarHeight!important
-.home-wrapper .banner .banner-conent
-  padding 0 2.9rem
-  box-sizing border-box
-.home-wrapper .banner .slide-banner .slide-banner-wrapper .slide-item a
-  h2
-    margin-top 2rem
-    font-size 1.2rem!important
-  p
-    padding 0 1rem
+@require '~vuepress-plugin-tabs/dist/themes/default.styl'
 
 // 评论区颜色重置
 .gt-container
   .gt-ico-tip
     &::after
-      content: '。( Win + . ) or ( ⌃ + ⌘ + ␣ ) open Emoji'
+      content: '。( Win + . ) 或 ( ⌃ + ⌘ + ␣ ) 打开表情'
       color: #999
+      font-size: .8rem
   .gt-meta
     border-color var(--borderColor)!important
   .gt-comments-null
@@ -80,15 +60,7 @@ body .vuepress-plugin-demo-block__wrapper
       fill: $accentColor !important;
 
 
-// 全文搜索框
-.suggestions
-  overflow: auto
-  max-height: calc(100vh - 6rem)
-  @media (max-width: 719px) {
-    width: 90vw;
-    min-width: 90vw!important;
-    margin-right: -20px;
-  }
-  .highlight
-    color: $accentColor
-    font-weight: bold
+// 自定义class
+
+
+

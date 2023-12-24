@@ -4,8 +4,8 @@ exports.type = function (o){
   return s.match(/\[object (.*?)\]/)[1].toLowerCase()
 }
 
-// 修复date时区格式的问题
-exports.repairDate = function (date) {
+ // 修复date时区格式的问题
+ exports.repairDate = function (date) {
   date = new Date(date);
   return `${date.getUTCFullYear()}-${zero(date.getUTCMonth()+1)}-${zero(date.getUTCDate())} ${zero(date.getUTCHours())}:${zero(date.getUTCMinutes())}:${zero(date.getUTCSeconds())}`;
 }

@@ -56,7 +56,6 @@ notices-2: # 可选的
     position: top-left
 ---
 
-<Notice :data="$frontmatter.notices"/>
 
 <br/>
 
