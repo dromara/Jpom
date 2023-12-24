@@ -59,10 +59,24 @@
           <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
           <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
           <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
-          <!-- <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button> -->
-          <a-tooltip :title="`${record.scriptType === 'server-sync' ? '服务端分发同步的脚本不能直接删除,需要到服务端去操作' : '删除'}`">
-            <a-button size="small" :disabled="record.scriptType === 'server-sync'" type="danger" @click="handleDelete(record)">删除</a-button>
-          </a-tooltip>
+
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              更多
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <!-- <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button> -->
+                <a-tooltip :title="`${record.scriptType === 'server-sync' ? '服务端分发同步的脚本不能直接删除,需要到服务端去操作' : '删除'}`">
+                  <a-button size="small" :disabled="record.scriptType === 'server-sync'" type="danger" @click="handleDelete(record)">删除</a-button>
+                </a-tooltip>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
         </a-space>
       </template>
     </a-table>
@@ -231,7 +245,7 @@
   </div>
 </template>
 <script>
-import { delAllCache, deleteScript, editScript, getScriptListAll, itemScript, getTriggerUrl } from "@/api/node-other";
+import { delAllCache, deleteScript, editScript, getScriptListAll, itemScript, getTriggerUrl, unbindScript } from "@/api/node-other";
 import codeEditor from "@/components/codeEditor";
 import { getNodeListAll } from "@/api/node";
 import ScriptConsole from "@/pages/node/node-layout/other/script-console";
@@ -488,6 +502,39 @@ export default {
       this.temp.batchTriggerUrl = `${location.protocol}//${location.host}${res.data.batchTriggerUrl}`;
 
       this.temp = { ...this.temp };
+    },
+    // 解绑
+    handleUnbind(record) {
+      const html =
+        "<b style='font-size: 20px;'>真的要解绑节点脚本么？</b>" +
+        "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
+        "<li>解绑不会真实请求节点删除脚本信息</b></li>" +
+        "<li>一般用于服务器无法连接且已经确定不再使用</li>" +
+        "<li>如果误操作会产生冗余数据！！！</li>" +
+        " </ul>";
+
+      const h = this.$createElement;
+      this.$confirm({
+        title: "危险操作！！！",
+        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
+        okButtonProps: { props: { type: "danger", size: "small" } },
+        cancelButtonProps: { props: { type: "primary" } },
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 解绑
+          unbindScript({
+            id: record.id,
+          }).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.loadData();
+            }
+          });
+        },
+      });
     },
   },
 };

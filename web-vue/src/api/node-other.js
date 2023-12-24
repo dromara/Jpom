@@ -127,3 +127,17 @@ export function delAllCache() {
     params: {},
   });
 }
+
+/**
+ * 解绑 Script
+ * @param {id} params
+
+ * params.id 编辑修改时判断 ID
+ */
+export function unbindScript(params) {
+  return axios({
+    url: "/node/script/unbind.json",
+    method: "get",
+    params: params,
+  });
+}
