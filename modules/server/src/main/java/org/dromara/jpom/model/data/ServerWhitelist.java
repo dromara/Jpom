@@ -72,7 +72,9 @@ public class ServerWhitelist extends BaseJsonModel {
     public void checkAllowRemoteDownloadHost(String url) {
         Set<String> allowRemoteDownloadHost = this.getAllowRemoteDownloadHost();
         Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), "还没有配置运行的远程地址");
-        List<String> collect = allowRemoteDownloadHost.stream().filter(s -> StrUtil.startWith(url, s)).collect(Collectors.toList());
+        List<String> collect = allowRemoteDownloadHost.stream()
+            .filter(s -> StrUtil.startWith(url, s))
+            .collect(Collectors.toList());
         Assert.state(CollUtil.isNotEmpty(collect), "不允许下载当前地址的文件");
     }
 }

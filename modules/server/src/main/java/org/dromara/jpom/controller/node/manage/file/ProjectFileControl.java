@@ -150,7 +150,7 @@ public class ProjectFileControl extends BaseServerController {
         // 验证远程 地址
         ServerWhitelist whitelist = outGivingWhitelistService.getServerWhitelistData(request);
         whitelist.checkAllowRemoteDownloadHost(url);
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_Remote_Download).toString();
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_Remote_Download).toString();
     }
 
     /**
@@ -160,8 +160,8 @@ public class ProjectFileControl extends BaseServerController {
      */
     @GetMapping(value = "new_file_folder", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.EDIT)
-    public String newFileFolder() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.MANAGE_FILE_NEW_FILE_FOLDER).toString();
+    public String newFileFolder(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_NEW_FILE_FOLDER).toString();
     }
 
 
@@ -172,8 +172,8 @@ public class ProjectFileControl extends BaseServerController {
      */
     @GetMapping(value = "rename_file_folder", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.EDIT)
-    public String renameFileFolder() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.MANAGE_FILE_RENAME_FILE_FOLDER).toString();
+    public String renameFileFolder(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_RENAME_FILE_FOLDER).toString();
     }
 
 }
