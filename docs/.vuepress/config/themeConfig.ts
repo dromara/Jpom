@@ -9,7 +9,7 @@ import {
   readEachFileWords,
 } from "../webSiteInfo/readFile";
 import {
-  penName,
+  name,
   link,
   loginKeyConfig,
   firstLoginKeyConfig,
@@ -111,7 +111,7 @@ export default <VdoingThemeConfig>{
   },
   author: {
     // 文章默认的作者信息，可在md文件中单独配置此信息 String | {name: String, link: String}
-    name: penName, // 必需
+    name, // 必需
     link, // 可选的
   },
   //   blogger: {
