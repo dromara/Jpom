@@ -11,9 +11,6 @@ export default [
     text: "📖文档",
     link: "/pages/install/",
     items: [
-      { text: "一键安装教程", link: "/pages/15b7a2/" },
-      { text: "Docker 容器安装教程", link: "/pages/c846d3/" },
-      { text: "离线安装教程", link: "/pages/af288b/" },
       {
         text: "大版本升级",
         items: [
@@ -41,7 +38,17 @@ export default [
   {
     text: "🔥实践案例",
     link: "/pages/practice/",
-    items: [{ text: "实践案例目录", link: "/pages/practice/catalogue/" }],
+    items: [
+      { text: "实践案例目录", link: "/pages/practice/catalogue/" },
+      {
+        text: "安装实践",
+        items: [
+          { text: "一键安装教程", link: "/pages/15b7a2/" },
+          { text: "Docker 容器安装教程", link: "/pages/c846d3/" },
+          { text: "离线安装教程", link: "/pages/af288b/" },
+        ],
+      },
+    ],
   },
   {
     text: "❓常见问题",

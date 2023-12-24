@@ -37,7 +37,7 @@ export default <VdoingThemeConfig>{
   categoryText: "随笔", // 碎片化文章（_posts文件夹的文章）预设生成的分类值，默认'随笔'
 
   // pageStyle: 'card', // 页面风格，card 时背景显示灰色衬托出卡片样式，line 时背景显示纯色，并且部分模块带线条边框（未设置 bodyBgImg 时才生效），默认 card
-  // defaultMode: 'auto', // 默认主题外观模式，用户未在页面手动修改过模式时才生效，否则以用户设置的模式为准，可选值：'auto' | 'light' | 'dark' | 'read'
+  defaultMode: "auto", // 默认主题外观模式，用户未在页面手动修改过模式时才生效，否则以用户设置的模式为准，可选值：'auto' | 'light' | 'dark' | 'read'
 
   // bodyBgImg: "/img/index/bg.jpg",
   // bodyBgImg: [
@@ -54,13 +54,14 @@ export default <VdoingThemeConfig>{
   // ],
   // contentBgStyle: 1, // 文章内容块的背景风格，默认无. 1 => 方格 | 2 => 横线 | 3 => 竖线 | 4 => 左斜线 | 5 => 右斜线 | 6 => 点状
 
-  // updateBar: { // 最近更新栏
-  //   showToArticle: true, // 显示到文章页底部，默认true
-  //   moreArticle: '/archives' // “更多文章”跳转的页面，默认'/archives'
-  // },
+  updateBar: {
+    // 最近更新栏
+    showToArticle: true, // 显示到文章页底部，默认true
+    moreArticle: "/archives", // “更多文章”跳转的页面，默认'/archives'
+  },
   // rightMenuBar: false, // 是否显示右侧文章大纲栏，默认true (屏宽小于1300px下无论如何都不显示)
   // sidebarOpen: false, // 初始状态是否打开侧边栏，默认true
-  // pageButton: false, // 是否显示快捷翻页按钮，默认true
+  pageButton: false, // 是否显示快捷翻页按钮，默认true
 
   sidebar: "structuring", // 侧边栏  'structuring' | { mode: 'structuring', collapsable: Boolean} | 'auto' | 自定义    温馨提示：目录页数据依赖于结构化的侧边栏数据，如果你不设置为'structuring',将无法使用目录页
 
