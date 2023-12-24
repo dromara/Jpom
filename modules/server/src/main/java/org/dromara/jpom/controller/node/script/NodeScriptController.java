@@ -166,6 +166,20 @@ public class NodeScriptController extends BaseServerController {
     }
 
     /**
+     * 释放脚本关联的节点
+     *
+     * @param id 脚本ID
+     * @return json
+     */
+    @RequestMapping(value = "unbind.json", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    @SystemPermission
+    public IJsonMessage<String> unbind(@ValidatorItem String id, HttpServletRequest request) {
+        nodeScriptServer.delByKey(id, request);
+        return JsonMessage.success("解绑成功");
+    }
+
+    /**
      * get a trigger url
      *
      * @param id id
