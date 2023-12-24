@@ -67,14 +67,15 @@ public class WhitelistDirectoryController extends BaseJpomController {
 
 
     @PostMapping(value = "whitelistDirectory_submit", produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<String> whitelistDirectorySubmit(String project, String nginx, String nginxPath,
-                                                        String allowEditSuffix, String allowRemoteDownloadHost) {
+    public IJsonMessage<String> whitelistDirectorySubmit(String project,
+                                                         String nginx,
+                                                         String nginxPath,
+                                                         String allowEditSuffix) {
         List<String> list = AgentWhitelist.parseToList(project, true, "项目路径白名单不能为空");
         //
         List<String> nList = AgentWhitelist.parseToList(nginx, "nginx路径白名单不能为空");
         List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
-        List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "允许远程下载的 host 不能配置为空");
-        return save(list, nList, nginxPath, allowEditSuffixList, allowRemoteDownloadHostList);
+        return save(list, nList, nginxPath, allowEditSuffixList);
     }
 //
 //	private JsonMessage<String> save(String project, List<String> certificate, List<String> nginx, List<String> allowEditSuffixList) {
@@ -86,8 +87,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
     private JsonMessage<String> save(List<String> projects,
                                      List<String> nginx,
                                      String nginxPath,
-                                     List<String> allowEditSuffixList,
-                                     List<String> allowRemoteDownloadHostList) {
+                                     List<String> allowEditSuffixList) {
         List<String> projectArray;
         {
             projectArray = AgentWhitelist.covertToArray(projects, "项目路径白名单不能位于Jpom目录下");
@@ -115,18 +115,12 @@ public class WhitelistDirectoryController extends BaseJpomController {
                 }
             }
         }
-        if (CollUtil.isNotEmpty(allowRemoteDownloadHostList)) {
-            for (String s : allowRemoteDownloadHostList) {
-                Assert.state(ReUtil.isMatch(RegexPool.URL_HTTP, s), "配置的远程地址不规范,请重新填写：" + s);
-            }
-        }
 
         AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
         agentWhitelist.setNginxPath(nginxPath);
         agentWhitelist.setProject(projectArray);
         agentWhitelist.setNginx(nginxArray);
         agentWhitelist.setAllowEditSuffix(allowEditSuffixList);
-        agentWhitelist.setAllowRemoteDownloadHost(allowRemoteDownloadHostList == null ? null : CollUtil.newHashSet(allowRemoteDownloadHostList));
         whitelistDirectoryService.saveWhitelistDirectory(agentWhitelist);
         return new JsonMessage<>(200, "保存成功");
     }

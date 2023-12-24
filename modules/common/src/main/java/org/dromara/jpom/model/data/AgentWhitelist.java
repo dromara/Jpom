@@ -72,12 +72,6 @@ public class AgentWhitelist extends BaseJsonModel {
      */
     private List<String> allowEditSuffix;
 
-    /**
-     * 运行远程下载的 host
-     */
-    @Deprecated
-    private Set<String> allowRemoteDownloadHost;
-
     public static String convertRealPath(String path) {
         String val = String.format("/%s/", path);
         return FileUtil.normalize(val);

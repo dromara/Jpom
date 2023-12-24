@@ -14,9 +14,7 @@
       <a-form-model-item label="Nginx 安装路径" help="当前功能将择机下架，请提前使用 DSL 项目管理来代替 nginx 管理" prop="nginxPath">
         <a-input v-model="temp.nginxPath" placeholder="请输入 nginx安装路径,一般情况下无需配置，windows 下建议配置 nginx 安装的绝对路径,用于能 reload nginx " />
       </a-form-model-item>
-      <a-form-model-item label="远程下载安全HOST" prop="allowRemoteDownloadHost">
-        <a-input v-model="temp.allowRemoteDownloadHost" type="textarea" :rows="5" style="resize: none" placeholder="请输入远程下载安全HOST，回车支持输入多个路径，示例 https://www.test.com 等" />
-      </a-form-model-item>
+
       <a-form-model-item label="文件后缀" prop="allowEditSuffix">
         <a-input
           v-model="temp.allowEditSuffix"
