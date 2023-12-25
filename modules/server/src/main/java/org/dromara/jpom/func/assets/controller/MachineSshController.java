@@ -26,7 +26,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.io.BomReader;
+import cn.hutool.core.io.CharsetDetector;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
@@ -63,6 +63,7 @@ import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.service.dblog.SshTerminalExecuteLogService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.service.system.WorkspaceService;
+import org.dromara.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,7 +74,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,16 +99,19 @@ public class MachineSshController extends BaseGroupNameController {
     private final SshService sshService;
     private final SshTerminalExecuteLogService sshTerminalExecuteLogService;
     private final WorkspaceService workspaceService;
+    private final ServerConfig serverConfig;
 
     public MachineSshController(MachineSshServer machineSshServer,
                                 SshService sshService,
                                 SshTerminalExecuteLogService sshTerminalExecuteLogService,
-                                WorkspaceService workspaceService) {
+                                WorkspaceService workspaceService,
+                                ServerConfig serverConfig) {
         super(machineSshServer);
         this.machineSshServer = machineSshServer;
         this.sshService = sshService;
         this.sshTerminalExecuteLogService = sshTerminalExecuteLogService;
         this.workspaceService = workspaceService;
+        this.serverConfig = serverConfig;
     }
 
     @PostMapping(value = "list-data", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -133,17 +139,17 @@ public class MachineSshController extends BaseGroupNameController {
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
-                                    @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "host不能为空") String host,
-                                    @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "user不能为空") String user,
-                                    String password,
-                                    MachineSshModel.ConnectType connectType,
-                                    String privateKey,
-                                    @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "port错误") int port,
-                                    String charset,
-                                    String id,
-                                    Integer timeout,
-                                    String allowEditSuffix,
-                                    String groupName) {
+                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "host不能为空") String host,
+                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "user不能为空") String user,
+                                     String password,
+                                     MachineSshModel.ConnectType connectType,
+                                     String privateKey,
+                                     @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "port错误") int port,
+                                     String charset,
+                                     String id,
+                                     Integer timeout,
+                                     String allowEditSuffix,
+                                     String groupName) {
         boolean add = StrUtil.isEmpty(id);
         if (add) {
             // 优先判断参数 如果是 password 在修改时可以不填写
@@ -396,70 +402,83 @@ public class MachineSshController extends BaseGroupNameController {
         String originalFilename = file.getOriginalFilename();
         String extName = FileUtil.extName(originalFilename);
         Assert.state(StrUtil.endWithIgnoreCase(extName, "csv"), "不允许的文件格式");
-        BomReader bomReader = IoUtil.getBomReader(file.getInputStream());
-        CsvReadConfig csvReadConfig = CsvReadConfig.defaultConfig();
-        csvReadConfig.setHeaderLineNo(0);
-        CsvReader reader = CsvUtil.getReader(bomReader, csvReadConfig);
-        CsvData csvData;
-        try {
-            csvData = reader.read();
-        } catch (Exception e) {
-            log.error("解析 csv 异常", e);
-            return new JsonMessage<>(405, "解析文件异常," + e.getMessage());
-        }
-        List<CsvRow> rows = csvData.getRows();
-        Assert.notEmpty(rows, "没有任何数据");
+        assert originalFilename != null;
+        File csvFile = FileUtil.file(serverConfig.getUserTempPath(), originalFilename);
         int addCount = 0, updateCount = 0;
-        for (int i = 0; i < rows.size(); i++) {
-            CsvRow csvRow = rows.get(i);
-            String name = csvRow.getByName("name");
-            int finalI = i;
-            Assert.hasText(name, () -> StrUtil.format("第 {} 行 name 字段不能位空", finalI + 1));
-            String groupName = csvRow.getByName("groupName");
-            String host = csvRow.getByName("host");
-            Assert.hasText(host, () -> StrUtil.format("第 {} 行 host 字段不能位空", finalI + 1));
-            Integer port = Convert.toInt(csvRow.getByName("port"));
-            Assert.state(port != null && NetUtil.isValidPort(port), () -> StrUtil.format("第 {} 行 port 字段不能位空或者不正确", finalI + 1));
-            String user = csvRow.getByName("user");
-            Assert.hasText(host, () -> StrUtil.format("第 {} 行 user 字段不能位空", finalI + 1));
-            String password = csvRow.getByName("password");
-            String charset = csvRow.getByName("charset");
-            //
-            String type = csvRow.getByName("connectType");
-            type = StrUtil.emptyToDefault(type, "").toUpperCase();
-            MachineSshModel.ConnectType connectType = EnumUtil.fromString(MachineSshModel.ConnectType.class, type, MachineSshModel.ConnectType.PASS);
-            String privateKey = csvRow.getByName("privateKey");
-            Integer timeout = Convert.toInt(csvRow.getByName("timeout"));
-            //
-            MachineSshModel where = new MachineSshModel();
-            where.setHost(host);
-            where.setUser(user);
-            where.setPort(port);
-            where.setConnectType(connectType.name());
-            MachineSshModel machineSshModel = machineSshServer.queryByBean(where);
-            if (machineSshModel == null) {
-                // 添加
-                where.setName(name);
-                where.setGroupName(groupName);
-                where.setPassword(password);
-                where.setPrivateKey(privateKey);
-                where.setTimeout(timeout);
-                where.setCharset(charset);
-                machineSshServer.insert(where);
-                addCount++;
-            } else {
-                MachineSshModel update = new MachineSshModel();
-                update.setId(machineSshModel.getId());
-                update.setName(name);
-                update.setGroupName(groupName);
-                update.setPassword(password);
-                update.setPrivateKey(privateKey);
-                update.setTimeout(timeout);
-                update.setCharset(charset);
-                machineSshServer.updateById(update);
-                updateCount++;
+        Charset fileCharset;
+        try {
+            file.transferTo(csvFile);
+            fileCharset = CharsetDetector.detect(csvFile);
+            Reader bomReader = FileUtil.getReader(csvFile, fileCharset);
+            CsvReadConfig csvReadConfig = CsvReadConfig.defaultConfig();
+            csvReadConfig.setHeaderLineNo(0);
+            CsvReader reader = CsvUtil.getReader(bomReader, csvReadConfig);
+            CsvData csvData;
+            try {
+                csvData = reader.read();
+            } catch (Exception e) {
+                log.error("解析 csv 异常", e);
+                return new JsonMessage<>(405, "解析文件异常," + e.getMessage());
+            } finally {
+                IoUtil.close(reader);
             }
+            List<CsvRow> rows = csvData.getRows();
+            Assert.notEmpty(rows, "没有任何数据");
+
+            for (int i = 0; i < rows.size(); i++) {
+                CsvRow csvRow = rows.get(i);
+                String name = csvRow.getByName("name");
+                int finalI = i;
+                Assert.hasText(name, () -> StrUtil.format("第 {} 行 name 字段不能位空", finalI + 1));
+                String groupName = csvRow.getByName("groupName");
+                String host = csvRow.getByName("host");
+                Assert.hasText(host, () -> StrUtil.format("第 {} 行 host 字段不能位空", finalI + 1));
+                Integer port = Convert.toInt(csvRow.getByName("port"));
+                Assert.state(port != null && NetUtil.isValidPort(port), () -> StrUtil.format("第 {} 行 port 字段不能位空或者不正确", finalI + 1));
+                String user = csvRow.getByName("user");
+                Assert.hasText(host, () -> StrUtil.format("第 {} 行 user 字段不能位空", finalI + 1));
+                String password = csvRow.getByName("password");
+                String charset = csvRow.getByName("charset");
+                //
+                String type = csvRow.getByName("connectType");
+                type = StrUtil.emptyToDefault(type, "").toUpperCase();
+                MachineSshModel.ConnectType connectType = EnumUtil.fromString(MachineSshModel.ConnectType.class, type, MachineSshModel.ConnectType.PASS);
+                String privateKey = csvRow.getByName("privateKey");
+                Integer timeout = Convert.toInt(csvRow.getByName("timeout"));
+                //
+                MachineSshModel where = new MachineSshModel();
+                where.setHost(host);
+                where.setUser(user);
+                where.setPort(port);
+                where.setConnectType(connectType.name());
+                MachineSshModel machineSshModel = machineSshServer.queryByBean(where);
+                if (machineSshModel == null) {
+                    // 添加
+                    where.setName(name);
+                    where.setGroupName(groupName);
+                    where.setPassword(password);
+                    where.setPrivateKey(privateKey);
+                    where.setTimeout(timeout);
+                    where.setCharset(charset);
+                    machineSshServer.insert(where);
+                    addCount++;
+                } else {
+                    MachineSshModel update = new MachineSshModel();
+                    update.setId(machineSshModel.getId());
+                    update.setName(name);
+                    update.setGroupName(groupName);
+                    update.setPassword(password);
+                    update.setPrivateKey(privateKey);
+                    update.setTimeout(timeout);
+                    update.setCharset(charset);
+                    machineSshServer.updateById(update);
+                    updateCount++;
+                }
+            }
+        } finally {
+            FileUtil.del(csvFile);
         }
-        return JsonMessage.success("导入成功,添加 {} 条数据,修改 {} 条数据", addCount, updateCount);
+        String fileCharsetStr = Optional.ofNullable(fileCharset).map(Charset::name).orElse(StrUtil.EMPTY);
+        return JsonMessage.success("导入成功(编码格式：{}),添加 {} 条数据,修改 {} 条数据", fileCharsetStr, addCount, updateCount);
     }
 }

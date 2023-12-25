@@ -25,7 +25,7 @@ package org.dromara.jpom.controller.node.manage;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.io.BomReader;
+import cn.hutool.core.io.CharsetDetector;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Tuple;
@@ -66,6 +66,7 @@ import org.dromara.jpom.service.monitor.MonitorService;
 import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.dromara.jpom.service.outgiving.LogReadServer;
 import org.dromara.jpom.service.outgiving.OutGivingServer;
+import org.dromara.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -73,11 +74,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.io.Reader;
+import java.nio.charset.Charset;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -100,6 +101,7 @@ public class ProjectManageControl extends BaseServerController {
     private final RepositoryService repositoryService;
     private final ProjectInfoCacheService projectInfoCacheService;
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
+    private final ServerConfig serverConfig;
 
     public ProjectManageControl(OutGivingServer outGivingServer,
                                 LogReadServer logReadServer,
@@ -107,7 +109,8 @@ public class ProjectManageControl extends BaseServerController {
                                 BuildInfoService buildService,
                                 RepositoryService repositoryService,
                                 ProjectInfoCacheService projectInfoCacheService,
-                                DbBuildHistoryLogService dbBuildHistoryLogService) {
+                                DbBuildHistoryLogService dbBuildHistoryLogService,
+                                ServerConfig serverConfig) {
         this.outGivingServer = outGivingServer;
         this.logReadServer = logReadServer;
         this.monitorService = monitorService;
@@ -115,6 +118,7 @@ public class ProjectManageControl extends BaseServerController {
         this.repositoryService = repositoryService;
         this.projectInfoCacheService = projectInfoCacheService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
+        this.serverConfig = serverConfig;
     }
 
 
@@ -510,44 +514,58 @@ public class ProjectManageControl extends BaseServerController {
         String originalFilename = file.getOriginalFilename();
         String extName = FileUtil.extName(originalFilename);
         Assert.state(StrUtil.endWithIgnoreCase(extName, "csv"), "不允许的文件格式");
-        BomReader bomReader = IoUtil.getBomReader(file.getInputStream());
-        CsvReadConfig csvReadConfig = CsvReadConfig.defaultConfig();
-        csvReadConfig.setHeaderLineNo(0);
-        CsvReader reader = CsvUtil.getReader(bomReader, csvReadConfig);
-        CsvData csvData;
-        try {
-            csvData = reader.read();
-        } catch (Exception e) {
-            log.error("解析 csv 异常", e);
-            return new JsonMessage<>(405, "解析文件异常," + e.getMessage());
-        }
-        List<CsvRow> rows = csvData.getRows();
-        Assert.notEmpty(rows, "没有任何数据");
+        assert originalFilename != null;
+        File csvFile = FileUtil.file(serverConfig.getUserTempPath(), originalFilename);
         int updateCount = 0, ignoreCount = 0;
-        for (int i = 0; i < rows.size(); i++) {
-            CsvRow csvRow = rows.get(i);
-            JSONObject jsonObject = this.loadProjectData(csvRow, workspaceId, node);
-            if (jsonObject == null) {
-                ignoreCount++;
-                continue;
-            }
+        Charset fileCharset;
+        try {
+            file.transferTo(csvFile);
+            //
+            fileCharset = CharsetDetector.detect(csvFile);
+            Reader bomReader = FileUtil.getReader(csvFile, fileCharset);
+            CsvReadConfig csvReadConfig = CsvReadConfig.defaultConfig();
+            csvReadConfig.setHeaderLineNo(0);
+            CsvReader reader = CsvUtil.getReader(bomReader, csvReadConfig);
+            CsvData csvData;
             try {
-                //
-                JsonMessage<String> jsonMessage = NodeForward.request(node, NodeUrl.Manage_SaveProject, jsonObject);
-                if (jsonMessage.success()) {
-                    updateCount++;
+                csvData = reader.read();
+            } catch (Exception e) {
+                log.error("解析项目 csv 异常", e);
+                return new JsonMessage<>(405, "解析文件异常," + e.getMessage());
+            } finally {
+                IoUtil.close(reader);
+            }
+            List<CsvRow> rows = csvData.getRows();
+            Assert.notEmpty(rows, "没有任何数据");
+
+            for (int i = 0; i < rows.size(); i++) {
+                CsvRow csvRow = rows.get(i);
+                JSONObject jsonObject = this.loadProjectData(csvRow, workspaceId, node);
+                if (jsonObject == null) {
+                    ignoreCount++;
                     continue;
                 }
-                throw new IllegalArgumentException(StrUtil.format("导入第 {} 条数据保存失败:{}", i + 2, jsonMessage.getMsg()));
-            } catch (IllegalArgumentException | IllegalStateException e) {
-                throw Lombok.sneakyThrow(e);
-            } catch (Exception e) {
-                log.error("导入保存项目异常", e);
-                throw new IllegalArgumentException(StrUtil.format("导入第 {} 条数据异常:{}", i + 2, e.getMessage()));
+                try {
+                    //
+                    JsonMessage<String> jsonMessage = NodeForward.request(node, NodeUrl.Manage_SaveProject, jsonObject);
+                    if (jsonMessage.success()) {
+                        updateCount++;
+                        continue;
+                    }
+                    throw new IllegalArgumentException(StrUtil.format("导入第 {} 条数据保存失败:{}", i + 2, jsonMessage.getMsg()));
+                } catch (IllegalArgumentException | IllegalStateException e) {
+                    throw Lombok.sneakyThrow(e);
+                } catch (Exception e) {
+                    log.error("导入保存项目异常", e);
+                    throw new IllegalArgumentException(StrUtil.format("导入第 {} 条数据异常:{}", i + 2, e.getMessage()));
+                }
             }
+            projectInfoCacheService.syncExecuteNode(node);
+        } finally {
+            FileUtil.del(csvFile);
         }
-        projectInfoCacheService.syncExecuteNode(node);
-        return JsonMessage.success("导入成功,更新 {} 条数据,因为节点分发/项目副本忽略 {} 条数据", updateCount, ignoreCount);
+        String fileCharsetStr = Optional.ofNullable(fileCharset).map(Charset::name).orElse(StrUtil.EMPTY);
+        return JsonMessage.success("导入成功(编码格式：{}),更新 {} 条数据,因为节点分发/项目副本忽略 {} 条数据", fileCharsetStr, updateCount, ignoreCount);
     }
 
     private JSONObject loadProjectData(CsvRow csvRow, String workspaceId, NodeModel node) {
