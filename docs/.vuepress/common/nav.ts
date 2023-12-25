@@ -52,7 +52,7 @@ export default [
   },
   {
     text: "❓常见问题",
-    link: "/pages/FQA/more/",
+    link: "/pages/FQA/",
     items: [
       { text: "名词解释", link: "/pages/FQA/proper-noun/" },
       { text: "什么是 DSL", link: "/pages/FQA/DSL/" },

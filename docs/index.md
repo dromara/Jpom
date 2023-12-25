@@ -61,7 +61,7 @@ notices-2: # 可选的
 
 <p align="center">
   <a class="become-sponsor" href="/pages/practice/">实践案例</a>
-  <a class="become-sponsor" href="/pages/FQA/more/">常见问题</a>
+  <a class="become-sponsor" href="/pages/FQA/">常见问题</a>
   <a class="become-sponsor" href="/pages/FQA/proper-noun/">名词解释</a>
   <a class="become-sponsor" href="/pages/praise/">支持这个项目</a>
 </p>

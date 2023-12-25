@@ -7,6 +7,7 @@ tags:
 categories: 
   - docs
   - FQA
+sidebar: auto
 ---
 
 
