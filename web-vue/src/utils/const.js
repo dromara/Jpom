@@ -402,7 +402,7 @@ export function formatUnits(value, base, unitArr, defaultValue = "-") {
   // console.log(value, srcsize);
   index = Math.floor(Math.log(srcsize) / Math.log(base));
   var size = srcsize / Math.pow(base, index);
-  size = size.toFixed(2); //保留的小数位数
+  size = Number(size.toFixed(2)); //保留的小数位数
   return size + unitArr[index];
 }
 
@@ -492,7 +492,7 @@ export function formatPercent2(point, keep = 2) {
   if (null == point) {
     return "-";
   }
-  var percent = Number(point).toFixed(keep);
+  var percent = Number(Number(point).toFixed(keep));
   percent += "%";
   return percent;
 }
