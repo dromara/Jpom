@@ -44,6 +44,7 @@ import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.model.MachineNodeStatLogModel;
@@ -77,7 +78,7 @@ import java.util.concurrent.TimeUnit;
 public class MachineNodeServer extends BaseDbService<MachineNodeModel> implements ILoadEvent, IAsyncLoad, Runnable {
 
     private final NodeService nodeService;
-    private final ServerConfig.NodeConfig nodeConfig;
+    private final NodeConfig nodeConfig;
     private final MachineNodeStatLogServer machineNodeStatLogServer;
     private final ClusterInfoService clusterInfoService;
 

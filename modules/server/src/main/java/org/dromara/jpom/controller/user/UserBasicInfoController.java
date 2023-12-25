@@ -39,6 +39,7 @@ import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.interceptor.PermissionInterceptor;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
+import org.dromara.jpom.configuration.UserConfig;
 import org.dromara.jpom.func.system.model.ClusterInfoModel;
 import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.func.user.model.UserLoginLogModel;
@@ -83,7 +84,7 @@ public class UserBasicInfoController extends BaseServerController {
     private final SystemParametersServer systemParametersServer;
     private final UserBindWorkspaceService userBindWorkspaceService;
     private final UserService userService;
-    private final ServerConfig.UserConfig userConfig;
+    private final UserConfig userConfig;
     private final UserLoginLogServer userLoginLogServer;
     private final DbUserOperateLogService dbUserOperateLogService;
     private final ClusterInfoService clusterInfoService;

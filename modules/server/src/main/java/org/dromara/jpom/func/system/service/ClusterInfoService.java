@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.configuration.ClusterConfig;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
@@ -65,7 +66,7 @@ import java.util.stream.Collectors;
 public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implements IAsyncLoad, Runnable {
 
 
-    private final ServerConfig.ClusterConfig clusterConfig;
+    private final ClusterConfig clusterConfig;
     private static final String TASK_ID = "system_monitor_cluster";
 
     private final WorkspaceService workspaceService;

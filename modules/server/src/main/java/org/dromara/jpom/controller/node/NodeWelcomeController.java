@@ -35,6 +35,7 @@ import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.model.MachineNodeStatLogModel;
 import org.dromara.jpom.func.assets.server.MachineNodeStatLogServer;
@@ -60,7 +61,7 @@ import java.util.Optional;
 public class NodeWelcomeController extends BaseServerController {
 
     private final MachineNodeStatLogServer machineNodeStatLogServer;
-    private final ServerConfig.NodeConfig nodeConfig;
+    private final NodeConfig nodeConfig;
 
     public NodeWelcomeController(MachineNodeStatLogServer machineNodeStatLogServer,
                                  ServerConfig serverConfig) {

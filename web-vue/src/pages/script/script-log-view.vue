@@ -1,6 +1,15 @@
 <template>
   <div>
-    <log-view :ref="`logView`" titleName="脚本日志" :visible="visible" />
+    <log-view
+      :ref="`logView`"
+      titleName="脚本日志"
+      :visible="visible"
+      @close="
+        () => {
+          $emit('close');
+        }
+      "
+    />
   </div>
 </template>
 <script>

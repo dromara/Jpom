@@ -53,6 +53,8 @@ import org.dromara.jpom.common.interceptor.LoginInterceptor;
 import org.dromara.jpom.common.interceptor.NotLogin;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
+import org.dromara.jpom.configuration.UserConfig;
+import org.dromara.jpom.configuration.WebConfig;
 import org.dromara.jpom.func.user.server.UserLoginLogServer;
 import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.model.dto.UserLoginDto;
@@ -98,8 +100,8 @@ public class LoginControl extends BaseServerController implements InitializingBe
 
     private final UserService userService;
     private final UserBindWorkspaceService userBindWorkspaceService;
-    private final ServerConfig.UserConfig userConfig;
-    private final ServerConfig.WebConfig webConfig;
+    private final UserConfig userConfig;
+    private final WebConfig webConfig;
     private final UserLoginLogServer userLoginLogServer;
 
     public LoginControl(UserService userService,
@@ -180,9 +182,9 @@ public class LoginControl extends BaseServerController implements InitializingBe
     @PostMapping(value = "userLogin", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
     public IJsonMessage<Object> userLogin(@ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息") String loginName,
-                                         @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息") String userPwd,
-                                         String code,
-                                         HttpServletRequest request) {
+                                          @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息") String userPwd,
+                                          String code,
+                                          HttpServletRequest request) {
         if (this.ipLock()) {
             return new JsonMessage<>(400, "尝试次数太多，请稍后再来");
         }
@@ -288,9 +290,9 @@ public class LoginControl extends BaseServerController implements InitializingBe
     @PostMapping(value = "oauth2/login", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
     public IJsonMessage<UserLoginDto> oauth2Callback(@ValidatorItem String code,
-                                                    @ValidatorItem String provide,
-                                                    String state,
-                                                    HttpServletRequest request) {
+                                                     @ValidatorItem String provide,
+                                                     String state,
+                                                     HttpServletRequest request) {
         AuthRequest authRequest = Oauth2Factory.get(provide);
         AuthCallback authCallback = new AuthCallback();
         authCallback.setCode(code);

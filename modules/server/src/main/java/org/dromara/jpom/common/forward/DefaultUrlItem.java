@@ -25,6 +25,7 @@ package org.dromara.jpom.common.forward;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.extra.spring.SpringUtil;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.transport.DataContentType;
 import org.dromara.jpom.transport.IUrlItem;
@@ -60,7 +61,7 @@ public class DefaultUrlItem implements IUrlItem {
     public Integer timeout() {
         if (nodeUrl.isFileTimeout()) {
             ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
-            ServerConfig.NodeConfig configNode = serverConfig.getNode();
+            NodeConfig configNode = serverConfig.getNode();
             return configNode.getUploadFileTimeout();
         } else {
             return Optional.of(nodeUrl.getTimeout())

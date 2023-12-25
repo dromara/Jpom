@@ -24,23 +24,20 @@ package org.dromara.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.Const;
+import org.dromara.jpom.configuration.*;
 import org.dromara.jpom.model.AgentFileModel;
 import org.dromara.jpom.model.user.UserModel;
-import org.dromara.jpom.socket.ServiceFileTailWatcher;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
-import java.nio.charset.Charset;
-import java.time.Duration;
 import java.util.Optional;
 
 /**
@@ -50,6 +47,7 @@ import java.util.Optional;
 @EqualsAndHashCode(callSuper = true)
 @Configuration
 @ConfigurationProperties("jpom")
+@EnableConfigurationProperties({ClusterConfig.class, SystemConfig.class, NodeConfig.class, UserConfig.class, FileStorageConfig.class, WebConfig.class})
 @Data
 public class ServerConfig extends BaseExtConfig implements InitializingBean {
 
@@ -63,11 +61,26 @@ public class ServerConfig extends BaseExtConfig implements InitializingBean {
      * 集群 配置信息
      */
     private ClusterConfig cluster;
-
     /**
      * 系统配置参数
      */
     private SystemConfig system;
+    /**
+     * 节点配置
+     */
+    private NodeConfig node;
+    /**
+     * 用户相关配置
+     */
+    private UserConfig user;
+    /**
+     * 前端配置
+     */
+    private WebConfig web;
+    /**
+     * 文件中心配置
+     */
+    private FileStorageConfig fileStorage;
 
     public SystemConfig getSystem() {
         return Optional.ofNullable(this.system).orElseGet(() -> {
@@ -76,10 +89,6 @@ public class ServerConfig extends BaseExtConfig implements InitializingBean {
         });
     }
 
-    /**
-     * 节点配置
-     */
-    private NodeConfig node;
 
     public NodeConfig getNode() {
         return Optional.ofNullable(this.node).orElseGet(() -> {
@@ -88,10 +97,6 @@ public class ServerConfig extends BaseExtConfig implements InitializingBean {
         });
     }
 
-    /**
-     * 用户相关配置
-     */
-    private UserConfig user;
 
     public UserConfig getUser() {
         return Optional.ofNullable(this.user).orElseGet(() -> {
@@ -100,10 +105,6 @@ public class ServerConfig extends BaseExtConfig implements InitializingBean {
         });
     }
 
-    /**
-     * 前端配置
-     */
-    private WebConfig web;
 
     public WebConfig getWeb() {
         return Optional.ofNullable(this.web).orElseGet(() -> {
@@ -182,191 +183,6 @@ public class ServerConfig extends BaseExtConfig implements InitializingBean {
         }
     }
 
-    @Data
-    public static class WebConfig {
-
-        /**
-         * 前端接口 超时时间 单位秒
-         */
-        private int apiTimeout = 20;
-
-        public int getApiTimeout() {
-            return Math.max(this.apiTimeout, 5);
-        }
-
-        /**
-         * 系统名称
-         */
-        private String name;
-
-        /**
-         * 系统副名称（标题） 建议4个汉字以内
-         */
-        private String subTitle;
-
-        /**
-         * 登录页标题
-         */
-        private String loginTitle;
-
-        /**
-         * logo 文件路径
-         */
-        private String logoFile;
-
-        /**
-         * icon 文件路径
-         */
-        private String iconFile;
-
-        /**
-         * 禁用页面引导导航
-         */
-        private boolean disabledGuide = false;
-        /**
-         * 禁用登录图形验证码
-         */
-        private boolean disabledCaptcha = false;
-
-        /**
-         * 前端消息弹出位置，可选 topLeft topRight bottomLeft bottomRight
-         */
-        private String notificationPlacement;
-
-        public String getName() {
-            return StrUtil.emptyToDefault(name, "Jpom项目运维系统");
-        }
-
-        public String getSubTitle() {
-            return StrUtil.emptyToDefault(subTitle, "项目运维");
-        }
-
-        public String getLoginTitle() {
-            return StrUtil.emptyToDefault(loginTitle, "登录JPOM");
-        }
-
-    }
-
-    @Data
-    public static class UserConfig {
-
-        /**
-         * 用户连续登录失败次数，超过此数将自动不再被允许登录，零是不限制
-         */
-        private int alwaysLoginError = 5;
-
-        /**
-         * IP连续登录失败次数，超过此数将自动不再被允许登录，零是不限制
-         */
-        private int alwaysIpLoginError = 10;
-
-        /**
-         * 是否强制提醒用户开启  mfa
-         */
-        private boolean forceMfa = false;
-        /**
-         * 当ip连续登录失败，锁定对应IP时长，单位毫秒
-         */
-        private Duration ipErrorLockTime;
-
-        public Duration getIpErrorLockTime() {
-            return Optional.ofNullable(this.ipErrorLockTime).orElseGet(() -> {
-                ipErrorLockTime = Duration.ofHours(5);
-                return ipErrorLockTime;
-            });
-        }
-
-        /**
-         * demo 账号的提示
-         */
-        private String demoTip;
-
-
-        /**
-         * 登录token失效时间(单位：小时),默认为24
-         */
-        private int tokenExpired = 24;
-
-        public int getTokenExpired() {
-            return Math.max(this.tokenExpired, 1);
-        }
-
-        /**
-         * 登录token失效后自动续签时间（单位：分钟），默认为60，
-         */
-        private int tokenRenewal = 60;
-
-        public int getTokenRenewal() {
-            return Math.max(this.tokenRenewal, 1);
-        }
-
-        /**
-         * 登录token 加密的key 长度建议控制到 16位
-         */
-        private String tokenJwtKey;
-
-        public byte[] getTokenJwtKeyByte() {
-            return StrUtil.emptyToDefault(this.tokenJwtKey, "KZQfFBJTW2v6obS1").getBytes();
-        }
-    }
-
-
-    @Data
-    public static class NodeConfig {
-        /**
-         * 检查节点心跳间隔时间,最小值 5 秒
-         */
-        private int heartSecond = 30;
-
-        public int getHeartSecond() {
-            return Math.max(this.heartSecond, 5);
-        }
-
-        /**
-         * 上传文件的超时时间 单位秒,最短5秒中
-         */
-        private int uploadFileTimeout = 300;
-
-        /**
-         * 节点文件分片上传大小，单位 M
-         */
-        private int uploadFileSliceSize = 1;
-
-        /**
-         * 节点文件分片上传并发数,最小1 最大 服务端 CPU 核心数
-         */
-        private int uploadFileConcurrent = 2;
-
-        public int getUploadFileTimeout() {
-            return Math.max(this.uploadFileTimeout, 5);
-        }
-
-        public int getUploadFileSliceSize() {
-            return Math.max(this.uploadFileSliceSize, 1);
-        }
-
-        public void setUploadFileConcurrent(int uploadFileConcurrent) {
-            this.uploadFileConcurrent = Math.min(Math.max(uploadFileConcurrent, 1), RuntimeUtil.getProcessorCount());
-        }
-
-        /**
-         * 节点统计日志保留天数，如果小于等于 0 不自动删除
-         */
-        private int statLogKeepDays = 3;
-    }
-
-    @EqualsAndHashCode(callSuper = true)
-    @Data
-    public static class SystemConfig extends BaseSystemConfig {
-
-        @Override
-        public void setLogCharset(Charset logCharset) {
-            super.setLogCharset(logCharset);
-            ServiceFileTailWatcher.setCharset(getLogCharset());
-        }
-    }
-
-    private FileStorageConfig fileStorage;
 
     /**
      * 获取文件中心存储目录
@@ -383,36 +199,5 @@ public class ServerConfig extends BaseExtConfig implements InitializingBean {
             fileStorage.setSavePah(FileUtil.getAbsolutePath(FileUtil.file(dataPath, "file-storage")));
         }
         return FileUtil.file(fileStorage.getSavePah());
-    }
-
-    /**
-     * 文件管理存储
-     */
-    @Data
-    public static class FileStorageConfig {
-        private String savePah;
-    }
-
-    /**
-     * 集群信息
-     */
-    @Data
-    public static class ClusterConfig {
-        /**
-         * 集群Id，默认为 default 不区分大小写，只能是字母或者数字，长度小于 20
-         */
-        private String id;
-        /**
-         * 检查节点心跳间隔时间,最小值 5 秒
-         */
-        private int heartSecond = 30;
-
-        public int getHeartSecond() {
-            return Math.max(this.heartSecond, 5);
-        }
-
-        public String getId() {
-            return StrUtil.emptyToDefault(this.id, Const.WORKSPACE_DEFAULT_ID).toUpperCase();
-        }
     }
 }

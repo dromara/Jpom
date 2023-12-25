@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom.socket;
 
+import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.service.system.SystemParametersServer;
 import org.dromara.jpom.socket.handler.*;
@@ -41,7 +42,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 public class ServerWebSocketConfig implements WebSocketConfigurer {
     private final ServerWebSocketInterceptor serverWebSocketInterceptor;
     private final SystemParametersServer systemParametersServer;
-    private final ServerConfig.NodeConfig nodeConfig;
+    private final NodeConfig nodeConfig;
     private final MachineNodeServer machineNodeServer;
 
     public ServerWebSocketConfig(ServerWebSocketInterceptor serverWebSocketInterceptor,

@@ -46,6 +46,8 @@ import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.interceptor.NotLogin;
+import org.dromara.jpom.configuration.NodeConfig;
+import org.dromara.jpom.configuration.WebConfig;
 import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserModel;
@@ -86,8 +88,8 @@ public class IndexControl extends BaseServerController {
     private final UserService userService;
     private final UserBindWorkspaceService userBindWorkspaceService;
     private final SystemParametersServer systemParametersServer;
-    private final ServerConfig.WebConfig webConfig;
-    private final ServerConfig.NodeConfig nodeConfig;
+    private final WebConfig webConfig;
+    private final NodeConfig nodeConfig;
     private final DbExtConfig dbExtConfig;
 
     public IndexControl(UserService userService,

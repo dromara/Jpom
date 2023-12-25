@@ -30,6 +30,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.configuration.UserConfig;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.user.UserService;
 import org.dromara.jpom.system.ServerConfig;
@@ -61,7 +62,7 @@ public class LoginInterceptor implements HandlerMethodInterceptor {
 
     private static final Map<Integer, String> MSG_CACHE = new HashMap<>(3);
 
-    private final ServerConfig.UserConfig userConfig;
+    private final UserConfig userConfig;
 
     static {
         MSG_CACHE.put(ServerConst.AUTHORIZE_TIME_OUT_CODE, ServerConst.LOGIN_TIP);

@@ -39,6 +39,7 @@ import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
+import org.dromara.jpom.configuration.ClusterConfig;
 import org.dromara.jpom.controller.LoginControl;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.permission.ClassFeature;
@@ -80,7 +81,7 @@ public class CacheManageController extends BaseServerController implements ICach
 
     private final JpomApplication jpomApplication;
     private final DataInitEvent dataInitEvent;
-    private final ServerConfig.ClusterConfig clusterConfig;
+    private final ClusterConfig clusterConfig;
 
     public CacheManageController(JpomApplication jpomApplication,
                                  DataInitEvent dataInitEvent,
