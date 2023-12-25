@@ -132,15 +132,15 @@ export function formatUnits(value, base, unitArr, defaultValue = "-") {
     return defaultValue;
   }
 
-  var index = 0;
-  var srcsize = parseFloat(value);
+  let index = 0;
+  const srcsize = parseFloat(value);
   if (srcsize <= 0) {
     return defaultValue;
   }
   // console.log(value, srcsize);
   index = Math.floor(Math.log(srcsize) / Math.log(base));
-  var size = srcsize / Math.pow(base, index);
-  size = size.toFixed(2); //保留的小数位数
+  let size = srcsize / Math.pow(base, index);
+  size = Number(size.toFixed(2)); //保留的小数位数
   return size + unitArr[index];
 }
 
