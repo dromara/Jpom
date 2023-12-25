@@ -49,7 +49,7 @@
 <script>
 import { mapGetters } from "vuex";
 import { getWebSocketUrl } from "@/utils/const";
-import LogView from "@/components/logView";
+import LogView from "@/components/logView/index2";
 
 export default {
   components: {

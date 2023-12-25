@@ -28,7 +28,7 @@
 // import { getProjectData, getProjectLogSize, downloadProjectLogFile, getLogBackList, downloadProjectLogBackFile, deleteProjectLogBackFile } from "@/api/node-project";
 import { mapGetters } from "vuex";
 import { getWebSocketUrl } from "@/utils/const";
-import LogView from "@/components/logView";
+import LogView from "@/components/logView/index2";
 
 export default {
   components: {
