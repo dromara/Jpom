@@ -96,6 +96,14 @@ jpom:
   file-storage:
     # 文件中心存储路径
     save-pah:
+  assets:
+    # ssh 资产
+    ssh:
+      # 监控频率
+      monitor-cron: 0 0/1 * * * ?
+      # 指定分组不启用监控功能（如果想禁用所有配置 * 即可）
+      disable-monitor-group-name:
+        - 禁用监控
 server:
   #运行端口号
   port: 2122

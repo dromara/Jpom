@@ -49,6 +49,7 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.configuration.AssetsConfig;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.system.service.ClusterInfoService;
@@ -86,11 +87,14 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
 
     private final JpomApplication jpomApplication;
     private final ClusterInfoService clusterInfoService;
+    private final AssetsConfig.SshConfig sshConfig;
 
     public MachineSshServer(JpomApplication jpomApplication,
-                            ClusterInfoService clusterInfoService) {
+                            ClusterInfoService clusterInfoService,
+                            AssetsConfig assetsConfig) {
         this.jpomApplication = jpomApplication;
         this.clusterInfoService = clusterInfoService;
+        this.sshConfig = assetsConfig.getSsh();
     }
 
     @Override
@@ -179,7 +183,9 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
 
     @Override
     public void startLoad() {
-        CronUtils.add(CRON_ID, "0 0/1 * * * ?", () -> MachineSshServer.this);
+        String monitorCron = sshConfig.getMonitorCron();
+        String cron = Opt.ofBlankAble(monitorCron).orElse("0 0/1 * * * ?");
+        CronUtils.add(CRON_ID, cron, () -> MachineSshServer.this);
     }
 
     @Override
@@ -205,8 +211,22 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
         monitorModels.forEach(monitorModel -> ThreadUtil.execute(() -> this.updateMonitor(monitorModel)));
     }
 
+    /**
+     * 执行监控 ssh
+     *
+     * @param machineSshModel 资产 ssh
+     */
     private void updateMonitor(MachineSshModel machineSshModel) {
-
+        List<String> monitorGroupName = sshConfig.getDisableMonitorGroupName();
+        if (CollUtil.containsAny(monitorGroupName, CollUtil.newArrayList(machineSshModel.getGroupName(), "*"))) {
+            // 禁用监控
+            if (machineSshModel.getStatus() != null && machineSshModel.getStatus() == 2) {
+                // 不需要更新
+                return;
+            }
+            this.updateStatus(machineSshModel.id(), 2, "禁用监控");
+            return;
+        }
         Session session = null;
         try {
             InputStream sshExecTemplateInputStream = ExtConfigBean.getConfigResourceInputStream("/ssh/monitor-script.sh");
@@ -235,6 +255,13 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
         }
     }
 
+    /**
+     * 解析监控执行结果
+     *
+     * @param machineSshModel 监控的ssh
+     * @param listStr         结果信息
+     * @param errorList       错误信息
+     */
     private void updateMonitorInfo(MachineSshModel machineSshModel, List<String> listStr, List<String> errorList) {
         String error = CollUtil.join(errorList, StrUtil.LF);
         if (StrUtil.isNotEmpty(error)) {
@@ -343,6 +370,14 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
         machineSshModel.setId(id);
         machineSshModel.setStatus(status);
         machineSshModel.setStatusMsg(msg);
+        //
+        machineSshModel.setOsLoadAverage("-");
+        machineSshModel.setOsOccupyCpu(-1D);
+        machineSshModel.setOsMaxOccupyDisk(-1D);
+        machineSshModel.setOsOccupyMemory(-1D);
+        machineSshModel.setDockerInfo("");
+        machineSshModel.setJavaVersion("");
+        machineSshModel.setJpomAgentPid(0);
         super.updateById(machineSshModel);
     }
 

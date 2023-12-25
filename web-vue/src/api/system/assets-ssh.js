@@ -111,3 +111,9 @@ export function importData(formData) {
     data: formData,
   });
 }
+
+export const statusMap = {
+  0: { desc: "无法连接", color: "red" },
+  1: { desc: "正常", color: "green" },
+  2: { desc: "禁用监控", color: "orange" },
+};

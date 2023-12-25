@@ -59,33 +59,41 @@
             {{ text || "未知" }}
           </a-popover>
           <template slot="nodeId" slot-scope="text, record">
-            <div v-if="record.javaVersion">
-              <a-popover title="java信息" v-if="record.jpomAgentPid > 0">
-                <template slot="content">
-                  <p>插件端进程ID：{{ record.jpomAgentPid }}</p>
-                  <p>java版本：{{ record.javaVersion }}</p>
-                </template>
-                <a-tag color="green"> {{ record.jpomAgentPid }}</a-tag>
-              </a-popover>
-              <a-button v-else size="small" type="primary" @click="install(record)">安装节点</a-button>
-            </div>
+            <template v-if="record.status !== 2">
+              <!-- 禁用监控不显示 -->
+              <div v-if="record.javaVersion">
+                <a-popover title="java信息" v-if="record.jpomAgentPid > 0">
+                  <template slot="content">
+                    <p>插件端进程ID：{{ record.jpomAgentPid }}</p>
+                    <p>java版本：{{ record.javaVersion }}</p>
+                  </template>
+                  <a-tag color="green"> {{ record.jpomAgentPid }}</a-tag>
+                </a-popover>
+                <a-button v-else size="small" type="primary" @click="install(record)">安装节点</a-button>
+              </div>
 
-            <a-tag color="orange" v-else>no java</a-tag>
+              <a-tag color="orange" v-else>no java</a-tag>
+            </template>
+            <template v-else>-</template>
           </template>
           <template slot="dockerInfo" slot-scope="text, record">
-            <a-popover title="docker信息" v-if="record.dockerInfo">
-              <template slot="content">
-                <p>路径：{{ JSON.parse(record.dockerInfo).path }}</p>
-                <p>版本：{{ JSON.parse(record.dockerInfo).version }}</p>
-              </template>
-              <a-tag color="green">存在</a-tag>
-            </a-popover>
+            <template v-if="record.status !== 2">
+              <!-- 禁用监控不显示 -->
+              <a-popover title="docker信息" v-if="record.dockerInfo">
+                <template slot="content">
+                  <p>路径：{{ JSON.parse(record.dockerInfo).path }}</p>
+                  <p>版本：{{ JSON.parse(record.dockerInfo).version }}</p>
+                </template>
+                <a-tag color="green">存在</a-tag>
+              </a-popover>
 
-            <a-tag v-else>不存在</a-tag>
+              <a-tag v-else>不存在</a-tag>
+            </template>
+            <template v-else>-</template>
           </template>
           <template slot="status" slot-scope="text, record">
             <a-tooltip :title="record.statusMsg">
-              <a-tag :color="record.status === 1 ? 'green' : 'red'">{{ record.status === 1 ? "正常" : "无法连接" }}</a-tag>
+              <a-tag :color="statusMap[record.status] && statusMap[record.status].color">{{ (statusMap[record.status] && statusMap[record.status].desc) || "未知" }}</a-tag>
             </a-tooltip>
           </template>
           <a-tooltip slot="renderSize" slot-scope="text" placement="topLeft" :title="renderSize(text)">
@@ -383,6 +391,7 @@ import {
   importTemplate,
   exportData,
   importData,
+  statusMap,
 } from "@/api/system/assets-ssh";
 import { COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, CHANGE_PAGE, renderSize, formatPercent, formatDuration, formatPercent2Number } from "@/utils/const";
 import fastInstall from "@/pages/node/fast-install.vue";
@@ -417,6 +426,7 @@ export default {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       editSshVisible: false,
       temp: {},
+      statusMap,
       // tempPwd: '',
       options: [
         { label: "密码", value: "PASS" },

@@ -84,7 +84,7 @@ public class MachineSshModel extends BaseGroupNameModel implements ISshInfo {
     /**
      * ssh连接状态
      * <p>
-     * 状态{0，无法连接，1 正常}
+     * 状态{0，无法连接，1 正常，2 禁用监控}
      */
     private Integer status;
     /**
