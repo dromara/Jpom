@@ -7,6 +7,8 @@
 1. 【server】优化 导入 SSH、项目 CSV 数据自动识别编码格式 
 2. 【server】优化 执行 SSH 脚本获取流异常：getInputStream() should be called before connect()
 3. 【server】升级 mwiede 依赖版本
+4. 【server】优化 资产管理 SSH 支持配置禁用监控（避免频繁登录）`jpom.assets.ssh.disable-monitor-group-name`（感谢@Again...）
+5. 【server】优化 资产管理 SSH 支持配置监控周期：`jpom.assets.ssh.monitor-cron`
 
 ------
 

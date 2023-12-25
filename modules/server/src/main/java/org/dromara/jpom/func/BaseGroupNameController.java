@@ -32,7 +32,7 @@ import org.dromara.jpom.service.h2db.BaseDbService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * @author bwcx_jzy
@@ -49,8 +49,8 @@ public abstract class BaseGroupNameController extends BaseServerController {
 
     @GetMapping(value = "list-group", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<List<String>> listGroup() {
-        List<String> list = dbService.listGroupName();
+    public IJsonMessage<Collection<String>> listGroup() {
+        Collection<String> list = dbService.listGroupName();
         return JsonMessage.success("", list);
     }
 }

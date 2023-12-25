@@ -41,7 +41,9 @@
       </a-tooltip>
       <template slot="status" slot-scope="text, record">
         <a-tooltip :title="record.machineSsh && record.machineSsh.statusMsg">
-          <a-tag :color="record.machineSsh && record.machineSsh.status === 1 ? 'green' : 'red'">{{ record.machineSsh && record.machineSsh.status === 1 ? "正常" : "无法连接" }}</a-tag>
+          <a-tag :color="statusMap[record.machineSsh && record.machineSsh.status] && statusMap[record.machineSsh && record.machineSsh.status].color">
+            {{ (statusMap[record.machineSsh && record.machineSsh.status] && statusMap[record.machineSsh && record.machineSsh.status].desc) || "未知" }}
+          </a-tag>
         </a-tooltip>
       </template>
       <a-popover title="系统信息" slot="osName" slot-scope="text, record">
@@ -225,6 +227,7 @@
 </template>
 <script>
 import { deleteSsh, editSsh, getSshList, syncToWorkspace, getSshGroupAll } from "@/api/ssh";
+import { statusMap } from "@/api/system/assets-ssh";
 import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, formatPercent2Number, renderSize, formatDuration, formatPercent } from "@/utils/const";
@@ -254,8 +257,7 @@ export default {
       workspaceList: [],
       tempNode: {},
       // fileList: [],
-      sshAgentInfo: {},
-      agentData: {},
+      statusMap,
       formLoading: false,
 
       drawerVisible: false,

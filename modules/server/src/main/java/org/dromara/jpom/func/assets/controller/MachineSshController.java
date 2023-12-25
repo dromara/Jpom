@@ -47,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.interceptor.PermissionInterceptor;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
+import org.dromara.jpom.configuration.AssetsConfig;
 import org.dromara.jpom.func.BaseGroupNameController;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
@@ -78,10 +79,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -100,18 +98,21 @@ public class MachineSshController extends BaseGroupNameController {
     private final SshTerminalExecuteLogService sshTerminalExecuteLogService;
     private final WorkspaceService workspaceService;
     private final ServerConfig serverConfig;
+    private final AssetsConfig.SshConfig sshConfig;
 
     public MachineSshController(MachineSshServer machineSshServer,
                                 SshService sshService,
                                 SshTerminalExecuteLogService sshTerminalExecuteLogService,
                                 WorkspaceService workspaceService,
-                                ServerConfig serverConfig) {
+                                ServerConfig serverConfig,
+                                AssetsConfig assetsConfig) {
         super(machineSshServer);
         this.machineSshServer = machineSshServer;
         this.sshService = sshService;
         this.sshTerminalExecuteLogService = sshTerminalExecuteLogService;
         this.workspaceService = workspaceService;
         this.serverConfig = serverConfig;
+        this.sshConfig = assetsConfig.getSsh();
     }
 
     @PostMapping(value = "list-data", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -121,6 +122,22 @@ public class MachineSshController extends BaseGroupNameController {
         return JsonMessage.success("", pageResultDto);
     }
 
+
+    @Override
+    @GetMapping(value = "list-group", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<Collection<String>> listGroup() {
+        Collection<String> list = dbService.listGroupName();
+        // 合并配置禁用分组
+        List<String> monitorGroupName = sshConfig.getDisableMonitorGroupName();
+        if (monitorGroupName != null) {
+            list.addAll(monitorGroupName);
+            //
+            list.remove("*");
+            list = new HashSet<>(list);
+        }
+        return JsonMessage.success("", list);
+    }
 
     /**
      * 编辑

@@ -104,9 +104,14 @@ jpom:
     pool-wait-queue: 10
     # 日志显示 压缩折叠显示进度比例 范围 1-100
     log-reduce-progress-ratio: 5
-  file-storage:
+  fileStorage:
     # 文件中心存储路径
     save-pah:
+  assets:
+    ssh:
+      monitor-cron: 0 0/1 * * * ?
+      disable-monitor-group-name:
+        - 禁用监控
 server:
   #运行端口号
   port: 2122

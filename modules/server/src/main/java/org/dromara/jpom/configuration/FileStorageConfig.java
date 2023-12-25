@@ -13,5 +13,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("jpom.file-storage")
 public class FileStorageConfig {
 
+    /**
+     * 文件中心存储路径
+     */
     private String savePah;
 }
