@@ -315,9 +315,9 @@ public class JschUtils {
             channel.setInputStream(null);
             try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
                 channel.setErrStream(outputStream, true);
-                // 不添加超时，添加超时后可能存在阻塞
-                channel.connect();
                 try (InputStream in = channel.getInputStream()) {
+                    // 不添加超时，添加超时后可能存在阻塞
+                    channel.connect();
                     IoUtil.readLines(in, charset, normal);
                 }
                 // 输出错误信息
