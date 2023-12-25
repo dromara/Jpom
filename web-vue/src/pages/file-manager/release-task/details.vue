@@ -77,7 +77,7 @@
 </template>
 <script>
 import { taskDetails, statusMap, taskLogInfoList } from "@/api/file-manager/release-task-log";
-import LogView from "@/components/logView";
+import LogView from "@/components/logView/index2";
 import codeEditor from "@/components/codeEditor";
 import { getSshListAll } from "@/api/ssh";
 import { getNodeListAll } from "@/api/node";
