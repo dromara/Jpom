@@ -93,6 +93,9 @@ jpom:
     pool-wait-queue: 10
     # 日志显示 压缩折叠显示进度比例 范围 1-100
     log-reduce-progress-ratio: 5
+  file-storage:
+    # 文件中心存储路径
+    save-pah:
 server:
   #运行端口号
   port: 2122

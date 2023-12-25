@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.model.AgentFileModel;
@@ -50,7 +51,6 @@ import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.service.system.SystemParametersServer;
 import org.dromara.jpom.socket.BaseProxyHandler;
 import org.dromara.jpom.socket.ConsoleCommandOp;
-import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.transport.*;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -83,11 +83,11 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 
     private final SystemParametersServer systemParametersServer;
     private final MachineNodeServer machineNodeServer;
-    private final ServerConfig.NodeConfig nodeConfig;
+    private final NodeConfig nodeConfig;
 
     public NodeUpdateHandler(MachineNodeServer machineNodeServer,
                              SystemParametersServer systemParametersServer,
-                             ServerConfig.NodeConfig nodeConfig) {
+                             NodeConfig nodeConfig) {
         super(null);
         this.machineNodeServer = machineNodeServer;
         this.systemParametersServer = systemParametersServer;

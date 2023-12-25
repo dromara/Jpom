@@ -27,6 +27,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.db.Entity;
 import cn.keepbx.jpom.event.ISystemTask;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.func.assets.model.MachineNodeStatLogModel;
 import org.dromara.jpom.service.h2db.BaseDbService;
 import org.dromara.jpom.system.ServerConfig;
@@ -40,7 +41,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class MachineNodeStatLogServer extends BaseDbService<MachineNodeStatLogModel> implements ISystemTask {
 
-    private final ServerConfig.NodeConfig nodeConfig;
+    private final NodeConfig nodeConfig;
 
     public MachineNodeStatLogServer(ServerConfig serverConfig) {
         this.nodeConfig = serverConfig.getNode();

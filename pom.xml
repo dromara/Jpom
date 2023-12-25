@@ -65,7 +65,7 @@
         <fastjson2.version>2.0.43</fastjson2.version>
         <fastjson-version>2.0.43</fastjson-version>
         <jna-version>5.12.1</jna-version>
-        <mwiede.jsch-version>0.2.13</mwiede.jsch-version>
+        <mwiede.jsch-version>0.2.15</mwiede.jsch-version>
         <oshi.version>6.4.8</oshi.version>
     </properties>
     <dependencies>
@@ -88,7 +88,6 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
-
 
     </dependencies>
     <dependencyManagement>
@@ -131,6 +130,12 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
+                    <annotationProcessorPaths>
+<!--                        <path>-->
+<!--                            <groupId>org.springframework.boot</groupId>-->
+<!--                            <artifactId>spring-boot-configuration-processor</artifactId>-->
+<!--                        </path>-->
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>

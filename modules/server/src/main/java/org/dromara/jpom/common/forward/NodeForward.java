@@ -43,6 +43,7 @@ import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.model.data.NodeModel;
@@ -351,7 +352,7 @@ public class NodeForward {
     private static <T> JsonMessage<T> requestSharding(INodeInfo nodeInfo, String workspaceId, NodeUrl nodeUrl, JSONObject jsonObject, File file, Function<File, String> fileNameFn, Function<JSONObject, JsonMessage<T>> doneCallback, BiConsumer<Long, Long> streamProgress) throws IOException {
         IUrlItem urlItem = parseUrlItem(nodeInfo, workspaceId, nodeUrl, DataContentType.FORM_URLENCODED);
         ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
-        ServerConfig.NodeConfig nodeConfig = serverConfig.getNode();
+        NodeConfig nodeConfig = serverConfig.getNode();
         long length = file.length();
         String fileName = fileNameFn.apply(file);
         Assert.state(length > 0, "空文件不能上传");

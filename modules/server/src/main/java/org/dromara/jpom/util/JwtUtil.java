@@ -33,6 +33,7 @@ import cn.hutool.jwt.JWTHeader;
 import cn.hutool.jwt.JWTValidator;
 import cn.hutool.jwt.signers.JWTSignerUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.configuration.UserConfig;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.system.ServerConfig;
 
@@ -60,7 +61,7 @@ public class JwtUtil {
             return null;
         }
         ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
-        ServerConfig.UserConfig user = serverConfig.getUser();
+        UserConfig user = serverConfig.getUser();
         JWT jwt = JWT.of(token);
         if (jwt.verify(JWTSignerUtil.hs256(user.getTokenJwtKeyByte()))) {
             return jwt;
@@ -135,7 +136,7 @@ public class JwtUtil {
      */
     public static String builder(UserModel userModel, String jwtId) {
         ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
-        ServerConfig.UserConfig user = serverConfig.getUser();
+        UserConfig user = serverConfig.getUser();
         //
         DateTime now = DateTime.now();
         JWT jwt = JWT.create();

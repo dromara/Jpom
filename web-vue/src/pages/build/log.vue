@@ -1,5 +1,14 @@
 <template>
-  <log-view :ref="`logView`" titleName="构建日志" :visible="visible">
+  <log-view
+    :ref="`logView`"
+    titleName="构建日志"
+    :visible="visible"
+    @close="
+      () => {
+        $emit('close');
+      }
+    "
+  >
     <template #before>
       <a-space>
         <span v-if="status">
@@ -50,9 +59,7 @@ export default {
   beforeDestroy() {
     this.logTimer && clearTimeout(this.logTimer);
   },
-  created() {
-
-  },
+  created() {},
   mounted() {
     this.pullLog();
   },
