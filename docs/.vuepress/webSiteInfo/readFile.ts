@@ -32,8 +32,10 @@ function readFileList(excludeFiles: Array<string> = [''], dir: string = docsRoot
             name = fileNameArr[1]
             type = fileNameArr[2]
           } else { // 超过两个‘.’的
-            log(chalk.yellow(`warning: 该文件 "${filePath}" 没有按照约定命名，将忽略生成相应数据。`))
-            return
+            type = fileNameArr[fileNameArr.length - 1];
+            name = fileNameArr.slice(1, fileNameArr.length - 1).join(".")
+            //log(chalk.yellow(`warning: 该文件 "${filePath}" 没有按照约定命名，将忽略生成相应数据。`))
+            //return
           }
           if (type === 'md') { // 过滤非 md 文件
             filesList.push({
