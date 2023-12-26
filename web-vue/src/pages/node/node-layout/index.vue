@@ -31,7 +31,7 @@
         <script-template v-if="currentId === 'script'" :node="node" />
         <script-log v-if="currentId === 'script-log'" :nodeId="node.id" />
         <nginx-list v-if="currentId === 'nginxList'" :node="node" />
-        <cert v-if="currentId === 'certificate'" :node="node" />
+
         <white-list v-if="currentId === 'whitelistDirectory'" :node="node" />
         <cache v-if="currentId === 'cacheManage'" :node="node" />
         <log v-if="currentId === 'logManage'" :node="node" />
@@ -49,7 +49,7 @@ import ProjectList from "@/pages/node/node-layout/project/project-list";
 import ScriptTemplate from "@/pages/node/node-layout/other/script-list";
 import ScriptLog from "@/pages/node/node-layout/other/script-log";
 import NginxList from "@/pages/node/node-layout/nginx/list";
-import Cert from "@/pages/node/node-layout/nginx/cert";
+
 import WhiteList from "@/pages/node/node-layout/system/white-list.vue";
 import Cache from "@/pages/node/node-layout/system/cache";
 import Log from "@/pages/node/node-layout/system/log.vue";
@@ -64,7 +64,7 @@ export default {
 
     ScriptTemplate,
     NginxList,
-    Cert,
+
     WhiteList,
     Cache,
     Log,
@@ -138,7 +138,7 @@ export default {
             {
               title: "导航助手",
               element: document.querySelector(".whitelistDirectory"),
-              intro: "白名单目录是一个配置型菜单，里面配置的内容将会在</p><p><b>项目列表</b></br><b>Nginx 列表</b></br><b>证书管理</b></p> 【插件端配置】->【白名单配置】。",
+              intro: "白名单目录是一个配置型菜单，里面配置的内容将会在</p><p><b>项目列表</b></br><b>Nginx 列表</b></br></p> 【插件端配置】->【白名单配置】。",
             },
           ],
         },

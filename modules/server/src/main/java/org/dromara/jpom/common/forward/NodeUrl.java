@@ -178,9 +178,6 @@ public enum NodeUrl {
     System_Nginx_updateConf("/system/nginx/updateConf"),
     System_Nginx_reload("/system/nginx/reload"),
 
-    System_Certificate_getCertList("/system/certificate/getCertList"),
-    System_Certificate_delete("/system/certificate/delete"),
-    System_Certificate_export("/system/certificate/export", true),
 
     Script_List("/script/list.json"),
     SCRIPT_PULL_EXEC_LOG("/script/pull_exec_log"),

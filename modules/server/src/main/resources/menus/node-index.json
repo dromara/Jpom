@@ -32,11 +32,6 @@
         "id": "nginxList",
         "title": "nginx列表",
         "role": "system"
-      },
-      {
-        "id": "certificate",
-        "title": "证书管理",
-        "role": "system"
       }
     ]
   },
