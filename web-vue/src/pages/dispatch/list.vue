@@ -534,7 +534,7 @@
                   <template slot="title">
                     <ul>
                       <li>项目启动,停止,重启都将请求对应的地址</li>
-                      <li>传入参数有：projectId、projectName、type、copyId、result</li>
+                      <li>传入参数有：projectId、projectName、type、result</li>
                       <li>type 的值有：stop、beforeStop、start、beforeRestart</li>
                     </ul>
                   </template>
@@ -543,54 +543,6 @@
               </template>
               <a-input v-model="temp[`${nodeId}_token`]" placeholder="项目启动,停止,重启都将请求对应的地址,非必填，GET请求" />
             </a-form-model-item>
-
-            <div v-if="javaModes.includes(temp.runMode)">
-              <a-form-model-item>
-                <template slot="label">
-                  副本
-                  <a-tooltip v-show="temp.type !== 'edit'">
-                    <template slot="title">
-                      <ul>
-                        <li>副本是指同一个项目在一个节点（服务器）中运行多份</li>
-                      </ul>
-                    </template>
-                    <a-icon type="question-circle" theme="filled" />
-                  </a-tooltip>
-                </template>
-                <!-- 副本信息 -->
-                <a-collapse v-if="temp[`${nodeId}_javaCopyItemList`] && temp[`${nodeId}_javaCopyItemList`].length">
-                  <a-collapse-panel v-for="replica in temp[`${nodeId}_javaCopyItemList`]" :key="replica.id">
-                    <template #header>
-                      <a-row>
-                        <a-col :span="18"> 副本 {{ replica.name }} {{ replica.id }} </a-col>
-                        <a-col :span="4">
-                          <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除">
-                            <a-button size="small" :disabled="!replica.deleteAble" type="danger" @click.stop="handleDeleteReplica(nodeId, replica)">删除</a-button>
-                          </a-tooltip>
-                        </a-col>
-                      </a-row>
-                    </template>
-                    <a-form-model-item :label="`名称`" prop="replicaName">
-                      <a-input v-model="replica.name" class="replica-area" placeholder="副本名称" />
-                    </a-form-model-item>
-                    <a-form-model-item :label="`JVM 参数`" prop="jvm">
-                      <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
-                    </a-form-model-item>
-                    <a-form-model-item :label="`args 参数`" prop="args">
-                      <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
-                    </a-form-model-item>
-                    <!-- <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除" class="replica-btn-del">
-                      <a-button :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(nodeId, replica)">删除</a-button>
-                    </a-tooltip> -->
-                  </a-collapse-panel>
-                </a-collapse>
-
-                <!-- 添加副本 -->
-                <a-form-model-item>
-                  <a-button type="primary" @click="handleAddReplica(nodeId)">添加副本</a-button>
-                </a-form-model-item>
-              </a-form-model-item>
-            </div>
           </a-collapse-panel>
         </a-collapse>
         <a-form-model-item prop="webhook">
@@ -1082,10 +1034,7 @@ export default {
           intervalTime: undefined,
           clearOld: false,
         };
-        // 添加 javaCopyItemList
-        this.nodeList.forEach((node) => {
-          this.temp[`${node.id}_javaCopyItemList`] = [];
-        });
+
         this.loadAccesList();
         this.loadGroupList();
 
@@ -1145,8 +1094,7 @@ export default {
             this.temp[`${ele.nodeId}_args`] = res.data.args || "";
             this.temp[`${ele.nodeId}_autoStart`] = res.data.autoStart;
             this.temp[`${ele.nodeId}_dslEnv`] = res.data.dslEnv || "";
-            // 添加 javaCopyItemList
-            this.temp[`${ele.nodeId}_javaCopyItemList`] = res.data.javaCopyItemList || [];
+
             this.temp = { ...this.temp };
           }
         });
@@ -1158,25 +1106,7 @@ export default {
         this.editDispatchVisible = true;
       });
     },
-    // 添加副本
-    handleAddReplica(nodeId) {
-      let repliccaId = randomStr();
-      this.temp[`${nodeId}_javaCopyItemList`].push({
-        id: repliccaId,
-        jvm: "",
-        args: "",
-        name: "",
-        deleteAble: true,
-      });
-      this.temp = { ...this.temp };
-    },
-    // 移除副本
-    handleDeleteReplica(nodeId, reeplica) {
-      const index = this.temp[`${nodeId}_javaCopyItemList`].findIndex((element) => element.id === reeplica.id);
-      const newList = this.temp[`${nodeId}_javaCopyItemList`].slice();
-      newList.splice(index, 1);
-      this.temp[`${nodeId}_javaCopyItemList`] = newList;
-    },
+
     // 提交创建分发项目
     handleEditDispatchOk() {
       // 检验表单
@@ -1194,28 +1124,7 @@ export default {
         }
         // 设置 reqId
         // this.temp.reqId = this.reqId;
-        this.nodeList.forEach((item) => {
-          //console.log(item);
-          //delete this.temp[`add_${item.id}`];
-          delete tempData[`${item.id}}_javaCopyIds`];
-        });
-        // 设置节点
-        tempData.nodeIdList.forEach((key) => {
-          // this.temp[`add_${key}`] = key;
-          // 设置副本
-          tempData[`${key}_javaCopyIds`] = "";
-          const copyIds = [];
-          tempData[`${key}_javaCopyItemList`]?.forEach((element) => {
-            //this.temp[`${key}_javaCopyIds`] += `${element.id},`;
-            copyIds.push(element.id);
-            tempData[`${key}_jvm_${element.id}`] = element.jvm;
-            tempData[`${key}_args_${element.id}`] = element.args;
-            tempData[`${key}_name_${element.id}`] = element.name;
-          });
-          // 移除多余的后缀 ,
-          tempData[`${key}_javaCopyIds`] = copyIds.join(",");
-          //  this.temp[`${key}_javaCopyIds`].substring(0, this.temp[`${key}_javaCopyIds`].length - 1);
-        });
+
         tempData.nodeIds = tempData.nodeIdList.join(",");
         delete tempData.nodeIdList;
         // 提交

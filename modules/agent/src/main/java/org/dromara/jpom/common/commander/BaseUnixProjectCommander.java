@@ -48,30 +48,30 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
     }
 
     @Override
-    public String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
+    public String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel) {
         String path = NodeProjectInfoModel.getClassPathLib(nodeProjectInfoModel);
         if (StrUtil.isBlank(path)) {
             return null;
         }
-        String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
+        String tag = nodeProjectInfoModel.getId();
         return StrUtil.format("nohup {} {} {} {} {} {} >> {} 2>&1 &",
             getRunJavaPath(nodeProjectInfoModel, false),
-            Optional.ofNullable(javaCopyItem == null ? nodeProjectInfoModel.getJvm() : javaCopyItem.getJvm()).orElse(StrUtil.EMPTY),
+            Optional.ofNullable(nodeProjectInfoModel.getJvm()).orElse(StrUtil.EMPTY),
             JvmUtil.getJpomPidTag(tag, nodeProjectInfoModel.allLib()),
             path,
             Optional.ofNullable(nodeProjectInfoModel.getMainClass()).orElse(StrUtil.EMPTY),
-            Optional.ofNullable(javaCopyItem == null ? nodeProjectInfoModel.getArgs() : javaCopyItem.getArgs()).orElse(StrUtil.EMPTY),
-            nodeProjectInfoModel.getAbsoluteLog(javaCopyItem));
+            Optional.ofNullable(nodeProjectInfoModel.getArgs()).orElse(StrUtil.EMPTY),
+            nodeProjectInfoModel.getAbsoluteLog());
     }
 
     @Override
-    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, int pid) throws Exception {
+    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, int pid) throws Exception {
         File file = FileUtil.file(nodeProjectInfoModel.allLib());
         List<String> result = new ArrayList<>();
         boolean success = false;
         String kill = AbstractSystemCommander.getInstance().kill(file, pid);
         result.add(kill);
-        if (this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, false)) {
+        if (this.loopCheckRun(nodeProjectInfoModel, false)) {
             success = true;
         } else {
             // 强制杀进程
@@ -79,13 +79,13 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
             String cmd = String.format("kill -9 %s", pid);
             CommandUtil.asyncExeLocalCommand(file, cmd);
             //
-            if (this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, 5, false)) {
+            if (this.loopCheckRun(nodeProjectInfoModel, 5, false)) {
                 success = true;
             } else {
                 result.add("Kill -9 not completed, kill -9 failed ");
             }
         }
-        String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
+        String tag = nodeProjectInfoModel.getId();
         return CommandOpResult.of(success, status(tag)).appendMsg(result);
 //        return status(tag) + StrUtil.SPACE + kill;
     }

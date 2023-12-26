@@ -53,26 +53,24 @@ import java.util.List;
 public class LogBackController extends BaseAgentController {
 
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> logSize(String id, String copyId) {
+    public IJsonMessage<JSONObject> logSize(String id) {
         NodeProjectInfoModel nodeProjectInfoModel = getProjectInfoModel();
         JSONObject jsonObject = new JSONObject();
         //
-        NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(copyId);
         //获取日志备份路径
-        File logBack = copyItem == null ? nodeProjectInfoModel.getLogBack() : nodeProjectInfoModel.getLogBack(copyItem);
+        File logBack = nodeProjectInfoModel.getLogBack();
         boolean logBackBool = logBack.exists() && logBack.isDirectory();
         jsonObject.put("logBack", logBackBool);
-        String info = projectInfoService.getLogSize(nodeProjectInfoModel, copyItem);
+        String info = projectInfoService.getLogSize(nodeProjectInfoModel);
         jsonObject.put("logSize", info);
         return JsonMessage.success("", jsonObject);
     }
 
     @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<String> resetLog(String copyId) {
+    public IJsonMessage<String> resetLog() {
         NodeProjectInfoModel pim = getProjectInfoModel();
-        NodeProjectInfoModel.JavaCopyItem copyItem = pim.findCopyItem(copyId);
         try {
-            String msg = AbstractProjectCommander.getInstance().backLog(pim, copyItem);
+            String msg = AbstractProjectCommander.getInstance().backLog(pim);
             if (msg.contains("ok")) {
                 return JsonMessage.success("重置成功");
             }
@@ -84,11 +82,10 @@ public class LogBackController extends BaseAgentController {
     }
 
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<String> clear(String name, String copyId) {
+    public IJsonMessage<String> clear(String name) {
         Assert.hasText(name, "没有对应到文件");
         NodeProjectInfoModel pim = getProjectInfoModel();
-        NodeProjectInfoModel.JavaCopyItem copyItem = pim.findCopyItem(copyId);
-        File logBack = copyItem == null ? pim.getLogBack() : pim.getLogBack(copyItem);
+        File logBack = pim.getLogBack();
         if (logBack.exists() && logBack.isDirectory()) {
             logBack = FileUtil.file(logBack, name);
             if (logBack.exists()) {
@@ -102,12 +99,11 @@ public class LogBackController extends BaseAgentController {
     }
 
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)
-    public void download(String key, String copyId, HttpServletResponse response) {
+    public void download(String key, HttpServletResponse response) {
         Assert.hasText(key, "请选择对应到文件");
         try {
             NodeProjectInfoModel pim = getProjectInfoModel();
-            NodeProjectInfoModel.JavaCopyItem copyItem = pim.findCopyItem(copyId);
-            File logBack = copyItem == null ? pim.getLogBack() : pim.getLogBack(copyItem);
+            File logBack = pim.getLogBack();
             if (logBack.exists() && logBack.isDirectory()) {
                 logBack = FileUtil.file(logBack, key);
                 ServletUtil.write(response, logBack);
@@ -121,13 +117,13 @@ public class LogBackController extends BaseAgentController {
     }
 
     @RequestMapping(value = "logBack", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> console(String copyId) {
+    public IJsonMessage<JSONObject> console() {
         // 查询项目路径
         NodeProjectInfoModel pim = getProjectInfoModel();
-        NodeProjectInfoModel.JavaCopyItem copyItem = pim.findCopyItem(copyId);
+
         JSONObject jsonObject = new JSONObject();
 
-        File logBack = copyItem == null ? pim.getLogBack() : pim.getLogBack(copyItem);
+        File logBack = pim.getLogBack();
         if (logBack.exists() && logBack.isDirectory()) {
             File[] filesAll = logBack.listFiles();
             if (filesAll != null) {
@@ -136,17 +132,17 @@ public class LogBackController extends BaseAgentController {
             }
         }
         jsonObject.put("id", pim.getId());
-        jsonObject.put("logPath", copyItem == null ? pim.getLog() : pim.getLog(copyItem));
+        jsonObject.put("logPath", pim.getLog());
         jsonObject.put("logBackPath", logBack.getAbsolutePath());
         return JsonMessage.success("", jsonObject);
     }
 
     @RequestMapping(value = "export.html", method = RequestMethod.GET)
     @ResponseBody
-    public void export(String copyId, HttpServletResponse response) {
+    public void export(HttpServletResponse response) {
         NodeProjectInfoModel pim = getProjectInfoModel();
-        NodeProjectInfoModel.JavaCopyItem copyItem = pim.findCopyItem(copyId);
-        File file = copyItem == null ? new File(pim.getLog()) : pim.getLog(copyItem);
+
+        File file = new File(pim.getLog());
         if (!file.exists()) {
             ServletUtil.write(response, JsonMessage.getString(400, "没有日志文件:" + file.getPath()), MediaType.APPLICATION_JSON_VALUE);
             return;

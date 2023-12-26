@@ -112,7 +112,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 if (dataItem == null) {
                     return false;
                 }
-                attributes.put("copyId", httpServletRequest.getParameter("copyId"));
+
                 attributes.put("projectId", BeanUtil.getProperty(dataItem, "projectId"));
                 attributes.put("dataItem", dataItem);
                 break;

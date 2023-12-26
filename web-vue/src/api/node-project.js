@@ -40,23 +40,6 @@ export function getRuningProjectInfo(params, noTip) {
 }
 
 /**
- *  获取副本 端口信息
- * @param {*} params
- * @returns
- */
-export function getRuningProjectCopyInfo(params) {
-  return axios({
-    url: "/node/manage/getProjectCopyPort",
-    method: "post",
-    data: params,
-    timeout: 0,
-    headers: {
-      loading: "no",
-    },
-  });
-}
-
-/**
  * 获取单个项目信息
  * @param {
  *  nodeId: 节点 ID
@@ -95,13 +78,9 @@ export function getProjectAccessList(nodeId) {
  *  group: 分组名称
  *  ...
  * }
- * @param {JSON} replicaParams {
- *  javaCopyIds: 副本 xx1,xx2
- *  jvm_xxn: 副本 n JVM 参数
- *  args_xxn: 副本 n args 参数
- * }
+
  */
-export function editProject(params, replicaParams) {
+export function editProject(params) {
   const data = {
     nodeId: params.nodeId,
     id: params.id,
@@ -119,7 +98,6 @@ export function editProject(params, replicaParams) {
     logPath: params.logPath,
     autoStart: params.autoStart,
     dslContent: params.dslContent,
-    ...replicaParams,
   };
   return axios({
     url: "/node/manage/saveProject",
@@ -133,7 +111,7 @@ export function editProject(params, replicaParams) {
  * @param {
  *  nodeId: 节点 ID
  *  id: 项目 ID
- *  copyId: copyId
+
  * } params
  */
 export function deleteProject(params) {
@@ -289,38 +267,11 @@ export function deleteProjectFile(params) {
 }
 
 /**
- * 项目回收列表
- * @param {String} nodeId 节点 ID
- */
-export function getRecoverList(nodeId) {
-  return axios({
-    url: "/node/manage/recover/recover-list",
-    method: "post",
-    data: { nodeId },
-  });
-}
-
-/**
- * 获取回收项目信息
- * @param {
- *  nodeId: 节点 ID
- *  id: 项目 ID
- * } params
- */
-export function getRecoverData(params) {
-  return axios({
-    url: "/node/manage/recover/data.json",
-    method: "post",
-    data: params,
-  });
-}
-
-/**
  * 获取项目日志文件大小
  * @param {
  *  nodeId: 节点 ID
  *  id: 项目 ID
- *  copyId: copyId
+
  * } params
  */
 export function getProjectLogSize(params) {
@@ -339,7 +290,7 @@ export function getProjectLogSize(params) {
  * @param {
  *  nodeId: 节点 ID
  *  id: 项目 ID
- *  copyId: copyId
+
  * } params
  */
 export function downloadProjectLogFile(params) {
@@ -366,7 +317,7 @@ export function getLogBackList(params) {
  * @param {
  *  nodeId: 节点 ID
  *  id: 项目 ID
- *  copyId: copyId
+
  *  key: 文件名
  * } params
  */
@@ -379,7 +330,7 @@ export function downloadProjectLogBackFile(params) {
  * @param {
  *  nodeId: 节点 ID
  *  id: 项目 ID
- *  copyId: copyId
+
  *  name: 文件名
  * } params
  */
@@ -396,7 +347,7 @@ export function deleteProjectLogBackFile(params) {
  * @param {
  *  nodeId: 节点 ID
  *  tag: 项目 ID
- *  copyId: copyId
+
  * } params
  */
 export function getInternalData(params) {
@@ -428,7 +379,6 @@ export function getInternalData(params) {
 //  * @param {
 //  *  nodeId: 节点 ID
 //  *  tag: 项目 ID
-//  *  copyId: copyId
 //  * } params
 //  */
 // export function exportStack(params) {
@@ -446,7 +396,6 @@ export function getInternalData(params) {
 //  * @param {
 //  *  nodeId: 节点 ID
 //  *  tag: 项目 ID
-//  *  copyId: copyId
 //  * } params
 //  */
 // export function exportRam(params) {
@@ -458,21 +407,6 @@ export function getInternalData(params) {
 //     params,
 //   });
 // }
-
-/**
- * 加载副本集
- * @param {
- *  nodeId: 节点 ID
- *  id: 项目 ID
- * } params
- */
-export function getProjectReplicaList(params) {
-  return axios({
-    url: "/node/manage/project_copy_list",
-    method: "post",
-    data: params,
-  });
-}
 
 // /**
 //  * 查询节点目录是否存在
@@ -497,7 +431,6 @@ export function getProjectReplicaList(params) {
  * @param {
  *  nodeId: 节点 ID,
  *  id: 项目id
- *  copyId: 副本id
  * } params
  */
 export function restartProject(params) {
@@ -517,7 +450,6 @@ export function restartProject(params) {
  * @param {
  *  nodeId: 节点 ID,
  *  id: 项目id
- *  copyId: 副本id
  * } params
  */
 export function startProject(params) {
@@ -537,7 +469,6 @@ export function startProject(params) {
  * @param {
  *  nodeId: 节点 ID,
  *  id: 项目id
- *  copyId: 副本id
  * } params
  */
 export function stopProject(params) {

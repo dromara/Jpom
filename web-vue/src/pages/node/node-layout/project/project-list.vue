@@ -3,16 +3,13 @@
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
-      :expandIconColumnIndex="-1"
-      :expandIconAsCell="false"
-      :expandedRowKeys="expandedRowKeys"
       size="middle"
       :columns="columns"
       :pagination="pagination"
       @change="
         (pagination, filters, sorter) => {
           this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
-          this.expandedRowKeys = [];
+
           this.loadData();
         }
       "
@@ -68,17 +65,7 @@
           </a-tooltip>
         </a-space>
       </template>
-      <template slot="copyIcon" slot-scope="javaCopyItemList, record">
-        <template v-if="javaCopyItemList">
-          <div v-if="!expandedRowKeys.includes(record.id)" class="ant-table-row-expand-icon ant-table-row-collapsed" @click="handleExpand(record, true)"></div>
-          <div v-else class="ant-table-row-expand-icon ant-table-row-expanded" @click="handleExpand(record, false)"></div>
-        </template>
-        <template v-else>
-          <a-tooltip title="当项目存在副本集时此列将可以用于查看副本集功能，其他情况此列没有实际作用">
-            <a-icon type="minus-circle" />
-          </a-tooltip>
-        </template>
-      </template>
+
       <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="`名称：${text}`" @click="handleEdit(record)">
         <a-button type="link" style="padding: 0" size="small"><a-icon v-if="record.outGivingProject" type="apartment" />{{ text }} </a-button>
       </a-tooltip>
@@ -106,26 +93,6 @@
       <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${(record.pids || [record.pid || '-']).join(',')} / 端口号：${record.port || '-'}`">
         <span>{{ record.port || "-" }}/{{ (record.pids || [record.pid || "-"]).join(",") }}</span>
       </a-tooltip>
-
-      <template slot="expandedRowRender" slot-scope="record">
-        <a-table :columns="copyColumns" :data-source="record.javaCopyItemList" rowKey="id" :pagination="false">
-          <template slot="id" slot-scope="text">
-            {{ text }}
-            <a-icon type="reload" @click="getRuningProjectCopyInfo(record)" />
-          </template>
-          <template slot="name" slot-scope="text, record">
-            {{ text || record.id }}
-          </template>
-          <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关" />
-          <template slot="operation" slot-scope="text, copyRecord">
-            <a-space>
-              <a-button size="small" type="primary" @click="handleConsoleCopy(record, copyRecord)">控制台</a-button>
-              <a-button size="small" type="primary" @click="handleLogBack(record, copyRecord)">日志</a-button>
-              <a-button size="small" type="danger" @click="handleDeleteCopy(record, copyRecord, 'thorough')">删除</a-button>
-            </a-space>
-          </template>
-        </a-table>
-      </template>
 
       <template slot="operation" slot-scope="text, record">
         <a-space>
@@ -197,6 +164,7 @@
             loadData();
           }
         "
+        :data="temp"
         :nodeId="temp.nodeId"
         :projectId="temp.id"
       />
@@ -215,17 +183,13 @@
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer destroyOnClose :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <console v-if="drawerConsoleVisible" :nodeId="node.id" :id="temp.id" :projectId="temp.projectId" :replica="replicaTemp" :copyId="replicaTemp ? replicaTemp.id : ''" @goFile="goFile" />
+      <console v-if="drawerConsoleVisible" :nodeId="node.id" :id="temp.id" :projectId="temp.projectId" :replica="replicaTemp" @goFile="goFile" />
     </a-drawer>
     <!-- 项目跟踪文件组件 -->
     <a-drawer destroyOnClose :title="drawerTitle" placement="right" width="85vw" :visible="drawerReadFileVisible" @close="onReadFileClose">
       <file-read v-if="drawerReadFileVisible" :nodeId="node.id" :readFilePath="temp.readFilePath" :id="temp.id" :projectId="temp.projectId" @goFile="goFile" />
     </a-drawer>
 
-    <!-- 项目副本集组件 -->
-    <!-- <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerReplicaVisible" @close="onReplicaClose">
-      <replica v-if="drawerReplicaVisible" :node="node" :project="temp" />
-    </a-drawer> -->
     <!-- 批量操作状态 -->
     <a-modal destroyOnClose v-model="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
       <a-list bordered :data-source="selectedRows">
@@ -239,7 +203,7 @@
     </a-modal>
     <!-- 日志备份 -->
     <a-modal destroyOnClose v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
-      <ProjectLog v-if="lobbackVisible" :nodeId="node.id" :copyId="temp.copyItem && temp.copyItem.id" :projectId="temp.projectId"></ProjectLog>
+      <ProjectLog v-if="lobbackVisible" :nodeId="node.id" :projectId="temp.projectId"></ProjectLog>
     </a-modal>
   </div>
 </template>
@@ -256,7 +220,6 @@ import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_
 import {
   deleteProject,
   getProjectList,
-  getRuningProjectCopyInfo,
   getRuningProjectInfo,
   javaModes,
   // nodeJudgeLibExist,
@@ -315,19 +278,7 @@ export default {
       batchVisible: false,
       batchTitle: "",
 
-      copyColumns: [
-        { title: "编号", dataIndex: "id", width: "80px", ellipsis: true, scopedSlots: { customRender: "id" } },
-        { title: "名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "进程 ID", dataIndex: "pid", width: 100, ellipsis: true, scopedSlots: { customRender: "pid" } },
-        { title: "端口号", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "最后修改时间", dataIndex: "modifyTime", width: "180px", ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: "150px" },
-      ],
-
-      expandedRowKeys: [],
       lobbackVisible: false,
-      showJavaCopyItemList: false,
     };
   },
   computed: {
@@ -364,9 +315,8 @@ export default {
         },
         { title: "修改时间", sorter: true, dataIndex: "modifyTimeMillis", width: "170px", ellipsis: true, customRender: (text) => parseTime(text) },
       ];
-      this.showJavaCopyItemList && columns.unshift({ title: "", dataIndex: "javaCopyItemList", align: "center", width: "40px", scopedSlots: { customRender: "copyIcon" } });
-      !(this.expandedRowKeys && this.expandedRowKeys.length) &&
-        columns.push({ title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, fixed: "right", align: "center", width: "180px" });
+
+      columns.push({ title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, fixed: "right", align: "center", width: "180px" });
       return columns;
     },
     filePath() {
@@ -416,22 +366,8 @@ export default {
           // 如果运行模式是文件，则无需批量启动/重启/关闭
           let tempList = resultList.filter((item) => item.runMode !== "File");
           let fileList = resultList.filter((item) => item.runMode === "File");
-          this.list = tempList.concat(fileList).map((item) => {
-            //  javaCopyItemList
-            let javaCopyItemList = null;
-            if (item.javaCopyItemList) {
-              try {
-                javaCopyItemList = JSON.parse(item.javaCopyItemList);
-                javaCopyItemList = javaCopyItemList.length ? javaCopyItemList : null;
-              } catch (error) {
-                //
-              }
-            }
-            return { ...item, javaCopyItemList: javaCopyItemList };
-          });
-          this.showJavaCopyItemList = !!this.list.find((item) => {
-            return !!item.javaCopyItemList;
-          });
+          this.list = tempList.concat(fileList);
+
           // // 项目ID 字段更新
           // this.list = this.list.map((element) => {
           //   //element.dataId = element.id;
@@ -473,7 +409,6 @@ export default {
               }
             });
             //
-            this.expandedRowKeys = [];
           }
           this.loadGroupList();
         }
@@ -495,9 +430,8 @@ export default {
       delete temp.id;
       delete temp.createTimeMillis;
       delete temp.outGivingProject;
-      this.temp = { ...temp, name: temp.name + "副本", id: temp.projectId + "_copy", javaCopyItemList: [], lib: temp.lib + "_copy" };
+      this.temp = { ...temp, name: temp.name + "副本", id: temp.projectId + "_copy", lib: temp.lib + "_copy" };
 
-      this.loadAccesList();
       this.editProjectVisible = true;
     },
     // 编辑
@@ -529,31 +463,13 @@ export default {
       this.drawerConsoleVisible = true;
       this.replicaTemp = null;
     },
-    // 副本控制台
-    handleConsoleCopy(record, copyItem) {
-      this.checkRecord = record;
-      this.temp = Object.assign({}, record);
-      this.drawerTitle = `控制台(${this.temp.name})-${copyItem.id}`;
-      this.drawerConsoleVisible = true;
-      this.replicaTemp = copyItem;
-      // console.log(record, copyItem);
-    },
+
     // 关闭控制台
     onConsoleClose() {
       this.drawerConsoleVisible = false;
       this.loadData();
     },
 
-    // // 副本集
-    // handleReplica(record) {
-    //   this.temp = Object.assign({}, record);
-    //   this.drawerTitle = `副本集(${this.temp.name})`;
-    //   this.drawerReplicaVisible = true;
-    // },
-    // 关闭副本集
-    // onReplicaClose() {
-    //   this.drawerReplicaVisible = false;
-    // },
     // 删除
     handleDelete(record, thorough) {
       this.$confirm({
@@ -787,57 +703,6 @@ export default {
       }
     },
 
-    // 折叠事件
-    handleExpand(item, status) {
-      //javaCopyItemList
-      if (status) {
-        this.expandedRowKeys.push(item.id);
-        this.getRuningProjectCopyInfo(item);
-      } else {
-        this.expandedRowKeys = this.expandedRowKeys.filter((item2) => item2 !== item.id);
-      }
-    },
-    // 获取副本信息
-    getRuningProjectCopyInfo(project) {
-      const ids = project.javaCopyItemList.map((item) => item.id);
-      const tempParams = {
-        nodeId: this.node.id,
-        id: project.projectId,
-        copyIds: JSON.stringify(ids),
-      };
-
-      getRuningProjectCopyInfo(tempParams).then((res) => {
-        if (res.code === 200) {
-          this.list = this.list.map((item) => {
-            let javaCopyItemList = item.javaCopyItemList;
-            if (javaCopyItemList && item.projectId === project.projectId) {
-              javaCopyItemList = javaCopyItemList.map((copyItem) => {
-                if (res.data[copyItem.id]) {
-                  // element.port = res.data[element.id].port;
-                  // element.pid = res.data[element.id].pid;
-                  // element.status = true;
-
-                  return {
-                    ...copyItem,
-                    status: res.data[copyItem.id].pid > 0,
-                    pid: res.data[copyItem.id].pid,
-                    pids: res.data[copyItem.id].pids,
-                    port: res.data[copyItem.id].port,
-                    error: res.data[copyItem.id].error,
-                  };
-                }
-                return copyItem;
-              });
-            }
-            return { ...item, javaCopyItemList: javaCopyItemList };
-          });
-
-          this.list = this.list.map((element) => {
-            return element;
-          });
-        }
-      });
-    },
     // 删除
     handleDeleteCopy(project, record, thorough) {
       this.$confirm({
@@ -850,7 +715,7 @@ export default {
           const params = {
             nodeId: this.node.id,
             id: project.projectId,
-            copyId: record.id,
+
             thorough: thorough,
           };
           deleteProject(params).then((res) => {
@@ -859,16 +724,7 @@ export default {
                 message: res.msg,
               });
 
-              this.list = this.list.map((item) => {
-                let javaCopyItemList = item.javaCopyItemList;
-                if (javaCopyItemList) {
-                  javaCopyItemList = javaCopyItemList.filter((item2) => {
-                    return item2.id !== record.id;
-                  });
-                }
-                return { ...item, javaCopyItemList: javaCopyItemList };
-              });
-              // this.loadData();
+              this.loadData();
             }
           });
         },
@@ -935,8 +791,8 @@ export default {
       });
     },
     // 日志备份列表
-    handleLogBack(record, copyItem) {
-      this.temp = Object.assign({}, record, { copyItem: copyItem });
+    handleLogBack(record) {
+      this.temp = Object.assign({}, record);
       this.lobbackVisible = true;
     },
   },

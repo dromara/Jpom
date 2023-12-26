@@ -50,7 +50,7 @@ public class ConsoleHandler extends BaseProxyHandler {
 
     @Override
     protected Object[] getParameters(Map<String, Object> attributes) {
-        return new Object[]{"projectId", attributes.get("projectId"), "copyId", attributes.get("copyId")};
+        return new Object[]{"projectId", attributes.get("projectId")};
     }
 
     @Override

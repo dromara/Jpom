@@ -1,18 +1,5 @@
 <template>
   <div>
-    <!-- <div ref="filter" class="filter"> -->
-    <!-- <template v-if="copyId">
-        <a-space>
-          <a-button :disabled="replicaStatus" :loading="optButtonLoading" type="primary" @click="start">启动</a-button>
-          <a-button :disabled="!replicaStatus" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
-          <a-button :disabled="!replicaStatus" :loading="optButtonLoading" type="danger" @click="stop">停止</a-button>
-          <a-button type="primary" @click="handleDownload">导出日志</a-button>
-          <a-tag color="#87d068">文件大小: {{ project.logSize }}</a-tag>
-          <a-switch checked-children="自动滚动" un-checked-children="关闭滚动" v-model="logScroll" />
-        </a-space>
-      </template> -->
-    <!-- <template> </template> -->
-    <!-- </div> -->
     <!-- console -->
     <log-view :ref="`logView`" height="calc(100vh - 140px)">
       <template slot="before">
@@ -21,7 +8,7 @@
           <a-button size="small" :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
           <a-button size="small" :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="stop">停止</a-button>
 
-          <a-button size="small" v-if="!copyId" type="primary" @click="goFile">文件管理</a-button>
+          <a-button size="small" type="primary" @click="goFile">文件管理</a-button>
 
           <a-dropdown>
             <!-- <a type="link" class="ant-dropdown-link"> 更多<a-icon type="down" /> </a> -->
@@ -54,7 +41,7 @@
     </log-view>
     <!-- 日志备份 -->
     <a-modal destroyOnClose v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
-      <ProjectLog v-if="lobbackVisible" :nodeId="this.nodeId" :copyId="this.copyId" :projectId="this.projectId"></ProjectLog>
+      <ProjectLog v-if="lobbackVisible" :nodeId="this.nodeId" :projectId="this.projectId"></ProjectLog>
     </a-modal>
   </div>
 </template>
@@ -80,9 +67,6 @@ export default {
     id: {
       type: String,
     },
-    copyId: {
-      type: String,
-    },
   },
   data() {
     return {
@@ -99,7 +83,7 @@ export default {
   computed: {
     ...mapGetters(["getLongTermToken", "getWorkspaceId"]),
     socketUrl() {
-      return getWebSocketUrl("/socket/console", `userId=${this.getLongTermToken}&id=${this.id}&nodeId=${this.nodeId}&type=console&copyId=${this.copyId || ""}&workspaceId=${this.getWorkspaceId}`);
+      return getWebSocketUrl("/socket/console", `userId=${this.getLongTermToken}&id=${this.id}&nodeId=${this.nodeId}&type=console&workspaceId=${this.getWorkspaceId}`);
     },
   },
   mounted() {
@@ -128,22 +112,7 @@ export default {
       getProjectData(params).then((res) => {
         if (res.code === 200) {
           this.project = { ...this.project, ...res.data };
-          if (this.copyId) {
-            if (this.project.javaCopyItemList) {
-              const finds = this.project.javaCopyItemList.filter((item) => item.id === this.copyId);
-              if (finds.length) {
-                this.project = { ...this.project, log: finds[0].log, logBack: finds[0].logBack };
-              } else {
-                this.$notification.error({
-                  message: "没有找到副本",
-                });
-              }
-            } else {
-              this.$notification.error({
-                message: "没有副本",
-              });
-            }
-          }
+
           // 加载日志文件大小
           this.loadFileSize();
         }
@@ -211,7 +180,6 @@ export default {
       const data = {
         op: op,
         projectId: this.projectId,
-        copyId: this.copyId,
       };
       this.socket.send(JSON.stringify(data));
       if (op === "stop" || op === "start" || op === "restart") {
@@ -224,7 +192,6 @@ export default {
       const params = {
         nodeId: this.nodeId,
         id: this.projectId,
-        copyId: this.copyId,
       };
       getProjectLogSize(params).then((res) => {
         if (res.code === 200) {

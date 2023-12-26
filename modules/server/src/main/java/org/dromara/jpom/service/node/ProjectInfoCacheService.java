@@ -22,7 +22,6 @@
  */
 package org.dromara.jpom.service.node;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -34,8 +33,6 @@ import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseNodeService;
 import org.dromara.jpom.service.system.WorkspaceService;
 import org.springframework.stereotype.Service;
-
-import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -100,23 +97,7 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoCacheMod
      * @return data
      */
     public JSONObject convertToRequestData(JSONObject item) {
-        JSONArray javaCopyItemList = item.getJSONArray("javaCopyItemList");
-        if (CollUtil.isNotEmpty(javaCopyItemList)) {
-            String javaCopyIds = javaCopyItemList.stream().map(o -> {
-                JSONObject javaCopyItem = (JSONObject) o;
-                String id = javaCopyItem.getString("id");
-                String name = javaCopyItem.getString("name");
-                String jvm = javaCopyItem.getString("jvm");
-                String args = javaCopyItem.getString("args");
-                //
-                item.put("jvm_" + id, jvm);
-                item.put("args_" + id, args);
-                item.put("name_" + id, name);
-                return id;
-            }).collect(Collectors.joining(","));
-            item.put("javaCopyIds", javaCopyIds);
-            item.remove("javaCopyItemList");
-        }
+
         return item;
     }
 

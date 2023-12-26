@@ -78,16 +78,14 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 return;
             }
             String projectId = super.getParameters(session, "projectId");
-            String copyId = super.getParameters(session, "copyId");
-            copyId = StrUtil.nullToDefault(copyId, StrUtil.EMPTY);
             // 判断项目
             if (!Const.SYSTEM_ID.equals(projectId)) {
-                NodeProjectInfoModel nodeProjectInfoModel = this.checkProject(projectId, copyId, session);
+                NodeProjectInfoModel nodeProjectInfoModel = this.checkProject(projectId, session);
                 if (nodeProjectInfoModel == null) {
                     return;
                 }
                 //
-                SocketSessionUtil.send(session, "连接成功：" + nodeProjectInfoModel.getName() + (StrUtil.isEmpty(copyId) ? StrUtil.EMPTY : StrUtil.AT + copyId));
+                SocketSessionUtil.send(session, "连接成功：" + nodeProjectInfoModel.getName());
             }
         } catch (Exception e) {
             log.error("socket 错误", e);
@@ -118,21 +116,12 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         return false;
     }
 
-    private NodeProjectInfoModel checkProject(String projectId, String copyId, Session session) throws IOException {
+    private NodeProjectInfoModel checkProject(String projectId, Session session) throws IOException {
         NodeProjectInfoModel nodeProjectInfoModel = projectInfoService.getItem(projectId);
         if (nodeProjectInfoModel == null) {
             SocketSessionUtil.send(session, "没有对应项目：" + projectId);
             session.close();
             return null;
-        }
-        // 判断副本集
-        if (StrUtil.isNotEmpty(copyId)) {
-            NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(copyId);
-            if (copyItem == null) {
-                SocketSessionUtil.send(session, "获取项目信息错误,没有对应副本：" + copyId);
-                session.close();
-                return null;
-            }
         }
         return nodeProjectInfoModel;
     }
@@ -146,17 +135,16 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             return;
         }
         String projectId = json.getString("projectId");
-        String copyId = json.getString("copyId");
-        NodeProjectInfoModel nodeProjectInfoModel = this.checkProject(projectId, copyId, session);
+        NodeProjectInfoModel nodeProjectInfoModel = this.checkProject(projectId, session);
         if (nodeProjectInfoModel == null) {
             return;
         }
-        runMsg(consoleCommandOp, session, nodeProjectInfoModel, copyId, json);
+        runMsg(consoleCommandOp, session, nodeProjectInfoModel, json);
     }
 
-    private void runMsg(ConsoleCommandOp consoleCommandOp, Session session, NodeProjectInfoModel nodeProjectInfoModel, String copyId, JSONObject reqJson) throws Exception {
+    private void runMsg(ConsoleCommandOp consoleCommandOp, Session session, NodeProjectInfoModel nodeProjectInfoModel, JSONObject reqJson) throws Exception {
         //
-        NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(copyId);
+
         JsonMessage<Object> resultData = null;
         CommandOpResult strResult;
         boolean logUser = false;
@@ -166,7 +154,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 case start:
                 case restart:
                     logUser = true;
-                    strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel, copyItem);
+                    strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel);
                     if (strResult.isSuccess()) {
                         resultData = new JsonMessage<>(200, "操作成功", strResult);
                     } else {
@@ -176,7 +164,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 case stop: {
                     logUser = true;
                     // 停止项目
-                    strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel, copyItem);
+                    strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel);
                     if (strResult.isSuccess()) {
                         resultData = new JsonMessage<>(200, "操作成功", strResult);
                     } else {
@@ -186,7 +174,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 }
                 case status: {
                     // 获取项目状态
-                    strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel, copyItem);
+                    strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel);
                     if (strResult.isSuccess()) {
                         resultData = new JsonMessage<>(200, "运行中", strResult);
                     } else {
@@ -200,7 +188,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                     if (StrUtil.isNotEmpty(search)) {
                         resultData = searchLog(session, nodeProjectInfoModel, reqJson);
                     } else {
-                        showLog(session, nodeProjectInfoModel, reqJson, copyItem);
+                        showLog(session, nodeProjectInfoModel, reqJson);
                     }
                     break;
                 }
@@ -288,12 +276,12 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         return null;
     }
 
-    private void showLog(Session session, NodeProjectInfoModel nodeProjectInfoModel, JSONObject reqJson, NodeProjectInfoModel.JavaCopyItem copyItem) throws IOException {
+    private void showLog(Session session, NodeProjectInfoModel nodeProjectInfoModel, JSONObject reqJson) throws IOException {
         //        日志文件路径
         String fileName = reqJson.getString("fileName");
         File file;
         if (StrUtil.isEmpty(fileName)) {
-            file = copyItem == null ? new File(nodeProjectInfoModel.getLog()) : nodeProjectInfoModel.getLog(copyItem);
+            file = new File(nodeProjectInfoModel.getLog());
         } else {
             file = FileUtil.file(nodeProjectInfoModel.allLib(), fileName);
         }

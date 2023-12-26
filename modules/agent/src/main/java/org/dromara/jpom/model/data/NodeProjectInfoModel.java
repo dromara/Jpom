@@ -27,7 +27,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.keepbx.jpom.model.BaseJsonModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.model.RunMode;
@@ -35,7 +34,10 @@ import org.dromara.jpom.system.JpomRuntimeException;
 import org.springframework.util.Assert;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -70,8 +72,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      * java main 方法参数
      */
     private String args;
-
-    private List<JavaCopyItem> javaCopyItemList;
     /**
      * WebHooks
      */
@@ -108,14 +108,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      * dsl 环境变量
      */
     private String dslEnv;
-
-    public List<JavaCopyItem> getJavaCopyItemList() {
-        return javaCopyItemList;
-    }
-
-    public void setJavaCopyItemList(List<JavaCopyItem> javaCopyItemList) {
-        this.javaCopyItemList = javaCopyItemList;
-    }
 
     public String getJavaExtDirsCp() {
         return StrUtil.emptyToDefault(javaExtDirsCp, StrUtil.EMPTY);
@@ -249,23 +241,10 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return StrUtil.emptyToDefault(this.log, StrUtil.EMPTY);
     }
 
-    /**
-     * 副本的控制台日志文件
-     *
-     * @param javaCopyItem 副本信息
-     * @return file
-     */
-    public File getLog(JavaCopyItem javaCopyItem) {
-        String log1 = getLog();
-        Assert.hasText(log1, "log path error");
-        File file = FileUtil.file(log1);
-        return FileUtil.file(file.getParentFile(), getId() + "_" + javaCopyItem.getId() + ".log");
-    }
-
-    public String getAbsoluteLog(JavaCopyItem javaCopyItem) {
+    public String getAbsoluteLog() {
         String pathname = getLog();
         Assert.hasText(pathname, "log path error");
-        File file = javaCopyItem == null ? new File(pathname) : getLog(javaCopyItem);
+        File file = new File(pathname);
         // auto create dir
         FileUtil.mkParentDirs(file);
         return file.getAbsolutePath();
@@ -275,10 +254,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         String log1 = getLog();
         Assert.hasText(log1, "log path error");
         return new File(log1 + "_back");
-    }
-
-    public File getLogBack(JavaCopyItem javaCopyItem) {
-        return new File(getLog(javaCopyItem) + "_back");
     }
 
     /**
@@ -292,33 +267,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
             return "";
         }
         return StrUtil.emptyToDefault(token, StrUtil.EMPTY);
-    }
-
-    public JavaCopyItem findCopyItem(String copyId) {
-        if (StrUtil.isEmpty(copyId)) {
-            return null;
-        }
-        List<JavaCopyItem> javaCopyItemList = getJavaCopyItemList();
-        if (CollUtil.isEmpty(javaCopyItemList)) {
-            return null;
-        }
-        Optional<JavaCopyItem> first = javaCopyItemList.stream().filter(javaCopyItem -> StrUtil.equals(javaCopyItem.getId(), copyId)).findFirst();
-        return first.orElse(null);
-    }
-
-    public boolean removeCopyItem(String copyId) {
-
-        if (StrUtil.isEmpty(copyId) || CollUtil.isEmpty(javaCopyItemList)) {
-            return true;
-        }
-        int size = javaCopyItemList.size();
-        List<JavaCopyItem> collect = javaCopyItemList.stream().filter(javaCopyItem -> !StrUtil.equals(javaCopyItem.getId(), copyId)).collect(Collectors.toList());
-        if (size - 1 == collect.size()) {
-            this.javaCopyItemList = collect;
-            return true;
-        } else {
-            return false;
-        }
     }
 
     public DslYmlDto dslConfig() {
@@ -353,77 +301,5 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         DslYmlDto build = dslConfig();
         Assert.notNull(build, "yml 还未配置");
         return build.runProcess(opt);
-    }
-
-    @EqualsAndHashCode(callSuper = true)
-    @Data
-    public static class JavaCopyItem extends BaseJsonModel {
-        /**
-         * 名称
-         */
-        private String name;
-        private String parentId;
-        /**
-         * id
-         */
-        private String id;
-
-        /**
-         * jvm 参数
-         */
-        private String jvm;
-        /**
-         * java main 方法参数
-         */
-        private String args;
-
-        private String modifyTime;
-
-        /**
-         * 日志
-         */
-        private String log;
-
-        /**
-         * 日志备份
-         */
-        private String logBack;
-
-        public String getTagId() {
-            return getTagId(this.getParentId(), id);
-        }
-
-        /**
-         * 创建进程标记
-         *
-         * @param id     父级项目ID
-         * @param copyId 副本ID
-         * @return 运行ID
-         */
-        public static String getTagId(String id, String copyId) {
-            if (StrUtil.isEmpty(copyId)) {
-                return id;
-            }
-            return StrUtil.format("{}:{}", id, copyId);
-        }
-
-        /**
-         * 请勿随意修改此方法，用户判断副本是否相同（编辑接口需要使用到）
-         *
-         * @param o 尝试
-         * @return bool
-         */
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            JavaCopyItem that = (JavaCopyItem) o;
-            return Objects.equals(parentId, that.parentId) &&
-                Objects.equals(id, that.id);
-        }
     }
 }

@@ -43,8 +43,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 /**
  * 项目文件管理
  *
@@ -76,27 +74,12 @@ public class ProjectStatusController extends BaseAgentController {
         try {
             CommandUtil.openCache();
             try {
-                CommandOpResult status = AbstractProjectCommander.getInstance().status(nodeProjectInfoModel, null);
+                CommandOpResult status = AbstractProjectCommander.getInstance().status(nodeProjectInfoModel);
                 jsonObject.put("pId", status.getPid());
                 jsonObject.put("pIds", status.getPids());
                 jsonObject.put("statusMsg", status.getStatusMsg());
             } catch (Exception e) {
                 log.error("获取项目pid 失败", e);
-            }
-            //
-            if (StrUtil.isNotEmpty(getCopy)) {
-                List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
-                JSONArray copys = new JSONArray();
-                if (javaCopyItemList != null) {
-                    for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
-                        JSONObject jsonObject1 = new JSONObject();
-                        jsonObject1.put("copyId", javaCopyItem.getId());
-                        boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, javaCopyItem);
-                        jsonObject1.put("status", run);
-                        copys.add(jsonObject1);
-                    }
-                }
-                jsonObject.put("copys", copys);
             }
         } finally {
             CommandUtil.closeCache();
@@ -123,7 +106,7 @@ public class ProjectStatusController extends BaseAgentController {
                 try {
                     NodeProjectInfoModel projectInfoServiceItem = projectInfoService.getItem(item);
                     itemObj.put("name", projectInfoServiceItem.getName());
-                    CommandOpResult commandOpResult = AbstractProjectCommander.getInstance().status(projectInfoServiceItem, null);
+                    CommandOpResult commandOpResult = AbstractProjectCommander.getInstance().status(projectInfoServiceItem);
                     int pid = commandOpResult.getPid();
                     //
                     itemObj.put("pid", pid);
@@ -148,60 +131,12 @@ public class ProjectStatusController extends BaseAgentController {
     }
 
 
-    /**
-     * 获取项目的运行端口
-     *
-     * @param id      项目id
-     * @param copyIds 副本 ids ["aa","ss"]
-     * @return obj
-     */
-    @RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> getProjectPort(String id, String copyIds) {
-        if (StrUtil.isEmpty(copyIds) || StrUtil.isEmpty(id)) {
-            return new JsonMessage<>(400, "参数异常");
-        }
-        NodeProjectInfoModel nodeProjectInfoModel = getProjectInfoModel();
-
-        JSONArray jsonArray = JSONArray.parseArray(copyIds);
-        JSONObject jsonObject = new JSONObject();
-
-        try {
-            CommandUtil.openCache();
-            for (Object object : jsonArray) {
-                String item = object.toString();
-                NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(item);
-                JSONObject itemObj = new JSONObject();
-                if (copyItem != null) {
-                    try {
-                        CommandOpResult status = AbstractProjectCommander.getInstance().status(nodeProjectInfoModel, copyItem);
-                        int pid = status.getPid();
-                        String port = AbstractProjectCommander.getInstance().getMainPort(pid);
-                        itemObj.put("port", port);
-                        itemObj.put("pid", pid);
-                        itemObj.put("pids", status.getPids());
-                        itemObj.put("statusMsg", status.getStatusMsg());
-                    } catch (Exception e) {
-                        log.error("获取端口错误", e);
-                        itemObj.put("error", e.getMessage());
-                    }
-                } else {
-                    itemObj.put("error", "对应的副本不存在");
-                }
-                jsonObject.put(item, itemObj);
-            }
-        } finally {
-            CommandUtil.closeCache();
-        }
-        return JsonMessage.success("", jsonObject);
-    }
-
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<CommandOpResult> restart(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
+    public IJsonMessage<CommandOpResult> restart(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id) {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
-        NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
         try {
-            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, item, copyItem);
+            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, item);
             // boolean status = AbstractProjectCommander.getInstance().isRun(item, copyItem);
 
             return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr(), result);
@@ -214,13 +149,12 @@ public class ProjectStatusController extends BaseAgentController {
 
 
     @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<CommandOpResult> stop(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
+    public IJsonMessage<CommandOpResult> stop(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id) {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
-        NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
 
         try {
-            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.stop, item, copyItem);
+            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.stop, item);
             return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr(), result);
         } catch (Exception e) {
             log.error("关闭项目异常", e);
@@ -230,13 +164,12 @@ public class ProjectStatusController extends BaseAgentController {
 
 
     @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<CommandOpResult> start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
+    public IJsonMessage<CommandOpResult> start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id) {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
-        NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
 
         try {
-            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.start, item, copyItem);
+            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.start, item);
             return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr(), result);
         } catch (Exception e) {
             log.error("获取项目pid 失败", e);

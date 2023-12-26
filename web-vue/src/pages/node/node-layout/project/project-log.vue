@@ -42,9 +42,6 @@ export default {
     projectId: {
       type: String,
     },
-    copyId: {
-      type: String,
-    },
   },
   data() {
     return {
@@ -69,7 +66,6 @@ export default {
       const params = {
         nodeId: this.nodeId,
         id: this.projectId,
-        copyId: this.copyId,
       };
       getProjectLogSize(params).then((res) => {
         if (res.code === 200) {
@@ -82,7 +78,6 @@ export default {
       const params = {
         nodeId: this.nodeId,
         id: this.projectId,
-        copyId: this.copyId,
       };
       getLogBackList(params).then((res) => {
         if (res.code === 200) {
@@ -101,7 +96,6 @@ export default {
       const params = {
         nodeId: this.nodeId,
         id: this.projectId,
-        copyId: this.copyId,
       };
       // 请求接口拿到 blob
       window.open(downloadProjectLogFile(params), "_blank");
@@ -115,7 +109,7 @@ export default {
       const params = {
         nodeId: this.nodeId,
         id: this.projectId,
-        copyId: this.copyId,
+
         key: record.filename,
       };
       // 请求接口拿到 blob
@@ -133,7 +127,7 @@ export default {
           const params = {
             nodeId: this.nodeId,
             id: this.projectId,
-            copyId: this.copyId,
+
             name: record.filename,
           };
           // 删除

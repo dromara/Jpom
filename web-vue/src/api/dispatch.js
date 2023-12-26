@@ -74,10 +74,7 @@ export function editDispatch(params) {
  *  whitelistDirectory: 白名单地址
  *  lib: lib
  *  add_xxx: xxx 表示添加的节点信息
- *  xxx_token: xxx 节点的 webhook 地址
- *  xxx_jvm: jvm 参数
- *  xxx_args: args 参数
- *  xxx_javaCopyIds: xxx 节点副本 ID （如果有副本，还需要加上 xxx_jvm_${副本ID} | xxx_args_${副本ID} 参数）
+
  * } params
  */
 export function editDispatchProject(params) {

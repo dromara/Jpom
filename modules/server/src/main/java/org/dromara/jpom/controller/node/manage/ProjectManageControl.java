@@ -173,24 +173,24 @@ public class ProjectManageControl extends BaseServerController {
     @PostMapping(value = "deleteProject", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id,
-                                              String copyId,
+
                                               HttpServletRequest request) {
         NodeModel nodeModel = getNode();
-        if (StrUtil.isEmpty(copyId)) {
-            // 检查节点分发
-            outGivingServer.checkNodeProject(nodeModel.getId(), id, request, "当前项目存在节点分发，不能直接删除");
-            // 检查日志阅读
-            logReadServer.checkNodeProject(nodeModel.getId(), id, request, "当前项目存在日志阅读，不能直接删除");
-            // 项目监控
-            List<MonitorModel> monitorModels = monitorService.listByWorkspace(request);
-            if (monitorModels != null) {
-                boolean match = monitorModels.stream().anyMatch(monitorModel -> monitorModel.checkNodeProject(nodeModel.getId(), id));
-                Assert.state(!match, "当前项目存在监控项，不能直接删除");
-            }
-            // 构建
-            boolean releaseMethod = buildService.checkReleaseMethod(nodeModel.getId() + StrUtil.COLON + id, request, BuildReleaseMethod.Project);
-            Assert.state(!releaseMethod, "当前项目存在构建项，不能直接删除");
+
+        // 检查节点分发
+        outGivingServer.checkNodeProject(nodeModel.getId(), id, request, "当前项目存在节点分发，不能直接删除");
+        // 检查日志阅读
+        logReadServer.checkNodeProject(nodeModel.getId(), id, request, "当前项目存在日志阅读，不能直接删除");
+        // 项目监控
+        List<MonitorModel> monitorModels = monitorService.listByWorkspace(request);
+        if (monitorModels != null) {
+            boolean match = monitorModels.stream().anyMatch(monitorModel -> monitorModel.checkNodeProject(nodeModel.getId(), id));
+            Assert.state(!match, "当前项目存在监控项，不能直接删除");
         }
+        // 构建
+        boolean releaseMethod = buildService.checkReleaseMethod(nodeModel.getId() + StrUtil.COLON + id, request, BuildReleaseMethod.Project);
+        Assert.state(!releaseMethod, "当前项目存在构建项，不能直接删除");
+
         JsonMessage<String> jsonMessage = NodeForward.request(nodeModel, request, NodeUrl.Manage_DeleteProject);
         if (jsonMessage.success()) {
             //
@@ -372,7 +372,7 @@ public class ProjectManageControl extends BaseServerController {
     /**
      * 重启项目
      * <p>
-     * nodeId,id,copyId
+     * nodeId,id
      *
      * @return json
      */
@@ -387,7 +387,7 @@ public class ProjectManageControl extends BaseServerController {
     /**
      * 启动项目
      * <p>
-     * nodeId,id,copyId
+     * nodeId,id
      *
      * @return json
      */
@@ -402,7 +402,7 @@ public class ProjectManageControl extends BaseServerController {
     /**
      * 关闭项目项目
      * <p>
-     * nodeId,id,copyId
+     * nodeId,id
      *
      * @return json
      */

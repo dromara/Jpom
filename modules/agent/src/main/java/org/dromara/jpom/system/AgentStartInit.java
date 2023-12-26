@@ -99,23 +99,16 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
                 if (list == null) {
                     return;
                 }
-                list.forEach(projectInfoModel -> {
-                    checkProject(projectInfoModel, null);
-                    //
-                    List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = projectInfoModel.getJavaCopyItemList();
-                    if (javaCopyItemList == null) {
-                        return;
-                    }
-                    javaCopyItemList.forEach(javaCopyItem -> checkProject(projectInfoModel, javaCopyItem));
-                });
+                //
+                list.forEach(this::checkProject);
             } catch (Exception e) {
                 log.error("定时备份日志失败", e);
             }
         });
     }
 
-    private void checkProject(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
-        File file = javaCopyItem == null ? new File(nodeProjectInfoModel.getLog()) : nodeProjectInfoModel.getLog(javaCopyItem);
+    private void checkProject(NodeProjectInfoModel nodeProjectInfoModel) {
+        File file = new File(nodeProjectInfoModel.getLog());
         if (!file.exists()) {
             return;
         }
@@ -125,13 +118,13 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
         long len = file.length();
         if (len > autoBackSize.toBytes()) {
             try {
-                AbstractProjectCommander.getInstance().backLog(nodeProjectInfoModel, javaCopyItem);
+                AbstractProjectCommander.getInstance().backLog(nodeProjectInfoModel);
             } catch (Exception e) {
                 log.warn("auto back log", e);
             }
         }
         // 清理过期的文件
-        File logFile = javaCopyItem == null ? nodeProjectInfoModel.getLogBack() : nodeProjectInfoModel.getLogBack(javaCopyItem);
+        File logFile = nodeProjectInfoModel.getLogBack();
         DateTime nowTime = DateTime.now();
         List<File> files = FileUtil.loopFiles(logFile, pathname -> {
             DateTime dateTime = DateUtil.date(pathname.lastModified());
@@ -180,16 +173,8 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
             AbstractProjectCommander instance = AbstractProjectCommander.getInstance();
             for (NodeProjectInfoModel nodeProjectInfoModel : finalList) {
                 try {
-                    if (!instance.isRun(nodeProjectInfoModel, null)) {
-                        instance.start(nodeProjectInfoModel, null);
-                    }
-                    List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
-                    if (javaCopyItemList != null) {
-                        for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
-                            if (!instance.isRun(nodeProjectInfoModel, javaCopyItem)) {
-                                instance.start(nodeProjectInfoModel, javaCopyItem);
-                            }
-                        }
+                    if (!instance.isRun(nodeProjectInfoModel)) {
+                        instance.start(nodeProjectInfoModel);
                     }
                 } catch (Exception e) {
                     log.warn("自动启动项目失败：{} {}", nodeProjectInfoModel.getId(), e.getMessage());

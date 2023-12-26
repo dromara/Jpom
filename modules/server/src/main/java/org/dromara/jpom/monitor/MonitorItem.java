@@ -123,7 +123,7 @@ public class MonitorItem implements Task {
                     JSONObject jsonObject = jsonMessage.getData();
                     int pid = jsonObject.getIntValue("pId");
                     String statusMsg = jsonObject.getString("statusMsg");
-                    boolean runStatus = this.checkNotify(monitorModel, nodeModel, id, null, pid > 0, statusMsg);
+                    boolean runStatus = this.checkNotify(monitorModel, nodeModel, id, pid > 0, statusMsg);
                     // 检查副本
                     List<Boolean> booleanList = null;
                     JSONArray copys = jsonObject.getJSONArray("copys");
@@ -131,9 +131,9 @@ public class MonitorItem implements Task {
                         booleanList = copys.stream()
                             .map(o -> {
                                 JSONObject jsonObject1 = (JSONObject) o;
-                                String copyId = jsonObject1.getString("copyId");
+
                                 boolean status = jsonObject1.getBooleanValue("status");
-                                return MonitorItem.this.checkNotify(monitorModel, nodeModel, id, copyId, status, StrUtil.EMPTY);
+                                return MonitorItem.this.checkNotify(monitorModel, nodeModel, id, status, StrUtil.EMPTY);
                             })
                             .filter(aBoolean -> !aBoolean)
                             .collect(Collectors.toList());
@@ -175,18 +175,12 @@ public class MonitorItem implements Task {
      * @param monitorModel 监控信息
      * @param nodeModel    节点信息
      * @param id           项目id
-     * @param copyId       副本id
      * @param runStatus    当前运行状态
      */
-    private boolean checkNotify(MonitorModel monitorModel, NodeModel nodeModel, String id, String copyId, boolean runStatus, String statusMsg) {
+    private boolean checkNotify(MonitorModel monitorModel, NodeModel nodeModel, String id, boolean runStatus, String statusMsg) {
         // 获取上次状态
-        String projectCopyId = id;
         String copyMsg = StrUtil.EMPTY;
-        if (StrUtil.isNotEmpty(copyId)) {
-            projectCopyId = StrUtil.format("{}:{}", id, copyId);
-            copyMsg = StrUtil.format("副本：{}", copyId);
-        }
-        boolean pre = this.getPreStatus(monitorModel.getId(), nodeModel.getId(), projectCopyId);
+        boolean pre = this.getPreStatus(monitorModel.getId(), nodeModel.getId(), id);
         String title = null;
         String context = null;
         //查询项目运行状态
@@ -201,7 +195,7 @@ public class MonitorItem implements Task {
             if (monitorModel.autoRestart()) {
                 // 执行重启
                 try {
-                    JsonMessage<String> reJson = NodeForward.request(nodeModel, NodeUrl.Manage_Restart, "id", id, "copyId", copyId);
+                    JsonMessage<String> reJson = NodeForward.request(nodeModel, NodeUrl.Manage_Restart, "id", id);
                     if (reJson.success()) {
                         // 重启成功
                         runStatus = true;
