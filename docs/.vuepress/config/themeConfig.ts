@@ -37,9 +37,9 @@ export default <VdoingThemeConfig>{
   categoryText: "随笔", // 碎片化文章（_posts文件夹的文章）预设生成的分类值，默认'随笔'
 
   // pageStyle: 'card', // 页面风格，card 时背景显示灰色衬托出卡片样式，line 时背景显示纯色，并且部分模块带线条边框（未设置 bodyBgImg 时才生效），默认 card
-  defaultMode: "auto", // 默认主题外观模式，用户未在页面手动修改过模式时才生效，否则以用户设置的模式为准，可选值：'auto' | 'light' | 'dark' | 'read'
+  //defaultMode: "auto", // 默认主题外观模式，用户未在页面手动修改过模式时才生效，否则以用户设置的模式为准，可选值：'auto' | 'light' | 'dark' | 'read'
 
-  // bodyBgImg: "/img/index/bg.jpg",
+//   bodyBgImg: "/images/index-bg.png",
   // bodyBgImg: [
   //   'https://cdn.staticaly.com/gh/xugaoyi/image_store@master/blog/20200507175828.jpeg',
   //   'https://cdn.staticaly.com/gh/xugaoyi/image_store@master/blog/20200507175845.jpeg',
