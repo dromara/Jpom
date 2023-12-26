@@ -6,7 +6,7 @@
     <a-table v-else :data-source="projList" :columns="columns" size="middle" bordered :pagination="pagination" @change="changePage" :row-selection="rowSelection" :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+          <a-select v-if="!nodeId" v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
           <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="search-input-item" @change="getNodeProjectData">
@@ -42,6 +42,18 @@
           </a-tooltip>
 
           <a-button type="primary" @click="openAdd">创建项目</a-button>
+
+          <a-button v-if="nodeId" icon="download" type="primary" @click="handlerExportData()">导出</a-button>
+          <a-dropdown v-if="nodeId">
+            <a-menu slot="overlay">
+              <a-menu-item key="1"> <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button> </a-menu-item>
+            </a-menu>
+
+            <a-upload name="file" accept=".csv" action="" :showUploadList="false" :multiple="false" :before-upload="importBeforeUpload">
+              <a-button type="primary" icon="upload"> 导入 <a-icon type="down" /> </a-button>
+            </a-upload>
+          </a-dropdown>
+
           <a-tooltip>
             <template slot="title">
               <div>
@@ -144,6 +156,18 @@
                   <a-tooltip title="文件类型没有触发器功能"> <a-button size="small" type="primary" :disabled="true">触发器</a-button></a-tooltip>
                 </template>
               </a-menu-item>
+              <a-menu-item v-if="noFileModes.includes(record.runMode)">
+                <a-button size="small" type="primary" @click="handleLogBack(record)">项目日志 </a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="danger" @click="handleDelete(record)">逻辑删除</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="danger" @click="handleDelete(record, 'thorough')">彻底删除</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="danger" @click="migrateWorkspace(record)">迁移工作空间</a-button>
+              </a-menu-item>
               <a-menu-item>
                 <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'top')">置顶</a-button>
               </a-menu-item>
@@ -154,15 +178,6 @@
                 <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total" @click="sortItemHander(record, index, 'down')">
                   下移
                 </a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="danger" @click="handleDelete(record)">逻辑删除</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="danger" @click="handleDelete(record, 'thorough')">彻底删除</a-button>
-              </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="danger" @click="migrateWorkspace(record)">迁移工作空间</a-button>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -344,6 +359,10 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 日志备份 -->
+    <a-modal destroyOnClose v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
+      <ProjectLog v-if="lobbackVisible" :nodeId="temp.nodeId" :projectId="temp.projectId"></ProjectLog>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -359,6 +378,9 @@ import {
   getProjectGroupAll,
   deleteProject,
   migrateWorkspace,
+  importTemplate,
+  exportData,
+  importData,
 } from "@/api/node-project";
 import File from "@/pages/node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
@@ -368,13 +390,20 @@ import ProjectEdit from "@/pages/node/node-layout/project/project-edit";
 import Vue from "vue";
 import { mapGetters } from "vuex";
 import { getWorkSpaceListAll } from "@/api/workspace";
-
+import ProjectLog from "@/pages/node/node-layout/project/project-log.vue";
 export default {
   components: {
     File,
     Console,
     FileRead,
     ProjectEdit,
+    ProjectLog,
+  },
+  props: {
+    nodeId: {
+      type: String,
+      default: "",
+    },
   },
   data() {
     return {
@@ -447,6 +476,7 @@ export default {
       migrateWorkspaceVisible: false,
       workspaceList: [],
       migrateWorkspaceNodeList: [],
+      lobbackVisible: false,
     };
   },
   computed: {
@@ -514,6 +544,8 @@ export default {
     getNodeProjectData(pointerEvent, loading) {
       this.loading = true;
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
+      this.nodeId && (this.listQuery.nodeId = this.nodeId);
+
       getProjectList(this.listQuery, loading)
         .then((res) => {
           if (res.code === 200) {
@@ -885,7 +917,9 @@ export default {
     },
     // 打开编辑
     openAdd() {
-      this.temp = {};
+      this.temp = {
+        nodeId: this.listQuery.nodeId,
+      };
       this.editProjectVisible = true;
     },
     // 删除
@@ -943,7 +977,7 @@ export default {
         this.migrateWorkspaceNodeList = res.data || [];
       });
     },
-    //
+    // 迁移确认
     migrateWorkspaceOk() {
       if (!this.temp.workspaceId) {
         this.$notification.warn({
@@ -972,6 +1006,37 @@ export default {
           return false;
         }
       });
+    },
+    // 下载导入模板
+    handlerImportTemplate() {
+      window.open(
+        importTemplate({
+          nodeId: this.listQuery.nodeId,
+        }),
+        "_blank"
+      );
+    },
+    handlerExportData() {
+      window.open(exportData({ ...this.listQuery }), "_blank");
+    },
+    // 导入
+    importBeforeUpload(file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("nodeId", this.listQuery.nodeId);
+      importData(formData).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.loadData();
+        }
+      });
+    },
+    // 日志备份列表
+    handleLogBack(record) {
+      this.temp = Object.assign({}, record);
+      this.lobbackVisible = true;
     },
   },
 };

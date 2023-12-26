@@ -26,10 +26,10 @@
 
       <a-layout-content :class="`layout-content jpom-node-content ${this.fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'} ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
         <welcome v-if="currentId === 'welcome'" :node="node" />
-        <project-list v-if="currentId === 'manageList'" :node="node" />
+        <!-- <project-list v-if="currentId === 'manageList'" :node="node" /> -->
 
-        <script-template v-if="currentId === 'script'" :node="node" />
-        <script-log v-if="currentId === 'script-log'" :nodeId="node.id" />
+        <!-- <script-template v-if="currentId === 'script'" :node="node" /> -->
+        <!-- <script-log v-if="currentId === 'script-log'" :nodeId="node.id" /> -->
 
         <white-list v-if="currentId === 'whitelistDirectory'" :node="node" />
         <cache v-if="currentId === 'cacheManage'" :node="node" />
@@ -43,10 +43,7 @@
 <script>
 import { getNodeMenu } from "@/api/menu";
 import Welcome from "@/pages/node/node-layout/welcome";
-import ProjectList from "@/pages/node/node-layout/project/project-list";
 
-import ScriptTemplate from "@/pages/node/node-layout/other/script-list";
-import ScriptLog from "@/pages/node/node-layout/other/script-log";
 import WhiteList from "@/pages/node/node-layout/system/white-list.vue";
 import Cache from "@/pages/node/node-layout/system/cache";
 import Log from "@/pages/node/node-layout/system/log.vue";
@@ -56,16 +53,12 @@ import { mapGetters } from "vuex";
 export default {
   components: {
     Welcome,
-    ProjectList,
-
-    ScriptTemplate,
 
     WhiteList,
     Cache,
     Log,
 
     ConfigFile,
-    ScriptLog,
   },
   props: {
     node: {
