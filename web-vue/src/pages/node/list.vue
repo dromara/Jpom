@@ -405,10 +405,7 @@
       </a-form-model>
     </a-modal>
     <!-- 管理节点 -->
-    <a-drawer destroyOnClose :title="`${this.temp.name}`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="drawerVisible" @close="onClose">
-      <!-- 节点管理组件 -->
-      <node-layout v-if="drawerVisible" :node="temp" />
-    </a-drawer>
+    <NodeFunc v-if="drawerVisible" :name="temp.name" :id="temp.id" @close="onClose"></NodeFunc>
     <!-- Terminal -->
     <a-modal
       v-model="terminalVisible"
@@ -474,7 +471,7 @@ import { mapGetters } from "vuex";
 import { deleteNode, editNode, getNodeGroupAll, getNodeList, syncProject, syncToWorkspace, unbind, sortItem } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import { syncScript } from "@/api/node-other";
-import NodeLayout from "./node-layout";
+import NodeFunc from "./node-func";
 import Terminal from "@/pages/ssh/terminal";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, formatDuration, renderSize, formatPercent2Number, parseTime, PAGE_DEFAULT_SHOW_TOTAL, getCachePageLimit } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";
@@ -485,7 +482,7 @@ import NodeTop from "@/pages/node/node-layout/node-top";
 
 export default {
   components: {
-    NodeLayout,
+    NodeFunc,
     Terminal,
     CustomSelect,
     fastInstall,

@@ -4,7 +4,7 @@
     <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
       <template slot="title">
         <a-space>
-          <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+          <a-select v-if="!nodeId" v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" allowClear class="search-input-item" />
@@ -14,6 +14,13 @@
           </a-tooltip>
 
           <a-button type="primary" @click="handleEdit()">新增</a-button>
+
+          <a-tooltip v-if="nodeId" placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息并重新同步">
+            <a-button type="danger" @click="sync()" icon="sync"> 重新同步 </a-button>
+          </a-tooltip>
+          <a-tooltip v-else placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息, 需要重新同步">
+            <a-button type="danger" @click="delAll()" icon="delete"> 删除缓存 </a-button>
+          </a-tooltip>
           <a-tooltip>
             <template slot="title">
               <div>节点脚本模版是存储在节点中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
@@ -27,9 +34,6 @@
               </div>
             </template>
             <a-icon type="question-circle" theme="filled" />
-          </a-tooltip>
-          <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息, 需要重新同步">
-            <a-icon @click="delAll()" type="delete" />
           </a-tooltip>
         </a-space>
       </template>
@@ -245,7 +249,7 @@
   </div>
 </template>
 <script>
-import { delAllCache, deleteScript, editScript, getScriptListAll, itemScript, getTriggerUrl, unbindScript } from "@/api/node-other";
+import { delAllCache, deleteScript, editScript, getScriptListAll, itemScript, getTriggerUrl, unbindScript, syncScript } from "@/api/node-other";
 import codeEditor from "@/components/codeEditor";
 import { getNodeListAll } from "@/api/node";
 import ScriptConsole from "@/pages/node/node-layout/other/script-console";
@@ -259,7 +263,12 @@ export default {
     codeEditor,
     ScriptLog,
   },
-  props: {},
+  props: {
+    nodeId: {
+      type: String,
+      default: "",
+    },
+  },
   data() {
     return {
       loading: false,
@@ -331,6 +340,7 @@ export default {
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.loading = true;
+      this.nodeId && (this.listQuery.nodeId = this.nodeId);
       getScriptListAll(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
@@ -357,7 +367,7 @@ export default {
           }
         });
       } else {
-        this.temp = { global: false, type: "add" };
+        this.temp = { global: false, type: "add", nodeId: this.listQuery.nodeId };
         this.editScriptVisible = true;
       }
     },
@@ -534,6 +544,18 @@ export default {
             }
           });
         },
+      });
+    },
+    sync() {
+      syncScript({
+        nodeId: this.listQuery.nodeId,
+      }).then((res) => {
+        if (res.code == 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.loadData();
+        }
       });
     },
   },
