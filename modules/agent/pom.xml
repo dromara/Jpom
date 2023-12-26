@@ -48,12 +48,6 @@
             <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--nginx-->
-        <dependency>
-            <groupId>com.github.odiszapc</groupId>
-            <artifactId>nginxparser</artifactId>
-            <version>0.9.6</version>
-        </dependency>
 
         <dependency>
             <groupId>org.dromara.jpom.plugins</groupId>

@@ -17,8 +17,8 @@ export function getWhiteList(data) {
  * @param {
  *  nodeId: 节点 ID,
  *  project: 项目目录,
- 
- *  nginx: Nginx 目录
+
+
  * } params
  */
 export function editWhiteList(params) {
