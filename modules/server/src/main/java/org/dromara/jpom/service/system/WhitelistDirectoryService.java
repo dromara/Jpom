@@ -62,13 +62,4 @@ public class WhitelistDirectoryService {
         return agentWhitelist.getProject();
     }
 
-    public List<String> getNgxDirectory(NodeModel model) {
-        AgentWhitelist agentWhitelist = getData(model);
-        if (agentWhitelist == null) {
-            return null;
-        }
-        return agentWhitelist.getNginx();
-    }
-
-
 }

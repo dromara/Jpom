@@ -60,14 +60,6 @@ public class AgentWhitelist extends BaseJsonModel {
      */
     private List<String> project;
     /**
-     * nginx 配置文件 白名单
-     */
-    private List<String> nginx;
-    /**
-     * nginx 安装路径
-     */
-    private String nginxPath;
-    /**
      * 运行编辑的后缀文件
      */
     private List<String> allowEditSuffix;
@@ -84,9 +76,6 @@ public class AgentWhitelist extends BaseJsonModel {
         return list.stream().map(AgentWhitelist::convertRealPath).collect(Collectors.toList());
     }
 
-    public List<String> nginx() {
-        return useConvert(nginx);
-    }
 
     public List<String> project() {
         return useConvert(project);

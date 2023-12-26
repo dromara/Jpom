@@ -23,9 +23,7 @@
 package org.dromara.jpom.controller.system;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
@@ -68,25 +66,18 @@ public class WhitelistDirectoryController extends BaseJpomController {
 
     @PostMapping(value = "whitelistDirectory_submit", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> whitelistDirectorySubmit(String project,
-                                                         String nginx,
-                                                         String nginxPath,
+
+
                                                          String allowEditSuffix) {
         List<String> list = AgentWhitelist.parseToList(project, true, "项目路径白名单不能为空");
         //
-        List<String> nList = AgentWhitelist.parseToList(nginx, "nginx路径白名单不能为空");
         List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
-        return save(list, nList, nginxPath, allowEditSuffixList);
+        return save(list, allowEditSuffixList);
     }
-//
-//	private JsonMessage<String> save(String project, List<String> certificate, List<String> nginx, List<String> allowEditSuffixList) {
-//
-//		return save(list, certificate, nginx);
-//	}
 
 
     private JsonMessage<String> save(List<String> projects,
-                                     List<String> nginx,
-                                     String nginxPath,
+
                                      List<String> allowEditSuffixList) {
         List<String> projectArray;
         {
@@ -95,12 +86,6 @@ public class WhitelistDirectoryController extends BaseJpomController {
             Assert.isNull(error, "白名单目录中不能存在包含关系：" + error);
         }
 
-        List<String> nginxArray = null;
-        if (nginx != null && !nginx.isEmpty()) {
-            nginxArray = AgentWhitelist.covertToArray(nginx, "nginx路径白名单不能位于Jpom目录下");
-            String error = findStartsWith(nginxArray, 0);
-            Assert.isNull(error, "nginx目录中不能存在包含关系：" + error);
-        }
         //
         if (CollUtil.isNotEmpty(allowEditSuffixList)) {
             for (String s : allowEditSuffixList) {
@@ -117,9 +102,8 @@ public class WhitelistDirectoryController extends BaseJpomController {
         }
 
         AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
-        agentWhitelist.setNginxPath(nginxPath);
+
         agentWhitelist.setProject(projectArray);
-        agentWhitelist.setNginx(nginxArray);
         agentWhitelist.setAllowEditSuffix(allowEditSuffixList);
         whitelistDirectoryService.saveWhitelistDirectory(agentWhitelist);
         return new JsonMessage<>(200, "保存成功");

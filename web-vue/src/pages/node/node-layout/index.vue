@@ -30,7 +30,6 @@
 
         <script-template v-if="currentId === 'script'" :node="node" />
         <script-log v-if="currentId === 'script-log'" :nodeId="node.id" />
-        <nginx-list v-if="currentId === 'nginxList'" :node="node" />
 
         <white-list v-if="currentId === 'whitelistDirectory'" :node="node" />
         <cache v-if="currentId === 'cacheManage'" :node="node" />
@@ -48,12 +47,9 @@ import ProjectList from "@/pages/node/node-layout/project/project-list";
 
 import ScriptTemplate from "@/pages/node/node-layout/other/script-list";
 import ScriptLog from "@/pages/node/node-layout/other/script-log";
-import NginxList from "@/pages/node/node-layout/nginx/list";
-
 import WhiteList from "@/pages/node/node-layout/system/white-list.vue";
 import Cache from "@/pages/node/node-layout/system/cache";
 import Log from "@/pages/node/node-layout/system/log.vue";
-
 import ConfigFile from "@/pages/node/node-layout/system/config-file.vue";
 import { mapGetters } from "vuex";
 
@@ -63,7 +59,6 @@ export default {
     ProjectList,
 
     ScriptTemplate,
-    NginxList,
 
     WhiteList,
     Cache,

@@ -76,9 +76,9 @@ public class WhitelistDirectoryService extends BaseDataService {
         List<String> project = agentWhitelist.getProject();
         project = ObjectUtil.defaultIfNull(project, new ArrayList<>());
         project = CollUtil.addAll(project, checkOk)
-                .stream()
-                .distinct()
-                .collect(Collectors.toList());
+            .stream()
+            .distinct()
+            .collect(Collectors.toList());
         agentWhitelist.setProject(project);
         saveWhitelistDirectory(agentWhitelist);
     }
@@ -89,12 +89,6 @@ public class WhitelistDirectoryService extends BaseDataService {
         return AgentWhitelist.checkPath(list, path);
     }
 
-    public boolean checkNgxDirectory(String path) {
-
-        AgentWhitelist agentWhitelist = getWhitelist();
-        List<String> list = agentWhitelist.nginx();
-        return AgentWhitelist.checkPath(list, path);
-    }
 
     /**
      * 保存白名单

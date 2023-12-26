@@ -24,18 +24,6 @@
     ]
   },
   {
-    "id": "nginx",
-    "title": "nginx管理",
-    "icon_v3": "gateway",
-    "childs": [
-      {
-        "id": "nginxList",
-        "title": "nginx列表",
-        "role": "system"
-      }
-    ]
-  },
-  {
     "id": "systemConfig",
     "title": "插件端配置",
     "icon_v3": "setting",

@@ -147,34 +147,6 @@ public enum NodeUrl {
 
     Manage_Log_export("/manage/log/export.html", true),
 
-//    Manage_internal_data("/manage/internal_data"),
-//    Manage_internal_stack("/manage/internal_stack"),
-//    Manage_internal_ram("/manage/internal_ram"),
-//    Manage_internal_threadInfos("/manage/threadInfos"),
-
-//    /**
-//     * jdk
-//     */
-//    Manage_jdk_list("/manage/jdk/list"),
-//    Manage_jdk_update("/manage/jdk/update"),
-//    Manage_jdk_delete("/manage/jdk/delete"),
-
-    System_Nginx_list_data("/system/nginx/list_data.json"),
-    System_Nginx_Tree("/system/nginx/tree.json"),
-
-    System_Nginx_item_data("/system/nginx/item_data"),
-
-    System_Nginx_updateNgx("/system/nginx/updateNgx"),
-
-    System_Nginx_delete("/system/nginx/delete"),
-
-    System_Nginx_status("/system/nginx/status"),
-    System_Nginx_config("/system/nginx/config"),
-    System_Nginx_open("/system/nginx/open"),
-    System_Nginx_close("/system/nginx/close"),
-    System_Nginx_updateConf("/system/nginx/updateConf"),
-    System_Nginx_reload("/system/nginx/reload"),
-
 
     Script_List("/script/list.json"),
     SCRIPT_PULL_EXEC_LOG("/script/pull_exec_log"),
@@ -186,24 +158,6 @@ public enum NodeUrl {
     SCRIPT_DEL_LOG("/script/del_log"),
     //    Script_Upload("/script/upload.json"),
     Script_Del("/script/del.json"),
-
-//    Tomcat_List("/tomcat/list"),
-//    Tomcat_Add("/tomcat/add"),
-//    Tomcat_Update("/tomcat/update"),
-//    Tomcat_Delete("/tomcat/delete"),
-//    Tomcat_Start("/tomcat/start"),
-//    Tomcat_Stop("/tomcat/stop"),
-//    Tomcat_Restart("/tomcat/restart"),
-//    Tomcat_GetItem("/tomcat/getItem"),
-//    Tomcat_LOG_List("/tomcat/logList"),
-//    Tomcat_GetTomcatProjectList("/tomcat/getTomcatProjectList"),
-//    Tomcat_GetTomcatStatus("/tomcat/getTomcatStatus"),
-//    Tomcat_TomcatProjectManage("/tomcat/tomcatProjectManage"),
-//    Tomcat_File_GetFileList("/tomcat/getFileList"),
-//    Tomcat_File_DeleteFile("/tomcat/deleteFile"),
-//    Tomcat_File_Download("/tomcat/download"),
-//    Tomcat_File_Upload("/tomcat/upload"),
-//    Tomcat_File_UploadWar("/tomcat/uploadWar"),
 
     /**
      * Workspace
