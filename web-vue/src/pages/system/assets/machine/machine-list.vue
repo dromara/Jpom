@@ -334,10 +334,6 @@
           <a-input v-model="temp.project" type="textarea" :rows="5" style="resize: none" placeholder="请输入项目存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径" />
         </a-form-model-item>
 
-        <a-form-model-item label="Nginx 路径" prop="nginx" help="当前功能将择机下架，请提前使用 DSL 项目管理来代替 nginx 管理">
-          <a-input v-model="temp.nginx" type="textarea" :rows="5" style="resize: none" placeholder="请输入 nginx 存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径" />
-        </a-form-model-item>
-
         <a-form-model-item label="文件后缀" prop="allowEditSuffix">
           <a-input
             v-model="temp.allowEditSuffix"
