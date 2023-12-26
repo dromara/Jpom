@@ -121,16 +121,6 @@ public class ProjectManageControl extends BaseServerController {
         this.serverConfig = serverConfig;
     }
 
-
-    /**
-     * 展示项目页面
-     */
-    @RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<Object> projectCopyList(HttpServletRequest request) {
-        return NodeForward.request(getNode(), request, NodeUrl.Manage_ProjectCopyList);
-    }
-
     /**
      * 获取正在运行的项目的端口和进程id
      *
@@ -139,16 +129,6 @@ public class ProjectManageControl extends BaseServerController {
     @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> getProjectPort(HttpServletRequest request) {
         return NodeForward.request(getNode(), request, NodeUrl.Manage_GetProjectPort);
-    }
-
-    /**
-     * 获取正在运行的项目的端口和进程id
-     *
-     * @return json
-     */
-    @RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> getProjectCopyPort(HttpServletRequest request) {
-        return NodeForward.request(getNode(), request, NodeUrl.Manage_GetProjectCopyPort);
     }
 
 
