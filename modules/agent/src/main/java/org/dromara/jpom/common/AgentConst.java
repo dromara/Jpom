@@ -45,12 +45,6 @@ public class AgentConst {
      * 脚本管理执行记录数据文件
      */
     public static final String SCRIPT_LOG = "script_log.json";
-
-    /**
-     * nginx配置信息
-     */
-    public static final String NGINX_CONF = "nginx_conf.json";
-
     /**
      * 环境变量列表信息
      */

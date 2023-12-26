@@ -131,8 +131,7 @@ public enum ClassFeature {
 //    TOMCAT_FILE("Tomcat file", ClassFeature.NODE),
 //    TOMCAT_LOG("Tomcat log", ClassFeature.NODE),
 
-    NGINX("Nginx", ClassFeature.NODE),
-    SSL("ssl证书", ClassFeature.NODE),
+
     NODE_CONFIG_WHITELIST("节点白名单配置", ClassFeature.NODE),
     NODE_CONFIG("节点白名单配置", ClassFeature.NODE),
     NODE_CACHE("节点缓存", ClassFeature.NODE),
