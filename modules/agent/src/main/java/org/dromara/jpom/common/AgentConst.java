@@ -37,15 +37,6 @@ public class AgentConst {
      * 项目数据文件
      */
     public static final String PROJECT = "project.json";
-
-    /**
-     * 项目回收文件
-     */
-//    public static final String PROJECT_RECOVER = "project_recover.json";
-    /**
-     * 证书文件
-     */
-    public static final String CERT = "cert.json";
     /**
      * 脚本管理数据文件
      */

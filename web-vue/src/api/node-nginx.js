@@ -1,5 +1,5 @@
 import axios from "./config";
-import { loadRouterBase } from "./config";
+
 /**
  * Nginx 目录列表
  * @param {
@@ -139,43 +139,3 @@ export function editNginxServerName(params) {
 }
 
 /***************************** */
-
-/**
- * cert 列表
- * @param {
- *  nodeId: 节点 ID
- * } params
- */
-export function getCertList(params) {
-  return axios({
-    url: "/node/system/certificate/getCertList",
-    method: "post",
-    data: params,
-  });
-}
-
-/**
- * 删除 cert
- * @param {
- *  nodeId: 节点 ID
- *  id: 证书 ID
- * } params
- */
-export function deleteCert(params) {
-  return axios({
-    url: "/node/system/certificate/delete",
-    method: "post",
-    data: params,
-  });
-}
-
-/**
- * 导出 cert
- * @param {
- *  nodeId: 节点 ID
- *  id: 证书 ID
- * } params
- */
-export function downloadCert(params) {
-  return loadRouterBase("/node/system/certificate/export", params);
-}
