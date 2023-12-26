@@ -48,26 +48,25 @@ public class ConsoleService {
      *
      * @param consoleCommandOp     执行的操作
      * @param nodeProjectInfoModel 项目信息
-     * @param copyItem             副本信息
      * @return 执行结果
      * @throws Exception 异常
      */
-    public CommandOpResult execCommand(ConsoleCommandOp consoleCommandOp, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem copyItem) throws Exception {
+    public CommandOpResult execCommand(ConsoleCommandOp consoleCommandOp, NodeProjectInfoModel nodeProjectInfoModel) throws Exception {
         CommandOpResult result;
         AbstractProjectCommander abstractProjectCommander = AbstractProjectCommander.getInstance();
         // 执行命令
         switch (consoleCommandOp) {
             case restart:
-                result = abstractProjectCommander.restart(nodeProjectInfoModel, copyItem);
+                result = abstractProjectCommander.restart(nodeProjectInfoModel);
                 break;
             case start:
-                result = abstractProjectCommander.start(nodeProjectInfoModel, copyItem);
+                result = abstractProjectCommander.start(nodeProjectInfoModel);
                 break;
             case stop:
-                result = abstractProjectCommander.stop(nodeProjectInfoModel, copyItem);
+                result = abstractProjectCommander.stop(nodeProjectInfoModel);
                 break;
             case status: {
-                result = abstractProjectCommander.status(nodeProjectInfoModel, copyItem);
+                result = abstractProjectCommander.status(nodeProjectInfoModel);
                 break;
             }
             case top:
@@ -80,10 +79,6 @@ public class ConsoleService {
             // 修改 run lib 使用情况
             NodeProjectInfoModel modify = projectInfoService.getItem(nodeProjectInfoModel.getId());
             //
-            if (copyItem != null) {
-                NodeProjectInfoModel.JavaCopyItem copyItem1 = modify.findCopyItem(copyItem.getId());
-                copyItem1.setModifyTime(DateUtil.now());
-            }
             try {
                 projectInfoService.updateItem(modify);
             } catch (Exception ignored) {

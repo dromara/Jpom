@@ -68,14 +68,13 @@ public class ProjectInfoService extends BaseWorkspaceOptService<NodeProjectInfoM
      * 查看项目控制台日志文件大小
      *
      * @param nodeProjectInfoModel 项目
-     * @param copyItem             副本
      * @return 文件大小
      */
-    public String getLogSize(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem copyItem) {
+    public String getLogSize(NodeProjectInfoModel nodeProjectInfoModel) {
         if (nodeProjectInfoModel == null) {
             return null;
         }
-        File file = copyItem == null ? new File(nodeProjectInfoModel.getLog()) : nodeProjectInfoModel.getLog(copyItem);
+        File file = new File(nodeProjectInfoModel.getLog());
         if (file.exists()) {
             long fileSize = file.length();
             if (fileSize <= 0) {

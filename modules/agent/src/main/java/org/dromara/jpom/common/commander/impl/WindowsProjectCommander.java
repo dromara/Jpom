@@ -51,16 +51,16 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
     }
 
     @Override
-    public String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
+    public String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel) {
         String classPath = NodeProjectInfoModel.getClassPathLib(nodeProjectInfoModel);
         if (StrUtil.isBlank(classPath)) {
             return null;
         }
         // 拼接命令
-        String jvm = javaCopyItem == null ? nodeProjectInfoModel.getJvm() : javaCopyItem.getJvm();
-        String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
+        String jvm = nodeProjectInfoModel.getJvm();
+        String tag = nodeProjectInfoModel.getId();
         String mainClass = nodeProjectInfoModel.getMainClass();
-        String args = javaCopyItem == null ? nodeProjectInfoModel.getArgs() : javaCopyItem.getArgs();
+        String args = nodeProjectInfoModel.getArgs();
         return StrUtil.format("{} {} {} {} {} {} >> {} &",
             getRunJavaPath(nodeProjectInfoModel, true),
             Optional.ofNullable(jvm).orElse(StrUtil.EMPTY),
@@ -68,18 +68,18 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
             classPath,
             Optional.ofNullable(mainClass).orElse(StrUtil.EMPTY),
             Optional.ofNullable(args).orElse(StrUtil.EMPTY),
-            nodeProjectInfoModel.getAbsoluteLog(javaCopyItem));
+            nodeProjectInfoModel.getAbsoluteLog());
     }
 
     @Override
-    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, int pid) throws Exception {
-        String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
+    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, int pid) throws Exception {
+        String tag = nodeProjectInfoModel.getId();
         List<String> result = new ArrayList<>();
         boolean success = false;
         // 如果正在运行，则执行杀进程命令
         String kill = AbstractSystemCommander.getInstance().kill(FileUtil.file(nodeProjectInfoModel.allLib()), pid);
         result.add(kill);
-        if (this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, false)) {
+        if (this.loopCheckRun(nodeProjectInfoModel, false)) {
             success = true;
         } else {
             result.add("Kill not completed");

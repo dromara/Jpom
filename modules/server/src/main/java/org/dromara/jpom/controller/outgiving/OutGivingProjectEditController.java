@@ -390,20 +390,7 @@ public class OutGivingProjectEditController extends BaseServerController {
             String autoStart = getParameter(StrUtil.format("{}_autoStart", nodeModel.getId()));
             allData.put("autoStart", Convert.toBool(autoStart, false));
             allData.put("dslEnv", getParameter(StrUtil.format("{}_dslEnv", nodeModel.getId())));
-            // 项目副本
-            String javaCopyIds = getParameter(StrUtil.format("{}_javaCopyIds", nodeModel.getId()));
-            allData.put("javaCopyIds", javaCopyIds);
-            if (StrUtil.isNotEmpty(javaCopyIds)) {
-                String[] split = StrUtil.splitToArray(javaCopyIds, StrUtil.COMMA);
-                for (String copyId : split) {
-                    String copyJvm = getParameter(StrUtil.format("{}_jvm_{}", nodeModel.getId(), copyId));
-                    String copyArgs = getParameter(StrUtil.format("{}_args_{}", nodeModel.getId(), copyId));
-                    String nameArgs = getParameter(StrUtil.format("{}_name_{}", nodeModel.getId(), copyId));
-                    allData.put("jvm_" + copyId, copyJvm);
-                    allData.put("args_" + copyId, copyArgs);
-                    allData.put("name_" + copyId, nameArgs);
-                }
-            }
+
             JsonMessage<String> jsonMessage = this.sendData(nodeModel, allData, false);
             Assert.state(jsonMessage.success(), nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
             tuples.add(new Tuple(nodeModel, allData));

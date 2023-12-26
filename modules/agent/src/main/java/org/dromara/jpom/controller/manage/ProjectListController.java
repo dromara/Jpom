@@ -22,7 +22,6 @@
  */
 package org.dromara.jpom.controller.manage;
 
-import cn.hutool.core.io.FileUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -31,12 +30,10 @@ import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -64,18 +61,8 @@ public class ProjectListController extends BaseAgentController {
             RunMode runMode = nodeProjectInfoModel.getRunMode();
             if (runMode != RunMode.Dsl && runMode != RunMode.File) {
                 // 返回实际执行的命令
-                String command = AbstractProjectCommander.getInstance().buildJavaCommand(nodeProjectInfoModel, null);
+                String command = AbstractProjectCommander.getInstance().buildJavaCommand(nodeProjectInfoModel);
                 nodeProjectInfoModel.setRunCommand(command);
-            }
-            //
-            List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
-            if (javaCopyItemList != null) {
-                for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
-                    File logBack = nodeProjectInfoModel.getLogBack(javaCopyItem);
-                    File log = nodeProjectInfoModel.getLog(javaCopyItem);
-                    javaCopyItem.setLogBack(FileUtil.getAbsolutePath(logBack));
-                    javaCopyItem.setLog(FileUtil.getAbsolutePath(log));
-                }
             }
         }
         return JsonMessage.success("", nodeProjectInfoModel);
@@ -96,25 +83,5 @@ public class ProjectListController extends BaseAgentController {
             log.error(e.getMessage(), e);
             return new JsonMessage<>(500, "查询异常：" + e.getMessage());
         }
-    }
-
-    /**
-     * 展示项目页面
-     */
-    @RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<List<NodeProjectInfoModel.JavaCopyItem>> projectCopyList(String id) {
-        NodeProjectInfoModel nodeProjectInfoModel = projectInfoService.getItem(id);
-        Assert.notNull(nodeProjectInfoModel, "没有对应项目");
-
-        List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
-        Assert.notEmpty(javaCopyItemList, "对应项目没有副本集");
-        //		JSONArray array = new JSONArray();
-        //		for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
-        //			JSONObject object = javaCopyItem.toJson();
-        //			boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, javaCopyItem);
-        //			object.put("status", run);
-        //			array.add(object);
-        //		}
-        return JsonMessage.success("", javaCopyItemList);
     }
 }

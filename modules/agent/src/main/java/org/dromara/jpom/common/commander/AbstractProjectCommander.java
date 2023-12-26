@@ -125,10 +125,9 @@ public abstract class AbstractProjectCommander {
      * 生成可以执行的命令
      *
      * @param nodeProjectInfoModel 项目
-     * @param javaCopyItem         副本信息
      * @return null 是条件不足
      */
-    public abstract String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem);
+    public abstract String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel);
 
     protected String getRunJavaPath(NodeProjectInfoModel nodeProjectInfoModel, boolean w) {
 //        if (StrUtil.isEmpty(nodeProjectInfoModel.getJdkId())) {
@@ -152,8 +151,8 @@ public abstract class AbstractProjectCommander {
      * @return 结果
      * @throws Exception 异常
      */
-    public CommandOpResult start(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
-        return this.start(nodeProjectInfoModel, javaCopyItem, false);
+    public CommandOpResult start(NodeProjectInfoModel nodeProjectInfoModel) throws Exception {
+        return this.start(nodeProjectInfoModel, false);
     }
 
     /**
@@ -164,8 +163,8 @@ public abstract class AbstractProjectCommander {
      * @return 结果
      * @throws Exception 异常
      */
-    public CommandOpResult start(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, boolean sync) throws Exception {
-        String msg = checkStart(nodeProjectInfoModel, javaCopyItem);
+    public CommandOpResult start(NodeProjectInfoModel nodeProjectInfoModel, boolean sync) throws Exception {
+        String msg = checkStart(nodeProjectInfoModel);
         if (msg != null) {
             return CommandOpResult.of(false, msg);
         }
@@ -173,7 +172,7 @@ public abstract class AbstractProjectCommander {
         if (runMode == RunMode.Dsl) {
             //
             this.runDsl(nodeProjectInfoModel, "start", (baseProcess, action) -> {
-                String log = nodeProjectInfoModel.getAbsoluteLog(javaCopyItem);
+                String log = nodeProjectInfoModel.getAbsoluteLog();
                 try {
                     DslScriptBuilder.run(baseProcess, nodeProjectInfoModel, action, log, sync);
                 } catch (Exception e) {
@@ -183,7 +182,7 @@ public abstract class AbstractProjectCommander {
             });
 
         } else {
-            String command = this.buildJavaCommand(nodeProjectInfoModel, javaCopyItem);
+            String command = this.buildJavaCommand(nodeProjectInfoModel);
             if (command == null) {
                 return CommandOpResult.of(false, "没有需要执行的命令");
             }
@@ -202,9 +201,9 @@ public abstract class AbstractProjectCommander {
             });
         }
         //
-        this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, true);
-        CommandOpResult status = this.status(nodeProjectInfoModel, javaCopyItem);
-        this.asyncWebHooks(nodeProjectInfoModel, javaCopyItem, "start", "result", status.msgStr());
+        this.loopCheckRun(nodeProjectInfoModel, true);
+        CommandOpResult status = this.status(nodeProjectInfoModel);
+        this.asyncWebHooks(nodeProjectInfoModel, "start", "result", status.msgStr());
         return status;
     }
 
@@ -226,29 +225,27 @@ public abstract class AbstractProjectCommander {
      * 停止
      *
      * @param nodeProjectInfoModel 项目
-     * @param javaCopyItem         副本信息
      * @return 结果
      * @throws Exception 异常
      */
-    public CommandOpResult stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
-        return this.stop(nodeProjectInfoModel, javaCopyItem, false);
+    public CommandOpResult stop(NodeProjectInfoModel nodeProjectInfoModel) throws Exception {
+        return this.stop(nodeProjectInfoModel, false);
     }
 
     /**
      * 停止
      *
      * @param nodeProjectInfoModel 项目
-     * @param javaCopyItem         副本信息
      * @param sync                 dsl 是否同步执行
      * @return 结果
      * @throws Exception 异常
      */
-    public CommandOpResult stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, boolean sync) throws Exception {
+    public CommandOpResult stop(NodeProjectInfoModel nodeProjectInfoModel, boolean sync) throws Exception {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
         if (runMode == RunMode.File) {
             return CommandOpResult.of(true, "file 类型项目没有 stop");
         }
-        Tuple tuple = this.stopBefore(nodeProjectInfoModel, javaCopyItem);
+        Tuple tuple = this.stopBefore(nodeProjectInfoModel);
         CommandOpResult status = tuple.get(1);
         String webHook = tuple.get(0);
         if (status.isSuccess()) {
@@ -256,7 +253,7 @@ public abstract class AbstractProjectCommander {
             if (runMode == RunMode.Dsl) {
                 //
                 this.runDsl(nodeProjectInfoModel, "stop", (process, action) -> {
-                    String log = nodeProjectInfoModel.getAbsoluteLog(javaCopyItem);
+                    String log = nodeProjectInfoModel.getAbsoluteLog();
                     try {
                         DslScriptBuilder.run(process, nodeProjectInfoModel, action, log, sync);
                     } catch (Exception e) {
@@ -264,13 +261,13 @@ public abstract class AbstractProjectCommander {
                     }
                     return null;
                 });
-                boolean checkRun = this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, false);
+                boolean checkRun = this.loopCheckRun(nodeProjectInfoModel, false);
                 return CommandOpResult.of(checkRun, checkRun ? "stop done" : "stop done,but unsuccessful")
                     .appendMsg(status.getMsgs())
                     .appendMsg(webHook);
             } else {
                 //
-                return this.stopJava(nodeProjectInfoModel, javaCopyItem, status.getPid()).appendMsg(status.getMsgs()).appendMsg(webHook);
+                return this.stopJava(nodeProjectInfoModel, status.getPid()).appendMsg(status.getMsgs()).appendMsg(webHook);
             }
         }
         return CommandOpResult.of(true).appendMsg(status.getMsgs()).appendMsg(webHook);
@@ -280,12 +277,11 @@ public abstract class AbstractProjectCommander {
      * 停止
      *
      * @param nodeProjectInfoModel 项目
-     * @param javaCopyItem         副本信息
      * @param pid                  进程ID
      * @return 结果
      * @throws Exception 异常
      */
-    public abstract CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, int pid) throws Exception;
+    public abstract CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, int pid) throws Exception;
 
     /**
      * 停止之前
@@ -294,15 +290,15 @@ public abstract class AbstractProjectCommander {
      * @return 结果
      * @throws Exception 异常
      */
-    private Tuple stopBefore(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
-        String beforeStop = this.webHooks(nodeProjectInfoModel, javaCopyItem, "beforeStop");
+    private Tuple stopBefore(NodeProjectInfoModel nodeProjectInfoModel) throws Exception {
+        String beforeStop = this.webHooks(nodeProjectInfoModel, "beforeStop");
         // 再次查看进程信息
-        CommandOpResult result = this.status(nodeProjectInfoModel, javaCopyItem);
+        CommandOpResult result = this.status(nodeProjectInfoModel);
         if (result.isSuccess()) {
             // 端口号缓存
             PID_PORT.remove(result.getPid());
         }
-        this.asyncWebHooks(nodeProjectInfoModel, javaCopyItem, "stop", "result", result);
+        this.asyncWebHooks(nodeProjectInfoModel, "stop", "result", result);
         return new Tuple(StrUtil.emptyToDefault(beforeStop, StrUtil.EMPTY), result);
     }
 
@@ -310,19 +306,18 @@ public abstract class AbstractProjectCommander {
      * 执行 webhooks 通知
      *
      * @param nodeProjectInfoModel 项目信息
-     * @param javaCopyItem         副本信息
      * @param type                 类型
      * @param other                其他参数
      */
     public void asyncWebHooks(NodeProjectInfoModel nodeProjectInfoModel,
-                              NodeProjectInfoModel.JavaCopyItem javaCopyItem,
+
                               String type, Object... other) {
         String token = nodeProjectInfoModel.getToken();
         Opt.ofBlankAble(token)
             .ifPresent(s ->
                 ThreadUtil.execute(() -> {
                     try {
-                        this.webHooks(nodeProjectInfoModel, javaCopyItem, type, other);
+                        this.webHooks(nodeProjectInfoModel, type, other);
                     } catch (Exception e) {
                         log.error("project webhook", e);
                     }
@@ -334,13 +329,12 @@ public abstract class AbstractProjectCommander {
      * 执行 webhooks 通知
      *
      * @param nodeProjectInfoModel 项目信息
-     * @param javaCopyItem         副本信息
      * @param type                 类型
      * @param other                其他参数
      * @return 结果
      */
     private String webHooks(NodeProjectInfoModel nodeProjectInfoModel,
-                            NodeProjectInfoModel.JavaCopyItem javaCopyItem,
+
                             String type, Object... other) throws Exception {
         String token = nodeProjectInfoModel.getToken();
         IPlugin plugin = PluginFactory.getPlugin("webhook");
@@ -348,9 +342,7 @@ public abstract class AbstractProjectCommander {
         map.put("projectId", nodeProjectInfoModel.getId());
         map.put("projectName", nodeProjectInfoModel.getName());
         map.put("type", type);
-        if (javaCopyItem != null) {
-            map.put("copyId", javaCopyItem.getId());
-        }
+
         for (int i = 0; i < other.length; i += 2) {
             map.put(other[i].toString(), other[i + 1]);
         }
@@ -365,18 +357,18 @@ public abstract class AbstractProjectCommander {
      * @return 结果
      * @throws Exception 异常
      */
-    public CommandOpResult restart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+    public CommandOpResult restart(NodeProjectInfoModel nodeProjectInfoModel) throws Exception {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
         if (runMode == RunMode.File) {
             return CommandOpResult.of(true, "file 类型项目没有 restart");
         }
-        this.asyncWebHooks(nodeProjectInfoModel, javaCopyItem, "beforeRestart");
+        this.asyncWebHooks(nodeProjectInfoModel, "beforeRestart");
         if (runMode == RunMode.Dsl) {
             DslYmlDto.BaseProcess dslProcess = nodeProjectInfoModel.tryDslProcess("restart");
             if (dslProcess != null) {
                 //
                 this.runDsl(nodeProjectInfoModel, "restart", (process, action) -> {
-                    String log = nodeProjectInfoModel.getAbsoluteLog(javaCopyItem);
+                    String log = nodeProjectInfoModel.getAbsoluteLog();
                     try {
                         DslScriptBuilder.run(process, nodeProjectInfoModel, action, log, false);
                     } catch (Exception e) {
@@ -385,18 +377,18 @@ public abstract class AbstractProjectCommander {
                     return null;
                 });
                 // 等待 状态成功
-                boolean run = this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, true);
+                boolean run = this.loopCheckRun(nodeProjectInfoModel, true);
                 return CommandOpResult.of(run, run ? "restart done" : "restart done,but unsuccessful");
 
                 //return new Tuple(run ? "restart done,but unsuccessful" : "restart done", resultMsg);
             }
         }
-        boolean run = this.isRun(nodeProjectInfoModel, javaCopyItem);
+        boolean run = this.isRun(nodeProjectInfoModel);
         CommandOpResult stopMsg = null;
         if (run) {
-            stopMsg = this.stop(nodeProjectInfoModel, javaCopyItem, true);
+            stopMsg = this.stop(nodeProjectInfoModel, true);
         }
-        CommandOpResult startMsg = this.start(nodeProjectInfoModel, javaCopyItem);
+        CommandOpResult startMsg = this.start(nodeProjectInfoModel);
         if (stopMsg != null) {
             startMsg.appendMsg(stopMsg.getMsgs());
         }
@@ -410,8 +402,8 @@ public abstract class AbstractProjectCommander {
      * @return null 检查一切正常
      * @throws Exception 异常
      */
-    private String checkStart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
-        CommandOpResult status = this.status(nodeProjectInfoModel, javaCopyItem);
+    private String checkStart(NodeProjectInfoModel nodeProjectInfoModel) throws Exception {
+        CommandOpResult status = this.status(nodeProjectInfoModel);
         if (status.isSuccess()) {
             return "当前程序正在运行中，不能重复启动,PID:" + status.getPid();
         }
@@ -447,7 +439,7 @@ public abstract class AbstractProjectCommander {
             return "当前项目类型不支持启动";
         }
         // 备份日志
-        backLog(nodeProjectInfoModel, javaCopyItem);
+        backLog(nodeProjectInfoModel);
         return null;
     }
 
@@ -497,8 +489,8 @@ public abstract class AbstractProjectCommander {
      * @param nodeProjectInfoModel 项目
      * @return 结果
      */
-    public String backLog(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
-        File file = javaCopyItem == null ? new File(nodeProjectInfoModel.getLog()) : nodeProjectInfoModel.getLog(javaCopyItem);
+    public String backLog(NodeProjectInfoModel nodeProjectInfoModel) {
+        File file = new File(nodeProjectInfoModel.getLog());
         if (!file.exists() || file.isDirectory()) {
             return "not exists";
         }
@@ -510,7 +502,7 @@ public abstract class AbstractProjectCommander {
         boolean openLogBack = this.resolveOpenLogBack(nodeProjectInfoModel);
         if (openLogBack) {
             // 开启日志备份才移动文件
-            File backPath = javaCopyItem == null ? nodeProjectInfoModel.getLogBack() : nodeProjectInfoModel.getLogBack(javaCopyItem);
+            File backPath = nodeProjectInfoModel.getLogBack();
             backPath = new File(backPath, DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
             FileUtil.copy(file, backPath, true);
         }
@@ -528,10 +520,9 @@ public abstract class AbstractProjectCommander {
      * 查询项目状态
      *
      * @param nodeProjectInfoModel 项目
-     * @param javaCopyItem         副本
      * @return 状态
      */
-    public CommandOpResult status(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
+    public CommandOpResult status(NodeProjectInfoModel nodeProjectInfoModel) {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
         if (runMode == RunMode.File) {
             return CommandOpResult.of(false, "file 类型项目没有运行状态");
@@ -549,7 +540,7 @@ public abstract class AbstractProjectCommander {
 
             return Optional.ofNullable(status)
                 .map(strings -> {
-                    String log = nodeProjectInfoModel.getAbsoluteLog(javaCopyItem);
+                    String log = nodeProjectInfoModel.getAbsoluteLog();
                     FileUtil.appendLines(strings, FileUtil.file(log), fileCharset);
                     return strings;
                 })
@@ -560,7 +551,7 @@ public abstract class AbstractProjectCommander {
                 .map(CommandOpResult::of)
                 .orElseGet(() -> CommandOpResult.of(false, STOP_TAG));
         } else {
-            String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
+            String tag = nodeProjectInfoModel.getId();
             String statusResult = this.status(tag);
             CommandOpResult of = CommandOpResult.of(statusResult);
             if (!of.isSuccess()) {
@@ -691,41 +682,39 @@ public abstract class AbstractProjectCommander {
      * @param nodeProjectInfoModel 项目
      * @return true 正在运行
      */
-    public boolean isRun(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
-        CommandOpResult result = this.status(nodeProjectInfoModel, javaCopyItem);
+    public boolean isRun(NodeProjectInfoModel nodeProjectInfoModel) {
+        CommandOpResult result = this.status(nodeProjectInfoModel);
         return result.isSuccess();
     }
 
     /***
      * 阻塞检查程序状态
      * @param nodeProjectInfoModel 项目
-     * @param javaCopyItem  副本
      * @param status 要检查的状态
      *
      * @return 和参数status相反
      */
-    protected boolean loopCheckRun(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, boolean status) {
+    protected boolean loopCheckRun(NodeProjectInfoModel nodeProjectInfoModel, boolean status) {
         int statusWaitTime = AgentConfig.ProjectConfig.getInstance().getStatusWaitTime();
-        return this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, statusWaitTime, status);
+        return this.loopCheckRun(nodeProjectInfoModel, statusWaitTime, status);
     }
 
     /***
      * 阻塞检查程序状态
      * @param nodeProjectInfoModel 项目
-     * @param javaCopyItem  副本
      * @param status 要检查的状态
      * @param waitTime  检查等待时间
      *
      * @return 如果和期望一致则返回 true，反之 false
      */
-    protected boolean loopCheckRun(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, int waitTime, boolean status) {
+    protected boolean loopCheckRun(NodeProjectInfoModel nodeProjectInfoModel, int waitTime, boolean status) {
         waitTime = Math.max(waitTime, 1);
         int statusDetectionInterval = AgentConfig.ProjectConfig.getInstance().getStatusDetectionInterval();
         statusDetectionInterval = Math.max(statusDetectionInterval, 1);
         int loopCount = (int) (TimeUnit.SECONDS.toMillis(waitTime) / 500);
         int count = 0;
         do {
-            if (this.isRun(nodeProjectInfoModel, javaCopyItem) == status) {
+            if (this.isRun(nodeProjectInfoModel) == status) {
                 // 是期望的结果
                 return true;
             }
