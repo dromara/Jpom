@@ -422,7 +422,7 @@ mvn -f xxxx/pom.xml clean package
 
 ## 🛠️ 整体架构
 
-![jpom-func-arch](https://jpom.top/images/jpom-func-arch.jpg)
+![jpom-func-arch](https://jpom.top/images/jpom-func-arch.png)
 
 ## 🔨贡献指南
 

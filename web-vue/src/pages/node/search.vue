@@ -182,14 +182,15 @@
       <file-read v-if="drawerReadFileVisible" :nodeId="temp.nodeId" :readFilePath="temp.readFilePath" :id="temp.id" :projectId="temp.projectId" @goFile="goFile" />
     </a-drawer>
     <!-- 批量操作状态 -->
-    <a-modal destroyOnClose v-model="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
-      <a-list bordered :data-source="selectedRowKeys">
+    <a-modal destroyOnClose v-model="batchVisible" :title="temp.title" :footer="null" @cancel="batchClose">
+      <a-list bordered :data-source="temp.data">
         <a-list-item slot="renderItem" slot-scope="item">
-          <a-list-item-meta :description="item.email">
-            <a slot="title"> {{ projList[item].name }}</a>
+          <a-list-item-meta>
+            <!-- <template #description> :="item.whitelistDirectory" </template> -->
+            <a slot="title"> {{ item.name }}</a>
           </a-list-item-meta>
           <div>
-            <a-tooltip :title="`${projList[item].cause || '未开始'}`">{{ projList[item].cause || "未开始" }} </a-tooltip>
+            <a-tooltip :title="`${item.cause || '未开始'}`">{{ item.cause || "未开始" }} </a-tooltip>
           </div>
         </a-list-item>
       </a-list>
@@ -392,7 +393,7 @@ export default {
       drawerConsoleVisible: false,
       drawerReadFileVisible: false,
       batchVisible: false,
-      batchTitle: "",
+
       columns: [
         { title: "项目名称", dataIndex: "name", width: 200, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "项目分组", dataIndex: "group", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "group" } },
@@ -654,6 +655,29 @@ export default {
       this.getNodeProjectData();
       this.selectedRowKeys = [];
     },
+    /**
+     * 将选中的 key 转为 data
+     */
+    selectedRowKeysToId() {
+      return this.selectedRowKeys.map((item) => {
+        return {
+          projectId: this.projList[item]?.projectId,
+          nodeId: this.projList[item]?.nodeId,
+          runMode: this.projList[item]?.runMode,
+          name: this.projList[item]?.name,
+        };
+      });
+    },
+    // 更新数据
+    updateBatchData(index, data2) {
+      const data = this.temp.data;
+      data[index] = { ...data[index], ...data2 };
+
+      this.temp = {
+        ...this.temp,
+        data: [...data],
+      };
+    },
     //批量开始
     batchStart() {
       if (this.selectedRowKeys.length <= 0) {
@@ -662,44 +686,46 @@ export default {
         });
         return;
       }
+      this.temp = {
+        title: "批量启动",
+        data: this.selectedRowKeysToId(),
+      };
+
       this.batchVisible = true;
-      this.batchTitle = "批量启动";
-      this.projList = this.projList.map((item) => {
-        delete item.cause;
-        return item;
-      });
-      this.batchStartInfo(1);
+      this.batchOptInfo(0, "启动", startProject);
     },
-    //批量启动详情
-    batchStartInfo(count) {
-      if (count > this.selectedRowKeys.length) {
+    // 批量操作
+    batchOptInfo(index, msg, api) {
+      if (index >= (this.temp?.data?.length || -1)) {
         return;
       }
-      let value = this.selectedRowKeys[count - 1];
-      this.projList[value].cause = "启动中";
-      count++;
-      if (this.projList[value].runMode !== "File") {
+      const value = this.temp.data[index];
+      value.cause = msg + "中";
+      this.updateBatchData(index, value);
+      if (value.runMode !== "File") {
         const params = {
-          nodeId: this.projList[value].nodeId,
-          id: this.projList[value].projectId,
+          nodeId: value.nodeId,
+          id: value.projectId,
         };
-        startProject(params)
+
+        api(params)
           .then((data) => {
-            this.projList[value].cause = data.msg;
-            this.selectedRowKeys = [...this.selectedRowKeys];
-            this.batchStartInfo(count);
+            value.cause = data.msg;
+            this.updateBatchData(index, value);
+            this.batchOptInfo(index + 1, msg, api);
           })
           .catch(() => {
-            this.projList[value].cause = "启动失败";
-            this.selectedRowKeys = [...this.selectedRowKeys];
-            this.batchStartInfo(count);
+            value.cause = msg + "失败";
+            this.updateBatchData(index, value);
+            this.batchOptInfo(index + 1, msg, api);
           });
       } else {
-        this.projList[value].cause = "跳过";
-        this.selectedRowKeys = [...this.selectedRowKeys];
-        this.batchStartInfo(count);
+        value.cause = "跳过";
+        this.updateBatchData(index, value);
+        this.batchOptInfo(index + 1, msg, api);
       }
     },
+
     //批量重启
     batchRestart() {
       if (this.selectedRowKeys.length <= 0) {
@@ -708,44 +734,14 @@ export default {
         });
         return;
       }
+      this.temp = {
+        title: "批量重新启动",
+        data: this.selectedRowKeysToId(),
+      };
       this.batchVisible = true;
-      this.batchTitle = "批量重新启动";
-      this.projList = this.projList.map((item) => {
-        delete item.cause;
-        return item;
-      });
-      this.batchRestartInfo(1);
+      this.batchOptInfo(0, "重启", restartProject);
     },
-    //批量重启详情
-    batchRestartInfo(count) {
-      if (count > this.selectedRowKeys.length) {
-        return;
-      }
-      let value = this.selectedRowKeys[count - 1];
-      this.projList[value].cause = "重新启动中";
-      count++;
-      if (this.projList[value].runMode !== "File") {
-        const params = {
-          nodeId: this.projList[value].nodeId,
-          id: this.projList[value].projectId,
-        };
-        restartProject(params)
-          .then((data) => {
-            this.projList[value].cause = data.msg;
-            this.selectedRowKeys = [...this.selectedRowKeys];
-            this.batchRestartInfo(count);
-          })
-          .catch(() => {
-            this.projList[value].cause = "重新启动失败";
-            this.selectedRowKeys = [...this.selectedRowKeys];
-            this.batchRestartInfo(count);
-          });
-      } else {
-        this.projList[value].cause = "跳过";
-        this.selectedRowKeys = [...this.selectedRowKeys];
-        this.batchRestartInfo(count);
-      }
-    },
+
     //批量关闭
     batchStop() {
       if (this.selectedRowKeys.length <= 0) {
@@ -753,44 +749,14 @@ export default {
           message: "请选中要关闭的项目",
         });
       }
+      this.temp = {
+        title: "批量关闭启动",
+        data: this.selectedRowKeysToId(),
+      };
       this.batchVisible = true;
-      this.batchTitle = "批量关闭启动";
-      this.projList = this.projList.map((item) => {
-        delete item.cause;
-        return item;
-      });
-      this.batchStopInfo(1);
+      this.batchOptInfo(0, "停止", stopProject);
     },
-    //批量关闭详情
-    batchStopInfo(count) {
-      if (count > this.selectedRowKeys.length) {
-        return;
-      }
-      let value = this.selectedRowKeys[count - 1];
-      this.projList[value].cause = "关闭中";
-      count++;
-      if (this.projList[value].runMode !== "File") {
-        const params = {
-          nodeId: this.projList[value].nodeId,
-          id: this.projList[value].projectId,
-        };
-        stopProject(params)
-          .then((data) => {
-            this.projList[value].cause = data.msg;
-            this.selectedRowKeys = [...this.selectedRowKeys];
-            this.batchStopInfo(count);
-          })
-          .catch(() => {
-            this.projList[value].cause = "关闭失败";
-            this.selectedRowKeys = [...this.selectedRowKeys];
-            this.batchStopInfo(count);
-          });
-      } else {
-        this.projList[value].cause = "跳过";
-        this.selectedRowKeys = [...this.selectedRowKeys];
-        this.batchStopInfo(count);
-      }
-    },
+
     // 获取复选框属性 判断是否可以勾选
     getCheckboxProps(record) {
       return {
