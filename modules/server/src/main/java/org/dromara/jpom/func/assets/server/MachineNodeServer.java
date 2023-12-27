@@ -29,6 +29,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
@@ -68,6 +69,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -327,7 +330,14 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             machineNodeModel.setOsMoneyTotal(jsonObject.getLong("osMoneyTotal"));
             machineNodeModel.setOsSwapTotal(jsonObject.getLong("osSwapTotal"));
             machineNodeModel.setOsVirtualMax(jsonObject.getLong("osVirtualMax"));
-            machineNodeModel.setOsLoadAverage(CollUtil.join(jsonObject.getList("osLoadAverage", Double.class), StrUtil.COMMA));
+            List<Double> osLoadAverage = jsonObject.getList("osLoadAverage", Double.class);
+            if (osLoadAverage != null) {
+                // 保留两位小数
+                osLoadAverage = osLoadAverage.stream()
+                    .map(aDouble -> NumberUtil.div(aDouble, (Double) 1D, 2))
+                    .collect(Collectors.toList());
+            }
+            machineNodeModel.setOsLoadAverage(CollUtil.join(osLoadAverage, StrUtil.COMMA));
             machineNodeModel.setOsFileStoreTotal(jsonObject.getLong("osFileStoreTotal"));
         });
         this.updateById(machineNodeModel);
