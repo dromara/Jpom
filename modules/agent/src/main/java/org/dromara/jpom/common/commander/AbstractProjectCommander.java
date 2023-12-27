@@ -35,6 +35,7 @@ import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.text.StrPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.OsInfo;
@@ -53,6 +54,7 @@ import org.dromara.jpom.model.system.NetstatModel;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.script.DslScriptBuilder;
 import org.dromara.jpom.socket.AgentFileTailWatcher;
+import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.system.AgentConfig;
 import org.dromara.jpom.system.JpomRuntimeException;
 import org.dromara.jpom.util.CommandUtil;
@@ -171,7 +173,7 @@ public abstract class AbstractProjectCommander {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
         if (runMode == RunMode.Dsl) {
             //
-            this.runDsl(nodeProjectInfoModel, "start", (baseProcess, action) -> {
+            this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.start.name(), (baseProcess, action) -> {
                 String log = nodeProjectInfoModel.getAbsoluteLog();
                 try {
                     DslScriptBuilder.run(baseProcess, nodeProjectInfoModel, action, log, sync);
@@ -252,7 +254,7 @@ public abstract class AbstractProjectCommander {
             // 运行中
             if (runMode == RunMode.Dsl) {
                 //
-                this.runDsl(nodeProjectInfoModel, "stop", (process, action) -> {
+                this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.stop.name(), (process, action) -> {
                     String log = nodeProjectInfoModel.getAbsoluteLog();
                     try {
                         DslScriptBuilder.run(process, nodeProjectInfoModel, action, log, sync);
@@ -270,7 +272,11 @@ public abstract class AbstractProjectCommander {
                 return this.stopJava(nodeProjectInfoModel, status.getPid()).appendMsg(status.getMsgs()).appendMsg(webHook);
             }
         }
-        return CommandOpResult.of(true).appendMsg(status.getMsgs()).appendMsg(webHook);
+        return CommandOpResult.of(true).
+
+            appendMsg(status.getMsgs()).
+
+            appendMsg(webHook);
     }
 
     /**
@@ -310,10 +316,9 @@ public abstract class AbstractProjectCommander {
      * @param other                其他参数
      */
     public void asyncWebHooks(NodeProjectInfoModel nodeProjectInfoModel,
-
                               String type, Object... other) {
-        String token = nodeProjectInfoModel.getToken();
-        Opt.ofBlankAble(token)
+        // webhook 通知
+        Opt.ofBlankAble(nodeProjectInfoModel.getToken())
             .ifPresent(s ->
                 ThreadUtil.execute(() -> {
                     try {
@@ -323,6 +328,28 @@ public abstract class AbstractProjectCommander {
                     }
                 })
             );
+        // 判断文件变动
+        if (ArrayUtil.contains(other, "fileChange")) {
+            RunMode runMode = nodeProjectInfoModel.getRunMode();
+            if (runMode == RunMode.Dsl) {
+                DslYmlDto dslYmlDto = nodeProjectInfoModel.dslConfig();
+                if (dslYmlDto.hasRunProcess(ConsoleCommandOp.reload.name())) {
+                    DslYmlDto.Run run = dslYmlDto.getRun();
+                    Boolean fileChangeReload = run.getFileChangeReload();
+                    if (fileChangeReload != null && fileChangeReload) {
+                        // 需要执行重载事件
+                        ThreadUtil.execute(() -> {
+                            try {
+                                CommandOpResult reload = this.reload(nodeProjectInfoModel);
+                                log.info("触发项目 reload 事件：{}", reload);
+                            } catch (Exception e) {
+                                log.error("重载项目异常", e);
+                            }
+                        });
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -367,7 +394,7 @@ public abstract class AbstractProjectCommander {
             DslYmlDto.BaseProcess dslProcess = nodeProjectInfoModel.tryDslProcess("restart");
             if (dslProcess != null) {
                 //
-                this.runDsl(nodeProjectInfoModel, "restart", (process, action) -> {
+                this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.restart.name(), (process, action) -> {
                     String log = nodeProjectInfoModel.getAbsoluteLog();
                     try {
                         DslScriptBuilder.run(process, nodeProjectInfoModel, action, log, false);
@@ -528,10 +555,11 @@ public abstract class AbstractProjectCommander {
             return CommandOpResult.of(false, "file 类型项目没有运行状态");
         }
         if (runMode == RunMode.Dsl) {
-            List<String> status = this.runDsl(nodeProjectInfoModel, "status", (baseProcess, action) -> {
+            List<String> status = this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.status.name(), (baseProcess, action) -> {
                 // 提前判断脚本 id,避免填写错误在删除项目检测状态时候异常
                 try {
-                    return DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel, action);
+                    Tuple tuple = DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel, action);
+                    return tuple.get(1);
                 } catch (IllegalArgument2Exception argument2Exception) {
                     log.warn("执行 DSL 脚本异常：{}", argument2Exception.getMessage());
                     return CollUtil.newArrayList(argument2Exception.getMessage());
@@ -560,6 +588,29 @@ public abstract class AbstractProjectCommander {
             }
             return of;
         }
+    }
+
+    /**
+     * 重新加载
+     *
+     * @param nodeProjectInfoModel 项目
+     * @return 结果
+     */
+    public CommandOpResult reload(NodeProjectInfoModel nodeProjectInfoModel) {
+        RunMode runMode = nodeProjectInfoModel.getRunMode();
+        Assert.state(runMode == RunMode.Dsl, "非 DSL 项目不支持此操作");
+        return this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.reload.name(), (baseProcess, action) -> {
+            // 提前判断脚本 id,避免填写错误在删除项目检测状态时候异常
+            try {
+                Tuple tuple = DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel, action);
+                int code = tuple.get(0);
+                List<String> list = tuple.get(1);
+                return CommandOpResult.of(code == 0, CollUtil.join(list, StrUtil.SPACE));
+            } catch (IllegalArgument2Exception argument2Exception) {
+                log.warn("执行 DSL 脚本异常：{}", argument2Exception.getMessage());
+                return CommandOpResult.of(false, argument2Exception.getMessage());
+            }
+        });
     }
 
     /**
@@ -610,7 +661,7 @@ public abstract class AbstractProjectCommander {
         return AbstractProjectCommander.STOP_TAG;
     }
 
-    //---------------------------------------------------- 基本操作----end
+//---------------------------------------------------- 基本操作----end
 
     /**
      * 获取进程占用的主要端口
@@ -721,5 +772,41 @@ public abstract class AbstractProjectCommander {
             ThreadUtil.sleep(statusDetectionInterval);
         } while (count++ < loopCount);
         return false;
+    }
+
+    /**
+     * 执行shell命令
+     *
+     * @param consoleCommandOp     执行的操作
+     * @param nodeProjectInfoModel 项目信息
+     * @return 执行结果
+     * @throws Exception 异常
+     */
+    public CommandOpResult execCommand(ConsoleCommandOp consoleCommandOp, NodeProjectInfoModel nodeProjectInfoModel) throws Exception {
+        CommandOpResult result;
+        // 执行命令
+        switch (consoleCommandOp) {
+            case restart:
+                result = this.restart(nodeProjectInfoModel);
+                break;
+            case start:
+                result = this.start(nodeProjectInfoModel);
+                break;
+            case stop:
+                result = this.stop(nodeProjectInfoModel);
+                break;
+            case status: {
+                result = this.status(nodeProjectInfoModel);
+                break;
+            }
+            case reload: {
+                result = this.reload(nodeProjectInfoModel);
+                break;
+            }
+            case showlog:
+            default:
+                throw new IllegalArgumentException(consoleCommandOp + " error");
+        }
+        return result;
     }
 }

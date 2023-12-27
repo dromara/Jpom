@@ -27,6 +27,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.controller.outgiving.OutGivingWhitelistService;
 import org.dromara.jpom.model.data.ServerWhitelist;
 import org.dromara.jpom.permission.ClassFeature;
@@ -65,8 +66,8 @@ public class ProjectFileControl extends BaseServerController {
      */
     @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.LIST)
-    public String getFileList() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_GetFileList).toString();
+    public IJsonMessage<Object> getFileList() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_GetFileList);
     }
 
     /**
@@ -112,8 +113,8 @@ public class ProjectFileControl extends BaseServerController {
      */
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.DEL)
-    public String deleteFile(HttpServletRequest request) {
-        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_DeleteFile).toString();
+    public IJsonMessage<Object> deleteFile(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_DeleteFile);
     }
 
 
@@ -124,8 +125,8 @@ public class ProjectFileControl extends BaseServerController {
      */
     @PostMapping(value = "update_config_file", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.EDIT)
-    public String updateConfigFile(HttpServletRequest request) {
-        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_UpdateConfigFile).toString();
+    public IJsonMessage<Object> updateConfigFile(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_UpdateConfigFile);
     }
 
     /**
@@ -135,8 +136,8 @@ public class ProjectFileControl extends BaseServerController {
      */
     @GetMapping(value = "read_file", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.LIST)
-    public String readFile(HttpServletRequest request) {
-        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_ReadFile).toString();
+    public IJsonMessage<Object> readFile(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_ReadFile);
     }
 
     /**
@@ -146,11 +147,11 @@ public class ProjectFileControl extends BaseServerController {
      */
     @GetMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.REMOTE_DOWNLOAD)
-    public String remoteDownload(String url, HttpServletRequest request) {
+    public IJsonMessage<Object> remoteDownload(@ValidatorItem String url, HttpServletRequest request) {
         // 验证远程 地址
         ServerWhitelist whitelist = outGivingWhitelistService.getServerWhitelistData(request);
         whitelist.checkAllowRemoteDownloadHost(url);
-        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_Remote_Download).toString();
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_Remote_Download);
     }
 
     /**
@@ -160,8 +161,8 @@ public class ProjectFileControl extends BaseServerController {
      */
     @GetMapping(value = "new_file_folder", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.EDIT)
-    public String newFileFolder(HttpServletRequest request) {
-        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_NEW_FILE_FOLDER).toString();
+    public IJsonMessage<Object> newFileFolder(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_NEW_FILE_FOLDER);
     }
 
 
@@ -172,8 +173,8 @@ public class ProjectFileControl extends BaseServerController {
      */
     @GetMapping(value = "rename_file_folder", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.EDIT)
-    public String renameFileFolder(HttpServletRequest request) {
-        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_RENAME_FILE_FOLDER).toString();
+    public IJsonMessage<Object> renameFileFolder(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_RENAME_FILE_FOLDER);
     }
 
 }

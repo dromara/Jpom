@@ -91,11 +91,7 @@ public enum NodeUrl {
 
     Manage_GetProjectStatus("/manage/getProjectStatus"),
 
-    Manage_Restart("/manage/restart"),
-
-    Manage_Start("/manage/start"),
-
-    Manage_Stop("/manage/stop"),
+    Manage_Operate("/manage/operate"),
 
     Manage_GetProjectPort("/manage/getProjectPort"),
 

@@ -118,7 +118,7 @@ public class MonitorItem implements Task {
             String context;
             try {
                 //查询项目运行状态
-                JsonMessage<JSONObject> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", id, "getCopy", true);
+                JsonMessage<JSONObject> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", id);
                 if (jsonMessage.success()) {
                     JSONObject jsonObject = jsonMessage.getData();
                     int pid = jsonObject.getIntValue("pId");
@@ -195,7 +195,7 @@ public class MonitorItem implements Task {
             if (monitorModel.autoRestart()) {
                 // 执行重启
                 try {
-                    JsonMessage<String> reJson = NodeForward.request(nodeModel, NodeUrl.Manage_Restart, "id", id);
+                    JsonMessage<String> reJson = NodeForward.request(nodeModel, NodeUrl.Manage_Operate, "id", id, "opt", "restart");
                     if (reJson.success()) {
                         // 重启成功
                         runStatus = true;

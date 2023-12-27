@@ -38,6 +38,7 @@ import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.service.WhitelistDirectoryService;
+import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
@@ -174,7 +175,7 @@ public class ManageEditProjectController extends BaseAgentController {
             String dslContent = projectInfo.getDslContent();
             Assert.hasText(dslContent, "请配置 dsl 内容");
             DslYmlDto build = DslYmlDto.build(dslContent);
-            Assert.state(build.hasRunProcess("status"), "没有配置 run.status");
+            Assert.state(build.hasRunProcess(ConsoleCommandOp.status.name()), "没有配置 run.status");
         }
     }
 

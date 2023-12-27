@@ -427,53 +427,15 @@ export function getInternalData(params) {
 // }
 
 /**
- * 重启项目
+ * 操作项目
  * @param {
  *  nodeId: 节点 ID,
  *  id: 项目id
  * } params
  */
-export function restartProject(params) {
+export function operateProject(params) {
   return axios({
-    url: "/node/manage/restart",
-    method: "post",
-    data: params,
-    headers: {
-      loading: "no",
-      tip: "no",
-    },
-  });
-}
-
-/**
- * 启动项目
- * @param {
- *  nodeId: 节点 ID,
- *  id: 项目id
- * } params
- */
-export function startProject(params) {
-  return axios({
-    url: "/node/manage/start",
-    method: "post",
-    data: params,
-    headers: {
-      loading: "no",
-      tip: "no",
-    },
-  });
-}
-
-/**
- * 关闭项目
- * @param {
- *  nodeId: 节点 ID,
- *  id: 项目id
- * } params
- */
-export function stopProject(params) {
-  return axios({
-    url: "/node/manage/stop",
+    url: "/node/manage/operate",
     method: "post",
     data: params,
     headers: {

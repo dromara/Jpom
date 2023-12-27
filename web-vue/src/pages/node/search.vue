@@ -370,10 +370,8 @@ import { delAllProjectCache, getNodeListAll, getProjectList, sortItemProject } f
 import {
   getRuningProjectInfo,
   noFileModes,
-  restartProject,
+  operateProject,
   runModeList,
-  startProject,
-  stopProject,
   getProjectTriggerUrl,
   getProjectGroupAll,
   deleteProject,
@@ -724,10 +722,10 @@ export default {
       };
 
       this.batchVisible = true;
-      this.batchOptInfo(0, "启动", startProject);
+      this.batchOptInfo(0, "启动", operateProject, "start");
     },
     // 批量操作
-    batchOptInfo(index, msg, api) {
+    batchOptInfo(index, msg, api, opt) {
       if (index >= (this.temp?.data?.length || -1)) {
         return;
       }
@@ -738,6 +736,7 @@ export default {
         const params = {
           nodeId: value.nodeId,
           id: value.projectId,
+          opt: opt,
         };
 
         api(params)
@@ -771,7 +770,7 @@ export default {
         data: this.selectedRowKeysToId(),
       };
       this.batchVisible = true;
-      this.batchOptInfo(0, "重启", restartProject);
+      this.batchOptInfo(0, "重启", operateProject, "restart");
     },
 
     //批量关闭
@@ -786,7 +785,7 @@ export default {
         data: this.selectedRowKeysToId(),
       };
       this.batchVisible = true;
-      this.batchOptInfo(0, "停止", stopProject);
+      this.batchOptInfo(0, "停止", operateProject, "stop");
     },
 
     // 获取复选框属性 判断是否可以勾选

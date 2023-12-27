@@ -31,9 +31,11 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.common.commander.CommandOpResult;
+import org.dromara.jpom.model.RunMode;
+import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
-import org.dromara.jpom.service.manage.ConsoleService;
 import org.dromara.jpom.service.manage.ProjectInfoService;
 import org.dromara.jpom.system.AgentConfig;
 import org.dromara.jpom.util.FileSearchUtil;
@@ -59,15 +61,12 @@ import java.nio.charset.Charset;
 public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 
     private static ProjectInfoService projectInfoService;
-    private static ConsoleService consoleService;
     private static AgentConfig.ProjectConfig.LogConfig logConfig;
 
     @Autowired
     public void init(ProjectInfoService projectInfoService,
-                     ConsoleService consoleService,
                      AgentConfig agentConfig) {
         AgentWebSocketConsoleHandle.projectInfoService = projectInfoService;
-        AgentWebSocketConsoleHandle.consoleService = consoleService;
         AgentWebSocketConsoleHandle.logConfig = agentConfig.getProject().getLog();
     }
 
@@ -139,6 +138,14 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         if (nodeProjectInfoModel == null) {
             return;
         }
+        // DSL
+        RunMode runMode = nodeProjectInfoModel.getRunMode();
+        if (runMode == RunMode.Dsl) {
+            // 判断是否可以执行 reload 事件
+            DslYmlDto dslYmlDto = nodeProjectInfoModel.dslConfig();
+            boolean b = dslYmlDto.hasRunProcess(ConsoleCommandOp.reload.name());
+            json.put("canReload", b);
+        }
         runMsg(consoleCommandOp, session, nodeProjectInfoModel, json);
     }
 
@@ -153,28 +160,19 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             switch (consoleCommandOp) {
                 case start:
                 case restart:
+                case stop:
                     logUser = true;
-                    strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel);
+                    strResult = AbstractProjectCommander.getInstance().execCommand(consoleCommandOp, nodeProjectInfoModel);
                     if (strResult.isSuccess()) {
                         resultData = new JsonMessage<>(200, "操作成功", strResult);
                     } else {
                         resultData = new JsonMessage<>(400, strResult.msgStr());
                     }
                     break;
-                case stop: {
-                    logUser = true;
-                    // 停止项目
-                    strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel);
-                    if (strResult.isSuccess()) {
-                        resultData = new JsonMessage<>(200, "操作成功", strResult);
-                    } else {
-                        resultData = new JsonMessage<>(400, strResult.msgStr());
-                    }
-                    break;
-                }
+
                 case status: {
                     // 获取项目状态
-                    strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel);
+                    strResult = AbstractProjectCommander.getInstance().execCommand(consoleCommandOp, nodeProjectInfoModel);
                     if (strResult.isSuccess()) {
                         resultData = new JsonMessage<>(200, "运行中", strResult);
                     } else {

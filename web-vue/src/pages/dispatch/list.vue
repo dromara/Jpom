@@ -118,9 +118,6 @@
               <a-menu-item>
                 <a-button type="danger" size="small" @click="handleUnbind(record)">解绑</a-button>
               </a-menu-item>
-              <a-menu-item>
-                <a-button type="primary" size="small" @click="handleViewDispatchManager(record)">配置</a-button>
-              </a-menu-item>
             </a-menu>
           </a-dropdown>
         </a-space>
@@ -575,54 +572,19 @@
         }
       "
     />
-    <!-- 配置分发 -->
-    <a-modal destroyOnClose v-model="viewDispatchManager" width="50%" :title="`配置分发`" @ok="viewDispatchManagerOk" :maskClosable="false">
-      <draggable v-model="temp.dispatchManagerList" :group="`sortValue`" handle=".move" chosenClass="box-shadow">
-        <a-row v-for="item in temp.dispatchManagerList" :key="item.id" class="item-row">
-          <a-col :span="18">
-            <span> 节点名： {{ item.nodeName }} </span>
-            <span> 项目名： {{ item.cacheProjectName }} </span>
-          </a-col>
-          <a-col :span="6">
-            <a-space>
-              <a-switch
-                checked-children="启用"
-                un-checked-children="禁用"
-                :checked="item.disabled ? false : true"
-                @change="
-                  (checked) => {
-                    temp.dispatchManagerList = temp.dispatchManagerList.map((item2) => {
-                      if (item.id === item2.id) {
-                        item2.disabled = !checked;
-                      }
-                      return { ...item2 };
-                    });
-                  }
-                "
-              />
 
-              <a-button type="danger" size="small" @click="handleRemoveProject(item)" :disabled="!temp || !temp.dispatchManagerList || temp.dispatchManagerList.length <= 1"> 解绑 </a-button>
-              <a-tooltip placement="left" :title="`长按可以拖动排序`" class="move"> <a-icon type="menu" /> </a-tooltip>
-            </a-space>
-          </a-col>
-        </a-row>
-      </draggable>
-    </a-modal>
     <!-- 分发状态 -->
-    <a-drawer
-      destroyOnClose
-      :title="`查看 ${temp.name} 状态`"
-      placement="right"
-      width="85vw"
-      :visible="drawerStatusVisible"
+
+    <Status
+      v-if="drawerStatusVisible"
+      :id="temp.id"
+      :name="temp.name"
       @close="
         () => {
           this.drawerStatusVisible = false;
         }
       "
-    >
-      <Status v-if="drawerStatusVisible" :id="temp.id" />
-    </a-drawer>
+    />
   </div>
 </template>
 <script>
@@ -634,28 +596,25 @@ import {
   editDispatch,
   editDispatchProject,
   getDishPatchList,
-  getDispatchProject,
   getDispatchWhiteList,
   releaseDelDisPatch,
   statusMap,
   unbindOutgiving,
   dispatchStatusMap,
   cancelOutgiving,
-  saveDispatchProjectConfig,
-  removeProject,
 } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, javaModes, noFileModes, runModeList, getProjectGroupAll } from "@/api/node-project";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, randomStr, itemGroupBy, parseTime } from "@/utils/const";
 
 import CustomSelect from "@/components/customSelect";
-import draggable from "vuedraggable";
+
 import StartDispatch from "./start";
 export default {
   components: {
     codeEditor,
     CustomSelect,
-    draggable,
+
     Status,
     StartDispatch,
   },
@@ -1222,77 +1181,7 @@ export default {
         },
       });
     },
-    //分发管理
-    handleViewDispatchManager(record) {
-      this.handleViewDispatchManagerById(record.id);
-    },
-    handleViewDispatchManagerById(id) {
-      getDispatchProject(id, true).then((res) => {
-        if (res.code === 200) {
-          this.temp = {
-            dispatchManagerList: res.data?.projectList,
-            id: id,
-          };
-          this.viewDispatchManager = true;
-        }
-      });
-    },
-    viewDispatchManagerOk() {
-      // console.log(this.temp);
-      const temp = {
-        data: this.temp.dispatchManagerList.map((item, index) => {
-          return {
-            nodeId: item.nodeId,
-            projectId: item.projectId,
-            sortValue: index,
-            disabled: item.disabled,
-          };
-        }),
-        id: this.temp.id,
-      };
-      saveDispatchProjectConfig(temp).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg,
-          });
-          this.viewDispatchManager = false;
-        }
-      });
-    },
-    // 删除项目
-    handleRemoveProject(item) {
-      const html =
-        "<b style='font-size: 20px;'>真的要释放(删除)当前项目么？</b>" +
-        "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
-        "<li>不会真实请求节点删除项目信息</b></li>" +
-        "<li>一般用于服务器无法连接且已经确定不再使用</li>" +
-        "<li>如果误操作会产生冗余数据！！！</li>" +
-        " </ul>";
 
-      const h = this.$createElement;
-      this.$confirm({
-        title: "危险操作！！！",
-        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
-        okButtonProps: { props: { type: "danger", size: "small" } },
-        cancelButtonProps: { props: { type: "primary" } },
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          removeProject({
-            nodeId: item.nodeId,
-            projectId: item.projectId,
-            id: this.temp.id,
-          }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.handleViewDispatchManagerById(this.temp.id);
-            }
-          });
-        },
-      });
-    },
     // 查看项目状态
     handleViewStatus(item) {
       this.drawerStatusVisible = true;
@@ -1302,9 +1191,6 @@ export default {
 };
 </script>
 <style scoped>
-.replica-area {
-  width: 80%;
-}
 /deep/ .ant-progress-text {
   width: auto;
 }
@@ -1320,17 +1206,5 @@ export default {
 /deep/ .ant-statistic-content-value,
 /deep/ .ant-statistic-content {
   font-size: 16px;
-}
-
-.box-shadow {
-  box-shadow: 0 0 10px 5px rgba(223, 222, 222, 0.5);
-  border-radius: 5px;
-}
-
-.item-row {
-  padding: 10px;
-  margin: 5px;
-  border: 1px solid #e8e8e8;
-  border-radius: 2px;
 }
 </style>

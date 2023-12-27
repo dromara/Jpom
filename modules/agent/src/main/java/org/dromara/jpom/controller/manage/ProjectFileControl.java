@@ -47,7 +47,6 @@ import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.script.ProjectFileBackupUtil;
 import org.dromara.jpom.service.WhitelistDirectoryService;
-import org.dromara.jpom.service.manage.ConsoleService;
 import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.system.AgentConfig;
 import org.dromara.jpom.util.CommandUtil;
@@ -78,14 +77,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ProjectFileControl extends BaseAgentController {
 
-    private final ConsoleService consoleService;
     private final WhitelistDirectoryService whitelistDirectoryService;
     private final AgentConfig agentConfig;
 
-    public ProjectFileControl(ConsoleService consoleService,
-                              WhitelistDirectoryService whitelistDirectoryService,
+    public ProjectFileControl(WhitelistDirectoryService whitelistDirectoryService,
                               AgentConfig agentConfig) {
-        this.consoleService = consoleService;
         this.whitelistDirectoryService = whitelistDirectoryService;
         this.agentConfig = agentConfig;
     }
@@ -190,7 +186,7 @@ public class ProjectFileControl extends BaseAgentController {
         // 判断是否需要先关闭项目
         boolean closeFirst = BooleanUtil.toBoolean(closeFirstStr);
         if (closeFirst) {
-            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.stop, projectInfoModel);
+            CommandOpResult result = AbstractProjectCommander.getInstance().execCommand(ConsoleCommandOp.stop, projectInfoModel);
             Assert.state(result.isSuccess(), "关闭项目失败：" + result.msgStr());
         }
         String clearType = getParameter("clearType");
@@ -260,8 +256,7 @@ public class ProjectFileControl extends BaseAgentController {
                 FileUtil.mkdir(lib);
                 FileUtil.move(file, lib, true);
             }
-            AbstractProjectCommander.getInstance().asyncWebHooks(pim, null, "fileChange",
-                "changeEvent", "upload", "levelName", levelName, "fileType", type, "fileName", file.getName());
+            AbstractProjectCommander.getInstance().asyncWebHooks(pim, "fileChange", "changeEvent", "upload", "levelName", levelName, "fileType", type, "fileName", file.getName());
             //
             JsonMessage<CommandOpResult> resultJsonMessage = this.saveProjectFileAfter(after, pim);
             if (resultJsonMessage != null) {
@@ -280,29 +275,15 @@ public class ProjectFileControl extends BaseAgentController {
         //
         AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(after, AfterOpt.No.getCode()));
         if ("restart".equalsIgnoreCase(after) || afterOpt == AfterOpt.Restart) {
-            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, pim);
+            CommandOpResult result = AbstractProjectCommander.getInstance().execCommand(ConsoleCommandOp.restart, pim);
 
             return new JsonMessage<>(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
         } else if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
-            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, pim);
+            CommandOpResult result = AbstractProjectCommander.getInstance().execCommand(ConsoleCommandOp.restart, pim);
 
             return new JsonMessage<>(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
         }
         return null;
-    }
-
-
-    private boolean restart(NodeProjectInfoModel nodeProjectInfoModel, AfterOpt afterOpt) {
-        try {
-            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, nodeProjectInfoModel);
-            if (result.isSuccess()) {
-                return true;
-            }
-        } catch (Exception e) {
-            log.error("重复失败", e);
-        }
-        // 完整重启，不再继续剩余的节点项目
-        return afterOpt != AfterOpt.Order_Must_Restart;
     }
 
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -312,14 +293,14 @@ public class ProjectFileControl extends BaseAgentController {
         // 备份文件
         String backupId = ProjectFileBackupUtil.backup(pim);
         try {
+            AbstractProjectCommander commander = AbstractProjectCommander.getInstance();
             if ("clear".equalsIgnoreCase(type)) {
                 // 清空文件
                 if (FileUtil.clean(file)) {
-                    AbstractProjectCommander.getInstance().asyncWebHooks(pim, null, "fileChange",
-                        "changeEvent", "delete", "levelName", levelName, "deleteType", type, "fileName", filename);
+                    commander.asyncWebHooks(pim, "fileChange", "changeEvent", "delete", "levelName", levelName, "deleteType", type, "fileName", filename);
                     return JsonMessage.success("清除成功");
                 }
-                boolean run = AbstractProjectCommander.getInstance().isRun(pim);
+                boolean run = commander.isRun(pim);
                 Assert.state(!run, "文件被占用，请先停止项目");
                 return new JsonMessage<>(500, "删除失败：" + file.getAbsolutePath());
             } else {
@@ -327,8 +308,7 @@ public class ProjectFileControl extends BaseAgentController {
                 Assert.hasText(filename, "请选择要删除的文件");
                 file = FileUtil.file(file, filename);
                 if (FileUtil.del(file)) {
-                    AbstractProjectCommander.getInstance().asyncWebHooks(pim, null, "fileChange",
-                        "changeEvent", "delete", "levelName", levelName, "deleteType", type, "fileName", filename);
+                    commander.asyncWebHooks(pim, "fileChange", "changeEvent", "delete", "levelName", levelName, "deleteType", type, "fileName", filename);
                     return JsonMessage.success("删除成功");
                 }
                 return new JsonMessage<>(500, "删除失败");
@@ -359,6 +339,7 @@ public class ProjectFileControl extends BaseAgentController {
                 }
                 return new JsonMessage<>(500, "删除失败：" + file.getAbsolutePath());
             }
+            AbstractProjectCommander.getInstance().asyncWebHooks(projectInfoModel, "fileChange", "changeEvent", "batch-delete", "levelName", dir);
             return JsonMessage.success("删除成功");
         } finally {
             ProjectFileBackupUtil.checkDiff(projectInfoModel, backupId);
@@ -404,8 +385,7 @@ public class ProjectFileControl extends BaseAgentController {
         String backupId = ProjectFileBackupUtil.backup(pim);
         try {
             FileUtil.writeString(fileText, FileUtil.file(pim.allLib(), filePath, filename), charset);
-            AbstractProjectCommander.getInstance().asyncWebHooks(pim, null, "fileChange",
-                "changeEvent", "edit", "levelName", filePath, "fileName", filename);
+            AbstractProjectCommander.getInstance().asyncWebHooks(pim, "fileChange", "changeEvent", "edit", "levelName", filePath, "fileName", filename);
             return JsonMessage.success("文件写入成功");
         } finally {
             ProjectFileBackupUtil.checkDiff(pim, backupId);
@@ -481,8 +461,7 @@ public class ProjectFileControl extends BaseAgentController {
                 // 移动文件到对应目录
                 FileUtil.move(downloadFile, file, true);
             }
-            AbstractProjectCommander.getInstance().asyncWebHooks(pim, null, "fileChange",
-                "changeEvent", "remoteDownload", "levelName", levelName, "fileName", file.getName(), "url", url);
+            AbstractProjectCommander.getInstance().asyncWebHooks(pim, "fileChange", "changeEvent", "remoteDownload", "levelName", levelName, "fileName", file.getName(), "url", url);
             return JsonMessage.success("下载成功文件大小：" + fileSize);
         } catch (Exception e) {
             log.error("下载远程文件异常", e);
@@ -514,8 +493,7 @@ public class ProjectFileControl extends BaseAgentController {
         } else {
             FileUtil.touch(file);
         }
-        AbstractProjectCommander.getInstance().asyncWebHooks(projectInfoModel, null, "fileChange",
-            "changeEvent", "newFileOrFolder", "levelName", levelName, "fileName", filename, "folder", folder);
+        AbstractProjectCommander.getInstance().asyncWebHooks(projectInfoModel, "fileChange", "changeEvent", "newFileOrFolder", "levelName", levelName, "fileName", filename, "folder", folder);
         return JsonMessage.success("操作成功");
     }
 
@@ -538,8 +516,7 @@ public class ProjectFileControl extends BaseAgentController {
         Assert.state(!FileUtil.exist(newFile), "文件名已经存在拉");
 
         FileUtil.rename(file, newname, false);
-        AbstractProjectCommander.getInstance().asyncWebHooks(projectInfoModel, null, "fileChange",
-            "changeEvent", "rename", "levelName", levelName, "fileName", filename, "newname", newname);
+        AbstractProjectCommander.getInstance().asyncWebHooks(projectInfoModel, "fileChange", "changeEvent", "rename", "levelName", levelName, "fileName", filename, "newname", newname);
         return JsonMessage.success("操作成功");
     }
 

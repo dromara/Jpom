@@ -55,8 +55,13 @@ public abstract class BaseRunScript implements AutoCloseable, ILogRecorder {
     protected InputStream inputStream;
 
     protected BaseRunScript(File logFile, Charset charset) {
-        this.logFile = logFile;
-        this.logRecorder = LogRecorder.builder().file(logFile).charset(charset).build();
+        if (logFile == null) {
+            this.logFile = null;
+            this.logRecorder = null;
+        } else {
+            this.logFile = logFile;
+            this.logRecorder = LogRecorder.builder().file(logFile).charset(charset).build();
+        }
     }
 
     @Override
