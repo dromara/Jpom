@@ -181,21 +181,9 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
             this.errorMsg(response, "您不是超级管理员没有权限:-2");
             return false;
         }
-        NodeModel node = (NodeModel) request.getAttribute("node");
-        if (node == null) {
-            // 服务端
-            if (!userModel.isSystemUser()) {
-                this.errorMsg(response, "您没有服务端管理权限:-2");
-                return false;
-            }
-        } else {
-            // 判断节点管理权限
-            String workspaceId = BaseWorkspaceService.getWorkspaceId(request);
-            UserBindWorkspaceModel.PermissionResult permissionResult = userBindWorkspaceService.checkPermission(userModel, workspaceId + UserBindWorkspaceService.SYSTEM_USER);
-            if (!permissionResult.isSuccess()) {
-                this.errorMsg(response, permissionResult.errorMsg("节点管理"));
-                return false;
-            }
+        if (!userModel.isSystemUser()) {
+            this.errorMsg(response, "您没有服务端管理权限:-2");
+            return false;
         }
         return true;
     }
