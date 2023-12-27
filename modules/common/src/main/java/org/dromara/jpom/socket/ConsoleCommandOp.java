@@ -22,30 +22,41 @@
  */
 package org.dromara.jpom.socket;
 
+import lombok.Getter;
+
 /**
  * 控制台socket 操作枚举
  *
  * @author bwcx_jzy
  * @since 2019/4/16
  */
+@Getter
 public enum ConsoleCommandOp {
     /**
      * 启动
      */
-    start,
-    stop,
-    restart,
+    start(true),
+    stop(true),
+    restart(true),
     status,
+    reload(true),
     /**
      * 运行日志
      */
     showlog,
     /**
-     * 查看内存信息
-     */
-    top,
-    /**
      * 心跳
      */
-    heart
+    heart,
+    ;
+
+    private final boolean canOpt;
+
+    ConsoleCommandOp() {
+        this.canOpt = false;
+    }
+
+    ConsoleCommandOp(boolean canOpt) {
+        this.canOpt = canOpt;
+    }
 }

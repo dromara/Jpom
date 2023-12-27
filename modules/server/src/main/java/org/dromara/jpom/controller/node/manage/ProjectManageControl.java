@@ -350,47 +350,17 @@ public class ProjectManageControl extends BaseServerController {
     }
 
     /**
-     * 重启项目
+     * 操作项目
      * <p>
      * nodeId,id
      *
      * @return json
      */
-    @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "operate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<Object> restart(HttpServletRequest request) {
+    public IJsonMessage<Object> operate(HttpServletRequest request) {
         NodeModel nodeModel = getNode();
-        return NodeForward.request(nodeModel, request, NodeUrl.Manage_Restart);
-    }
-
-
-    /**
-     * 启动项目
-     * <p>
-     * nodeId,id
-     *
-     * @return json
-     */
-    @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<Object> start(HttpServletRequest request) {
-        NodeModel nodeModel = getNode();
-        return NodeForward.request(nodeModel, request, NodeUrl.Manage_Start);
-    }
-
-
-    /**
-     * 关闭项目项目
-     * <p>
-     * nodeId,id
-     *
-     * @return json
-     */
-    @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<Object> stop(HttpServletRequest request) {
-        NodeModel nodeModel = getNode();
-        return NodeForward.request(nodeModel, request, NodeUrl.Manage_Stop);
+        return NodeForward.request(nodeModel, request, NodeUrl.Manage_Operate);
     }
 
 

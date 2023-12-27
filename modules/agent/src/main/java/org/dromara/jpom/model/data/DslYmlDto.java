@@ -71,6 +71,12 @@ public class DslYmlDto extends BaseJsonModel {
         return baseProcess;
     }
 
+    /**
+     * 判断是否包含指定流程
+     *
+     * @param opt 流程名
+     * @return true
+     */
     public boolean hasRunProcess(String opt) {
         DslYmlDto.Run run = this.getRun();
         if (run == null) {
@@ -101,8 +107,19 @@ public class DslYmlDto extends BaseJsonModel {
         private Status status;
         private Stop stop;
         private Restart restart;
+        private Reload reload;
+        /**
+         * 文件变动是否执行重新加载
+         */
+        private Boolean fileChangeReload;
     }
 
+    /**
+     * 重新加载
+     */
+    public static class Reload extends BaseProcess {
+
+    }
 
     /**
      * 启动流程

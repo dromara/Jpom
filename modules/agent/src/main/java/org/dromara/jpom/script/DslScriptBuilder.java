@@ -29,6 +29,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.thread.ThreadUtil;
@@ -139,10 +140,14 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 
     /**
      * 执行
+     * <p>
+     * 0 退出码
+     * 1 日志
      */
-    public List<String> syncExecute() {
+    public Tuple syncExecute() {
         ProcessBuilder processBuilder = this.init();
         List<String> result = new ArrayList<>();
+        int waitFor = -100;
         try {
             //
             process = processBuilder.start();
@@ -150,18 +155,17 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 
             IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> result.add(this.formatLine(line)));
             //
-            int waitFor = process.waitFor();
+            waitFor = process.waitFor();
             // 插入第一行
             result.add(0, this.formatLine(StrUtil.format("执行结束: {}", waitFor)));
             //
-            return result;
         } catch (Exception e) {
             log.error("执行异常", e);
             result.add(this.formatLine(StrUtil.format("执行异常：", e.getMessage())));
         } finally {
             this.close();
         }
-        return result;
+        return new Tuple(waitFor, result);
     }
 
     @Override
@@ -205,12 +209,20 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
      *
      * @param scriptProcess 脚本流程
      */
-    public static List<String> syncRun(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action) {
+    public static Tuple syncRun(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action) {
         try (DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, action, null)) {
             return builder.syncExecute();
         }
     }
 
+    /**
+     * 构建 DSL 执行器
+     *
+     * @param scriptProcess        脚本流程
+     * @param nodeProjectInfoModel 项目
+     * @param log                  日志路径
+     * @param action               具体操作
+     */
     private static DslScriptBuilder create(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log) {
         NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
         AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);

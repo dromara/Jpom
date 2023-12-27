@@ -185,7 +185,7 @@ export default {
         nodeId: this.nodeId,
         id: this.projectId,
       }).then((res) => {
-        if (res.code === 200) {
+        if (res.code === 200 && res.data) {
           this.backupListData = res.data;
         }
         this.backupListLoading = false;

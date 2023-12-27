@@ -108,6 +108,10 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      * dsl 环境变量
      */
     private String dslEnv;
+    /**
+     * 是否可以重新加载
+     */
+    private Boolean canReload;
 
     public String getJavaExtDirsCp() {
         return StrUtil.emptyToDefault(javaExtDirsCp, StrUtil.EMPTY);

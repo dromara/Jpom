@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom.controller.manage;
 
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
@@ -34,7 +35,6 @@ import org.dromara.jpom.common.commander.CommandOpResult;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
-import org.dromara.jpom.service.manage.ConsoleService;
 import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.util.CommandUtil;
 import org.springframework.http.MediaType;
@@ -54,11 +54,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class ProjectStatusController extends BaseAgentController {
 
-    private final ConsoleService consoleService;
-
-    public ProjectStatusController(ConsoleService consoleService) {
-        this.consoleService = consoleService;
-    }
 
     /**
      * 获取项目的进程id
@@ -131,49 +126,15 @@ public class ProjectStatusController extends BaseAgentController {
     }
 
 
-    @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<CommandOpResult> restart(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id) {
+    @RequestMapping(value = "operate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<CommandOpResult> operate(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id,
+                                                 @ValidatorItem String opt) throws Exception {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
-        try {
-            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, item);
-            // boolean status = AbstractProjectCommander.getInstance().isRun(item, copyItem);
-
-            return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr(), result);
-
-        } catch (Exception e) {
-            log.error("重启项目异常", e);
-            return new JsonMessage<>(500, "重启项目异常:" + e.getMessage());
-        }
-    }
-
-
-    @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<CommandOpResult> stop(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id) {
-        NodeProjectInfoModel item = projectInfoService.getItem(id);
-        Assert.notNull(item, "没有找到对应的项目");
-
-        try {
-            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.stop, item);
-            return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr(), result);
-        } catch (Exception e) {
-            log.error("关闭项目异常", e);
-            return new JsonMessage<>(500, "关闭项目异常：" + e.getMessage());
-        }
-    }
-
-
-    @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<CommandOpResult> start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id) {
-        NodeProjectInfoModel item = projectInfoService.getItem(id);
-        Assert.notNull(item, "没有找到对应的项目");
-
-        try {
-            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.start, item);
-            return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr(), result);
-        } catch (Exception e) {
-            log.error("获取项目pid 失败", e);
-            return new JsonMessage<>(500, "启动项目异常：" + e.getMessage());
-        }
+        ConsoleCommandOp consoleCommandOp = EnumUtil.fromStringQuietly(ConsoleCommandOp.class, opt);
+        Assert.notNull(consoleCommandOp, "请选择操作类型");
+        Assert.state(consoleCommandOp.isCanOpt(), "不支持当前操作：" + opt);
+        CommandOpResult result = AbstractProjectCommander.getInstance().execCommand(consoleCommandOp, item);
+        return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr(), result);
     }
 }

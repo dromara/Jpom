@@ -28,7 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.model.RunMode;
+import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
+import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -64,6 +66,11 @@ public class ProjectListController extends BaseAgentController {
                 String command = AbstractProjectCommander.getInstance().buildJavaCommand(nodeProjectInfoModel);
                 nodeProjectInfoModel.setRunCommand(command);
             }
+            if (runMode == RunMode.Dsl) {
+                DslYmlDto dslYmlDto = nodeProjectInfoModel.dslConfig();
+                boolean reload = dslYmlDto.hasRunProcess(ConsoleCommandOp.reload.name());
+                nodeProjectInfoModel.setCanReload(reload);
+            }
         }
         return JsonMessage.success("", nodeProjectInfoModel);
     }
@@ -75,13 +82,8 @@ public class ProjectListController extends BaseAgentController {
      */
     @RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<List<NodeProjectInfoModel>> getProjectInfo() {
-        try {
-            // 查询数据
-            List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
-            return JsonMessage.success("查询成功！", nodeProjectInfoModels);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new JsonMessage<>(500, "查询异常：" + e.getMessage());
-        }
+        // 查询数据
+        List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
+        return JsonMessage.success("", nodeProjectInfoModels);
     }
 }
