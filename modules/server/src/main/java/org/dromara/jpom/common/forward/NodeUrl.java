@@ -62,9 +62,9 @@ public enum NodeUrl {
      */
     FreeScriptRun("/free-script-run"),
     /**
-     * Tomcat
+     * 系统日志
      */
-    Tomcat_Socket("/tomcat_log"),
+    Socket_SystemLog("/system_log"),
     /**
      * 节点升级
      */

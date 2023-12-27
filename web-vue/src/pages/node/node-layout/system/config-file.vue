@@ -24,8 +24,8 @@ export default {
     codeEditor,
   },
   props: {
-    node: {
-      type: Object,
+    machineId: {
+      type: String,
     },
   },
   data() {
@@ -44,7 +44,7 @@ export default {
   methods: {
     // load data
     loadData() {
-      getConfigData({ nodeId: this.node.id }).then((res) => {
+      getConfigData({ machineId: this.machineId }).then((res) => {
         if (res.code === 200) {
           this.temp.content = res.data;
           this.temp.content = res.data.content;
@@ -56,7 +56,7 @@ export default {
     onSubmit(restart) {
       // disabled submit button
       this.submitAble = true;
-      this.temp.nodeId = this.node.id;
+      this.temp.machineId = this.machineId;
       this.temp.restart = restart;
       editConfig(this.temp).then((res) => {
         if (res.code === 200) {
@@ -81,7 +81,7 @@ export default {
       setTimeout(() => {
         //
         this.timer = setInterval(() => {
-          systemInfo(this.node.id)
+          systemInfo(this.machineId)
             .then((res) => {
               if (res.code === 200) {
                 clearInterval(this.timer);

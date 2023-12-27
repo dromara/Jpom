@@ -40,7 +40,6 @@ import org.dromara.jpom.common.*;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
-import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
@@ -96,7 +95,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
     @PostMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> info(HttpServletRequest request, String machineId) {
-        IJsonMessage<JSONObject> message = this.tryRequestNode(machineId, request, NodeUrl.Info);
+        IJsonMessage<JSONObject> message = this.tryRequestMachine(machineId, request, NodeUrl.Info);
         return Optional.ofNullable(message).orElseGet(() -> {
             JpomManifest instance = JpomManifest.getInstance();
             cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
@@ -132,7 +131,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
     @PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> changeLog(HttpServletRequest request, String machineId) {
         boolean betaRelease = RemoteVersion.betaRelease();
-        JsonMessage<String> message = this.tryRequestNode(machineId, request, NodeUrl.CHANGE_LOG, "beta", String.valueOf(betaRelease));
+        JsonMessage<String> message = this.tryRequestMachine(machineId, request, NodeUrl.CHANGE_LOG, "beta", String.valueOf(betaRelease));
         if (message != null) {
             return message;
         }
@@ -150,17 +149,12 @@ public class SystemUpdateController extends BaseServerController implements ILoa
     @PostMapping(value = "upload-jar-sharding", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE, log = false)
     public IJsonMessage<String> uploadJarSharding(MultipartFile file,
-                                                 String machineId,
-                                                 String sliceId,
-                                                 Integer totalSlice,
-                                                 Integer nowSlice,
-                                                 String fileSumMd5) throws IOException {
+                                                  String machineId,
+                                                  String sliceId,
+                                                  Integer totalSlice,
+                                                  Integer nowSlice,
+                                                  String fileSumMd5) throws IOException {
         MultipartHttpServletRequest multiRequest = getMultiRequest();
-        NodeModel nodeModel = tryGetNode();
-        if (nodeModel != null) {
-            Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
-            return NodeForward.requestMultipart(nodeModel, multiRequest, NodeUrl.SystemUploadJar);
-        }
         if (StrUtil.isNotEmpty(machineId)) {
             MachineNodeModel model = machineNodeServer.getByKey(machineId);
             Assert.notNull(model, "没有找到对应的机器");
@@ -174,11 +168,11 @@ public class SystemUpdateController extends BaseServerController implements ILoa
     @PostMapping(value = "upload-jar-sharding-merge", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public IJsonMessage<String> uploadJar(String sliceId,
-                                         Integer totalSlice,
-                                         String fileSumMd5,
-                                         HttpServletRequest request,
-                                         String machineId) throws IOException {
-        JsonMessage<String> message = this.tryRequestNode(machineId, request, NodeUrl.SystemUploadJarMerge);
+                                          Integer totalSlice,
+                                          String fileSumMd5,
+                                          HttpServletRequest request,
+                                          String machineId) throws IOException {
+        JsonMessage<String> message = this.tryRequestMachine(machineId, request, NodeUrl.SystemUploadJarMerge);
         if (message != null) {
             // 判断-删除分片id
             BaseServerController.SHARDING_IDS.remove(sliceId);
@@ -215,8 +209,8 @@ public class SystemUpdateController extends BaseServerController implements ILoa
      */
     @PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<cn.keepbx.jpom.RemoteVersion> checkVersion(HttpServletRequest request,
-                                                   String machineId) {
-        IJsonMessage<cn.keepbx.jpom.RemoteVersion> message = this.tryRequestNode(machineId, request, NodeUrl.CHECK_VERSION);
+                                                                   String machineId) {
+        IJsonMessage<cn.keepbx.jpom.RemoteVersion> message = this.tryRequestMachine(machineId, request, NodeUrl.CHECK_VERSION);
         return Optional.ofNullable(message).orElseGet(() -> {
             cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
             return JsonMessage.success("", remoteVersion);
@@ -232,9 +226,9 @@ public class SystemUpdateController extends BaseServerController implements ILoa
     @GetMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DOWNLOAD)
     public IJsonMessage<String> upgrade(HttpServletRequest request,
-                                       String machineId) throws IOException {
+                                        String machineId) throws IOException {
 
-        IJsonMessage<String> message = this.tryRequestNode(machineId, request, NodeUrl.REMOTE_UPGRADE);
+        IJsonMessage<String> message = this.tryRequestMachine(machineId, request, NodeUrl.REMOTE_UPGRADE);
         return Optional.ofNullable(message).orElseGet(() -> {
             try {
                 RemoteVersion.upgrade(JpomApplication.getInstance().getTempPath().getAbsolutePath(), objects -> backupInfoService.autoBackup());

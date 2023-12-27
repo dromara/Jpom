@@ -47,8 +47,7 @@ export default {
       socket: null,
       // 日志内容
       // logContext: "choose file loading context...",
-      tomcatId: "system",
-      nodeId: "system",
+
       replaceFields: {
         children: "children",
         title: "title",
@@ -61,7 +60,7 @@ export default {
   computed: {
     ...mapGetters(["getLongTermToken"]),
     socketUrl() {
-      return getWebSocketUrl("/socket/tomcat_log", `userId=${this.getLongTermToken}&tomcatId=${this.tomcatId}&nodeId=${this.nodeId}&type=tomcat`);
+      return getWebSocketUrl("/socket/system_log", `userId=${this.getLongTermToken}&nodeId=system&type=systemLog`);
     },
   },
   watch: {},

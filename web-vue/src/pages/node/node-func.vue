@@ -21,6 +21,7 @@
             v-model="current"
             :tabBarStyle="{
               margin: '0',
+              borderBottom: '0',
             }"
           >
             <a-tab-pane key="project" tab="项目管理"></a-tab-pane>

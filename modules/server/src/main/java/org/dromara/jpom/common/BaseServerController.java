@@ -78,11 +78,17 @@ public abstract class BaseServerController extends BaseJpomController {
         return nodeService.getByKey(nodeId);
     }
 
-    protected <T> JsonMessage<T> tryRequestNode(String machineId, HttpServletRequest request, NodeUrl nodeUrl, String... pars) {
-        NodeModel nodeModel = tryGetNode();
-        if (nodeModel != null) {
-            return NodeForward.request(nodeModel, request, nodeUrl, new String[]{}, pars);
-        }
+    /**
+     * 判断是否传入机器 id
+     *
+     * @param machineId 机器id
+     * @param request   请求
+     * @param nodeUrl   节点 url
+     * @param pars      参数
+     * @param <T>       泛型
+     * @return data
+     */
+    protected <T> JsonMessage<T> tryRequestMachine(String machineId, HttpServletRequest request, NodeUrl nodeUrl, String... pars) {
         if (StrUtil.isNotEmpty(machineId)) {
             MachineNodeModel model = machineNodeServer.getByKey(machineId);
             Assert.notNull(model, "没有找到对应的机器");

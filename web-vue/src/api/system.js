@@ -48,11 +48,11 @@ export function getServerCache() {
  * 节点缓存数据
  * @param {String} nodeId
  */
-export function getNodeCache(nodeId) {
+export function getNodeCache(data) {
   return axios({
     url: "/system/node_cache.json",
     method: "post",
-    data: { nodeId },
+    data,
   });
 }
 

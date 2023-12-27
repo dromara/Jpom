@@ -1,12 +1,12 @@
 <template>
   <div>
-    <a-tabs @change="changeTabs">
+    <a-tabs @change="changeTabs" tab-position="left">
       <template slot="tabBarExtraContent">
         <a-space>
-          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="pullNodeData" />
+          <a-statistic-countdown format=" s 秒后刷新" title="" :value="countdownTime" @finish="pullNodeData" />
         </a-space>
       </template>
-      <a-tab-pane key="info" tab="信息">
+      <a-tab-pane key="info" tab="基础信息">
         <a-card size="small">
           <template slot="title">
             {{ machineInfo && machineInfo.name }}
@@ -122,7 +122,7 @@
           </a-card>
         </a-space>
       </a-tab-pane>
-      <a-tab-pane key="process" tab="进程">
+      <a-tab-pane key="process" tab="系统进程">
         <a-card size="small">
           <template #title>
             <a-row>
@@ -214,7 +214,7 @@
           </a-table>
         </a-table>
       </a-tab-pane>
-      <a-tab-pane key="networkInterfaces" tab="网络">
+      <a-tab-pane key="networkInterfaces" tab="网卡信息">
         <a-collapse v-if="networkInterfaces && networkInterfaces.length">
           <a-collapse-panel :key="index" v-for="(item, index) in networkInterfaces">
             <template #header>

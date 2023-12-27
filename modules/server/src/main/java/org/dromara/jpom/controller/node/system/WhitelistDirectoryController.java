@@ -112,7 +112,7 @@ public class WhitelistDirectoryController extends BaseServerController {
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
     public IJsonMessage<String> whitelistDirectorySubmit(HttpServletRequest request, String machineId) {
-        JsonMessage<String> objectJsonMessage = this.tryRequestNode(machineId, request, NodeUrl.WhitelistDirectory_Submit);
+        JsonMessage<String> objectJsonMessage = this.tryRequestMachine(machineId, request, NodeUrl.WhitelistDirectory_Submit);
         Assert.notNull(objectJsonMessage, "请选择节点");
         return objectJsonMessage;
     }

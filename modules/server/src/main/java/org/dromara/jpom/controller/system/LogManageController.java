@@ -50,6 +50,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -67,12 +68,12 @@ public class LogManageController extends BaseServerController {
 
     @RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<List<JSONObject>> logData(String nodeId) {
-        if (StrUtil.isNotEmpty(nodeId)) {
-            return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemLog);
-        }
-        List<JSONObject> data = DirTreeUtil.getTreeData(LogbackConfig.getPath());
-        return JsonMessage.success("", data);
+    public IJsonMessage<List<JSONObject>> logData(String machineId, HttpServletRequest request) {
+        IJsonMessage<List<JSONObject>> message = this.tryRequestMachine(machineId, request, NodeUrl.SystemLog);
+        return Optional.ofNullable(message).orElseGet(() -> {
+            List<JSONObject> data = DirTreeUtil.getTreeData(LogbackConfig.getPath());
+            return JsonMessage.success("", data);
+        });
     }
 
     /**
@@ -85,7 +86,7 @@ public class LogManageController extends BaseServerController {
     @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> logData(String nodeId,
-                                       @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
+                                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
         if (StrUtil.isNotEmpty(nodeId)) {
             return NodeForward.request(getNode(), getRequest(), NodeUrl.DelSystemLog);
         }

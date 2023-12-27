@@ -28,7 +28,6 @@ import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.Const;
 import org.dromara.jpom.system.AgentConfig;
 import org.dromara.jpom.system.LogbackConfig;
 import org.dromara.jpom.util.SocketSessionUtil;
@@ -47,10 +46,10 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2019/4/16
  */
-@ServerEndpoint(value = "/tomcat_log")
+@ServerEndpoint(value = "/system_log")
 @Component
 @Slf4j
-public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
+public class AgentWebSocketSystemLogHandle extends BaseAgentWebSocketHandle {
 
     private static AgentConfig.SystemConfig systemConfig;
 
@@ -58,7 +57,7 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
 
     @Autowired
     public void init(AgentConfig agentConfig) {
-        AgentWebSocketTomcatHandle.systemConfig = agentConfig.getSystem();
+        AgentWebSocketSystemLogHandle.systemConfig = agentConfig.getSystem();
     }
 
     @OnOpen
@@ -67,14 +66,7 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
             if (super.checkAuthorize(session)) {
                 return;
             }
-            String tomcatId = super.getParameters(session, "tomcatId");
-
-            if (!Const.SYSTEM_ID.equalsIgnoreCase(tomcatId)) {
-                SocketSessionUtil.send(session, "获取tomcat信息错误");
-                session.close();
-                return;
-            }
-            SocketSessionUtil.send(session, "连接成功：");
+            SocketSessionUtil.send(session, "连接成功：插件端日志");
         } catch (Exception e) {
             log.error("socket 错误", e);
             try {
@@ -94,10 +86,7 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
         if (consoleCommandOp == ConsoleCommandOp.heart) {
             return;
         }
-        String tomcatId = json.getString("tomcatId");
-        if (Const.SYSTEM_ID.equalsIgnoreCase(tomcatId)) {
-            runMsg(session, json);
-        }
+        runMsg(session, json);
     }
 
     private void runMsg(Session session, JSONObject reqJson) throws Exception {

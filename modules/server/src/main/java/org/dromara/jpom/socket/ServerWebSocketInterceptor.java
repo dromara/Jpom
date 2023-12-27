@@ -31,9 +31,12 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.interceptor.PermissionInterceptor;
+import org.dromara.jpom.func.assets.model.MachineNodeModel;
+import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserBindWorkspaceModel;
@@ -71,13 +74,16 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
     private final UserService userService;
     private final NodeService nodeService;
     private final UserBindWorkspaceService userBindWorkspaceService;
+    private final MachineNodeServer machineNodeServer;
 
     public ServerWebSocketInterceptor(UserService userService,
                                       NodeService nodeService,
-                                      UserBindWorkspaceService userBindWorkspaceService) {
+                                      UserBindWorkspaceService userBindWorkspaceService,
+                                      MachineNodeServer machineNodeServer) {
         this.userService = userService;
         this.nodeService = nodeService;
         this.userBindWorkspaceService = userBindWorkspaceService;
+        this.machineNodeServer = machineNodeServer;
     }
 
     private boolean checkNode(HttpServletRequest httpServletRequest, Map<String, Object> attributes, UserModel userModel) {
@@ -90,6 +96,19 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             }
             //
             attributes.put("nodeInfo", nodeModel);
+        }
+        // 验证机器权限
+        String machineId = httpServletRequest.getParameter("machineId");
+        if (StringUtils.isNotEmpty(machineId)) {
+            if (!userModel.isSystemUser()) {
+                // 没有权限
+                return false;
+            }
+            MachineNodeModel machine = machineNodeServer.getByKey(machineId);
+            if (machine == null) {
+                return false;
+            }
+            attributes.put("machine", machine);
         }
         return true;
     }
@@ -137,10 +156,8 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 attributes.put("scriptId", BeanUtil.getProperty(dataItem, "id"));
                 break;
             }
-            case tomcat:
-                String tomcatId = httpServletRequest.getParameter("tomcatId");
-
-                attributes.put("tomcatId", tomcatId);
+            case systemLog:
+            case agentLog:
                 break;
             case dockerLog: {
                 Tuple dataItem = this.checkAssetsData(handlerType, userModel, httpServletRequest);
@@ -194,10 +211,14 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 attributes.put("permissionMsg", "用户不存在");
                 return true;
             }
-            boolean checkNode = this.checkNode(httpServletRequest, attributes, userModel);
             HandlerType handlerType = this.fromType(httpServletRequest);
-            if (!checkNode || handlerType == null) {
+            if (handlerType == null) {
                 attributes.put("permissionMsg", "未匹配到合适的处理类型");
+                return true;
+            }
+            boolean checkNode = this.checkNode(httpServletRequest, attributes, userModel);
+            if (!checkNode) {
+                attributes.put("permissionMsg", "未匹配到合适的权限不足");
                 return true;
             }
             if (!this.checkHandlerType(handlerType, userModel, httpServletRequest, attributes)) {

@@ -27,6 +27,8 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.func.assets.model.MachineNodeModel;
+import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.transport.*;
 import org.dromara.jpom.util.SocketSessionUtil;
@@ -36,6 +38,7 @@ import org.springframework.web.socket.WebSocketSession;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 服务端socket 基本类
@@ -81,23 +84,31 @@ public abstract class BaseProxyHandler extends BaseHandler {
             return;
         }
         NodeModel nodeModel = (NodeModel) attributes.get("nodeInfo");
-//        UserModel userInfo = (UserModel) attributes.get("userInfo");
+        MachineNodeModel machine = (MachineNodeModel) attributes.get("machine");
 
-        if (nodeModel != null) {
-            Object[] parameters = this.getParameters(attributes);
-            // 连接节点
-            INodeInfo nodeInfo = NodeForward.parseNodeInfo(nodeModel);
-            IUrlItem urlItem = NodeForward.parseUrlItem(nodeInfo, nodeModel.getWorkspaceId(), this.nodeUrl, DataContentType.FORM_URLENCODED);
-
-            IProxyWebSocket proxySession = TransportServerFactory.get().websocket(nodeInfo, urlItem, parameters);
-            proxySession.onMessage(s -> sendMsg(session, s));
-            if (!proxySession.connectBlocking()) {
-                this.sendMsg(session, "插件端连接失败");
-                this.destroy(session);
-                return;
-            }
-            session.getAttributes().put("proxySession", proxySession);
+        Object[] parameters = this.getParameters(attributes);
+        // 连接节点
+        INodeInfo nodeInfo = Optional.ofNullable(machine)
+            .map(NodeForward::coverNodeInfo)
+            .orElseGet(() -> Optional.ofNullable(nodeModel)
+                .map(NodeForward::parseNodeInfo)
+                .orElse(null)
+            );
+        if (nodeInfo == null) {
+            return;
         }
+        String workspaceId = Optional.ofNullable(nodeModel).map(BaseWorkspaceModel::getWorkspaceId).orElse(StrUtil.EMPTY);
+        IUrlItem urlItem = NodeForward.parseUrlItem(nodeInfo, workspaceId, this.nodeUrl, DataContentType.FORM_URLENCODED);
+
+        IProxyWebSocket proxySession = TransportServerFactory.get().websocket(nodeInfo, urlItem, parameters);
+        proxySession.onMessage(s -> sendMsg(session, s));
+        if (!proxySession.connectBlocking()) {
+            this.sendMsg(session, "插件端连接失败");
+            this.destroy(session);
+            return;
+        }
+        session.getAttributes().put("proxySession", proxySession);
+
 
         attributes.put("init", true);
     }

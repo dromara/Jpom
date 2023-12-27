@@ -28,8 +28,8 @@ import { editWhiteList, getWhiteList } from "@/api/node-system";
 
 export default {
   props: {
-    node: {
-      type: Object,
+    machineId: {
+      type: String,
     },
   },
   data() {
@@ -45,7 +45,7 @@ export default {
     // load data
     loadData() {
       getWhiteList({
-        nodeId: this.node.id,
+        machineId: this.machineId,
       }).then((res) => {
         if (res.code === 200) {
           this.temp = res.data;
@@ -56,7 +56,7 @@ export default {
     onSubmit() {
       // disabled submit button
       this.submitAble = true;
-      this.temp.nodeId = this.node.id;
+      this.temp.machineId = this.machineId;
       editWhiteList(this.temp).then((res) => {
         if (res.code === 200) {
           // 成功

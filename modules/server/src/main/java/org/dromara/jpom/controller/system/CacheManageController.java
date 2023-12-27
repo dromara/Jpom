@@ -30,12 +30,12 @@ import cn.hutool.core.io.FileUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.event.ICacheTask;
 import cn.keepbx.jpom.model.JsonMessage;
+import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.build.BuildExecuteManage;
 import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JpomManifest;
-import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -134,8 +134,14 @@ public class CacheManageController extends BaseServerController implements ICach
      */
     @RequestMapping(value = "node_cache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String nodeCache(HttpServletRequest request) {
-        return NodeForward.request(getNode(), request, NodeUrl.Cache).toString();
+    public IJsonMessage<JSONObject> nodeCache(HttpServletRequest request, @ValidatorItem String machineId) {
+        return this.tryRequestMachine(machineId, request, NodeUrl.Cache);
+
+//        return Optional.ofNullable(message).orElseGet(() -> {
+//            List<JSONObject> data = DirTreeUtil.getTreeData(LogbackConfig.getPath());
+//            return JsonMessage.success("", data);
+//        });
+//        return NodeForward.request(getNode(), request, NodeUrl.Cache).toString();
     }
 
     /**
@@ -146,7 +152,9 @@ public class CacheManageController extends BaseServerController implements ICach
      */
     @RequestMapping(value = "clearCache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type, HttpServletRequest request) {
+    public IJsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type,
+                                           String machineId,
+                                           HttpServletRequest request) {
         switch (type) {
             case "serviceCacheFileSize": {
                 File tempPath = JpomApplication.getInstance().getTempPath();
@@ -164,8 +172,7 @@ public class CacheManageController extends BaseServerController implements ICach
                 break;
             }
             default:
-                return NodeForward.request(getNode(), request, NodeUrl.ClearCache);
-
+                return this.tryRequestMachine(machineId, request, NodeUrl.ClearCache);
         }
         return JsonMessage.success("清空成功");
     }
