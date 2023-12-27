@@ -615,6 +615,8 @@ public class ReleaseManage {
                 .file(zipFile)
                 .logRecorder(logRecorder)
                 .userModel(userModel)
+                .mode("build-trigger")
+                .modeData(buildExtraModule.getId())
                 .unzip(unZip)
                 // 由构建配置决定是否删除
                 .doneDeleteFile(false)

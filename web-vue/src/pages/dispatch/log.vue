@@ -26,7 +26,12 @@
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <a-tooltip slot="nodeName" slot-scope="text, record" placement="topLeft" :title="nodeList.filter((item) => item.id === record.nodeId) && nodeList.filter((item) => item.id === record.nodeId)[0] && nodeList.filter((item) => item.id === record.nodeId)[0].name">
+      <a-tooltip
+        slot="nodeName"
+        slot-scope="text, record"
+        placement="topLeft"
+        :title="nodeList.filter((item) => item.id === record.nodeId) && nodeList.filter((item) => item.id === record.nodeId)[0] && nodeList.filter((item) => item.id === record.nodeId)[0].name"
+      >
         <span>{{
           nodeList.filter((item) => item.id === record.nodeId) && nodeList.filter((item) => item.id === record.nodeId)[0] && nodeList.filter((item) => item.id === record.nodeId)[0].name
         }}</span>
@@ -34,6 +39,12 @@
       <a-tooltip slot="projectId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <template slot="mode" slot-scope="text, item">
+        <a-tooltip placement="topLeft" :title="`${dispatchMode[text] || ''}  关联数据：${item.modeData || ''}`">
+          <span>{{ dispatchMode[text] || "" }}</span>
+        </a-tooltip>
+      </template>
+
       <a-tooltip slot="outGivingResultMsg" slot-scope="text, item" placement="topLeft" :title="readJsonStrField(item.result, 'msg')">
         <span>{{ readJsonStrField(item.result, "code") }}-{{ readJsonStrField(item.result, "msg") || item.result }}</span>
       </a-tooltip>
@@ -72,13 +83,14 @@
 </template>
 <script>
 import { getNodeListAll } from "@/api/node";
-import { dispatchStatusMap, getDishPatchListAll, getDishPatchLogList } from "@/api/dispatch";
+import { dispatchStatusMap, getDishPatchListAll, getDishPatchLogList, dispatchMode } from "@/api/dispatch";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, readJsonStrField, parseTime } from "@/utils/const";
 
 export default {
   data() {
     return {
-      loading: false,
+      dispatchMode,
+      loading: true,
       list: [],
       nodeList: [],
       dispatchList: [],
@@ -89,12 +101,13 @@ export default {
       detailVisible: false,
       detailData: [],
       columns: [
-        { title: "分发项目 ID", dataIndex: "outGivingId", ellipsis: true, scopedSlots: { customRender: "outGivingId" } },
+        { title: "分发项目 ID", dataIndex: "outGivingId", width: 100, ellipsis: true, scopedSlots: { customRender: "outGivingId" } },
 
-        { title: "节点名称", dataIndex: "nodeName", ellipsis: true, scopedSlots: { customRender: "nodeName" } },
-        { title: "项目 ID", dataIndex: "projectId", ellipsis: true, scopedSlots: { customRender: "projectId" } },
-        { title: "分发结果", dataIndex: "outGivingResultMsg", ellipsis: true, scopedSlots: { customRender: "outGivingResultMsg" } },
-        { title: "分发状态消息", dataIndex: "outGivingResultMsgData", ellipsis: true, scopedSlots: { customRender: "outGivingResultMsgData" } },
+        { title: "节点名称", dataIndex: "nodeName", ellipsis: true, width: 150, scopedSlots: { customRender: "nodeName" } },
+        { title: "项目 ID", dataIndex: "projectId", ellipsis: true, width: 100, scopedSlots: { customRender: "projectId" } },
+        { title: "分发方式", dataIndex: "mode", ellipsis: true, width: "100px", scopedSlots: { customRender: "mode" } },
+        { title: "分发结果", dataIndex: "outGivingResultMsg", ellipsis: true, width: 200, scopedSlots: { customRender: "outGivingResultMsg" } },
+        { title: "分发状态消息", dataIndex: "outGivingResultMsgData", ellipsis: true, width: 100, scopedSlots: { customRender: "outGivingResultMsgData" } },
         { title: "分发耗时", dataIndex: "outGivingResultTime", width: "120px", scopedSlots: { customRender: "outGivingResultTime" } },
         { title: "文件大小", dataIndex: "outGivingResultSize", width: "100px", scopedSlots: { customRender: "outGivingResultSize" } },
         {
@@ -116,7 +129,7 @@ export default {
           width: "170px",
         },
         { title: "操作人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
-        { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" }, fixed: "right" },
         // { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "100px" },
       ],
     };

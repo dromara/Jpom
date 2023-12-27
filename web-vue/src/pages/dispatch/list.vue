@@ -60,7 +60,7 @@
 
       <a-tooltip slot="status" slot-scope="text, record" placement="topLeft" :title="`${record.statusMsg || ''}`">
         <a-tag v-if="text === 2" color="green">{{ statusMap[text] || "未知" }}</a-tag>
-        <a-tag v-else-if="text === 1 || text === 0" color="orange">{{ statusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else-if="text === 1" color="orange">{{ statusMap[text] || "未知" }}</a-tag>
         <a-tag v-else-if="text === 3 || text === 4" color="red">{{ statusMap[text] || "未知" }}</a-tag>
         <a-tag v-else>{{ statusMap[text] || "未知" }}</a-tag>
       </a-tooltip>
@@ -500,6 +500,23 @@
             </a-col>
           </a-row>
         </a-form-model-item>
+        <a-form-model-item prop="webhook">
+          <template slot="label">
+            WebHooks
+            <a-tooltip v-show="!temp.id">
+              <template slot="title">
+                <ul>
+                  <li>分发过程请求对应的地址,开始分发,分发完成,分发失败,取消分发</li>
+                  <li>传入参数有：outGivingId、outGivingName、status、statusMsg、executeTime</li>
+                  <li>status 的值有：1:分发中、2：分发结束、3：已取消、4：分发失败</li>
+                  <li>异步请求不能保证有序性</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input v-model="temp.webhook" placeholder="分发过程请求,非必填，GET请求" />
+        </a-form-model-item>
         <!-- 节点 -->
         <a-form-model-item label="分发节点" prop="nodeId">
           <a-select show-search option-filter-prop="children" v-model="temp.nodeIdList" mode="multiple" placeholder="请选择分发节点">
@@ -545,109 +562,19 @@
             </a-form-model-item>
           </a-collapse-panel>
         </a-collapse>
-        <a-form-model-item prop="webhook">
-          <template slot="label">
-            WebHooks
-            <a-tooltip v-show="!temp.id">
-              <template slot="title">
-                <ul>
-                  <li>分发过程请求对应的地址,开始分发,分发完成,分发失败,取消分发</li>
-                  <li>传入参数有：outGivingId、outGivingName、status、statusMsg、executeTime</li>
-                  <li>status 的值有：1:分发中、2：分发结束、3：已取消、4：分发失败</li>
-                  <li>异步请求不能保证有序性</li>
-                </ul>
-              </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-input v-model="temp.webhook" placeholder="分发过程请求,非必填，GET请求" />
-        </a-form-model-item>
       </a-form-model>
     </a-modal>
     <!-- 分发项目 -->
-    <a-modal
-      destroyOnClose
-      v-model="dispatchVisible"
-      :closable="!uploading"
-      :footer="uploading ? null : undefined"
-      width="50%"
-      :keyboard="false"
-      :title="'分发项目-' + temp.name"
-      @ok="handleDispatchOk"
-      :maskClosable="false"
-    >
-      <a-form-model ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-model-item label="方式" prop="type">
-          <a-radio-group v-model="temp.type" name="type" :disabled="!!percentage">
-            <a-radio :value="'upload'">上传文件</a-radio>
-            <a-radio :value="'download'">远程下载</a-radio>
-          </a-radio-group>
-        </a-form-model-item>
-
-        <a-form-model-item label="选择分发文件" prop="clearOld" v-if="temp.type === 'upload'">
-          <!-- accept=".zip,.tar,.gz,.bz2" -->
-
-          <a-progress v-if="percentage" :percent="percentage">
-            <template #format="percent">
-              {{ percent }}%
-              <template v-if="percentageInfo.total"> ({{ renderSize(percentageInfo.total) }}) </template>
-              <template v-if="percentageInfo.duration"> 用时:{{ formatDuration(percentageInfo.duration) }} </template>
-            </template>
-          </a-progress>
-
-          <a-upload :file-list="fileList" :disabled="!!percentage" :remove="handleRemove" :before-upload="beforeUpload">
-            <a-icon type="loading" v-if="percentage" />
-            <a-button v-else type="primary" icon="upload">选择文件上传</a-button>
-          </a-upload>
-        </a-form-model-item>
-        <a-form-model-item label="远程下载URL" prop="url" v-if="temp.type === 'download'">
-          <a-input v-model="temp.url" placeholder="远程下载地址" />
-        </a-form-model-item>
-        <!-- <a-form-model-item label="是否为压缩包" v-if="temp.type == 'download'">
-          <a-switch v-model="temp.unzip" checked-children="是" un-checked-children="否" v-decorator="['unzip', { valuePropName: 'checked' }]" />
-        </a-form-model-item> -->
-        <a-form-model-item prop="clearOld">
-          <template slot="label">
-            清空发布
-            <a-tooltip>
-              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件 </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
-        </a-form-model-item>
-        <a-form-model-item prop="unzip">
-          <template slot="label">
-            是否解压
-            <a-tooltip>
-              <template slot="title"> 如果上传的压缩文件是否自动解压 支持的压缩包类型有 tar.bz2, tar.gz, tar, bz2, zip, gz</template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-switch v-model="temp.autoUnzip" checked-children="是" un-checked-children="否" />
-        </a-form-model-item>
-        <a-form-model-item label="剔除文件夹" v-if="temp.autoUnzip">
-          <a-input-number style="width: 100%" v-model="temp.stripComponents" :min="0" placeholder="解压时候自动剔除压缩包里面多余的文件夹名" />
-        </a-form-model-item>
-
-        <a-form-model-item label="分发后操作" prop="afterOpt">
-          <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
-            <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
-          </a-select>
-        </a-form-model-item>
-        <a-form-model-item prop="secondaryDirectory" label="二级目录">
-          <a-input v-model="temp.secondaryDirectory" placeholder="不填写则发布至项目的根目录" />
-        </a-form-model-item>
-        <a-form-model-item prop="selectProject" label="筛选项目" help="筛选之后本次发布操作只发布筛选项,并且只对本次操作生效">
-          <a-select mode="multiple" v-model="temp.selectProjectArray" placeholder="请选择指定发布的项目">
-            <a-select-option v-for="item in itemProjectList" :key="item.id" :value="`${item.projectId}@${item.nodeId}`">
-              {{ item.nodeName }}-{{ item.cacheProjectName || item.projectId }}
-            </a-select-option>
-          </a-select>
-        </a-form-model-item>
-      </a-form-model>
-    </a-modal>
-
+    <start-dispatch
+      :data="temp"
+      v-if="dispatchVisible"
+      @cancel="
+        () => {
+          dispatchVisible = false;
+          loadData();
+        }
+      "
+    />
     <!-- 配置分发 -->
     <a-modal destroyOnClose v-model="viewDispatchManager" width="50%" :title="`配置分发`" @ok="viewDispatchManagerOk" :maskClosable="false">
       <draggable v-model="temp.dispatchManagerList" :group="`sortValue`" handle=".move" chosenClass="box-shadow">
@@ -710,39 +637,36 @@ import {
   getDispatchProject,
   getDispatchWhiteList,
   releaseDelDisPatch,
-  remoteDownload,
   statusMap,
   unbindOutgiving,
-  uploadDispatchFile,
   dispatchStatusMap,
   cancelOutgiving,
-  uploadDispatchFileMerge,
   saveDispatchProjectConfig,
   removeProject,
 } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, javaModes, noFileModes, runModeList, getProjectGroupAll } from "@/api/node-project";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, randomStr, itemGroupBy, parseTime, renderSize, formatDuration } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, randomStr, itemGroupBy, parseTime } from "@/utils/const";
 
-import { uploadPieces } from "@/utils/upload-pieces";
 import CustomSelect from "@/components/customSelect";
 import draggable from "vuedraggable";
-
+import StartDispatch from "./start";
 export default {
   components: {
     codeEditor,
     CustomSelect,
     draggable,
     Status,
+    StartDispatch,
   },
   data() {
     return {
       loading: false,
 
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-      statusMap: statusMap,
-      javaModes: javaModes,
-      noFileModes: noFileModes,
+      statusMap,
+      javaModes,
+      noFileModes,
       dispatchStatusMap,
       PROJECT_DSL_DEFATUL,
       list: [],
@@ -754,7 +678,7 @@ export default {
       targetKeys: [],
       // reqId: "",
       temp: {},
-      fileList: [],
+
       runModeList: runModeList,
 
       linkDispatchVisible: false,
@@ -804,15 +728,10 @@ export default {
         whitelistDirectory: [{ required: true, message: "请选择项目白名单路径", trigger: "blur" }],
         lib: [{ required: true, message: "请输入项目文件夹", trigger: "blur" }],
         afterOpt: [{ required: true, message: "请选择发布后操作", trigger: "blur" }],
-        url: [{ required: true, message: "请输入远程地址", trigger: "blur" }],
       },
       countdownTime: Date.now(),
       refreshInterval: 5,
 
-      percentage: 0,
-      percentageInfo: {},
-      uploading: false,
-      itemProjectList: [],
       viewDispatchManager: false,
 
       drawerStatusVisible: false,
@@ -834,8 +753,6 @@ export default {
     this.loadGroupList();
   },
   methods: {
-    renderSize,
-    formatDuration,
     randomStr,
     CHANGE_PAGE,
     // 页面引导
@@ -1144,143 +1061,10 @@ export default {
 
     // 处理分发
     handleDispatch(record) {
-      getDispatchProject(record.id, true).then((res) => {
-        if (res.code === 200) {
-          this.itemProjectList = res.data?.projectList;
-          // itemProjectList
-          this.temp = Object.assign({ type: "upload" }, record);
-          this.dispatchVisible = true;
-          this.percentage = 0;
-          this.percentageInfo = {};
-          this.fileList = [];
-          this.$refs["dispatchForm"] && this.$refs["dispatchForm"].resetFields();
-        }
-      });
+      this.temp = Object.assign({ type: "upload" }, record);
+      this.dispatchVisible = true;
     },
-    // 处理文件移除
-    handleRemove(file) {
-      const index = this.fileList.indexOf(file);
-      const newFileList = this.fileList.slice();
-      newFileList.splice(index, 1);
-      this.fileList = newFileList;
-    },
-    // 准备上传文件
-    beforeUpload(file) {
-      // 只允许上传单个文件
-      this.fileList = [file];
-      return false;
-    },
-    // 提交分发文件
-    handleDispatchOk() {
-      // console.log(this.temp);
-      this.temp = { ...this.temp, selectProject: (this.temp.selectProjectArray && this.temp.selectProjectArray.join(",")) || "" };
-      // 检验表单
-      this.$refs["dispatchForm"].validate((valid) => {
-        if (!valid) {
-          return false;
-        }
-        // const key = this.temp.type;
-        if (this.temp.type == "upload") {
-          // 判断文件
-          if (this.fileList.length === 0) {
-            this.$notification.error({
-              message: "请选择文件",
-            });
-            return false;
-          }
-          this.percentage = 0;
-          this.percentageInfo = {};
-          let file = this.fileList[0];
-          this.uploading = true;
-          uploadPieces({
-            file,
-            process: (process, end, total, duration) => {
-              this.percentage = Math.max(this.percentage, process);
-              this.percentageInfo = { end, total, duration };
-            },
-            success: (uploadData) => {
-              // 准备合并
-              uploadDispatchFileMerge({
-                ...uploadData[0],
-                id: this.temp.id,
-                afterOpt: this.temp.afterOpt,
-                clearOld: this.temp.clearOld,
-                autoUnzip: this.temp.autoUnzip,
-                secondaryDirectory: this.temp.secondaryDirectory || "",
-                stripComponents: this.temp.stripComponents || 0,
-                selectProject: this.temp.selectProject,
-              })
-                .then((res) => {
-                  if (res.code === 200) {
-                    this.fileList = [];
-                    this.loadData();
-                    this.dispatchVisible = false;
-                    this.$refs["dispatchForm"].resetFields();
-                  }
-                  setTimeout(() => {
-                    this.percentage = 0;
-                    this.percentageInfo = {};
-                  }, 2000);
-                  this.uploading = false;
-                })
-                .catch(() => {
-                  this.uploading = false;
-                });
-            },
-            error: (msg) => {
-              this.$notification.error({
-                message: msg,
-              });
-              this.uploading = false;
-            },
-            uploadCallback: (formData) => {
-              return new Promise((resolve, reject) => {
-                formData.append("id", this.temp.id);
-                // 上传文件
-                uploadDispatchFile(formData)
-                  .then((res) => {
-                    if (res.code === 200) {
-                      resolve();
-                    } else {
-                      reject();
-                    }
-                  })
-                  .catch(() => {
-                    reject();
-                  });
-              });
-            },
-          });
 
-          return true;
-        }
-        if (this.temp.type == "download") {
-          if (!this.temp.url) {
-            this.$notification.error({
-              message: "请填写远程URL",
-            });
-            return false;
-          }
-          // 远程下载
-          // this.$message.loading({ content: "正在下载文件...", key, duration: 0 });
-          remoteDownload(this.temp).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              // this.$message.success({ content: "下载成功,开始分发!", key });
-
-              this.loadData();
-              this.dispatchVisible = false;
-              this.$refs["dispatchForm"] && this.$refs["dispatchForm"].resetFields();
-            } else {
-              // this.$message.warn({ content: "下载失败", key });
-            }
-          });
-          return true;
-        }
-      });
-    },
     // 删除
     handleDelete(record, thorough) {
       if (record.outGivingProject) {

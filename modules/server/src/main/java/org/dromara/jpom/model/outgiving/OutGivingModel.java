@@ -109,6 +109,15 @@ public class OutGivingModel extends BaseGroupModel {
      * 构建发布状态通知
      */
     private String webhook;
+    /**
+     * 分发方式
+     * upload: "手动上传",
+     * download: "远程下载",
+     * "build-trigger": "构建触发",
+     * "use-build": "构建产物",
+     */
+    private String mode;
+    private String modeData;
 
     public boolean clearOld() {
         return clearOld != null && clearOld;

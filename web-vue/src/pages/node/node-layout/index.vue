@@ -25,40 +25,32 @@
       <!-- class="layout-content jpom-node-content drawer-layout-content" -->
 
       <a-layout-content :class="`layout-content jpom-node-content ${this.fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'} ${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
-        <welcome v-if="currentId === 'welcome'" :node="node" />
+        <!-- <welcome v-if="currentId === 'welcome'" :node="node" /> -->
         <!-- <project-list v-if="currentId === 'manageList'" :node="node" /> -->
 
         <!-- <script-template v-if="currentId === 'script'" :node="node" /> -->
         <!-- <script-log v-if="currentId === 'script-log'" :nodeId="node.id" /> -->
 
-        <white-list v-if="currentId === 'whitelistDirectory'" :node="node" />
-        <cache v-if="currentId === 'cacheManage'" :node="node" />
-        <log v-if="currentId === 'logManage'" :node="node" />
+        <!-- <white-list v-if="currentId === 'whitelistDirectory'" :node="node" /> -->
+        <!-- <cache v-if="currentId === 'cacheManage'" :node="node" /> -->
+        <!-- <log v-if="currentId === 'logManage'" :node="node" /> -->
 
-        <config-file v-if="currentId === 'sysConfig'" :node="node" />
+        <!-- <config-file v-if="currentId === 'sysConfig'" :node="node" /> -->
       </a-layout-content>
     </a-layout>
   </div>
 </template>
 <script>
 import { getNodeMenu } from "@/api/menu";
-import Welcome from "@/pages/node/node-layout/welcome";
-
-import WhiteList from "@/pages/node/node-layout/system/white-list.vue";
-import Cache from "@/pages/node/node-layout/system/cache";
-import Log from "@/pages/node/node-layout/system/log.vue";
-import ConfigFile from "@/pages/node/node-layout/system/config-file.vue";
 import { mapGetters } from "vuex";
 
 export default {
   components: {
-    Welcome,
-
-    WhiteList,
-    Cache,
-    Log,
-
-    ConfigFile,
+    // Welcome,
+    // WhiteList,
+    // Cache,
+    // Log,
+    // ConfigFile,
   },
   props: {
     node: {

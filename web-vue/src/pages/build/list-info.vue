@@ -35,9 +35,9 @@
             <a-button :disabled="true" type="primary"> 批量操作 <a-icon type="down" /> </a-button>
           </a-tooltip>
 
-          <a-button type="primary" @click="changeLayout" :icon="this.layoutType === 'card' ? 'layout' : 'table'"> {{ this.layoutType === "card" ? "卡片" : "表格" }} </a-button>
+          <a-button v-if="!layout" type="primary" @click="changeLayout" :icon="this.layoutType === 'card' ? 'layout' : 'table'"> {{ this.layoutType === "card" ? "卡片" : "表格" }} </a-button>
 
-          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
+          <a-statistic-countdown v-if="!choose" format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
         </a-space>
       </template>
       <template v-if="this.layoutType === 'card'">
@@ -473,6 +473,35 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 选择确认区域 -->
+    <div style="padding-top: 50px" v-if="this.choose">
+      <div
+        :style="{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          borderTop: '1px solid #e9e9e9',
+          padding: '10px 16px',
+          background: '#fff',
+          textAlign: 'right',
+          zIndex: 1,
+        }"
+      >
+        <a-space>
+          <a-button
+            @click="
+              () => {
+                this.$emit('cancel');
+              }
+            "
+          >
+            取消
+          </a-button>
+          <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
+        </a-space>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -514,6 +543,15 @@ export default {
     fullContent: {
       type: Boolean,
       default: true,
+    },
+    choose: {
+      // "radio"
+      type: String,
+      default: "",
+    },
+    layout: {
+      type: String,
+      default: "",
     },
   },
   data() {
@@ -623,12 +661,18 @@ export default {
           this.tableSelections = selectedRowKeys;
         },
         selectedRowKeys: this.tableSelections,
+        type: this.choose || "checkbox",
       };
     },
   },
   watch: {},
   created() {
-    this.changeLayout();
+    if (this.layout) {
+      this.layoutType = this.layout;
+      this.loadData();
+    } else {
+      this.changeLayout();
+    }
     this.loadGroupList();
     //
     this.countdownTime = Date.now() + this.refreshInterval * 1000;
@@ -972,6 +1016,25 @@ export default {
       }
       this.listQuery = { ...this.listQuery, limit: this.layoutType === "card" ? 8 : getCachePageLimit() };
       this.loadData();
+    },
+    // 选择确认
+    handerConfirm() {
+      if (!this.tableSelections.length) {
+        this.$notification.warning({
+          message: "请选择要使用的构建",
+        });
+        return;
+      }
+      const selectData = this.list.filter((item) => {
+        return this.tableSelections.indexOf(item.id) > -1;
+      });
+      if (!selectData.length) {
+        this.$notification.warning({
+          message: "请选择要使用的构建",
+        });
+        return;
+      }
+      this.$emit("confirm", selectData);
     },
   },
 };
