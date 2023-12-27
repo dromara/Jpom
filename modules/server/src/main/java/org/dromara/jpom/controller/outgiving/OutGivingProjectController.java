@@ -40,6 +40,8 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
+import org.dromara.jpom.func.files.model.FileStorageModel;
+import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.BaseEnum;
 import org.dromara.jpom.model.BaseNodeModel;
@@ -98,6 +100,7 @@ public class OutGivingProjectController extends BaseServerController {
     private final ProjectInfoCacheService projectInfoCacheService;
     private final BuildInfoService buildInfoService;
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
+    private final FileStorageService fileStorageService;
 
     public OutGivingProjectController(OutGivingServer outGivingServer,
                                       OutGivingWhitelistService outGivingWhitelistService,
@@ -105,7 +108,8 @@ public class OutGivingProjectController extends BaseServerController {
                                       DbOutGivingLogService dbOutGivingLogService,
                                       ProjectInfoCacheService projectInfoCacheService,
                                       BuildInfoService buildInfoService,
-                                      DbBuildHistoryLogService dbBuildHistoryLogService) {
+                                      DbBuildHistoryLogService dbBuildHistoryLogService,
+                                      FileStorageService fileStorageService) {
         this.outGivingServer = outGivingServer;
         this.outGivingWhitelistService = outGivingWhitelistService;
         this.serverConfig = serverConfig;
@@ -113,6 +117,7 @@ public class OutGivingProjectController extends BaseServerController {
         this.projectInfoCacheService = projectInfoCacheService;
         this.buildInfoService = buildInfoService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
+        this.fileStorageService = fileStorageService;
     }
 
     @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -332,7 +337,6 @@ public class OutGivingProjectController extends BaseServerController {
     @PostMapping(value = "use-build", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public IJsonMessage<String> useBuild(String id, String afterOpt, String clearOld, String buildId, String buildNumberId,
-                                         String autoUnzip,
                                          String secondaryDirectory,
                                          String stripComponents,
                                          String selectProject,
@@ -355,7 +359,6 @@ public class OutGivingProjectController extends BaseServerController {
         EnvironmentMapBuilder environmentMapBuilder = buildHistoryLog.toEnvironmentMapBuilder();
         boolean tarGz = environmentMapBuilder.getBool(BuildUtil.USE_TAR_GZ, false);
         int stripComponentsValue = Convert.toInt(stripComponents, 0);
-        boolean unzip = BooleanUtil.toBoolean(autoUnzip);
         //
         outGivingModel.setClearOld(Convert.toBool(clearOld, false));
         outGivingModel.setAfterOpt(afterOpt1.getCode());
@@ -370,7 +373,7 @@ public class OutGivingProjectController extends BaseServerController {
                 .id(outGivingModel.getId())
                 .file(zipFile)
                 .userModel(getUser())
-                .unzip(unzip)
+                .unzip(unZip)
                 // 由构建配置决定是否删除
                 .doneDeleteFile(false)
                 .mode(outGivingModel.getMode())
@@ -378,6 +381,56 @@ public class OutGivingProjectController extends BaseServerController {
                 .stripComponents(stripComponentsValue);
             return outGivingRunBuilder.build().startRun(selectProject);
         });
+        return JsonMessage.success("开始分发!");
+    }
+
+    /**
+     * 远程文件中心分发文件
+     *
+     * @param id       分发id
+     * @param afterOpt 之后的操作
+     * @return json
+     */
+    @PostMapping(value = "use-file-storage", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public IJsonMessage<String> useFileStorage(String id, String afterOpt, String clearOld, String fileId, String autoUnzip,
+                                               String secondaryDirectory,
+                                               String stripComponents,
+                                               String selectProject,
+                                               HttpServletRequest request) {
+
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
+        AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
+        Assert.notNull(afterOpt1, "请选择分发后的操作");
+        FileStorageModel storageModel = fileStorageService.getByKey(fileId, request);
+        Assert.notNull(storageModel, "对应的文件不存在");
+        //
+        outGivingModel.setClearOld(Convert.toBool(clearOld, false));
+        outGivingModel.setAfterOpt(afterOpt1.getCode());
+        outGivingModel.setSecondaryDirectory(secondaryDirectory);
+        outGivingModel.setMode("file-storage");
+        outGivingModel.setModeData(fileId);
+        outGivingServer.updateById(outGivingModel);
+        File storageSavePath = serverConfig.fileStorageSavePath();
+        File file = FileUtil.file(storageSavePath, storageModel.getPath());
+        Assert.state(FileUtil.isFile(file), "当前文件丢失不能执行发布任务");
+        //
+        boolean unzip = BooleanUtil.toBoolean(autoUnzip);
+        //
+        this.checkZip(file, unzip);
+        int stripComponentsValue = Convert.toInt(stripComponents, 0);
+        // 开启
+        OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
+            .id(outGivingModel.getId())
+            .file(file)
+            .userModel(getUser())
+            .unzip(unzip)
+            .mode(outGivingModel.getMode())
+            .modeData(outGivingModel.getModeData())
+            // 可以不再设置-会查询最新的
+            //            .projectSecondaryDirectory(secondaryDirectory)
+            .stripComponents(stripComponentsValue);
+        outGivingRunBuilder.build().startRun(selectProject);
         return JsonMessage.success("开始分发!");
     }
 
