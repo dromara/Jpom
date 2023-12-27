@@ -291,6 +291,35 @@
         <releaseFile ref="releaseFile" v-if="releaseFileVisible" @commit="handleCommitTask"></releaseFile>
       </a-modal>
     </div>
+    <!-- 选择确认区域 -->
+    <div style="padding-top: 50px" v-if="this.choose">
+      <div
+        :style="{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          borderTop: '1px solid #e9e9e9',
+          padding: '10px 16px',
+          background: '#fff',
+          textAlign: 'right',
+          zIndex: 1,
+        }"
+      >
+        <a-space>
+          <a-button
+            @click="
+              () => {
+                this.$emit('cancel');
+              }
+            "
+          >
+            取消
+          </a-button>
+          <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
+        </a-space>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -305,6 +334,13 @@ import { addReleaseTask } from "@/api/file-manager/release-task-log";
 export default {
   components: {
     releaseFile,
+  },
+  props: {
+    choose: {
+      // "radio"
+      type: String,
+      default: "",
+    },
   },
   data() {
     return {
@@ -381,6 +417,7 @@ export default {
           this.tableSelections = selectedRowKeys;
         },
         selectedRowKeys: this.tableSelections,
+        type: this.choose || "checkbox",
       };
     },
   },
@@ -663,6 +700,25 @@ export default {
 
     releaseFileOk() {
       this.$refs.releaseFile?.tryCommit();
+    },
+    // 选择确认
+    handerConfirm() {
+      if (!this.tableSelections.length) {
+        this.$notification.warning({
+          message: "请选择要使用的文件",
+        });
+        return;
+      }
+      const selectData = this.list.filter((item) => {
+        return this.tableSelections.indexOf(item.id) > -1;
+      });
+      if (!selectData.length) {
+        this.$notification.warning({
+          message: "请选择要使用的文件",
+        });
+        return;
+      }
+      this.$emit("confirm", selectData);
     },
   },
 };

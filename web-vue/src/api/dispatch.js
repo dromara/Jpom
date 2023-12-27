@@ -144,6 +144,14 @@ export function useBuild(params) {
   });
 }
 
+export function useuseFileStorage(params) {
+  return axios({
+    url: "/outgiving/use-file-storage",
+    method: "post",
+    data: params,
+  });
+}
+
 /**
  * 释放分发
  * @param {*} id 分发 ID

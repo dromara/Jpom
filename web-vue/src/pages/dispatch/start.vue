@@ -22,9 +22,10 @@
             <a-radio :value="'upload'">上传文件</a-radio>
             <a-radio :value="'download'">远程下载</a-radio>
             <a-radio :value="'use-build'">构建产物</a-radio>
+            <a-radio :value="'file-storage'">文件中心</a-radio>
           </a-radio-group>
         </a-form-model-item>
-
+        <!-- 手动上传 -->
         <a-form-model-item label="选择分发文件" prop="clearOld" v-if="temp.type === 'upload'">
           <a-progress v-if="percentage" :percent="percentage">
             <template #format="percent">
@@ -39,18 +40,20 @@
             <a-button v-else type="primary" icon="upload">选择文件上传</a-button>
           </a-upload>
         </a-form-model-item>
+        <!-- 远程下载 -->
         <a-form-model-item label="远程下载URL" prop="url" v-else-if="temp.type === 'download'">
           <a-input v-model="temp.url" placeholder="远程下载地址" />
         </a-form-model-item>
+        <!-- 在线构建 -->
         <template v-else-if="temp.type == 'use-build'">
           <a-form-model-item label="选择构建">
             <a-space>
-              {{ buildInfo.name }}
+              {{ chooseBuildInfo.name }}
               <a-button
                 type="primary"
                 @click="
                   () => {
-                    chooseBuildVisible = 1;
+                    chooseVisible = 1;
                   }
                 "
               >
@@ -60,13 +63,13 @@
           </a-form-model-item>
           <a-form-model-item label="选择产物">
             <a-space>
-              <a-tag v-if="buildInfo.buildNumberId">#{{ buildInfo.buildNumberId }}</a-tag>
+              <a-tag v-if="chooseBuildInfo.buildNumberId">#{{ chooseBuildInfo.buildNumberId }}</a-tag>
               <a-button
                 type="primary"
-                :disabled="!buildInfo.id"
+                :disabled="!chooseBuildInfo.id"
                 @click="
                   () => {
-                    chooseBuildVisible = 2;
+                    chooseVisible = 2;
                   }
                 "
               >
@@ -75,6 +78,24 @@
             </a-space>
           </a-form-model-item>
         </template>
+        <!-- 文件中心 -->
+        <template v-else-if="temp.type === 'file-storage'">
+          <a-form-model-item label="选择文件">
+            <a-space>
+              {{ chooseFileInfo.name }}
+              <a-button
+                type="primary"
+                @click="
+                  () => {
+                    chooseVisible = 3;
+                  }
+                "
+              >
+                选择文件
+              </a-button>
+            </a-space>
+          </a-form-model-item></template
+        >
         <a-form-model-item prop="clearOld">
           <template slot="label">
             清空发布
@@ -85,7 +106,7 @@
           </template>
           <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
         </a-form-model-item>
-        <a-form-model-item prop="unzip">
+        <a-form-model-item prop="unzip" v-if="temp.type !== 'use-build'">
           <template slot="label">
             是否解压
             <a-tooltip>
@@ -121,32 +142,32 @@
       destroyOnClose
       :title="`选择构建`"
       placement="right"
-      :visible="chooseBuildVisible === 1"
+      :visible="chooseVisible === 1"
       width="80vw"
       :zIndex="1009"
       @close="
         () => {
-          this.chooseBuildVisible = 0;
+          this.chooseVisible = 0;
         }
       "
     >
       <build-list
-        v-if="chooseBuildVisible === 1"
+        v-if="chooseVisible === 1"
         :choose="'radio'"
         layout="table"
         mode="choose"
         @confirm="
           (data) => {
-            this.buildInfo = {
+            this.chooseBuildInfo = {
               id: data[0].id,
               name: data[0].name,
             };
-            this.chooseBuildVisible = 0;
+            this.chooseVisible = 0;
           }
         "
         @cancel="
           () => {
-            this.chooseBuildVisible = 0;
+            this.chooseVisible = 0;
           }
         "
       ></build-list>
@@ -156,43 +177,78 @@
       destroyOnClose
       :title="`选择构建产物`"
       placement="right"
-      :visible="chooseBuildVisible === 2"
+      :visible="chooseVisible === 2"
       width="80vw"
       :zIndex="1009"
       @close="
         () => {
-          this.chooseBuildVisible = 0;
+          this.chooseVisible = 0;
         }
       "
     >
+      <!-- 选择构建产物 -->
       <build-history
-        v-if="chooseBuildVisible === 2"
+        v-if="chooseVisible === 2"
         :choose="'radio'"
         mode="choose"
         @confirm="
           (data) => {
-            this.buildInfo = { ...this.buildInfo, buildNumberId: data[0] };
-            this.chooseBuildVisible = 0;
+            this.chooseBuildInfo = { ...this.chooseBuildInfo, buildNumberId: data[0] };
+            this.chooseVisible = 0;
           }
         "
         @cancel="
           () => {
-            this.chooseBuildVisible = 0;
+            this.chooseVisible = 0;
           }
         "
       ></build-history>
+    </a-drawer>
+    <!-- 选择文件 -->
+    <a-drawer
+      destroyOnClose
+      :title="`选择文件`"
+      placement="right"
+      :visible="chooseVisible === 3"
+      width="80vw"
+      :zIndex="1009"
+      @close="
+        () => {
+          this.chooseVisible = 0;
+        }
+      "
+    >
+      <!-- 选择文件 -->
+      <file-storage
+        v-if="chooseVisible === 3"
+        :choose="'radio'"
+        mode="choose"
+        @confirm="
+          (data) => {
+            this.chooseFileInfo = { id: data[0].id, name: data[0].name };
+            this.chooseVisible = 0;
+          }
+        "
+        @cancel="
+          () => {
+            this.chooseVisible = 0;
+          }
+        "
+      ></file-storage>
     </a-drawer>
   </div>
 </template>
 <script>
 import { uploadPieces } from "@/utils/upload-pieces";
-import { remoteDownload, uploadDispatchFile, uploadDispatchFileMerge, afterOptList, getDispatchProject, useBuild } from "@/api/dispatch";
+import { remoteDownload, uploadDispatchFile, uploadDispatchFileMerge, afterOptList, getDispatchProject, useBuild, useuseFileStorage } from "@/api/dispatch";
 import { renderSize, formatDuration } from "@/utils/const";
 import BuildList from "@/pages/build/list-info";
 import BuildHistory from "@/pages/build/history";
+import FileStorage from "@/pages/file-manager/fileStorage/list";
 import { getBuildGet } from "@/api/build-info";
+import { hasFile } from "@/api/file-manager/file-storage";
 export default {
-  components: { BuildList, BuildHistory },
+  components: { BuildList, BuildHistory, FileStorage },
   props: {
     data: Object,
   },
@@ -209,8 +265,9 @@ export default {
         url: [{ required: true, message: "请输入远程地址", trigger: "blur" }],
       },
       temp: { type: "upload" },
-      chooseBuildVisible: 0,
-      buildInfo: {},
+      chooseVisible: 0,
+      chooseBuildInfo: {},
+      chooseFileInfo: {},
     };
   },
   created() {
@@ -226,18 +283,29 @@ export default {
       }
     });
     if (this.data.mode === "use-build") {
+      // 构建
       const buildData = (this.data.modeData || "").split(":");
       if (buildData.length === 2) {
         getBuildGet({
           id: buildData[0],
         }).then((res) => {
           if (res.code === 200 && res.data) {
-            this.buildInfo = { id: res.data.id, name: res.data.name, buildNumberId: buildData[1] };
+            this.chooseBuildInfo = { id: res.data.id, name: res.data.name, buildNumberId: buildData[1] };
           }
         });
       }
     } else if (this.data.mode === "download") {
+      // 下载
       this.temp = { ...this.temp, url: this.data.modeData };
+    } else if (this.data.mode === "file-storage") {
+      // 文件中心
+      if (this.data.modeData) {
+        hasFile({ fileSumMd5: this.data.modeData }).then((res) => {
+          if (res.code === 200 && res.data) {
+            this.chooseFileInfo = { id: res.data.id, name: res.data.name };
+          }
+        });
+      }
     }
     // console.log(this.temp);
   },
@@ -357,13 +425,32 @@ export default {
           });
           return true;
         } else if (this.temp.type == "use-build") {
-          if (!this.buildInfo || !this.buildInfo.id || !this.buildInfo.buildNumberId) {
+          // 构建
+          if (!this.chooseBuildInfo || !this.chooseBuildInfo.id || !this.chooseBuildInfo.buildNumberId) {
             this.$notification.error({
               message: "请填写构建和产物",
             });
             return false;
           }
-          useBuild({ ...this.temp, buildId: this.buildInfo.id, buildNumberId: this.buildInfo.buildNumberId }).then((res) => {
+          useBuild({ ...this.temp, buildId: this.chooseBuildInfo.id, buildNumberId: this.chooseBuildInfo.buildNumberId }).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+
+              this.$emit("cancel");
+            }
+          });
+          return true;
+        } else if (this.temp.type == "file-storage") {
+          // 文件中心
+          if (!this.chooseFileInfo || !this.chooseFileInfo.id) {
+            this.$notification.error({
+              message: "请填写文件中心文件",
+            });
+            return false;
+          }
+          useuseFileStorage({ ...this.temp, fileId: this.chooseFileInfo.id }).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
