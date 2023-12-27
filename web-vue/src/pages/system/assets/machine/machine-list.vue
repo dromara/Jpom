@@ -262,21 +262,30 @@
       </a-form-model>
     </a-modal>
     <!-- 机器信息组件 -->
-    <a-drawer
-      destroyOnClose
-      title="机器详情"
-      placement="right"
-      :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
-      :visible="drawerVisible"
+
+    <machine-info
+      v-if="drawerVisible"
+      :machineId="temp.id"
+      :name="temp.name"
       @close="
         () => {
           this.drawerVisible = false;
         }
       "
-    >
-      <!-- 机器信息组件 -->
-      <machine-info v-if="drawerVisible" :machineId="temp.id" />
-    </a-drawer>
+    />
+    <!-- 机器在线升级相关信息 -->
+    <machine-info
+      v-if="drawerUpgradeVisible"
+      :machineId="temp.id"
+      :name="temp.name"
+      tab="upgrade"
+      @close="
+        () => {
+          this.drawerUpgradeVisible = false;
+        }
+      "
+    />
+
     <!-- 分配到其他工作空间 -->
     <a-modal destroyOnClose v-model="syncToWorkspaceVisible" title="分配到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
       <!-- <a-alert message="温馨提示" type="warning">
@@ -291,22 +300,7 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
-    <!-- 机器在线升级相关信息 -->
-    <a-drawer
-      destroyOnClose
-      :title="`${temp.name} 插件版本信息`"
-      placement="right"
-      :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
-      :visible="drawerUpgradeVisible"
-      @close="
-        () => {
-          this.drawerUpgradeVisible = false;
-        }
-      "
-    >
-      <!-- 在线升级 -->
-      <upgrade v-if="drawerUpgradeVisible" :machineId="temp.id" />
-    </a-drawer>
+
     <!-- 查看机器关联节点 -->
     <a-modal destroyOnClose v-model="viewLinkNode" width="50%" title="关联节点" :footer="null" :maskClosable="false">
       <a-list bordered :data-source="nodeList">
@@ -387,10 +381,10 @@ import {
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime, formatPercent2Number, getCachePageLimit } from "@/utils/const";
 import CustomSelect from "@/components/customSelect";
 import { mapGetters } from "vuex";
-import machineInfo from "./machine-info.vue";
+import machineInfo from "./machine-func";
 import { getWorkSpaceListAll } from "@/api/workspace";
 // import Upgrade from "@/pages/node/node-layout/system/upgrade.vue";
-import upgrade from "@/components/upgrade";
+
 import { getWhiteList } from "@/api/node-system";
 import { getConfigData } from "@/api/system";
 import codeEditor from "@/components/codeEditor";
@@ -399,7 +393,7 @@ export default {
   components: {
     CustomSelect,
     machineInfo,
-    upgrade,
+
     codeEditor,
   },
   data() {

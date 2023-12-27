@@ -1,6 +1,6 @@
 <template>
   <div class="node-full-content">
-    <a-tabs default-active-key="1">
+    <a-tabs default-active-key="1" tab-position="left">
       <a-tab-pane key="1" tab="缓存信息">
         <a-alert message="请勿手动删除数据目录下面文件,如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除" style="margin-top: 10px; margin-bottom: 40px" banner />
         <a-timeline>
@@ -53,7 +53,7 @@
           </a-timeline-item>
         </a-timeline>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="运行中的定时任务"> <task-stat :taskList="taskList" @refresh="loadData" /></a-tab-pane>
+      <a-tab-pane key="2" tab="定时任务"> <task-stat :taskList="taskList" @refresh="loadData" /></a-tab-pane>
     </a-tabs>
   </div>
 </template>
@@ -66,8 +66,8 @@ export default {
     TaskStat,
   },
   props: {
-    node: {
-      type: Object,
+    machineId: {
+      type: String,
     },
   },
   data() {
@@ -84,7 +84,9 @@ export default {
     renderSize,
     // load data
     loadData() {
-      getNodeCache(this.node.id).then((res) => {
+      getNodeCache({
+        machineId: this.machineId,
+      }).then((res) => {
         if (res.code === 200) {
           this.temp = res.data;
           this.taskList = res.data?.taskList;
@@ -95,7 +97,7 @@ export default {
     clear(type) {
       const params = {
         type: type,
-        nodeId: this.node.id,
+        machineId: this.machineId,
       };
       clearCache(params).then((res) => {
         if (res.code === 200) {

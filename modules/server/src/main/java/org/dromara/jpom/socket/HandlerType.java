@@ -45,9 +45,13 @@ public enum HandlerType {
      */
     nodeScript(NodeScriptHandler.class, NodeScriptServer.class),
     /**
-     * tomcat
+     * 系统日志
      */
-    tomcat(TomcatHandler.class, null),
+    systemLog(SystemLogHandler.class, null),
+    /**
+     * 插件端日志
+     */
+    agentLog(AgentLogHandler.class, null),
     /**
      * 项目控制台和首页监控
      */

@@ -43,8 +43,8 @@ export default {
     LogView,
   },
   props: {
-    node: {
-      type: Object,
+    machineId: {
+      type: String,
     },
   },
   data() {
@@ -53,7 +53,7 @@ export default {
       socket: null,
       // 日志内容
       logContext: "choose file loading context...",
-      tomcatId: "system",
+
       replaceFields: {
         children: "children",
         title: "title",
@@ -64,9 +64,9 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getLongTermToken", "getWorkspaceId"]),
+    ...mapGetters(["getLongTermToken"]),
     socketUrl() {
-      return getWebSocketUrl("/socket/tomcat_log", `userId=${this.getLongTermToken}&tomcatId=${this.tomcatId}&nodeId=${this.node.id}&type=tomcat&workspaceId=${this.getWorkspaceId}`);
+      return getWebSocketUrl("/socket/agent_log", `userId=${this.getLongTermToken}&machineId=${this.machineId}&nodeId=system&type=agentLog`);
     },
   },
   watch: {},
@@ -87,7 +87,7 @@ export default {
     // 加载数据
     loadData() {
       this.list = [];
-      const params = { nodeId: this.node.id };
+      const params = { machineId: this.machineId };
       getLogList(params).then((res) => {
         if (res.code === 200) {
           res.data.forEach((element) => {
@@ -163,7 +163,7 @@ export default {
     downloadLog() {
       // 请求参数
       const params = {
-        nodeId: this.node.id,
+        machineId: this.machineId,
         path: this.temp.path,
       };
       // 请求接口拿到 blob
@@ -178,7 +178,7 @@ export default {
         cancelText: "取消",
         onOk: () => {
           const params = {
-            nodeId: this.node.id,
+            machineId: this.machineId,
             path: this.temp.path,
           };
           // 删除日志

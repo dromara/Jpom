@@ -63,8 +63,11 @@ public class ServerWebSocketConfig implements WebSocketConfigurer {
         // 节点脚本模板
         registry.addHandler(new NodeScriptHandler(), "/socket/node/script_run")
             .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
-        // tomcat
-        registry.addHandler(new TomcatHandler(), "/socket/tomcat_log")
+        // 系统日志
+        registry.addHandler(new SystemLogHandler(), "/socket/system_log")
+            .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+        // 插件端日志
+        registry.addHandler(new AgentLogHandler(), "/socket/agent_log")
             .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
         // ssh
         registry.addHandler(new SshHandler(), "/socket/ssh")

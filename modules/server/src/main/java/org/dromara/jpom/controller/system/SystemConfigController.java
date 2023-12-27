@@ -108,7 +108,7 @@ public class SystemConfigController extends BaseServerController {
     @RequestMapping(value = "config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> configData(String machineId, HttpServletRequest request) {
-        IJsonMessage<JSONObject> message = this.tryRequestNode(machineId, request, NodeUrl.SystemGetConfig);
+        IJsonMessage<JSONObject> message = this.tryRequestMachine(machineId, request, NodeUrl.SystemGetConfig);
         return Optional.ofNullable(message).orElseGet(() -> {
             JSONObject jsonObject = new JSONObject();
             Resource resource = ExtConfigBean.getResource();
@@ -127,7 +127,7 @@ public class SystemConfigController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission(superUser = true)
     public IJsonMessage<String> saveConfig(String machineId, String content, String restart, HttpServletRequest request) throws SQLException, IOException {
-        JsonMessage<String> jsonMessage = this.tryRequestNode(machineId, request, NodeUrl.SystemSaveConfig);
+        JsonMessage<String> jsonMessage = this.tryRequestMachine(machineId, request, NodeUrl.SystemSaveConfig);
         if (jsonMessage != null) {
             return jsonMessage;
         }
