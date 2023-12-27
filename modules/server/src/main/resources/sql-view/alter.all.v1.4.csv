@@ -3,3 +3,7 @@ ADD,COMMAND_EXEC_LOG,exitCode,Integer,,,退出码
 ADD,SERVER_SCRIPT_EXECUTE_LOG,exitCode,Integer,,,退出码
 ADD,SERVER_SCRIPT_EXECUTE_LOG,status,TINYINT,,,执行状态
 ADD,WORKSPACE_ENV_VAR,triggerToken,String,100,,触发器token
+ADD,OUTGIVINGLOG,mode,String,50,,分发方式
+ADD,OUTGIVINGLOG,modeData,String,500,,分发方式数据
+ADD,OUT_GIVING,mode,String,50,,分发方式
+ADD,OUT_GIVING,modeData,String,500,,分发方式数据

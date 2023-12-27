@@ -136,6 +136,14 @@ export function remoteDownload(params) {
   });
 }
 
+export function useBuild(params) {
+  return axios({
+    url: "/outgiving/use-build",
+    method: "post",
+    data: params,
+  });
+}
+
 /**
  * 释放分发
  * @param {*} id 分发 ID
@@ -281,4 +289,11 @@ export const statusMap = {
   2: "分发结束",
   3: "取消分发",
   4: "分发失败",
+};
+
+export const dispatchMode = {
+  upload: "手动上传",
+  download: "远程下载",
+  "build-trigger": "构建触发",
+  "use-build": "构建产物",
 };

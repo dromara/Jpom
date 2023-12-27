@@ -91,6 +91,15 @@ public class OutGivingRun {
     private boolean unzip;
     private int stripComponents;
     /**
+     * 分发方式
+     * upload: "手动上传",
+     * download: "远程下载",
+     * "build-trigger": "构建触发",
+     * "use-build": "构建产物",
+     */
+    private String mode;
+    private String modeData;
+    /**
      * 是否删除发布文件
      */
     @Builder.Default
@@ -306,6 +315,9 @@ public class OutGivingRun {
                 outGivingLog.setModifyUser(userId);
                 outGivingLog.setStartTime(SystemClock.now());
                 outGivingLog.setStatus(OutGivingNodeProject.Status.Prepare.getCode());
+                outGivingLog.setMode(mode);
+                // 限制最大长度
+                outGivingLog.setModeData(StrUtil.maxLength(modeData, 400));
                 return outGivingLog;
             })
             .collect(Collectors.toList());
