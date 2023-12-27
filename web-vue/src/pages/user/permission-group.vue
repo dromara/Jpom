@@ -256,7 +256,6 @@ export default {
                   parentId: element.id,
                 };
               });
-              children.push({ key: element.id + "-systemUser", title: "节点管理员", parentId: element.id });
               children.push({ key: element.id + "-sshCommandNotLimited", title: "SSH 终端命令无限制", parentId: element.id });
               this.workspaceList.push({
                 key: element.id,

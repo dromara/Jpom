@@ -298,33 +298,26 @@ public class IndexControl extends BaseServerController {
      */
     @RequestMapping(value = "menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<List<Object>> menusData(HttpServletRequest request) {
-        NodeModel nodeModel = tryGetNode();
         UserModel userModel = getUserModel();
         String workspaceId = nodeService.getCheckUserWorkspace(request);
         JSONObject config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("menus_config_{}", workspaceId), JSONObject.class);
         // 菜单
-        InputStream inputStream;
-        JSONArray showArray;
-        if (nodeModel == null) {
-            inputStream = ResourceUtil.getStream("classpath:/menus/index.json");
-            showArray = config.getJSONArray("serverMenuKeys");
-        } else {
-            inputStream = ResourceUtil.getStream("classpath:/menus/node-index.json");
-            showArray = config.getJSONArray("nodeMenuKeys");
-        }
+        InputStream inputStream = ResourceUtil.getStream("classpath:/menus/index.json");
+        JSONArray showArray = config.getJSONArray("serverMenuKeys");
+
 
         String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
         JSONArray jsonArray = JSONArray.parseArray(json);
         List<Object> collect1 = jsonArray.stream().filter(o -> {
             JSONObject jsonObject = (JSONObject) o;
-            if (!testMenus(jsonObject, userModel, nodeModel, showArray, request)) {
+            if (!testMenus(jsonObject, userModel, showArray, request)) {
                 return false;
             }
             JSONArray childs = jsonObject.getJSONArray("childs");
             if (childs != null) {
                 List<Object> collect = childs.stream().filter(o1 -> {
                     JSONObject jsonObject1 = (JSONObject) o1;
-                    return testMenus(jsonObject1, userModel, nodeModel, showArray, request);
+                    return testMenus(jsonObject1, userModel, showArray, request);
                 }).collect(Collectors.toList());
                 if (collect.isEmpty()) {
                     return false;
@@ -355,14 +348,14 @@ public class IndexControl extends BaseServerController {
         JSONArray jsonArray = JSONArray.parseArray(json);
         List<Object> collect1 = jsonArray.stream().filter(o -> {
             JSONObject jsonObject = (JSONObject) o;
-            if (!testMenus(jsonObject, userModel, null, null, request)) {
+            if (!testMenus(jsonObject, userModel, null, request)) {
                 return false;
             }
             JSONArray childs = jsonObject.getJSONArray("childs");
             if (childs != null) {
                 List<Object> collect = childs.stream().filter(o1 -> {
                     JSONObject jsonObject1 = (JSONObject) o1;
-                    return testMenus(jsonObject1, userModel, null, null, request);
+                    return testMenus(jsonObject1, userModel, null, request);
                 }).collect(Collectors.toList());
                 if (collect.isEmpty()) {
                     return false;
@@ -375,7 +368,7 @@ public class IndexControl extends BaseServerController {
         return JsonMessage.success("", collect1);
     }
 
-    private boolean testMenus(JSONObject jsonObject, UserModel userModel, NodeModel nodeModel, JSONArray showArray, HttpServletRequest request) {
+    private boolean testMenus(JSONObject jsonObject, UserModel userModel, JSONArray showArray, HttpServletRequest request) {
         String storageMode = jsonObject.getString("storageMode");
         if (StrUtil.isNotEmpty(storageMode)) {
             if (!StrUtil.equals(dbExtConfig.getMode().name(), storageMode)) {
@@ -403,15 +396,7 @@ public class IndexControl extends BaseServerController {
         // 系统管理员权限
         boolean system = StrUtil.equals(role, "system");
         if (system) {
-            if (nodeModel == null) {
-                return userModel.isSystemUser();
-            } else {
-                if (userModel.isSuperSystemUser()) {
-                    return true;
-                }
-                String workspaceId = BaseWorkspaceService.getWorkspaceId(request);
-                return userBindWorkspaceService.exists(userModel, workspaceId + UserBindWorkspaceService.SYSTEM_USER);
-            }
+            return userModel.isSystemUser();
         }
         return true;
     }
