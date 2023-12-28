@@ -9,7 +9,7 @@ export default <HeadTags>[
     {
       name: "keywords",
       content:
-        "Jpom,Jpom官网,Jpom文档,开源,项目管理,管理系统,运维,项目运维,服务器运维,CI/CD,devops,自动部署,在线构建,项目管理系统,open source",
+        "Jpom,Jpom官网,Jpom文档,开源,管理系统,运维,项目运维,服务器运维,原生 ops,CI/CD,devops,自动部署,在线构建,项目管理系统,open source",
     },
   ],
   ["meta", { name: "theme-color", content: "#11a8cd" }], // 移动浏览器主题颜色

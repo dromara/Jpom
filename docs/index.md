@@ -1,7 +1,7 @@
 ---
 home: true
 heroImage: /images/logo/jpom_logo_big.svg
-heroText: 
+heroText: 一款原生 ops 软件
 tagline: 🚀简而轻的低侵入式在线构建、自动部署、日常运维、项目运维监控软件
 actions:
   - actionText: 🛠️开始安装
