@@ -20,7 +20,6 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.watch.WatchMonitor;
 import cn.hutool.core.io.watch.WatchUtil;
@@ -39,16 +38,19 @@ public class TestFileWatch {
 
     @Test
     public void test() {
-        File file = FileUtil.file("P:\\");
+        File file = FileUtil.file("Y:\\Z.package");
         WatchMonitor monitor = WatchUtil.createAll(file, new Watcher() {
             @Override
             public void onCreate(WatchEvent<?> event, Path currentPath) {
+                Path context = (Path) event.context();
+                System.out.println(context);
                 System.out.println("创建：" + currentPath);
             }
 
             @Override
             public void onModify(WatchEvent<?> event, Path currentPath) {
-                System.out.println("修改：" + currentPath);
+                Path context = (Path) event.context();
+                System.out.println("修改：" + currentPath + " " + event.context() + "  " + event.kind());
             }
 
             @Override

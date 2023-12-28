@@ -20,14 +20,14 @@
         <template slot="title">
           <a-space>
             <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="文件名称" class="search-input-item" />
-            <a-input v-model="listQuery['%aliasCode%']" @pressEnter="loadData" placeholder="别名码" class="search-input-item" />
+
             <a-input v-model="listQuery['extName']" @pressEnter="loadData" placeholder="后缀,精准搜索" class="search-input-item" />
             <a-input v-model="listQuery['id']" @pressEnter="loadData" placeholder="文件id,精准搜索" class="search-input-item" />
             <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
               <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
             </a-tooltip>
-            <a-button type="primary" @click="handleUpload">上传文件</a-button>
-            <a-button type="primary" @click="handleRemoteDownload">远程下载</a-button>
+            <!-- <a-button type="primary" @click="handleUpload">上传文件</a-button> -->
+
             <a-button type="danger" :disabled="!tableSelections || tableSelections.length <= 0" @click="handleBatchDelete"> 批量删除 </a-button>
           </a-space>
         </template>
@@ -40,10 +40,9 @@
         </a-tooltip>
         <a-popover slot="name" slot-scope="text, item" title="文件信息">
           <template slot="content">
+            <p>文件ID：{{ item.id }}</p>
             <p>文件名：{{ text }}</p>
             <p>文件描述：{{ item.description }}</p>
-            <p v-if="item.status !== undefined">下载状态：{{ statusMap[item.status] || "未知" }}</p>
-            <p v-if="item.progressDesc">状态描述：{{ item.progressDesc }}</p>
           </template>
           <!-- {{ text }} -->
           <a-button type="link" style="padding: 0" @click="handleEdit(item)" size="small">{{ text }}</a-button>
@@ -56,19 +55,21 @@
           <span>{{ sourceMap[text] || "未知" }}</span>
         </a-tooltip>
 
-        <template slot="exists" slot-scope="text">
-          <a-tag v-if="text" color="green">存在</a-tag>
+        <template slot="status" slot-scope="text">
+          <a-tag v-if="text === 1" color="green">存在</a-tag>
           <a-tag v-else color="red">丢失</a-tag>
         </template>
-        <template slot="global" slot-scope="text">
-          <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
-          <a-tag v-else>工作空间</a-tag>
+
+        <template slot="type" slot-scope="text">
+          <a-tag v-if="text === 1">文件</a-tag>
+          <a-tag v-else>文件夹</a-tag>
         </template>
+
         <template slot="operation" slot-scope="text, record">
           <a-space>
             <!-- <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button> -->
-            <a-button size="small" :disabled="!record.exists" type="primary" @click="handleDownloadUrl(record)">下载</a-button>
-            <a-button size="small" :disabled="!record.exists" type="primary" @click="handleReleaseFile(record)">发布</a-button>
+            <a-button size="small" :disabled="!(record.status === 1 && record.type === 1)" type="primary" @click="handleDownloadUrl(record)"> 下载</a-button>
+            <a-button size="small" :disabled="!(record.status === 1 && record.type === 1)" type="primary" @click="handleReleaseFile(record)">发布</a-button>
             <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
           </a-space>
         </template>
@@ -139,74 +140,15 @@
       <a-modal destroyOnClose v-model="editVisible" :title="`修改文件`" @ok="handleEditOk" :maskClosable="false">
         <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <a-form-model-item label="文件名" prop="name">
-            <a-input placeholder="文件名" v-model="temp.name" />
+            <a-input placeholder="文件名" :disabled="true" v-model="temp.name" />
           </a-form-model-item>
-          <a-form-model-item label="保留天数" prop="keepDay">
-            <a-input-number v-model="temp.keepDay" :min="1" style="width: 100%" placeholder="文件保存天数,默认 3650 天" />
-          </a-form-model-item>
-          <a-form-model-item label="文件共享" prop="global">
-            <a-radio-group v-model="temp.global">
-              <a-radio :value="true"> 全局 </a-radio>
-              <a-radio :value="false"> 当前工作空间 </a-radio>
-            </a-radio-group>
-          </a-form-model-item>
-          <a-form-model-item label="别名码" prop="aliasCode" help="用于区别文件是否为同一类型,可以针对同类型进行下载管理">
-            <a-input-search
-              :maxLength="50"
-              v-model="temp.aliasCode"
-              placeholder="请输入别名码"
-              @search="
-                () => {
-                  this.temp = { ...this.temp, aliasCode: randomStr(6) };
-                }
-              "
-            >
-              <template slot="enterButton">
-                <a-button type="primary"> 随机生成 </a-button>
-              </template>
-            </a-input-search>
-          </a-form-model-item>
+
           <a-form-model-item label="文件描述" prop="description">
             <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
           </a-form-model-item>
         </a-form-model>
       </a-modal>
-      <!--远程下载  -->
-      <a-modal destroyOnClose v-model="uploadRemoteFileVisible" title="远程下载文件" @ok="handleRemoteUpload" :maskClosable="false">
-        <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }" :rules="rules" ref="remoteForm">
-          <a-form-model-item label="远程下载URL" prop="url">
-            <a-input v-model="temp.url" placeholder="远程下载地址" />
-          </a-form-model-item>
-          <a-form-model-item label="保留天数" prop="keepDay">
-            <a-input-number v-model="temp.keepDay" :min="1" style="width: 100%" placeholder="文件保存天数,默认 3650 天" />
-          </a-form-model-item>
-          <a-form-model-item label="文件共享" prop="global">
-            <a-radio-group v-model="temp.global">
-              <a-radio :value="true"> 全局 </a-radio>
-              <a-radio :value="false"> 当前工作空间 </a-radio>
-            </a-radio-group>
-          </a-form-model-item>
-          <a-form-model-item label="别名码" prop="aliasCode" help="用于区别文件是否为同一类型,可以针对同类型进行下载管理">
-            <a-input-search
-              :maxLength="50"
-              v-model="temp.aliasCode"
-              placeholder="请输入别名码"
-              @search="
-                () => {
-                  this.temp = { ...this.temp, aliasCode: randomStr(6) };
-                }
-              "
-            >
-              <template slot="enterButton">
-                <a-button type="primary"> 随机生成 </a-button>
-              </template>
-            </a-input-search>
-          </a-form-model-item>
-          <a-form-model-item label="文件描述" prop="description">
-            <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
-          </a-form-model-item>
-        </a-form-model>
-      </a-modal>
+
       <!-- 断点下载 -->
       <a-modal destroyOnClose v-model="triggerVisible" title="断点/分片下载" width="50%" :footer="null" :maskClosable="false">
         <a-form-model ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
@@ -325,10 +267,11 @@
 
 <script>
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, renderSize, formatDuration, randomStr } from "@/utils/const";
-import { fileStorageList, uploadFile, uploadFileMerge, fileEdit, hasFile, delFile, sourceMap, remoteDownload, statusMap, triggerUrl } from "@/api/file-manager/file-storage";
-import { uploadPieces } from "@/utils/upload-pieces";
+// import { uploadFile, uploadFileMerge, hasFile } from "@/api/file-manager/file-storage";
+import { staticFileStorageList, delFile, triggerUrl, fileEdit } from "@/api/file-manager/static-storage";
+// import { uploadPieces } from "@/utils/upload-pieces";
 import Vue from "vue";
-import releaseFile from "./releaseFile.vue";
+import releaseFile from "@/pages/file-manager/fileStorage/releaseFile";
 import { addReleaseTask } from "@/api/file-manager/release-task-log";
 
 export default {
@@ -344,46 +287,26 @@ export default {
   },
   data() {
     return {
-      loading: false,
+      loading: true,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       columns: [
-        { title: "文件MD5", dataIndex: "id", ellipsis: true, width: 100, scopedSlots: { customRender: "id" } },
         { title: "名称", dataIndex: "name", ellipsis: true, width: 150, scopedSlots: { customRender: "name" } },
-        { title: "别名码", dataIndex: "aliasCode", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
+        { title: "描述", dataIndex: "description", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
+        { title: "路径", dataIndex: "absolutePath", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
         { title: "大小", dataIndex: "size", sorter: true, ellipsis: true, scopedSlots: { customRender: "renderSize" }, width: "100px" },
         { title: "后缀", dataIndex: "extName", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "80px" },
-        { title: "共享", dataIndex: "workspaceId", ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
-        { title: "来源", dataIndex: "source", ellipsis: true, scopedSlots: { customRender: "source" }, width: "80px" },
+        { title: "类型", dataIndex: "type", ellipsis: true, scopedSlots: { customRender: "type" }, width: "80px" },
+        { title: "文件状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" }, width: "80px" },
+
         {
-          title: "过期天数",
-          dataIndex: "validUntil",
-          sorter: true,
-          customRender: (text) => {
-            if (!text) {
-              return "-";
-            }
-            return Math.floor((new Date(Number(text)).getTime() - Date.now()) / (60 * 60 * 24 * 1000));
-          },
-          width: "100px",
-        },
-        { title: "文件状态", dataIndex: "exists", ellipsis: true, scopedSlots: { customRender: "exists" }, width: "80px" },
-        { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
-        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
-        {
-          title: "创建时间",
-          dataIndex: "createTimeMillis",
+          title: "文件修改时间",
+          dataIndex: "lastModified",
           sorter: true,
           customRender: (text) => parseTime(text),
           width: "170px",
         },
-        {
-          title: "修改时间",
-          dataIndex: "modifyTimeMillis",
-          sorter: true,
-          customRender: (text) => parseTime(text),
-          width: "170px",
-        },
+
         { title: "操作", dataIndex: "operation", align: "center", ellipsis: true, scopedSlots: { customRender: "operation" }, fixed: "right", width: "170px" },
       ],
       rules: {
@@ -392,15 +315,14 @@ export default {
       },
 
       temp: {},
-      sourceMap,
-      statusMap,
+
       fileList: [],
       percentage: 0,
       percentageInfo: {},
       uploading: false,
       uploadVisible: false,
       editVisible: false,
-      uploadRemoteFileVisible: false,
+
       tempVue: null,
       triggerVisible: false,
       releaseFileVisible: false,
@@ -434,7 +356,7 @@ export default {
     loadData(pointerEvent) {
       this.loading = true;
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
-      fileStorageList(this.listQuery).then((res) => {
+      staticFileStorageList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
           this.listQuery.total = res.data.total;
@@ -442,103 +364,103 @@ export default {
         this.loading = false;
       });
     },
-    handleUpload() {
-      this.temp = {
-        global: false,
-      };
-      this.uploadVisible = true;
-      this.$refs["form"]?.resetFields();
-    },
-    // 上传文件
-    handleUploadOk() {
-      // 检验表单
-      this.$refs["form"].validate((valid) => {
-        if (!valid) {
-          return false;
-        }
+    // handleUpload() {
+    //   this.temp = {
+    //     global: false,
+    //   };
+    //   this.uploadVisible = true;
+    //   this.$refs["form"]?.resetFields();
+    // },
+    // // 上传文件
+    // handleUploadOk() {
+    //   // 检验表单
+    //   this.$refs["form"].validate((valid) => {
+    //     if (!valid) {
+    //       return false;
+    //     }
 
-        // 判断文件
-        if (this.fileList.length === 0) {
-          this.$notification.error({
-            message: "请选择文件",
-          });
-          return false;
-        }
-        this.percentage = 0;
-        this.percentageInfo = {};
-        this.uploading = true;
-        uploadPieces({
-          file: this.fileList[0],
-          uploadBeforeAbrot: (md5) => {
-            return new Promise((resolve) => {
-              hasFile({
-                fileSumMd5: md5,
-              }).then((res) => {
-                if (res.code === 200) {
-                  if (res.data) {
-                    //
-                    this.$notification.warning({
-                      message: `当前文件已经存在啦,文件名：${res.data.name} ,是否共享：${res.data.workspaceId === "GLOBAL" ? "是" : "否"}`,
-                    });
-                    //
-                    this.uploading = false;
-                  } else {
-                    resolve();
-                  }
-                }
-              });
-            });
-          },
-          process: (process, end, total, duration) => {
-            this.percentage = Math.max(this.percentage, process);
-            this.percentageInfo = { end, total, duration };
-          },
-          success: (uploadData) => {
-            // 准备合并
-            uploadFileMerge(Object.assign({}, { ...uploadData[0] }, this.temp))
-              .then((res) => {
-                if (res.code === 200) {
-                  this.fileList = [];
-                  this.loadData();
-                  this.uploadVisible = false;
-                }
-                setTimeout(() => {
-                  this.percentage = 0;
-                  this.percentageInfo = {};
-                }, 2000);
-                this.uploading = false;
-              })
-              .catch(() => {
-                this.uploading = false;
-              });
-          },
-          error: (msg) => {
-            this.$notification.error({
-              message: msg,
-            });
-            this.uploading = false;
-          },
-          uploadCallback: (formData) => {
-            return new Promise((resolve, reject) => {
-              // 上传文件
-              uploadFile(formData)
-                .then((res) => {
-                  if (res.code === 200) {
-                    resolve();
-                  } else {
-                    reject();
-                  }
-                })
-                .catch(() => {
-                  reject();
-                });
-            });
-          },
-        });
+    //     // 判断文件
+    //     if (this.fileList.length === 0) {
+    //       this.$notification.error({
+    //         message: "请选择文件",
+    //       });
+    //       return false;
+    //     }
+    //     this.percentage = 0;
+    //     this.percentageInfo = {};
+    //     this.uploading = true;
+    //     uploadPieces({
+    //       file: this.fileList[0],
+    //       uploadBeforeAbrot: (md5) => {
+    //         return new Promise((resolve) => {
+    //           hasFile({
+    //             fileSumMd5: md5,
+    //           }).then((res) => {
+    //             if (res.code === 200) {
+    //               if (res.data) {
+    //                 //
+    //                 this.$notification.warning({
+    //                   message: `当前文件已经存在啦,文件名：${res.data.name} ,是否共享：${res.data.workspaceId === "GLOBAL" ? "是" : "否"}`,
+    //                 });
+    //                 //
+    //                 this.uploading = false;
+    //               } else {
+    //                 resolve();
+    //               }
+    //             }
+    //           });
+    //         });
+    //       },
+    //       process: (process, end, total, duration) => {
+    //         this.percentage = Math.max(this.percentage, process);
+    //         this.percentageInfo = { end, total, duration };
+    //       },
+    //       success: (uploadData) => {
+    //         // 准备合并
+    //         uploadFileMerge(Object.assign({}, { ...uploadData[0] }, this.temp))
+    //           .then((res) => {
+    //             if (res.code === 200) {
+    //               this.fileList = [];
+    //               this.loadData();
+    //               this.uploadVisible = false;
+    //             }
+    //             setTimeout(() => {
+    //               this.percentage = 0;
+    //               this.percentageInfo = {};
+    //             }, 2000);
+    //             this.uploading = false;
+    //           })
+    //           .catch(() => {
+    //             this.uploading = false;
+    //           });
+    //       },
+    //       error: (msg) => {
+    //         this.$notification.error({
+    //           message: msg,
+    //         });
+    //         this.uploading = false;
+    //       },
+    //       uploadCallback: (formData) => {
+    //         return new Promise((resolve, reject) => {
+    //           // 上传文件
+    //           uploadFile(formData)
+    //             .then((res) => {
+    //               if (res.code === 200) {
+    //                 resolve();
+    //               } else {
+    //                 reject();
+    //               }
+    //             })
+    //             .catch(() => {
+    //               reject();
+    //             });
+    //         });
+    //       },
+    //     });
 
-        return true;
-      });
-    },
+    //     return true;
+    //   });
+    // },
     // 编辑
     handleEdit(item) {
       this.temp = { ...item, global: item.workspaceId === "GLOBAL", workspaceId: "" };
@@ -575,6 +497,7 @@ export default {
           // 删除
           delFile({
             id: record.id,
+            thorough: false,
           }).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
@@ -602,7 +525,7 @@ export default {
         cancelText: "取消",
         onOk: () => {
           // 删除
-          delFile({ ids: this.tableSelections.join(",") }).then((res) => {
+          delFile({ ids: this.tableSelections.join(","), thorough: false }).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
@@ -614,34 +537,7 @@ export default {
         },
       });
     },
-    // 远程下载
-    handleRemoteDownload() {
-      this.uploadRemoteFileVisible = true;
-      this.temp = {
-        global: false,
-      };
-      this.$refs["remoteForm"]?.resetFields();
-    },
-    // 开始远程下载
-    handleRemoteUpload() {
-      //
-      this.$refs["remoteForm"].validate((valid) => {
-        if (!valid) {
-          return false;
-        }
-        remoteDownload(this.temp).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            this.$notification.success({
-              message: res.msg,
-            });
 
-            this.uploadRemoteFileVisible = false;
-            this.loadData();
-          }
-        });
-      });
-    },
     // 下载地址
     handleDownloadUrl(record) {
       this.temp = Object.assign({}, record);
@@ -685,7 +581,7 @@ export default {
     },
 
     handleCommitTask(data) {
-      addReleaseTask({ ...data, fileId: this.temp.fileId, fileType: 1 }).then((res) => {
+      addReleaseTask({ ...data, fileId: this.temp.fileId, fileType: 2 }).then((res) => {
         if (res.code === 200) {
           // 成功
           this.$notification.success({

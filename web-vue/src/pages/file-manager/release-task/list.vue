@@ -46,6 +46,10 @@
       <template slot="taskType" slot-scope="text">
         <span>{{ taskTypeMap[text] || "未知" }}</span>
       </template>
+      <template slot="fileType" slot-scope="text">
+        <span v-if="text == 2">静态文件</span>
+        <span v-else>文件中心</span>
+      </template>
 
       <template slot="operation" slot-scope="text, record">
         <a-space>
@@ -152,10 +156,10 @@
         <a-form-model-item label="文件大小" prop="size">
           {{ renderSize(temp.size) }}
         </a-form-model-item>
-        <a-form-model-item label="过期时间" prop="keepDay">
+        <a-form-model-item label="过期时间" prop="validUntil" v-if="temp.validUntil">
           {{ parseTime(temp.validUntil) }}
         </a-form-model-item>
-        <a-form-model-item label="文件共享" prop="global">
+        <a-form-model-item label="文件共享" prop="global" v-if="temp.workspaceId">
           {{ temp.workspaceId === "GLOBAL" ? "全局" : "工作空间" }}
         </a-form-model-item>
         <a-form-model-item label="文件描述" prop="description">
@@ -174,7 +178,7 @@ import { getSshListAll } from "@/api/ssh";
 import codeEditor from "@/components/codeEditor";
 import { hasFile } from "@/api/file-manager/file-storage";
 import { getNodeListAll } from "@/api/node";
-
+import { hasStaticFile } from "@/api/file-manager/static-storage";
 export default {
   components: {
     taskDetailsPage,
@@ -192,6 +196,7 @@ export default {
       columns: [
         { title: "任务名称", dataIndex: "name", ellipsis: true, width: 150, scopedSlots: { customRender: "tooltip" } },
         { title: "分发类型", dataIndex: "taskType", width: "100px", ellipsis: true, scopedSlots: { customRender: "taskType" } },
+        { title: "文件来源", dataIndex: "fileType", width: "100px", ellipsis: true, scopedSlots: { customRender: "fileType" } },
         { title: "状态", dataIndex: "status", width: "100px", ellipsis: true, scopedSlots: { customRender: "status" } },
 
         { title: "状态描述", dataIndex: "statusMsg", ellipsis: true, width: 200, scopedSlots: { customRender: "tooltip" } },
@@ -374,20 +379,38 @@ export default {
     },
     // 查看文件
     handleViewFile(record) {
-      hasFile({
-        fileSumMd5: record.fileId,
-      }).then((res) => {
-        if (res.code === 200) {
-          if (res.data) {
-            this.temp = res.data;
-            this.viewFileVisible = true;
-          } else {
-            this.$notification.warning({
-              message: "文件不存在啦",
-            });
+      if (record.fileType === 2) {
+        //
+        hasStaticFile({
+          fileId: record.fileId,
+        }).then((res) => {
+          if (res.code === 200) {
+            if (res.data) {
+              this.temp = res.data;
+              this.viewFileVisible = true;
+            } else {
+              this.$notification.warning({
+                message: "文件不存在啦",
+              });
+            }
           }
-        }
-      });
+        });
+      } else {
+        hasFile({
+          fileSumMd5: record.fileId,
+        }).then((res) => {
+          if (res.code === 200) {
+            if (res.data) {
+              this.temp = res.data;
+              this.viewFileVisible = true;
+            } else {
+              this.$notification.warning({
+                message: "文件不存在啦",
+              });
+            }
+          }
+        });
+      }
     },
   },
 };

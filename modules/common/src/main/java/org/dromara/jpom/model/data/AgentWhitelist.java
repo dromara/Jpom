@@ -34,7 +34,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.system.ExtConfigBean;
-import org.dromara.jpom.util.FileUtils;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -88,16 +87,32 @@ public class AgentWhitelist extends BaseJsonModel {
      * @return null 是有冲突的
      */
     public static List<String> covertToArray(List<String> list, String errorMsg) {
+        return covertToArray(list, -1, errorMsg);
+    }
+
+    /**
+     * 格式化，判断是否与jpom 数据路径冲突
+     *
+     * @param list list
+     * @return null 是有冲突的
+     */
+    public static List<String> covertToArray(List<String> list, int maxLen, String errorMsg) {
         if (list == null) {
             return null;
         }
         return list.stream()
             .map(s -> {
-                String val = String.format("/%s/", s);
-                val = FileUtil.normalize(val);
-                FileUtils.checkSlip(val);
+                String val = FileUtil.normalize(s);
+                Assert.state(FileUtil.isAbsolutePath(val), "需要配置绝对路径：" + val);
+                File file = FileUtil.file(val);
+                File parentFile = file.getParentFile();
+                Assert.notNull(parentFile, "不能配置根路径：" + val);
                 // 判断是否保护jpom 路径
                 Assert.state(!StrUtil.startWith(ExtConfigBean.getPath(), val), errorMsg);
+                //
+                if (maxLen > 0) {
+                    Assert.state(StrUtil.length(val) <= maxLen, "配置路径超过" + maxLen + "长度限制:" + val);
+                }
                 return val;
             })
             .distinct()
@@ -231,6 +246,44 @@ public class AgentWhitelist extends BaseJsonModel {
                 // 满足正则条件
                 return entry.getValue();
             }
+        }
+        return null;
+    }
+
+    /**
+     * 检查授权包含关系
+     *
+     * @param jsonArray 要检查的对象
+     * @return null 正常
+     */
+    public static String findStartsWith(List<String> jsonArray) {
+        return findStartsWith(jsonArray, 0);
+    }
+
+    /**
+     * 检查授权包含关系
+     *
+     * @param jsonArray 要检查的对象
+     * @param start     检查的坐标
+     * @return null 正常
+     */
+    private static String findStartsWith(List<String> jsonArray, int start) {
+        if (jsonArray == null) {
+            return null;
+        }
+        String str = jsonArray.get(start);
+        int len = jsonArray.size();
+        for (int i = 0; i < len; i++) {
+            if (i == start) {
+                continue;
+            }
+            String findStr = jsonArray.get(i);
+            if (FileUtil.isSub(FileUtil.file(findStr), FileUtil.file(str))) {
+                return str;
+            }
+        }
+        if (start < len - 1) {
+            return findStartsWith(jsonArray, start + 1);
         }
         return null;
     }

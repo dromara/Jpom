@@ -20,37 +20,15 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.dromara.jpom.configuration;
-
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+package org.dromara.jpom.func.files.model;
 
 /**
- * 文件管理存储
- *
  * @author bwcx_jzy
- * @since 23/12/25 025
+ * @since 23/12/28 028
  */
-@Data
-@ConfigurationProperties("jpom.file-storage")
-public class FileStorageConfig {
+public interface IFileStorage {
 
-    /**
-     * 文件中心存储路径
-     */
-    private String savePah;
-    /**
-     * 静态目录扫描周期
-     * <p>
-     * 0 0/1 * * *
-     */
-    private String scanStaticDirCron = "0 0/1 * * *";
-    /**
-     * 开启静态目录监听
-     */
-    private Boolean watchMonitorStaticDir = true;
-    /**
-     * 监听深度
-     */
-    private Integer watchMonitorMaxDepth = 1;
+    String getName();
+
+    String getExtName();
 }

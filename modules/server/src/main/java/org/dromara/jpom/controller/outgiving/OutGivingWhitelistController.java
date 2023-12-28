@@ -29,7 +29,7 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.validator.ValidatorItem;
+import org.dromara.jpom.func.files.service.StaticFileStorageService;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.model.data.ServerWhitelist;
 import org.dromara.jpom.permission.ClassFeature;
@@ -63,11 +63,14 @@ public class OutGivingWhitelistController extends BaseServerController {
 
     private final SystemParametersServer systemParametersServer;
     private final OutGivingWhitelistService outGivingWhitelistService;
+    private final StaticFileStorageService staticFileStorageService;
 
     public OutGivingWhitelistController(SystemParametersServer systemParametersServer,
-                                        OutGivingWhitelistService outGivingWhitelistService) {
+                                        OutGivingWhitelistService outGivingWhitelistService,
+                                        StaticFileStorageService staticFileStorageService) {
         this.systemParametersServer = systemParametersServer;
         this.outGivingWhitelistService = outGivingWhitelistService;
+        this.staticFileStorageService = staticFileStorageService;
     }
 
 
@@ -105,36 +108,31 @@ public class OutGivingWhitelistController extends BaseServerController {
     @SystemPermission
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> whitelistDirectorySubmit(String outGiving,
-                                                        String allowRemoteDownloadHost,
-                                                        HttpServletRequest request) {
+                                                         String allowRemoteDownloadHost,
+                                                         String staticDir,
+                                                         HttpServletRequest request) {
         String workspaceId = nodeService.getCheckUserWorkspace(request);
-        return this.whitelistDirectorySubmit(outGiving, allowRemoteDownloadHost, workspaceId);
+        return this.whitelistDirectorySubmit(outGiving, staticDir, allowRemoteDownloadHost, workspaceId);
     }
 
-    /**
-     * 保存节点授权
-     *
-     * @param outGiving 数据
-     * @return json
-     */
-    @RequestMapping(value = "whitelist-directory-submit2", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @SystemPermission
-    @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<String> whitelistDirectorySubmit2(String outGiving,
-                                                         String allowRemoteDownloadHost,
-                                                         @ValidatorItem String workspaceId) {
-        nodeService.checkUserWorkspace(workspaceId);
-        return this.whitelistDirectorySubmit(outGiving, allowRemoteDownloadHost, workspaceId);
-    }
 
     private IJsonMessage<String> whitelistDirectorySubmit(String outGiving,
-                                                         String allowRemoteDownloadHost,
-                                                         String workspaceId) {
-        List<String> list = AgentWhitelist.parseToList(outGiving, true, "项目路径授权不能为空");
-        list = AgentWhitelist.covertToArray(list, "项目路径授权不能位于Jpom目录下");
+                                                          String staticDir,
+                                                          String allowRemoteDownloadHost,
+                                                          String workspaceId) {
+        List<String> list = AgentWhitelist.parseToList(outGiving, true, "授权目录不能为空");
+        list = AgentWhitelist.covertToArray(list, "授权目录不能位于Jpom目录下");
+        String error = AgentWhitelist.findStartsWith(list);
+        Assert.isNull(error, "授权目录中不能存在包含关系：" + error);
+        //
+        List<String> staticDirList = AgentWhitelist.parseToList(staticDir, false, "静态目录授权不能为空");
+        staticDirList = AgentWhitelist.covertToArray(staticDirList, 100, "静态目录授权不能位于Jpom目录下");
+        error = AgentWhitelist.findStartsWith(staticDirList);
+        Assert.isNull(error, "静态目录中不能存在包含关系：" + error);
 
         ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(workspaceId);
         serverWhitelist.setOutGiving(list);
+        serverWhitelist.setStaticDir(staticDirList);
         //
         List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "运行远程下载的 host 不能配置为空");
         //
@@ -150,6 +148,8 @@ public class OutGivingWhitelistController extends BaseServerController {
         systemParametersServer.upsert(id, serverWhitelist, id);
 
         String resultData = AgentWhitelist.convertToLine(list);
+        // 重新检查静态目录任务状态
+        staticFileStorageService.startLoad();
         return JsonMessage.success("保存成功", resultData);
     }
 }

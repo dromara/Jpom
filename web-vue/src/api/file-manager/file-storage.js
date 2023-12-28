@@ -60,7 +60,6 @@ export function hasFile(params) {
   });
 }
 
-// 判断文件是否存在
 export function delFile(params) {
   return axios({
     url: "/file-storage/del",

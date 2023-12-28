@@ -22,7 +22,7 @@
       },
       {
         "id": "outgivingWhitelistDirectory",
-        "title": "授权目录",
+        "title": "授权配置",
         "role": "system"
       },
       {
@@ -134,6 +134,10 @@
       {
         "id": "fileStorage",
         "title": "文件列表"
+      },
+      {
+        "id": "staticFileStorage",
+        "title": "静态文件"
       },
       {
         "id": "fileReleaseTask",

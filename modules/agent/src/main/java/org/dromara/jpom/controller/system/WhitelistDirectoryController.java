@@ -82,7 +82,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
         List<String> projectArray;
         {
             projectArray = AgentWhitelist.covertToArray(projects, "项目路径授权不能位于Jpom目录下");
-            String error = findStartsWith(projectArray, 0);
+            String error = findStartsWith(projectArray);
             Assert.isNull(error, "授权目录中不能存在包含关系：" + error);
         }
 
@@ -113,27 +113,12 @@ public class WhitelistDirectoryController extends BaseJpomController {
      * 检查授权包含关系
      *
      * @param jsonArray 要检查的对象
-     * @param start     检查的坐标
      * @return null 正常
      */
-    private String findStartsWith(List<String> jsonArray, int start) {
+    private String findStartsWith(List<String> jsonArray) {
         if (jsonArray == null || !agentConfig.getWhitelist().isCheckStartsWith()) {
             return null;
         }
-        String str = jsonArray.get(start);
-        int len = jsonArray.size();
-        for (int i = 0; i < len; i++) {
-            if (i == start) {
-                continue;
-            }
-            String findStr = jsonArray.get(i);
-            if (findStr.startsWith(str)) {
-                return str;
-            }
-        }
-        if (start < len - 1) {
-            return findStartsWith(jsonArray, start + 1);
-        }
-        return null;
+        return AgentWhitelist.findStartsWith(jsonArray);
     }
 }

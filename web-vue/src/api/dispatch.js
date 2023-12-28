@@ -152,6 +152,14 @@ export function useuseFileStorage(params) {
   });
 }
 
+export function useuseStaticFileStorage(params) {
+  return axios({
+    url: "/outgiving/use-static-file-storage",
+    method: "post",
+    data: params,
+  });
+}
+
 /**
  * 释放分发
  * @param {*} id 分发 ID
@@ -221,18 +229,6 @@ export function getDispatchWhiteList(params) {
 export function editDispatchWhiteList(params) {
   return axios({
     url: "/outgiving/whitelistDirectory_submit",
-    method: "post",
-    data: params,
-  });
-}
-
-/**
- * 编辑分发授权
- * @param {*} params
- */
-export function editDispatchWhiteList2(params) {
-  return axios({
-    url: "/outgiving/whitelist-directory-submit2",
     method: "post",
     data: params,
   });

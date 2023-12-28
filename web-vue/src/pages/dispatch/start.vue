@@ -19,10 +19,11 @@
       <a-form-model ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="方式" prop="type">
           <a-radio-group v-model="temp.type" name="type" :disabled="!!percentage" @change="restForm">
-            <a-radio :value="'upload'">上传文件</a-radio>
-            <a-radio :value="'download'">远程下载</a-radio>
             <a-radio :value="'use-build'">构建产物</a-radio>
             <a-radio :value="'file-storage'">文件中心</a-radio>
+            <a-radio :value="'static-file-storage'">静态文件</a-radio>
+            <a-radio :value="'upload'">上传文件</a-radio>
+            <a-radio :value="'download'">远程下载</a-radio>
           </a-radio-group>
         </a-form-model-item>
         <!-- 手动上传 -->
@@ -88,6 +89,24 @@
                 @click="
                   () => {
                     chooseVisible = 3;
+                  }
+                "
+              >
+                选择文件
+              </a-button>
+            </a-space>
+          </a-form-model-item></template
+        >
+        <!-- 静态文件 -->
+        <template v-else-if="temp.type === 'static-file-storage'">
+          <a-form-model-item label="选择文件">
+            <a-space>
+              {{ chooseFileInfo.name }}
+              <a-button
+                type="primary"
+                @click="
+                  () => {
+                    chooseVisible = 4;
                   }
                 "
               >
@@ -236,19 +255,58 @@
         "
       ></file-storage>
     </a-drawer>
+    <!-- 选择静态文件 -->
+    <a-drawer
+      destroyOnClose
+      :title="`选择静态文件`"
+      placement="right"
+      :visible="chooseVisible === 4"
+      width="80vw"
+      :zIndex="1009"
+      @close="
+        () => {
+          this.chooseVisible = 0;
+        }
+      "
+    >
+      <!-- 选择静态文件 -->
+      <static-file-storage
+        v-if="chooseVisible === 4"
+        :choose="'radio'"
+        mode="choose"
+        @confirm="
+          (data) => {
+            this.chooseFileInfo = { id: data[0].id, name: data[0].name };
+            this.chooseVisible = 0;
+          }
+        "
+        @cancel="
+          () => {
+            this.chooseVisible = 0;
+          }
+        "
+      ></static-file-storage>
+    </a-drawer>
   </div>
 </template>
 <script>
 import { uploadPieces } from "@/utils/upload-pieces";
-import { remoteDownload, uploadDispatchFile, uploadDispatchFileMerge, afterOptList, getDispatchProject, useBuild, useuseFileStorage } from "@/api/dispatch";
+import { remoteDownload, uploadDispatchFile, uploadDispatchFileMerge, afterOptList, getDispatchProject, useBuild, useuseFileStorage, useuseStaticFileStorage } from "@/api/dispatch";
 import { renderSize, formatDuration } from "@/utils/const";
 import BuildList from "@/pages/build/list-info";
 import BuildHistory from "@/pages/build/history";
 import FileStorage from "@/pages/file-manager/fileStorage/list";
+import StaticFileStorage from "@/pages/file-manager/staticFileStorage/list";
 import { getBuildGet } from "@/api/build-info";
 import { hasFile } from "@/api/file-manager/file-storage";
+import { hasStaticFile } from "@/api/file-manager/static-storage";
 export default {
-  components: { BuildList, BuildHistory, FileStorage },
+  components: {
+    BuildList,
+    BuildHistory,
+    FileStorage,
+    StaticFileStorage,
+  },
   props: {
     data: Object,
   },
@@ -301,6 +359,15 @@ export default {
       // 文件中心
       if (this.data.modeData) {
         hasFile({ fileSumMd5: this.data.modeData }).then((res) => {
+          if (res.code === 200 && res.data) {
+            this.chooseFileInfo = { id: res.data.id, name: res.data.name };
+          }
+        });
+      }
+    } else if (this.data.mode === "static-file-storage") {
+      // 静态文件
+      if (this.data.modeData) {
+        hasStaticFile({ fileId: this.data.modeData }).then((res) => {
           if (res.code === 200 && res.data) {
             this.chooseFileInfo = { id: res.data.id, name: res.data.name };
           }
@@ -446,7 +513,7 @@ export default {
           // 文件中心
           if (!this.chooseFileInfo || !this.chooseFileInfo.id) {
             this.$notification.error({
-              message: "请填写文件中心文件",
+              message: "请选择文件中心的文件",
             });
             return false;
           }
@@ -456,6 +523,23 @@ export default {
                 message: res.msg,
               });
 
+              this.$emit("cancel");
+            }
+          });
+          return true;
+        } else if (this.temp.type == "static-file-storage") {
+          // 文件中心
+          if (!this.chooseFileInfo || !this.chooseFileInfo.id) {
+            this.$notification.error({
+              message: "请选择静态文件中的文件",
+            });
+            return false;
+          }
+          useuseStaticFileStorage({ ...this.temp, fileId: this.chooseFileInfo.id }).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
               this.$emit("cancel");
             }
           });
