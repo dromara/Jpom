@@ -150,7 +150,7 @@ public class MachineNodeController extends BaseGroupNameController {
 
 
     /**
-     * 保存白名单配置
+     * 保存授权配置
      *
      * @return json
      */
@@ -164,7 +164,7 @@ public class MachineNodeController extends BaseGroupNameController {
             MachineNodeModel machineNodeModel = machineNodeServer.getByKey(s);
             Assert.notNull(machineNodeModel, "没有对应的机器");
             JsonMessage<String> jsonMessage = NodeForward.request(machineNodeModel, request, NodeUrl.WhitelistDirectory_Submit);
-            Assert.state(jsonMessage.success(), "分发 " + machineNodeModel.getName() + " 节点白名单失败" + jsonMessage.getMsg());
+            Assert.state(jsonMessage.success(), "分发 " + machineNodeModel.getName() + " 节点授权失败" + jsonMessage.getMsg());
         }
         return JsonMessage.success("保存成功");
     }

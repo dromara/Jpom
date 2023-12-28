@@ -78,7 +78,7 @@ public class IpInterceptor implements HandlerMethodInterceptor {
                 return true;
             }
         } catch (Exception e) {
-            log.warn("IP白名单拦截异常,请检查配置是否正确", e);
+            log.warn("IP授权拦截异常,请检查配置是否正确", e);
             return true;
         }
         ServletUtil.write(response, JsonMessage.getString(IP_ACCESS_CODE, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);

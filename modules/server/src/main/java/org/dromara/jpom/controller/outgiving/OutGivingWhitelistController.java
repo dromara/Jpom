@@ -51,7 +51,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 节点白名单
+ * 节点授权
  *
  * @author bwcx_jzy
  * @since 2019/4/22
@@ -73,7 +73,7 @@ public class OutGivingWhitelistController extends BaseServerController {
 
     /**
      * get whiteList data
-     * 白名单数据接口
+     * 授权数据接口
      *
      * @return json
      * @author Hotstrip
@@ -96,7 +96,7 @@ public class OutGivingWhitelistController extends BaseServerController {
 
 
     /**
-     * 保存节点白名单
+     * 保存节点授权
      *
      * @param outGiving 数据
      * @return json
@@ -112,7 +112,7 @@ public class OutGivingWhitelistController extends BaseServerController {
     }
 
     /**
-     * 保存节点白名单
+     * 保存节点授权
      *
      * @param outGiving 数据
      * @return json
@@ -130,8 +130,8 @@ public class OutGivingWhitelistController extends BaseServerController {
     private IJsonMessage<String> whitelistDirectorySubmit(String outGiving,
                                                          String allowRemoteDownloadHost,
                                                          String workspaceId) {
-        List<String> list = AgentWhitelist.parseToList(outGiving, true, "项目路径白名单不能为空");
-        list = AgentWhitelist.covertToArray(list, "项目路径白名单不能位于Jpom目录下");
+        List<String> list = AgentWhitelist.parseToList(outGiving, true, "项目路径授权不能为空");
+        list = AgentWhitelist.covertToArray(list, "项目路径授权不能位于Jpom目录下");
 
         ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(workspaceId);
         serverWhitelist.setOutGiving(list);

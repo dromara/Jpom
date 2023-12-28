@@ -53,7 +53,7 @@ public class JpomServerApplication {
     /**
      * 启动执行
      * <p>
-     * --rest:ip_config 重置 IP 白名单配置
+     * --rest:ip_config 重置 IP 授权配置
      * <p>
      * --rest:load_init_db 重新加载数据库初始化操作
      * <p>
@@ -80,7 +80,7 @@ public class JpomServerApplication {
         SpringApplicationBuilder springApplicationBuilder = new SpringApplicationBuilder(JpomServerApplication.class);
         springApplicationBuilder.bannerMode(Banner.Mode.LOG);
         springApplicationBuilder.run(args);
-        // 重置 ip 白名单配置
+        // 重置 ip 授权配置
         if (ArrayUtil.containsIgnoreCase(args, "--rest:ip_config")) {
             SystemParametersServer parametersServer = SpringUtil.getBean(SystemParametersServer.class);
             parametersServer.delByKey(SystemIpConfigModel.ID);

@@ -66,10 +66,10 @@
         </a-form-model-item>
         <a-form-model-item prop="systemUser">
           <template slot="label">
-            管理员
-            <a-tooltip v-if="createOption">
+            <a-tooltip>
+              管理员
               <template slot="title"> 管理员拥有：管理服务端的部分权限 </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-if="createOption" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-row>

@@ -27,20 +27,20 @@
         </a-form-model-item>
         <a-form-model-item prop="workspace">
           <template slot="label">
-            工作空间
-            <a-tooltip v-if="!temp.id">
+            <a-tooltip>
+              工作空间
               <template slot="title"> 配置工作空间权限,用户限制用户只能对应的工作空间里面操作对应的功能</template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <transfer ref="transferRef" :tree-data="workspaceList" :editKey="temp.targetKeys" />
         </a-form-model-item>
         <a-form-model-item prop="prohibitExecute">
           <template slot="label">
-            禁用时段
-            <a-tooltip v-if="!temp.id">
+            <a-tooltip>
+              禁用时段
               <template slot="title"> 配置后可以控制想要在某个时间段禁止用户操作某些功能，优先判断禁用时段</template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <div v-for="(item, index) in temp.prohibitExecuteArray" :key="item.key">
@@ -101,10 +101,10 @@
         </a-form-model-item>
         <a-form-model-item prop="allowExecute">
           <template slot="label">
-            允许时段
-            <a-tooltip v-if="!temp.id">
+            <a-tooltip>
+              允许时段
               <template slot="title"> 优先判断禁用时段,再判断允许时段。配置允许时段后用户只能在对应的时段执行相应功能的操作</template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <div v-for="(item, index) in temp.allowExecuteArray" :key="item.key">

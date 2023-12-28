@@ -357,7 +357,7 @@ export default {
                 allowPathParent: element.allowPathParent,
                 nextPath: "/",
                 isLeaf: false,
-                // 配置的白名单目录可能不存在
+                // 配置的授权目录可能不存在
                 disabled: !!element.error,
                 modifyTime: element.modifyTime,
               };

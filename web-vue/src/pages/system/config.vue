@@ -21,7 +21,7 @@
     <a-tab-pane key="2" class="ip-config-panel">
       <span slot="tab">
         <a-icon type="lock" />
-        服务端IP白名单配置
+        服务端IP授权配置
       </span>
       <a-alert :message="`当前访问IP：${ipTemp.ip}`" type="success" />
       <a-alert
@@ -37,11 +37,11 @@
               <a-tooltip>
                 <template slot="title">禁止访问的 IP 地址 </template>
                 <a-icon type="stop" theme="twoTone" />
-                IP黑名单
+                IP禁止
               </a-tooltip>
             </a-space>
           </template>
-          <a-input v-model="ipTemp.prohibited" type="textarea" :rows="8" class="ip-list-config" placeholder="请输入IP黑名单,多个使用换行,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24" />
+          <a-input v-model="ipTemp.prohibited" type="textarea" :rows="8" class="ip-list-config" placeholder="请输入IP禁止,多个使用换行,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24" />
         </a-form-model-item>
         <a-form-model-item prop="content">
           <template slot="label">
@@ -49,7 +49,7 @@
               <a-tooltip>
                 <template slot="title"> 只允许访问的 IP 地址 </template>
                 <a-icon type="check-circle" theme="twoTone" />
-                IP白名单
+                IP授权
               </a-tooltip>
             </a-space>
           </template>
@@ -58,7 +58,7 @@
             type="textarea"
             :rows="8"
             class="ip-list-config"
-            placeholder="请输入IP白名单,多个使用换行,0.0.0.0 是开放所有IP,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24"
+            placeholder="请输入IP授权,多个使用换行,0.0.0.0 是开放所有IP,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24"
           />
         </a-form-model-item>
 
@@ -178,7 +178,7 @@ export default {
         }
       });
     },
-    // 加载 ip 白名单配置
+    // 加载 ip 授权配置
     loadIpConfigData() {
       getIpConfigData().then((res) => {
         if (res.code === 200) {
@@ -262,7 +262,7 @@ export default {
     onSubmitIp() {
       this.$confirm({
         title: "系统提示",
-        content: "真的要保存当前配置吗？IP 白名单请慎重配置奥( 白名单是指只允许访问的 IP ),配置后立马生效 如果配置错误将出现无法访问的情况,需要手动恢复奥！！！",
+        content: "真的要保存当前配置吗？IP 授权请慎重配置奥( 授权是指只允许访问的 IP ),配置后立马生效 如果配置错误将出现无法访问的情况,需要手动恢复奥！！！",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {

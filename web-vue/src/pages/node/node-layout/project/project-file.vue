@@ -48,7 +48,7 @@
                   </a-menu-item>
                 </a-menu>
               </a-dropdown>
-              <a-tooltip title="通过 URL 下载远程文件到项目文件夹,需要到节点系统配置->白名单配置中配置允许的 HOST 白名单">
+              <a-tooltip title="通过 URL 下载远程文件到项目文件夹,需要到对应的工作空间下授权目录配置中配置允许的 HOST 授权">
                 <a-button size="small" type="primary" @click="openRemoteUpload"><a-icon type="cloud-download" /></a-button>
               </a-tooltip>
               <a-tooltip title="刷新文件表格">
@@ -98,7 +98,7 @@
                 </a-tooltip>
               </template>
               <template v-else>
-                <a-tooltip title="需要到 节点管理中的【插件端配置】的白名单配置中配置允许编辑的文件后缀">
+                <a-tooltip title="需要到 节点管理中的【插件端配置】的授权配置中配置允许编辑的文件后缀">
                   <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEditFile(record)">编辑</a-button>
                 </a-tooltip>
                 <a-button size="small" type="primary" @click="handleDownload(record)">下载</a-button>

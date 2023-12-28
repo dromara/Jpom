@@ -118,8 +118,8 @@ public abstract class BaseSshFileController extends BaseServerController {
      * 验证数据id 和目录合法性
      *
      * @param id              数据id
-     * @param allowPathParent 想要验证的目录 （白名单）
-     * @param nextPath        白名单后的二级路径
+     * @param allowPathParent 想要验证的目录 （授权）
+     * @param nextPath        授权后的二级路径
      * @param function        回调
      * @param <T>             泛型
      * @return 处理后的数据

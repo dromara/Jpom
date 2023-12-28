@@ -20,9 +20,12 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.watch.WatchMonitor;
 import cn.hutool.core.io.watch.WatchUtil;
 import cn.hutool.core.io.watch.Watcher;
+import org.junit.Test;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -31,7 +34,36 @@ import java.nio.file.WatchEvent;
 /**
  * Created by bwcx_jzy on 2018/10/2.
  */
+
 public class TestFileWatch {
+
+    @Test
+    public void test() {
+        File file = FileUtil.file("P:\\");
+        WatchMonitor monitor = WatchUtil.createAll(file, new Watcher() {
+            @Override
+            public void onCreate(WatchEvent<?> event, Path currentPath) {
+                System.out.println("创建：" + currentPath);
+            }
+
+            @Override
+            public void onModify(WatchEvent<?> event, Path currentPath) {
+                System.out.println("修改：" + currentPath);
+            }
+
+            @Override
+            public void onDelete(WatchEvent<?> event, Path currentPath) {
+                System.out.println("删除：" + currentPath);
+            }
+
+            @Override
+            public void onOverflow(WatchEvent<?> event, Path currentPath) {
+                System.out.println("超限：" + currentPath);
+            }
+        });
+        monitor.run();
+    }
+
     public static void main(String[] args) {
         File file = new File("D:\\SystemDocument\\Desktop\\top.txt");
         WatchMonitor watchMonitor = WatchUtil.create(file);

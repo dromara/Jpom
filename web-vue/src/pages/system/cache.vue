@@ -49,9 +49,9 @@
               <a-button size="small" v-if="temp.oldJarsSize !== '0'" type="primary" class="btn" @click="clear('serviceOldJarsSize')">清空</a-button>
             </a-space>
           </a-descriptions-item>
-          <a-descriptions-item label="黑名单 IP">
+          <a-descriptions-item label="禁止 IP">
             <a-space>
-              <a-popover title="黑名单 IP">
+              <a-popover title="禁止 IP">
                 <template slot="content"
                   ><a-list size="small" bordered :data-source="temp.errorIp">
                     <a-list-item slot="renderItem" slot-scope="item">

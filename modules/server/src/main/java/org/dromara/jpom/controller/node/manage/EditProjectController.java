@@ -73,7 +73,7 @@ public class EditProjectController extends BaseServerController {
 
     /**
      * get project access list
-     * 获取项目的白名单
+     * 获取项目的授权
      *
      * @return json
      * @author Hotstrip

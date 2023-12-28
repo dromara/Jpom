@@ -75,10 +75,10 @@
         </a-form-model-item>
         <a-form-model-item prop="notifyUser" class="jpom-monitor-notify">
           <template slot="label">
-            报警联系人
-            <a-tooltip v-show="!temp.id">
+            <a-tooltip>
+              报警联系人
               <template slot="title"> 如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。 </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="!temp.id" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-transfer :data-source="userList" :lazy="false" show-search :filter-option="filterOption" :target-keys="notifyUserKeys" :render="(item) => item.title" @change="handleNotifyUserChange" />

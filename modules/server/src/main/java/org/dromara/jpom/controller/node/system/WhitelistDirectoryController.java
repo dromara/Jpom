@@ -47,7 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 白名单目录
+ * 授权目录
  *
  * @author bwcx_jzy
  * @since 2019/2/28
@@ -67,7 +67,7 @@ public class WhitelistDirectoryController extends BaseServerController {
 
     /**
      * get whiteList data
-     * 白名单数据接口
+     * 授权数据接口
      *
      * @return json
      * @author Hotstrip

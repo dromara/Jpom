@@ -43,7 +43,7 @@
 
       <a-form-model-item prop="releasePathParent" label="发布目录">
         <template slot="help">
-          <a-tooltip title="需要配置授权目录（白名单才能正常使用发布）,授权目录主要是用于确定可以发布到哪些目录中"
+          <a-tooltip title="需要配置授权目录（授权才能正常使用发布）,授权目录主要是用于确定可以发布到哪些目录中"
             ><a-button
               icon="info-circle"
               size="small"
@@ -162,7 +162,7 @@ export default {
         this.$emit("commit", { ...this.temp, taskDataIds: this.temp.taskDataIds?.join(",") });
       });
     },
-    // 加载项目白名单列表
+    // 加载项目授权列表
     loadAccesList() {
       getDispatchWhiteList().then((res) => {
         if (res.code === 200) {

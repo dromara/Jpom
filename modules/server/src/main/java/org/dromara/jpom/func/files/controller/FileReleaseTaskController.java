@@ -88,7 +88,7 @@ public class FileReleaseTaskController extends BaseServerController {
         // 判断参数
         ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(request);
         List<String> whitelistServerOutGiving = configDeNewInstance.outGiving();
-        Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, releasePathParent), "请选择正确的项目路径,或者还没有配置白名单");
+        Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, releasePathParent), "请选择正确的项目路径,或者还没有配置授权");
         Assert.hasText(releasePathSecondary, "请填写发布文件的二级目录");
 
         String releasePath = FileUtil.normalize(releasePathParent + StrUtil.SLASH + releasePathSecondary);

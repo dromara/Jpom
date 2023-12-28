@@ -136,10 +136,10 @@
       <a-form-model ref="linkDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item prop="id">
           <template slot="label">
-            分发 ID
-            <a-tooltip v-show="temp.type !== 'edit'">
+            <a-tooltip>
+              分发 ID
               <template slot="title">分发 ID 等同于项目 ID</template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-input :maxLength="50" v-model="temp.id" v-if="temp.type === 'edit'" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
@@ -238,13 +238,13 @@
         </a-form-model-item>
         <a-form-model-item prop="intervalTime" v-if="temp.afterOpt === 2 || temp.afterOpt === 3">
           <template slot="label">
-            间隔时间
-            <a-tooltip v-show="temp.type !== 'edit'">
+            <a-tooltip>
+              间隔时间
               <template slot="title">
                 在执行多节点分发时候使用 顺序重启、完整顺序重启 时候需要保证项目能正常重启,并等待上一个项目启动完成才能关闭下一个项目,请根据自身项目启动时间来配置
                 <li>一般建议 10 秒以上</li>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-input-number :min="0" v-model="temp.intervalTime" placeholder="分发间隔时间 （顺序重启、完整顺序重启）方式才生效" style="width: 100%" />
@@ -254,10 +254,10 @@
         </a-form-model-item>
         <a-form-model-item prop="clearOld">
           <template slot="label">
-            清空发布
-            <a-tooltip v-show="temp.type !== 'edit'">
+            <a-tooltip>
+              清空发布
               <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件 </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-row>
@@ -279,8 +279,7 @@
         </a-form-model-item>
         <a-form-model-item prop="webhook">
           <template slot="label">
-            WebHooks
-            <a-tooltip v-show="!temp.id">
+            <a-tooltip>
               <template slot="title">
                 <ul>
                   <li>分发过程请求对应的地址,开始分发,分发完成,分发失败,取消分发</li>
@@ -289,7 +288,8 @@
                   <li>异步请求不能保证有序性</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              WebHooks
+              <a-icon v-show="!temp.id" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-input v-model="temp.webhook" placeholder="分发过程请求,非必填，GET请求" />
@@ -301,10 +301,10 @@
       <a-form-model ref="editDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item prop="id">
           <template slot="label">
-            分发 ID
-            <a-tooltip v-show="temp.type !== 'edit'">
+            <a-tooltip>
+              分发 ID
               <template slot="title">分发 ID 等同于项目 ID</template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-input :maxLength="50" v-model="temp.id" v-if="temp.type === 'edit'" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改,分发 ID 等同于项目 ID" />
@@ -340,8 +340,8 @@
 
         <a-form-model-item prop="runMode">
           <template slot="label">
-            运行方式
-            <a-tooltip v-show="temp.type !== 'edit'">
+            <a-tooltip>
+              运行方式
               <template slot="title">
                 <ul>
                   <li><b>Dsl</b> 配合脚本模版实现自定义项目管理</li>
@@ -352,7 +352,7 @@
                   <li><b>File</b> 项目为静态文件夹,没有项目状态以及控制等功能</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-select v-model="temp.runMode" placeholder="请选择运行方式">
@@ -362,21 +362,21 @@
 
         <a-form-model-item prop="whitelistDirectory" class="jpom-project-whitelist">
           <template slot="label">
-            项目路径
-            <a-tooltip v-show="temp.type !== 'edit'">
+            <a-tooltip>
+              项目路径
               <template slot="title">
                 <ul>
-                  <li>白名单路径是指项目文件存放到服务中的文件夹</li>
-                  <li>可以到【节点分发】=>【分发白名单配置】修改</li>
+                  <li>授权路径是指项目文件存放到服务中的文件夹</li>
+                  <li>可以到【节点分发】=>【分发授权配置】修改</li>
                   <li>项目文件夹是项目实际存放的目录名称</li>
-                  <li>项目文件会存放到 <br />&nbsp;&nbsp;<b>项目白名单路径+项目文件夹</b></li>
+                  <li>项目文件会存放到 <br />&nbsp;&nbsp;<b>项目授权路径+项目文件夹</b></li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-input-group compact>
-            <a-select style="width: 50%" v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
+            <a-select style="width: 50%" v-model="temp.whitelistDirectory" placeholder="请选择项目授权路径">
               <a-select-option v-for="access in accessList" :key="access">
                 <a-tooltip :title="access">
                   {{ access }}
@@ -403,15 +403,15 @@
         </a-form-model-item>
         <a-form-model-item v-show="temp.runMode === 'Dsl'" prop="dslContent">
           <template slot="label">
-            DSL 内容
-            <a-tooltip v-show="temp.type !== 'edit'">
+            <a-tooltip>
+              DSL 内容
               <template slot="title">
                 <p>以 yaml/yml 格式配置,scriptId 为项目路径下的脚本文件的相对路径或者服务端脚本模版ID，可以到服务端脚本模版编辑弹窗中查看 scriptId</p>
                 <p>脚本里面支持的变量有：${PROJECT_ID}、${PROJECT_NAME}、${PROJECT_PATH}</p>
                 <p><b>status</b> 流程执行完脚本后，输出的内容最后一行必须为：running:$pid <b>$pid 为当前项目实际的进程ID</b>。如果输出最后一行不是预期格式项目状态将是未运行</p>
                 <p>配置详情请参考配置示例</p>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-tabs>
@@ -429,16 +429,16 @@
         </a-form-model-item>
         <a-form-model-item v-show="noFileModes.includes(temp.runMode)">
           <template slot="label">
-            日志目录
-            <a-tooltip v-show="temp.type !== 'edit'">
+            <a-tooltip>
+              日志目录
               <template slot="title">
                 <ul>
                   <li>日志目录是指控制台日志存储目录</li>
                   <li>默认是在项目文件夹父级</li>
-                  <li>可选择的列表和项目白名单目录是一致的，即相同配置</li>
+                  <li>可选择的列表和项目授权目录是一致的，即相同配置</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-select v-model="temp.logPath" placeholder="请选择日志目录">
@@ -459,13 +459,13 @@
         </a-form-model-item>
         <a-form-model-item prop="intervalTime" v-if="temp.afterOpt === 2 || temp.afterOpt === 3">
           <template slot="label">
-            间隔时间
-            <a-tooltip v-show="temp.type !== 'edit'">
+            <a-tooltip>
+              间隔时间
               <template slot="title">
                 在执行多节点分发时候使用 顺序重启、完整顺序重启 时候需要保证项目能正常重启,并等待上一个项目启动完成才能关闭下一个项目,请根据自身项目启动时间来配置
                 <li>一般建议 10 秒以上</li>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-input-number :min="0" v-model="temp.intervalTime" placeholder="分发间隔时间 （顺序重启、完整顺序重启）方式才生效" style="width: 100%" />
@@ -475,10 +475,10 @@
         </a-form-model-item>
         <a-form-model-item prop="clearOld">
           <template slot="label">
-            清空发布
-            <a-tooltip v-if="temp.type !== 'edit'">
+            <a-tooltip>
+              清空发布
               <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件 </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-if="temp.type !== 'edit'" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-row>
@@ -499,8 +499,8 @@
         </a-form-model-item>
         <a-form-model-item prop="webhook">
           <template slot="label">
-            WebHooks
-            <a-tooltip v-show="!temp.id">
+            <a-tooltip>
+              WebHooks
               <template slot="title">
                 <ul>
                   <li>分发过程请求对应的地址,开始分发,分发完成,分发失败,取消分发</li>
@@ -509,7 +509,7 @@
                   <li>异步请求不能保证有序性</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="!temp.id" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-input v-model="temp.webhook" placeholder="分发过程请求,非必填，GET请求" />
@@ -530,10 +530,10 @@
             </a-form-model-item>
             <a-form-model-item prop="autoStart" v-show="noFileModes.includes(temp.runMode)">
               <template slot="label">
-                自启动
-                <a-tooltip v-show="temp.type !== 'edit'">
+                <a-tooltip>
+                  自启动
                   <template slot="title">插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template>
-                  <a-icon type="question-circle" theme="filled" />
+                  <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
               <a-switch v-model="temp[`${nodeId}_autoStart`]" checked-children="开" un-checked-children="关" />
@@ -543,8 +543,7 @@
             </a-form-model-item>
             <a-form-model-item prop="token" v-show="noFileModes.includes(temp.runMode)">
               <template slot="label">
-                WebHooks
-                <a-tooltip v-show="temp.type !== 'edit'">
+                <a-tooltip>
                   <template slot="title">
                     <ul>
                       <li>项目启动,停止,重启都将请求对应的地址</li>
@@ -552,10 +551,11 @@
                       <li>type 的值有：stop、beforeStop、start、beforeRestart</li>
                     </ul>
                   </template>
-                  <a-icon type="question-circle" theme="filled" />
+                  WebHooks
+                  <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
-              <a-input v-model="temp[`${nodeId}_token`]" placeholder="项目启动,停止,重启都将请求对应的地址,非必填，GET请求" />
+              <a-input v-model="temp[`${nodeId}_token`]" placeholder="项目启动,停止,重启,文件变动都将请求对应的地址,非必填，GET请求" />
             </a-form-model-item>
           </a-collapse-panel>
         </a-collapse>
@@ -684,7 +684,7 @@ export default {
         name: [{ required: true, message: "请输入项目名称", trigger: "blur" }],
         projectId: [{ required: true, message: "请选择项目", trigger: "blur" }],
         runMode: [{ required: true, message: "请选择项目运行方式", trigger: "blur" }],
-        whitelistDirectory: [{ required: true, message: "请选择项目白名单路径", trigger: "blur" }],
+        whitelistDirectory: [{ required: true, message: "请选择项目授权路径", trigger: "blur" }],
         lib: [{ required: true, message: "请输入项目文件夹", trigger: "blur" }],
         afterOpt: [{ required: true, message: "请选择发布后操作", trigger: "blur" }],
       },
@@ -724,7 +724,7 @@ export default {
             {
               title: "导航助手",
               element: document.querySelector(".jpom-project-whitelist"),
-              intro: "项目白名单需要在侧边栏菜单<b>分发白名单</b>组件里面去设置",
+              intro: "项目授权需要在侧边栏菜单<b>分发授权</b>组件里面去设置",
             },
           ],
         },
@@ -767,7 +767,7 @@ export default {
         });
       });
     },
-    // 加载项目白名单列表
+    // 加载项目授权列表
     loadAccesList() {
       getDispatchWhiteList().then((res) => {
         if (res.code === 200) {

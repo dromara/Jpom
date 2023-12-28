@@ -71,7 +71,7 @@ public class ManageEditProjectController extends BaseAgentController {
      * 基础检查
      *
      * @param projectInfo        项目实体
-     * @param whitelistDirectory 白名单
+     * @param whitelistDirectory 授权
      * @param previewData        预检查数据
      */
     private NodeProjectInfoModel checkParameter(NodeProjectInfoModel projectInfo,
@@ -101,12 +101,12 @@ public class ManageEditProjectController extends BaseAgentController {
 
         projectInfo.setOutGivingProject(outGivingProject);
         if (!previewData) {
-            // 不是预检查数据才效验白名单
+            // 不是预检查数据才效验授权
             if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
                 if (outGivingProject) {
                     whitelistDirectoryService.addProjectWhiteList(whitelistDirectory);
                 } else {
-                    throw new IllegalArgumentException("请选择正确的项目路径,或者还没有配置白名单");
+                    throw new IllegalArgumentException("请选择正确的项目路径,或者还没有配置授权");
                 }
             }
             String logPath = projectInfo.getLogPath();
@@ -115,7 +115,7 @@ public class ManageEditProjectController extends BaseAgentController {
                     if (outGivingProject) {
                         whitelistDirectoryService.addProjectWhiteList(logPath);
                     } else {
-                        throw new IllegalArgumentException("请填写的项目日志存储路径,或者还没有配置白名单");
+                        throw new IllegalArgumentException("请填写的项目日志存储路径,或者还没有配置授权");
                     }
                 }
             }

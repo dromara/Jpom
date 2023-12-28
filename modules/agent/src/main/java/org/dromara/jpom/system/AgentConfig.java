@@ -58,7 +58,7 @@ public class AgentConfig extends BaseExtConfig {
     }
 
     /**
-     * 白名单配置
+     * 授权配置
      */
     private WhitelistDirectory whitelist;
 
@@ -210,7 +210,7 @@ public class AgentConfig extends BaseExtConfig {
     @Data
     public static class WhitelistDirectory {
         /**
-         * 白名单目录是否验证包含关系
+         * 授权目录是否验证包含关系
          */
         private boolean checkStartsWith = true;
     }

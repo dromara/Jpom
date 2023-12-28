@@ -78,7 +78,7 @@
           <ul>
             <li>创建工作空间后还需要在对应工作空间中分别管理对应数据</li>
             <li>如果要将工作空间分配给其他用户还需要到权限组管理</li>
-            <li>工作空间的菜单、环境变量、节点分发白名单需要逐一配置</li>
+            <li>工作空间的菜单、环境变量、节点分发授权需要逐一配置</li>
           </ul>
         </template>
       </a-alert>
@@ -453,7 +453,7 @@ export default {
         }
       });
     },
-    // 配置节点白名单
+    // 配置节点授权
     configWhiteDir(record) {
       this.temp = Object.assign({}, record);
       this.configDir = true;

@@ -69,7 +69,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
 
 
                                                          String allowEditSuffix) {
-        List<String> list = AgentWhitelist.parseToList(project, true, "项目路径白名单不能为空");
+        List<String> list = AgentWhitelist.parseToList(project, true, "项目路径授权不能为空");
         //
         List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
         return save(list, allowEditSuffixList);
@@ -81,9 +81,9 @@ public class WhitelistDirectoryController extends BaseJpomController {
                                      List<String> allowEditSuffixList) {
         List<String> projectArray;
         {
-            projectArray = AgentWhitelist.covertToArray(projects, "项目路径白名单不能位于Jpom目录下");
+            projectArray = AgentWhitelist.covertToArray(projects, "项目路径授权不能位于Jpom目录下");
             String error = findStartsWith(projectArray, 0);
-            Assert.isNull(error, "白名单目录中不能存在包含关系：" + error);
+            Assert.isNull(error, "授权目录中不能存在包含关系：" + error);
         }
 
         //
@@ -110,7 +110,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
     }
 
     /**
-     * 检查白名单包含关系
+     * 检查授权包含关系
      *
      * @param jsonArray 要检查的对象
      * @param start     检查的坐标

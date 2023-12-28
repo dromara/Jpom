@@ -170,10 +170,10 @@
             </a-form-model-item>
             <a-form-model-item prop="user">
               <template #label>
-                用户名
-                <a-tooltip v-if="!temp.id">
+                <a-tooltip>
+                  用户名
                   <template slot="title"> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
-                  <a-icon type="question-circle" theme="filled" />
+                  <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
               <a-input v-model="temp.user" placeholder="用户">
@@ -189,10 +189,10 @@
             <!-- 修改时可以不填写 -->
             <a-form-model-item :prop="`${temp.type === 'add' && temp.connectType === 'PASS' ? 'password' : 'password-update'}`">
               <template #label>
-                密码
-                <a-tooltip v-if="!temp.id">
+                <a-tooltip>
+                  密码
                   <template slot="title"> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
-                  <a-icon type="question-circle" theme="filled" />
+                  <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
               <!-- <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" /> -->
@@ -210,10 +210,10 @@
             </a-form-model-item>
             <a-form-model-item v-if="temp.connectType === 'PUBKEY'" prop="privateKey">
               <template slot="label">
-                私钥内容
-                <a-tooltip v-if="temp.type !== 'edit'" placement="topLeft">
+                <a-tooltip placement="topLeft">
+                  私钥内容
                   <template slot="title">不填将使用默认的 $HOME/.ssh 目录中的配置,使用优先级是：id_dsa>id_rsa>identity </template>
-                  <a-icon type="question-circle" theme="filled" />
+                  <a-icon v-if="temp.type !== 'edit'" type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
 
@@ -326,8 +326,8 @@
 
             <a-form-model-item prop="fileDirs">
               <template slot="label">
-                文件目录
                 <a-tooltip>
+                  文件目录
                   <template slot="title"> 绑定指定目录可以在线管理，同时构建 ssh 发布目录也需要在此配置 </template>
                   <a-icon type="question-circle" theme="filled" />
                 </a-tooltip>
@@ -346,8 +346,8 @@
             </a-form-model-item>
             <a-form-model-item prop="notAllowedCommand">
               <template slot="label">
-                禁止命令
                 <a-tooltip>
+                  禁止命令
                   <template slot="title">
                     限制禁止在在线终端执行的命令
                     <ul>

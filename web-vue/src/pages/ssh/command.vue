@@ -60,14 +60,14 @@
 
         <a-form-model-item prop="command" help="脚本存放路径：${user.home}/.jpom/xxxx.sh，执行脚本路径：${user.home}，执行脚本方式：bash ${user.home}/.jpom/xxxx.sh par1 par2">
           <template slot="label">
-            命令内容
-            <a-tooltip v-show="!temp.id">
+            <a-tooltip>
+              命令内容
               <template slot="title">
                 <ul>
                   <li>可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="!temp.id" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <div style="height: 40vh; overflow-y: scroll">

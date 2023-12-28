@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 节点分发白名单
+ * 节点分发授权
  *
  * @author bwcx_jzy
  * @since 2019/4/22
@@ -56,7 +56,7 @@ public class ServerWhitelist extends BaseJsonModel {
     }
 
     /**
-     * 项目的白名单
+     * 项目的授权
      */
     private List<String> outGiving;
 

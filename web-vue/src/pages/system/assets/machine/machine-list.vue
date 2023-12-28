@@ -23,7 +23,7 @@
           <a-dropdown v-if="this.layoutType === 'table'">
             <a-menu slot="overlay">
               <a-menu-item key="1" @click="syncToWorkspaceShow()"> 分配节点 </a-menu-item>
-              <a-menu-item key="2" @click="syncNodeWhiteConfig"> 同步白名单 </a-menu-item>
+              <a-menu-item key="2" @click="syncNodeWhiteConfig"> 同步授权 </a-menu-item>
               <a-menu-item key="3" @click="syncNodeConfig"> 同步系统配置 </a-menu-item>
             </a-menu>
             <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
@@ -195,8 +195,8 @@
 
         <a-form-model-item prop="jpomUrl">
           <template slot="label">
-            节点地址
-            <a-tooltip v-show="!temp.id">
+            <a-tooltip>
+              节点地址
               <template slot="title"
                 >节点地址为插件端的 IP:PORT 插件端端口默认为：2123
                 <ul>
@@ -204,7 +204,7 @@
                   <li>如果插件端正常运行但是连接失败请检查端口是否开放,防火墙规则,云服务器的安全组入站规则</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="!temp.id" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-input v-model="temp.jpomUrl" placeholder="节点地址 (127.0.0.1:2123)">
@@ -220,10 +220,10 @@
         </a-form-model-item>
         <a-form-model-item :prop="`${temp.id ? 'loginPwd-update' : 'loginPwd'}`">
           <template slot="label">
-            节点密码
-            <a-tooltip v-show="!temp.id">
+            <a-tooltip>
+              节点密码
               <template slot="title"> 节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json 文件查看（如果自定义配置了账号密码将没有此文件） </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="!temp.id" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-input-password v-model="temp.jpomPassword" placeholder="节点密码,请查看节点启动输出的信息" />
@@ -313,9 +313,9 @@
         </a-list-item>
       </a-list>
     </a-modal>
-    <!-- 分发节点白名单 -->
-    <a-modal destroyOnClose v-model="whiteConfigVisible" width="50%" title="同步节点白名单" @ok="onSubmitWhitelist" :maskClosable="false">
-      <a-alert :message="`一键分发同步多个节点的白名单配置,不用挨个配置。配置后会覆盖之前的配置,一般用于节点环境一致的情况`" style="margin-top: 10px; margin-bottom: 20px" banner />
+    <!-- 分发节点授权 -->
+    <a-modal destroyOnClose v-model="whiteConfigVisible" width="50%" title="同步节点授权" @ok="onSubmitWhitelist" :maskClosable="false">
+      <a-alert :message="`一键分发同步多个节点的授权配置,不用挨个配置。配置后会覆盖之前的配置,一般用于节点环境一致的情况`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-form-model ref="editWhiteForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="模板节点">
           <a-select show-search option-filter-prop="children" @change="(id) => loadWhitelistData(id)" placeholder="请选择模板节点" v-model="temp.templateNodeId">
@@ -325,7 +325,7 @@
           </a-select>
         </a-form-model-item>
         <a-form-model-item label="项目路径" prop="project">
-          <a-input v-model="temp.project" type="textarea" :rows="5" style="resize: none" placeholder="请输入项目存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径" />
+          <a-input v-model="temp.project" type="textarea" :rows="5" style="resize: none" placeholder="请输入项目存放路径授权，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径" />
         </a-form-model-item>
 
         <a-form-model-item label="文件后缀" prop="allowEditSuffix">
@@ -654,7 +654,7 @@ export default {
     syncNodeWhiteConfig() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         this.$notification.warn({
-          message: "请选择要同步白名单的机器节点",
+          message: "请选择要同步授权的机器节点",
         });
         return;
       }
@@ -675,7 +675,7 @@ export default {
       });
     },
 
-    // 加载节点白名单分发配置
+    // 加载节点授权分发配置
     loadWhitelistData(id) {
       getWhiteList({
         machineId: id,
