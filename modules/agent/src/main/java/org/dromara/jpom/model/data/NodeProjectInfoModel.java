@@ -55,7 +55,7 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
     private String mainClass;
     private String lib;
     /**
-     * 白名单目录
+     * 授权目录
      */
     private String whitelistDirectory;
     private String log;
@@ -139,7 +139,7 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 
     public String getWhitelistDirectory() {
         if (StrUtil.isEmpty(whitelistDirectory)) {
-            throw new JpomRuntimeException("恢复白名单数据异常");
+            throw new JpomRuntimeException("恢复授权数据异常");
         }
         return whitelistDirectory;
     }

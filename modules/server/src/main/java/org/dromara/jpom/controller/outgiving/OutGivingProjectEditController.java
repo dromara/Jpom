@@ -301,12 +301,12 @@ public class OutGivingProjectEditController extends BaseServerController {
         String whitelistDirectory = getParameter("whitelistDirectory");
         ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(getRequest());
         List<String> whitelistServerOutGiving = configDeNewInstance.outGiving();
-        Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, whitelistDirectory), "请选择正确的项目路径,或者还没有配置白名单");
+        Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, whitelistDirectory), "请选择正确的项目路径,或者还没有配置授权");
 
         defData.put("whitelistDirectory", whitelistDirectory);
         String logPath = getParameter("logPath");
         if (StrUtil.isNotEmpty(logPath)) {
-            Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, logPath), "请选择正确的日志路径,或者还没有配置白名单");
+            Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, logPath), "请选择正确的日志路径,或者还没有配置授权");
             defData.put("logPath", logPath);
         }
         String lib = getParameter("lib");

@@ -111,8 +111,8 @@ export function getIpConfigData() {
 /**
  * 编辑配置
  * @param {JSON} params {
- *  allowed: 允许访问，白名单ip,
- *  prohibited: 禁止访问，黑名单ip
+ *  allowed: 允许访问，授权ip,
+ *  prohibited: 禁止访问，禁止ip
  * }
  */
 export function editIpConfig(params) {

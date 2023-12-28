@@ -46,7 +46,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 白名单
+ * 授权
  *
  * @author bwcx_jzy
  * @since 2019/4/16
@@ -56,7 +56,7 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(callSuper = true)
 public class AgentWhitelist extends BaseJsonModel {
     /**
-     * 项目目录白名单、日志文件白名单
+     * 项目目录授权、日志文件授权
      */
     private List<String> project;
     /**
@@ -115,7 +115,7 @@ public class AgentWhitelist extends BaseJsonModel {
     }
 
     /**
-     * 判断是否在白名单列表中
+     * 判断是否在授权列表中
      *
      * @param list list
      * @param path 对应项

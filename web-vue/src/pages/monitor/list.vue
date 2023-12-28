@@ -92,10 +92,10 @@
         </a-form-model-item>
         <a-form-model-item prop="notifyUser" class="jpom-notify">
           <template slot="label">
-            联系人
-            <a-tooltip v-show="!temp.id">
+            <a-tooltip>
+              联系人
               <template slot="title"> 如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。 </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="!temp.id" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-transfer
@@ -114,8 +114,8 @@
         </a-form-model-item>
         <a-form-model-item prop="webhook">
           <template slot="label">
-            WebHooks
-            <a-tooltip v-show="!temp.id">
+            <a-tooltip>
+              WebHooks
               <template slot="title">
                 <ul>
                   <li>发生报警时候请求</li>
@@ -123,7 +123,7 @@
                   <li>runStatus 值为 true 表示项目当前为运行中(异常恢复),false 表示项目当前未运行(发生异常)</li>
                 </ul>
               </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="!temp.id" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-input v-model="temp.webhook" placeholder="接收报警消息,非必填，GET请求" />

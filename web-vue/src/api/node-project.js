@@ -55,7 +55,7 @@ export function getProjectData(params) {
 }
 
 /**
- * 项目白名单列表
+ * 项目授权列表
  * @param {String} nodeId 节点 ID
  */
 export function getProjectAccessList(nodeId) {
@@ -73,7 +73,7 @@ export function getProjectAccessList(nodeId) {
  *  id: 项目 ID
  *  name: 项目名称
  *  runMode: 运行方式
- *  whitelistDirectory: 项目白名单路径
+ *  whitelistDirectory: 项目授权路径
  *  lib: 项目文件夹
  *  group: 分组名称
  *  ...

@@ -88,7 +88,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class LoginControl extends BaseServerController implements InitializingBean {
     /**
-     * ip 黑名单
+     * ip 禁止缓存
      */
     public static final LFUCache<String, Integer> LFU_CACHE = new LFUCache<>(1000);
     /**

@@ -47,7 +47,7 @@ public class ProjectInfoCacheModel extends BaseNodeGroupModel {
     private String mainClass;
     private String lib;
     /**
-     * 白名单目录
+     * 授权目录
      */
     private String whitelistDirectory;
     /**

@@ -12,7 +12,7 @@ const whiteList = ["/login", "/install", "/system/ipAccess"];
 const noTabs = ["/full-terminal", "/ssh-tabs"];
 
 router.beforeEach((to, from, next) => {
-  // 检测白名单
+  // 检测不需要授权（登录）
   if (whiteList.indexOf(to.path) !== -1) {
     next();
     return;

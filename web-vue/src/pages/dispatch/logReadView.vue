@@ -338,7 +338,7 @@ export default {
           this.sendSearchLog();
         } else {
           //
-          this.$message.error("当前文件不可读,需要配置可读文件白名单");
+          this.$message.error("当前文件不可读,需要配置可读文件授权");
         }
       }
     },

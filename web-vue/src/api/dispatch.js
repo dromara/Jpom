@@ -71,7 +71,7 @@ export function editDispatch(params) {
  *  runMode: 运行方式
  *  mainClass: 启动类
  *  javaExtDirsCp: 目录地址
- *  whitelistDirectory: 白名单地址
+ *  whitelistDirectory: 授权地址
  *  lib: lib
  *  add_xxx: xxx 表示添加的节点信息
 
@@ -205,7 +205,7 @@ export function getDishPatchLogList(params) {
   });
 }
 
-// 获取分发白名单数据
+// 获取分发授权数据
 export function getDispatchWhiteList(params) {
   return axios({
     url: "/outgiving/white-list",
@@ -215,7 +215,7 @@ export function getDispatchWhiteList(params) {
 }
 
 /**
- * 编辑分发白名单
+ * 编辑分发授权
  * @param {*} params
  */
 export function editDispatchWhiteList(params) {
@@ -227,7 +227,7 @@ export function editDispatchWhiteList(params) {
 }
 
 /**
- * 编辑分发白名单
+ * 编辑分发授权
  * @param {*} params
  */
 export function editDispatchWhiteList2(params) {

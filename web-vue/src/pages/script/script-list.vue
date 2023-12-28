@@ -134,10 +134,10 @@
         </a-form-model-item>
         <a-form-model-item v-else>
           <template slot="label">
-            分发节点
-            <a-tooltip v-show="!temp.id">
+            <a-tooltip>
+              分发节点
               <template slot="title"> 分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本中 </template>
-              <a-icon type="question-circle" theme="filled" />
+              <a-icon v-show="!temp.id" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-select show-search option-filter-prop="children" placeholder="请选择分发到的节点" mode="multiple" v-model="temp.chooseNode">

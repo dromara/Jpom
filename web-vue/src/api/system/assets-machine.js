@@ -69,7 +69,7 @@ export function machineListTemplateNode(params) {
 }
 
 /**
- * 保存 白名单配置
+ * 保存 授权配置
  */
 export function saveWhitelist(data) {
   return axios({

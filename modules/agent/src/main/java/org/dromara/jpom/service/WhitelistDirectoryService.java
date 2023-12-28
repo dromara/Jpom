@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 白名单服务
+ * 授权服务
  *
  * @author bwcx_jzy
  * @since 2019/2/28
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 public class WhitelistDirectoryService extends BaseDataService {
 
     /**
-     * 获取白名单信息配置、如何没有配置或者配置错误将返回新对象
+     * 获取授权信息配置、如何没有配置或者配置错误将返回新对象
      *
      * @return AgentWhitelist
      */
@@ -64,13 +64,13 @@ public class WhitelistDirectoryService extends BaseDataService {
     }
 
     /**
-     * 单项添加白名单
+     * 单项添加授权
      *
-     * @param item 白名单
+     * @param item 授权
      */
     public void addProjectWhiteList(String item) {
         ArrayList<String> list = CollUtil.newArrayList(item);
-        List<String> checkOk = AgentWhitelist.covertToArray(list, "项目路径白名单不能位于Jpom目录下");
+        List<String> checkOk = AgentWhitelist.covertToArray(list, "项目路径授权不能位于Jpom目录下");
 
         AgentWhitelist agentWhitelist = getWhitelist();
         List<String> project = agentWhitelist.getProject();
@@ -91,7 +91,7 @@ public class WhitelistDirectoryService extends BaseDataService {
 
 
     /**
-     * 保存白名单
+     * 保存授权
      *
      * @param jsonObject 实体
      */
