@@ -100,7 +100,13 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
         return scanning;
     }
 
-
+    /**
+     * 分页查询
+     *
+     * @param request     请求对象
+     * @param workspaceId 工作空间id
+     * @return page
+     */
     public PageResultDto<StaticFileStorageModel> listPage(HttpServletRequest request, String workspaceId) {
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
         ServerWhitelist whitelistData = outGivingWhitelistService.getServerWhitelistData(workspaceId);
@@ -167,6 +173,34 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
         this.closeWatchMonitor();
     }
 
+    /**
+     * 扫描指定工作空间
+     *
+     * @param workspaceId 工作空间id
+     */
+    public void scanByWorkspace(String workspaceId) {
+        ServerWhitelist serverWhitelistData = outGivingWhitelistService.getServerWhitelistData(workspaceId);
+        List<String> stringList = serverWhitelistData.staticDir();
+        this.scanList(stringList);
+    }
+
+    /**
+     * 扫描指定目录
+     *
+     * @param list 目录
+     */
+    private void scanList(List<String> list) {
+        Snowflake snowflake = IdUtil.getSnowflake();
+        long taskId = snowflake.nextId();
+        for (String item : list) {
+            // 开始扫描目录
+            this.scanItem(item, item, 0, taskId);
+            // 更新文件状态
+            String sql = StrUtil.format("update {} set status=0 where staticDir=? and scanTaskId <> ?", this.getTableName());
+            this.execute(sql, item, taskId);
+        }
+    }
+
     @Override
     public void execute() {
         try {
@@ -177,15 +211,7 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
                 this.removeTask();
                 return;
             }
-            Snowflake snowflake = IdUtil.getSnowflake();
-            long taskId = snowflake.nextId();
-            for (String item : list) {
-                // 开始扫描目录
-                this.scanItem(item, item, 0, taskId);
-                // 更新文件状态
-                String sql = StrUtil.format("update {} set status=0 where staticDir=? and scanTaskId <> ?", this.getTableName());
-                this.execute(sql, item, taskId);
-            }
+            this.scanList(list);
         } finally {
             this.scanning = false;
         }
