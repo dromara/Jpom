@@ -26,6 +26,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.stream.CollectorUtil;
 import cn.hutool.core.thread.ThreadUtil;
@@ -45,6 +46,8 @@ import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.files.model.FileReleaseTaskLogModel;
 import org.dromara.jpom.func.files.model.FileStorageModel;
+import org.dromara.jpom.func.files.model.IFileStorage;
+import org.dromara.jpom.func.files.model.StaticFileStorageModel;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
@@ -89,6 +92,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     private final BuildExtConfig buildExtConfig;
     private final ServerConfig serverConfig;
     private final FileStorageService fileStorageService;
+    private final StaticFileStorageService staticFileStorageService;
 
     private final Map<String, String> cancelTag = new SafeConcurrentHashMap<>();
 
@@ -98,7 +102,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                                   NodeService nodeService,
                                   BuildExtConfig buildExtConfig,
                                   ServerConfig serverConfig,
-                                  FileStorageService fileStorageService) {
+                                  FileStorageService fileStorageService,
+                                  StaticFileStorageService staticFileStorageService) {
         this.sshService = sshService;
         this.jpomApplication = jpomApplication;
         this.workspaceEnvVarService = workspaceEnvVarService;
@@ -106,6 +111,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         this.buildExtConfig = buildExtConfig;
         this.serverConfig = serverConfig;
         this.fileStorageService = fileStorageService;
+        this.staticFileStorageService = staticFileStorageService;
     }
 
     /**
@@ -125,6 +131,40 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     }
 
     /**
+     * 获取文件中心的文件
+     *
+     * @param fileId  文件id
+     * @param request 请求
+     * @return tuple 0 文件 1 文件信息
+     */
+    private Tuple getFileStorage(String fileId, HttpServletRequest request) {
+        FileStorageModel storageModel = fileStorageService.getByKey(fileId, request);
+        Assert.notNull(storageModel, "不存在对应的文件");
+        File storageSavePath = serverConfig.fileStorageSavePath();
+        File file = FileUtil.file(storageSavePath, storageModel.getPath());
+        Assert.state(FileUtil.isFile(file), "当前文件丢失不能执行发布任务");
+
+        return new Tuple(file, storageModel);
+    }
+
+
+    /**
+     * 获取静态文件中心的文件
+     *
+     * @param fileId  文件id
+     * @param request 请求
+     * @return tuple 0 文件 1 文件信息
+     */
+    private Tuple getStaticFileStorage(String fileId, HttpServletRequest request) {
+        StaticFileStorageModel storageModel = staticFileStorageService.getByKey(fileId);
+        String workspaceId = getWorkspaceId(request);
+        staticFileStorageService.checkStaticDir(storageModel, workspaceId);
+        File file = FileUtil.file(storageModel.getAbsolutePath());
+        Assert.state(FileUtil.isFile(file), "当前文件丢失不能执行发布任务");
+        return new Tuple(file, storageModel);
+    }
+
+    /**
      * 创建任务
      *
      * @param fileId       文件id
@@ -138,6 +178,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
      * @return json
      */
     public IJsonMessage<String> addTask(String fileId,
+                                        Integer fileType,
                                         String name,
                                         int taskType,
                                         String taskDataIds,
@@ -146,11 +187,19 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                                         String afterScript,
                                         Map<String, String> env,
                                         HttpServletRequest request) {
-        FileStorageModel storageModel = fileStorageService.getByKey(fileId, request);
-        Assert.notNull(storageModel, "不存在对应的文件");
-        File storageSavePath = serverConfig.fileStorageSavePath();
-        File file = FileUtil.file(storageSavePath, storageModel.getPath());
-        Assert.state(FileUtil.isFile(file), "当前文件丢失不能执行发布任务");
+        Tuple tuple;
+        switch (fileType) {
+            case 1:
+                tuple = this.getFileStorage(fileId, request);
+                break;
+            case 2:
+                tuple = this.getStaticFileStorage(fileId, request);
+                break;
+            default:
+                throw new IllegalArgumentException("不支持的类型：" + fileType);
+        }
+        File file = tuple.get(0);
+        IFileStorage storageModel = tuple.get(1);
         //
         List<String> list;
         if (taskType == 0) {
@@ -171,6 +220,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         taskRoot.setTaskDataId(FileReleaseTaskLogModel.TASK_ROOT_ID);
         taskRoot.setName(name);
         taskRoot.setFileId(fileId);
+        taskRoot.setFileType(fileType);
         taskRoot.setStatus(0);
         taskRoot.setTaskType(taskType);
         taskRoot.setReleasePath(releasePath);
@@ -184,6 +234,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
             releaseTaskLogModel.setTaskDataId(dataId);
             releaseTaskLogModel.setName(name);
             releaseTaskLogModel.setFileId(fileId);
+            releaseTaskLogModel.setFileType(fileType);
             releaseTaskLogModel.setStatus(0);
             releaseTaskLogModel.setTaskType(taskType);
             releaseTaskLogModel.setReleasePath(taskRoot.getReleasePath());
@@ -199,7 +250,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
      * @param taskId          任务id
      * @param storageSaveFile 文件
      */
-    private void startTask(String taskId, File storageSaveFile, Map<String, String> env, FileStorageModel storageModel) {
+    private void startTask(String taskId, File storageSaveFile, Map<String, String> env, IFileStorage storageModel) {
         FileReleaseTaskLogModel taskRoot = this.getByKey(taskId);
         Assert.notNull(taskRoot, "没有找到父级任务");
         //
@@ -283,7 +334,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                                    FileReleaseTaskLogModel taskRoot,
                                    EnvironmentMapBuilder environmentMapBuilder,
                                    File storageSaveFile,
-                                   FileStorageModel storageModel) {
+                                   IFileStorage storageModel) {
         String taskId = taskRoot.getId();
         for (FileReleaseTaskLogModel model : values) {
             model.setAfterScript(taskRoot.getAfterScript());

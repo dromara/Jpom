@@ -51,6 +51,7 @@ const routeMenuMap = {
   cronTools: "/tools/cron",
   myWorkspaceList: "/my-workspace",
   fileStorage: "/file-manager/file-storage",
+  staticFileStorage: "/file-manager/static-file-storage",
   fileReleaseTask: "/file-manager/release-task",
   certificate: "/certificate/list",
   authConfig: "/system/oauth-config",

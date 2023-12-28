@@ -144,6 +144,11 @@ const children = [
     name: "/certificate-list",
     component: () => import("../pages/certificate/list"),
   },
+  {
+    path: "/file-manager/static-file-storage",
+    name: "static-file-storage",
+    component: () => import("../pages/file-manager/staticFileStorage/list"),
+  },
 ];
 
 const management = [

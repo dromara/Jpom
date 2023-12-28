@@ -116,4 +116,10 @@ public class TestPath {
         System.out.println(StrUtil.subBefore("sssddsf", "!", false));
 
     }
+
+    @Test
+    public void testWinPath(){
+        File file = FileUtil.file("/D:/");
+
+    }
 }

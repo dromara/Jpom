@@ -41,7 +41,9 @@ import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.func.files.model.FileStorageModel;
+import org.dromara.jpom.func.files.model.StaticFileStorageModel;
 import org.dromara.jpom.func.files.service.FileStorageService;
+import org.dromara.jpom.func.files.service.StaticFileStorageService;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.BaseEnum;
 import org.dromara.jpom.model.BaseNodeModel;
@@ -101,6 +103,7 @@ public class OutGivingProjectController extends BaseServerController {
     private final BuildInfoService buildInfoService;
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
     private final FileStorageService fileStorageService;
+    private final StaticFileStorageService staticFileStorageService;
 
     public OutGivingProjectController(OutGivingServer outGivingServer,
                                       OutGivingWhitelistService outGivingWhitelistService,
@@ -109,7 +112,8 @@ public class OutGivingProjectController extends BaseServerController {
                                       ProjectInfoCacheService projectInfoCacheService,
                                       BuildInfoService buildInfoService,
                                       DbBuildHistoryLogService dbBuildHistoryLogService,
-                                      FileStorageService fileStorageService) {
+                                      FileStorageService fileStorageService,
+                                      StaticFileStorageService staticFileStorageService) {
         this.outGivingServer = outGivingServer;
         this.outGivingWhitelistService = outGivingWhitelistService;
         this.serverConfig = serverConfig;
@@ -118,6 +122,7 @@ public class OutGivingProjectController extends BaseServerController {
         this.buildInfoService = buildInfoService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.fileStorageService = fileStorageService;
+        this.staticFileStorageService = staticFileStorageService;
     }
 
     @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -308,22 +313,7 @@ public class OutGivingProjectController extends BaseServerController {
         File file = FileUtil.file(serverConfig.getUserTempPath(), ServerConst.OUTGIVING_FILE, id);
         FileUtil.mkdir(file);
         File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
-        boolean unzip = BooleanUtil.toBoolean(autoUnzip);
-        //
-        this.checkZip(downloadFile, unzip);
-        int stripComponentsValue = Convert.toInt(stripComponents, 0);
-        // 开启
-        OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
-            .id(outGivingModel.getId())
-            .file(downloadFile)
-            .userModel(getUser())
-            .unzip(unzip)
-            .mode(outGivingModel.getMode())
-            .modeData(outGivingModel.getModeData())
-            // 可以不再设置-会查询最新的
-            //            .projectSecondaryDirectory(secondaryDirectory)
-            .stripComponents(stripComponentsValue);
-        outGivingRunBuilder.build().startRun(selectProject);
+        this.startTask(outGivingModel, downloadFile, autoUnzip, stripComponents, selectProject);
         return JsonMessage.success("下载成功,开始分发!");
     }
 
@@ -385,7 +375,7 @@ public class OutGivingProjectController extends BaseServerController {
     }
 
     /**
-     * 远程文件中心分发文件
+     * 文件中心分发文件
      *
      * @param id       分发id
      * @param afterOpt 之后的操作
@@ -413,6 +403,56 @@ public class OutGivingProjectController extends BaseServerController {
         outGivingServer.updateById(outGivingModel);
         File storageSavePath = serverConfig.fileStorageSavePath();
         File file = FileUtil.file(storageSavePath, storageModel.getPath());
+        this.startTask(outGivingModel, file, autoUnzip, stripComponents, selectProject);
+        return JsonMessage.success("开始分发!");
+    }
+
+    /**
+     * 静态文件分发文件
+     *
+     * @param id       分发id
+     * @param afterOpt 之后的操作
+     * @return json
+     */
+    @PostMapping(value = "use-static-file-storage", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public IJsonMessage<String> useStaticFileStorage(String id, String afterOpt, String clearOld, String fileId, String autoUnzip,
+                                                     String secondaryDirectory,
+                                                     String stripComponents,
+                                                     String selectProject,
+                                                     HttpServletRequest request) {
+
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
+        AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
+        Assert.notNull(afterOpt1, "请选择分发后的操作");
+        StaticFileStorageModel storageModel = staticFileStorageService.getByKey(fileId);
+        String workspaceId = outGivingServer.getCheckUserWorkspace(request);
+        staticFileStorageService.checkStaticDir(storageModel, workspaceId);
+        //
+        outGivingModel.setClearOld(Convert.toBool(clearOld, false));
+        outGivingModel.setAfterOpt(afterOpt1.getCode());
+        outGivingModel.setSecondaryDirectory(secondaryDirectory);
+        outGivingModel.setMode("static-file-storage");
+        outGivingModel.setModeData(fileId);
+        outGivingServer.updateById(outGivingModel);
+
+        File file = FileUtil.file(storageModel.getAbsolutePath());
+        this.startTask(outGivingModel, file, autoUnzip, stripComponents, selectProject);
+        return JsonMessage.success("开始分发!");
+    }
+
+    /**
+     * 开始发布任务
+     *
+     * @param outGivingModel  分发对象
+     * @param file            文件
+     * @param autoUnzip       是否解压
+     * @param stripComponents 剔除目录
+     * @param selectProject   选择指定项目
+     */
+    private void startTask(OutGivingModel outGivingModel, File file, String autoUnzip,
+                           String stripComponents,
+                           String selectProject) {
         Assert.state(FileUtil.isFile(file), "当前文件丢失不能执行发布任务");
         //
         boolean unzip = BooleanUtil.toBoolean(autoUnzip);
@@ -431,7 +471,6 @@ public class OutGivingProjectController extends BaseServerController {
             //            .projectSecondaryDirectory(secondaryDirectory)
             .stripComponents(stripComponentsValue);
         outGivingRunBuilder.build().startRun(selectProject);
-        return JsonMessage.success("开始分发!");
     }
 
     @PostMapping(value = "cancel", produces = MediaType.APPLICATION_JSON_VALUE)

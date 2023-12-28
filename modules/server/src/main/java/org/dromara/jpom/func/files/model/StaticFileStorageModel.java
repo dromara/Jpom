@@ -22,40 +22,34 @@
  */
 package org.dromara.jpom.func.files.model;
 
-import cn.hutool.core.annotation.PropIgnore;
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.dromara.jpom.db.TableName;
-import org.dromara.jpom.model.BaseWorkspaceModel;
+import org.dromara.jpom.model.BaseUserModifyDbModel;
 
 /**
  * @author bwcx_jzy
- * @since 2023/3/16
+ * @since 23/12/28 028
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "FILE_STORAGE", name = "文件管理中心")
+@TableName(value = "STATIC_FILE_STORAGE", name = "静态文件管理")
 @Data
 @NoArgsConstructor
-public class FileStorageModel extends BaseWorkspaceModel implements IFileStorage {
-
-    @Override
-    public void setId(String id) {
-        // 文件 md5
-        super.setId(id);
-    }
+public class StaticFileStorageModel extends BaseUserModifyDbModel implements IFileStorage {
 
     /**
      * 文件名
      */
     private String name;
 
+    /**
+     * 只保留 240 字符
+     *
+     * @param name 名称
+     */
     public void setName(String name) {
         this.name = StrUtil.maxLength(name, 240);
     }
@@ -65,65 +59,51 @@ public class FileStorageModel extends BaseWorkspaceModel implements IFileStorage
      */
     private Long size;
     /**
-     * 文件描述
-     */
-    private String description;
-    /**
-     * 文件来源 0 上传 1 构建 2 下载 3 证书
-     */
-    private Integer source;
-    /**
-     * 文件有效期（毫秒）
-     */
-    private Long validUntil;
-    /**
      * 文件路径
      */
-    private String path;
+    private String absolutePath;
+    private String parentAbsolutePath;
+    private String staticDir;
+    private Integer level;
+    /**
+     * 文件修改时间
+     */
+    private Long lastModified;
     /**
      * 文件扩展名
      */
     private String extName;
     /**
-     * 只有下载的时候才使用本字段
-     * <p>
-     * 0 下载中 1 下载完成 2 下载异常
+     * 文件状态
+     * 0 不存在
+     * 1 存在
      */
     private Integer status;
     /**
-     * 进度描述
+     * 文件类型
+     * 0 文件夹
+     * 1 文件
      */
-    private String progressDesc;
+    private Integer type;
     /**
-     * 文件是否存在
+     * 扫描任务id
      */
-    @PropIgnore
-    private Boolean exists;
+    private Long scanTaskId;
+    /**
+     * 描述
+     */
+    private String description;
     /**
      * 触发器 token
      */
     private String triggerToken;
 
-    /**
-     * 别名码
-     */
-    private String aliasCode;
-
-    /**
-     * 设置保留天数的过期时间
-     *
-     * @param keepDay   保留天数
-     * @param startTime 文件开始的时间
-     */
-    public void validUntil(Integer keepDay, Long startTime) {
-        int keepDayInt = ObjectUtil.defaultIfNull(keepDay, 3650);
-        keepDayInt = Math.max(keepDayInt, 1);
-        DateTime dateTime = new DateTime(ObjectUtil.defaultIfNull(startTime, SystemClock.now())).offset(DateField.DAY_OF_YEAR, keepDayInt);
-        this.setValidUntil(DateUtil.endOfDay(dateTime).getTime());
-    }
-
     @Override
     protected boolean hasCreateUser() {
-        return true;
+        return false;
+    }
+
+    public int type() {
+        return ObjectUtil.defaultIfNull(this.getType(), 0);
     }
 }

@@ -80,7 +80,7 @@ public class ServerConfig extends BaseExtConfig implements InitializingBean {
     /**
      * 文件中心配置
      */
-    private FileStorageConfig fileStorage;
+    private FileStorageConfig fileStorage = new FileStorageConfig();
 
     public SystemConfig getSystem() {
         return Optional.ofNullable(this.system).orElseGet(() -> {
@@ -190,9 +190,6 @@ public class ServerConfig extends BaseExtConfig implements InitializingBean {
      * @return path
      */
     public File fileStorageSavePath() {
-        if (fileStorage == null) {
-            fileStorage = new FileStorageConfig();
-        }
         String savePah = fileStorage.getSavePah();
         if (StrUtil.isEmpty(savePah)) {
             String dataPath = configBean.getDataPath();

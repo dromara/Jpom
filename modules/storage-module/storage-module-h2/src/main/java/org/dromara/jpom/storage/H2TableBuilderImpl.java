@@ -48,13 +48,21 @@ public class H2TableBuilderImpl implements IStorageSqlBuilderService {
         for (TableViewIndexData viewIndexData : row) {
             String indexType = viewIndexData.getIndexType();
             switch (indexType) {
-                case "ADD-UNIQUE":
+                case "ADD-UNIQUE": {
                     //  CREATE UNIQUE INDEX IF NOT EXISTS SYSTEMMONITORLOG_INDEX1 ON PUBLIC.SYSTEMMONITORLOG (nodeId, monitorTime);
                     String field = viewIndexData.getField();
                     List<String> fields = StrUtil.splitTrim(field, "+");
                     Assert.notEmpty(fields, "索引未配置字段");
                     stringBuilder.append("CREATE UNIQUE INDEX IF NOT EXISTS ").append(viewIndexData.getName()).append(" ON PUBLIC.").append(viewIndexData.getTableName()).append(" (").append(CollUtil.join(fields, StrUtil.COMMA)).append(")");
                     break;
+                }
+                case "ADD": {
+                    String field = viewIndexData.getField();
+                    List<String> fields = StrUtil.splitTrim(field, "+");
+                    Assert.notEmpty(fields, "索引未配置字段");
+                    stringBuilder.append("CREATE INDEX IF NOT EXISTS ").append(viewIndexData.getName()).append(" ON PUBLIC.").append(viewIndexData.getTableName()).append(" (").append(CollUtil.join(fields, StrUtil.COMMA)).append(")");
+                    break;
+                }
                 default:
                     throw new IllegalArgumentException("不支持的类型：" + indexType);
             }

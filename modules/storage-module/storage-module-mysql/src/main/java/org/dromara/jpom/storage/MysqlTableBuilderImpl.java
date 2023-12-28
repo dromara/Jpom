@@ -48,7 +48,7 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
         for (TableViewIndexData viewIndexData : row) {
             String indexType = viewIndexData.getIndexType();
             switch (indexType) {
-                case "ADD-UNIQUE":
+                case "ADD-UNIQUE": {
                     // ALTER TABLE `jpom`.`PROJECT_INFO`
                     //DROP INDEX `workspaceId`,
                     //ADD UNIQUE INDEX `workspaceId`(`workspaceId` ASC, `strike` ASC, `modifyUser`) USING BTREE;
@@ -59,6 +59,19 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
                     stringBuilder.append(this.delimiter()).append(StrUtil.LF);
                     stringBuilder.append("ALTER TABLE ").append(viewIndexData.getTableName()).append(" ADD UNIQUE INDEX ").append(viewIndexData.getName()).append(" (").append(CollUtil.join(fields, StrUtil.COMMA)).append(")");
                     break;
+                }
+                case "ADD": {
+                    // ALTER TABLE `jpom`.`PROJECT_INFO`
+                    //DROP INDEX `workspaceId`,
+                    //ADD UNIQUE INDEX `workspaceId`(`workspaceId` ASC, `strike` ASC, `modifyUser`) USING BTREE;
+                    String field = viewIndexData.getField();
+                    List<String> fields = StrUtil.splitTrim(field, "+");
+                    Assert.notEmpty(fields, "索引未配置字段");
+                    stringBuilder.append("call drop_index_if_exists('").append(viewIndexData.getTableName()).append("','").append(viewIndexData.getName()).append("')").append(";").append(StrUtil.LF);
+                    stringBuilder.append(this.delimiter()).append(StrUtil.LF);
+                    stringBuilder.append("ALTER TABLE ").append(viewIndexData.getTableName()).append(" ADD INDEX ").append(viewIndexData.getName()).append(" (").append(CollUtil.join(fields, StrUtil.COMMA)).append(")");
+                    break;
+                }
                 default:
                     throw new IllegalArgumentException("不支持的类型：" + indexType);
             }
@@ -126,9 +139,9 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
         }
         // 主键
         List<String> primaryKeys = row.stream()
-                .filter(tableViewData -> tableViewData.getPrimaryKey() != null && tableViewData.getPrimaryKey())
-                .map(TableViewRowData::getName)
-                .collect(Collectors.toList());
+            .filter(tableViewData -> tableViewData.getPrimaryKey() != null && tableViewData.getPrimaryKey())
+            .map(TableViewRowData::getName)
+            .collect(Collectors.toList());
         Assert.notEmpty(primaryKeys, "表没有主键");
         stringBuilder.append(StrUtil.TAB).append("PRIMARY KEY (").append(CollUtil.join(primaryKeys, StrUtil.COMMA)).append(")").append(StrUtil.LF);
         stringBuilder.append(") ").append("COMMENT=").append("'").append(desc).append("';");

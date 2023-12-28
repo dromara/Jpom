@@ -29,6 +29,7 @@ import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.func.cert.service.CertificateInfoService;
 import org.dromara.jpom.func.files.service.FileReleaseTaskService;
 import org.dromara.jpom.func.files.service.FileStorageService;
+import org.dromara.jpom.func.files.service.StaticFileStorageService;
 import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.func.user.server.UserLoginLogServer;
 import org.dromara.jpom.service.dblog.*;
@@ -79,7 +80,7 @@ public enum ClassFeature {
     OUTGIVING("分发管理", OutGivingServer.class),
     LOG_READ("日志阅读", LogReadServer.class),
     OUTGIVING_LOG("分发日志", DbOutGivingLogService.class),
-    OUTGIVING_CONFIG_WHITELIST("分发授权配置"),
+    OUTGIVING_CONFIG_WHITELIST("授权配置"),
     MONITOR("项目监控", MonitorService.class),
     MONITOR_LOG("监控日志", DbMonitorNotifyLogService.class),
     OPT_MONITOR("操作监控", MonitorUserOptService.class),
@@ -95,6 +96,7 @@ public enum ClassFeature {
     USER_LOG("操作日志", DbUserOperateLogService.class),
     USER_LOGIN_LOG("登录日志", UserLoginLogServer.class),
     FILE_STORAGE("文件存储中心", FileStorageService.class),
+    STATIC_FILE_STORAGE("静态文件存储", StaticFileStorageService.class),
     FILE_STORAGE_RELEASE("文件发布", FileReleaseTaskService.class),
     CERTIFICATE_INFO("证书管理", CertificateInfoService.class),
     USER_PERMISSION_GROUP("权限分组", UserPermissionGroupServer.class),
