@@ -161,6 +161,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 case start:
                 case restart:
                 case stop:
+                case reload:
                     logUser = true;
                     strResult = AbstractProjectCommander.getInstance().execCommand(consoleCommandOp, nodeProjectInfoModel);
                     if (strResult.isSuccess()) {
