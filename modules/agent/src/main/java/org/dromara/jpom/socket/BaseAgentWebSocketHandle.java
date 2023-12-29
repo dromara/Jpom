@@ -41,8 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static javax.websocket.CloseReason.CloseCodes.CANNOT_ACCEPT;
-
 /**
  * 插件端socket 基类
  *
@@ -81,7 +79,7 @@ public abstract class BaseAgentWebSocketHandle {
         if (!ok) {
             log.warn("socket 会话建立失败,授权信息错误");
             try {
-                session.close(new CloseReason(CANNOT_ACCEPT, "授权信息错误"));
+                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "授权信息错误"));
             } catch (Exception e) {
                 log.error("socket 错误", e);
             }
@@ -119,7 +117,8 @@ public abstract class BaseAgentWebSocketHandle {
         return StrUtil.emptyToDefault(name, StrUtil.DASHED);
     }
 
-    public void onClose(Session session) {
+    public void onClose(Session session, CloseReason closeReason) {
+        log.debug("会话[{}]关闭原因：{}", session.getId(), closeReason);
         // 清理日志监听
         try {
             AgentFileTailWatcher.offline(session);

@@ -157,8 +157,8 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
 
     @Override
     @OnClose
-    public void onClose(Session session) {
-        super.onClose(session);
+    public void onClose(Session session, CloseReason closeReason) {
+        super.onClose(session, closeReason);
         UPLOAD_FILE_INFO.remove(session.getId());
     }
 
