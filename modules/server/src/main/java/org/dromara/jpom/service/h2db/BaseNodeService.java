@@ -163,29 +163,28 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                 .collect(Collectors.toSet());
             // 转换数据修改时间
             List<T> projectInfoModels = jsonArray.stream().map(o -> {
-                // modifyTime,createTime
-                JSONObject jsonObject = (JSONObject) o;
-                T t = jsonObject.to(tClass);
-                Opt.ofBlankAble(jsonObject.getString("createTime")).map(s -> {
-                    try {
-                        return DateUtil.parse(s);
-                    } catch (Exception e) {
-                        log.warn("数据创建时间格式不正确 {} {}", s, jsonObject);
-                        return null;
-                    }
-                }).ifPresent(s -> t.setCreateTimeMillis(s.getTime()));
-                //
-                Opt.ofBlankAble(jsonObject.getString("modifyTime")).map(s -> {
-                    try {
-                        return DateUtil.parse(s);
-                    } catch (Exception e) {
-                        log.warn("数据修改时间格式不正确 {} {}", s, jsonObject);
-                        return null;
-                    }
-                }).ifPresent(s -> t.setModifyTimeMillis(s.getTime()));
-                return t;
-            }).collect(Collectors.toList());
-            List<T> models = projectInfoModels.stream()
+                    // modifyTime,createTime
+                    JSONObject jsonObject = (JSONObject) o;
+                    T t = jsonObject.to(tClass);
+                    Opt.ofBlankAble(jsonObject.getString("createTime")).map(s -> {
+                        try {
+                            return DateUtil.parse(s);
+                        } catch (Exception e) {
+                            log.warn("数据创建时间格式不正确 {} {}", s, jsonObject);
+                            return null;
+                        }
+                    }).ifPresent(s -> t.setCreateTimeMillis(s.getTime()));
+                    //
+                    Opt.ofBlankAble(jsonObject.getString("modifyTime")).map(s -> {
+                        try {
+                            return DateUtil.parse(s);
+                        } catch (Exception e) {
+                            log.warn("数据修改时间格式不正确 {} {}", s, jsonObject);
+                            return null;
+                        }
+                    }).ifPresent(s -> t.setModifyTimeMillis(s.getTime()));
+                    return t;
+                })
                 .peek(item -> this.fullData(item, nodeModel))
                 // 只保留自己节点的数据
                 .filter(t -> StrUtil.equals(t.getNodeId(), nodeModel.getId()))
@@ -219,7 +218,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
             // 设置 临时缓存，便于放行检查
             BaseServerController.resetInfo(UserModel.EMPTY);
             //
-            models.forEach(BaseNodeService.super::upsert);
+            projectInfoModels.forEach(BaseNodeService.super::upsert);
             // 删除项目
             int delCount = 0;
             Set<String> strings = cacheIds.stream()
@@ -232,12 +231,14 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
             if (CollUtil.isNotEmpty(needDelete)) {
                 delCount = super.delByKey(needDelete, null);
             }
+            int size = CollUtil.size(projectInfoModels);
             String format = StrUtil.format(
                 "{} 节点拉取到 {} 个{},已经缓存 {} 个{},更新 {} 个{},删除 {} 个缓存",
                 nodeModelName, CollUtil.size(jsonArray), dataName,
                 CollUtil.size(cacheAll), dataName,
-                CollUtil.size(models), dataName,
+                size, dataName,
                 delCount);
+            this.refreshCacheStat(nodeModel.getId(), size);
             log.debug(format);
             return format;
         } catch (Exception e) {
@@ -245,6 +246,16 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
         } finally {
             BaseServerController.removeEmpty();
         }
+    }
+
+    /**
+     * 刷新缓存统计
+     *
+     * @param nodeId    节点id
+     * @param dataCount 数据总数
+     */
+    protected void refreshCacheStat(String nodeId, int dataCount) {
+
     }
 
     protected String checkException(Exception e, String nodeModelName) {

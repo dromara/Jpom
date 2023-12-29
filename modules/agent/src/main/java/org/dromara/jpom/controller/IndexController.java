@@ -50,7 +50,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -125,9 +127,33 @@ public class IndexController extends BaseAgentController {
         jsonObject.put("totalMemory", SystemUtil.getTotalMemory());
         //
         jsonObject.put("freeMemory", SystemUtil.getFreeMemory());
+        Map<String, JSONObject> workspaceMap = new HashMap<>(4);
         //
-        jsonObject.put("projectCount", CollUtil.size(nodeProjectInfoModels));
-        jsonObject.put("scriptCount", CollUtil.size(list));
+        {
+            for (NodeProjectInfoModel model : nodeProjectInfoModels) {
+                JSONObject jsonObject1 = workspaceMap.computeIfAbsent(model.getWorkspaceId(), s -> {
+                    JSONObject jsonObject11 = new JSONObject();
+                    jsonObject11.put("projectCount", 0);
+                    jsonObject11.put("scriptCount", 0);
+                    return jsonObject11;
+                });
+                jsonObject1.merge("projectCount", 1, (v1, v2) -> Integer.sum((Integer) v1, (Integer) v2));
+            }
+            jsonObject.put("projectCount", CollUtil.size(nodeProjectInfoModels));
+        }
+        {
+            for (NodeScriptModel model : list) {
+                JSONObject jsonObject1 = workspaceMap.computeIfAbsent(model.getWorkspaceId(), s -> {
+                    JSONObject jsonObject11 = new JSONObject();
+                    jsonObject11.put("projectCount", 0);
+                    jsonObject11.put("scriptCount", 0);
+                    return jsonObject11;
+                });
+                jsonObject1.merge("scriptCount", 1, (v1, v2) -> Integer.sum((Integer) v1, (Integer) v2));
+            }
+            jsonObject.put("scriptCount", CollUtil.size(list));
+        }
+        jsonObject.put("workspaceStat", workspaceMap);
         return jsonObject;
     }
 

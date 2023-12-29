@@ -79,4 +79,12 @@ public class NodeScriptServer extends BaseNodeService<NodeScriptCacheModel> impl
     public String typeName() {
         return getTableName();
     }
+
+    @Override
+    protected void refreshCacheStat(String nodeId, int dataCount) {
+        NodeModel nodeModel = new NodeModel();
+        nodeModel.setId(nodeId);
+        nodeModel.setJpomScriptCount(dataCount);
+        nodeService.updateById(nodeModel);
+    }
 }

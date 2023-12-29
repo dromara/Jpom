@@ -34,8 +34,8 @@ import org.dromara.jpom.model.BaseMachineModel;
  * 节点实体
  *
  * @author bwcx_jzy
- * @since 2019/4/16
  * @see MachineNodeModel
+ * @since 2019/4/16
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "NODE_INFO", name = "节点信息")
@@ -90,6 +90,14 @@ public class NodeModel extends BaseMachineModel {
 
     @PropIgnore
     private WorkspaceModel workspace;
+    /**
+     * jpom 项目数
+     */
+    private Integer jpomProjectCount;
+    /**
+     * jpom 脚本数据
+     */
+    private Integer jpomScriptCount;
 
     public boolean isOpenStatus() {
         return openStatus != null && openStatus == 1;

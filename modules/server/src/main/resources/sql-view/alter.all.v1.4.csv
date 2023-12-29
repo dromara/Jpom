@@ -8,3 +8,5 @@ ADD,OUTGIVINGLOG,modeData,String,500,,分发方式数据
 ADD,OUT_GIVING,mode,String,50,,分发方式
 ADD,OUT_GIVING,modeData,String,500,,分发方式数据
 ADD,FILE_RELEASE_TASK_LOG,fileType,TINYINT,,,文件类型
+ADD,NODE_INFO,jpomProjectCount,Integer,,,jpom项目数,
+ADD,NODE_INFO,jpomScriptCount,Integer,,,jpom脚本数,
