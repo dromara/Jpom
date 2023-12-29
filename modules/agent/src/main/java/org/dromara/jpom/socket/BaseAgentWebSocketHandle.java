@@ -27,11 +27,10 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.system.AgentAuthorize;
+import org.dromara.jpom.configuration.AgentAuthorize;
 import org.dromara.jpom.util.SocketSessionUtil;
 
 import javax.websocket.CloseReason;
@@ -51,6 +50,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class BaseAgentWebSocketHandle {
 
     private static final ConcurrentHashMap<String, String> USER = new SafeConcurrentHashMap<>();
+    protected static AgentAuthorize agentAuthorize;
+
+    /**
+     * 设置授权对象
+     *
+     * @param agentAuthorize 授权
+     */
+    protected static void setAgentAuthorize(AgentAuthorize agentAuthorize) {
+        BaseAgentWebSocketHandle.agentAuthorize = agentAuthorize;
+    }
 
     protected String getParameters(Session session, String name) {
         Map<String, List<String>> requestParameterMap = session.getRequestParameterMap();
@@ -74,7 +83,6 @@ public abstract class BaseAgentWebSocketHandle {
      */
     public boolean checkAuthorize(Session session) {
         String authorize = this.getParameters(session, Const.JPOM_AGENT_AUTHORIZE);
-        AgentAuthorize agentAuthorize = SpringUtil.getBean(AgentAuthorize.class);
         boolean ok = agentAuthorize.checkAuthorize(authorize);
         if (!ok) {
             log.warn("socket 会话建立失败,授权信息错误");

@@ -25,6 +25,8 @@ package org.dromara.jpom.common.commander;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Lombok;
+import org.dromara.jpom.configuration.ProjectConfig;
+import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JvmUtil;
@@ -43,8 +45,10 @@ import java.util.Optional;
  */
 public abstract class BaseUnixProjectCommander extends AbstractProjectCommander {
 
-    public BaseUnixProjectCommander(Charset fileCharset, SystemCommander systemCommander) {
-        super(fileCharset, systemCommander);
+    public BaseUnixProjectCommander(Charset fileCharset,
+                                    SystemCommander systemCommander,
+                                    ProjectConfig projectConfig) {
+        super(fileCharset, systemCommander, projectConfig);
     }
 
     @Override

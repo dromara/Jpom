@@ -28,8 +28,8 @@ import cn.hutool.core.util.StrUtil;
 import org.dromara.jpom.common.commander.BaseUnixProjectCommander;
 import org.dromara.jpom.common.commander.Commander;
 import org.dromara.jpom.common.commander.SystemCommander;
+import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.model.system.NetstatModel;
-import org.dromara.jpom.system.AgentConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
@@ -49,9 +49,11 @@ import java.util.stream.Collectors;
 @Service
 public class MacOsProjectCommander extends BaseUnixProjectCommander {
 
-    public MacOsProjectCommander(AgentConfig agentConfig, SystemCommander systemCommander) {
-        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander);
+    public MacOsProjectCommander(AgentConfig agentConfig,
+                                 SystemCommander systemCommander) {
+        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander, agentConfig.getProject());
     }
+
     @Override
     public List<NetstatModel> listNetstat(int pId, boolean listening) {
         String cmd;

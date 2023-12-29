@@ -42,13 +42,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.IllegalArgument2Exception;
+import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.model.data.NodeScriptModel;
 import org.dromara.jpom.service.script.NodeScriptServer;
 import org.dromara.jpom.service.system.AgentWorkspaceEnvVarService;
-import org.dromara.jpom.system.AgentConfig;
+import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.FileUtils;
@@ -226,7 +227,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
     private static DslScriptBuilder create(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log) {
         NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
         AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
-        AgentConfig.ProjectConfig.LogConfig logConfig = agentConfig.getProject().getLog();
+        ProjectLogConfig logConfig = agentConfig.getProject().getLog();
         String scriptId = scriptProcess.getScriptId();
         cn.hutool.core.lang.Assert.notBlank(scriptId, () -> new IllegalArgument2Exception("请填写脚本模板id"));
 

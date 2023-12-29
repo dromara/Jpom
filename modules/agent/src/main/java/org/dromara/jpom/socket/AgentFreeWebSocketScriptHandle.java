@@ -35,6 +35,7 @@ import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.util.CommandUtil;
@@ -67,8 +68,8 @@ public class AgentFreeWebSocketScriptHandle extends BaseAgentWebSocketHandle {
     private final static Map<String, ScriptProcess> CACHE = new SafeConcurrentHashMap<>();
 
     @Autowired
-    public void init() {
-
+    public void init(AgentConfig agentConfig) {
+        setAgentAuthorize(agentConfig.getAuthorize());
     }
 
     @OnOpen

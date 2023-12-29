@@ -37,7 +37,7 @@ import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.RemoteVersion;
-import org.dromara.jpom.system.AgentConfig;
+import org.dromara.jpom.configuration.AgentConfig;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

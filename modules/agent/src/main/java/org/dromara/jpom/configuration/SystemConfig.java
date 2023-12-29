@@ -20,34 +20,19 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.dromara.jpom.system;
+package org.dromara.jpom.configuration;
 
 import lombok.Data;
-import org.dromara.jpom.util.BaseFileTailWatcher;
+import lombok.EqualsAndHashCode;
+import org.dromara.jpom.system.BaseSystemConfig;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * @author bwcx_jzy
- * @since 2022/12/17
+ * @since 23/12/29 029
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public abstract class BaseExtConfig {
-    /**
-     * 数据目录
-     */
-    private String path;
-
-    /**
-     * 初始读取日志文件行号
-     */
-    private int initReadLine = 10;
-
-    public void setInitReadLine(int initReadLine) {
-        this.initReadLine = initReadLine;
-        BaseFileTailWatcher.setInitReadLine(this.getInitReadLine());
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-        ExtConfigBean.setPath(path);
-    }
+@ConfigurationProperties("jpom.system")
+public class SystemConfig extends BaseSystemConfig {
 }

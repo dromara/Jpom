@@ -26,7 +26,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.system.AgentAuthorize;
+import org.dromara.jpom.configuration.AgentConfig;
+import org.dromara.jpom.configuration.AgentAuthorize;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
@@ -45,8 +46,8 @@ public class AuthorizeInterceptor implements HandlerMethodInterceptor {
 
     private final AgentAuthorize agentAuthorize;
 
-    public AuthorizeInterceptor(AgentAuthorize agentAuthorize) {
-        this.agentAuthorize = agentAuthorize;
+    public AuthorizeInterceptor(AgentConfig agentConfig) {
+        this.agentAuthorize = agentConfig.getAuthorize();
     }
 
     @Override

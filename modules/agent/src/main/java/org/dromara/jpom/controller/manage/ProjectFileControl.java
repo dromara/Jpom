@@ -48,7 +48,7 @@ import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.service.ProjectFileBackupService;
 import org.dromara.jpom.service.WhitelistDirectoryService;
 import org.dromara.jpom.socket.ConsoleCommandOp;
-import org.dromara.jpom.system.AgentConfig;
+import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.CompressionFileUtil;
 import org.dromara.jpom.util.FileUtils;

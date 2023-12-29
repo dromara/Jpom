@@ -32,13 +32,13 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.configuration.AgentConfig;
+import org.dromara.jpom.configuration.ProjectConfig;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
-import org.dromara.jpom.system.AgentConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
@@ -57,6 +57,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class ProjectFileBackupService {
+
+    private final ProjectConfig projectConfig;
+
+    public ProjectFileBackupService(AgentConfig agentConfig) {
+        this.projectConfig = agentConfig.getProject();
+    }
 
     /**
      * 整个项目的备份目录
@@ -167,11 +173,7 @@ public class ProjectFileBackupService {
         return Optional.ofNullable(dslYmlDto)
             .map(DslYmlDto::getFile)
             .map(DslYmlDto.FileConfig::getBackupCount)
-            .orElseGet(() -> {
-                AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
-                AgentConfig.ProjectConfig project = agentConfig.getProject();
-                return project.getFileBackupCount();
-            });
+            .orElseGet(projectConfig::getFileBackupCount);
     }
 
     /**
@@ -208,11 +210,7 @@ public class ProjectFileBackupService {
                 String[] backupSuffix = Optional.ofNullable(dslYmlDto)
                     .map(DslYmlDto::getFile)
                     .map(DslYmlDto.FileConfig::getBackupSuffix)
-                    .orElseGet(() -> {
-                        AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
-                        AgentConfig.ProjectConfig project = agentConfig.getProject();
-                        return project.getFileBackupSuffix();
-                    });
+                    .orElseGet(projectConfig::getFileBackupSuffix);
                 if (ArrayUtil.isNotEmpty(backupSuffix)) {
                     backupFiles.values()
                         .stream()

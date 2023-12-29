@@ -31,7 +31,7 @@ import org.dromara.jpom.common.commander.Commander;
 import org.dromara.jpom.common.commander.SystemCommander;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.model.system.NetstatModel;
-import org.dromara.jpom.system.AgentConfig;
+import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JvmUtil;
 import org.springframework.context.annotation.Conditional;
@@ -50,9 +50,9 @@ import java.util.Optional;
 @Service
 public class WindowsProjectCommander extends AbstractProjectCommander {
 
-
-    public WindowsProjectCommander(AgentConfig agentConfig, SystemCommander systemCommander) {
-        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander);
+    public WindowsProjectCommander(AgentConfig agentConfig,
+                                   SystemCommander systemCommander) {
+        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander, agentConfig.getProject());
     }
 
     @Override
