@@ -137,8 +137,8 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
 
     @Override
     @OnClose
-    public void onClose(Session session) {
-        super.onClose(session);
+    public void onClose(Session session, CloseReason closeReason) {
+        super.onClose(session, closeReason);
         NodeScriptProcessBuilder.stopWatcher(session);
     }
 
