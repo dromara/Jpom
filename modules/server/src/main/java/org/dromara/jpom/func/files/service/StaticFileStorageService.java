@@ -187,6 +187,7 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
     public void scanByWorkspace(String workspaceId) {
         ServerWhitelist serverWhitelistData = outGivingWhitelistService.getServerWhitelistData(workspaceId);
         List<String> stringList = serverWhitelistData.staticDir();
+        Assert.notEmpty(stringList, "还未配置静态目录");
         this.scanList(stringList);
     }
 

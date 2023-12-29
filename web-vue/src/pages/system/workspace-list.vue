@@ -61,7 +61,7 @@
         <a-space>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
           <a-button size="small" type="primary" @click="configMeun(record)">菜单</a-button>
-          <a-button size="small" type="primary" @click="configWhiteDir(record)">分发配置</a-button>
+          <a-button size="small" type="primary" @click="configWhiteDir(record)">授权配置</a-button>
           <a-button size="small" type="primary" @click="viewEnvVar(record)">变量</a-button>
 
           <a-tooltip v-if="record.id === 'DEFAULT'" title="不能删除默认工作空间">
