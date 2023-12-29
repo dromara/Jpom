@@ -80,7 +80,7 @@
         <dependency>
             <groupId>org.dromara.jpom.plugins</groupId>
             <artifactId>ssh-jsch</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
