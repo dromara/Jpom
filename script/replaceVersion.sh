@@ -83,7 +83,7 @@ if [ "$2" == "release" ]; then
 elif [ "$2" == "beta" ]; then
 	# 替换远程更新包的版本号
 	sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/docs/.vuepress/public/docs/beta-versions.json"
-	downloads="02.下载链接.md"
+	downloads="02.下载链接beta.md"
 else
 	echo "不支持的模式 $2"
 	exit
@@ -91,7 +91,7 @@ fi
 
 function updateDocUrlItem() {
 
-	mdPath="${pwd}/docs/更新日志/02.下载链接/${downloads}"
+	mdPath="${pwd}/docs/日志&下载/02.下载链接/${downloads}"
 
 	if [[ $(grep "$1" "${mdPath}") != "" ]]; then
 		echo "下载地址已经更新啦"
