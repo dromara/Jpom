@@ -112,4 +112,12 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoCacheMod
     public String typeName() {
         return getTableName();
     }
+
+    @Override
+    protected void refreshCacheStat(String nodeId, int dataCount) {
+        NodeModel nodeModel = new NodeModel();
+        nodeModel.setId(nodeId);
+        nodeModel.setJpomProjectCount(dataCount);
+        nodeService.updateById(nodeModel);
+    }
 }

@@ -160,6 +160,9 @@
                 <a-button size="small" type="primary" @click="handleLogBack(record)">项目日志 </a-button>
               </a-menu-item>
               <a-menu-item>
+                <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
+              </a-menu-item>
+              <a-menu-item>
                 <a-button size="small" type="danger" @click="handleDelete(record)">逻辑删除</a-button>
               </a-menu-item>
               <a-menu-item>
@@ -310,6 +313,7 @@
             this.loadGroupList();
           }
         "
+        :data="temp"
         :nodeId="temp.nodeId"
         :projectId="temp.id"
       />
@@ -911,6 +915,16 @@ export default {
         id: data.projectId,
         nodeId: data.nodeId,
       };
+
+      this.editProjectVisible = true;
+    },
+    // 复制
+    copyItem(record) {
+      const temp = Object.assign({}, record);
+      delete temp.id;
+      delete temp.createTimeMillis;
+      delete temp.outGivingProject;
+      this.temp = { ...temp, name: temp.name + "副本", id: temp.projectId + "_copy", lib: temp.lib + "_copy" };
 
       this.editProjectVisible = true;
     },

@@ -269,10 +269,11 @@ export default {
             ...res.data,
             type: "edit",
           };
-        }
-        if (this.data) {
-          // 复制项目
-          this.temp = { ...this.temp, ...this.data, type: "add" };
+        } else {
+          if (this.data) {
+            // 复制项目
+            this.temp = { ...this.temp, ...this.data, type: "add" };
+          }
         }
       });
     } else {

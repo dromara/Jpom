@@ -137,19 +137,19 @@
           <a-tooltip slot="runTime" slot-scope="text, item" placement="topLeft" :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime)">
             <span>{{ formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, "", 2) }}</span>
           </a-tooltip>
-          <template slot="projectCount" slot-scope="text, item">
+          <template slot="jpomProjectCount" slot-scope="text, item">
             <div v-if="item.machineNodeData && item.machineNodeData.status === 1" @click="syncNode(item)">
-              <a-tooltip placement="topLeft" title="节点中的所有项目数量,点击重新同步节点项目信息">
-                <a-tag>{{ item.machineNodeData.jpomProjectCount }} </a-tag>
+              <a-tooltip placement="topLeft" :title="`节点中的项目数量：${text || 0}/${item.machineNodeData.jpomProjectCount},点击重新同步节点项目信息`">
+                <a-tag>{{ text || 0 }} </a-tag>
                 <a-icon type="sync" />
               </a-tooltip>
             </div>
             <span v-else>-</span>
           </template>
-          <template slot="scriptCount" slot-scope="text, item">
+          <template slot="jpomScriptCount" slot-scope="text, item">
             <div v-if="item.machineNodeData && item.machineNodeData.status === 1" @click="syncNodeScript(item)">
-              <a-tooltip placement="topLeft" title="节点中的所有脚本模版数量,点击重新同步脚本模版信息">
-                <a-tag>{{ item.machineNodeData.jpomScriptCount }} </a-tag>
+              <a-tooltip placement="topLeft" :title="`节点中脚本模版数量：${text || 0}/${item.machineNodeData.jpomScriptCount},点击重新同步脚本模版信息`">
+                <a-tag>{{ text || 0 }} </a-tag>
                 <a-icon type="sync" />
               </a-tooltip>
             </div>
@@ -519,8 +519,8 @@ export default {
         { title: "JVM 信息", dataIndex: "jvmInfo", width: 100, ellipsis: true, scopedSlots: { customRender: "jvmInfo" } },
         // { title: "JVM 剩余内存", dataIndex: "machineNodeData.jvmFreeMemory", ellipsis: true, scopedSlots: { customRender: "freeMemory" } },
 
-        { title: "项目数", dataIndex: "count", key: "count", width: "90px", scopedSlots: { customRender: "projectCount" } },
-        { title: "脚本数", dataIndex: "scriptCount", key: "scriptCount", width: "90px", scopedSlots: { customRender: "scriptCount" } },
+        { title: "项目数", dataIndex: "jpomProjectCount", width: "90px", scopedSlots: { customRender: "jpomProjectCount" } },
+        { title: "脚本数", dataIndex: "jpomScriptCount", width: "90px", scopedSlots: { customRender: "jpomScriptCount" } },
 
         { title: "插件运行", dataIndex: "runTime", width: "100px", key: "runTime", ellipsis: true, scopedSlots: { customRender: "runTime" } },
         {

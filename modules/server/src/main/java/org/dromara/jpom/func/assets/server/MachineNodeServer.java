@@ -69,7 +69,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -283,9 +282,9 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         networkDelay = networkDelay - systemSleep;
         machineNodeModel.setNetworkDelay(networkDelay);
         // jpom 相关信息
-        Optional.ofNullable(data.getJSONObject("jpomInfo")).ifPresent(jsonObject -> {
-            JSONObject jpomManifest = jsonObject.getJSONObject("jpomManifest");
-            Optional.ofNullable(jpomManifest)
+        JSONObject jpomInfo = data.getJSONObject("jpomInfo");
+        Optional.ofNullable(jpomInfo).ifPresent(jsonObject -> {
+            Optional.ofNullable(jsonObject.getJSONObject("jpomManifest"))
                 .ifPresent(jsonObject1 -> {
                     machineNodeModel.setJpomVersion(jsonObject1.getString("version"));
                     machineNodeModel.setJpomBuildTime(jsonObject1.getString("timeStamp"));
@@ -342,6 +341,26 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         });
         this.updateById(machineNodeModel);
         machineNodeStatLogServer.insert(machineNodeStatLogModel);
+        //
+        Optional.ofNullable(jpomInfo).ifPresent(jsonObject -> {
+            JSONObject workspaceStat = jsonObject.getJSONObject("workspaceStat");
+            if (workspaceStat == null) {
+                return;
+            }
+            for (Map.Entry<String, Object> entry : workspaceStat.entrySet()) {
+                String key = entry.getKey();
+                JSONObject value = (JSONObject) entry.getValue();
+                int projectCount = value.getIntValue("projectCount", 0);
+                int scriptCount = value.getIntValue("scriptCount", 0);
+                Entity entity = Entity.create();
+                entity.set("jpomProjectCount", projectCount);
+                entity.set("jpomScriptCount", scriptCount);
+                Entity where = Entity.create();
+                where.set("machineId", machineNodeModel.getId());
+                where.set("workspaceId", key);
+                nodeService.update(entity, where);
+            }
+        });
     }
 
     /**
