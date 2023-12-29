@@ -29,7 +29,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
-import org.dromara.jpom.common.commander.AbstractProjectCommander;
+import org.dromara.jpom.common.commander.ProjectCommander;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
@@ -52,6 +52,12 @@ import java.util.List;
 @Slf4j
 public class LogBackController extends BaseAgentController {
 
+    private final ProjectCommander projectCommander;
+
+    public LogBackController(ProjectCommander projectCommander) {
+        this.projectCommander = projectCommander;
+    }
+
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> logSize(String id) {
         NodeProjectInfoModel nodeProjectInfoModel = getProjectInfoModel();
@@ -61,16 +67,37 @@ public class LogBackController extends BaseAgentController {
         File logBack = nodeProjectInfoModel.getLogBack();
         boolean logBackBool = logBack.exists() && logBack.isDirectory();
         jsonObject.put("logBack", logBackBool);
-        String info = projectInfoService.getLogSize(nodeProjectInfoModel);
+        String info = this.getLogSize(nodeProjectInfoModel);
         jsonObject.put("logSize", info);
         return JsonMessage.success("", jsonObject);
+    }
+
+    /**
+     * 查看项目控制台日志文件大小
+     *
+     * @param nodeProjectInfoModel 项目
+     * @return 文件大小
+     */
+    private String getLogSize(NodeProjectInfoModel nodeProjectInfoModel) {
+        if (nodeProjectInfoModel == null) {
+            return null;
+        }
+        File file = new File(nodeProjectInfoModel.getLog());
+        if (file.exists()) {
+            long fileSize = file.length();
+            if (fileSize <= 0) {
+                return null;
+            }
+            return FileUtil.readableFileSize(fileSize);
+        }
+        return null;
     }
 
     @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> resetLog() {
         NodeProjectInfoModel pim = getProjectInfoModel();
         try {
-            String msg = AbstractProjectCommander.getInstance().backLog(pim);
+            String msg = projectCommander.backLog(pim);
             if (msg.contains("ok")) {
                 return JsonMessage.success("重置成功");
             }

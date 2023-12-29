@@ -31,8 +31,8 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.common.commander.CommandOpResult;
+import org.dromara.jpom.common.commander.ProjectCommander;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
@@ -62,12 +62,15 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 
     private static ProjectInfoService projectInfoService;
     private static AgentConfig.ProjectConfig.LogConfig logConfig;
+    private static ProjectCommander projectCommander;
 
     @Autowired
     public void init(ProjectInfoService projectInfoService,
-                     AgentConfig agentConfig) {
+                     AgentConfig agentConfig,
+                     ProjectCommander projectCommander) {
         AgentWebSocketConsoleHandle.projectInfoService = projectInfoService;
         AgentWebSocketConsoleHandle.logConfig = agentConfig.getProject().getLog();
+        AgentWebSocketConsoleHandle.projectCommander = projectCommander;
     }
 
     @OnOpen
@@ -163,7 +166,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 case stop:
                 case reload:
                     logUser = true;
-                    strResult = AbstractProjectCommander.getInstance().execCommand(consoleCommandOp, nodeProjectInfoModel);
+                    strResult = projectCommander.execCommand(consoleCommandOp, nodeProjectInfoModel);
                     if (strResult.isSuccess()) {
                         resultData = new JsonMessage<>(200, "操作成功", strResult);
                     } else {
@@ -173,7 +176,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 
                 case status: {
                     // 获取项目状态
-                    strResult = AbstractProjectCommander.getInstance().execCommand(consoleCommandOp, nodeProjectInfoModel);
+                    strResult = projectCommander.execCommand(consoleCommandOp, nodeProjectInfoModel);
                     if (strResult.isSuccess()) {
                         resultData = new JsonMessage<>(200, "运行中", strResult);
                     } else {

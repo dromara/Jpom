@@ -41,11 +41,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.RemoteVersion;
-import org.dromara.jpom.common.commander.AbstractProjectCommander;
+import org.dromara.jpom.common.commander.ProjectCommander;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.script.BaseRunScript;
 import org.dromara.jpom.service.manage.ProjectInfoService;
+import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.util.CommandUtil;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -75,16 +76,19 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
     private final AgentConfig agentConfig;
     private final AgentAuthorize agentAuthorize;
     private final JpomApplication jpomApplication;
+    private final ProjectCommander projectCommander;
 
 
     public AgentStartInit(ProjectInfoService projectInfoService,
                           AgentConfig agentConfig,
                           AgentAuthorize agentAuthorize,
-                          JpomApplication jpomApplication) {
+                          JpomApplication jpomApplication,
+                          ProjectCommander projectCommander) {
         this.projectInfoService = projectInfoService;
         this.agentConfig = agentConfig;
         this.agentAuthorize = agentAuthorize;
         this.jpomApplication = jpomApplication;
+        this.projectCommander = projectCommander;
     }
 
 
@@ -118,7 +122,7 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
         long len = file.length();
         if (len > autoBackSize.toBytes()) {
             try {
-                AbstractProjectCommander.getInstance().backLog(nodeProjectInfoModel);
+                projectCommander.backLog(nodeProjectInfoModel);
             } catch (Exception e) {
                 log.warn("auto back log", e);
             }
@@ -170,11 +174,10 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
         list = list.stream().filter(nodeProjectInfoModel -> nodeProjectInfoModel.getAutoStart() != null && nodeProjectInfoModel.getAutoStart()).collect(Collectors.toList());
         List<NodeProjectInfoModel> finalList = list;
         ThreadUtil.execute(() -> {
-            AbstractProjectCommander instance = AbstractProjectCommander.getInstance();
             for (NodeProjectInfoModel nodeProjectInfoModel : finalList) {
                 try {
-                    if (!instance.isRun(nodeProjectInfoModel)) {
-                        instance.start(nodeProjectInfoModel);
+                    if (!projectCommander.isRun(nodeProjectInfoModel)) {
+                        projectCommander.execCommand(ConsoleCommandOp.start, nodeProjectInfoModel);
                     }
                 } catch (Exception e) {
                     log.warn("自动启动项目失败：{} {}", nodeProjectInfoModel.getId(), e.getMessage());

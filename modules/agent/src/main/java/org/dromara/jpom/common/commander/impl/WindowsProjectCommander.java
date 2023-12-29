@@ -26,14 +26,17 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import org.dromara.jpom.common.commander.AbstractProjectCommander;
-import org.dromara.jpom.common.commander.AbstractSystemCommander;
 import org.dromara.jpom.common.commander.CommandOpResult;
+import org.dromara.jpom.common.commander.Commander;
+import org.dromara.jpom.common.commander.SystemCommander;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.model.system.NetstatModel;
+import org.dromara.jpom.system.AgentConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JvmUtil;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.stereotype.Service;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,11 +46,13 @@ import java.util.Optional;
  *
  * @author Administrator
  */
+@Conditional(Commander.Windows.class)
+@Service
 public class WindowsProjectCommander extends AbstractProjectCommander {
 
 
-    public WindowsProjectCommander(Charset fileCharset) {
-        super(fileCharset);
+    public WindowsProjectCommander(AgentConfig agentConfig, SystemCommander systemCommander) {
+        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander);
     }
 
     @Override
@@ -72,12 +77,12 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
     }
 
     @Override
-    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, int pid) throws Exception {
+    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, int pid) {
         String tag = nodeProjectInfoModel.getId();
         List<String> result = new ArrayList<>();
         boolean success = false;
         // 如果正在运行，则执行杀进程命令
-        String kill = AbstractSystemCommander.getInstance().kill(FileUtil.file(nodeProjectInfoModel.allLib()), pid);
+        String kill = systemCommander.kill(FileUtil.file(nodeProjectInfoModel.allLib()), pid);
         result.add(kill);
         if (this.loopCheckRun(nodeProjectInfoModel, false)) {
             success = true;

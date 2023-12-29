@@ -24,6 +24,7 @@ package org.dromara.jpom.common.commander;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import lombok.Lombok;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JvmUtil;
@@ -42,9 +43,8 @@ import java.util.Optional;
  */
 public abstract class BaseUnixProjectCommander extends AbstractProjectCommander {
 
-
-    public BaseUnixProjectCommander(Charset fileCharset) {
-        super(fileCharset);
+    public BaseUnixProjectCommander(Charset fileCharset, SystemCommander systemCommander) {
+        super(fileCharset, systemCommander);
     }
 
     @Override
@@ -65,11 +65,11 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
     }
 
     @Override
-    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, int pid) throws Exception {
+    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, int pid) {
         File file = FileUtil.file(nodeProjectInfoModel.allLib());
         List<String> result = new ArrayList<>();
         boolean success = false;
-        String kill = AbstractSystemCommander.getInstance().kill(file, pid);
+        String kill = systemCommander.kill(file, pid);
         result.add(kill);
         if (this.loopCheckRun(nodeProjectInfoModel, false)) {
             success = true;
@@ -77,7 +77,11 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
             // 强制杀进程
             result.add("Kill not completed, test kill -9");
             String cmd = String.format("kill -9 %s", pid);
-            CommandUtil.asyncExeLocalCommand(file, cmd);
+            try {
+                CommandUtil.asyncExeLocalCommand(file, cmd);
+            } catch (Exception e) {
+                throw Lombok.sneakyThrow(e);
+            }
             //
             if (this.loopCheckRun(nodeProjectInfoModel, 5, false)) {
                 success = true;

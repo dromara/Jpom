@@ -30,8 +30,8 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
-import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.common.commander.CommandOpResult;
+import org.dromara.jpom.common.commander.ProjectCommander;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
@@ -53,7 +53,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/manage/")
 @Slf4j
 public class ProjectStatusController extends BaseAgentController {
+    private final ProjectCommander projectCommander;
 
+    public ProjectStatusController(ProjectCommander projectCommander) {
+        this.projectCommander = projectCommander;
+    }
 
     /**
      * 获取项目的进程id
@@ -69,7 +73,7 @@ public class ProjectStatusController extends BaseAgentController {
         try {
             CommandUtil.openCache();
             try {
-                CommandOpResult status = AbstractProjectCommander.getInstance().status(nodeProjectInfoModel);
+                CommandOpResult status = projectCommander.execCommand(ConsoleCommandOp.status, nodeProjectInfoModel);
                 jsonObject.put("pId", status.getPid());
                 jsonObject.put("pIds", status.getPids());
                 jsonObject.put("statusMsg", status.getStatusMsg());
@@ -101,7 +105,7 @@ public class ProjectStatusController extends BaseAgentController {
                 try {
                     NodeProjectInfoModel projectInfoServiceItem = projectInfoService.getItem(item);
                     itemObj.put("name", projectInfoServiceItem.getName());
-                    CommandOpResult commandOpResult = AbstractProjectCommander.getInstance().status(projectInfoServiceItem);
+                    CommandOpResult commandOpResult = projectCommander.execCommand(ConsoleCommandOp.status, projectInfoServiceItem);
                     int pid = commandOpResult.getPid();
                     //
                     itemObj.put("pid", pid);
@@ -110,7 +114,7 @@ public class ProjectStatusController extends BaseAgentController {
                     if (StrUtil.isNotEmpty(commandOpResult.getPorts())) {
                         itemObj.put("port", commandOpResult.getPorts());
                     } else {
-                        String port = AbstractProjectCommander.getInstance().getMainPort(pid);
+                        String port = projectCommander.getMainPort(pid);
                         itemObj.put("port", port);
                     }
                 } catch (Exception e) {
@@ -134,7 +138,7 @@ public class ProjectStatusController extends BaseAgentController {
         ConsoleCommandOp consoleCommandOp = EnumUtil.fromStringQuietly(ConsoleCommandOp.class, opt);
         Assert.notNull(consoleCommandOp, "请选择操作类型");
         Assert.state(consoleCommandOp.isCanOpt(), "不支持当前操作：" + opt);
-        CommandOpResult result = AbstractProjectCommander.getInstance().execCommand(consoleCommandOp, item);
+        CommandOpResult result = projectCommander.execCommand(consoleCommandOp, item);
         return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr(), result);
     }
 }

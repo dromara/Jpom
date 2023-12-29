@@ -22,9 +22,11 @@
  */
 package org.dromara.jpom.common.commander.impl;
 
-import cn.hutool.core.util.StrUtil;
 import org.dromara.jpom.common.commander.AbstractSystemCommander;
+import org.dromara.jpom.common.commander.Commander;
 import org.dromara.jpom.util.CommandUtil;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 
@@ -34,6 +36,8 @@ import java.io.File;
  * @author bwcx_jzy
  * @since 2019/4/16
  */
+@Conditional(Commander.Windows.class)
+@Service
 public class WindowsSystemCommander extends AbstractSystemCommander {
 
     @Override

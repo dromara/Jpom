@@ -33,8 +33,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.RemoteVersion;
-import org.dromara.jpom.common.commander.AbstractProjectCommander;
-import org.dromara.jpom.common.commander.AbstractSystemCommander;
+import org.dromara.jpom.common.commander.ProjectCommander;
+import org.dromara.jpom.common.commander.SystemCommander;
 import org.dromara.jpom.common.interceptor.NotAuthorize;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.model.data.NodeScriptModel;
@@ -67,11 +67,17 @@ public class IndexController extends BaseAgentController {
 
     private final ProjectInfoService projectInfoService;
     private final NodeScriptServer nodeScriptServer;
+    private final SystemCommander systemCommander;
+    private final ProjectCommander projectCommander;
 
     public IndexController(ProjectInfoService projectInfoService,
-                           NodeScriptServer nodeScriptServer) {
+                           NodeScriptServer nodeScriptServer,
+                           SystemCommander systemCommander,
+                           ProjectCommander projectCommander) {
         this.projectInfoService = projectInfoService;
         this.nodeScriptServer = nodeScriptServer;
+        this.systemCommander = systemCommander;
+        this.projectCommander = projectCommander;
     }
 
     @RequestMapping(value = {"index", "", "index.html", "/"}, produces = MediaType.TEXT_PLAIN_VALUE)
@@ -165,7 +171,7 @@ public class IndexController extends BaseAgentController {
         processes = processes.stream()
             .peek(jsonObject -> {
                 int processId = jsonObject.getIntValue("processId");
-                String port = AbstractProjectCommander.getInstance().getMainPort(processId);
+                String port = projectCommander.getMainPort(processId);
                 jsonObject.put("port", port);
                 //
             })
@@ -178,7 +184,7 @@ public class IndexController extends BaseAgentController {
     public IJsonMessage<String> kill(int pid) {
         long jpomAgentId = JpomManifest.getInstance().getPid();
         Assert.state(!StrUtil.equals(StrUtil.toString(jpomAgentId), StrUtil.toString(pid)), "不支持在线关闭 Agent 进程");
-        String result = AbstractSystemCommander.getInstance().kill(null, pid);
+        String result = systemCommander.kill(null, pid);
         if (StrUtil.isEmpty(result)) {
             result = "成功kill";
         }

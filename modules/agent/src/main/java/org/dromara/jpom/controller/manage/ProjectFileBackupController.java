@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
-import org.dromara.jpom.script.ProjectFileBackupUtil;
+import org.dromara.jpom.service.ProjectFileBackupService;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
@@ -63,6 +63,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ProjectFileBackupController extends BaseAgentController {
 
+    private final ProjectFileBackupService projectFileBackupService;
+
+    public ProjectFileBackupController(ProjectFileBackupService projectFileBackupService) {
+        this.projectFileBackupService = projectFileBackupService;
+    }
+
     /**
      * 查询备份列表
      *
@@ -74,9 +80,9 @@ public class ProjectFileBackupController extends BaseAgentController {
         //
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel(id);
         // 合并
-        ProjectFileBackupUtil.margeBackupPath(projectInfoModel);
+        projectFileBackupService.margeBackupPath(projectInfoModel);
         //
-        File path = ProjectFileBackupUtil.pathProject(projectInfoModel);
+        File path = projectFileBackupService.pathProject(projectInfoModel);
         //
         List<File> collect = Arrays.stream(Optional.ofNullable(path.listFiles()).orElse(new File[0]))
             .filter(FileUtil::isDirectory)
@@ -104,7 +110,7 @@ public class ProjectFileBackupController extends BaseAgentController {
     public IJsonMessage<List<JSONObject>> backupItemFiles(String id, String path, @ValidatorItem String backupId) {
         // 查询项目路径
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
-        File lib = ProjectFileBackupUtil.pathProjectBackup(projectInfoModel, backupId);
+        File lib = projectFileBackupService.pathProjectBackup(projectInfoModel, backupId);
         File fileDir = FileUtil.file(lib, StrUtil.emptyToDefault(path, FileUtil.FILE_SEPARATOR));
         //
         File[] filesAll = FileUtil.exist(fileDir) ? fileDir.listFiles() : new File[]{};
@@ -127,7 +133,7 @@ public class ProjectFileBackupController extends BaseAgentController {
     public void download(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName, HttpServletResponse response) {
         try {
             NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
-            File lib = ProjectFileBackupUtil.pathProjectBackup(projectInfoModel, backupId);
+            File lib = projectFileBackupService.pathProjectBackup(projectInfoModel, backupId);
             File file = FileUtil.file(lib, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
             if (file.isDirectory()) {
                 ServletUtil.write(response, "暂不支持下载文件夹", MediaType.TEXT_HTML_VALUE);
@@ -152,7 +158,7 @@ public class ProjectFileBackupController extends BaseAgentController {
     @RequestMapping(value = "backup-delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Object> deleteFile(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName) {
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
-        File lib = ProjectFileBackupUtil.pathProjectBackup(projectInfoModel, backupId);
+        File lib = projectFileBackupService.pathProjectBackup(projectInfoModel, backupId);
         File file = FileUtil.file(lib, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
         CommandUtil.systemFastDel(file);
         return JsonMessage.success("删除成功");
@@ -171,7 +177,7 @@ public class ProjectFileBackupController extends BaseAgentController {
     @RequestMapping(value = "backup-recover", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Object> recoverFile(String id, @ValidatorItem String backupId, String type, String filename, String levelName) {
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
-        File backupPath = ProjectFileBackupUtil.pathProjectBackup(projectInfoModel, backupId);
+        File backupPath = projectFileBackupService.pathProjectBackup(projectInfoModel, backupId);
         String projectPath = projectInfoModel.allLib();
         //
         File backupFile;

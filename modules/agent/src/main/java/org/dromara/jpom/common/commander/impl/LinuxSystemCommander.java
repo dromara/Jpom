@@ -25,7 +25,11 @@ package org.dromara.jpom.common.commander.impl;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.commander.AbstractSystemCommander;
+import org.dromara.jpom.common.commander.Commander;
 import org.dromara.jpom.util.CommandUtil;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 
@@ -34,6 +38,9 @@ import java.io.File;
  * @since 2019/4/16
  */
 @Slf4j
+@Conditional(Commander.Linux.class)
+@Service
+@Primary
 public class LinuxSystemCommander extends AbstractSystemCommander {
 
 

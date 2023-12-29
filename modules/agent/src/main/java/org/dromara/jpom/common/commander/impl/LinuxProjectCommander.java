@@ -26,10 +26,15 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import org.dromara.jpom.common.commander.BaseUnixProjectCommander;
+import org.dromara.jpom.common.commander.Commander;
+import org.dromara.jpom.common.commander.SystemCommander;
 import org.dromara.jpom.model.system.NetstatModel;
+import org.dromara.jpom.system.AgentConfig;
 import org.dromara.jpom.util.CommandUtil;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
 
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -39,10 +44,13 @@ import java.util.stream.Collectors;
  *
  * @author Administrator
  */
+@Conditional(Commander.Linux.class)
+@Service
+@Primary
 public class LinuxProjectCommander extends BaseUnixProjectCommander {
 
-    public LinuxProjectCommander(Charset fileCharset) {
-        super(fileCharset);
+    public LinuxProjectCommander(AgentConfig agentConfig, SystemCommander systemCommander) {
+        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander);
     }
 
     @Override
