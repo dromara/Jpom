@@ -24,10 +24,12 @@ package org.dromara.jpom.controller.outgiving;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.RegexPool;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.func.files.service.StaticFileStorageService;
 import org.dromara.jpom.model.data.AgentWhitelist;
@@ -59,6 +61,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(value = "/outgiving")
 @Feature(cls = ClassFeature.OUTGIVING_CONFIG_WHITELIST)
+@Slf4j
 public class OutGivingWhitelistController extends BaseServerController {
 
     private final SystemParametersServer systemParametersServer;
@@ -149,7 +152,14 @@ public class OutGivingWhitelistController extends BaseServerController {
 
         String resultData = AgentWhitelist.convertToLine(list);
         // 重新检查静态目录任务状态
-        staticFileStorageService.startLoad();
+        ThreadUtil.execute(() -> {
+            try {
+                staticFileStorageService.startLoad();
+            } catch (Exception e) {
+                log.error("静态文件任务加载失败", e);
+            }
+        });
+
         return JsonMessage.success("保存成功", resultData);
     }
 }
