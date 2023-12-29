@@ -162,6 +162,13 @@ public interface IStorageService extends AutoCloseable, IMode {
     String dbUrl();
 
     /**
+     * 游标查询批处理数量
+     *
+     * @return mysql 和 h2 不一致
+     */
+    int getFetchSize();
+
+    /**
      * 异常转换
      *
      * @param e 异常

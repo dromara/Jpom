@@ -48,6 +48,11 @@ public class MysqlStorageServiceImpl implements IStorageService {
     }
 
     @Override
+    public int getFetchSize() {
+        return Integer.MIN_VALUE;
+    }
+
+    @Override
     public DbExtConfig.Mode mode() {
         return DbExtConfig.Mode.MYSQL;
     }

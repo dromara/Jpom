@@ -73,6 +73,11 @@ public class H2StorageServiceImpl implements IStorageService {
     }
 
     @Override
+    public int getFetchSize() {
+        return 100;
+    }
+
+    @Override
     public DbExtConfig.Mode mode() {
         return DbExtConfig.Mode.H2;
     }
