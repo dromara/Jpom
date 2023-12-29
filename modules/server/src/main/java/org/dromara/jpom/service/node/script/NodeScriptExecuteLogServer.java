@@ -41,7 +41,7 @@ import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.h2db.BaseNodeService;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.system.WorkspaceService;
-import org.dromara.jpom.system.AgentException;
+import org.dromara.jpom.exception.AgentException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;

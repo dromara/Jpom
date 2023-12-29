@@ -20,26 +20,21 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.dromara.jpom.system;
-
-import cn.keepbx.jpom.IJsonMessage;
-import cn.keepbx.jpom.model.JsonMessage;
+package org.dromara.jpom.exception;
 
 /**
- * 授权错误
+ * agent 插件端异常
  *
  * @author bwcx_jzy
  * @since 2019/4/17
  */
-public class AuthorizeException extends RuntimeException {
-    private final JsonMessage<String> jsonMessage;
+public class AgentException extends RuntimeException {
 
-    public AuthorizeException(JsonMessage<String> jsonMessage) {
-        super(jsonMessage.getMsg());
-        this.jsonMessage = jsonMessage;
+    public AgentException(String message) {
+        super(message);
     }
 
-    public IJsonMessage<String> getJsonMessage() {
-        return jsonMessage;
+    public AgentException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

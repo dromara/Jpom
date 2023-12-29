@@ -35,6 +35,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.exception.PermissionException;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.user.UserModel;
@@ -262,7 +263,9 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
         // 查询绑定的权限
         UserBindWorkspaceService userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
         boolean exists = userBindWorkspaceService.exists(userModel, workspaceId);
-        Assert.state(exists, "没有对应的工作空间权限");
+        if (exists) {
+            throw new PermissionException("没有对应的工作空间权限");
+        }
     }
 
 

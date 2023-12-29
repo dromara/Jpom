@@ -155,7 +155,7 @@ function wrapResult(response) {
   return res;
 }
 
-function toLogin(res, response, timeout = 100) {
+function toLogin(res, response, timeout = 2000) {
   notification.warn({
     message: "提示信息 " + (pro ? "" : response.config.url),
     description: res.msg,

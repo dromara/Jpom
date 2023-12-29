@@ -37,7 +37,7 @@ import org.dromara.jpom.service.h2db.BaseNodeService;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
-import org.dromara.jpom.system.AgentException;
+import org.dromara.jpom.exception.AgentException;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
