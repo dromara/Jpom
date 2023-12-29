@@ -82,7 +82,7 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
     /**
      * 节点分发项目，不允许在项目管理中编辑
      */
-    private boolean outGivingProject;
+    private Boolean outGivingProject;
     /**
      * 实际运行的命令
      */
@@ -118,11 +118,7 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
     }
 
     public boolean isOutGivingProject() {
-        return outGivingProject;
-    }
-
-    public void setOutGivingProject(boolean outGivingProject) {
-        this.outGivingProject = outGivingProject;
+        return outGivingProject != null && outGivingProject;
     }
 
     public RunMode getRunMode() {

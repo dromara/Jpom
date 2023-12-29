@@ -22,11 +22,6 @@
  */
 package org.dromara.jpom.common.commander;
 
-import cn.hutool.system.SystemUtil;
-import org.dromara.jpom.common.commander.impl.LinuxSystemCommander;
-import org.dromara.jpom.common.commander.impl.MacOsSystemCommander;
-import org.dromara.jpom.common.commander.impl.WindowsSystemCommander;
-import org.dromara.jpom.system.JpomRuntimeException;
 import org.dromara.jpom.util.CommandUtil;
 
 import java.io.File;
@@ -37,27 +32,8 @@ import java.io.File;
  * @author bwcx_jzy
  * @since 2019/4/16
  */
-public abstract class AbstractSystemCommander {
+public abstract class AbstractSystemCommander implements SystemCommander {
 
-    private static AbstractSystemCommander abstractSystemCommander = null;
-
-    public static AbstractSystemCommander getInstance() {
-        if (abstractSystemCommander != null) {
-            return abstractSystemCommander;
-        }
-        if (SystemUtil.getOsInfo().isLinux()) {
-            // Linux系统
-            abstractSystemCommander = new LinuxSystemCommander();
-        } else if (SystemUtil.getOsInfo().isWindows()) {
-            // Windows系统
-            abstractSystemCommander = new WindowsSystemCommander();
-        } else if (SystemUtil.getOsInfo().isMac()) {
-            abstractSystemCommander = new MacOsSystemCommander();
-        } else {
-            throw new JpomRuntimeException("不支持的：" + SystemUtil.getOsInfo().getName());
-        }
-        return abstractSystemCommander;
-    }
 
     /**
      * 清空文件内容

@@ -33,7 +33,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.commander.AbstractProjectCommander;
+import org.dromara.jpom.common.commander.ProjectCommander;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
@@ -62,9 +62,12 @@ import java.util.List;
 public class ManageEditProjectController extends BaseAgentController {
 
     private final WhitelistDirectoryService whitelistDirectoryService;
+    private final ProjectCommander projectCommander;
 
-    public ManageEditProjectController(WhitelistDirectoryService whitelistDirectoryService) {
+    public ManageEditProjectController(WhitelistDirectoryService whitelistDirectoryService,
+                                       ProjectCommander projectCommander) {
         this.whitelistDirectoryService = whitelistDirectoryService;
+        this.projectCommander = projectCommander;
     }
 
     /**
@@ -194,7 +197,7 @@ public class ManageEditProjectController extends BaseAgentController {
         if (exits == null) {
             // 检查运行中的tag 是否被占用
             if (runMode != RunMode.File && runMode != RunMode.Dsl) {
-                Assert.state(!AbstractProjectCommander.getInstance().isRun(projectInfo), "当前项目id已经被正在运行的程序占用");
+                Assert.state(!projectCommander.isRun(projectInfo), "当前项目id已经被正在运行的程序占用");
             }
             if (previewData) {
                 // 预检查数据
@@ -270,7 +273,7 @@ public class ManageEditProjectController extends BaseAgentController {
     }
 
     private void projectMustNotRun(NodeProjectInfoModel projectInfoModel, String msg) {
-        boolean run = AbstractProjectCommander.getInstance().isRun(projectInfoModel);
+        boolean run = projectCommander.isRun(projectInfoModel);
         Assert.state(!run, msg);
     }
 
@@ -318,7 +321,7 @@ public class ManageEditProjectController extends BaseAgentController {
             return JsonMessage.success("项目不存在");
         }
         // 运行判断
-        boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel);
+        boolean run = projectCommander.isRun(nodeProjectInfoModel);
         Assert.state(!run, "不能删除正在运行的项目");
         this.thorough(thorough, nodeProjectInfoModel);
         //

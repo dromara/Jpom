@@ -26,7 +26,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
-import org.dromara.jpom.common.commander.AbstractProjectCommander;
+import org.dromara.jpom.common.commander.ProjectCommander;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
@@ -49,6 +49,12 @@ import java.util.List;
 @Slf4j
 public class ProjectListController extends BaseAgentController {
 
+    private final ProjectCommander projectCommander;
+
+    public ProjectListController(ProjectCommander projectCommander) {
+        this.projectCommander = projectCommander;
+    }
+
     /**
      * 获取项目的信息
      *
@@ -63,7 +69,7 @@ public class ProjectListController extends BaseAgentController {
             RunMode runMode = nodeProjectInfoModel.getRunMode();
             if (runMode != RunMode.Dsl && runMode != RunMode.File) {
                 // 返回实际执行的命令
-                String command = AbstractProjectCommander.getInstance().buildJavaCommand(nodeProjectInfoModel);
+                String command = projectCommander.buildJavaCommand(nodeProjectInfoModel);
                 nodeProjectInfoModel.setRunCommand(command);
             }
             if (runMode == RunMode.Dsl) {

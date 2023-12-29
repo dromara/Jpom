@@ -23,13 +23,10 @@
 package org.dromara.jpom.service.manage;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.io.FileUtil;
 import org.dromara.jpom.common.AgentConst;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.service.BaseWorkspaceOptService;
 import org.springframework.stereotype.Service;
-
-import java.io.File;
 
 /**
  * 项目管理
@@ -44,19 +41,6 @@ public class ProjectInfoService extends BaseWorkspaceOptService<NodeProjectInfoM
         super(AgentConst.PROJECT);
     }
 
-//    public HashSet<String> getAllGroup() {
-//        //获取所有分组
-//        List<NodeProjectInfoModel> nodeProjectInfoModels = list();
-//        HashSet<String> hashSet = new HashSet<>();
-//        if (nodeProjectInfoModels == null) {
-//            return hashSet;
-//        }
-//        for (NodeProjectInfoModel nodeProjectInfoModel : nodeProjectInfoModels) {
-//            hashSet.add(nodeProjectInfoModel.getGroup());
-//        }
-//        return hashSet;
-//    }
-
 
     @Override
     public void addItem(NodeProjectInfoModel nodeProjectInfoModel) {
@@ -64,24 +48,4 @@ public class ProjectInfoService extends BaseWorkspaceOptService<NodeProjectInfoM
         super.addItem(nodeProjectInfoModel);
     }
 
-    /**
-     * 查看项目控制台日志文件大小
-     *
-     * @param nodeProjectInfoModel 项目
-     * @return 文件大小
-     */
-    public String getLogSize(NodeProjectInfoModel nodeProjectInfoModel) {
-        if (nodeProjectInfoModel == null) {
-            return null;
-        }
-        File file = new File(nodeProjectInfoModel.getLog());
-        if (file.exists()) {
-            long fileSize = file.length();
-            if (fileSize <= 0) {
-                return null;
-            }
-            return FileUtil.readableFileSize(fileSize);
-        }
-        return null;
-    }
 }

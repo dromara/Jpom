@@ -24,7 +24,10 @@ package org.dromara.jpom.common.commander.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.commander.AbstractSystemCommander;
+import org.dromara.jpom.common.commander.Commander;
 import org.dromara.jpom.util.CommandUtil;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 
@@ -32,6 +35,8 @@ import java.io.File;
  * @author User
  */
 @Slf4j
+@Conditional(Commander.Mac.class)
+@Service
 public class MacOsSystemCommander extends AbstractSystemCommander {
 
 
