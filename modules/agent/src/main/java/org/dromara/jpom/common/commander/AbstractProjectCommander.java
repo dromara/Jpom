@@ -605,7 +605,7 @@ public abstract class AbstractProjectCommander {
                 Tuple tuple = DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel, action);
                 int code = tuple.get(0);
                 List<String> list = tuple.get(1);
-                return CommandOpResult.of(code == 0, CollUtil.join(list, StrUtil.SPACE));
+                return CommandOpResult.of(code == 0, list);
             } catch (IllegalArgument2Exception argument2Exception) {
                 log.warn("执行 DSL 脚本异常：{}", argument2Exception.getMessage());
                 return CommandOpResult.of(false, argument2Exception.getMessage());

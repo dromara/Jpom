@@ -7,6 +7,7 @@
           <a-button size="small" :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start">启动</a-button>
           <a-button size="small" :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
           <a-button size="small" :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="stop">停止</a-button>
+          <a-button size="small" v-if="project.runMode === 'Dsl'" :disabled="!canReload" :loading="optButtonLoading" type="primary" @click="reload">重载</a-button>
 
           <a-button size="small" type="primary" @click="goFile">文件管理</a-button>
 
@@ -76,7 +77,7 @@ export default {
       socket: null,
       logExist: false,
       lobbackVisible: false,
-
+      canReload: false,
       heart: null,
     };
   },
@@ -146,7 +147,7 @@ export default {
         if (msg.data.indexOf("JPOM_MSG") > -1 && msg.data.indexOf("op") > -1) {
           // console.log(msg.data);
           const res = JSON.parse(msg.data);
-          if (res.op === "stop" || res.op === "start" || res.op === "restart" || res.op === "status") {
+          if (res.op === "stop" || res.op === "start" || res.op === "restart" || res.op === "status" || res.op === "reload") {
             this.optButtonLoading = false;
             this.$message.info(res.msg);
             if (res.code === 200) {
@@ -162,7 +163,19 @@ export default {
             } else {
               this.project = { ...this.project, status: false };
             }
-            // return;
+            this.canReload = res.canReload;
+            this.$refs.logView.appendLine(res.op + " " + res.msg);
+            if (res.data) {
+              this.$refs.logView.appendLine(res.data.statusMsg);
+              if (res.data.msgs) {
+                res.data.msgs.forEach((element) => {
+                  this.$refs.logView.appendLine(element);
+                });
+              }
+              res.data.ports && this.$refs.logView.appendLine("端口：" + res.data.ports);
+              res.data.pids && this.$refs.logView.appendLine("进程号：" + res.data.pids.join(","));
+            }
+            return;
           }
         }
         this.$refs.logView.appendLine(msg.data);
@@ -206,6 +219,10 @@ export default {
     // 启动
     start() {
       this.sendMsg("start");
+    },
+    // 重载
+    reload() {
+      this.sendMsg("reload");
     },
     // 重启
     restart() {

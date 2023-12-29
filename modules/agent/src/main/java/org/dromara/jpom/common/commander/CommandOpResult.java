@@ -88,13 +88,20 @@ public class CommandOpResult {
     }
 
     public static CommandOpResult of(boolean success) {
-        return of(success, null);
+        return of(success, (List<String>) null);
     }
 
     public static CommandOpResult of(boolean success, String msg) {
         CommandOpResult commandOpResult = new CommandOpResult();
         commandOpResult.success = success;
         commandOpResult.appendMsg(msg);
+        return commandOpResult;
+    }
+
+    public static CommandOpResult of(boolean success, List<String> msg) {
+        CommandOpResult commandOpResult = new CommandOpResult();
+        commandOpResult.success = success;
+        commandOpResult.msgs.addAll(msg);
         return commandOpResult;
     }
 
