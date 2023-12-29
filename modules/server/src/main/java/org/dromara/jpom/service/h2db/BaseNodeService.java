@@ -45,8 +45,8 @@ import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.system.WorkspaceService;
-import org.dromara.jpom.system.AgentException;
-import org.dromara.jpom.system.AuthorizeException;
+import org.dromara.jpom.exception.AgentException;
+import org.dromara.jpom.exception.AgentAuthorizeException;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
@@ -263,10 +263,10 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
             AgentException agentException = (AgentException) e;
             log.error("{} 同步失败 {}", nodeModelName, agentException.getMessage());
             return "同步失败" + agentException.getMessage();
-        } else if (e instanceof AuthorizeException) {
-            AuthorizeException authorizeException = (AuthorizeException) e;
-            log.error("{} 授权异常 {}", nodeModelName, authorizeException.getMessage());
-            return "授权异常" + authorizeException.getMessage();
+        } else if (e instanceof AgentAuthorizeException) {
+            AgentAuthorizeException agentAuthorizeException = (AgentAuthorizeException) e;
+            log.error("{} 授权异常 {}", nodeModelName, agentAuthorizeException.getMessage());
+            return "授权异常" + agentAuthorizeException.getMessage();
         }
 //        else if (e instanceof JSONException) {
 //            log.error("{} 消息解析失败 {}", nodeModelName, e.getMessage());

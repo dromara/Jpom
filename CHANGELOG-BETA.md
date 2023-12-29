@@ -11,6 +11,7 @@
 2. 【server】优化 逻辑节点中项目数和脚本数仅显示当前工作空间数量
 3. 【server】优化 项目编辑和节点分发页面支持快捷配置授权目录
 4. 【server】优化 项目编辑支持切换节点（快速同步其他节点项目）
+5. 【server】修复 没有工作空间权限时页面循环跳转（感谢[@王先生](https://gitee.com/whz_gmg1) [Gitee issues I8RR01](https://gitee.com/dromara/Jpom/issues/I8RR01)）
 
 ------
 

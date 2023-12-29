@@ -54,8 +54,8 @@ import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.h2db.BaseDbService;
 import org.dromara.jpom.service.node.NodeService;
-import org.dromara.jpom.system.AgentException;
-import org.dromara.jpom.system.AuthorizeException;
+import org.dromara.jpom.exception.AgentException;
+import org.dromara.jpom.exception.AgentAuthorizeException;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.system.db.InitDb;
 import org.springframework.context.ApplicationContext;
@@ -251,7 +251,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
                     }
                     jsonObject.put("networkDelay", networkTime);
                     this.saveStatInfo(machineNodeModel, jsonObject);
-                } catch (AuthorizeException agentException) {
+                } catch (AgentAuthorizeException agentException) {
                     this.updateStatus(machineNodeModel, 2, agentException.getMessage());
                 } catch (AgentException e) {
                     this.updateStatus(machineNodeModel, 0, e.getMessage());

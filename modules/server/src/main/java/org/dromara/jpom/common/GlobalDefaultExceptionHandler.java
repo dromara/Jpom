@@ -25,8 +25,9 @@ package org.dromara.jpom.common;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.system.AgentException;
-import org.dromara.jpom.system.AuthorizeException;
+import org.dromara.jpom.exception.AgentAuthorizeException;
+import org.dromara.jpom.exception.AgentException;
+import org.dromara.jpom.exception.PermissionException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -47,8 +48,8 @@ public class GlobalDefaultExceptionHandler extends BaseExceptionHandler {
      *
      * @param e 异常
      */
-    @ExceptionHandler({AuthorizeException.class})
-    public IJsonMessage<String> delExceptionHandler(AuthorizeException e) {
+    @ExceptionHandler({AgentAuthorizeException.class})
+    public IJsonMessage<String> delExceptionHandler(AgentAuthorizeException e) {
         return e.getJsonMessage();
     }
 
@@ -69,5 +70,16 @@ public class GlobalDefaultExceptionHandler extends BaseExceptionHandler {
             log.error("controller {}", request.getRequestURI(), cause);
         }
         return new JsonMessage<>(405, e.getMessage());
+    }
+
+    /**
+     * 权限异常 需要退出登录
+     *
+     * @param e 异常
+     * @return json
+     */
+    @ExceptionHandler({PermissionException.class})
+    public IJsonMessage<String> doPermissionException(PermissionException e) {
+        return new JsonMessage<>(ServerConst.AUTHORIZE_TIME_OUT_CODE, e.getMessage());
     }
 }
