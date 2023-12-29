@@ -63,6 +63,10 @@ public class StaticFileStorageModel extends BaseUserModifyDbModel implements IFi
      */
     private String absolutePath;
     private String parentAbsolutePath;
+    /**
+     * 要组索引不字段不能太长
+     * [42000][1071] Specified key was too long; max key length is 3072 bytes
+     */
     private String staticDir;
     private Integer level;
     /**
