@@ -37,12 +37,13 @@ import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.plugins.IPlugin;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.IllegalArgument2Exception;
+import org.dromara.jpom.configuration.ProjectConfig;
+import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
@@ -51,7 +52,6 @@ import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.script.DslScriptBuilder;
 import org.dromara.jpom.socket.AgentFileTailWatcher;
 import org.dromara.jpom.socket.ConsoleCommandOp;
-import org.dromara.jpom.system.AgentConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JvmUtil;
 import org.springframework.util.Assert;
@@ -87,11 +87,16 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
 
     protected final Charset fileCharset;
     protected final SystemCommander systemCommander;
+    protected final ProjectConfig projectConfig;
+    protected final ProjectLogConfig projectLogConfig;
 
     public AbstractProjectCommander(Charset fileCharset,
-                                    SystemCommander systemCommander) {
+                                    SystemCommander systemCommander,
+                                    ProjectConfig projectConfig) {
         this.fileCharset = fileCharset;
         this.systemCommander = systemCommander;
+        this.projectConfig = projectConfig;
+        this.projectLogConfig = projectConfig.getLog();
     }
 
 
@@ -468,8 +473,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
      */
     private boolean resolveOpenLogBack(NodeProjectInfoModel nodeProjectInfoModel) {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
-        AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
-        boolean autoBackToFile = agentConfig.getProject().getLog().isAutoBackupToFile();
+        boolean autoBackToFile = projectLogConfig.isAutoBackupToFile();
         if (runMode == RunMode.Dsl) {
             DslYmlDto dslYmlDto = nodeProjectInfoModel.dslConfig();
             return Optional.ofNullable(dslYmlDto)
@@ -716,7 +720,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
      * @return 和参数status相反
      */
     protected boolean loopCheckRun(NodeProjectInfoModel nodeProjectInfoModel, boolean status) {
-        int statusWaitTime = AgentConfig.ProjectConfig.getInstance().getStatusWaitTime();
+        int statusWaitTime = projectConfig.getStatusWaitTime();
         return this.loopCheckRun(nodeProjectInfoModel, statusWaitTime, status);
     }
 
@@ -730,7 +734,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
      */
     protected boolean loopCheckRun(NodeProjectInfoModel nodeProjectInfoModel, int waitTime, boolean status) {
         waitTime = Math.max(waitTime, 1);
-        int statusDetectionInterval = AgentConfig.ProjectConfig.getInstance().getStatusDetectionInterval();
+        int statusDetectionInterval = projectConfig.getStatusDetectionInterval();
         statusDetectionInterval = Math.max(statusDetectionInterval, 1);
         int loopCount = (int) (TimeUnit.SECONDS.toMillis(waitTime) / 500);
         int count = 0;

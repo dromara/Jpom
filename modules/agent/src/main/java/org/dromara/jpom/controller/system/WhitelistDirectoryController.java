@@ -30,7 +30,6 @@ import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseJpomController;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.service.WhitelistDirectoryService;
-import org.dromara.jpom.system.AgentConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,12 +48,9 @@ import java.util.List;
 public class WhitelistDirectoryController extends BaseJpomController {
 
     private final WhitelistDirectoryService whitelistDirectoryService;
-    private final AgentConfig agentConfig;
 
-    public WhitelistDirectoryController(WhitelistDirectoryService whitelistDirectoryService,
-                                        AgentConfig agentConfig) {
+    public WhitelistDirectoryController(WhitelistDirectoryService whitelistDirectoryService) {
         this.whitelistDirectoryService = whitelistDirectoryService;
-        this.agentConfig = agentConfig;
     }
 
     @RequestMapping(value = "whitelistDirectory_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -116,9 +112,6 @@ public class WhitelistDirectoryController extends BaseJpomController {
      * @return null 正常
      */
     private String findStartsWith(List<String> jsonArray) {
-        if (jsonArray == null || !agentConfig.getWhitelist().isCheckStartsWith()) {
-            return null;
-        }
         return AgentWhitelist.findStartsWith(jsonArray);
     }
 }

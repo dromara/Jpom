@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.dromara.jpom.system;
+package org.dromara.jpom.configuration;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -32,13 +32,11 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.model.system.AgentAutoUser;
+import org.dromara.jpom.system.JpomRuntimeException;
 import org.dromara.jpom.util.JsonFileUtil;
 import org.dromara.jpom.util.JvmUtil;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 
@@ -50,9 +48,8 @@ import java.io.File;
  */
 @Slf4j
 @Data
-@Configuration
 @ConfigurationProperties("jpom.authorize")
-public class AgentAuthorize implements ILoadEvent {
+public class AgentAuthorize {
     /**
      * 账号
      */
@@ -74,17 +71,6 @@ public class AgentAuthorize implements ILoadEvent {
         return null;
     }
 
-    private final JpomApplication configBean;
-    /**
-     * 注入控制加载顺序，必须先加载数据目录才能初始化
-     */
-    private final AgentConfig agentConfig;
-
-    public AgentAuthorize(JpomApplication configBean,
-                          AgentConfig agentConfig) {
-        this.configBean = configBean;
-        this.agentConfig = agentConfig;
-    }
 
     /**
      * 判断授权是否正确
@@ -99,7 +85,7 @@ public class AgentAuthorize implements ILoadEvent {
     /**
      * 检查是否配置密码
      */
-    private void checkPwd() {
+    private void checkPwd(JpomApplication configBean) {
         File path = FileUtil.file(configBean.getDataPath(), Const.AUTHORIZE);
         if (StrUtil.isNotEmpty(agentPwd)) {
             // 有指定密码 清除旧密码信息
@@ -130,14 +116,12 @@ public class AgentAuthorize implements ILoadEvent {
         log.info("Automatically generate authorized account:{}  password:{}  Authorization information storage location：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
     }
 
-    @Override
-    public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
-        // 登录名不能为空
+    public void init(JpomApplication configBean) {
         if (StrUtil.isEmpty(this.agentName)) {
             throw new JpomRuntimeException("The agent login name cannot be empty");
         }
         if (StrUtil.isEmpty(this.authorize)) {
-            this.checkPwd();
+            this.checkPwd(configBean);
             // 生成密码授权字符串
             this.authorize = SecureUtil.sha1(this.agentName + "@" + this.agentPwd);
         } else {
@@ -145,10 +129,5 @@ public class AgentAuthorize implements ILoadEvent {
         }
         //
         JvmUtil.checkJpsNormal();
-    }
-
-    @Override
-    public int getOrder() {
-        return HIGHEST_PRECEDENCE;
     }
 }

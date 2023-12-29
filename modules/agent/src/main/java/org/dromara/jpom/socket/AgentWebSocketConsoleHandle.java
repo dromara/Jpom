@@ -33,11 +33,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.commander.CommandOpResult;
 import org.dromara.jpom.common.commander.ProjectCommander;
+import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.service.manage.ProjectInfoService;
-import org.dromara.jpom.system.AgentConfig;
+import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.util.FileSearchUtil;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,7 @@ import java.nio.charset.Charset;
 public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 
     private static ProjectInfoService projectInfoService;
-    private static AgentConfig.ProjectConfig.LogConfig logConfig;
+    private static ProjectLogConfig logConfig;
     private static ProjectCommander projectCommander;
 
     @Autowired
@@ -71,6 +72,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         AgentWebSocketConsoleHandle.projectInfoService = projectInfoService;
         AgentWebSocketConsoleHandle.logConfig = agentConfig.getProject().getLog();
         AgentWebSocketConsoleHandle.projectCommander = projectCommander;
+        setAgentAuthorize(agentConfig.getAuthorize());
     }
 
     @OnOpen

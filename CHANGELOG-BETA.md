@@ -13,6 +13,7 @@
 4. 【server】优化 项目编辑支持切换节点（快速同步其他节点项目）
 5. 【server】修复 没有工作空间权限时页面循环跳转（感谢[@王先生](https://gitee.com/whz_gmg1) [Gitee issues I8RR01](https://gitee.com/dromara/Jpom/issues/I8RR01)）
 6. 【all】优化 授权目录判断逻辑
+7. 【agent】取消 插件端授权目录关闭包含判断(`jpom.whitelist.check-starts-with`)
 
 ### ⚠️ 注意
 

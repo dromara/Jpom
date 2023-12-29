@@ -42,6 +42,9 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.RemoteVersion;
 import org.dromara.jpom.common.commander.ProjectCommander;
+import org.dromara.jpom.configuration.AgentAuthorize;
+import org.dromara.jpom.configuration.AgentConfig;
+import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.script.BaseRunScript;
@@ -77,25 +80,25 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
     private final AgentAuthorize agentAuthorize;
     private final JpomApplication jpomApplication;
     private final ProjectCommander projectCommander;
+    private final ProjectLogConfig projectLogConfig;
 
 
     public AgentStartInit(ProjectInfoService projectInfoService,
                           AgentConfig agentConfig,
-                          AgentAuthorize agentAuthorize,
                           JpomApplication jpomApplication,
                           ProjectCommander projectCommander) {
         this.projectInfoService = projectInfoService;
         this.agentConfig = agentConfig;
-        this.agentAuthorize = agentAuthorize;
+        this.agentAuthorize = agentConfig.getAuthorize();
         this.jpomApplication = jpomApplication;
         this.projectCommander = projectCommander;
+        projectLogConfig = agentConfig.getProject().getLog();
     }
 
 
     private void startAutoBackLog() {
-        AgentConfig.ProjectConfig.LogConfig logConfig = agentConfig.getProject().getLog();
         // 获取cron 表达式
-        String cron = Opt.ofBlankAble(logConfig.getAutoBackupConsoleCron()).orElse("0 0/10 * * * ?");
+        String cron = Opt.ofBlankAble(projectLogConfig.getAutoBackupConsoleCron()).orElse("0 0/10 * * * ?");
         //
         CronUtils.upsert(ID, cron, () -> {
             try {
@@ -116,8 +119,7 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
         if (!file.exists()) {
             return;
         }
-        AgentConfig.ProjectConfig.LogConfig logConfig = agentConfig.getProject().getLog();
-        DataSize autoBackSize = logConfig.getAutoBackupSize();
+        DataSize autoBackSize = projectLogConfig.getAutoBackupSize();
         autoBackSize = Optional.ofNullable(autoBackSize).orElseGet(() -> DataSize.ofMegabytes(50));
         long len = file.length();
         if (len > autoBackSize.toBytes()) {
@@ -133,7 +135,7 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
         List<File> files = FileUtil.loopFiles(logFile, pathname -> {
             DateTime dateTime = DateUtil.date(pathname.lastModified());
             long days = DateUtil.betweenDay(dateTime, nowTime, false);
-            long saveDays = logConfig.getSaveDays();
+            long saveDays = projectLogConfig.getSaveDays();
             return days > saveDays;
         });
         files.forEach(FileUtil::del);
