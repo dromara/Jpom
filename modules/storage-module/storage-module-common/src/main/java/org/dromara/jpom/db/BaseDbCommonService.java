@@ -85,7 +85,7 @@ public abstract class BaseDbCommonService<T> {
         return tableName;
     }
 
-    private DataSource getDataSource() {
+    protected DataSource getDataSource() {
         DSFactory dsFactory = StorageServiceFactory.get().getDsFactory();
         return dsFactory.getDataSource();
     }

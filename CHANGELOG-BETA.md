@@ -14,6 +14,7 @@
 5. 【server】修复 没有工作空间权限时页面循环跳转（感谢[@王先生](https://gitee.com/whz_gmg1) [Gitee issues I8RR01](https://gitee.com/dromara/Jpom/issues/I8RR01)）
 6. 【all】优化 授权目录判断逻辑
 7. 【agent】取消 插件端授权目录关闭包含判断(`jpom.whitelist.check-starts-with`)
+8. 【server】优化 触发器清理优化、删除用户主动删除关联触发器
 
 ### ⚠️ 注意
 

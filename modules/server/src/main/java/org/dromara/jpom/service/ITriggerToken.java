@@ -36,4 +36,13 @@ public interface ITriggerToken {
      * @return 数据分类名称
      */
     String typeName();
+
+    /**
+     * 判断是否存在
+     *
+     * @param dataId 数据id
+     * @return true 存在
+     */
+    boolean exists(String dataId);
+
 }

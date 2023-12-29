@@ -22,17 +22,27 @@
  */
 package org.dromara.jpom.service.user;
 
-import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.BetweenFormatter;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Db;
+import cn.hutool.db.handler.RsHandler;
+import cn.keepbx.jpom.event.ISystemTask;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.db.StorageServiceFactory;
 import org.dromara.jpom.model.user.TriggerTokenLogBean;
 import org.dromara.jpom.model.user.UserModel;
+import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseDbService;
 import org.springframework.stereotype.Service;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author bwcx_jzy
@@ -40,12 +50,26 @@ import java.util.Optional;
  */
 @Service
 @Slf4j
-public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> {
+public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> implements ISystemTask {
 
     private final UserService userService;
+    private final List<ITriggerToken> triggerTokens;
 
-    public TriggerTokenLogServer(UserService userService) {
+    public TriggerTokenLogServer(UserService userService,
+                                 List<ITriggerToken> triggerTokens) {
         this.userService = userService;
+        this.triggerTokens = triggerTokens;
+    }
+
+    /**
+     * 通过用户ID 删除数据
+     *
+     * @param userId 用户d
+     */
+    public void delByUserId(String userId) {
+        TriggerTokenLogBean tokenLogBean = new TriggerTokenLogBean();
+        tokenLogBean.setUserId(userId);
+        this.delByBean(tokenLogBean);
     }
 
     /**
@@ -63,15 +87,8 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> {
                 return userModel;
             }
         }
-        // 兼容旧版本数据
-        TriggerTokenLogBean where = new TriggerTokenLogBean();
-        where.setTriggerToken(token);
-        where.setType(type);
-        List<TriggerTokenLogBean> triggerTokenLogBeans = this.listByBean(where);
-        return Optional.ofNullable(triggerTokenLogBeans)
-            .map(CollUtil::getFirst)
-            .map(triggerTokenLogBean -> userService.getByKey(triggerTokenLogBean.getUserId()))
-            .orElse(null);
+        //
+        return null;
     }
 
     /**
@@ -85,20 +102,7 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> {
      */
     public String restToken(String oldToken, String type, String dataId, String userId) {
         if (StrUtil.isNotEmpty(oldToken)) {
-            TriggerTokenLogBean tokenLogBean = this.getByKey(oldToken);
-            if (tokenLogBean != null) {
-                this.delByKey(oldToken);
-            } else {
-                // 可能存在之前版本数据
-                TriggerTokenLogBean where = new TriggerTokenLogBean();
-                where.setTriggerToken(oldToken);
-                where.setType(type);
-                List<TriggerTokenLogBean> triggerTokenLogBeans = this.listByBean(where);
-                Optional.ofNullable(triggerTokenLogBeans)
-                    .ifPresent(triggerTokenLogBeans1 ->
-                        triggerTokenLogBeans1.forEach(triggerTokenLogBean -> this.delByKey(triggerTokenLogBean.getId()))
-                    );
-            }
+            this.delByKey(oldToken);
         }
         // 创建 token
         return this.createToken(type, dataId, userId);
@@ -122,5 +126,62 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> {
         trigger.setUserId(userId);
         this.insert(trigger);
         return uuid;
+    }
+
+    @Override
+    public void executeTask() {
+        if (triggerTokens == null) {
+            return;
+        }
+        log.debug("clean trigger token start...");
+        long start = SystemClock.now();
+        // 调用方法处理逻辑
+        cleanTriggerToken();
+        log.debug("clean trigger token end... cost time: {}", DateUtil.formatBetween(SystemClock.now() - start, BetweenFormatter.Level.MILLISECOND));
+    }
+
+    /**
+     * @author Hotstrip
+     * @since 2023-04-13
+     */
+    private void cleanTriggerToken() {
+        // 统计删除条数
+        int delCount = 0;
+        int fetchSize = StorageServiceFactory.get().getFetchSize();
+        for (ITriggerToken triggerToken : triggerTokens) {
+            TriggerTokenLogBean tokenLogBean = new TriggerTokenLogBean();
+            tokenLogBean.setType(triggerToken.typeName());
+            try {
+                delCount += Db.use(this.getDataSource())
+                    .query((conn -> {
+                        PreparedStatement ps = conn.prepareStatement("select dataId,id from " + this.getTableName() + " where type=?",
+                            ResultSet.TYPE_FORWARD_ONLY,
+                            ResultSet.CONCUR_READ_ONLY);
+                        ps.setString(1, triggerToken.typeName());
+                        ps.setFetchSize(fetchSize);
+                        ps.setFetchDirection(ResultSet.FETCH_FORWARD);
+                        return ps;
+                    }), (RsHandler<Integer>) rs -> {
+                        List<String> ids = new ArrayList<>();
+                        while (rs.next()) {
+                            //
+                            String dataId = rs.getString("dataId");
+                            if (triggerToken.exists(dataId)) {
+                                continue;
+                            }
+                            String id = rs.getString("id");
+                            ids.add(id);
+                        }
+                        // 删除 token
+                        this.delByKey(ids);
+                        return ids.size();
+                    });
+            } catch (SQLException e) {
+                log.error("执行清理 token[{}] 异常", triggerToken.typeName(), e);
+            }
+        }
+        if (delCount > 0) {
+            log.info("clean trigger token count: {}", delCount);
+        }
     }
 }
