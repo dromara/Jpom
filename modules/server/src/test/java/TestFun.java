@@ -20,7 +20,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+import cn.hutool.core.util.StrUtil;
 import org.junit.Test;
+import org.springframework.util.Assert;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -34,6 +36,8 @@ public class TestFun {
 
     @Test
     public void tset() {
+        // Assert.state(!StrUtil.equals("1", "1"), "not equal...");
+        Assert.state(StrUtil.equals("1", "1"), "not equal...");
         List<Supplier<Boolean>> AFTER_CALLBACK = new LinkedList<>();
         AFTER_CALLBACK.add(() -> {
             System.out.println("1");

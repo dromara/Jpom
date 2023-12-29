@@ -29,6 +29,7 @@ import cn.hutool.crypto.GlobalBouncyCastleProvider;
 import cn.hutool.crypto.KeyUtil;
 import cn.hutool.crypto.PemUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.crypto.asymmetric.ECIES;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.db.Entity;
@@ -256,12 +257,22 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
      */
     public void testKey(PublicKey pubkey, PrivateKey privateKey) {
         Assert.state(pubkey != null && privateKey != null, "公钥或者私钥不存在");
-        RSA rsa = new RSA(privateKey, pubkey);
         // 测试字符串
         String str = "您好，Jpom";
-        String encryptStr = rsa.encryptBase64(str, KeyType.PublicKey);
-        String decryptStr = rsa.decryptStr(encryptStr, KeyType.PrivateKey);
-        Assert.state(!StrUtil.equals(encryptStr, decryptStr), "公钥和私钥不匹配");
+
+        // 判断算法名称是否包含 “RSA” 或 “EC”
+        String algorithm = pubkey.getAlgorithm();
+        if (algorithm.contains(ServerConst.RSA)) {
+            RSA rsa = new RSA(privateKey, pubkey);
+            String encryptStr = rsa.encryptBase64(str, KeyType.PublicKey);
+            String decryptStr = rsa.decryptStr(encryptStr, KeyType.PrivateKey);
+            Assert.state(StrUtil.equals(str, decryptStr), "公钥和私钥不匹配");
+        } else if (algorithm.contains(ServerConst.EC)) {
+            ECIES ecies = new ECIES(privateKey, pubkey);
+            String encryptStr = ecies.encryptBase64(str, KeyType.PublicKey);
+            String decryptStr = StrUtil.utf8Str(ecies.decrypt(encryptStr, KeyType.PrivateKey));
+            Assert.state(StrUtil.equals(str, decryptStr), "公钥和私钥不匹配");
+        }
     }
 
     /**
