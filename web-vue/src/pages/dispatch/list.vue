@@ -385,6 +385,22 @@
             </a-select>
             <a-input style="width: 50%" v-model="temp.lib" placeholder="项目存储的文件夹，jar 包存放的文件夹" />
           </a-input-group>
+          <template slot="help">
+            需要提前为工作空间配置授权目录
+
+            <a-button
+              icon="info-circle"
+              size="small"
+              type="link"
+              @click="
+                () => {
+                  this.configDir = true;
+                }
+              "
+            >
+              配置目录
+            </a-button>
+          </template>
         </a-form-model-item>
         <!-- <a-form-model-item prop="lib">
           <template slot="label">
@@ -574,7 +590,6 @@
     />
 
     <!-- 分发状态 -->
-
     <Status
       v-if="drawerStatusVisible"
       :id="temp.id"
@@ -585,6 +600,30 @@
         }
       "
     />
+
+    <a-modal
+      destroyOnClose
+      v-model="configDir"
+      :title="`配置授权目录`"
+      :footer="null"
+      width="50vw"
+      :maskClosable="false"
+      @cancel="
+        () => {
+          this.configDir = false;
+        }
+      "
+    >
+      <whiteList
+        v-if="configDir"
+        @cancel="
+          () => {
+            this.configDir = false;
+            this.loadAccesList();
+          }
+        "
+      ></whiteList>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -608,13 +647,13 @@ import { getProjectData, javaModes, noFileModes, runModeList, getProjectGroupAll
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, randomStr, itemGroupBy, parseTime } from "@/utils/const";
 
 import CustomSelect from "@/components/customSelect";
-
+import whiteList from "@/pages/dispatch/white-list.vue";
 import StartDispatch from "./start";
 export default {
   components: {
     codeEditor,
     CustomSelect,
-
+    whiteList,
     Status,
     StartDispatch,
   },
@@ -637,7 +676,7 @@ export default {
       targetKeys: [],
       // reqId: "",
       temp: {},
-
+      configDir: false,
       runModeList: runModeList,
 
       linkDispatchVisible: false,
@@ -714,22 +753,7 @@ export default {
   methods: {
     randomStr,
     CHANGE_PAGE,
-    // 页面引导
-    introGuide() {
-      this.$store.dispatch("tryOpenGuide", {
-        key: "dispatch",
-        options: {
-          hidePrev: true,
-          steps: [
-            {
-              title: "导航助手",
-              element: document.querySelector(".jpom-project-whitelist"),
-              intro: "项目授权需要在侧边栏菜单<b>分发授权</b>组件里面去设置",
-            },
-          ],
-        },
-      });
-    },
+
     // 静默
     silenceLoadData() {
       if (this.$attrs.routerUrl !== this.$route.path) {
@@ -915,12 +939,8 @@ export default {
         this.loadGroupList();
 
         this.editDispatchVisible = true;
-        this.$nextTick(() => {
-          this.$refs["editDispatchForm"].resetFields();
-          setTimeout(() => {
-            this.introGuide();
-          }, 500);
-        });
+
+        this.$refs["editDispatchForm"]?.resetFields();
       });
     },
     // 编辑分发项目

@@ -118,7 +118,8 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<NodeScriptExecut
                 return null;
             }
             //
-            List<NodeScriptExecuteLogCacheModel> models = jsonArray.toJavaList(this.tClass).stream()
+            List<NodeScriptExecuteLogCacheModel> models = jsonArray.toJavaList(this.tClass)
+                .stream()
                 .filter(item -> {
                     if (StrUtil.equals(item.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL)) {
                         return true;
