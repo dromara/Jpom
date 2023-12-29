@@ -144,14 +144,8 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return whitelistDirectory;
     }
 
-    public void setWhitelistDirectory(String whitelistDirectory) {
-        this.whitelistDirectory = whitelistDirectory;
-    }
-
-
     public String allLib() {
         String directory = this.getWhitelistDirectory();
-        directory = AgentWhitelist.convertRealPath(directory);
         return FileUtil.file(directory, this.getLib()).getAbsolutePath();
     }
 

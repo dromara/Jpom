@@ -42,23 +42,23 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
     }
 
 
-    @Override
-    public boolean getServiceStatus(String serviceName) {
-        String result = CommandUtil.execSystemCommand("sc query " + serviceName);
-        return StrUtil.containsIgnoreCase(result, "RUNNING");
-    }
-
-    @Override
-    public String startService(String serviceName) {
-        String format = StrUtil.format("net start {}", serviceName);
-        return CommandUtil.execSystemCommand(format);
-    }
-
-    @Override
-    public String stopService(String serviceName) {
-        String format = StrUtil.format("net stop {}", serviceName);
-        return CommandUtil.execSystemCommand(format);
-    }
+//    @Override
+//    public boolean getServiceStatus(String serviceName) {
+//        String result = CommandUtil.execSystemCommand("sc query " + serviceName);
+//        return StrUtil.containsIgnoreCase(result, "RUNNING");
+//    }
+//
+//    @Override
+//    public String startService(String serviceName) {
+//        String format = StrUtil.format("net start {}", serviceName);
+//        return CommandUtil.execSystemCommand(format);
+//    }
+//
+//    @Override
+//    public String stopService(String serviceName) {
+//        String format = StrUtil.format("net stop {}", serviceName);
+//        return CommandUtil.execSystemCommand(format);
+//    }
 
     @Override
     public String buildKill(int pid) {

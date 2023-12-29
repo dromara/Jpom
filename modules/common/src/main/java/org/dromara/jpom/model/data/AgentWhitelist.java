@@ -63,23 +63,6 @@ public class AgentWhitelist extends BaseJsonModel {
      */
     private List<String> allowEditSuffix;
 
-    public static String convertRealPath(String path) {
-        String val = String.format("/%s/", path);
-        return FileUtil.normalize(val);
-    }
-
-    public static List<String> useConvert(List<String> list) {
-        if (list == null) {
-            return null;
-        }
-        return list.stream().map(AgentWhitelist::convertRealPath).collect(Collectors.toList());
-    }
-
-
-    public List<String> project() {
-        return useConvert(project);
-    }
-
     /**
      * 格式化，判断是否与jpom 数据路径冲突
      *
@@ -143,7 +126,7 @@ public class AgentWhitelist extends BaseJsonModel {
         if (StrUtil.isEmpty(path)) {
             return false;
         }
-        File file1, file2 = FileUtil.file(convertRealPath(path));
+        File file1, file2 = FileUtil.file(path);
         for (String item : list) {
             file1 = FileUtil.file(item);
             if (FileUtil.pathEquals(file1, file2)) {
