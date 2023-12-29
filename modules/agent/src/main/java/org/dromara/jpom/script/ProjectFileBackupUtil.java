@@ -147,6 +147,12 @@ public class ProjectFileBackupUtil {
         }
     }
 
+    /**
+     * 解析项目的备份路径
+     *
+     * @param dslYmlDto dsl 配置
+     * @return path
+     */
     public static String resolveBackupPath(DslYmlDto dslYmlDto) {
         return Optional.ofNullable(dslYmlDto)
             .map(DslYmlDto::getFile)

@@ -101,10 +101,6 @@ public class ServerWhitelist extends BaseJsonModel {
         Assert.state(contains, "没有当前静态目录权限");
     }
 
-    public List<String> outGiving() {
-        return AgentWhitelist.useConvert(outGiving);
-    }
-
     /**
      * 判断指定 url 是否在授权范围
      *
