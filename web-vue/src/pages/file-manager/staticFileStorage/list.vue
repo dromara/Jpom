@@ -27,6 +27,7 @@
               <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
             </a-tooltip>
             <!-- <a-button type="primary" @click="handleUpload">上传文件</a-button> -->
+            <a-button type="primary" @click="reScanner">扫描</a-button>
 
             <a-button type="danger" :disabled="!tableSelections || tableSelections.length <= 0" @click="handleBatchDelete"> 批量删除 </a-button>
           </a-space>
@@ -74,7 +75,7 @@
           </a-space>
         </template>
       </a-table>
-      <!-- 上传文件 -->
+      <!-- 上传文件
       <a-modal destroyOnClose v-model="uploadVisible" :closable="!uploading" :footer="uploading ? null : undefined" :keyboard="false" :title="`上传文件`" @ok="handleUploadOk" :maskClosable="false">
         <a-form-model ref="form" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <a-form-model-item label="选择文件" prop="file">
@@ -135,7 +136,7 @@
             <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
           </a-form-model-item>
         </a-form-model>
-      </a-modal>
+      </a-modal> -->
       <!-- 编辑文件 -->
       <a-modal destroyOnClose v-model="editVisible" :title="`修改文件`" @ok="handleEditOk" :maskClosable="false">
         <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
@@ -268,7 +269,7 @@
 <script>
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, renderSize, formatDuration, randomStr } from "@/utils/const";
 // import { uploadFile, uploadFileMerge, hasFile } from "@/api/file-manager/file-storage";
-import { staticFileStorageList, delFile, triggerUrl, fileEdit } from "@/api/file-manager/static-storage";
+import { staticFileStorageList, delFile, triggerUrl, fileEdit, staticScanner } from "@/api/file-manager/static-storage";
 // import { uploadPieces } from "@/utils/upload-pieces";
 import Vue from "vue";
 import releaseFile from "@/pages/file-manager/fileStorage/releaseFile";
@@ -615,6 +616,17 @@ export default {
         return;
       }
       this.$emit("confirm", selectData);
+    },
+    // 扫描
+    reScanner() {
+      staticScanner({}).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.loadData();
+        }
+      });
     },
   },
 };

@@ -210,11 +210,11 @@ public class StaticFileStorageController extends BaseServerController {
      *
      * @return json
      */
-    @GetMapping(value = "has-file", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "scanner", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<String> scanner(HttpServletRequest request) {
         boolean scanning = staticFileStorageService.isScanning();
-        Assert.state(scanning, "当前正在扫描中");
+        Assert.state(!scanning, "当前正在扫描中");
         String workspace = fileStorageService.getCheckUserWorkspace(request);
         staticFileStorageService.scanByWorkspace(workspace);
         return JsonMessage.success("扫描成功");

@@ -142,6 +142,13 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
             // 开启任务
             watchMonitor = new HashMap<>(list.size());
             for (String s : list) {
+                File file = FileUtil.file(s);
+                if (!FileUtil.exist(file)) {
+                    log.warn("被监控的目录不存在忽略创建监听器：{}", s);
+                    // 自动删除已经存在的任务
+                    this.delete(file);
+                    continue;
+                }
                 DelayWatcher delayWatcher = new DelayWatcher(StaticFileStorageService.this, 1000);
                 WatchMonitor monitor = WatchUtil.createAll(s, watchMonitorMaxDepth, delayWatcher);
                 watchMonitor.put(s, monitor);
@@ -149,7 +156,6 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
                 ThreadUtil.execute(monitor);
             }
         }
-        this.execute();
     }
 
     /**
@@ -228,6 +234,8 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
     private void scanItem(String staticDir, String item, int level, Long taskId) {
         File file = FileUtil.file(item);
         if (!FileUtil.exist(file)) {
+            // 目录不存在了，自动删除
+            this.delete(file);
             return;
         }
         if (FileUtil.isFile(file)) {
