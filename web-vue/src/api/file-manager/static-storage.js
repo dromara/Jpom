@@ -41,3 +41,11 @@ export function hasStaticFile(params) {
     params: params,
   });
 }
+
+export function staticScanner(params) {
+  return axios({
+    url: "/file-storage/static/scanner",
+    method: "get",
+    params: params,
+  });
+}
