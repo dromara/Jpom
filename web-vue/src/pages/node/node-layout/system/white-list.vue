@@ -1,5 +1,5 @@
 <template>
-  <div class="node-full-content">
+  <div>
     <template>
       <a-alert style="margin-bottom: 20px" message="路径需要配置绝对路径,不支持软链" type="info" />
     </template>
@@ -30,6 +30,11 @@ export default {
   props: {
     machineId: {
       type: String,
+      default: "",
+    },
+    nodeId: {
+      type: String,
+      default: "",
     },
   },
   data() {
@@ -46,6 +51,7 @@ export default {
     loadData() {
       getWhiteList({
         machineId: this.machineId,
+        nodeId: this.nodeId,
       }).then((res) => {
         if (res.code === 200) {
           this.temp = res.data;
@@ -56,17 +62,20 @@ export default {
     onSubmit() {
       // disabled submit button
       this.submitAble = true;
-      this.temp.machineId = this.machineId;
-      editWhiteList(this.temp).then((res) => {
-        if (res.code === 200) {
-          // 成功
-          this.$notification.success({
-            message: res.msg,
-          });
-        }
-        // button recover
-        this.submitAble = false;
-      });
+
+      editWhiteList({ ...this.temp, machineId: this.machineId, nodeId: this.nodeId })
+        .then((res) => {
+          if (res.code === 200) {
+            // 成功
+            this.$notification.success({
+              message: res.msg,
+            });
+          }
+        })
+        .finally(() => {
+          // button recover
+          this.submitAble = false;
+        });
     },
   },
 };

@@ -296,8 +296,8 @@
       :maskClosable="false"
     >
       <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item label="选择节点">
-          <a-select v-model="temp.nodeId" :disabled="!!temp.nodeId" allowClear placeholder="请选择节点">
+        <a-form-model-item label="选择节点" help="编辑过程中可以切换节点但是要注意数据是否匹配">
+          <a-select v-model="temp.nodeId" allowClear placeholder="请选择节点">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -911,10 +911,11 @@ export default {
     },
     // 打开编辑
     openEdit(data) {
-      this.temp = {
-        id: data.projectId,
-        nodeId: data.nodeId,
-      };
+      // this.temp = {
+      //   id: data.projectId,
+      //   nodeId: data.nodeId,
+      // };
+      this.temp = { ...data, id: data.projectId };
 
       this.editProjectVisible = true;
     },

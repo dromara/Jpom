@@ -56,8 +56,8 @@
             >
               配置目录
             </a-button>
-          </a-tooltip></template
-        >
+          </a-tooltip>
+        </template>
         <a-input-group compact>
           <a-select show-search allowClear style="width: 30%" v-model="temp.releasePathParent" placeholder="请选择发布的一级目录">
             <a-select-option v-for="item in accessList" :key="item">
