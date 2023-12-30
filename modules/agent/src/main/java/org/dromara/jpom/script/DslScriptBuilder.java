@@ -138,7 +138,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
             //
             waitFor = process.waitFor();
             // 插入第一行
-            result.add(0, this.formatLine(StrUtil.format("执行结束: {}", waitFor)));
+            result.add(0, this.formatLine(StrUtil.format("本次执行退出码: {}", waitFor)));
             //
         } catch (Exception e) {
             log.error("执行异常", e);

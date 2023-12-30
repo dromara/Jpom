@@ -29,6 +29,7 @@ import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.configuration.ProjectConfig;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
+import org.dromara.jpom.service.manage.ProjectInfoService;
 import org.dromara.jpom.service.script.DslScriptServer;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JvmUtil;
@@ -51,8 +52,9 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
     public BaseUnixProjectCommander(Charset fileCharset,
                                     SystemCommander systemCommander,
                                     ProjectConfig projectConfig,
-                                    DslScriptServer dslScriptServer) {
-        super(fileCharset, systemCommander, projectConfig, dslScriptServer);
+                                    DslScriptServer dslScriptServer,
+                                    ProjectInfoService projectInfoService) {
+        super(fileCharset, systemCommander, projectConfig, dslScriptServer, projectInfoService);
     }
 
     @Override
@@ -67,9 +69,9 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
             Optional.ofNullable(nodeProjectInfoModel.getJvm()).orElse(StrUtil.EMPTY),
             JvmUtil.getJpomPidTag(tag, nodeProjectInfoModel.allLib()),
             path,
-            Optional.ofNullable(nodeProjectInfoModel.getMainClass()).orElse(StrUtil.EMPTY),
+            Optional.ofNullable(nodeProjectInfoModel.mainClass()).orElse(StrUtil.EMPTY),
             Optional.ofNullable(nodeProjectInfoModel.getArgs()).orElse(StrUtil.EMPTY),
-            nodeProjectInfoModel.getAbsoluteLog());
+            nodeProjectInfoModel.absoluteLog());
     }
 
     @Override

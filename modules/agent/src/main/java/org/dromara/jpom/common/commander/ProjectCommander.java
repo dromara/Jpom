@@ -64,7 +64,7 @@ public interface ProjectCommander {
      * @param pid 进程id
      * @return 端口
      */
-    String getMainPort(int pid);
+    String getMainPort(Integer pid);
 
 
     /**

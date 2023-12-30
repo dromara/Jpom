@@ -7,8 +7,26 @@
           <a-button size="small" :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start">启动</a-button>
           <a-button size="small" :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
           <a-button size="small" :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="stop">停止</a-button>
-          <a-button size="small" v-if="project.runMode === 'Dsl'" :disabled="!canReload" :loading="optButtonLoading" type="primary" @click="reload">重载</a-button>
-
+          <template v-if="project.runMode === 'Dsl'">
+            <template v-if="canReload">
+              <a-popover title="上次重载结果">
+                <template slot="content">
+                  <template v-if="project.lastReloadResult">
+                    <p>
+                      <a-tag v-if="project.lastReloadResult.success" color="green">成功</a-tag>
+                      <a-tag v-else color="green">成功</a-tag>
+                    </p>
+                    <p v-for="(item, index) in project.lastReloadResult.msgs" :key="index">{{ item }}</p>
+                  </template>
+                  <template v-else>还未执行reload</template>
+                </template>
+                <a-button size="small" :loading="optButtonLoading" type="primary" @click="reload">重载</a-button>
+              </a-popover>
+            </template>
+            <template v-else>
+              <a-button size="small" :disabled="true" :loading="optButtonLoading" type="primary">重载</a-button>
+            </template>
+          </template>
           <a-button size="small" type="primary" @click="goFile">文件管理</a-button>
           <a-dropdown v-if="project.dslProcessInfo">
             <a-menu slot="overlay">
@@ -204,7 +222,6 @@ export default {
               this.project = { ...this.project, status: false };
             }
             this.canReload = res.canReload;
-            this.$refs.logView.appendLine(res.op + " " + res.msg);
             if (res.data) {
               this.$refs.logView.appendLine(res.data.statusMsg);
               if (res.data.msgs) {
@@ -215,6 +232,7 @@ export default {
               res.data.ports && this.$refs.logView.appendLine("端口：" + res.data.ports);
               res.data.pids && this.$refs.logView.appendLine("进程号：" + res.data.pids.join(","));
             }
+            this.$refs.logView.appendLine(res.op + " " + res.msg);
             return;
           }
         }

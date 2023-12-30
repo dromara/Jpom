@@ -32,6 +32,7 @@ import org.dromara.jpom.common.commander.SystemCommander;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.model.system.NetstatModel;
 import org.dromara.jpom.configuration.AgentConfig;
+import org.dromara.jpom.service.manage.ProjectInfoService;
 import org.dromara.jpom.service.script.DslScriptServer;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JvmUtil;
@@ -53,8 +54,9 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
 
     public WindowsProjectCommander(AgentConfig agentConfig,
                                    SystemCommander systemCommander,
-                                   DslScriptServer dslScriptServer) {
-        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander, agentConfig.getProject(), dslScriptServer);
+                                   DslScriptServer dslScriptServer,
+                                   ProjectInfoService projectInfoService) {
+        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander, agentConfig.getProject(), dslScriptServer, projectInfoService);
     }
 
     @Override
@@ -66,7 +68,7 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
         // 拼接命令
         String jvm = nodeProjectInfoModel.getJvm();
         String tag = nodeProjectInfoModel.getId();
-        String mainClass = nodeProjectInfoModel.getMainClass();
+        String mainClass = nodeProjectInfoModel.mainClass();
         String args = nodeProjectInfoModel.getArgs();
         return StrUtil.format("{} {} {} {} {} {} >> {} &",
             getRunJavaPath(nodeProjectInfoModel, true),
@@ -75,7 +77,7 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
             classPath,
             Optional.ofNullable(mainClass).orElse(StrUtil.EMPTY),
             Optional.ofNullable(args).orElse(StrUtil.EMPTY),
-            nodeProjectInfoModel.getAbsoluteLog());
+            nodeProjectInfoModel.absoluteLog());
     }
 
     @Override

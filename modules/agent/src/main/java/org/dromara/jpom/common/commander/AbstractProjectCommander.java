@@ -35,7 +35,6 @@ import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.text.StrPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.plugins.IPlugin;
@@ -49,6 +48,7 @@ import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.model.system.NetstatModel;
 import org.dromara.jpom.plugin.PluginFactory;
+import org.dromara.jpom.service.manage.ProjectInfoService;
 import org.dromara.jpom.service.script.DslScriptServer;
 import org.dromara.jpom.socket.AgentFileTailWatcher;
 import org.dromara.jpom.socket.ConsoleCommandOp;
@@ -90,16 +90,19 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
     protected final ProjectConfig projectConfig;
     protected final ProjectLogConfig projectLogConfig;
     protected final DslScriptServer dslScriptServer;
+    protected final ProjectInfoService projectInfoService;
 
     public AbstractProjectCommander(Charset fileCharset,
                                     SystemCommander systemCommander,
                                     ProjectConfig projectConfig,
-                                    DslScriptServer dslScriptServer) {
+                                    DslScriptServer dslScriptServer,
+                                    ProjectInfoService projectInfoService) {
         this.fileCharset = fileCharset;
         this.systemCommander = systemCommander;
         this.projectConfig = projectConfig;
         this.projectLogConfig = projectConfig.getLog();
         this.dslScriptServer = dslScriptServer;
+        this.projectInfoService = projectInfoService;
     }
 
 
@@ -154,7 +157,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         if (runMode == RunMode.Dsl) {
             //
             this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.start.name(), (baseProcess, action) -> {
-                String log = nodeProjectInfoModel.getAbsoluteLog();
+                String log = nodeProjectInfoModel.absoluteLog();
                 try {
                     dslScriptServer.run(baseProcess, nodeProjectInfoModel, action, log, sync);
                 } catch (Exception e) {
@@ -233,7 +236,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
             if (runMode == RunMode.Dsl) {
                 //
                 this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.stop.name(), (process, action) -> {
-                    String log = nodeProjectInfoModel.getAbsoluteLog();
+                    String log = nodeProjectInfoModel.absoluteLog();
                     try {
                         dslScriptServer.run(process, nodeProjectInfoModel, action, log, sync);
                     } catch (Exception e) {
@@ -294,7 +297,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
     public void asyncWebHooks(NodeProjectInfoModel nodeProjectInfoModel,
                               String type, Object... other) {
         // webhook 通知
-        Opt.ofBlankAble(nodeProjectInfoModel.getToken())
+        Opt.ofBlankAble(nodeProjectInfoModel.token())
             .ifPresent(s ->
                 ThreadUtil.execute(() -> {
                     try {
@@ -305,7 +308,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
                 })
             );
         // 判断文件变动
-        if (ArrayUtil.contains(other, "fileChange")) {
+        if (StrUtil.equals(type, "fileChange")) {
             RunMode runMode = nodeProjectInfoModel.getRunMode();
             if (runMode == RunMode.Dsl) {
                 DslYmlDto dslYmlDto = nodeProjectInfoModel.mustDslConfig();
@@ -337,7 +340,10 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
      * @return 结果
      */
     private String webHooks(NodeProjectInfoModel nodeProjectInfoModel, String type, Object... other) {
-        String token = nodeProjectInfoModel.getToken();
+        String token = nodeProjectInfoModel.token();
+        if (StrUtil.isEmpty(token)) {
+            return null;
+        }
         IPlugin plugin = PluginFactory.getPlugin("webhook");
         Map<String, Object> map = new HashMap<>(10);
         map.put("projectId", nodeProjectInfoModel.getId());
@@ -373,7 +379,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
                 // 如果存在自定义 restart 流程
                 //
                 this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.restart.name(), (process, action) -> {
-                    String log = nodeProjectInfoModel.getAbsoluteLog();
+                    String log = nodeProjectInfoModel.absoluteLog();
                     try {
                         dslScriptServer.run(process, nodeProjectInfoModel, action, log, false);
                     } catch (Exception e) {
@@ -424,10 +430,11 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
             String dslContent = nodeProjectInfoModel.getDslContent();
         } else if (runMode == RunMode.ClassPath || runMode == RunMode.JavaExtDirsCp) {
             // 判断主类
+            String mainClass = nodeProjectInfoModel.mainClass();
             try (JarClassLoader jarClassLoader = JarClassLoader.load(fileLib)) {
-                jarClassLoader.loadClass(nodeProjectInfoModel.getMainClass());
+                jarClassLoader.loadClass(mainClass);
             } catch (ClassNotFoundException notFound) {
-                return "没有找到对应的MainClass:" + nodeProjectInfoModel.getMainClass();
+                return "没有找到对应的MainClass:" + mainClass;
             } catch (IOException io) {
                 throw Lombok.sneakyThrow(io);
             }
@@ -494,7 +501,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
      * @return 结果
      */
     public String backLog(NodeProjectInfoModel nodeProjectInfoModel) {
-        File file = new File(nodeProjectInfoModel.getLog());
+        File file = nodeProjectInfoModel.absoluteLogFile();
         if (!file.exists() || file.isDirectory()) {
             return "not exists";
         }
@@ -506,7 +513,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         boolean openLogBack = this.resolveOpenLogBack(nodeProjectInfoModel);
         if (openLogBack) {
             // 开启日志备份才移动文件
-            File backPath = nodeProjectInfoModel.getLogBack();
+            File backPath = nodeProjectInfoModel.logBack();
             backPath = new File(backPath, DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
             FileUtil.copy(file, backPath, true);
         }
@@ -545,8 +552,8 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
 
             return Optional.ofNullable(status)
                 .map(strings -> {
-                    String log = nodeProjectInfoModel.getAbsoluteLog();
-                    FileUtil.appendLines(strings, FileUtil.file(log), fileCharset);
+                    File log = nodeProjectInfoModel.absoluteLogFile();
+                    FileUtil.appendLines(strings, log, fileCharset);
                     return strings;
                 })
                 .map(CollUtil::getLast)
@@ -576,7 +583,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
     protected CommandOpResult reload(NodeProjectInfoModel nodeProjectInfoModel) {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
         Assert.state(runMode == RunMode.Dsl, "非 DSL 项目不支持此操作");
-        return this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.reload.name(), (baseProcess, action) -> {
+        CommandOpResult commandOpResult = this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.reload.name(), (baseProcess, action) -> {
             // 提前判断脚本 id,避免填写错误在删除项目检测状态时候异常
             try {
                 Tuple tuple = dslScriptServer.syncRun(baseProcess, nodeProjectInfoModel, action);
@@ -589,6 +596,11 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
                 return CommandOpResult.of(false, argument2Exception.getMessage());
             }
         });
+        // 缓存执行结果
+        NodeProjectInfoModel update = new NodeProjectInfoModel();
+        update.setLastReloadResult(commandOpResult);
+        projectInfoService.updateById(update, nodeProjectInfoModel.getId());
+        return commandOpResult;
     }
 
     /**
@@ -638,8 +650,8 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
      * @param pid 进程id
      * @return 端口
      */
-    public String getMainPort(int pid) {
-        if (pid <= 0) {
+    public String getMainPort(Integer pid) {
+        if (pid == null || pid <= 0) {
             return StrUtil.DASHED;
         }
         String cachePort = CacheObject.get(PID_PORT, pid);

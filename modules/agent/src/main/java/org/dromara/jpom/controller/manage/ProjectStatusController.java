@@ -106,7 +106,7 @@ public class ProjectStatusController extends BaseAgentController {
                     NodeProjectInfoModel projectInfoServiceItem = projectInfoService.getItem(item);
                     itemObj.put("name", projectInfoServiceItem.getName());
                     CommandOpResult commandOpResult = projectCommander.execCommand(ConsoleCommandOp.status, projectInfoServiceItem);
-                    int pid = commandOpResult.getPid();
+                    Integer pid = commandOpResult.getPid();
                     //
                     itemObj.put("pid", pid);
                     itemObj.put("pids", commandOpResult.getPids());

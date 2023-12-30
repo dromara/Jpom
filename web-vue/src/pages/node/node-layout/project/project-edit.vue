@@ -133,6 +133,7 @@
             <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
           </a-tooltip>
         </template>
+        <template #help>查看节点脚本</template>
         <a-tabs>
           <a-tab-pane key="1" tab="DSL 配置">
             <div style="height: 40vh; overflow-y: scroll">

@@ -23,6 +23,7 @@
 package org.dromara.jpom.service;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.JpomApplication;
@@ -59,21 +60,17 @@ public abstract class BaseDataService {
     protected void saveJson(String filename, BaseModel json) {
         String key = json.getId();
         // 读取文件，如果存在记录，则抛出异常
-        JSONObject allData;
-        JSONObject data = null;
-        allData = getJSONObject(filename);
+        JSONObject allData = getJSONObject(filename);
         if (allData != null) {
-            data = allData.getJSONObject(key);
+            // 判断是否存在数据
+            if (allData.containsKey(key)) {
+                throw new JpomRuntimeException("数据Id已经存在啦：" + filename + " :" + key);
+            }
         } else {
             allData = new JSONObject();
         }
-        // 判断是否存在数据
-        if (null != data && 0 < data.keySet().size()) {
-            throw new JpomRuntimeException("数据Id已经存在啦：" + filename + " :" + key);
-        } else {
-            allData.put(key, json.toJson());
-            JsonFileUtil.saveJson(getDataFilePath(filename), allData);
-        }
+        allData.put(key, json.toJson());
+        JsonFileUtil.saveJson(getDataFilePath(filename), allData);
     }
 
     /**
@@ -89,7 +86,7 @@ public abstract class BaseDataService {
         JSONObject data = allData.getJSONObject(key);
 
         // 判断是否存在数据
-        if (null == data || 0 == data.keySet().size()) {
+        if (MapUtil.isEmpty(data)) {
             throw new JpomRuntimeException("数据不存在:" + key);
         } else {
             allData.put(key, json.toJson());
