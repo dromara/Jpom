@@ -285,7 +285,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         String fileName = reqJson.getString("fileName");
         File file;
         if (StrUtil.isEmpty(fileName)) {
-            file = new File(nodeProjectInfoModel.getLog());
+            file = nodeProjectInfoModel.absoluteLogFile();
         } else {
             file = FileUtil.file(nodeProjectInfoModel.allLib(), fileName);
         }

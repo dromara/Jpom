@@ -22,15 +22,20 @@
  */
 package org.dromara.jpom.service;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.thread.lock.LockUtil;
 import cn.hutool.core.util.ClassUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.model.BaseModel;
 import org.dromara.jpom.util.JsonFileUtil;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
 
 /**
  * 标准操作Service
@@ -42,6 +47,7 @@ public abstract class BaseOperService<T extends BaseModel> extends BaseDataServi
 
     private final String fileName;
     private final Class<?> typeArgument;
+    private final Lock lock = LockUtil.createStampLock().asWriteLock();
 
     public BaseOperService(String fileName) {
         this.fileName = fileName;
@@ -90,7 +96,12 @@ public abstract class BaseOperService<T extends BaseModel> extends BaseDataServi
      */
     public void addItem(T t) {
         Objects.requireNonNull(fileName, "没有配置fileName");
-        saveJson(fileName, t);
+        try {
+            lock.lock();
+            saveJson(fileName, t);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -100,7 +111,12 @@ public abstract class BaseOperService<T extends BaseModel> extends BaseDataServi
      */
     public void deleteItem(String id) {
         Objects.requireNonNull(fileName, "没有配置fileName");
-        deleteJson(fileName, id);
+        try {
+            lock.lock();
+            deleteJson(fileName, id);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -110,8 +126,30 @@ public abstract class BaseOperService<T extends BaseModel> extends BaseDataServi
      */
     public void updateItem(T t) {
         Objects.requireNonNull(fileName, "没有配置fileName");
-        updateJson(fileName, t);
+        try {
+            lock.lock();
+            updateJson(fileName, t);
+        } finally {
+            lock.unlock();
+        }
     }
 
-
+    /**
+     * 根据数据Id 修改
+     *
+     * @param updateData 实体
+     * @param id         数据Id
+     */
+    public void updateById(T updateData, String id) {
+        Objects.requireNonNull(fileName, "没有配置fileName");
+        try {
+            lock.lock();
+            T item = getItem(id);
+            Assert.notNull(item, "数据不存在");
+            BeanUtil.copyProperties(updateData, item, CopyOptions.create().ignoreNullValue());
+            updateJson(fileName, item);
+        } finally {
+            lock.unlock();
+        }
+    }
 }

@@ -115,7 +115,7 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
     }
 
     private void checkProject(NodeProjectInfoModel nodeProjectInfoModel) {
-        File file = new File(nodeProjectInfoModel.getLog());
+        File file = nodeProjectInfoModel.absoluteLogFile();
         if (!file.exists()) {
             return;
         }
@@ -130,7 +130,7 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
             }
         }
         // 清理过期的文件
-        File logFile = nodeProjectInfoModel.getLogBack();
+        File logFile = nodeProjectInfoModel.logBack();
         DateTime nowTime = DateTime.now();
         List<File> files = FileUtil.loopFiles(logFile, pathname -> {
             DateTime dateTime = DateUtil.date(pathname.lastModified());

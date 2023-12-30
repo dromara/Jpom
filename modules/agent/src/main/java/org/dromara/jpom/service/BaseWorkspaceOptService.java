@@ -61,4 +61,10 @@ public abstract class BaseWorkspaceOptService<T extends BaseWorkspaceModel> exte
         }
         super.updateItem(data);
     }
+
+    @Override
+    public void updateById(T updateData, String id) {
+        updateData.setModifyTime(DateUtil.now());
+        super.updateById(updateData, id);
+    }
 }

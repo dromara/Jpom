@@ -355,8 +355,18 @@
               <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
+
           <a-select v-model="temp.runMode" placeholder="请选择运行方式">
-            <a-select-option v-for="runMode in runModeList" :key="runMode">{{ runMode }}</a-select-option>
+            <a-select-option v-for="(val, key) in runModeObj" :key="key">
+              <template v-if="val.indexOf('不推荐') > -1">
+                <s>
+                  <b>[{{ key }}]</b> {{ val }}
+                </s>
+              </template>
+              <template v-else>
+                <b>[{{ key }}]</b> {{ val }}
+              </template>
+            </a-select-option>
           </a-select>
         </a-form-model-item>
 
@@ -643,7 +653,7 @@ import {
   cancelOutgiving,
 } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
-import { getProjectData, javaModes, noFileModes, runModeList, getProjectGroupAll } from "@/api/node-project";
+import { getProjectData, javaModes, noFileModes, runModeObj, getProjectGroupAll } from "@/api/node-project";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, randomStr, itemGroupBy, parseTime } from "@/utils/const";
 
 import CustomSelect from "@/components/customSelect";
@@ -665,6 +675,7 @@ export default {
       statusMap,
       javaModes,
       noFileModes,
+      runModeObj,
       dispatchStatusMap,
       PROJECT_DSL_DEFATUL,
       list: [],
@@ -677,7 +688,6 @@ export default {
       // reqId: "",
       temp: {},
       configDir: false,
-      runModeList: runModeList,
 
       linkDispatchVisible: false,
       editDispatchVisible: false,

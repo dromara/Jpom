@@ -30,6 +30,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.dromara.jpom.common.commander.CommandOpResult;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.system.JpomRuntimeException;
 import org.springframework.util.Assert;
@@ -84,10 +85,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      * 节点分发项目，不允许在项目管理中编辑
      */
     private Boolean outGivingProject;
-    /**
-     * 实际运行的命令
-     */
-    private String runCommand;
 
     /**
      * -Djava.ext.dirs=lib -cp conf:run.jar
@@ -109,6 +106,10 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      * dsl 环境变量
      */
     private String dslEnv;
+    /**
+     * 最后一次执行 reload 结果
+     */
+    private CommandOpResult lastReloadResult;
     //  ---------------- 中转字段 start
     /**
      * 是否可以重新加载
@@ -118,9 +119,14 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      * DSL 流程信息统计
      */
     private List<JSONObject> dslProcessInfo;
+    /**
+     * 实际运行的命令
+     */
+    private String runCommand;
     //  ---------------- 中转字段 end
 
-    public String getJavaExtDirsCp() {
+
+    public String javaExtDirsCp() {
         return StrUtil.emptyToDefault(javaExtDirsCp, StrUtil.EMPTY);
     }
 
@@ -128,27 +134,20 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return outGivingProject != null && outGivingProject;
     }
 
-    public RunMode getRunMode() {
-        if (runMode == null) {
-            return RunMode.ClassPath;
-        }
-        return runMode;
-    }
 
-
-    public String getMainClass() {
+    public String mainClass() {
         return StrUtil.emptyToDefault(mainClass, StrUtil.EMPTY);
     }
 
-    public String getWhitelistDirectory() {
+    public String whitelistDirectory() {
         if (StrUtil.isEmpty(whitelistDirectory)) {
-            throw new JpomRuntimeException("恢复授权数据异常");
+            throw new JpomRuntimeException("恢复授权数据异常或者没有选择授权目录");
         }
         return whitelistDirectory;
     }
 
     public String allLib() {
-        String directory = this.getWhitelistDirectory();
+        String directory = this.whitelistDirectory();
         return FileUtil.file(directory, this.getLib()).getAbsolutePath();
     }
 
@@ -201,7 +200,7 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
             len = 1;
         } else if (runMode == RunMode.JavaExtDirsCp) {
             classPath.append("-Djava.ext.dirs=");
-            String javaExtDirsCp = nodeProjectInfoModel.getJavaExtDirsCp();
+            String javaExtDirsCp = nodeProjectInfoModel.javaExtDirsCp();
             String[] split = StrUtil.splitToArray(javaExtDirsCp, StrUtil.COLON);
             if (ArrayUtil.isEmpty(split)) {
                 classPath.append(". -cp ");
@@ -224,45 +223,54 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return classPath.toString();
     }
 
-    public String getLogPath() {
+    public String logPath() {
         return StrUtil.emptyToDefault(this.logPath, StrUtil.EMPTY);
     }
 
-    public String getLog() {
-        if (StrUtil.isEmpty(this.getId())) {
+
+    public String log() {
+        String id = this.getId();
+        if (StrUtil.isEmpty(id)) {
             return StrUtil.EMPTY;
         }
-        if (StrUtil.isNotEmpty(this.getLogPath())) {
-            return FileUtil.normalize(String.format("%s/%s/%s.log", this.getLogPath(), this.getId(), this.getId()));
+        String loggedPath = this.logPath();
+        if (StrUtil.isNotEmpty(loggedPath)) {
+            return FileUtil.normalize(String.format("%s/%s/%s.log", loggedPath, id, id));
         }
         if (StrUtil.isEmpty(this.log)) {
             String log = new File(this.allLib()).getParent();
-            this.log = FileUtil.normalize(String.format("%s/%s.log", log, this.getId()));
+            this.log = FileUtil.normalize(String.format("%s/%s.log", log, id));
         }
         return StrUtil.emptyToDefault(this.log, StrUtil.EMPTY);
     }
 
-    public String getAbsoluteLog() {
-        String pathname = getLog();
+    public String absoluteLog() {
+        File file = this.absoluteLogFile();
+        return FileUtil.getAbsolutePath(file);
+    }
+
+    public File absoluteLogFile() {
+        String pathname = log();
         Assert.hasText(pathname, "log path error");
         File file = new File(pathname);
         // auto create dir
         FileUtil.mkParentDirs(file);
-        return file.getAbsolutePath();
+        return file;
     }
 
-    public File getLogBack() {
-        String log1 = getLog();
+    public File logBack() {
+        String log1 = log();
         Assert.hasText(log1, "log path error");
         return new File(log1 + "_back");
     }
+
 
     /**
      * 默认
      *
      * @return url token
      */
-    public String getToken() {
+    public String token() {
         // 兼容旧数据
         if ("no".equalsIgnoreCase(this.token)) {
             return "";

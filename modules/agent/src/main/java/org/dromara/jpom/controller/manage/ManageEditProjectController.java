@@ -91,12 +91,12 @@ public class ManageEditProjectController extends BaseAgentController {
         projectInfo.setRunMode(runMode1);
         // 监测
         if (runMode1 == RunMode.ClassPath || runMode1 == RunMode.JavaExtDirsCp) {
-            Assert.hasText(projectInfo.getMainClass(), "ClassPath、JavaExtDirsCp 模式 MainClass必填");
+            Assert.hasText(projectInfo.mainClass(), "ClassPath、JavaExtDirsCp 模式 MainClass必填");
         } else if (runMode1 == RunMode.Jar || runMode1 == RunMode.JarWar) {
             projectInfo.setMainClass(StrUtil.EMPTY);
         }
         if (runMode1 == RunMode.JavaExtDirsCp) {
-            Assert.hasText(projectInfo.getJavaExtDirsCp(), "JavaExtDirsCp 模式 javaExtDirsCp必填");
+            Assert.hasText(projectInfo.javaExtDirsCp(), "JavaExtDirsCp 模式 javaExtDirsCp必填");
         }
         // 判断是否为分发添加
         String strOutGivingProject = getParameter("outGivingProject");
@@ -112,7 +112,7 @@ public class ManageEditProjectController extends BaseAgentController {
                     throw new IllegalArgumentException("请选择正确的项目路径,或者还没有配置授权");
                 }
             }
-            String logPath = projectInfo.getLogPath();
+            String logPath = projectInfo.log();
             if (StrUtil.isNotEmpty(logPath)) {
                 if (!whitelistDirectoryService.checkProjectDirectory(logPath)) {
                     if (outGivingProject) {
@@ -137,7 +137,7 @@ public class ManageEditProjectController extends BaseAgentController {
         // 预检查数据
         String strPreviewData = getParameter("previewData");
         boolean previewData = Convert.toBool(strPreviewData, false);
-        String whitelistDirectory = projectInfo.getWhitelistDirectory();
+        String whitelistDirectory = projectInfo.whitelistDirectory();
         //
         NodeProjectInfoModel exits = this.checkParameter(projectInfo, whitelistDirectory, previewData);
         String id = projectInfo.getId();
@@ -158,12 +158,10 @@ public class ManageEditProjectController extends BaseAgentController {
             }
         }
         // 自动生成log文件
-        String log = projectInfo.getLog();
-        Assert.hasText(log, "项目log解析读取失败");
-        checkFile = FileUtil.file(log);
+        checkFile = projectInfo.absoluteLogFile();
         Assert.state(!FileUtil.exist(checkFile) || FileUtil.isFile(checkFile), "项目log是一个已经存在的文件夹");
         //
-        String token = projectInfo.getToken();
+        String token = projectInfo.token();
         if (StrUtil.isNotEmpty(token)) {
             Validator.validateMatchRegex(RegexPool.URL_HTTP, token, "WebHooks 地址不合法");
         }
@@ -214,25 +212,25 @@ public class ManageEditProjectController extends BaseAgentController {
             exits.setName(projectInfo.getName());
             exits.setGroup(projectInfo.getGroup());
             exits.setAutoStart(projectInfo.getAutoStart());
-            exits.setMainClass(projectInfo.getMainClass());
+            exits.setMainClass(projectInfo.mainClass());
             exits.setJvm(projectInfo.getJvm());
             exits.setArgs(projectInfo.getArgs());
             exits.setWorkspaceId(this.getWorkspaceId());
             exits.setOutGivingProject(projectInfo.isOutGivingProject());
             exits.setRunMode(runMode);
-            exits.setToken(projectInfo.getToken());
+            exits.setToken(projectInfo.token());
             exits.setDslContent(projectInfo.getDslContent());
             exits.setDslEnv(projectInfo.getDslEnv());
 
-            exits.setJavaExtDirsCp(projectInfo.getJavaExtDirsCp());
+            exits.setJavaExtDirsCp(projectInfo.javaExtDirsCp());
             // 移动到新路径
             this.moveTo(exits, projectInfo);
             // 最后才设置新的路径
             exits.setLib(projectInfo.getLib());
-            exits.setWhitelistDirectory(projectInfo.getWhitelistDirectory());
+            exits.setWhitelistDirectory(projectInfo.whitelistDirectory());
             //
-            exits.setLog(projectInfo.getLog());
-            exits.setLogPath(projectInfo.getLogPath());
+            exits.setLog(projectInfo.log());
+            exits.setLogPath(projectInfo.logPath());
             projectInfoService.updateItem(exits);
             return JsonMessage.success("修改成功");
         }
@@ -253,8 +251,8 @@ public class ManageEditProjectController extends BaseAgentController {
         }
         {
             // log
-            File oldLog = FileUtil.file(old.getLog());
-            File newLog = FileUtil.file(news.getLog());
+            File oldLog = old.absoluteLogFile();
+            File newLog = news.absoluteLogFile();
             if (!FileUtil.equals(oldLog, newLog)) {
                 // 正在运行的项目不能修改路径
                 this.projectMustNotRun(old, "正在运行的项目不能修改路径");
@@ -263,9 +261,9 @@ public class ManageEditProjectController extends BaseAgentController {
                     FileUtil.move(oldLog, newLog, true);
                 }
                 // logBack
-                File oldLogBack = old.getLogBack();
+                File oldLogBack = old.logBack();
                 if (oldLogBack.exists()) {
-                    File logBack = news.getLogBack();
+                    File logBack = news.logBack();
                     FileUtils.tempMoveContent(oldLogBack, logBack);
                 }
             }
@@ -341,10 +339,10 @@ public class ManageEditProjectController extends BaseAgentController {
         if (StrUtil.isEmpty(thorough)) {
             return;
         }
-        File logBack = nodeProjectInfoModel.getLogBack();
+        File logBack = nodeProjectInfoModel.logBack();
         boolean fastDel = CommandUtil.systemFastDel(logBack);
         Assert.state(!fastDel, "删除日志文件失败:" + logBack.getAbsolutePath());
-        File log = FileUtil.file(nodeProjectInfoModel.getAbsoluteLog());
+        File log = nodeProjectInfoModel.absoluteLogFile();
         fastDel = CommandUtil.systemFastDel(log);
         Assert.state(!fastDel, "删除日志文件失败:" + log.getAbsolutePath());
         //

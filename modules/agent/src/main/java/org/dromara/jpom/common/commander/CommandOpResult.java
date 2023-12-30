@@ -26,7 +26,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import lombok.Getter;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,17 +37,17 @@ import java.util.List;
  * @author bwcx_jzy
  * @since 2022/11/30
  */
-@Getter
+@Data
 public class CommandOpResult {
 
     /**
      * 是否成功
      */
-    private boolean success;
+    private Boolean success;
     /**
      * 进程id
      */
-    private int pid;
+    private Integer pid;
     /**
      * 多个进程 id
      */
@@ -65,6 +65,21 @@ public class CommandOpResult {
      */
     private final List<String> msgs = new ArrayList<>();
 
+    /**
+     * 执行是否成功
+     *
+     * @return true 成功
+     */
+    public boolean isSuccess() {
+        return success != null && success;
+    }
+
+    /**
+     * 构建结构对象
+     *
+     * @param msg 结果消息
+     * @return result
+     */
     public static CommandOpResult of(String msg) {
         int[] pidsArray = null;
         String ports = null;
@@ -114,13 +129,6 @@ public class CommandOpResult {
     }
 
     public CommandOpResult appendMsg(List<String> msgs) {
-        for (String msg : msgs) {
-            this.appendMsg(msg);
-        }
-        return this;
-    }
-
-    public CommandOpResult appendMsg(String... msgs) {
         for (String msg : msgs) {
             this.appendMsg(msg);
         }
