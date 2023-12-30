@@ -27,6 +27,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.model.RunMode;
@@ -108,10 +109,16 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      * dsl 环境变量
      */
     private String dslEnv;
+    //  ---------------- 中转字段 start
     /**
      * 是否可以重新加载
      */
     private Boolean canReload;
+    /**
+     * DSL 流程信息统计
+     */
+    private List<JSONObject> dslProcessInfo;
+    //  ---------------- 中转字段 end
 
     public String getJavaExtDirsCp() {
         return StrUtil.emptyToDefault(javaExtDirsCp, StrUtil.EMPTY);
@@ -263,12 +270,28 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return StrUtil.emptyToDefault(token, StrUtil.EMPTY);
     }
 
+    /**
+     * 获取当前 dsl 配置
+     *
+     * @return DslYmlDto
+     */
     public DslYmlDto dslConfig() {
         String dslContent = this.getDslContent();
         if (StrUtil.isEmpty(dslContent)) {
             return null;
         }
         return DslYmlDto.build(dslContent);
+    }
+
+    /**
+     * 必须存在 dsl 配置
+     *
+     * @return DslYmlDto
+     */
+    public DslYmlDto mustDslConfig() {
+        DslYmlDto dslYmlDto = this.dslConfig();
+        Assert.notNull(dslYmlDto, "未配置 dsl 信息（项目信息错误）");
+        return dslYmlDto;
     }
 
     /**
@@ -279,6 +302,16 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      */
     public DslYmlDto.BaseProcess tryDslProcess(String opt) {
         DslYmlDto build = dslConfig();
+        return tryDslProcess(build, opt);
+    }
+
+    /**
+     * 获取 dsl 流程信息
+     *
+     * @param opt 操作
+     * @return 结果
+     */
+    public static DslYmlDto.BaseProcess tryDslProcess(DslYmlDto build, String opt) {
         return Optional.ofNullable(build)
             .map(DslYmlDto::getRun)
             .map(run -> (DslYmlDto.BaseProcess) ReflectUtil.getFieldValue(run, opt))
@@ -292,8 +325,8 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      * @return 结果
      */
     public DslYmlDto.BaseProcess getDslProcess(String opt) {
-        DslYmlDto build = dslConfig();
-        Assert.notNull(build, "yml 还未配置");
-        return build.runProcess(opt);
+        DslYmlDto.BaseProcess baseProcess = this.tryDslProcess(opt);
+        Assert.notNull(baseProcess, "DSL 未配置运行管理或者未配置 " + opt + " 流程");
+        return baseProcess;
     }
 }

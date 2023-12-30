@@ -30,7 +30,6 @@ import org.dromara.jpom.common.JpomManifest;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -114,11 +113,15 @@ public class JvmUtil {
     public static Integer getPidByTag(String tag) {
         String execSystemCommand = CommandUtil.execSystemCommand("jps -mv");
         List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
-        Optional<String> any = list.stream().filter(s -> checkCommandLineIsJpom(s, tag)).map(s -> {
-            List<String> split = StrUtil.split(s, StrUtil.SPACE);
-            return CollUtil.getFirst(split);
-        }).findAny();
-        return any.map(Convert::toInt).orElse(null);
+        return list.stream()
+            .filter(s -> checkCommandLineIsJpom(s, tag))
+            .map(s -> {
+                List<String> split = StrUtil.split(s, StrUtil.SPACE);
+                return CollUtil.getFirst(split);
+            })
+            .findAny()
+            .map(Convert::toInt)
+            .orElse(null);
     }
 
     /**

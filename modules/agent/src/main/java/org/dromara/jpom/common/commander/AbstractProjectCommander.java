@@ -49,7 +49,7 @@ import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.model.system.NetstatModel;
 import org.dromara.jpom.plugin.PluginFactory;
-import org.dromara.jpom.script.DslScriptBuilder;
+import org.dromara.jpom.service.script.DslScriptServer;
 import org.dromara.jpom.socket.AgentFileTailWatcher;
 import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.util.CommandUtil;
@@ -89,14 +89,17 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
     protected final SystemCommander systemCommander;
     protected final ProjectConfig projectConfig;
     protected final ProjectLogConfig projectLogConfig;
+    protected final DslScriptServer dslScriptServer;
 
     public AbstractProjectCommander(Charset fileCharset,
                                     SystemCommander systemCommander,
-                                    ProjectConfig projectConfig) {
+                                    ProjectConfig projectConfig,
+                                    DslScriptServer dslScriptServer) {
         this.fileCharset = fileCharset;
         this.systemCommander = systemCommander;
         this.projectConfig = projectConfig;
         this.projectLogConfig = projectConfig.getLog();
+        this.dslScriptServer = dslScriptServer;
     }
 
 
@@ -108,7 +111,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
      * @param nodeProjectInfoModel 项目
      * @return null 是条件不足
      */
-    public abstract String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel);
+    public abstract String buildRunCommand(NodeProjectInfoModel nodeProjectInfoModel);
 
     protected String getRunJavaPath(NodeProjectInfoModel nodeProjectInfoModel, boolean w) {
 //        if (StrUtil.isEmpty(nodeProjectInfoModel.getJdkId())) {
@@ -153,7 +156,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
             this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.start.name(), (baseProcess, action) -> {
                 String log = nodeProjectInfoModel.getAbsoluteLog();
                 try {
-                    DslScriptBuilder.run(baseProcess, nodeProjectInfoModel, action, log, sync);
+                    dslScriptServer.run(baseProcess, nodeProjectInfoModel, action, log, sync);
                 } catch (Exception e) {
                     throw Lombok.sneakyThrow(e);
                 }
@@ -161,7 +164,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
             });
 
         } else {
-            String command = this.buildJavaCommand(nodeProjectInfoModel);
+            String command = this.buildRunCommand(nodeProjectInfoModel);
             if (command == null) {
                 return CommandOpResult.of(false, "没有需要执行的命令");
             }
@@ -172,7 +175,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
                     if (SystemUtil.getOsInfo().isWindows()) {
                         CommandUtil.execSystemCommand(command, file);
                     } else {
-                        CommandUtil.asyncExeLocalCommand(file, command);
+                        CommandUtil.asyncExeLocalCommand(command, file);
                     }
                 } catch (Exception e) {
                     log.error("执行命令失败", e);
@@ -232,7 +235,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
                 this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.stop.name(), (process, action) -> {
                     String log = nodeProjectInfoModel.getAbsoluteLog();
                     try {
-                        DslScriptBuilder.run(process, nodeProjectInfoModel, action, log, sync);
+                        dslScriptServer.run(process, nodeProjectInfoModel, action, log, sync);
                     } catch (Exception e) {
                         throw Lombok.sneakyThrow(e);
                     }
@@ -305,7 +308,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         if (ArrayUtil.contains(other, "fileChange")) {
             RunMode runMode = nodeProjectInfoModel.getRunMode();
             if (runMode == RunMode.Dsl) {
-                DslYmlDto dslYmlDto = nodeProjectInfoModel.dslConfig();
+                DslYmlDto dslYmlDto = nodeProjectInfoModel.mustDslConfig();
                 if (dslYmlDto.hasRunProcess(ConsoleCommandOp.reload.name())) {
                     DslYmlDto.Run run = dslYmlDto.getRun();
                     Boolean fileChangeReload = run.getFileChangeReload();
@@ -365,13 +368,14 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         }
         this.asyncWebHooks(nodeProjectInfoModel, "beforeRestart");
         if (runMode == RunMode.Dsl) {
-            DslYmlDto.BaseProcess dslProcess = nodeProjectInfoModel.tryDslProcess("restart");
+            DslYmlDto.BaseProcess dslProcess = nodeProjectInfoModel.tryDslProcess(ConsoleCommandOp.restart.name());
             if (dslProcess != null) {
+                // 如果存在自定义 restart 流程
                 //
                 this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.restart.name(), (process, action) -> {
                     String log = nodeProjectInfoModel.getAbsoluteLog();
                     try {
-                        DslScriptBuilder.run(process, nodeProjectInfoModel, action, log, false);
+                        dslScriptServer.run(process, nodeProjectInfoModel, action, log, false);
                     } catch (Exception e) {
                         throw Lombok.sneakyThrow(e);
                     }
@@ -475,8 +479,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
         boolean autoBackToFile = projectLogConfig.isAutoBackupToFile();
         if (runMode == RunMode.Dsl) {
-            DslYmlDto dslYmlDto = nodeProjectInfoModel.dslConfig();
-            return Optional.ofNullable(dslYmlDto)
+            return Optional.ofNullable(nodeProjectInfoModel.dslConfig())
                 .map(DslYmlDto::getConfig)
                 .map(DslYmlDto.Config::getAutoBackToFile)
                 .orElse(autoBackToFile);
@@ -532,7 +535,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
             List<String> status = this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.status.name(), (baseProcess, action) -> {
                 // 提前判断脚本 id,避免填写错误在删除项目检测状态时候异常
                 try {
-                    Tuple tuple = DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel, action);
+                    Tuple tuple = dslScriptServer.syncRun(baseProcess, nodeProjectInfoModel, action);
                     return tuple.get(1);
                 } catch (IllegalArgument2Exception argument2Exception) {
                     log.warn("执行 DSL 脚本异常：{}", argument2Exception.getMessage());
@@ -576,9 +579,10 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         return this.runDsl(nodeProjectInfoModel, ConsoleCommandOp.reload.name(), (baseProcess, action) -> {
             // 提前判断脚本 id,避免填写错误在删除项目检测状态时候异常
             try {
-                Tuple tuple = DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel, action);
+                Tuple tuple = dslScriptServer.syncRun(baseProcess, nodeProjectInfoModel, action);
                 int code = tuple.get(0);
                 List<String> list = tuple.get(1);
+                // 如果退出码为 0 认为执行成功
                 return CommandOpResult.of(code == 0, list);
             } catch (IllegalArgument2Exception argument2Exception) {
                 log.warn("执行 DSL 脚本异常：{}", argument2Exception.getMessage());
@@ -595,10 +599,21 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
      */
     protected String status(String tag) {
         String jpsStatus = this.getJpsStatus(tag);
-        if (StrUtil.equals(AbstractProjectCommander.STOP_TAG, jpsStatus) && SystemUtil.getOsInfo().isLinux()) {
-            return getLinuxPsStatus(tag);
+        if (StrUtil.equals(AbstractProjectCommander.STOP_TAG, jpsStatus)) {
+            // 通过系统命令查询
+            return this.bySystemPs(tag);
         }
         return jpsStatus;
+    }
+
+    /**
+     * 通过系统命令查询进程是否存在
+     *
+     * @param tag 进程标识
+     * @return 是否存在
+     */
+    protected String bySystemPs(String tag) {
+        return AbstractProjectCommander.STOP_TAG;
     }
 
     /**
@@ -613,26 +628,6 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
             return AbstractProjectCommander.STOP_TAG;
         }
         return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, pid);
-    }
-
-
-    /**
-     * 尝试ps -ef | grep  中查看进程id
-     *
-     * @param tag 进程标识
-     * @return 运行标识
-     */
-    private String getLinuxPsStatus(String tag) {
-        String execSystemCommand = CommandUtil.execSystemCommand("ps -ef | grep " + tag);
-        log.debug("getLinuxPsStatus {} {}", tag, execSystemCommand);
-        List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
-        for (String item : list) {
-            if (JvmUtil.checkCommandLineIsJpom(item, tag)) {
-                String[] split = StrUtil.splitToArray(item, StrUtil.SPACE);
-                return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, split[1]);
-            }
-        }
-        return AbstractProjectCommander.STOP_TAG;
     }
 
 //---------------------------------------------------- 基本操作----end

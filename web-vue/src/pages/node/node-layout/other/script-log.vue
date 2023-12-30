@@ -1,5 +1,5 @@
 <template>
-  <div class="node-full-content">
+  <div>
     <!-- 数据表格 -->
     <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
       <template slot="title">

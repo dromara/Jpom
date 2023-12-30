@@ -216,13 +216,14 @@ public class JpomApplication implements DisposableBean, InitializingBean {
                 if (SystemUtil.getOsInfo().isWindows()) {
                     //String result = CommandUtil.execSystemCommand(command, scriptFile.getParentFile());
                     //log.debug("windows restart {}", result);
-                    CommandUtil.asyncExeLocalCommand(parentFile, "start /b" + command);
+                    CommandUtil.asyncExeLocalCommand("start /b" + command, parentFile);
                 } else {
                     String jpomService = SystemUtil.get("JPOM_SERVICE");
                     if (StrUtil.isEmpty(jpomService)) {
-                        CommandUtil.asyncExeLocalCommand(parentFile, command);
+                        CommandUtil.asyncExeLocalCommand(command, parentFile);
                     } else {
-                        CommandUtil.asyncExeLocalCommand(parentFile, "systemctl restart " + jpomService);
+                        // 使用了服务
+                        CommandUtil.asyncExeLocalCommand("systemctl restart " + jpomService, parentFile);
                     }
                 }
             } catch (Exception e) {

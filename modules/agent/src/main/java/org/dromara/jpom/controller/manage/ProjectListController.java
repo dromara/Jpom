@@ -22,21 +22,26 @@
  */
 package org.dromara.jpom.controller.manage;
 
+import cn.hutool.core.lang.Tuple;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
+import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.commander.ProjectCommander;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
+import org.dromara.jpom.service.script.DslScriptServer;
 import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 管理的信息获取接口
@@ -50,9 +55,12 @@ import java.util.List;
 public class ProjectListController extends BaseAgentController {
 
     private final ProjectCommander projectCommander;
+    private final DslScriptServer dslScriptServer;
 
-    public ProjectListController(ProjectCommander projectCommander) {
+    public ProjectListController(ProjectCommander projectCommander,
+                                 DslScriptServer dslScriptServer) {
         this.projectCommander = projectCommander;
+        this.dslScriptServer = dslScriptServer;
     }
 
     /**
@@ -69,13 +77,24 @@ public class ProjectListController extends BaseAgentController {
             RunMode runMode = nodeProjectInfoModel.getRunMode();
             if (runMode != RunMode.Dsl && runMode != RunMode.File) {
                 // 返回实际执行的命令
-                String command = projectCommander.buildJavaCommand(nodeProjectInfoModel);
+                String command = projectCommander.buildRunCommand(nodeProjectInfoModel);
                 nodeProjectInfoModel.setRunCommand(command);
             }
             if (runMode == RunMode.Dsl) {
-                DslYmlDto dslYmlDto = nodeProjectInfoModel.dslConfig();
+                DslYmlDto dslYmlDto = nodeProjectInfoModel.mustDslConfig();
                 boolean reload = dslYmlDto.hasRunProcess(ConsoleCommandOp.reload.name());
                 nodeProjectInfoModel.setCanReload(reload);
+                // 查询 dsl 流程信息
+                List<JSONObject> list = Arrays.stream(ConsoleCommandOp.values())
+                    .filter(ConsoleCommandOp::isCanOpt)
+                    .map(consoleCommandOp -> {
+                        Tuple tuple = dslScriptServer.resolveProcessScript(nodeProjectInfoModel, dslYmlDto, consoleCommandOp);
+                        JSONObject jsonObject = tuple.get(0);
+                        jsonObject.put("process", consoleCommandOp);
+                        return jsonObject;
+                    })
+                    .collect(Collectors.toList());
+                nodeProjectInfoModel.setDslProcessInfo(list);
             }
         }
         return JsonMessage.success("", nodeProjectInfoModel);

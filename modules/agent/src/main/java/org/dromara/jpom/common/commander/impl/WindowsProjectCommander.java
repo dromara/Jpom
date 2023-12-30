@@ -32,6 +32,7 @@ import org.dromara.jpom.common.commander.SystemCommander;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.model.system.NetstatModel;
 import org.dromara.jpom.configuration.AgentConfig;
+import org.dromara.jpom.service.script.DslScriptServer;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JvmUtil;
 import org.springframework.context.annotation.Conditional;
@@ -51,12 +52,13 @@ import java.util.Optional;
 public class WindowsProjectCommander extends AbstractProjectCommander {
 
     public WindowsProjectCommander(AgentConfig agentConfig,
-                                   SystemCommander systemCommander) {
-        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander, agentConfig.getProject());
+                                   SystemCommander systemCommander,
+                                   DslScriptServer dslScriptServer) {
+        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander, agentConfig.getProject(), dslScriptServer);
     }
 
     @Override
-    public String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel) {
+    public String buildRunCommand(NodeProjectInfoModel nodeProjectInfoModel) {
         String classPath = NodeProjectInfoModel.getClassPathLib(nodeProjectInfoModel);
         if (StrUtil.isBlank(classPath)) {
             return null;
@@ -122,4 +124,7 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
         }
         return array;
     }
+
+    // tasklist | findstr /s /i "java"
+    // wmic process where caption="javaw.exe" get processid,caption,commandline /value
 }

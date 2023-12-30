@@ -18,7 +18,7 @@
       </a-table>
     </div>
     <!-- 布局 -->
-    <a-layout v-show="!viewList" class="file-layout node-full-content">
+    <a-layout v-show="!viewList" class="file-layout">
       <!-- 目录树 -->
       <a-layout-sider theme="light" class="sider" width="25%">
         <div class="dir-container">

@@ -37,7 +37,7 @@ public interface ProjectCommander {
      * @param nodeProjectInfoModel 项目
      * @return null 是条件不足
      */
-    String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel);
+    String buildRunCommand(NodeProjectInfoModel nodeProjectInfoModel);
 
     /**
      * 执行 webhooks 通知

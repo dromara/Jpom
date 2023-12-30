@@ -23,12 +23,10 @@
 package org.dromara.jpom.model.data;
 
 import cn.hutool.core.util.ReflectUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.setting.yaml.YamlUtil;
 import cn.keepbx.jpom.model.BaseJsonModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springframework.util.Assert;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -62,14 +60,6 @@ public class DslYmlDto extends BaseJsonModel {
      * 配置
      */
     private Config config;
-
-    public DslYmlDto.BaseProcess runProcess(String opt) {
-        DslYmlDto.Run run = this.getRun();
-        Assert.notNull(run, "yml 未配置 运行管理");
-        DslYmlDto.BaseProcess baseProcess = (DslYmlDto.BaseProcess) ReflectUtil.getFieldValue(run, opt);
-        Assert.notNull(baseProcess, "未找到对应的类型或者未配置 " + opt);
-        return baseProcess;
-    }
 
     /**
      * 判断是否包含指定流程
@@ -116,6 +106,8 @@ public class DslYmlDto extends BaseJsonModel {
 
     /**
      * 重新加载
+     *
+     * @see org.dromara.jpom.socket.ConsoleCommandOp
      */
     public static class Reload extends BaseProcess {
 
@@ -123,6 +115,8 @@ public class DslYmlDto extends BaseJsonModel {
 
     /**
      * 启动流程
+     *
+     * @see org.dromara.jpom.socket.ConsoleCommandOp
      */
     public static class Start extends BaseProcess {
 
@@ -130,6 +124,8 @@ public class DslYmlDto extends BaseJsonModel {
 
     /**
      * 获取状态流程
+     *
+     * @see org.dromara.jpom.socket.ConsoleCommandOp
      */
     public static class Status extends BaseProcess {
 
@@ -137,6 +133,8 @@ public class DslYmlDto extends BaseJsonModel {
 
     /**
      * 停止流程
+     *
+     * @see org.dromara.jpom.socket.ConsoleCommandOp
      */
     public static class Stop extends BaseProcess {
 
@@ -144,6 +142,8 @@ public class DslYmlDto extends BaseJsonModel {
 
     /**
      * 重启流程
+     *
+     * @see org.dromara.jpom.socket.ConsoleCommandOp
      */
     public static class Restart extends BaseProcess {
 
@@ -164,15 +164,6 @@ public class DslYmlDto extends BaseJsonModel {
          * 执行脚本的环境变量
          */
         private Map<String, String> scriptEnv;
-
-        /**
-         * 通过 脚本模版运行
-         *
-         * @return true
-         */
-        public boolean runByScript() {
-            return StrUtil.isNotEmpty(this.getScriptId());
-        }
     }
 
     @Data

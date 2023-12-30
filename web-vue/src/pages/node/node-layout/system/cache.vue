@@ -1,5 +1,5 @@
 <template>
-  <div class="node-full-content">
+  <div class="">
     <a-tabs default-active-key="1" tab-position="left">
       <a-tab-pane key="1" tab="缓存信息">
         <a-alert message="请勿手动删除数据目录下面文件,如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除" style="margin-top: 10px; margin-bottom: 40px" banner />

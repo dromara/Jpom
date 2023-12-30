@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.dromara.jpom.controller.manage.log;
+package org.dromara.jpom.controller.manage;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -50,11 +50,11 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "manage/log")
 @Slf4j
-public class LogBackController extends BaseAgentController {
+public class ProjectLogBackController extends BaseAgentController {
 
     private final ProjectCommander projectCommander;
 
-    public LogBackController(ProjectCommander projectCommander) {
+    public ProjectLogBackController(ProjectCommander projectCommander) {
         this.projectCommander = projectCommander;
     }
 

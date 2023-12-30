@@ -1,5 +1,5 @@
 <template>
-  <a-layout class="log-layout node-full-content">
+  <a-layout class="log-layout">
     <!-- 侧边栏 文件树 -->
     <a-layout-sider theme="light" class="log-sider jpom-node-log-tree" width="20%">
       <a-empty v-if="list.length === 0" />

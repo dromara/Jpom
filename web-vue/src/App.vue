@@ -95,10 +95,6 @@ export default {
   padding-bottom: 20px;
 }
 
-.node-full-content {
-  min-height: calc(100vh - 130px) !important;
-}
-
 .globalLoading {
   height: 100vh;
   width: 100vw;
