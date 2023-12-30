@@ -29,7 +29,6 @@
     "yamljs": "^0.3.0",
     "vuepress-plugin-reading-progress": "^1.0.10",
     "vuepress-plugin-cursor-effects": "^1.0.2",
-    "vuepress-plugin-dynamic-title": "^1.0.0",
     "vuepress-plugin-meting": "^0.3.2",
     "vuepress-plugin-tabs": "^0.3.0",
     "vue-tabs-component": "^1.5.0",
