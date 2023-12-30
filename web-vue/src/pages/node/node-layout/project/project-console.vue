@@ -10,33 +10,60 @@
           <a-button size="small" v-if="project.runMode === 'Dsl'" :disabled="!canReload" :loading="optButtonLoading" type="primary" @click="reload">重载</a-button>
 
           <a-button size="small" type="primary" @click="goFile">文件管理</a-button>
-
-          <a-dropdown>
-            <!-- <a type="link" class="ant-dropdown-link"> 更多<a-icon type="down" /> </a> -->
-            <a-button
-              size="small"
-              @click="
-                (e) => {
-                  e.preventDefault();
-                  handleLogBack();
-                }
-              "
-            >
-              <!-- <a-tag> -->
-              日志大小: {{ project.logSize || "-" }}
-              <!-- 更多 -->
-              <a-icon type="fullscreen" />
-              <!-- </a-tag> -->
-            </a-button>
-            <!-- <a-menu slot="overlay">
-              <a-menu-item>
-                <a-button type="primary" size="small" :disabled="!project.logSize" @click="handleDownload">导出日志</a-button>
+          <a-dropdown v-if="project.dslProcessInfo">
+            <a-menu slot="overlay">
+              <a-menu-item v-for="(item, index) in project.dslProcessInfo" :key="index">
+                <template v-if="item.status">
+                  <a-tag>
+                    {{ item.process }}
+                  </a-tag>
+                  <template v-if="item.type === 'file'">项目文件 {{ item.scriptId }} </template>
+                  <template v-else-if="item.type === 'script'">
+                    <a-button
+                      type="link"
+                      size="small"
+                      icon="edit"
+                      @click="
+                        () => {
+                          temp = { scriptId: item.scriptId };
+                          editScriptVisible = true;
+                        }
+                      "
+                    >
+                      节点脚本
+                    </a-button>
+                  </template>
+                </template>
+                <template v-else>
+                  <a-space>
+                    <a-tag>
+                      {{ item.process }}
+                    </a-tag>
+                    <a-icon type="exclamation-circle" />
+                    {{ item.msg }}
+                  </a-space>
+                </template>
               </a-menu-item>
-              <a-menu-item>
-                <a-button type="primary" size="small" @click="handleLogBack">备份列表</a-button>
-              </a-menu-item>
-            </a-menu> -->
+            </a-menu>
+            <a-button size="small" type="primary"> 关联脚本 <a-icon type="down" /> </a-button>
           </a-dropdown>
+          <a-button
+            size="small"
+            @click="
+              (e) => {
+                e.preventDefault();
+                handleLogBack();
+              }
+            "
+          >
+            <!-- <a-tag> -->
+            日志大小: {{ project.logSize || "-" }}
+            <!-- 更多 -->
+            <a-icon type="fullscreen" />
+            <!-- </a-tag> -->
+          </a-button>
+
+          |
         </a-space>
       </template>
     </log-view>
@@ -44,6 +71,17 @@
     <a-modal destroyOnClose v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
       <ProjectLog v-if="lobbackVisible" :nodeId="this.nodeId" :projectId="this.projectId"></ProjectLog>
     </a-modal>
+    <!-- 编辑区 -->
+    <ScriptEdit
+      v-if="editScriptVisible"
+      :nodeId="this.nodeId"
+      :scriptId="temp.scriptId"
+      @close="
+        () => {
+          editScriptVisible = false;
+        }
+      "
+    ></ScriptEdit>
   </div>
 </template>
 <script>
@@ -51,12 +89,13 @@ import { getProjectData, getProjectLogSize } from "@/api/node-project";
 import { mapGetters } from "vuex";
 import { getWebSocketUrl } from "@/utils/const";
 import LogView from "@/components/logView/index2";
-import ProjectLog from "./project-log.vue";
-
+import ProjectLog from "./project-log";
+import ScriptEdit from "@/pages/node/script-edit";
 export default {
   components: {
     LogView,
     ProjectLog,
+    ScriptEdit,
   },
   props: {
     nodeId: {
@@ -79,6 +118,7 @@ export default {
       lobbackVisible: false,
       canReload: false,
       heart: null,
+      editScriptVisible: false,
     };
   },
   computed: {

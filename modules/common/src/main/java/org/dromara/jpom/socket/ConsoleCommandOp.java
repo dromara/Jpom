@@ -39,6 +39,9 @@ public enum ConsoleCommandOp {
     stop(true),
     restart(true),
     status,
+    /**
+     * 重载
+     */
     reload(true),
     /**
      * 运行日志
@@ -49,7 +52,9 @@ public enum ConsoleCommandOp {
      */
     heart,
     ;
-
+    /**
+     * 是否支持手动操作（执行）
+     */
     private final boolean canOpt;
 
     ConsoleCommandOp() {

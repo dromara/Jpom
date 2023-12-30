@@ -1,5 +1,5 @@
 <template>
-  <div class="node-full-content">
+  <div class="">
     <a-form-model ref="editForm" :model="temp">
       <a-alert v-if="temp.file" :message="`配置文件路径:${temp.file}`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-form-model-item class="node-content-config">

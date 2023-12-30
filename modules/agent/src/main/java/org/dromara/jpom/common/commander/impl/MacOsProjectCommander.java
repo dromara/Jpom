@@ -30,6 +30,7 @@ import org.dromara.jpom.common.commander.Commander;
 import org.dromara.jpom.common.commander.SystemCommander;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.model.system.NetstatModel;
+import org.dromara.jpom.service.script.DslScriptServer;
 import org.dromara.jpom.util.CommandUtil;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
@@ -50,8 +51,9 @@ import java.util.stream.Collectors;
 public class MacOsProjectCommander extends BaseUnixProjectCommander {
 
     public MacOsProjectCommander(AgentConfig agentConfig,
-                                 SystemCommander systemCommander) {
-        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander, agentConfig.getProject());
+                                 SystemCommander systemCommander,
+                                 DslScriptServer dslScriptServer) {
+        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander, agentConfig.getProject(), dslScriptServer);
     }
 
     @Override
@@ -71,26 +73,29 @@ public class MacOsProjectCommander extends BaseUnixProjectCommander {
         if (CollUtil.isEmpty(netList)) {
             return null;
         }
-        return netList.stream().map(str -> {
-            List<String> list = StrSplitter.splitTrim(str, " ", true);
-            if (list.size() < 10) {
-                return null;
-            }
-            NetstatModel netstatModel = new NetstatModel();
-            netstatModel.setProtocol(list.get(7));
-            //netstatModel.setReceive(list.get(1));
-            //netstatModel.setSend(list.get(2));
-            netstatModel.setLocal(list.get(8));
-            netstatModel.setForeign(list.get(4));
-            if ("tcp".equalsIgnoreCase(netstatModel.getProtocol())) {
-                netstatModel.setStatus(CollUtil.get(list, 9));
-                netstatModel.setName(CollUtil.get(list, 0));
-            } else {
-                netstatModel.setStatus(StrUtil.DASHED);
-                netstatModel.setName(CollUtil.get(list, 5));
-            }
+        return netList.stream()
+            .map(str -> {
+                List<String> list = StrSplitter.splitTrim(str, " ", true);
+                if (list.size() < 10) {
+                    return null;
+                }
+                NetstatModel netstatModel = new NetstatModel();
+                netstatModel.setProtocol(list.get(7));
+                //netstatModel.setReceive(list.get(1));
+                //netstatModel.setSend(list.get(2));
+                netstatModel.setLocal(list.get(8));
+                netstatModel.setForeign(list.get(4));
+                if ("tcp".equalsIgnoreCase(netstatModel.getProtocol())) {
+                    netstatModel.setStatus(CollUtil.get(list, 9));
+                    netstatModel.setName(CollUtil.get(list, 0));
+                } else {
+                    netstatModel.setStatus(StrUtil.DASHED);
+                    netstatModel.setName(CollUtil.get(list, 5));
+                }
 
-            return netstatModel;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+                return netstatModel;
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 }

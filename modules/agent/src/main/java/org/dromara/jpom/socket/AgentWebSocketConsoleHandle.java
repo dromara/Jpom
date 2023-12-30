@@ -147,7 +147,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
         if (runMode == RunMode.Dsl) {
             // 判断是否可以执行 reload 事件
-            DslYmlDto dslYmlDto = nodeProjectInfoModel.dslConfig();
+            DslYmlDto dslYmlDto = nodeProjectInfoModel.mustDslConfig();
             boolean b = dslYmlDto.hasRunProcess(ConsoleCommandOp.reload.name());
             json.put("canReload", b);
         }

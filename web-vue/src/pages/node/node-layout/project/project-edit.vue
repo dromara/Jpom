@@ -52,7 +52,16 @@
           </a-tooltip>
         </template>
         <a-select v-model="temp.runMode" placeholder="请选择运行方式">
-          <a-select-option v-for="runMode in runModeList" :key="runMode">{{ runMode }}</a-select-option>
+          <a-select-option v-for="(val, key) in runModeObj" :key="key">
+            <template v-if="val.indexOf('不推荐') > -1">
+              <s>
+                <b>[{{ key }}]</b> {{ val }}
+              </s>
+            </template>
+            <template v-else>
+              <b>[{{ key }}]</b> {{ val }}
+            </template>
+          </a-select-option>
         </a-select>
       </a-form-model-item>
       <a-form-model-item prop="whitelistDirectory" class="jpom-node-project-whitelist">
@@ -178,7 +187,9 @@
             <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
           </a-tooltip>
         </template>
+        <template #help>非服务器开机自启,如需开机自启建议配置<b>插件端开机自启</b>并开启此开关</template>
         <a-switch v-model="temp.autoStart" checked-children="开" un-checked-children="关" />
+        插件端启动时自动检查项目如未启动将尝试启动
       </a-form-model-item>
       <a-form-model-item v-if="temp.runMode === 'Dsl'" prop="dslEnv" label="DSL环境变量">
         <a-input v-model="temp.dslEnv" placeholder="DSL环境变量,如：key1=values1&keyvalue2" />
@@ -244,6 +255,7 @@ import {
   getProjectData,
   javaModes,
   // nodeJudgeLibExist,
+  runModeObj,
   noFileModes,
   runModeList,
   getProjectGroupAll,
@@ -269,9 +281,10 @@ export default {
     return {
       accessList: [],
       groupList: [],
-      runModeList: runModeList,
-      javaModes: javaModes,
-      noFileModes: noFileModes,
+      runModeObj,
+      runModeList,
+      javaModes,
+      noFileModes,
       PROJECT_DSL_DEFATUL,
       configDir: false,
       temp: {},

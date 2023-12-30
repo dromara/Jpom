@@ -498,6 +498,15 @@ export function getProjectGroupAll() {
  */
 export const runModeList = ["Dsl", "ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"];
 
+export const runModeObj = {
+  Dsl: "自定义脚本项目（python、nodejs、go、接口探活、es）【推荐】",
+  ClassPath: "Java 项目（java -classpath）",
+  Jar: "Java 项目（java -jar xxx）",
+  JavaExtDirsCp: "Java 项目（java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS）",
+  File: "静态文件项目（前端、日志等）",
+  JarWar: "Java 项目（java -jar Springboot war）【不推荐】",
+};
+
 /**
  * java 项目的运行模式
  */

@@ -266,7 +266,7 @@ public class CommandUtil {
      * @param command 命令
      * @throws IOException 异常
      */
-    public static void asyncExeLocalCommand(File file, String command) throws Exception {
+    public static void asyncExeLocalCommand(String command, File file) throws Exception {
         String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
         newCommand = StrUtil.replace(newCommand, StrUtil.LF, StrUtil.SPACE);
         //

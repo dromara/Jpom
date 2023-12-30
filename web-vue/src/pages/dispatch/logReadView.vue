@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 布局 -->
-    <a-layout class="file-layout node-full-content">
+    <a-layout class="file-layout">
       <!-- 目录树 -->
       <a-layout-sider theme="light" class="sider" width="25%">
         <div class="dir-container">

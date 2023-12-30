@@ -34,6 +34,7 @@ import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.sql.Condition;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.system.JpomRuntimeException;
@@ -69,6 +70,7 @@ public abstract class BaseDbCommonService<T> {
     /**
      * 表名
      */
+    @Getter
     protected final String tableName;
     protected final Class<T> tClass;
 
@@ -79,10 +81,6 @@ public abstract class BaseDbCommonService<T> {
         TableName annotation = tClass.getAnnotation(TableName.class);
         Assert.notNull(annotation, "请配置 table Name");
         this.tableName = annotation.value();
-    }
-
-    public String getTableName() {
-        return tableName;
     }
 
     protected DataSource getDataSource() {

@@ -23,11 +23,13 @@
 package org.dromara.jpom.common.commander;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import lombok.Lombok;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.configuration.ProjectConfig;
-import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
+import org.dromara.jpom.service.script.DslScriptServer;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JvmUtil;
 
@@ -43,16 +45,18 @@ import java.util.Optional;
  * @author bwcx_jzy
  * @since 2021/12/17
  */
+@Slf4j
 public abstract class BaseUnixProjectCommander extends AbstractProjectCommander {
 
     public BaseUnixProjectCommander(Charset fileCharset,
                                     SystemCommander systemCommander,
-                                    ProjectConfig projectConfig) {
-        super(fileCharset, systemCommander, projectConfig);
+                                    ProjectConfig projectConfig,
+                                    DslScriptServer dslScriptServer) {
+        super(fileCharset, systemCommander, projectConfig, dslScriptServer);
     }
 
     @Override
-    public String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel) {
+    public String buildRunCommand(NodeProjectInfoModel nodeProjectInfoModel) {
         String path = NodeProjectInfoModel.getClassPathLib(nodeProjectInfoModel);
         if (StrUtil.isBlank(path)) {
             return null;
@@ -82,7 +86,7 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
             result.add("Kill not completed, test kill -9");
             String cmd = String.format("kill -9 %s", pid);
             try {
-                CommandUtil.asyncExeLocalCommand(file, cmd);
+                CommandUtil.asyncExeLocalCommand(cmd, file);
             } catch (Exception e) {
                 throw Lombok.sneakyThrow(e);
             }
@@ -96,5 +100,25 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
         String tag = nodeProjectInfoModel.getId();
         return CommandOpResult.of(success, status(tag)).appendMsg(result);
 //        return status(tag) + StrUtil.SPACE + kill;
+    }
+
+    /**
+     * 尝试ps -ef | grep  中查看进程id
+     *
+     * @param tag 进程标识
+     * @return 运行标识
+     */
+    @Override
+    protected String bySystemPs(String tag) {
+        String execSystemCommand = CommandUtil.execSystemCommand("ps -ef | grep " + tag);
+        log.debug("getPsStatus {} {}", tag, execSystemCommand);
+        List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
+        for (String item : list) {
+            if (JvmUtil.checkCommandLineIsJpom(item, tag)) {
+                String[] split = StrUtil.splitToArray(item, StrUtil.SPACE);
+                return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, split[1]);
+            }
+        }
+        return AbstractProjectCommander.STOP_TAG;
     }
 }

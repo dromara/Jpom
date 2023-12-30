@@ -25,11 +25,13 @@ package org.dromara.jpom.common.commander.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.commander.BaseUnixProjectCommander;
 import org.dromara.jpom.common.commander.Commander;
 import org.dromara.jpom.common.commander.SystemCommander;
-import org.dromara.jpom.model.system.NetstatModel;
 import org.dromara.jpom.configuration.AgentConfig;
+import org.dromara.jpom.model.system.NetstatModel;
+import org.dromara.jpom.service.script.DslScriptServer;
 import org.dromara.jpom.util.CommandUtil;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Primary;
@@ -47,11 +49,13 @@ import java.util.stream.Collectors;
 @Conditional(Commander.Linux.class)
 @Service
 @Primary
+@Slf4j
 public class LinuxProjectCommander extends BaseUnixProjectCommander {
 
     public LinuxProjectCommander(AgentConfig agentConfig,
-                                 SystemCommander systemCommander) {
-        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander, agentConfig.getProject());
+                                 SystemCommander systemCommander,
+                                 DslScriptServer dslScriptServer) {
+        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander, agentConfig.getProject(), dslScriptServer);
     }
 
     @Override
