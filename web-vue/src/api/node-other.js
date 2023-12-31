@@ -3,18 +3,6 @@ import axios from "./config";
 /************************** */
 
 /**
- * script 列表
- * @param {String} nodeId 节点 ID
- */
-export function getScriptList(params) {
-  return axios({
-    url: "/node/script/list",
-    method: "post",
-    data: params,
-  });
-}
-
-/**
  * script 服务端中的所有列表
  */
 export function getScriptListAll(params) {

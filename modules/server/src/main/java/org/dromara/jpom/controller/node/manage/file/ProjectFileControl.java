@@ -66,8 +66,8 @@ public class ProjectFileControl extends BaseServerController {
      */
     @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.LIST)
-    public IJsonMessage<Object> getFileList() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_GetFileList);
+    public IJsonMessage<Object> getFileList(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_GetFileList);
     }
 
     /**

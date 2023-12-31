@@ -80,8 +80,8 @@
           <a-icon type="fullscreen" />
         </a-button>
       </a-tooltip>
-      <a-tooltip slot="path" slot-scope="text, item" placement="topLeft" :title="item.whitelistDirectory + item.lib">
-        <span>{{ item.whitelistDirectory + item.lib }}</span>
+      <a-tooltip slot="path" slot-scope="text, item" placement="topLeft" :title="(item.whitelistDirectory || '') + (item.lib || '')">
+        <span>{{ (item.whitelistDirectory || "") + (item.lib || "") }}</span>
       </a-tooltip>
 
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
@@ -412,10 +412,10 @@ export default {
       projList: [],
       projectStatusMap: {},
       groupList: [],
-      runModeList: runModeList,
+      runModeList,
       selectedRowKeys: [],
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-      noFileModes: noFileModes,
+      noFileModes,
       nodeMap: {},
       drawerTitle: "",
       loading: true,

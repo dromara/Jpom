@@ -46,11 +46,14 @@ export function getRuningProjectInfo(params, noTip) {
  *  id: 项目 ID
  * } params
  */
-export function getProjectData(params) {
+export function getProjectData(params, loading) {
   return axios({
     url: "/node/manage/getProjectData.json",
     method: "post",
     data: params,
+    headers: {
+      loading: loading === false ? "no" : "",
+    },
   });
 }
 
@@ -98,6 +101,8 @@ export function editProject(params) {
     logPath: params.logPath,
     autoStart: params.autoStart,
     dslContent: params.dslContent,
+    dslEnv: params.dslEnv,
+    linkId: params.linkId,
   };
   return axios({
     url: "/node/manage/saveProject",
@@ -294,7 +299,7 @@ export function getProjectLogSize(params) {
  * } params
  */
 export function downloadProjectLogFile(params) {
-  return loadRouterBase("/node/manage/log/export.html", params);
+  return loadRouterBase("/node/manage/log/export", params);
 }
 
 /**
@@ -496,16 +501,22 @@ export function getProjectGroupAll() {
 /**
  * 所有的运行模式
  */
-export const runModeList = ["Dsl", "ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"];
+export const runModeList = ["Dsl", "ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File", "Link"];
 
-export const runModeObj = {
-  Dsl: "自定义脚本项目（python、nodejs、go、接口探活、es）【推荐】",
-  ClassPath: "Java 项目（java -classpath）",
-  Jar: "Java 项目（java -jar xxx）",
-  JavaExtDirsCp: "Java 项目（java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS）",
-  File: "静态文件项目（前端、日志等）",
-  JarWar: "Java 项目（java -jar Springboot war）【不推荐】",
-};
+export const runModeArray = [
+  { name: "Dsl", desc: "自定义脚本项目（python、nodejs、go、接口探活、es）【推荐】" },
+  { name: "ClassPath", desc: "Java 项目（java -classpath）" },
+  { name: "Jar", desc: "Java 项目（java -jar xxx）" },
+  { name: "JavaExtDirsCp", desc: "Java 项目（java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS）" },
+  { name: "File", desc: "静态文件项目（前端、日志等）" },
+  {
+    name: "Link",
+    desc: "软链项目（类似于项目副本使用相关路径的文件）",
+    // 仅有节点有此项目（节点分发不支持）
+    onlyNode: true,
+  },
+  { name: "JarWar", desc: "Java 项目（java -jar Springboot war）【不推荐】" },
+];
 
 /**
  * java 项目的运行模式
@@ -515,7 +526,7 @@ export const javaModes = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp"];
 /**
  * 有状态管理的运行模式
  */
-export const noFileModes = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "Dsl"];
+export const noFileModes = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "Dsl", "Link"];
 
 /*
  * 下载导入模板

@@ -204,9 +204,10 @@ public class OutGivingProjectController extends BaseServerController {
                                                String sliceId,
                                                Integer totalSlice,
                                                Integer nowSlice,
-                                               String fileSumMd5) throws IOException {
+                                               String fileSumMd5,
+                                               HttpServletRequest request) throws IOException {
         // 状态判断
-        this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
+        this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
         File userTempPath = serverConfig.getUserTempPath();
         // 保存文件
         this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumMd5);
@@ -230,8 +231,8 @@ public class OutGivingProjectController extends BaseServerController {
                                        String selectProject,
                                        String sliceId,
                                        Integer totalSlice,
-                                       String fileSumMd5) throws IOException {
-        this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
+                                       String fileSumMd5, HttpServletRequest request) throws IOException {
+        this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
         //
@@ -268,8 +269,8 @@ public class OutGivingProjectController extends BaseServerController {
         return JsonMessage.success("上传成功,开始分发!");
     }
 
-    private OutGivingModel check(String id, BiConsumer<OutGivingModel.Status, OutGivingModel> consumer) {
-        OutGivingModel outGivingModel = outGivingServer.getByKey(id, getRequest());
+    private OutGivingModel check(String id, BiConsumer<OutGivingModel.Status, OutGivingModel> consumer, HttpServletRequest request) {
+        OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
         Assert.notNull(outGivingModel, "上传失败,没有找到对应的分发项目");
         // 检查状态
         Integer statusCode = outGivingModel.getStatus();
@@ -295,7 +296,7 @@ public class OutGivingProjectController extends BaseServerController {
                                                HttpServletRequest request) {
         Assert.hasText(url, "填写下载地址");
         Assert.state(StrUtil.length(url) <= 200, "url 长度不能超过 200");
-        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
         // 验证远程 地址
@@ -332,7 +333,7 @@ public class OutGivingProjectController extends BaseServerController {
                                          String selectProject,
                                          HttpServletRequest request) {
 
-        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
 
@@ -389,7 +390,7 @@ public class OutGivingProjectController extends BaseServerController {
                                                String selectProject,
                                                HttpServletRequest request) {
 
-        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
         FileStorageModel storageModel = fileStorageService.getByKey(fileId, request);
@@ -422,7 +423,7 @@ public class OutGivingProjectController extends BaseServerController {
                                                      String selectProject,
                                                      HttpServletRequest request) {
 
-        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
         StaticFileStorageModel storageModel = staticFileStorageService.getByKey(fileId);
@@ -475,8 +476,8 @@ public class OutGivingProjectController extends BaseServerController {
 
     @PostMapping(value = "cancel", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<String> cancel(@ValidatorItem String id) {
-        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status == OutGivingModel.Status.ING, "当前状态不是分发中"));
+    public IJsonMessage<String> cancel(@ValidatorItem String id, HttpServletRequest request) {
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status == OutGivingModel.Status.ING, "当前状态不是分发中"), request);
         OutGivingRun.cancel(outGivingModel.getId(), getUser());
         //
         return JsonMessage.success("取消成功");

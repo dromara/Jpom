@@ -148,8 +148,8 @@ public class NodeUpdateController extends BaseServerController {
     @SystemPermission
     @Feature(method = MethodFeature.UPLOAD)
     public IJsonMessage<String> uploadAgent(String sliceId,
-                                           Integer totalSlice,
-                                           String fileSumMd5) throws IOException {
+                                            Integer totalSlice,
+                                            String fileSumMd5) throws IOException {
         File agentPath = serverConfig.getAgentPath();
 
         File userTempPath = serverConfig.getUserTempPath();
@@ -190,7 +190,7 @@ public class NodeUpdateController extends BaseServerController {
     }
 
     @GetMapping(value = "fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> fastInstall() {
+    public IJsonMessage<JSONObject> fastInstall(HttpServletRequest request) {
         boolean beta = RemoteVersion.betaRelease();
         InputStream inputStream = ExtConfigBean.getConfigResourceInputStream(beta ? "/fast-install-beta.json" : "/fast-install-release.json");
         String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
@@ -202,7 +202,7 @@ public class NodeUpdateController extends BaseServerController {
         JSONArray jsonArray = JSONArray.parseArray(json);
         jsonObject.put("shUrls", jsonArray);
         //
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
         String url = String.format("/%s/%s", contextPath, ServerOpenApi.RECEIVE_PUSH);
         jsonObject.put("url", FileUtil.normalize(url));
         return JsonMessage.success("", jsonObject);
@@ -211,19 +211,21 @@ public class NodeUpdateController extends BaseServerController {
     @GetMapping(value = "pull_fast_install_result.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Collection<JSONObject>> pullFastInstallResult(String removeId) {
         Collection<JSONObject> jsonObjects = NodeInfoController.listReceiveCache(removeId);
-        jsonObjects = jsonObjects.stream().map(jsonObject -> {
-            JSONObject clone = jsonObject.clone();
-            clone.remove("canUseNode");
-            return clone;
-        }).collect(Collectors.toList());
+        jsonObjects = jsonObjects.stream()
+            .map(jsonObject -> {
+                JSONObject clone = jsonObject.clone();
+                clone.remove("canUseNode");
+                return clone;
+            })
+            .collect(Collectors.toList());
         return JsonMessage.success("", jsonObjects);
     }
 
     @GetMapping(value = "confirm_fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Collection<JSONObject>> confirmFastInstall(HttpServletRequest request,
-                                                                  @ValidatorItem String id,
-                                                                  @ValidatorItem String ip,
-                                                                  int port) {
+                                                                   @ValidatorItem String id,
+                                                                   @ValidatorItem String ip,
+                                                                   int port) {
         JSONObject receiveCache = NodeInfoController.getReceiveCache(id);
         Assert.notNull(receiveCache, "没有对应的缓存信息");
         JSONArray jsonArray = receiveCache.getJSONArray("canUseNode");

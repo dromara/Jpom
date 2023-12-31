@@ -31,23 +31,20 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.exception.AgentAuthorizeException;
+import org.dromara.jpom.exception.AgentException;
 import org.dromara.jpom.model.BaseNodeModel;
-import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.system.WorkspaceService;
-import org.dromara.jpom.exception.AgentException;
-import org.dromara.jpom.exception.AgentAuthorizeException;
-import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -74,24 +71,17 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
         this.dataName = dataName;
     }
 
-    public PageResultDto<T> listPageNode(HttpServletRequest request) {
-        // 验证工作空间权限
-        Map<String, String> paramMap = ServletUtil.getParamMap(request);
+    @Override
+    public List<T> listByWorkspace(HttpServletRequest request) {
         String workspaceId = this.getCheckUserWorkspace(request);
-        // 验证节点
-        String nodeId = paramMap.get(BaseServerController.NODE_ID);
-        Assert.notNull(nodeId, "没有选择节点ID");
-        NodeService nodeService = SpringUtil.getBean(NodeService.class);
-        NodeModel nodeModel = nodeService.getByKey(nodeId);
-        Assert.notNull(nodeModel, "不存在对应的节点");
-        Assert.state(StrUtil.equals(workspaceId, nodeModel.getWorkspaceId()), "节点的工作空间和操作的工作空间补一致");
-        paramMap.remove("workspaceId");
-        paramMap.put("nodeId", nodeId);
-        paramMap.put("workspaceId:in", workspaceId + StrUtil.COMMA + ServerConst.WORKSPACE_GLOBAL);
-
-        return super.listPage(paramMap);
+        Map<String, String> paramMap = ServletUtil.getParamMap(request);
+        String nodeId = paramMap.get("nodeId");
+        Entity entity = Entity.create();
+        entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL));
+        Opt.ofBlankAble(nodeId).ifPresent(s -> entity.set("nodeId", s));
+        List<Entity> entities = super.queryList(entity);
+        return super.entityToBeanList(entities);
     }
-
 
     /**
      * 同步所有节点的项目

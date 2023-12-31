@@ -265,7 +265,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
      */
     @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<Map<String, String>> getTriggerUrl(@ValidatorItem String id, @ValidatorItem String workspaceId, String rest) {
+    public IJsonMessage<Map<String, String>> getTriggerUrl(@ValidatorItem String id, @ValidatorItem String workspaceId, String rest, HttpServletRequest request) {
         workspaceEnvVarService.checkUserWorkspace(workspaceId);
         WorkspaceEnvVarModel item = workspaceEnvVarService.getByKey(id);
         Assert.notNull(item, "没有对应的环境变量");
@@ -283,12 +283,12 @@ public class WorkspaceEnvVarController extends BaseServerController {
         } else {
             updateInfo = item;
         }
-        Map<String, String> map = this.getBuildToken(updateInfo);
+        Map<String, String> map = this.getBuildToken(updateInfo, request);
         return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
-    private Map<String, String> getBuildToken(WorkspaceEnvVarModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
+    private Map<String, String> getBuildToken(WorkspaceEnvVarModel item, HttpServletRequest request) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
         String url = ServerOpenApi.SERVER_ENV_VAR_TRIGGER_URL.
             replace("{id}", item.getId()).
             replace("{token}", item.getTriggerToken());

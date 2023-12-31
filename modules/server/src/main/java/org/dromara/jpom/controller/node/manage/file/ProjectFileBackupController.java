@@ -23,6 +23,7 @@
 package org.dromara.jpom.controller.node.manage.file;
 
 
+import cn.keepbx.jpom.IJsonMessage;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
@@ -57,8 +58,8 @@ public class ProjectFileBackupController extends BaseServerController {
      * @return list
      */
     @RequestMapping(value = "list-backup", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String listBackup(String id) {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.MANAGE_FILE_BACKUP_LIST_BACKUP).toString();
+    public IJsonMessage<Object> listBackup(String id, HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_BACKUP_LIST_BACKUP);
     }
 
     /**
@@ -70,8 +71,8 @@ public class ProjectFileBackupController extends BaseServerController {
      * @return list
      */
     @RequestMapping(value = "backup-item-files", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String backupItemFiles(String id, String path, @ValidatorItem String backupId) {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.MANAGE_FILE_BACKUP_LIST_ITEM_FILES).toString();
+    public IJsonMessage<Object> backupItemFiles(String id, String path, @ValidatorItem String backupId, HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_BACKUP_LIST_ITEM_FILES);
     }
 
     /**
@@ -99,8 +100,8 @@ public class ProjectFileBackupController extends BaseServerController {
      * @return msg
      */
     @RequestMapping(value = "backup-delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String deleteFile(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName, HttpServletRequest request) {
-        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_BACKUP_DELETE).toString();
+    public IJsonMessage<Object> deleteFile(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName, HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_BACKUP_DELETE);
     }
 
     /**
@@ -114,7 +115,7 @@ public class ProjectFileBackupController extends BaseServerController {
      * @return msg
      */
     @RequestMapping(value = "backup-recover", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String recoverFile(String id, @ValidatorItem String backupId, String type, String filename, String levelName, HttpServletRequest request) {
-        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_BACKUP_RECOVER).toString();
+    public IJsonMessage<Object> recoverFile(String id, @ValidatorItem String backupId, String type, String filename, String levelName, HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_BACKUP_RECOVER);
     }
 }

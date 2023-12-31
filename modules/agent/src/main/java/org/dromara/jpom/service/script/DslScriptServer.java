@@ -19,6 +19,7 @@ import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.model.data.NodeScriptModel;
 import org.dromara.jpom.script.DslScriptBuilder;
+import org.dromara.jpom.service.manage.ProjectInfoService;
 import org.dromara.jpom.service.system.AgentWorkspaceEnvVarService;
 import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.system.ExtConfigBean;
@@ -41,15 +42,18 @@ public class DslScriptServer {
     private final NodeScriptServer nodeScriptServer;
     private final ProjectLogConfig logConfig;
     private final JpomApplication jpomApplication;
+    private final ProjectInfoService projectInfoService;
 
     public DslScriptServer(AgentWorkspaceEnvVarService agentWorkspaceEnvVarService,
                            NodeScriptServer nodeScriptServer,
                            ProjectLogConfig logConfig,
-                           JpomApplication jpomApplication) {
+                           JpomApplication jpomApplication,
+                           ProjectInfoService projectInfoService) {
         this.agentWorkspaceEnvVarService = agentWorkspaceEnvVarService;
         this.nodeScriptServer = nodeScriptServer;
         this.logConfig = logConfig;
         this.jpomApplication = jpomApplication;
+        this.projectInfoService = projectInfoService;
     }
 
     /**
@@ -58,8 +62,8 @@ public class DslScriptServer {
      * @param scriptProcess 脚本流程
      * @param log           日志
      */
-    public void run(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log, boolean sync) throws Exception {
-        DslScriptBuilder builder = this.create(scriptProcess, nodeProjectInfoModel, action, log);
+    public void run(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel, String action, String log, boolean sync) throws Exception {
+        DslScriptBuilder builder = this.create(scriptProcess, nodeProjectInfoModel, originalModel, action, log);
         Future<?> execute = ThreadUtil.execAsync(builder);
         if (sync) {
             execute.get();
@@ -71,8 +75,8 @@ public class DslScriptServer {
      *
      * @param scriptProcess 脚本流程
      */
-    public Tuple syncRun(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action) {
-        try (DslScriptBuilder builder = this.create(scriptProcess, nodeProjectInfoModel, action, null)) {
+    public Tuple syncRun(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel, String action) {
+        try (DslScriptBuilder builder = this.create(scriptProcess, nodeProjectInfoModel, originalModel, action, null)) {
             return builder.syncExecute();
         }
     }
@@ -97,7 +101,7 @@ public class DslScriptServer {
      * @param scriptProcess        流程
      * @return data
      */
-    public Tuple resolveProcessScript(NodeProjectInfoModel nodeProjectInfoModel, DslYmlDto.BaseProcess scriptProcess) {
+    private Tuple resolveProcessScript(NodeProjectInfoModel nodeProjectInfoModel, DslYmlDto.BaseProcess scriptProcess) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("status", false);
         if (scriptProcess == null) {
@@ -118,7 +122,8 @@ public class DslScriptServer {
             jsonObject.put("scriptId", scriptId);
             return new Tuple(jsonObject, item);
         }
-        File scriptFile = FileUtil.file(nodeProjectInfoModel.allLib(), scriptId);
+        File lib = projectInfoService.resolveLibFile(nodeProjectInfoModel);
+        File scriptFile = FileUtil.file(lib, scriptId);
         if (FileUtil.isFile(scriptFile)) {
             // 文件存在
             jsonObject.put("status", true);
@@ -138,8 +143,8 @@ public class DslScriptServer {
      * @param log                  日志路径
      * @param action               具体操作
      */
-    private DslScriptBuilder create(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log) {
-        Tuple tuple = this.resolveProcessScript(nodeProjectInfoModel, scriptProcess);
+    private DslScriptBuilder create(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel, String action, String log) {
+        Tuple tuple = this.resolveProcessScript(originalModel, scriptProcess);
         JSONObject jsonObject = tuple.get(0);
         // 判断状态
         boolean status = jsonObject.getBooleanValue("status");
@@ -149,6 +154,7 @@ public class DslScriptServer {
         });
         String type = jsonObject.getString("type");
         EnvironmentMapBuilder environment = this.environment(nodeProjectInfoModel, scriptProcess);
+        environment.put("PROJECT_LOG_FILE", log);
         File scriptFile;
         boolean autoDelete = false;
         if (StrUtil.equals(type, "file")) {
@@ -196,12 +202,13 @@ public class DslScriptServer {
                 return map1;
             })
             .ifPresent(environmentMapBuilder::putStr);
+        String lib = projectInfoService.resolveLibPath(nodeProjectInfoModel);
         //
         environmentMapBuilder
             .putStr(scriptProcess.getScriptEnv())
             .put("PROJECT_ID", nodeProjectInfoModel.getId())
             .put("PROJECT_NAME", nodeProjectInfoModel.getName())
-            .put("PROJECT_PATH", nodeProjectInfoModel.allLib());
+            .put("PROJECT_PATH", lib);
         return environmentMapBuilder;
     }
 }

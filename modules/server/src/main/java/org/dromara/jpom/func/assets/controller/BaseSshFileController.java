@@ -126,7 +126,7 @@ public abstract class BaseSshFileController extends BaseServerController {
      */
     protected abstract <T> T checkConfigPathChildren(String id, String allowPathParent, String nextPath, BiFunction<MachineSshModel, ItemConfig, T> function);
 
-    @RequestMapping(value = "download.html", method = RequestMethod.GET)
+    @RequestMapping(value = "download", method = RequestMethod.GET)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void download(@ValidatorItem String id,
                          @ValidatorItem String allowPathParent,

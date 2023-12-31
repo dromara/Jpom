@@ -22,16 +22,15 @@
  */
 package org.dromara.jpom.common.commander.impl;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.common.commander.CommandOpResult;
 import org.dromara.jpom.common.commander.Commander;
 import org.dromara.jpom.common.commander.SystemCommander;
+import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.model.system.NetstatModel;
-import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.service.manage.ProjectInfoService;
 import org.dromara.jpom.service.script.DslScriptServer;
 import org.dromara.jpom.util.CommandUtil;
@@ -39,6 +38,7 @@ import org.dromara.jpom.util.JvmUtil;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -61,34 +61,44 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
 
     @Override
     public String buildRunCommand(NodeProjectInfoModel nodeProjectInfoModel) {
-        String classPath = NodeProjectInfoModel.getClassPathLib(nodeProjectInfoModel);
+        NodeProjectInfoModel infoModel = projectInfoService.resolveModel(nodeProjectInfoModel);
+        return this.buildRunCommand(nodeProjectInfoModel, infoModel);
+    }
+
+    @Override
+    public String buildRunCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
+        String lib = projectInfoService.resolveLibPath(originalModel);
+        String classPath = this.getClassPathLib(originalModel, lib);
         if (StrUtil.isBlank(classPath)) {
             return null;
         }
         // 拼接命令
         String jvm = nodeProjectInfoModel.getJvm();
         String tag = nodeProjectInfoModel.getId();
-        String mainClass = nodeProjectInfoModel.mainClass();
+        String mainClass = originalModel.mainClass();
         String args = nodeProjectInfoModel.getArgs();
+
+        String absoluteLog = projectInfoService.resolveAbsoluteLog(nodeProjectInfoModel, originalModel);
         return StrUtil.format("{} {} {} {} {} {} >> {} &",
             getRunJavaPath(nodeProjectInfoModel, true),
             Optional.ofNullable(jvm).orElse(StrUtil.EMPTY),
-            JvmUtil.getJpomPidTag(tag, nodeProjectInfoModel.allLib()),
+            JvmUtil.getJpomPidTag(tag, lib),
             classPath,
             Optional.ofNullable(mainClass).orElse(StrUtil.EMPTY),
             Optional.ofNullable(args).orElse(StrUtil.EMPTY),
-            nodeProjectInfoModel.absoluteLog());
+            absoluteLog);
     }
 
     @Override
-    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, int pid) {
+    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel, int pid) {
         String tag = nodeProjectInfoModel.getId();
         List<String> result = new ArrayList<>();
         boolean success = false;
         // 如果正在运行，则执行杀进程命令
-        String kill = systemCommander.kill(FileUtil.file(nodeProjectInfoModel.allLib()), pid);
+        File file = projectInfoService.resolveLibFile(nodeProjectInfoModel);
+        String kill = systemCommander.kill(file, pid);
         result.add(kill);
-        if (this.loopCheckRun(nodeProjectInfoModel, false)) {
+        if (this.loopCheckRun(nodeProjectInfoModel, originalModel, false)) {
             success = true;
         } else {
             result.add("Kill not completed");

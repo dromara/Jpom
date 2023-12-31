@@ -363,14 +363,14 @@
           </template>
 
           <a-select v-model="temp.runMode" placeholder="请选择运行方式">
-            <a-select-option v-for="(val, key) in runModeObj" :key="key">
-              <template v-if="val.indexOf('不推荐') > -1">
+            <a-select-option v-for="item in runModeArray.filter((item) => item.onlyNode !== true)" :key="item.name">
+              <template v-if="item.desc.indexOf('不推荐') > -1">
                 <s>
-                  <b>[{{ key }}]</b> {{ val }}
+                  <b>[{{ item.name }}]</b> {{ item.desc }}
                 </s>
               </template>
               <template v-else>
-                <b>[{{ key }}]</b> {{ val }}
+                <b>[{{ item.name }}]</b> {{ item.desc }}
               </template>
             </a-select-option>
           </a-select>
@@ -480,7 +480,7 @@
               <template slot="title">
                 <ul>
                   <li>日志目录是指控制台日志存储目录</li>
-                  <li>默认是在项目文件夹父级</li>
+                  <li>默认是在插件端数据目录/${projectId}/${projectId}.log</li>
                   <li>可选择的列表和项目授权目录是一致的，即相同配置</li>
                 </ul>
               </template>
@@ -488,7 +488,7 @@
             </a-tooltip>
           </template>
           <a-select v-model="temp.logPath" placeholder="请选择日志目录">
-            <a-select-option key="" value="">默认是在项目文件夹父级</a-select-option>
+            <a-select-option key="" value="">默认是在插件端数据目录/${projectId}/${projectId}.log</a-select-option>
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -699,7 +699,7 @@ import {
   cancelOutgiving,
 } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
-import { getProjectData, javaModes, noFileModes, runModeObj, getProjectGroupAll } from "@/api/node-project";
+import { getProjectData, javaModes, noFileModes, runModeArray, getProjectGroupAll } from "@/api/node-project";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, randomStr, itemGroupBy, parseTime } from "@/utils/const";
 import scriptPage from "@/pages/script/script-list";
 import CustomSelect from "@/components/customSelect";
@@ -722,7 +722,7 @@ export default {
       statusMap,
       javaModes,
       noFileModes,
-      runModeObj,
+      runModeArray,
       dispatchStatusMap,
       PROJECT_DSL_DEFATUL,
       list: [],

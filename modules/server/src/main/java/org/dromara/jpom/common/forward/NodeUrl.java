@@ -141,7 +141,7 @@ public enum NodeUrl {
 
     Manage_Log_logBack("/manage/log/logBack"),
 
-    Manage_Log_export("/manage/log/export.html", true),
+    Manage_Log_export("/manage/log/export", true),
 
 
     Script_List("/script/list.json"),

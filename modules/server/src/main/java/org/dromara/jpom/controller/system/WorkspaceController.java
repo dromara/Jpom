@@ -56,6 +56,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -138,8 +139,8 @@ public class WorkspaceController extends BaseServerController {
      */
     @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<WorkspaceModel>> list() {
-        PageResultDto<WorkspaceModel> listPage = workspaceService.listPage(getRequest());
+    public IJsonMessage<PageResultDto<WorkspaceModel>> list(HttpServletRequest request) {
+        PageResultDto<WorkspaceModel> listPage = workspaceService.listPage(request);
         return JsonMessage.success("", listPage);
     }
 

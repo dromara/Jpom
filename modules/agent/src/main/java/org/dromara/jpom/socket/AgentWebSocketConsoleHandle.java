@@ -208,10 +208,10 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         } finally {
             if (logUser) {
                 // 记录操作人
-                NodeProjectInfoModel newNodeProjectInfoModel = projectInfoService.getItem(nodeProjectInfoModel.getId());
+                NodeProjectInfoModel update = new NodeProjectInfoModel();
                 String name = getOptUserName(session);
-                newNodeProjectInfoModel.setModifyUser(name);
-                projectInfoService.updateItem(newNodeProjectInfoModel);
+                update.setModifyUser(name);
+                projectInfoService.updateById(update, nodeProjectInfoModel.getId());
             }
         }
         // 返回数据
@@ -246,7 +246,8 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
     private JsonMessage<Object> searchLog(Session session, NodeProjectInfoModel nodeProjectInfoModel, JSONObject reqJson) {
         //
         String fileName = reqJson.getString("logFile");
-        File file = FileUtil.file(nodeProjectInfoModel.allLib(), fileName);
+        File libFile = projectInfoService.resolveLibFile(nodeProjectInfoModel);
+        File file = FileUtil.file(libFile, fileName);
         if (!FileUtil.isFile(file)) {
             return new JsonMessage<>(404, "文件不存在");
         }
@@ -285,9 +286,10 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         String fileName = reqJson.getString("fileName");
         File file;
         if (StrUtil.isEmpty(fileName)) {
-            file = nodeProjectInfoModel.absoluteLogFile();
+            file = projectInfoService.resolveAbsoluteLogFile(nodeProjectInfoModel);
         } else {
-            file = FileUtil.file(nodeProjectInfoModel.allLib(), fileName);
+            File libFile = projectInfoService.resolveLibFile(nodeProjectInfoModel);
+            file = FileUtil.file(libFile, fileName);
         }
         try {
             Charset charset = logConfig.getFileCharset();

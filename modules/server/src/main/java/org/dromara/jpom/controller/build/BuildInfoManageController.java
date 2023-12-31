@@ -97,8 +97,9 @@ public class BuildInfoManageController extends BaseServerController {
                                        String checkRepositoryDiff,
                                        String projectSecondaryDirectory,
                                        String buildEnvParameter,
-                                       String dispatchSelectProject) {
-        BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
+                                       String dispatchSelectProject,
+                                       HttpServletRequest request) {
+        BuildInfoModel item = buildInfoService.getByKey(id, request);
         Assert.notNull(item, "没有对应数据");
         // 更新数据
         BuildInfoModel update = new BuildInfoModel();
@@ -136,8 +137,8 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/cancel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<String> cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
-        BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
+    public IJsonMessage<String> cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id, HttpServletRequest request) {
+        BuildInfoModel item = buildInfoService.getByKey(id, request);
         Objects.requireNonNull(item, "没有对应数据");
         String checkStatus = buildExecuteService.checkStatus(item);
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, item.getStatus());
@@ -184,8 +185,9 @@ public class BuildInfoManageController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
                                               @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
-                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
-        BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
+                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line,
+                                              HttpServletRequest request) {
+        BuildInfoModel item = buildInfoService.getByKey(id, request);
         Assert.notNull(item, "没有对应数据");
         Assert.state(buildId <= item.getBuildId(), "还没有对应的构建记录");
 

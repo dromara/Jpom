@@ -64,7 +64,7 @@ public class ProjectLogBackController extends BaseAgentController {
         JSONObject jsonObject = new JSONObject();
         //
         //获取日志备份路径
-        File logBack = nodeProjectInfoModel.logBack();
+        File logBack = projectInfoService.resolveLogBack(nodeProjectInfoModel);
         boolean logBackBool = logBack.exists() && logBack.isDirectory();
         jsonObject.put("logBack", logBackBool);
         String info = this.getLogSize(nodeProjectInfoModel);
@@ -82,7 +82,7 @@ public class ProjectLogBackController extends BaseAgentController {
         if (nodeProjectInfoModel == null) {
             return null;
         }
-        File file = nodeProjectInfoModel.absoluteLogFile();
+        File file = projectInfoService.resolveAbsoluteLogFile(nodeProjectInfoModel);
         if (file.exists()) {
             long fileSize = file.length();
             if (fileSize <= 0) {
@@ -112,7 +112,7 @@ public class ProjectLogBackController extends BaseAgentController {
     public IJsonMessage<String> clear(String name) {
         Assert.hasText(name, "没有对应到文件");
         NodeProjectInfoModel pim = getProjectInfoModel();
-        File logBack = pim.logBack();
+        File logBack = projectInfoService.resolveLogBack(pim);
         if (logBack.exists() && logBack.isDirectory()) {
             logBack = FileUtil.file(logBack, name);
             if (logBack.exists()) {
@@ -130,7 +130,7 @@ public class ProjectLogBackController extends BaseAgentController {
         Assert.hasText(key, "请选择对应到文件");
         try {
             NodeProjectInfoModel pim = getProjectInfoModel();
-            File logBack = pim.logBack();
+            File logBack = projectInfoService.resolveLogBack(pim);
             if (logBack.exists() && logBack.isDirectory()) {
                 logBack = FileUtil.file(logBack, key);
                 ServletUtil.write(response, logBack);
@@ -149,8 +149,8 @@ public class ProjectLogBackController extends BaseAgentController {
         NodeProjectInfoModel pim = getProjectInfoModel();
 
         JSONObject jsonObject = new JSONObject();
-
-        File logBack = pim.logBack();
+        NodeProjectInfoModel infoModel = projectInfoService.resolveModel(pim);
+        File logBack = projectInfoService.resolveLogBack(pim, infoModel);
         if (logBack.exists() && logBack.isDirectory()) {
             File[] filesAll = logBack.listFiles();
             if (filesAll != null) {
@@ -159,17 +159,17 @@ public class ProjectLogBackController extends BaseAgentController {
             }
         }
         jsonObject.put("id", pim.getId());
-        jsonObject.put("logPath", pim.log());
+        jsonObject.put("logPath", projectInfoService.resolveAbsoluteLog(pim, infoModel));
         jsonObject.put("logBackPath", logBack.getAbsolutePath());
         return JsonMessage.success("", jsonObject);
     }
 
-    @RequestMapping(value = "export.html", method = RequestMethod.GET)
+    @RequestMapping(value = "export", method = RequestMethod.GET)
     @ResponseBody
     public void export(HttpServletResponse response) {
         NodeProjectInfoModel pim = getProjectInfoModel();
 
-        File file = pim.absoluteLogFile();
+        File file = projectInfoService.resolveAbsoluteLogFile(pim);
         if (!file.exists()) {
             ServletUtil.write(response, JsonMessage.getString(400, "没有日志文件:" + file.getPath()), MediaType.APPLICATION_JSON_VALUE);
             return;

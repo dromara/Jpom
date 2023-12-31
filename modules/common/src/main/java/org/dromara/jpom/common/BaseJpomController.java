@@ -30,7 +30,6 @@ import cn.hutool.extra.servlet.ServletUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
-import org.dromara.jpom.common.multipart.MultipartFileBuilder;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
@@ -47,7 +46,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -228,24 +226,6 @@ public abstract class BaseJpomController {
         throw new IllegalArgumentException("not MultipartHttpServletRequest");
     }
 
-    /**
-     * 判断是否存在文件
-     *
-     * @return true 存在文件
-     */
-    protected boolean hasFile() {
-        Map<String, MultipartFile> fileMap = getMultiRequest().getFileMap();
-        return fileMap.size() > 0;
-    }
-
-    /**
-     * 创建多文件上传对象
-     *
-     * @return MultipartFileBuilder
-     */
-    protected MultipartFileBuilder createMultipart() {
-        return new MultipartFileBuilder(getMultiRequest());
-    }
     // ------------------------文件上传结束
 
     /**
@@ -346,7 +326,7 @@ public abstract class BaseJpomController {
     protected void setApplicationHeader(HttpServletResponse response, String fileName) {
         String contentType = ObjectUtil.defaultIfNull(FileUtil.getMimeType(fileName), "application/octet-stream");
         response.setHeader("Content-Disposition", StrUtil.format("attachment;filename=\"{}\"",
-                URLUtil.encode(fileName, CharsetUtil.CHARSET_UTF_8)));
+            URLUtil.encode(fileName, CharsetUtil.CHARSET_UTF_8)));
         response.setContentType(contentType);
     }
 

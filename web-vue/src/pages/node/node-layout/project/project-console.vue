@@ -163,12 +163,12 @@ export default {
       clearInterval(this.heart);
     },
     // 加载项目
-    loadProject() {
+    loadProject(loading) {
       const params = {
         id: this.projectId,
         nodeId: this.nodeId,
       };
-      getProjectData(params).then((res) => {
+      getProjectData(params, loading).then((res) => {
         if (res.code === 200) {
           this.project = { ...this.project, ...res.data };
 
@@ -217,6 +217,10 @@ export default {
               } else if (res.op === "status") {
                 // 如果是 status
                 this.project = { ...this.project, status: true };
+              }
+              if (res.op === "reload") {
+                // 刷新项目信息（reload页面消息）
+                this.loadProject();
               }
             } else {
               this.project = { ...this.project, status: false };

@@ -66,8 +66,8 @@ public class LogReadController extends BaseServerController {
      */
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<LogReadModel>> list() {
-        PageResultDto<LogReadModel> pageResultDto = logReadServer.listPage(getRequest());
+    public IJsonMessage<PageResultDto<LogReadModel>> list(HttpServletRequest request) {
+        PageResultDto<LogReadModel> pageResultDto = logReadServer.listPage(request);
         return JsonMessage.success("success", pageResultDto);
     }
 
@@ -79,8 +79,7 @@ public class LogReadController extends BaseServerController {
      */
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<String> del(String id) {
-        HttpServletRequest request = getRequest();
+    public IJsonMessage<String> del(String id, HttpServletRequest request) {
         int byKey = logReadServer.delByKey(id, request);
         return JsonMessage.success("操作成功");
     }
@@ -95,7 +94,7 @@ public class LogReadController extends BaseServerController {
      */
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<String> save(@RequestBody JSONObject jsonObject) {
+    public IJsonMessage<String> save(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
         Assert.notNull(jsonObject, "请传入参数");
         String id = jsonObject.getString("id");
         String name = jsonObject.getString("name");
@@ -115,7 +114,6 @@ public class LogReadController extends BaseServerController {
         if (StrUtil.isEmpty(id)) {
             logReadServer.insert(logReadModel);
         } else {
-            HttpServletRequest request = getRequest();
             logReadServer.updateById(logReadModel, request);
         }
         return JsonMessage.success("修改成功");
@@ -136,12 +134,12 @@ public class LogReadController extends BaseServerController {
      */
     @RequestMapping(value = "update-cache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<String> updateCache(@RequestBody JSONObject jsonObject) {
+    public IJsonMessage<String> updateCache(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
         Assert.notNull(jsonObject, "请传入参数");
         String id = jsonObject.getString("id");
         Assert.hasText(id, "请传入参数");
         LogReadModel.CacheDta cacheDta = jsonObject.toJavaObject(LogReadModel.CacheDta.class);
-        HttpServletRequest request = getRequest();
+
         LogReadModel logReadModel = new LogReadModel();
         logReadModel.setId(id);
         logReadModel.setCacheData(JSONArray.toJSONString(cacheDta));

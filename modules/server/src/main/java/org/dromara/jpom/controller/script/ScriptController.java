@@ -96,8 +96,8 @@ public class ScriptController extends BaseServerController {
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<ScriptModel>> scriptList() {
-        PageResultDto<ScriptModel> pageResultDto = scriptServer.listPage(getRequest());
+    public IJsonMessage<PageResultDto<ScriptModel>> scriptList(HttpServletRequest request) {
+        PageResultDto<ScriptModel> pageResultDto = scriptServer.listPage(request);
         return JsonMessage.success("success", pageResultDto);
     }
 
@@ -116,13 +116,13 @@ public class ScriptController extends BaseServerController {
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> save(String id,
-                                    @ValidatorItem String context,
-                                    @ValidatorItem String name,
-                                    String autoExecCron,
-                                    String defArgs,
-                                    String description,
-                                    String nodeIds,
-                                    HttpServletRequest request) {
+                                     @ValidatorItem String context,
+                                     @ValidatorItem String name,
+                                     String autoExecCron,
+                                     String defArgs,
+                                     String description,
+                                     String nodeIds,
+                                     HttpServletRequest request) {
         ScriptModel scriptModel = new ScriptModel();
         scriptModel.setId(id);
         scriptModel.setContext(context);
@@ -269,8 +269,8 @@ public class ScriptController extends BaseServerController {
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public IJsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
-        String nowWorkspaceId = nodeService.getCheckUserWorkspace(getRequest());
+    public IJsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId, HttpServletRequest request) {
+        String nowWorkspaceId = nodeService.getCheckUserWorkspace(request);
         //
         scriptServer.checkUserWorkspace(toWorkspaceId);
         scriptServer.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
@@ -298,12 +298,12 @@ public class ScriptController extends BaseServerController {
         } else {
             updateInfo = item;
         }
-        Map<String, String> map = this.getBuildToken(updateInfo);
+        Map<String, String> map = this.getBuildToken(updateInfo, request);
         return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
-    private Map<String, String> getBuildToken(ScriptModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
+    private Map<String, String> getBuildToken(ScriptModel item, HttpServletRequest request) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
         String url = ServerOpenApi.SERVER_SCRIPT_TRIGGER_URL.
             replace("{id}", item.getId()).
             replace("{token}", item.getTriggerToken());
