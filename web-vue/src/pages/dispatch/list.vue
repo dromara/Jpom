@@ -52,6 +52,12 @@
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <template slot="id" slot-scope="text, record">
+        <a-tooltip placement="topLeft" :title="text">
+          <a-button size="small" style="padding: 0" type="link" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">{{ text }}</a-button>
+          <a-button size="small" style="padding: 0" type="link" v-else @click="handleEditDispatch(record)">{{ text }}</a-button>
+        </a-tooltip>
+      </template>
       <template slot="name" slot-scope="text, record">
         <a-tooltip placement="topLeft" :title="text">
           <a-button size="small" style="padding: 0" type="link" icon="fullscreen" @click="handleViewStatus(record)">{{ text }}</a-button>
@@ -440,6 +446,20 @@
               <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
+          <template #help>
+            scriptId建议使用服务端脚本分发到脚本：
+            <a-button
+              type="link"
+              size="small"
+              @click="
+                () => {
+                  viewScriptVisible = true;
+                }
+              "
+            >
+              查看服务端脚本
+            </a-button>
+          </template>
           <a-tabs>
             <a-tab-pane key="1" tab="DSL 配置">
               <div style="height: 40vh; overflow-y: scroll">
@@ -562,7 +582,9 @@
                   <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
+              <template #help>非服务器开机自启,如需开机自启建议配置<b>插件端开机自启</b>并开启此开关</template>
               <a-switch v-model="temp[`${nodeId}_autoStart`]" checked-children="开" un-checked-children="关" />
+              插件端启动时自动检查项目如未启动将尝试启动
             </a-form-model-item>
             <a-form-model-item prop="dslEnv" label="DSL环境变量">
               <a-input v-model="temp[`${nodeId}_dslEnv`]" placeholder="DSL环境变量,如：key1=values1&keyvalue2" />
@@ -610,7 +632,7 @@
         }
       "
     />
-
+    <!-- 配置工作空间授权目录 -->
     <a-modal
       destroyOnClose
       v-model="configDir"
@@ -634,6 +656,30 @@
         "
       ></whiteList>
     </a-modal>
+    <!-- 查看服务端脚本 -->
+    <a-drawer
+      destroyOnClose
+      :title="`查看脚本`"
+      placement="right"
+      :visible="viewScriptVisible"
+      width="70vw"
+      :zIndex="1009"
+      @close="
+        () => {
+          this.viewScriptVisible = false;
+        }
+      "
+    >
+      <scriptPage
+        v-if="viewScriptVisible"
+        choose="checkbox"
+        @cancel="
+          () => {
+            this.viewScriptVisible = false;
+          }
+        "
+      ></scriptPage>
+    </a-drawer>
   </div>
 </template>
 <script>
@@ -655,9 +701,9 @@ import {
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, javaModes, noFileModes, runModeObj, getProjectGroupAll } from "@/api/node-project";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, randomStr, itemGroupBy, parseTime } from "@/utils/const";
-
+import scriptPage from "@/pages/script/script-list";
 import CustomSelect from "@/components/customSelect";
-import whiteList from "@/pages/dispatch/white-list.vue";
+import whiteList from "@/pages/dispatch/white-list";
 import StartDispatch from "./start";
 export default {
   components: {
@@ -666,6 +712,7 @@ export default {
     whiteList,
     Status,
     StartDispatch,
+    scriptPage,
   },
   data() {
     return {
@@ -688,7 +735,7 @@ export default {
       // reqId: "",
       temp: {},
       configDir: false,
-
+      viewScriptVisible: false,
       linkDispatchVisible: false,
       editDispatchVisible: false,
       dispatchVisible: false,
@@ -699,7 +746,7 @@ export default {
       dispatchList: [],
       totalProjectNum: 0,
       columns: [
-        { title: "分发 ID", dataIndex: "id", ellipsis: true, width: 110, scopedSlots: { customRender: "tooltip" } },
+        { title: "分发 ID", dataIndex: "id", ellipsis: true, width: 110, scopedSlots: { customRender: "id" } },
         { title: "分发名称", dataIndex: "name", ellipsis: true, width: 200, scopedSlots: { customRender: "name" } },
         { title: "项目分组", dataIndex: "group", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "group" } },
         { title: "分发类型", dataIndex: "outGivingProject", width: "90px", ellipsis: true, scopedSlots: { customRender: "outGivingProject" } },
