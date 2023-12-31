@@ -48,6 +48,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -81,8 +82,8 @@ public class UserPermissionGroupController extends BaseServerController {
      */
     @RequestMapping(value = "get-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<UserPermissionGroupBean>> getUserList() {
-        PageResultDto<UserPermissionGroupBean> userModelPageResultDto = userPermissionGroupServer.listPage(getRequest());
+    public IJsonMessage<PageResultDto<UserPermissionGroupBean>> getUserList(HttpServletRequest request) {
+        PageResultDto<UserPermissionGroupBean> userModelPageResultDto = userPermissionGroupServer.listPage(request);
         return new JsonMessage<>(200, "", userModelPageResultDto);
     }
 
@@ -106,11 +107,11 @@ public class UserPermissionGroupController extends BaseServerController {
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> edit(String id,
-                                    @ValidatorItem String name,
-                                    String description,
-                                    String prohibitExecute,
-                                    String allowExecute,
-                                    @ValidatorItem String workspace) {
+                                     @ValidatorItem String name,
+                                     String description,
+                                     String prohibitExecute,
+                                     String allowExecute,
+                                     @ValidatorItem String workspace) {
         UserPermissionGroupBean userPermissionGroupBean = new UserPermissionGroupBean();
         userPermissionGroupBean.setName(name);
         userPermissionGroupBean.setDescription(description);

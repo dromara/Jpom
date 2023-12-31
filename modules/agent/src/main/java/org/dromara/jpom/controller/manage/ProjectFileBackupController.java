@@ -178,7 +178,7 @@ public class ProjectFileBackupController extends BaseAgentController {
     public IJsonMessage<Object> recoverFile(String id, @ValidatorItem String backupId, String type, String filename, String levelName) {
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
         File backupPath = projectFileBackupService.pathProjectBackup(projectInfoModel, backupId);
-        String projectPath = projectInfoModel.allLib();
+        File projectPath = projectInfoService.resolveLibFile(projectInfoModel);
         //
         File backupFile;
         File projectFile;

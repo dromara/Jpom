@@ -55,9 +55,9 @@ public class JvmUtil {
     };
 
     /**
-     * 主持的标签数组
+     * 支持的标签数组
      */
-    private static final String[] JPOM_PID_TAG = new String[]{"DJpom.application", "Jpom.application", "Dapplication"};
+    private static final String[] JPOM_PID_TAG = new String[]{"DJpom.application", "Jpom.application"};
 
     /**
      * 检查 jps 命令是否正常
@@ -97,10 +97,13 @@ public class JvmUtil {
     public static boolean exist(long pid) {
         String execSystemCommand = CommandUtil.execSystemCommand("jps -l");
         List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
-        String pidCommandInfo = list.stream().filter(s -> {
-            List<String> split = StrSplitter.splitTrim(s, StrUtil.SPACE, true);
-            return StrUtil.equals(pid + "", CollUtil.getFirst(split));
-        }).findAny().orElse(null);
+        String pidCommandInfo = list.stream()
+            .filter(s -> {
+                List<String> split = StrSplitter.splitTrim(s, StrUtil.SPACE, true);
+                return StrUtil.equals(pid + "", CollUtil.getFirst(split));
+            })
+            .findAny()
+            .orElse(null);
         return StrUtil.isNotEmpty(pidCommandInfo);
     }
 

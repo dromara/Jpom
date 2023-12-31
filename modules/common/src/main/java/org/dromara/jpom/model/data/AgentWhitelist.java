@@ -29,10 +29,10 @@ import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.keepbx.jpom.model.BaseJsonModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.model.BaseModel;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.springframework.util.Assert;
 
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class AgentWhitelist extends BaseJsonModel {
+public class AgentWhitelist extends BaseModel {
     /**
      * 项目目录授权、日志文件授权
      */

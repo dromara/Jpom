@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,8 +73,8 @@ public class BuildInfoTriggerController extends BaseServerController {
      */
     @RequestMapping(value = "/build/trigger/url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
-        BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
+    public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
+        BuildInfoModel item = buildInfoService.getByKey(id, request);
         UserModel user = getUser();
         BuildInfoModel updateInfo;
         if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
@@ -85,12 +86,12 @@ public class BuildInfoTriggerController extends BaseServerController {
         } else {
             updateInfo = item;
         }
-        Map<String, String> map = this.getBuildToken(updateInfo);
+        Map<String, String> map = this.getBuildToken(updateInfo, request);
         return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
-    private Map<String, String> getBuildToken(BuildInfoModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
+    private Map<String, String> getBuildToken(BuildInfoModel item, HttpServletRequest request) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
         String url = ServerOpenApi.BUILD_TRIGGER_BUILD2.
             replace("{id}", item.getId()).
             replace("{token}", item.getTriggerToken());

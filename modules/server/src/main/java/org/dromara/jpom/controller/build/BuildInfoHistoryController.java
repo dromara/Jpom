@@ -77,7 +77,7 @@ public class BuildInfoHistoryController extends BaseServerController {
      *
      * @param logId 日志id
      */
-    @RequestMapping(value = "/build/history/download_file.html", method = RequestMethod.GET)
+    @RequestMapping(value = "/build/history/download_file", method = RequestMethod.GET)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void downloadFile(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId, HttpServletRequest request, HttpServletResponse response) {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, request, false);
@@ -94,8 +94,9 @@ public class BuildInfoHistoryController extends BaseServerController {
     @Feature(method = MethodFeature.DOWNLOAD)
     public void downloadFile(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String buildId,
                              @ValidatorItem(ValidatorRule.NUMBERS) int buildNumberId,
-                             HttpServletResponse response) {
-        String workspaceId = dbBuildHistoryLogService.getCheckUserWorkspace(getRequest());
+                             HttpServletResponse response,
+                             HttpServletRequest request) {
+        String workspaceId = dbBuildHistoryLogService.getCheckUserWorkspace(request);
         //
         BuildHistoryLog historyLog = new BuildHistoryLog();
         historyLog.setWorkspaceId(workspaceId);
@@ -119,7 +120,7 @@ public class BuildInfoHistoryController extends BaseServerController {
     }
 
 
-    @RequestMapping(value = "/build/history/download_log.html", method = RequestMethod.GET)
+    @RequestMapping(value = "/build/history/download_log", method = RequestMethod.GET)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId, HttpServletRequest request, HttpServletResponse response) {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, request);
@@ -137,8 +138,8 @@ public class BuildInfoHistoryController extends BaseServerController {
 
     @RequestMapping(value = "/build/history/history_list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<BuildHistoryLog>> historyList() {
-        PageResultDto<BuildHistoryLog> pageResultTemp = dbBuildHistoryLogService.listPage(getRequest());
+    public IJsonMessage<PageResultDto<BuildHistoryLog>> historyList(HttpServletRequest request) {
+        PageResultDto<BuildHistoryLog> pageResultTemp = dbBuildHistoryLogService.listPage(request);
         pageResultTemp.each(buildHistoryLog -> {
             File file = BuildUtil.getHistoryPackageFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
             buildHistoryLog.setHasFile(FileUtil.isNotEmpty(file));
@@ -157,10 +158,10 @@ public class BuildInfoHistoryController extends BaseServerController {
      */
     @RequestMapping(value = "/build/history/delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<String> delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
+    public IJsonMessage<String> delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId, HttpServletRequest request) {
         List<String> strings = StrUtil.splitTrim(logId, StrUtil.COMMA);
         for (String itemId : strings) {
-            BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(itemId, getRequest());
+            BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(itemId, request);
             IJsonMessage<String> jsonMessage = dbBuildHistoryLogService.deleteLogAndFile(buildHistoryLog);
             if (!jsonMessage.success()) {
                 return jsonMessage;

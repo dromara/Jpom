@@ -22,7 +22,6 @@
  */
 package org.dromara.jpom.common.commander;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import lombok.Lombok;
@@ -59,29 +58,38 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
 
     @Override
     public String buildRunCommand(NodeProjectInfoModel nodeProjectInfoModel) {
-        String path = NodeProjectInfoModel.getClassPathLib(nodeProjectInfoModel);
+        NodeProjectInfoModel infoModel = projectInfoService.resolveModel(nodeProjectInfoModel);
+        return this.buildRunCommand(nodeProjectInfoModel, infoModel);
+    }
+
+
+    @Override
+    public String buildRunCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
+        String lib = projectInfoService.resolveLibPath(originalModel);
+        String path = this.getClassPathLib(originalModel, lib);
         if (StrUtil.isBlank(path)) {
             return null;
         }
         String tag = nodeProjectInfoModel.getId();
+        String absoluteLog = projectInfoService.resolveAbsoluteLog(nodeProjectInfoModel, originalModel);
         return StrUtil.format("nohup {} {} {} {} {} {} >> {} 2>&1 &",
             getRunJavaPath(nodeProjectInfoModel, false),
             Optional.ofNullable(nodeProjectInfoModel.getJvm()).orElse(StrUtil.EMPTY),
-            JvmUtil.getJpomPidTag(tag, nodeProjectInfoModel.allLib()),
+            JvmUtil.getJpomPidTag(tag, lib),
             path,
-            Optional.ofNullable(nodeProjectInfoModel.mainClass()).orElse(StrUtil.EMPTY),
+            Optional.ofNullable(originalModel.mainClass()).orElse(StrUtil.EMPTY),
             Optional.ofNullable(nodeProjectInfoModel.getArgs()).orElse(StrUtil.EMPTY),
-            nodeProjectInfoModel.absoluteLog());
+            absoluteLog);
     }
 
     @Override
-    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, int pid) {
-        File file = FileUtil.file(nodeProjectInfoModel.allLib());
+    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel, int pid) {
+        File file = projectInfoService.resolveLibFile(originalModel);
         List<String> result = new ArrayList<>();
         boolean success = false;
         String kill = systemCommander.kill(file, pid);
         result.add(kill);
-        if (this.loopCheckRun(nodeProjectInfoModel, false)) {
+        if (this.loopCheckRun(nodeProjectInfoModel, originalModel, false)) {
             success = true;
         } else {
             // 强制杀进程
@@ -93,7 +101,7 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
                 throw Lombok.sneakyThrow(e);
             }
             //
-            if (this.loopCheckRun(nodeProjectInfoModel, 5, false)) {
+            if (this.loopCheckRun(nodeProjectInfoModel, originalModel, 5, false)) {
                 success = true;
             } else {
                 result.add("Kill -9 not completed, kill -9 failed ");

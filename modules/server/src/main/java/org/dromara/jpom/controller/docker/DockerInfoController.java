@@ -133,8 +133,8 @@ public class DockerInfoController extends BaseServerController {
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public IJsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
-        String nowWorkspaceId = dockerInfoService.getCheckUserWorkspace(getRequest());
+    public IJsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId, HttpServletRequest request) {
+        String nowWorkspaceId = dockerInfoService.getCheckUserWorkspace(request);
         //
         dockerInfoService.checkUserWorkspace(toWorkspaceId);
         dockerInfoService.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);

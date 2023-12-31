@@ -43,7 +43,11 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class WhitelistDirectoryService extends BaseDataService {
+public class WhitelistDirectoryService extends BaseOperService<AgentWhitelist> {
+
+    public WhitelistDirectoryService() {
+        super(AgentConst.WHITELIST_DIRECTORY);
+    }
 
     /**
      * 获取授权信息配置、如何没有配置或者配置错误将返回新对象
@@ -52,7 +56,7 @@ public class WhitelistDirectoryService extends BaseDataService {
      */
     public AgentWhitelist getWhitelist() {
         try {
-            JSONObject jsonObject = getJSONObject(AgentConst.WHITELIST_DIRECTORY);
+            JSONObject jsonObject = getJSONObject();
             if (jsonObject == null) {
                 return new AgentWhitelist();
             }

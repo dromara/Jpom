@@ -86,8 +86,8 @@ public class CommandInfoController extends BaseServerController {
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<CommandModel>> page() {
-        PageResultDto<CommandModel> page = commandService.listPage(getRequest());
+    public IJsonMessage<PageResultDto<CommandModel>> page(HttpServletRequest request) {
+        PageResultDto<CommandModel> page = commandService.listPage(request);
         return JsonMessage.success("", page);
     }
 
@@ -149,12 +149,12 @@ public class CommandInfoController extends BaseServerController {
      */
     @RequestMapping(value = "del", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<Object> del(String id) {
+    public IJsonMessage<Object> del(String id, HttpServletRequest request) {
         File logFileDir = CommandExecLogModel.logFileDir(id);
         boolean fastDel = CommandUtil.systemFastDel(logFileDir);
         Assert.state(!fastDel, "清理日志文件失败");
         //
-        HttpServletRequest request = getRequest();
+
         commandService.delByKey(id, request);
         commandExecLogService.delByWorkspace(request, entity -> entity.set("commandId", id));
         return JsonMessage.success("操作成功");
@@ -175,8 +175,8 @@ public class CommandInfoController extends BaseServerController {
     @RequestMapping(value = "batch", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public IJsonMessage<String> batch(String id,
-                                     String params,
-                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "运行节点不能为空") String nodes) throws IOException {
+                                      String params,
+                                      @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "运行节点不能为空") String nodes) throws IOException {
         Assert.hasText(id, "请选择执行的命令");
         Assert.hasText(nodes, "请选择执行节点");
         String batchId = commandService.executeBatch(id, params, nodes);
@@ -193,8 +193,8 @@ public class CommandInfoController extends BaseServerController {
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public IJsonMessage<Object> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
-        String nowWorkspaceId = nodeService.getCheckUserWorkspace(getRequest());
+    public IJsonMessage<Object> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId, HttpServletRequest request) {
+        String nowWorkspaceId = nodeService.getCheckUserWorkspace(request);
         //
         commandService.checkUserWorkspace(toWorkspaceId);
         commandService.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
@@ -209,8 +209,8 @@ public class CommandInfoController extends BaseServerController {
      */
     @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
-        CommandModel item = commandService.getByKey(id, getRequest());
+    public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
+        CommandModel item = commandService.getByKey(id, request);
         UserModel user = getUser();
         CommandModel updateInfo;
         if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
@@ -222,12 +222,12 @@ public class CommandInfoController extends BaseServerController {
         } else {
             updateInfo = item;
         }
-        Map<String, String> map = this.getBuildToken(updateInfo);
+        Map<String, String> map = this.getBuildToken(updateInfo, request);
         return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
-    private Map<String, String> getBuildToken(CommandModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
+    private Map<String, String> getBuildToken(CommandModel item, HttpServletRequest request) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
         String url = ServerOpenApi.SSH_COMMAND_TRIGGER_URL.
             replace("{id}", item.getId()).
             replace("{token}", item.getTriggerToken());

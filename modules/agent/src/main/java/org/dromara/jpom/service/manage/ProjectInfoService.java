@@ -22,11 +22,17 @@
  */
 package org.dromara.jpom.service.manage;
 
-import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import org.dromara.jpom.common.AgentConst;
+import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.service.BaseWorkspaceOptService;
+import org.dromara.jpom.system.ExtConfigBean;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
+import java.io.File;
 
 /**
  * 项目管理
@@ -36,16 +42,142 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProjectInfoService extends BaseWorkspaceOptService<NodeProjectInfoModel> {
 
-
     public ProjectInfoService() {
         super(AgentConst.PROJECT);
     }
 
-
     @Override
-    public void addItem(NodeProjectInfoModel nodeProjectInfoModel) {
-        nodeProjectInfoModel.setCreateTime(DateUtil.now());
-        super.addItem(nodeProjectInfoModel);
+    public void updateItem(NodeProjectInfoModel data) {
+        super.updateItem(data);
+    }
+
+    /**
+     * 获取原始项目信息
+     *
+     * @param nodeProjectInfoModel 项目信息
+     * @return model
+     */
+    public NodeProjectInfoModel resolveModel(NodeProjectInfoModel nodeProjectInfoModel) {
+        RunMode runMode = nodeProjectInfoModel.getRunMode();
+        if (runMode != RunMode.Link) {
+            return nodeProjectInfoModel;
+        }
+        NodeProjectInfoModel item = this.getItem(nodeProjectInfoModel.getLinkId());
+        Assert.notNull(item, "被软链的项目已经不存在啦，" + nodeProjectInfoModel.getLinkId());
+        return item;
+    }
+
+    /**
+     * 解析lib路径
+     *
+     * @param nodeProjectInfoModel 项目
+     * @return 项目的 lib 路径（文件路径）
+     */
+    public String resolveLibPath(NodeProjectInfoModel nodeProjectInfoModel) {
+        RunMode runMode = nodeProjectInfoModel.getRunMode();
+        if (runMode == RunMode.Link) {
+            NodeProjectInfoModel item = this.getItem(nodeProjectInfoModel.getLinkId());
+            Assert.notNull(item, "软链项目已经不存在啦");
+            return item.allLib();
+        }
+        return nodeProjectInfoModel.allLib();
+    }
+
+    /**
+     * 解析lib路径
+     *
+     * @param nodeProjectInfoModel 项目
+     * @return 项目的 lib 路径（文件路径）
+     */
+    public File resolveLibFile(NodeProjectInfoModel nodeProjectInfoModel) {
+        String path = this.resolveLibPath(nodeProjectInfoModel);
+        return FileUtil.file(path);
+    }
+
+    /**
+     * 解析项目的日志路径
+     *
+     * @param nodeProjectInfoModel 项目
+     * @return path
+     */
+    private File resolveLogFile(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
+        String id = nodeProjectInfoModel.getId();
+        File logPath = this.resolveLogPath(nodeProjectInfoModel, originalModel);
+        return FileUtil.file(logPath, id + ".log");
+    }
+
+    /**
+     * 解析项目的日志路径
+     *
+     * @param nodeProjectInfoModel 项目
+     * @return path
+     */
+    private File resolveLogPath(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
+        String id = nodeProjectInfoModel.getId();
+        Assert.hasText(id, "没有项目id");
+        String loggedPath = originalModel.logPath();
+        if (StrUtil.isNotEmpty(loggedPath)) {
+            return FileUtil.file(loggedPath, id);
+        }
+        String path = ExtConfigBean.getPath();
+        return FileUtil.file(path, "project-log", id);
+    }
+
+    /**
+     * 解析项目的日志路径
+     *
+     * @param nodeProjectInfoModel 项目
+     * @return path
+     */
+    public String resolveAbsoluteLog(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
+        File file = this.resolveAbsoluteLogFile(nodeProjectInfoModel, originalModel);
+        return FileUtil.getAbsolutePath(file);
+    }
+
+    /**
+     * 解析项目的日志路径
+     *
+     * @param nodeProjectInfoModel 项目
+     * @return path
+     */
+    public File resolveAbsoluteLogFile(NodeProjectInfoModel nodeProjectInfoModel) {
+        NodeProjectInfoModel infoModel = this.resolveModel(nodeProjectInfoModel);
+        return this.resolveLogFile(nodeProjectInfoModel, infoModel);
+    }
+
+    /**
+     * 解析项目的日志路径
+     *
+     * @param nodeProjectInfoModel 项目
+     * @return path
+     */
+    public File resolveAbsoluteLogFile(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
+        File file = this.resolveLogFile(nodeProjectInfoModel, originalModel);
+        // auto create dir
+        FileUtil.touch(file);
+        return file;
+    }
+
+    /**
+     * 解析日志备份路径
+     *
+     * @param nodeProjectInfoModel 项目
+     * @return file
+     */
+    public File resolveLogBack(NodeProjectInfoModel nodeProjectInfoModel) {
+        NodeProjectInfoModel infoModel = this.resolveModel(nodeProjectInfoModel);
+        return this.resolveLogBack(nodeProjectInfoModel, infoModel);
+    }
+
+    /**
+     * 解析日志备份路径
+     *
+     * @param nodeProjectInfoModel 项目
+     * @return file
+     */
+    public File resolveLogBack(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
+        File logPath = this.resolveLogPath(nodeProjectInfoModel, originalModel);
+        return FileUtil.file(logPath, "back");
     }
 
 }

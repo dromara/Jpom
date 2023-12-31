@@ -48,15 +48,6 @@ export function getNodeListWithVersion(params) {
 // }
 
 // 节点 + 项目列表
-export function getNodeProjectList(params) {
-  return axios({
-    url: "/node/node_project_list",
-    method: "post",
-    data: params,
-  });
-}
-
-// 节点 + 项目列表
 export function getProjectList(params, loading) {
   return axios({
     url: "/node/project_list",
@@ -69,11 +60,11 @@ export function getProjectList(params, loading) {
 }
 
 // 节点 + 项目列表
-export function getProjectListAll() {
+export function getProjectListAll(params) {
   return axios({
     url: "/node/project_list_all",
     method: "get",
-    params: {},
+    params,
   });
 }
 

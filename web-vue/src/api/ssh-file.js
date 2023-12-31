@@ -53,7 +53,7 @@ export function getFileList(baseUrl, params) {
  * @param {id, path, name} params
  */
 export function downloadFile(baseUrl, params) {
-  return loadRouterBase(baseUrl + "download.html", params);
+  return loadRouterBase(baseUrl + "download", params);
 }
 
 /**
@@ -120,15 +120,15 @@ export function renameFileFolder(baseUrl, params) {
 
 /**
  * 修改文件权限
- * @param {*} baseUrl 
+ * @param {*} baseUrl
  * @param {
  *  String id,
  *  String allowPathParent,
  *  String nextPath,
  *  String fileName,
  *  String permissionValue
- * } params 
- * @returns 
+ * } params
+ * @returns
  */
 export function changeFilePermission(baseUrl, params) {
   return axios({
@@ -141,23 +141,23 @@ export function changeFilePermission(baseUrl, params) {
 /**
  * 权限字符串转权限对象
  * @param {String} str "lrwxr-xr-x"
- * @returns 
+ * @returns
  */
 export function parsePermissions(str) {
-  let permissions = {owner: {}, group: {}, others: {}};
+  let permissions = { owner: {}, group: {}, others: {} };
 
-  let chars = str.split('');
-  permissions.owner.read = (chars[1] === "r");
-  permissions.owner.write = (chars[2] === "w");
-  permissions.owner.execute = (chars[3] === "x");
+  let chars = str.split("");
+  permissions.owner.read = chars[1] === "r";
+  permissions.owner.write = chars[2] === "w";
+  permissions.owner.execute = chars[3] === "x";
 
-  permissions.group.read = (chars[4] === "r");
-  permissions.group.write = (chars[5] === "w");
-  permissions.group.execute = (chars[6] === "x");
+  permissions.group.read = chars[4] === "r";
+  permissions.group.write = chars[5] === "w";
+  permissions.group.execute = chars[6] === "x";
 
-  permissions.others.read = (chars[7] === "r");
-  permissions.others.write = (chars[8] === "w");
-  permissions.others.execute = (chars[9] === "x");
+  permissions.others.read = chars[7] === "r";
+  permissions.others.write = chars[8] === "w";
+  permissions.others.execute = chars[9] === "x";
 
   return permissions;
 }
@@ -169,7 +169,7 @@ export function parsePermissions(str) {
  *  group: { read: false, write: false, execute: false, },
  *  others: { read: false, write: false, execute: false, },
  * } permissions
- * @returns 
+ * @returns
  */
 export function calcFilePermissionValue(permissions) {
   let value = 0;

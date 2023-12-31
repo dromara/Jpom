@@ -131,8 +131,7 @@ public class NodeEditController extends BaseServerController {
      */
     @PostMapping(value = "del.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<String> del(@ValidatorItem String id) {
-        HttpServletRequest request = getRequest();
+    public IJsonMessage<String> del(@ValidatorItem String id, HttpServletRequest request) {
         this.checkDataBind(id, request, "删除");
         //
         {
@@ -185,8 +184,7 @@ public class NodeEditController extends BaseServerController {
      */
     @GetMapping(value = "unbind.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<String> unbind(String id) {
-        HttpServletRequest request = getRequest();
+    public IJsonMessage<String> unbind(String id, HttpServletRequest request) {
         this.checkDataBind(id, request, "解绑");
         //
         projectInfoCacheService.delCache(id, request);
@@ -206,8 +204,8 @@ public class NodeEditController extends BaseServerController {
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public IJsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
-        String nowWorkspaceId = nodeService.getCheckUserWorkspace(getRequest());
+    public IJsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId, HttpServletRequest request) {
+        String nowWorkspaceId = nodeService.getCheckUserWorkspace(request);
         //
         nodeService.checkUserWorkspace(toWorkspaceId);
         nodeService.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
@@ -224,8 +222,7 @@ public class NodeEditController extends BaseServerController {
      */
     @GetMapping(value = "sort-item", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId) {
-        HttpServletRequest request = getRequest();
+    public IJsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId, HttpServletRequest request) {
         if (StrUtil.equalsIgnoreCase(method, "top")) {
             nodeService.sortToTop(id, request);
         } else if (StrUtil.equalsIgnoreCase(method, "up")) {

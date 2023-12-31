@@ -42,6 +42,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.List;
@@ -70,8 +71,8 @@ public class CommandLogController extends BaseServerController {
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<CommandExecLogModel>> page() {
-        PageResultDto<CommandExecLogModel> page = commandExecLogService.listPage(getRequest());
+    public IJsonMessage<PageResultDto<CommandExecLogModel>> page(HttpServletRequest request) {
+        PageResultDto<CommandExecLogModel> page = commandExecLogService.listPage(request);
         return JsonMessage.success("", page);
     }
 
@@ -87,8 +88,8 @@ public class CommandLogController extends BaseServerController {
      */
     @RequestMapping(value = "del", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<String> del(String id) {
-        CommandExecLogModel execLogModel = commandExecLogService.getByKey(id);
+    public IJsonMessage<String> del(String id, HttpServletRequest request) {
+        CommandExecLogModel execLogModel = commandExecLogService.getByKey(id, request);
         Assert.notNull(execLogModel, "没有对应的记录");
         File logFile = execLogModel.logFile();
         boolean fastDel = CommandUtil.systemFastDel(logFile);
@@ -122,8 +123,10 @@ public class CommandLogController extends BaseServerController {
      */
     @GetMapping(value = "batch_list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<List<CommandExecLogModel>> batchList(@ValidatorItem String commandId, @ValidatorItem String batchId) {
+    public IJsonMessage<List<CommandExecLogModel>> batchList(@ValidatorItem String commandId, @ValidatorItem String batchId, HttpServletRequest request) {
         CommandExecLogModel commandExecLogModel = new CommandExecLogModel();
+        String workspace = commandExecLogService.getCheckUserWorkspace(request);
+        commandExecLogModel.setWorkspaceId(workspace);
         commandExecLogModel.setCommandId(commandId);
         commandExecLogModel.setBatchId(batchId);
         List<CommandExecLogModel> commandExecLogModels = commandExecLogService.listByBean(commandExecLogModel);
@@ -147,8 +150,8 @@ public class CommandLogController extends BaseServerController {
     @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> log(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-                                       @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
-        CommandExecLogModel item = commandExecLogService.getByKey(id, getRequest());
+                                        @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line, HttpServletRequest request) {
+        CommandExecLogModel item = commandExecLogService.getByKey(id, request);
         Assert.notNull(item, "没有对应数据");
 
         File file = item.logFile();
@@ -178,8 +181,8 @@ public class CommandLogController extends BaseServerController {
     @RequestMapping(value = "download_log", method = RequestMethod.GET)
     @ResponseBody
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId, HttpServletResponse response) {
-        CommandExecLogModel item = commandExecLogService.getByKey(logId);
+    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId, HttpServletRequest request, HttpServletResponse response) {
+        CommandExecLogModel item = commandExecLogService.getByKey(logId, request);
         Assert.notNull(item, "没有对应数据");
         File logFile = item.logFile();
         if (!FileUtil.exist(logFile)) {

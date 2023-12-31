@@ -39,6 +39,7 @@ import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.configuration.ProjectConfig;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
+import org.dromara.jpom.service.manage.ProjectInfoService;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
@@ -59,9 +60,12 @@ import java.util.stream.Collectors;
 public class ProjectFileBackupService {
 
     private final ProjectConfig projectConfig;
+    private final ProjectInfoService projectInfoService;
 
-    public ProjectFileBackupService(AgentConfig agentConfig) {
+    public ProjectFileBackupService(AgentConfig agentConfig,
+                                    ProjectInfoService projectInfoService) {
         this.projectConfig = agentConfig.getProject();
+        this.projectInfoService = projectInfoService;
     }
 
     /**
@@ -71,9 +75,10 @@ public class ProjectFileBackupService {
      * @return file
      */
     public File pathProject(NodeProjectInfoModel projectInfoModel) {
-        DslYmlDto dslYmlDto = projectInfoModel.dslConfig();
+        NodeProjectInfoModel infoModel = projectInfoService.resolveModel(projectInfoModel);
+        DslYmlDto dslYmlDto = infoModel.dslConfig();
         String backupPath = resolveBackupPath(dslYmlDto);
-        return pathProject(backupPath, projectInfoModel.getId());
+        return pathProject(backupPath, infoModel.getId());
     }
 
     /**
@@ -109,18 +114,19 @@ public class ProjectFileBackupService {
      * @param projectInfoModel 项目
      */
     public String backup(NodeProjectInfoModel projectInfoModel) {
-        int backupCount = resolveBackupCount(projectInfoModel.dslConfig());
+        NodeProjectInfoModel infoModel = projectInfoService.resolveModel(projectInfoModel);
+        int backupCount = resolveBackupCount(infoModel.dslConfig());
         if (backupCount <= 0) {
             // 未开启备份
             return null;
         }
-        File file = FileUtil.file(projectInfoModel.allLib());
+        File file = projectInfoService.resolveLibFile(infoModel);
         //
         if (!FileUtil.exist(file)) {
             return null;
         }
         String backupId = DateTime.now().toString(DatePattern.PURE_DATETIME_MS_FORMAT);
-        File projectFileBackup = this.pathProjectBackup(projectInfoModel, backupId);
+        File projectFileBackup = this.pathProjectBackup(infoModel, backupId);
         Assert.state(!FileUtil.exist(projectFileBackup), "备份目录冲突：" + projectFileBackup.getName());
         FileUtil.copyContent(file, projectFileBackup, true);
         //
@@ -187,16 +193,17 @@ public class ProjectFileBackupService {
             // 备份ID 不存在
             return;
         }
-        String projectPath = projectInfoModel.allLib();
-        DslYmlDto dslYmlDto = projectInfoModel.dslConfig();
+        NodeProjectInfoModel infoModel = projectInfoService.resolveModel(projectInfoModel);
+        File projectPath = projectInfoService.resolveLibFile(infoModel);
+        DslYmlDto dslYmlDto = infoModel.dslConfig();
         // 考虑到大文件对比，比较耗时。需要异步对比文件
         ThreadUtil.execute(() -> {
             try {
                 //String useBackupPath = resolveBackupPath(dslYmlDto);
-                File backupItemPath = this.pathProjectBackup(projectInfoModel, backupId);
-                File backupPath = this.pathProject(projectInfoModel);
+                File backupItemPath = this.pathProjectBackup(infoModel, backupId);
+                File backupPath = this.pathProject(infoModel);
                 // 获取文件列表
-                Map<String, File> backupFiles = this.listFiles(backupItemPath.getAbsolutePath());
+                Map<String, File> backupFiles = this.listFiles(backupItemPath);
                 Map<String, File> nowFiles = this.listFiles(projectPath);
                 nowFiles.forEach((fileSha1, file) -> {
                     // 当前目录存在的，但是备份目录也存在的相同文件则删除
@@ -231,7 +238,7 @@ public class ProjectFileBackupService {
                 // 检查备份保留个数
                 clearOldBackup(backupPath, dslYmlDto);
                 // 合并之前备份目录
-                margeBackupPath(projectInfoModel);
+                margeBackupPath(infoModel);
             } catch (Exception e) {
                 log.warn("对比清空项目文件备份失败", e);
             }
@@ -275,7 +282,7 @@ public class ProjectFileBackupService {
      * @param path 路径
      * @return 文件列表信息
      */
-    private Map<String, File> listFiles(String path) {
+    private Map<String, File> listFiles(File path) {
         // 将所有的文件信息组装并签名
         List<File> files = FileUtil.loopFiles(path);
         List<JSONObject> collect = files.stream().map(file -> {

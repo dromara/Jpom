@@ -30,6 +30,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 命令操作执行结果
@@ -116,7 +117,7 @@ public class CommandOpResult {
     public static CommandOpResult of(boolean success, List<String> msg) {
         CommandOpResult commandOpResult = new CommandOpResult();
         commandOpResult.success = success;
-        commandOpResult.msgs.addAll(msg);
+        Optional.ofNullable(msg).ifPresent(commandOpResult.msgs::addAll);
         return commandOpResult;
     }
 

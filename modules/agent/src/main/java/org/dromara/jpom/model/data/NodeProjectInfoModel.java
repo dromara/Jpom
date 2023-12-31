@@ -22,9 +22,7 @@
  */
 package org.dromara.jpom.model.data;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
@@ -35,12 +33,8 @@ import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.system.JpomRuntimeException;
 import org.springframework.util.Assert;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * 项目配置信息实体
@@ -54,18 +48,22 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      * 分组
      */
     private String group;
-    private String mainClass;
+    /**
+     * 项目路径
+     */
     private String lib;
     /**
      * 授权目录
      */
     private String whitelistDirectory;
-    private String log;
-
     /**
      * 日志目录
      */
     private String logPath;
+    /**
+     * java 模式运行的 class
+     */
+    private String mainClass;
     /**
      * jvm 参数
      */
@@ -78,20 +76,23 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      * WebHooks
      */
     private String token;
-
-
+    /**
+     * 项目运行模式
+     */
     private RunMode runMode;
+    /**
+     * 软链的父级项目id
+     */
+    private String linkId;
     /**
      * 节点分发项目，不允许在项目管理中编辑
      */
     private Boolean outGivingProject;
-
     /**
      * -Djava.ext.dirs=lib -cp conf:run.jar
      * 填写【lib:conf】
      */
     private String javaExtDirsCp;
-
     /**
      * 项目自动启动
      */
@@ -134,7 +135,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return outGivingProject != null && outGivingProject;
     }
 
-
     public String mainClass() {
         return StrUtil.emptyToDefault(mainClass, StrUtil.EMPTY);
     }
@@ -151,119 +151,9 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return FileUtil.file(directory, this.getLib()).getAbsolutePath();
     }
 
-    /**
-     * 获取项目文件中的所有jar 文件
-     *
-     * @param nodeProjectInfoModel 项目
-     * @return list
-     */
-    public static List<File> listJars(NodeProjectInfoModel nodeProjectInfoModel) {
-        File fileLib = new File(nodeProjectInfoModel.allLib());
-        File[] files = fileLib.listFiles();
-        if (files == null) {
-            return new ArrayList<>();
-        }
-        RunMode runMode = nodeProjectInfoModel.getRunMode();
-        return Arrays.stream(files)
-            .filter(File::isFile)
-            .filter(file -> {
-                if (runMode == RunMode.ClassPath || runMode == RunMode.Jar || runMode == RunMode.JavaExtDirsCp) {
-                    return StrUtil.endWith(file.getName(), FileUtil.JAR_FILE_EXT, true);
-                } else if (runMode == RunMode.JarWar) {
-                    return StrUtil.endWith(file.getName(), "war", true);
-                }
-                return false;
-            })
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * 拼接java 执行的jar路径
-     *
-     * @param nodeProjectInfoModel 项目
-     * @return classpath 或者 jar
-     */
-    public static String getClassPathLib(NodeProjectInfoModel nodeProjectInfoModel) {
-        List<File> files = listJars(nodeProjectInfoModel);
-        if (CollUtil.isEmpty(files)) {
-            return "";
-        }
-        // 获取lib下面的所有jar包
-        StringBuilder classPath = new StringBuilder();
-        RunMode runMode = nodeProjectInfoModel.getRunMode();
-        int len = files.size();
-        if (runMode == RunMode.ClassPath) {
-            classPath.append("-classpath ");
-        } else if (runMode == RunMode.Jar || runMode == RunMode.JarWar) {
-            classPath.append("-jar ");
-            // 只取一个jar文件
-            len = 1;
-        } else if (runMode == RunMode.JavaExtDirsCp) {
-            classPath.append("-Djava.ext.dirs=");
-            String javaExtDirsCp = nodeProjectInfoModel.javaExtDirsCp();
-            String[] split = StrUtil.splitToArray(javaExtDirsCp, StrUtil.COLON);
-            if (ArrayUtil.isEmpty(split)) {
-                classPath.append(". -cp ");
-            } else {
-                classPath.append(split[0]).append(" -cp ");
-                if (split.length > 1) {
-                    classPath.append(split[1]).append(FileUtil.PATH_SEPARATOR);
-                }
-            }
-        } else {
-            return StrUtil.EMPTY;
-        }
-        for (int i = 0; i < len; i++) {
-            File file = files.get(i);
-            classPath.append(file.getAbsolutePath());
-            if (i != len - 1) {
-                classPath.append(FileUtil.PATH_SEPARATOR);
-            }
-        }
-        return classPath.toString();
-    }
-
     public String logPath() {
         return StrUtil.emptyToDefault(this.logPath, StrUtil.EMPTY);
     }
-
-
-    public String log() {
-        String id = this.getId();
-        if (StrUtil.isEmpty(id)) {
-            return StrUtil.EMPTY;
-        }
-        String loggedPath = this.logPath();
-        if (StrUtil.isNotEmpty(loggedPath)) {
-            return FileUtil.normalize(String.format("%s/%s/%s.log", loggedPath, id, id));
-        }
-        if (StrUtil.isEmpty(this.log)) {
-            String log = new File(this.allLib()).getParent();
-            this.log = FileUtil.normalize(String.format("%s/%s.log", log, id));
-        }
-        return StrUtil.emptyToDefault(this.log, StrUtil.EMPTY);
-    }
-
-    public String absoluteLog() {
-        File file = this.absoluteLogFile();
-        return FileUtil.getAbsolutePath(file);
-    }
-
-    public File absoluteLogFile() {
-        String pathname = log();
-        Assert.hasText(pathname, "log path error");
-        File file = new File(pathname);
-        // auto create dir
-        FileUtil.mkParentDirs(file);
-        return file;
-    }
-
-    public File logBack() {
-        String log1 = log();
-        Assert.hasText(log1, "log path error");
-        return new File(log1 + "_back");
-    }
-
 
     /**
      * 默认

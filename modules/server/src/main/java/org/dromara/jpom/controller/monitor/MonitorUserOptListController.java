@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -69,8 +70,8 @@ public class MonitorUserOptListController extends BaseServerController {
 
     @RequestMapping(value = "list_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<MonitorUserOptModel>> getMonitorList() {
-        PageResultDto<MonitorUserOptModel> pageResultDto = monitorUserOptService.listPage(getRequest());
+    public IJsonMessage<PageResultDto<MonitorUserOptModel>> getMonitorList(HttpServletRequest request) {
+        PageResultDto<MonitorUserOptModel> pageResultDto = monitorUserOptService.listPage(request);
         return JsonMessage.success("", pageResultDto);
     }
 
@@ -117,9 +118,9 @@ public class MonitorUserOptListController extends BaseServerController {
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<Object> deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id) {
+    public IJsonMessage<Object> deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id, HttpServletRequest request) {
         //
-        monitorUserOptService.delByKey(id, getRequest());
+        monitorUserOptService.delByKey(id, request);
         return JsonMessage.success("删除成功");
     }
 
@@ -135,11 +136,11 @@ public class MonitorUserOptListController extends BaseServerController {
     @RequestMapping(value = "update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Object> updateMonitor(String id,
-                                             @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空") String name,
-                                             String notifyUser,
-                                             String monitorUser,
-                                             String monitorOpt,
-                                             String monitorFeature) {
+                                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空") String name,
+                                              String notifyUser,
+                                              String monitorUser,
+                                              String monitorOpt,
+                                              String monitorFeature) {
 
         String status = getParameter("status");
 
@@ -210,7 +211,7 @@ public class MonitorUserOptListController extends BaseServerController {
     @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Object> changeStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id不能为空") String id,
-                                            String status) {
+                                             String status) {
         MonitorUserOptModel monitorModel = monitorUserOptService.getByKey(id);
         Assert.notNull(monitorModel, "不存在监控项啦");
 

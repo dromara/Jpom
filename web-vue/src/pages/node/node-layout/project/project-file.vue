@@ -314,8 +314,8 @@ export default {
   },
   data() {
     return {
-      ZIP_ACCEPT: ZIP_ACCEPT,
-      noFileModes: noFileModes,
+      ZIP_ACCEPT,
+      noFileModes,
       loading: false,
       treeList: [],
       fileList: [],

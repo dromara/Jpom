@@ -74,18 +74,6 @@ public class NodeScriptController extends BaseServerController {
     }
 
     /**
-     * get script list
-     *
-     * @return json
-     * @author Hotstrip
-     */
-    @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<PageResultDto<NodeScriptCacheModel>> scriptList(HttpServletRequest request) {
-        PageResultDto<NodeScriptCacheModel> pageResultDto = nodeScriptServer.listPageNode(request);
-        return JsonMessage.success("success", pageResultDto);
-    }
-
-    /**
      * load node script list
      * 加载节点脚本列表
      *
@@ -200,12 +188,12 @@ public class NodeScriptController extends BaseServerController {
         } else {
             updateInfo = item;
         }
-        Map<String, String> map = this.getBuildToken(updateInfo);
+        Map<String, String> map = this.getBuildToken(updateInfo, request);
         return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
-    private Map<String, String> getBuildToken(NodeScriptCacheModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
+    private Map<String, String> getBuildToken(NodeScriptCacheModel item, HttpServletRequest request) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
         String url = ServerOpenApi.NODE_SCRIPT_TRIGGER_URL.
             replace("{id}", item.getId()).
             replace("{token}", item.getTriggerToken());
