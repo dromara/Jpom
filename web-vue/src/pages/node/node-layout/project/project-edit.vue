@@ -92,8 +92,8 @@
             "
           >
             快速配置
-          </a-button></template
-        >
+          </a-button>
+        </template>
         <a-input-group compact>
           <a-select style="width: 50%" v-model="temp.whitelistDirectory" placeholder="请选择项目授权路径">
             <a-select-option v-for="access in accessList" :key="access">
@@ -133,7 +133,20 @@
             <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
           </a-tooltip>
         </template>
-        <template #help>查看节点脚本</template>
+        <template #help>
+          scriptId可以使用节点脚本：
+          <a-button
+            type="link"
+            size="small"
+            @click="
+              () => {
+                drawerVisible = true;
+              }
+            "
+          >
+            查看节点脚本
+          </a-button>
+        </template>
         <a-tabs>
           <a-tab-pane key="1" tab="DSL 配置">
             <div style="height: 40vh; overflow-y: scroll">
@@ -218,6 +231,7 @@
         <a-alert :message="temp.runCommand || '无'" type="success" />
       </a-form-model-item>
     </a-form-model>
+    <!-- 配置节点授权目录 -->
     <a-modal
       destroyOnClose
       v-model="configDir"
@@ -241,11 +255,23 @@
         "
       ></whiteList>
     </a-modal>
+    <!-- 管理节点 -->
+    <NodeFunc
+      v-if="drawerVisible"
+      name="查看节点脚本"
+      :id="nodeId"
+      :tabs="['scripct']"
+      @close="
+        () => {
+          drawerVisible = false;
+        }
+      "
+    ></NodeFunc>
   </div>
 </template>
 <script>
 import CustomSelect from "@/components/customSelect";
-
+import NodeFunc from "@/pages/node/node-func";
 import codeEditor from "@/components/codeEditor";
 import { PROJECT_DSL_DEFATUL, randomStr } from "@/utils/const";
 import whiteList from "@/pages/node/node-layout/system/white-list.vue";
@@ -277,6 +303,7 @@ export default {
     CustomSelect,
     whiteList,
     codeEditor,
+    NodeFunc,
   },
   data() {
     return {
@@ -289,7 +316,7 @@ export default {
       PROJECT_DSL_DEFATUL,
       configDir: false,
       temp: {},
-
+      drawerVisible: false,
       rules: {
         id: [{ required: true, message: "请输入项目ID", trigger: "blur" }],
         name: [{ required: true, message: "请输入项目名称", trigger: "blur" }],
@@ -428,18 +455,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-.replica-area {
-  width: 80%;
-}
-
-/* .replica-btn-del {
-  position: absolute;
-  right: 120px;
-  top: 74px;
-} */
-
-/* .lib-exist {
-  color: #faad14;
-} */
-</style>
+<style scoped></style>
