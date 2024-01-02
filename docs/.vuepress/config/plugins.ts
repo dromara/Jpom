@@ -185,17 +185,6 @@ export default <UserPlugins>[
   //     zIndex: 999999999, // 页面的索引属性，默认值：99999999，
   //   },
   // ],
-  // 动态标题，官网：https://moefyit.github.io/moefy-vuepress/packages/dynamic-title.html
-  [
-    "dynamic-title",
-    {
-      showIcon: "/favicon.ico",
-      showText: "欢迎回来！继续阅读",
-      hideIcon: "/failure.ico",
-      hideText: "不要走呀！还没有读完呢",
-      recoverTime: 2000, //  持续时间
-    },
-  ],
   // vuepress-plugin-tabs。官网：https://github.com/pskordilakis/vuepress-plugin-tabs
   ["tabs"],
   [

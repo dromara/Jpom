@@ -11,7 +11,7 @@
 <h1>欢迎访问 Jpom 网站</h1>
 <p>本页面将在 <span id="countdown">3</span> 秒后自动跳转到 <a href="https://jpom.top" id="to">https://jpom.top</a></p>
 <script>
-  var toUrl = 'https://jpom.top?referrer=' + document.referrer;
+  var toUrl = 'https://jpom.top?referrer=' + document.referrer || document.location.origin;
   var toElement = document.getElementById('to');
   toElement.setAttribute('href', toUrl);
   var countdownElement = document.getElementById('countdown');

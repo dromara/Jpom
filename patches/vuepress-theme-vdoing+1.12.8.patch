@@ -61,3 +61,68 @@ index 7eececa..e920d99 100644
      }
    },
    components: { NavLink, MainLayout, PostList, UpdateArticle, BloggerBar, CategoriesBar, TagsBar, Pagination },
+diff --git a/node_modules/vuepress-theme-vdoing/components/BodyBgImg.vue b/node_modules/vuepress-theme-vdoing/components/BodyBgImg.vue
+index 97b6b55..ac34162 100644
+--- a/node_modules/vuepress-theme-vdoing/components/BodyBgImg.vue
++++ b/node_modules/vuepress-theme-vdoing/components/BodyBgImg.vue
+@@ -8,17 +8,31 @@
+ <script>
+ import { type } from '../util'
+ export default {
++  props: {
++    themeMode: {
++      type: String,
++      default: 'auto'
++    }
++  },
+   data() {
+     return {
+       bgImg: '',
+-      opacity: 0.5
++      opacity: 0.5,
++      bodyBgMode: {},
++      bodyBgImg: ''
+     }
+   },
++  watch: {
++    themeMode() {
++      this.computeBgImg();
++    },
++  },
+   mounted() {
+-    let { bodyBgImg, bodyBgImgOpacity, bodyBgImgInterval = 15 } = this.$themeConfig
+-
++    let {bodyBgImg, bodyBgImgOpacity, bodyBgImgInterval = 15, bodyBgMode = {}} = this.$themeConfig
++    this.bodyBgMode = bodyBgMode;
+     if (type(bodyBgImg) === 'string') {
+-      this.bgImg = bodyBgImg
++      this.bodyBgImg = bodyBgImg;
++      this.computeBgImg();
+     } else if (type(bodyBgImg) === 'array') {
+       let count = 0
+       let timer = null
+@@ -43,6 +57,11 @@ export default {
+       this.opacity = bodyBgImgOpacity
+     }
+
++  },
++  methods: {
++    computeBgImg() {
++      this.bgImg = this.bodyBgMode[this.themeMode] || this.bodyBgImg;
++    }
+   }
+ }
+ </script>
+diff --git a/node_modules/vuepress-theme-vdoing/layouts/Layout.vue b/node_modules/vuepress-theme-vdoing/layouts/Layout.vue
+index 62dda70..3df2575 100644
+--- a/node_modules/vuepress-theme-vdoing/layouts/Layout.vue
++++ b/node_modules/vuepress-theme-vdoing/layouts/Layout.vue
+@@ -69,7 +69,7 @@
+
+     <Buttons ref="buttons" @toggle-theme-mode="toggleThemeMode" />
+
+-    <BodyBgImg v-if="$themeConfig.bodyBgImg" />
++    <BodyBgImg v-if="$themeConfig.bodyBgImg" :themeMode="themeMode"/>
+
+     <!-- 自定义html插入左右下角的小窗口 -->
+     <div

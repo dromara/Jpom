@@ -1,7 +1,7 @@
 ---
 home: true
 heroImage: /images/logo/jpom_logo_big.svg
-heroText: 
+heroText: 一款原生 ops 软件
 tagline: 🚀简而轻的低侵入式在线构建、自动部署、日常运维、项目运维监控软件
 actions:
   - actionText: 🛠️开始安装
@@ -359,7 +359,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 
 ## 🍭架构图
 
-<img class="no-zoom" :src="$withBase('/images/jpom-func-arch.jpg')" style="zoom: 120%" alt="jpom-func-arch">
+<img class="no-zoom" :src="$withBase('/images/jpom-func-arch.png')" style="zoom: 120%" alt="jpom-func-arch">
 
 <br/>
 
@@ -455,7 +455,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 </p>
 
 ## 🧲友情链接
-<div class="friends-item">
+<div class="friends-item" style="background-color: var(--imgBgColor);">
     <a href="https://shop108037867.taobao.com" target="_blank">
         <img :src="$withBase('/images/friends/yuanlaiyishe.png')" class="no-zoom friends-item-img hover-alt" alt="yuanlaiyishe">
     </a>
