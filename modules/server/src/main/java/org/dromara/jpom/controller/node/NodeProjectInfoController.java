@@ -24,7 +24,6 @@ package org.dromara.jpom.controller.node;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Entity;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +39,6 @@ import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
-import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
@@ -125,21 +123,6 @@ public class NodeProjectInfoController extends BaseServerController {
         int count = projectInfoCacheService.delCache(nodeId, request);
         String msg = projectInfoCacheService.syncExecuteNode(nodeModel);
         return JsonMessage.success("主动清除：" + count + StrUtil.SPACE + msg);
-    }
-
-    /**
-     * 删除节点缓存的所有项目
-     *
-     * @return json
-     */
-    @GetMapping(value = "clear_all_project", produces = MediaType.APPLICATION_JSON_VALUE)
-    @SystemPermission(superUser = true)
-    @Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
-    public IJsonMessage<Object> clearAll() {
-        Entity where = Entity.create();
-        where.set("id", " <> id");
-        int del = projectInfoCacheService.del(where);
-        return JsonMessage.success("成功删除" + del + "条项目缓存");
     }
 
     /**

@@ -37,11 +37,16 @@
           </a-dropdown>
           <a-button v-else type="primary" :disabled="true"> 批量操作 <a-icon type="down" /> </a-button>
 
-          <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的项目信息, 需要重新同步：可以通过节点列表逐个同步">
-            <a-button type="danger" @click="delAll()" icon="delete"> 删除缓存 </a-button>
-          </a-tooltip>
-
           <a-button type="primary" @click="openAdd">创建项目</a-button>
+          <a-dropdown v-if="!nodeId">
+            <a-button type="danger"> 同步缓存 <a-icon type="down" /></a-button>
+            <a-menu slot="overlay">
+              <a-menu-item v-for="(nodeName, key) in nodeMap" :key="key" @click="reSyncProject(key)">
+                <a href="javascript:;">{{ nodeName }} <a-icon type="sync" /></a>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+          <a-button v-else type="danger" @click="reSyncProject(nodeId)" icon="sync"> 同步缓存 </a-button>
 
           <a-button v-if="nodeId" icon="download" type="primary" @click="handlerExportData()">导出</a-button>
           <a-dropdown v-if="nodeId">
@@ -370,7 +375,7 @@
   </div>
 </template>
 <script>
-import { delAllProjectCache, getNodeListAll, getProjectList, sortItemProject } from "@/api/node";
+import { getNodeListAll, getProjectList, sortItemProject, syncProject } from "@/api/node";
 import {
   getRuningProjectInfo,
   noFileModes,
@@ -806,15 +811,15 @@ export default {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.getNodeProjectData();
     },
-    delAll() {
+    reSyncProject(nodeId) {
       this.$confirm({
         title: "系统提示",
-        content: "确定要清除服务端所有的项目缓存信息吗？清除后需要重新同步节点项目才能正常使用项目相关功能",
+        content: "确定要重新同步当前节点项目缓存信息吗？",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
           // 删除
-          delAllProjectCache().then((res) => {
+          syncProject(nodeId).then((res) => {
             if (res.code == 200) {
               this.$notification.success({
                 message: res.msg,
