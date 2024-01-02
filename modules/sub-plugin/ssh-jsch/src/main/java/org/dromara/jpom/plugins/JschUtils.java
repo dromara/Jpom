@@ -235,7 +235,7 @@ public class JschUtils {
             String tempId = IdUtil.fastSimpleUUID();
             File tmpDir = FileUtil.getTmpDir();
             File buildSsh = FileUtil.file(tmpDir, "ssh_temp", tempId + ".sh");
-            try (InputStream sshExecTemplateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template.sh")) {
+            try (InputStream sshExecTemplateInputStream = ExtConfigBean.getConfigResourceInputStream("/ssh/template.sh")) {
                 String sshExecTemplate = IoUtil.readUtf8(sshExecTemplateInputStream);
                 FileUtil.writeString(sshExecTemplate + command + StrUtil.LF, buildSsh, charset);
             }

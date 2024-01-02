@@ -394,7 +394,9 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
                 });
                 // 等待 状态成功
                 boolean run = this.loopCheckRun(nodeProjectInfoModel, originalModel, true);
-                return CommandOpResult.of(run, run ? "restart done" : "restart done,but unsuccessful");
+                CommandOpResult result = CommandOpResult.of(run, run ? "restart done" : "restart done,but unsuccessful");
+                this.asyncWebHooks(nodeProjectInfoModel, originalModel, "restart", "result", result);
+                return result;
 
                 //return new Tuple(run ? "restart done,but unsuccessful" : "restart done", resultMsg);
             }
@@ -635,6 +637,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         NodeProjectInfoModel update = new NodeProjectInfoModel();
         update.setLastReloadResult(commandOpResult);
         projectInfoService.updateById(update, nodeProjectInfoModel.getId());
+        this.asyncWebHooks(nodeProjectInfoModel, originalModel, "reload", "result", commandOpResult);
         return commandOpResult;
     }
 

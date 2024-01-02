@@ -229,6 +229,7 @@
                 <li>项目启动,停止,重启,文件变动都将请求对应的地址</li>
                 <li>传入参数有：projectId、projectName、type、result</li>
                 <li>type 的值有：stop、beforeStop、start、beforeRestart、fileChange</li>
+                <li>DSL 类型项目特有的 type：reload、restart</li>
               </ul>
             </template>
             <a-icon v-show="temp.type !== 'edit'" type="question-circle" theme="filled" />
