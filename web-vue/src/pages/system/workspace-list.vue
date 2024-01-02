@@ -109,20 +109,9 @@
       <a-form-model ref="editWhiteForm" :model="menusConfigData">
         <a-row type="flex" justify="center">
           <a-alert :message="`菜单配置只对非超级管理员生效`" style="margin-top: 10px; margin-bottom: 20px" banner />
-          <a-col :span="12">
+          <a-col :span="20">
             <a-card title="服务端菜单" :bordered="false">
               <a-tree show-icon v-if="menusConfigData.serverMenus" checkable :tree-data="menusConfigData.serverMenus" :replaceFields="replaceFields" v-model="menusConfigData.serverMenuKeys">
-                <a-icon slot="switcherIcon" type="down" />
-
-                <template slot="custom" slot-scope="{ dataRef }">
-                  <a-icon :type="dataRef.icon_v3" />
-                </template>
-              </a-tree>
-            </a-card>
-          </a-col>
-          <a-col :span="12">
-            <a-card title="节点菜单" :bordered="false">
-              <a-tree show-icon v-if="menusConfigData.nodeMenus" checkable :tree-data="menusConfigData.nodeMenus" :replaceFields="replaceFields" v-model="menusConfigData.nodeMenuKeys">
                 <a-icon slot="switcherIcon" type="down" />
 
                 <template slot="custom" slot-scope="{ dataRef }">
@@ -400,14 +389,7 @@ export default {
           });
           return item;
         });
-        this.menusConfigData.nodeMenus = this.menusConfigData?.nodeMenus.map((item) => {
-          item.scopedSlots = { icon: "custom" };
-          item.childs?.map((item2) => {
-            item2.id = item.id + ":" + item2.id;
-            return item2;
-          });
-          return item;
-        });
+
         if (!this.menusConfigData?.serverMenuKeys) {
           //
           const serverMenuKeys = [];
@@ -422,26 +404,13 @@ export default {
           this.menusConfigData = { ...this.menusConfigData, serverMenuKeys: serverMenuKeys };
         }
 
-        if (!this.menusConfigData?.nodeMenuKeys) {
-          //
-          const nodeMenuKeys = [];
-          this.menusConfigData.nodeMenus.forEach((item) => {
-            nodeMenuKeys.push(item.id);
-            if (item.childs) {
-              item.childs.forEach((item2) => {
-                nodeMenuKeys.push(item2.id);
-              });
-            }
-          });
-          this.menusConfigData = { ...this.menusConfigData, nodeMenuKeys: nodeMenuKeys };
-        }
         this.configMenuVisible = true;
       });
     },
     onSubmitMenus() {
       saveMenusConfig({
         serverMenuKeys: this.menusConfigData.serverMenuKeys.join(","),
-        nodeMenuKeys: this.menusConfigData.nodeMenuKeys.join(","),
+
         workspaceId: this.temp.id,
       }).then((res) => {
         if (res.code === 200) {
