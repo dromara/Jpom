@@ -28,8 +28,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.annotation.Resource;
-
 /**
  * @author bwcx_jzy
  * @since 2022/12/8
@@ -37,10 +35,14 @@ import javax.annotation.Resource;
 @Configuration
 public class WebConfigurer implements WebMvcConfigurer {
 
-    @Resource
-    private ParameterInterceptor parameterInterceptor;
-    @Resource
-    private AuthorizeInterceptor authorizeInterceptor;
+    private final ParameterInterceptor parameterInterceptor;
+    private final AuthorizeInterceptor authorizeInterceptor;
+
+    public WebConfigurer(ParameterInterceptor parameterInterceptor,
+                         AuthorizeInterceptor authorizeInterceptor) {
+        this.parameterInterceptor = parameterInterceptor;
+        this.authorizeInterceptor = authorizeInterceptor;
+    }
 
 
     @Override
