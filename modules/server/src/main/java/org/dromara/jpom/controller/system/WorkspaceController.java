@@ -292,7 +292,6 @@ public class WorkspaceController extends BaseServerController {
         //"classpath:/menus/index.json"
         //"classpath:/menus/node-index.json"
         config.put("serverMenus", this.readMenusJson("classpath:/menus/index.json"));
-        config.put("nodeMenus", this.readMenusJson("classpath:/menus/node-index.json"));
         return JsonMessage.success("", config);
     }
 

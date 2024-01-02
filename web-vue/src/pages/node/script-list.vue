@@ -15,12 +15,16 @@
 
           <a-button type="primary" @click="handleEdit()">新增</a-button>
 
-          <a-tooltip v-if="nodeId" placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息并重新同步">
-            <a-button type="danger" @click="sync()" icon="sync"> 重新同步 </a-button>
-          </a-tooltip>
-          <a-tooltip v-else placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息, 需要重新同步">
-            <a-button type="danger" @click="delAll()" icon="delete"> 删除缓存 </a-button>
-          </a-tooltip>
+          <a-dropdown v-if="!nodeId">
+            <a-button type="danger"> 同步缓存 <a-icon type="down" /></a-button>
+            <a-menu slot="overlay">
+              <a-menu-item v-for="(nodeName, key) in nodeMap" :key="key" @click="sync(key)">
+                <a href="javascript:;">{{ nodeName }} <a-icon type="sync" /></a>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+          <a-button v-else type="danger" @click="sync(nodeId)" icon="sync"> 同步缓存 </a-button>
+
           <a-tooltip>
             <template slot="title">
               <div>节点脚本模版是存储在节点中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
@@ -191,7 +195,7 @@
   </div>
 </template>
 <script>
-import { delAllCache, deleteScript, getScriptListAll, getTriggerUrl, unbindScript, syncScript } from "@/api/node-other";
+import { deleteScript, getScriptListAll, getTriggerUrl, unbindScript, syncScript } from "@/api/node-other";
 
 import { getNodeListAll } from "@/api/node";
 import ScriptConsole from "@/pages/node/node-layout/other/script-console";
@@ -338,25 +342,7 @@ export default {
     // onConsoleClose() {
     //   this.drawerConsoleVisible = false;
     // },
-    delAll() {
-      this.$confirm({
-        title: "系统提示",
-        content: "确定要清除服务端所有的脚步模版缓存信息吗？",
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          // 删除
-          delAllCache().then((res) => {
-            if (res.code == 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.loadData();
-            }
-          });
-        },
-      });
-    },
+
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
@@ -428,9 +414,9 @@ export default {
         },
       });
     },
-    sync() {
+    sync(nodeId) {
       syncScript({
-        nodeId: this.listQuery.nodeId,
+        nodeId: nodeId,
       }).then((res) => {
         if (res.code == 200) {
           this.$notification.success({

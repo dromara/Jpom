@@ -24,7 +24,6 @@ package org.dromara.jpom.controller.node.script;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Entity;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
@@ -136,21 +135,6 @@ public class NodeScriptController extends BaseServerController {
         int cache = nodeScriptServer.delCache(node.getId(), request);
         String msg = nodeScriptServer.syncExecuteNode(node);
         return JsonMessage.success("主动清除 " + cache + StrUtil.SPACE + msg);
-    }
-
-    /**
-     * 删除节点缓存的所有脚本模版
-     *
-     * @return json
-     */
-    @GetMapping(value = "clear_all", produces = MediaType.APPLICATION_JSON_VALUE)
-    @SystemPermission(superUser = true)
-    @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<Object> clearAll() {
-        Entity where = Entity.create();
-        where.set("id", " <> id");
-        int del = nodeScriptServer.del(where);
-        return JsonMessage.success("成功删除" + del + "条脚本模版缓存");
     }
 
     /**

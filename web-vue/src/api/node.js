@@ -94,15 +94,6 @@ export function sortItem(params) {
   });
 }
 
-// 删除节点项目缓存
-export function delAllProjectCache() {
-  return axios({
-    url: "/node/clear_all_project",
-    method: "get",
-    params: {},
-  });
-}
-
 // 项目排序
 export function sortItemProject(params) {
   return axios({
