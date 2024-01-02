@@ -726,10 +726,10 @@ export default {
       };
 
       this.batchVisible = true;
-      this.batchOptInfo(0, "启动", operateProject, "start");
+      this.batchOptInfo(0, "启动", "start");
     },
     // 批量操作
-    batchOptInfo(index, msg, api, opt) {
+    batchOptInfo(index, msg, opt) {
       if (index >= (this.temp?.data?.length || -1)) {
         return;
       }
@@ -743,21 +743,21 @@ export default {
           opt: opt,
         };
 
-        api(params)
+        operateProject(params)
           .then((data) => {
             value.cause = data.msg;
             this.updateBatchData(index, value);
-            this.batchOptInfo(index + 1, msg, api);
+            this.batchOptInfo(index + 1, msg, opt);
           })
           .catch(() => {
             value.cause = msg + "失败";
             this.updateBatchData(index, value);
-            this.batchOptInfo(index + 1, msg, api);
+            this.batchOptInfo(index + 1, msg, opt);
           });
       } else {
         value.cause = "跳过";
         this.updateBatchData(index, value);
-        this.batchOptInfo(index + 1, msg, api);
+        this.batchOptInfo(index + 1, msg, opt);
       }
     },
 
@@ -774,7 +774,7 @@ export default {
         data: this.selectedRowKeysToId(),
       };
       this.batchVisible = true;
-      this.batchOptInfo(0, "重启", operateProject, "restart");
+      this.batchOptInfo(0, "重启", "restart");
     },
 
     //批量关闭
@@ -789,7 +789,7 @@ export default {
         data: this.selectedRowKeysToId(),
       };
       this.batchVisible = true;
-      this.batchOptInfo(0, "停止", operateProject, "stop");
+      this.batchOptInfo(0, "停止", "stop");
     },
 
     // 获取复选框属性 判断是否可以勾选
