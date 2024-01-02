@@ -537,7 +537,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         if (openLogBack) {
             // 开启日志备份才移动文件
             File backPath = projectInfoService.resolveLogBack(nodeProjectInfoModel, originalModel);
-            String pathId = nodeProjectInfoModel.getId() + "-" + DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log";
+            String pathId = DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log";
             backPath = new File(backPath, pathId);
             FileUtil.copy(file, backPath, true);
         }

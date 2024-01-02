@@ -46,6 +46,7 @@ import org.dromara.jpom.configuration.AgentAuthorize;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.cron.CronUtils;
+import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.script.BaseRunScript;
 import org.dromara.jpom.service.manage.ProjectInfoService;
@@ -168,15 +169,19 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
         }
     }
 
+    /**
+     * 尝试开启项目
+     */
     private void autoStartProject() {
-        List<NodeProjectInfoModel> list = projectInfoService.list();
-        if (CollUtil.isEmpty(list)) {
+        List<NodeProjectInfoModel> allProject = projectInfoService.list();
+        if (CollUtil.isEmpty(allProject)) {
             return;
         }
-        list = list.stream().filter(nodeProjectInfoModel -> nodeProjectInfoModel.getAutoStart() != null && nodeProjectInfoModel.getAutoStart()).collect(Collectors.toList());
-        List<NodeProjectInfoModel> finalList = list;
+        List<NodeProjectInfoModel> startList = allProject.stream()
+            .filter(nodeProjectInfoModel -> nodeProjectInfoModel.getAutoStart() != null && nodeProjectInfoModel.getAutoStart())
+            .collect(Collectors.toList());
         ThreadUtil.execute(() -> {
-            for (NodeProjectInfoModel nodeProjectInfoModel : finalList) {
+            for (NodeProjectInfoModel nodeProjectInfoModel : startList) {
                 try {
                     if (!projectCommander.isRun(nodeProjectInfoModel)) {
                         projectCommander.execCommand(ConsoleCommandOp.start, nodeProjectInfoModel);
@@ -186,6 +191,32 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
                 }
             }
         });
+        // 迁移备份日志文件
+        allProject.stream()
+            .filter(nodeProjectInfoModel -> nodeProjectInfoModel.getRunMode() != RunMode.Link)
+            .filter(nodeProjectInfoModel -> StrUtil.isEmpty(nodeProjectInfoModel.getLogPath()))
+            .forEach(nodeProjectInfoModel -> {
+                String logPath = new File(nodeProjectInfoModel.allLib()).getParent();
+                String log1 = FileUtil.normalize(String.format("%s/%s.log", logPath, nodeProjectInfoModel.getId()));
+                File logBack = new File(log1 + "_back");
+                if (FileUtil.isDirectory(logBack)) {
+                    File resolveLogBack = projectInfoService.resolveLogBack(nodeProjectInfoModel);
+                    FileUtil.mkdir(resolveLogBack);
+                    log.info("自动迁移存在备份日志 {} -> {}", logBack.getAbsolutePath(), resolveLogBack);
+                    FileUtil.moveContent(logBack, resolveLogBack, true);
+                    FileUtil.del(logBack);
+                }
+                if (FileUtil.isFile(log1)) {
+                    if (projectCommander.isRun(nodeProjectInfoModel)) {
+                        log.warn("存在旧版项目日志但项目在运行中需要停止运行后手动迁移：{} {}", nodeProjectInfoModel.getName(), log1);
+                    } else {
+                        File resolveLogBack = projectInfoService.resolveLogBack(nodeProjectInfoModel);
+                        FileUtil.mkdir(resolveLogBack);
+                        log.info("自动迁移存在日志 {} -> {}", log1, resolveLogBack);
+                        FileUtil.move(FileUtil.file(log1), resolveLogBack, true);
+                    }
+                }
+            });
     }
 
 
