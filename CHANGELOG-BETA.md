@@ -6,6 +6,13 @@
 
 1. 【server】修复 工作空间菜单配置无法使用（感谢@新）
 2. 【server】优化 重新同步节点项目、节点脚本缓存交互
+3. 【server】优化 SSH 脚本执行模板独立（`/exec/template.sh` -> `/ssh/template.sh`）
+4. 【server】优化 服务端脚本支持加载脚本模板来实现自动加载部分环境变量
+
+### ⚠️ 注意
+
+如果您自定义过 SSH 脚本默认那么您需要重新同步一下脚本模板`/exec/template.sh` -> `/ssh/template.sh`
+新版本 `/exec/template.sh` 中仅在服务端中生效（本地构建脚本、服务端脚本、本地发布脚本）
 
 ------
 

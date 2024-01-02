@@ -218,7 +218,6 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         if (resultData != null) {
             reqJson.putAll(resultData.toJson());
             reqJson.put(Const.SOCKET_MSG_TAG, Const.SOCKET_MSG_TAG);
-            log.info(reqJson.toString());
             SocketSessionUtil.send(session, reqJson.toString());
         }
     }
