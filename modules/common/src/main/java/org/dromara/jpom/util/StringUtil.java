@@ -256,15 +256,17 @@ public class StringUtil {
             return MapUtil.newHashMap();
         }
         List<Tuple> collect = envStrList.stream()
-                .map(StrUtil::trim)
-                .filter(s -> !StrUtil.isEmpty(s) && !StrUtil.startWith(s, "#"))
-                .map(s -> {
-                    List<String> list1 = StrUtil.splitTrim(s, "=");
-                    if (CollUtil.size(list1) != 2) {
-                        return null;
-                    }
-                    return new Tuple(list1.get(0), list1.get(1));
-                }).filter(Objects::nonNull).collect(Collectors.toList());
+            .map(StrUtil::trim)
+            .filter(s -> !StrUtil.isEmpty(s) && !StrUtil.startWith(s, "#"))
+            .map(s -> {
+                List<String> list1 = StrUtil.splitTrim(s, "=");
+                if (CollUtil.size(list1) != 2) {
+                    return null;
+                }
+                return new Tuple(list1.get(0), list1.get(1));
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
         return CollStreamUtil.toMap(collect, objects -> objects.get(0), objects -> objects.get(1));
     }
 

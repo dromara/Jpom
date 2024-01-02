@@ -90,6 +90,10 @@ public class EnvironmentMapBuilder {
         Map<String, String> map = new LinkedHashMap<>(this.map.size());
         for (Map.Entry<String, Item> entry : this.map.entrySet()) {
             Item entryValue = entry.getValue();
+            if (entryValue.value == null) {
+                // 值不能为 null
+                continue;
+            }
             map.put(entry.getKey(), entryValue.value);
         }
         Optional.ofNullable(appendMap).ifPresent(objectMap -> {
