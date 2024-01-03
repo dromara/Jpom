@@ -832,6 +832,7 @@ export default {
         title: "系统提示",
         content: msg,
         okText: "确认",
+        zIndex: 1009,
         cancelText: "取消",
         onOk: () => {
           // 请求参数
@@ -874,6 +875,7 @@ export default {
         title: "系统提示",
         content: msg,
         okText: "确认",
+        zIndex: 1009,
         cancelText: "取消",
         onOk: () => {
           // 请求参数

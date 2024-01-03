@@ -290,6 +290,7 @@ export default {
     restart() {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要重启项目么？",
         okText: "确认",
         cancelText: "取消",
@@ -302,6 +303,7 @@ export default {
     stop() {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要停止项目么？",
         okText: "确认",
         cancelText: "取消",

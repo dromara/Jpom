@@ -702,6 +702,7 @@ export default {
     handleDelete(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要删除节点么？删除会检查数据关联性,并且节点不存在项目或者脚本",
         okText: "确认",
         cancelText: "取消",
@@ -731,6 +732,7 @@ export default {
       const h = this.$createElement;
       this.$confirm({
         title: "危险操作！！！",
+        zIndex: 1009,
         content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
         okButtonProps: { props: { type: "danger", size: "small" } },
         cancelButtonProps: { props: { type: "primary" } },
@@ -847,6 +849,7 @@ export default {
       const compareId = this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1].id;
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: msg,
         okText: "确认",
         cancelText: "取消",

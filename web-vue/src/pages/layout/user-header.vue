@@ -628,6 +628,7 @@ export default {
     logOutAll() {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要彻底退出系统么？彻底退出将退出登录和清空浏览器缓存",
         okText: "确认",
         cancelText: "取消",
@@ -653,6 +654,7 @@ export default {
     logOutSwap() {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要退出并切换账号登录么？",
         okText: "确认",
         cancelText: "取消",
@@ -678,6 +680,7 @@ export default {
     logOut() {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要退出系统么？",
         okText: "确认",
         cancelText: "取消",
@@ -864,6 +867,7 @@ export default {
         }
         this.$confirm({
           title: "系统提示",
+          zIndex: 1009,
           content: "确定要关闭两步验证吗？关闭后账号安全性将受到影响,关闭后已经存在的 mfa key 将失效",
           okText: "确认",
           cancelText: "取消",

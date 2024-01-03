@@ -224,6 +224,7 @@ export default {
       }
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: action.msg,
         okText: "确认",
         cancelText: "取消",
@@ -356,6 +357,7 @@ export default {
       let ids = this.tableSelections;
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要批量删除选择的镜像吗？已经被容器使用的镜像无法删除！",
         okText: "确认",
         cancelText: "取消",

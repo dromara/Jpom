@@ -415,6 +415,7 @@ export default {
       const h = this.$createElement;
       this.$confirm({
         title: "危险操作！！！",
+        zIndex: 1009,
         content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
         okButtonProps: { props: { type: "danger", size: "small" } },
         cancelButtonProps: { props: { type: "primary" } },

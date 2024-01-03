@@ -516,6 +516,7 @@ export default {
     kill(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要 Kill 这个进程么？",
         okText: "确认",
         cancelText: "取消",

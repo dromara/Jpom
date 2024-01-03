@@ -380,6 +380,7 @@ export default {
       const h = this.$createElement;
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
         okText: "确认",
         cancelText: "取消",
@@ -402,6 +403,7 @@ export default {
       const h = this.$createElement;
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
         okText: "确认",
         cancelText: "取消",
@@ -463,6 +465,7 @@ export default {
       const h = this.$createElement;
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
         okText: "确认",
         cancelText: "取消",

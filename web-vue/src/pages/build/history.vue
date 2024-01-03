@@ -263,6 +263,7 @@ export default {
     handleRollback(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要回滚该构建历史记录么？",
         okText: "确认",
         cancelText: "取消",
@@ -289,6 +290,7 @@ export default {
     handleDelete(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要删除构建历史记录么？",
         okText: "确认",
         cancelText: "取消",
@@ -315,6 +317,7 @@ export default {
       }
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要删除这些构建历史记录么？",
         okText: "确认",
         cancelText: "取消",

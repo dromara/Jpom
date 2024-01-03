@@ -309,6 +309,7 @@ export default {
     ignoreBindMfa() {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "确定要忽略绑定两步验证吗？强烈建议超级管理员开启两步验证来保证账号安全性",
         okText: "确认",
         cancelText: "取消",

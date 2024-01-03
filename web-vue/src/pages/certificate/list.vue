@@ -106,14 +106,7 @@
       </a-form-model>
     </a-modal>
     <!-- 发布文件 -->
-    <a-modal
-      destroyOnClose
-      v-model="releaseFileVisible"
-      title="部署证书"
-      width="50%"
-      :maskClosable="false"
-      @ok="releaseFileOk()"
-    >
+    <a-modal destroyOnClose v-model="releaseFileVisible" title="部署证书" width="50%" :maskClosable="false" @ok="releaseFileOk()">
       <a-alert message="证书将打包成 zip 文件上传到对应的文件夹" type="info" show-icon />
       <releaseFile ref="releaseFile" v-if="releaseFileVisible" @commit="handleCommitTask"></releaseFile>
     </a-modal>
@@ -264,6 +257,7 @@ export default {
     handleDelete(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要删除该证书么，删除会将证书文件一并删除奥？",
         okText: "确认",
         cancelText: "取消",
@@ -337,7 +331,7 @@ export default {
 
     releaseFileOk() {
       this.$refs.releaseFile?.tryCommit();
-    }
+    },
   },
 };
 </script>

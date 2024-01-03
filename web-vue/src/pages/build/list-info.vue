@@ -771,6 +771,7 @@ export default {
     handleDelete(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要删除构建信息么？删除也将同步删除所有的构建历史记录信息",
         okText: "确认",
         cancelText: "取消",
@@ -792,6 +793,7 @@ export default {
     handleClear(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要清除构建信息么？",
         okText: "确认",
         cancelText: "取消",
@@ -880,6 +882,7 @@ export default {
     handleStopBuild(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "确定要取消构建 【名称：" + record.name + "】 吗？注意：取消/停止构建不一定能正常关闭所有关联进程",
         okText: "确认",
         cancelText: "取消",
@@ -924,6 +927,7 @@ export default {
       const compareId = this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1].id;
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: msg,
         okText: "确认",
         cancelText: "取消",
@@ -960,6 +964,7 @@ export default {
       }
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "确定要取批量构建吗？注意：同时运行多个构建将占用较大的资源,请慎重使用批量构建,如果批量构建的数量超多构建任务队列等待数，构建任务将自动取消",
         okText: "确认",
         cancelText: "取消",
@@ -988,6 +993,7 @@ export default {
       }
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "确定要取批量消选中的构建吗？注意：取消/停止构建不一定能正常关闭所有关联进程",
         okText: "确认",
         cancelText: "取消",

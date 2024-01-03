@@ -548,6 +548,7 @@ export default {
     deleteMachineInfo(item) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要删除机器么？删除会检查数据关联性",
         okText: "确认",
         cancelText: "取消",
@@ -741,6 +742,7 @@ export default {
           ? "真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！ 保存成功后请及时关注重启状态！！"
           : "真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！",
         okText: "确认",
+        zIndex: 1009,
         cancelText: "取消",
         onOk: () => {
           saveNodeConfig({

@@ -814,6 +814,7 @@ export default {
     reSyncProject(nodeId) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "确定要重新同步当前节点项目缓存信息吗？",
         okText: "确认",
         cancelText: "取消",
@@ -845,6 +846,7 @@ export default {
       const compareId = this.projList[method === "top" ? index : method === "up" ? index - 1 : index + 1].id;
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: msg,
         okText: "确认",
         cancelText: "取消",
@@ -945,6 +947,7 @@ export default {
     handleDelete(record, thorough) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: thorough
           ? "真的要彻底删除项目么？彻底项目会自动删除项目相关文件奥(包含项目日志，日志备份，项目文件)"
           : "真的要删除项目么？删除项目不会删除项目相关文件奥,建议先清理项目相关文件再删除项目",
