@@ -321,6 +321,7 @@ export default {
     handleDelete(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要删除该记录么？删除后构建关联的容器标签将无法使用",
         okText: "确认",
         cancelText: "取消",

@@ -491,6 +491,7 @@ export default {
     handleDelete(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要删除当前文件么？" + record.name,
         okText: "确认",
         cancelText: "取消",
@@ -521,6 +522,7 @@ export default {
       }
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要删除这些文件么？",
         okText: "确认",
         cancelText: "取消",

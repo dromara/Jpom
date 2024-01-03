@@ -318,6 +318,7 @@ export default {
       const msg = record.isDirectory ? "真的要删除【" + record.filename + "】文件夹么？" : "真的要删除【" + record.filename + "】文件么？";
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: msg,
         okText: "确认",
         cancelText: "取消",
@@ -348,6 +349,7 @@ export default {
       const msg = "真的要删除【" + record.filename + "】备份文件夹么？";
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: msg,
         okText: "确认",
         cancelText: "取消",
@@ -402,6 +404,7 @@ export default {
       } else {
         this.$confirm({
           title: "系统提示",
+          zIndex: 1009,
           content: "是否将【" + record.filename + "】此文件还原到项目目录？",
           okText: "确认",
           cancelText: "取消",

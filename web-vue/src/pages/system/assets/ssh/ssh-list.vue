@@ -622,6 +622,7 @@ export default {
       this.$confirm({
         title: "系统提示",
         content: "真的要删除机器 SSH 么？",
+        zIndex: 1009,
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
@@ -700,6 +701,7 @@ export default {
     handleDeleteWorkspaceItem(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要删除对应工作空间的 SSH 么？",
         okText: "确认",
         cancelText: "取消",
@@ -773,6 +775,7 @@ export default {
     handerRestHideField(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要清除 SSH 隐藏字段信息么？（密码，私钥）",
         okText: "确认",
         cancelText: "取消",

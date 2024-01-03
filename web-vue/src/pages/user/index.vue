@@ -291,6 +291,7 @@ export default {
       this.$confirm({
         title: "系统提示",
         content: "真的要删除用户么？",
+        zIndex: 1009,
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
@@ -311,6 +312,7 @@ export default {
       this.$confirm({
         title: "系统提示",
         content: "真的要解锁用户么？",
+        zIndex: 1009,
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
@@ -331,6 +333,7 @@ export default {
       this.$confirm({
         title: "系统提示",
         content: "真的关闭当前用户的两步验证么？",
+        zIndex: 1009,
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
@@ -356,6 +359,7 @@ export default {
       if (this.temp?.id === "demo") {
         this.$confirm({
           title: "系统提示",
+          zIndex: 1009,
           content: "demo 账号是系统特定演示使用的账号,系统默认将对 demo 账号限制很多权限。非演示场景不建议使用 demo 账号",
           okText: "确认",
           cancelText: "取消",
@@ -370,6 +374,7 @@ export default {
     restUserPwdHander(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "确定要重置用户密码吗？",
         okText: "确认",
         cancelText: "取消",

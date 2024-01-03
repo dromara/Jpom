@@ -273,6 +273,7 @@ export default {
     handleDelete(row) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要删除该执行记录吗？",
         okText: "确认",
         cancelText: "取消",
@@ -361,6 +362,7 @@ export default {
     handleCancelTask(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的取消当前发布任务吗？",
         okText: "确认",
         cancelText: "取消",

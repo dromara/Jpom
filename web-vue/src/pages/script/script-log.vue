@@ -140,6 +140,7 @@ export default {
       this.$confirm({
         title: "系统提示",
         content: "真的要删除执行记录么？",
+        zIndex: 1009,
         okText: "确认",
         cancelText: "取消",
         onOk: () => {

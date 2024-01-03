@@ -1106,6 +1106,7 @@ export default {
       if (record.outGivingProject) {
         this.$confirm({
           title: "系统提示",
+          zIndex: 1009,
           content: thorough
             ? "真的要彻底删除分发信息么？删除后节点下面的项目也都将彻底删除，彻底项目会自动删除项目相关文件奥(包含项目日志，日志备份，项目文件)"
             : "真的要删除分发信息么？删除后节点下面的项目也都将删除",
@@ -1128,6 +1129,7 @@ export default {
       }
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要释放分发信息么？释放之后节点下面的项目信息还会保留，如需删除项目还需要到节点管理中操作",
         okText: "确认",
         cancelText: "取消",
@@ -1158,6 +1160,7 @@ export default {
       const h = this.$createElement;
       this.$confirm({
         title: "危险操作！！！",
+        zIndex: 1009,
         content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
         okButtonProps: { props: { type: "danger", size: "small" } },
         cancelButtonProps: { props: { type: "primary" } },
@@ -1241,6 +1244,7 @@ export default {
     handleCancel(record) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的取消当前分发吗？",
         okText: "确认",
         cancelText: "取消",

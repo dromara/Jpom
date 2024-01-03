@@ -193,6 +193,7 @@ export default {
     onSubmit(restart) {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！",
         okText: "确认",
         cancelText: "取消",
@@ -262,6 +263,7 @@ export default {
     onSubmitIp() {
       this.$confirm({
         title: "系统提示",
+        zIndex: 1009,
         content: "真的要保存当前配置吗？IP 授权请慎重配置奥( 授权是指只允许访问的 IP ),配置后立马生效 如果配置错误将出现无法访问的情况,需要手动恢复奥！！！",
         okText: "确认",
         cancelText: "取消",

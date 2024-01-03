@@ -202,6 +202,7 @@ export default {
         title: "系统提示",
         content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
         okText: "确认",
+        zIndex: 1009,
         cancelText: "取消",
         onOk: () => {
           const file = this.fileList[0];
@@ -402,6 +403,7 @@ export default {
         title: "系统提示",
         content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
         okText: "确认",
+        zIndex: 1009,
         cancelText: "取消",
         onOk: () => {
           //
@@ -434,6 +436,7 @@ export default {
         title: "系统提示",
         content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
         okText: "确认",
+        zIndex: 1009,
         cancelText: "取消",
         onOk: () => {
           //

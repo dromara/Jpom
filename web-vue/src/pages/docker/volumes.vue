@@ -128,6 +128,7 @@ export default {
       this.$confirm({
         title: "系统提示",
         content: action.msg,
+        zIndex: 1009,
         okText: "确认",
         cancelText: "取消",
         onOk: () => {

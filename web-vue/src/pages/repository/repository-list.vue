@@ -696,6 +696,7 @@ export default {
         content: "真的要删除仓库信息么？",
         okText: "确认",
         cancelText: "取消",
+        zIndex: 1009,
         onOk: () => {
           const params = {
             id: record.id,
@@ -754,6 +755,7 @@ export default {
         content: msg,
         okText: "确认",
         cancelText: "取消",
+        zIndex: 1009,
         onOk: () => {
           // 解锁
           sortItem({
