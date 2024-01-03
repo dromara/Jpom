@@ -44,3 +44,5 @@ for element in "${userProfiles[@]}"; do
 		source "$element"
 	fi
 done
+
+# Do not delete the following content (leave at least one blank line)! ! ! ! !
