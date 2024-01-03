@@ -140,7 +140,7 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<NodeScriptExecut
             //
             models.forEach(NodeScriptExecuteLogServer.super::upsert);
             String format = StrUtil.format(
-                "{} 节点拉取到 {} 个执行记录,更新 {} 个执行记录",
+                "{} 物理节点拉取到 {} 个执行记录,更新 {} 个执行记录",
                 nodeModelName, CollUtil.size(jsonArray),
                 CollUtil.size(models));
             log.debug(format);
