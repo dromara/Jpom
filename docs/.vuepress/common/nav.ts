@@ -64,9 +64,10 @@ export default [
     link: "/pages/FQA/DSL/",
   },
   {
-    text: "💖支持",
-    link: "/pages/praise/",
+    text: "💖周边",
+    link: "/pages/shop/",
     items: [
+      { text: "赞赏支持", link: "/pages/praise/" },
       { text: "赞赏记录", link: "/pages/praise/publicity/" },
       { text: "加入社区讨论", link: "/pages/praise/join/" },
       { text: "如何贡献", link: "/pages/dc18b8/" },
