@@ -51,7 +51,6 @@
               <template slot="title">
                 <div>
                   <ul>
-                    <li>监控数据目前采用原生命令获取,和真实情况有一定差异可以当做参考依据</li>
                     <li>监控频率可以到服务端配置文件中修改</li>
                     <li>悬停到仪表盘上显示具体含义</li>
                     <li>点击仪表盘查看监控历史数据</li>
@@ -139,7 +138,14 @@
           </a-tooltip>
           <template slot="jpomProjectCount" slot-scope="text, item">
             <div v-if="item.machineNodeData && item.machineNodeData.status === 1" @click="syncNode(item)">
-              <a-tooltip placement="topLeft" :title="`节点中的项目数量：${text || 0}/${item.machineNodeData.jpomProjectCount},点击重新同步节点项目信息`">
+              <a-tooltip placement="topLeft">
+                <template #title>
+                  <ul>
+                    <li>工作空间中逻辑节点中的项目数量：{{ text || 0 }}</li>
+                    <li>物理节点项目数量：{{ item.machineNodeData.jpomProjectCount }}</li>
+                    <li>点击重新同步当前工作空间逻辑节点项目信息</li>
+                  </ul>
+                </template>
                 <a-tag>{{ text || 0 }} </a-tag>
                 <a-icon type="sync" />
               </a-tooltip>
@@ -148,7 +154,14 @@
           </template>
           <template slot="jpomScriptCount" slot-scope="text, item">
             <div v-if="item.machineNodeData && item.machineNodeData.status === 1" @click="syncNodeScript(item)">
-              <a-tooltip placement="topLeft" :title="`节点中脚本模版数量：${text || 0}/${item.machineNodeData.jpomScriptCount},点击重新同步脚本模版信息`">
+              <a-tooltip placement="topLeft">
+                <template #title>
+                  <ul>
+                    <li>工作空间中逻辑节点中脚本模版数量：{{ text || 0 }}</li>
+                    <li>物理节点脚本模板数据：{{ item.machineNodeData.jpomScriptCount }}</li>
+                    <li>点击重新同步当前工作空间逻辑节点脚本模版信息</li>
+                  </ul>
+                </template>
                 <a-tag>{{ text || 0 }} </a-tag>
                 <a-icon type="sync" />
               </a-tooltip>

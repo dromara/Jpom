@@ -223,7 +223,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
             }
             int size = CollUtil.size(projectInfoModels);
             String format = StrUtil.format(
-                "{} 节点拉取到 {} 个{},已经缓存 {} 个{},更新 {} 个{},删除 {} 个缓存",
+                "{} 物理节点拉取到 {} 个{},当前工作空间逻辑节点已经缓存 {} 个{},更新 {} 个{},删除 {} 个缓存",
                 nodeModelName, CollUtil.size(jsonArray), dataName,
                 CollUtil.size(cacheAll), dataName,
                 size, dataName,
