@@ -114,6 +114,14 @@ export function deleteBuild(id) {
   });
 }
 
+export function deleteatchBuild(data) {
+  return axios({
+    url: "/build/batch-delete",
+    method: "post",
+    data: data,
+  });
+}
+
 /**
  * 获取触发器地址
  * @param {*} id

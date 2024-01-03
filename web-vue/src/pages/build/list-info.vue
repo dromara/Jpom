@@ -27,6 +27,7 @@
               <a-menu slot="overlay">
                 <a-menu-item key="1" @click="batchBuild"> 批量构建 </a-menu-item>
                 <a-menu-item key="2" @click="batchCancel"> 批量取消 </a-menu-item>
+                <a-menu-item key="3" @click="handleBatchDelete"> 批量删除 </a-menu-item>
               </a-menu>
               <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
             </a-dropdown>
@@ -520,6 +521,7 @@ import {
   stopBuild,
   sortItem,
   getBranchList,
+  deleteatchBuild,
 } from "@/api/build-info";
 import { getDispatchProject } from "@/api/dispatch";
 import detailsPage from "./details.vue";
@@ -788,7 +790,33 @@ export default {
         },
       });
     },
-
+    // 批量删除
+    handleBatchDelete() {
+      if (!this.tableSelections || this.tableSelections.length <= 0) {
+        this.$notification.warning({
+          message: "没有选择任何数据",
+        });
+        return;
+      }
+      this.$confirm({
+        title: "系统提示",
+        zIndex: 1009,
+        content: "真的要批量删除这些构建信息么？删除也将同步删除所有的构建历史记录信息，如果中途删除失败将终止删除操作",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          deleteatchBuild({ ids: this.tableSelections.join(",") }).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.loadData();
+            }
+          });
+        },
+      });
+    },
     // 清除构建
     handleClear(record) {
       this.$confirm({
