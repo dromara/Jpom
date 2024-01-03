@@ -295,18 +295,27 @@ function checkModule() {
 	if [[ $(echo "$module" | grep "jdk") != "" ]]; then
 		echo "开始检查 jdk"
 		installJdkFn
+		echo "=> jdk 安装完成!"
+    echo "=> 最后您需要重启终端才能正常使用 java 环境"
+    echo
 	fi
 
 	# 判断是否包含mvn
 	if [[ $(echo "$module" | grep "mvn") != "" ]]; then
 		echo "开始检查 mvn"
 		installMvnFn
+		echo "=> maven 安装完成!"
+    echo "=> 最后您需要重启终端才能正常使用 mvn 环境"
+    echo
 	fi
 
 	# 判断是否包含 node
 	if [[ $(echo "$module" | grep "node") != "" ]]; then
 		echo "开始检查 node"
 		installNodeFn
+		echo "=> node 安装完成!"
+    echo "=> 最后您需要重启终端才能正常使用 node 环境"
+    echo
 	fi
 
 	if [[ $(echo "$module" | grep "only-module") != "" ]]; then
