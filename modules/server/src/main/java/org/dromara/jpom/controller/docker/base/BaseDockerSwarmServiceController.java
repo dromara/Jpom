@@ -25,6 +25,7 @@ package org.dromara.jpom.controller.docker.base;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -181,10 +182,12 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
         ThreadUtil.execute(() -> {
             try {
                 plugin.execute(StrUtil.equalsIgnoreCase(type, "service") ? "logService" : "logTask", parameter);
+                logRecorder.system("pull end");
             } catch (Exception e) {
                 logRecorder.error("拉取日志异常", e);
+            } finally {
+                IoUtil.close(logRecorder);
             }
-            logRecorder.system("pull end");
         });
         // 添加到缓存中
         LOG_CACHE.put(uuid, CollUtil.newHashSet(getUser().getId()));

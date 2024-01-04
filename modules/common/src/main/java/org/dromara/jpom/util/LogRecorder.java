@@ -22,16 +22,14 @@
  */
 package org.dromara.jpom.util;
 
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.log.ILogRecorder;
-import lombok.Builder;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -44,22 +42,57 @@ import java.nio.charset.Charset;
  * @author bwcx_jzy
  * @since 2022/1/26
  */
-@Builder
 @Slf4j
-@Getter
-public class LogRecorder implements ILogRecorder {
+public class LogRecorder implements ILogRecorder, AutoCloseable {
+    private final File file;
+    private final PrintWriter writer;
     /**
-     * 文件
+     * 是否关闭
      */
-    private File file;
-    /**
-     * 文件编码
-     */
-    private Charset charset;
+    private boolean close;
 
-    public Charset getCharset() {
-        return ObjectUtil.defaultIfNull(this.charset, CharsetUtil.CHARSET_UTF_8);
+    public LogRecorder(File file, Charset charset) {
+        if (file == null) {
+            this.close = true;
+            this.writer = null;
+            this.file = null;
+            return;
+        }
+        this.file = file;
+        this.writer = FileWriter.create(file, charset).getPrintWriter(true);
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private File file;
+        private Charset charset;
+
+        Builder() {
+        }
+
+        public Builder file(final File file) {
+            this.file = file;
+            return this;
+        }
+
+        public Builder charset(final Charset charset) {
+            this.charset = charset;
+            return this;
+        }
+
+        public LogRecorder build() {
+            Charset charset1 = ObjectUtil.defaultIfNull(this.charset, CharsetUtil.CHARSET_UTF_8);
+            return new LogRecorder(this.file, charset1);
+        }
+
+        public String toString() {
+            return "LogRecorder.LogRecorderBuilder(file=" + this.file + ", charset=" + this.charset + ")";
+        }
+    }
+
 
     /**
      * 记录错误信息
@@ -69,9 +102,15 @@ public class LogRecorder implements ILogRecorder {
      */
     public void error(String title, Throwable throwable) {
         log.error(title, throwable);
-        FileUtil.appendLines(CollectionUtil.toList(title), this.file, this.getCharset());
-        String s = ExceptionUtil.stacktraceToString(throwable);
-        FileUtil.appendLines(CollectionUtil.toList(s), this.file, this.getCharset());
+        if (!this.close) {
+            writer.println(title);
+            String s = ExceptionUtil.stacktraceToString(throwable);
+            writer.println(s);
+            writer.flush();
+        } else {
+            throw new IllegalStateException("日志记录器未启用");
+        }
+
     }
 
     /**
@@ -81,7 +120,12 @@ public class LogRecorder implements ILogRecorder {
      */
     public String info(String info, Object... vals) {
         String format = StrUtil.format(info, vals);
-        FileUtil.appendLines(CollectionUtil.toList(format), this.file, this.getCharset());
+        if (!this.close) {
+            writer.println(format);
+            writer.flush();
+        } else {
+            throw new IllegalStateException("日志记录器未启用");
+        }
         return format;
     }
 
@@ -118,8 +162,12 @@ public class LogRecorder implements ILogRecorder {
      * @param info 日志
      */
     public void append(String info, Object... vals) {
-        String format = StrUtil.format(info, vals);
-        FileUtil.appendString(format, this.file, this.getCharset());
+        if (!this.close) {
+            writer.append(StrUtil.format(info, vals));
+            writer.flush();
+        } else {
+            throw new IllegalStateException("日志记录器未启用");
+        }
     }
 
     /**
@@ -128,6 +176,16 @@ public class LogRecorder implements ILogRecorder {
      * @return Writer
      */
     public PrintWriter getPrintWriter() {
-        return FileWriter.create(this.file, this.getCharset()).getPrintWriter(true);
+        return writer;
+    }
+
+    @Override
+    public void close() {
+        IoUtil.close(writer);
+        this.close = true;
+    }
+
+    public long size() {
+        return FileUtil.size(this.file);
     }
 }

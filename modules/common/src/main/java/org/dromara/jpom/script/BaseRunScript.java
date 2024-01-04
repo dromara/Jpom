@@ -112,6 +112,7 @@ public abstract class BaseRunScript implements AutoCloseable, ILogRecorder {
         // windows 中不能正常关闭
         IoUtil.close(inputStream);
         CommandUtil.kill(process);
+        IoUtil.close(logRecorder);
     }
 
     /**

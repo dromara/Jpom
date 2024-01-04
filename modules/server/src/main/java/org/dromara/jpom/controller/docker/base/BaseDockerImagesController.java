@@ -23,6 +23,7 @@
 package org.dromara.jpom.controller.docker.base;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
@@ -150,10 +151,13 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
         ThreadUtil.execute(() -> {
             try {
                 plugin.execute("pullImage", parameter);
+                logRecorder.system("pull end");
             } catch (Exception e) {
                 logRecorder.error("拉取异常", e);
+            } finally {
+                IoUtil.close(logRecorder);
             }
-            logRecorder.system("pull end");
+
         });
         return JsonMessage.success("开始拉取", uuid);
     }
