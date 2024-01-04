@@ -65,7 +65,7 @@
 	3. 账号可以开启 **MFA 两步验证**提高账号安全性
 - 界面形式实时查看项目运行状态、控制台日志、管理项目文件
 	1. 在线修改项目文本文件
-- Docker 容器管理、Docker swarm 集群管理（**Docker ui**）
+- Docker 容器管理、Docker Swarm 集群管理（**Docker UI**）
 - **在线 SSH 终端**，让您在没有 Xshell、FinalShell 等软件也能轻松管理服务器
 	1. 登录 Jpom 系统后不需要知道服务器密码
 	2. 能指定 SSH 禁止执行的命令，避免执行高风险命令，并且能自动执行命令日志
@@ -85,7 +85,7 @@
 - 项目状态监控异常自动报警、自动尝试重启
 	1. 支持邮件 + 钉钉群 + 微信群通知，主动感知项目运行状况
 - 节点脚本模版+定时执行或者触发器，拓展更多功能
-- 重要路径白名单模式，杜绝用户误操作系统文件
+- 重要路径授权配置，杜绝用户误操作系统文件
 
 ### 🔔️ 特别提醒
 
@@ -376,6 +376,26 @@ docker-compose -f docker-compose.yml up
 2. 服务端示例：
    [`logback.xml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/config_default/logback.xml)
 
+## 📝 常见问题、操作说明
+
+- [文档主页](https://jpom.top/)
+- [FQA](https://jpom.top/pages/FQA/)
+- [名词解释](https://jpom.top/pages/FQA/proper-noun/)
+
+### 实践案例
+
+> 里面有部分图片加载可能比较慢
+
+1. [本地构建 + SSH 发布 java 项目](https://jpom.top/pages/practice/build-java-ssh-release/)
+2. [本地构建 + 项目发布 node 项目](https://jpom.top/pages/practice/build-node-release/)
+3. [本地构建 + SSH 发布 node 项目](https://jpom.top/pages/practice/build-node-ssh-release/)
+4. [本地构建 + 自定义管理 python 项目](https://jpom.top/pages/practice/project-dsl-python/)
+5. [自定义管理 java 项目](https://jpom.top/pages/practice/project-dsl-java/)
+6. [管理编译安装的 nginx](https://jpom.top/pages/practice/node-nginx/)
+7. [管理 docker](https://jpom.top/pages/practice/docker-cli/)
+8. [容器构建 + 项目发布 java 项目](https://jpom.top/pages/practice/build-docker-java-node-release/)
+9. [更新实践案例>>](https://jpom.top/pages/practice/)
+
 ## 构建案例仓库代码
 
 1. [Jboot 案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/jboot-test)
@@ -397,26 +417,6 @@ yarn --cwd xxxx/ build
 mvn -f xxxx/pom.xml clean package
 ```
 
-## 📝 常见问题、操作说明
-
-- [文档主页](https://jpom.top/)
-- [FQA](https://jpom.top/pages/FQA/)
-- [名词解释](https://jpom.top/pages/FQA/proper-noun/)
-
-### 实践案例
-
-> 里面有部分图片加载可能比较慢
-
-1. [本地构建 + SSH 发布 java 项目](https://jpom.top/pages/practice/build-java-ssh-release/)
-2. [本地构建 + 项目发布 node 项目](https://jpom.top/pages/practice/build-node-release/)
-3. [本地构建 + SSH 发布 node 项目](https://jpom.top/pages/practice/build-node-ssh-release/)
-4. [本地构建 + 自定义管理 python 项目](https://jpom.top/pages/practice/project-dsl-python/)
-5. [自定义管理 java 项目](https://jpom.top/pages/practice/project-dsl-java/)
-6. [管理编译安装的 nginx](https://jpom.top/pages/practice/node-nginx/)
-7. [管理 docker](https://jpom.top/pages/practice/docker-cli/)
-8. [容器构建 + 项目发布 java 项目](https://jpom.top/pages/practice/build-docker-java-node-release/)
-9. [更新实践案例>>](https://jpom.top/pages/practice/)
-
 ## 🛠️ 整体架构
 
 ![jpom-func-arch](https://jpom.top/images/jpom-func-arch.png)
@@ -429,9 +429,10 @@ mvn -f xxxx/pom.xml clean package
    欢迎扫描下方[微信、支付宝收款码赞赏](https://jpom.top/images/praise-qrcorde.png)
    或通过[码云赞赏](https://gitee.com/dromara/Jpom)
    （在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom.top/pages/praise/publicity/)
-3. 企业技术服务请单独与我们联系沟通服务方案
-4. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
-5. 参与贡献，请查看[贡献指南](#贡献指南)。
+3. 购买开源周边商品：[周边介绍](https://jpom.top/pages/shop/)
+4. 企业技术服务请单独与我们联系沟通服务方案
+5. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
+6. 参与贡献，请查看[贡献指南](#贡献指南)。
 
 感谢所有赞赏以及参与贡献的小伙伴，你们的支持是我们不断更新前进的动力！
 
