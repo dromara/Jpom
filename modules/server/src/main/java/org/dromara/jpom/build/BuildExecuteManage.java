@@ -44,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.exception.LogRecorderCloseException;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.model.data.BuildInfoModel;
@@ -115,6 +116,7 @@ public class BuildExecuteManage implements Runnable {
     private LogRecorder logRecorder;
     private File gitFile;
     private Thread currentThread;
+    private ReleaseManage releaseManage;
 
     /**
      * 提交任务时间
@@ -627,11 +629,15 @@ public class BuildExecuteManage implements Runnable {
             int waitFor = JpomApplication.getInstance()
                 .execScript(s1 + script, file -> {
                     try {
-                        return CommandUtil.execWaitFor(file, this.gitFile, environment, StrUtil.EMPTY, (s, process) -> logRecorder.info(s));
+                        return CommandUtil.execWaitFor(file, this.gitFile, environment, StrUtil.EMPTY, (s, process) -> {
+                            BuildExecuteManage.this.process = process;
+                            logRecorder.info(s);
+                        });
                     } catch (IOException | InterruptedException e) {
                         throw Lombok.sneakyThrow(e);
                     }
                 });
+            BuildExecuteManage.this.process = null;
             logRecorder.system("执行脚本的退出码是：{}", waitFor);
             // 判断是否为严格执行
             if (buildExtraModule.strictlyEnforce()) {
@@ -653,7 +659,7 @@ public class BuildExecuteManage implements Runnable {
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
         UserModel userModel = taskData.userModel;
         // 发布文件
-        ReleaseManage releaseManage = ReleaseManage.builder()
+        this.releaseManage = ReleaseManage.builder()
             .buildNumberId(buildInfoModel.getBuildId())
             .buildExtraModule(buildExtraModule)
             .userModel(userModel)
@@ -849,6 +855,8 @@ public class BuildExecuteManage implements Runnable {
             if (!stop) { // 没有执行 stop
                 this.asyncWebHooks("success");
             }
+        } catch (LogRecorderCloseException logRecorderCloseException) {
+            log.warn("构建日志记录器已关闭,可能手动取消停止构建,流程:{}", processName);
         } catch (DiyInterruptException diyInterruptException) {
             // 主动中断
             this.asyncWebHooks("stop", "process", processName);

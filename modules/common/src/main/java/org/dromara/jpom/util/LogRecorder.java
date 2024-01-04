@@ -31,6 +31,8 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.log.ILogRecorder;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.exception.LogRecorderCloseException;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -44,16 +46,12 @@ import java.nio.charset.Charset;
  */
 @Slf4j
 public class LogRecorder implements ILogRecorder, AutoCloseable {
-    private final File file;
-    private final PrintWriter writer;
-    /**
-     * 是否关闭
-     */
-    private boolean close;
+
+    private File file;
+    private PrintWriter writer;
 
     public LogRecorder(File file, Charset charset) {
         if (file == null) {
-            this.close = true;
             this.writer = null;
             this.file = null;
             return;
@@ -102,15 +100,13 @@ public class LogRecorder implements ILogRecorder, AutoCloseable {
      */
     public void error(String title, Throwable throwable) {
         log.error(title, throwable);
-        if (!this.close) {
-            writer.println(title);
-            String s = ExceptionUtil.stacktraceToString(throwable);
-            writer.println(s);
-            writer.flush();
-        } else {
-            throw new IllegalStateException("日志记录器未启用");
+        if (writer == null) {
+            throw new LogRecorderCloseException();
         }
-
+        writer.println(title);
+        String s = ExceptionUtil.stacktraceToString(throwable);
+        writer.println(s);
+        writer.flush();
     }
 
     /**
@@ -119,13 +115,12 @@ public class LogRecorder implements ILogRecorder, AutoCloseable {
      * @param info 日志
      */
     public String info(String info, Object... vals) {
-        String format = StrUtil.format(info, vals);
-        if (!this.close) {
-            writer.println(format);
-            writer.flush();
-        } else {
-            throw new IllegalStateException("日志记录器未启用");
+        if (writer == null) {
+            throw new LogRecorderCloseException();
         }
+        String format = StrUtil.format(info, vals);
+        writer.println(format);
+        writer.flush();
         return format;
     }
 
@@ -162,12 +157,12 @@ public class LogRecorder implements ILogRecorder, AutoCloseable {
      * @param info 日志
      */
     public void append(String info, Object... vals) {
-        if (!this.close) {
-            writer.append(StrUtil.format(info, vals));
-            writer.flush();
-        } else {
-            throw new IllegalStateException("日志记录器未启用");
+        if (writer == null) {
+            throw new LogRecorderCloseException();
         }
+        writer.append(StrUtil.format(info, vals));
+        writer.flush();
+
     }
 
     /**
@@ -182,10 +177,12 @@ public class LogRecorder implements ILogRecorder, AutoCloseable {
     @Override
     public void close() {
         IoUtil.close(writer);
-        this.close = true;
+        this.writer = null;
+        this.file = null;
     }
 
     public long size() {
+        Assert.notNull(writer, "日志记录器未启用");
         return FileUtil.size(this.file);
     }
 }
