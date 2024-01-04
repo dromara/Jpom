@@ -1,5 +1,10 @@
 [
   {
+    "title": "概括总览",
+    "icon_v3": "laptop",
+    "id": "overview"
+  },
+  {
     "title": "节点&项目",
     "icon_v3": "apartment",
     "id": "outgiving",

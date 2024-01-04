@@ -12,7 +12,7 @@
         }
       "
     >
-      <a-tabs default-active-key="1" tab-position="left">
+      <a-tabs v-model="tabKey" tab-position="left">
         <a-tab-pane key="1" tab="状态">
           <!-- 嵌套表格 -->
           <a-table :loading="childLoading" :columns="childColumns" size="middle" :bordered="true" :data-source="list" :pagination="false" rowKey="id_no">
@@ -174,6 +174,7 @@ export default {
       dispatchStatusMap,
 
       list: [],
+      tabKey: "1",
       data: {},
       drawerTitle: "",
       drawerFileVisible: false,
@@ -242,6 +243,12 @@ export default {
     },
     // 静默
     silenceLoadData() {
+      if (this.tabKey !== "1") {
+        // 避免配置页面数据被刷新
+        // 重新计算倒计时
+        this.countdownTime = Date.now() + this.refreshInterval * 1000;
+        return;
+      }
       this.childLoading = true;
       this.handleReloadById().then(() => {
         // 重新计算倒计时

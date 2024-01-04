@@ -15,7 +15,7 @@ export default {
   watch: {},
   mounted() {
     if (this.getUserInfo && this.getToken) {
-      this.$router.push({ path: "/node/list" });
+      this.$router.push({ path: "/overview" });
     } else {
       // 将参数携带进去
       this.$router.push({

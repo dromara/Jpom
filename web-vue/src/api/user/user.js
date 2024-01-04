@@ -243,6 +243,14 @@ export function myWorkspace() {
   });
 }
 
+export function statWorkspace() {
+  return axios({
+    url: "/stat/workspace",
+    method: "get",
+    params: {},
+  });
+}
+
 /**
  * 我的集群
  *
@@ -311,6 +319,14 @@ export function listLoginLog(params) {
 export function listOperaterLog(params) {
   return axios({
     url: "/user/list-operate-log-data",
+    method: "post",
+    data: params,
+  });
+}
+
+export function recentLogData(params) {
+  return axios({
+    url: "/user/recent-log-data",
     method: "post",
     data: params,
   });
