@@ -84,8 +84,9 @@ public abstract class BaseAgentController extends BaseJpomController {
      * @return NodeProjectInfoModel
      */
     protected NodeProjectInfoModel getProjectInfoModel() {
-        NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
-        Assert.notNull(nodeProjectInfoModel, "获取项目信息失败");
+        String id = getParameter("id");
+        NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel(id);
+        Assert.notNull(nodeProjectInfoModel, "获取项目信息失败:" + id);
         return nodeProjectInfoModel;
     }
 
@@ -106,10 +107,9 @@ public abstract class BaseAgentController extends BaseJpomController {
     }
 
     protected NodeProjectInfoModel tryGetProjectInfoModel(String id) {
-        NodeProjectInfoModel nodeProjectInfoModel = null;
         if (StrUtil.isNotEmpty(id)) {
-            nodeProjectInfoModel = projectInfoService.getItem(id);
+            return projectInfoService.getItem(id);
         }
-        return nodeProjectInfoModel;
+        return null;
     }
 }
