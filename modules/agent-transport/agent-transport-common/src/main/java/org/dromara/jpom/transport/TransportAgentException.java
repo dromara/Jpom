@@ -29,9 +29,9 @@ import lombok.NoArgsConstructor;
  * @since 2022/12/24
  */
 @NoArgsConstructor
-public class AgentException extends RuntimeException {
+public class TransportAgentException extends RuntimeException {
 
-    public AgentException(String message) {
+    public TransportAgentException(String message) {
         super(message);
     }
 }

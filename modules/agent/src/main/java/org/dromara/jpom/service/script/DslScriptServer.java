@@ -34,7 +34,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.IllegalArgument2Exception;
+import org.dromara.jpom.exception.IllegalArgument2Exception;
 import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.DslYmlDto;

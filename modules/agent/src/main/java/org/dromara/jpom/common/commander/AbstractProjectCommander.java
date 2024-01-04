@@ -41,7 +41,7 @@ import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.plugins.IPlugin;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.IllegalArgument2Exception;
+import org.dromara.jpom.exception.IllegalArgument2Exception;
 import org.dromara.jpom.configuration.ProjectConfig;
 import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.model.RunMode;

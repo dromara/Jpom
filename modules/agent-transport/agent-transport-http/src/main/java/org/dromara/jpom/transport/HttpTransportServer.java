@@ -108,7 +108,7 @@ public class HttpTransportServer implements TransportServer {
                 }
             } catch (Exception e) {
                 log.error("编码异常", e);
-                throw new AgentException("节点传输信息编码异常:" + e.getMessage());
+                throw new TransportAgentException("节点传输信息编码异常:" + e.getMessage());
             }
         });
     }
@@ -124,7 +124,7 @@ public class HttpTransportServer implements TransportServer {
             log.debug("Completed {}", body);
             if (status != HttpStatus.HTTP_OK) {
                 log.warn("{} 响应异常 状态码错误：{} {}", nodeInfo.name(), status, body);
-                throw new AgentException(nodeInfo.name() + " 节点响应异常,状态码错误：" + status);
+                throw new TransportAgentException(nodeInfo.name() + " 节点响应异常,状态码错误：" + status);
             }
             return body;
         });

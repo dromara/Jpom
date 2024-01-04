@@ -54,8 +54,6 @@ import org.dromara.jpom.model.log.BuildHistoryLog;
 import org.dromara.jpom.model.log.UserOperateLogV1;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.monitor.EmailUtil;
-import org.dromara.jpom.permission.Feature;
-import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.dblog.DbUserOperateLogService;
 import org.dromara.jpom.service.system.SystemParametersServer;
@@ -305,7 +303,6 @@ public class UserBasicInfoController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "list-login-log-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<UserLoginLogModel>> listLoginLogData(HttpServletRequest request) {
         UserModel user = getUser();
         PageResultDto<UserLoginLogModel> pageResult = userLoginLogServer.listPageByUserId(request, user.getId());
@@ -318,7 +315,6 @@ public class UserBasicInfoController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "list-operate-log-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<UserOperateLogV1>> listOperateLogData(HttpServletRequest request) {
         UserModel user = getUser();
         PageResultDto<UserOperateLogV1> pageResult = dbUserOperateLogService.listPageByUserId(request, user.getId());
@@ -326,7 +322,6 @@ public class UserBasicInfoController extends BaseServerController {
     }
 
     @RequestMapping(value = "recent-log-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> recentData(HttpServletRequest request) {
         UserModel user = getUser();
         JSONObject jsonObject = new JSONObject();

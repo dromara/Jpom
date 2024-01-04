@@ -118,6 +118,7 @@ public class ReleaseManage {
 
     private final LogRecorder logRecorder;
     private File resultFile;
+    private Process process;
 
 
     private Integer getRealBuildNumberId() {
@@ -386,11 +387,15 @@ public class ReleaseManage {
         int waitFor = JpomApplication.getInstance()
             .execScript(s1 + releaseCommand, file -> {
                 try {
-                    return CommandUtil.execWaitFor(file, sourceFile, envFileMap, StrUtil.EMPTY, (s, process) -> logRecorder.info(s));
+                    return CommandUtil.execWaitFor(file, sourceFile, envFileMap, StrUtil.EMPTY, (s, process) -> {
+                        ReleaseManage.this.process = process;
+                        logRecorder.info(s);
+                    });
                 } catch (IOException | InterruptedException e) {
                     throw Lombok.sneakyThrow(e);
                 }
             });
+        ReleaseManage.this.process = null;
         logRecorder.system("执行发布脚本的退出码是：{}", waitFor);
         // 判断是否为严格执行
         if (buildExtraModule.strictlyEnforce()) {
