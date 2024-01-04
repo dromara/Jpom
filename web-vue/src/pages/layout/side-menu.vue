@@ -13,15 +13,25 @@
       </a-menu-item>
     </a-menu>
     <a-menu theme="dark" mode="inline" v-model="selectedKeys" @openChange="openChange" :openKeys="getMenuOpenKeys2">
-      <a-sub-menu v-for="menu in this.mode == 'normal' ? getMenus : getManagementMenus" :key="menu.id">
-        <span slot="title">
-          <a-icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
-          <span>{{ menu.title }}</span>
-        </span>
-        <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" :p="(subMenu.parent = menu)" @click="handleClick(subMenu)">
-          <span>{{ subMenu.title }}</span>
-        </a-menu-item>
-      </a-sub-menu>
+      <template v-for="menu in this.mode == 'normal' ? getMenus : getManagementMenus">
+        <template v-if="menu.childs && menu.childs.length">
+          <a-sub-menu :key="menu.id">
+            <span slot="title">
+              <a-icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
+              <span>{{ menu.title }}</span>
+            </span>
+            <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" :p="(subMenu.parent = menu)" @click="handleClick(subMenu)">
+              <span>{{ subMenu.title }}</span>
+            </a-menu-item>
+          </a-sub-menu>
+        </template>
+        <template v-else>
+          <a-menu-item :key="menu.id" @click="handleClick(menu)">
+            <a-icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
+            <span>{{ menu.title }}</span>
+          </a-menu-item>
+        </template>
+      </template>
     </a-menu>
   </div>
 </template>
@@ -69,7 +79,7 @@ export default {
       this.$nextTick(() => {
         this.mangerMenuOpenkeys = [];
         this.$router.push({
-          path: this.mode == "normal" ? "/system/management" : "/node/list",
+          path: this.mode == "normal" ? "/system/management" : "/overview",
         });
       });
     },
@@ -100,7 +110,7 @@ export default {
       }
       // 跳转路由
       this.$router.push({
-        query: { ...this.$route.query, sPid: subMenu.parent.id, sId: subMenu.id },
+        query: { ...this.$route.query, sPid: subMenu.parent?.id, sId: subMenu.id },
         path: subMenu.path,
       });
       // this.$router.push()

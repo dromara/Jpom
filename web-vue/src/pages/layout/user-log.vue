@@ -1,7 +1,7 @@
 <template>
   <div>
-    <a-tabs>
-      <a-tab-pane key="1" tab="操作日志">
+    <a-tabs v-model="tabKey">
+      <a-tab-pane :key="1" tab="操作日志">
         <!-- 数据表格 -->
         <a-table
           size="middle"
@@ -60,7 +60,7 @@
           </a-tooltip>
         </a-table>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="登录日志">
+      <a-tab-pane :key="2" tab="登录日志">
         <a-table
           size="middle"
           :data-source="loginlist"
@@ -120,6 +120,12 @@ import { listOperaterLog, listLoginLog } from "@/api/user/user";
 import { getMonitorOperateTypeList } from "@/api/monitor";
 import { operateCodeMap } from "@/api/user/user-login-log";
 export default {
+  props: {
+    openTab: {
+      type: Number,
+      default: 1,
+    },
+  },
   data() {
     return {
       operateloading: false,
@@ -172,6 +178,7 @@ export default {
           width: "170px",
         },
       ],
+      tabKey: 1,
     };
   },
   computed: {
@@ -183,6 +190,9 @@ export default {
     },
   },
   created() {
+    if (this.openTab) {
+      this.tabKey = this.openTab;
+    }
     this.operaterloadData();
     this.loginloadData();
     getMonitorOperateTypeList().then((res) => {

@@ -17,6 +17,11 @@ const children = [
     component: () => import("../pages/layout/my-workspace"),
   },
   {
+    path: "/overview",
+    name: "overview",
+    component: () => import("../pages/layout/overview"),
+  },
+  {
     path: "/node/list",
     name: "node-list",
     component: () => import("../pages/node/list"),
@@ -269,7 +274,7 @@ const router = new Router({
       path: "/management",
       name: "management",
       component: () => import("../pages/layout"),
-      redirect: "/node/list",
+      redirect: "/overview",
       children: children.map((item) => {
         const props = item.props || {};
         props.routerUrl = item.path;

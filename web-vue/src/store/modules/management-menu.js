@@ -48,7 +48,7 @@ const app = {
         getSystemMenu()
           .then((res) => {
             res.data.forEach((element) => {
-              if (element.childs.length > 0) {
+              if (element.childs?.length > 0) {
                 element.childs = element.childs.map((child) => {
                   return {
                     ...child,
@@ -73,7 +73,7 @@ const app = {
         let currentMenu = null,
           firstMenu = null;
         menus.forEach((menu) => {
-          menu.childs.forEach((subMenu) => {
+          menu.childs?.forEach((subMenu) => {
             if (!firstMenu) {
               firstMenu = subMenu;
             }
@@ -89,7 +89,7 @@ const app = {
           return (
             menus.filter((menu) => {
               return (
-                menu.childs.filter((subMenu) => {
+                menu.childs?.filter((subMenu) => {
                   return subMenu.path === item.path;
                 }).length > 0
               );

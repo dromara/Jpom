@@ -79,13 +79,6 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
      */
     private String buildName;
     /**
-     * 构建名称-未用
-     *
-     * @see this#buildName
-     */
-    @Deprecated
-    private String name;
-    /**
      * 构建编号
      *
      * @see BuildInfoModel#getBuildId()

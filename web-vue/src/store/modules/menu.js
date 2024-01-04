@@ -61,8 +61,8 @@ const app = {
         getMenu()
           .then((res) => {
             if (res.data) {
-              res.data?.forEach((element) => {
-                if (element.childs.length > 0) {
+              res.data = res.data?.map((element) => {
+                if (element.childs?.length > 0) {
                   const childs = element.childs.map((child) => {
                     return {
                       ...child,
@@ -71,6 +71,8 @@ const app = {
                   });
                   element.childs = childs;
                 }
+                element.path = routeMenuMap[element.id];
+                return element;
               });
               commit("setMenus", res.data);
               resolve();
@@ -94,15 +96,25 @@ const app = {
         let currentMenu = null,
           firstMenu = null;
         menus.forEach((menu) => {
-          menu.childs.forEach((subMenu) => {
+          if (menu.childs && menu.childs.length) {
+            menu.childs.forEach((subMenu) => {
+              if (!firstMenu) {
+                firstMenu = subMenu;
+              }
+              if (subMenu.path === tab.path) {
+                currentMenu = subMenu;
+                currentMenu.parent = menu;
+              }
+            });
+          } else {
             if (!firstMenu) {
-              firstMenu = subMenu;
+              firstMenu = menu;
             }
-            if (subMenu.path === tab.path) {
-              currentMenu = subMenu;
-              currentMenu.parent = menu;
+            if (menu.path === tab.path) {
+              currentMenu = menu;
+              // currentMenu.parent = menu;
             }
-          });
+          }
         });
         let tabList = state.tabList || [];
         // 过滤已经不能显示的菜单
@@ -110,7 +122,8 @@ const app = {
           return (
             menus.filter((menu) => {
               return (
-                menu.childs.filter((subMenu) => {
+                menu.path == item.path ||
+                menu.childs?.filter((subMenu) => {
                   return subMenu.path === item.path;
                 }).length > 0
               );
@@ -128,7 +141,7 @@ const app = {
         //
         tab.title = currentMenu.title;
         tab.id = currentMenu.id;
-        tab.parentId = currentMenu.parent.id;
+        tab.parentId = currentMenu.parent?.id;
 
         if (index > -1) {
           // 设置 activeTabKey

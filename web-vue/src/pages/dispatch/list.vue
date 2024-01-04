@@ -1272,9 +1272,6 @@ export default {
 };
 </script>
 <style scoped>
-/deep/ .ant-progress-text {
-  width: auto;
-}
 /* .replica-btn-del {
   position: absolute;
   right: 0;

@@ -43,7 +43,7 @@ import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.dromara.jpom.service.node.script.NodeScriptExecuteLogServer;
 import org.dromara.jpom.service.node.script.NodeScriptServer;
 import org.dromara.jpom.service.node.ssh.CommandExecLogService;
-import org.dromara.jpom.service.node.ssh.CommandService;
+import org.dromara.jpom.service.node.ssh.SshCommandService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.service.outgiving.DbOutGivingLogService;
 import org.dromara.jpom.service.outgiving.LogReadServer;
@@ -75,7 +75,7 @@ public enum ClassFeature {
     SSH_FILE("SSH文件管理", SshService.class),
     SSH_TERMINAL("SSH终端", SshService.class),
     SSH_TERMINAL_LOG("SSH终端日志", SshTerminalExecuteLogService.class),
-    SSH_COMMAND("SSH命令管理", CommandService.class),
+    SSH_COMMAND("SSH命令管理", SshCommandService.class),
     SSH_COMMAND_LOG("SSH命令日志", CommandExecLogService.class),
     OUTGIVING("分发管理", OutGivingServer.class),
     LOG_READ("日志阅读", LogReadServer.class),

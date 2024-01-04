@@ -67,7 +67,7 @@ import java.util.Map;
  */
 @Service
 @Slf4j
-public class CommandService extends BaseWorkspaceService<CommandModel> implements ICron<CommandModel>, ITriggerToken {
+public class SshCommandService extends BaseWorkspaceService<CommandModel> implements ICron<CommandModel>, ITriggerToken {
 
     private final SshService sshService;
     private final CommandExecLogService commandExecLogService;
@@ -75,9 +75,9 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
 
     private static final byte[] LINE_BYTES = SystemUtil.getOsInfo().getLineSeparator().getBytes(CharsetUtil.CHARSET_UTF_8);
 
-    public CommandService(SshService sshService,
-                          CommandExecLogService commandExecLogService,
-                          WorkspaceEnvVarService workspaceEnvVarService) {
+    public SshCommandService(SshService sshService,
+                             CommandExecLogService commandExecLogService,
+                             WorkspaceEnvVarService workspaceEnvVarService) {
         this.sshService = sshService;
         this.commandExecLogService = commandExecLogService;
         this.workspaceEnvVarService = workspaceEnvVarService;
@@ -125,7 +125,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
             return false;
         }
         log.debug("start ssh command cron {} {} {}", id, buildInfoModel.getName(), autoExecCron);
-        CronUtils.upsert(taskId, autoExecCron, new CommandService.CronTask(id));
+        CronUtils.upsert(taskId, autoExecCron, new SshCommandService.CronTask(id));
         return true;
     }
 
@@ -155,8 +155,8 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
         public void execute() {
             try {
                 BaseServerController.resetInfo(UserModel.EMPTY);
-                CommandModel commandModel = CommandService.this.getByKey(this.id);
-                CommandService.this.executeBatch(commandModel, commandModel.getDefParams(), commandModel.getSshIds(), 1);
+                CommandModel commandModel = SshCommandService.this.getByKey(this.id);
+                SshCommandService.this.executeBatch(commandModel, commandModel.getDefParams(), commandModel.getSshIds(), 1);
             } catch (Exception e) {
                 log.error("触发自动执行命令模版异常", e);
             } finally {
