@@ -167,12 +167,13 @@ function toLogin(res, response, timeout = 2000) {
     if (index > -1) {
       params = Qs.parse(location.hash.substring(index + 1));
     }
-    router.push({
+    const pageUrl = router.resolve({
+      name: "login",
       path: "/login",
       query: params,
     });
     setTimeout(() => {
-      location.reload();
+      location.href = pageUrl;
     }, timeout);
   });
   return false;
