@@ -28,12 +28,12 @@ import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.service.manage.ProjectInfoService;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Objects;
 
 /**
  * agent 端
@@ -85,7 +85,7 @@ public abstract class BaseAgentController extends BaseJpomController {
      */
     protected NodeProjectInfoModel getProjectInfoModel() {
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
-        Objects.requireNonNull(nodeProjectInfoModel, "获取项目信息失败");
+        Assert.notNull(nodeProjectInfoModel, "获取项目信息失败");
         return nodeProjectInfoModel;
     }
 
@@ -96,7 +96,7 @@ public abstract class BaseAgentController extends BaseJpomController {
      */
     protected NodeProjectInfoModel getProjectInfoModel(String id) {
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel(id);
-        Objects.requireNonNull(nodeProjectInfoModel, "获取项目信息失败");
+        Assert.notNull(nodeProjectInfoModel, "获取项目信息失败:" + id);
         return nodeProjectInfoModel;
     }
 
