@@ -197,7 +197,7 @@ public class BuildExecuteManage implements Runnable {
      * 取消任务
      */
     private void cancelTask(String desc) {
-        Optional.ofNullable(process).ifPresent(Process::destroy);
+        CommandUtil.kill(process);
         Integer buildMode = taskData.buildInfoModel.getBuildMode();
         if (buildMode != null && buildMode == 1) {
             // 容器构建 删除容器

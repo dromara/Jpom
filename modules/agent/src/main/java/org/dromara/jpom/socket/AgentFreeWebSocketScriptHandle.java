@@ -196,7 +196,7 @@ public class AgentFreeWebSocketScriptHandle extends BaseAgentWebSocketHandle {
         @Override
         public void close() throws Exception {
             IoUtil.close(inputStream);
-            Optional.ofNullable(process).ifPresent(Process::destroy);
+            CommandUtil.kill(process);
             try {
                 FileUtil.del(this.scriptFile);
             } catch (Exception ignored) {

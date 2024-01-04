@@ -30,6 +30,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.keepbx.jpom.log.ILogRecorder;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.LogRecorder;
 
 import java.io.File;
@@ -110,7 +111,7 @@ public abstract class BaseRunScript implements AutoCloseable, ILogRecorder {
     public void close() {
         // windows 中不能正常关闭
         IoUtil.close(inputStream);
-        Optional.ofNullable(process).ifPresent(Process::destroy);
+        CommandUtil.kill(process);
     }
 
     /**
