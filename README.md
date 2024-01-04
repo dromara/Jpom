@@ -421,6 +421,30 @@ mvn -f xxxx/pom.xml clean package
 
 ![jpom-func-arch](https://jpom.top/images/jpom-func-arch.png)
 
+
+## 🐞 交流讨论 、反馈 BUG、提出建议等
+
+1. 快扫描下方左侧微信群二维码和我们一起交流讨论吧！（添加小助手：备注 Jpom 进群）
+2. 开源项目离不开社区的支持，如果项目帮助到了你，并且想给我们加个餐。
+   欢迎扫描下方[微信、支付宝收款码赞赏](https://jpom.top/images/praise-qrcorde.png)
+   或通过[码云赞赏](https://gitee.com/dromara/Jpom)
+   （在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom.top/pages/praise/publicity/)
+3. 企业技术服务请单独与我们联系沟通服务方案
+4. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
+5. 参与贡献，请查看[贡献指南](#贡献指南)。
+
+感谢所有赞赏以及参与贡献的小伙伴，你们的支持是我们不断更新前进的动力！
+
+![wx-qrcode-praise.png](https://jpom.top/images/praise-qrcorde.png)
+
+## 💖 周边商品
+
+为了更好地维持开源项目，我们决定推出周边商品。
+
+购买支持我们这样您既获得了一份小商品我们也获得了您购买商品的利润（周边商品的价格会比市场价稍高，介意请勿下单）
+
+![wx-qrcode-praise.png](https://jpom.top/images/gift-shop/shop-home.jpg)
+
 ## 🔨贡献指南
 
 ### 贡献须知
@@ -469,21 +493,6 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 | docs   | 项目文档分支，接受 PR，介绍项目功能、汇总常见问题等。                         |
 
 > 目前用到的主要是 dev 和 docs 分支，接受 PR 修改，其他的分支为归档分支，贡献者可以不用管。
-
-## 🐞 交流讨论 、反馈 BUG、提出建议等
-
-1. 快扫描下方左侧微信群二维码和我们一起交流讨论吧！（添加小助手：备注 Jpom 进群）
-2. 开源项目离不开社区的支持，如果项目帮助到了你，并且想给我们加个餐。
-   欢迎扫描下方[微信、支付宝收款码赞赏](https://jpom.top/images/praise-qrcorde.png)
-   或通过[码云赞赏](https://gitee.com/dromara/Jpom)
-   （在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom.top/pages/praise/publicity/)
-3. 企业技术服务请单独与我们联系沟通服务方案
-4. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
-5. 参与贡献，请查看[贡献指南](#贡献指南)。
-
-感谢所有赞赏以及参与贡献的小伙伴，你们的支持是我们不断更新前进的动力！
-
-![wx-qrcode-praise.png](https://jpom.top/images/praise-qrcorde.png)
 
 ## 🌍 知识星球
 
