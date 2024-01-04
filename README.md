@@ -513,7 +513,7 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 | hippo4j       | [https://gitee.com/magegoofy/hippo4j](https://gitee.com/magegoofy/hippo4j) | 强大的动态线程池框架，附带监控报警功能。                          |
 | HertzBeat     | [https://gitee.com/dromara/hertzbeat](https://gitee.com/dromara/hertzbeat) | 易用友好的云监控系统, 无需 Agent, 强大自定义监控能力。              |
 
-## 鸣谢
+## 🤝 鸣谢
 
 - 感谢 JetBrains 提供的免费开源 License：
 
