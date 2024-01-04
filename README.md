@@ -443,7 +443,9 @@ mvn -f xxxx/pom.xml clean package
 
 购买支持我们这样您既获得了一份小商品我们也获得了您购买商品的利润（周边商品的价格会比市场价稍高，介意请勿下单）
 
-![wx-qrcode-praise.png](https://jpom.top/images/gift-shop/shop-home.jpg)
+<p align="center">
+<img  src="https://jpom.top/images/gift-shop/shop-home.jpg" style="zoom: 80%;box-shadow: 0px 0px 20px 10px rgba(0,0,0,0.06);" alt="shop home">
+</p>
 
 ## 🔨贡献指南
 
