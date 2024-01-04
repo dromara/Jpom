@@ -25,6 +25,7 @@ package org.dromara.jpom.func.files.service;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.SafeConcurrentHashMap;
@@ -341,10 +342,11 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
             model.setBeforeScript(taskRoot.getBeforeScript());
             strictSyncFinisher.addWorker(() -> {
                 String modelId = model.getId();
+                LogRecorder logRecorder = null;
                 try {
                     this.updateStatus(taskId, modelId, 1, "开始发布文件");
                     File logFile = logFile(model);
-                    LogRecorder logRecorder = LogRecorder.builder().file(logFile).charset(CharsetUtil.CHARSET_UTF_8).build();
+                    logRecorder = LogRecorder.builder().file(logFile).charset(CharsetUtil.CHARSET_UTF_8).build();
                     NodeModel item = nodeService.getByKey(model.getTaskDataId());
                     if (item == null) {
                         logRecorder.systemError("没有找到对应的节点项：{}", model.getTaskDataId());
@@ -364,6 +366,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
                     String name = storageModel.getName();
                     name = StrUtil.wrapIfMissing(name, StrUtil.EMPTY, StrUtil.DOT + storageModel.getExtName());
+                    LogRecorder finalLogRecorder = logRecorder;
                     JsonMessage<String> jsonMessage = NodeForward.requestSharding(item, NodeUrl.Manage_File_Upload_Sharding2, data, storageSaveFile, name,
                         sliceData -> {
                             sliceData.putAll(data);
@@ -374,7 +377,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                             double progressPercentage = Math.floor(((float) progressSize / total) * 100);
                             int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
                             if (progressRangeList.add(progressRange)) {
-                                logRecorder.system("上传文件进度:{}/{} {}",
+                                finalLogRecorder.system("上传文件进度:{}/{} {}",
                                     FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
                                     NumberUtil.formatPercent(((float) progressSize / total), 0));
                             }
@@ -392,6 +395,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                 } catch (Exception e) {
                     log.error("执行发布任务异常", e);
                     updateStatus(taskId, modelId, 3, e.getMessage());
+                } finally {
+                    IoUtil.close(logRecorder);
                 }
             });
         }
@@ -462,10 +467,11 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                 String modelId = model.getId();
                 Session session = null;
                 ChannelSftp channelSftp = null;
+                LogRecorder logRecorder = null;
                 try {
                     this.updateStatus(taskId, modelId, 1, "开始发布文件");
                     File logFile = logFile(model);
-                    LogRecorder logRecorder = LogRecorder.builder().file(logFile).charset(CharsetUtil.CHARSET_UTF_8).build();
+                    logRecorder = LogRecorder.builder().file(logFile).charset(CharsetUtil.CHARSET_UTF_8).build();
                     SshModel item = sshService.getByKey(model.getTaskDataId());
                     if (item == null) {
                         logRecorder.systemError("没有找到对应的ssh项：{}", model.getTaskDataId());
@@ -501,6 +507,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     log.error("执行发布任务异常", e);
                     updateStatus(taskId, modelId, 3, e.getMessage());
                 } finally {
+                    IoUtil.close(logRecorder);
                     JschUtil.close(channelSftp);
                     JschUtil.close(session);
                 }

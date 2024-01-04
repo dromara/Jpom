@@ -24,6 +24,7 @@ package org.dromara.jpom.socket.handler;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -119,6 +120,7 @@ public class DockerLogHandler extends BaseProxyHandler {
                 }
             };
             attributes.put("uuid", uuid);
+            attributes.put("logRecorder", logRecorder);
             map.put("uuid", attributes.get("uuid"));
             map.put("charset", CharsetUtil.CHARSET_UTF_8);
             map.put("consumer", consumer);
@@ -159,6 +161,8 @@ public class DockerLogHandler extends BaseProxyHandler {
         } catch (Exception e) {
             log.error("关闭资源失败", e);
         }
+        LogRecorder logRecorder = (LogRecorder) attributes.get("logRecorder");
+        IoUtil.close(logRecorder);
         // 删除日志缓存
         UserModel userModel = (UserModel) attributes.get("userInfo");
         Optional.ofNullable(userModel).ifPresent(userModel1 -> {

@@ -222,6 +222,8 @@ public class BuildExecuteService {
             //
             EnvironmentMapBuilder environmentMapBuilder = buildHistoryLog.toEnvironmentMapBuilder();
             //
+            File logFile = BuildUtil.getLogFile(item.getId(), buildId);
+            LogRecorder logRecorder = LogRecorder.builder().file(logFile).build();
             ReleaseManage manage = ReleaseManage.builder()
                 .buildExtraModule(buildExtraModule)
                 .logId(buildHistoryLog.getId())
@@ -233,10 +235,9 @@ public class BuildExecuteService {
                 .buildNumberId(buildHistoryLog.getBuildNumberId())
                 .fromBuildNumberId(fromBuildNumberId)
                 .buildExecuteService(this)
+                .logRecorder(logRecorder)
                 .buildEnv(environmentMapBuilder)
                 .build();
-            File logFile = BuildUtil.getLogFile(item.getId(), buildId);
-            LogRecorder logRecorder = LogRecorder.builder().file(logFile).build();
             //
             logRecorder.system("开始准备回滚：{} -> {}", fromBuildNumberId, buildId);
             //

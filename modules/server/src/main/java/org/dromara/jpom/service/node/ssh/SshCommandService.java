@@ -256,39 +256,40 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
      */
     private void execute(CommandModel commandModel, CommandExecLogModel commandExecLogModel, SshModel sshModel, String commandParamsLine) {
         File file = commandExecLogModel.logFile();
-        LogRecorder logRecorder = LogRecorder.builder().file(file).charset(CharsetUtil.CHARSET_UTF_8).build();
-        if (sshModel == null) {
-            logRecorder.systemError("ssh 不存在");
-            return;
-        }
-        EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.getEnv(commandModel.getWorkspaceId());
-        environmentMapBuilder.put("JPOM_SSH_ID", sshModel.getId());
-        environmentMapBuilder.put("JPOM_COMMAND_ID", commandModel.getId());
-        environmentMapBuilder.eachStr(logRecorder::system);
-        Map<String, String> environment = environmentMapBuilder.environment();
-        String commands = StringUtil.formatStrByMap(commandModel.getCommand(), environment);
+        try (LogRecorder logRecorder = LogRecorder.builder().file(file).charset(CharsetUtil.CHARSET_UTF_8).build()) {
+            if (sshModel == null) {
+                logRecorder.systemError("ssh 不存在");
+                return;
+            }
+            EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.getEnv(commandModel.getWorkspaceId());
+            environmentMapBuilder.put("JPOM_SSH_ID", sshModel.getId());
+            environmentMapBuilder.put("JPOM_COMMAND_ID", commandModel.getId());
+            environmentMapBuilder.eachStr(logRecorder::system);
+            Map<String, String> environment = environmentMapBuilder.environment();
+            String commands = StringUtil.formatStrByMap(commandModel.getCommand(), environment);
 
-        MachineSshModel machineSshModel = sshService.getMachineSshModel(sshModel);
-        //
-        Session session = null;
-        try {
-            Charset charset = machineSshModel.charset();
-            int timeout = machineSshModel.timeout();
+            MachineSshModel machineSshModel = sshService.getMachineSshModel(sshModel);
             //
-            session = sshService.getSessionByModel(machineSshModel);
-            int exitCode = JschUtils.execCallbackLine(session, charset, timeout, commands, commandParamsLine, logRecorder::info);
-            logRecorder.system("执行退出码：{}", exitCode);
-            // 更新状态
-            this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.DONE, exitCode);
-        } catch (Exception e) {
-            log.error("执行命令错误", e);
-            // 更新状态
-            this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.ERROR);
-            // 记录错误日志
-            String stacktraceToString = ExceptionUtil.stacktraceToString(e);
-            logRecorder.systemError(stacktraceToString);
-        } finally {
-            JschUtil.close(session);
+            Session session = null;
+            try {
+                Charset charset = machineSshModel.charset();
+                int timeout = machineSshModel.timeout();
+                //
+                session = sshService.getSessionByModel(machineSshModel);
+                int exitCode = JschUtils.execCallbackLine(session, charset, timeout, commands, commandParamsLine, logRecorder::info);
+                logRecorder.system("执行退出码：{}", exitCode);
+                // 更新状态
+                this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.DONE, exitCode);
+            } catch (Exception e) {
+                log.error("执行命令错误", e);
+                // 更新状态
+                this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.ERROR);
+                // 记录错误日志
+                String stacktraceToString = ExceptionUtil.stacktraceToString(e);
+                logRecorder.systemError(stacktraceToString);
+            } finally {
+                JschUtil.close(session);
+            }
         }
     }
 

@@ -1,4 +1,5 @@
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.Tailer;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -30,7 +31,12 @@ public class TestProcess {
             try {
                 start.set(processBuilder.start());
                 try (InputStream inputStream = start.get().getInputStream()) {
-                    IoUtil.readLines(inputStream, CharsetUtil.CHARSET_GBK, new Tailer.ConsoleLineHandler());
+                    IoUtil.readLines(inputStream, CharsetUtil.CHARSET_GBK, new LineHandler() {
+                        @Override
+                        public void handle(String line) {
+                            throw new IllegalArgumentException(line);
+                        }
+                    });
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);

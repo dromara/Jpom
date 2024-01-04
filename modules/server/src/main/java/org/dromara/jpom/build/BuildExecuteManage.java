@@ -220,6 +220,7 @@ public class BuildExecuteManage implements Runnable {
         buildExecuteService.updateStatus(buildId, logId, taskData.buildInfoModel.getBuildId(), BuildStatus.Cancel, desc);
         Optional.ofNullable(currentThread).ifPresent(Thread::interrupt);
         BUILD_MANAGE_MAP.remove(buildId);
+        IoUtil.close(logRecorder);
     }
 
     /**
@@ -556,7 +557,7 @@ public class BuildExecuteManage implements Runnable {
         String buildInfoModelId = buildInfoModel.getId();
         taskData.buildContainerId = "jpom-build-" + buildInfoModelId;
         map.put("dockerName", taskData.buildContainerId);
-        map.put("logFile", logRecorder.getFile());
+        map.put("logRecorder", logRecorder);
         //
         List<String> copy = ObjectUtil.defaultIfNull(dockerYmlDsl.getCopy(), new ArrayList<>());
         // 将仓库文件上传到容器
@@ -781,9 +782,7 @@ public class BuildExecuteManage implements Runnable {
         File historyPackageZipFile = BuildUtil.getHistoryPackageZipFile(buildExtraModule.getId(), buildInfoModel1.getBuildId());
         CommandUtil.systemFastDel(historyPackageZipFile);
         // 计算文件占用大小
-        File file = logRecorder.getFile();
-        long size = FileUtil.size(file);
-
+        long size = logRecorder.size();
         BuildHistoryLog buildInfoModel = new BuildHistoryLog();
         buildInfoModel.setId(logId);
         buildInfoModel.setResultFileSize(taskData.resultFileSize);
@@ -866,6 +865,7 @@ public class BuildExecuteManage implements Runnable {
             this.clearResources();
             logRecorder.system("构建结束-累计耗时:{}", DateUtil.formatBetween(SystemClock.now() - startTime));
             this.asyncWebHooks("done");
+            IoUtil.close(logRecorder);
             BaseServerController.removeAll();
         }
     }
@@ -1017,6 +1017,7 @@ public class BuildExecuteManage implements Runnable {
                 FileUtil.del(scriptFile);
             } catch (Exception ignored) {
             }
+            IoUtil.close(logRecorder);
         }
     }
 

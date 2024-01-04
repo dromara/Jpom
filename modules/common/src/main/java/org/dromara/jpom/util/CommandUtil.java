@@ -23,6 +23,7 @@
 package org.dromara.jpom.util;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
@@ -173,8 +174,13 @@ public class CommandUtil {
             String[] cmd = commands.toArray(new String[]{});
             result = exec(cmd, file);
         } catch (Exception e) {
-            log.error("执行命令异常", e);
-            result += e.getMessage();
+            if (ExceptionUtil.isCausedBy(e, InterruptedException.class)) {
+                log.warn("执行被中断：{}", command);
+                result += "执行被中断";
+            } else {
+                log.error("执行命令异常", e);
+                result += e.getMessage();
+            }
         }
         return result;
     }
@@ -400,15 +406,15 @@ public class CommandUtil {
             return;
         }
         while (true) {
+            Object handle = tryGetProcessId(process);
             process.destroy();
             if (process.isAlive()) {
-                Object handle = tryGetProcessId(process);
-                log.info("等待关闭进程：{}", handle);
                 process.destroyForcibly();
                 try {
                     process.waitFor(500, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException ignored) {
                 }
+                log.info("等待关闭[Process]进程：{}", handle);
             } else {
                 break;
             }
