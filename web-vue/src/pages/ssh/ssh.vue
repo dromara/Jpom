@@ -76,7 +76,7 @@
 
       <a-popover title="硬盘信息" slot="osMaxOccupyDisk" slot-scope="text, record">
         <template slot="content">
-          <p>硬盘总量：{{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</p>
+          <p>内存总量：{{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</p>
           <p>硬盘最大的使用率：{{ formatPercent(record.machineSsh && record.machineSsh.osMaxOccupyDisk) }}</p>
           <p>使用率最大的分区：{{ record.machineSsh && record.machineSsh.osMaxOccupyDiskName }}</p>
         </template>

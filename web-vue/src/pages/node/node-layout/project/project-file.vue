@@ -79,10 +79,7 @@
             <span>{{ text ? "目录" : "文件" }}</span>
           </template>
           <a-tooltip slot="fileSizeLong" slot-scope="text, item" placement="topLeft" :title="`${text ? renderSize(text) : item.fileSize}`">
-            <template v-if="text">
-              {{ renderSize(text) }}
-            </template>
-            <span v-else>{{ item.fileSize }}</span>
+            {{ text ? renderSize(text) : item.fileSize }}
           </a-tooltip>
           <a-tooltip slot="modifyTimeLong" slot-scope="text, record" :title="`${parseTime(record.modifyTimeLong)}}`">
             <span>{{ parseTime(record.modifyTimeLong) }}</span>
