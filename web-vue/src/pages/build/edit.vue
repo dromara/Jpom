@@ -1135,7 +1135,7 @@ export default {
     // 修改
     handleEdit(record) {
       this.$refs["editBuildForm"]?.resetFields();
-      this.temp = Object.assign({}, record);
+      this.temp = Object.assign({}, record, { resultKeepDay: record.resultKeepDay || 0 });
       this.temp.buildMode = this.temp.buildMode || 0;
       // 设置当前临时的 额外构建信息
       this.tempExtraData = JSON.parse(record.extraData) || {};
