@@ -1025,7 +1025,7 @@ public class BuildExecuteManage implements Runnable {
                 FileUtil.del(scriptFile);
             } catch (Exception ignored) {
             }
-            IoUtil.close(logRecorder);
+            IoUtil.close(scriptLog);
         }
     }
 
