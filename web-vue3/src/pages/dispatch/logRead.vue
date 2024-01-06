@@ -47,7 +47,7 @@
       :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="日志名称" prop="name">
+        <a-form-item label="日志名称" name="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="日志项目名称" />
         </a-form-item>
         <a-form-item label="绑定节点" required>
@@ -153,7 +153,7 @@ import { deleteLogRead, editLogRead, getLogReadList } from '@/api/log-read'
 import { getNodeListAll, getProjectListAll } from '@/api/node'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, itemGroupBy, parseTime } from '@/utils/const'
 
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 import logReadView from './logReadView'
 
 export default {

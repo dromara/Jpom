@@ -7,5 +7,8 @@
   "eslint.alwaysShowStatus": true,
   "prettier.enable": true,
   "stylelint.enable": true,
-  "editor.codeActionsOnSave": { "source.fixAll.eslint": true, "source.fixAll.stylelint": true }
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.stylelint": "explicit"
+  }
 }

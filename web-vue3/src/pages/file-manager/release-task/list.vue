@@ -118,18 +118,18 @@
         :label-col="{ span: 4 }"
         :wrapper-col="{ span: 20 }"
       >
-        <a-form-item label="任务名" prop="name">
+        <a-form-item label="任务名" name="name">
           <a-input placeholder="请输入任务名" :maxLength="50" v-model="temp.name" />
         </a-form-item>
 
-        <a-form-item label="发布方式" prop="taskType">
+        <a-form-item label="发布方式" name="taskType">
           <a-radio-group v-model="temp.taskType" :disabled="true">
             <a-radio :value="0"> SSH </a-radio>
             <a-radio :value="1"> 节点 </a-radio>
           </a-radio-group>
         </a-form-item>
 
-        <a-form-item prop="taskDataIds" label="发布的SSH" v-if="temp.taskType === 0">
+        <a-form-item name="taskDataIds" label="发布的SSH" v-if="temp.taskType === 0">
           <a-row>
             <a-col :span="22">
               <a-select
@@ -149,7 +149,7 @@
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item prop="taskDataIds" label="发布的节点" v-else-if="temp.taskType === 1">
+        <a-form-item name="taskDataIds" label="发布的节点" v-else-if="temp.taskType === 1">
           <a-row>
             <a-col :span="22">
               <a-select
@@ -170,15 +170,15 @@
           </a-row>
         </a-form-item>
 
-        <a-form-item prop="releasePathParent" label="发布目录">
+        <a-form-item name="releasePathParent" label="发布目录">
           <a-input placeholder="请输入发布目录" :disabled="true" v-model="temp.releasePath" />
         </a-form-item>
 
-        <a-form-item prop="releasePathParent" label="文件id">
+        <a-form-item name="releasePathParent" label="文件id">
           <a-input placeholder="请输入发布的文件id" v-model="temp.fileId" />
         </a-form-item>
 
-        <a-form-item label="执行脚本" prop="releaseBeforeCommand">
+        <a-form-item label="执行脚本" name="releaseBeforeCommand">
           <a-tabs tabPosition="right">
             <a-tab-pane key="before" tab="上传前">
               <div style="height: 40vh; overflow-y: scroll">
@@ -205,22 +205,22 @@
     <!-- 查看文件 -->
     <a-modal destroyOnClose v-model:visible="viewFileVisible" :title="`查看文件`" :footer="null" :maskClosable="false">
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item label="文件名" prop="name">
+        <a-form-item label="文件名" name="name">
           {{ temp.name }}
         </a-form-item>
-        <a-form-item label="文件ID" prop="name">
+        <a-form-item label="文件ID" name="name">
           {{ temp.id }}
         </a-form-item>
-        <a-form-item label="文件大小" prop="size">
+        <a-form-item label="文件大小" name="size">
           {{ renderSize(temp.size) }}
         </a-form-item>
-        <a-form-item label="过期时间" prop="keepDay">
+        <a-form-item label="过期时间" name="keepDay">
           {{ parseTime(temp.validUntil) }}
         </a-form-item>
-        <a-form-item label="文件共享" prop="global">
+        <a-form-item label="文件共享" name="global">
           {{ temp.workspaceId === 'GLOBAL' ? '全局' : '工作空间' }}
         </a-form-item>
-        <a-form-item label="文件描述" prop="description">
+        <a-form-item label="文件描述" name="description">
           {{ temp.description }}
         </a-form-item>
       </a-form>

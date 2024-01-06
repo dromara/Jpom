@@ -1,11 +1,21 @@
 <template>
   <div>
-    <log-view :ref="`logView`" height="70vh" marginTop="-10px" />
+    <log-view
+      titleName="pull日志"
+      :visible="visible"
+      :ref="`logView`"
+      @close="
+        () => {
+          $emit('close')
+        }
+      "
+    />
   </div>
 </template>
+
 <script>
-import LogView from "@/components/logView";
-import { dockerImagePullImageLog } from "@/api/docker-api";
+import LogView from '@/components/logView'
+import { dockerImagePullImageLog } from '@/api/docker-api'
 export default {
   components: {
     LogView,
@@ -16,15 +26,19 @@ export default {
     },
     machineDockerId: {
       type: String,
-      default: "",
+      default: '',
     },
     urlPrefix: {
       type: String,
     },
+    visible: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     reqDataId() {
-      return this.id || this.machineDockerId;
+      return this.id || this.machineDockerId
     },
   },
   data() {
@@ -32,46 +46,50 @@ export default {
       logTimer: null,
       // logText: "loading...",
       line: 1,
-    };
+    }
   },
-  beforeDestroy() {
-    this.logTimer && clearTimeout(this.logTimer);
+  beforeUnmount() {
+    this.logTimer && clearTimeout(this.logTimer)
   },
   mounted() {
-    this.pullLog();
+    this.pullLog()
   },
   methods: {
     nextPull() {
-      this.logTimer && clearTimeout(this.logTimer);
+      this.logTimer && clearTimeout(this.logTimer)
       // 加载构建日志
       this.logTimer = setTimeout(() => {
-        this.pullLog();
-      }, 2000);
+        this.pullLog()
+      }, 2000)
     },
     // 加载日志内容
     pullLog() {
       const params = {
         id: this.reqDataId,
         line: this.line,
-      };
+      }
       dockerImagePullImageLog(this.urlPrefix, params).then((res) => {
-        let next = true;
+        let next = true
         if (res.code === 200) {
           // 停止请求
-          const dataLines = res.data.dataLines;
-          if (dataLines && dataLines.length && dataLines[dataLines.length - 1].indexOf("pull end") > -1) {
-            this.logTimer && clearTimeout(this.logTimer);
-            next = false;
+          const dataLines = res.data.dataLines
+          if (
+            dataLines &&
+            dataLines.length &&
+            dataLines[dataLines.length - 1].indexOf('pull end') > -1
+          ) {
+            this.logTimer && clearTimeout(this.logTimer)
+            next = false
           }
 
-          this.$refs.logView.appendLine(dataLines);
-          this.line = res.data.line;
+          this.$refs.logView.appendLine(dataLines)
+          this.line = res.data.line
         }
         // 继续拉取日志
-        if (next) this.nextPull();
-      });
+        if (next) this.nextPull()
+      })
     },
   },
-};
+  emits: ['close'],
+}
 </script>
-<style scoped></style>

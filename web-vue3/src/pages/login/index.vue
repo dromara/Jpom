@@ -39,10 +39,10 @@
       <template v-if="action === 'login'">
         <a-form :model="loginForm" :label-col="{ span: 0 }" :wrapper-col="{ span: 24 }" @finish="handleLogin">
           <a-form-item name="loginName" :rules="[{ required: true, message: '请输入用户名' }]">
-            <a-input v-model:value="loginForm.loginName" placeholder="用户名" />
+            <a-input autocomplete="true" v-model:value="loginForm.loginName" placeholder="用户名" />
           </a-form-item>
           <a-form-item name="userPwd" :rules="[{ required: true, message: '请输入密码' }]">
-            <a-input-password v-model:value="loginForm.userPwd" placeholder="密码" />
+            <a-input-password autocomplete="true" v-model:value="loginForm.userPwd" placeholder="密码" />
           </a-form-item>
           <a-form-item v-if="!disabledCaptcha" name="code" :rules="[{ required: true, message: '请输入验证码' }]">
             <a-row>
@@ -114,9 +114,6 @@
 import { login, loginConfig, mfaVerify, oauth2Url, oauth2Login, loginRandCode } from '@/api/user/user'
 import { checkSystem } from '@/api/install'
 import sha1 from 'js-sha1'
-import { useAppStore } from '@/stores/app'
-import { useUserStore } from '@/stores/user'
-import { useMenuStore } from '@/stores/menu'
 
 import maxkeyImg from '@/assets/images/maxkey.png'
 import giteeImg from '@/assets/images/gitee.svg'
@@ -130,8 +127,6 @@ interface IFormState {
 
 const router = useRouter()
 const route = useRoute()
-const appStore = useAppStore()
-const userStore = useUserStore()
 
 const loginTitle = ref('登录JPOM')
 const loginForm = reactive<IFormState>({
@@ -248,7 +243,7 @@ const startDispatchLogin = (res: any) => {
   $notification.success({
     message: res.msg
   })
-  const existWorkspace = res.data.bindWorkspaceModels.find((item: any) => item.id === appStore.getWorkspaceId)
+  const existWorkspace = res.data.bindWorkspaceModels.find((item: any) => item.id === appStore().getWorkspaceId)
   if (existWorkspace) {
     // 缓存的还存在
     dispatchLogin(res.data)
@@ -256,16 +251,18 @@ const startDispatchLogin = (res: any) => {
     // 之前的工作空间已经不存在,切换到当前列表的第一个
     // 还没有选择工作空间，默认选中第一个 用户加载菜单
     let firstWorkspace = res.data.bindWorkspaceModels[0]
-    appStore.changeWorkspace(firstWorkspace.id)
+    appStore().changeWorkspace(firstWorkspace.id)
     dispatchLogin(res.data)
   }
 }
 const dispatchLogin = (data: any) => {
   // 调用 store action 存储当前登录的用户名和 token
-  userStore.login({ token: data.token, longTermToken: data.longTermToken }).then(() => {
-    // 跳转主页面
-    router.push({ path: '/' })
-  })
+  userStore()
+    .login({ token: data.token, longTermToken: data.longTermToken })
+    .then(() => {
+      // 跳转主页面
+      router.push({ path: '/' })
+    })
 }
 
 // Controls the background display or hiding
@@ -372,7 +369,8 @@ onMounted(() => {
 </script>
 <style scoped lang="less">
 .wrapper {
-  width: 100vw;
+  margin: 0;
+  // width: 100vw;
   height: 100vh;
   /* background-color: #fbefdf; */
   background: linear-gradient(#1890ff, #66a9c9);

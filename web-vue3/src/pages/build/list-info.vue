@@ -524,10 +524,10 @@
       :maskClosable="false"
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item label="名称" prop="name">
+        <a-form-item label="名称" name="name">
           <a-input readOnly disabled v-model="temp.name" />
         </a-form-item>
-        <a-form-item label="分支" prop="branchName">
+        <a-form-item label="分支" name="branchName">
           <custom-select
             v-model="temp.branchName"
             :data="branchList"
@@ -549,7 +549,7 @@
         <a-form-item
           v-if="(branchTagList && branchTagList.length) || (temp.branchTagName && temp.branchTagName.length)"
           label="标签(TAG)"
-          prop="branchTagName"
+          name="branchTagName"
         >
           <custom-select
             v-model="temp.branchTagName"
@@ -568,10 +568,10 @@
             </div>
           </custom-select>
         </a-form-item>
-        <a-form-item prop="resultDirFile" label="产物目录">
+        <a-form-item name="resultDirFile" label="产物目录">
           <a-input v-model="temp.resultDirFile" placeholder="不填写则不更新" />
         </a-form-item>
-        <a-form-item prop="checkRepositoryDiff" label="差异构建" help="">
+        <a-form-item name="checkRepositoryDiff" label="差异构建" help="">
           <a-space>
             <a-switch v-model="temp.checkRepositoryDiff" checked-children="是" un-checked-children="否" />
             <span>
@@ -586,19 +586,19 @@
 
         <a-form-item
           v-if="temp.releaseMethod === 1 || temp.releaseMethod === 2"
-          prop="projectSecondaryDirectory"
+          name="projectSecondaryDirectory"
           label="二级目录"
         >
           <a-input v-model="temp.projectSecondaryDirectory" placeholder="不填写则发布至项目的根目录" />
         </a-form-item>
-        <a-form-item label="环境变量" prop="buildEnvParameter" help="配置后将保存到当前构建">
+        <a-form-item label="环境变量" name="buildEnvParameter" help="配置后将保存到当前构建">
           <a-textarea
             v-model="temp.buildEnvParameter"
             placeholder="请输入构建环境变量：xx=abc 多个变量回车换行即可"
             :auto-size="{ minRows: 3, maxRows: 5 }"
           />
         </a-form-item>
-        <a-form-item label="构建备注" prop="buildRemark" help="填写备注仅本次构建生效">
+        <a-form-item label="构建备注" name="buildRemark" help="填写备注仅本次构建生效">
           <a-textarea
             v-model="temp.buildRemark"
             :maxLength="240"
@@ -608,7 +608,7 @@
         </a-form-item>
         <a-form-item
           v-if="dispatchProjectList && dispatchProjectList.length"
-          prop="selectProject"
+          name="selectProject"
           label="筛选项目"
           help="筛选之后本次发布操作只发布筛选项,并且只对本次操作生效"
         >

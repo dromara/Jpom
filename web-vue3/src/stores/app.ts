@@ -11,7 +11,7 @@ export const useAppStore = defineStore('app', {
   state: () => ({
     workspaceId: localStorage.getItem(CACHE_WORKSPACE_ID),
     // 菜单折叠
-    isCollapsed: !!localStorage.getItem('collapsed'),
+    isCollapsed: localStorage.getItem('collapsed') === 'true',
     isShowInfo: false
   }),
 

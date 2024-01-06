@@ -1,59 +1,102 @@
 <template>
-  <div class="node-update full-content">
+  <div>
     <a-tabs type="card" default-active-key="1">
-      <a-tab-pane key="1" tab="服务端">
-        <!-- <upgrade></upgrade> -->
-      </a-tab-pane>
-      <a-tab-pane key="2" tab="所有节点(插件端)" force-render>
-        <div class="search-wrapper">
-          <a-row v-if="percentage">
-            <a-col span="24"><a-progress v-if="percentage" :percent="percentage" /> </a-col>
-          </a-row>
-          <a-space>
-            <a-input class="search-input-item" @pressEnter="getNodeList" v-model:value="listQuery['%name%']"
-              placeholder="节点名称" />
-            <a-input class="search-input-item" @pressEnter="getNodeList" v-model:value="listQuery['%jpomUrl%']"
-              placeholder="节点地址" />
-            <a-input class="search-input-item" @pressEnter="getNodeList" v-model:value="listQuery['%jpomVersion%']"
-              placeholder="插件版本" />
-            <a-select show-search option-filter-prop="children" v-model:value="listQuery.groupName" allowClear
-              placeholder="分组" class="search-input-item">
-              <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
-            </a-select>
-            <a-button :loading="loading" type="primary" @click="getNodeList">搜索</a-button>
+      <a-tab-pane key="1" tab="服务端"> <upgrade></upgrade></a-tab-pane>
+      <a-tab-pane key="2" tab="所有节点(插件端)">
+        <a-table
+          :columns="columns"
+          :data-source="list"
+          bordered
+          size="middle"
+          rowKey="id"
+          :pagination="pagination"
+          @change="changePage"
+          :row-selection="rowSelection"
+          :scroll="{
+            x: 'max-content'
+          }"
+        >
+          <template #title>
+            <a-row v-if="percentage">
+              <a-col span="24"><a-progress v-if="percentage" :percent="percentage" /> </a-col>
+            </a-row>
+            <a-space>
+              <a-input
+                class="search-input-item"
+                @pressEnter="getNodeList"
+                v-model:value="listQuery['%name%']"
+                placeholder="节点名称"
+              />
+              <a-input
+                class="search-input-item"
+                @pressEnter="getNodeList"
+                v-model:value="listQuery['%jpomUrl%']"
+                placeholder="节点地址"
+              />
+              <a-input
+                class="search-input-item"
+                @pressEnter="getNodeList"
+                v-model:value="listQuery['%jpomVersion%']"
+                placeholder="插件版本"
+              />
+              <a-select
+                show-search
+                option-filter-prop="children"
+                v-model:value="listQuery.groupName"
+                allowClear
+                placeholder="分组"
+                class="search-input-item"
+              >
+                <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+              </a-select>
+              <a-button :loading="loading" type="primary" @click="getNodeList">搜索</a-button>
 
-            <a-select v-model:value="temp.protocol" placeholder="升级协议" class="search-input-item">
-              <a-select-option value="WebSocket">WebSocket</a-select-option>
-              <a-select-option value="Http">Http</a-select-option>
-            </a-select>
-            <a-button type="primary" @click="batchUpdate">批量更新</a-button>
-            |
-            <a-upload name="file" accept=".jar,.zip" action="" :disabled="!!percentage" :showUploadList="false"
-              :multiple="false" :before-upload="beforeUpload">
-              <a-icon type="loading" v-if="percentage" />
-              <a-button type="primary" v-else icon="upload"> 上传包 </a-button>
-            </a-upload>
-            <a-tooltip :title="`打包时间：${agentTimeStamp || '未知'}`">
-              Agent版本：{{ agentVersion | version }}
-              <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">新版本：{{ temp.newVersion }} <a-icon
-                  type="download" /></a-tag>
-            </a-tooltip>
-          </a-space>
-        </div>
-        <a-table :columns="columns" :data-source="list" bordered size="middle" rowKey="id" class="table"
-          :pagination="pagination" @change="changePage" :row-selection="rowSelection">
+              <a-select v-model:value="temp.protocol" placeholder="升级协议" class="search-input-item">
+                <a-select-option value="WebSocket">WebSocket</a-select-option>
+                <a-select-option value="Http">Http</a-select-option>
+              </a-select>
+              <a-button type="primary" @click="batchUpdate">批量更新</a-button>
+              |
+              <a-upload
+                name="file"
+                accept=".jar,.zip"
+                action=""
+                :disabled="!!percentage"
+                :showUploadList="false"
+                :multiple="false"
+                :before-upload="beforeUpload"
+              >
+                <LoadingOutlined v-if="percentage" />
+                <a-button type="primary" v-else> <UploadOutlined />上传包 </a-button>
+              </a-upload>
+              <a-tooltip :title="`打包时间：${agentTimeStamp || '未知'}`">
+                Agent版本：{{ version_filter(agentVersion) }}
+                <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">
+                  新版本：{{ temp.newVersion }} <DownloadOutlined />
+                </a-tag>
+                <!-- </div> -->
+              </a-tooltip>
+
+              <!-- 打包时间：{{ agentTimeStamp | version }}</div> -->
+            </a-space>
+          </template>
           <template #bodyCell="{ column, text, record }">
-            <template v-if="column.dataIndex === 'version'">
-              {{ text | version }}
+            <template v-if="column.tooltip">
+              <a-tooltip :title="text">
+                <span>{{ text }}</span>
+              </a-tooltip>
+            </template>
+            <template v-else-if="column.dataIndex === 'jpomVersion'">
+              {{ version_filter(text) }}
             </template>
             <template v-else-if="column.dataIndex === 'upTime'">
               <a-tooltip placement="topLeft" :title="formatDuration(text)">
-                <span>{{ formatDuration(text, "", 2) }}</span>
+                <span>{{ formatDuration(text, '', 2) }}</span>
               </a-tooltip>
             </template>
             <template v-else-if="column.dataIndex === 'status'">
               <a-tag :color="text === 1 ? 'green' : 'pink'" style="margin-right: 0">
-                {{ statusMap[text] || "未知" }}
+                {{ statusMap[text] || '未知' }}
               </a-tag>
             </template>
             <template v-else-if="column.dataIndex === 'updateStatus'">
@@ -64,11 +107,13 @@
                 <a-tooltip :title="text.data"> {{ text.data }} </a-tooltip>
               </div>
               <div v-if="text && text.type === 'uploading'">
-                <div class="text">{{ text.percent === 100 ? "上传成功" : "正在上传文件" }}</div>
+                <div class="text">
+                  {{ text.percent === 100 ? '上传成功' : '正在上传文件' }}
+                </div>
                 <a-progress :percent="text.percent" />
               </div>
             </template>
-            <template v-if="column.dataIndex === 'operation'">
+            <template v-else-if="column.dataIndex === 'operation'">
               <a-button type="primary" size="small" @click="updateNodeHandler(record)">更新</a-button>
             </template>
           </template>
@@ -77,420 +122,25 @@
     </a-tabs>
   </div>
 </template>
-<script setup lang="ts">
-// import upgrade from "@/components/upgrade";
-import {
-  checkVersion,
-  downloadRemote,
-  uploadAgentFile,
-  uploadAgentFileMerge,
-} from "@/api/node";
-import {
-  machineListData,
-  machineListGroup,
-  statusMap,
-} from "@/api/system/assets-machine";
-import { useUserStore } from "@/stores/user";
-// import { mapGetters } from "vuex";
-import {
-  CHANGE_PAGE,
-  COMPUTED_PAGINATION,
-  PAGE_DEFAULT_LIST_QUERY,
-  formatDuration,
-  getWebSocketUrl,
-} from "@/utils/const";
-import { uploadPieces } from "@/utils/upload-pieces";
 
-// 使用 ref 定义变量
-const agentVersion = ref("");
-const agentTimeStamp = ref("");
-
-const loading = ref(false);
-const tableSelections = ref([]);
-const temp = reactive({});
-const percentage = ref(0);
-
-const listQuery = ref({ ...PAGE_DEFAULT_LIST_QUERY });
-
-const list = reactive([]);
-const groupList = reactive([]);
-const nodeVersion = reactive({});
-const nodeStatus = reactive({});
-
-
-const rowSelection = computed(() => ({
-  onChange: tableSelectionChange,
-  selectedRowKeys: tableSelections.value,
-}));
-
-const userStore = useUserStore()
-
-const longTermToken = userStore.getLongTermToken;
-const socketUrl = computed(() =>
-  getWebSocketUrl(
-    "/socket/node_update",
-    `userId=${longTermToken}&nodeId=system&type=nodeUpdate`
-  )
-);
-
-const pagination = computed(() => COMPUTED_PAGINATION(listQuery.value));
-
-const updateList = () => {
-  list.forEach((item) => {
-    const itemData = nodeVersion[item.id];
-    if (itemData) {
-      try {
-        const parsedItemData = JSON.parse(itemData);
-        item.version = parsedItemData.version;
-        item.timeStamp = parsedItemData.timeStamp;
-        item.upTime = parsedItemData.upTime;
-      } catch (e) {
-        item.version = itemData;
-      }
-    }
-    item.updateStatus = nodeStatus[item.id];
-  });
-};
-
-const loadGroupList = () => {
-  machineListGroup().then((res) => {
-    if (res.data) {
-      groupList = res.data;
-    }
-  });
-};
-
-const websocket = ref();
-let heart: any = null;
-websocket.value = new WebSocket(socketUrl.value);
-const close = () => {
-  websocket.value?.close();
-  clearInterval(heart);
-  websocket.value = null;
-};
-
-const initWebsocket = (ids) => {
-  if (websocket.value) {
-    initHeart(ids);
-    return;
-  }
-
-  websocket.value.onopen = () => {
-    initHeart(ids);
-  };
-  websocket.value.onmessage = ({ data: socketData }) => {
-    let msgObj;
-    try {
-      msgObj = JSON.parse(socketData);
-    } catch (e) {
-      console.error(e);
-    }
-    if (msgObj) {
-      const { command, data, nodeId } = msgObj;
-      if (command === "getNodeList") {
-        list = data;
-        updateList();
-      } else if (command === "getAgentVersion") {
-        getAgentVersionResult(data);
-      } else if (command === "getVersion") {
-        getVersionResult(data, nodeId);
-      } else if (command === "onError") {
-        onErrorResult(data, nodeId);
-      } else if (command === "updateNode") {
-        updateNodeResult(data, nodeId);
-      } else if (command === "restart") {
-        restartResult(data, nodeId);
-      }
-    }
-  };
-  websocket.value.onerror = (err) => {
-    console.error(err);
-    $notification.error({
-      message: "web socket 错误,请检查是否开启 ws 代理",
-    });
-  };
-  websocket.value.onclose = (err) => {
-    console.error(err);
-    $message.warning("会话已经关闭[upgrade]");
-    clearInterval(heart);
-  };
-};
-
-const checkAgentFileVersion = () => {
-  checkVersion().then((res) => {
-    if (res.code === 200) {
-      const upgrade = res.data?.upgrade;
-      if (upgrade) {
-        temp.upgrade = upgrade;
-        temp.newVersion = res.data.tagName;
-      } else {
-        temp.upgrade = false;
-      }
-    }
-  });
-};
-
-const initHeart = (ids) => {
-  sendMsg("getNodeList:" + ids.join(","));
-  getAgentVersion();
-  clearInterval(heart);
-  heart = setInterval(() => {
-    sendMsg("heart", {});
-  }, 2000);
-};
-
-const batchUpdate = () => {
-  if (tableSelections.length === 0) {
-    $notification.warning({
-      message: "请选择要升级的节点",
-    });
-    return;
-  }
-  updateNode();
-};
-
-const updateNodeHandler = (record) => {
-  tableSelections = [record.id];
-  updateNode();
-};
-
-const tableSelectionChange = (selectedRowKeys) => {
-  tableSelections = selectedRowKeys;
-};
-
-const sendMsg = (command, params) => {
-  websocket.value.send(JSON.stringify({ command, params }));
-};
-
-const getNodeList = () => {
-  loading.value = true;
-  machineListData(listQuery.value).then((res) => {
-    if (res.code === 200) {
-      list = res.data.result;
-      listQuery.total = res.data.total;
-      const ids = list.map((item) => item.id);
-      if (ids.length > 0) {
-        initWebsocket(ids);
-      }
-    }
-    loading.value = false;
-    updateList();
-  });
-};
-
-const getAgentVersion = () => {
-  sendMsg("getAgentVersion");
-};
-
-const getAgentVersionResult = (data) => {
-  try {
-    const newData = JSON.parse(data);
-    agentVersion = newData.version;
-    agentTimeStamp = newData.timeStamp;
-  } catch (e) {
-    agentVersion = data || "";
-  }
-  checkAgentFileVersion();
-  updateList();
-};
-
-const getVersionResult = (data, nodeId) => {
-  nodeVersion[nodeId] = data;
-  updateList();
-};
-
-const onErrorResult = (data, nodeId) => {
-  if (nodeId) {
-    nodeStatus[nodeId] = {
-      type: "error",
-      data: data,
-    };
-  } else {
-    $notification.warning({
-      message: data,
-    });
-  }
-  updateList();
-};
-
-const updateNodeResult = (data, nodeId) => {
-  const { completeSize, size } = data;
-  nodeStatus[nodeId] = {
-    ...data,
-    type: "uploading",
-    percent: Math.floor((completeSize / size) * 100),
-  };
-  updateList();
-};
-
-const restartResult = (data, nodeId) => {
-  nodeStatus[nodeId] = {
-    type: "restarting",
-    data: data,
-  };
-  updateList();
-};
-
-const updateNode = () => {
-  if (!agentVersion) {
-    $notification.error({
-      message: "请先上传或者下载新版本",
-    });
-    return;
-  }
-  const len = tableSelections.length;
-  const html =
-    "确认要将选中的  <b style='color:red;font-size: 20px;'>" +
-    len +
-    "</b> 个节点升级到 <b style='color:red;font-size: 20px;'>" +
-    (agentVersion || "--") +
-    "</b> 吗？<ul style='color:red;'>" +
-    "<li>升级前请阅读更新日志里面的说明和注意事项并且<b>请注意备份数据防止数据丢失！！</b></li>" +
-    "<li>如果升级失败需要手动恢复奥</li>" +
-    "<li>一般情况下不建议降级操作</li>" +
-    " </ul>";
-  $confirm({
-    title: "系统提示",
-    content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
-    okText: "确认",
-    cancelText: "取消",
-    onOk: () => {
-      sendMsg("updateNode", {
-        ids: tableSelections,
-        protocol: temp.protocol,
-      });
-      tableSelections = [];
-    },
-  });
-};
-
-const beforeUpload = (file) => {
-  const html =
-    "确认要上传最新的插件包吗？<ul style='color:red;'>" +
-    "<li>上传前请阅读更新日志里面的说明和注意事项并且更新前<b>请注意备份数据防止数据丢失！！</b></li>" +
-    "<li>上传前请检查包是否完整,否则可能出现更新后无法正常启动的情况！！</li>" +
-    " </ul>";
-  $confirm({
-    title: "系统提示",
-    content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
-    okText: "确认",
-    cancelText: "取消",
-    onOk: () => {
-      percentage = 0;
-      uploadPieces({
-        file,
-        process: (process) => {
-          percentage = Math.max(percentage, process);
-        },
-        success: (uploadData) => {
-          uploadAgentFileMerge({
-            ...uploadData[0],
-          }).then((res) => {
-            if (res.code === 200) {
-              getNodeList();
-            }
-            setTimeout(() => {
-              percentage = 0;
-            }, 2000);
-          });
-        },
-        error: (msg) => {
-          $notification.error({
-            message: msg,
-          });
-        },
-        uploadCallback: (formData) => {
-          return new Promise((resolve, reject) => {
-            uploadAgentFile(formData)
-              .then((res) => {
-                if (res.code === 200) {
-                  resolve();
-                } else {
-                  reject();
-                }
-              })
-              .catch(() => {
-                reject();
-              });
-          });
-        },
-      });
-    },
-  });
-  return false;
-};
-
-const downloadRemoteEvent = () => {
-  const html =
-    "确认要下载最新版本吗？<ul style='color:red;'>" +
-    "<li>下载速度根据网速来确定,如果网络不佳下载会较慢</li>" +
-    "<li>下载前请阅读更新日志里面的说明和注意事项并且更新前<b>请注意备份数据防止数据丢失！！</b></li>" +
-    "<li>下载完成后需要手动选择更新到节点才能完成节点更新奥</li>" +
-    "<li>如果升级失败需要手动恢复奥</li>" +
-    " </ul>";
-  $confirm({
-    title: "系统提示",
-    content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
-    okText: "确认",
-    cancelText: "取消",
-    onOk: () => {
-      downloadRemote().then((res) => {
-        if (res.code === 200) {
-          $notification.success({ message: res.msg });
-          getNodeList();
-        } else {
-          // $notification.error({ message: res.msg });
-        }
-      });
-    },
-  });
-};
-
-const changePage = (pagination, filters, sorter) => {
-  listQuery.value = CHANGE_PAGE(listQuery.value, { pagination, sorter });
-  getNodeList();
-};
-
-
-
-onMounted(() => {
-  getNodeList();
-  loadGroupList();
-  checkAgentFileVersion();
-  window.onbeforeunload = () => {
-    close();
-  };
-});
-
-onUnmounted(() => {
-  close();
-});
-</script>
-
-<!-- <script>
-import upgrade from "@/components/upgrade";
-import { checkVersion, downloadRemote, uploadAgentFile, uploadAgentFileMerge } from "@/api/node";
-import { machineListData, machineListGroup, statusMap } from "@/api/system/assets-machine";
-import { mapGetters } from "vuex";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, getWebSocketUrl, PAGE_DEFAULT_LIST_QUERY, formatDuration } from "@/utils/const";
-import { uploadPieces } from "@/utils/upload-pieces";
-
+<script>
+import upgrade from '@/components/upgrade'
+import { checkVersion, downloadRemote, uploadAgentFile, uploadAgentFileMerge } from '@/api/node'
+import { machineListData, machineListGroup, statusMap } from '@/api/system/assets-machine'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/stores/user'
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, formatDuration } from '@/utils/const'
+import { getWebSocketUrl } from '@/api/config'
+import { uploadPieces } from '@/utils/upload-pieces'
+import { h } from 'vue'
 export default {
   components: {
-    upgrade,
-  },
-  filters: {
-    version(value) {
-      return (value && value) || "---";
-    },
-    status(value) {
-      return (value && value) || "未知";
-    },
+    upgrade
   },
   data() {
     return {
-      agentVersion: "",
-      agentTimeStamp: "",
+      agentVersion: '',
+      agentTimeStamp: '',
       websocket: null,
 
       loading: false,
@@ -498,150 +148,217 @@ export default {
       list: [],
       groupList: [],
       columns: [
-        { title: "机器名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "节点地址", dataIndex: "jpomUrl", sorter: true, width: "150px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "分组名", dataIndex: "groupName", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
-        { title: "机器状态(缓存)", dataIndex: "status", width: "130px", ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "缓存版本号", dataIndex: "jpomVersion", width: "100px", ellipsis: true, scopedSlots: { customRender: "version" } },
-        { title: "实时版本号", dataIndex: "version", width: "100px", ellipsis: true, scopedSlots: { customRender: "version" } },
-        { title: "打包时间", dataIndex: "timeStamp", width: "170px", ellipsis: true, scopedSlots: { customRender: "timeStamp" } },
-        { title: "运行时间", dataIndex: "upTime", width: "110px", ellipsis: true, scopedSlots: { customRender: "upTime" } },
+        {
+          title: '机器名称',
+          dataIndex: 'name',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '节点地址',
+          dataIndex: 'jpomUrl',
+          sorter: true,
+          width: '150px',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '分组名',
+          dataIndex: 'groupName',
+          ellipsis: true,
+          width: '100px',
+          tooltip: true
+        },
+        {
+          title: '机器状态(缓存)',
+          dataIndex: 'status',
+          width: '130px',
+          ellipsis: true
+        },
+        {
+          title: '缓存版本号',
+          dataIndex: 'jpomVersion',
+          width: '100px',
+          ellipsis: true
+        },
+        {
+          title: '实时版本号',
+          dataIndex: 'version',
+          width: '100px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'version' }
+        },
+        {
+          title: '打包时间',
+          dataIndex: 'timeStamp',
+          width: '170px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'timeStamp' }
+        },
+        {
+          title: '运行时间',
+          dataIndex: 'upTime',
+          width: '110px',
+          ellipsis: true,
+          scopedSlots: { customRender: 'upTime' }
+        },
 
-        { title: "更新状态", dataIndex: "updateStatus", ellipsis: true, scopedSlots: { customRender: "updateStatus" } },
+        {
+          title: '更新状态',
+          dataIndex: 'updateStatus',
+          ellipsis: true
+        },
         // {title: '自动更新', dataIndex: 'autoUpdate', ellipsis: true, scopedSlots: {customRender: 'autoUpdate'}},
-        { title: "操作", dataIndex: "operation", width: "80px", scopedSlots: { customRender: "operation" }, align: "center" },
+        {
+          title: '操作',
+          dataIndex: 'operation',
+          width: '80px',
+
+          align: 'center',
+          fixed: 'right'
+        }
       ],
       nodeVersion: {},
       nodeStatus: {},
       tableSelections: [],
       temp: {},
       percentage: 0,
-      statusMap,
-    };
+      statusMap
+    }
   },
   computed: {
-    ...mapGetters(["getLongTermToken"]),
+    ...mapState(useUserStore, ['getLongTermToken']),
 
     rowSelection() {
       return {
         onChange: this.tableSelectionChange,
-        selectedRowKeys: this.tableSelections,
-      };
+        selectedRowKeys: this.tableSelections
+      }
     },
     socketUrl() {
-      return getWebSocketUrl("/socket/node_update", `userId=${this.getLongTermToken}&nodeId=system&type=nodeUpdate`);
+      return getWebSocketUrl('/socket/node_update', `userId=${this.getLongTermToken}&nodeId=system&type=nodeUpdate`)
     },
     pagination() {
-      return COMPUTED_PAGINATION(this.listQuery);
-    },
+      return COMPUTED_PAGINATION(this.listQuery)
+    }
   },
   mounted() {
-    this.getNodeList();
-    this.loadGroupList();
-    this.checkAgentFileVersion();
+    this.getNodeList()
+    this.loadGroupList()
+    this.checkAgentFileVersion()
     // 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
     window.onbeforeunload = () => {
-      this.close();
-    };
+      this.close()
+    }
   },
-  beforeDestroy() {
-    this.close();
+  beforeUnmount() {
+    this.close()
   },
   methods: {
+    status_filter(value) {
+      return (value && value) || '未知'
+    },
+    version_filter(value) {
+      return value || '---'
+    },
     close() {
-      this.socket?.close();
-      clearInterval(this.heart);
-      this.socket = null;
+      this.socket?.close()
+      clearInterval(this.heart)
+      this.socket = null
     },
     formatDuration,
     updateList() {
       this.list = this.list.map((item) => {
-        let itemData = this.nodeVersion[item.id];
+        let itemData = this.nodeVersion[item.id]
         if (itemData) {
           try {
-            itemData = JSON.parse(itemData);
-            item.version = itemData.version;
-            item.timeStamp = itemData.timeStamp;
-            item.upTime = itemData.upTime;
+            itemData = JSON.parse(itemData)
+            item.version = itemData.version
+            item.timeStamp = itemData.timeStamp
+            item.upTime = itemData.upTime
           } catch (e) {
-            item.version = itemData;
+            item.version = itemData
           }
         }
         // item.nextTIme = Date.now();
-        item.updateStatus = this.nodeStatus[item.id];
+        item.updateStatus = this.nodeStatus[item.id]
         // data.push(item);
-        return { ...item };
-      });
+        return { ...item }
+      })
     },
     // 获取所有的分组
     loadGroupList() {
       machineListGroup().then((res) => {
         if (res.data) {
-          this.groupList = res.data;
+          this.groupList = res.data
         }
-      });
+      })
     },
     initWebsocket(ids) {
       if (this.socket) {
-        this.initHeart(ids);
-        return;
+        this.initHeart(ids)
+        return
       }
       // if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
-      this.socket = new WebSocket(this.socketUrl);
+      this.socket = new WebSocket(this.socketUrl)
       // }
 
       this.socket.onopen = () => {
-        this.initHeart(ids);
-      };
+        this.initHeart(ids)
+      }
       this.socket.onmessage = ({ data: socketData }) => {
-        let msgObj;
+        let msgObj
         try {
-          msgObj = JSON.parse(socketData);
+          msgObj = JSON.parse(socketData)
         } catch (e) {
-          console.error(e);
+          console.error(e)
         }
         if (msgObj) {
-          const { command, data, nodeId } = msgObj;
-          this[`${command}Result`] && this[`${command}Result`](data, nodeId);
+          const { command, data, nodeId } = msgObj
+          this[`${command}Result`] && this[`${command}Result`](data, nodeId)
         }
-      };
+      }
       this.socket.onerror = (err) => {
-        console.error(err);
+        console.error(err)
         this.$notification.error({
-          message: "web socket 错误,请检查是否开启 ws 代理",
-        });
-      };
+          message: 'web socket 错误,请检查是否开启 ws 代理'
+        })
+      }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
-        console.error(err);
-        this.$message.warning("会话已经关闭[upgrade]");
-        clearInterval(this.heart);
-      };
+        console.error(err)
+        this.$message.warning('会话已经关闭[upgrade]')
+        clearInterval(this.heart)
+      }
     },
     checkAgentFileVersion() {
       // 获取是否有新版本
       checkVersion().then((res) => {
         if (res.code === 200) {
-          let upgrade = res.data?.upgrade;
+          let upgrade = res.data?.upgrade
           if (upgrade) {
             //
-            this.temp = { ...this.temp, upgrade: upgrade, newVersion: res.data.tagName };
+            this.temp = {
+              ...this.temp,
+              upgrade: upgrade,
+              newVersion: res.data.tagName
+            }
             // this.temp.upgrade = upgrade;
             // this.temp.newVersion = ;
           } else {
-            this.temp = { ...this.temp, upgrade: false };
+            this.temp = { ...this.temp, upgrade: false }
           }
         }
-      });
+      })
     },
     initHeart(ids) {
-      this.sendMsg("getNodeList:" + ids.join(","));
-      this.getAgentVersion();
+      this.sendMsg('getNodeList:' + ids.join(','))
+      this.getAgentVersion()
       // 创建心跳，防止掉线
-      this.heart && clearInterval(this.heart);
+      this.heart && clearInterval(this.heart)
       this.heart = setInterval(() => {
-        this.sendMsg("heart", {});
-      }, 2000);
+        this.sendMsg('heart', {})
+      }, 2000)
     },
     // refresh() {
     //   // if (this.socket) {
@@ -654,174 +371,179 @@ export default {
     batchUpdate() {
       if (this.tableSelections.length === 0) {
         this.$notification.warning({
-          message: "请选择要升级的节点",
-        });
-        return;
+          message: '请选择要升级的节点'
+        })
+        return
       }
-      this.updateNode();
+      this.updateNode()
     },
     updateNodeHandler(record) {
-      this.tableSelections = [record.id];
-      this.updateNode();
+      this.tableSelections = [record.id]
+      this.updateNode()
     },
     tableSelectionChange(selectedRowKeys) {
-      this.tableSelections = selectedRowKeys;
+      this.tableSelections = selectedRowKeys
     },
     sendMsg(command, params) {
       this.socket.send(
         JSON.stringify({
           command,
-          params,
+          params
         })
-      );
+      )
     },
     getNodeList() {
-      this.loading = true;
-      machineListData(this.listQuery).then((res) => {
-        if (res.code === 200) {
-          this.list = res.data.result;
-          this.listQuery.total = res.data.total;
-          let ids = this.list.map((item) => {
-            return item.id;
-          });
-          if (ids.length > 0) {
-            this.initWebsocket(ids);
+      this.loading = true
+      machineListData(this.listQuery)
+        .then((res) => {
+          if (res.code === 200) {
+            this.list = res.data.result
+            this.listQuery.total = res.data.total
+            let ids = this.list.map((item) => {
+              return item.id
+            })
+            if (ids.length > 0) {
+              this.initWebsocket(ids)
+            }
           }
-        }
-        this.loading = false;
-        this.updateList();
-      });
+
+          this.updateList()
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     // getNodeListResult(data) {
     //   this.list = data;
     //   this.updateList();
     // },
     getAgentVersion() {
-      this.sendMsg("getAgentVersion");
+      this.sendMsg('getAgentVersion')
     },
     getAgentVersionResult(data) {
       try {
-        let newData = JSON.parse(data);
-        this.agentVersion = newData.version;
-        this.agentTimeStamp = newData.timeStamp;
+        let newData = JSON.parse(data)
+        this.agentVersion = newData.version
+        this.agentTimeStamp = newData.timeStamp
       } catch (e) {
-        this.agentVersion = data || "";
+        this.agentVersion = data || ''
       }
-      this.checkAgentFileVersion();
-      this.updateList();
+      this.checkAgentFileVersion()
+      this.updateList()
     },
     getVersionResult(data, nodeId) {
       this.nodeVersion = Object.assign({}, this.nodeVersion, {
-        [nodeId]: data,
-      });
-      this.updateList();
+        [nodeId]: data
+      })
+      this.updateList()
     },
     onErrorResult(data, nodeId) {
       if (nodeId) {
         //
         this.nodeStatus = Object.assign({}, this.nodeStatus, {
           [nodeId]: {
-            type: "error",
-            data: data,
-          },
-        });
+            type: 'error',
+            data: data
+          }
+        })
       } else {
-        this.$notification.warning({
-          message: data,
-        });
+        $notification.warning({
+          message: data
+        })
       }
-      this.updateList();
+      this.updateList()
     },
     updateNodeResult(data, nodeId) {
-      const { completeSize, size } = data;
+      const { completeSize, size } = data
       this.nodeStatus = Object.assign({}, this.nodeStatus, {
         [nodeId]: {
           ...data,
-          type: "uploading",
-          percent: Math.floor((completeSize / size) * 100),
-        },
-      });
-      this.updateList();
+          type: 'uploading',
+          percent: Math.floor((completeSize / size) * 100)
+        }
+      })
+      this.updateList()
     },
     restartResult(data, nodeId) {
       this.nodeStatus = Object.assign({}, this.nodeStatus, {
         [nodeId]: {
-          type: "restarting",
-          data: data,
-        },
-      });
-      this.updateList();
+          type: 'restarting',
+          data: data
+        }
+      })
+      this.updateList()
     },
     updateNode() {
       if (!this.agentVersion) {
         this.$notification.error({
-          message: "请先上传或者下载新版本",
-        });
-        return;
+          message: '请先上传或者下载新版本'
+        })
+        return
       }
-      const len = this.tableSelections.length;
+      const len = this.tableSelections.length
       const html =
         "确认要将选中的  <b style='color:red;font-size: 20px;'>" +
         len +
         "</b> 个节点升级到 <b style='color:red;font-size: 20px;'>" +
-        (this.agentVersion || "--") +
+        (this.agentVersion || '--') +
         "</b> 吗？<ul style='color:red;'>" +
-        "<li>升级前请阅读更新日志里面的说明和注意事项并且<b>请注意备份数据防止数据丢失！！</b></li>" +
-        "<li>如果升级失败需要手动恢复奥</li>" +
-        "<li>一般情况下不建议降级操作</li>" +
-        " </ul>";
-      const h = this.$createElement;
-      this.$confirm({
-        title: "系统提示",
-        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          this.sendMsg("updateNode", {
-            ids: this.tableSelections,
-            protocol: this.temp.protocol,
-          });
-          this.tableSelections = [];
-        },
-      });
-    },
+        '<li>升级前请阅读更新日志里面的说明和注意事项并且<b>请注意备份数据防止数据丢失！！</b></li>' +
+        '<li>如果升级失败需要手动恢复奥</li>' +
+        '<li>一般情况下不建议降级操作</li>' +
+        ' </ul>'
 
+      this.$confirm({
+        title: '系统提示',
+        zIndex: 1009,
+        content: h('div', null, [h('p', { innerHTML: html }, null)]),
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          this.sendMsg('updateNode', {
+            ids: this.tableSelections,
+            protocol: this.temp.protocol
+          })
+          this.tableSelections = []
+        }
+      })
+    },
     beforeUpload(file) {
       const html =
         "确认要上传最新的插件包吗？<ul style='color:red;'>" +
-        "<li>上传前请阅读更新日志里面的说明和注意事项并且更新前<b>请注意备份数据防止数据丢失！！</b></li>" +
-        "<li>上传前请检查包是否完整,否则可能出现更新后无法正常启动的情况！！</li>" +
-        " </ul>";
-      const h = this.$createElement;
+        '<li>上传前请阅读更新日志里面的说明和注意事项并且更新前<b>请注意备份数据防止数据丢失！！</b></li>' +
+        '<li>上传前请检查包是否完整,否则可能出现更新后无法正常启动的情况！！</li>' +
+        ' </ul>'
+
       this.$confirm({
-        title: "系统提示",
-        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
-        okText: "确认",
-        cancelText: "取消",
+        title: '系统提示',
+        zIndex: 1009,
+        content: h('div', null, [h('p', { innerHTML: html }, null)]),
+        okText: '确认',
+        cancelText: '取消',
         onOk: () => {
-          this.percentage = 0;
+          this.percentage = 0
           uploadPieces({
             file,
             process: (process) => {
-              this.percentage = Math.max(this.percentage, process);
+              this.percentage = Math.max(this.percentage, process)
             },
             success: (uploadData) => {
               // 准备合并
               uploadAgentFileMerge({
-                ...uploadData[0],
+                ...uploadData[0]
               }).then((res) => {
                 if (res.code === 200) {
-                  this.getNodeList();
+                  this.getNodeList()
                 }
                 setTimeout(() => {
-                  this.percentage = 0;
-                }, 2000);
-              });
+                  this.percentage = 0
+                }, 2000)
+              })
             },
             error: (msg) => {
               this.$notification.error({
-                message: msg,
-              });
+                message: msg
+              })
             },
             uploadCallback: (formData) => {
               return new Promise((resolve, reject) => {
@@ -829,53 +551,55 @@ export default {
                 uploadAgentFile(formData)
                   .then((res) => {
                     if (res.code === 200) {
-                      resolve();
+                      resolve()
                     } else {
-                      reject();
+                      reject()
                     }
                   })
                   .catch(() => {
-                    reject();
-                  });
-              });
-            },
-          });
-        },
-      });
-      return false;
+                    reject()
+                  })
+              })
+            }
+          })
+        }
+      })
+
+      return false
     },
     // 下载远程最新文件
     downloadRemoteEvent() {
       const html =
         "确认要下载最新版本吗？<ul style='color:red;'>" +
-        "<li>下载速度根据网速来确定,如果网络不佳下载会较慢</li>" +
-        "<li>下载前请阅读更新日志里面的说明和注意事项并且更新前<b>请注意备份数据防止数据丢失！！</b></li>" +
-        "<li>下载完成后需要手动选择更新到节点才能完成节点更新奥</li>" +
-        "<li>如果升级失败需要手动恢复奥</li>" +
-        " </ul>";
-      const h = this.$createElement;
+        '<li>下载速度根据网速来确定,如果网络不佳下载会较慢</li>' +
+        '<li>下载前请阅读更新日志里面的说明和注意事项并且更新前<b>请注意备份数据防止数据丢失！！</b></li>' +
+        '<li>下载完成后需要手动选择更新到节点才能完成节点更新奥</li>' +
+        '<li>如果升级失败需要手动恢复奥</li>' +
+        ' </ul>'
+
       this.$confirm({
-        title: "系统提示",
-        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
-        okText: "确认",
-        cancelText: "取消",
+        title: '系统提示',
+        zIndex: 1009,
+        content: h('div', null, [h('p', { innerHTML: html }, null)]),
+        okText: '确认',
+        cancelText: '取消',
         onOk: () => {
           downloadRemote().then((res) => {
             if (res.code === 200) {
-              this.$notification.success({ message: res.msg });
-              this.getNodeList();
+              this.$notification.success({ message: res.msg })
+              this.getNodeList()
             } else {
               //this.$notification.error({ message: res.msg });
             }
-          });
-        },
-      });
+          })
+        }
+      })
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
-      this.getNodeList();
-    },
-  },
-};
-</script> -->
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
+      this.getNodeList()
+    }
+  }
+}
+</script>

@@ -21,7 +21,7 @@
     <!--远程下载  -->
     <a-modal destroyOnClose v-model:visible="editArgs" title="添加运行参数" @ok="startExecution" :maskClosable="false">
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" ref="ruleForm">
-        <!-- <a-form-item label="执行参数" prop="args">
+        <!-- <a-form-item label="执行参数" name="args">
           <a-input v-model="temp.args" placeholder="执行参数,没有参数可以不填写" />
         </a-form-item> -->
         <a-form-item
@@ -62,7 +62,7 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 import { getWebSocketUrl } from '@/api/config'
 import LogView from '@/components/logView'
 

@@ -60,7 +60,7 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 import { getWebSocketUrl } from '@/api/config'
 import LogView from '@/components/logView'
 

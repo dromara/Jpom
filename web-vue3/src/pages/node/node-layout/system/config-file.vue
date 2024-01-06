@@ -1,5 +1,5 @@
 <template>
-  <div class="node-full-content">
+  <div class="">
     <a-form ref="editForm" :model="temp">
       <a-alert
         v-if="temp.file"
@@ -8,16 +8,17 @@
         banner
       />
       <a-form-item class="node-content-config">
-        <code-editor v-model="temp.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
+        <code-editor v-model:content="temp.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
         <!-- <a-input v-model="temp.content" type="textarea" :rows="25" style="resize: none" class="node-content-config" placeholder="请输入配置内容，参考项目的配置文件"/> -->
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
         <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit(false)">保存</a-button>
-        <a-button type="danger" class="btn" :disabled="submitAble" @click="onSubmit(true)">保存并重启</a-button>
+        <a-button type="primary" danger class="btn" :disabled="submitAble" @click="onSubmit(true)">保存并重启</a-button>
       </a-form-item>
     </a-form>
   </div>
 </template>
+
 <script>
 import { getConfigData, editConfig, systemInfo } from '@/api/system'
 import codeEditor from '@/components/codeEditor'
@@ -28,8 +29,8 @@ export default {
     codeEditor
   },
   props: {
-    node: {
-      type: Object
+    machineId: {
+      type: String
     }
   },
   data() {
@@ -48,7 +49,7 @@ export default {
   methods: {
     // load data
     loadData() {
-      getConfigData({ nodeId: this.node.id }).then((res) => {
+      getConfigData({ machineId: this.machineId }).then((res) => {
         if (res.code === 200) {
           this.temp.content = res.data
           this.temp.content = res.data.content
@@ -60,12 +61,12 @@ export default {
     onSubmit(restart) {
       // disabled submit button
       this.submitAble = true
-      this.temp.nodeId = this.node.id
+      this.temp.machineId = this.machineId
       this.temp.restart = restart
       editConfig(this.temp).then((res) => {
         if (res.code === 200) {
           // 成功
-          $notification.success({
+          this.$notification.success({
             message: res.msg
           })
           if (this.temp.restart) {
@@ -78,19 +79,19 @@ export default {
     },
     startCheckRestartStatus(msg) {
       this.checkCount = 0
-      this.$setLoading({
+      window.$vueApp.config.globalProperties.$setLoading({
         spinning: true,
         tip: (msg || '重启中，请稍候...') + ',请耐心等待暂时不用刷新页面,重启成功后会自动刷新'
       })
       setTimeout(() => {
         //
         this.timer = setInterval(() => {
-          systemInfo(this.node.id)
+          systemInfo(this.machineId)
             .then((res) => {
               if (res.code === 200) {
                 clearInterval(this.timer)
-                this.$setLoading(false)
-                $notification.success({
+                window.$vueApp.config.globalProperties.$setLoading(false)
+                this.$notification.success({
                   message: '重启成功'
                 })
 
@@ -99,10 +100,10 @@ export default {
                 }, 1000)
               } else {
                 if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
-                  $notification.warning({
+                  this.$notification.warning({
                     message: '未重启成功：' + (res.msg || '')
                   })
-                  this.$setLoading(false)
+                  window.$vueApp.config.globalProperties.$setLoading(false)
                   clearInterval(this.timer)
                 }
               }
@@ -110,8 +111,8 @@ export default {
             .catch((error) => {
               console.error(error)
               if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
-                this.$setLoading(false)
-                $notification.error({
+                window.$vueApp.config.globalProperties.$setLoading(false)
+                this.$notification.error({
                   message: '重启超时,请去服务器查看控制台日志排查问题'
                 })
                 clearInterval(this.timer)
@@ -124,6 +125,7 @@ export default {
   }
 }
 </script>
+
 <style scoped>
 .node-content-config {
   height: calc(100vh - 260px);

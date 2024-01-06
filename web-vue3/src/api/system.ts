@@ -1,16 +1,16 @@
-import axios from './config'
-import { loadRouterBase } from './config'
+import axios from "./config";
+import { loadRouterBase } from "./config";
 
 /**
  * 日志列表
  * @param {nodeId} params
  */
-export function getLogList(params: any) {
+export function getLogList(params) {
   return axios({
-    url: '/system/log_data.json',
-    method: 'post',
-    data: params
-  })
+    url: "/system/log_data.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -18,20 +18,20 @@ export function getLogList(params: any) {
  * 下载文件的返回是 blob 类型，把 blob 用浏览器下载下来
  * @param {nodeId, path} params
  */
-export function downloadFile(params: any) {
-  return loadRouterBase('/system/log_download', params)
+export function downloadFile(params) {
+  return loadRouterBase("/system/log_download", params);
 }
 
 /**
  * 删除日志
  * @param {nodeId, path} params
  */
-export function deleteLog(params: any) {
+export function deleteLog(params) {
   return axios({
-    url: '/system/log_del.json',
-    method: 'post',
-    data: params
-  })
+    url: "/system/log_del.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -39,21 +39,21 @@ export function deleteLog(params: any) {
  */
 export function getServerCache() {
   return axios({
-    url: '/system/server-cache',
-    method: 'post'
-  })
+    url: "/system/server-cache",
+    method: "post",
+  });
 }
 
 /**
  * 节点缓存数据
  * @param {String} nodeId
  */
-export function getNodeCache(nodeId: string) {
+export function getNodeCache(data) {
   return axios({
-    url: '/system/node_cache.json',
-    method: 'post',
-    data: { nodeId }
-  })
+    url: "/system/node_cache.json",
+    method: "post",
+    data,
+  });
 }
 
 /**
@@ -63,38 +63,38 @@ export function getNodeCache(nodeId: string) {
  *  nodeId: 节点 ID
  * } params
  */
-export function clearCache(params: any) {
+export function clearCache(params) {
   return axios({
-    url: '/system/clearCache.json',
-    method: 'post',
-    data: params
-  })
+    url: "/system/clearCache.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
  * 清理错误工作空间的数据
  *
  */
-export function clearErrorWorkspace(params: any) {
+export function clearErrorWorkspace(params) {
   return axios({
-    url: '/system/clear-error-workspace',
-    method: 'get',
+    url: "/system/clear-error-workspace",
+    method: "get",
 
     headers: {},
-    params
-  })
+    params,
+  });
 }
 
 /**
  * 加载配置数据
  * @param {String} nodeId 节点 ID，若为空表示加载 Server 端配置
  */
-export function getConfigData(data?: any) {
+export function getConfigData(data) {
   return axios({
-    url: '/system/config-data',
-    method: 'post',
-    data: data
-  })
+    url: "/system/config-data",
+    method: "post",
+    data: data,
+  });
 }
 
 /**
@@ -102,25 +102,25 @@ export function getConfigData(data?: any) {
  */
 export function getIpConfigData() {
   return axios({
-    url: '/system/ip-config-data',
-    method: 'post',
-    data: {}
-  })
+    url: "/system/ip-config-data",
+    method: "post",
+    data: {},
+  });
 }
 
 /**
  * 编辑配置
  * @param {JSON} params {
- *  allowed: 允许访问，白名单ip,
- *  prohibited: 禁止访问，黑名单ip
+ *  allowed: 允许访问，授权ip,
+ *  prohibited: 禁止访问，禁止ip
  * }
  */
-export function editIpConfig(params: any) {
+export function editIpConfig(params) {
   return axios({
-    url: '/system/save_ip_config.json',
-    method: 'post',
-    data: params
-  })
+    url: "/system/save_ip_config.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -131,12 +131,12 @@ export function editIpConfig(params: any) {
  *  restart: 是否重启
  * } params
  */
-export function editConfig(params: any) {
+export function editConfig(params) {
   return axios({
-    url: '/system/save_config.json',
-    method: 'post',
-    data: params
-  })
+    url: "/system/save_config.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -144,25 +144,25 @@ export function editConfig(params: any) {
  */
 export function getMailConfigData() {
   return axios({
-    url: '/system/mail-config-data',
-    method: 'post'
-  })
+    url: "/system/mail-config-data",
+    method: "post",
+  });
 }
 
-export function oauthConfigOauth2(params: any) {
+export function oauthConfigOauth2(params) {
   return axios({
-    url: '/system/oauth-config/oauth2',
-    method: 'get',
-    params
-  })
+    url: "/system/oauth-config/oauth2",
+    method: "get",
+    params,
+  });
 }
 
-export function oauthConfigOauth2Save(params: any) {
+export function oauthConfigOauth2Save(params) {
   return axios({
-    url: '/system/oauth-config/oauth2-save',
-    method: 'post',
-    data: params
-  })
+    url: "/system/oauth-config/oauth2-save",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -177,28 +177,28 @@ export function oauthConfigOauth2Save(params: any) {
  *  socketFactoryPort: SSL 加密端口
  * } params
  */
-export function editMailConfig(params: any) {
+export function editMailConfig(params) {
   return axios({
-    url: '/system/mailConfig_save.json',
-    method: 'post',
-    data: params
-  })
+    url: "/system/mailConfig_save.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
  * 系统程序信息
  * @param {String} nodeId 节点 ID
  */
-export function systemInfo(data?: any) {
+export function systemInfo(data) {
   return axios({
-    url: '/system/info',
-    method: 'post',
+    url: "/system/info",
+    method: "post",
     headers: {
-      tip: 'no',
-      loading: 'no'
+      tip: "no",
+      loading: "no",
     },
-    data
-  })
+    data,
+  });
 }
 
 /**
@@ -208,82 +208,82 @@ export function systemInfo(data?: any) {
  *  nodeId: 节点 ID
  * } formData
  */
-export function uploadUpgradeFile(formData: FormData) {
+export function uploadUpgradeFile(formData) {
   return axios({
-    url: '/system/upload-jar-sharding',
+    url: "/system/upload-jar-sharding",
     headers: {
-      'Content-Type': 'multipart/form-data;charset=UTF-8',
-      loading: 'no'
+      "Content-Type": "multipart/form-data;charset=UTF-8",
+      loading: "no",
     },
-    method: 'post',
+    method: "post",
     // 0 表示无超时时间
     timeout: 0,
-    data: formData
-  })
+    data: formData,
+  });
 }
 
 /**
  * 上传文件合并
  *@param {String} nodeId 节点 ID
  */
-export function uploadUpgradeFileMerge(data: any) {
+export function uploadUpgradeFileMerge(data) {
   return axios({
-    url: '/system/upload-jar-sharding-merge',
-    method: 'post',
+    url: "/system/upload-jar-sharding-merge",
+    method: "post",
     headers: {},
     data: data,
     // 0 表示无超时时间
-    timeout: 0
-  })
+    timeout: 0,
+  });
 }
 
 /**
  * 获取更新日志
  *@param {String} nodeId 节点 ID
  */
-export function changelog(data: any) {
+export function changelog(data) {
   return axios({
-    url: '/system/change_log',
-    method: 'post',
+    url: "/system/change_log",
+    method: "post",
     headers: {},
-    data
-  })
+    data,
+  });
 }
 
-export function changBetaRelease(params: any) {
+export function changBetaRelease(params) {
   return axios({
-    url: '/system/change-beta-release',
-    method: 'get',
+    url: "/system/change-beta-release",
+    method: "get",
     headers: {},
-    params
-  })
+    params,
+  });
 }
 
 /**
  * 检查新版本
  *@param {String} nodeId 节点 ID
  */
-export function checkVersion(data: any) {
+export function checkVersion(data) {
   return axios({
-    url: '/system/check_version.json',
-    method: 'post',
+    url: "/system/check_version.json",
+    method: "post",
     headers: {},
-    data
-  })
+    data,
+  });
 }
 
 /**
  * 远程升级
  *@param {String} nodeId 节点 ID
  */
-export function remoteUpgrade(params: any) {
+export function remoteUpgrade(params) {
   return axios({
-    url: '/system/remote_upgrade.json',
-    method: 'get',
+    url: "/system/remote_upgrade.json",
+    method: "get",
     timeout: 0,
     headers: {},
-    params
-  })
+    params,
+  });
 }
 
 /**
@@ -291,22 +291,22 @@ export function remoteUpgrade(params: any) {
  */
 export function getProxyConfig() {
   return axios({
-    url: '/system/get_proxy_config',
-    method: 'get',
-    params: {}
-  })
+    url: "/system/get_proxy_config",
+    method: "get",
+    params: {},
+  });
 }
 
 /**
  * 保存代理配置
  */
-export function saveProxyConfig(data: any) {
+export function saveProxyConfig(data) {
   return axios({
-    url: '/system/save_proxy_config',
-    method: 'post',
+    url: "/system/save_proxy_config",
+    method: "post",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
-    data: data
-  })
+    data: data,
+  });
 }

@@ -1,12 +1,12 @@
-import axios from './config'
+import axios from "./config";
 
 // 日志搜索列表
-export function getLogReadList(params: any) {
+export function getLogReadList(params) {
   return axios({
-    url: '/log-read/list',
-    method: 'post',
-    data: params
-  })
+    url: "/log-read/list",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -18,26 +18,26 @@ export function getLogReadList(params: any) {
  *
  * } params
  */
-export function editLogRead(params: any) {
+export function editLogRead(params) {
   return axios({
-    url: '/log-read/save.json',
-    method: 'post',
+    url: "/log-read/save.json",
+    method: "post",
     data: params,
     headers: {
-      'Content-Type': 'application/json'
-    }
-  })
+      "Content-Type": "application/json",
+    },
+  });
 }
 
-export function updateCache(params: any) {
+export function updateCache(params) {
   return axios({
-    url: '/log-read/update-cache.json',
-    method: 'post',
+    url: "/log-read/update-cache.json",
+    method: "post",
     data: params,
     headers: {
-      'Content-Type': 'application/json'
-    }
-  })
+      "Content-Type": "application/json",
+    },
+  });
 }
 
 /**
@@ -46,8 +46,8 @@ export function updateCache(params: any) {
  */
 export function deleteLogRead(id) {
   return axios({
-    url: '/log-read/del.json',
-    method: 'post',
-    data: { id }
-  })
+    url: "/log-read/del.json",
+    method: "post",
+    data: { id },
+  });
 }

@@ -18,6 +18,8 @@ interface IStateGuideCache {
   fullScreenFlag: boolean
   scrollbarFlag: boolean
   menuMultipleFlag: boolean
+  fullscreenViewLog: boolean
+  close: boolean
 }
 
 export const useGuideStore = defineStore('guide', {
@@ -60,6 +62,31 @@ export const useGuideStore = defineStore('guide', {
         resolve(cache.menuMultipleFlag)
       })
     },
+    // 切换引导开关
+    toggleGuideFlag(): Promise<boolean> {
+      return new Promise((resolve) => {
+        const cache = this.getGuideCache
+        cache.close = !cache.close
+        this.setGuideCache(cache)
+        resolve(cache.close)
+      })
+    },
+    //   切换全屏查看日志
+    toggleFullscreenViewLog(): Promise<boolean> {
+      return new Promise((resolve) => {
+        const cache = this.getGuideCache
+        cache.fullscreenViewLog = !cache.fullscreenViewLog
+        this.setGuideCache(cache)
+        resolve(cache.fullscreenViewLog)
+      })
+    },
+    // 重置导航
+    restGuide(): Promise<boolean> {
+      return new Promise((resolve) => {
+        this.setGuideCache({} as IStateGuideCache)
+        resolve(true)
+      })
+    },
     commitGuide(guideData: IState) {
       this.disabledGuide = guideData.disabledGuide
       this.extendPlugins = guideData.extendPlugins
@@ -74,9 +101,56 @@ export const useGuideStore = defineStore('guide', {
     },
     getExtendPlugins(state) {
       return state.extendPlugins
+    },
+    // 计算弹窗全屏样式
+    getFullscreenViewLogStyle(state) {
+      const cache = cacheToJson(state)
+      if (cache.fullscreenViewLog) {
+        // 全屏
+        return {
+          dialogStyle: {
+            maxWidth: '100vw',
+            top: 0,
+            paddingBottom: 0
+          },
+          bodyStyle: {
+            padding: '0 10px',
+            paddingTop: '10px',
+            marginRight: '10px',
+            height: 'calc(100vh - 68px)'
+          },
+          width: '100vw'
+        }
+      }
+      // 非全屏
+      return {
+        dialogStyle: {
+          maxWidth: '100vw',
+          top: false,
+          paddingBottom: 0
+        },
+        bodyStyle: {
+          padding: '0 10px',
+          paddingTop: '10px',
+          marginRight: '10px',
+          height: '70vh'
+        },
+        width: '80vw'
+      }
     }
   }
 })
+
+function cacheToJson(state: any) {
+  const cacheStr = state.guideCache || ''
+  let cahce
+  try {
+    cahce = JSON.parse(cacheStr)
+  } catch (e) {
+    cahce = {}
+  }
+  return cahce
+}
 
 // const app = {
 //   state: {

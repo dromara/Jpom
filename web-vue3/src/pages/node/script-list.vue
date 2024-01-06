@@ -1,15 +1,23 @@
 <template>
   <div class="node-full-content">
-
     <div class="search-wrapper">
       <a-space>
         <a-select v-model="listQuery.nodeId" allow-clear placeholder="请选择节点" class="search-input-item">
           <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
         </a-select>
-        <a-input v-model:value="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" allow-clear
-          class="search-input-item" />
-        <a-input v-model:value="listQuery['%autoExecCron%']" @pressEnter="loadData" placeholder="定时执行"
-          class="search-input-item" />
+        <a-input
+          v-model:value="listQuery['%name%']"
+          @pressEnter="loadData"
+          placeholder="名称"
+          allow-clear
+          class="search-input-item"
+        />
+        <a-input
+          v-model:value="listQuery['%autoExecCron%']"
+          @pressEnter="loadData"
+          placeholder="定时执行"
+          class="search-input-item"
+        />
         <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
           <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
         </a-tooltip>
@@ -35,9 +43,15 @@
       </a-space>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="pagination" bordered
-      rowKey="id">
-
+    <a-table
+      :data-source="list"
+      size="middle"
+      :columns="columns"
+      @change="changePage"
+      :pagination="pagination"
+      bordered
+      rowKey="id"
+    >
       <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -65,38 +79,58 @@
           <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
           <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
           <!-- <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button> -->
-          <a-tooltip :title="`${record.scriptType === 'server-sync' ? '服务端分发同步的脚本不能直接删除,需要到服务端去操作' : '删除'
-            }`">
-            <a-button size="small" :disabled="record.scriptType === 'server-sync'" type="danger"
-              @click="handleDelete(record)">删除</a-button>
+          <a-tooltip
+            :title="`${
+              record.scriptType === 'server-sync' ? '服务端分发同步的脚本不能直接删除,需要到服务端去操作' : '删除'
+            }`"
+          >
+            <a-button
+              size="small"
+              :disabled="record.scriptType === 'server-sync'"
+              type="danger"
+              @click="handleDelete(record)"
+              >删除</a-button
+            >
           </a-tooltip>
         </a-space>
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false"
-      width="80vw">
+    <a-modal
+      destroyOnClose
+      v-model="editScriptVisible"
+      title="编辑 Script"
+      @ok="handleEditScriptOk"
+      :maskClosable="false"
+      width="80vw"
+    >
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
         <a-alert v-if="temp.scriptType === 'server-sync'" message="服务端同步的脚本不能在此修改" banner />
-        <a-form-item label="Script 名称" prop="name">
+        <a-form-item label="Script 名称" name="name">
           <a-input v-model="temp.name" placeholder="名称" />
         </a-form-item>
-        <a-form-item label="Script 内容" prop="context">
+        <a-form-item label="Script 内容" name="context">
           <div style="height: 40vh; overflow-y: scroll">
             <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
           </div>
         </a-form-item>
-        <!-- <a-form-item label="默认参数" prop="defArgs">
+        <!-- <a-form-item label="默认参数" name="defArgs">
           <a-input v-model="temp.defArgs" placeholder="默认参数" />
         </a-form-item> -->
         <a-form-item label="默认参数">
           <div v-for="(item, index) in commandParams" :key="item.key">
             <a-row type="flex" justify="center" align="middle">
               <a-col :span="22">
-                <a-input :addon-before="`参数${index + 1}描述`" v-model="item.desc"
-                  placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义" />
-                <a-input :addon-before="`参数${index + 1}值`" v-model="item.value"
-                  placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值" />
+                <a-input
+                  :addon-before="`参数${index + 1}描述`"
+                  v-model="item.desc"
+                  placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义"
+                />
+                <a-input
+                  :addon-before="`参数${index + 1}值`"
+                  v-model="item.value"
+                  placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值"
+                />
               </a-col>
               <a-col :span="2">
                 <a-row type="flex" justify="center" align="middle">
@@ -111,15 +145,18 @@
 
           <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
         </a-form-item>
-        <a-form-item label="共享" prop="global">
+        <a-form-item label="共享" name="global">
           <a-radio-group v-model="temp.global">
             <a-radio :value="true"> 全局</a-radio>
             <a-radio :value="false"> 当前工作空间</a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item label="定时执行" prop="autoExecCron">
-          <a-auto-complete v-model="temp.autoExecCron"
-            placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
+        <a-form-item label="定时执行" name="autoExecCron">
+          <a-auto-complete
+            v-model="temp.autoExecCron"
+            placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
+            option-label-prop="value"
+          >
             <template #dataSource>
               <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
                 <template #label>
@@ -132,24 +169,43 @@
             </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item label="描述" prop="description">
+        <a-form-item label="描述" name="description">
           <a-input v-model="temp.description" type="textarea" :rows="3" style="resize: none" placeholder="详细描述" />
         </a-form-item>
       </a-form>
     </a-modal>
     <!-- 脚本控制台组件 -->
-    <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="() => {
-      this.drawerConsoleVisible = false
-    }
-      ">
-      <script-console v-if="drawerConsoleVisible" :nodeId="temp.nodeId" :defArgs="temp.defArgs" :id="temp.id"
-        :scriptId="temp.scriptId" />
+    <a-drawer
+      :title="drawerTitle"
+      placement="right"
+      width="85vw"
+      :visible="drawerConsoleVisible"
+      @close="
+        () => {
+          this.drawerConsoleVisible = false
+        }
+      "
+    >
+      <script-console
+        v-if="drawerConsoleVisible"
+        :nodeId="temp.nodeId"
+        :defArgs="temp.defArgs"
+        :id="temp.id"
+        :scriptId="temp.scriptId"
+      />
     </a-drawer>
     <!-- 脚本日志 -->
-    <a-drawer destroyOnClose :title="drawerTitle" width="50vw" :visible="drawerLogVisible" @close="() => {
-      this.drawerLogVisible = false
-    }
-      ">
+    <a-drawer
+      destroyOnClose
+      :title="drawerTitle"
+      width="50vw"
+      :visible="drawerLogVisible"
+      @close="
+        () => {
+          this.drawerLogVisible = false
+        }
+      "
+    >
       <script-log v-if="drawerLogVisible" :scriptId="temp.scriptId" :nodeId="temp.nodeId" />
     </a-drawer>
     <!-- 触发器 -->
@@ -174,25 +230,41 @@
                   </ul>
                 </template>
               </a-alert>
-              <a-alert v-clipboard:copy="temp.triggerUrl" v-clipboard:success="() => {
-                tempVue.prototype.$notification.success({ message: '复制成功' })
-              }
-                " v-clipboard:error="() => {
-    tempVue.prototype.$notification.error({ message: '复制失败' })
-  }
-    " type="info" :message="`单个触发器地址(点击可以复制)`">
+              <a-alert
+                v-clipboard:copy="temp.triggerUrl"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' })
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' })
+                  }
+                "
+                type="info"
+                :message="`单个触发器地址(点击可以复制)`"
+              >
                 <template #description>
                   <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   <a-icon type="copy" />
                 </template>
               </a-alert>
-              <a-alert v-clipboard:copy="temp.batchTriggerUrl" v-clipboard:success="() => {
-                tempVue.prototype.$notification.success({ message: '复制成功' })
-              }
-                " v-clipboard:error="() => {
-    tempVue.prototype.$notification.error({ message: '复制失败' })
-  }
-    " type="info" :message="`批量触发器地址(点击可以复制)`">
+              <a-alert
+                v-clipboard:copy="temp.batchTriggerUrl"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' })
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' })
+                  }
+                "
+                type="info"
+                :message="`批量触发器地址(点击可以复制)`"
+              >
                 <template #description>
                   <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
                   <a-icon type="copy" />
@@ -206,8 +278,6 @@
   </div>
 </template>
 
-
-
 <script>
 import { delAllCache, deleteScript, editScript, getScriptListAll, itemScript, getTriggerUrl } from '@/api/node-other'
 import codeEditor from '@/components/codeEditor'
@@ -215,7 +285,7 @@ import { getNodeListAll } from '@/api/node'
 import ScriptConsole from '@/pages/node/node-layout/other/script-console'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import ScriptLog from '@/pages/node/node-layout/other/script-log'
-import { DeleteOutlined } from "@ant-design/icons-vue";
+import { DeleteOutlined } from '@ant-design/icons-vue'
 
 export default {
   components: {

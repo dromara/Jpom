@@ -163,7 +163,7 @@
       @cancel="clearDispatchList"
     >
       <a-form ref="linkDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item prop="id">
+        <a-form-item name="id">
           <template #label>
             分发 ID
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -197,7 +197,7 @@
           <!-- <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" /> -->
         </a-form-item>
 
-        <a-form-item label="分发名称" prop="name">
+        <a-form-item label="分发名称" name="name">
           <a-row>
             <a-col :span="10">
               <a-input v-model="temp.name" :maxLength="50" placeholder="分发名称" />
@@ -283,12 +283,12 @@
           </a-list>
           <a-button type="primary" @click="addDispachList" size="small">添加</a-button>
         </a-form-item>
-        <a-form-item label="分发后操作" prop="afterOpt">
+        <a-form-item label="分发后操作" name="afterOpt">
           <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item prop="intervalTime" v-if="temp.afterOpt === 2 || temp.afterOpt === 3">
+        <a-form-item name="intervalTime" v-if="temp.afterOpt === 2 || temp.afterOpt === 3">
           <template #label>
             间隔时间
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -307,10 +307,10 @@
             style="width: 100%"
           />
         </a-form-item>
-        <a-form-item prop="secondaryDirectory" label="二级目录">
+        <a-form-item name="secondaryDirectory" label="二级目录">
           <a-input v-model="temp.secondaryDirectory" placeholder="不填写则发布至项目的根目录" />
         </a-form-item>
-        <a-form-item prop="clearOld">
+        <a-form-item name="clearOld">
           <template #label>
             清空发布
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -340,7 +340,7 @@
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item prop="webhook">
+        <a-form-item name="webhook">
           <template #label>
             WebHooks
             <a-tooltip v-show="!temp.id">
@@ -369,7 +369,7 @@
       :maskClosable="false"
     >
       <a-form ref="editDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item prop="id">
+        <a-form-item name="id">
           <template #label>
             分发 ID
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -402,7 +402,7 @@
           </template>
           <!-- <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改,分发 ID 等同于项目 ID" /> -->
         </a-form-item>
-        <a-form-item label="分发名称" prop="name">
+        <a-form-item label="分发名称" name="name">
           <a-row>
             <a-col :span="10">
               <a-input v-model="temp.name" :maxLength="50" placeholder="分发名称（项目名称）" />
@@ -422,7 +422,7 @@
           </a-row>
         </a-form-item>
 
-        <a-form-item prop="runMode">
+        <a-form-item name="runMode">
           <template #label>
             运行方式
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -444,7 +444,7 @@
           </a-select>
         </a-form-item>
 
-        <a-form-item prop="whitelistDirectory" class="jpom-project-whitelist">
+        <a-form-item name="whitelistDirectory" class="jpom-project-whitelist">
           <template #label>
             项目路径
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -470,7 +470,7 @@
             <a-input style="width: 50%" v-model="temp.lib" placeholder="项目存储的文件夹，jar 包存放的文件夹" />
           </a-input-group>
         </a-form-item>
-        <!-- <a-form-item prop="lib">
+        <!-- <a-form-item name="lib">
           <template #label>
             项目文件夹
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -485,7 +485,7 @@
         <a-form-item v-show="filePath !== ''" label="项目完整目录">
           <a-alert :message="filePath" type="success" />
         </a-form-item>
-        <a-form-item v-show="temp.runMode === 'Dsl'" prop="dslContent">
+        <a-form-item v-show="temp.runMode === 'Dsl'" name="dslContent">
           <template #label>
             DSL 内容
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -544,24 +544,24 @@
         </a-form-item>
         <a-form-item
           label="Main Class"
-          prop="mainClass"
+          name="mainClass"
           v-show="javaModes.includes(temp.runMode) && temp.runMode !== 'Jar'"
         >
           <a-input v-model="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)" />
         </a-form-item>
         <a-form-item
           label="JavaExtDirsCp"
-          prop="javaExtDirsCp"
+          name="javaExtDirsCp"
           v-show="javaModes.includes(temp.runMode) && temp.runMode === 'JavaExtDirsCp'"
         >
           <a-input v-model="temp.javaExtDirsCp" placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】" />
         </a-form-item>
-        <a-form-item label="分发后操作" prop="afterOpt">
+        <a-form-item label="分发后操作" name="afterOpt">
           <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item prop="intervalTime" v-if="temp.afterOpt === 2 || temp.afterOpt === 3">
+        <a-form-item name="intervalTime" v-if="temp.afterOpt === 2 || temp.afterOpt === 3">
           <template #label>
             间隔时间
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -580,10 +580,10 @@
             style="width: 100%"
           />
         </a-form-item>
-        <a-form-item prop="secondaryDirectory" label="二级目录">
+        <a-form-item name="secondaryDirectory" label="二级目录">
           <a-input v-model="temp.secondaryDirectory" placeholder="不填写则发布至项目的根目录" />
         </a-form-item>
-        <a-form-item prop="clearOld">
+        <a-form-item name="clearOld">
           <template #label>
             清空发布
             <a-tooltip v-if="temp.type !== 'edit'">
@@ -613,7 +613,7 @@
           </a-row>
         </a-form-item>
         <!-- 节点 -->
-        <a-form-item label="分发节点" prop="nodeId">
+        <a-form-item label="分发节点" name="nodeId">
           <a-select
             show-search
             option-filter-prop="children"
@@ -626,21 +626,21 @@
         </a-form-item>
         <a-collapse v-show="noFileModes.includes(temp.runMode)">
           <a-collapse-panel v-for="nodeId in temp.nodeIdList" :key="nodeId" :header="nodeNameMap[nodeId] || nodeId">
-            <a-form-item label="JVM 参数" prop="jvm" v-show="javaModes.includes(temp.runMode)">
+            <a-form-item label="JVM 参数" name="jvm" v-show="javaModes.includes(temp.runMode)">
               <a-textarea
                 v-model="temp[`${nodeId}_jvm`]"
                 :auto-size="{ minRows: 3, maxRows: 3 }"
                 placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m"
               />
             </a-form-item>
-            <a-form-item label="args 参数" prop="args" v-show="javaModes.includes(temp.runMode)">
+            <a-form-item label="args 参数" name="args" v-show="javaModes.includes(temp.runMode)">
               <a-textarea
                 v-model="temp[`${nodeId}_args`]"
                 :auto-size="{ minRows: 3, maxRows: 3 }"
                 placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080"
               />
             </a-form-item>
-            <a-form-item prop="autoStart" v-show="noFileModes.includes(temp.runMode)">
+            <a-form-item name="autoStart" v-show="noFileModes.includes(temp.runMode)">
               <template #label>
                 自启动
                 <a-tooltip v-show="temp.type !== 'edit'">
@@ -650,7 +650,7 @@
               </template>
               <a-switch v-model="temp[`${nodeId}_autoStart`]" checked-children="开" un-checked-children="关" />
             </a-form-item>
-            <a-form-item prop="token" v-show="noFileModes.includes(temp.runMode)">
+            <a-form-item name="token" v-show="noFileModes.includes(temp.runMode)">
               <template #label>
                 WebHooks
                 <a-tooltip v-show="temp.type !== 'edit'">
@@ -702,10 +702,10 @@
                         </a-col>
                       </a-row>
                     </template>
-                    <a-form-item :label="`名称`" prop="replicaName">
+                    <a-form-item :label="`名称`" name="replicaName">
                       <a-input v-model="replica.name" class="replica-area" placeholder="副本名称" />
                     </a-form-item>
-                    <a-form-item :label="`JVM 参数`" prop="jvm">
+                    <a-form-item :label="`JVM 参数`" name="jvm">
                       <a-textarea
                         v-model="replica.jvm"
                         :auto-size="{ minRows: 3, maxRows: 3 }"
@@ -713,7 +713,7 @@
                         placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m"
                       />
                     </a-form-item>
-                    <a-form-item :label="`args 参数`" prop="args">
+                    <a-form-item :label="`args 参数`" name="args">
                       <a-textarea
                         v-model="replica.args"
                         :auto-size="{ minRows: 3, maxRows: 3 }"
@@ -735,7 +735,7 @@
             </div>
           </a-collapse-panel>
         </a-collapse>
-        <a-form-item prop="webhook">
+        <a-form-item name="webhook">
           <template #label>
             WebHooks
             <a-tooltip v-show="!temp.id">
@@ -767,14 +767,14 @@
       :maskClosable="false"
     >
       <a-form ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item label="方式" prop="type">
+        <a-form-item label="方式" name="type">
           <a-radio-group v-model="temp.type" name="type" :disabled="!!percentage">
             <a-radio :value="'upload'">上传文件</a-radio>
             <a-radio :value="'download'">远程下载</a-radio>
           </a-radio-group>
         </a-form-item>
 
-        <a-form-item label="选择分发文件" prop="clearOld" v-if="temp.type === 'upload'">
+        <a-form-item label="选择分发文件" name="clearOld" v-if="temp.type === 'upload'">
           <!-- accept=".zip,.tar,.gz,.bz2" -->
 
           <a-progress v-if="percentage" :percent="percentage">
@@ -790,13 +790,13 @@
             <a-button v-else type="primary" icon="upload">选择文件上传</a-button>
           </a-upload>
         </a-form-item>
-        <a-form-item label="远程下载URL" prop="url" v-if="temp.type === 'download'">
+        <a-form-item label="远程下载URL" name="url" v-if="temp.type === 'download'">
           <a-input v-model="temp.url" placeholder="远程下载地址" />
         </a-form-item>
         <!-- <a-form-item label="是否为压缩包" v-if="temp.type == 'download'">
           <a-switch v-model="temp.unzip" checked-children="是" un-checked-children="否" v-decorator="['unzip', { valuePropName: 'checked' }]" />
         </a-form-item> -->
-        <a-form-item prop="clearOld">
+        <a-form-item name="clearOld">
           <template #label>
             清空发布
             <a-tooltip>
@@ -808,7 +808,7 @@
           </template>
           <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
         </a-form-item>
-        <a-form-item prop="unzip">
+        <a-form-item name="unzip">
           <template #label>
             是否解压
             <a-tooltip>
@@ -829,15 +829,15 @@
           />
         </a-form-item>
 
-        <a-form-item label="分发后操作" prop="afterOpt">
+        <a-form-item label="分发后操作" name="afterOpt">
           <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item prop="secondaryDirectory" label="二级目录">
+        <a-form-item name="secondaryDirectory" label="二级目录">
           <a-input v-model="temp.secondaryDirectory" placeholder="不填写则发布至项目的根目录" />
         </a-form-item>
-        <a-form-item prop="selectProject" label="筛选项目" help="筛选之后本次发布操作只发布筛选项,并且只对本次操作生效">
+        <a-form-item name="selectProject" label="筛选项目" help="筛选之后本次发布操作只发布筛选项,并且只对本次操作生效">
           <a-select mode="multiple" v-model="temp.selectProjectArray" placeholder="请选择指定发布的项目">
             <a-select-option v-for="item in itemProjectList" :key="item.id" :value="`${item.projectId}@${item.nodeId}`">
               {{ item.nodeName }}-{{ item.cacheProjectName || item.projectId }}
@@ -856,43 +856,49 @@
       @ok="viewDispatchManagerOk"
       :maskClosable="false"
     >
-      <draggable v-model="temp.dispatchManagerList" :group="`sortValue`" handle=".move" chosenClass="box-shadow">
-        <a-row v-for="item in temp.dispatchManagerList" :key="item.id" class="item-row">
-          <a-col :span="18">
-            <span> 节点名： {{ item.nodeName }} </span>
-            <span> 项目名： {{ item.cacheProjectName }} </span>
-          </a-col>
-          <a-col :span="6">
-            <a-space>
-              <a-switch
-                checked-children="启用"
-                un-checked-children="禁用"
-                :checked="item.disabled ? false : true"
-                @change="
-                  (checked) => {
-                    temp.dispatchManagerList = temp.dispatchManagerList.map((item2) => {
-                      if (item.id === item2.id) {
-                        item2.disabled = !checked
-                      }
-                      return { ...item2 }
-                    })
-                  }
-                "
-              />
+      <!-- <draggable
+        v-model="temp.dispatchManagerList"
+        :group="`sortValue`"
+        handle=".move"
+        item-key="id"
+        chosenClass="box-shadow"
+      > -->
+      <a-row v-for="item in temp.dispatchManagerList" :key="item.id" class="item-row">
+        <a-col :span="18">
+          <span> 节点名： {{ item.nodeName }} </span>
+          <span> 项目名： {{ item.cacheProjectName }} </span>
+        </a-col>
+        <a-col :span="6">
+          <a-space>
+            <a-switch
+              checked-children="启用"
+              un-checked-children="禁用"
+              :checked="item.disabled ? false : true"
+              @change="
+                (checked) => {
+                  temp.dispatchManagerList = temp.dispatchManagerList.map((item2) => {
+                    if (item.id === item2.id) {
+                      item2.disabled = !checked
+                    }
+                    return { ...item2 }
+                  })
+                }
+              "
+            />
 
-              <a-button
-                type="danger"
-                size="small"
-                @click="handleRemoveProject(item)"
-                :disabled="!temp || !temp.dispatchManagerList || temp.dispatchManagerList.length <= 1"
-              >
-                解绑
-              </a-button>
-              <a-tooltip placement="left" :title="`长按可以拖动排序`" class="move"> <a-icon type="menu" /> </a-tooltip>
-            </a-space>
-          </a-col>
-        </a-row>
-      </draggable>
+            <a-button
+              type="danger"
+              size="small"
+              @click="handleRemoveProject(item)"
+              :disabled="!temp || !temp.dispatchManagerList || temp.dispatchManagerList.length <= 1"
+            >
+              解绑
+            </a-button>
+            <a-tooltip placement="left" :title="`长按可以拖动排序`" class="move"> <a-icon type="menu" /> </a-tooltip>
+          </a-space>
+        </a-col>
+      </a-row>
+      <!-- </draggable> -->
     </a-modal>
     <!-- 分发状态 -->
     <a-drawer
@@ -949,13 +955,13 @@ import {
 
 import { uploadPieces } from '@/utils/upload-pieces'
 import CustomSelect from '@/components/customSelect'
-import draggable from 'vuedraggable'
+// import draggable from 'vuedraggable'
 
 export default {
   components: {
     codeEditor,
     CustomSelect,
-    draggable,
+    // draggable,
     Status
   },
   data() {

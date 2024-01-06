@@ -1,6 +1,6 @@
 <template>
-  <div class="full-content">
-    <template v-if="useSuggestions">
+  <div>
+    <template v-if="this.useSuggestions">
       <a-result
         title="当前工作空间还没有 Docker 集群"
         sub-title="请到【系统管理】-> 【资产管理】-> 【Docker管理】添加Docker并创建集群，或者将已存在的的 Docker 集群授权关联、分配到此工作空间"
@@ -20,21 +20,32 @@
       @change="changePage"
       :pagination="pagination"
       bordered
-      :rowKey="(record, index) => index"
     >
-      <template #title>
+      <template v-slot:title>
         <a-space>
-          <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
-          <a-input v-model="listQuery['%tag%']" @pressEnter="loadData" placeholder="标签" class="search-input-item" />
+          <a-input
+            v-model:value="listQuery['%name%']"
+            @pressEnter="loadData"
+            placeholder="名称"
+            class="search-input-item"
+          />
+          <a-input
+            v-model:value="listQuery['%tag%']"
+            @pressEnter="loadData"
+            placeholder="标签"
+            class="search-input-item"
+          />
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <template #status slot-scope="text, record">
+      <template v-slot:tooltip="text">
+        <a-tooltip placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+      </template>
+      <template v-slot:status="text, record">
         <template v-if="record.machineDocker">
           <a-tag color="green" v-if="record.machineDocker.status === 1">正常</a-tag>
           <a-tooltip v-else :title="record.machineDocker.failureMsg">
@@ -47,7 +58,7 @@
         </a-tooltip>
       </template>
 
-      <template #operation slot-scope="text, record">
+      <template v-slot:operation="text, record">
         <a-space>
           <template v-if="record.machineDocker">
             <a-button
@@ -71,24 +82,26 @@
           </template>
 
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
     <!-- 创建集群区 -->
     <a-modal
       destroyOnClose
-      v-model:visible="editVisible"
+      v-model:value="editVisible"
       title="编辑 Docker 集群"
       @ok="handleEditOk"
       :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="集群名称" prop="name">
-          <a-input v-model="temp.name" placeholder="容器名称" />
+        <a-form-item label="集群名称" name="name">
+          <a-input v-model:value="temp.name" placeholder="容器名称" />
         </a-form-item>
 
-        <a-form-item label="标签" prop="tag"><a-input v-model="temp.tag" placeholder="关联容器标签" /> </a-form-item>
+        <a-form-item label="标签" name="tag"
+          ><a-input v-model:value="temp.tag" placeholder="关联容器标签" />
+        </a-form-item>
       </a-form>
     </a-modal>
 
@@ -119,9 +132,10 @@
 <script>
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import { dockerSwarmList, editDockerSwarm, delSwarm } from '@/api/docker-swarm'
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 import Console from './console'
-
+import { useGuideStore } from '@/stores/guide'
+import { useUserStore } from '@/stores/user'
 export default {
   components: {
     Console
@@ -136,7 +150,12 @@ export default {
       editVisible: false,
       consoleVisible: false,
       columns: [
-        { title: '名称', dataIndex: 'name', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: '名称',
+          dataIndex: 'name',
+          ellipsis: true,
+          scopedSlots: { customRender: 'tooltip' }
+        },
 
         {
           title: '集群ID',
@@ -145,7 +164,12 @@ export default {
           align: 'center',
           scopedSlots: { customRender: 'tooltip' }
         },
-        { title: '容器标签', dataIndex: 'tag', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: '容器标签',
+          dataIndex: 'tag',
+          ellipsis: true,
+          scopedSlots: { customRender: 'tooltip' }
+        },
         {
           title: '状态',
           dataIndex: 'status',
@@ -205,7 +229,8 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getCollapsed', 'getUserInfo']),
+    ...mapState(useUserStore, ['getUserInfo']),
+    ...mapState(useGuideStore, ['getCollapsed']),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
     },
@@ -270,7 +295,7 @@ export default {
         editDockerSwarm(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            $notification.success({
+            this.$notification.success({
               message: res.msg
             })
             this.editVisible = false
@@ -289,7 +314,7 @@ export default {
 
     //   const h = this.$createElement;
     //   //
-    //   $confirm({
+    //   this.$confirm({
     //     title: "危险操作！！！",
     //     content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
     //     okButtonProps: { props: { type: "danger", size: "small" } },
@@ -303,7 +328,7 @@ export default {
     //       };
     //       unbindSwarm(params).then((res) => {
     //         if (res.code === 200) {
-    //           $notification.success({
+    //           this.$notification.success({
     //             message: res.msg,
     //           });
     //           this.loadData();
@@ -314,8 +339,9 @@ export default {
     // },
     // 删除
     handleDelete(record) {
-      $confirm({
+      this.$confirm({
         title: '系统提示',
+        zIndex: 1009,
         content: '真的要删除该记录么？删除后构建关联的容器标签将无法使用',
         okText: '确认',
         cancelText: '取消',
@@ -326,7 +352,7 @@ export default {
           }
           delSwarm(params).then((res) => {
             if (res.code === 200) {
-              $notification.success({
+              this.$notification.success({
                 message: res.msg
               })
               this.loadData()

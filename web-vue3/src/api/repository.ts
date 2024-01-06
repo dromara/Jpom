@@ -1,4 +1,4 @@
-import axios from './config'
+import axios, { loadRouterBase } from "./config";
 
 /**
  * 分页获取仓库列表
@@ -14,12 +14,53 @@ import axios from './config'
  * @param {String} params.gitUrl        仓库地址
  * @return {axios} 请求结果 axios 对象
  */
-export function getRepositoryList(params: any) {
+export function getRepositoryList(params) {
   return axios({
-    url: '/build/repository/list',
-    method: 'post',
-    data: params
-  })
+    url: "/build/repository/list",
+    method: "post",
+    data: params,
+  });
+}
+
+/*
+ * 下载导入模板
+ *
+ */
+export function importTemplate(data) {
+  return loadRouterBase("/build/repository/import-template", data);
+}
+/**
+ * 导出CSV
+ * @param data
+ * @returns {string}
+ */
+export function exportData(data) {
+  return loadRouterBase("/build/repository/export", data);
+}
+// 导入数据
+export function importData(formData) {
+  return axios({
+    url: "/build/repository/import-data",
+    headers: {
+      "Content-Type": "multipart/form-data;charset=UTF-8",
+    },
+    method: "post",
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData,
+  });
+}
+/**
+ * 获取仓库信息
+ *
+ * @return {axios} 请求结果 axios 对象
+ */
+export function getRepositoryInfo(params) {
+  return axios({
+    url: "/build/repository/get",
+    method: "get",
+    params,
+  });
 }
 
 /**
@@ -27,12 +68,12 @@ export function getRepositoryList(params: any) {
  *
  * @return {axios} 请求结果 axios 对象
  */
-export function getRepositoryInfo(params: any) {
+export function listRepositoryGroup(params) {
   return axios({
-    url: '/build/repository/get',
-    method: 'get',
-    params
-  })
+    url: "/build/repository/list-group",
+    method: "get",
+    params,
+  });
 }
 
 /**
@@ -49,12 +90,12 @@ export function getRepositoryInfo(params: any) {
  * @param {String} params.rsaPub      公钥信息
  * @return {axios} 请求结果 axios 对象
  */
-export function editRepository(params: any) {
+export function editRepository(params) {
   return axios({
-    url: '/build/repository/edit',
-    method: 'post',
-    data: params
-  })
+    url: "/build/repository/edit",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -65,12 +106,12 @@ export function editRepository(params: any) {
  * @param {Boolean} params.isRealDel    是否真正删除
  * @return {axios} 请求结果 axios 对象
  */
-export function deleteRepository(params: any) {
+export function deleteRepository(params) {
   return axios({
-    url: '/build/repository/delete',
-    method: 'post',
-    data: params
-  })
+    url: "/build/repository/delete",
+    method: "post",
+    data: params,
+  });
 }
 /**
  * restHideField by id
@@ -79,31 +120,31 @@ export function deleteRepository(params: any) {
  */
 export function restHideField(id) {
   return axios({
-    url: '/build/repository/rest_hide_field',
-    method: 'post',
-    data: { id }
-  })
+    url: "/build/repository/rest_hide_field",
+    method: "post",
+    data: { id },
+  });
 }
 
 export function authorizeRepos(param) {
   return axios({
-    url: '/build/repository/authorize_repos',
-    method: 'get',
-    params: param
-  })
+    url: "/build/repository/authorize_repos",
+    method: "get",
+    params: param,
+  });
 }
 
 export function providerInfo() {
   return axios({
-    url: '/build/repository/provider_info',
-    method: 'get'
-  })
+    url: "/build/repository/provider_info",
+    method: "get",
+  });
 }
 
-export function sortItem(params: any) {
+export function sortItem(params) {
   return axios({
-    url: '/build/repository/sort-item',
-    method: 'get',
-    params: params
-  })
+    url: "/build/repository/sort-item",
+    method: "get",
+    params: params,
+  });
 }

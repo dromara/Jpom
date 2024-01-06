@@ -238,7 +238,7 @@
       :maskClosable="false"
     >
       <a-form ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="项目 ID" prop="id">
+        <a-form-item label="项目 ID" name="id">
           <a-input
             :maxLength="50"
             v-model="temp.id"
@@ -264,7 +264,7 @@
           </template>
         </a-form-item>
 
-        <a-form-item label="项目名称" prop="name">
+        <a-form-item label="项目名称" name="name">
           <a-row>
             <a-col :span="10">
               <a-input v-model="temp.name" :maxLength="50" placeholder="项目名称" />
@@ -283,7 +283,7 @@
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item prop="runMode">
+        <a-form-item name="runMode">
           <template #label>
             运行方式
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -304,7 +304,7 @@
             <a-select-option v-for="runMode in runModeList" :key="runMode">{{ runMode }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item prop="whitelistDirectory" class="jpom-node-project-whitelist">
+        <a-form-item name="whitelistDirectory" class="jpom-node-project-whitelist">
           <template #label>
             项目路径
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -331,7 +331,7 @@
             <!-- <span class="lib-exist" v-show="temp.libExist">{{ temp.libExistMsg }}</span> -->
           </template>
         </a-form-item>
-        <!-- <a-form-item prop="lib">
+        <!-- <a-form-item name="lib">
           <template #label>
             项目文件夹
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -345,7 +345,7 @@
         <a-form-item v-show="filePath !== ''" label="项目完整目录">
           <a-alert :message="filePath" type="success" />
         </a-form-item>
-        <a-form-item v-show="temp.runMode === 'Dsl'" prop="dslContent">
+        <a-form-item v-show="temp.runMode === 'Dsl'" name="dslContent">
           <template #label>
             DSL 内容
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -405,26 +405,26 @@
 
         <a-form-item
           label="Main Class"
-          prop="mainClass"
+          name="mainClass"
           v-show="javaModes.includes(temp.runMode) && temp.runMode !== 'Jar'"
         >
           <a-input v-model="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)" />
         </a-form-item>
         <a-form-item
           label="JavaExtDirsCp"
-          prop="javaExtDirsCp"
+          name="javaExtDirsCp"
           v-show="javaModes.includes(temp.runMode) && temp.runMode === 'JavaExtDirsCp'"
         >
           <a-input v-model="temp.javaExtDirsCp" placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】" />
         </a-form-item>
-        <a-form-item label="JVM 参数" prop="jvm" v-show="javaModes.includes(temp.runMode)">
+        <a-form-item label="JVM 参数" name="jvm" v-show="javaModes.includes(temp.runMode)">
           <a-textarea
             v-model="temp.jvm"
             :auto-size="{ minRows: 3, maxRows: 3 }"
             placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m"
           />
         </a-form-item>
-        <a-form-item label="args 参数" prop="args" v-show="javaModes.includes(temp.runMode)">
+        <a-form-item label="args 参数" name="args" v-show="javaModes.includes(temp.runMode)">
           <a-textarea
             v-model="temp.args"
             :auto-size="{ minRows: 3, maxRows: 3 }"
@@ -460,10 +460,10 @@
                     </a-col>
                   </a-row>
                 </template>
-                <a-form-item :label="`名称`" prop="replicaName">
+                <a-form-item :label="`名称`" name="replicaName">
                   <a-input v-model="replica.name" class="replica-area" placeholder="副本名称" />
                 </a-form-item>
-                <a-form-item :label="`JVM 参数`" prop="jvm">
+                <a-form-item :label="`JVM 参数`" name="jvm">
                   <a-textarea
                     v-model="replica.jvm"
                     :auto-size="{ minRows: 3, maxRows: 3 }"
@@ -471,7 +471,7 @@
                     placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m"
                   />
                 </a-form-item>
-                <a-form-item :label="`args 参数`" prop="args">
+                <a-form-item :label="`args 参数`" name="args">
                   <a-textarea
                     v-model="replica.args"
                     :auto-size="{ minRows: 3, maxRows: 3 }"
@@ -490,7 +490,7 @@
             </a-form-item>
           </a-form-item>
         </div>
-        <a-form-item prop="autoStart" v-show="noFileModes.includes(temp.runMode)">
+        <a-form-item name="autoStart" v-show="noFileModes.includes(temp.runMode)">
           <template #label>
             自启动
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -500,7 +500,7 @@
           </template>
           <a-switch v-model="temp.autoStart" checked-children="开" un-checked-children="关" />
         </a-form-item>
-        <a-form-item prop="token" v-show="noFileModes.includes(temp.runMode)" class="jpom-node-project-token">
+        <a-form-item name="token" v-show="noFileModes.includes(temp.runMode)" class="jpom-node-project-token">
           <template #label>
             WebHooks
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -520,7 +520,7 @@
           v-if="temp.log"
           v-show="temp.type === 'edit' && javaModes.includes(temp.runMode)"
           label="日志路径"
-          prop="log"
+          name="log"
         >
           <a-alert :message="temp.log" type="success" />
         </a-form-item>
@@ -528,7 +528,7 @@
           v-if="temp.runCommand"
           v-show="temp.type === 'edit' && javaModes.includes(temp.runMode)"
           label="运行命令"
-          prop="runCommand"
+          name="runCommand"
         >
           <a-alert :message="temp.runCommand || '无'" type="success" />
         </a-form-item>

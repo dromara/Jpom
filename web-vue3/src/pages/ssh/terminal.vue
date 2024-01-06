@@ -1,16 +1,18 @@
 <template>
-  <terminal :url="socketUrl" />
+  <terminal2 :url="this.socketUrl" />
 </template>
+
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/stores/user'
 import { getWebSocketUrl } from '@/api/config'
-import terminal from '@/components/terminal'
+import terminal2 from '@/components/terminal'
 
 // https://blog.csdn.net/qq_41840688/article/details/108636267
 
 export default {
   components: {
-    terminal
+    terminal2
   },
   props: {
     sshId: {
@@ -26,7 +28,7 @@ export default {
     return {}
   },
   computed: {
-    ...mapGetters(['getLongTermToken', 'getWorkspaceId']),
+    ...mapState(useUserStore, ['getLongTermToken', 'getWorkspaceId']),
     socketUrl() {
       return getWebSocketUrl(
         '/socket/ssh',
@@ -35,7 +37,7 @@ export default {
     }
   },
   mounted() {},
-  beforeDestroy() {},
+  beforeUnmount() {},
   methods: {}
 }
 </script>

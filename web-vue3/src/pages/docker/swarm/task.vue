@@ -6,31 +6,33 @@
       :columns="columns"
       bordered
       :pagination="false"
-      :rowKey="(record, index) => index"
+      :scroll="{
+        x: 'max-content'
+      }"
     >
-      <template #title>
+      <template v-slot:title>
         <a-space>
           <a-input
-            v-model="listQuery['serviceId']"
+            v-model:value="listQuery['serviceId']"
             @pressEnter="loadData"
             v-if="!this.serviceId"
             placeholder="服务id"
             class="search-input-item"
           />
           <a-input
-            v-model="listQuery['taskName']"
+            v-model:value="listQuery['taskName']"
             @pressEnter="loadData"
             placeholder="任务名称"
             class="search-input-item"
           />
           <a-input
-            v-model="listQuery['taskId']"
+            v-model:value="listQuery['taskId']"
             @pressEnter="loadData"
             placeholder="任务id"
             class="search-input-item"
           />
           <a-input
-            v-model="listQuery['taskNode']"
+            v-model:value="listQuery['taskNode']"
             @pressEnter="loadData"
             placeholder="节点id"
             class="search-input-item"
@@ -40,7 +42,7 @@
             <a-select
               show-search
               option-filter-prop="children"
-              v-model="listQuery['taskState']"
+              v-model:value="listQuery['taskState']"
               allowClear
               placeholder="状态"
               class="search-input-item"
@@ -53,94 +55,88 @@
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="loadData" />
         </a-space>
       </template>
-      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
 
-      <a-tooltip #address slot-scope="text, item" placement="topLeft" :title="text">
-        <a-icon v-if="item.managerStatus && item.managerStatus.leader" type="cloud-server" />
-        {{ text }}
-      </a-tooltip>
-      <a-popover :title="`状态信息：${TASK_STATE[text]}`" #desiredState slot-scope="text, item" placement="topLeft">
-        <template #content>
-          <p>
-            当前状态：<a-tag>{{ text }}-{{ TASK_STATE[text] }}</a-tag>
-          </p>
-          <p v-if="item.status && item.status.err">错误信息：{{ item.status.err }}</p>
-          <p v-if="item.status && item.status.state">
-            状态：<a-tag>{{ item.status.state }}</a-tag>
-          </p>
-
-          <p v-if="item.status && item.status.message">
-            信息：<a-tag>{{ item.status.message }} </a-tag>
-          </p>
-          <p v-if="item.status && item.status.timestamp">
-            更新时间：<a-tag>{{ parseTime(item.status.timestamp) }} </a-tag>
-          </p>
+      <template #bodyCell="{ column, text, record }">
+        <template v-if="column.tooltip">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
         </template>
 
-        <a-tag :color="`${item.status && item.status.err ? 'orange' : text === 'RUNNING' ? 'green' : ''}`">
-          {{ text }}
-        </a-tag>
-      </a-popover>
+        <template v-else-if="column.dataIndex === 'address'">
+          <a-tooltip placement="topLeft" :title="text">
+            <CloudServerOutlined v-if="record.managerStatus && record.managerStatus.leader" />
 
-      <a-tooltip #os slot-scope="text, item" placement="topLeft" :title="text">
-        <span>
-          <a-tag
-            >{{ text }}-{{
-              item.description && item.description.platform && item.description.platform.architecture
-            }}</a-tag
-          >
-        </span>
-      </a-tooltip>
-      <a-tooltip
-        #updatedAt
-        slot-scope="text, item"
-        placement="topLeft"
-        :title="`修改时间：${text} 创建时间：${item.createdAt}`"
-      >
-        <span>
-          {{ parseTime(text) }}
-        </span>
-      </a-tooltip>
+            {{ text }}
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'desiredState'">
+          <a-popover :title="`状态信息：${TASK_STATE[text]}`" placement="topLeft">
+            <template v-slot:content>
+              <p>
+                当前状态：<a-tag>{{ text }}-{{ TASK_STATE[text] }}</a-tag>
+              </p>
+              <p v-if="record.status && record.status.err">错误信息：{{ record.status.err }}</p>
+              <p v-if="record.status && record.status.state">
+                状态：<a-tag>{{ record.status.state }}</a-tag>
+              </p>
 
-      <template #operation slot-scope="text, record">
-        <a-space>
-          <template>
+              <p v-if="record.status && record.status.message">
+                信息：<a-tag>{{ record.status.message }} </a-tag>
+              </p>
+              <p v-if="record.status && record.status.timestamp">
+                更新时间：<a-tag>{{ parseTime(record.status.timestamp) }} </a-tag>
+              </p>
+            </template>
+
+            <a-tag :color="`${record.status && record.status.err ? 'orange' : text === 'RUNNING' ? 'green' : ''}`">
+              {{ text }}
+            </a-tag>
+          </a-popover>
+        </template>
+
+        <template v-else-if="column.dataIndex === 'os'">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>
+              <a-tag
+                >{{ text }}-{{
+                  record.description && record.description.platform && record.description.platform.architecture
+                }}
+              </a-tag>
+            </span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'updatedAt'">
+          <a-tooltip placement="topLeft" :title="`修改时间：${text} 创建时间：${record.createdAt}`">
+            <span>
+              {{ parseTime(text) }}
+            </span>
+          </a-tooltip>
+        </template>
+
+        <template v-else-if="column.dataIndex === 'operation'">
+          <a-space>
             <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
-          </template>
-        </a-space>
+          </a-space>
+        </template>
       </template>
     </a-table>
-    <!-- 编辑节点 -->
-    <a-modal destroyOnClose v-model:visible="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
-      <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="角色" prop="role">
-          <a-radio-group name="role" v-model="temp.role">
-            <a-radio value="WORKER"> 工作节点</a-radio>
-            <a-radio value="MANAGER"> 管理节点 </a-radio>
-          </a-radio-group>
-        </a-form-item>
-        <a-form-item label="状态" prop="availability">
-          <a-radio-group name="availability" v-model="temp.availability">
-            <a-radio value="ACTIVE"> 活跃</a-radio>
-            <a-radio value="PAUSE"> 暂停 </a-radio>
-            <a-radio value="DRAIN"> 排空 </a-radio>
-          </a-radio-group>
-        </a-form-item>
-      </a-form>
-    </a-modal>
+
     <!-- 查看日志 -->
-    <a-modal
-      destroyOnClose
-      v-model:visible="logVisible"
-      title="查看日志"
-      width="80vw"
-      :footer="null"
-      :maskClosable="false"
-    >
-      <pull-log v-if="logVisible" :id="id" :dataId="temp.id" type="taks" :urlPrefix="urlPrefix" />
-    </a-modal>
+
+    <pull-log
+      v-if="logVisible > 0"
+      :visible="logVisible != 0"
+      @close="
+        () => {
+          logVisible = 0
+        }
+      "
+      :id="this.id"
+      :dataId="this.temp.id"
+      type="taks"
+      :urlPrefix="this.urlPrefix"
+    />
   </div>
 </template>
 
@@ -177,7 +173,7 @@ export default {
       editVisible: false,
       initSwarmVisible: false,
       autoUpdateTime: null,
-      logVisible: false,
+      logVisible: 0,
       rules: {
         role: [{ required: true, message: '请选择节点角色', trigger: 'blur' }],
         availability: [{ required: true, message: '请选择节点状态', trigger: 'blur' }]
@@ -188,17 +184,32 @@ export default {
           width: '80px',
           ellipsis: true,
           align: 'center',
-          customRender: (text, record, index) => `${index + 1}`
+          customRender: ({ text, record, index }) => `${index + 1}`
         },
-        { title: '任务Id', dataIndex: 'id', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '节点Id', dataIndex: 'nodeId', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '服务ID', dataIndex: 'serviceId', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: '任务Id',
+          dataIndex: 'id',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '节点Id',
+          dataIndex: 'nodeId',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '服务ID',
+          dataIndex: 'serviceId',
+          ellipsis: true,
+          tooltip: true
+        },
         {
           title: '镜像',
-          dataIndex: 'spec.containerSpec.image',
+          dataIndex: ['spec', 'containerSpec', 'image'],
           ellipsis: true,
           width: 120,
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
         // { title: "副本数", dataIndex: "spec.mode.replicated.replicas", width: 90, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         // { title: "端点", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
@@ -207,17 +218,22 @@ export default {
           title: '状态',
           width: 140,
           dataIndex: 'desiredState',
-          ellipsis: true,
-          scopedSlots: { customRender: 'desiredState' }
+          ellipsis: true
         },
         {
           title: '错误信息',
           width: 150,
-          dataIndex: 'status.err',
+          dataIndex: ['status', 'err'],
           ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
-        { title: 'slot', width: '80px', dataIndex: 'slot', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: 'slot',
+          width: '80px',
+          dataIndex: 'slot',
+          ellipsis: true,
+          tooltip: true
+        },
 
         // { title: "系统类型", width: 140, align: "center", dataIndex: "description.platform.os", ellipsis: true, scopedSlots: { customRender: "os" } },
         // {
@@ -232,7 +248,7 @@ export default {
           title: '修改时间',
           dataIndex: 'updatedAt',
           ellipsis: true,
-          scopedSlots: { customRender: 'updatedAt' },
+
           sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
           sortDirections: ['descend', 'ascend'],
           defaultSortOrder: 'descend',
@@ -241,7 +257,7 @@ export default {
         {
           title: '操作',
           dataIndex: 'operation',
-          scopedSlots: { customRender: 'operation' },
+          fixed: 'right',
           align: 'center',
           width: '80px'
         }
@@ -250,7 +266,7 @@ export default {
     }
   },
   computed: {},
-  beforeDestroy() {},
+  beforeUnmount() {},
   mounted() {
     this.listQuery.taskState = this.taskState
     this.loadData()
@@ -277,43 +293,17 @@ export default {
     },
     // 日志
     handleLog(record) {
-      this.logVisible = true
+      this.logVisible = new Date() * Math.random()
       this.temp = record
-    },
-    handleEdit(record) {
-      this.editVisible = true
-      this.temp = {
-        nodeId: record.id,
-        role: record.spec.role,
-        availability: record.spec.availability
-      }
-    },
-    handleEditOk() {
-      this.$refs['editForm'].validate((valid) => {
-        if (!valid) {
-          return false
-        }
-        this.temp.id = this.id
-        dockerSwarmNodeUpdate(this.urlPrefix, this.temp).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            $notification.success({
-              message: res.msg
-            })
-            this.editVisible = false
-            this.loadData()
-          }
-        })
-      })
     }
   }
 }
 </script>
+
 <style scoped>
 /deep/ .ant-statistic div {
   display: inline-block;
 }
-
 /deep/ .ant-statistic-content-value,
 /deep/ .ant-statistic-content {
   font-size: 16px;

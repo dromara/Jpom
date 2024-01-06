@@ -212,10 +212,10 @@
       :maskClosable="false"
     >
       <a-form ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="SSH 名称" prop="name">
+        <a-form-item label="SSH 名称" name="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="SSH 名称" />
         </a-form-item>
-        <a-form-item label="分组名称" prop="group">
+        <a-form-item label="分组名称" name="group">
           <custom-select
             v-model="temp.group"
             :data="groupList"
@@ -295,7 +295,7 @@
       </a-alert>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item label="选择工作空间" prop="workspaceId">
+        <a-form-item label="选择工作空间" name="workspaceId">
           <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
             <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{
               item.name
@@ -322,7 +322,7 @@ import {
 } from '@/utils/const'
 import { getWorkSpaceListAll } from '@/api/workspace'
 
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 import OperationLog from '@/pages/system/assets/ssh/operation-log'
 import CustomSelect from '@/components/customSelect'
 

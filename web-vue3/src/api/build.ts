@@ -18,7 +18,7 @@
 //  *  group: 分组名称
 //  * } params
 //  */
-// export function getBuildList(params:any) {
+// export function getBuildList(params) {
 //     return axios({
 //         url: '/build/list_data.json',
 //         method: 'post',
@@ -34,7 +34,7 @@
 //  *  userPwd: 密码
 //  * } params
 //  */
-// export function getBranchList(params:any) {
+// export function getBranchList(params) {
 //     return axios({
 //         url: '/build/branchList.json',
 //         method: 'post',
@@ -59,7 +59,7 @@
 //  *  repoType: 仓库类型 0: GIT | 1: SVN
 //  * } params
 //  */
-// export function editBuild(params:any) {
+// export function editBuild(params) {
 //     const data = {
 //         id: params.id,
 //         name: params.name,
@@ -145,7 +145,7 @@
 //  *  line: 需要获取的行号 1 开始
 //  * }
 //  */
-// export function loadBuildLog(params:any) {
+// export function loadBuildLog(params) {
 //     return axios({
 //         url: '/build/getNowLog.json',
 //         method: 'post',
@@ -188,7 +188,7 @@
 //  *  status: 状态
 //  * } params
 //  */
-// export function geteBuildHistory(params:any) {
+// export function geteBuildHistory(params) {
 //     return axios({
 //         url: '/build/history_list.json',
 //         method: 'post',

@@ -1,7 +1,7 @@
 <template>
   <div>
     <a-form ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
-      <a-form-item label="名称" prop="name">
+      <a-form-item label="名称" name="name">
         <a-row>
           <a-col :span="10">
             <a-input v-model="temp.name" :maxLength="50" placeholder="名称" />
@@ -20,7 +20,7 @@
           </a-col>
         </a-row>
       </a-form-item>
-      <a-form-item label="源仓库" prop="repositoryId">
+      <a-form-item label="源仓库" name="repositoryId">
         <a-input-search
           :value="`${tempRepository ? tempRepository.name + '[' + tempRepository.gitUrl + ']' : '请选择仓库'}`"
           readOnly
@@ -33,7 +33,7 @@
           "
         />
       </a-form-item>
-      <a-form-item v-if="tempRepository && tempRepository.repoType === 0" label="分支" prop="branchName">
+      <a-form-item v-if="tempRepository && tempRepository.repoType === 0" label="分支" name="branchName">
         <a-row>
           <a-col :span="10">
             <custom-select
@@ -89,7 +89,7 @@
       <a-collapse :activeKey="['0', '1', '2']" expandIconPosition="right">
         <a-collapse-panel key="0">
           <template #header>
-            <a-form-item prop="buildMode" style="margin-bottom: 0">
+            <a-form-item name="buildMode" style="margin-bottom: 0">
               <template #label>
                 <a-tooltip>
                   方式
@@ -118,7 +118,7 @@
           </template>
           <div v-if="temp.buildMode === undefined" style="text-align: center">请选择构建方式</div>
 
-          <a-form-item v-if="temp.buildMode === 0" prop="script">
+          <a-form-item v-if="temp.buildMode === 0" name="script">
             <template #label>
               <a-tooltip>
                 构建命令
@@ -164,7 +164,7 @@
               />
             </a-popover>
           </a-form-item>
-          <a-form-item v-if="temp.buildMode === 1" prop="script">
+          <a-form-item v-if="temp.buildMode === 1" name="script">
             <template #label>
               <a-tooltip>
                 DSL 内容
@@ -217,7 +217,7 @@
               </a-tab-pane>
             </a-tabs>
           </a-form-item>
-          <a-form-item v-if="temp.buildMode !== undefined" prop="resultDirFile" class="jpom-target-dir">
+          <a-form-item v-if="temp.buildMode !== undefined" name="resultDirFile" class="jpom-target-dir">
             <template #label>
               <a-tooltip>
                 产物目录
@@ -251,7 +251,7 @@
         </a-collapse-panel>
         <a-collapse-panel key="1">
           <template #header>
-            <a-form-item prop="releaseMethod" style="margin-bottom: 0">
+            <a-form-item name="releaseMethod" style="margin-bottom: 0">
               <template #label>
                 <a-tooltip>
                   发布操作
@@ -283,7 +283,7 @@
             <template v-if="temp.releaseMethod === 0"> 不发布：只执行构建流程并且保存构建历史,不执行发布流程</template>
             <!-- 节点分发 -->
             <template v-if="temp.releaseMethod === 1">
-              <a-form-item label="分发项目" prop="releaseMethodDataId">
+              <a-form-item label="分发项目" name="releaseMethodDataId">
                 <a-select
                   show-search
                   allowClear
@@ -296,7 +296,7 @@
                   <a-icon #suffixIcon type="reload" @click="loadDispatchList" />
                 </a-select>
               </a-form-item>
-              <a-form-item prop="projectSecondaryDirectory" label="二级目录">
+              <a-form-item name="projectSecondaryDirectory" label="二级目录">
                 <a-input
                   v-model="tempExtraData.projectSecondaryDirectory"
                   placeholder="不填写则使用节点分发配置的二级目录"
@@ -306,23 +306,23 @@
 
             <!-- 项目 -->
             <template v-if="temp.releaseMethod === 2">
-              <a-form-item label="发布项目" prop="releaseMethodDataIdList">
+              <a-form-item label="发布项目" name="releaseMethodDataIdList">
                 <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="请选择节点项目">
                   <a-icon #suffixIcon type="reload" @click="loadNodeProjectList" />
                 </a-cascader>
               </a-form-item>
-              <a-form-item label="发布后操作" prop="afterOpt">
+              <a-form-item label="发布后操作" name="afterOpt">
                 <a-select show-search allowClear v-model="tempExtraData.afterOpt" placeholder="请选择发布后操作">
                   <a-select-option v-for="opt in afterOptListSimple" :key="opt.value">{{ opt.title }}</a-select-option>
                 </a-select>
               </a-form-item>
-              <a-form-item prop="projectSecondaryDirectory" label="二级目录">
+              <a-form-item name="projectSecondaryDirectory" label="二级目录">
                 <a-input v-model="tempExtraData.projectSecondaryDirectory" placeholder="不填写则发布至项目的根目录" />
               </a-form-item>
             </template>
             <!-- SSH -->
             <template v-if="temp.releaseMethod === 3">
-              <a-form-item prop="releaseMethodDataId" help="如果 ssh 没有配置授权目录是不能选择的哟">
+              <a-form-item name="releaseMethodDataId" help="如果 ssh 没有配置授权目录是不能选择的哟">
                 <template #label>
                   <a-tooltip>
                     发布的SSH
@@ -350,7 +350,7 @@
                 </a-row>
               </a-form-item>
               <a-form-item
-                prop="releaseMethodDataId"
+                name="releaseMethodDataId"
                 help="如果多选 ssh 下面目录只显示选项中的第一项，但是授权目录需要保证每项都配置对应目录"
               >
                 <template #label>
@@ -381,7 +381,7 @@
               </a-form-item>
             </template>
 
-            <a-form-item v-if="temp.releaseMethod === 3" prop="releaseBeforeCommand">
+            <a-form-item v-if="temp.releaseMethod === 3" name="releaseBeforeCommand">
               <!-- sshCommand -->
               <template #label>
                 <a-tooltip>
@@ -405,7 +405,7 @@
                 placeholder="发布前执行的命令(非阻塞命令),一般是关闭项目命令 ,支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}"
               />
             </a-form-item>
-            <a-form-item v-if="temp.releaseMethod === 3 || temp.releaseMethod === 4" prop="releaseCommand">
+            <a-form-item v-if="temp.releaseMethod === 3 || temp.releaseMethod === 4" name="releaseCommand">
               <!-- sshCommand LocalCommand -->
               <template #label>
                 <a-tooltip>
@@ -430,7 +430,7 @@
               />
             </a-form-item>
 
-            <a-form-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" prop="clearOld">
+            <a-form-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" name="clearOld">
               <template #label>
                 <a-tooltip>
                   清空发布
@@ -486,7 +486,7 @@
             </a-form-item>
             <!-- docker -->
             <template v-if="temp.releaseMethod === 5">
-              <a-form-item prop="fromTag">
+              <a-form-item name="fromTag">
                 <template #label>
                   <a-tooltip>
                     执行容器
@@ -503,18 +503,18 @@
               <a-tooltip
                 title="需要在仓库里面 dockerfile,如果多文件夹查看可以指定二级目录（二级目录:Dockerfile文件位置,执行dockerfile 会跳转到二级目录位置）如 springboot-test-jar:springboot-test-jar/Dockerfile"
               >
-                <a-form-item prop="dockerfile" label="Dockerfile">
+                <a-form-item name="dockerfile" label="Dockerfile">
                   <a-input v-model="tempExtraData.dockerfile" placeholder="文件夹路径 需要在仓库里面 dockerfile" />
                 </a-form-item>
               </a-tooltip>
-              <a-form-item prop="dockerTag" label="镜像 tag">
+              <a-form-item name="dockerTag" label="镜像 tag">
                 <a-tooltip
                   title="容器标签,如：xxxx:latest 多个使用逗号隔开, 配置附加环境变量文件支持加载仓库目录下 .env 文件环境变量 如： xxxx:${VERSION}"
                 >
                   <a-input v-model="tempExtraData.dockerTag" placeholder="容器标签,如：xxxx:latest 多个使用逗号隔开" />
                 </a-tooltip>
               </a-form-item>
-              <a-form-item prop="dockerBuildArgs" label="构建参数">
+              <a-form-item name="dockerBuildArgs" label="构建参数">
                 <a-row>
                   <a-col :span="10">
                     <a-tooltip title="构建参数,如：key1=values1&keyvalue2 使用 URL 编码">
@@ -535,7 +535,7 @@
                   </a-col>
                 </a-row>
               </a-form-item>
-              <a-form-item prop="swarmId">
+              <a-form-item name="swarmId">
                 <template #label>
                   <a-tooltip>
                     发布集群
@@ -555,7 +555,7 @@
                   <a-icon #suffixIcon type="reload" @click="loadDockerSwarmListAll" />
                 </a-select>
               </a-form-item>
-              <a-form-item prop="pushToRepository" :label="` `" :colon="false">
+              <a-form-item name="pushToRepository" :label="` `" :colon="false">
                 <a-row>
                   <a-col :span="6" style="text-align: right">
                     <a-space>
@@ -619,7 +619,7 @@
                   </a-col>
                 </a-row>
               </a-form-item>
-              <a-form-item prop="dockerSwarmServiceName" v-if="tempExtraData.dockerSwarmId">
+              <a-form-item name="dockerSwarmServiceName" v-if="tempExtraData.dockerSwarmId">
                 <template #label>
                   <a-tooltip>
                     集群服务
@@ -644,7 +644,7 @@
           <template #header>
             <a-form-item label="其他配置" style="margin-bottom: 0"></a-form-item>
           </template>
-          <a-form-item prop="cacheBuild">
+          <a-form-item name="cacheBuild">
             <template #label>
               <a-tooltip>
                 缓存构建目录
@@ -707,7 +707,7 @@
               </a-col>
             </a-row>
           </a-form-item>
-          <a-form-item prop="webhook">
+          <a-form-item name="webhook">
             <template #label>
               <a-tooltip>
                 WebHooks
@@ -724,7 +724,7 @@
             </template>
             <a-input v-model="temp.webhook" placeholder="构建过程请求,非必填，GET请求" />
           </a-form-item>
-          <a-form-item label="定时构建" prop="autoBuildCron">
+          <a-form-item label="定时构建" name="autoBuildCron">
             <a-auto-complete
               v-model="temp.autoBuildCron"
               placeholder="如果需要定时自动构建则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
@@ -742,7 +742,7 @@
               </template>
             </a-auto-complete>
           </a-form-item>
-          <a-form-item prop="noticeScriptId">
+          <a-form-item name="noticeScriptId">
             <template #label>
               <a-tooltip>
                 事件脚本
@@ -791,7 +791,7 @@
               <a-select-option v-for="item2 in scriptList" :key="item2.id">{{ item2.name }}</a-select-option>
             </a-select> -->
           </a-form-item>
-          <a-form-item prop="attachEnv">
+          <a-form-item name="attachEnv">
             <template #label>
               <a-tooltip>
                 附加环境变量
@@ -807,7 +807,7 @@
             </template>
             <a-input v-model="tempExtraData.attachEnv" placeholder="附加环境变量  .env 添加多个使用逗号分隔" />
           </a-form-item>
-          <a-form-item prop="cacheBuild">
+          <a-form-item name="cacheBuild">
             <template #label>
               <a-tooltip>
                 文件管理中心
@@ -838,7 +838,7 @@
               </a-col>
             </a-row>
           </a-form-item>
-          <a-form-item label="别名码" prop="aliasCode" help="如果产物同步到文件中心,当前值会共享">
+          <a-form-item label="别名码" name="aliasCode" help="如果产物同步到文件中心,当前值会共享">
             <a-input-search
               :maxLength="50"
               v-model="temp.aliasCode"
@@ -854,7 +854,7 @@
               </template>
             </a-input-search>
           </a-form-item>
-          <a-form-item prop="excludeReleaseAnt">
+          <a-form-item name="excludeReleaseAnt">
             <template #label>
               <a-tooltip>
                 排除发布
@@ -1031,7 +1031,7 @@ import { getNodeListAll, getProjectListAll } from '@/api/node'
 // import { getScriptListAll } from "@/api/server-script";
 import { getDishPatchListAll } from '@/api/dispatch'
 import { itemGroupBy, CRON_DATA_SOURCE, randomStr } from '@/utils/const'
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 import { afterOptListSimple } from '@/api/dispatch'
 export default {
   components: {

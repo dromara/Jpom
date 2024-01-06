@@ -1,11 +1,12 @@
 <template>
-  <terminal :url="socketUrl" />
+  <terminal :url="this.socketUrl" />
 </template>
+
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 import { getWebSocketUrl } from '@/api/config'
 import terminal from '@/components/terminal'
-
+import { useUserStore } from '@/stores/user'
 // https://blog.csdn.net/qq_41840688/article/details/108636267
 
 export default {
@@ -29,7 +30,7 @@ export default {
     return {}
   },
   computed: {
-    ...mapGetters(['getLongTermToken', 'getWorkspaceId']),
+    ...mapState(useUserStore, ['getLongTermToken', 'getWorkspaceId']),
     socketUrl() {
       return getWebSocketUrl(
         '/socket/docker_cli',
@@ -38,7 +39,7 @@ export default {
     }
   },
   mounted() {},
-  beforeDestroy() {},
+  beforeUnmount() {},
   methods: {}
 }
 </script>

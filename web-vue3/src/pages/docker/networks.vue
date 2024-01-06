@@ -5,68 +5,88 @@
     :columns="columns"
     :pagination="false"
     bordered
-    :rowKey="(record, index) => index"
+    :scroll="{
+      x: 'max-content'
+    }"
   >
-    <template #title>
+    <template v-slot:title>
       <a-space>
-        <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
-        <a-input v-model="listQuery['networkId']" @pressEnter="loadData" placeholder="id" class="search-input-item" />
+        <a-input
+          v-model:value="listQuery['name']"
+          @pressEnter="loadData"
+          placeholder="名称"
+          class="search-input-item"
+        />
+        <a-input
+          v-model:value="listQuery['networkId']"
+          @pressEnter="loadData"
+          placeholder="id"
+          class="search-input-item"
+        />
 
         <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
       </a-space>
     </template>
-
-    <a-tooltip #Created slot-scope="text" placement="topLeft" :title="text['Created']">
-      <span>{{ parseTime(text['Created']) }}</span>
-    </a-tooltip>
-    <a-tooltip
-      #ipam
-      slot-scope="text"
-      placement="topLeft"
-      :title="`${text && text.driver}  ${
-        text &&
-        text.config
-          .map((item) => {
-            return ('网关：' + item.gateway || '') + '#' + ('子网掩码：' + item.subnet || '')
-          })
-          .join(',')
-      }`"
-    >
-      <span>{{
-        text &&
-        text.config
-          .map((item) => {
-            return (item.gateway || '') + '#' + (item.subnet || '')
-          })
-          .join(',')
-      }}</span>
-    </a-tooltip>
-
-    <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
-      <span>{{ text }}</span>
-    </a-tooltip>
-
-    <a-tooltip #id slot-scope="text" :title="text">
-      <span> {{ text.split(':')[1].slice(0, 12) }}</span>
-    </a-tooltip>
-    <template #operation slot-scope="text, record">
-      <a-space>
-        <!-- <a-tooltip title="停止" v-if="record.state === 'running'">
-          <a-button size="small" type="link" @click="doAction(record, 'stop')"><a-icon type="stop" /></a-button>
+    <template #bodyCell="{ column, text, record }">
+      <template v-if="column.dataIndex === 'Created'">
+        <a-tooltip placement="topLeft" :title="record.rawValues && record.rawValues['Created']">
+          <span>{{ parseTime(record.rawValues && record.rawValues['Created']) }}</span>
         </a-tooltip>
-        <a-tooltip title="启动" v-else>
-          <a-button size="small" type="link" @click="doAction(record, 'start')"> <a-icon type="play-circle" /></a-button>
+      </template>
+      <template v-else-if="column.dataIndex === 'ipam'">
+        <a-tooltip
+          placement="topLeft"
+          :title="`${text && text.driver}  ${
+            text &&
+            text.config
+              .map((item) => {
+                return ('网关：' + item.gateway || '') + '#' + ('子网掩码：' + item.subnet || '')
+              })
+              .join(',')
+          }`"
+        >
+          <span>{{
+            text &&
+            text.config
+              .map((item) => {
+                return (item.gateway || '') + '#' + (item.subnet || '')
+              })
+              .join(',')
+          }}</span>
         </a-tooltip>
-        <a-tooltip title="重启">
-          <a-button size="small" type="link" :disabled="record.state !== 'running'" @click="doAction(record, 'restart')"><a-icon type="reload" /></a-button>
-        </a-tooltip> -->
-        <a-tooltip title="删除">
-          <a-button size="small" type="link" @click="doAction(record, 'remove')"><a-icon type="delete" /></a-button>
+      </template>
+
+      <template v-else-if="column.tooltip">
+        <a-tooltip placement="topLeft" :title="text">
+          <span>{{ text }}</span>
         </a-tooltip>
-      </a-space>
+      </template>
+
+      <template v-else-if="column.id">
+        <a-tooltip :title="text">
+          <span> {{ text.split(':')[1].slice(0, 12) }}</span>
+        </a-tooltip>
+      </template>
+      <template v-else-if="column.dataIndex === 'operation'">
+        <a-space>
+          <!-- <a-tooltip title="停止" v-if="record.state === 'running'">
+            <a-button size="small" type="link" @click="doAction(record, 'stop')"><a-icon type="stop" /></a-button>
+          </a-tooltip>
+          <a-tooltip title="启动" v-else>
+            <a-button size="small" type="link" @click="doAction(record, 'start')"> <a-icon type="play-circle" /></a-button>
+          </a-tooltip>
+          <a-tooltip title="重启">
+            <a-button size="small" type="link" :disabled="record.state !== 'running'" @click="doAction(record, 'restart')"><a-icon type="reload" /></a-button>
+          </a-tooltip> -->
+          <a-tooltip title="删除">
+            <a-button size="small" type="link" @click="doAction(record, 'remove')"><DeleteOutlined /></a-button>
+          </a-tooltip>
+        </a-space>
+      </template>
     </template>
   </a-table>
 </template>
+
 <script>
 import { renderSize, parseTime } from '@/utils/const'
 import { dockerNetworksList, dockerVolumesRemove } from '@/api/docker-api'
@@ -98,22 +118,44 @@ export default {
           width: 80,
           ellipsis: true,
           align: 'center',
-          customRender: (text, record, index) => `${index + 1}`
+          customRender: ({ text, record, index }) => `${index + 1}`
         },
-        { title: '名称', dataIndex: 'name', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: 'id', dataIndex: 'id', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '范围', dataIndex: 'scope', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: 'IPAM', dataIndex: 'ipam', ellipsis: true, scopedSlots: { customRender: 'ipam' } },
-        { title: '类型', dataIndex: 'driver', ellipsis: true, width: 80, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: '名称',
+          dataIndex: 'name',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: 'id',
+          dataIndex: 'id',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '范围',
+          dataIndex: 'scope',
+          ellipsis: true
+        },
+        {
+          title: 'IPAM',
+          dataIndex: 'ipam',
+          ellipsis: true
+        },
+        {
+          title: '类型',
+          dataIndex: 'driver',
+          ellipsis: true,
+          width: 80
+        },
         {
           title: '创建时间',
-          dataIndex: 'rawValues',
+          dataIndex: 'Created',
           ellipsis: true,
           width: 180,
           sorter: (a, b) => new Date(a.rawValues.Created).getTime() - new Date(b.rawValues.Created).getTime(),
           sortDirections: ['descend', 'ascend'],
-          defaultSortOrder: 'descend',
-          scopedSlots: { customRender: 'Created' }
+          defaultSortOrder: 'descend'
         }
         // { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
       ],
@@ -152,8 +194,9 @@ export default {
       if (!action) {
         return
       }
-      $confirm({
+      this.$confirm({
         title: '系统提示',
+        zIndex: 1009,
         content: action.msg,
         okText: '确认',
         cancelText: '取消',
@@ -165,7 +208,7 @@ export default {
           }
           action.api(this.urlPrefix, params).then((res) => {
             if (res.code === 200) {
-              $notification.success({
+              this.$notification.success({
                 message: res.msg
               })
               this.loadData()

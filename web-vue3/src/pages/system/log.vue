@@ -3,44 +3,35 @@
     <!-- 侧边栏 文件树 -->
     <a-layout-sider theme="light" class="sider jpom-log-tree" width="20%">
       <a-empty v-if="list.length === 0" />
-      <a-directory-tree :treeData="list" :replaceFields="replaceFields" @select="select" default-expand-all>
+      <a-directory-tree :treeData="list" :fieldNames="replaceFields" @select="select" default-expand-all>
       </a-directory-tree>
     </a-layout-sider>
     <!-- 单个文件内容 -->
     <a-layout-content class="log-content">
-      <!-- <div class="filter">
-        <a-button type="primary" @click="loadData">刷新</a-button>
-      </div>
-      <div>
-        <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none" />
-      </div> -->
-      <log-view :ref="`logView`" height="calc(100vh - 165px)">
+      <log-view2 :ref="`logView`" height="calc(100vh - 165px)">
         <template #before>
           <a-space>
             <a-button type="primary" size="small" @click="loadData">刷新</a-button>
-            <a-button type="danger" size="small" :disabled="!this.temp.path" @click="deleteLog">删除</a-button>
+            <a-button type="primary" danger size="small" :disabled="!this.temp.path" @click="deleteLog">删除</a-button>
             <a-button type="primary" size="small" :disabled="!this.temp.path" @click="downloadLog">下载</a-button>
+            |
           </a-space>
         </template>
-      </log-view>
+      </log-view2>
     </a-layout-content>
-    <!-- 对话框 -->
-    <!-- <a-modal v-model="visible" title="系统提示" :footer="null">
-      <a-space>
-
-        <a-button @click="visible = false">取消</a-button>
-      </a-space>
-    </a-modal> -->
   </a-layout>
 </template>
+
 <script>
 import { getLogList, downloadFile, deleteLog } from '@/api/system'
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/stores/user'
 import { getWebSocketUrl } from '@/api/config'
-import LogView from '@/components/logView'
+import LogView2 from '@/components/logView/index2.vue'
+
 export default {
   components: {
-    LogView
+    LogView2
   },
   data() {
     return {
@@ -48,8 +39,7 @@ export default {
       socket: null,
       // 日志内容
       // logContext: "choose file loading context...",
-      tomcatId: 'system',
-      nodeId: 'system',
+
       replaceFields: {
         children: 'children',
         title: 'title',
@@ -60,50 +50,24 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getLongTermToken']),
+    ...mapState(useUserStore, ['getLongTermToken']),
     socketUrl() {
-      return getWebSocketUrl(
-        '/socket/tomcat_log',
-        `userId=${this.getLongTermToken}&tomcatId=${this.tomcatId}&nodeId=${this.nodeId}&type=tomcat`
-      )
+      return getWebSocketUrl('/socket/system_log', `userId=${this.getLongTermToken}&nodeId=system&type=systemLog`)
     }
   },
   watch: {},
   created() {
     this.loadData()
-    nextTick(() => {
-      setTimeout(() => {
-        this.introGuide()
-      }, 500)
-    })
-  },
-  beforeDestroy() {
-    if (this.socket) {
-      this.socket.close()
+
+    // 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+    window.onbeforeunload = () => {
+      this.socket?.close()
     }
   },
+  beforeUnmount() {
+    this.socket?.close()
+  },
   methods: {
-    // 页面引导
-    introGuide() {
-      this.$store.dispatch('tryOpenGuide', {
-        key: 'server-log',
-        options: {
-          hidePrev: true,
-          steps: [
-            {
-              title: '导航助手',
-              element: document.querySelector('.jpom-log-tree'),
-              intro: '这里是 Server 端里面的日志文件，点击具体的文件可以在右边的区域查看日志内容。'
-            },
-            {
-              title: '导航助手',
-              element: document.querySelector('.ant-tree-node-content-wrapper'),
-              intro: '您还可以用右键点击，会弹出一个操作选项的窗口（嗯，入口隐藏的比较深，所以有必要提示一下）。'
-            }
-          ]
-        }
-      })
-    },
     // 加载数据
     loadData() {
       this.list = []
@@ -147,7 +111,7 @@ export default {
         fileName: node.dataRef.path
       }
       this.temp = node.dataRef
-      this.$refs.logView.clearLogCache()
+      this.$refs.logView?.clearLogCache()
 
       this.socket?.close()
 
@@ -158,18 +122,18 @@ export default {
       }
       this.socket.onmessage = (msg) => {
         // this.logContext += `${msg.data}\r\n`;
-        this.$refs.logView.appendLine(msg.data)
+        this.$refs.logView?.appendLine(msg.data)
       }
       this.socket.onerror = (err) => {
         console.error(err)
-        $notification.error({
+        this.$notification.error({
           message: 'web socket 错误,请检查是否开启 ws 代理'
         })
       }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        $message.warning('会话已经关闭')
+        this.$message.warning('会话已经关闭[system-log] ' + node.dataRef.path)
         // clearInterval(this.heart);
       }
     },
@@ -193,6 +157,7 @@ export default {
     deleteLog() {
       $confirm({
         title: '系统提示',
+        zIndex: 1009,
         content: '真的要删除日志文件么？',
         okText: '确认',
         cancelText: '取消',
@@ -204,7 +169,7 @@ export default {
           // 删除日志
           deleteLog(params).then((res) => {
             if (res.code === 200) {
-              $notification.success({
+              this.$notification.success({
                 message: res.msg
               })
               this.visible = false
@@ -217,6 +182,7 @@ export default {
   }
 }
 </script>
+
 <style scoped>
 .log-layout {
   padding: 0;
@@ -234,16 +200,4 @@ export default {
   height: calc(100vh - 110px);
   overflow-y: auto;
 }
-/*
-.console {
-  padding: 5px;
-  color: #fff;
-  font-size: 14px;
-  background-color: black;
-  width: 100%;
-  height: calc(100vh - 165px);
-  overflow-y: auto;
-  border: 1px solid #e2e2e2;
-  border-radius: 5px 5px;
-} */
 </style>

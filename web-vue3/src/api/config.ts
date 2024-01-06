@@ -4,8 +4,9 @@ import { NO_NOTIFY_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID } from '@/utils/con
 import { refreshToken } from './user/user'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
-import { useMenuStore } from '@/stores/menu'
 
+import Qs from 'qs'
+import router from '../router'
 const delTimeout: number = 20 * 1000
 const apiTimeout: number = Number(jpomWindow.apiTimeout === '<apiTimeout>' ? delTimeout : jpomWindow.apiTimeout)
 // debug routerBase
@@ -13,9 +14,11 @@ const routerBase: string = jpomWindow.routerBase === '<routerBase>' ? '' : jpomW
 
 const pro: boolean = process.env.NODE_ENV === 'production'
 
+const baseURL = import.meta.env.JPOM_BASE_API_URL
+
 // 创建实例
 const instance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.JPOM_BASE_API_URL,
+  baseURL: baseURL,
 
   timeout: apiTimeout || delTimeout,
   headers: {
@@ -147,10 +150,9 @@ async function redoRequest(config: AxiosRequestConfig) {
   if (result.code === 200) {
     // 调用 store action 存储当前登录的用户名和 token
     const userStore = useUserStore()
-    const menuStore = useMenuStore()
 
     await userStore.login(result.data)
-    await menuStore.loadSystemMenus()
+
     await request(config)
     return result
   }
@@ -165,15 +167,19 @@ function toLogin(res: IResponse<any>, response: AxiosResponse<IResponse<any>>) {
   const userStore = useUserStore()
 
   userStore.logOut().then(() => {
-    // const index = location.hash.indexOf("?");
-    // let params = {};
-    // if (index > -1) {
-    //   params = Qs.parse(location.hash.substring(index + 1));
-    // }
-    // router.push({
-    //   path: "/login",
-    //   query: params,
-    // });
+    const index = location.hash.indexOf('?')
+    let params = {}
+    if (index > -1) {
+      params = Qs.parse(location.hash.substring(index + 1))
+    }
+    const pageUrl = router.resolve({
+      name: 'login',
+      path: '/login',
+      query: params
+    })
+    setTimeout(() => {
+      ;(location.href as any) = pageUrl
+    }, 2000)
   })
   return false
 }
@@ -185,7 +191,7 @@ export function loadRouterBase(url: string, params: any) {
   Object.keys(paramsObj).forEach((key, i) => {
     queryStr += `${i === 0 ? '' : '&'}${key}=${paramsObj[key]}`
   })
-  return `${((routerBase || '') + url).replace(new RegExp('//', 'gm'), '/')}?${queryStr}`
+  return `${((baseURL + routerBase || '') + url).replace(new RegExp('//', 'gm'), '/')}?${queryStr}`
 }
 
 /**
@@ -196,7 +202,6 @@ export function loadRouterBase(url: string, params: any) {
  */
 export function getWebSocketUrl(url: string, parameter: any) {
   const protocol: string = location.protocol === 'https:' ? 'wss://' : 'ws://'
-  const domain: string = jpomWindow.routerBase
-  const fullUrl: string = (domain + url).replace(new RegExp('//', 'gm'), '/')
+  const fullUrl: string = (baseURL + routerBase + url).replace(new RegExp('//', 'gm'), '/')
   return `${protocol}${location.host}${fullUrl}?${parameter}`
 }

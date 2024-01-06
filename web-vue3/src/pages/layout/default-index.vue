@@ -1,7 +1,7 @@
 <template>
   <a-layout id="app-layout">
     <a-layout-sider
-      v-model="collapsed"
+      v-model:collapsed="collapsed"
       :trigger="null"
       collapsible
       :class="`${fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}`"
@@ -9,33 +9,42 @@
       <a-tooltip placement="right" title="点击可以折叠左侧菜单栏">
         <div class="logo" @click="changeCollapsed()">
           <img :src="logoUrl || defaultLogo" alt="logo" />
-          {{ subTitle }}
+          {{ !collapsed ? subTitle : '' }}
         </div>
       </a-tooltip>
       <side-menu class="side-menu" :mode="mode" />
     </a-layout-sider>
     <a-layout>
       <a-layout-header class="app-header">
-        <content-tab :mode="mode" />
+        <content-tab
+          :mode="mode"
+          :style="{
+            width: collapsed ? 'calc(100vw - 80px - 20px)' : 'calc(100vw - 200px - 20px)'
+          }"
+        />
       </a-layout-header>
       <a-layout-content
-        :class="`layout-content ${fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'}`"
+        :style="{
+          width: collapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 210px)',
+          overflowY: 'scroll'
+        }"
+        :class="`layout-content`"
       >
-        <keep-alive>
-          <router-view />
-        </keep-alive>
+        <router-view v-slot="{ Component }">
+          <keep-alive> <component :is="Component" /> </keep-alive>
+        </router-view>
       </a-layout-content>
     </a-layout>
   </a-layout>
 </template>
 <script setup lang="ts">
-import SideMenu from './side-menu'
+import SideMenu from './side-menu.vue'
 // import UserHeader from "./user-header";
-import ContentTab from './content-tab'
+import ContentTab from './content-tab.vue'
 import { checkSystem, loadingLogo } from '@/api/install'
 import { useAppStore } from '@/stores/app'
 import { useGuideStore } from '@/stores/guide'
-import defaultLogo from '@/assets/images/jpom.png'
+import defaultLogo from '@/assets/images/jpom.svg'
 
 defineProps({
   mode: {
@@ -97,6 +106,7 @@ const checkSystemHannder = () => {
 }
 const changeCollapsed = () => {
   collapsed.value = !collapsed.value
+
   appStore.collapsed(collapsed.value)
 }
 </script>
@@ -113,11 +123,9 @@ const changeCollapsed = () => {
   cursor: pointer;
   transition: color 0.3s;
 }
-
 #app-layout .trigger:hover {
   color: #1890ff;
 }
-
 #app-layout .logo {
   width: 100%;
   cursor: pointer;
@@ -128,12 +136,11 @@ const changeCollapsed = () => {
   font-weight: bold;
   overflow: hidden;
   padding: 0 16px;
+  text-align: center;
 }
-
 #app-layout .logo img {
   height: 26px;
   vertical-align: sub;
-  margin-right: 6px;
 }
 
 .app-header {
@@ -142,7 +149,7 @@ const changeCollapsed = () => {
   padding: 10px 10px 0;
   height: auto;
 }
-
+/*
 .sider-scroll {
   min-height: 100vh;
   overflow-y: auto;
@@ -160,7 +167,7 @@ const changeCollapsed = () => {
 .layout-content-full-screen {
   height: calc(100vh - 120px);
   overflow-y: scroll;
-}
+} */
 </style>
 
 <style>
@@ -172,7 +179,7 @@ const changeCollapsed = () => {
 }
 
 .drawer-layout-content {
-  min-height: calc(100vh - 85px);
+  /* min-height: calc(100vh - 85px); */
   overflow-y: auto;
 }
 </style>
