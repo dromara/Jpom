@@ -1,17 +1,17 @@
 <template>
   <div>
-    <a-tabs @change="changeTabs">
-      <template #tabBarExtraContent>
+    <a-tabs @change="changeTabs" tab-position="left">
+      <template v-slot:leftExtra>
         <a-space>
-          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="pullNodeData" />
+          <a-statistic-countdown format=" s 秒后刷新" title="" :value="countdownTime" @finish="pullNodeData" />
         </a-space>
       </template>
-      <a-tab-pane key="info" tab="信息">
+      <a-tab-pane key="info" tab="基础信息">
         <a-card size="small">
-          <template #title>
+          <template v-slot:title>
             {{ machineInfo && machineInfo.name }}
           </template>
-          <template #extra>
+          <template v-slot:extra>
             <a-tag
               v-if="machineInfo"
               :color="machineInfo && machineInfo.status === 1 ? 'green' : 'pink'"
@@ -29,7 +29,7 @@
               show-icon
             />
             <a-descriptions :column="4" :bordered="true">
-              <template #title> </template>
+              <template v-slot:title> </template>
 
               <a-descriptions-item label="系统名" :span="2">{{
                 machineInfo && machineInfo.osName
@@ -50,19 +50,21 @@
                 <template v-if="machineInfo && machineInfo.ipv4List && machineInfo.ipv4List.length">
                   {{ machineInfo && machineInfo.ipv4List[0] }}
                   <a-popover title="所有的IPV4列表">
-                    <template #content>
-                      <p v-for="item in machineInfo && machineInfo.ipv4List" :key="item">{{ item }}</p>
+                    <template v-slot:content>
+                      <p v-for="item in machineInfo && machineInfo.ipv4List" :key="item">
+                        {{ item }}
+                      </p>
                     </template>
                     <a-tag>
                       <!-- :count=""
-                      :number-style="{
-                        backgroundColor: '#fff',
-                        color: '#999',
-                        boxShadow: '0 0 0 1px #d9d9d9 inset',
-                      }" -->
+                        :number-style="{
+                          backgroundColor: '#fff',
+                          color: '#999',
+                          boxShadow: '0 0 0 1px #d9d9d9 inset',
+                        }" -->
                       {{ machineInfo && machineInfo.ipv4List && machineInfo.ipv4List.length }}
-                      <!-- <a-icon type="more" /> -->
-                      <a-icon type="ellipsis" />
+
+                      <EllipsisOutlined />
                     </a-tag>
                   </a-popover>
                 </template>
@@ -144,35 +146,35 @@
       <a-tab-pane key="stat" tab="统计趋势">
         <a-space direction="vertical" style="display: block">
           <a-card size="small" title="基础信息">
-            <template #extra>
-              <a-button size="small" v-if="historyChart" type="primary" @click="handleHistory"
-                ><a-icon type="area-chart" />历史监控图表</a-button
-              >
+            <template v-slot:extra>
+              <a-button size="small" v-if="historyChart" type="primary" @click="handleHistory">
+                <AreaChartOutlined />历史监控图表
+              </a-button>
             </template>
             <!-- top 图表 -->
             <div id="top-chart" class="chart">loading...</div>
           </a-card>
           <a-card size="small" title="网络流量信息">
-            <template #extra>
-              <a-button size="small" v-if="netHistoryChart" type="primary" @click="handleHistory('network-stat')"
-                ><a-icon type="area-chart" />历史监控图表</a-button
-              >
+            <template v-slot:extra>
+              <a-button size="small" v-if="netHistoryChart" type="primary" @click="handleHistory('network-stat')">
+                <AreaChartOutlined />历史监控图表
+              </a-button>
             </template>
             <!-- 网络流量图表 -->
             <div id="net-chart" class="chart">loading...</div>
           </a-card>
           <a-card size="small" title="机器延迟">
-            <template #extra>
-              <a-button size="small" v-if="networkDelayChart" type="primary" @click="handleHistory('networkDelay')"
-                ><a-icon type="area-chart" />历史监控图表</a-button
-              >
+            <template v-slot:extra>
+              <a-button size="small" v-if="networkDelayChart" type="primary" @click="handleHistory('networkDelay')">
+                <AreaChartOutlined />历史监控图表
+              </a-button>
             </template>
             <!-- 机器延迟 图表 -->
             <div id="network-delay-chart" class="chart">loading...</div>
           </a-card>
         </a-space>
       </a-tab-pane>
-      <a-tab-pane key="process" tab="进程">
+      <a-tab-pane key="process" tab="系统进程">
         <a-card size="small">
           <template #title>
             <a-row>
@@ -183,20 +185,20 @@
                     selStyle="width: 200px !important"
                     @change="loadNodeProcess"
                     @addOption="addNodeProcess"
-                    v-model="processSearch.processName"
+                    v-model:value="processSearch.processName"
                     :data="processNames"
                     :popupContainerParent="false"
                     inputPlaceholder="自定义进程类型"
                     selectPlaceholder="选择进程名"
                     suffixIcon=""
                   >
-                    <template #suffixIcon> <down-outlined /></template>
+                    <template v-slot:suffixIcon> <DownOutlined /></template>
                   </custom-select>
                   <a-tooltip title="查看的进程数量">
-                    <a-input-number v-model="processSearch.processCount" :min="1" @change="loadNodeProcess" />
+                    <a-input-number v-model:value="processSearch.processCount" :min="1" @change="loadNodeProcess" />
                   </a-tooltip>
                   <a-tooltip title="重置自定义的进程名信息">
-                    <a-icon type="rest" @click="restProcessNames" />
+                    <RestOutlined @click="restProcessNames" />
                   </a-tooltip>
                 </a-space>
               </a-col>
@@ -210,26 +212,41 @@
             :data-source="processList"
             bordered
             rowKey="processId"
+            :scroll="{
+              x: 'max-content'
+            }"
             :pagination="false"
           >
-            <a-tooltip #percentTooltip slot-scope="text" placement="topLeft" :title="formatPercent(text)">
-              {{ formatPercent(text) }}
-            </a-tooltip>
-            <a-tooltip #timeTooltip slot-scope="text" placement="topLeft" :title="parseTime(text)">
-              {{ parseTime(text) }}
-            </a-tooltip>
-            <a-tooltip #durationTooltip slot-scope="text" placement="topLeft" :title="formatDuration(text)">
-              {{ formatDuration(text, '', 2) }}
-            </a-tooltip>
+            <template #bodyCell="{ column, text, record }">
+              <template v-if="column.percentTooltip">
+                <a-tooltip placement="topLeft" :title="formatPercent(text)">
+                  {{ formatPercent(text) }}
+                </a-tooltip>
+              </template>
+              <template v-else-if="column.timeTooltip">
+                <a-tooltip placement="topLeft" :title="parseTime(text)">
+                  {{ parseTime(text) }}
+                </a-tooltip>
+              </template>
+              <template v-else-if="column.durationTooltip">
+                <a-tooltip placement="topLeft" :title="formatDuration(text)">
+                  {{ formatDuration(text, '', 2) }}
+                </a-tooltip>
+              </template>
 
-            <a-tooltip #sizeTooltip slot-scope="text" placement="topLeft" :title="renderSize(text)">
-              {{ renderSize(text) }}
-            </a-tooltip>
-            <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
-              {{ text }}
-            </a-tooltip>
-            <template #operation slot-scope="text, record">
-              <a-button type="primary" size="small" @click="kill(record)">Kill</a-button>
+              <template v-else-if="column.sizeTooltip">
+                <a-tooltip placement="topLeft" :title="renderSize(text)">
+                  {{ renderSize(text) }}
+                </a-tooltip>
+              </template>
+              <template v-else-if="column.tooltip">
+                <a-tooltip placement="topLeft" :title="text">
+                  {{ text }}
+                </a-tooltip>
+              </template>
+              <template v-else-if="column.dataIndex === 'operation'">
+                <a-button type="primary" size="small" @click="kill(record)">Kill</a-button>
+              </template>
             </template>
           </a-table>
         </a-card>
@@ -242,20 +259,31 @@
           :data-source="diskList"
           bordered
           rowKey="uuid"
+          :scroll="{
+            x: 'max-content'
+          }"
           :pagination="false"
         >
-          <a-tooltip #percentTooltip slot-scope="text" placement="topLeft" :title="formatPercent(text)">
-            {{ formatPercent(text) }}
-          </a-tooltip>
+          <template #bodyCell="{ column, text, record }">
+            <template v-if="column.percentTooltip">
+              <a-tooltip placement="topLeft" :title="formatPercent(text)">
+                {{ formatPercent(text) }}
+              </a-tooltip>
+            </template>
 
-          <a-tooltip #sizeTooltip slot-scope="text" placement="topLeft" :title="renderSize(text)">
-            {{ renderSize(text) }}
-          </a-tooltip>
-          <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
-            {{ text }}
-          </a-tooltip>
-          <template #operation slot-scope="text, record">
-            <a-button type="primary" size="small" @click="kill(record)">Kill</a-button>
+            <template v-else-if="column.sizeTooltip">
+              <a-tooltip placement="topLeft" :title="renderSize(text)">
+                {{ renderSize(text) }}
+              </a-tooltip>
+            </template>
+            <template v-else-if="column.tooltip">
+              <a-tooltip placement="topLeft" :title="text">
+                {{ text }}
+              </a-tooltip>
+            </template>
+            <template v-else-if="column.dataIndex === 'operation'">
+              <a-button type="primary" size="small" @click="kill(record)">Kill</a-button>
+            </template>
           </template>
         </a-table>
       </a-tab-pane>
@@ -265,37 +293,53 @@
           :columns="hwDiskColumns"
           :data-source="hwDiskList"
           bordered
-          :rowKey="(record, index) => index"
           :pagination="false"
+          :scroll="{
+            x: 'max-content'
+          }"
         >
-          <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
-            {{ text }}
-          </a-tooltip>
-          <a-tooltip #sizeTooltip slot-scope="text" placement="topLeft" :title="renderSize(text)">
-            {{ renderSize(text) }}
-          </a-tooltip>
-          <a-tooltip #durationTooltip slot-scope="text" placement="topLeft" :title="formatDuration(text)">
-            {{ formatDuration(text, '', 2) }}
-          </a-tooltip>
-          <a-table
-            size="middle"
-            #expandedRowRender
-            slot-scope="item"
-            :columns="hwDiskPartitionColumns"
-            :rowKey="(record, index) => index"
-            :data-source="item.partition"
-            :pagination="false"
-          >
-            <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
-              {{ text }}
-            </a-tooltip>
-            <a-tooltip #sizeTooltip slot-scope="text" placement="topLeft" :title="renderSize(text)">
-              {{ renderSize(text) }}
-            </a-tooltip>
-          </a-table>
+          <template #bodyCell="{ column, text, record }">
+            <template v-if="column.tooltip">
+              <a-tooltip placement="topLeft" :title="text">
+                {{ text }}
+              </a-tooltip>
+            </template>
+            <template v-else-if="column.sizeTooltip">
+              <a-tooltip placement="topLeft" :title="renderSize(text)">
+                {{ renderSize(text) }}
+              </a-tooltip>
+            </template>
+            <template v-else-if="column.durationTooltip">
+              <a-tooltip placement="topLeft" :title="formatDuration(text)">
+                {{ formatDuration(text, '', 2) }}
+              </a-tooltip>
+            </template>
+          </template>
+          <template #expandedRowRender="{ record }">
+            <a-table
+              size="middle"
+              :columns="hwDiskPartitionColumns"
+              :data-source="record.partition"
+              :pagination="false"
+              :scroll="{
+                x: 'max-content'
+              }"
+            >
+              <template v-if="column.tooltip">
+                <a-tooltip placement="topLeft" :title="text">
+                  {{ text }}
+                </a-tooltip>
+              </template>
+              <template v-else-if="column.sizeTooltip">
+                <a-tooltip placement="topLeft" :title="renderSize(text)">
+                  {{ renderSize(text) }}
+                </a-tooltip>
+              </template>
+            </a-table>
+          </template>
         </a-table>
       </a-tab-pane>
-      <a-tab-pane key="networkInterfaces" tab="网络">
+      <a-tab-pane key="networkInterfaces" tab="网卡信息">
         <a-collapse v-if="networkInterfaces && networkInterfaces.length">
           <a-collapse-panel :key="index" v-for="(item, index) in networkInterfaces">
             <template #header>
@@ -307,33 +351,33 @@
                 {{ item.ifAlias }}
               </a-tag>
               <!-- /**
-         * Up and operational. Ready to pass packets.
-         */
-        UP(1),
-        /**
-         * Down and not operational. Not ready to pass packets.
-         */
-        DOWN(2),
-        /**
-         * In some test mode.
-         */
-        TESTING(3),
-        /**
-         * The interface status is unknown.
-         */
-        UNKNOWN(4),
-        /**
-         * The interface is not up, but is in a pending state, waiting for some external event.
-         */
-        DORMANT(5),
-        /**
-         * Some component is missing
-         */
-        NOT_PRESENT(6),
-        /**
-         * Down due to state of lower-layer interface(s).
-         */
-        LOWER_LAYER_DOWN(7); -->
+           * Up and operational. Ready to pass packets.
+           */
+          UP(1),
+          /**
+           * Down and not operational. Not ready to pass packets.
+           */
+          DOWN(2),
+          /**
+           * In some test mode.
+           */
+          TESTING(3),
+          /**
+           * The interface status is unknown.
+           */
+          UNKNOWN(4),
+          /**
+           * The interface is not up, but is in a pending state, waiting for some external event.
+           */
+          DORMANT(5),
+          /**
+           * Some component is missing
+           */
+          NOT_PRESENT(6),
+          /**
+           * Down due to state of lower-layer interface(s).
+           */
+          LOWER_LAYER_DOWN(7); -->
 
               <a-tag v-if="item.ifOperStatus === 'UP'" color="green">{{ item.ifOperStatus }}</a-tag>
               <a-tag
@@ -355,8 +399,12 @@
               <a-tag v-else>{{ item.ifOperStatus }}</a-tag>
             </template>
             <a-descriptions title="" bordered :column="4">
-              <a-descriptions-item label="MAC"> {{ item.macaddr }} </a-descriptions-item>
-              <a-descriptions-item label="MTU"> {{ item.mtu }} </a-descriptions-item>
+              <a-descriptions-item label="MAC">
+                {{ item.macaddr }}
+              </a-descriptions-item>
+              <a-descriptions-item label="MTU">
+                {{ item.mtu }}
+              </a-descriptions-item>
               <a-descriptions-item label="速度">{{ renderBpsSize(item.speed) }} </a-descriptions-item>
               <a-descriptions-item label="虚拟MAC">{{ item.knownVmMacAddr ? '是' : '否' }} </a-descriptions-item>
 
@@ -384,7 +432,7 @@
     <!-- 历史监控 -->
     <a-modal
       destroyOnClose
-      v-model="monitorVisible.visible"
+      v-model:open="monitorVisible.visible"
       width="75%"
       title="历史监控图表"
       :footer="null"
@@ -392,13 +440,14 @@
     >
       <node-top
         v-if="monitorVisible && monitorVisible.visible"
-        :nodeId="nodeId"
-        :machineId="machineId"
+        :nodeId="this.nodeId"
+        :machineId="this.machineId"
         :type="monitorVisible.type"
       ></node-top>
     </a-modal>
   </div>
 </template>
+
 <script>
 import { nodeMonitorData, getProcessList, killPid } from '@/api/node'
 import {
@@ -470,129 +519,288 @@ export default {
           dataIndex: 'processId',
           width: '80px',
           ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
-        { title: '名称', dataIndex: 'name', width: '80px', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '端口', dataIndex: 'port', width: '100px', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: '名称',
+          dataIndex: 'name',
+          width: '80px',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '端口',
+          dataIndex: 'port',
+          width: '100px',
+          ellipsis: true,
+          tooltip: true
+        },
         {
           title: '所有者',
           dataIndex: 'user',
           width: '100px',
           ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
 
-        { title: '状态', dataIndex: 'state', width: '80px', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: '状态',
+          dataIndex: 'state',
+          width: '80px',
+          ellipsis: true,
+          tooltip: true
+        },
         {
           title: '虚拟内存',
           dataIndex: 'virtualSize',
           width: '100px',
           ellipsis: true,
-          scopedSlots: { customRender: 'sizeTooltip' }
+          sizeTooltip: true
         },
         {
           title: 'CPU',
           dataIndex: 'processCpuLoadCumulative',
           width: '100px',
           ellipsis: true,
-          scopedSlots: { customRender: 'percentTooltip' }
+          percentTooltip: true
         },
         {
           title: '驻留集',
           dataIndex: 'residentSetSize',
           width: '100px',
           ellipsis: true,
-          scopedSlots: { customRender: 'sizeTooltip' }
+          sizeTooltip: true
         },
         {
           title: '优先级',
           dataIndex: 'priority',
           width: '80px',
           ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
         {
           title: '启动时间',
           dataIndex: 'startTime',
           width: '180px',
           ellipsis: true,
-          scopedSlots: { customRender: 'timeTooltip' }
+          timeTooltip: true
         },
         {
           title: '运行时间',
           dataIndex: 'upTime',
           width: '100px',
           ellipsis: true,
-          scopedSlots: { customRender: 'durationTooltip' }
+          durationTooltip: true
         },
         {
           title: '用户时间',
           dataIndex: 'userTime',
           width: '100px',
           ellipsis: true,
-          scopedSlots: { customRender: 'durationTooltip' }
+          durationTooltip: true
         },
-        { title: '路径', dataIndex: 'path', width: '180px', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: '路径',
+          dataIndex: 'path',
+          width: '180px',
+          ellipsis: true,
+          tooltip: true
+        },
         {
           title: '启动命令',
           dataIndex: 'commandLine',
           width: '180px',
           ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
         {
           title: '操作',
           dataIndex: 'operation',
-          scopedSlots: { customRender: 'operation' },
+
           align: 'center',
           width: '80px',
           fixed: 'right'
         }
       ],
       diskColumns: [
-        { title: 'uuid', dataIndex: 'uuid', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '名称', dataIndex: 'name', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '卷', dataIndex: 'mount', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '文件系统类型', dataIndex: 'type', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '描述', dataIndex: 'description', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: 'uuid',
+          dataIndex: 'uuid',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '名称',
+          dataIndex: 'name',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '卷',
+          dataIndex: 'mount',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '文件系统类型',
+          dataIndex: 'type',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '描述',
+          dataIndex: 'description',
+          ellipsis: true,
+          tooltip: true
+        },
         {
           title: '剩余空间(未分配)',
           dataIndex: 'freeSpace',
           ellipsis: true,
-          scopedSlots: { customRender: 'sizeTooltip' }
+          sizeTooltip: true
         },
-        { title: '剩余空间', dataIndex: 'usableSpace', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
-        { title: '总空间', dataIndex: 'totalSpace', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
-        { title: '剩余 inode 数', dataIndex: 'freeInodes', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '总 inode 数', dataIndex: 'totalInodes', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '选项', dataIndex: 'options', ellipsis: true, scopedSlots: { customRender: 'tooltip' } }
+        {
+          title: '剩余空间',
+          dataIndex: 'usableSpace',
+          ellipsis: true,
+          sizeTooltip: true
+        },
+        {
+          title: '总空间',
+          dataIndex: 'totalSpace',
+          ellipsis: true,
+          sizeTooltip: true
+        },
+        {
+          title: '剩余 inode 数',
+          dataIndex: 'freeInodes',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '总 inode 数',
+          dataIndex: 'totalInodes',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '选项',
+          dataIndex: 'options',
+          ellipsis: true,
+          tooltip: true
+        }
       ],
       hwDiskColumns: [
-        { title: '名称', dataIndex: 'name', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '型号', dataIndex: 'model', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '序号', dataIndex: 'serial', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '大小', dataIndex: 'size', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
-        { title: '写入大小', dataIndex: 'writeBytes', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
-        { title: '读取大小', dataIndex: 'readBytes', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
-        { title: '写入次数', dataIndex: 'writes', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
-        { title: '读取次数', dataIndex: 'reads', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
+        {
+          title: '名称',
+          dataIndex: 'name',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '型号',
+          dataIndex: 'model',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '序号',
+          dataIndex: 'serial',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '大小',
+          dataIndex: 'size',
+          ellipsis: true,
+          sizeTooltip: true
+        },
+        {
+          title: '写入大小',
+          dataIndex: 'writeBytes',
+          ellipsis: true,
+          sizeTooltip: true
+        },
+        {
+          title: '读取大小',
+          dataIndex: 'readBytes',
+          ellipsis: true,
+          sizeTooltip: true
+        },
+        {
+          title: '写入次数',
+          dataIndex: 'writes',
+          ellipsis: true,
+          sizeTooltip: true
+        },
+        {
+          title: '读取次数',
+          dataIndex: 'reads',
+          ellipsis: true,
+          sizeTooltip: true
+        },
         {
           title: '运行时间',
           dataIndex: 'transferTime',
           ellipsis: true,
-          scopedSlots: { customRender: 'durationTooltip' }
+          durationTooltip: true
         },
-        { title: '队列数', dataIndex: 'currentQueueLength', ellipsis: true, scopedSlots: { customRender: 'tooltip' } }
+        {
+          title: '队列数',
+          dataIndex: 'currentQueueLength',
+          ellipsis: true,
+          tooltip: true
+        }
       ],
       hwDiskPartitionColumns: [
-        { title: '分区ID', dataIndex: 'identification', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '挂载分区', dataIndex: 'mountPoint', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '名称', dataIndex: 'name', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '类型', dataIndex: 'type', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '大小', dataIndex: 'size', ellipsis: true, scopedSlots: { customRender: 'sizeTooltip' } },
-        { title: '主要ID', dataIndex: 'major', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '次要ID', dataIndex: 'minor', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: 'uuid', dataIndex: 'uuid', ellipsis: true, scopedSlots: { customRender: 'tooltip' } }
+        {
+          title: '分区ID',
+          dataIndex: 'identification',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '挂载分区',
+          dataIndex: 'mountPoint',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '名称',
+          dataIndex: 'name',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '类型',
+          dataIndex: 'type',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '大小',
+          dataIndex: 'size',
+          ellipsis: true,
+          sizeTooltip: true
+        },
+        {
+          title: '主要ID',
+          dataIndex: 'major',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '次要ID',
+          dataIndex: 'minor',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: 'uuid',
+          dataIndex: 'uuid',
+          ellipsis: true,
+          tooltip: true
+        }
       ],
       refreshInterval: 5,
       historyChart: null,
@@ -608,12 +816,12 @@ export default {
     this.initData()
     window.addEventListener('resize', this.resize)
   },
-  destroyed() {
+  unmounted() {
     window.removeEventListener('resize', this.resize)
   },
   watch: {
     refreshInterval: {
-      deep: false,
+      deep: true,
       handler() {
         this.cacheNodeProcess()
       }
@@ -633,7 +841,10 @@ export default {
           this.machineInfo = res.data.data
           if (this.machineInfo) {
             let ipListStr = (this.machineInfo && this.machineInfo.hostIpv4s) || ''
-            this.machineInfo = { ...this.machineInfo, ipv4List: ipListStr.length ? ipListStr.split(',') : '' }
+            this.machineInfo = {
+              ...this.machineInfo,
+              ipv4List: ipListStr.length ? ipListStr.split(',') : ''
+            }
           }
           this.refreshInterval = res.data.heartSecond
         }
@@ -718,8 +929,9 @@ export default {
     },
     // kill pid
     kill(record) {
-      $confirm({
+      this.$confirm({
         title: '系统提示',
+        zIndex: 1009,
         content: '真的要 Kill 这个进程么？',
         okText: '确认',
         cancelText: '取消',
@@ -731,7 +943,7 @@ export default {
           }
           killPid(params).then((res) => {
             if (res.code === 200) {
-              $notification.success({
+              this.$notification.success({
                 message: res.msg
               })
               this.loadNodeProcess()
@@ -805,26 +1017,23 @@ export default {
   }
 }
 </script>
+
 <style scoped>
 .chart {
   height: 35vh;
 }
-
 .search-input-item {
   width: 200px !important;
   margin-right: 10px;
 }
-
 #history-chart {
   height: 60vh;
 }
-
 /deep/ .ant-statistic div {
-  display: inline-block;
+  /* display: inline-block; */
 }
-
 /deep/ .ant-statistic-content-value,
 /deep/ .ant-statistic-content {
-  font-size: 16px;
+  font-size: 12px;
 }
 </style>

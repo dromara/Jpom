@@ -78,7 +78,7 @@ import Cache from '@/pages/node/node-layout/system/cache'
 import Log from '@/pages/node/node-layout/system/log.vue'
 
 import ConfigFile from '@/pages/node/node-layout/system/config-file.vue'
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 
 export default {
   components: {

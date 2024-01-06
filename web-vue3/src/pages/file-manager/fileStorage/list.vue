@@ -115,7 +115,7 @@
         :maskClosable="false"
       >
         <a-form ref="form" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-          <a-form-item label="选择文件" prop="file">
+          <a-form-item label="选择文件" name="file">
             <a-progress v-if="percentage" :percent="percentage">
               <template #format="percent">
                 {{ percent }}%
@@ -144,7 +144,7 @@
               <a-button v-else type="primary" icon="upload">选择文件</a-button>
             </a-upload>
           </a-form-item>
-          <a-form-item label="保留天数" prop="keepDay">
+          <a-form-item label="保留天数" name="keepDay">
             <a-input-number
               v-model="temp.keepDay"
               :min="1"
@@ -152,13 +152,13 @@
               placeholder="文件保存天数,默认 3650 天"
             />
           </a-form-item>
-          <a-form-item label="文件共享" prop="global">
+          <a-form-item label="文件共享" name="global">
             <a-radio-group v-model="temp.global">
               <a-radio :value="true"> 全局 </a-radio>
               <a-radio :value="false"> 当前工作空间 </a-radio>
             </a-radio-group>
           </a-form-item>
-          <a-form-item label="别名码" prop="aliasCode" help="用于区别文件是否为同一类型,可以针对同类型进行下载管理">
+          <a-form-item label="别名码" name="aliasCode" help="用于区别文件是否为同一类型,可以针对同类型进行下载管理">
             <a-input-search
               :maxLength="50"
               v-model="temp.aliasCode"
@@ -174,7 +174,7 @@
               </template>
             </a-input-search>
           </a-form-item>
-          <a-form-item label="文件描述" prop="description">
+          <a-form-item label="文件描述" name="description">
             <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
           </a-form-item>
         </a-form>
@@ -188,10 +188,10 @@
         :maskClosable="false"
       >
         <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-          <a-form-item label="文件名" prop="name">
+          <a-form-item label="文件名" name="name">
             <a-input placeholder="文件名" v-model="temp.name" />
           </a-form-item>
-          <a-form-item label="保留天数" prop="keepDay">
+          <a-form-item label="保留天数" name="keepDay">
             <a-input-number
               v-model="temp.keepDay"
               :min="1"
@@ -199,13 +199,13 @@
               placeholder="文件保存天数,默认 3650 天"
             />
           </a-form-item>
-          <a-form-item label="文件共享" prop="global">
+          <a-form-item label="文件共享" name="global">
             <a-radio-group v-model="temp.global">
               <a-radio :value="true"> 全局 </a-radio>
               <a-radio :value="false"> 当前工作空间 </a-radio>
             </a-radio-group>
           </a-form-item>
-          <a-form-item label="别名码" prop="aliasCode" help="用于区别文件是否为同一类型,可以针对同类型进行下载管理">
+          <a-form-item label="别名码" name="aliasCode" help="用于区别文件是否为同一类型,可以针对同类型进行下载管理">
             <a-input-search
               :maxLength="50"
               v-model="temp.aliasCode"
@@ -221,7 +221,7 @@
               </template>
             </a-input-search>
           </a-form-item>
-          <a-form-item label="文件描述" prop="description">
+          <a-form-item label="文件描述" name="description">
             <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
           </a-form-item>
         </a-form>
@@ -235,10 +235,10 @@
         :maskClosable="false"
       >
         <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }" :rules="rules" ref="remoteForm">
-          <a-form-item label="远程下载URL" prop="url">
+          <a-form-item label="远程下载URL" name="url">
             <a-input v-model="temp.url" placeholder="远程下载地址" />
           </a-form-item>
-          <a-form-item label="保留天数" prop="keepDay">
+          <a-form-item label="保留天数" name="keepDay">
             <a-input-number
               v-model="temp.keepDay"
               :min="1"
@@ -246,13 +246,13 @@
               placeholder="文件保存天数,默认 3650 天"
             />
           </a-form-item>
-          <a-form-item label="文件共享" prop="global">
+          <a-form-item label="文件共享" name="global">
             <a-radio-group v-model="temp.global">
               <a-radio :value="true"> 全局 </a-radio>
               <a-radio :value="false"> 当前工作空间 </a-radio>
             </a-radio-group>
           </a-form-item>
-          <a-form-item label="别名码" prop="aliasCode" help="用于区别文件是否为同一类型,可以针对同类型进行下载管理">
+          <a-form-item label="别名码" name="aliasCode" help="用于区别文件是否为同一类型,可以针对同类型进行下载管理">
             <a-input-search
               :maxLength="50"
               v-model="temp.aliasCode"
@@ -268,7 +268,7 @@
               </template>
             </a-input-search>
           </a-form-item>
-          <a-form-item label="文件描述" prop="description">
+          <a-form-item label="文件描述" name="description">
             <a-textarea v-model="temp.description" placeholder="请输入文件描述" />
           </a-form-item>
         </a-form>

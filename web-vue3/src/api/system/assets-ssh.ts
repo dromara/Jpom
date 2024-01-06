@@ -1,74 +1,74 @@
-import axios from '@/api/config'
-import { loadRouterBase } from '@/api/config'
+import axios from "@/api/config";
+import { loadRouterBase } from "@/api/config";
 
 // ssh 列表
-export function machineSshListData(params: any) {
+export function machineSshListData(params) {
   return axios({
-    url: '/system/assets/ssh/list-data',
-    method: 'post',
-    params: params
-  })
+    url: "/system/assets/ssh/list-data",
+    method: "post",
+    data: params,
+  });
 }
 
-export function machineSshListGroup(params: any) {
+export function machineSshListGroup(params) {
   return axios({
-    url: '/system/assets/ssh/list-group',
-    method: 'get',
-    params: params
-  })
+    url: "/system/assets/ssh/list-group",
+    method: "get",
+    params: params,
+  });
 }
 
 // 编辑ssh
-export function machineSshEdit(params: any) {
+export function machineSshEdit(params) {
   return axios({
-    url: '/system/assets/ssh/edit',
-    method: 'post',
-    params: params
-  })
+    url: "/system/assets/ssh/edit",
+    method: "post",
+    data: params,
+  });
 }
 
 // 删除 ssh
-export function machineSshDelete(params: any) {
+export function machineSshDelete(params) {
   return axios({
-    url: '/system/assets/ssh/delete',
-    method: 'post',
-    params: params
-  })
+    url: "/system/assets/ssh/delete",
+    method: "post",
+    data: params,
+  });
 }
 
 // 分配 ssh
-export function machineSshDistribute(params: any) {
+export function machineSshDistribute(params) {
   return axios({
-    url: '/system/assets/ssh/distribute',
-    method: 'post',
-    params: params
-  })
+    url: "/system/assets/ssh/distribute",
+    method: "post",
+    data: params,
+  });
 }
 
 // ssh 操作日志列表
-export function getMachineSshOperationLogList(params: any) {
+export function getMachineSshOperationLogList(params) {
   return axios({
-    url: '/system/assets/ssh/log-list-data',
-    method: 'post',
-    data: params
-  })
+    url: "/system/assets/ssh/log-list-data",
+    method: "post",
+    data: params,
+  });
 }
 
 // ssh 关联工作空间的数据
-export function machineListGroupWorkspaceSsh(params: any) {
+export function machineListGroupWorkspaceSsh(params) {
   return axios({
-    url: '/system/assets/ssh/list-workspace-ssh',
-    method: 'get',
-    params: params
-  })
+    url: "/system/assets/ssh/list-workspace-ssh",
+    method: "get",
+    params: params,
+  });
 }
 
-export function machineSshSaveWorkspaceConfig(params: any) {
+export function machineSshSaveWorkspaceConfig(params) {
   return axios({
-    url: '/system/assets/ssh/save-workspace-config',
-    method: 'post',
-    params: params
-  })
+    url: "/system/assets/ssh/save-workspace-config",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -78,36 +78,42 @@ export function machineSshSaveWorkspaceConfig(params: any) {
  */
 export function restHideField(id) {
   return axios({
-    url: '/system/assets/ssh/rest-hide-field',
-    method: 'post',
-    data: { id }
-  })
+    url: "/system/assets/ssh/rest-hide-field",
+    method: "post",
+    data: { id },
+  });
 }
 /*
  * 下载导入模板
  *
  */
-export function importTemplate(params: any) {
-  return loadRouterBase('/system/assets/ssh/import-template', data)
+export function importTemplate(data) {
+  return loadRouterBase("/system/assets/ssh/import-template", data);
 }
 
 /*
  * 导出数据
  *
  */
-export function exportData(params: any) {
-  return loadRouterBase('/system/assets/ssh/export-data', data)
+export function exportData(data) {
+  return loadRouterBase("/system/assets/ssh/export-data", data);
 }
 // 导入数据
 export function importData(formData) {
   return axios({
-    url: '/system/assets/ssh/import-data',
+    url: "/system/assets/ssh/import-data",
     headers: {
-      'Content-Type': 'multipart/form-data;charset=UTF-8'
+      "Content-Type": "multipart/form-data;charset=UTF-8",
     },
-    method: 'post',
+    method: "post",
     // 0 表示无超时时间
     timeout: 0,
-    data: formData
-  })
+    data: formData,
+  });
 }
+
+export const statusMap = {
+  0: { desc: "无法连接", color: "red" },
+  1: { desc: "正常", color: "green" },
+  2: { desc: "禁用监控", color: "orange" },
+};

@@ -1,21 +1,21 @@
 <template>
   <div>
     <a-form :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
-      <a-form-item label="任务名" prop="name">
+      <a-form-item label="任务名" name="name">
         <a-input placeholder="请输入任务名" :disabled="true" :value="temp.taskData && temp.taskData.name" />
       </a-form-item>
 
-      <a-form-item label="发布方式" prop="taskType">
+      <a-form-item label="发布方式" name="taskType">
         <a-radio-group :value="temp.taskData && temp.taskData.taskType" :disabled="true">
           <a-radio :value="0"> SSH </a-radio>
           <a-radio :value="1"> 节点 </a-radio>
         </a-radio-group>
       </a-form-item>
 
-      <a-form-item prop="releasePath" label="发布目录">
+      <a-form-item name="releasePath" label="发布目录">
         <a-input placeholder="请输入任务名" :disabled="true" :value="temp.taskData && temp.taskData.releasePath" />
       </a-form-item>
-      <a-form-item prop="releasePath" label="状态" :help="temp.taskData && temp.taskData.statusMsg">
+      <a-form-item name="releasePath" label="状态" :help="temp.taskData && temp.taskData.statusMsg">
         {{ statusMap[temp.taskData && temp.taskData.status] || '未知' }}
       </a-form-item>
 
@@ -52,7 +52,7 @@
           </a-tab-pane>
         </a-tabs>
       </a-form-item>
-      <a-form-item label="执行脚本" prop="releaseBeforeCommand">
+      <a-form-item label="执行脚本" name="releaseBeforeCommand">
         <a-tabs tabPosition="right">
           <a-tab-pane key="before" tab="上传前">
             <div style="height: 40vh; overflow-y: scroll">

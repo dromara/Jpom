@@ -9,34 +9,38 @@
             @end="sortFieldEnd()"
             handle=".move"
             chosenClass="box-shadow"
+            item-key="id"
           >
-            <a-row v-for="item in myWorkspaceList" :key="item.id" class="item-row">
-              <a-col :span="18">
-                <template v-if="item.edit">
-                  <a-input-search
-                    placeholder="请输入工作空间备注,留空使用默认的名称"
-                    enter-button="确定"
-                    v-model="item.name"
-                    @search="editOk(item)"
-                  />
-                </template>
-                <template v-else>
-                  <a-tooltip :title="`原始名：${item.originalName}`">
-                    {{ item.name || item.originalName }}
-                  </a-tooltip>
-                </template>
-              </a-col>
-              <a-col :span="2"></a-col>
-              <a-col :span="4">
-                <a-space>
-                  <a-button :disabled="item.edit" type="primary" icon="edit" size="small" @click="edit(item)">
-                  </a-button>
-                  <a-tooltip placement="left" :title="`长按可以拖动排序`" class="move">
-                    <a-icon type="menu" />
-                  </a-tooltip>
-                </a-space>
-              </a-col>
-            </a-row>
+            <template #item="{ element }">
+              <a-row class="item-row">
+                <a-col :span="18">
+                  <template v-if="element.edit">
+                    <a-input-search
+                      placeholder="请输入工作空间备注,留空使用默认的名称"
+                      enter-button="确定"
+                      v-model="element.name"
+                      @search="editOk(element)"
+                    />
+                  </template>
+                  <template v-else>
+                    <a-tooltip :title="`原始名：${element.originalName}`">
+                      {{ element.name || element.originalName }}
+                    </a-tooltip>
+                  </template>
+                </a-col>
+                <a-col :span="2"></a-col>
+                <a-col :span="4">
+                  <a-space>
+                    <a-button :disabled="element.edit" type="primary" size="small" @click="edit(element)">
+                      <template #icon><EditOutlined /></template>
+                    </a-button>
+                    <a-tooltip placement="left" :title="`长按可以拖动排序`" class="move">
+                      <MenuOutlined />
+                    </a-tooltip>
+                  </a-space>
+                </a-col>
+              </a-row>
+            </template>
           </draggable>
           <a-col style="margin-top: 10px">
             <a-space>
@@ -62,7 +66,7 @@
 </template>
 <script>
 import { myWorkspace, saveWorkspace } from '@/api/user/user'
-import draggable from 'vuedraggable'
+import draggable from 'vuedraggable-es'
 
 export default {
   components: {

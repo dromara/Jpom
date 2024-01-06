@@ -180,7 +180,7 @@ import { getNodeListAll, getProjectListAll } from '@/api/node'
 import { getFileList } from '@/api/node-project'
 import { itemGroupBy } from '@/utils/const'
 import { getWebSocketUrl } from '@/api/config'
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 import viewPre from '@/components/logView/view-pre'
 import { updateCache } from '@/api/log-read'
 

@@ -1,15 +1,16 @@
-import axios from './config'
+import axios from "./config";
+import { loadRouterBase } from "./config";
 
 /**
  * 容器列表
  * @param {JSON} params
  */
-export function dockerList(params: any) {
+export function dockerList(params) {
   return axios({
-    url: '/docker/list',
-    method: 'post',
-    data: params
-  })
+    url: "/docker/list",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -18,18 +19,18 @@ export function dockerList(params: any) {
  */
 export function apiVersions() {
   return axios({
-    url: '/docker/api-versions',
-    method: 'get',
-    data: {}
-  })
+    url: "/docker/api-versions",
+    method: "get",
+    data: {},
+  });
 }
 
-export function editDocker(data: any) {
+export function editDocker(data) {
   return axios({
-    url: '/docker/edit',
-    method: 'post',
-    data: data
-  })
+    url: "/docker/edit",
+    method: "post",
+    data: data,
+  });
 }
 
 /**
@@ -38,12 +39,12 @@ export function editDocker(data: any) {
  *  id: docker ID
  * } params
  */
-export function deleteDcoker(params: any) {
+export function deleteDcoker(params) {
   return axios({
-    url: '/docker/del',
-    method: 'get',
-    params
-  })
+    url: "/docker/del",
+    method: "get",
+    params,
+  });
 }
 
 /**
@@ -52,13 +53,13 @@ export function deleteDcoker(params: any) {
  */
 export function dockerContainerList(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/container/list',
-    method: 'post',
+    url: urlPrefix + "/container/list",
+    method: "post",
     data: params,
     headers: {
-      loading: 'no'
-    }
-  })
+      loading: "no",
+    },
+  });
 }
 
 /**
@@ -67,13 +68,13 @@ export function dockerContainerList(urlPrefix, params) {
  */
 export function dockerContainerListCompose(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/container/list-compose',
-    method: 'post',
+    url: urlPrefix + "/container/list-compose",
+    method: "post",
     data: params,
     headers: {
-      loading: 'no'
-    }
-  })
+      loading: "no",
+    },
+  });
 }
 
 /**
@@ -82,10 +83,10 @@ export function dockerContainerListCompose(urlPrefix, params) {
  */
 export function dockerInfo(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/container/info',
-    method: 'get',
-    params: params
-  })
+    url: urlPrefix + "/container/info",
+    method: "get",
+    params: params,
+  });
 }
 
 /**
@@ -94,11 +95,11 @@ export function dockerInfo(urlPrefix, params) {
  */
 export function dockerPrune(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/container/prune',
-    method: 'post',
+    url: urlPrefix + "/container/prune",
+    method: "post",
     data: params,
-    timeout: 0
-  })
+    timeout: 0,
+  });
 }
 
 /**
@@ -107,10 +108,10 @@ export function dockerPrune(urlPrefix, params) {
  */
 export function dockerContainerRemove(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/container/remove',
-    method: 'get',
-    params: params
-  })
+    url: urlPrefix + "/container/remove",
+    method: "get",
+    params: params,
+  });
 }
 
 /**
@@ -119,10 +120,10 @@ export function dockerContainerRemove(urlPrefix, params) {
  */
 export function dockerContainerRestart(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/container/restart',
-    method: 'get',
-    params: params
-  })
+    url: urlPrefix + "/container/restart",
+    method: "get",
+    params: params,
+  });
 }
 
 /**
@@ -131,10 +132,10 @@ export function dockerContainerRestart(urlPrefix, params) {
  */
 export function dockerContainerStart(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/container/start',
-    method: 'get',
-    params: params
-  })
+    url: urlPrefix + "/container/start",
+    method: "get",
+    params: params,
+  });
 }
 
 /**
@@ -143,10 +144,10 @@ export function dockerContainerStart(urlPrefix, params) {
  */
 export function dockerContainerStop(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/container/stop',
-    method: 'get',
-    params: params
-  })
+    url: urlPrefix + "/container/stop",
+    method: "get",
+    params: params,
+  });
 }
 
 /**
@@ -155,14 +156,14 @@ export function dockerContainerStop(urlPrefix, params) {
  */
 export function dockerContainerStats(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/container/stats',
-    method: 'get',
+    url: urlPrefix + "/container/stats",
+    method: "get",
     params: params,
     headers: {
       // tip: "no",
-      loading: 'no'
-    }
-  })
+      loading: "no",
+    },
+  });
 }
 
 /**
@@ -171,10 +172,10 @@ export function dockerContainerStats(urlPrefix, params) {
  */
 export function dockerInspectContainer(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/container/inspect-container',
-    method: 'get',
-    params: params
-  })
+    url: urlPrefix + "/container/inspect-container",
+    method: "get",
+    params: params,
+  });
 }
 
 /**
@@ -184,13 +185,19 @@ export function dockerInspectContainer(urlPrefix, params) {
  */
 export function dockerUpdateContainer(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/container/update-container',
-    method: 'post',
+    url: urlPrefix + "/container/update-container",
+    method: "post",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
-    data: params
-  })
+    data: params,
+  });
+}
+
+export function dockerContainerDownloaLog(urlPrefix, id) {
+  return loadRouterBase(urlPrefix + "/container/download-log", {
+    id: id,
+  });
 }
 
 /**
@@ -199,10 +206,10 @@ export function dockerUpdateContainer(urlPrefix, params) {
  */
 export function dockerImagesList(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/images/list',
-    method: 'post',
-    data: params
-  })
+    url: urlPrefix + "/images/list",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -211,10 +218,22 @@ export function dockerImagesList(urlPrefix, params) {
  */
 export function dockerImageRemove(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/images/remove',
-    method: 'get',
-    params: params
-  })
+    url: urlPrefix + "/images/remove",
+    method: "get",
+    params: params,
+  });
+}
+
+/**
+ * 批量删除镜像
+ * @param {JSON} params
+ */
+export function dockerImageBatchRemove(urlPrefix, params) {
+  return axios({
+    url: urlPrefix + "/images/batchRemove",
+    method: "get",
+    params: params,
+  });
 }
 
 /**
@@ -223,10 +242,10 @@ export function dockerImageRemove(urlPrefix, params) {
  */
 export function dockerImageInspect(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/images/inspect',
-    method: 'get',
-    params: params
-  })
+    url: urlPrefix + "/images/inspect",
+    method: "get",
+    params: params,
+  });
 }
 
 /**
@@ -235,13 +254,13 @@ export function dockerImageInspect(urlPrefix, params) {
  */
 export function dockerImageCreateContainer(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/images/create-container',
-    method: 'post',
+    url: urlPrefix + "/images/create-container",
+    method: "post",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
-    data: params
-  })
+    data: params,
+  });
 }
 
 /**
@@ -250,10 +269,39 @@ export function dockerImageCreateContainer(urlPrefix, params) {
  */
 export function dockerImagePullImage(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/images/pull-image',
-    method: 'get',
-    params: params
-  })
+    url: urlPrefix + "/images/pull-image",
+    method: "get",
+    params: params,
+  });
+}
+
+/**
+ * 导出镜像
+ * @param {JSON} params
+ */
+export function dockerImageSaveImage(urlPrefix, params) {
+  return loadRouterBase(urlPrefix + "/images/save-image", params);
+}
+
+/**
+ * 导入镜像到容器 节点
+ * @param {
+ *  file: 文件 multipart/form-data,
+ *  id: 容器ID,
+ *
+ * } formData
+ */
+export function dockerImageLoadImage(baseUrl, formData) {
+  return axios({
+    url: baseUrl + "/images/load-image",
+    headers: {
+      "Content-Type": "multipart/form-data;charset=UTF-8",
+    },
+    method: "post",
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData,
+  });
 }
 
 /**
@@ -262,14 +310,14 @@ export function dockerImagePullImage(urlPrefix, params) {
  */
 export function dockerImagePullImageLog(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/images/pull-image-log',
-    method: 'get',
+    url: urlPrefix + "/images/pull-image-log",
+    method: "get",
     params: params,
     headers: {
       // tip: "no",
-      loading: 'no'
-    }
-  })
+      loading: "no",
+    },
+  });
 }
 
 /**
@@ -278,10 +326,10 @@ export function dockerImagePullImageLog(urlPrefix, params) {
  */
 export function dockerVolumesList(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/volumes/list',
-    method: 'post',
-    data: params
-  })
+    url: urlPrefix + "/volumes/list",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -290,10 +338,10 @@ export function dockerVolumesList(urlPrefix, params) {
  */
 export function dockerVolumesRemove(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/volumes/remove',
-    method: 'get',
-    params: params
-  })
+    url: urlPrefix + "/volumes/remove",
+    method: "get",
+    params: params,
+  });
 }
 
 /**
@@ -302,16 +350,31 @@ export function dockerVolumesRemove(urlPrefix, params) {
  */
 export function dockerNetworksList(urlPrefix, params) {
   return axios({
-    url: urlPrefix + '/networks/list',
-    method: 'post',
-    data: params
-  })
+    url: urlPrefix + "/networks/list",
+    method: "post",
+    data: params,
+  });
 }
 
-export function syncToWorkspace(params: any) {
+export function syncToWorkspace(params) {
   return axios({
-    url: '/docker/sync-to-workspace',
-    method: 'get',
-    params: params
-  })
+    url: "/docker/sync-to-workspace",
+    method: "get",
+    params: params,
+  });
+}
+
+/**
+ * 容器 重建容器
+ * @param {JSON} params
+ */
+export function dockerContainerRebuildContainer(urlPrefix, params) {
+  return axios({
+    url: urlPrefix + "/container/rebuild-container",
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: params,
+  });
 }

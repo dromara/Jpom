@@ -1,46 +1,41 @@
-import axios from './config'
+import axios from "./config";
 
 // node 列表
-export function getNodeList(params: any) {
+export function getNodeList(params) {
   return axios({
-    url: '/node/list_data.json',
-    method: 'post',
-    params: params
-  })
+    url: "/node/list_data.json",
+    method: "post",
+    data: params,
+    headers: {
+      loading: "no",
+    },
+  });
 }
 
 // node 列表 all
-export function getNodeListAll() {
+export function getNodeListAll(params) {
   return axios({
-    url: '/node/list_data_all.json',
-    method: 'get'
-  })
-}
-
-// node 列表 根据 工作空间ID
-export function getNodeListByWorkspace(params: any) {
-  return axios({
-    url: '/node/list_data_by_workspace_id.json',
-    method: 'get',
-    params: params
-  })
+    url: "/node/list_data_all.json",
+    method: "get",
+    params,
+  });
 }
 
 // node group all
 export function getNodeGroupAll() {
   return axios({
-    url: '/node/list_group_all.json',
-    method: 'get'
-  })
+    url: "/node/list_group_all.json",
+    method: "get",
+  });
 }
 
 // 节点和版本信息
-export function getNodeListWithVersion(params: any) {
+export function getNodeListWithVersion(params) {
   return axios({
-    url: '/node/list_data_with_version',
-    method: 'get',
-    params: params
-  })
+    url: "/node/list_data_with_version",
+    method: "get",
+    params: params,
+  });
 }
 
 // // node 状态
@@ -53,74 +48,59 @@ export function getNodeListWithVersion(params: any) {
 // }
 
 // 节点 + 项目列表
-export function getNodeProjectList(params: any) {
+export function getProjectList(params, loading) {
   return axios({
-    url: '/node/node_project_list',
-    method: 'post',
-    params: params
-  })
+    url: "/node/project_list",
+    method: "post",
+    data: params,
+    headers: {
+      loading: loading === false ? "no" : "",
+    },
+  });
 }
 
 // 节点 + 项目列表
-export function getProjectList(params: any) {
+export function getProjectListAll(params) {
   return axios({
-    url: '/node/project_list',
-    method: 'post',
-    params: params
-  })
-}
-
-// 节点 + 项目列表
-export function getProjectListAll() {
-  return axios({
-    url: '/node/project_list_all',
-    method: 'get',
-    params: {}
-  })
+    url: "/node/project_list_all",
+    method: "get",
+    params,
+  });
 }
 
 // 同步节点项目
-export function syncProject(nodeId: string) {
+export function syncProject(nodeId) {
   return axios({
-    url: '/node/sync_project',
-    method: 'get',
-    params: { nodeId: nodeId }
-  })
+    url: "/node/sync_project",
+    method: "get",
+    params: { nodeId: nodeId },
+  });
 }
 
-export function syncToWorkspace(params: any) {
+export function syncToWorkspace(params) {
   return axios({
-    url: '/node/sync-to-workspace',
-    method: 'get',
-    params: params
-  })
+    url: "/node/sync-to-workspace",
+    method: "get",
+    params: params,
+  });
 }
 
 //
-export function sortItem(params: any) {
+export function sortItem(params) {
   return axios({
-    url: '/node/sort-item',
-    method: 'get',
-    params: params
-  })
-}
-
-// 删除节点项目缓存
-export function delAllProjectCache() {
-  return axios({
-    url: '/node/clear_all_project',
-    method: 'get',
-    params: {}
-  })
+    url: "/node/sort-item",
+    method: "get",
+    params: params,
+  });
 }
 
 // 项目排序
-export function sortItemProject(params: any) {
+export function sortItemProject(params) {
   return axios({
-    url: '/node/project-sort-item',
-    method: 'get',
-    params: params
-  })
+    url: "/node/project-sort-item",
+    method: "get",
+    params: params,
+  });
 }
 
 /**
@@ -140,7 +120,7 @@ export function sortItemProject(params: any) {
  *  type: 操作类型 add || update
  * } params
  */
-export function editNode(params: any) {
+export function editNode(params) {
   const data = {
     id: params.id,
     name: params.name,
@@ -155,31 +135,31 @@ export function editNode(params: any) {
     loginPwd: params.loginPwd,
     type: params.type,
     httpProxy: params.httpProxy,
-    httpProxyType: params.httpProxyType
-  }
+    httpProxyType: params.httpProxyType,
+  };
   return axios({
-    url: '/node/save.json',
-    method: 'post',
-    data
-  })
+    url: "/node/save.json",
+    method: "post",
+    data,
+  });
 }
 
 // 删除 node
-export function deleteNode(id: string) {
+export function deleteNode(id) {
   return axios({
-    url: '/node/del.json',
-    method: 'post',
-    data: { id }
-  })
+    url: "/node/del.json",
+    method: "post",
+    data: { id },
+  });
 }
 
 // 解绑 node
-export function unbind(id: string) {
+export function unbind(id) {
   return axios({
-    url: '/node/unbind.json',
-    method: 'get',
-    params: { id }
-  })
+    url: "/node/unbind.json",
+    method: "get",
+    params: { id },
+  });
 }
 
 // // 节点 top 命令
@@ -195,29 +175,29 @@ export function unbind(id: string) {
 // }
 
 // 获取进程列表
-export function getProcessList(data: any) {
+export function getProcessList(data) {
   return axios({
-    url: '/node/processList',
-    method: 'post',
+    url: "/node/processList",
+    method: "post",
     data: data,
     timeout: 0,
     headers: {
-      loading: 'no',
-      tip: 'no'
-    }
-  })
+      loading: "no",
+      tip: "no",
+    },
+  });
 }
 
 /**
  * 杀掉进程
  * @param {nodeId, pid} params
  */
-export function killPid(params: any) {
+export function killPid(params) {
   return axios({
-    url: '/node/kill.json',
-    method: 'post',
-    data: params
-  })
+    url: "/node/kill.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -227,15 +207,15 @@ export function killPid(params: any) {
  *  time: 时间段，格式：yyyy-MM-dd HH:mm:ss ~ yyyy-MM-dd HH:mm:ss
  * } params
  */
-export function nodeMonitorData(params: any, loading: boolean) {
+export function nodeMonitorData(params, loading) {
   return axios({
-    url: '/node/node_monitor_data.json',
-    method: 'post',
+    url: "/node/node_monitor_data.json",
+    method: "post",
     data: params,
     headers: {
-      loading: loading === false ? 'no' : ''
-    }
-  })
+      loading: loading === false ? "no" : "",
+    },
+  });
 }
 
 /**
@@ -245,32 +225,32 @@ export function nodeMonitorData(params: any, loading: boolean) {
  *  nodeId: 节点 ID
  * } formData
  */
-export function uploadAgentFile(formData: FormData) {
+export function uploadAgentFile(formData) {
   return axios({
-    url: '/node/upload-agent-sharding',
+    url: "/node/upload-agent-sharding",
     headers: {
-      'Content-Type': 'multipart/form-data;charset=UTF-8',
-      loading: 'no'
+      "Content-Type": "multipart/form-data;charset=UTF-8",
+      loading: "no",
     },
-    method: 'post',
+    method: "post",
     // 0 表示无超时时间
     timeout: 0,
-    data: formData
-  })
+    data: formData,
+  });
 }
 
 /**
  *  上传文件合并
  * @returns json
  */
-export function uploadAgentFileMerge(data: any) {
+export function uploadAgentFileMerge(data) {
   return axios({
-    url: '/node/upload-agent-sharding-merge',
-    method: 'post',
+    url: "/node/upload-agent-sharding-merge",
+    method: "post",
     data: data,
     // 0 表示无超时时间
-    timeout: 0
-  })
+    timeout: 0,
+  });
 }
 
 /**
@@ -279,10 +259,10 @@ export function uploadAgentFileMerge(data: any) {
  */
 export function checkVersion() {
   return axios({
-    url: '/node/check_version.json',
-    method: 'get',
-    data: {}
-  })
+    url: "/node/check_version.json",
+    method: "get",
+    data: {},
+  });
 }
 
 /**
@@ -291,10 +271,10 @@ export function checkVersion() {
  */
 export function fastInstall() {
   return axios({
-    url: '/node/fast_install.json',
-    method: 'get',
-    data: {}
-  })
+    url: "/node/fast_install.json",
+    method: "get",
+    data: {},
+  });
 }
 
 /**
@@ -302,15 +282,15 @@ export function fastInstall() {
  * @param {JSON} params
  * @returns
  */
-export function pullFastInstallResult(params?: any) {
+export function pullFastInstallResult(params) {
   return axios({
-    url: '/node/pull_fast_install_result.json',
-    method: 'get',
+    url: "/node/pull_fast_install_result.json",
+    method: "get",
     params: params,
     headers: {
-      loading: 'no'
-    }
-  })
+      loading: "no",
+    },
+  });
 }
 
 /**
@@ -318,12 +298,12 @@ export function pullFastInstallResult(params?: any) {
  * @param {Json} params
  * @returns
  */
-export function confirmFastInstall(params: any) {
+export function confirmFastInstall(params) {
   return axios({
-    url: '/node/confirm_fast_install.json',
-    method: 'get',
-    params: params
-  })
+    url: "/node/confirm_fast_install.json",
+    method: "get",
+    params: params,
+  });
 }
 
 /**
@@ -332,10 +312,10 @@ export function confirmFastInstall(params: any) {
  */
 export function downloadRemote() {
   return axios({
-    url: '/node/download_remote.json',
-    method: 'get',
+    url: "/node/download_remote.json",
+    method: "get",
     // 0 表示无超时时间
     timeout: 0,
-    data: {}
-  })
+    data: {},
+  });
 }

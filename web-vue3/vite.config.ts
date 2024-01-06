@@ -57,36 +57,13 @@ export default defineConfig(({ mode }: ConfigEnv) => {
     },
     server: {
       port: Number(JPOM_PORT),
+      host: '0.0.0.0',
       proxy: {
-        // websocket
-        '/ssh': {
-          target: `wss://${HOST}`,
-          //  true/false: if you want to proxy websockets
-          ws: false,
-          secure: false
-        },
-        '/tomcat_log': {
-          target: `wss://${HOST}`,
-          //  true/false: if you want to proxy websockets
-          ws: false,
-          secure: false
-        },
-        '/console': {
-          target: `wss://${HOST}`,
-          //  true/false: if you want to proxy websockets
-          ws: false,
-          secure: false
-        },
-        '/script_run': {
-          target: `wss://${HOST}`,
-          //  true/false: if you want to proxy websockets
-          ws: false,
-          secure: false
-        },
         // http
         '/api': {
           target: `http://${HOST}`,
           changeOrigin: true,
+          ws: true,
           rewrite: (path) => path.replace(/^\/api/, ''),
           timeout: 10 * 60 * 1000
         }
@@ -109,7 +86,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       Components({
         dts: 'src/d.ts/components.d.ts',
         //ant-design-vue   importStyle = false 样式就没了
-        resolvers: [AntDesignVueResolver({ importStyle: true, resolveIcons: true })]
+        resolvers: [AntDesignVueResolver({ importStyle: false, resolveIcons: true })]
       }),
 
       createHtmlPlugin({

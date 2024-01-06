@@ -110,7 +110,7 @@ import {
   getProjectData,
   getProjectLogSize
 } from '@/api/node-project'
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 import { getWebSocketUrl } from '@/api/config'
 import LogView from '@/components/logView'
 

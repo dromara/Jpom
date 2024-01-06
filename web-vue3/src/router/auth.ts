@@ -3,18 +3,17 @@
  * 比如某些路由必须要登录
  */
 import router from './index'
-import { useMenuStore } from '@/stores/menu'
-import { useManagementMenuStore } from '@/stores/management-menu'
+
+import { useAllMenuStore } from '@/stores/menu2'
+
 import Qs from 'qs'
 import { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
 
 // 不需要鉴权的名单
 const whiteList: string[] = ['/login', '/install', '/system/ipAccess']
-const noTabs: string[] = ['/full-terminal']
+const noTabs: string[] = ['/full-terminal', '/ssh-tabs']
 
 router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
-  const menuStore = useMenuStore()
-  const managementMenuStore = useManagementMenuStore()
   // 检测白名单
   if (whiteList.indexOf(to.path) !== -1) {
     next()
@@ -45,7 +44,7 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
     next()
     return
   }
-  const lastMenuStore = to.meta?.mode === 'management' ? managementMenuStore : menuStore
+  const lastMenuStore = useAllMenuStore()
   // if (to.meta?.mode === 'management') {
   //   // 刷新菜单
   //   menuStore2 = managementMenuStore
@@ -54,12 +53,15 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
   //   menuStore2 = menuStore
   // }
   // console.log(lastMenuStore, to.meta?.mode)
+  // console.log(to)
+
+  const mode = to.meta?.mode || 'normal'
+
   lastMenuStore
-    .loadSystemMenus()
+    .loadSystemMenus(mode)
     .then(() => {
       // 存储 store
-      lastMenuStore.addTab({ key: to.name, path: to.path }).then((toMenu: any) => {
-        // console.log(toMenu)
+      lastMenuStore.addTab(mode, { key: to.name, path: to.path }).then((toMenu: any) => {
         toMenu?.path ? next(toMenu.path) : next()
       })
     })

@@ -67,18 +67,18 @@
     >
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 18 }">
         <a-alert v-if="temp.scriptType === 'server-sync'" message="服务端同步的脚本不能在此修改" banner />
-        <a-form-item v-if="temp.id" label="ScriptId" prop="id">
+        <a-form-item v-if="temp.id" label="ScriptId" name="id">
           <a-input v-model="temp.id" disabled readOnly />
         </a-form-item>
-        <a-form-item label="Script 名称" prop="name">
+        <a-form-item label="Script 名称" name="name">
           <a-input :maxLength="50" v-model="temp.name" placeholder="名称" />
         </a-form-item>
-        <a-form-item label="Script 内容" prop="context">
+        <a-form-item label="Script 内容" name="context">
           <div style="height: 40vh; overflow-y: scroll">
             <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
           </div>
         </a-form-item>
-        <!-- <a-form-item label="默认参数" prop="defArgs">
+        <!-- <a-form-item label="默认参数" name="defArgs">
           <a-input v-model="temp.defArgs" placeholder="默认参数" />
         </a-form-item> -->
         <a-form-item label="默认参数">
@@ -109,13 +109,13 @@
 
           <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
         </a-form-item>
-        <a-form-item label="共享" prop="global">
+        <a-form-item label="共享" name="global">
           <a-radio-group v-model="temp.global">
             <a-radio :value="true"> 全局</a-radio>
             <a-radio :value="false"> 当前工作空间</a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item label="定时执行" prop="autoExecCron">
+        <a-form-item label="定时执行" name="autoExecCron">
           <a-auto-complete
             v-model="temp.autoExecCron"
             placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
@@ -133,7 +133,7 @@
             </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item label="描述" prop="description">
+        <a-form-item label="描述" name="description">
           <a-input
             :maxLength="200"
             v-model="temp.description"

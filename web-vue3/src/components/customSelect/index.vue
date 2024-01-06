@@ -1,52 +1,25 @@
 <template>
-  <div @mousedown="setSelectOpen(true)">
+  <div>
     <Select
-      :getPopupContainer="
-        this.popupContainerParent
-          ? (triggerNode) => {
-              return triggerNode.parentNode || document.body
-            }
-          : null
-      "
-      v-model="selected"
+      v-model:value="selected"
       :style="selStyle"
-      :open="selectOpen"
       :disabled="disabled"
-      @blur="setSelectOpen(false)"
       showSearch
-      @focus="setSelectOpen(true)"
       @change="selectChange"
       :placeholder="selectPlaceholder"
     >
-      <a-icon #suffixIcon v-if="suffixIcon" :type="suffixIcon" @click="refreshSelect" />
-      <template v-if="$slots.suffixIcon && !suffixIcon" #suffixIcon>
-        <slot name="suffixIcon"></slot>
-      </template>
-      <template #dropdownRender slot-scope="menu">
-        <div style="padding: 8px 8px; cursor: pointer; display: flex" @mousedown="(e) => e.preventDefault()">
-          <a-input-search
-            enter-button="添加"
-            v-model="selectInput"
-            :maxLength="maxLength"
-            @search="onSearch"
-            @blur="visibleInput(false)"
-            @focus="visibleInput(true)"
-            @click="(e) => e.target.focus()"
-            :placeholder="inputPlaceholder"
-            size="small"
-          >
-            <template #suffix>
-              <a-tooltip v-if="$slots.inputTips">
-                <template #title>
-                  <slot name="inputTips"></slot>
-                </template>
-                <question-circle-filled />
-              </a-tooltip>
-            </template>
-          </a-input-search>
-        </div>
-        <a-divider style="margin: 4px 0" />
+      <template #dropdownRender="{ menuNode: menu }">
         <v-nodes :vnodes="menu" />
+        <a-divider />
+        <a-space>
+          <a-input ref="inputRef" :maxLength="maxLength" v-model:value="selectInput" :placeholder="inputPlaceholder" />
+          <a-button type="text" @click="addInput(selectInput)">
+            <template #icon>
+              <plus-outlined />
+            </template>
+            添加
+          </a-button>
+        </a-space>
       </template>
       <a-select-option v-if="selectPlaceholder" value="">{{ selectPlaceholder }}</a-select-option>
       <a-select-option v-for="item in optionList" :key="item">{{ item }} </a-select-option>
@@ -61,17 +34,22 @@ export default {
   components: {
     Select,
     VNodes: {
-      functional: true,
-      render: (h, ctx) => ctx.props.vnodes
+      props: {
+        vnodes: {
+          type: Object,
+          required: true
+        }
+      },
+      render() {
+        return this.vnodes
+      }
     }
   },
 
   data() {
     return {
       selectInput: '',
-      selectOpen: false,
-      selectFocus: false,
-      inputFocus: false,
+
       optionList: [],
       selected: ''
     }
@@ -92,17 +70,10 @@ export default {
       default: '请选择'
     },
     selStyle: { type: String, default: '' },
-    suffixIcon: {
-      type: String,
-      default: 'reload'
-    },
+
     maxLength: {
       type: Number,
       default: 200
-    },
-    popupContainerParent: {
-      type: Boolean,
-      default: true
     }
   },
   watch: {
@@ -122,15 +93,10 @@ export default {
   },
 
   methods: {
-    refreshSelect() {
-      this.$emit('onRefreshSelect')
-    },
     selectChange(v) {
-      this.$emit('input', v)
-      this.selectOpen = false
-      this.$emit('change', v)
+      this.$emit('update:value', v)
     },
-    onSearch(v) {
+    addInput(v) {
       if (!v) {
         return
       }
@@ -142,23 +108,6 @@ export default {
       this.selected = v
       //
       this.selectChange(v)
-      this.$emit('addOption', this.optionList)
-    },
-    setSelectOpen(v) {
-      this.selectFocus = v
-      if (this.inputFocus || this.selectFocus) {
-        this.selectOpen = true
-        return
-      }
-      this.selectOpen = false
-    },
-    visibleInput(v) {
-      this.inputFocus = v
-      if (this.inputFocus || this.selectFocus) {
-        this.selectOpen = true
-        return
-      }
-      this.selectOpen = false
     }
   }
 }

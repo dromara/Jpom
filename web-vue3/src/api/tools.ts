@@ -1,13 +1,13 @@
-import axios from './config'
+import axios from "./config";
 
 /**
  *
  * @param data
  */
-export function cronTools(params: any) {
+export function cronTools(data) {
   return axios({
-    url: '/tools/cron',
-    method: 'get',
-    params: data
-  })
+    url: "/tools/cron",
+    method: "get",
+    params: data,
+  });
 }

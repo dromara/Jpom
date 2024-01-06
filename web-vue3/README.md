@@ -2,7 +2,7 @@
 
 本项目采用 [Vue3](https://cn.vuejs.org/guide/introduction.html#what-is-vue) + [Vite](https://vitejs.dev/) + [TypeScript](https://www.typescriptlang.org/) + [Antdv](https://antdv.com/docs/vue/getting-started-cn) + [Pinia](https://pinia.vuejs.org/)构建。
 
-项目采用Vue 3 `<script setup>` SFC写法，请查看[script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup)了解更多信息。
+项目采用 Vue 3 `<script setup>` SFC 写法，请查看[script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup)了解更多信息。
 
 ### 构建运行
 
@@ -11,9 +11,7 @@ pnpm dev # 本地运行
 pnpm build # 打包
 ```
 
-
-
-##  参与贡献
+## 参与贡献
 
 ### 环境准备
 
@@ -27,9 +25,9 @@ pnpm build # 打包
 
 #### 编辑器
 
-这边我们推荐使用 VSCode， 我们我们尽量采用工具化方式来约束开发规范和编码风格， 使用VSCode即可应用现有配置和推荐你安装适合项目的插件。 具体配置看`/.vscode` 目录
+这边我们推荐使用 VSCode， 我们我们尽量采用工具化方式来约束开发规范和编码风格， 使用 VSCode 即可应用现有配置和推荐你安装适合项目的插件。 具体配置看`/.vscode` 目录
 
-⚠️：因为我们在升级vue3的过程中vue2版本也在不断迭代， 为了确保我们始终是在最新的代码基础上开发，编写某个页面前记得先从`web-vue`  目录中找到同名文件先替换下。
+⚠️：因为我们在升级 vue3 的过程中 vue2 版本也在不断迭代， 为了确保我们始终是在最新的代码基础上开发，编写某个页面前记得先从`web-vue` 目录中找到同名文件先替换下。
 
 ## 目录结构
 
@@ -65,13 +63,6 @@ pnpm build # 打包
 └── type.d.ts
 ```
 
+npm install -g npm-check-updates
 
-
-
-
-
-
-
-
-
-
+ncu

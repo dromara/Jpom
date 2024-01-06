@@ -1,9 +1,9 @@
 import axios from './config'
 import { parseTime, formatPercent2, renderSize, formatDuration } from '@/utils/const'
-// import echarts from "echarts";
+import * as echarts from 'echarts'
 
 // 获取机器信息
-export function machineInfo(params: any) {
+export function machineInfo(params) {
   return axios({
     url: '/node/machine-info',
     method: 'get',
@@ -15,7 +15,7 @@ export function machineInfo(params: any) {
 }
 
 // 机器文件系统
-export function machineDiskInfo(params: any) {
+export function machineDiskInfo(params) {
   return axios({
     url: '/node/disk-info',
     method: 'get',
@@ -27,7 +27,7 @@ export function machineDiskInfo(params: any) {
 }
 
 // 机器硬件硬盘
-export function machineHwDiskInfo(params: any) {
+export function machineHwDiskInfo(params) {
   return axios({
     url: '/node/hw-disk-info',
     method: 'get',
@@ -78,7 +78,7 @@ const defaultData = {
  * @param { JSON } data
  * @returns
  */
-export function generateNodeTopChart(params: any) {
+export function generateNodeTopChart(data) {
   const cpuItem = {
     name: 'cpu占用',
     type: 'line',
@@ -152,7 +152,7 @@ export function generateNodeTopChart(params: any) {
     tooltip: {
       trigger: 'axis',
       show: true,
-      formatter: function (params: any) {
+      formatter: function (params) {
         var html = params[0].name + '<br>'
         for (var i = 0; i < params.length; i++) {
           html += params[i].marker + params[i].seriesName + ':' + formatPercent2(params[i].value) + '<br>'
@@ -169,7 +169,7 @@ export function generateNodeTopChart(params: any) {
  * @param { JSON } data
  * @returns
  */
-export function generateNodeNetChart(params: any) {
+export function generateNodeNetChart(data) {
   const rxItem = {
     name: '接收',
     type: 'line',
@@ -221,7 +221,7 @@ export function generateNodeNetChart(params: any) {
     tooltip: {
       trigger: 'axis',
       show: true,
-      formatter: function (params: any) {
+      formatter: function (params) {
         var html = params[0].name + '<br>'
         for (var i = 0; i < params.length; i++) {
           html += params[i].marker + params[i].seriesName + ':' + renderSize(params[i].value) + '/s <br>'
@@ -238,7 +238,7 @@ export function generateNodeNetChart(params: any) {
  * @param { JSON } data
  * @returns
  */
-export function generateNodeNetworkTimeChart(params: any) {
+export function generateNodeNetworkTimeChart(data) {
   const dataArray = {
     name: '网络延迟',
     type: 'line',
@@ -279,7 +279,7 @@ export function generateNodeNetworkTimeChart(params: any) {
     tooltip: {
       trigger: 'axis',
       show: true,
-      formatter: function (params: any) {
+      formatter: function (params) {
         var html = params[0].name + '<br>'
         for (var i = 0; i < params.length; i++) {
           html += params[i].marker + params[i].seriesName + ':' + formatDuration(params[i].value) + ' <br>'
@@ -303,11 +303,15 @@ export function drawChart(data, domId, parseFn) {
     return
   }
   const option = parseFn(data)
-
+  let myChart = echarts.getInstanceByDom(historyChartDom)
+  if (myChart) {
+    myChart.setOption(option)
+    return myChart
+  }
   // 绘制图表
-  // const historyChart = echarts.init(historyChartDom);
-  // historyChart.setOption(option);
-  // return historyChart;
+  const historyChart = echarts.init(historyChartDom)
+  historyChart.setOption(option)
+  return historyChart
 }
 
 // export const status = {
@@ -319,7 +323,7 @@ export function drawChart(data, domId, parseFn) {
 // };
 
 // 机器网络
-export function machineNetworkInterfaces(params: any) {
+export function machineNetworkInterfaces(params) {
   return axios({
     url: '/node/network-interfaces',
     method: 'get',

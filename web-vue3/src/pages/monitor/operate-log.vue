@@ -61,13 +61,13 @@
       :maskClosable="false"
     >
       <a-form ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 5 }" :wrapper-col="{ span: 17 }">
-        <a-form-item label="监控名称" prop="name">
+        <a-form-item label="监控名称" name="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="监控名称" />
         </a-form-item>
-        <a-form-item label="开启状态" prop="status">
+        <a-form-item label="开启状态" name="status">
           <a-switch v-model="temp.start" checked-children="开" un-checked-children="关" />
         </a-form-item>
-        <a-form-item label="监控用户" prop="monitorUser">
+        <a-form-item label="监控用户" name="monitorUser">
           <a-transfer
             :data-source="monitorUserList"
             :lazy="false"
@@ -78,7 +78,7 @@
             @change="handleMonitorUserChange"
           />
         </a-form-item>
-        <a-form-item label="监控功能" prop="monitorOpt">
+        <a-form-item label="监控功能" name="monitorOpt">
           <a-transfer
             :data-source="classFeature"
             :lazy="false"
@@ -89,7 +89,7 @@
             @change="handleClassFeatureChange"
           />
         </a-form-item>
-        <a-form-item label="监控操作" prop="monitorOpt">
+        <a-form-item label="监控操作" name="monitorOpt">
           <a-transfer
             :data-source="methodFeature"
             :lazy="false"
@@ -100,7 +100,7 @@
             @change="handleMethodFeatureChange"
           />
         </a-form-item>
-        <a-form-item prop="notifyUser" class="jpom-monitor-notify">
+        <a-form-item name="notifyUser" class="jpom-monitor-notify">
           <template #label>
             报警联系人
             <a-tooltip v-show="!temp.id">

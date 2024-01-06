@@ -13,6 +13,8 @@ export const $info = Modal.info
 export const $error = Modal.error
 export const $warning = Modal.warning
 export const $success = Modal.success
+// export const $route = useRoute()
+// export const $router = useRouter()
 
 $notification.config({
   top: '100px',
@@ -27,4 +29,12 @@ export const appStore = () => {
 
 export const userStore = () => {
   return useUserStore()
+}
+
+export const router = () => {
+  return useRouter()
+}
+
+export const route = () => {
+  return useRoute()
 }

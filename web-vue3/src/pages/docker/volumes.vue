@@ -5,56 +5,72 @@
     :columns="columns"
     :pagination="false"
     bordered
-    :rowKey="(record, index) => index"
+    :scroll="{
+      x: 'max-content'
+    }"
   >
-    <template #title>
+    <template v-slot:title>
       <a-space>
-        <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
+        <a-input
+          v-model:value="listQuery['name']"
+          @pressEnter="loadData"
+          placeholder="名称"
+          class="search-input-item"
+        />
 
         <div>
           悬空
-          <a-switch checked-children="是" un-checked-children="否" v-model="listQuery['dangling']" />
+          <a-switch checked-children="是" un-checked-children="否" v-model:value="listQuery['dangling']" />
         </div>
 
         <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
       </a-space>
     </template>
-
-    <a-tooltip #CreatedAt slot-scope="text" placement="topLeft" :title="text['CreatedAt']">
-      <span>{{ parseTime(text['CreatedAt']) }}</span>
-    </a-tooltip>
-    <template #name slot-scope="text, record">
-      <a-popover title="卷标签" v-if="record.labels">
-        <template #content>
-          <p v-for="(value, key) in record.labels" :key="key">{{ key }}<a-icon type="arrow-right" />{{ value }}</p>
-        </template>
-        <a-icon type="pushpin" />
-      </a-popover>
-
-      <a-tooltip :title="text">
-        {{ text }}
-      </a-tooltip>
-    </template>
-    <!-- <a-tooltip #name slot-scope="text, record" placement="topLeft" :title="renderSize(text) + ' ' + renderSize(record.virtualSize)">
-      <span>{{ renderSize(text) }}</span>
-    </a-tooltip> -->
-
-    <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
-      <span>{{ text }}</span>
-    </a-tooltip>
-
-    <a-tooltip #id slot-scope="text" :title="text">
-      <span> {{ text.split(':')[1].slice(0, 12) }}</span>
-    </a-tooltip>
-    <template #operation slot-scope="text, record">
-      <a-space>
-        <a-tooltip title="删除">
-          <a-button size="small" type="link" @click="doAction(record, 'remove')"><a-icon type="delete" /></a-button>
+    <template #bodyCell="{ column, text, record }">
+      <template v-if="column.dataIndex === 'CreatedAt'">
+        <a-tooltip placement="topLeft" :title="record.rawValues && record.rawValues['CreatedAt']">
+          <span>{{ parseTime(record.rawValues && record.rawValues['CreatedAt']) }}</span>
         </a-tooltip>
-      </a-space>
+      </template>
+
+      <template v-else-if="column.dataIndex === 'name'">
+        <a-popover title="卷标签" v-if="record.labels">
+          <template v-slot:content>
+            <p v-for="(value, key) in record.labels" :key="key">{{ key }}<ArrowRightOutlined />{{ value }}</p>
+          </template>
+          <PushpinOutlined />
+        </a-popover>
+
+        <a-tooltip :title="text">
+          {{ text }}
+        </a-tooltip>
+      </template>
+      <!-- <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="renderSize(text) + ' ' + renderSize(record.virtualSize)">
+        <span>{{ renderSize(text) }}</span>
+      </a-tooltip> -->
+
+      <template v-else-if="column.tooltip">
+        <a-tooltip placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+      </template>
+
+      <template v-else-if="column.id">
+        <a-tooltip :title="text">
+          <span> {{ text.split(':')[1].slice(0, 12) }}</span>
+        </a-tooltip>
+      </template>
+      <template v-else-if="column.dataIndex === 'operation'">
+        <a-space>
+          <a-tooltip title="删除">
+            <a-button size="small" type="link" @click="doAction(record, 'remove')"><DeleteOutlined /></a-button>
+          </a-tooltip>
+        </a-space>
+      </template>
     </template>
   </a-table>
 </template>
+
 <script>
 import { renderSize, parseTime } from '@/utils/const'
 import { dockerVolumesList, dockerVolumesRemove } from '@/api/docker-api'
@@ -86,22 +102,41 @@ export default {
           width: 80,
           ellipsis: true,
           align: 'center',
-          customRender: (text, record, index) => `${index + 1}`
+          customRender: ({ text, record, index }) => `${index + 1}`
         },
-        { title: '名称', dataIndex: 'name', ellipsis: true, scopedSlots: { customRender: 'name' } },
-        { title: '挂载点', dataIndex: 'mountpoint', ellipsis: true, scopedSlots: { customRender: 'tooltip' } },
-        { title: '类型', dataIndex: 'driver', ellipsis: true, width: 80, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: '名称',
+          dataIndex: 'name',
+          ellipsis: true
+        },
+        {
+          title: '挂载点',
+          dataIndex: 'mountpoint',
+          ellipsis: true,
+          tooltip: true
+        },
+        {
+          title: '类型',
+          dataIndex: 'driver',
+          ellipsis: true,
+          width: 80,
+          tooltip: true
+        },
         {
           title: '创建时间',
-          dataIndex: 'rawValues',
+          dataIndex: 'CreatedAt',
           ellipsis: true,
           width: 180,
           sorter: (a, b) => new Date(a.rawValues.CreatedAt).getTime() - new Date(b.rawValues.CreatedAt).getTime(),
           sortDirections: ['descend', 'ascend'],
-          defaultSortOrder: 'descend',
-          scopedSlots: { customRender: 'CreatedAt' }
+          defaultSortOrder: 'descend'
         },
-        { title: '操作', dataIndex: 'operation', scopedSlots: { customRender: 'operation' }, width: 80 }
+        {
+          title: '操作',
+          dataIndex: 'operation',
+          fixed: 'right',
+          width: '80px'
+        }
       ],
       action: {
         remove: {
@@ -138,9 +173,10 @@ export default {
       if (!action) {
         return
       }
-      $confirm({
+      this.$confirm({
         title: '系统提示',
         content: action.msg,
+        zIndex: 1009,
         okText: '确认',
         cancelText: '取消',
         onOk: () => {
@@ -151,7 +187,7 @@ export default {
           }
           action.api(this.urlPrefix, params).then((res) => {
             if (res.code === 200) {
-              $notification.success({
+              this.$notification.success({
                 message: res.msg
               })
               this.loadData()

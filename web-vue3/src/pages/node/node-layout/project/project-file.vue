@@ -318,7 +318,7 @@
             :rules="rules"
             ref="ruleForm"
           >
-            <a-form-item label="远程下载URL" prop="url">
+            <a-form-item label="远程下载URL" name="url">
               <a-input v-model="remoteDownloadData.url" placeholder="远程下载地址" />
             </a-form-item>
             <a-form-item label="是否为压缩包">

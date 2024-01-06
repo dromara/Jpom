@@ -76,7 +76,7 @@
       :maskClosable="false"
     >
       <a-form ref="importCertForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="证书类型" prop="type">
+        <a-form-item label="证书类型" name="type">
           <a-radio-group v-model="temp.type">
             <a-radio value="pkcs12"> pkcs12(pfx) </a-radio>
             <a-radio value="JKS"> JKS </a-radio>
@@ -84,7 +84,7 @@
           </a-radio-group>
         </a-form-item>
 
-        <a-form-item label="证书文件" prop="file">
+        <a-form-item label="证书文件" name="file">
           <a-upload
             v-if="temp.type"
             :file-list="uploadFileList"
@@ -108,7 +108,7 @@
         <a-form-item
           v-if="temp.type && temp.type !== 'X.509'"
           label="证书密码"
-          prop="password"
+          name="password"
           help="如果未填写将解析压缩包里面的 txt"
         >
           <a-input v-model="temp.password" placeholder="证书密码" />
@@ -118,13 +118,13 @@
     <!-- 编辑证书 -->
     <a-modal destroyOnClose v-model:visible="editVisible" :title="`编辑证书`" @ok="handleEditOk" :maskClosable="false">
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item label="证书共享" prop="global">
+        <a-form-item label="证书共享" name="global">
           <a-radio-group v-model="temp.global">
             <a-radio :value="true"> 全局 </a-radio>
             <a-radio :value="false"> 当前工作空间 </a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item label="证书描述" prop="description">
+        <a-form-item label="证书描述" name="description">
           <a-textarea v-model="temp.description" placeholder="请输入证书描述" />
         </a-form-item>
       </a-form>

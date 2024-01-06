@@ -1,12 +1,12 @@
-import axios from './config'
+import axios from "./config";
 
 // 监控列表
-export function getMonitorList(params: any) {
+export function getMonitorList(params) {
   return axios({
-    url: '/monitor/getMonitorList',
-    method: 'post',
-    data: params
-  })
+    url: "/monitor/getMonitorList",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -21,12 +21,12 @@ export function getMonitorList(params: any) {
  *  notifyUser: 报警联系人
  * } params
  */
-export function editMonitor(params: any) {
+export function editMonitor(params) {
   return axios({
-    url: '/monitor/updateMonitor',
-    method: 'post',
-    data: params
-  })
+    url: "/monitor/updateMonitor",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -37,12 +37,12 @@ export function editMonitor(params: any) {
  *  type: 状态类型 status | restart
  * } params
  */
-export function changeMonitorStatus(params: any) {
+export function changeMonitorStatus(params) {
   return axios({
-    url: '/monitor/changeStatus',
-    method: 'post',
-    data: params
-  })
+    url: "/monitor/changeStatus",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -51,10 +51,10 @@ export function changeMonitorStatus(params: any) {
  */
 export function deleteMonitor(id) {
   return axios({
-    url: '/monitor/deleteMonitor',
-    method: 'post',
-    data: { id }
-  })
+    url: "/monitor/deleteMonitor",
+    method: "post",
+    data: { id },
+  });
 }
 
 /**
@@ -66,12 +66,12 @@ export function deleteMonitor(id) {
  *  notifyStatus: 通知状态
  * } params
  */
-export function getMonitorLogList(params: any) {
+export function getMonitorLogList(params) {
   return axios({
-    url: '/monitor/list_data.json',
-    method: 'post',
-    data: params
-  })
+    url: "/monitor/list_data.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -79,9 +79,9 @@ export function getMonitorLogList(params: any) {
  */
 export function getMonitorOperateLogList() {
   return axios({
-    url: '/monitor_user_opt/list_data',
-    method: 'post'
-  })
+    url: "/monitor_user_opt/list_data",
+    method: "post",
+  });
 }
 
 /**
@@ -90,9 +90,9 @@ export function getMonitorOperateLogList() {
  */
 export function getMonitorOperateTypeList() {
   return axios({
-    url: '/monitor_user_opt/type_data',
-    method: 'post'
-  })
+    url: "/monitor_user_opt/type_data",
+    method: "post",
+  });
 }
 
 /**
@@ -107,12 +107,12 @@ export function getMonitorOperateTypeList() {
  * } params
  * @returns
  */
-export function editMonitorOperate(params: any) {
+export function editMonitorOperate(params) {
   return axios({
-    url: '/monitor_user_opt/update',
-    method: 'post',
-    data: params
-  })
+    url: "/monitor_user_opt/update",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -122,15 +122,15 @@ export function editMonitorOperate(params: any) {
  */
 export function deleteMonitorOperate(id) {
   return axios({
-    url: '/monitor_user_opt/delete',
-    method: 'post',
-    data: { id }
-  })
+    url: "/monitor_user_opt/delete",
+    method: "post",
+    data: { id },
+  });
 }
 
 export const notifyStyle = {
-  0: '钉钉',
-  1: '邮箱',
-  2: '企业微信',
-  3: 'webhook'
-}
+  0: "钉钉",
+  1: "邮箱",
+  2: "企业微信",
+  3: "webhook",
+};

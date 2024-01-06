@@ -1,91 +1,91 @@
-import axios from '@/api/config'
+import axios from "@/api/config";
 
 // 机器 列表
-export function machineListData(params: any) {
+export function machineListData(params) {
   return axios({
-    url: '/system/assets/machine/list-data',
-    method: 'post',
-    params: params
-  })
+    url: "/system/assets/machine/list-data",
+    method: "post",
+    data: params,
+  });
 }
 
-export function machineListGroup(params: any = {}) {
+export function machineListGroup(params) {
   return axios({
-    url: '/system/assets/machine/list-group',
-    method: 'get',
-    params: params
-  })
+    url: "/system/assets/machine/list-group",
+    method: "get",
+    params: params,
+  });
 }
 
 // 编辑机器
-export function machineEdit(params: any) {
+export function machineEdit(params) {
   return axios({
-    url: '/system/assets/machine/edit',
-    method: 'post',
-    params: params
-  })
+    url: "/system/assets/machine/edit",
+    method: "post",
+    data: params,
+  });
 }
 
 // 删除机器
-export function machineDelete(params: any) {
+export function machineDelete(params) {
   return axios({
-    url: '/system/assets/machine/delete',
-    method: 'post',
-    params: params
-  })
+    url: "/system/assets/machine/delete",
+    method: "post",
+    data: params,
+  });
 }
 
 // 分配机器
-export function machineDistribute(params: any) {
+export function machineDistribute(params) {
   return axios({
-    url: '/system/assets/machine/distribute',
-    method: 'post',
-    params: params
-  })
+    url: "/system/assets/machine/distribute",
+    method: "post",
+    data: params,
+  });
 }
 
 export const statusMap = {
-  0: '无法连接',
-  1: '正常',
-  2: '授权信息错误',
-  3: '状态码错误'
-}
+  0: "无法连接",
+  1: "正常",
+  2: "授权信息错误",
+  3: "状态码错误",
+};
 
 // 查看机器关联节点
-export function machineListNode(params: any) {
+export function machineListNode(params) {
   return axios({
-    url: '/system/assets/machine/list-node',
-    method: 'get',
-    params: params
-  })
+    url: "/system/assets/machine/list-node",
+    method: "get",
+    params: params,
+  });
 }
 
-export function machineListTemplateNode(params: any = {}) {
+export function machineListTemplateNode(params) {
   return axios({
-    url: '/system/assets/machine/list-template-node',
-    method: 'get',
-    params: params
-  })
+    url: "/system/assets/machine/list-template-node",
+    method: "get",
+    params: params,
+  });
 }
 
 /**
- * 保存 白名单配置
+ * 保存 授权配置
  */
-export function saveWhitelist(data: any) {
+export function saveWhitelist(data) {
   return axios({
-    url: '/system/assets/machine/save-whitelist',
-    method: 'post',
-    data: data
-  })
+    url: "/system/assets/machine/save-whitelist",
+    method: "post",
+    data: data,
+  });
 }
 
 /**
  * 保存 节点系统配置
  */
-export function saveNodeConfig(data: any) {
+export function saveNodeConfig(data) {
   return axios({
-    url: '/system/assets/machine/save-node-config',
-    method: 'post',
-    data: data
-  })
+    url: "/system/assets/machine/save-node-config",
+    method: "post",
+    data: data,
+  });
 }

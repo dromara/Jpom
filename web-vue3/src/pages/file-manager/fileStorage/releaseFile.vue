@@ -7,18 +7,18 @@
       :label-col="{ span: 4 }"
       :wrapper-col="{ span: 20 }"
     >
-      <a-form-item label="任务名" prop="name">
+      <a-form-item label="任务名" name="name">
         <a-input placeholder="请输入任务名" :maxLength="50" v-model="temp.name" />
       </a-form-item>
 
-      <a-form-item label="发布方式" prop="taskType">
+      <a-form-item label="发布方式" name="taskType">
         <a-radio-group v-model="temp.taskType" @change="taskTypeChange">
           <a-radio :value="0"> SSH </a-radio>
           <a-radio :value="1"> 节点 </a-radio>
         </a-radio-group>
       </a-form-item>
 
-      <a-form-item prop="taskDataIds" label="发布的SSH" v-if="temp.taskType === 0">
+      <a-form-item name="taskDataIds" label="发布的SSH" v-if="temp.taskType === 0">
         <a-row>
           <a-col :span="22">
             <a-select
@@ -38,7 +38,7 @@
           </a-col>
         </a-row>
       </a-form-item>
-      <a-form-item prop="taskDataIds" label="发布的节点" v-else-if="temp.taskType === 1">
+      <a-form-item name="taskDataIds" label="发布的节点" v-else-if="temp.taskType === 1">
         <a-row>
           <a-col :span="22">
             <a-select
@@ -59,7 +59,7 @@
         </a-row>
       </a-form-item>
 
-      <a-form-item prop="releasePathParent" label="发布目录">
+      <a-form-item name="releasePathParent" label="发布目录">
         <template #help>
           <a-tooltip title="需要配置授权目录（白名单才能正常使用发布）,授权目录主要是用于确定可以发布到哪些目录中"
             ><a-button
@@ -94,7 +94,7 @@
         </a-input-group>
       </a-form-item>
 
-      <a-form-item label="执行脚本" prop="releaseBeforeCommand">
+      <a-form-item label="执行脚本" name="releaseBeforeCommand">
         <a-tabs tabPosition="right">
           <a-tab-pane key="before" tab="上传前">
             <div style="height: 40vh; overflow-y: scroll">

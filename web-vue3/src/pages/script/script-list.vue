@@ -123,18 +123,18 @@
       width="80vw"
     >
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
-        <a-form-item v-if="temp.id" label="ScriptId" prop="id">
+        <a-form-item v-if="temp.id" label="ScriptId" name="id">
           <a-input v-model="temp.id" disabled readOnly />
         </a-form-item>
-        <a-form-item label="Script 名称" prop="name">
+        <a-form-item label="Script 名称" name="name">
           <a-input :maxLength="50" v-model="temp.name" placeholder="名称" />
         </a-form-item>
-        <a-form-item label="Script 内容" prop="context">
+        <a-form-item label="Script 内容" name="context">
           <div style="height: 40vh; overflow-y: scroll">
             <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
           </div>
         </a-form-item>
-        <!-- <a-form-item label="默认参数" prop="defArgs">
+        <!-- <a-form-item label="默认参数" name="defArgs">
           <a-input v-model="temp.defArgs" placeholder="默认参数" />
         </a-form-item> -->
         <a-form-item label="默认参数">
@@ -165,7 +165,7 @@
 
           <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
         </a-form-item>
-        <a-form-item label="定时执行" prop="autoExecCron">
+        <a-form-item label="定时执行" name="autoExecCron">
           <a-auto-complete
             v-model="temp.autoExecCron"
             placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
@@ -183,7 +183,7 @@
             </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item label="描述" prop="description">
+        <a-form-item label="描述" name="description">
           <a-input
             v-model="temp.description"
             :maxLength="200"
@@ -193,7 +193,7 @@
             placeholder="详细描述"
           />
         </a-form-item>
-        <a-form-item label="共享" prop="global">
+        <a-form-item label="共享" name="global">
           <a-radio-group v-model="temp.global">
             <a-radio :value="true"> 全局</a-radio>
             <a-radio :value="false"> 当前工作空间</a-radio>
@@ -256,7 +256,7 @@
       </a-alert>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item label="选择工作空间" prop="workspaceId">
+        <a-form-item label="选择工作空间" name="workspaceId">
           <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
             <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{
               item.name
@@ -397,7 +397,7 @@ import codeEditor from '@/components/codeEditor'
 import { getNodeListAll } from '@/api/node'
 import ScriptConsole from '@/pages/script/script-console'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 import { getWorkSpaceListAll } from '@/api/workspace'
 // import Vue from 'vue'
 import ScriptLog from '@/pages/script/script-log'

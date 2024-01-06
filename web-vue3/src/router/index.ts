@@ -7,6 +7,11 @@ const children = [
     component: () => import('../pages/layout/my-workspace.vue')
   },
   {
+    path: '/overview',
+    name: 'overview',
+    component: () => import('../pages/layout/overview.vue')
+  },
+  {
     path: '/node/list',
     name: 'node-list',
     component: () => import('../pages/node/list.vue')
@@ -151,6 +156,11 @@ const management = [
     path: '/system/assets/docker-list',
     name: 'system-machine-docker-list',
     component: () => import('../pages/system/assets/docker/list.vue')
+  },
+  {
+    path: '/system/assets/repository-list',
+    name: 'system-global-repository',
+    component: () => import('../pages/repository/global-repository')
   },
   {
     path: '/user/permission-group',

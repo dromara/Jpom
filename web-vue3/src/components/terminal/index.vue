@@ -5,14 +5,15 @@
         <a-button type="primary" @click="initSocket">重连 </a-button>
       </template>
     </a-result>
-    <div class="flex-100" id="xterm" v-else></div>
+    <div class="flex-100 br" :id="domId" v-else></div>
   </div>
 </template>
+
 <script>
 import 'xterm/css/xterm.css'
 import 'xterm/lib/xterm.js'
 import { Terminal } from 'xterm'
-// import { FitAddon } from "xterm-addon-fit";
+import { FitAddon } from 'xterm-addon-fit'
 import { AttachAddon } from 'xterm-addon-attach'
 
 // https://blog.csdn.net/qq_41840688/article/details/108636267
@@ -35,19 +36,30 @@ export default {
       cols: 100,
       wp: 0,
       hp: 0,
-      disconnect: false
+      disconnect: false,
+      domId: 'xterm'
     }
   },
   computed: {},
+  created() {
+    this.domId =
+      (this.$options._parentVnode?.tag || '' + '-' + this.$options._componentTag || '') + '-' + new Date().getTime()
+  },
+
   mounted() {
-    nextTick(() => {
+    this.$nextTick(() => {
       setTimeout(() => {
         this.initSocket()
       }, 200)
     })
+    // 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+    window.onbeforeunload = () => {
+      this.socket?.close()
+      this.dispose()
+    }
   },
-  beforeDestroy() {
-    this.socket && this.socket.close()
+  beforeUnmount() {
+    this.socket?.close()
     this.dispose()
   },
   methods: {
@@ -61,7 +73,7 @@ export default {
       }
       this.socket.onerror = (err) => {
         console.error(err)
-        $notification.error({
+        this.$notification.error({
           message: 'web socket 错误,请检查是否开启 ws 代理'
         })
         this.dispose()
@@ -69,7 +81,7 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        $message.warning('会话已经关闭')
+        this.$message.warning('会话已经关闭[ssh-terminal]')
         this.dispose()
       }
     },
@@ -84,8 +96,8 @@ export default {
       // // this.hp = ;
       // this.wp = 100;
       //;
-      this.rows = document.querySelector('#xterm').offsetHeight / 16
-      this.cols = document.querySelector('#xterm').offsetWidth / 8
+      this.rows = document.querySelector('#' + this.domId).offsetHeight / 16
+      this.cols = document.querySelector('#' + this.domId).offsetWidth / 8
       this.hp = this.rows * 8
       this.wp = this.cols * 8
       //
@@ -107,10 +119,12 @@ export default {
       })
       // const attachAddon = new AttachAddon(this.socket, { bidirectional: false });
       const attachAddon = new AttachAddon(this.socket)
-      // const fitAddon = new FitAddon();
-      this.terminal.loadAddon(attachAddon)
-      // this.terminal.loadAddon(fitAddon);
-      this.terminal.open(document.getElementById('xterm'))
+      const fitAddon = new FitAddon()
+      attachAddon.activate(this.terminal)
+      fitAddon.activate(this.terminal)
+      // this.terminal.loadAddon(attachAddon)
+      // this.terminal.loadAddon(fitAddon)
+      this.terminal.open(document.getElementById(this.domId))
       this.terminal.focus()
       // fitAddon.fit();
       //
@@ -126,10 +140,16 @@ export default {
       //     console.log("e", e.message);
       //   }
       // });
-      this.sendJson({ data: 'resize', cols: this.cols, rows: this.rows, wp: this.wp, hp: this.hp })
+      this.sendJson({
+        data: 'resize',
+        cols: this.cols,
+        rows: this.rows,
+        wp: this.wp,
+        hp: this.hp
+      })
       // 创建心跳，防止掉线
       this.heart = setInterval(() => {
-        let op = {
+        const op = {
           data: 'jpom-heart'
         }
         this.sendJson(op)
@@ -148,5 +168,8 @@ export default {
   flex-flow: column;
   height: 100%;
   flex: 1;
+}
+.br {
+  /* box-shadow: inset 0 0 10px 0 #e8e8e8; */
 }
 </style>

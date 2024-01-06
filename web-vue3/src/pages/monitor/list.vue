@@ -86,11 +86,11 @@
       :maskClosable="false"
     >
       <a-form ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="监控名称" prop="name">
+        <a-form-item label="监控名称" name="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="监控名称" />
         </a-form-item>
 
-        <a-form-item label="开启状态" prop="status">
+        <a-form-item label="开启状态" name="status">
           <a-space size="large">
             <a-switch v-model="temp.status" checked-children="开" un-checked-children="关" />
             <div>
@@ -100,11 +100,11 @@
           </a-space>
         </a-form-item>
 
-        <!-- <a-form-item label="自动重启" prop="autoRestart">
+        <!-- <a-form-item label="自动重启" name="autoRestart">
 
           </a-form-item> -->
 
-        <!-- <a-form-item label="监控周期" prop="cycle">
+        <!-- <a-form-item label="监控周期" name="cycle">
           <a-radio-group v-model="temp.cycle" name="cycle">
             <a-radio :value="1">1 分钟</a-radio>
             <a-radio :value="5">5 分钟</a-radio>
@@ -113,7 +113,7 @@
           </a-radio-group>
         </a-form-item> -->
 
-        <a-form-item label="监控周期" prop="execCron">
+        <a-form-item label="监控周期" name="execCron">
           <a-auto-complete
             v-model="temp.execCron"
             placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
@@ -131,7 +131,7 @@
             </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item label="监控项目" prop="projects">
+        <a-form-item label="监控项目" name="projects">
           <a-select
             option-label-prop="label"
             v-model="projectKeys"
@@ -156,7 +156,7 @@
             </a-select-opt-group>
           </a-select>
         </a-form-item>
-        <a-form-item prop="notifyUser" class="jpom-notify">
+        <a-form-item name="notifyUser" class="jpom-notify">
           <template #label>
             联系人
             <a-tooltip v-show="!temp.id">
@@ -193,7 +193,7 @@
             </template>
           </a-transfer>
         </a-form-item>
-        <a-form-item prop="webhook">
+        <a-form-item name="webhook">
           <template #label>
             WebHooks
             <a-tooltip v-show="!temp.id">

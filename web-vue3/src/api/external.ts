@@ -11,12 +11,11 @@ external.interceptors.response.use(
     return response.data
   },
   (error) => {
-    console.error(error)
     return Promise.reject(error)
   }
 )
 
-export function executionRequest(url: string, param: any) {
+export function executionRequest(url: any, param: any) {
   return external({
     url: url,
     method: 'get',

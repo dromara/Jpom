@@ -9,38 +9,40 @@
       @change="changeListLog"
       bordered
       size="middle"
-      :rowKey="(record, index) => index"
+      :scroll="{
+        x: 'max-content'
+      }"
     >
-      <template #title>
+      <template v-slot:title>
         <a-space>
           <a-input
             class="search-input-item"
             @pressEnter="handleListLog"
-            v-model="viewOperationLogListQuery['modifyUser']"
+            v-model:value="viewOperationLogListQuery['modifyUser']"
             placeholder="操作人"
           />
           <a-input
             class="search-input-item"
             @pressEnter="handleListLog"
-            v-model="viewOperationLogListQuery['%sshName%']"
+            v-model:value="viewOperationLogListQuery['%sshName%']"
             placeholder="ssh 名"
           />
           <a-input
             class="search-input-item"
             @pressEnter="handleListLog"
-            v-model="viewOperationLogListQuery['%machineSshName%']"
+            v-model:value="viewOperationLogListQuery['%machineSshName%']"
             placeholder="机器 ssh 名"
           />
           <a-input
             class="search-input-item"
             @pressEnter="handleListLog"
-            v-model="viewOperationLogListQuery['ip']"
+            v-model:value="viewOperationLogListQuery['ip']"
             placeholder="ip"
           />
           <a-input
             class="search-input-item"
             @pressEnter="handleListLog"
-            v-model="viewOperationLogListQuery['%commands%']"
+            v-model:value="viewOperationLogListQuery['%commands%']"
             placeholder="执行命令"
           />
           <a-range-picker
@@ -52,39 +54,39 @@
           <a-button type="primary" @click="handleListLog">搜索</a-button>
         </a-space>
       </template>
-      <a-tooltip
-        #commands
-        slot-scope="text"
-        placement="topLeft"
-        :title="text"
-        v-clipboard:copy="text"
-        v-clipboard:success="
-          () => {
-            $notification.success({ message: '复制成功' })
-          }
-        "
-        v-clipboard:error="
-          () => {
-            $notification.error({ message: '复制失败' })
-          }
-        "
-      >
-        <a-button type="link" icon="copy" size="small"> {{ text }} </a-button>
-        <!-- <a-input disabled :value="text"><a-icon #suffix type="copy" /></a-input> -->
-      </a-tooltip>
-      <a-tooltip #modifyUser slot-scope="text, item" placement="topLeft" :title="item.modifyUser || item.userId">
-        <span>{{ item.modifyUser || item.userId }}</span>
-      </a-tooltip>
+      <template #bodyCell="{ column, text, record }">
+        <template v-if="column.dataIndex === 'commands'">
+          <a-tooltip placement="topLeft" :title="text">
+            <a-typography-paragraph
+              v-if="text"
+              :copyable="{ tooltip: false, text: text }"
+              style="display: inline-block"
+            >
+            </a-typography-paragraph>
+            {{ text }}
 
-      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <template #refuse slot-scope="text">
-        <span>{{ text ? '成功' : '拒绝' }}</span>
+            <!-- <a-input disabled :value="text"><a-icon slot="suffix" type="copy" /></a-input> -->
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'modifyUser'">
+          <a-tooltip placement="topLeft" :title="record.modifyUser || record.userId">
+            <span>{{ record.modifyUser || record.userId }}</span>
+          </a-tooltip>
+        </template>
+
+        <template v-else-if="column.tooltip">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'refuse'">
+          <span>{{ text ? '成功' : '拒绝' }}</span>
+        </template>
       </template>
     </a-table>
   </div>
 </template>
+
 <script>
 import { getSshOperationLogList } from '@/api/ssh'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
@@ -120,48 +122,49 @@ export default {
         PAGE_DEFAULT_LIST_QUERY
       ),
       viewOperationLogColumns: [
-        { title: '操作者', dataIndex: 'modifyUser', width: 100, scopedSlots: { customRender: 'modifyUser' } },
+        {
+          title: '操作者',
+          dataIndex: 'modifyUser',
+          width: 100
+        },
         { title: 'IP', dataIndex: 'ip', width: '130px' },
         {
           title: 'ssh名',
           dataIndex: 'sshName',
           width: '200px',
           ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
         {
           title: '机器SSH名',
           dataIndex: 'machineSshName',
           width: '200px',
           ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
         {
           title: '执行命令',
           dataIndex: 'commands',
           width: 200,
-          ellipsis: true,
-          scopedSlots: { customRender: 'commands' }
+          ellipsis: true
         },
         {
           title: 'userAgent',
           dataIndex: 'userAgent',
-          /*width: 240,*/ ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
+          /*width: 240,*/ ellipsis: true
         },
         {
           title: '是否成功',
           dataIndex: 'refuse',
           width: '100px',
-          ellipsis: true,
-          scopedSlots: { customRender: 'refuse' }
+          ellipsis: true
         },
 
         {
           title: '操作时间',
           dataIndex: 'createTimeMillis',
           sorter: true,
-          customRender: (text) => {
+          customRender: ({ text }) => {
             return parseTime(text)
           },
           width: '180px'

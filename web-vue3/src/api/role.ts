@@ -18,7 +18,7 @@
 // }
 
 // // 编辑角色
-// export function editRole(params:any) {
+// export function editRole(params) {
 //   return axios({
 //     url: '/user/role/save.json',
 //     method: 'post',
@@ -48,9 +48,9 @@
 //  * @param {
 //  *  id: 角色 ID
 //  *  dynamic: dynamic
-//  * } params
+//  * } params 
 //  */
-// export function getRoleDynamicList(params:any) {
+// export function getRoleDynamicList(params) {
 //   return axios({
 //     url: '/user/role/getDynamic.json',
 //     method: 'post',
@@ -64,9 +64,9 @@
 //  * @param {
 //  *  id: 角色 ID
 //  *  dynamic: dynamic
-//  * } params
+//  * } params 
 //  */
-// export function editRoleDynamic(params:any) {
+// export function editRoleDynamic(params) {
 //   return axios({
 //     url: '/user/role/saveDynamic.json',
 //     method: 'post',

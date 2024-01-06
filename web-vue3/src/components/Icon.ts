@@ -15,7 +15,8 @@ import {
   ApartmentOutlined,
   DashboardOutlined,
   ProjectOutlined,
-  GatewayOutlined
+  GatewayOutlined,
+  LaptopOutlined
 } from '@ant-design/icons-vue'
 
 const iconObj = {
@@ -34,7 +35,8 @@ const iconObj = {
   tool: ToolOutlined,
   dashboard: DashboardOutlined,
   project: ProjectOutlined,
-  gateway: GatewayOutlined
+  gateway: GatewayOutlined,
+  laptop: LaptopOutlined
 }
 
 const Icon = (props: { type: string }) => {

@@ -1,11 +1,11 @@
 <template>
-  <div :class="`${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
+  <div>
     <!-- 控制台 -->
     <a-drawer
       destroyOnClose
       placement="right"
       :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
-      :visible="true"
+      :open="true"
       @close="onClose"
       :bodyStyle="{
         padding: '0'
@@ -13,8 +13,13 @@
     >
       <template #title>
         <a-space>
-          【控制台】
-          <a-menu theme="light" mode="horizontal" class="docker-menu" v-model="menuKeyArray" @click="menuClick">
+          <a-menu
+            theme="light"
+            mode="horizontal"
+            class="docker-menu"
+            v-model:selectedKeys="menuKeyArray"
+            @click="menuClick"
+          >
             <a-menu-item key="containers">
               <span class="nav-text">独立容器</span>
             </a-menu-item>
@@ -40,69 +45,65 @@
         </a-space>
       </template>
 
-      <a-layout
-        :class="`layout-content drawer-layout-content ${scrollbarFlag ? '' : 'hide-scrollbar'}`"
-        style="padding-bottom: 10px"
-      >
+      <a-layout :class="`layout-content`" style="padding-bottom: 10px">
         <a-layout-content>
           <container
-            :key="menuKey"
             v-if="menuKey === 'containers'"
             type="container"
-            :id="id"
-            :machineDockerId="machineDockerId"
-            :visible="visible"
-            :urlPrefix="urlPrefix"
+            :id="this.id"
+            :machineDockerId="this.machineDockerId"
+            :visible="this.visible"
+            :urlPrefix="this.urlPrefix"
           />
           <container
-            :key="`docker-compose`"
             v-else-if="menuKey === 'docker-compose'"
             type="compose"
-            :id="id"
-            :machineDockerId="machineDockerId"
-            :visible="visible"
-            :urlPrefix="urlPrefix"
+            :id="this.id"
+            :machineDockerId="this.machineDockerId"
+            :visible="this.visible"
+            :urlPrefix="this.urlPrefix"
           />
           <images
             v-if="menuKey === 'images'"
-            :id="id"
-            :machineDockerId="machineDockerId"
-            :visible="visible"
-            :urlPrefix="urlPrefix"
+            :id="this.id"
+            :machineDockerId="this.machineDockerId"
+            :visible="this.visible"
+            :urlPrefix="this.urlPrefix"
           />
           <volumes
             v-if="menuKey === 'volumes'"
-            :id="id"
-            :machineDockerId="machineDockerId"
-            :visible="visible"
-            :urlPrefix="urlPrefix"
+            :id="this.id"
+            :machineDockerId="this.machineDockerId"
+            :visible="this.visible"
+            :urlPrefix="this.urlPrefix"
           />
           <info
             v-if="menuKey === 'info'"
-            :id="id"
-            :machineDockerId="machineDockerId"
-            :visible="visible"
-            :urlPrefix="urlPrefix"
+            :id="this.id"
+            :machineDockerId="this.machineDockerId"
+            :visible="this.visible"
+            :urlPrefix="this.urlPrefix"
           />
           <networks
             v-if="menuKey === 'networks'"
-            :id="id"
-            :machineDockerId="machineDockerId"
-            :visible="visible"
-            :urlPrefix="urlPrefix"
+            :id="this.id"
+            :machineDockerId="this.machineDockerId"
+            :visible="this.visible"
+            :urlPrefix="this.urlPrefix"
           />
           <prune
             v-if="menuKey === 'prune'"
-            :id="id"
-            :machineDockerId="machineDockerId"
-            :visible="visible"
-            :urlPrefix="urlPrefix"
+            :id="this.id"
+            :machineDockerId="this.machineDockerId"
+            :visible="this.visible"
+            :urlPrefix="this.urlPrefix"
           />
         </a-layout-content>
       </a-layout>
     </a-drawer>
   </div>
 </template>
+
 <script>
 import Container from './container'
 import Images from './images'
@@ -110,7 +111,8 @@ import Volumes from './volumes'
 import Info from './info'
 import Networks from './networks'
 import Prune from './prune'
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { useGuideStore } from '@/stores/guide'
 export default {
   props: {
     id: {
@@ -142,10 +144,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getCollapsed', 'getGuideCache']),
-    scrollbarFlag() {
-      return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag
-    }
+    ...mapState(useGuideStore, ['getCollapsed'])
   },
   mounted() {},
   methods: {
@@ -155,7 +154,7 @@ export default {
     onClose() {
       this.$emit('close')
     }
-  }
+  },
+  emits: ['close']
 }
 </script>
-<style scoped></style>

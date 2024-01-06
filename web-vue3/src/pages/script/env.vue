@@ -5,7 +5,7 @@
 </template>
 <script>
 import workspaceEnv from '@/pages/system/workspace-env.vue'
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 
 export default {
   components: {

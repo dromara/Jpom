@@ -357,7 +357,7 @@ import {
 } from '@/utils/const'
 import FileRead from '@/pages/node/node-layout/project/project-file-read'
 // import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 
 export default {
   components: {

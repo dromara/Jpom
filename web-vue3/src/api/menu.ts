@@ -20,7 +20,7 @@ export function getSystemMenu() {
  * 节点菜单
  * @param {String} nodeId
  */
-export function getNodeMenu(nodeId:string) {
+export function getNodeMenu(nodeId) {
   return axios({
     url: "/menus_data.json",
     method: "post",

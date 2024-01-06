@@ -97,12 +97,12 @@
       :maskClosable="false"
     >
       <a-form ref="editCommandForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
-        <a-form-item label="命令名称" prop="name">
+        <a-form-item label="命令名称" name="name">
           <a-input v-model="temp.name" :maxLength="100" placeholder="命令名称" />
         </a-form-item>
 
         <a-form-item
-          prop="command"
+          name="command"
           help="脚本存放路径：${user.home}/.jpom/xxxx.sh，执行脚本路径：${user.home}，执行脚本方式：bash ${user.home}/.jpom/xxxx.sh par1 par2"
         >
           <template #label>
@@ -162,7 +162,7 @@
 
           <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
         </a-form-item>
-        <a-form-item label="自动执行" prop="autoExecCron">
+        <a-form-item label="自动执行" name="autoExecCron">
           <a-auto-complete
             v-model="temp.autoExecCron"
             placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
@@ -180,7 +180,7 @@
             </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item label="命令描述" prop="desc">
+        <a-form-item label="命令描述" name="desc">
           <a-input
             v-model="temp.desc"
             :maxLength="255"
@@ -202,7 +202,7 @@
       :maskClosable="false"
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="命令名称" prop="name">
+        <a-form-item label="命令名称" name="name">
           <a-input v-model="temp.name" :disabled="true" placeholder="命令名称" />
         </a-form-item>
 
@@ -285,7 +285,7 @@
       </a-alert>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item label="选择工作空间" prop="workspaceId">
+        <a-form-item label="选择工作空间" name="workspaceId">
           <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
             <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{
               item.name
@@ -378,7 +378,7 @@ import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_Q
 import { getSshListAll } from '@/api/ssh'
 import codeEditor from '@/components/codeEditor'
 import CommandLog from './command-view-log'
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
 import { getWorkSpaceListAll } from '@/api/workspace'
 // import Vue from 'vue'
 

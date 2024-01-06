@@ -17,21 +17,21 @@
       bordered
       rowKey="id"
     >
-      <template #title>
+      <template v-slot:title>
         <a-space>
           <a-space>
             <a-input
               allowClear
               class="search-input-item"
               @pressEnter="loadData"
-              v-model="listQuery['%issuerDnName%']"
+              v-model:value="listQuery['%issuerDnName%']"
               placeholder="颁发者"
             />
             <a-input
               allowClear
               class="search-input-item"
               @pressEnter="loadData"
-              v-model="listQuery['%subjectDnName%']"
+              v-model:value="listQuery['%subjectDnName%']"
               placeholder="主题"
             />
             <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
@@ -41,21 +41,25 @@
           </a-space>
         </a-space>
       </template>
-      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <a-popover #name slot-scope="text, item" title="证书描述">
-        <template #content>
-          <p>描述：{{ item.description }}</p>
-        </template>
-        <!-- {{ text }} -->
-        {{ text }}
-      </a-popover>
-      <template #fileExists slot-scope="text">
+      <template v-slot:tooltip="text">
+        <a-tooltip placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+      </template>
+      <template v-slot:name="text, item">
+        <a-popover title="证书描述">
+          <template v-slot:content>
+            <p>描述：{{ item.description }}</p>
+          </template>
+          <!-- {{ text }} -->
+          {{ text }}
+        </a-popover>
+      </template>
+      <template v-slot:fileExists="text">
         <a-tag v-if="text" color="green">存在</a-tag>
         <a-tag v-else color="red">丢失</a-tag>
       </template>
-      <template #global slot-scope="text">
+      <template v-slot:global="text">
         <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
         <a-tag v-else>工作空间</a-tag>
       </template>
@@ -64,7 +68,7 @@
     <a-modal
       destroyOnClose
       :zIndex="1009"
-      v-model="editCertVisible"
+      v-model:value="editCertVisible"
       width="700px"
       title="导入证书"
       @ok="handleEditCertOk"
@@ -73,7 +77,7 @@
       <a-form ref="importCertForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item
           label="证书文件"
-          prop="file"
+          name="file"
           help="请上传 zip 压缩包,并且包里面必须包含：ca.pem、key.pem、cert.pem 三个文件"
         >
           <a-upload
@@ -126,6 +130,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import { dockerImportTls } from '@/api/system/assets-docker'
 import { certListAll } from '@/api/tools/certificate'
@@ -298,7 +303,7 @@ export default {
           return false
         }
         if (this.uploadFileList.length === 0) {
-          $notification.error({
+          this.$notification.error({
             message: '请选择证书文件'
           })
           return false
@@ -310,7 +315,7 @@ export default {
         dockerImportTls(formData).then((res) => {
           if (res.code === 200) {
             // 成功
-            $notification.success({
+            this.$notification.success({
               message: res.msg
             })
 
@@ -323,7 +328,7 @@ export default {
     // 确认
     handerConfirm() {
       if (!this.tableSelections.length) {
-        $notification.warning({
+        this.$notification.warning({
           message: '请选择要使用的证书'
         })
         return
@@ -332,9 +337,9 @@ export default {
         return item.id === this.tableSelections[0]
       })[0]
 
-      this.$emit('confirm', `${selectData.serialNumberStr}:${selectData.keyType}`)
+      $emit(this, 'confirm', `${selectData.serialNumberStr}:${selectData.keyType}`)
     }
-  }
+  },
+  emits: ['cancel', 'confirm']
 }
 </script>
-<style scoped></style>

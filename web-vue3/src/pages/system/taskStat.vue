@@ -2,20 +2,21 @@
   <div>
     <a-table size="middle" rowKey="taskId" :columns="taskColumns" bordered :data-source="taskList" :pagination="false">
       <template #title>
-        <a-button size="small" type="primary" @click="refresh"> <a-icon type="reload" /> </a-button>
+        <a-button size="small" type="primary" @click="refresh"><ReloadOutlined /></a-button>
       </template>
-      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <a-tooltip #time slot-scope="text" placement="topLeft" :title="parseTime(text)">
-        <span>{{ parseTime(text) }}</span>
-      </a-tooltip>
-      <a-tooltip #cron slot-scope="text" placement="topLeft" :title="text">
-        <!-- <a-icon type="unordered-list" /> -->
-        <a-button type="link" style="padding: 0" size="small" @click="toCronTaskList(text)">
-          {{ text }} <a-icon type="unordered-list" />
-        </a-button>
-      </a-tooltip>
+      <template #bodyCell="{ column, text, record }">
+        <a-tooltip v-if="column.tooltip" placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+        <a-tooltip v-else-if="column.dataIndex === 'lastExecuteTime'" :title="parseTime(text)">
+          <span>{{ parseTime(text) }}</span>
+        </a-tooltip>
+        <a-tooltip v-else-if="column.dataIndex === 'cron'" placement="topLeft" :title="text">
+          <a-button type="link" v-if="text" style="padding: 0" size="small" @click="toCronTaskList(text)">
+            {{ text }} <UnorderedListOutlined />
+          </a-button>
+        </a-tooltip>
+      </template>
     </a-table>
   </div>
 </template>
@@ -39,7 +40,8 @@ export default {
           dataIndex: 'taskId',
 
           // sorter: (a, b) => (a && b ? a.localeCompare(b, "zh-CN") : 0),
-          scopedSlots: { customRender: 'tooltip' },
+          tooltip: true,
+
           ellipsis: true,
           filters: [
             {
@@ -63,8 +65,8 @@ export default {
         },
         {
           title: 'cron',
-          dataIndex: 'cron',
-          scopedSlots: { customRender: 'cron' }
+          dataIndex: 'cron'
+
           // sorter: (a, b) => (a && b ? a.localeCompare(b, "zh-CN") : 0),
           // sortDirections: ["descend", "ascend"],
         },
@@ -95,28 +97,26 @@ export default {
           sortDirections: ['descend', 'ascend'],
           defaultSortOrder: 'descend',
           width: 180,
-          sorter: (a, b) => a.lastExecuteTime || 0 - b.lastExecuteTime || 0,
-          scopedSlots: { customRender: 'time' }
+          sorter: (a, b) => a.lastExecuteTime || 0 - b.lastExecuteTime || 0
         }
       ]
     }
   },
   mounted() {},
   methods: {
-    parseTime: parseTime,
+    parseTime,
     refresh() {
       this.$emit('refresh')
     },
     // 前往 cron 详情
     toCronTaskList(cron) {
       const newpage = this.$router.resolve({
-        name: 'cron-task-list',
         path: '/tools/cron',
         query: {
           ...this.$route.query,
           sPid: 'tools',
           sId: 'cronTools',
-          cron: cron
+          cron
         }
       })
       window.open(newpage.href, '_blank')
