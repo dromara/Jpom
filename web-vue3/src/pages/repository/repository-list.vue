@@ -85,7 +85,7 @@
           </a-dropdown>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #bodyCell="{ column, text, record, index }">
         <template v-if="column.tooltip">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
@@ -378,30 +378,33 @@
           label="私人令牌"
           help="使用私人令牌，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。"
         >
-          <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder[giteeImportForm.type]}`">
-            <!-- <a-input v-model="giteeImportForm.token" :placeholder="importTypePlaceholder[giteeImportForm.type]">
+          <a-form-item-rest>
+            <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder[giteeImportForm.type]}`">
+              <!-- <a-input v-model="giteeImportForm.token" :placeholder="importTypePlaceholder[giteeImportForm.type]">
                 <a-select slot="addonBefore" style="width: 100px" @change="importChange" v-model="giteeImportForm.type">
                   <a-select-option :value="item" v-for="item in Object.keys(providerData)" :key="item"> {{ item }}</a-select-option>
                 </a-select>
 
                 <a-button slot="addonAfter" size="small" type="primary" icon="search" @click="handleGiteeImportFormOk"></a-button>
               </a-input> -->
-            <a-input-group compact>
-              <a-select style="width: 10%" @change="importChange" v-model:value="giteeImportForm.type">
-                <a-select-option :value="item" v-for="item in Object.keys(providerData)" :key="item">
-                  {{ item }}</a-select-option
-                >
-              </a-select>
+              <a-input-group compact>
+                <a-select style="width: 10%" @change="importChange" v-model:value="giteeImportForm.type">
+                  <a-select-option :value="item" v-for="item in Object.keys(providerData)" :key="item">
+                    {{ item }}</a-select-option
+                  >
+                </a-select>
 
-              <a-input-search
-                style="width: 90%; margin-top: 1px"
-                enter-button
-                v-model:value="giteeImportForm.token"
-                @search="handleGiteeImportFormOk"
-                :placeholder="importTypePlaceholder[giteeImportForm.type]"
-              />
-            </a-input-group>
-          </a-tooltip>
+                <a-input-search
+                  style="width: 90%; margin-top: 1px"
+                  enter-button
+                  :loading="importLoading"
+                  v-model:value="giteeImportForm.token"
+                  @search="handleGiteeImportFormOk"
+                  :placeholder="importTypePlaceholder[giteeImportForm.type]"
+                />
+              </a-input-group>
+            </a-tooltip>
+          </a-form-item-rest>
         </a-form-item>
         <a-form-item name="address" label="地址">
           <a-input v-model:value="giteeImportForm.address" placeholder="请填写平台地址" />
@@ -416,7 +419,7 @@
         </a-form-item>
       </a-form>
       <a-table
-        :loading="loading"
+        :loading="importLoading"
         size="middle"
         :columns="reposColumns"
         :data-source="repos"
@@ -425,39 +428,41 @@
         @change="reposChange"
         :pagination="reposPagination"
       >
-        <template v-slot:private="text, record">
-          <a-switch size="small" :disabled="true" :checked="record.private" />
-        </template>
-        <template v-slot:name="text">
-          <a-tooltip placement="topLeft" :title="text">
-            <span>{{ text }}</span>
-          </a-tooltip>
-        </template>
-        <template v-slot:full_name="text">
-          <a-tooltip placement="topLeft" :title="text">
-            <span>{{ text }}</span>
-          </a-tooltip>
-        </template>
-        <template v-slot:url="text">
-          <a-tooltip placement="topLeft" :title="text">
-            <span>{{ text }}</span>
-          </a-tooltip>
-        </template>
-        <template v-slot:description="text">
-          <a-tooltip placement="topLeft" :title="text">
-            <span>{{ text }}</span>
-          </a-tooltip>
-        </template>
+        <template #bodyCell="{ column, text, record }">
+          <template v-if="column.dataIndex === 'private'">
+            <a-switch size="small" :disabled="true" :checked="record.private" />
+          </template>
+          <template v-else-if="column.dataIndex === 'name'">
+            <a-tooltip placement="topLeft" :title="text">
+              <span>{{ text }}</span>
+            </a-tooltip>
+          </template>
+          <template v-else-if="column.dataIndex === 'full_name'">
+            <a-tooltip placement="topLeft" :title="text">
+              <span>{{ text }}</span>
+            </a-tooltip>
+          </template>
+          <template v-else-if="column.dataIndex === 'url'">
+            <a-tooltip placement="topLeft" :title="text">
+              <span>{{ text }}</span>
+            </a-tooltip>
+          </template>
+          <template v-else-if="column.dataIndex === 'description'">
+            <a-tooltip placement="topLeft" :title="text">
+              <span>{{ text }}</span>
+            </a-tooltip>
+          </template>
 
-        <template v-slot:operation="text, record">
-          <a-button type="primary" size="small" :disabled="record.exists" @click="handleGiteeRepoAdd(record)">{{
-            record.exists ? '已存在' : '添加'
-          }}</a-button>
+          <template v-else-if="column.dataIndex === 'operation'">
+            <a-button type="primary" size="small" :disabled="record.exists" @click="handleGiteeRepoAdd(record)">{{
+              record.exists ? '已存在' : '添加'
+            }}</a-button>
+          </template>
         </template>
       </a-table>
     </a-modal>
     <!-- 选择仓库确认区域 -->
-    <div style="padding-top: 50px" v-if="this.choose">
+    <!-- <div style="padding-top: 50px" v-if="this.choose">
       <div
         :style="{
           position: 'absolute',
@@ -483,8 +488,8 @@
           </a-button>
           <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
         </a-space>
-      </div>
-    </div>
+      </div> -->
+    <!-- </div> -->
     <!-- 关联构建 -->
     <a-modal
       destroyOnClose
@@ -494,7 +499,8 @@
       :maskClosable="false"
       :footer="null"
     >
-      <component :is="buildListComponent" v-if="buildListComponent" :repositoryId="temp.id" :fullContent="false" />
+      <buildList-component v-if="viewBuildVisible" :repositoryId="temp.id" :fullContent="false" />
+      <a-spin v-else>loading....</a-spin>
     </a-modal>
   </div>
 </template>
@@ -518,7 +524,11 @@ import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } 
 import { getWorkspaceEnvAll } from '@/api/workspace'
 import CustomSelect from '@/components/customSelect'
 export default {
-  components: { CustomInput, CustomSelect },
+  components: {
+    CustomInput,
+    CustomSelect,
+    buildListComponent: defineAsyncComponent(() => import('@/pages/build/list-info'))
+  },
   props: {
     choose: {
       type: Boolean,
@@ -541,7 +551,7 @@ export default {
     return {
       loading: false,
       PAGE_DEFAULT_SIZW_OPTIONS: ['15', '20', '25', '30', '35', '40', '50'],
-      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, { limit: 15 }),
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       groupList: [],
       providerData: {
@@ -637,48 +647,43 @@ export default {
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
-          width: this.global ? '220px' : '180px'
+          width: this.global ? '240px' : '180px'
         }
       ],
       reposColumns: [
         {
           title: '仓库名称',
           dataIndex: 'name',
-          ellipsis: true,
-          scopedSlots: { customRender: 'name' }
+          ellipsis: true
         },
         {
           title: '仓库路径',
           dataIndex: 'full_name',
-          ellipsis: true,
-          scopedSlots: { customRender: 'full_name' }
+          ellipsis: true
         },
         {
           title: 'GitUrl',
           dataIndex: 'url',
-          ellipsis: true,
-          scopedSlots: { customRender: 'url' }
+          ellipsis: true
         },
 
         {
           title: '描述',
           dataIndex: 'description',
 
-          ellipsis: true,
-          scopedSlots: { customRender: 'description' }
+          ellipsis: true
         },
         {
           title: '私有',
           dataIndex: 'private',
           width: 80,
-          ellipsis: true,
-          scopedSlots: { customRender: 'private' }
+          ellipsis: true
         },
         {
           title: '操作',
           dataIndex: 'operation',
           width: 100,
-          scopedSlots: { customRender: 'operation' },
+
           align: 'left'
         }
       ],
@@ -706,15 +711,16 @@ export default {
       },
       tableSelections: [],
       envVarList: [],
-      buildListComponent: null,
+
       viewBuildVisible: false,
-      confirmLoading: false
+      confirmLoading: false,
+      importLoading: false
     }
   },
   computed: {
     // 分页
     pagination() {
-      return COMPUTED_PAGINATION(this.listQuery, this.PAGE_DEFAULT_SIZW_OPTIONS)
+      return COMPUTED_PAGINATION(this.listQuery)
     },
     reposPagination() {
       return COMPUTED_PAGINATION(this.giteeImportForm, this.PAGE_DEFAULT_SIZW_OPTIONS)
@@ -740,8 +746,7 @@ export default {
     })
     this.getWorkEnvList()
     this.loadGroupList()
-    // 异步加载组件
-    this.buildListComponent = () => import('@/pages/build/list-info')
+
     if (this.chooseVal) {
       this.tableSelections = [this.chooseVal]
     }
@@ -823,18 +828,20 @@ export default {
       })
     },
     handleGiteeImportFormOk() {
-      this.$refs['giteeImportForm'].validate((valid) => {
-        if (!valid) {
-          return false
-        }
-        authorizeRepos(this.giteeImportForm).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            //this.username = res.data.username;
-            this.giteeImportForm.total = res.data.total
-            this.repos = res.data.result
-          }
-        })
+      this.$refs['giteeImportForm'].validate().then(() => {
+        this.importLoading = true
+        authorizeRepos(this.giteeImportForm)
+          .then((res) => {
+            if (res.code === 200) {
+              // 成功
+              //this.username = res.data.username;
+              this.giteeImportForm.total = res.data.total
+              this.repos = res.data.result
+            }
+          })
+          .finally(() => {
+            this.importLoading = false
+          })
       })
     },
     reposChange(pagination) {
@@ -1009,7 +1016,7 @@ export default {
         return item.id === this.tableSelections[0]
       })[0]
 
-      $emit(this, 'confirm', `${selectData.id}`)
+      this.$emit('confirm', `${selectData.id}`)
     },
     // 查看关联构建
     viewBuild(data) {

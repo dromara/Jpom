@@ -156,7 +156,7 @@
             </a-tooltip>
           </template>
           <a-tab-pane key="1" tab="获取">
-            <a-space direction="vertical" align="baseline">
+            <a-space direction="vertical" style="width: 100%">
               <a-alert message="温馨提示" type="warning">
                 <template #description>
                   <ul>

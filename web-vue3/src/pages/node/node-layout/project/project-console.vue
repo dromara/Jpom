@@ -1,122 +1,152 @@
 <template>
   <div>
-    <!-- <div ref="filter" class="filter"> -->
-    <!-- <template v-if="copyId">
-        <a-space>
-          <a-button :disabled="replicaStatus" :loading="optButtonLoading" type="primary" @click="start">启动</a-button>
-          <a-button :disabled="!replicaStatus" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
-          <a-button :disabled="!replicaStatus" :loading="optButtonLoading" type="danger" @click="stop">停止</a-button>
-          <a-button type="primary" @click="handleDownload">导出日志</a-button>
-          <a-tag color="#87d068">文件大小: {{ project.logSize }}</a-tag>
-          <a-switch checked-children="自动滚动" un-checked-children="关闭滚动" v-model="logScroll" />
-        </a-space>
-      </template> -->
-    <!-- <template> </template> -->
-    <!-- </div> -->
     <!-- console -->
-    <log-view :ref="`logView`" height="calc(100vh - 140px)">
-      <template #before>
+    <log-view2 :ref="`logView`" height="calc(100vh - 140px)">
+      <template v-slot:before>
         <a-space>
           <a-button size="small" :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start"
             >启动</a-button
           >
-          <a-button size="small" :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="restart"
+          <a-button
+            size="small"
+            :disabled="!project.status"
+            :loading="optButtonLoading"
+            type="primary"
+            danger
+            @click="restart"
             >重启</a-button
           >
-          <a-button size="small" :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="stop"
+          <a-button
+            size="small"
+            :disabled="!project.status"
+            :loading="optButtonLoading"
+            type="primary"
+            danger
+            @click="stop"
             >停止</a-button
           >
-
-          <a-button size="small" v-if="!copyId" type="primary" @click="goFile">文件管理</a-button>
-
-          <a-dropdown>
-            <!-- <a type="link" class="ant-dropdown-link"> 更多<down-outlined /> </a> -->
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-              <a-tag>
-                文件大小: {{ project.logSize || '-' }}
-                <!-- 更多 -->
-                <down-outlined />
-              </a-tag>
-            </a>
-            <template #overlay>
+          <template v-if="project.runMode === 'Dsl'">
+            <template v-if="canReload">
+              <a-popover title="上次重载结果">
+                <template v-slot:content>
+                  <template v-if="project.lastReloadResult">
+                    <p>
+                      <a-tag v-if="project.lastReloadResult.success" color="green">成功</a-tag>
+                      <a-tag v-else color="green">成功</a-tag>
+                    </p>
+                    <p v-for="(item, index) in project.lastReloadResult.msgs" :key="index">
+                      {{ item }}
+                    </p>
+                  </template>
+                  <template v-else>还未执行reload</template>
+                </template>
+                <a-button size="small" :loading="optButtonLoading" type="primary" @click="reload">重载</a-button>
+              </a-popover>
+            </template>
+            <template v-else>
+              <a-button size="small" :disabled="true" :loading="optButtonLoading" type="primary">重载</a-button>
+            </template>
+          </template>
+          <a-button size="small" type="primary" @click="goFile">文件管理</a-button>
+          <a-dropdown v-if="project.dslProcessInfo">
+            <template v-slot:overlay>
               <a-menu>
-                <a-menu-item>
-                  <a-button type="primary" size="small" :disabled="!project.logSize" @click="handleDownload">
-                    导出日志
-                  </a-button>
-                </a-menu-item>
-                <a-menu-item>
-                  <a-button type="primary" size="small" @click="handleLogBack">备份列表</a-button>
+                <a-menu-item v-for="(item, index) in project.dslProcessInfo" :key="index">
+                  <template v-if="item.status">
+                    <a-tag>
+                      {{ item.process }}
+                    </a-tag>
+                    <template v-if="item.type === 'file'">项目文件 {{ item.scriptId }} </template>
+                    <template v-else-if="item.type === 'script'">
+                      <a-button
+                        type="link"
+                        size="small"
+                        icon="edit"
+                        @click="
+                          () => {
+                            temp = { scriptId: item.scriptId }
+                            editScriptVisible = true
+                          }
+                        "
+                      >
+                        节点脚本
+                      </a-button>
+                    </template>
+                  </template>
+                  <template v-else>
+                    <a-space>
+                      <a-tag>
+                        {{ item.process }}
+                      </a-tag>
+
+                      <ExclamationCircleOutlined />
+                      {{ item.msg }}
+                    </a-space>
+                  </template>
                 </a-menu-item>
               </a-menu>
             </template>
+            <a-button size="small" type="primary"> 关联脚本 <DownOutlined /> </a-button>
           </a-dropdown>
+          <a-button
+            size="small"
+            @click="
+              (e) => {
+                e.preventDefault()
+                handleLogBack()
+              }
+            "
+          >
+            <!-- <a-tag> -->
+            日志大小: {{ project.logSize || '-' }}
+            <!-- 更多 -->
+            <FullscreenOutlined />
+            <!-- </a-tag> -->
+          </a-button>
+
+          |
         </a-space>
       </template>
-    </log-view>
+    </log-view2>
     <!-- 日志备份 -->
     <a-modal
       destroyOnClose
-      v-model="lobbackVisible"
+      v-model:open="lobbackVisible"
       title="日志备份列表"
       width="850px"
       :footer="null"
       :maskClosable="false"
     >
-      <div ref="model-filter" class="filter">
-        <a-space direction="vertical">
-          <a-tag
-            >控制台日志只是启动项目输出的日志信息,并非项目日志。可以关闭控制台日志备份功能：<b
-              >jpom.project.log.auto-backup-to-file: false</b
-            ></a-tag
-          >
-
-          <a-tag color="orange">控制台日志路径: {{ project.log }}</a-tag>
-          <a-tag color="orange">控制台日志备份路径: {{ project.logBack }}</a-tag>
-        </a-space>
-      </div>
-      <!-- 数据表格 -->
-      <a-table
-        :data-source="logBackList"
-        :loading="loading"
-        :columns="columns"
-        :scroll="{ y: 400 }"
-        :pagination="false"
-        bordered
-        :rowKey="(record, index) => index"
-      >
-        <a-tooltip #filename slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip>
-        <a-tooltip #fileSize slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip>
-        <template #operation slot-scope="text, record">
-          <a-space>
-            <a-button type="primary" @click="handleDownloadLogback(record)">下载</a-button>
-            <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-          </a-space>
-        </template>
-      </a-table>
+      <ProjectLog v-if="lobbackVisible" :nodeId="this.nodeId" :projectId="this.projectId"></ProjectLog>
     </a-modal>
+    <!-- 编辑区 -->
+    <ScriptEdit
+      v-if="editScriptVisible"
+      :nodeId="this.nodeId"
+      :scriptId="temp.scriptId"
+      @close="
+        () => {
+          editScriptVisible = false
+        }
+      "
+    ></ScriptEdit>
   </div>
 </template>
-<script>
-import {
-  deleteProjectLogBackFile,
-  downloadProjectLogBackFile,
-  downloadProjectLogFile,
-  getLogBackList,
-  getProjectData,
-  getProjectLogSize
-} from '@/api/node-project'
-import { mapState } from 'pinia'
-import { getWebSocketUrl } from '@/api/config'
-import LogView from '@/components/logView'
 
+<script>
+import { getProjectData, getProjectLogSize } from '@/api/node-project'
+import { getWebSocketUrl } from '@/api/config'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/stores/user'
+import { useAppStore } from '@/stores/app'
+import LogView2 from '@/components/logView/index2'
+import ProjectLog from './project-log'
+import ScriptEdit from '@/pages/node/script-edit'
 export default {
   components: {
-    LogView
+    LogView2,
+    ProjectLog,
+    ScriptEdit
   },
   props: {
     nodeId: {
@@ -126,9 +156,6 @@ export default {
       type: String
     },
     id: {
-      type: String
-    },
-    copyId: {
       type: String
     }
   },
@@ -140,81 +167,50 @@ export default {
       socket: null,
       logExist: false,
       lobbackVisible: false,
-      logBackList: [],
-      columns: [
-        {
-          title: '文件名称',
-          dataIndex: 'filename',
-          width: 150,
-          ellipsis: true,
-          scopedSlots: { customRender: 'filename' }
-        },
-        {
-          title: '修改时间',
-          dataIndex: 'modifyTime',
-          width: 150,
-          ellipsis: true,
-          scopedSlots: { customRender: 'modifyTime' }
-        },
-        {
-          title: '文件大小',
-          dataIndex: 'fileSize',
-          width: 100,
-          ellipsis: true,
-          scopedSlots: { customRender: 'fileSize' }
-        },
-        { title: '操作', dataIndex: 'operation', scopedSlots: { customRender: 'operation' }, width: 130 }
-      ],
-      heart: null
+      canReload: false,
+      heart: null,
+      editScriptVisible: false
     }
   },
   computed: {
-    ...mapGetters(['getLongTermToken', 'getWorkspaceId']),
+    ...mapState(useUserStore, ['getLongTermToken']),
+    ...mapState(useAppStore, ['getWorkspaceId']),
     socketUrl() {
       return getWebSocketUrl(
         '/socket/console',
-        `userId=${this.getLongTermToken}&id=${this.id}&nodeId=${this.nodeId}&type=console&copyId=${
-          this.copyId || ''
-        }&workspaceId=${this.getWorkspaceId}`
+        `userId=${this.getLongTermToken}&id=${this.id}&nodeId=${
+          this.nodeId
+        }&type=console&workspaceId=${this.getWorkspaceId()}`
       )
     }
   },
   mounted() {
     this.loadProject()
     this.initWebSocket()
-  },
-  beforeDestroy() {
-    if (this.socket) {
-      this.socket.close()
+    // 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+    window.onbeforeunload = () => {
+      this.close()
     }
-    clearInterval(this.heart)
+  },
+  beforeUnmount() {
+    this.close()
   },
   methods: {
+    close() {
+      this.socket?.close()
+
+      clearInterval(this.heart)
+    },
     // 加载项目
-    loadProject() {
+    loadProject(loading) {
       const params = {
         id: this.projectId,
         nodeId: this.nodeId
       }
-      getProjectData(params).then((res) => {
+      getProjectData(params, loading).then((res) => {
         if (res.code === 200) {
           this.project = { ...this.project, ...res.data }
-          if (this.copyId) {
-            if (this.project.javaCopyItemList) {
-              const finds = this.project.javaCopyItemList.filter((item) => item.id === this.copyId)
-              if (finds.length) {
-                this.project = { ...this.project, log: finds[0].log, logBack: finds[0].logBack }
-              } else {
-                $notification.error({
-                  message: '没有找到副本'
-                })
-              }
-            } else {
-              $notification.error({
-                message: '没有副本'
-              })
-            }
-          }
+
           // 加载日志文件大小
           this.loadFileSize()
         }
@@ -237,7 +233,7 @@ export default {
       }
       this.socket.onerror = (err) => {
         console.error(err)
-        $notification.error({
+        this.$notification.error({
           message: 'web socket 错误,请检查是否开启 ws 代理'
         })
         clearInterval(this.heart)
@@ -245,19 +241,23 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        $message.warning('会话已经关闭')
+        this.$message.warning('会话已经关闭[project-console]')
         clearInterval(this.heart)
       }
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf('JPOM_MSG') > -1 && msg.data.indexOf('op') > -1) {
           // console.log(msg.data);
           const res = JSON.parse(msg.data)
-          if (res.op === 'stop' || res.op === 'start' || res.op === 'restart' || res.op === 'status') {
+          if (
+            res.op === 'stop' ||
+            res.op === 'start' ||
+            res.op === 'restart' ||
+            res.op === 'status' ||
+            res.op === 'reload'
+          ) {
             this.optButtonLoading = false
+            this.$message.info(res.msg)
             if (res.code === 200) {
-              $notification.success({
-                message: res.msg
-              })
               // 如果操作是启动或者停止
               if (res.op === 'stop') {
                 this.project = { ...this.project, status: false }
@@ -267,13 +267,26 @@ export default {
                 // 如果是 status
                 this.project = { ...this.project, status: true }
               }
+              if (res.op === 'reload') {
+                // 刷新项目信息（reload页面消息）
+                this.loadProject()
+              }
             } else {
-              $notification.error({
-                message: res.msg
-              })
               this.project = { ...this.project, status: false }
             }
-            // return;
+            this.canReload = res.canReload
+            if (res.data) {
+              this.$refs.logView.appendLine(res.data.statusMsg)
+              if (res.data.msgs) {
+                res.data.msgs.forEach((element) => {
+                  this.$refs.logView.appendLine(element)
+                })
+              }
+              res.data.ports && this.$refs.logView.appendLine('端口：' + res.data.ports)
+              res.data.pids && this.$refs.logView.appendLine('进程号：' + res.data.pids.join(','))
+            }
+            this.$refs.logView.appendLine(res.op + ' ' + res.msg)
+            return
           }
         }
         this.$refs.logView.appendLine(msg.data)
@@ -290,8 +303,7 @@ export default {
     sendMsg(op) {
       const data = {
         op: op,
-        projectId: this.projectId,
-        copyId: this.copyId
+        projectId: this.projectId
       }
       this.socket.send(JSON.stringify(data))
       if (op === 'stop' || op === 'start' || op === 'restart') {
@@ -303,8 +315,7 @@ export default {
     loadFileSize() {
       const params = {
         nodeId: this.nodeId,
-        id: this.projectId,
-        copyId: this.copyId
+        id: this.projectId
       }
       getProjectLogSize(params).then((res) => {
         if (res.code === 200) {
@@ -320,10 +331,15 @@ export default {
     start() {
       this.sendMsg('start')
     },
+    // 重载
+    reload() {
+      this.sendMsg('reload')
+    },
     // 重启
     restart() {
-      $confirm({
+      this.$confirm({
         title: '系统提示',
+        zIndex: 1009,
         content: '真的要重启项目么？',
         okText: '确认',
         cancelText: '取消',
@@ -334,8 +350,9 @@ export default {
     },
     // 停止
     stop() {
-      $confirm({
+      this.$confirm({
         title: '系统提示',
+        zIndex: 1009,
         content: '真的要停止项目么？',
         okText: '确认',
         cancelText: '取消',
@@ -344,100 +361,18 @@ export default {
         }
       })
     },
-    // 下载日志文件
-    handleDownload() {
-      $notification.info({
-        message: '正在下载，请稍等...'
-      })
-      // 请求参数
-      const params = {
-        nodeId: this.nodeId,
-        id: this.projectId,
-        copyId: this.copyId
-      }
-      // 请求接口拿到 blob
-      window.open(downloadProjectLogFile(params), '_blank')
-    },
+
     // 日志备份列表
     handleLogBack() {
-      this.loading = true
       // 设置显示的数据
-      this.detailData = []
+      // this.detailData = [];
       this.lobbackVisible = true
-      const params = {
-        nodeId: this.nodeId,
-        id: this.projectId,
-        copyId: this.copyId
-      }
-      getLogBackList(params).then((res) => {
-        if (res.code === 200) {
-          this.logBackList = res.data.array
-        }
-        this.loading = false
-      })
     },
-    // 下载日志备份文件
-    handleDownloadLogback(record) {
-      $notification.info({
-        message: '正在下载，请稍等...'
-      })
-      // 请求参数
-      const params = {
-        nodeId: this.nodeId,
-        id: this.projectId,
-        copyId: this.copyId,
-        key: record.filename
-      }
-      // 请求接口拿到 blob
-      window.open(downloadProjectLogBackFile(params), '_blank')
-    },
-    // 删除日志备份文件
-    handleDelete(record) {
-      $confirm({
-        title: '系统提示',
-        content: '真的要删除文件么？',
-        okText: '确认',
-        cancelText: '取消',
-        onOk: () => {
-          // 请求参数
-          const params = {
-            nodeId: this.nodeId,
-            id: this.projectId,
-            copyId: this.copyId,
-            name: record.filename
-          }
-          // 删除
-          deleteProjectLogBackFile(params).then((res) => {
-            if (res.code === 200) {
-              $notification.success({
-                message: res.msg
-              })
-              this.handleLogBack()
-            }
-          })
-        }
-      })
-    },
+
     goFile() {
-      this.$emit('goFile')
+      $emit(this, 'goFile')
     }
-  }
+  },
+  emits: ['goFile']
 }
 </script>
-<style scoped>
-/* .filter {
-  margin: 0 0 10px;
-} */
-/*
-.console {
-  padding: 5px;
-  color: #fff;
-  font-size: 14px;
-  background-color: black;
-  width: 100%;
-  height: calc(100vh - 120px);
-  overflow-y: auto;
-  border: 1px solid #e2e2e2;
-  border-radius: 5px 5px;
-} */
-</style>

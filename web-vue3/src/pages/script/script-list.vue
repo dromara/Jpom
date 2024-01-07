@@ -11,30 +11,30 @@
       rowKey="id"
       :row-selection="rowSelection"
     >
-      <template #title>
+      <template v-slot:title>
         <a-space>
           <a-input
-            v-model="listQuery['id']"
+            v-model:value="listQuery['id']"
             placeholder="脚本ID"
             @pressEnter="loadData"
             allowClear
             class="search-input-item"
           />
           <a-input
-            v-model="listQuery['%name%']"
+            v-model:value="listQuery['%name%']"
             placeholder="名称"
             @pressEnter="loadData"
             allowClear
             class="search-input-item"
           />
           <a-input
-            v-model="listQuery['%description%']"
+            v-model:value="listQuery['%description%']"
             placeholder="描述"
             @pressEnter="loadData"
             class="search-input-item"
           />
           <a-input
-            v-model="listQuery['%autoExecCron%']"
+            v-model:value="listQuery['%autoExecCron%']"
             placeholder="定时执行"
             @pressEnter="loadData"
             class="search-input-item"
@@ -45,13 +45,13 @@
           <a-button type="primary" @click="createScript">新建脚本</a-button>
           <a-button
             type="primary"
-            v-if="choose === 'checkbox'"
+            v-if="mode === 'manage'"
             :disabled="!tableSelections || !tableSelections.length"
             @click="syncToWorkspaceShow"
             >工作空间同步</a-button
           >
           <a-tooltip>
-            <template #title>
+            <template v-slot:title>
               <div>脚本模版是存储在服务端中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
 
               <div>
@@ -62,43 +62,52 @@
                 </ul>
               </div>
             </template>
-            <question-circle-filled />
+            <QuestionCircleOutlined />
           </a-tooltip>
         </a-space>
       </template>
 
-      <a-tooltip #nodeId slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ nodeMap[text] }}</span>
-      </a-tooltip>
-      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <template #global slot-scope="text">
+      <template v-slot:nodeId="text">
+        <a-tooltip placement="topLeft" :title="text">
+          <span>{{ nodeMap[text] }}</span>
+        </a-tooltip>
+      </template>
+      <template v-slot:tooltip="text">
+        <a-tooltip placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+      </template>
+      <template v-slot:global="text">
         <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
         <a-tag v-else>工作空间</a-tag>
       </template>
-      <template #operation slot-scope="text, record">
+      <template v-slot:operation="text, record">
         <a-space>
-          <template v-if="choose === 'checkbox'">
+          <template v-if="mode === 'manage'">
             <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
             <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
             <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
             <a-dropdown>
               <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
                 更多
-                <down-outlined />
+                <a-icon type="down" />
               </a>
-              <template #overlay>
+              <template v-slot:overlay>
                 <a-menu>
                   <a-menu-item>
                     <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
                   </a-menu-item>
 
                   <a-menu-item>
-                    <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                    <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button size="small" type="danger" :disabled="!record.nodeIds" @click="handleUnbind(record)"
+                    <a-button
+                      size="small"
+                      type="primary"
+                      danger
+                      :disabled="!record.nodeIds"
+                      @click="handleUnbind(record)"
                       >解绑</a-button
                     >
                   </a-menu-item>
@@ -116,7 +125,7 @@
     <a-modal
       :zIndex="1009"
       destroyOnClose
-      v-model="editScriptVisible"
+      v-model:value="editScriptVisible"
       title="编辑 Script"
       @ok="handleEditScriptOk"
       :maskClosable="false"
@@ -124,31 +133,34 @@
     >
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
         <a-form-item v-if="temp.id" label="ScriptId" name="id">
-          <a-input v-model="temp.id" disabled readOnly />
+          <a-input v-model:value="temp.id" disabled readOnly />
         </a-form-item>
         <a-form-item label="Script 名称" name="name">
-          <a-input :maxLength="50" v-model="temp.name" placeholder="名称" />
+          <a-input :maxLength="50" v-model:value="temp.name" placeholder="名称" />
         </a-form-item>
         <a-form-item label="Script 内容" name="context">
           <div style="height: 40vh; overflow-y: scroll">
-            <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
+            <code-editor
+              v-model:value="temp.context"
+              :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"
+            ></code-editor>
           </div>
         </a-form-item>
         <!-- <a-form-item label="默认参数" name="defArgs">
-          <a-input v-model="temp.defArgs" placeholder="默认参数" />
-        </a-form-item> -->
+            <a-input v-model="temp.defArgs" placeholder="默认参数" />
+          </a-form-item> -->
         <a-form-item label="默认参数">
           <div v-for="(item, index) in commandParams" :key="item.key">
             <a-row type="flex" justify="center" align="middle">
               <a-col :span="22">
                 <a-input
                   :addon-before="`参数${index + 1}描述`"
-                  v-model="item.desc"
+                  v-model:value="item.desc"
                   placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义"
                 />
                 <a-input
                   :addon-before="`参数${index + 1}值`"
-                  v-model="item.value"
+                  v-model:value="item.value"
                   placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值"
                 />
               </a-col>
@@ -167,15 +179,17 @@
         </a-form-item>
         <a-form-item label="定时执行" name="autoExecCron">
           <a-auto-complete
-            v-model="temp.autoExecCron"
+            v-model:value="temp.autoExecCron"
             placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
             option-label-prop="value"
           >
-            <template #dataSource>
+            <template v-slot:dataSource>
               <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
-                <span #label>
-                  {{ group.title }}
-                </span>
+                <template v-slot:label>
+                  <span>
+                    {{ group.title }}
+                  </span>
+                </template>
                 <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value">
                   {{ opt.title }} {{ opt.value }}
                 </a-select-option>
@@ -185,7 +199,7 @@
         </a-form-item>
         <a-form-item label="描述" name="description">
           <a-input
-            v-model="temp.description"
+            v-model:value="temp.description"
             :maxLength="200"
             type="textarea"
             :rows="3"
@@ -194,7 +208,7 @@
           />
         </a-form-item>
         <a-form-item label="共享" name="global">
-          <a-radio-group v-model="temp.global">
+          <a-radio-group v-model:value="temp.global">
             <a-radio :value="true"> 全局</a-radio>
             <a-radio :value="false"> 当前工作空间</a-radio>
           </a-radio-group>
@@ -205,11 +219,11 @@
           >
         </a-form-item>
         <a-form-item v-else>
-          <template #label>
-            分发节点
-            <a-tooltip v-show="!temp.id">
-              <template #title> 分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本中 </template>
-              <question-circle-filled />
+          <template v-slot:label>
+            <a-tooltip>
+              分发节点
+              <template v-slot:title> 分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本中 </template>
+              <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
           <a-select
@@ -217,7 +231,7 @@
             option-filter-prop="children"
             placeholder="请选择分发到的节点"
             mode="multiple"
-            v-model="temp.chooseNode"
+            v-model:value="temp.chooseNode"
           >
             <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
               {{ item.name }}
@@ -240,13 +254,13 @@
     <!-- 同步到其他工作空间 -->
     <a-modal
       destroyOnClose
-      v-model="syncToWorkspaceVisible"
+      v-model:value="syncToWorkspaceVisible"
       title="同步到其他工作空间"
       @ok="handleSyncToWorkspace"
       :maskClosable="false"
     >
       <a-alert message="温馨提示" type="warning">
-        <template #description>
+        <template v-slot:description>
           <ul>
             <li>同步机制采用<b>脚本名称</b>确定是同一个脚本</li>
             <li>当目标工作空间不存在对应的 脚本 时候将自动创建一个新的 脚本</li>
@@ -257,8 +271,13 @@
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" name="workspaceId">
-          <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
-            <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{
+          <a-select
+            show-search
+            option-filter-prop="children"
+            v-model:value="temp.workspaceId"
+            placeholder="请选择工作空间"
+          >
+            <a-select-option :disabled="getWorkspaceId() === item.id" v-for="item in workspaceList" :key="item.id">{{
               item.name
             }}</a-select-option>
           </a-select>
@@ -268,7 +287,7 @@
     <!-- 触发器 -->
     <a-modal
       destroyOnClose
-      v-model:visible="triggerVisible"
+      v-model:value="triggerVisible"
       title="触发器"
       width="50%"
       :footer="null"
@@ -276,7 +295,7 @@
     >
       <a-form ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
-          <template #tabBarExtraContent>
+          <template v-slot:tabBarExtraContent>
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>
@@ -284,7 +303,7 @@
           <a-tab-pane key="1" tab="执行">
             <a-space style="display: block" direction="vertical" align="baseline">
               <a-alert message="温馨提示" type="warning">
-                <template #description>
+                <template v-slot:description>
                   <ul>
                     <li>单个触发器地址中：第一个随机字符串为脚本ID，第二个随机字符串为 token</li>
                     <li>
@@ -298,18 +317,22 @@
                 v-clipboard:copy="temp.triggerUrl"
                 v-clipboard:success="
                   () => {
-                    tempVue.prototype.$notification.success({ message: '复制成功' })
+                    tempVue.prototype.$notification.success({
+                      message: '复制成功'
+                    })
                   }
                 "
                 v-clipboard:error="
                   () => {
-                    tempVue.prototype.$notification.error({ message: '复制失败' })
+                    tempVue.prototype.$notification.error({
+                      message: '复制失败'
+                    })
                   }
                 "
                 type="info"
                 :message="`单个触发器地址(点击可以复制)`"
               >
-                <template #description>
+                <template v-slot:description>
                   <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   <a-icon type="copy" />
                 </template>
@@ -318,18 +341,22 @@
                 v-clipboard:copy="temp.batchTriggerUrl"
                 v-clipboard:success="
                   () => {
-                    tempVue.prototype.$notification.success({ message: '复制成功' })
+                    tempVue.prototype.$notification.success({
+                      message: '复制成功'
+                    })
                   }
                 "
                 v-clipboard:error="
                   () => {
-                    tempVue.prototype.$notification.error({ message: '复制失败' })
+                    tempVue.prototype.$notification.error({
+                      message: '复制失败'
+                    })
                   }
                 "
                 type="info"
                 :message="`批量触发器地址(点击可以复制)`"
               >
-                <template #description>
+                <template v-slot:description>
                   <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
                   <a-icon type="copy" />
                 </template>
@@ -353,7 +380,7 @@
     >
       <script-log v-if="drawerLogVisible" :scriptId="temp.id" />
     </a-drawer>
-    <div style="padding-top: 50px" v-if="choose === 'radio'">
+    <div style="padding-top: 50px" v-if="mode === 'choose'">
       <div
         :style="{
           position: 'absolute',
@@ -383,6 +410,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import {
   deleteScript,
@@ -397,9 +425,9 @@ import codeEditor from '@/components/codeEditor'
 import { getNodeListAll } from '@/api/node'
 import ScriptConsole from '@/pages/script/script-console'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
-import { mapState } from 'pinia'
+import { mapGetters } from 'vuex'
 import { getWorkSpaceListAll } from '@/api/workspace'
-// import Vue from 'vue'
+import * as Vue from 'vue'
 import ScriptLog from '@/pages/script/script-log'
 export default {
   components: {
@@ -412,6 +440,15 @@ export default {
       type: String,
       default: 'checkbox'
       // "radio" ,"checkbox"
+    },
+    mode: {
+      // choose、manage
+      type: String,
+      default: 'manage'
+    },
+    chooseVal: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -427,11 +464,26 @@ export default {
       drawerTitle: '',
       drawerConsoleVisible: false,
       columns: [
-        { title: 'id', dataIndex: 'id', ellipsis: true, width: 150, scopedSlots: { customRender: 'tooltip' } },
-        { title: '名称', dataIndex: 'name', ellipsis: true, width: 150, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: 'id',
+          dataIndex: 'id',
+          ellipsis: true,
+          sorter: true,
+          width: 150,
+          scopedSlots: { customRender: 'tooltip' }
+        },
+        {
+          title: '名称',
+          dataIndex: 'name',
+          ellipsis: true,
+          sorter: true,
+          width: 150,
+          scopedSlots: { customRender: 'tooltip' }
+        },
         {
           title: '共享',
           dataIndex: 'workspaceId',
+          sorter: true,
           ellipsis: true,
           scopedSlots: { customRender: 'global' },
           width: '90px'
@@ -447,6 +499,7 @@ export default {
           title: '定时执行',
           dataIndex: 'autoExecCron',
           ellipsis: true,
+          sorter: true,
           width: '100px',
           scopedSlots: { customRender: 'tooltip' }
         },
@@ -487,7 +540,7 @@ export default {
           width: '120px',
           scopedSlots: { customRender: 'tooltip' }
         },
-        this.choose === 'checkbox'
+        this.mode === 'manage'
           ? {
               title: '操作',
               dataIndex: 'operation',
@@ -530,6 +583,21 @@ export default {
         selectedRowKeys: this.tableSelections,
         type: this.choose
       }
+    }
+  },
+  watch: {
+    chooseVal: {
+      deep: true,
+
+      handler(v) {
+        if (v) {
+          this.tableSelections = v.split(',')
+        } else {
+          this.tableSelections = []
+        }
+      },
+
+      immediate: true
     }
   },
   created() {
@@ -601,7 +669,7 @@ export default {
         if (this.commandParams && this.commandParams.length > 0) {
           for (let i = 0; i < this.commandParams.length; i++) {
             if (!this.commandParams[i].desc) {
-              $notification.error({
+              this.$notification.error({
                 message: '请填写第' + (i + 1) + '个参数的描述'
               })
               return false
@@ -617,7 +685,7 @@ export default {
         editScript(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
-            $notification.success({
+            this.$notification.success({
               message: res.msg
             })
 
@@ -629,9 +697,10 @@ export default {
       })
     },
     handleDelete(record) {
-      $confirm({
+      this.$confirm({
         title: '系统提示',
         content: '真的要删除脚本么？',
+        zIndex: 1009,
         okText: '确认',
         cancelText: '取消',
         onOk: () => {
@@ -642,7 +711,7 @@ export default {
           // 删除
           deleteScript(params).then((res) => {
             if (res.code === 200) {
-              $notification.success({
+              this.$notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -676,9 +745,9 @@ export default {
         '<li>如果误操作会产生冗余数据！！！</li>' +
         ' </ul>'
 
-      const h = this.$createElement
-      $confirm({
+      this.$confirm({
         title: '危险操作！！！',
+        zIndex: 1009,
         content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),
         okButtonProps: { props: { type: 'danger', size: 'small' } },
         cancelButtonProps: { props: { type: 'primary' } },
@@ -690,7 +759,7 @@ export default {
             id: record.id
           }).then((res) => {
             if (res.code === 200) {
-              $notification.success({
+              this.$notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -718,7 +787,7 @@ export default {
     //
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
-        $notification.warn({
+        this.$notification.warn({
           message: '请选择工作空间'
         })
         return false
@@ -729,7 +798,7 @@ export default {
         toWorkspaceId: this.temp.workspaceId
       }).then((res) => {
         if (res.code === 200) {
-          $notification.success({
+          this.$notification.success({
             message: res.msg
           })
           this.tableSelections = []
@@ -758,7 +827,7 @@ export default {
         rest: 'rest'
       }).then((res) => {
         if (res.code === 200) {
-          $notification.success({
+          this.$notification.success({
             message: res.msg
           })
           this.fillTriggerResult(res)
@@ -778,18 +847,21 @@ export default {
     },
     handerConfirm() {
       if (!this.tableSelections.length) {
-        $notification.warning({
+        this.$notification.warning({
           message: '请选择要使用的脚本'
         })
         return
       }
-      const selectData = this.list.filter((item) => {
-        return item.id === this.tableSelections[0]
-      })[0]
-
-      this.$emit('confirm', `${selectData.id}`)
+      if (this.choose === 'checkbox') {
+        $emit(this, 'confirm', this.tableSelections.join(','))
+      } else {
+        const selectData = this.list.filter((item) => {
+          return item.id === this.tableSelections[0]
+        })[0]
+        $emit(this, 'confirm', `${selectData.id}`)
+      }
     }
-  }
+  },
+  emits: ['cancel', 'confirm']
 }
 </script>
-<style scoped></style>

@@ -18,8 +18,11 @@ export const useAppStore = defineStore('app', {
   actions: {
     // 切换工作空间
     changeWorkspace(workspaceId: string) {
-      this.workspaceId = workspaceId
-      localStorage.setItem(CACHE_WORKSPACE_ID, workspaceId)
+      return new Promise((resolve) => {
+        this.workspaceId = workspaceId
+        localStorage.setItem(CACHE_WORKSPACE_ID, workspaceId)
+        resolve(true)
+      })
     },
     collapsed(isCollapsed: boolean) {
       this.isCollapsed = isCollapsed
@@ -50,9 +53,11 @@ export const useAppStore = defineStore('app', {
     }
   },
   getters: {
-    getWorkspaceId(state) {
-      const query = getHashQuery()
-      return query.wid || state.workspaceId
+    getWorkspaceId: (state) => {
+      return () => {
+        const query = getHashQuery()
+        return query.wid || state.workspaceId
+      }
     },
     getCollapsed(state) {
       return state.isCollapsed

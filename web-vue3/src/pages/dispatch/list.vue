@@ -1655,7 +1655,6 @@ export default {
         '<li>如果误操作会产生冗余数据！！！</li>' +
         ' </ul>'
 
-      const h = this.$createElement
       $confirm({
         title: '危险操作！！！',
         content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),
@@ -1806,7 +1805,6 @@ export default {
         '<li>如果误操作会产生冗余数据！！！</li>' +
         ' </ul>'
 
-      const h = this.$createElement
       $confirm({
         title: '危险操作！！！',
         content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),

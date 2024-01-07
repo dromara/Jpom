@@ -1,11 +1,12 @@
 <template>
   <div class="full-content">
-    <workspaceEnv ref="workspaceEnv" :workspaceId="getWorkspaceId" :global="true" />
+    <workspaceEnv ref="workspaceEnv" :workspaceId="this.getWorkspaceId()" :global="true" />
   </div>
 </template>
+
 <script>
 import workspaceEnv from '@/pages/system/workspace-env.vue'
-import { mapState } from 'pinia'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -19,4 +20,3 @@ export default {
   methods: {}
 }
 </script>
-<style scoped></style>

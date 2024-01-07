@@ -5,7 +5,7 @@
     <div>
       <!-- <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none" /> -->
       <log-view ref="logView" height="calc(100vh - 140px)">
-        <template #before>
+        <template v-slot:before>
           <a-space>
             <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start"
               >执行</a-button
@@ -19,11 +19,11 @@
     </div>
 
     <!--远程下载  -->
-    <a-modal destroyOnClose v-model:visible="editArgs" title="添加运行参数" @ok="startExecution" :maskClosable="false">
+    <a-modal destroyOnClose v-model:value="editArgs" title="添加运行参数" @ok="startExecution" :maskClosable="false">
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" ref="ruleForm">
         <!-- <a-form-item label="执行参数" name="args">
-          <a-input v-model="temp.args" placeholder="执行参数,没有参数可以不填写" />
-        </a-form-item> -->
+            <a-input v-model="temp.args" placeholder="执行参数,没有参数可以不填写" />
+          </a-form-item> -->
         <a-form-item
           label="命令参数"
           :help="`${
@@ -36,10 +36,10 @@
             <a-col :span="22">
               <a-input
                 :addon-before="`参数${index + 1}值`"
-                v-model="item.value"
+                v-model:value="item.value"
                 :placeholder="`参数值 ${item.desc ? ',' + item.desc : ''}`"
               >
-                <template #suffix>
+                <template v-slot:suffix>
                   <a-tooltip v-if="item.desc" :title="item.desc">
                     <a-icon type="info-circle" style="color: rgba(0, 0, 0, 0.45)" />
                   </a-tooltip>
@@ -61,11 +61,13 @@
     </a-modal>
   </div>
 </template>
-<script>
-import { mapState } from 'pinia'
-import { getWebSocketUrl } from '@/api/config'
-import LogView from '@/components/logView'
 
+<script>
+import LogView from '@/components/logView/index2'
+import { getWebSocketUrl } from '@/api/config'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/stores/user'
+import { useAppStore } from '@/stores/app'
 export default {
   components: {
     LogView
@@ -93,11 +95,12 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getLongTermToken', 'getWorkspaceId']),
+    ...mapState(useUserStore, ['getLongTermToken']),
+    ...mapState(useAppStore, ['getWorkspaceId']),
     socketUrl() {
       return getWebSocketUrl(
         '/socket/script_run',
-        `userId=${this.getLongTermToken}&id=${this.id}&type=script&nodeId=system&workspaceId=${this.getWorkspaceId}`
+        `userId=${this.getLongTermToken}&id=${this.id}&type=script&nodeId=system&workspaceId=${this.getWorkspaceId()}`
       )
     }
   },
@@ -108,14 +111,20 @@ export default {
     } else {
       this.commandParams = []
     }
-  },
-  beforeDestroy() {
-    if (this.socket) {
-      this.socket.close()
+    // 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+    window.onbeforeunload = () => {
+      this.close()
     }
-    clearInterval(this.heart)
+  },
+  beforeUnmount() {
+    this.close()
   },
   methods: {
+    close() {
+      this.socket?.close()
+
+      clearInterval(this.heart)
+    },
     // 初始化
     initWebSocket() {
       this.logContext = ''
@@ -133,7 +142,7 @@ export default {
       }
       this.socket.onerror = (err) => {
         console.error(err)
-        $notification.error({
+        this.$notification.error({
           message: 'web socket 错误,请检查是否开启 ws 代理'
         })
         this.btnLoading = true
@@ -141,7 +150,7 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        $message.warning('会话已经关闭')
+        this.$message.warning('会话已经关闭[script-console]')
         clearInterval(this.heart)
         this.btnLoading = true
       }
@@ -149,7 +158,7 @@ export default {
         if (msg.data.indexOf('JPOM_MSG') > -1 && msg.data.indexOf('op') > -1) {
           const res = JSON.parse(msg.data)
           if (res.code === 200) {
-            $notification.success({
+            this.$notification.success({
               message: res.msg
             })
             // 如果操作是启动或者停止
@@ -163,7 +172,7 @@ export default {
               this.temp = { ...this.temp, executeId: res.executeId }
             }
           } else {
-            $notification.error({
+            this.$notification.error({
               message: res.msg
             })
             this.scriptStatus = 0
@@ -204,16 +213,15 @@ export default {
   }
 }
 </script>
+
 <style scoped>
 .script-console-layout {
   padding: 0;
   margin: 0;
 }
-
 .filter {
   margin: 0 0 10px;
 }
-
 .console {
   padding: 5px;
   color: #fff;

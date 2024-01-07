@@ -243,7 +243,7 @@ const startDispatchLogin = (res: any) => {
   $notification.success({
     message: res.msg
   })
-  const existWorkspace = res.data.bindWorkspaceModels.find((item: any) => item.id === appStore().getWorkspaceId)
+  const existWorkspace = res.data.bindWorkspaceModels.find((item: any) => item.id === appStore().getWorkspaceId())
   if (existWorkspace) {
     // 缓存的还存在
     dispatchLogin(res.data)
@@ -251,8 +251,11 @@ const startDispatchLogin = (res: any) => {
     // 之前的工作空间已经不存在,切换到当前列表的第一个
     // 还没有选择工作空间，默认选中第一个 用户加载菜单
     let firstWorkspace = res.data.bindWorkspaceModels[0]
-    appStore().changeWorkspace(firstWorkspace.id)
-    dispatchLogin(res.data)
+    appStore()
+      .changeWorkspace(firstWorkspace.id)
+      .then(() => {
+        dispatchLogin(res.data)
+      })
   }
 }
 const dispatchLogin = (data: any) => {

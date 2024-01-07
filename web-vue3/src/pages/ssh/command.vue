@@ -287,7 +287,7 @@
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" name="workspaceId">
           <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
-            <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{
+            <a-select-option :disabled="getWorkspaceId() === item.id" v-for="item in workspaceList" :key="item.id">{{
               item.name
             }}</a-select-option>
           </a-select>

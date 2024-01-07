@@ -1,15 +1,14 @@
 <template>
   <a-modal
     destroyOnClose
-    :width="getFullscreenViewLogStyle.width"
+    :width="style.width"
     v-model:open="visibleModel"
-    :bodyStyle="getFullscreenViewLogStyle.bodyStyle"
+    :bodyStyle="style.bodyStyle"
+    :style="style.style"
     :footer="null"
     :maskClosable="false"
     @cancel="close"
   >
-    <!-- :style="getFullscreenViewLogStyle.dialogStyle"
-    -->
     <template #title>
       <a-page-header :title="titleName" :backIcon="false" style="padding: 0">
         <template #subTitle>
@@ -49,11 +48,7 @@
       </a-page-header>
     </template>
 
-    <viewPre
-      ref="viewPre"
-      :height="`calc(${getFullscreenViewLogStyle.bodyStyle.height} - 50px)`"
-      :config="this.temp"
-    ></viewPre>
+    <viewPre ref="viewPre" :height="`calc(${style.bodyStyle.height} - 40px)`" :config="this.temp"></viewPre>
   </a-modal>
 </template>
 
@@ -101,10 +96,12 @@ export default {
         // 自动换行
         wordBreak: false
       },
-      visibleModel: false
+      visibleModel: false,
+      style: {}
     }
   },
   created() {
+    this.style = this.getFullscreenViewLogStyle()
     this.visibleModel = this.visible
   },
   mounted() {

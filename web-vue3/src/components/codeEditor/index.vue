@@ -1,60 +1,65 @@
 <template>
   <div class="code-mirror-div">
-    <div class="tool-bar" ref="toolBar" v-if="showTool">
-      <slot name="tool_before" />
+    <a-spin tip="加载编辑器中" :spinning="loading" v-if="loading">
+      <a-skeleton />
+    </a-spin>
+    <template v-else>
+      <div class="tool-bar" ref="toolBar" v-if="showTool">
+        <slot name="tool_before" />
 
-      <a-space class="tool-bar-end">
-        <div>
-          皮肤：
-          <a-select
-            v-model:value="cmOptions.theme"
-            @select="handleSelectTheme"
-            show-search
-            option-filter-prop="children"
-            :filter-option="filterOption"
-            placeholder="请选择皮肤"
-            style="width: 150px"
-          >
-            <a-select-option v-for="item in themeList" :key="item">{{ item }}</a-select-option>
-          </a-select>
-        </div>
-        <div>
-          语言：
-          <a-select
-            v-model:value="cmOptions.mode"
-            @select="handleSelectMode"
-            show-search
-            option-filter-prop="children"
-            :filter-option="filterOption"
-            placeholder="请选择语言模式"
-            style="width: 150px"
-          >
-            <a-select-option value="">请选择语言模式</a-select-option>
-            <a-select-option v-for="item in modeList" :key="item">{{ item }}</a-select-option>
-          </a-select>
-        </div>
+        <a-space class="tool-bar-end">
+          <div>
+            皮肤：
+            <a-select
+              v-model:value="cmOptions.theme"
+              @select="handleSelectTheme"
+              show-search
+              option-filter-prop="children"
+              :filter-option="filterOption"
+              placeholder="请选择皮肤"
+              style="width: 150px"
+            >
+              <a-select-option v-for="item in themeList" :key="item">{{ item }}</a-select-option>
+            </a-select>
+          </div>
+          <div>
+            语言：
+            <a-select
+              v-model:value="cmOptions.mode"
+              @select="handleSelectMode"
+              show-search
+              option-filter-prop="children"
+              :filter-option="filterOption"
+              placeholder="请选择语言模式"
+              style="width: 150px"
+            >
+              <a-select-option value="">请选择语言模式</a-select-option>
+              <a-select-option v-for="item in modeList" :key="item">{{ item }}</a-select-option>
+            </a-select>
+          </div>
 
-        <a-tooltip>
-          <template v-slot:title>
-            <ul>
-              <li>Ctrl-F / Cmd-F Start searching</li>
-              <li>Ctrl-G / Cmd-G Find next</li>
-              <li>Shift-Ctrl-G / Shift-Cmd-G Find previous</li>
-              <li>Shift-Ctrl-F / Cmd-Option-F Replace</li>
-              <li>Shift-Ctrl-R / Shift-Cmd-Option-F Replace all</li>
-              <li>
-                Alt-F Persistent search (dialog doesn't autoclose, enter to find next, Shift-Enter to find previous)
-              </li>
-              <li>Alt-G Jump to line</li>
-            </ul>
-          </template>
-          <QuestionCircleOutlined />
-        </a-tooltip>
-      </a-space>
-    </div>
-    <div :style="{ height: codeMirrorHeight }">
-      <Codemirror v-model:value="data" :options="cmOptions" @change="onCmCodeChanges" placeholder="请输入内容" />
-    </div>
+          <a-tooltip>
+            <template v-slot:title>
+              <ul>
+                <li>Ctrl-F / Cmd-F Start searching</li>
+                <li>Ctrl-G / Cmd-G Find next</li>
+                <li>Shift-Ctrl-G / Shift-Cmd-G Find previous</li>
+                <li>Shift-Ctrl-F / Cmd-Option-F Replace</li>
+                <li>Shift-Ctrl-R / Shift-Cmd-Option-F Replace all</li>
+                <li>
+                  Alt-F Persistent search (dialog doesn't autoclose, enter to find next, Shift-Enter to find previous)
+                </li>
+                <li>Alt-G Jump to line</li>
+              </ul>
+            </template>
+            <QuestionCircleOutlined />
+          </a-tooltip>
+        </a-space>
+      </div>
+      <div :style="{ height: codeMirrorHeight }">
+        <Codemirror v-model:value="data" :options="cmOptions" @change="onCmCodeChanges" placeholder="请输入内容" />
+      </div>
+    </template>
   </div>
 </template>
 
@@ -245,7 +250,8 @@ export default {
         defaultJsonIndentation: 2
       },
       modeList: [],
-      themeList: []
+      themeList: [],
+      loading: true
     }
   },
   mounted() {
@@ -270,6 +276,10 @@ export default {
         this.themeList.push(paths[paths.length - 1].split('.')[0])
       })
     }
+    // 延迟渲染，等待资源加载完成
+    setTimeout(() => {
+      this.loading = false
+    }, 1000)
   },
   methods: {
     onCmCodeChanges(v) {

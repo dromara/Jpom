@@ -312,7 +312,6 @@ export default {
     //     "<li>解绑只删除在本系统的关联数据,不会删除容器里面数据</b></li>" +
     //     " </ul>";
 
-    //   const h = this.$createElement;
     //   //
     //   this.$confirm({
     //     title: "危险操作！！！",

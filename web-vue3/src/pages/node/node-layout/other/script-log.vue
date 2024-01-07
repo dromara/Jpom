@@ -1,5 +1,5 @@
 <template>
-  <div class="node-full-content">
+  <div>
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
@@ -9,14 +9,17 @@
       :pagination="pagination"
       bordered
       rowKey="id"
+      :scroll="{
+        x: 'max-content'
+      }"
     >
-      <template #title>
+      <template v-slot:title>
         <a-space>
-          <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
+          <a-input v-model:value="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
           <a-select
             show-search
             option-filter-prop="children"
-            v-model="listQuery.triggerExecType"
+            v-model:value="listQuery.triggerExecType"
             allowClear
             placeholder="触发类型"
             class="search-input-item"
@@ -24,10 +27,9 @@
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-range-picker
-            v-model="listQuery['createTimeMillis']"
+            v-model:value="listQuery['createTimeMillis']"
             allowClear
             inputReadOnly
-            class="search-input-item"
             :show-time="{ format: 'HH:mm:ss' }"
             :placeholder="['执行时间开始', '执行时间结束']"
             format="YYYY-MM-DD HH:mm:ss"
@@ -37,7 +39,7 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-tooltip>
-            <template #title>
+            <template v-slot:title>
               <div>
                 脚本模版是存储在节点(插件端),执行也都将在节点里面执行,服务端会定时去拉取执行日志,拉取频率为 100 条/分钟
               </div>
@@ -47,47 +49,58 @@
                 </ul>
               </div>
             </template>
-            <question-circle-filled />
+            <QuestionCircleOutlined />
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip #scriptName slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <a-tooltip #modifyUser slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <template #triggerExecTypeMap slot-scope="text">
-        <span>{{ triggerExecTypeMap[text] || '未知' }}</span>
-      </template>
-      <template #global slot-scope="text">
-        <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
-        <a-tag v-else>工作空间</a-tag>
-      </template>
-      <a-tooltip #createTimeMillis slot-scope="text, record" :title="`${parseTime(record.createTimeMillis)}`">
-        <span>{{ parseTime(record.createTimeMillis) }}</span>
-      </a-tooltip>
-      <template #operation slot-scope="text, record">
-        <a-space>
-          <a-button size="small" type="primary" @click="viewLog(record)">查看日志</a-button>
 
-          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-        </a-space>
+      <template #bodyCell="{ column, text, record, index }">
+        <template v-if="column.dataIndex === 'scriptName'">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'modifyUser'">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'triggerExecType'">
+          <span>{{ triggerExecTypeMap[text] || '未知' }}</span>
+        </template>
+        <template v-else-if="column.dataIndex === 'workspaceId'">
+          <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
+          <a-tag v-else>工作空间</a-tag>
+        </template>
+        <template v-else-if="column.dataIndex === 'createTimeMillis'">
+          <a-tooltip :title="`${parseTime(record.createTimeMillis)}`">
+            <span>{{ parseTime(record.createTimeMillis) }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'operation'">
+          <a-space>
+            <a-button size="small" type="primary" @click="viewLog(record)">查看日志</a-button>
+
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+          </a-space>
+        </template>
       </template>
     </a-table>
     <!-- 日志 -->
-    <a-modal
-      destroyOnClose
-      :width="'80vw'"
-      v-model:visible="logVisible"
-      title="执行日志"
-      :footer="null"
-      :maskClosable="false"
-    >
-      <script-log-view v-if="logVisible" :temp="temp" />
-    </a-modal>
+
+    <script-log-view
+      v-if="logVisible > 0"
+      :visible="logVisible != 0"
+      @close="
+        () => {
+          logVisible = 0
+        }
+      "
+      :temp="temp"
+    />
   </div>
 </template>
+
 <script>
 import { getScriptLogList, scriptDel, triggerExecTypeMap } from '@/api/node-other'
 // import {triggerExecTypeMap} from "@/api/node-script";
@@ -119,50 +132,46 @@ export default {
       triggerExecTypeMap: triggerExecTypeMap,
       list: [],
       temp: {},
-      logVisible: false,
+      logVisible: 0,
       columns: [
         {
           title: '名称',
           dataIndex: 'scriptName',
           ellipsis: true,
-          width: 100,
-          scopedSlots: { customRender: 'scriptName' }
+          width: 100
         },
         {
           title: '执行时间',
           dataIndex: 'createTimeMillis',
           ellipsis: true,
-          width: '160px',
-          scopedSlots: { customRender: 'createTimeMillis' }
+          width: '160px'
         },
         {
           title: '触发类型',
           dataIndex: 'triggerExecType',
           width: 100,
-          ellipsis: true,
-          scopedSlots: { customRender: 'triggerExecTypeMap' }
+          ellipsis: true
         },
         {
           title: '执行域',
           dataIndex: 'workspaceId',
           ellipsis: true,
-          scopedSlots: { customRender: 'global' },
+
           width: '90px'
         },
         {
           title: '执行人',
           dataIndex: 'modifyUser',
           ellipsis: true,
-          width: 100,
-          scopedSlots: { customRender: 'modifyUser' }
+          width: 100
         },
         {
           title: '操作',
           dataIndex: 'operation',
           align: 'center',
-          scopedSlots: { customRender: 'operation' },
+
           fixed: 'right',
-          width: '140px'
+          width: '100px'
         }
       ]
     }
@@ -193,12 +202,13 @@ export default {
       return parseTime(v)
     },
     viewLog(record) {
-      this.logVisible = true
+      this.logVisible = new Date() * Math.random()
       this.temp = record
     },
     handleDelete(record) {
-      $confirm({
+      this.$confirm({
         title: '系统提示',
+        zIndex: 1009,
         content: '真的要删除执行记录么？',
         okText: '确认',
         cancelText: '取消',
@@ -212,7 +222,7 @@ export default {
           // 删除
           scriptDel(params).then((res) => {
             if (res.code === 200) {
-              $notification.success({
+              this.$notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -229,4 +239,3 @@ export default {
   }
 }
 </script>
-<style scoped></style>

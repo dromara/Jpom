@@ -70,7 +70,7 @@
           <a-form-item-rest>
             <a-space direction="vertical">
               <div v-for="(item, index) in temp.prohibitExecuteArray" :key="item.key">
-                <a-space direction="vertical" class="item-info">
+                <a-space direction="vertical" class="item-info" style="width: 100%">
                   <a-range-picker
                     style="width: 100%"
                     v-model:value="item.moments"
@@ -140,7 +140,7 @@
           <a-form-item-rest>
             <a-space direction="vertical">
               <div v-for="(item, index) in temp.allowExecuteArray" :key="item.key">
-                <a-space direction="vertical" class="item-info">
+                <a-space direction="vertical" class="item-info" style="width: 100%">
                   <div>
                     <a-select
                       placeholder="请选择可以执行的星期"

@@ -160,7 +160,7 @@
                 <a-menu-item key="2">
                   <router-link
                     target="_blank"
-                    :to="{ path: '/full-terminal', query: { id: record.id, wid: getWorkspaceId } }"
+                    :to="{ path: '/full-terminal', query: { id: record.id, wid: getWorkspaceId() } }"
                   >
                     <a-button size="small" type="primary" icon="fullscreen"> 新标签终端</a-button>
                   </router-link>
@@ -297,7 +297,7 @@
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" name="workspaceId">
           <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
-            <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{
+            <a-select-option :disabled="getWorkspaceId() === item.id" v-for="item in workspaceList" :key="item.id">{{
               item.name
             }}</a-select-option>
           </a-select>

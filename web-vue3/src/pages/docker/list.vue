@@ -169,7 +169,7 @@
             v-model:value="temp.workspaceId"
             placeholder="请选择工作空间"
           >
-            <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{
+            <a-select-option :disabled="getWorkspaceId() === item.id" v-for="item in workspaceList" :key="item.id">{{
               item.name
             }}</a-select-option>
           </a-select>

@@ -107,7 +107,7 @@ export default {
         // 填充空白，避免无内容 页面背景太低
         const min = Math.ceil(element.clientHeight / this.itemHeight)
         const le = min - result.length
-        for (let i = 0; i < le; i++) {
+        for (let i = 0; i < le - 1; i++) {
           result.push({
             id: 'system-warp-empty:' + i,
             warp: true
@@ -254,6 +254,7 @@ export default {
   color: #ffb86c;
   padding: 10px;
   box-shadow: inset 0 0 10px 0 #e8e8e8;
+  border-radius: 8px;
 }
 .scroller {
   height: 100%;
