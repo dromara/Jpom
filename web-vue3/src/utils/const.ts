@@ -33,8 +33,6 @@ export const NO_NOTIFY_KEY = 'tip'
 
 export const NO_LOADING_KEY = 'loading'
 
-export const LOADING_TIP = 'loadingTip'
-
 const cachePageLimitKeyName = 'page_limit'
 import dayjs from 'dayjs'
 export function getCachePageLimit(): number {
@@ -68,7 +66,7 @@ export const PAGE_DEFAULT_LIST_QUERY: any = {
  * @returns
  */
 export function COMPUTED_PAGINATION(queryParam: any, pageSizeOptions = PAGE_DEFAULT_SIZW_OPTIONS) {
-  // console.log(queryParam);
+  // console.log(queryParam)
   const limit = queryParam.limit || PAGE_DEFAULT_LIST_QUERY.limit
   const total = queryParam.total || 0
   return {
@@ -125,7 +123,7 @@ export const RESTART_UPGRADE_WAIT_TIME_COUNT = 80
 export const CRON_DATA_SOURCE = [
   {
     title: '取消定时,不再定时执行（支持 ! 前缀禁用定时执行，如：!0 0/1 * * * ?）',
-    children: [
+    options: [
       {
         title: '',
         value: ''
@@ -134,7 +132,7 @@ export const CRON_DATA_SOURCE = [
   },
   {
     title: '分钟级别',
-    children: [
+    options: [
       {
         title: '1分钟',
         value: '0 0/1 * * * ?'
@@ -155,7 +153,7 @@ export const CRON_DATA_SOURCE = [
   },
   {
     title: '小时级别',
-    children: [
+    options: [
       {
         title: '每小时',
         value: '0 0 0/1 * * ?'
@@ -164,7 +162,7 @@ export const CRON_DATA_SOURCE = [
   },
   {
     title: '天级别',
-    children: [
+    options: [
       {
         title: '凌晨0点和中午12点',
         value: '0 0 0,12 * * ?'
@@ -177,7 +175,7 @@ export const CRON_DATA_SOURCE = [
   },
   {
     title: '秒级别（默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）',
-    children: [
+    options: [
       {
         title: '5秒一次',
         value: '0/5 * * * * ?'

@@ -1,18 +1,32 @@
 <template>
   <div>
-    <log-view :ref="`logView`" height="70vh" marginTop="-10px" />
+    <log-view1
+      titleName="执行日志"
+      :ref="`logView`"
+      :visible="visible"
+      @close="
+        () => {
+          $emit('close')
+        }
+      "
+    />
   </div>
 </template>
+
 <script>
 import { scriptLog } from '@/api/node-other'
-import LogView from '@/components/logView'
+import LogView1 from '@/components/logView'
 export default {
   components: {
-    LogView
+    LogView1
   },
   props: {
     temp: {
       type: Object
+    },
+    visible: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -22,7 +36,7 @@ export default {
       line: 1
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.logTimer) {
       clearInterval(this.logTimer)
     }
@@ -64,7 +78,7 @@ export default {
           this.line = res.data.line
           // if (lines.length) {
           //   // 自动滚动到底部
-          //   nextTick(() => {
+          //   this.$nextTick(() => {
           //     setTimeout(() => {
           //       const textarea = document.getElementById("script-log-textarea");
           //       if (textarea) {
@@ -76,7 +90,7 @@ export default {
         }
       })
     }
-  }
+  },
+  emits: ['close']
 }
 </script>
-<style scoped></style>

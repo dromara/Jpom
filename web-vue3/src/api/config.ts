@@ -34,7 +34,7 @@ instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
   const { headers } = config
   headers[TOKEN_HEADER_KEY] = userStore.token
-  headers[CACHE_WORKSPACE_ID] = appStore.getWorkspaceId
+  headers[CACHE_WORKSPACE_ID] = appStore.getWorkspaceId()
 
   if (routerBase) {
     // 防止 url 出现 //
@@ -173,7 +173,6 @@ function toLogin(res: IResponse<any>, response: AxiosResponse<IResponse<any>>) {
       params = Qs.parse(location.hash.substring(index + 1))
     }
     const pageUrl = router.resolve({
-      name: 'login',
       path: '/login',
       query: params
     })
@@ -186,7 +185,7 @@ function toLogin(res: IResponse<any>, response: AxiosResponse<IResponse<any>>) {
 
 export function loadRouterBase(url: string, params: any) {
   const paramsObj = params || {}
-  paramsObj[CACHE_WORKSPACE_ID] = useAppStore().getWorkspaceId
+  paramsObj[CACHE_WORKSPACE_ID] = useAppStore().getWorkspaceId()
   let queryStr = ''
   Object.keys(paramsObj).forEach((key, i) => {
     queryStr += `${i === 0 ? '' : '&'}${key}=${paramsObj[key]}`

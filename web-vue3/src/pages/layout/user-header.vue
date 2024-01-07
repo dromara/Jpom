@@ -586,7 +586,7 @@ export default {
             this.myWorkspaceList = itemGroupBy(tempArray, 'group', 'value', 'children')
 
             let wid = this.$route.query.wid
-            wid = wid ? wid : this.getWorkspaceId
+            wid = wid ? wid : this.getWorkspaceId()
             const existWorkspace = tempArray.find((item) => item.id === wid)
 
             if (existWorkspace) {
@@ -890,15 +890,17 @@ export default {
         // console.log(location.href.indexOf(cluster.url), url);
         location.href = url
       } else {
-        appStore().changeWorkspace(item.id)
-
-        this.$router
-          .push({
-            query: { ...this.$route.query, wid: item.id }
-          })
+        appStore()
+          .changeWorkspace(item.id)
           .then(() => {
-            useAllMenuStore().restLoadSystemMenus('normal')
-            this.reload()
+            this.$router
+              .push({
+                query: { ...this.$route.query, wid: item.id }
+              })
+              .then(() => {
+                useAllMenuStore().restLoadSystemMenus('normal')
+                this.reload()
+              })
           })
       }
     },

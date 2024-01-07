@@ -8,6 +8,7 @@
       @change="selectChange"
       :placeholder="selectPlaceholder"
     >
+      <template #suffixIcon v-if="canReload"> <ReloadOutlined @click="refreshSelect" /></template>
       <template #dropdownRender="{ menuNode: menu }">
         <v-nodes :vnodes="menu" />
         <a-divider />
@@ -21,7 +22,7 @@
           </a-button>
         </a-space>
       </template>
-      <a-select-option v-if="selectPlaceholder" value="">{{ selectPlaceholder }}</a-select-option>
+      <a-select-option v-if="selectPlaceholder" value="">{{ selectPlaceholder }}{{ this.canReload }}</a-select-option>
       <a-select-option v-for="item in optionList" :key="item">{{ item }} </a-select-option>
     </Select>
   </div>
@@ -74,6 +75,10 @@ export default {
     maxLength: {
       type: Number,
       default: 200
+    },
+    canReload: {
+      type: Boolean,
+      default: false
     }
   },
   watch: {
@@ -108,7 +113,11 @@ export default {
       this.selected = v
       //
       this.selectChange(v)
+    },
+    refreshSelect() {
+      this.$emit('onRefreshSelect')
     }
-  }
+  },
+  emits: ['update:value', 'onRefreshSelect']
 }
 </script>

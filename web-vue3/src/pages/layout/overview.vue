@@ -21,7 +21,7 @@
     <a-row>
       <a-col :span="4">
         <!-- <a-list bordered :data-source="myWorkspaceList">
-            <a-list-item slot="renderItem" slot-scope="item"> <a-tag color="blue" v-if="getWorkspaceId === item.id">当前</a-tag>{{ item.name }} </a-list-item>
+            <a-list-item slot="renderItem" slot-scope="item"> <a-tag color="blue" v-if="getWorkspaceId() === item.id">当前</a-tag>{{ item.name }} </a-list-item>
             <div slot="header">
               <b>您的工作空间</b>
             </div>

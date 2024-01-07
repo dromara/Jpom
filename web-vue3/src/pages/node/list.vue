@@ -1,8 +1,8 @@
 <template>
   <div class="full-content">
-    <template v-if="useSuggestions">
+    <template v-if="this.useSuggestions">
       <a-result title="当前工作空间还没有节点">
-        <template #subTitle> 需要您在需要被管理的服务器中安装 agent ，并将 agent 信息添加到系统中 </template>
+        <template v-slot:subTitle> 需要您在需要被管理的服务器中安装 agent ，并将 agent 信息添加到系统中 </template>
         <template #extra>
           <a-button type="primary" @click="fastInstallNodeShow">快速安装 </a-button>
           <router-link to="/system/assets/machine-list">
@@ -24,14 +24,14 @@
     </template>
     <template v-else>
       <a-card :bodyStyle="{ padding: '10px' }">
-        <template #title>
+        <template v-slot:title>
           <a-space>
-            <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="节点名称" />
+            <a-input v-model:value="listQuery['%name%']" @pressEnter="loadData" placeholder="节点名称" />
 
             <a-select
               show-search
               option-filter-prop="children"
-              v-model="listQuery.group"
+              v-model:value="listQuery.group"
               allowClear
               placeholder="分组"
               class="search-input-item"
@@ -45,12 +45,12 @@
               type="primary"
               @click="
                 () => {
-                  showFastInstall = true
+                  this.fastInstallNode = true
                 }
               "
               >快速安装
             </a-button>
-            <a-dropdown v-if="layoutType === 'table'">
+            <a-dropdown v-if="this.layoutType === 'table'">
               <a-button
                 type="primary"
                 :disabled="!tableSelections || !tableSelections.length"
@@ -63,17 +63,16 @@
             </a-tooltip>
 
             <a-button type="primary" @click="changeLayout">
-              {{ layoutType === 'card' ? '卡片' : '表格' }}
               <template #icon>
-                <layout-outlined v-if="layoutType === 'card'" />
-                <table-outlined v-else />
+                <LayoutOutlined v-if="layoutType === 'card'" />
+                <TableOutlined v-else />
               </template>
+              {{ this.layoutType === 'card' ? '卡片' : '表格' }}
             </a-button>
             <a-tooltip placement="bottom">
-              <template #title>
+              <template v-slot:title>
                 <div>
                   <ul>
-                    <li>监控数据目前采用原生命令获取,和真实情况有一定差异可以当做参考依据</li>
                     <li>监控频率可以到服务端配置文件中修改</li>
                     <li>悬停到仪表盘上显示具体含义</li>
                     <li>点击仪表盘查看监控历史数据</li>
@@ -84,7 +83,7 @@
                   </ul>
                 </div>
               </template>
-              <question-circle-filled />
+              <QuestionCircleOutlined />
             </a-tooltip>
             <div class="header-statistic">
               <a-statistic-countdown format="s 秒" title="刷新倒计时 " :value="deadline" @finish="onFinish" />
@@ -92,7 +91,7 @@
           </a-space>
         </template>
         <a-table
-          v-if="layoutType === 'table'"
+          v-if="this.layoutType === 'table'"
           :columns="columns"
           :data-source="list"
           bordered
@@ -101,357 +100,357 @@
           :pagination="pagination"
           @change="
             (pagination, filters, sorter) => {
-              listQuery.value = CHANGE_PAGE(listQuery.value, { pagination, sorter })
-              loadData()
+              this.listQuery = CHANGE_PAGE(this.listQuery, {
+                pagination,
+                sorter
+              })
+              this.loadData()
             }
           "
+          :scroll="{
+            x: 'max-content'
+          }"
           :row-selection="rowSelection"
         >
-          <a-tooltip #url slot-scope="text, record" placement="topLeft" :title="text">
-            <template v-if="record.machineNodeData">
-              <span>{{ record.machineNodeData.jpomProtocol }}://{{ record.machineNodeData.jpomUrl }}</span>
-            </template>
-            <span v-else> - </span>
-          </a-tooltip>
-          <!-- <template #name slot-scope="text, record">
-            <template v-if="record.openStatus !== 1">
-              <a-tooltip :title="`${text}`">
-                <span>{{ text }}</span>
-              </a-tooltip>
-            </template>
-            <template v-else>
-              <a-tooltip :title="`${text} 点击进入节点管理`" @click="handleNode(record)">
-                <a-button type="link" style="padding: 0" size="small">
-                  <a-icon type="fullscreen" /><span>{{ text }}</span>
-                </a-button>
-              </a-tooltip>
-            </template>
-          </template> -->
-          <a-tooltip
-            #status
-            slot-scope="text, item"
-            placement="topLeft"
-            :title="`${statusMap[item.machineNodeData && item.machineNodeData.status] || '未知'} ${
-              item.machineNodeData && item.machineNodeData.statusMsg
-            }`"
-          >
-            <template v-if="item.openStatus === 1">
-              <a-tag
-                :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'"
-                style="margin-right: 0"
-              >
-                {{ statusMap[item.machineNodeData && item.machineNodeData.status] || '未知' }}
-              </a-tag>
-            </template>
-            <a-tag v-else>未启用</a-tag>
-          </a-tooltip>
-          <a-tooltip #osName slot-scope="text, item" placement="topLeft" :title="text">
-            <span>{{ item.machineNodeData && item.machineNodeData.osName }}</span>
-          </a-tooltip>
-          <a-tooltip #javaVersion slot-scope="text, item" placement="topLeft" :title="text">
-            <span>{{ item.machineNodeData && item.machineNodeData.javaVersion }}</span>
-          </a-tooltip>
-          <a-tooltip
-            #jvmInfo
-            slot-scope="text, item"
-            placement="topLeft"
-            :title="`剩余内存：${renderSize(
-              item.machineNodeData && item.machineNodeData.jvmFreeMemory
-            )} 总内存：${renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory)}`"
-          >
-            <span
-              >{{ renderSize(item.machineNodeData && item.machineNodeData.jvmFreeMemory) }} /
-              {{ renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory) }}</span
-            >
-          </a-tooltip>
-          <!-- <a-tooltip #freeMemory slot-scope="text" placement="topLeft" :title="renderSize(text)">
-        <span>{{ renderSize(text) }}</span>
-      </a-tooltip> -->
-
-          <a-tooltip
-            #runTime
-            slot-scope="text, item"
-            placement="topLeft"
-            :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime)"
-          >
-            <span>{{ formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 2) }}</span>
-          </a-tooltip>
-          <template #projectCount slot-scope="text, item">
-            <div v-if="item.machineNodeData && item.machineNodeData.status === 1" @click="syncNode(item)">
-              <a-tooltip placement="topLeft" title="节点中的所有项目数量,点击重新同步节点项目信息">
-                <a-tag>{{ item.machineNodeData.jpomProjectCount }} </a-tag>
-                <a-icon type="sync" />
-              </a-tooltip>
-            </div>
-            <span v-else>-</span>
-          </template>
-          <template #scriptCount slot-scope="text, item">
-            <div v-if="item.machineNodeData && item.machineNodeData.status === 1" @click="syncNodeScript(item)">
-              <a-tooltip placement="topLeft" title="节点中的所有脚本模版数量,点击重新同步脚本模版信息">
-                <a-tag>{{ item.machineNodeData.jpomScriptCount }} </a-tag>
-                <a-icon type="sync" />
-              </a-tooltip>
-            </div>
-            <span v-else>-</span>
-          </template>
-
-          <template #operation slot-scope="text, record, index">
-            <a-space>
-              <a-tooltip title="如果按钮不可用则表示当前节点已经关闭啦,需要去编辑中启用">
-                <a-button
-                  size="small"
-                  class="jpom-node-manage-btn"
-                  type="primary"
-                  @click="handleNode(record)"
-                  :disabled="record.openStatus !== 1"
-                  ><a-icon type="apartment" />管理</a-button
-                >
-              </a-tooltip>
-              <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
-                <a-button size="small" type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"
-                  ><a-icon type="code" />终端</a-button
-                >
-              </a-tooltip>
-
-              <a-dropdown>
-                <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-                  更多
-                  <down-outlined />
-                </a>
-                <template #overlay>
-                  <a-menu>
-                    <a-menu-item>
-                      <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-                    </a-menu-item>
-
-                    <a-menu-item>
-                      <a-tooltip placement="leftBottom" title="删除会检查数据关联性,并且节点不存在项目或者脚本">
-                        <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-                      </a-tooltip>
-                    </a-menu-item>
-                    <a-menu-item>
-                      <a-tooltip
-                        placement="leftBottom"
-                        title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用"
-                      >
-                        <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
-                      </a-tooltip>
-                    </a-menu-item>
-                    <a-menu-divider />
-                    <a-menu-item>
-                      <a-button
-                        size="small"
-                        type="primary"
-                        :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
-                        @click="sortItemHander(record, index, 'top')"
-                        >置顶</a-button
-                      >
-                    </a-menu-item>
-                    <a-menu-item>
-                      <a-button
-                        size="small"
-                        type="primary"
-                        :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
-                        @click="sortItemHander(record, index, 'up')"
-                        >上移</a-button
-                      >
-                    </a-menu-item>
-                    <a-menu-item>
-                      <a-button
-                        size="small"
-                        type="primary"
-                        :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
-                        @click="sortItemHander(record, index, 'down')"
-                      >
-                        下移
-                      </a-button>
-                    </a-menu-item>
-                  </a-menu>
+          <template #bodyCell="{ column, text, record, index }">
+            <template v-if="column.dataIndex === 'url'">
+              <a-tooltip placement="topLeft" :title="text">
+                <template v-if="record.machineNodeData">
+                  <span>{{ record.machineNodeData.jpomProtocol }}://{{ record.machineNodeData.jpomUrl }}</span>
                 </template>
-              </a-dropdown>
-            </a-space>
+                <span v-else> - </span>
+              </a-tooltip>
+            </template>
+            <template v-else-if="column.dataIndex === 'name'">
+              <template v-if="record.openStatus !== 1">
+                <a-tooltip :title="`${text}`">
+                  <span>{{ (text || '').slice(0, 10) }}</span>
+                </a-tooltip>
+              </template>
+              <template v-else>
+                <a-tooltip :title="`${text} 点击进入节点管理`" @click="handleNode(record)">
+                  <a-button type="link" style="padding: 0" size="small">
+                    <FullscreenOutlined /><span>{{ text }}</span>
+                  </a-button>
+                </a-tooltip>
+              </template>
+            </template>
+            <template v-else-if="column.dataIndex === 'status'">
+              <a-tooltip
+                placement="topLeft"
+                :title="`${statusMap[record.machineNodeData && record.machineNodeData.status] || '未知'} ${
+                  record.machineNodeData && record.machineNodeData.statusMsg
+                }`"
+              >
+                <template v-if="record.openStatus === 1">
+                  <a-tag
+                    :color="record.machineNodeData && record.machineNodeData.status === 1 ? 'green' : 'pink'"
+                    style="margin-right: 0"
+                  >
+                    {{ statusMap[record.machineNodeData && record.machineNodeData.status] || '未知' }}
+                  </a-tag>
+                </template>
+                <a-tag v-else>未启用</a-tag>
+              </a-tooltip>
+            </template>
+            <template v-else-if="column.dataIndex === 'osName'">
+              <a-tooltip placement="topLeft" :title="text">
+                <span>{{ record.machineNodeData && record.machineNodeData.osName }}</span>
+              </a-tooltip>
+            </template>
+            <template v-else-if="column.dataIndex === 'javaVersion'">
+              <a-tooltip placement="topLeft" :title="record.machineNodeData && record.machineNodeData.javaVersion">
+                <span>{{ record.machineNodeData && record.machineNodeData.javaVersion }}</span>
+              </a-tooltip>
+            </template>
+            <template v-else-if="column.dataIndex === 'jvmInfo'">
+              <a-tooltip
+                placement="topLeft"
+                :title="`剩余内存：${renderSize(
+                  record.machineNodeData && record.machineNodeData.jvmFreeMemory
+                )} 总内存：${renderSize(record.machineNodeData && record.machineNodeData.jvmTotalMemory)}`"
+              >
+                <span
+                  >{{ renderSize(record.machineNodeData && record.machineNodeData.jvmFreeMemory) }}
+                  /
+                  {{ renderSize(record.machineNodeData && record.machineNodeData.jvmTotalMemory) }}</span
+                >
+              </a-tooltip>
+            </template>
+            <!-- <a-tooltip slot="freeMemory" slot-scope="text" placement="topLeft" :title="renderSize(text)">
+          <span>{{ renderSize(text) }}</span>
+        </a-tooltip> -->
+
+            <template v-else-if="column.dataIndex === 'runTime'">
+              <a-tooltip
+                placement="topLeft"
+                :title="formatDuration(record.machineNodeData && record.machineNodeData.jpomUptime)"
+              >
+                <span>{{ formatDuration(record.machineNodeData && record.machineNodeData.jpomUptime, '', 2) }}</span>
+              </a-tooltip>
+            </template>
+            <template v-else-if="column.dataIndex === 'jpomProjectCount'">
+              <div v-if="record.machineNodeData && record.machineNodeData.status === 1" @click="syncNode(record)">
+                <a-tooltip placement="topLeft">
+                  <template #title>
+                    <ul>
+                      <li>工作空间中逻辑节点中的项目数量：{{ text || 0 }}</li>
+                      <li>物理节点项目数量：{{ record.machineNodeData.jpomProjectCount }}</li>
+                      <li>点击重新同步当前工作空间逻辑节点项目信息</li>
+                    </ul>
+                  </template>
+                  <a-tag>{{ text || 0 }} </a-tag>
+                  <SyncOutlined />
+                </a-tooltip>
+              </div>
+              <span v-else>-</span>
+            </template>
+            <template v-else-if="column.dataIndex === 'jpomScriptCount'">
+              <div v-if="record.machineNodeData && record.machineNodeData.status === 1" @click="syncNodeScript(record)">
+                <a-tooltip placement="topLeft">
+                  <template #title>
+                    <ul>
+                      <li>工作空间中逻辑节点中脚本模版数量：{{ text || 0 }}</li>
+                      <li>物理节点脚本模板数据：{{ record.machineNodeData.jpomScriptCount }}</li>
+                      <li>点击重新同步当前工作空间逻辑节点脚本模版信息</li>
+                    </ul>
+                  </template>
+                  <a-tag>{{ text || 0 }} </a-tag>
+                  <SyncOutlined />
+                </a-tooltip>
+              </div>
+              <span v-else>-</span>
+            </template>
+
+            <template v-else-if="column.dataIndex === 'operation'">
+              <a-space>
+                <a-tooltip title="如果按钮不可用则表示当前节点已经关闭啦,需要去编辑中启用">
+                  <a-button size="small" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"
+                    >管理</a-button
+                  >
+                </a-tooltip>
+                <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
+                  <a-button size="small" type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"
+                    ><CodeOutlined />终端</a-button
+                  >
+                </a-tooltip>
+
+                <a-dropdown>
+                  <a @click="(e) => e.preventDefault()">
+                    更多
+                    <DownOutlined />
+                  </a>
+                  <template v-slot:overlay>
+                    <a-menu>
+                      <a-menu-item>
+                        <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+                      </a-menu-item>
+
+                      <a-menu-item>
+                        <a-tooltip placement="leftBottom" title="删除会检查数据关联性,并且节点不存在项目或者脚本">
+                          <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+                        </a-tooltip>
+                      </a-menu-item>
+                      <a-menu-item>
+                        <a-tooltip
+                          placement="leftBottom"
+                          title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用"
+                        >
+                          <a-button size="small" type="primary" danger @click="handleUnbind(record)">解绑</a-button>
+                        </a-tooltip>
+                      </a-menu-item>
+                      <a-menu-divider />
+                      <a-menu-item>
+                        <a-button
+                          size="small"
+                          type="primary"
+                          :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
+                          @click="sortItemHander(record, index, 'top')"
+                          >置顶</a-button
+                        >
+                      </a-menu-item>
+                      <a-menu-item>
+                        <a-button
+                          size="small"
+                          type="primary"
+                          :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
+                          @click="sortItemHander(record, index, 'up')"
+                          >上移</a-button
+                        >
+                      </a-menu-item>
+                      <a-menu-item>
+                        <a-button
+                          size="small"
+                          type="primary"
+                          :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
+                          @click="sortItemHander(record, index, 'down')"
+                        >
+                          下移
+                        </a-button>
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
+              </a-space>
+            </template>
           </template>
         </a-table>
-        <template v-else-if="layoutType === 'card'">
-          <a-row>
-            <a-row :gutter="[16, 16]">
-              <template v-if="list && list.length">
-                <a-col v-for="item in list" :key="item.id" :span="6">
-                  <template>
-                    <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
-                      <template #title>
-                        <a-row :gutter="[4, 0]">
-                          <a-col
-                            :span="17"
-                            class="jpom-node-manage-btn"
-                            style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
-                          >
-                            <a-tooltip>
-                              <template #title>
-                                点击进入节点管理
-                                <div>节点名称：{{ item.name }}</div>
-                                <div>节点地址：{{ item.url }}</div>
-                              </template>
+        <template v-else-if="this.layoutType === 'card'">
+          <a-row :gutter="[16, 16]">
+            <template v-if="list && list.length">
+              <a-col v-for="item in list" :key="item.id" :span="6">
+                <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
+                  <template v-slot:title>
+                    <a-row :gutter="[4, 0]">
+                      <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+                        <a-tooltip>
+                          <template v-slot:title>
+                            点击进入节点管理
+                            <div>节点名称：{{ item.name }}</div>
+                            <div>节点地址：{{ item.url }}</div>
+                          </template>
 
-                              <a-button type="link" style="padding: 0" size="small" @click="handleNode(item)">
-                                <span> {{ item.name }}</span>
-                              </a-button>
-                            </a-tooltip>
-                          </a-col>
-                          <a-col :span="7" style="text-align: right">
-                            <a-tooltip>
-                              <template #title>
-                                <div>
-                                  当前状态：{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
-                                </div>
-                                <div>
-                                  状态描述：{{ (item.machineNodeData && item.machineNodeData.statusMsg) || '' }}
-                                </div>
-                              </template>
-                              <a-tag
-                                :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'"
-                                style="margin-right: 0"
-                              >
-                                {{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
-                              </a-tag>
-                            </a-tooltip>
-                          </a-col>
-                        </a-row>
-                      </template>
-
-                      <a-row :gutter="[8, 8]">
-                        <a-col :span="8" style="text-align: center">
-                          <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`CPU 占用率：${item.occupyCpu}%`">
-                            <a-progress
-                              type="circle"
-                              :width="80"
-                              :stroke-color="{
-                                '0%': '#87d068',
-                                '30%': '#87d068',
-                                '100%': '#108ee9'
-                              }"
-                              size="small"
-                              status="active"
-                              :percent="item.occupyCpu"
-                            />
-                          </a-tooltip>
-                        </a-col>
-                        <a-col :span="8" style="text-align: center">
-                          <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`硬盘占用率：${item.occupyDisk}%`">
-                            <a-progress
-                              type="circle"
-                              :width="80"
-                              :stroke-color="{
-                                '0%': '#87d068',
-                                '30%': '#87d068',
-                                '100%': '#108ee9'
-                              }"
-                              size="small"
-                              status="active"
-                              :percent="item.occupyDisk"
-                            />
-                          </a-tooltip>
-                        </a-col>
-                        <a-col :span="8" style="text-align: center">
-                          <a-tooltip
-                            @click="handleHistory(item, 'nodeTop')"
-                            :title="`内存占用率：${item.occupyMemory}%`"
+                          <a-button type="link" style="padding: 0" size="small" @click="handleNode(item)">
+                            <span> {{ item.name }}</span>
+                          </a-button>
+                        </a-tooltip>
+                      </a-col>
+                      <a-col :span="7" style="text-align: right">
+                        <a-tooltip>
+                          <template v-slot:title>
+                            <div>当前状态：{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}</div>
+                            <div>状态描述：{{ (item.machineNodeData && item.machineNodeData.statusMsg) || '' }}</div>
+                          </template>
+                          <a-tag
+                            :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'"
+                            style="margin-right: 0"
                           >
-                            <a-progress
-                              :width="80"
-                              type="circle"
-                              :stroke-color="{
-                                '0%': '#87d068',
-                                '30%': '#87d068',
-                                '100%': '#108ee9'
-                              }"
-                              size="small"
-                              status="active"
-                              :percent="item.occupyMemory"
-                            />
-                          </a-tooltip>
-                        </a-col>
-                      </a-row>
-
-                      <a-row :gutter="[8, 8]" style="text-align: center">
-                        <a-col :span="8">
-                          <a-tooltip
-                            @click="handleHistory(item, 'networkDelay')"
-                            :title="`${
-                              '延迟' +
-                              (formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) ||
-                                '-') +
-                              ' 点击查看历史趋势'
-                            }`"
-                          >
-                            <a-statistic
-                              title="延迟"
-                              :value="item.machineNodeData && item.machineNodeData.networkDelay"
-                              valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
-                              :formatter="
-                                (v) => {
-                                  return (
-                                    formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) ||
-                                    '-'
-                                  )
-                                }
-                              "
-                            />
-                          </a-tooltip>
-                        </a-col>
-                        <a-col :span="8">
-                          <a-tooltip
-                            :title="
-                              formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 1) || '-'
-                            "
-                          >
-                            <a-statistic
-                              title="运行时间"
-                              valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
-                              :formatter="
-                                (v) => {
-                                  return (
-                                    formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 2) ||
-                                    '-'
-                                  )
-                                }
-                              "
-                            />
-                          </a-tooltip>
-                        </a-col>
-                        <a-col :span="8">
-                          <a-tooltip
-                            :title="`${parseTime(item.machineNodeData && item.machineNodeData.modifyTimeMillis)}`"
-                          >
-                            <a-statistic
-                              title="更新时间"
-                              valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
-                              :formatter="
-                                (v) => {
-                                  return parseTime(
-                                    item.machineNodeData && item.machineNodeData.modifyTimeMillis,
-                                    '{h}:{i}:{s}'
-                                  )
-                                }
-                              "
-                            />
-                          </a-tooltip>
-                        </a-col>
-                      </a-row>
-                    </a-card>
+                            {{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
+                          </a-tag>
+                        </a-tooltip>
+                      </a-col>
+                    </a-row>
                   </template>
-                </a-col>
-              </template>
-              <a-col v-else :span="24">
-                <a-empty description="没有任何节点" />
+
+                  <a-row :gutter="[8, 8]">
+                    <a-col :span="8" style="text-align: center">
+                      <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`CPU 占用率：${item.occupyCpu}%`">
+                        <a-progress
+                          type="circle"
+                          :size="80"
+                          :stroke-color="{
+                            '0%': '#87d068',
+                            '30%': '#87d068',
+                            '100%': '#108ee9'
+                          }"
+                          status="active"
+                          :percent="item.occupyCpu"
+                        />
+                      </a-tooltip>
+                    </a-col>
+                    <a-col :span="8" style="text-align: center">
+                      <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`硬盘占用率：${item.occupyDisk}%`">
+                        <a-progress
+                          type="circle"
+                          :size="80"
+                          :stroke-color="{
+                            '0%': '#87d068',
+                            '30%': '#87d068',
+                            '100%': '#108ee9'
+                          }"
+                          status="active"
+                          :percent="item.occupyDisk"
+                        />
+                      </a-tooltip>
+                    </a-col>
+                    <a-col :span="8" style="text-align: center">
+                      <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`内存占用率：${item.occupyMemory}%`">
+                        <a-progress
+                          :size="80"
+                          type="circle"
+                          :stroke-color="{
+                            '0%': '#87d068',
+                            '30%': '#87d068',
+                            '100%': '#108ee9'
+                          }"
+                          status="active"
+                          :percent="item.occupyMemory"
+                        />
+                      </a-tooltip>
+                    </a-col>
+                  </a-row>
+
+                  <a-row :gutter="[8, 8]" style="text-align: center">
+                    <a-col :span="8">
+                      <a-tooltip
+                        @click="handleHistory(item, 'networkDelay')"
+                        :title="`${
+                          '延迟' +
+                          (formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-') +
+                          ' 点击查看历史趋势'
+                        }`"
+                      >
+                        <a-statistic
+                          title="延迟"
+                          :value="item.machineNodeData && item.machineNodeData.networkDelay"
+                          :valueStyle="statValueStyle"
+                          :formatter="
+                            (v) => {
+                              return (
+                                formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-'
+                              )
+                            }
+                          "
+                        />
+                      </a-tooltip>
+                    </a-col>
+                    <a-col :span="8">
+                      <a-tooltip
+                        :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 1) || '-'"
+                      >
+                        <a-statistic
+                          title="运行时间"
+                          :valueStyle="statValueStyle"
+                          :formatter="
+                            (v) => {
+                              return (
+                                formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 2) || '-'
+                              )
+                            }
+                          "
+                        />
+                      </a-tooltip>
+                    </a-col>
+                    <a-col :span="8">
+                      <a-tooltip :title="`${parseTime(item.machineNodeData && item.machineNodeData.modifyTimeMillis)}`">
+                        <a-statistic
+                          title="更新时间"
+                          :valueStyle="statValueStyle"
+                          :formatter="
+                            (v) => {
+                              return parseTime(
+                                item.machineNodeData && item.machineNodeData.modifyTimeMillis,
+                                'HH:mm:ss'
+                              )
+                            }
+                          "
+                        />
+                      </a-tooltip>
+                    </a-col>
+                  </a-row>
+                </a-card>
               </a-col>
-            </a-row>
+            </template>
+            <a-col v-else :span="24">
+              <a-empty description="没有任何节点" />
+            </a-col>
           </a-row>
+
           <a-row type="flex" justify="center">
             <a-divider v-if="listQuery.total / listQuery.limit > 1" dashed />
             <a-col>
               <a-pagination
-                v-model="listQuery.page"
+                v-model:value="listQuery.page"
                 :showTotal="
                   (total) => {
                     return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery)
@@ -464,11 +463,11 @@
                 :hideOnSinglePage="true"
                 @showSizeChange="
                   (current, size) => {
-                    listQuery.value.limit = size
-                    loadData()
+                    this.listQuery.limit = size
+                    this.loadData()
                   }
                 "
-                @change="loadData"
+                @change="this.loadData"
                 show-less-items
               />
             </a-col>
@@ -480,21 +479,21 @@
     <!-- 编辑区 -->
     <a-modal
       destroyOnClose
-      v-model="editNodeVisible"
+      v-model:open="editNodeVisible"
       width="50%"
       title="编辑节点"
       @ok="handleEditNodeOk"
+      :confirmLoading="confirmLoading"
       :maskClosable="false"
     >
       <a-form ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 19 }">
         <a-form-item label="节点名称" name="name">
-          <a-input :maxLength="50" v-model="temp.name" placeholder="节点名称" />
+          <a-input :maxLength="50" v-model:value="temp.name" placeholder="节点名称" />
         </a-form-item>
         <a-form-item label="分组名称" name="group">
           <custom-select
-            v-model="temp.group"
+            v-model:value="temp.group"
             :data="groupList"
-            suffixIcon=""
             inputPlaceholder="添加分组"
             selectPlaceholder="选择分组名"
           >
@@ -515,7 +514,7 @@
           />
         </a-form-item>
         <a-form-item label="绑定 SSH " name="sshId">
-          <a-select show-search option-filter-prop="children" v-model="temp.sshId" placeholder="请选择SSH">
+          <a-select show-search option-filter-prop="children" v-model:value="temp.sshId" placeholder="请选择SSH">
             <a-select-option value="">不绑定</a-select-option>
             <a-select-option v-for="ssh in sshList" :key="ssh.id" :disabled="ssh.disabled">{{
               ssh.name
@@ -525,20 +524,10 @@
       </a-form>
     </a-modal>
     <!-- 管理节点 -->
-    <a-drawer
-      destroyOnClose
-      :title="`${temp.name}`"
-      placement="right"
-      :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
-      :visible="drawerVisible"
-      @close="onClose"
-    >
-      <!-- 节点管理组件 -->
-      <node-layout v-if="drawerVisible" :node="temp" />
-    </a-drawer>
+    <NodeFunc v-if="drawerVisible" :name="temp.name" :id="temp.id" @close="onClose"></NodeFunc>
     <!-- Terminal -->
     <a-modal
-      v-model="terminalVisible"
+      v-model:open="terminalVisible"
       :bodyStyle="{
         padding: '0 10px',
         paddingTop: '10px',
@@ -556,30 +545,30 @@
     <!-- 快速安装插件端 -->
     <a-modal
       destroyOnClose
-      v-model:visible="showFastInstall"
+      v-model:open="fastInstallNode"
       width="80%"
       title="快速安装插件端"
       :footer="null"
       :maskClosable="false"
       @cancel="
         () => {
-          showFastInstall = false
-          loadData()
+          this.fastInstallNode = false
+          this.loadData()
         }
       "
     >
-      <fastInstall v-if="showFastInstall"></fastInstall>
+      <fastInstall v-if="fastInstallNode"></fastInstall>
     </a-modal>
     <!-- 同步到其他工作空间 -->
     <a-modal
       destroyOnClose
-      v-model="syncToWorkspaceVisible"
+      v-model:open="syncToWorkspaceVisible"
       title="同步到其他工作空间"
       @ok="handleSyncToWorkspace"
       :maskClosable="false"
     >
       <a-alert message="温馨提示" type="warning">
-        <template #description>
+        <template v-slot:description>
           <ul>
             <li>同步机制采用节点地址确定是同一个服务器（节点）</li>
             <li>当目标工作空间不存在对应的节点时候将自动创建一个新的节点（逻辑节点）</li>
@@ -590,7 +579,12 @@
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" name="workspaceId">
-          <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
+          <a-select
+            show-search
+            option-filter-prop="children"
+            v-model:value="temp.workspaceId"
+            placeholder="请选择工作空间"
+          >
             <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{
               item.name
             }}</a-select-option>
@@ -601,17 +595,33 @@
     <!-- 历史监控 -->
     <a-modal
       destroyOnClose
-      v-model="monitorVisible"
+      v-model:open="monitorVisible"
       width="75%"
-      :title="`${temp.name}历史监控图表`"
+      :title="`${this.temp.name}历史监控图表`"
       :footer="null"
       :maskClosable="false"
     >
-      <node-top v-if="monitorVisible" :type="temp.type" :nodeId="temp.id"></node-top>
+      <node-top v-if="monitorVisible" :type="this.temp.type" :nodeId="this.temp.id"></node-top>
     </a-modal>
   </div>
 </template>
-<script lang="tsx" setup>
+
+<script>
+import { mapState } from 'pinia'
+import {
+  deleteNode,
+  editNode,
+  getNodeGroupAll,
+  getNodeList,
+  syncProject,
+  syncToWorkspace,
+  unbind,
+  sortItem
+} from '@/api/node'
+import { getSshListAll } from '@/api/ssh'
+import { syncScript } from '@/api/node-other'
+import NodeFunc from './node-func'
+import Terminal from '@/pages/ssh/terminal'
 import {
   CHANGE_PAGE,
   COMPUTED_PAGINATION,
@@ -623,511 +633,503 @@ import {
   PAGE_DEFAULT_SHOW_TOTAL,
   getCachePageLimit
 } from '@/utils/const'
-import { getSshListAll } from '@/api/ssh'
-import { syncScript } from '@/api/node-other'
-import {
-  deleteNode,
-  editNode,
-  getNodeGroupAll,
-  getNodeList,
-  syncProject,
-  syncToWorkspace,
-  unbind,
-  sortItem
-} from '@/api/node'
 import { getWorkSpaceListAll } from '@/api/workspace'
+import CustomSelect from '@/components/customSelect'
 import fastInstall from './fast-install.vue'
 import { statusMap } from '@/api/system/assets-machine'
-// import CustomSelect from '@/components/customSelect'
-// import NodeTop from '@/pages/node/node-layout/node-top'
-// import NodeLayout from './node-layout'
-// import Terminal from '@/pages/ssh/terminal'
+import NodeTop from '@/pages/node/node-layout/node-top'
 import { useUserStore } from '@/stores/user'
-import { FormInstance, List } from 'ant-design-vue'
-
-const userStore = useUserStore()
-
-const { userInfo } = toRefs(userStore)
-
-const router = useRouter()
-const route = useRoute()
-
-const columns = [
-  {
-    title: '节点名称',
-    dataIndex: 'name',
-    width: 200,
-    sorter: true,
-    key: 'name',
-    ellipsis: true
+import { useAppStore } from '@/stores/app'
+export default {
+  components: {
+    NodeFunc,
+    Terminal,
+    CustomSelect,
+    fastInstall,
+    NodeTop
   },
-  { title: '状态', dataIndex: 'status', width: '100px', ellipsis: true, scopedSlots: { customRender: 'status' } },
-  {
-    title: '节点地址',
-    dataIndex: 'url',
-    key: 'url',
-    width: '190px',
-    ellipsis: true,
-    scopedSlots: { customRender: 'url' }
-  },
-  {
-    title: '系统名',
-    dataIndex: 'osName',
-    key: 'osName',
-    width: '100px',
-    ellipsis: true,
-    scopedSlots: { customRender: 'osName' }
-  },
-  {
-    title: 'JDK 版本',
-    dataIndex: 'javaVersion',
-    width: 100,
-    key: 'javaVersion',
-    ellipsis: true,
-    scopedSlots: { customRender: 'javaVersion' }
-  },
-  {
-    title: 'JVM 信息',
-    dataIndex: 'jvmInfo',
-    width: 100,
-    ellipsis: true,
-    scopedSlots: { customRender: 'jvmInfo' }
-  },
-  // {title: "JVM 剩余内存", dataIndex: "machineNodeData.jvmFreeMemory", ellipsis: true, scopedSlots: {customRender: "freeMemory" } },
+  data() {
+    return {
+      loading: true,
 
-  {
-    title: '项目数',
-    dataIndex: 'count',
-    key: 'count',
-    width: '90px',
-    scopedSlots: { customRender: 'projectCount' }
-  },
-  {
-    title: '脚本数',
-    dataIndex: 'scriptCount',
-    key: 'scriptCount',
-    width: '90px',
-    scopedSlots: { customRender: 'scriptCount' }
-  },
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
+      statusMap,
+      sshList: [],
+      list: [],
+      sizeOptions: ['8', '12', '16', '20', '24'],
+      groupList: [],
+      refreshInterval: 5,
+      deadline: 0,
+      temp: {},
+      monitorVisible: false,
+      layoutType: null,
+      editNodeVisible: false,
+      drawerVisible: false,
+      terminalVisible: false,
 
-  {
-    title: '插件运行',
-    dataIndex: 'runTime',
-    width: '100px',
-    key: 'runTime',
-    ellipsis: true,
-    scopedSlots: { customRender: 'runTime' }
-  },
-  {
-    title: '创建时间',
-    dataIndex: 'createTimeMillis',
-    ellipsis: true,
-    sorter: true,
-    customRender: (text) => parseTime(text),
-    width: '170px'
-  },
-  {
-    title: '修改时间',
-    dataIndex: 'modifyTimeMillis',
-    ellipsis: true,
-    sorter: true,
-    customRender: (text) => parseTime(text),
-    width: '170px'
-  },
-  {
-    title: '操作',
-    dataIndex: 'operation',
-    key: 'operation',
-    fixed: 'right',
-    width: '210px',
-    scopedSlots: { customRender: 'operation' },
-    align: 'center'
-  }
-]
+      fastInstallNode: false,
+      syncToWorkspaceVisible: false,
 
-const loading = ref(true)
-const listQuery = ref<Record<string, any>>(PAGE_DEFAULT_LIST_QUERY)
-const list = ref([])
-const sizeOptions = ref(['8', '12', '16', '20', '24'])
-const refreshInterval = ref(5)
-const deadline = ref(0)
-const temp = ref({})
-const monitorVisible = ref(false)
-const drawerVisible = ref(false)
-const showFastInstall = ref(false)
-const syncToWorkspaceVisible = ref(false)
+      columns: [
+        {
+          title: '节点名称',
+          dataIndex: 'name',
+          width: 200,
+          sorter: true,
+          key: 'name',
+          ellipsis: true
+        },
+        {
+          title: '状态',
+          dataIndex: 'status',
+          width: '100px',
+          ellipsis: true
+        },
+        {
+          title: '节点地址',
+          dataIndex: 'url',
+          key: 'url',
+          width: '190px',
+          ellipsis: true
+        },
+        {
+          title: '系统名',
+          dataIndex: 'osName',
+          key: 'osName',
+          width: '100px',
+          ellipsis: true
+        },
+        {
+          title: 'JDK 版本',
+          dataIndex: 'javaVersion',
+          width: 100,
+          key: 'javaVersion',
+          ellipsis: true
+        },
+        {
+          title: 'JVM 信息',
+          dataIndex: 'jvmInfo',
+          width: 100,
+          ellipsis: true
+        },
+        // { title: "JVM 剩余内存", dataIndex: "machineNodeData.jvmFreeMemory", ellipsis: true, scopedSlots: { customRender: "freeMemory" } },
 
-const rules = {
-  name: [{ required: true, message: '请输入节点名称', trigger: 'blur' }]
-}
+        {
+          title: '项目数',
+          dataIndex: 'jpomProjectCount',
+          width: '90px'
+        },
+        {
+          title: '脚本数',
+          dataIndex: 'jpomScriptCount',
+          width: '90px'
+        },
 
-const workspaceList = ref([])
+        {
+          title: '插件运行',
+          dataIndex: 'runTime',
+          width: '100px',
+          key: 'runTime',
+          ellipsis: true
+        },
+        {
+          title: '创建时间',
+          dataIndex: 'createTimeMillis',
+          ellipsis: true,
+          sorter: true,
+          customRender: ({ text }) => parseTime(text),
+          width: '170px'
+        },
+        {
+          title: '修改时间',
+          dataIndex: 'modifyTimeMillis',
+          ellipsis: true,
+          sorter: true,
+          customRender: ({ text }) => parseTime(text),
+          width: '170px'
+        },
+        {
+          title: '操作',
+          dataIndex: 'operation',
+          key: 'operation',
+          fixed: 'right',
+          width: '200px',
 
-const pagination = computed(() => {
-  return COMPUTED_PAGINATION(listQuery.value)
-})
-
-const useSuggestions = computed(() => {
-  if (loading.value) {
-    // 加载中不提示
-    return false
-  }
-  if (!userInfo || !userInfo.value.systemUser) {
-    // 没有登录或者不是超级管理员
-    return false
-  }
-  if (listQuery.value.page !== 1 || listQuery.value.total > 0) {
-    // 不是第一页 或者总记录数大于 0
-    return false
-  }
-  // 判断是否存在搜索条件
-  const nowKeys = Object.keys(listQuery.value)
-  const defaultKeys = Object.keys(PAGE_DEFAULT_LIST_QUERY)
-  const dictOrigin = nowKeys.filter((item) => !defaultKeys.includes(item))
-  return dictOrigin.length === 0
-})
-
-const tableSelections = ref([])
-const rowSelection = computed(() => {
-  return {
-    onChange: (_selectedRowKeys, selectedRows) => {
-      tableSelections.value = selectedRows
-    }
-  }
-})
-
-onMounted(() => {
-  const searchNodeName = route.query.searchNodeName
-  if (searchNodeName) {
-    listQuery.value['%name%'] = searchNodeName
-  }
-  changeLayout()
-  loadGroupList()
-})
-
-// 获取所有的分组
-const groupList = ref([])
-const loadGroupList = () => {
-  getNodeGroupAll().then((res) => {
-    if (res.data) {
-      groupList.value = res.data
-    }
-  })
-}
-
-// 加载 SSH 列表
-const sshList = ref([])
-const loadSshList = () => {
-  getSshListAll().then((res) => {
-    if (res.code === 200) {
-      sshList.value = res.data
-    }
-  })
-}
-
-// 管理节点
-const handleNode = (record: any) => {
-  temp.value = Object.assign({}, record)
-
-  drawerVisible.value = true
-  let nodeId = route.query.nodeId
-  if (nodeId !== record.id) {
-    router.push({
-      query: { ...route.query, nodeId: record.id }
-    })
-  }
-}
-
-const loadData = (pointerEvent?: any) => {
-  list.value = []
-  listQuery.value.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : listQuery.value.page
-  loading.value = true
-  getNodeList(listQuery.value).then((res) => {
-    if (res.code === 200) {
-      list.value =
-        res.data.result &&
-        res.data.result.map((item: any) => {
-          item.occupyCpu = formatPercent2Number(item.machineNodeData?.osOccupyCpu)
-
-          item.occupyDisk = formatPercent2Number(item.machineNodeData?.osOccupyDisk)
-          item.occupyMemory = formatPercent2Number(item.machineNodeData?.osOccupyMemory)
-          return item
-        })
-      listQuery.value.total = res.data.total
-      let nodeId = route.query.nodeId
-      list.value.forEach((item: any) => {
-        if (nodeId === item.id) {
-          handleNode(item)
+          align: 'center'
         }
-      })
-      refreshInterval.value = 30
-      deadline.value = Date.now() + refreshInterval.value * 1000
+      ],
+
+      rules: {
+        name: [{ required: true, message: '请输入节点名称', trigger: 'blur' }]
+      },
+      workspaceList: [],
+      tableSelections: [],
+      statValueStyle: {
+        fontSize: '14px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      },
+      confirmLoading: false
     }
-    loading.value = false
-  })
-}
-
-// 进入终端
-const terminalVisible = ref(false)
-const handleTerminal = (record: any) => {
-  temp.value = Object.assign({}, record)
-  terminalVisible.value = true
-}
-
-// 修改
-const editNodeVisible = ref(false)
-const handleEdit = (record: any) => {
-  temp.value = Object.assign({}, record)
-  loadSshList()
-  editNodeVisible.value = true
-}
-
-// 提交节点数据
-const editNodeForm = ref<FormInstance>()
-const handleEditNodeOk = () => {
-  // 检验表单
-  editNodeForm.value?.validate().then((valid) => {
-    if (!valid) {
-      return false
-    }
-    // 提交数据
-    editNode(temp.value).then((res) => {
-      if (res.code === 200) {
-        // 成功
-        $notification.success({
-          message: res.msg
-        })
-        editNodeForm.value?.resetFields()
-        editNodeVisible.value = false
-        loadData()
-        loadGroupList()
+  },
+  computed: {
+    ...mapState(useUserStore, ['getUserInfo']),
+    ...mapState(useAppStore, ['getWorkspaceId']),
+    pagination() {
+      return COMPUTED_PAGINATION(this.listQuery)
+    },
+    useSuggestions() {
+      if (this.loading) {
+        // 加载中不提示
+        return false
       }
-    })
-  })
-}
+      if (!this.getUserInfo || !this.getUserInfo.systemUser) {
+        // 没有登录或者不是超级管理员
+        return false
+      }
+      if (this.listQuery.page !== 1 || this.listQuery.total > 0) {
+        // 不是第一页 或者总记录数大于 0
+        return false
+      }
+      // 判断是否存在搜索条件
+      const nowKeys = Object.keys(this.listQuery)
+      const defaultKeys = Object.keys(PAGE_DEFAULT_LIST_QUERY)
+      const dictOrigin = nowKeys.filter((item) => !defaultKeys.includes(item))
+      return dictOrigin.length === 0
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys
+        },
+        selectedRowKeys: this.tableSelections
+      }
+    }
+  },
+  watch: {},
+  created() {
+    const searchNodeName = this.$route.query.searchNodeName
+    if (searchNodeName) {
+      this.listQuery = { ...this.listQuery, '%name%': searchNodeName }
+    }
 
-const handleDelete = (record: any) => {
-  $confirm({
-    title: '系统提示',
-    content: '真的要删除节点么？删除会检查数据关联性,并且节点不存在项目或者脚本',
-    okText: '确认',
-    cancelText: '取消',
-    onOk: () => {
-      // 删除
-      deleteNode(record.id).then((res) => {
-        if (res.code === 200) {
-          $notification.success({
-            message: res.msg
-          })
-          loadData()
+    this.changeLayout()
+    this.loadGroupList()
+  },
+
+  methods: {
+    formatDuration,
+    renderSize,
+    PAGE_DEFAULT_SHOW_TOTAL,
+    parseTime,
+    CHANGE_PAGE,
+    // 获取所有的分组
+    loadGroupList() {
+      getNodeGroupAll().then((res) => {
+        if (res.data) {
+          this.groupList = res.data
         }
       })
-    }
-  })
-}
-
-// 解绑
-const handleUnbind = (record: any) => {
-  const html =
-    "<b style='font-size: 20px;'>真的要解绑节点么？</b>" +
-    "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
-    '<li>解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息</b></li>' +
-    '<li>一般用于服务器无法连接且已经确定不再使用</li>' +
-    '<li>如果误操作会产生冗余数据！！！</li>' +
-    ' </ul>'
-
-  $confirm({
-    title: '危险操作！！！',
-    content: h('div', null, [h('p', { domProps: { innerHTML: html } }, [])]),
-    okButtonProps: { props: { type: 'danger', size: 'small' } },
-    cancelButtonProps: { props: { type: 'primary' } },
-    okText: '确认',
-    cancelText: '取消',
-    onOk: () => {
-      // 删除
-      unbind(record.id).then((res) => {
+    },
+    // 加载 SSH 列表
+    loadSshList() {
+      getSshListAll().then((res) => {
         if (res.code === 200) {
-          $notification.success({
-            message: res.msg
-          })
-          loadData()
+          this.sshList = res.data
         }
       })
-    }
-  })
-}
+    },
+    // 加载数据
+    loadData(pointerEvent) {
+      return new Promise((resolve) => {
+        this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
+        this.loading = true
+        getNodeList(this.listQuery)
+          .then((res) => {
+            if (res.code === 200) {
+              this.list =
+                res.data.result &&
+                res.data.result.map((item) => {
+                  // console.log(item);
+                  item.occupyCpu = formatPercent2Number(item.machineNodeData?.osOccupyCpu)
 
-const syncNode = (node) => {
-  syncProject(node.id).then((res) => {
-    if (res.code == 200) {
-      $notification.success({
-        message: res.msg
+                  item.occupyDisk = formatPercent2Number(item.machineNodeData?.osOccupyDisk)
+                  item.occupyMemory = formatPercent2Number(item.machineNodeData?.osOccupyMemory)
+                  return item
+                })
+              this.listQuery.total = res.data.total
+              let nodeId = this.$route.query.nodeId
+              this.list.map((item) => {
+                if (nodeId === item.id) {
+                  this.handleNode(item)
+                }
+              })
+
+              resolve()
+              this.refreshInterval = 30
+              this.deadline = Date.now() + this.refreshInterval * 1000
+            }
+          })
+          .finally(() => {
+            this.loading = false
+          })
       })
-      return false
-    }
-  })
-}
+    },
 
-const syncNodeScript = (node) => {
-  syncScript({
-    nodeId: node.id
-  }).then((res) => {
-    if (res.code == 200) {
-      $notification.success({
-        message: res.msg
+    // 进入终端
+    handleTerminal(record) {
+      this.temp = Object.assign({}, record)
+      this.terminalVisible = true
+    },
+    // 修改
+    handleEdit(record) {
+      this.temp = Object.assign({}, record)
+      this.loadSshList()
+      // this.temp.tempGroup = "";
+      this.editNodeVisible = true
+    },
+    // 提交节点数据
+    handleEditNodeOk() {
+      // 检验表单
+      this.$refs['editNodeForm'].validate().then(() => {
+        // 提交数据
+        this.confirmLoading = true
+        editNode(this.temp)
+          .then((res) => {
+            if (res.code === 200) {
+              // 成功
+              this.$notification.success({
+                message: res.msg
+              })
+              this.$refs['editNodeForm'].resetFields()
+              this.editNodeVisible = false
+              this.loadData()
+              this.loadGroupList()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
       })
-    }
-  })
-}
-
-// 关闭抽屉层
-const onClose = () => {
-  drawerVisible.value = false
-  let query = Object.assign({}, route.query)
-  delete query.nodeId, delete query.id, delete query.pId
-  router.replace({
-    query: query
-  })
-}
-
-// 加载工作空间数据
-const loadWorkSpaceListAll = () => {
-  getWorkSpaceListAll().then((res) => {
-    if (res.code === 200) {
-      workspaceList.value = res.data
-    }
-  })
-}
-
-// 同步到其他工作情况
-const syncToWorkspaceShow = () => {
-  syncToWorkspaceVisible.value = true
-  loadWorkSpaceListAll()
-  temp.value = {
-    workspaceId: undefined
-  }
-}
-//
-const handleSyncToWorkspace = () => {
-  if (!temp.value.workspaceId) {
-    $notification.warn({
-      message: '请选择工作空间'
-    })
-    return false
-  }
-  // 同步
-  syncToWorkspace({
-    ids: tableSelections.value.join(','),
-    toWorkspaceId: temp.value.workspaceId
-  }).then((res) => {
-    if (res.code == 200) {
-      $notification.success({
-        message: res.msg
+    },
+    handleDelete(record) {
+      this.$confirm({
+        title: '系统提示',
+        zIndex: 1009,
+        content: '真的要删除节点么？删除会检查数据关联性,并且节点不存在项目或者脚本',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 删除
+          deleteNode(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg
+              })
+              this.loadData()
+            }
+          })
+        }
       })
-      tableSelections.value = []
-      syncToWorkspaceVisible.value = false
-      return false
-    }
-  })
-}
+    },
+    // 解绑
+    handleUnbind(record) {
+      const html =
+        "<b style='font-size: 20px;'>真的要解绑节点么？</b>" +
+        "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
+        '<li>解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息</b></li>' +
+        '<li>一般用于服务器无法连接且已经确定不再使用</li>' +
+        '<li>如果误操作会产生冗余数据！！！</li>' +
+        ' </ul>'
 
-// 排序
-const sortItemHander = (record, index, method: 'top' | 'up' | 'down') => {
-  const msgData = {
-    top: '确定要将此数据置顶吗？',
-    up: '确定要将此数上移吗？',
-    down: '确定要将此数据下移吗？下移操作可能因为列表后续数据没有排序值操作无效！'
-  }
-  let msg = msgData[method] || '确定要操作吗？'
-  if (!record.sortValue) {
-    msg += ' 当前数据为默认状态,操后上移或者下移可能不会达到预期排序,还需要对相关数据都操作后才能达到预期排序'
-  }
-  // console.log(list.value, index, list.value[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
-  const compareId = list.value[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
-  $confirm({
-    title: '系统提示',
-    content: msg,
-    okText: '确认',
-    cancelText: '取消',
-    onOk: () => {
-      // 解锁
-      sortItem({
-        id: record.id,
-        method: method,
-        compareId: compareId
-      }).then((res) => {
+      this.$confirm({
+        title: '危险操作！！！',
+        zIndex: 1009,
+        content: h('div', null, [h('p', { innerHTML: html }, null)]),
+        okButtonProps: { size: 'small', danger: true, type: 'primary' },
+        cancelButtonProps: { type: 'primary' },
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 删除
+          unbind(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg
+              })
+              this.loadData()
+            }
+          })
+        }
+      })
+    },
+    // 管理节点
+    handleNode(record) {
+      this.temp = Object.assign({}, record)
+
+      this.drawerVisible = true
+      let nodeId = this.$route.query.nodeId
+      if (nodeId !== record.id) {
+        this.$router.push({
+          query: { ...this.$route.query, nodeId: record.id }
+        })
+      }
+    },
+    syncNode(node) {
+      syncProject(node.id).then((res) => {
         if (res.code == 200) {
-          $notification.success({
+          this.$notification.success({
             message: res.msg
           })
-
-          loadData()
           return false
         }
       })
+    },
+    syncNodeScript(node) {
+      syncScript({
+        nodeId: node.id
+      }).then((res) => {
+        if (res.code == 200) {
+          this.$notification.success({
+            message: res.msg
+          })
+        }
+      })
+    },
+    // 关闭抽屉层
+    onClose() {
+      this.drawerVisible = false
+      let query = Object.assign({}, this.$route.query)
+      delete query.nodeId, delete query.id, delete query.pId
+      this.$router.replace({
+        query: query
+      })
+    },
+
+    // 加载工作空间数据
+    loadWorkSpaceListAll() {
+      getWorkSpaceListAll().then((res) => {
+        if (res.code === 200) {
+          this.workspaceList = res.data
+        }
+      })
+    },
+
+    // 同步到其他工作情况
+    syncToWorkspaceShow() {
+      this.syncToWorkspaceVisible = true
+      this.loadWorkSpaceListAll()
+      this.temp = {
+        workspaceId: undefined
+      }
+    },
+    //
+    handleSyncToWorkspace() {
+      if (!this.temp.workspaceId) {
+        this.$notification.warn({
+          message: '请选择工作空间'
+        })
+        return false
+      }
+      // 同步
+      syncToWorkspace({
+        ids: this.tableSelections.join(','),
+        toWorkspaceId: this.temp.workspaceId
+      }).then((res) => {
+        if (res.code == 200) {
+          this.$notification.success({
+            message: res.msg
+          })
+          this.tableSelections = []
+          this.syncToWorkspaceVisible = false
+          return false
+        }
+      })
+    },
+    // 排序
+    sortItemHander(record, index, method) {
+      const msgData = {
+        top: '确定要将此数据置顶吗？',
+        up: '确定要将此数上移吗？',
+        down: '确定要将此数据下移吗？下移操作可能因为列表后续数据没有排序值操作无效！'
+      }
+      let msg = msgData[method] || '确定要操作吗？'
+      if (!record.sortValue) {
+        msg += ' 当前数据为默认状态,操后上移或者下移可能不会达到预期排序,还需要对相关数据都操作后才能达到预期排序'
+      }
+      // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
+      const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
+      this.$confirm({
+        title: '系统提示',
+        zIndex: 1009,
+        content: msg,
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 解锁
+          sortItem({
+            id: record.id,
+            method: method,
+            compareId: compareId
+          }).then((res) => {
+            if (res.code == 200) {
+              this.$notification.success({
+                message: res.msg
+              })
+
+              this.loadData()
+              return false
+            }
+          })
+        }
+      })
+    },
+    // 切换视图
+    changeLayout() {
+      if (!this.layoutType) {
+        const layoutType = localStorage.getItem('tableLayout')
+        // 默认表格
+        this.layoutType = layoutType === 'card' ? 'card' : 'table'
+      } else {
+        this.layoutType = this.layoutType === 'card' ? 'table' : 'card'
+        localStorage.setItem('tableLayout', this.layoutType)
+      }
+      this.listQuery = {
+        ...this.listQuery,
+        limit: this.layoutType === 'card' ? 8 : getCachePageLimit()
+      }
+      this.loadData()
+    },
+    onFinish() {
+      if (this.drawerVisible) {
+        // 打开节点 不刷新
+        return
+      }
+      if (this.$attrs.routerUrl !== this.$route.path) {
+        // 重新计算倒计时
+        this.deadline = Date.now() + this.refreshInterval * 1000
+        return
+      }
+      this.loadData()
+    },
+    // 历史图表
+    handleHistory(record, type) {
+      this.monitorVisible = true
+      this.temp = record
+      this.temp = { ...this.temp, type }
+    },
+    fastInstallNodeShow() {
+      this.fastInstallNode = true
     }
-  })
-}
-
-// 切换视图
-const layoutType = ref<'card' | 'table' | null>(null)
-const changeLayout = () => {
-  if (!layoutType.value) {
-    // 默认表格
-    layoutType.value = localStorage.getItem('tableLayout') === 'card' ? 'card' : 'table'
-  } else {
-    layoutType.value = layoutType.value === 'card' ? 'table' : 'card'
-    localStorage.setItem('tableLayout', layoutType.value)
   }
-  listQuery.value = { ...listQuery.value, limit: layoutType.value === 'card' ? 8 : getCachePageLimit() }
-  loadData()
 }
-const attrs = useAttrs()
-const onFinish = () => {
-  if (drawerVisible.value) {
-    // 打开节点 不刷新
-    return
-  }
-  if (attrs.routerUrl !== route.path) {
-    // 重新计算倒计时
-    deadline.value = Date.now() + refreshInterval.value * 1000
-    return
-  }
-  loadData()
-}
-
-// 历史图表
-const handleHistory = (record, type) => {
-  monitorVisible.value = true
-  temp.value = record
-  temp.value = { ...temp.value, type }
-}
-
-const fastInstallNodeShow = () => {
-  showFastInstall.value = true
-}
-
-// export default {
-
-// computed: {
-//   ...mapGetters(['getCollapsed', 'getWorkspaceId', 'getUserInfo']),
-// },
-
-// methods: {
-// formatDuration,
-// renderSize,
-// PAGE_DEFAULT_SHOW_TOTAL,
-// parseTime,
-// CHANGE_PAGE,
-
-// }
-// }
 </script>
-<style scoped lang="less">
+
+<style scoped>
 .header-statistic /deep/ .ant-statistic div {
   display: inline-block;
 }
-
 .header-statistic /deep/ .ant-statistic-content-value,
 .header-statistic /deep/ .ant-statistic-content {
   font-size: 16px;

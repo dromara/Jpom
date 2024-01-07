@@ -5,6 +5,7 @@
 <script>
 import { mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
+import { useAppStore } from '@/stores/app'
 import { getWebSocketUrl } from '@/api/config'
 import terminal2 from '@/components/terminal'
 
@@ -28,11 +29,14 @@ export default {
     return {}
   },
   computed: {
-    ...mapState(useUserStore, ['getLongTermToken', 'getWorkspaceId']),
+    ...mapState(useUserStore, ['getLongTermToken']),
+    ...mapState(useAppStore, ['getWorkspaceId']),
     socketUrl() {
       return getWebSocketUrl(
         '/socket/ssh',
-        `userId=${this.getLongTermToken}&id=${this.sshId}&machineSshId=${this.machineSshId}&nodeId=system&type=ssh&workspaceId=${this.getWorkspaceId}`
+        `userId=${this.getLongTermToken}&id=${this.sshId}&machineSshId=${
+          this.machineSshId
+        }&nodeId=system&type=ssh&workspaceId=${this.getWorkspaceId()}`
       )
     }
   },

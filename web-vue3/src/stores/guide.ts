@@ -103,54 +103,67 @@ export const useGuideStore = defineStore('guide', {
       return state.extendPlugins
     },
     // 计算弹窗全屏样式
-    getFullscreenViewLogStyle(state) {
-      const cache = cacheToJson(state)
-      if (cache.fullscreenViewLog) {
-        // 全屏
+    getFullscreenViewLogStyle: (state) => {
+      return () => {
+        const cache = state.guideCache as any
+
+        if (cache.fullscreenViewLog) {
+          // 全屏
+          return {
+            // dialogStyle: {
+            //   maxWidth: '100vw',
+            //   top: 0,
+            //   paddingBottom: 0
+            // },
+            bodyStyle: {
+              padding: '0 10px',
+              paddingTop: '10px',
+              marginRight: '10px',
+              height: 'calc(100vh - 90px)'
+            },
+            width: '100vw',
+            style: {
+              maxWidth: '100vw',
+              top: 0,
+              paddingBottom: 0
+            }
+          }
+        }
+        // 非全屏
         return {
-          dialogStyle: {
-            maxWidth: '100vw',
-            top: 0,
-            paddingBottom: 0
-          },
+          // dialogStyle: {
+          //   maxWidth: '100vw',
+          //   top: false,
+          //   paddingBottom: 0
+          // },
           bodyStyle: {
             padding: '0 10px',
             paddingTop: '10px',
             marginRight: '10px',
-            height: 'calc(100vh - 68px)'
+            height: '70vh'
           },
-          width: '100vw'
+          width: '80vw',
+          style: {
+            maxWidth: '100vw',
+            top: false,
+            paddingBottom: 0
+          }
         }
-      }
-      // 非全屏
-      return {
-        dialogStyle: {
-          maxWidth: '100vw',
-          top: false,
-          paddingBottom: 0
-        },
-        bodyStyle: {
-          padding: '0 10px',
-          paddingTop: '10px',
-          marginRight: '10px',
-          height: '70vh'
-        },
-        width: '80vw'
       }
     }
   }
 })
 
-function cacheToJson(state: any) {
-  const cacheStr = state.guideCache || ''
-  let cahce
-  try {
-    cahce = JSON.parse(cacheStr)
-  } catch (e) {
-    cahce = {}
-  }
-  return cahce
-}
+// function cacheToJson(state: any) {
+//   const cacheStr = state.getGuideCache || ''
+//   let cahce
+//   try {
+//     cahce = JSON.parse(cacheStr)
+//   } catch (e) {
+//     cahce = {}
+//   }
+//   return cahce
+// }
 
 // const app = {
 //   state: {

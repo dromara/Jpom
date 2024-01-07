@@ -399,7 +399,7 @@ export default {
         '<li>如果版本相差大需要重新初始化数据来保证和当前程序里面字段一致</li>' +
         '<li>重置初始化在启动时候传入参数 <b> --rest:load_init_db </b> </li>' +
         ' </ul>还原过程中不能操作哦...'
-      const h = this.$createElement
+
       this.$confirm({
         title: '系统提示',
         zIndex: 1009,

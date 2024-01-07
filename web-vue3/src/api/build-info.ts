@@ -1,5 +1,5 @@
-import axios from "./config";
-import { loadRouterBase } from "./config";
+import axios from './config'
+import { loadRouterBase } from './config'
 
 /**
  * 构建列表
@@ -9,13 +9,13 @@ import { loadRouterBase } from "./config";
  */
 export function getBuildList(params, loading) {
   return axios({
-    url: "/build/list",
-    method: "post",
+    url: '/build/list',
+    method: 'post',
     data: params,
     headers: {
-      loading: loading === false ? "no" : "",
-    },
-  });
+      loading: loading === false ? 'no' : ''
+    }
+  })
 }
 
 /**
@@ -26,10 +26,10 @@ export function getBuildList(params, loading) {
  */
 export function getBuildGet(params) {
   return axios({
-    url: "/build/get",
-    method: "get",
-    params,
-  });
+    url: '/build/get',
+    method: 'get',
+    params
+  })
 }
 
 /**
@@ -37,9 +37,9 @@ export function getBuildGet(params) {
  */
 export function getBuildGroupAll() {
   return axios({
-    url: "/build/list_group_all",
-    method: "get",
-  });
+    url: '/build/list_group_all',
+    method: 'get'
+  })
 }
 
 /**
@@ -50,14 +50,12 @@ export function getBuildGroupAll() {
  */
 export function getBranchList(params) {
   return axios({
-    url: "/build/branch-list",
-    method: "post",
+    url: '/build/branch-list',
+    method: 'post',
     timeout: 0,
     data: params,
-    headers: {
-      loadingTip: "正在加载项目分支",
-    },
-  });
+    headers: {}
+  })
 }
 
 /**
@@ -93,13 +91,13 @@ export function editBuild(params) {
     autoBuildCron: params.autoBuildCron,
     buildMode: params.buildMode,
     aliasCode: params.aliasCode,
-    resultKeepDay: params.resultKeepDay,
-  };
+    resultKeepDay: params.resultKeepDay
+  }
   return axios({
-    url: "/build/edit",
-    method: "post",
-    data,
-  });
+    url: '/build/edit',
+    method: 'post',
+    data
+  })
 }
 
 /**
@@ -108,18 +106,18 @@ export function editBuild(params) {
  */
 export function deleteBuild(id) {
   return axios({
-    url: "/build/delete",
-    method: "post",
-    data: { id },
-  });
+    url: '/build/delete',
+    method: 'post',
+    data: { id }
+  })
 }
 
 export function deleteatchBuild(data) {
   return axios({
-    url: "/build/batch-delete",
-    method: "post",
-    data: data,
-  });
+    url: '/build/batch-delete',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -128,10 +126,10 @@ export function deleteatchBuild(data) {
  */
 export function getTriggerUrl(data) {
   return axios({
-    url: "/build/trigger/url",
-    method: "post",
-    data: data,
-  });
+    url: '/build/trigger/url',
+    method: 'post',
+    data: data
+  })
 }
 
 // /**
@@ -152,10 +150,10 @@ export function getTriggerUrl(data) {
  */
 export function clearBuid(id) {
   return axios({
-    url: "/build/clean-source",
-    method: "post",
-    data: { id },
-  });
+    url: '/build/clean-source',
+    method: 'post',
+    data: { id }
+  })
 }
 
 /**
@@ -168,14 +166,14 @@ export function clearBuid(id) {
  */
 export function loadBuildLog(params) {
   return axios({
-    url: "/build/manage/get-now-log",
-    method: "post",
+    url: '/build/manage/get-now-log',
+    method: 'post',
     data: params,
     headers: {
-      tip: "no",
-      loading: "no",
-    },
-  });
+      tip: 'no',
+      loading: 'no'
+    }
+  })
 }
 
 /**
@@ -184,10 +182,10 @@ export function loadBuildLog(params) {
  */
 export function startBuild(data) {
   return axios({
-    url: "/build/manage/start",
-    method: "post",
-    data: data,
-  });
+    url: '/build/manage/start',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -196,10 +194,10 @@ export function startBuild(data) {
  */
 export function stopBuild(id) {
   return axios({
-    url: "/build/manage/cancel",
-    method: "post",
-    data: { id },
-  });
+    url: '/build/manage/cancel',
+    method: 'post',
+    data: { id }
+  })
 }
 
 /**
@@ -211,10 +209,10 @@ export function stopBuild(id) {
  */
 export function geteBuildHistory(params) {
   return axios({
-    url: "/build/history/history_list.json",
-    method: "post",
-    data: params,
-  });
+    url: '/build/history/history_list.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -222,9 +220,9 @@ export function geteBuildHistory(params) {
  * @param {*} logId
  */
 export function downloadBuildLog(logId) {
-  return loadRouterBase("/build/history/download_log", {
-    logId: logId,
-  });
+  return loadRouterBase('/build/history/download_log', {
+    logId: logId
+  })
 }
 
 /**
@@ -232,9 +230,9 @@ export function downloadBuildLog(logId) {
  * @param {*} logId
  */
 export function downloadBuildFile(logId) {
-  return loadRouterBase("/build/history/download_file", {
-    logId: logId,
-  });
+  return loadRouterBase('/build/history/download_file', {
+    logId: logId
+  })
 }
 
 /**
@@ -242,10 +240,10 @@ export function downloadBuildFile(logId) {
  * @param {*} logId
  */
 export function downloadBuildFileByBuild(id, numberId) {
-  return loadRouterBase("/build/history/download_file_by_build", {
+  return loadRouterBase('/build/history/download_file_by_build', {
     buildId: id,
-    buildNumberId: numberId,
-  });
+    buildNumberId: numberId
+  })
 }
 
 /**
@@ -255,10 +253,10 @@ export function downloadBuildFileByBuild(id, numberId) {
  */
 export function rollback(logId) {
   return axios({
-    url: "/build/manage/reRelease",
-    method: "post",
-    data: { logId },
-  });
+    url: '/build/manage/reRelease',
+    method: 'post',
+    data: { logId }
+  })
 }
 
 /**
@@ -267,62 +265,62 @@ export function rollback(logId) {
  */
 export function deleteBuildHistory(logId) {
   return axios({
-    url: "/build/history/delete_log.json",
-    method: "post",
-    data: { logId },
-  });
+    url: '/build/history/delete_log.json',
+    method: 'post',
+    data: { logId }
+  })
 }
 
 export function sortItem(params) {
   return axios({
-    url: "/build/sort-item",
-    method: "get",
-    params: params,
-  });
+    url: '/build/sort-item',
+    method: 'get',
+    params: params
+  })
 }
 
 export const statusMap = {
-  1: "构建中",
-  2: "构建完成",
-  3: "构建失败",
-  4: "发布中",
-  5: "发布成功",
-  6: "发布失败",
-  7: "取消构建",
-  8: "构建中断",
-  9: "队列等待",
-  10: "异常关闭",
-};
+  1: '构建中',
+  2: '构建完成',
+  3: '构建失败',
+  4: '发布中',
+  5: '发布成功',
+  6: '发布失败',
+  7: '取消构建',
+  8: '构建中断',
+  9: '队列等待',
+  10: '异常关闭'
+}
 export const statusColor = {
-  1: "orange",
-  2: "green",
-  3: "red",
-  4: "orange",
-  5: "green",
-  6: "red",
-  7: "",
-  8: "blue",
-  9: "orange",
-  10: "red",
-};
+  1: 'orange',
+  2: 'green',
+  3: 'red',
+  4: 'orange',
+  5: 'green',
+  6: 'red',
+  7: '',
+  8: 'blue',
+  9: 'orange',
+  10: 'red'
+}
 
 export const releaseMethodMap = {
-  0: "不发布",
-  1: "节点分发",
-  2: "项目",
-  3: "SSH",
-  4: "本地命令",
-  5: "Docker镜像",
-};
+  0: '不发布',
+  1: '节点分发',
+  2: '项目',
+  3: 'SSH',
+  4: '本地命令',
+  5: 'Docker镜像'
+}
 
 export const triggerBuildTypeMap = {
-  0: "手动",
-  1: "触发器",
-  2: "定时",
-  3: "手动回滚",
-};
+  0: '手动',
+  1: '触发器',
+  2: '定时',
+  3: '手动回滚'
+}
 
 export const buildModeMap = {
-  0: "本地构建",
-  1: "容器构建",
-};
+  0: '本地构建',
+  1: '容器构建'
+}
