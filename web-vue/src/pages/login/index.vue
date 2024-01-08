@@ -1,6 +1,14 @@
 <template>
   <div class="wrapper" :style="backgroundImage">
-    <svg width="100%" height="100%" viewBox="0 0 1440 500" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 1440 500"
+      stroke="none"
+      stroke-width="1"
+      fill="none"
+      fill-rule="evenodd"
+    >
       <g>
         <circle stroke="#13C2C2" cx="500" cy="-20" r="6"></circle>
         <circle fill-opacity="0.4" fill="#9EE6E6" cx="166" cy="76" r="8"></circle>
@@ -24,281 +32,357 @@
         <rect stroke="#CED4D9" x="108" y="1" width="9" height="9" rx="1"></rect>
       </g>
     </svg>
-    <div class="switch" @click="handleToggleBg">{{ dynamicBg ? "关闭动态背景" : "开启动态背景" }}</div>
+    <div class="switch" @click="handleToggleBg">{{ dynamicBg ? '关闭动态背景' : '开启动态背景' }}</div>
     <a-card class="login-card" hoverable>
       <a-card-meta :title="`${loginTitle}`" style="text-align: center" description="" />
       <br />
-      <template v-if="this.action === 'login'">
-        <a-form-model ref="loginForm" :label-col="{ span: 0 }" :model="loginForm" :rules="rules" @submit="handleLogin">
-          <a-form-model-item :wrapper-col="{ span: 24 }" prop="loginName">
-            <a-input v-model="loginForm.loginName" placeholder="用户名" />
-          </a-form-model-item>
-          <a-form-model-item :wrapper-col="{ span: 24 }" prop="userPwd">
-            <a-input-password v-model="loginForm.userPwd" placeholder="密码" />
-          </a-form-model-item>
-          <a-form-model-item v-if="!this.disabledCaptcha" :wrapper-col="{ span: 24 }" prop="code">
+      <template v-if="action === 'login'">
+        <a-form :model="loginForm" :label-col="{ span: 0 }" :wrapper-col="{ span: 24 }" @finish="handleLogin">
+          <a-form-item name="loginName" :rules="[{ required: true, message: '请输入用户名' }]">
+            <a-input autocomplete="true" v-model:value="loginForm.loginName" placeholder="用户名" />
+          </a-form-item>
+          <a-form-item name="userPwd" :rules="[{ required: true, message: '请输入密码' }]">
+            <a-input-password autocomplete="true" v-model:value="loginForm.userPwd" placeholder="密码" />
+          </a-form-item>
+          <a-form-item v-if="!disabledCaptcha" name="code" :rules="[{ required: true, message: '请输入验证码' }]">
             <a-row>
               <a-col :span="14">
-                <a-input v-model="loginForm.code" placeholder="验证码" />
+                <a-input v-model:value="loginForm.code" placeholder="验证码" />
               </a-col>
               <a-col :offset="2" :span="8">
                 <div class="rand-code">
                   <img v-if="randCode" :src="randCode" @click="changeCode" />
-                  <a-icon v-else type="loading" />
+                  <loading-outlined v-else />
                 </div>
               </a-col>
             </a-row>
-          </a-form-model-item>
-          <a-form-model-item :wrapper-col="{ span: 24 }">
-            <a-button type="primary" html-type="submit" class="btn-login"> 登录 </a-button>
-          </a-form-model-item>
-          <template v-if="this.enabledOauth2Provides.length">
+          </a-form-item>
+          <a-form-item :wrapper-col="{ span: 24 }">
+            <a-button type="primary" html-type="submit" class="btn-login" :loading="loading"> 登录 </a-button>
+          </a-form-item>
+          <template v-if="enabledOauth2Provides.length">
             <a-divider>第三方登录</a-divider>
-            <!-- <a-form-model-item :wrapper-col="{ span: 24 }"> </a-form-model-item> -->
-            <a-form-model-item :wrapper-col="{ span: 24 }">
+            <a-form-item :wrapper-col="{ span: 24 }">
               <a-space :size="20">
-                <div class="oauth2-item" v-if="this.enabledOauth2Provides.indexOf('gitee') > -1">
-                  <a-tooltip @click="toOauth2Url('gitee')" title="gitee"><img :src="giteeImg" /></a-tooltip>
+                <div class="oauth2-item" v-if="enabledOauth2Provides.includes('gitee')">
+                  <a-tooltip @click="toOauth2Url('gitee')" title="gitee">
+                    <img alt="gitee" :src="giteeImg" />
+                  </a-tooltip>
                 </div>
-                <div class="oauth2-item" v-if="this.enabledOauth2Provides.indexOf('maxkey') > -1">
-                  <a-tooltip @click="toOauth2Url('maxkey')" title="maxkey"><img :src="maxkeyImg" /></a-tooltip>
+                <div class="oauth2-item" v-if="enabledOauth2Provides.includes('maxkey')">
+                  <a-tooltip @click="toOauth2Url('maxkey')" title="maxkey">
+                    <img alt="maxkey" :src="maxkeyImg" />
+                  </a-tooltip>
                 </div>
-                <div class="oauth2-item" v-if="this.enabledOauth2Provides.indexOf('github') > -1">
-                  <a-tooltip @click="toOauth2Url('github')" title="github"><img :src="githubImg" /></a-tooltip>
+                <div class="oauth2-item" v-if="enabledOauth2Provides.includes('github')">
+                  <a-tooltip @click="toOauth2Url('github')" title="github">
+                    <img alt="github" :src="githubImg" />
+                  </a-tooltip>
                 </div>
               </a-space>
-            </a-form-model-item>
+            </a-form-item>
           </template>
-        </a-form-model>
+        </a-form>
       </template>
-      <template v-if="this.action === 'mfa'">
-        <a-form-model ref="mfaDataForm" :label-col="{ span: 0 }" :model="mfaData" :rules="rules" @submit="handleMfa">
-          <a-form-model-item label="验证码" :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }" prop="mfaCode" help="需要验证 MFA">
-            <a-input v-model="mfaData.mfaCode" placeholder="mfa 验证码" />
-          </a-form-model-item>
+      <template v-if="action === 'mfa'">
+        <a-form
+          ref="mfaDataForm"
+          :label-col="{ span: 5 }"
+          :wrapper-col="{ span: 19 }"
+          :model="mfaData"
+          @finish="handleMfa"
+        >
+          <a-form-item
+            label="验证码"
+            name="mfaCode"
+            help="需要验证 MFA"
+            :rules="[
+              { required: true, message: '请输入两步验证码' },
+              { pattern: /^\d{6}$/, message: '验证码 6 为纯数字' }
+            ]"
+          >
+            <a-input v-model:value="mfaData.mfaCode" placeholder="mfa 验证码" />
+          </a-form-item>
 
           <a-button type="primary" html-type="submit" class="btn-login"> 确认 </a-button>
-        </a-form-model>
+        </a-form>
       </template>
     </a-card>
   </div>
 </template>
-<script>
-import { login, loginConfig, mfaVerify, oauth2Url, oauth2Login, loginRandCode } from "@/api/user/user";
-import { checkSystem } from "@/api/install";
-import sha1 from "js-sha1";
+<script setup lang="ts">
+import { login, loginConfig, mfaVerify, oauth2Url, oauth2Login, loginRandCode } from '@/api/user/user'
+import { checkSystem } from '@/api/install'
+import sha1 from 'js-sha1'
 
-import { mapGetters } from "vuex";
-export default {
-  data() {
-    return {
-      loginForm: {
-        loginName: "",
-        userPwd: "",
-        code: "",
-      },
-      mfaData: {},
-      action: "login",
-      randCode: "",
-      dynamicBg: localStorage.getItem("dynamicBg") === "true",
-      loginTitle: "登录JPOM",
-      rules: {
-        loginName: [{ required: true, message: "请输入用户名" }],
-        userPwd: [{ required: true, message: "请输入密码" }],
-        code: [{ required: true, message: "请输入验证码" }],
-        mfaCode: [
-          { required: true, message: "请输入两步验证码" },
-          { pattern: /^\d{6}$/, message: "验证码 6 为纯数字" },
-        ],
-      },
-      disabledCaptcha: false,
-      enabledOauth2Provides: [],
-      maxkeyImg: require(`@/assets/images/maxkey.png`),
-      giteeImg: require(`@/assets/images/gitee.svg`),
-      githubImg: require(`@/assets/images/github.png`),
-    };
-  },
-  created() {
-    this.checkSystem();
-    //this.getBg();
+import maxkeyImg from '@/assets/images/maxkey.png'
+import giteeImg from '@/assets/images/gitee.svg'
+import githubImg from '@/assets/images/github.png'
 
-    this.getLoginConfig();
-  },
-  computed: {
-    ...mapGetters(["getWorkspaceId"]),
-    backgroundImage: function () {
-      if (this.dynamicBg) {
-        return {
-          backgroundImage: `url(https://picsum.photos/${screen.width}/${screen.height}/?random)`,
-        };
-      }
-      return {};
-    },
-  },
-  methods: {
-    // 检查是否需要初始化
-    checkSystem() {
-      checkSystem().then((res) => {
+interface IFormState {
+  loginName: string
+  userPwd: string
+  code: string
+}
+
+const router = useRouter()
+const route = useRoute()
+
+const loginTitle = ref('登录JPOM')
+const loginForm = reactive<IFormState>({
+  loginName: '',
+  userPwd: '',
+  code: ''
+})
+const mfaData = reactive({
+  mfaCode: '',
+  token: ''
+})
+const loading = ref(false)
+const action = ref<'mfa' | 'login'>('login')
+const enabledOauth2Provides = ref<string[]>([])
+
+const randCode = ref('')
+const dynamicBg = ref(localStorage.getItem('dynamicBg') === 'true')
+const disabledCaptcha = ref(false)
+
+const backgroundImage = computed(() => {
+  return dynamicBg.value
+    ? { backgroundImage: `url(https://picsum.photos/${screen.width}/${screen.height}/?random)` }
+    : {}
+})
+
+// 检查是否需要初始化
+const beginCheckSystem = () => {
+  checkSystem().then((res) => {
+    if (res.code !== 200) {
+      $notification.warn({
+        message: res.msg
+      })
+    }
+    if (res.code === 999) {
+      router.push('/system/ipAccess')
+    } else if (res.code === 222) {
+      router.push('/install')
+    }
+    if (res.data?.loginTitle) {
+      loginTitle.value = res.data.loginTitle
+    }
+    disabledCaptcha.value = res.data.disabledCaptcha
+    checkOauth2()
+  })
+}
+
+const getLoginConfig = () => {
+  loginConfig().then((res) => {
+    if (res.data && res.data.demo) {
+      const demo = res.data.demo
+      const p = h('p', { innerHTML: demo.msg }, [])
+      $notification.info({
+        message: '温馨提示',
+        description: h('div', {}, [p])
+      })
+      loginForm.loginName = demo.user
+    }
+    enabledOauth2Provides.value = res.data?.oauth2Provides || []
+  })
+}
+// change Code
+const changeCode = () => {
+  loginRandCode().then((res) => {
+    if (res.code === 200) {
+      randCode.value = res.data
+      loginForm.code = ''
+    }
+  })
+}
+
+const parseOauth2Provide = () => {
+  if (jpomWindow.oauth2Provide === '<oauth2Provide>') {
+    const pathname = location.pathname.substring(1)
+    const pathArray = pathname.split('-')
+    return pathArray[pathArray.length - 1]
+    // console.log(location.pathname.substring(1))
+  }
+  return jpomWindow.oauth2Provide
+}
+
+const checkOauth2 = () => {
+  if (route.query.code) {
+    loading.value = true
+    oauth2Login({
+      code: route.query.code,
+      state: route.query.state,
+      provide: parseOauth2Provide()
+    })
+      .then((res) => {
+        // 删除参数，避免刷新页面 code 已经被使用提示错误信息
+        let query = Object.assign({}, route.query)
+        delete query.code, delete query.state
+        router.replace({
+          query: query
+        })
+        // 登录不成功，更新验证码
         if (res.code !== 200) {
-          this.$notification.warn({
-            message: res.msg,
-          });
+          changeCode()
+        } else {
+          startDispatchLogin(res)
         }
-        if (res.code === 999) {
-          this.$router.push("/system/ipAccess");
-        } else if (res.code === 222) {
-          this.$router.push("/install");
-        }
-        if (res.data?.loginTitle) {
-          this.loginTitle = res.data.loginTitle;
-        }
+      })
+      .finally(() => {
+        loading.value = false
+      })
+  }
+}
+// 跳转到第三方系统
+const toOauth2Url = (provide: string) => {
+  oauth2Url({ provide: provide }).then((res) => {
+    if (res.code === 200 && res.data) {
+      $message.loading({ content: '跳转到第三方系统中', key: 'oauth2', duration: 0 })
+      location.href = res.data.toUrl
+    }
+  })
+}
+const startDispatchLogin = (res: any) => {
+  $notification.success({
+    message: res.msg
+  })
+  const existWorkspace = res.data.bindWorkspaceModels.find((item: any) => item.id === appStore().getWorkspaceId())
+  if (existWorkspace) {
+    // 缓存的还存在
+    dispatchLogin(res.data)
+  } else {
+    // 之前的工作空间已经不存在,切换到当前列表的第一个
+    // 还没有选择工作空间，默认选中第一个 用户加载菜单
+    let firstWorkspace = res.data.bindWorkspaceModels[0]
+    appStore()
+      .changeWorkspace(firstWorkspace.id)
+      .then(() => {
+        dispatchLogin(res.data)
+      })
+  }
+}
+const dispatchLogin = (data: any) => {
+  // 调用 store action 存储当前登录的用户名和 token
+  userStore()
+    .login({ token: data.token, longTermToken: data.longTermToken })
+    .then(() => {
+      // 跳转主页面
+      router.push({ path: '/' })
+    })
+}
 
-        this.checkOauth2();
-      });
-    },
-    // Controls the background display or hiding
-    handleToggleBg() {
-      this.dynamicBg = !this.dynamicBg;
-      localStorage.setItem("dynamicBg", this.dynamicBg);
-      //this.getBg();
-    },
-    // Get background pic
-    // getBg() {},
-    //
-    getLoginConfig() {
-      loginConfig().then((res) => {
-        if (res.data && res.data.demo) {
-          const demo = res.data.demo;
-          const h = this.$createElement;
-          this.$notification.info({
-            message: "温馨提示",
-            description: h("div", null, [h("p", { domProps: { innerHTML: demo.msg } }, null)]),
-          });
-          this.loginForm.loginName = demo.user;
-        }
-        this.disabledCaptcha = res.data?.disabledCaptcha;
-        this.enabledOauth2Provides = res.data?.oauth2Provides || [];
-        if (!this.disabledCaptcha) {
-          this.changeCode();
-        }
-      });
-    },
-    // change Code
-    changeCode() {
-      // this.randCode = "randCode.png?r=" + new Date().getTime();
-      loginRandCode().then((res) => {
-        if (res.code === 200) {
-          this.randCode = res.data;
-        }
-      });
-      this.loginForm = { ...this.loginForm, code: "" };
-    },
-    checkOauth2() {
-      if (this.$route.query.code) {
-        oauth2Login({ code: this.$route.query.code, state: this.$route.query.state, provide: window.oauth2Provide }).then((res) => {
-          // 删除参数，避免刷新页面 code 已经被使用提示错误信息
-          let query = Object.assign({}, this.$route.query);
-          delete query.code, delete query.state;
-          this.$router.replace({
-            query: query,
-          });
-          // 登录不成功，更新验证码
-          if (res.code !== 200) {
-            this.changeCode();
-          } else {
-            this.startDispatchLogin(res);
-          }
-        });
+// Controls the background display or hiding
+const handleToggleBg = () => {
+  dynamicBg.value = !dynamicBg.value
+  localStorage.setItem('dynamicBg', String(dynamicBg.value))
+}
+
+const handleLogin = (values: IFormState) => {
+  const params = {
+    ...values,
+    userPwd: sha1(loginForm.userPwd)
+  }
+  loading.value = true
+  login(params)
+    .then((res) => {
+      if (res.code === 201) {
+        action.value = 'mfa'
+        mfaData.token = res.data.tempToken
+        return
       }
-    },
-    // 跳转到第三方系统
-    toOauth2Url(provide) {
-      oauth2Url({ provide: provide }).then((res) => {
-        if (res.code === 200 && res.data) {
-          this.$message.loading({ content: "跳转到第三方系统中", key: "oauth2", duration: 0 });
-          location.href = res.data.toUrl;
-        }
-      });
-    },
-    // login
-    handleLogin(e) {
-      e.preventDefault();
-      this.$refs["loginForm"].validate((valid) => {
-        if (!valid) {
-          return false;
-        }
-        const params = {
-          ...this.loginForm,
-          userPwd: sha1(this.loginForm.userPwd),
-        };
-        login(params).then((res) => {
-          if (res.code === 201) {
-            //
-            this.action = "mfa";
-            this.mfaData.token = res.data.tempToken;
-            return;
-          }
-          // 登录不成功，更新验证码
-          if (res.code !== 200) {
-            this.changeCode();
-          } else {
-            this.startDispatchLogin(res);
-          }
-        });
-      });
-    },
-    // 验证 验证码
-    handleMfa(e) {
-      e.preventDefault();
-      this.$refs["mfaDataForm"].validate((valid) => {
-        if (!valid) {
-          return false;
-        }
-        mfaVerify({
-          token: this.mfaData.token,
-          code: this.mfaData.mfaCode,
-        }).then((res) => {
-          if (res.code === 201) {
-            // 过期需要重新登录
-            this.action = "login";
-            this.mfaData = {};
-            return;
-          } else if (res.code === 200) {
-            this.startDispatchLogin(res);
-          }
-        });
-      });
-    },
-    startDispatchLogin(res) {
-      this.$notification.success({
-        message: res.msg,
-      });
-      const existWorkspace = res.data.bindWorkspaceModels.filter((item) => item.id === this.getWorkspaceId);
-      if (existWorkspace.length) {
-        // 缓存的还存在
-        this.dispatchLogin(res.data);
+      // 登录不成功，更新验证码
+      if (res.code !== 200) {
+        changeCode()
       } else {
-        // 之前的工作空间已经不存在,切换到当前列表的第一个
-        // 还没有选择工作空间，默认选中第一个 用户加载菜单
-        let firstWorkspace = res.data.bindWorkspaceModels[0];
-        this.$store.dispatch("changeWorkspace", firstWorkspace.id).then(() => {
-          this.dispatchLogin(res.data);
-        });
+        startDispatchLogin(res)
       }
-    },
-    dispatchLogin(data) {
-      // 调用 store action 存储当前登录的用户名和 token
-      this.$store.dispatch("login", { token: data.token, longTermToken: data.longTermToken }).then(() => {
-        // 跳转主页面
-        this.$router.push({ path: "/" });
-      });
-    },
-  },
-};
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+
+const handleMfa = () => {
+  mfaVerify({
+    token: mfaData.token,
+    code: mfaData.mfaCode
+  }).then((res) => {
+    if (res.code === 201) {
+      // 过期需要重新登录
+      action.value = 'login'
+      mfaData.token = ''
+      mfaData.mfaCode = ''
+    } else if (res.code === 200) {
+      startDispatchLogin(res)
+    }
+  })
+}
+
+onMounted(() => {
+  beginCheckSystem()
+  changeCode()
+  getLoginConfig()
+})
+
+// export default {
+//   data() {
+//     return {
+//       loginForm: {
+//         loginName: '',
+//         userPwd: '',
+//         code: '',
+//       },
+//       mfaData: {},
+//       action: 'login',
+//       randCode: 'randCode.png',
+//       dynamicBg: localStorage.getItem('dynamicBg') === 'true',
+//       loginTitle: '登录JPOM',
+//       rules: {
+//         loginName: [{ required: true, message: '请输入用户名' }],
+//         userPwd: [{ required: true, message: '请输入密码' }],
+//         code: [{ required: true, message: '请输入验证码' }],
+//         mfaCode: [
+//           { required: true, message: '请输入两步验证码' },
+//           { pattern: /^\d{6}$/, message: '验证码 6 为纯数字' },
+//         ],
+//       },
+//       disabledCaptcha: false,
+//       enabledOauth2Provides: [],
+//       maxkeyImg: require(`@/assets/images/maxkey.png`),
+//       giteeImg: require(`@/assets/images/gitee.svg`),
+//       githubImg: require(`@/assets/images/github.png`),
+//     }
+//   },
+//   created() {
+//     this.checkSystem()
+//     //this.getBg();
+
+//     this.changeCode()
+//     this.getLoginConfig()
+//   },
+//   computed: {
+//     ...mapGetters(['getWorkspaceId']),
+//     backgroundImage: function () {
+//       if (this.dynamicBg) {
+//         return {
+//           backgroundImage: `url(https://picsum.photos/${screen.width}/${screen.height}/?random)`,
+//         }
+//       }
+//       return {}
+//     },
+//   },
+//   methods: {
+//     // Get background pic
+//     // getBg() {},
+//     //
+//   },
+// }
 </script>
-<style scoped>
+<style scoped lang="less">
 .wrapper {
-  width: 100vw;
+  margin: 0;
+  // width: 100vw;
   height: 100vh;
   /* background-color: #fbefdf; */
   background: linear-gradient(#1890ff, #66a9c9);
@@ -309,6 +393,7 @@ export default {
   position: relative;
   overflow: hidden;
 }
+
 .switch {
   width: 128px;
   height: 38px;
@@ -326,11 +411,13 @@ export default {
   border-top-left-radius: 6px;
   border-bottom-left-radius: 6px;
 }
+
 .switch:hover {
   transform: translateX(0);
 }
+
 .switch::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 10px;
   top: 13px;
@@ -349,10 +436,12 @@ export default {
   top: 50%;
   transform: translate(-50%, -50%);
 }
+
 .rand-code {
   width: 100%;
-  height: 36px;
+  height: 32px;
 }
+
 .rand-code img {
   width: 100%;
   height: 100%;
@@ -360,13 +449,16 @@ export default {
   border-radius: 4px;
   display: inherit;
 }
+
 .btn-login {
   width: 100%;
   margin: 10px 0;
 }
+
 /deep/ .ant-card-meta-title {
   font-size: 30px;
 }
+
 /deep/ .ant-card-body {
   padding: 30px;
 }

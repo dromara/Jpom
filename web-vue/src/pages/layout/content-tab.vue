@@ -1,124 +1,117 @@
 <template>
-  <a-tabs v-model="activeKey" size="small" class="my-tabs" hide-add type="editable-card" @edit="onEdit" @change="changeTab">
-    <a-tab-pane v-for="(tab, index) in nowTabList" :key="tab.key" :closable="nowTabList.length > 1">
-      <template slot="tab">
+  <a-tabs v-model:activeKey="activeTabKey" class="my-tabs" hide-add type="editable-card" @edit="onEdit">
+    <a-tab-pane v-for="(tab, index) in tabList" :key="tab.key" :closable="tabList.length > 1">
+      <template #tab>
         <a-dropdown :trigger="['contextmenu']">
           <span style="display: inline-table">{{ tab.title }}</span>
-          <a-menu slot="overlay">
-            <a-menu-item
-              @click="
-                closeTabs({
-                  key: tab.key,
-                })
-              "
-            >
-              <a-button type="link" :disabled="nowTabList.length <= 1">关闭其他</a-button>
-            </a-menu-item>
-            <a-menu-item
-              @click="
-                closeTabs({
-                  key: tab.key,
-                  position: 'left',
-                })
-              "
-            >
-              <a-button type="link" :disabled="nowTabList.length <= 1 || index === 0">关闭左侧</a-button>
-            </a-menu-item>
-            <a-menu-item
-              @click="
-                closeTabs({
-                  key: tab.key,
-                  position: 'right',
-                })
-              "
-            >
-              <a-button type="link" :disabled="nowTabList.length <= 1 || index === nowTabList.length - 1">关闭右侧</a-button>
-            </a-menu-item>
-          </a-menu>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item
+                @click="
+                  closeTabs({
+                    key: tab.key
+                  })
+                "
+              >
+                <a-button type="link" :disabled="tabList.length <= 1">关闭其他</a-button>
+              </a-menu-item>
+              <a-menu-item
+                @click="
+                  closeTabs({
+                    key: tab.key,
+                    position: 'left'
+                  })
+                "
+              >
+                <a-button type="link" :disabled="tabList.length <= 1 || index === 0">关闭左侧</a-button>
+              </a-menu-item>
+              <a-menu-item
+                @click="
+                  closeTabs({
+                    key: tab.key,
+                    position: 'right'
+                  })
+                "
+              >
+                <a-button type="link" :disabled="tabList.length <= 1 || index === tabList.length - 1"
+                  >关闭右侧
+                </a-button>
+              </a-menu-item>
+            </a-menu>
+          </template>
         </a-dropdown>
       </template>
     </a-tab-pane>
-    <template slot="tabBarExtraContent"> <user-header :mode="this.mode" /> </template>
+    <template #rightExtra> <user-header :mode="props.mode" /> </template>
   </a-tabs>
 </template>
-<script>
-import { mapGetters } from "vuex";
-import UserHeader from "./user-header";
-export default {
-  props: {
-    mode: {
-      type: String,
-    },
+<script lang="ts" setup>
+import userHeader from './user-header.vue'
+import { useAllMenuStore } from '@/stores/menu2'
+
+const router = useRouter()
+const route = useRoute()
+
+const props = defineProps<{
+  mode: string
+}>()
+
+const menuStore = useAllMenuStore()
+const tabList = computed(() => {
+  return menuStore.getTabList(props.mode)
+})
+const activeTabKey = computed({
+  get() {
+    return menuStore.getActiveTabKey(props.mode)
   },
-  components: {
-    UserHeader,
-  },
-  data() {
-    return {};
-  },
-  computed: {
-    ...mapGetters(["getActiveTabKey", "getManagementActiveTabKey", "getTabList", "getManagementTabList", "getCollapsed"]),
-    activeKey: {
-      get() {
-        return this.mode === "normal" ? this.getActiveTabKey : this.getManagementActiveTabKey;
-      },
-      set(value) {
-        this.activeTab(value);
-      },
-    },
-    nowTabList() {
-      return this.mode === "normal" ? this.getTabList : this.getManagementTabList;
-    },
-  },
-  created() {},
-  methods: {
-    // 编辑 Tab
-    onEdit(key, action) {
-      if (action === "remove") {
-        if (this.nowTabList.length === 1) {
-          this.$notification.warn({
-            message: "不能关闭了",
-          });
-          return;
-        }
-        this.$store.dispatch(this.mode === "normal" ? "removeTab" : "removeManagementTab", key).then(() => {
-          this.activeTab();
-        });
-      }
-    },
-    // 改变 Tab
-    changeTab() {},
-    // 关闭 tabs
-    closeTabs(data) {
-      this.$notification.success({
-        message: "操作成功",
-      });
-      this.$store.dispatch(this.mode === "normal" ? "clearTabs" : "clearManagementTabs", data).then(() => {
-        this.activeTab();
-      });
-    },
-    activeTab(key) {
-      key = key || this.activeKey;
-      const index = this.nowTabList.findIndex((ele) => ele.key === key);
-      const activeTab = this.nowTabList[index];
-      this.$router.push({ query: { ...this.$route.query, sPid: activeTab.parentId, sId: activeTab.id }, path: activeTab.path });
-      //
-      this.$store.dispatch(this.mode === "normal" ? "activeMenu" : "activeManagementMenu", activeTab.id);
-      this.$store.dispatch(this.mode === "normal" ? "menuOpenKeys" : "menuManagementOpenKeys", activeTab.parentId);
-      return activeTab;
-    },
-  },
-};
+  set(value) {
+    activeTab(value)
+  }
+})
+
+const activeTab = (key?: string) => {
+  key = key || activeTabKey.value
+  const index = tabList.value.findIndex((ele: any) => ele.key === key)
+  const activeTab = tabList.value[index]
+  router.push({
+    query: { ...route.query, sPid: activeTab.parentId, sId: activeTab.id },
+    path: activeTab.path
+  })
+
+  menuStore.activeMenu(props.mode, activeTab.id)
+
+  return activeTab
+}
+
+const onEdit = (key: string, action: 'remove') => {
+  if (action === 'remove') {
+    if (tabList.value.length === 1) {
+      $notification.warn({
+        message: '不能关闭了'
+      })
+      return
+    }
+    menuStore.removeTab(props.mode, key).then(() => {
+      activeTab()
+    })
+  }
+}
+
+// 关闭 tabs
+const closeTabs = (data: any) => {
+  $notification.success({
+    message: '操作成功'
+  })
+  menuStore.clearTabs(props.mode, data).then(() => {
+    activeTab()
+  })
+}
 </script>
 <style scoped>
 .my-tabs {
-  flex: auto;
-  /* margin-right: 20px; */
+  width: 50vw;
+  /* flex: auto; */
   /* align-self: center; */
-  /* height: 40px; */
-}
-
-/deep/ .ant-tabs-bar {
-  margin: 0;
+  height: 40px;
 }
 </style>

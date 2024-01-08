@@ -1,86 +1,44 @@
 <template>
-  <a-config-provider :locale="locale">
-    <div id="app" :class="`${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
+  <a-config-provider :locale="zhCN">
+    <div :class="`${scrollbarFlag ? '' : 'hide-scrollbar'}`">
       <router-view v-if="routerActivation" />
       <template>
         <a-back-top />
       </template>
-      <a-spin v-bind="globalLoadingProps">
-        <div></div>
-      </a-spin>
     </div>
   </a-config-provider>
 </template>
 
-<script>
-import zhCN from "ant-design-vue/lib/locale-provider/zh_CN";
-import Vue from "vue";
-import { mapGetters } from "vuex";
-import store from "@/store/index";
+<script setup lang="ts">
+import zhCN from 'ant-design-vue/es/locale/zh_CN'
+// import { useAllMenuStore } from '@/stores/menu2'
+import { useGuideStore } from '@/stores/guide'
 
-export default {
-  name: "App",
-  data() {
-    return {
-      locale: zhCN,
-      routerActivation: true,
-      globalLoadingProps: {
-        spinning: false,
-        tip: "加载中",
-        size: "large",
-        delayTime: 500,
-      },
-    };
-  },
-  provide() {
-    return {
-      reload: this.reload,
-    };
-  },
-  components: {},
-  computed: {
-    ...mapGetters(["getGuideCache"]),
-    scrollbarFlag() {
-      return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
-    },
-  },
-  created() {
-    this.$notification.config({
-      top: "100px",
-      duration: 4,
-    });
+const routerActivation = ref(true)
+const guideStore = useGuideStore().getGuideCache
+const scrollbarFlag = computed(() => {
+  return guideStore.scrollbarFlag ?? true
+})
 
-    this.$message.config({ duration: 4 });
-  },
-  methods: {
-    reload() {
-      return new Promise(() => {
-        this.routerActivation = false;
-        // 刷新菜单
-        store
-          .dispatch("restLoadSystemMenus")
-          .then(() => {
-            //
-          })
-          .catch(() => {
-            // 跳转到登录页面
-            this.$router.push({
-              path: "/login",
-            });
-          });
-        this.$nextTick(() => {
-          this.routerActivation = true;
-        });
-      });
-    },
-  },
-  beforeCreate() {
-    Vue.prototype.$app = this;
-  },
-};
+onMounted(() => {})
+
+const reload = () => {
+  routerActivation.value = false
+  nextTick(() => {
+    // const menuStore = useMenuStore()
+    // 刷新菜单
+    // menuStore.restLoadSystemMenus()
+    routerActivation.value = true
+  })
+}
+
+provide('reload', reload)
 </script>
 
-<style>
+<style lang="less">
+body {
+  margin: 0;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -93,6 +51,10 @@ export default {
 .full-content {
   min-height: calc(100vh - 120px);
   padding-bottom: 20px;
+}
+
+.node-full-content {
+  min-height: calc(100vh - 130px) !important;
 }
 
 .globalLoading {
@@ -108,7 +70,72 @@ export default {
   right: 0;
   display: flex;
 }
+
 .ant-spin-text {
   text-shadow: 0 0 black !important;
+}
+
+.search-wrapper {
+  margin-bottom: 20px;
+}
+
+@color-border-last: rgba(140, 140, 140, 1);
+@color-neutral-last: rgba(140, 140, 140, 0.2);
+@scrollbar-size: 5px;
+
+// 兼容火狐
+* {
+  scrollbar-width: thin;
+  scrollbar-color: @color-border-last @color-neutral-last;
+}
+// 滚动条样式
+::-webkit-scrollbar {
+  width: @scrollbar-size;
+  height: @scrollbar-size;
+  border-radius: @scrollbar-size;
+  background-color: transparent;
+}
+// 滚动条-活动按钮
+::-webkit-scrollbar-thumb {
+  background: @color-border-last;
+  border-radius: @scrollbar-size;
+  box-shadow: outset 0 0 @scrollbar-size @color-border-last;
+}
+// 滚动条背景
+::-webkit-scrollbar-track {
+  background-color: @color-neutral-last;
+  border-radius: @scrollbar-size;
+  box-shadow: outset 0 0 @scrollbar-size @color-neutral-last;
+}
+
+.search-input-item {
+  width: 140px;
+  /* margin-right: 10px; */
+}
+
+.hide-scrollbar *::-webkit-scrollbar {
+  width: 0 !important;
+  display: none;
+}
+
+.hide-scrollbar * {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar pre::-webkit-scrollbar {
+  width: 0 !important;
+  display: none;
+}
+
+.hide-scrollbar pre {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.text-overflow-hidden {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

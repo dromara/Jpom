@@ -3,155 +3,155 @@
     <!-- 侧边栏 文件树 -->
     <a-layout-sider theme="light" class="log-sider jpom-node-log-tree" width="20%">
       <a-empty v-if="list.length === 0" />
-      <a-directory-tree :treeData="list" :replaceFields="replaceFields" @select="select" default-expand-all> </a-directory-tree>
+      <a-directory-tree :treeData="list" :fieldNames="replaceFields" @select="select" default-expand-all>
+      </a-directory-tree>
     </a-layout-sider>
     <!-- 单个文件内容 -->
     <a-layout-content class="log-content">
-      <!-- <div class="filter">
-        <a-button type="primary" @click="loadData">刷新</a-button>
-      </div>
-      <div>
-        <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none" />
-      </div> -->
-      <log-view :ref="`logView`" height="calc(100vh - 165px)">
-        <template slot="before">
+      <log-view2 :ref="`logView`" height="calc(100vh - 165px)">
+        <template v-slot:before>
           <a-space>
             <a-button type="primary" size="small" @click="loadData">刷新</a-button>
-            <a-button type="danger" size="small" :disabled="!this.temp.path" @click="deleteLog">删除</a-button>
+            <a-button type="primary" danger size="small" :disabled="!this.temp.path" @click="deleteLog">删除</a-button>
             <a-button type="primary" size="small" :disabled="!this.temp.path" @click="downloadLog">下载</a-button>
           </a-space>
         </template>
-      </log-view>
+      </log-view2>
     </a-layout-content>
     <!-- 对话框 -->
     <!-- <a-modal v-model="visible" title="系统提示" :footer="null">
-      <a-space>
-        <a-button type="danger" @click="deleteLog">删除日志文件</a-button>
-        <a-button type="primary" @click="downloadLog">下载日志文件</a-button>
-        <a-button @click="visible = false">取消</a-button>
-      </a-space>
-    </a-modal> -->
+        <a-space>
+          <a-button type="primary" danger @click="deleteLog">删除日志文件</a-button>
+          <a-button type="primary" @click="downloadLog">下载日志文件</a-button>
+          <a-button @click="visible = false">取消</a-button>
+        </a-space>
+      </a-modal> -->
   </a-layout>
 </template>
+
 <script>
-import { getLogList, downloadFile, deleteLog } from "@/api/system";
-import { mapGetters } from "vuex";
-import { getWebSocketUrl } from "@/utils/const";
-import LogView from "@/components/logView/index2";
+import { getLogList, downloadFile, deleteLog } from '@/api/system'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/stores/user'
+import { getWebSocketUrl } from '@/api/config'
+import LogView2 from '@/components/logView/index2'
 export default {
   components: {
-    LogView,
+    LogView2
   },
   props: {
     machineId: {
-      type: String,
-    },
+      type: String
+    }
   },
   data() {
     return {
       list: [],
       socket: null,
       // 日志内容
-      logContext: "choose file loading context...",
+      logContext: 'choose file loading context...',
 
       replaceFields: {
-        children: "children",
-        title: "title",
-        key: "path",
+        children: 'children',
+        title: 'title',
+        key: 'path'
       },
       // visible: false,
-      temp: {},
-    };
+      temp: {}
+    }
   },
   computed: {
-    ...mapGetters(["getLongTermToken"]),
+    ...mapState(useUserStore, ['getLongTermToken']),
     socketUrl() {
-      return getWebSocketUrl("/socket/agent_log", `userId=${this.getLongTermToken}&machineId=${this.machineId}&nodeId=system&type=agentLog`);
-    },
+      return getWebSocketUrl(
+        '/socket/agent_log',
+        `userId=${this.getLongTermToken}&machineId=${this.machineId}&nodeId=system&type=agentLog`
+      )
+    }
   },
   watch: {},
   created() {
-    this.loadData();
+    this.loadData()
     // 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
     window.onbeforeunload = () => {
-      this.close();
-    };
+      this.close()
+    }
   },
-  beforeDestroy() {
-    this.close();
+  beforeUnmount() {
+    this.close()
   },
   methods: {
     close() {
-      this.socket?.close();
+      this.socket?.close()
     },
     // 加载数据
     loadData() {
-      this.list = [];
-      const params = { machineId: this.machineId };
+      this.list = []
+      const params = { machineId: this.machineId }
       getLogList(params).then((res) => {
         if (res.code === 200) {
           res.data.forEach((element) => {
             if (element.children) {
-              this.calcTreeNode(element.children);
+              this.calcTreeNode(element.children)
             }
             // 组装数据
             this.list.push({
               ...element,
-              isLeaf: !element.children ? true : false,
-            });
-          });
+              isLeaf: !element.children ? true : false
+            })
+          })
         }
-      });
+      })
     },
     // 递归处理节点
     calcTreeNode(list) {
       list.forEach((element) => {
         if (element.children) {
-          this.calcTreeNode(element.children);
+          this.calcTreeNode(element.children)
         } else {
           // 叶子节点
-          element.isLeaf = true;
+          element.isLeaf = true
         }
-      });
+      })
     },
     // 选择节点
     select(selectedKeys, { node }) {
       if (this.temp?.path === node.dataRef?.path) {
-        return;
+        return
       }
       if (!node.dataRef.isLeaf) {
-        return;
+        return
       }
       const data = {
-        op: "showlog",
+        op: 'showlog',
         tomcatId: this.tomcatId,
-        fileName: node.dataRef.path,
-      };
-      this.temp = node.dataRef;
-      this.$refs.logView.clearLogCache();
+        fileName: node.dataRef.path
+      }
+      this.temp = node.dataRef
+      this.$refs.logView.clearLogCache()
 
-      this.socket?.close();
+      this.socket?.close()
 
-      this.socket = new WebSocket(this.socketUrl);
+      this.socket = new WebSocket(this.socketUrl)
       // 连接成功后
       this.socket.onopen = () => {
-        this.socket.send(JSON.stringify(data));
-      };
+        this.socket.send(JSON.stringify(data))
+      }
       this.socket.onmessage = (msg) => {
-        this.$refs.logView.appendLine(msg.data);
-      };
+        this.$refs.logView.appendLine(msg.data)
+      }
       this.socket.onerror = (err) => {
-        console.error(err);
-        this.$notification.error({
-          message: "web socket 错误,请检查是否开启 ws 代理",
-        });
-      };
+        console.error(err)
+        $notification.error({
+          message: 'web socket 错误,请检查是否开启 ws 代理'
+        })
+      }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
-        console.error(err);
-        this.$message.warning("会话已经关闭[node-system-log] " + node.dataRef.path);
+        console.error(err)
+        this.$message.warning('会话已经关闭[node-system-log] ' + node.dataRef.path)
         // clearInterval(this.heart);
-      };
+      }
     },
     // // 右键点击
     // rightClick({ node }) {
@@ -164,40 +164,47 @@ export default {
       // 请求参数
       const params = {
         machineId: this.machineId,
-        path: this.temp.path,
-      };
+        path: this.temp.path
+      }
       // 请求接口拿到 blob
-      window.open(downloadFile(params), "_blank");
+      window.open(downloadFile(params), '_blank')
     },
     // 删除文件
     deleteLog() {
+      const that = this
       this.$confirm({
-        title: "系统提示",
+        title: '系统提示',
         zIndex: 1009,
-        content: "真的要删除日志文件么？",
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          const params = {
-            machineId: this.machineId,
-            path: this.temp.path,
-          };
-          // 删除日志
-          deleteLog(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.visible = false;
-              this.loadData();
+        content: '真的要删除日志文件么？',
+        okText: '确认',
+        cancelText: '取消',
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            const params = {
+              machineId: that.machineId,
+              path: that.temp.path
             }
-          });
-        },
-      });
-    },
-  },
-};
+            // 删除日志
+            deleteLog(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  $notification.success({
+                    message: res.msg
+                  })
+                  that.visible = false
+                  that.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
+          })
+        }
+      })
+    }
+  }
+}
 </script>
+
 <style scoped>
 .log-layout {
   padding: 0;
@@ -205,8 +212,8 @@ export default {
 }
 .log-sider {
   border: 1px solid #e2e2e2;
-  /* height: calc(100vh - 130px); */
   overflow-x: auto;
+  /* width: max-content; */
 }
 .log-content {
   margin: 0;
@@ -215,15 +222,4 @@ export default {
   height: calc(100vh - 130px);
   overflow-y: auto;
 }
-/* .console {
-  padding: 5px;
-  color: #fff;
-  font-size: 14px;
-  background-color: black;
-  width: 100%;
-  height: calc(100vh - 185px);
-  overflow-y: auto;
-  border: 1px solid #e2e2e2;
-  border-radius: 5px 5px;
-} */
 </style>
