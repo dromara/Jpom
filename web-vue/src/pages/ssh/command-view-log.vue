@@ -1,102 +1,105 @@
 <template>
-  <div style="margin-top: -10px">
+  <div>
     <a-tabs :activeKey="activeKey" @change="tabCallback">
       <a-tab-pane v-for="item in logList" :key="item.id">
-        <span slot="tab">
-          <a-icon v-if="!logMap[item.id] || logMap[item.id].run" type="loading" />
-          {{ item.sshName }}
-        </span>
-        <!-- <a-input :id="`build-log-textarea-${item.id}`" v-model="logMap[item.id].logText" type="textarea" class="console" readOnly style="resize: none; height: 60vh" /> -->
-        <log-view :ref="`logView-${item.id}`" :height="`calc(${height} - 130px)`" />
+        <template v-slot:tab>
+          <span>
+            <LoadingOutlined v-if="!logMap[item.id] || logMap[item.id].run" />
+            {{ item.sshName }}
+          </span>
+        </template>
+
+        <log-view1 :ref="`logView-${item.id}`" :height="`calc(${height} - 130px)`" />
       </a-tab-pane>
     </a-tabs>
   </div>
 </template>
+
 <script>
-import { getCommandLogBarchList, getCommandLogInfo } from "@/api/command";
-import LogView from "@/components/logView/index2";
+import { getCommandLogBarchList, getCommandLogInfo } from '@/api/command'
+import LogView1 from '@/components/logView/index2'
 export default {
   components: {
-    LogView,
+    LogView1
   },
   props: {
     temp: {
-      type: Object,
+      type: Object
     },
     height: {
       type: String,
-      default: "60vh",
-    },
+      default: '60vh'
+    }
   },
   data() {
     return {
       logList: [],
-      activeKey: "",
+      activeKey: '',
       logTimerMap: {},
-      logMap: {},
-    };
+      logMap: {}
+    }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.logTimerMap) {
       this.logList.forEach((item) => {
-        clearInterval(this.logTimerMap[item.id]);
-      });
+        clearInterval(this.logTimerMap[item.id])
+      })
     }
   },
   mounted() {
-    this.loadData();
+    this.loadData()
   },
   methods: {
     // 加载日志内容
     loadData() {
-      this.activeKey = this.temp.id || "";
+      this.activeKey = this.temp.id || ''
       getCommandLogBarchList({
         commandId: this.temp.commandId,
-        batchId: this.temp.batchId,
+        batchId: this.temp.batchId
       }).then((res) => {
         if (res.code === 200) {
-          this.logList = res.data;
+          this.logList = res.data
           if (!this.activeKey) {
-            this.activeKey = this.logList[0].id;
+            this.activeKey = this.logList[0].id
           }
-          this.tabCallback(this.activeKey);
+          this.tabCallback(this.activeKey)
         }
-      });
+      })
     },
     initItemTimer(item) {
       // 加载构建日志
       this.logMap[item.id] = {
         line: 1,
-        run: true,
-      };
-      this.pullLog(item);
+        run: true
+      }
+      this.pullLog(item)
       this.logTimerMap[item.id] = setInterval(() => {
-        this.pullLog(item);
-      }, 2000);
+        this.pullLog(item)
+      }, 2000)
     },
     pullLog(item) {
       const params = {
         id: item.id,
         line: this.logMap[item.id].line,
-        tryCount: 0,
-      };
+        tryCount: 0
+      }
       getCommandLogInfo(params).then((res) => {
         if (res.code === 200) {
           if (!res.data) {
-            this.$notification.warning({
-              message: res.msg,
-            });
-            this.logMap[item.id].tryCount = this.logMap[item.id].tryCount + 1;
+            $notification.warning({
+              message: res.msg
+            })
+            this.logMap[item.id].tryCount = this.logMap[item.id].tryCount + 1
             if (this.logMap[item.id].tryCount > 10) {
-              clearInterval(this.logTimerMap[item.id]);
+              clearInterval(this.logTimerMap[item.id])
             }
-            return false;
+            return false
           }
           // 停止请求
           if (res.data.run === false) {
-            clearInterval(this.logTimerMap[item.id]);
+            clearInterval(this.logTimerMap[item.id])
           }
-          this.logMap[item.id].run = res.data.run;
+          this.logMap[item.id].run = res.data.run
           // 更新日志
           // if (this.logMap[item.id].logText === "loading...") {
           //   this.logMap[item.id].logText = "";
@@ -108,7 +111,7 @@ export default {
           //   .filter((item1) => item1 !== -1)[0];
 
           // console.log(this.$refs, this.$refs.logView, index);
-          this.$refs[`logView-${item.id}`][0]?.appendLine(res.data.dataLines);
+          this.$refs[`logView-${item.id}`][0]?.appendLine(res.data.dataLines)
           // lines.forEach((element) => {
           //   //this.logMap[item.id].logText += `${element}\r\n`;
 
@@ -116,7 +119,7 @@ export default {
           //   console.log(this.$refs.logView, this.$refs[`"logView- ${item.id}"`]);
 
           // });
-          this.logMap[item.id].line = res.data.line;
+          this.logMap[item.id].line = res.data.line
           // if (lines.length) {
           //   // 自动滚动到底部
           //   this.$nextTick(() => {
@@ -128,29 +131,30 @@ export default {
           //     }, 100);
           //   });
           // }
-          this.logMap = { ...this.logMap };
+          this.logMap = { ...this.logMap }
           //console.log(this.logMap);
         }
-      });
+      })
     },
     tabCallback(key) {
-      this.activeKey = key;
+      this.activeKey = key
       // console.log(this.$refs);
       if (this.logTimerMap[key]) {
-        return;
+        return
       }
       this.$nextTick(() => {
         const index = this.logList
           .map((item1, index) => {
-            return item1.id == key ? index : -1;
+            return item1.id == key ? index : -1
           })
-          .filter((item1) => item1 !== -1)[0];
-        this.initItemTimer(this.logList[index]);
-      });
-    },
-  },
-};
+          .filter((item1) => item1 !== -1)[0]
+        this.initItemTimer(this.logList[index])
+      })
+    }
+  }
+}
 </script>
+
 <style scoped>
 /* .console {
   padding: 5px;

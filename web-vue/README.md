@@ -1,91 +1,68 @@
-# JPOM 前端 VUE 项目（server）
+## 项目介绍（未开发完成请勿使用）
 
-## 介绍
+本项目采用 [Vue3](https://cn.vuejs.org/guide/introduction.html#what-is-vue) + [Vite](https://vitejs.dev/) + [TypeScript](https://www.typescriptlang.org/) + [Antdv](https://antdv.com/docs/vue/getting-started-cn) + [Pinia](https://pinia.vuejs.org/)构建。
 
-这是 Jpom项目的前端部分，基于 [Vue](https://cn.vuejs.org/) 构建，UI框架则是基于 [Ant Design Vue](https://www.antdv.com/docs/vue/introduce-cn/).
+项目采用 Vue 3 `<script setup>` SFC 写法，请查看[script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup)了解更多信息。
 
+### 构建运行
 
-
-## 快速开始
-
-如果您是第一次运行这个项目，您需要保证您的电脑里已经装好了 [Node](http://nodejs.cn/) 环境，Node默认携带`npm`管理器， 无需额外安装。 可通过`npm -v` 查看当前环境是否OK。
-
-然后进入当前目录 `web-vue`
-
-**运行命令**
-
-1. 打包和运行都需要安装依赖
-
-```
-npm install
+```bash
+pnpm dev # 本地运行
+pnpm build # 打包
 ```
 
-2. 本地开发测试？
+## 参与贡献
 
-```
-npm run serve
-```
+### 环境准备
 
-3. 项目开发好了，需要打包发布？
+#### Node.js 和 pnpm
 
-```
-npm run build
-```
+开发需要 Node.js 16+ 和 `pnpm` v8。
 
-> 也可以使用 `script/release.bat` `script/release.sh` 快速打包
+推荐使用 [`nvm`](https://github.com/nvm-sh/nvm) 管理 Node.js，避免权限问题的同时，还能够随时切换当前使用的 Node.js 的版本。在 Windows 系统下的开发者可以使用 [`nvm-windows`](https://github.com/coreybutler/nvm-windows)。
 
+推荐使用`pnpm`，节约内存。 在 `pnpm` 的[官网](https://pnpm.io/installation)选择一种方式安装即可。
+
+#### 编辑器
+
+这边我们推荐使用 VSCode， 我们我们尽量采用工具化方式来约束开发规范和编码风格， 使用 VSCode 即可应用现有配置和推荐你安装适合项目的插件。 具体配置看`/.vscode` 目录
+
+⚠️：因为我们在升级 vue3 的过程中 vue2 版本也在不断迭代， 为了确保我们始终是在最新的代码基础上开发，编写某个页面前记得先从`web-vue` 目录中找到同名文件先替换下。
 
 ## 目录结构
 
 ```
 .
-├── package.json
-├── vue.config.js
-├── babel.config.js
+├── .vscode
+│   └── setting.json
 ├── dist
-├── public
-└── src
-    ├── api => 接口管理
-    ├── assets => 静态资源
-    ├── pages  => 路由级页面
-    ├── router => 路由配置
-    ├── store => 状态管理
-    ├── utils => 共用方法
-    ├── App.vue 
-    └── main.js => 入口文件
+├── mock
+│   └── app.ts｜tsx
+├── src
+│   ├── components # 公共组件
+│   ├── assets # 静态资源
+│   ├── interface # 类型定义
+│   ├── router # 路由配置
+│   ├── stores # 状态管理器
+│   │   └── index.ts
+│   ├── pages # 页面
+│   │   ├── login
+│   │   └── user
+│   ├── utils # 工具文件
+│   │   └── index.ts
+│   ├── api # 接口文件
+│   │   └── api.ts
+│   ├── app.vue
+│   ├── main.ts
+├── node_modules
+├── .env
+├── eslint.json
+├── vite.config.ts // vite配置
+├── package.json
+├── tsconfig.json
+└── type.d.ts
 ```
 
-### package.json
+npm install -g npm-check-updates
 
-管理项目所依赖的各种包，运行脚本等配置
-
-### vue.config.js
-
-项目配置文件，可以配置运行端口、代理、项目输出目录......
-
-### babel.config.js
-
-babel配置文件， 关于项目编译期间的一些配置
-
-### dist
-
-项目打包后的输出目录
-
-### public
-
-项目共用文件，此目录中的文件不会被webpack编译
-
-### src
-
-项目主目录
-
-
-
-## 开发工具建议
-
-> 使用 Visual Studio Code (VS)
-
-> 需要插件：
-> 1. prettier (代码格式化)
-
-
+ncu

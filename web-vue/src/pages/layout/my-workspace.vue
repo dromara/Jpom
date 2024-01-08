@@ -3,26 +3,44 @@
     <a-row type="flex" justify="center">
       <a-col :span="18">
         <a-card title="我的工作空间" :bordered="true">
-          <draggable v-model="myWorkspaceList" :group="`sort`" @end="sortFieldEnd()" handle=".move" chosenClass="box-shadow">
-            <a-row v-for="item in myWorkspaceList" :key="item.id" class="item-row">
-              <a-col :span="18">
-                <template v-if="item.edit">
-                  <a-input-search placeholder="请输入工作空间备注,留空使用默认的名称" enter-button="确定" v-model="item.name" @search="editOk(item)" />
-                </template>
-                <template v-else>
-                  <a-tooltip :title="`原始名：${item.originalName}`">
-                    {{ item.name || item.originalName }}
-                  </a-tooltip>
-                </template>
-              </a-col>
-              <a-col :span="2"></a-col>
-              <a-col :span="4">
-                <a-space>
-                  <a-button :disabled="item.edit" type="primary" icon="edit" size="small" @click="edit(item)"> </a-button>
-                  <a-tooltip placement="left" :title="`长按可以拖动排序`" class="move"> <a-icon type="menu" /> </a-tooltip>
-                </a-space>
-              </a-col>
-            </a-row>
+          <draggable
+            v-model="myWorkspaceList"
+            :group="`sort`"
+            @end="sortFieldEnd()"
+            handle=".move"
+            chosenClass="box-shadow"
+            item-key="id"
+          >
+            <template #item="{ element }">
+              <a-row class="item-row">
+                <a-col :span="18">
+                  <template v-if="element.edit">
+                    <a-input-search
+                      placeholder="请输入工作空间备注,留空使用默认的名称"
+                      enter-button="确定"
+                      v-model:value="element.name"
+                      @search="editOk(element)"
+                    />
+                  </template>
+                  <template v-else>
+                    <a-tooltip :title="`原始名：${element.originalName}`">
+                      {{ element.name || element.originalName }}
+                    </a-tooltip>
+                  </template>
+                </a-col>
+                <a-col :span="2"></a-col>
+                <a-col :span="4">
+                  <a-space>
+                    <a-button :disabled="element.edit" type="primary" size="small" @click="edit(element)">
+                      <template #icon><EditOutlined /></template>
+                    </a-button>
+                    <a-tooltip placement="left" :title="`长按可以拖动排序`" class="move">
+                      <MenuOutlined />
+                    </a-tooltip>
+                  </a-space>
+                </a-col>
+              </a-row>
+            </template>
           </draggable>
           <a-col style="margin-top: 10px">
             <a-space>
@@ -32,8 +50,8 @@
                 @click="
                   () => {
                     myWorkspaceList = myWorkspaceList.map((item) => {
-                      return { ...item, name: '' };
-                    });
+                      return { ...item, name: '' }
+                    })
                   }
                 "
               >
@@ -47,65 +65,65 @@
   </div>
 </template>
 <script>
-import { myWorkspace, saveWorkspace } from "@/api/user/user";
-import draggable from "vuedraggable";
+import { myWorkspace, saveWorkspace } from '@/api/user/user'
+import draggable from 'vuedraggable-es'
 
 export default {
   components: {
-    draggable,
+    draggable
   },
   data() {
     return {
       myWorkspaceList: [],
-      loading: true,
-    };
+      loading: true
+    }
   },
   created() {
-    this.init();
+    this.init()
   },
   methods: {
     init() {
       myWorkspace().then((res) => {
         if (res.code == 200 && res.data) {
-          this.myWorkspaceList = res.data;
+          this.myWorkspaceList = res.data
         }
-        this.loading = false;
-      });
+        this.loading = false
+      })
     },
     edit(editItem) {
       this.myWorkspaceList = this.myWorkspaceList.map((item) => {
         if (item.id === editItem.id) {
-          item.edit = true;
+          item.edit = true
         }
-        return item;
-      });
+        return item
+      })
     },
     sortFieldEnd() {
       this.myWorkspaceList = this.myWorkspaceList.map((item, index) => {
-        return { ...item, sort: index };
-      });
+        return { ...item, sort: index }
+      })
     },
     // 编辑 ok
     editOk(editItem) {
       this.myWorkspaceList = this.myWorkspaceList.map((item) => {
         if (item.id === editItem.id) {
-          item.edit = false;
+          item.edit = false
         }
-        return item;
-      });
+        return item
+      })
     },
     // 保存
     save() {
       saveWorkspace(this.myWorkspaceList).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg,
-          });
+          $notification.success({
+            message: res.msg
+          })
         }
-      });
-    },
-  },
-};
+      })
+    }
+  }
+}
 </script>
 <style scoped>
 .box-shadow {

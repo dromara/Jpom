@@ -1,163 +1,123 @@
 <template>
-  <div @mousedown="setSelectOpen(true)">
+  <div>
     <Select
-      :getPopupContainer="
-        this.popupContainerParent
-          ? (triggerNode) => {
-              return triggerNode.parentNode || document.body;
-            }
-          : null
-      "
-      v-model="selected"
+      v-model:value="selected"
       :style="selStyle"
-      :open="selectOpen"
-      :disabled="this.disabled"
-      @blur="setSelectOpen(false)"
+      :disabled="disabled"
       showSearch
-      @focus="setSelectOpen(true)"
       @change="selectChange"
       :placeholder="selectPlaceholder"
     >
-      <a-icon slot="suffixIcon" v-if="suffixIcon" :type="suffixIcon" @click="refreshSelect" />
-      <template v-if="$slots.suffixIcon && !suffixIcon" slot="suffixIcon">
-        <slot name="suffixIcon"></slot>
-      </template>
-      <div slot="dropdownRender" slot-scope="menu">
-        <div style="padding: 8px 8px; cursor: pointer; display: flex" @mousedown="(e) => e.preventDefault()">
-          <a-input-search
-            enter-button="添加"
-            v-model="selectInput"
-            :maxLength="maxLength"
-            @search="onSearch"
-            @blur="visibleInput(false)"
-            @focus="visibleInput(true)"
-            @click="(e) => e.target.focus()"
-            :placeholder="inputPlaceholder"
-            size="small"
-          >
-            <a-tooltip slot="suffix" v-if="$slots.inputTips">
-              <template slot="title">
-                <slot name="inputTips"></slot>
-              </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </a-input-search>
-        </div>
-        <a-divider style="margin: 4px 0" />
+      <template #suffixIcon v-if="canReload"> <ReloadOutlined @click="refreshSelect" /></template>
+      <template #dropdownRender="{ menuNode: menu }">
         <v-nodes :vnodes="menu" />
-      </div>
-      <a-select-option v-if="selectPlaceholder" value="">{{ selectPlaceholder }}</a-select-option>
+        <a-divider />
+        <a-space>
+          <a-input ref="inputRef" :maxLength="maxLength" v-model:value="selectInput" :placeholder="inputPlaceholder" />
+          <a-button type="text" @click="addInput(selectInput)">
+            <template #icon>
+              <plus-outlined />
+            </template>
+            添加
+          </a-button>
+        </a-space>
+      </template>
+      <a-select-option v-if="selectPlaceholder" value="">{{ selectPlaceholder }}{{ this.canReload }}</a-select-option>
       <a-select-option v-for="item in optionList" :key="item">{{ item }} </a-select-option>
     </Select>
   </div>
 </template>
 
 <script>
-import { Select } from "ant-design-vue";
+import { Select } from 'ant-design-vue'
 
 export default {
   components: {
     Select,
     VNodes: {
-      functional: true,
-      render: (h, ctx) => ctx.props.vnodes,
-    },
+      props: {
+        vnodes: {
+          type: Object,
+          required: true
+        }
+      },
+      render() {
+        return this.vnodes
+      }
+    }
   },
 
   data() {
     return {
-      selectInput: "",
-      selectOpen: false,
-      selectFocus: false,
-      inputFocus: false,
+      selectInput: '',
+
       optionList: [],
-      selected: "",
-    };
+      selected: ''
+    }
   },
   props: {
     // 继承原组件所有props
     ...Select.props,
     data: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
     inputPlaceholder: {
       type: String,
-      default: "请输入...",
+      default: '请输入...'
     },
     selectPlaceholder: {
       type: String,
-      default: "请选择",
+      default: '请选择'
     },
-    selStyle: { type: String, default: "" },
-    suffixIcon: {
-      type: String,
-      default: "reload",
-    },
+    selStyle: { type: String, default: '' },
+
     maxLength: {
       type: Number,
-      default: 200,
+      default: 200
     },
-    popupContainerParent: {
+    canReload: {
       type: Boolean,
-      default: true,
-    },
+      default: false
+    }
   },
   watch: {
     value: {
       handler(v) {
-        this.selected = v;
+        this.selected = v
       },
-      immediate: true,
+      immediate: true
     },
     data: {
       handler(v) {
-        this.optionList = v;
+        this.optionList = v
       },
       deep: true,
-      immediate: true,
-    },
+      immediate: true
+    }
   },
 
   methods: {
-    refreshSelect() {
-      this.$emit("onRefreshSelect");
-    },
     selectChange(v) {
-      this.$emit("input", v);
-      this.selectOpen = false;
-      this.$emit("change", v);
+      this.$emit('update:value', v)
     },
-    onSearch(v) {
+    addInput(v) {
       if (!v) {
-        return;
+        return
       }
-      let index = this.optionList.indexOf(v);
+      let index = this.optionList.indexOf(v)
       if (index === -1) {
-        this.optionList = [...this.optionList, v];
+        this.optionList = [...this.optionList, v]
       }
-      this.selectInput = "";
-      this.selected = v;
+      this.selectInput = ''
+      this.selected = v
       //
-      this.selectChange(v);
-      this.$emit("addOption", this.optionList);
+      this.selectChange(v)
     },
-    setSelectOpen(v) {
-      this.selectFocus = v;
-      if (this.inputFocus || this.selectFocus) {
-        this.selectOpen = true;
-        return;
-      }
-      this.selectOpen = false;
-    },
-    visibleInput(v) {
-      this.inputFocus = v;
-      if (this.inputFocus || this.selectFocus) {
-        this.selectOpen = true;
-        return;
-      }
-      this.selectOpen = false;
-    },
+    refreshSelect() {
+      this.$emit('onRefreshSelect')
+    }
   },
-};
+  emits: ['update:value', 'onRefreshSelect']
+}
 </script>

@@ -24,7 +24,7 @@
 
 # shellcheck disable=SC2016,SC2119,SC2155,SC2206,SC2207,SC2254
 
-node_version=16.13.1
+node_version=18.19.0
 
 ARCH="$(dpkg --print-architecture)"
 case "${ARCH}" in

@@ -6,124 +6,134 @@
       :visible="visible"
       @close="
         () => {
-          $emit('close');
+          $emit('close')
         }
       "
     >
-      <template slot="before">
+      <template v-slot:before>
         <a-space>
-          <a-tooltip title="为避免显示内容太多而造成浏览器卡顿,读取日志最后多少行日志。修改后需要回车才能重新读取，小于 1 则读取所有">
-            读取行数：
-            <a-input-number v-model="tail" placeholder="读取行数">
-              <!-- <template slot="addonAfter"> </template> -->
-            </a-input-number>
-          </a-tooltip>
+          <a-input-number v-model:value="tail" placeholder="读取行数" style="width: 150px">
+            <template #addonBefore>
+              <a-tooltip
+                title="为避免显示内容太多而造成浏览器卡顿,读取日志最后多少行日志。修改后需要回车才能重新读取，小于 1 则读取所有"
+                >行数：
+              </a-tooltip>
+            </template>
+            <!-- <template slot="addonAfter"> </template> -->
+          </a-input-number>
           <div>
             时间戳：
-            <a-switch v-model="timestamps" checked-children="显示" un-checked-children="不显示" />
+            <a-switch v-model:checked="timestamps" checked-children="显示" un-checked-children="不显示" />
           </div>
-          <a-button type="primary" icon="reload" size="small" @click="init"> 刷新 </a-button>
+          <a-button type="primary" size="small" @click="init"><ReloadOutlined /> 刷新 </a-button>
           |
-          <a-button type="primary" icon="download" :disabled="!this.logId" size="small" @click="download"> 下载 </a-button>
+          <a-button type="primary" :disabled="!this.logId" size="small" @click="download">
+            <DownloadOutlined /> 下载
+          </a-button>
           |
         </a-space>
       </template>
     </log-view>
   </div>
 </template>
+
 <script>
-import LogView from "@/components/logView";
-import { dockerSwarmServicesPullLog, dockerSwarmServicesStartLog, dockerSwarmServicesDownloaLog } from "@/api/docker-swarm";
+import LogView from '@/components/logView'
+import {
+  dockerSwarmServicesPullLog,
+  dockerSwarmServicesStartLog,
+  dockerSwarmServicesDownloaLog
+} from '@/api/docker-swarm'
 export default {
   components: {
-    LogView,
+    LogView
   },
   props: {
     dataId: {
-      type: String,
+      type: String
     },
     id: {
-      type: String,
+      type: String
     },
     type: {
-      type: String,
+      type: String
     },
     urlPrefix: {
-      type: String,
+      type: String
     },
     visible: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   data() {
     return {
       logTimer: null,
-      logId: "",
+      logId: '',
       line: 1,
       tail: 500,
-      timestamps: false,
-    };
+      timestamps: false
+    }
   },
-  beforeDestroy() {
-    this.logTimer && clearTimeout(this.logTimer);
+  beforeUnmount() {
+    this.logTimer && clearTimeout(this.logTimer)
   },
   mounted() {
     //
-    this.init();
+    this.init()
   },
   methods: {
     init() {
-      this.logTimer && clearTimeout(this.logTimer);
-      this.$refs.logView.clearLogCache();
-      this.line = 1;
+      this.logTimer && clearTimeout(this.logTimer)
+      this.$refs.logView.clearLogCache()
+      this.line = 1
       //
       dockerSwarmServicesStartLog(this.urlPrefix, {
         type: this.type,
         dataId: this.dataId,
         id: this.id,
         tail: this.tail,
-        timestamps: this.timestamps,
+        timestamps: this.timestamps
       }).then((res) => {
         if (res.code === 200) {
-          this.logId = res.data;
-          this.pullLog();
+          this.logId = res.data
+          this.pullLog()
         } else {
-          this.$refs.logView.appendLine(res.msg);
+          this.$refs.logView.appendLine(res.msg)
         }
-      });
+      })
     },
     nextPull() {
-      this.logTimer && clearTimeout(this.logTimer);
+      this.logTimer && clearTimeout(this.logTimer)
       // 加载构建日志
       this.logTimer = setTimeout(() => {
-        this.pullLog();
-      }, 2000);
+        this.pullLog()
+      }, 2000)
     },
     // 加载日志内容
     pullLog() {
       const params = {
         id: this.logId,
-        line: this.line,
-      };
+        line: this.line
+      }
       dockerSwarmServicesPullLog(this.urlPrefix, params).then((res) => {
-        let next = true;
+        let next = true
         if (res.code === 200) {
           // 停止请求
-          const dataLines = res.data.dataLines;
+          const dataLines = res.data.dataLines
 
-          this.$refs.logView.appendLine(dataLines);
-          this.line = res.data.line;
+          this.$refs.logView.appendLine(dataLines)
+          this.line = res.data.line
         }
         // 继续拉取日志
-        if (next) this.nextPull();
-      });
+        if (next) this.nextPull()
+      })
     },
     // 下载
     download() {
-      window.open(dockerSwarmServicesDownloaLog(this.urlPrefix, this.logId), "_blank");
-    },
+      window.open(dockerSwarmServicesDownloaLog(this.urlPrefix, this.logId), '_blank')
+    }
   },
-};
+  emits: ['close']
+}
 </script>
-<style scoped></style>

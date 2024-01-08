@@ -1,9 +1,10 @@
 <template>
   <repository workspaceId="GLOBAL"> </repository>
 </template>
+
 <script>
-import repository from "./repository-list.vue";
+import repository from './repository-list.vue'
 export default {
-  components: { repository },
-};
+  components: { repository }
+}
 </script>

@@ -1,38 +1,47 @@
 <template>
-  <terminal :url="this.socketUrl" />
+  <terminal2 :url="this.socketUrl" />
 </template>
+
 <script>
-import { mapGetters } from "vuex";
-import { getWebSocketUrl } from "@/utils/const";
-import terminal from "@/components/terminal";
+import { mapState } from 'pinia'
+import { useUserStore } from '@/stores/user'
+import { useAppStore } from '@/stores/app'
+import { getWebSocketUrl } from '@/api/config'
+import terminal2 from '@/components/terminal'
 
 // https://blog.csdn.net/qq_41840688/article/details/108636267
 
 export default {
   components: {
-    terminal,
+    terminal2
   },
   props: {
     sshId: {
       type: String,
-      default: "",
+      default: ''
     },
     machineSshId: {
       type: String,
-      default: "",
-    },
+      default: ''
+    }
   },
   data() {
-    return {};
+    return {}
   },
   computed: {
-    ...mapGetters(["getLongTermToken", "getWorkspaceId"]),
+    ...mapState(useUserStore, ['getLongTermToken']),
+    ...mapState(useAppStore, ['getWorkspaceId']),
     socketUrl() {
-      return getWebSocketUrl("/socket/ssh", `userId=${this.getLongTermToken}&id=${this.sshId}&machineSshId=${this.machineSshId}&nodeId=system&type=ssh&workspaceId=${this.getWorkspaceId}`);
-    },
+      return getWebSocketUrl(
+        '/socket/ssh',
+        `userId=${this.getLongTermToken}&id=${this.sshId}&machineSshId=${
+          this.machineSshId
+        }&nodeId=system&type=ssh&workspaceId=${this.getWorkspaceId()}`
+      )
+    }
   },
   mounted() {},
-  beforeDestroy() {},
-  methods: {},
-};
+  beforeUnmount() {},
+  methods: {}
+}
 </script>
