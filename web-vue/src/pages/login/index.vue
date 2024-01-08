@@ -403,7 +403,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  //background: #fff;
   padding: 0 10px 0 18px;
   cursor: pointer;
   transform: translateX(105px);

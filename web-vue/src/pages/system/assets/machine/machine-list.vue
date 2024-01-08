@@ -178,7 +178,7 @@
           </template>
           <!-- </template> -->
           <a-col v-else :span="24">
-            <a-empty description="没有任何节点" />
+            <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="没有任何节点" />
           </a-col>
         </a-row>
         <a-row type="flex" justify="center">
@@ -593,7 +593,7 @@ import { mapState } from 'pinia'
 import machineInfo from './machine-func'
 import { getWorkSpaceListAll } from '@/api/workspace'
 // import Upgrade from "@/pages/node/node-layout/system/upgrade.vue";
-
+import { Empty } from 'ant-design-vue'
 import { getWhiteList } from '@/api/node-system'
 import { getConfigData } from '@/api/system'
 import codeEditor from '@/components/codeEditor'
@@ -607,6 +607,7 @@ export default {
   },
   data() {
     return {
+      Empty,
       statusMap,
       listQuery: Object.assign({ order: 'descend', order_field: 'networkDelay' }, PAGE_DEFAULT_LIST_QUERY, {}),
       sizeOptions: ['8', '12', '16', '20', '24'],

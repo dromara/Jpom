@@ -519,7 +519,7 @@ export default {
   height: calc(100vh - 80px);
   overflow-y: auto;
   padding: 0 10px;
-  background-color: #fff;
+  /* background-color: #fff; */
 }
 .log-filter {
   padding: 0 10px 10px;
