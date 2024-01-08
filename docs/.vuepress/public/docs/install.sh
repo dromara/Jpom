@@ -252,7 +252,7 @@ function installNodeFn() {
 			;;
 		esac
 
-		NODE_VERSION="18.19.0"
+		NODE_VERSION="16.13.1"
 		useDir=$(mustMkdir /usr/node/ node)
 		userProfileName=$(findProfile)
 		if grep -q "NODE_HOME" "$userProfileName"; then
