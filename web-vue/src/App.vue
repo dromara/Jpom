@@ -1,6 +1,11 @@
 <template>
-  <a-config-provider :locale="zhCN">
-    <div :class="`${scrollbarFlag ? '' : 'hide-scrollbar'}`">
+  <a-config-provider
+    :locale="zhCN"
+    :theme="{
+      algorithm: themeAlgorithm
+    }"
+  >
+    <div>
       <router-view v-if="routerActivation" />
       <template>
         <a-back-top />
@@ -11,13 +16,32 @@
 
 <script setup lang="ts">
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
-// import { useAllMenuStore } from '@/stores/menu2'
+import { theme } from 'ant-design-vue'
 import { useGuideStore } from '@/stores/guide'
-
+// theme.defaultAlgorithm
+// theme.darkAlgorithm
+// theme.compactAlgorithm
 const routerActivation = ref(true)
-const guideStore = useGuideStore().getGuideCache
-const scrollbarFlag = computed(() => {
-  return guideStore.scrollbarFlag ?? true
+const guideStore = useGuideStore()
+const getGuideCache = guideStore.getGuideCache
+// const scrollbarFlag = computed(() => {
+//   return getGuideCache.scrollbarFlag ?? true
+// })
+
+const themeAlgorithm = computed(() => {
+  const algorithm: any = []
+  if (getGuideCache.compactView) {
+    algorithm.push(theme.compactAlgorithm)
+  }
+  const themeDiy = guideStore.getThemeView()
+  if (themeDiy === 'light') {
+    algorithm.push(theme.defaultAlgorithm)
+  } else if (themeDiy === 'dark') {
+    algorithm.push(theme.darkAlgorithm)
+  }
+  console.log(algorithm)
+
+  return algorithm
 })
 
 onMounted(() => {})

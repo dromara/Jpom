@@ -1,8 +1,8 @@
 <template>
   <a-layout class="log-layout">
     <!-- 侧边栏 文件树 -->
-    <a-layout-sider theme="light" class="log-sider jpom-node-log-tree" width="20%">
-      <a-empty v-if="list.length === 0" />
+    <a-layout-sider theme="light" class="log-sider" width="20%">
+      <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" v-if="list.length === 0" />
       <a-directory-tree :treeData="list" :fieldNames="replaceFields" @select="select" default-expand-all>
       </a-directory-tree>
     </a-layout-sider>
@@ -35,6 +35,7 @@ import { mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
 import { getWebSocketUrl } from '@/api/config'
 import LogView2 from '@/components/logView/index2'
+import { Empty } from 'ant-design-vue'
 export default {
   components: {
     LogView2
@@ -46,6 +47,7 @@ export default {
   },
   data() {
     return {
+      Empty,
       list: [],
       socket: null,
       // 日志内容
@@ -218,7 +220,7 @@ export default {
 .log-content {
   margin: 0;
   padding-left: 15px;
-  background: #fff;
+  /* background: #fff; */
   height: calc(100vh - 130px);
   overflow-y: auto;
 }

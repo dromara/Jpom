@@ -1,8 +1,8 @@
 <template>
   <div>
     <a-menu
-      v-if="getUserInfo && getUserInfo.systemUser"
       theme="dark"
+      v-if="getUserInfo && getUserInfo.systemUser"
       mode="inline"
       v-model:value="mangerMenuOpenkeys"
       @click="mangerMenuClick"

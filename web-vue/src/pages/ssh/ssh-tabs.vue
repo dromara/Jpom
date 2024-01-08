@@ -1,9 +1,9 @@
 <template>
-  <a-layout style="padding: 5px 0; background: #fff">
+  <a-layout style="padding: 5px 0">
     <a-layout-sider
+      theme="light"
       width="200"
       :style="{
-        background: '#fff',
         height: `calc(100vh - 10px)`,
         borderRight: '1px solid #e8e8e8',
         overflowX: 'scroll'
@@ -18,7 +18,7 @@
         @select="select"
       >
       </a-directory-tree>
-      <a-empty v-else></a-empty>
+      <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" v-else></a-empty>
     </a-layout-sider>
     <a-layout-content :style="{ padding: '0 5px', height: `calc(100vh - 10px)` }">
       <a-tabs
@@ -65,7 +65,7 @@
           </div>
         </a-tab-pane>
       </a-tabs>
-      <a-empty v-else description="未选择ssh"></a-empty>
+      <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" v-else description="未选择ssh"></a-empty>
     </a-layout-content>
   </a-layout>
 </template>
@@ -74,7 +74,7 @@
 import { getSshListTree } from '@/api/ssh'
 import terminal1 from './terminal'
 import SshFile from '@/pages/ssh/ssh-file'
-
+import { Empty } from 'ant-design-vue'
 export default {
   components: {
     terminal1,
@@ -82,6 +82,7 @@ export default {
   },
   data() {
     return {
+      Empty,
       activeKey: '',
       selectPanes: [],
       treeList: [],

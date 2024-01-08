@@ -1,11 +1,6 @@
 <template>
   <a-layout id="app-layout">
-    <a-layout-sider
-      v-model:collapsed="collapsed"
-      :trigger="null"
-      collapsible
-      :class="`${fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}`"
-    >
+    <a-layout-sider theme="dark" v-model:collapsed="collapsed" :trigger="null" collapsible>
       <a-tooltip placement="right" title="点击可以折叠左侧菜单栏">
         <div class="logo" @click="changeCollapsed()">
           <img :src="logoUrl || defaultLogo" alt="logo" />
@@ -15,14 +10,14 @@
       <side-menu class="side-menu" :mode="mode" />
     </a-layout-sider>
     <a-layout>
-      <a-layout-header class="app-header">
+      <div class="app-header">
         <content-tab
           :mode="mode"
           :style="{
             width: collapsed ? 'calc(100vw - 80px - 20px)' : 'calc(100vw - 200px - 20px)'
           }"
         />
-      </a-layout-header>
+      </div>
       <a-layout-content
         :style="{
           width: collapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 210px)',
@@ -145,7 +140,7 @@ const changeCollapsed = () => {
 
 .app-header {
   display: flex;
-  background: #fff;
+  /* background: #fff; */
   padding: 10px 10px 0;
   height: auto;
 }
@@ -174,7 +169,7 @@ const changeCollapsed = () => {
 .layout-content {
   margin: 0;
   padding: 15px 15px 0;
-  background: #fff;
+  /* background: #fff; */
   /* min-height: 280px; */
 }
 

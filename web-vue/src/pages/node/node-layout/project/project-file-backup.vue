@@ -581,7 +581,7 @@ export default {
   overflow-y: auto;
   margin: 10px 10px 0;
   padding: 10px;
-  background-color: #fff;
+  /* background-color: #fff; */
 }
 .successTag {
   height: 32px;

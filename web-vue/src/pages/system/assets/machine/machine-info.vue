@@ -56,12 +56,6 @@
                       </p>
                     </template>
                     <a-tag>
-                      <!-- :count=""
-                        :number-style="{
-                          backgroundColor: '#fff',
-                          color: '#999',
-                          boxShadow: '0 0 0 1px #d9d9d9 inset',
-                        }" -->
                       {{ machineInfo && machineInfo.ipv4List && machineInfo.ipv4List.length }}
 
                       <EllipsisOutlined />
