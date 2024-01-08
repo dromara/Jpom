@@ -69,15 +69,6 @@
       </template>
       <template v-else-if="column.dataIndex === 'operation'">
         <a-space>
-          <!-- <a-tooltip title="停止" v-if="record.state === 'running'">
-            <a-button size="small" type="link" @click="doAction(record, 'stop')"><a-icon type="stop" /></a-button>
-          </a-tooltip>
-          <a-tooltip title="启动" v-else>
-            <a-button size="small" type="link" @click="doAction(record, 'start')"> <a-icon type="play-circle" /></a-button>
-          </a-tooltip>
-          <a-tooltip title="重启">
-            <a-button size="small" type="link" :disabled="record.state !== 'running'" @click="doAction(record, 'restart')"><a-icon type="reload" /></a-button>
-          </a-tooltip> -->
           <a-tooltip title="删除">
             <a-button size="small" type="link" @click="doAction(record, 'remove')"><DeleteOutlined /></a-button>
           </a-tooltip>
@@ -200,19 +191,25 @@ export default {
         content: action.msg,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 组装参数
-          const params = {
-            id: this.reqDataId,
-            volumeName: record.name
-          }
-          action.api(this.urlPrefix, params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 组装参数
+            const params = {
+              id: this.reqDataId,
+              volumeName: record.name
             }
+            action
+              .api(this.urlPrefix, params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

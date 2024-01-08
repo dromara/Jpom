@@ -20,7 +20,14 @@
     </div>
 
     <!--运行  -->
-    <a-modal destroyOnClose v-model:open="editArgs" title="添加运行参数" @ok="startExecution" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      :confirmLoading="confirmLoading"
+      v-model:open="editArgs"
+      title="添加运行参数"
+      @ok="startExecution"
+      :maskClosable="false"
+    >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" ref="ruleForm">
         <a-form-item
           label="命令参数"
@@ -198,6 +205,7 @@ export default {
     startExecution() {
       this.editArgs = false
       this.sendMsg('start')
+      this.confirmLoading = false
     },
     // 发送消息
     sendMsg(op) {

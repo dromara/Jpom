@@ -231,11 +231,11 @@
         <!-- 编辑区 -->
         <a-modal
           destroyOnClose
+          :confirmLoading="confirmLoading"
           v-model:open="editSshVisible"
           width="600px"
           title="编辑 SSH"
           @ok="handleEditSshOk"
-          :confirmLoading="confirmLoading"
           :maskClosable="false"
         >
           <a-form ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
@@ -450,11 +450,11 @@
         </a-modal>
         <a-modal
           destroyOnClose
+          :confirmLoading="confirmLoading"
           v-model:open="configWorkspaceSshVisible"
           width="50%"
           title="配置ssh"
           @ok="handleConfigWorkspaceSshOk"
-          :confirmLoading="confirmLoading"
           :maskClosable="false"
         >
           <a-form
@@ -522,10 +522,10 @@
         <!-- 分配到其他工作空间 -->
         <a-modal
           destroyOnClose
+          :confirmLoading="confirmLoading"
           v-model:open="syncToWorkspaceVisible"
           title="分配到其他工作空间"
           @ok="handleSyncToWorkspace"
-          :confirmLoading="confirmLoading"
           :maskClosable="false"
         >
           <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
@@ -820,29 +820,24 @@ export default {
     // 提交 SSH 数据
     handleEditSshOk() {
       // 检验表单
-      this.confirmLoading = true
-      this.$refs['editSshForm']
-        .validate()
-        .then(() => {
-          // 提交数据
-          machineSshEdit(this.temp)
-            .then((res) => {
-              if (res.code === 200) {
-                this.$notification.success({
-                  message: res.msg
-                })
-                this.editSshVisible = false
-                this.loadData()
-                this.loadGroupList()
-              }
-            })
-            .finally(() => {
-              this.confirmLoading = false
-            })
-        })
-        .catch(() => {
-          this.confirmLoading = false
-        })
+      this.$refs['editSshForm'].validate().then(() => {
+        // 提交数据
+        this.confirmLoading = true
+        machineSshEdit(this.temp)
+          .then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg
+              })
+              this.editSshVisible = false
+              this.loadData()
+              this.loadGroupList()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
+      })
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
@@ -867,17 +862,22 @@ export default {
         zIndex: 1009,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          machineSshDelete({
-            id: record.id
-          }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            machineSshDelete({
+              id: record.id
+            })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -949,21 +949,26 @@ export default {
         content: '真的要删除对应工作空间的 SSH 么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          deleteForeSsh(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              machineListGroupWorkspaceSsh({
-                id: this.temp.machineSshId
-              }).then((res) => {
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            deleteForeSsh(record.id)
+              .then((res) => {
                 if (res.code === 200) {
-                  this.workspaceSshList = res.data
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  machineListGroupWorkspaceSsh({
+                    id: this.temp.machineSshId
+                  }).then((res) => {
+                    if (res.code === 200) {
+                      this.workspaceSshList = res.data
+                    }
+                  })
                 }
+                resolve()
               })
-            }
+              .catch(reject)
           })
         }
       })
@@ -1028,15 +1033,20 @@ export default {
         content: '真的要清除 SSH 隐藏字段信息么？（密码，私钥）',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 恢复
-          restHideField(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 恢复
+            restHideField(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })

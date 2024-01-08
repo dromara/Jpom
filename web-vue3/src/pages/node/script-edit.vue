@@ -2,9 +2,10 @@
   <div>
     <a-modal
       destroyOnClose
-      :visible="true"
+      :open="true"
       title="编辑 Script"
       @ok="handleEditScriptOk"
+      :confirmLoading="confirmLoading"
       :maskClosable="false"
       width="80vw"
       @cancel="
@@ -25,47 +26,45 @@
             <a-input v-model:value="temp.name" placeholder="名称" />
           </a-form-item>
           <a-form-item label="Script 内容" name="context">
-            <div style="height: 40vh; overflow-y: scroll">
-              <code-editor
-                v-model:value="temp.context"
-                :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"
-              ></code-editor>
-            </div>
+            <a-form-item-rest>
+              <div style="height: 40vh; overflow-y: scroll">
+                <code-editor
+                  v-model:content="temp.context"
+                  :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"
+                ></code-editor>
+              </div>
+            </a-form-item-rest>
           </a-form-item>
           <!-- <a-form-item label="默认参数" name="defArgs">
             <a-input v-model="temp.defArgs" placeholder="默认参数" />
           </a-form-item> -->
           <a-form-item label="默认参数">
-            <div v-for="(item, index) in commandParams" :key="item.key">
-              <a-row type="flex" justify="center" align="middle">
+            <a-space style="width: 100%" direction="vertical">
+              <a-row v-for="(item, index) in commandParams" :key="item.key">
                 <a-col :span="22">
-                  <a-input
-                    :addon-before="`参数${index + 1}描述`"
-                    v-model:value="item.desc"
-                    placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义"
-                  />
-                  <a-input
-                    :addon-before="`参数${index + 1}值`"
-                    v-model:value="item.value"
-                    placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值"
-                  />
+                  <a-space style="width: 100%" direction="vertical">
+                    <a-input
+                      :addon-before="`参数${index + 1}描述`"
+                      v-model:value="item.desc"
+                      placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义"
+                    />
+                    <a-input
+                      :addon-before="`参数${index + 1}值`"
+                      v-model:value="item.value"
+                      placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值"
+                    />
+                  </a-space>
                 </a-col>
                 <a-col :span="2">
                   <a-row type="flex" justify="center" align="middle">
                     <a-col>
-                      <a-icon
-                        @click="() => commandParams.splice(index, 1)"
-                        type="minus-circle"
-                        style="color: #ff0000"
-                      />
+                      <MinusCircleOutlined @click="() => commandParams.splice(index, 1)" style="color: #ff0000" />
                     </a-col>
                   </a-row>
                 </a-col>
               </a-row>
-              <a-divider style="margin: 5px 0" />
-            </div>
-
-            <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
+              <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
+            </a-space>
           </a-form-item>
           <a-form-item label="共享" name="global">
             <a-radio-group v-model:value="temp.global">
@@ -77,30 +76,13 @@
             <a-auto-complete
               v-model:value="temp.autoExecCron"
               placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
-              option-label-prop="value"
+              :options="CRON_DATA_SOURCE"
             >
-              <template v-slot:dataSource>
-                <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
-                  <template v-slot:label>
-                    <span>
-                      {{ group.title }}
-                    </span>
-                  </template>
-                  <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value">
-                    {{ opt.title }} {{ opt.value }}
-                  </a-select-option>
-                </a-select-opt-group>
-              </template>
+              <template #option="item"> {{ item.title }} {{ item.value }} </template>
             </a-auto-complete>
           </a-form-item>
           <a-form-item label="描述" name="description">
-            <a-input
-              v-model:value="temp.description"
-              type="textarea"
-              :rows="3"
-              style="resize: none"
-              placeholder="详细描述"
-            />
+            <a-textarea v-model:value="temp.description" :rows="3" style="resize: none" placeholder="详细描述" />
           </a-form-item>
         </template>
       </a-form>
@@ -130,13 +112,14 @@ export default {
   data() {
     return {
       temp: {},
-      cronDataSource: CRON_DATA_SOURCE,
+      CRON_DATA_SOURCE,
       commandParams: [],
       nodeList: [],
       rules: {
         name: [{ required: true, message: '请输入脚本名称', trigger: 'blur' }],
         context: [{ required: true, message: '请输入脚本内容', trigger: 'blur' }]
-      }
+      },
+      confirmLoading: false
     }
   },
   mounted() {
@@ -189,10 +172,7 @@ export default {
         return
       }
       // 检验表单
-      this.$refs['editScriptForm'].validate((valid) => {
-        if (!valid) {
-          return false
-        }
+      this.$refs['editScriptForm'].validate().then(() => {
         if (this.commandParams && this.commandParams.length > 0) {
           for (let i = 0; i < this.commandParams.length; i++) {
             if (!this.commandParams[i].desc) {
@@ -207,16 +187,21 @@ export default {
           this.temp.defArgs = ''
         }
         // 提交数据
-        editScript(this.temp).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            this.$notification.success({
-              message: res.msg
-            })
+        this.confirmLoading = true
+        editScript(this.temp)
+          .then((res) => {
+            if (res.code === 200) {
+              // 成功
+              this.$notification.success({
+                message: res.msg
+              })
 
-            $emit(this, 'close')
-          }
-        })
+              this.$emit('close')
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
       })
     }
   },

@@ -3,8 +3,7 @@
     <!-- <div ref="filter" class="filter"></div> -->
     <!-- console -->
     <div>
-      <!-- <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none" /> -->
-      <log-view ref="logView" height="calc(100vh - 140px)">
+      <log-view1 ref="logView" height="calc(100vh - 140px)">
         <template v-slot:before>
           <a-space>
             <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start"
@@ -15,11 +14,18 @@
             >
           </a-space>
         </template>
-      </log-view>
+      </log-view1>
     </div>
 
-    <!--远程下载  -->
-    <a-modal destroyOnClose v-model:value="editArgs" title="添加运行参数" @ok="startExecution" :maskClosable="false">
+    <!--  -->
+    <a-modal
+      destroyOnClose
+      v-model:open="editArgs"
+      title="添加运行参数"
+      :confirmLoading="confirmLoading"
+      @ok="startExecution"
+      :maskClosable="false"
+    >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" ref="ruleForm">
         <!-- <a-form-item label="执行参数" name="args">
             <a-input v-model="temp.args" placeholder="执行参数,没有参数可以不填写" />
@@ -32,30 +38,32 @@
               : ''
           }`"
         >
-          <a-row v-for="(item, index) in commandParams" :key="item.key">
-            <a-col :span="22">
-              <a-input
-                :addon-before="`参数${index + 1}值`"
-                v-model:value="item.value"
-                :placeholder="`参数值 ${item.desc ? ',' + item.desc : ''}`"
-              >
-                <template v-slot:suffix>
-                  <a-tooltip v-if="item.desc" :title="item.desc">
-                    <a-icon type="info-circle" style="color: rgba(0, 0, 0, 0.45)" />
-                  </a-tooltip>
-                </template>
-              </a-input>
-            </a-col>
+          <a-space direction="vertical" style="width: 100%">
+            <a-row v-for="(item, index) in commandParams" :key="item.key">
+              <a-col :span="22">
+                <a-input
+                  :addon-before="`参数${index + 1}值`"
+                  v-model:value="item.value"
+                  :placeholder="`参数值 ${item.desc ? ',' + item.desc : ''}`"
+                >
+                  <template v-slot:suffix>
+                    <a-tooltip v-if="item.desc" :title="item.desc">
+                      <InfoCircleOutlined />
+                    </a-tooltip>
+                  </template>
+                </a-input>
+              </a-col>
 
-            <a-col v-if="!item.desc" :span="2">
-              <a-row type="flex" justify="center" align="middle">
-                <a-col>
-                  <a-icon type="minus-circle" @click="() => commandParams.splice(index, 1)" style="color: #ff0000" />
-                </a-col>
-              </a-row>
-            </a-col>
-          </a-row>
-          <a-button type="primary" size="small" @click="() => commandParams.push({})">添加参数</a-button>
+              <a-col v-if="!item.desc" :span="2">
+                <a-row type="flex" justify="center" align="middle">
+                  <a-col>
+                    <MinusCircleOutlined @click="() => commandParams.splice(index, 1)" style="color: #ff0000" />
+                  </a-col>
+                </a-row>
+              </a-col>
+            </a-row>
+            <a-button type="primary" size="small" @click="() => commandParams.push({})">添加参数</a-button>
+          </a-space>
         </a-form-item>
       </a-form>
     </a-modal>
@@ -63,14 +71,14 @@
 </template>
 
 <script>
-import LogView from '@/components/logView/index2'
+import LogView1 from '@/components/logView/index2'
 import { getWebSocketUrl } from '@/api/config'
 import { mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
 export default {
   components: {
-    LogView
+    LogView1
   },
   props: {
     id: {
@@ -91,7 +99,8 @@ export default {
       // 日志内容
       // logContext: "loading ...",
       btnLoading: true,
-      commandParams: []
+      commandParams: [],
+      confirmLoading: false
     }
   },
   computed: {
@@ -191,6 +200,7 @@ export default {
     startExecution() {
       this.editArgs = false
       this.sendMsg('start')
+      this.confirmLoading = false
     },
     // 发送消息
     sendMsg(op) {

@@ -151,6 +151,7 @@
     <!-- 发布文件 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="releaseFileVisible"
       title="部署证书"
       width="50%"
@@ -404,18 +405,23 @@ export default {
         content: '真的要删除该证书么，删除会将证书文件一并删除奥？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 组装参数
-          const params = {
-            id: record.id
-          }
-          deleteCert(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 组装参数
+            const params = {
+              id: record.id
             }
+            deleteCert(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

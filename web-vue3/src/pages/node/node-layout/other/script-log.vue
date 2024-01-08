@@ -212,21 +212,26 @@ export default {
         content: '真的要删除执行记录么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 组装参数
-          const params = {
-            nodeId: this.nodeId,
-            id: record.scriptId,
-            executeId: record.id
-          }
-          // 删除
-          scriptDel(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 组装参数
+            const params = {
+              nodeId: this.nodeId,
+              id: record.scriptId,
+              executeId: record.id
             }
+            // 删除
+            scriptDel(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

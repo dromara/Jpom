@@ -505,19 +505,24 @@ export default {
         okText: '确认',
         zIndex: 1009,
         cancelText: '取消',
-        onOk: () => {
+        async onOk() {
           //
-          remoteUpgrade({
-            nodeId: this.nodeId,
-            machineId: this.machineId
-          }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
+          return await new Promise((resolve, reject) => {
+            remoteUpgrade({
+              nodeId: this.nodeId,
+              machineId: this.machineId
+            })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
 
-              this.startCheckUpgradeStatus(res.msg)
-            }
+                  this.startCheckUpgradeStatus(res.msg)
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -538,18 +543,23 @@ export default {
         okText: '确认',
         zIndex: 1009,
         cancelText: '取消',
-        onOk: () => {
+        async onOk() {
           //
-          changBetaRelease({
-            beta: beta
-          }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
+          return await new Promise((resolve, reject) => {
+            changBetaRelease({
+              beta: beta
+            })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
 
-              this.loadData()
-            }
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

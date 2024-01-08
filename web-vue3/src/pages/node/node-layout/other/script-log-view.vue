@@ -76,17 +76,6 @@ export default {
           // });
           this.$refs.logView.appendLine(res.data.dataLines)
           this.line = res.data.line
-          // if (lines.length) {
-          //   // 自动滚动到底部
-          //   this.$nextTick(() => {
-          //     setTimeout(() => {
-          //       const textarea = document.getElementById("script-log-textarea");
-          //       if (textarea) {
-          //         textarea.scrollTop = textarea.scrollHeight;
-          //       }
-          //     }, 100);
-          //   });
-          // }
         }
       })
     }

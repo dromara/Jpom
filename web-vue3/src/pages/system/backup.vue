@@ -109,6 +109,7 @@
     <!-- 创建备份信息区 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="createBackupVisible"
       title="创建备份信息"
       @ok="handleCreateBackupOk"
@@ -139,13 +140,14 @@
     <!-- 上传 SQL 备份文件 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="uploadSqlFileVisible"
       width="300px"
       title="上传 SQL 文件"
       :footer="null"
       :maskClosable="true"
     >
-      <a-upload :file-list="uploadFileList" :remove="handleSqlRemove" :before-upload="beforeSqlUpload" accept=".sql">
+      <a-upload :file-list="uploadFileList" @remove="handleSqlRemove" :before-upload="beforeSqlUpload" accept=".sql">
         <a-button><UploadOutlined />选择 SQL 文件</a-button>
       </a-upload>
       <!-- <br />
@@ -154,8 +156,7 @@
           <a-radio :value="1">部分备份</a-radio>
         </a-radio-group>
         <br /> -->
-      <br />
-      <a-progress v-if="percentage" :percent="percentage" status="success"></a-progress>
+
       <br />
       <a-space>
         <a-button type="primary" :disabled="fileUploadDisabled" @click="startSqlUpload">开始上传</a-button>
@@ -273,7 +274,7 @@ export default {
         }
       ],
       rules: {},
-
+      confirmLoading: false,
       timer: null
     }
   },
@@ -348,22 +349,24 @@ export default {
     // 提交节点数据
     handleCreateBackupOk() {
       // 检验表单
-      this.$refs['editBackupForm'].validate((valid) => {
-        if (!valid) {
-          return false
-        }
+      this.$refs['editBackupForm'].validate().then(() => {
+        this.confirmLoading = true
         // 提交数据
-        createBackup(this.targetKeys).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            this.$notification.success({
-              message: res.msg
-            })
-            this.$refs['editBackupForm'].resetFields()
-            this.createBackupVisible = false
-            this.loadData()
-          }
-        })
+        createBackup(this.targetKeys)
+          .then((res) => {
+            if (res.code === 200) {
+              // 成功
+              this.$notification.success({
+                message: res.msg
+              })
+              this.$refs['editBackupForm'].resetFields()
+              this.createBackupVisible = false
+              this.loadData()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
       })
     },
     // 下载
@@ -378,15 +381,20 @@ export default {
         content: '真的要删除备份信息么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          deleteBackup(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            deleteBackup(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -407,15 +415,20 @@ export default {
         okText: '确认',
         cancelText: '取消',
         width: 600,
-        onOk: () => {
-          // 还原
-          restoreBackup(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 还原
+            restoreBackup(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -424,13 +437,14 @@ export default {
     handleSqlUpload() {
       this.successSize = 0
       this.uploadSqlFileVisible = true
-      clearInterval(this.timer)
-      this.percentage = 0
+      // clearInterval(this.timer)
+      // this.percentage = 0
       this.uploadFileList = []
       this.uploading = false
     },
     handleSqlRemove() {
       this.handleSqlUpload()
+      return true
     },
     beforeSqlUpload(file) {
       this.uploadFileList = [file]
@@ -443,9 +457,9 @@ export default {
       })
       // 设置上传状态
       this.uploading = true
-      this.timer = setInterval(() => {
-        this.percentage = this.percentage > 99 ? 99 : this.percentage + 1
-      }, 1000)
+      // this.timer = setInterval(() => {
+      //   this.percentage = this.percentage > 99 ? 99 : this.percentage + 1
+      // }, 1000)
 
       // 上传文件
       const file = this.uploadFileList[0]
@@ -453,20 +467,25 @@ export default {
       formData.append('file', file)
       formData.append('backupType', this.backupType)
       // 上传文件
-      uploadBackupFile(formData).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg
-          })
-          this.successSize++
-          this.percentage = 100
-          setTimeout(() => {
-            this.handleSqlRemove()
-            this.loadData()
-            this.uploadSqlFileVisible = false
-          }, 1000)
-        }
-      })
+      this.confirmLoading = true
+      uploadBackupFile(formData)
+        .then((res) => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg
+            })
+            this.successSize++
+            this.percentage = 100
+            setTimeout(() => {
+              this.handleSqlRemove()
+              this.loadData()
+              this.uploadSqlFileVisible = false
+            }, 1000)
+          }
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {

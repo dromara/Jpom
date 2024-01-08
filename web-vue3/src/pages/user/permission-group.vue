@@ -39,6 +39,7 @@
     <!-- 编辑区 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
       width="60vw"
       title="编辑"
@@ -196,7 +197,7 @@
         </a-form-item>
 
         <a-form-item label="描述" name="description">
-          <a-input v-model:value="temp.description" :maxLength="200" type="textarea" :rows="5" placeholder="描述" />
+          <a-textarea v-model:value="temp.description" :maxLength="200" :rows="5" placeholder="描述" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -266,7 +267,8 @@ export default {
       // 表单校验规则
       rules: {
         name: [{ required: true, message: '请输入权限组名称', trigger: 'blur' }]
-      }
+      },
+      confirmLoading: false
     }
   },
   computed: {
@@ -407,16 +409,21 @@ export default {
         delete temp.targetKeys
         // console.log(temp, emitKeys)
         // 需要判断当前操作是【新增】还是【修改】
-        editPermissionGroup(temp).then((res) => {
-          if (res.code === 200) {
-            this.$notification.success({
-              message: res.msg
-            })
-            this.$refs['editForm'].resetFields()
-            this.editVisible = false
-            this.loadData()
-          }
-        })
+        this.confirmLoading = true
+        editPermissionGroup(temp)
+          .then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg
+              })
+              this.$refs['editForm'].resetFields()
+              this.editVisible = false
+              this.loadData()
+            }
+          })
+          .finaly(() => {
+            this.confirmLoading = false
+          })
       })
     },
     // 删除
@@ -427,15 +434,20 @@ export default {
         content: '真的要删除权限组么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          deletePermissionGroup(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            deletePermissionGroup(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -455,7 +467,7 @@ export default {
             'demo 账号是系统特定演示使用的账号,系统默认将对 demo 账号限制很多权限。非演示场景不建议使用 demo 账号',
           okText: '确认',
           cancelText: '取消',
-          onOk: () => {},
+
           onCancel: () => {
             this.temp.id = ''
           }

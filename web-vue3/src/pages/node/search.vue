@@ -487,12 +487,12 @@
     <!-- 迁移到其他工作空间 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="migrateWorkspaceVisible"
       width="50vw"
       title="迁移到其他工作空间"
       @ok="migrateWorkspaceOk"
       :maskClosable="false"
-      :confirmLoading="confirmLoading"
     >
       <a-space direction="vertical">
         <a-alert message="温馨提示" type="warning" show-icon>
@@ -1060,15 +1060,20 @@ export default {
         content: '确定要重新同步当前节点项目缓存信息吗？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          syncProject(nodeId).then((res) => {
-            if (res.code == 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            syncProject(nodeId)
+              .then((res) => {
+                if (res.code == 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.getNodeProjectData()
+                }
+                resolve()
               })
-              this.getNodeProjectData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -1092,21 +1097,26 @@ export default {
         content: msg,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 解锁
-          sortItemProject({
-            id: record.id,
-            method: method,
-            compareId: compareId
-          }).then((res) => {
-            if (res.code == 200) {
-              this.$notification.success({
-                message: res.msg
-              })
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            //
+            sortItemProject({
+              id: record.id,
+              method: method,
+              compareId: compareId
+            })
+              .then((res) => {
+                if (res.code == 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
 
-              this.getNodeProjectData()
-              return false
-            }
+                  this.getNodeProjectData()
+                  return false
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -1199,21 +1209,26 @@ export default {
           : '真的要删除项目么？删除项目不会删除项目相关文件奥,建议先清理项目相关文件再删除项目',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          const params = {
-            nodeId: record.nodeId,
-            id: record.projectId,
-            thorough: thorough
-          }
-          deleteProject(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-
-              this.getNodeProjectData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            const params = {
+              nodeId: record.nodeId,
+              id: record.projectId,
+              thorough: thorough
             }
+            deleteProject(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+
+                  this.getNodeProjectData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

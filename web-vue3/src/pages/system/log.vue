@@ -161,20 +161,25 @@ export default {
         content: '真的要删除日志文件么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          const params = {
-            nodeId: null,
-            path: this.temp.path
-          }
-          // 删除日志
-          deleteLog(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.visible = false
-              this.loadData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            const params = {
+              nodeId: null,
+              path: this.temp.path
             }
+            // 删除日志
+            deleteLog(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.visible = false
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

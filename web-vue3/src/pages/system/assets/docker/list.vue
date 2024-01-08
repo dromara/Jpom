@@ -392,6 +392,7 @@
     <!-- 分配到其他工作空间 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="syncToWorkspaceVisible"
       title="分配到其他工作空间"
       @ok="handleSyncToWorkspace"
@@ -835,18 +836,23 @@ export default {
         content: '真的要删除该 Docker 么？删除只会检查本地系统的数据关联,不会删除 docker 容器中数据',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 组装参数
-          const params = {
-            id: record.id
-          }
-          deleteDcoker(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 组装参数
+            const params = {
+              id: record.id
             }
+            deleteDcoker(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -868,18 +874,23 @@ export default {
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 组装参数
-          const params = {
-            id: record.id
-          }
-          dcokerSwarmLeaveForce(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 组装参数
+            const params = {
+              id: record.id
             }
+            dcokerSwarmLeaveForce(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -1002,16 +1013,21 @@ export default {
         this.tableSelections = []
       }
       // 同步
-      machineDockerDistribute(this.temp).then((res) => {
-        if (res.code == 200) {
-          this.$notification.success({
-            message: res.msg
-          })
+      this.confirmLoading = true
+      machineDockerDistribute(this.temp)
+        .then((res) => {
+          if (res.code == 200) {
+            this.$notification.success({
+              message: res.msg
+            })
 
-          this.syncToWorkspaceVisible = false
-          return false
-        }
-      })
+            this.syncToWorkspaceVisible = false
+            return false
+          }
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
     },
     // 查看工作空间的 docker 信息
     viewWorkspaceDataHander(item) {

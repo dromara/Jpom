@@ -110,17 +110,22 @@ export default {
         content: '确认创建该【' + this.addName + '】配置文件吗？配置文件一旦创建不能通过管理页面删除的奥？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          addItem({ name: this.addName }).then((res) => {
-            if (res.code === 200) {
-              // 成功
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            addItem({ name: this.addName })
+              .then((res) => {
+                if (res.code === 200) {
+                  // 成功
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.addName = ''
+                  this.loadData()
+                }
+                resolve()
               })
-              this.addName = ''
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })

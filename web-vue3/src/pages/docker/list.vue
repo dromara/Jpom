@@ -439,18 +439,23 @@ export default {
         content: '真的要删除该记录么？删除后构建关联的容器标签将无法使用',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 组装参数
-          const params = {
-            id: record.id
-          }
-          deleteDcoker(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 组装参数
+            const params = {
+              id: record.id
             }
+            deleteDcoker(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

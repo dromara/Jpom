@@ -18,22 +18,22 @@ import { scriptLog } from '@/api/server-script'
 import LogView from '@/components/logView'
 export default {
   components: {
-    LogView,
+    LogView
   },
   props: {
     temp: {
-      type: Object,
+      type: Object
     },
     visible: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   data() {
     return {
       logTimer: null,
       // logText: "loading...",
-      line: 1,
+      line: 1
     }
   },
   beforeUnmount() {
@@ -58,7 +58,7 @@ export default {
         executeId: this.temp.id,
         id: this.temp.scriptId,
         nodeId: this.temp.nodeId,
-        line: this.line,
+        line: this.line
       }
       scriptLog(params).then((res) => {
         if (res.code === 200) {
@@ -76,21 +76,10 @@ export default {
           // });
           this.$refs.logView.appendLine(res.data.dataLines)
           this.line = res.data.line
-          // if (lines.length) {
-          //   // 自动滚动到底部
-          //   this.$nextTick(() => {
-          //     setTimeout(() => {
-          //       const textarea = document.getElementById("script-log-textarea");
-          //       if (textarea) {
-          //         textarea.scrollTop = textarea.scrollHeight;
-          //       }
-          //     }, 100);
-          //   });
-          // }
         }
       })
-    },
+    }
   },
-  emits: ['close'],
+  emits: ['close']
 }
 </script>

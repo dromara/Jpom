@@ -290,7 +290,7 @@ export default {
             containerId: this.containerId
           }).then((res) => {
             if (res.code === 200) {
-              this.editVisible = true
+              //this.editVisible = true
 
               const hostConfig = res.data.hostConfig || {}
               const data = {
@@ -316,16 +316,30 @@ export default {
       })
     },
     handleEditOk() {
-      this.$refs['editForm'].validate().then(() => {
-        const temp = Object.assign({}, this.temp, { id: this.reqDataId })
-        dockerUpdateContainer(this.urlPrefix, temp).then((res) => {
-          if (res.code === 200) {
-            this.$notification.success({
-              message: res.msg
-            })
-            this.editVisible = false
-          }
-        })
+      return new Promise((ok, reject) => {
+        this.$refs['editForm']
+          .validate()
+          .then(() => {
+            const temp = Object.assign({}, this.temp, { id: this.reqDataId })
+            dockerUpdateContainer(this.urlPrefix, temp)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  //this.editVisible = false
+                  ok()
+                } else {
+                  reject()
+                }
+              })
+              .catch(() => {
+                reject()
+              })
+          })
+          .catch(() => {
+            reject()
+          })
       })
     }
   }

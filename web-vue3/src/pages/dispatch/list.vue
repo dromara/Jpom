@@ -200,13 +200,13 @@
     <!-- 添加/编辑关联项目 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="linkDispatchVisible"
       width="900px"
       :title="temp.type === 'edit' ? '编辑关联项目' : '添加关联项目'"
       @ok="handleLinkDispatchOk"
       :maskClosable="false"
       @cancel="clearDispatchList"
-      :confirmLoading="confirmLoading"
     >
       <a-form ref="linkDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item name="id">
@@ -418,12 +418,12 @@
     <!-- 创建/编辑分发项目 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="editDispatchVisible"
       width="60vw"
       :title="temp.type === 'edit' ? '编辑分发项目' : '创建分发项目'"
       @ok="handleEditDispatchOk"
       :maskClosable="false"
-      :confirmLoading="confirmLoading"
     >
       <a-spin tip="加载数据中" :spinning="editDispatchLoading">
         <a-form
@@ -1395,16 +1395,21 @@ export default {
             : '真的要删除分发信息么？删除后节点下面的项目也都将删除',
           okText: '确认',
           cancelText: '取消',
-          onOk: () => {
-            // 删除
-            delDisPatchProject({ id: record.id, thorough: thorough }).then((res) => {
-              if (res.code === 200) {
-                this.$notification.success({
-                  message: res.msg
-                })
+          async onOk() {
+            return await new Promise((resolve, reject) => {
+              // 删除
+              delDisPatchProject({ id: record.id, thorough: thorough })
+                .then((res) => {
+                  if (res.code === 200) {
+                    this.$notification.success({
+                      message: res.msg
+                    })
 
-                this.loadData()
-              }
+                    this.loadData()
+                  }
+                  resolve()
+                })
+                .catch(reject)
             })
           }
         })
@@ -1416,16 +1421,21 @@ export default {
         content: '真的要释放分发信息么？释放之后节点下面的项目信息还会保留，如需删除项目还需要到节点管理中操作',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          releaseDelDisPatch(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            releaseDelDisPatch(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
 
-              this.loadData()
-            }
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -1448,16 +1458,21 @@ export default {
         cancelButtonProps: { type: 'primary' },
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          unbindOutgiving(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            unbindOutgiving(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
 
-              this.loadData()
-            }
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -1534,17 +1549,20 @@ export default {
         content: '真的取消当前分发吗？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          cancelOutgiving({ id: record.id }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
-              this.silenceLoadData()
-            }
-          })
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            cancelOutgiving({ id: record.id }).then((res) => {
+              if (res.code === 200) {
+                this.$notification.success({
+                  message: res.msg
+                })
+                this.loadData()
+                this.silenceLoadData()
+              }
+              resolve()
+            })
+          }).catch(reject)
         }
       })
     },

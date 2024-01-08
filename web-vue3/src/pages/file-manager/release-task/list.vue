@@ -418,17 +418,22 @@ export default {
         content: '真的要删除该执行记录吗？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          deleteReleaseTask({
-            id: row.id
-          }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            deleteReleaseTask({
+              id: row.id
+            })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -512,15 +517,20 @@ export default {
         content: '真的取消当前发布任务吗？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          cancelReleaseTask({ id: record.id }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            cancelReleaseTask({ id: record.id })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })

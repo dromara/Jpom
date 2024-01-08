@@ -38,7 +38,7 @@
           <a-space>
             <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
             <a-dropdown>
-              <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
+              <a @click="(e) => e.preventDefault()"> 更多 <DownOutlined /> </a>
               <template v-slot:overlay>
                 <a-menu>
                   <a-menu-item>
@@ -131,6 +131,7 @@
     <!-- 编辑区 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="editUserVisible"
       width="60vw"
       title="编辑用户"
@@ -308,7 +309,8 @@ export default {
         name: [{ required: true, message: '请填写用户昵称', trigger: 'blur' }],
         permissionGroup: [{ required: true, message: '请选择用户权限组', trigger: 'blur' }]
       },
-      showUserPwd: false
+      showUserPwd: false,
+      confirmLoading: false
     }
   },
   computed: {
@@ -376,25 +378,30 @@ export default {
         paramsTemp.permissionGroup = (paramsTemp.permissionGroup || []).join('@')
 
         // 需要判断当前操作是【新增】还是【修改】
-        editUser(paramsTemp).then((res) => {
-          if (res.code === 200) {
-            if (paramsTemp.type === 'add') {
-              this.temp = {
-                title: '账号添加成功',
-                randomPwd: res.data.randomPwd
+        this.confirmLoading = true
+        editUser(paramsTemp)
+          .then((res) => {
+            if (res.code === 200) {
+              if (paramsTemp.type === 'add') {
+                this.temp = {
+                  title: '账号添加成功',
+                  randomPwd: res.data.randomPwd
+                }
+
+                this.showUserPwd = true
+              } else {
+                this.$notification.success({
+                  message: res.msg
+                })
               }
 
-              this.showUserPwd = true
-            } else {
-              this.$notification.success({
-                message: res.msg
-              })
+              this.editUserVisible = false
+              this.loadData()
             }
-
-            this.editUserVisible = false
-            this.loadData()
-          }
-        })
+          })
+          .finaly(() => {
+            this.confirmLoading = false
+          })
       })
     },
     // 删除用户
@@ -405,15 +412,20 @@ export default {
         zIndex: 1009,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          deleteUser(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            deleteUser(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -426,15 +438,20 @@ export default {
         zIndex: 1009,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 解锁用户
-          unlockUser(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 解锁用户
+            unlockUser(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -447,15 +464,20 @@ export default {
         zIndex: 1009,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 解锁用户
-          closeUserMfa(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 解锁用户
+            closeUserMfa(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -475,7 +497,7 @@ export default {
             'demo 账号是系统特定演示使用的账号,系统默认将对 demo 账号限制很多权限。非演示场景不建议使用 demo 账号',
           okText: '确认',
           cancelText: '取消',
-          onOk: () => {},
+
           onCancel: () => {
             this.temp.id = ''
           }
@@ -490,17 +512,22 @@ export default {
         content: '确定要重置用户密码吗？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 解锁用户
-          restUserPwd(record.id).then((res) => {
-            if (res.code === 200) {
-              this.temp = {
-                title: '用户密码重置成功',
-                randomPwd: res.data.randomPwd
-              }
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 解锁用户
+            restUserPwd(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.temp = {
+                    title: '用户密码重置成功',
+                    randomPwd: res.data.randomPwd
+                  }
 
-              this.showUserPwd = true
-            }
+                  this.showUserPwd = true
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

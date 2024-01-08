@@ -297,6 +297,7 @@
     <!-- 修改用户资料区 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="updateUserVisible"
       title="修改用户资料"
       @ok="handleUpdateUserOk"
@@ -524,7 +525,8 @@ export default {
       },
       MFA_APP_TIP_ARRAY,
       bindMfaTip: false,
-      viewLogVisible: false
+      viewLogVisible: false,
+      confirmLoading: true
     }
   },
   computed: {
@@ -719,8 +721,8 @@ export default {
         content: '真的要彻底退出系统么？彻底退出将退出登录和清空浏览器缓存',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          return new Promise((resolve) => {
+        async onOk() {
+          return await new Promise((resolve, reject) => {
             // 退出登录
             useUserStore()
               .logOut()
@@ -735,6 +737,7 @@ export default {
                 })
                 resolve()
               })
+              .catch(reject)
           })
         }
       })
@@ -747,8 +750,8 @@ export default {
         content: '真的要退出并切换账号登录么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          return new Promise((resolve) => {
+        async onOk() {
+          return await new Promise((resolve, reject) => {
             // 退出登录
             useUserStore()
               .logOut()
@@ -763,6 +766,7 @@ export default {
                 })
                 resolve()
               })
+              .catch(reject)
           })
         }
       })
@@ -775,8 +779,8 @@ export default {
         content: '真的要退出系统么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          return new Promise((resolve) => {
+        async onOk() {
+          return await new Promise((resolve, reject) => {
             // 退出登录
             useUserStore()
               .logOut()
@@ -791,6 +795,7 @@ export default {
                 })
                 resolve()
               })
+              .catch(reject)
           })
         }
       })
@@ -865,18 +870,23 @@ export default {
       this.$refs['userForm'].validate().then(() => {
         const tempData = Object.assign({}, this.temp)
         delete tempData.token, delete tempData.md5Token
-        editUserInfo(tempData).then((res) => {
-          // 修改成功
-          if (res.code === 200) {
-            this.$notification.success({
-              message: res.msg
-            })
-            // 清空表单校验
-            this.$refs['userForm'].resetFields()
-            this.updateUserVisible = false
-            userStore().refreshUserInfo()
-          }
-        })
+        this.confirmLoading = true
+        editUserInfo(tempData)
+          .then((res) => {
+            // 修改成功
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg
+              })
+              // 清空表单校验
+              this.$refs['userForm'].resetFields()
+              this.updateUserVisible = false
+              userStore().refreshUserInfo()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
       })
     },
     // 工作空间切换
@@ -977,17 +987,22 @@ export default {
           content: '确定要关闭两步验证吗？关闭后账号安全性将受到影响,关闭后已经存在的 mfa key 将失效',
           okText: '确认',
           cancelText: '取消',
-          onOk: () => {
-            //
-            closeMfa({
-              code: this.temp.twoCode
-            }).then((res) => {
-              if (res.code === 200) {
-                $notification.success({
-                  message: res.msg
+          async onOk() {
+            return await new Promise((resolve, reject) => {
+              //
+              closeMfa({
+                code: this.temp.twoCode
+              })
+                .then((res) => {
+                  if (res.code === 200) {
+                    $notification.success({
+                      message: res.msg
+                    })
+                    this.temp = { ...this.temp, needVerify: false, status: false }
+                  }
+                  resolve()
                 })
-                this.temp = { ...this.temp, needVerify: false, status: false }
-              }
+                .catch(reject)
             })
           }
         })

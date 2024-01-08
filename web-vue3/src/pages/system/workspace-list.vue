@@ -115,7 +115,14 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model:open="editVisible" title="编辑工作空间" @ok="handleEditOk" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      :confirmLoading="confirmLoading"
+      v-model:open="editVisible"
+      title="编辑工作空间"
+      @ok="handleEditOk"
+      :maskClosable="false"
+    >
       <a-alert message="温馨提醒" type="info" show-icon>
         <template #description>
           <ul>
@@ -176,6 +183,7 @@
     <!-- 工作空间菜单 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="configMenuVisible"
       :title="`${temp.name} 工作空间菜单`"
       @ok="onSubmitMenus"
@@ -233,6 +241,7 @@
     <!-- 删除工作空间检查 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="preDeleteVisible"
       :title="`删除工作空间确认`"
       :maskClosable="false"
@@ -385,7 +394,8 @@ export default {
         key: 'id'
       },
       treeData: [],
-      clusterList: []
+      clusterList: [],
+      confirmLoading: false
     }
   },
   computed: {
@@ -499,15 +509,20 @@ export default {
     },
     handleDeleteOk() {
       // 删除
-      deleteWorkspace(this.temp.id).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg
-          })
-          this.preDeleteVisible = false
-          this.loadData()
-        }
-      })
+      this.confirmLoading = true
+      deleteWorkspace(this.temp.id)
+        .then((res) => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg
+            })
+            this.preDeleteVisible = false
+            this.loadData()
+          }
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
     },
     configMeun(record) {
       this.temp = Object.assign({}, record)
@@ -552,19 +567,24 @@ export default {
       })
     },
     onSubmitMenus() {
+      this.confirmLoading = true
       saveMenusConfig({
         serverMenuKeys: this.menusConfigData.serverMenuKeys.join(','),
 
         workspaceId: this.temp.id
-      }).then((res) => {
-        if (res.code === 200) {
-          // 成功
-          this.$notification.success({
-            message: res.msg
-          })
-          this.configMenuVisible = false
-        }
       })
+        .then((res) => {
+          if (res.code === 200) {
+            // 成功
+            this.$notification.success({
+              message: res.msg
+            })
+            this.configMenuVisible = false
+          }
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
     },
     // 配置节点授权
     configWhiteDir(record) {

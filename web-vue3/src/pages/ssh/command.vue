@@ -324,7 +324,7 @@
     >
       <a-form ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
-          <template v-slot:tabBarExtraContent>
+          <template v-slot:rightExtra>
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>
@@ -568,15 +568,21 @@ export default {
         content: '真的要删除“' + row.name + '”命令？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          deleteCommand(row.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            deleteCommand(row.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.getCommandData()
+                }
+
+                resolve()
               })
-              this.getCommandData()
-            }
+              .catch(reject)
           })
         }
       })

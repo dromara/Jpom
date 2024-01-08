@@ -64,8 +64,6 @@
             >
             </a-typography-paragraph>
             {{ text }}
-
-            <!-- <a-input disabled :value="text"><a-icon slot="suffix" type="copy" /></a-input> -->
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'modifyUser'">

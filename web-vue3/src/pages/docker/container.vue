@@ -60,7 +60,7 @@
                   <p v-for="(value, key) in record.labels" :key="key">
                     {{ key }}
                     <ArrowRightOutlined />
-                    <!-- <a-icon type="arrow-right" /> -->
+
                     {{ value }}
                   </p>
                 </template>
@@ -362,7 +362,7 @@
                     <template v-if="record.labels">
                       <p v-for="(value, key) in record.labels" :key="key">
                         {{ key }}
-                        <!-- <a-icon type="arrow-right" /> -->
+
                         <ArrowRightOutlined />
                         {{ value }}
                       </p>
@@ -602,14 +602,21 @@
     <!-- 编辑容器配置 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
       width="60vw"
       title="配置容器"
       @ok="
         () => {
-          this.$refs.editContainer.handleEditOk()
-          this.editVisible = false
-          this.loadData()
+          this.$refs.editContainer
+            .handleEditOk()
+            .then(() => {
+              this.editVisible = false
+              this.loadData()
+            })
+            .finally(() => {
+              this.confirmLoading = false
+            })
         }
       "
       :maskClosable="false"
@@ -702,7 +709,7 @@ export default {
       terminalVisible: false,
       logVisible: 0,
       temp: {},
-
+      confirmLoading: false,
       columns: [
         {
           title: '序号',
@@ -903,19 +910,25 @@ export default {
         content: action.msg,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 组装参数
-          const params = {
-            id: this.reqDataId,
-            containerId: record.id
-          }
-          action.api(this.urlPrefix, params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 组装参数
+            const params = {
+              id: this.reqDataId,
+              containerId: record.id
             }
+            action
+              .api(this.urlPrefix, params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

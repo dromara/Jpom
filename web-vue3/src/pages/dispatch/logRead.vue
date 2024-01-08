@@ -46,10 +46,10 @@
     <!-- 编辑区 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
       width="60%"
       title="编辑日志搜索"
-      :confirmLoading="confirmLoading"
       @ok="handleEditOk"
       :maskClosable="false"
     >
@@ -345,15 +345,20 @@ export default {
         content: '真的要删除日志搜索么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          deleteLogRead(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            deleteLogRead(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resLog()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })

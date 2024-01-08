@@ -583,14 +583,19 @@ export default {
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          downloadRemote().then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({ message: res.msg })
-              this.getNodeList()
-            } else {
-              //this.$notification.error({ message: res.msg });
-            }
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            downloadRemote()
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({ message: res.msg })
+                  this.getNodeList()
+                } else {
+                  //this.$notification.error({ message: res.msg });
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

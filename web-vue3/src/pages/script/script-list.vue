@@ -668,19 +668,25 @@ export default {
         zIndex: 1009,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 组装参数
-          const params = {
-            id: record.id
-          }
-          // 删除
-          deleteScript(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 组装参数
+            const params = {
+              id: record.id
             }
+            // 删除
+            deleteScript(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -718,17 +724,23 @@ export default {
         cancelButtonProps: { type: 'primary' },
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 解绑
-          unbindScript({
-            id: record.id
-          }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 解绑
+            unbindScript({
+              id: record.id
+            })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })

@@ -286,21 +286,26 @@ export default {
         okText: '确认',
         zIndex: 1009,
         cancelText: '取消',
-        onOk: () => {
+        async onOk() {
           // 重新发布
-          rollback(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+          return await new Promise((resolve, reject) => {
+            rollback(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.refresh()
+                  // 弹窗
+                  this.temp = {
+                    id: record.buildDataId,
+                    buildId: res.data
+                  }
+                  this.buildLogVisible = new Date() * Math.random()
+                }
+                resolve()
               })
-              this.refresh()
-              // 弹窗
-              this.temp = {
-                id: record.buildDataId,
-                buildId: res.data
-              }
-              this.buildLogVisible = new Date() * Math.random()
-            }
+              .catch(reject)
           })
         }
       })

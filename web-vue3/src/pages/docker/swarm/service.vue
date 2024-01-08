@@ -116,10 +116,10 @@
     <!-- 编辑节点 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
       title="编辑服务"
       width="70vw"
-      :confirmLoading="confirmLoading"
       @ok="handleEditOk"
       :maskClosable="false"
     >
@@ -843,19 +843,24 @@ export default {
         content: '真的要删除此服务么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 组装参数
-          const params = {
-            serviceId: record.id,
-            id: this.id
-          }
-          dockerSwarmServicesDel(this.urlPrefix, params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 组装参数
+            const params = {
+              serviceId: record.id,
+              id: this.id
             }
+            dockerSwarmServicesDel(this.urlPrefix, params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

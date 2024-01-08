@@ -175,22 +175,27 @@ export default {
         content: '真的要删除文件么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 请求参数
-          const params = {
-            nodeId: this.nodeId,
-            id: this.projectId,
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 请求参数
+            const params = {
+              nodeId: this.nodeId,
+              id: this.projectId,
 
-            name: record.filename
-          }
-          // 删除
-          deleteProjectLogBackFile(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.handleLogBack()
+              name: record.filename
             }
+            // 删除
+            deleteProjectLogBackFile(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.handleLogBack()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

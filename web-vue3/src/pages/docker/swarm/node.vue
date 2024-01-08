@@ -150,19 +150,6 @@
               <a-button size="small" type="primary" @click="handleEdit(record)">修改</a-button>
               <a-button size="small" type="primary" danger @click="handleLeava(record)">剔除</a-button>
             </template>
-
-            <!-- <template v-else>
-              <a-button size="small" type="primary" danger v-if="!item.managerStatus.leader" @click="handleLeava(record)">剔除</a-button>
-            </template> -->
-            <!-- <a-dropdown>
-              <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
-              <a-menu slot="overlay">
-                <a-menu-item> </a-menu-item>
-                <a-menu-item>
-                  <a-button size="small" type="primary" danger @click="handleUnbind(record)">解绑</a-button>
-                </a-menu-item>
-              </a-menu></a-dropdown
-            > -->
           </a-space>
         </template>
       </template>
@@ -170,9 +157,9 @@
     <!-- 编辑节点 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
       title="编辑节点"
-      :confirmLoading="confirmLoading"
       @ok="handleEditOk"
       :maskClosable="false"
     >
@@ -352,19 +339,24 @@ export default {
         content: '真的要在该集群剔除此节点么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 组装参数
-          const params = {
-            nodeId: record.id,
-            id: this.id
-          }
-          dockerSwarmNodeLeave(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 组装参数
+            const params = {
+              nodeId: record.id,
+              id: this.id
             }
+            dockerSwarmNodeLeave(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
