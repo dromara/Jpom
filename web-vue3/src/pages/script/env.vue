@@ -1,12 +1,14 @@
 <template>
-  <div class="full-content">
+  <div>
     <workspaceEnv ref="workspaceEnv" :workspaceId="this.getWorkspaceId()" :global="true" />
   </div>
 </template>
 
 <script>
 import workspaceEnv from '@/pages/system/workspace-env.vue'
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+
+import { useAppStore } from '@/stores/app'
 
 export default {
   components: {
@@ -15,7 +17,7 @@ export default {
   data() {
     return {}
   },
-  computed: { ...mapGetters(['getWorkspaceId']) },
+  computed: { ...mapState(useAppStore, ['getWorkspaceId']) },
   created() {},
   methods: {}
 }

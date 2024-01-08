@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 布局 -->
-    <a-layout class="file-layout node-full-content">
+    <a-layout class="file-layout">
       <!-- 目录树 -->
       <a-layout-sider theme="light" class="sider" width="25%">
         <div class="dir-container">
@@ -24,7 +24,7 @@
         </div>
 
         <a-directory-tree
-          :replace-fields="treeReplaceFields"
+          :fieldNames="treeReplaceFields"
           @select="nodeClick"
           :loadData="onTreeData"
           :treeData="treeList"
@@ -45,7 +45,7 @@
                   <a-input
                     placeholder="关键词,支持正则"
                     :style="`width: 250px`"
-                    v-model="temp.cacheData.keyword"
+                    v-model:value="temp.cacheData.keyword"
                     @pressEnter="sendSearchLog"
                   >
                   </a-input>
@@ -55,7 +55,7 @@
                 显示前N行
                 <a-input-number
                   id="inputNumber"
-                  v-model="temp.cacheData.beforeCount"
+                  v-model:value="temp.cacheData.beforeCount"
                   :min="0"
                   :max="1000"
                   @pressEnter="sendSearchLog"
@@ -65,22 +65,22 @@
                 显示后N行
                 <a-input-number
                   id="inputNumber"
-                  v-model="temp.cacheData.afterCount"
+                  v-model:value="temp.cacheData.afterCount"
                   :min="0"
                   :max="1000"
                   @pressEnter="sendSearchLog"
                 />
               </div>
               <a-popover title="正则语法参考">
-                <template #content>
+                <template v-slot:content>
                   <ul>
                     <li><b>^.*\d+.*$</b> - 匹配包含数字的行</li>
                     <li><b>.*(a|b).*</b> - 匹配包含 a 或者 b 的行</li>
                     <li><b>.*(异常).*</b> - 匹配包含 异常 的行</li>
                   </ul>
                 </template>
-                <a-button type="link" style="padding: 0" icon="unordered-list"
-                  ><span style="margin-left: 2px">语法参考</span></a-button
+                <a-button type="link" style="padding: 0"
+                  ><UnorderedListOutlined /><span style="margin-left: 2px">语法参考</span></a-button
                 >
               </a-popover>
             </a-space>
@@ -111,7 +111,7 @@
                 文件前N行
                 <a-input-number
                   id="inputNumber"
-                  v-model="temp.cacheData.head"
+                  v-model:value="temp.cacheData.head"
                   :min="0"
                   :max="1000"
                   @pressEnter="sendSearchLog"
@@ -121,14 +121,14 @@
                 文件后N行
                 <a-input-number
                   id="inputNumber"
-                  v-model="temp.cacheData.tail"
+                  v-model:value="temp.cacheData.tail"
                   :min="0"
                   :max="1000"
                   @pressEnter="sendSearchLog"
                 />
               </div>
               <a-popover title="搜索配置参考">
-                <template #content>
+                <template v-slot:content>
                   <ul>
                     <li><b>从尾搜索、文件前0行、文件后3行</b> - 在文件最后 3 行中搜索</li>
                     <li><b>从头搜索、文件前0行、文件后3行</b> - 在文件第 3 - 2147483647 行中搜索</li>
@@ -139,18 +139,18 @@
                     <li><b>从头搜索、文件前20行、文件后3行</b> - 在文件第 3 - 20 行中搜索</li>
                   </ul>
                 </template>
-                <a-button type="link" style="padding: 0" icon="unordered-list"
-                  ><span style="margin-left: 2px">搜索参考</span></a-button
+                <a-button type="link" style="padding: 0"
+                  ><UnorderedListOutlined /><span style="margin-left: 2px">搜索参考</span></a-button
                 >
               </a-popover>
             </a-space>
           </a-space>
         </div>
 
-        <a-tabs v-if="temp.cacheData" v-model="activeTagKey" :tabBarStyle="{ marginBottom: 0 }">
+        <a-tabs v-if="temp.cacheData" v-model:value="activeTagKey" :tabBarStyle="{ marginBottom: 0 }">
           <template v-for="item in temp.projectList">
-            <a-tab-pane forceRender v-if="nodeName[item.nodeId]" :key="`${item.nodeId},${item.projectId}`">
-              <template #tab>
+            <a-tab-pane forceRender v-if="nodeName[item.nodeId]">
+              <template v-slot:tab>
                 【{{ nodeName[item.nodeId] && nodeName[item.nodeId].name }}】
                 {{
                   nodeProjectList[item.nodeId] &&
@@ -175,12 +175,15 @@
     </a-layout>
   </div>
 </template>
+
 <script>
 import { getNodeListAll, getProjectListAll } from '@/api/node'
 import { getFileList } from '@/api/node-project'
 import { itemGroupBy } from '@/utils/const'
 import { getWebSocketUrl } from '@/api/config'
 import { mapState } from 'pinia'
+import { useUserStore } from '@/stores/user'
+import { useAppStore } from '@/stores/app'
 import viewPre from '@/components/logView/view-pre'
 import { updateCache } from '@/api/log-read'
 
@@ -210,7 +213,8 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getLongTermToken', 'getWorkspaceId']),
+    ...mapState(useUserStore, ['getLongTermToken']),
+    ...mapState(useAppStore, ['getWorkspaceId']),
     selectPath() {
       if (!Object.keys(this.tempNode).length) {
         return ''
@@ -255,7 +259,7 @@ export default {
           '/socket/console',
           `userId=${this.getLongTermToken}&id=${itemProjectData.id}&nodeId=${
             item.nodeId
-          }&type=console&copyId=&workspaceId=${this.getWorkspaceId()}`
+          }&type=console&workspaceId=${this.getWorkspaceId()}`
         )
         const domId = `pre-dom-${item.nodeId},${item.projectId}`
         this.socketCache = { ...this.socketCache, [domId]: {} }
@@ -263,7 +267,11 @@ export default {
 
         this.socketCache = {
           ...this.socketCache,
-          [domId]: { socket: socket, projectId: item.projectId, nodeId: item.nodeId }
+          [domId]: {
+            socket: socket,
+            projectId: item.projectId,
+            nodeId: item.nodeId
+          }
         }
 
         // 连接成功后
@@ -278,27 +286,27 @@ export default {
     })
     this.activeTagKey = this.temp.cacheData.useNodeId + ',' + this.temp.cacheData.useProjectId
     // console.log(cacheData);
+    // 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+    window.onbeforeunload = () => {
+      this.close()
+    }
   },
-  beforeDestroy() {
-    Object.keys(this.socketCache).forEach((item) => {
-      clearInterval(this.socketCache[item].heart)
-    })
-  },
-  destroyed() {
-    Object.keys(this.socketCache).forEach((item) => {
-      clearInterval(this.socketCache[item].heart)
-    })
+  beforeUnmount() {
+    this.close()
   },
   methods: {
+    close() {
+      Object.keys(this.socketCache).forEach((item) => {
+        clearInterval(this.socketCache[item].heart)
+        this.socketCache[item].socket?.close()
+      })
+    },
     initWebSocket(id, url) {
-      let socket
-      if (!socket || socket.readyState !== socket.OPEN || socket.readyState !== socket.CONNECTING) {
-        socket = new WebSocket(url)
-      }
+      const socket = new WebSocket(url)
 
       socket.onerror = (err) => {
         console.error(err)
-        $notification.error({
+        this.$notification.error({
           key: 'log-read-error',
           message: 'web socket 错误,请检查是否开启 ws 代理'
         })
@@ -307,9 +315,9 @@ export default {
       socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        $notification.info({
+        this.$notification.info({
           key: 'log-read-close',
-          message: '会话已经关闭'
+          message: '会话已经关闭[tail-log]'
         })
         clearInterval(this.socketCache[id].heart)
       }
@@ -377,7 +385,11 @@ export default {
     nodeChange(value) {
       const keyArray = value.split(',')
 
-      const cacheData = { ...this.temp.cacheData, useNodeId: keyArray[0], useProjectId: keyArray[1] }
+      const cacheData = {
+        ...this.temp.cacheData,
+        useNodeId: keyArray[0],
+        useProjectId: keyArray[1]
+      }
       this.temp = { ...this.temp, cacheData: cacheData }
       this.loadFileData()
       //
@@ -392,14 +404,17 @@ export default {
         if (node.dataRef.textFileEdit) {
           this.tempFileNode = node.dataRef
           // let cacheData = ;
-          const cacheData = { ...this.temp.cacheData, logFile: this.selectFilePath }
+          const cacheData = {
+            ...this.temp.cacheData,
+            logFile: this.selectFilePath
+          }
           this.temp = { ...this.temp, cacheData: cacheData }
           this.$emit('changeTitle', this.selectFilePath)
           //
           this.sendSearchLog()
         } else {
           //
-          $message.error('当前文件不可读,需要配置可读文件白名单')
+          this.$message.error('当前文件不可读,需要配置可读文件授权')
         }
       }
     },
@@ -485,7 +500,8 @@ export default {
       }
       //
     }
-  }
+  },
+  emits: ['changeTitle']
 }
 </script>
 
@@ -502,13 +518,10 @@ export default {
 .file-content {
   height: calc(100vh - 80px);
   overflow-y: auto;
-  /* margin: 10px 10px 0; */
   padding: 0 10px;
   background-color: #fff;
 }
 .log-filter {
-  /* margin-top: -22px; */
-  /* margin-bottom: 10px; */
   padding: 0 10px 10px;
   line-height: 0;
   border-bottom: 1px solid #eee;

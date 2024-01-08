@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div>
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
@@ -8,12 +8,14 @@
       :pagination="pagination"
       @change="changePage"
       bordered
-      :rowKey="(record, index) => index"
+      :scroll="{
+        x: 'max-content'
+      }"
     >
-      <template #title>
+      <template v-slot:title>
         <a-space>
           <a-input
-            v-model="listQuery['%name%']"
+            v-model:value="listQuery['%name%']"
             @pressEnter="loadData"
             placeholder="日志名称"
             class="search-input-item"
@@ -25,96 +27,107 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
         </a-space>
       </template>
-      <a-tooltip #name slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
+      <template #bodyCell="{ column, text, record, index }">
+        <template v-if="column.tooltip">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
 
-      <template #operation slot-scope="text, record">
-        <a-space>
-          <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
-          <a-button type="primary" size="small" @click="handleLogRead(record)">查看</a-button>
-          <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
-        </a-space>
+        <template v-else-if="column.dataIndex === 'operation'">
+          <a-space>
+            <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
+            <a-button type="primary" size="small" @click="handleLogRead(record)">查看</a-button>
+            <a-button type="primary" danger size="small" @click="handleDelete(record)">删除</a-button>
+          </a-space>
+        </template>
       </template>
     </a-table>
     <!-- 编辑区 -->
     <a-modal
       destroyOnClose
-      v-model="editVisible"
+      v-model:open="editVisible"
       width="60%"
       title="编辑日志搜索"
+      :confirmLoading="confirmLoading"
       @ok="handleEditOk"
       :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="日志名称" name="name">
-          <a-input v-model="temp.name" :maxLength="50" placeholder="日志项目名称" />
+          <a-input v-model:value="temp.name" :maxLength="50" placeholder="日志项目名称" />
         </a-form-item>
         <a-form-item label="绑定节点" required>
-          <a-row v-for="(item, index) in temp.projectList" :key="index">
-            <a-col :span="11">
-              <span>节点: </span>
-              <a-select
-                style="width: 80%"
-                v-model="item.nodeId"
-                placeholder="请选择节点"
-                @change="
-                  () => {
-                    temp = {
-                      ...temp,
-                      projectList: temp.projectList.map((item, index1) => {
-                        if (index1 === index && item.projectId) {
-                          return Object.assign(item, { projectId: undefined })
-                        }
-                        return item
-                      })
+          <a-space direction="vertical" style="width: 100%">
+            <a-row v-for="(item, index) in temp.projectList" :key="index">
+              <a-col :span="11">
+                <span>节点: </span>
+                <a-select
+                  style="width: 80%"
+                  v-model:value="item.nodeId"
+                  placeholder="请选择节点"
+                  @change="
+                    () => {
+                      temp = {
+                        ...temp,
+                        projectList: temp.projectList.map((item, index1) => {
+                          if (index1 === index && item.projectId) {
+                            return Object.assign(item, { projectId: undefined })
+                          }
+                          return item
+                        })
+                      }
                     }
-                  }
-                "
-              >
-                <a-select-option
-                  v-for="nodeItem in nodeList"
-                  :key="nodeItem.id"
-                  :disabled="
-                    !nodeProjectList[nodeItem.id] || !nodeProjectList[nodeItem.id].projects || nodeItem.openStatus !== 1
                   "
                 >
-                  {{ nodeItem.name }}
-                </a-select-option>
-              </a-select>
-            </a-col>
-            <a-col :span="11">
-              <span>项目: </span>
-              <a-select
-                :disabled="!item.nodeId"
-                style="width: 80%"
-                v-model="item.projectId"
-                :placeholder="`请选择项目`"
-              >
-                <!-- <a-select-option value=""> 请先选择节点</a-select-option> -->
-                <template v-if="nodeProjectList[item.nodeId]">
                   <a-select-option
-                    v-for="project in nodeProjectList[item.nodeId].projects"
+                    v-for="nodeItem in nodeList"
+                    :key="nodeItem.id"
                     :disabled="
-                      temp.projectList.filter((item, nowIndex) => {
-                        return (
-                          item.nodeId === project.nodeId && item.projectId === project.projectId && nowIndex !== index
-                        )
-                      }).length > 0
+                      !nodeProjectList[nodeItem.id] ||
+                      !nodeProjectList[nodeItem.id].projects ||
+                      nodeItem.openStatus !== 1
                     "
-                    :key="project.projectId"
                   >
-                    {{ project.name }}
+                    {{ nodeItem.name }}
                   </a-select-option>
-                </template>
-              </a-select>
-            </a-col>
-            <a-col :span="2">
-              <a-button type="danger" @click="() => temp.projectList.splice(index, 1)" icon="delete"></a-button>
-            </a-col>
-          </a-row>
+                </a-select>
+              </a-col>
+              <a-col :span="11">
+                <span>项目: </span>
+                <a-select
+                  :disabled="!item.nodeId"
+                  style="width: 80%"
+                  v-model:value="item.projectId"
+                  :placeholder="`请选择项目`"
+                >
+                  <!-- <a-select-option value=""> 请先选择节点</a-select-option> -->
+                  <template v-if="nodeProjectList[item.nodeId]">
+                    <a-select-option
+                      v-for="project in nodeProjectList[item.nodeId].projects"
+                      :disabled="
+                        temp.projectList.filter((item, nowIndex) => {
+                          return (
+                            item.nodeId === project.nodeId && item.projectId === project.projectId && nowIndex !== index
+                          )
+                        }).length > 0
+                      "
+                      :key="project.projectId"
+                    >
+                      {{ project.name }}
+                    </a-select-option>
+                  </template>
+                </a-select>
+              </a-col>
+              <a-col :span="2">
+                <a-button type="primary" danger @click="() => temp.projectList.splice(index, 1)"
+                  ><DeleteOutlined
+                /></a-button>
+              </a-col>
+            </a-row>
 
-          <a-button type="primary" @click="() => temp.projectList.push({})">添加</a-button>
+            <a-button type="primary" @click="() => temp.projectList.push({})">添加</a-button>
+          </a-space>
         </a-form-item>
       </a-form>
     </a-modal>
@@ -123,7 +136,7 @@
       destroyOnClose
       placement="right"
       :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
-      :visible="logReadVisible"
+      :open="logReadVisible"
       @close="
         () => {
           this.logReadVisible = false
@@ -137,7 +150,7 @@
       </template>
       <logReadView
         v-if="logReadVisible"
-        :data="temp"
+        :data="this.temp"
         @changeTitle="
           (logFile) => {
             const cacheData = { ...this.temp.cacheData, logFile: logFile }
@@ -148,11 +161,12 @@
     </a-drawer>
   </div>
 </template>
+
 <script>
 import { deleteLogRead, editLogRead, getLogReadList } from '@/api/log-read'
 import { getNodeListAll, getProjectListAll } from '@/api/node'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, itemGroupBy, parseTime } from '@/utils/const'
-
+import { useGuideStore } from '@/stores/guide'
 import { mapState } from 'pinia'
 import logReadView from './logReadView'
 
@@ -172,21 +186,26 @@ export default {
       temp: {},
       editVisible: false,
       columns: [
-        { title: '名称', dataIndex: 'name', ellipsis: true, scopedSlots: { customRender: 'name' } },
+        {
+          title: '名称',
+          dataIndex: 'name',
+          ellipsis: true,
+          tooltip: true
+        },
 
         {
           title: '修改人',
           dataIndex: 'modifyUser',
           ellipsis: true,
           align: 'center',
-          scopedSlots: { customRender: 'modifyUser' },
+          tooltip: true,
           width: 120
         },
         {
           title: '修改时间',
           dataIndex: 'modifyTimeMillis',
           sorter: true,
-          customRender: (text) => {
+          customRender: ({ text }) => {
             if (!text || text === '0') {
               return ''
             }
@@ -198,18 +217,19 @@ export default {
           title: '操作',
           dataIndex: 'operation',
           ellipsis: true,
-          scopedSlots: { customRender: 'operation' },
+
           width: 180,
           align: 'center'
         }
       ],
       rules: {
         name: [{ required: true, message: '请填写日志项目名称', trigger: 'blur' }]
-      }
+      },
+      confirmLoading: false
     }
   },
   computed: {
-    ...mapGetters(['getCollapsed']),
+    ...mapState(useGuideStore, ['getCollapsed']),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
     }
@@ -277,7 +297,9 @@ export default {
     },
     // 修改
     handleEdit(record) {
-      this.temp = Object.assign({}, record, { projectList: JSON.parse(record.nodeProject) })
+      this.temp = Object.assign({}, record, {
+        projectList: JSON.parse(record.nodeProject)
+      })
 
       this.loadNodeList().then(() => {
         this.editVisible = true
@@ -285,39 +307,41 @@ export default {
     },
     handleEditOk() {
       // 检验表单
-      this.$refs['editForm'].validate((valid) => {
-        if (!valid) {
-          return false
-        }
+      this.$refs['editForm'].validate().then(() => {
         const temp = Object.assign({}, this.temp)
         temp.projectList = temp.projectList?.filter((item) => {
           return item.nodeId && item.projectId
         })
         if (!temp.projectList || !temp.projectList.length) {
-          $notification.warn({
+          this.$notification.warn({
             message: '至少选择一个节点和项目'
           })
           return false
         }
         // console.log(temp);
-
-        editLogRead(temp).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            $notification.success({
-              message: res.msg
-            })
-            this.$refs['editForm'].resetFields()
-            this.editVisible = false
-            this.loadData()
-          }
-        })
+        this.confirmLoading = true
+        editLogRead(temp)
+          .then((res) => {
+            if (res.code === 200) {
+              // 成功
+              this.$notification.success({
+                message: res.msg
+              })
+              this.$refs['editForm'].resetFields()
+              this.editVisible = false
+              this.loadData()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
       })
     },
     // 删除
     handleDelete(record) {
-      $confirm({
+      this.$confirm({
         title: '系统提示',
+        zIndex: 1009,
         content: '真的要删除日志搜索么？',
         okText: '确认',
         cancelText: '取消',
@@ -325,7 +349,7 @@ export default {
           // 删除
           deleteLogRead(record.id).then((res) => {
             if (res.code === 200) {
-              $notification.success({
+              this.$notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -352,4 +376,3 @@ export default {
   }
 }
 </script>
-<style scoped></style>

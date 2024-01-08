@@ -22,8 +22,8 @@
       <a-form-item label="执行日志">
         <a-tabs :activeKey="activeKey" @change="tabCallback">
           <a-tab-pane v-for="item in temp.taskList" :key="item.id">
-            <template #tab>
-              <a-icon v-if="!logMap[item.id] || logMap[item.id].run" type="loading" />
+            <template v-slot:tab>
+              <LoadingOutlined v-if="!logMap[item.id] || logMap[item.id].run" type="loading" />
               <template v-if="temp.taskData && temp.taskData.taskType === 0">
                 {{
                   sshList.filter((item2) => {
@@ -45,7 +45,7 @@
                 }}
               </template>
               <template>
-                <a-tooltip v-if="item.statusMsg" :title="item.statusMsg"><a-icon type="info-circle" /></a-tooltip>
+                <a-tooltip v-if="item.statusMsg" :title="item.statusMsg"><InfoCircleOutlined /></a-tooltip>
               </template>
             </template>
             <log-view :ref="`logView-${item.id}`" height="60vh" />
@@ -57,7 +57,7 @@
           <a-tab-pane key="before" tab="上传前">
             <div style="height: 40vh; overflow-y: scroll">
               <code-editor
-                :code="temp.taskData && temp.taskData.beforeScript"
+                :content="temp.taskData && temp.taskData.beforeScript"
                 :options="{
                   mode: temp.taskData && temp.taskData.taskType === 0 ? 'shell' : '',
                   tabSize: 2,
@@ -70,7 +70,7 @@
           <a-tab-pane key="after" tab="上传后">
             <div style="height: 40vh; overflow-y: scroll">
               <code-editor
-                :code="temp.taskData && temp.taskData.afterScript"
+                :content="temp.taskData && temp.taskData.afterScript"
                 :options="{
                   mode: temp.taskData && temp.taskData.taskType === 0 ? 'shell' : '',
                   tabSize: 2,
@@ -85,9 +85,10 @@
     </a-form>
   </div>
 </template>
+
 <script>
 import { taskDetails, statusMap, taskLogInfoList } from '@/api/file-manager/release-task-log'
-import LogView from '@/components/logView'
+import LogView from '@/components/logView/index2'
 import codeEditor from '@/components/codeEditor'
 import { getSshListAll } from '@/api/ssh'
 import { getNodeListAll } from '@/api/node'
@@ -114,7 +115,7 @@ export default {
       nodeList: []
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.logTimerMap) {
       this.temp.taskList?.forEach((item) => {
         clearInterval(this.logTimerMap[item.id])
@@ -190,7 +191,7 @@ export default {
       taskLogInfoList(params).then((res) => {
         if (res.code === 200) {
           if (!res.data) {
-            $notification.warning({
+            this.$notification.warning({
               message: res.msg
             })
             if (res.data.status !== 0) {
@@ -226,7 +227,7 @@ export default {
       if (this.logTimerMap[key]) {
         return
       }
-      nextTick(() => {
+      this.$nextTick(() => {
         const data = this.temp.taskList?.filter((item1) => {
           return item1.id === key
         })[0]
@@ -236,4 +237,3 @@ export default {
   }
 }
 </script>
-<style scoped></style>

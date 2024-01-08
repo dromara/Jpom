@@ -1,27 +1,34 @@
 <template>
-  <div style="margin-top: -10px">
+  <div>
     <a-tabs :activeKey="activeKey" @change="tabCallback">
       <a-tab-pane v-for="item in logList" :key="item.id">
-        <span #tab>
-          <a-icon v-if="!logMap[item.id] || logMap[item.id].run" type="loading" />
-          {{ item.sshName }}
-        </span>
+        <template v-slot:tab>
+          <span>
+            <LoadingOutlined v-if="!logMap[item.id] || logMap[item.id].run" />
+            {{ item.sshName }}
+          </span>
+        </template>
         <!-- <a-input :id="`build-log-textarea-${item.id}`" v-model="logMap[item.id].logText" type="textarea" class="console" readOnly style="resize: none; height: 60vh" /> -->
-        <log-view :ref="`logView-${item.id}`" height="60vh" />
+        <log-view1 :ref="`logView-${item.id}`" :height="`calc(${height} - 130px)`" />
       </a-tab-pane>
     </a-tabs>
   </div>
 </template>
+
 <script>
 import { getCommandLogBarchList, getCommandLogInfo } from '@/api/command'
-import LogView from '@/components/logView'
+import LogView1 from '@/components/logView/index2'
 export default {
   components: {
-    LogView
+    LogView1
   },
   props: {
     temp: {
       type: Object
+    },
+    height: {
+      type: String,
+      default: '60vh'
     }
   },
   data() {
@@ -32,7 +39,7 @@ export default {
       logMap: {}
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.logTimerMap) {
       this.logList.forEach((item) => {
         clearInterval(this.logTimerMap[item.id])
@@ -79,7 +86,7 @@ export default {
       getCommandLogInfo(params).then((res) => {
         if (res.code === 200) {
           if (!res.data) {
-            $notification.warning({
+            this.$notification.warning({
               message: res.msg
             })
             this.logMap[item.id].tryCount = this.logMap[item.id].tryCount + 1
@@ -115,7 +122,7 @@ export default {
           this.logMap[item.id].line = res.data.line
           // if (lines.length) {
           //   // 自动滚动到底部
-          //   nextTick(() => {
+          //   this.$nextTick(() => {
           //     setTimeout(() => {
           //       const textarea = document.getElementById("build-log-textarea-" + item.id);
           //       if (textarea) {
@@ -135,7 +142,7 @@ export default {
       if (this.logTimerMap[key]) {
         return
       }
-      nextTick(() => {
+      this.$nextTick(() => {
         const index = this.logList
           .map((item1, index) => {
             return item1.id == key ? index : -1
@@ -147,6 +154,7 @@ export default {
   }
 }
 </script>
+
 <style scoped>
 /* .console {
   padding: 5px;

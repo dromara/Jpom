@@ -18,7 +18,7 @@
                     <a-input-search
                       placeholder="请输入工作空间备注,留空使用默认的名称"
                       enter-button="确定"
-                      v-model="element.name"
+                      v-model:value="element.name"
                       @search="editOk(element)"
                     />
                   </template>

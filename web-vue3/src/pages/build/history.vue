@@ -181,7 +181,7 @@
         }
       "
     />
-    <!-- 选择确认区域 -->
+    <!-- 选择确认区域
     <div style="padding-top: 50px" v-if="this.choose">
       <div
         :style="{
@@ -209,7 +209,7 @@
           <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
         </a-space>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 

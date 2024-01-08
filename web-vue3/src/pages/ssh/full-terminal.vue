@@ -10,17 +10,20 @@
         <template #title>
           <template v-if="sshData">
             <a-space>
-              <div>{{ sshData.name }} ({{ sshData.host }})</div>
+              <div>
+                {{ sshData.name }}
+                <template v-if="sshData.host">({{ sshData.host }})</template>
+              </div>
 
               <a-button size="small" type="primary" :disabled="!sshData.fileDirs" @click="handleFile()">文件</a-button>
             </a-space>
           </template>
           <template v-else>loading</template>
         </template>
-        <template #extra>
+        <template v-slot:extra>
           <a href="#"></a>
         </template>
-        <terminal v-if="sshData" :sshId="sshData.id" />
+        <terminal1 v-if="sshData" :sshId="sshData.id" />
         <template v-else>
           <a-result status="404" title="不能操作" sub-title="没有对应的SSH">
             <template #extra>
@@ -33,27 +36,23 @@
       </a-card>
     </a-spin>
     <!-- 文件管理 -->
-    <a-drawer
-      destroyOnClose
-      v-if="sshData"
-      :title="`${sshData.name} (${sshData.host}) 文件管理`"
-      placement="right"
-      width="90vw"
-      :visible="drawerVisible"
-      @close="onClose"
-    >
-      <ssh-file v-if="drawerVisible" :ssh="sshData" />
+    <a-drawer destroyOnClose v-if="sshData" placement="right" width="90vw" :open="drawerVisible" @close="onClose">
+      <template #title>
+        {{ sshData.name }}<template v-if="sshData.host"> ({{ sshData.host }}) </template>文件管理
+      </template>
+      <ssh-file v-if="drawerVisible" :sshId="sshData.id" />
     </a-drawer>
   </div>
 </template>
+
 <script>
-import terminal from './terminal'
+import terminal1 from './terminal'
 import { getItem } from '@/api/ssh'
 import SshFile from '@/pages/ssh/ssh-file'
 
 export default {
   components: {
-    terminal,
+    terminal1,
     SshFile
   },
 
@@ -72,7 +71,7 @@ export default {
       this.loadItemData()
     }
   },
-  beforeDestroy() {},
+  beforeUnmount() {},
   methods: {
     loadItemData() {
       getItem({

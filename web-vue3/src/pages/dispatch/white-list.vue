@@ -52,7 +52,7 @@ export default {
   data() {
     return {
       temp: {},
-      submitAble: false
+      submitAble: true
     }
   },
   mounted() {
@@ -61,9 +61,11 @@ export default {
   methods: {
     // load data
     loadData() {
+      this.loading = true
       getDispatchWhiteList({ workspaceId: this.workspaceId }).then((res) => {
         if (res.code === 200) {
           this.temp = res.data
+          this.submitAble = false
         }
       })
     },

@@ -1,8 +1,8 @@
 <template>
   <a-modal
     destroyOnClose
-    :width="style.width"
     v-model:open="visibleModel"
+    :width="style.width"
     :bodyStyle="style.bodyStyle"
     :style="style.style"
     :footer="null"
@@ -69,6 +69,9 @@ export default {
     ...mapState(useGuideStore, ['getFullscreenViewLogStyle']),
     regModifier() {
       return this.regModifiers.join('')
+    },
+    style() {
+      return this.getFullscreenViewLogStyle()
     }
   },
   props: {
@@ -96,12 +99,10 @@ export default {
         // 自动换行
         wordBreak: false
       },
-      visibleModel: false,
-      style: {}
+      visibleModel: false
     }
   },
   created() {
-    this.style = this.getFullscreenViewLogStyle()
     this.visibleModel = this.visible
   },
   mounted() {
