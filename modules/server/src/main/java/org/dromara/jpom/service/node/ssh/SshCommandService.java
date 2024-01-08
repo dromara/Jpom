@@ -22,7 +22,6 @@
  */
 package org.dromara.jpom.service.node.ssh;
 
-import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
@@ -285,8 +284,7 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
                 // 更新状态
                 this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.ERROR);
                 // 记录错误日志
-                String stacktraceToString = ExceptionUtil.stacktraceToString(e);
-                logRecorder.systemError(stacktraceToString);
+                logRecorder.error("执行命令错误", e);
             } finally {
                 JschUtil.close(session);
             }
