@@ -58,7 +58,7 @@
             </a-row>
           </a-form-item>
           <a-form-item :wrapper-col="{ span: 24 }">
-            <a-button type="primary" html-type="submit" class="btn-login"> 登录 </a-button>
+            <a-button type="primary" html-type="submit" class="btn-login" :loading="loading"> 登录 </a-button>
           </a-form-item>
           <template v-if="enabledOauth2Provides.length">
             <a-divider>第三方登录</a-divider>
@@ -138,6 +138,7 @@ const mfaData = reactive({
   mfaCode: '',
   token: ''
 })
+const loading = ref(false)
 const action = ref<'mfa' | 'login'>('login')
 const enabledOauth2Provides = ref<string[]>([])
 
@@ -176,7 +177,7 @@ const getLoginConfig = () => {
   loginConfig().then((res) => {
     if (res.data && res.data.demo) {
       const demo = res.data.demo
-      const p = h('p', { domProps: { innerHTML: demo.msg } }, [])
+      const p = h('p', { innerHTML: demo.msg }, [])
       $notification.info({
         message: '温馨提示',
         description: h('div', {}, [p])
@@ -210,24 +211,29 @@ const parseOauth2Provide = () => {
 
 const checkOauth2 = () => {
   if (route.query.code) {
+    loading.value = true
     oauth2Login({
       code: route.query.code,
       state: route.query.state,
       provide: parseOauth2Provide()
-    }).then((res) => {
-      // 删除参数，避免刷新页面 code 已经被使用提示错误信息
-      let query = Object.assign({}, route.query)
-      delete query.code, delete query.state
-      router.replace({
-        query: query
-      })
-      // 登录不成功，更新验证码
-      if (res.code !== 200) {
-        changeCode()
-      } else {
-        startDispatchLogin(res)
-      }
     })
+      .then((res) => {
+        // 删除参数，避免刷新页面 code 已经被使用提示错误信息
+        let query = Object.assign({}, route.query)
+        delete query.code, delete query.state
+        router.replace({
+          query: query
+        })
+        // 登录不成功，更新验证码
+        if (res.code !== 200) {
+          changeCode()
+        } else {
+          startDispatchLogin(res)
+        }
+      })
+      .finally(() => {
+        loading.value = fal
+      })
   }
 }
 // 跳转到第三方系统
@@ -279,19 +285,24 @@ const handleLogin = (values: IFormState) => {
     ...values,
     userPwd: sha1(loginForm.userPwd)
   }
-  login(params).then((res) => {
-    if (res.code === 201) {
-      action.value = 'mfa'
-      mfaData.token = res.data.tempToken
-      return
-    }
-    // 登录不成功，更新验证码
-    if (res.code !== 200) {
-      changeCode()
-    } else {
-      startDispatchLogin(res)
-    }
-  })
+  loading.value = true
+  login(params)
+    .then((res) => {
+      if (res.code === 201) {
+        action.value = 'mfa'
+        mfaData.token = res.data.tempToken
+        return
+      }
+      // 登录不成功，更新验证码
+      if (res.code !== 200) {
+        changeCode()
+      } else {
+        startDispatchLogin(res)
+      }
+    })
+    .finally(() => {
+      loading.value = false
+    })
 }
 
 const handleMfa = () => {

@@ -122,6 +122,7 @@
       <!-- 上传文件 -->
       <a-modal
         destroyOnClose
+        :confirmLoading="confirmLoading"
         v-model:open="uploadVisible"
         :closable="!uploading"
         :footer="uploading ? null : undefined"
@@ -129,7 +130,6 @@
         :title="`上传文件`"
         @ok="handleUploadOk"
         :maskClosable="false"
-        :confirmLoading="confirmLoading"
       >
         <a-form ref="form" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <a-form-item label="选择文件" name="file">
@@ -750,18 +750,23 @@ export default {
         content: '真的要删除当前文件么？' + record.name,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          delFile({
-            id: record.id
-          }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            delFile({
+              id: record.id
+            })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
 
-              this.loadData()
-            }
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -780,16 +785,21 @@ export default {
         content: '真的要删除这些文件么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          delFile({ ids: this.tableSelections.join(',') }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            delFile({ ids: this.tableSelections.join(',') })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.tableSelections = []
+                  this.loadData()
+                }
+                resolve()
               })
-              this.tableSelections = []
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })

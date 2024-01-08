@@ -9,7 +9,6 @@
       />
       <a-form-item class="node-content-config">
         <code-editor v-model:content="temp.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
-        <!-- <a-input v-model="temp.content" type="textarea" :rows="25" style="resize: none" class="node-content-config" placeholder="请输入配置内容，参考项目的配置文件"/> -->
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
         <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit(false)">保存</a-button>

@@ -159,10 +159,10 @@
     <a-modal
       :zIndex="1009"
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
       title="编辑仓库"
       @ok="handleEditOk"
-      :confirmLoading="confirmLoading"
       :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
@@ -206,9 +206,7 @@
                 <QuestionCircleOutlined v-if="!temp.id" />
               </a-tooltip>
             </template>
-            <!-- <a-input v-model="temp.userName" placeholder="登录用户">
-                <a-icon slot="prefix" type="user" />
-              </a-input> -->
+
             <custom-input
               :input="temp.userName"
               :envList="envVarList"
@@ -230,12 +228,7 @@
                 <QuestionCircleOutlined v-if="!temp.id" />
               </a-tooltip>
             </template>
-            <!--            <a-input-password v-if="temp.id === undefined" v-model="temp.password" placeholder="登录密码">
-                <a-icon slot="prefix" type="lock" />
-              </a-input-password>
-              <a-input-password v-if="temp.id !== undefined" v-model="temp.password" placeholder="此处不填不会修改密码">
-                <a-icon slot="prefix" type="lock" />
-              </a-input-password>-->
+
             <custom-input
               :input="temp.password"
               :envList="envVarList"
@@ -289,9 +282,6 @@
               "
             >
             </custom-input>
-            <!-- <a-input-password v-model="temp.password" placeholder="证书密码">
-                <a-icon slot="prefix" type="lock" />
-              </a-input-password> -->
           </a-form-item>
           <a-form-item label="私钥" name="rsaPrv">
             <a-tooltip placement="topLeft">
@@ -952,15 +942,20 @@ export default {
         okText: '确认',
         cancelText: '取消',
         zIndex: 1009,
-        onOk: () => {
-          // 恢复
-          restHideField(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 恢复
+            restHideField(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -985,21 +980,26 @@ export default {
         okText: '确认',
         cancelText: '取消',
         zIndex: 1009,
-        onOk: () => {
-          // 解锁
-          sortItem({
-            id: record.id,
-            method: method,
-            compareId: compareId
-          }).then((res) => {
-            if (res.code == 200) {
-              this.$notification.success({
-                message: res.msg
-              })
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 解锁
+            sortItem({
+              id: record.id,
+              method: method,
+              compareId: compareId
+            })
+              .then((res) => {
+                if (res.code == 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
 
-              this.loadData()
-              return false
-            }
+                  this.loadData()
+                  return false
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

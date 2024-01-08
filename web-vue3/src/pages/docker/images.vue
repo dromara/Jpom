@@ -83,13 +83,6 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <!-- <a-tooltip title="停止" v-if="record.state === 'running'">
-            <a-button size="small" type="link" @click="doAction(record, 'stop')"><a-icon type="stop" /></a-button>
-          </a-tooltip>
-          <a-tooltip title="启动" v-else>
-            <a-button size="small" type="link" @click="doAction(record, 'start')"> <a-icon type="play-circle" /></a-button>
-          </a-tooltip>
-          -->
             <a-tooltip title="使用当前镜像创建一个容器">
               <a-button size="small" type="link" @click="createContainer(record)"><SelectOutlined /></a-button>
             </a-tooltip>
@@ -305,19 +298,25 @@ export default {
         content: action.msg,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 组装参数
-          const params = {
-            id: this.reqDataId,
-            imageId: record.id
-          }
-          action.api(this.urlPrefix, params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 组装参数
+            const params = {
+              id: this.reqDataId,
+              imageId: record.id
             }
+            action
+              .api(this.urlPrefix, params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -438,19 +437,24 @@ export default {
         content: '真的要批量删除选择的镜像吗？已经被容器使用的镜像无法删除！',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 组装参数
-          const params = {
-            id: this.reqDataId,
-            imagesIds: ids.join(',')
-          }
-          dockerImageBatchRemove(this.urlPrefix, params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 组装参数
+            const params = {
+              id: this.reqDataId,
+              imagesIds: ids.join(',')
             }
+            dockerImageBatchRemove(this.urlPrefix, params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

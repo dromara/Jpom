@@ -8,7 +8,7 @@
             {{ item.sshName }}
           </span>
         </template>
-        <!-- <a-input :id="`build-log-textarea-${item.id}`" v-model="logMap[item.id].logText" type="textarea" class="console" readOnly style="resize: none; height: 60vh" /> -->
+
         <log-view1 :ref="`logView-${item.id}`" :height="`calc(${height} - 130px)`" />
       </a-tab-pane>
     </a-tabs>

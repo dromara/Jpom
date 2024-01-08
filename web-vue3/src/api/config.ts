@@ -27,6 +27,8 @@ const instance: AxiosInstance = axios.create({
   responseType: 'json'
 })
 
+let refreshTokenIng = false
+
 // 请求拦截
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const appStore = useAppStore()
@@ -104,11 +106,16 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
 
   // 需要续签
   if (data.code === 801) {
+    if (refreshTokenIng) {
+      return Promise.reject(data)
+    }
     $notification.info({
       message: '登录信息过期，尝试自动续签...',
       description: '如果不需要自动续签，请修改配置文件。该续签将不会影响页面。'
     })
+    refreshTokenIng = true
     await redoRequest(response.config)
+    refreshTokenIng = false
     return Promise.reject(data)
   }
 
@@ -152,9 +159,15 @@ async function redoRequest(config: AxiosRequestConfig) {
     const userStore = useUserStore()
 
     await userStore.login(result.data)
-
-    await request(config)
-    return result
+    // 刷新页面
+    $notification.success({
+      message: '提示',
+      description: '自动续签成功,页面将在 2 秒后自动刷新'
+    })
+    setTimeout(() => {
+      location.reload()
+    }, 2000)
+    //return await request(config)
   }
   return Promise.reject()
 }
@@ -176,8 +189,9 @@ function toLogin(res: IResponse<any>, response: AxiosResponse<IResponse<any>>) {
       path: '/login',
       query: params
     })
+
     setTimeout(() => {
-      ;(location.href as any) = pageUrl
+      ;(location.href as any) = pageUrl.href
     }, 2000)
   })
   return false

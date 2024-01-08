@@ -319,6 +319,7 @@
         <!--远程下载  -->
         <a-modal
           destroyOnClose
+          :confirmLoading="confirmLoading"
           v-model:open="uploadRemoteFileVisible"
           title="远程下载文件"
           @ok="handleRemoteUpload"
@@ -956,16 +957,21 @@ export default {
             unzip: this.remoteDownloadData.unzip,
             stripComponents: this.remoteDownloadData.stripComponents || 0
           }
-          remoteDownload(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.remoteDownloadData = {}
-              this.uploadRemoteFileVisible = false
-              this.loadFileList()
-            }
-          })
+          this.confirmLoading = true
+          remoteDownload(params)
+            .then((res) => {
+              if (res.code === 200) {
+                this.$notification.success({
+                  message: res.msg
+                })
+                this.remoteDownloadData = {}
+                this.uploadRemoteFileVisible = false
+                this.loadFileList()
+              }
+            })
+            .finally(() => {
+              this.confirmLoading = false
+            })
         } else {
           return false
         }
@@ -1014,22 +1020,27 @@ export default {
         okText: '确认',
         zIndex: 1009,
         cancelText: '取消',
-        onOk: () => {
-          // 请求参数
-          const params = {
-            nodeId: this.nodeId,
-            id: this.projectId,
-            type: 'clear',
-            levelName: this.uploadPath
-          }
-          // 删除
-          deleteProjectFile(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadFileList()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 请求参数
+            const params = {
+              nodeId: this.nodeId,
+              id: this.projectId,
+              type: 'clear',
+              levelName: this.uploadPath
             }
+            // 删除
+            deleteProjectFile(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadFileList()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -1059,23 +1070,28 @@ export default {
         okText: '确认',
         zIndex: 1009,
         cancelText: '取消',
-        onOk: () => {
-          // 请求参数
-          const params = {
-            nodeId: this.nodeId,
-            id: this.projectId,
-            levelName: record.levelName,
-            filename: record.filename
-          }
-          // 删除
-          deleteProjectFile(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
-              // this.loadFileList();
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 请求参数
+            const params = {
+              nodeId: this.nodeId,
+              id: this.projectId,
+              levelName: record.levelName,
+              filename: record.filename
             }
+            // 删除
+            deleteProjectFile(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                  // this.loadFileList();
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

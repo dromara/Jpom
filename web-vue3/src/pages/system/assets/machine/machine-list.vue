@@ -276,6 +276,7 @@
     <!-- 编辑区 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
       width="50%"
       title="编辑机器"
@@ -425,6 +426,7 @@
     <!-- 分配到其他工作空间 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="syncToWorkspaceVisible"
       title="分配到其他工作空间"
       @ok="handleSyncToWorkspace"
@@ -474,6 +476,7 @@
     <!-- 分发节点授权 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="whiteConfigVisible"
       width="50%"
       title="同步节点授权"
@@ -521,10 +524,10 @@
     <!-- 分发机器配置 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="nodeConfigVisible"
       width="50%"
       title="同步节点配置"
-      @ok="onSubmitWhitelist"
       :maskClosable="false"
     >
       <template #footer>
@@ -747,7 +750,8 @@ export default {
       tableSelections: [],
       whiteConfigVisible: false,
       nodeConfigVisible: false,
-      templateNodeList: []
+      templateNodeList: [],
+      confirmLoading: false
     }
   },
   computed: {
@@ -812,18 +816,23 @@ export default {
       // 检验表单
       this.$refs['editNodeForm'].validate().then(() => {
         // 提交数据
-        machineEdit(this.temp).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            this.$notification.success({
-              message: res.msg
-            })
-            this.$refs['editNodeForm'].resetFields()
-            this.editVisible = false
-            this.loadGroupList()
-            this.getMachineList()
-          }
-        })
+        this.confirmLoading = true
+        machineEdit(this.temp)
+          .then((res) => {
+            if (res.code === 200) {
+              // 成功
+              this.$notification.success({
+                message: res.msg
+              })
+              this.$refs['editNodeForm'].resetFields()
+              this.editVisible = false
+              this.loadGroupList()
+              this.getMachineList()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
       })
     },
     showMachineInfo(item) {
@@ -838,17 +847,22 @@ export default {
         content: '真的要删除机器么？删除会检查数据关联性',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          machineDelete({
-            id: item.id
-          }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            machineDelete({
+              id: item.id
+            })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.getMachineList()
+                }
+                resolve()
               })
-              this.getMachineList()
-            }
+              .catch(reject)
           })
         }
       })
@@ -883,16 +897,21 @@ export default {
         this.tableSelections = []
       }
       // 同步
-      machineDistribute(this.temp).then((res) => {
-        if (res.code == 200) {
-          this.$notification.success({
-            message: res.msg
-          })
+      this.confirmLoading = true
+      machineDistribute(this.temp)
+        .then((res) => {
+          if (res.code == 200) {
+            this.$notification.success({
+              message: res.msg
+            })
 
-          this.syncToWorkspaceVisible = false
-          return false
-        }
-      })
+            this.syncToWorkspaceVisible = false
+            return false
+          }
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
     },
     // 显示节点版本信息
     showMachineUpgrade(item) {
@@ -979,19 +998,24 @@ export default {
       })
     },
     onSubmitWhitelist() {
+      this.confirmLoading = true
       saveWhitelist({
         ...this.temp,
         ids: this.tableSelections.join(',')
-      }).then((res) => {
-        if (res.code === 200) {
-          // 成功
-          this.$notification.success({
-            message: res.msg
-          })
-          this.tableSelections = []
-          this.whiteConfigVisible = false
-        }
       })
+        .then((res) => {
+          if (res.code === 200) {
+            // 成功
+            this.$notification.success({
+              message: res.msg
+            })
+            this.tableSelections = []
+            this.whiteConfigVisible = false
+          }
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
     },
     syncNodeConfig() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
@@ -1038,20 +1062,29 @@ export default {
         okText: '确认',
         zIndex: 1009,
         cancelText: '取消',
-        onOk: () => {
-          saveNodeConfig({
-            ...this.temp,
-            restart: restart,
-            ids: this.tableSelections.join(',')
-          }).then((res) => {
-            if (res.code === 200) {
-              // 成功
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            this.confirmLoading = true
+            saveNodeConfig({
+              ...this.temp,
+              restart: restart,
+              ids: this.tableSelections.join(',')
+            })
+              .then((res) => {
+                if (res.code === 200) {
+                  // 成功
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.nodeConfigVisible = false
+                  this.tableSelections = []
+                }
+                resolve()
               })
-              this.nodeConfigVisible = false
-              this.tableSelections = []
-            }
+              .catch(reject)
+              .finally(() => {
+                this.confirmLoading = false
+              })
           })
         }
       })

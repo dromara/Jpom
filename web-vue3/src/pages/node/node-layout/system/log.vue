@@ -8,12 +8,6 @@
     </a-layout-sider>
     <!-- 单个文件内容 -->
     <a-layout-content class="log-content">
-      <!-- <div class="filter">
-          <a-button type="primary" @click="loadData">刷新</a-button>
-        </div>
-        <div>
-          <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none" />
-        </div> -->
       <log-view2 :ref="`logView`" height="calc(100vh - 165px)">
         <template v-slot:before>
           <a-space>
@@ -183,20 +177,25 @@ export default {
         content: '真的要删除日志文件么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          const params = {
-            machineId: this.machineId,
-            path: this.temp.path
-          }
-          // 删除日志
-          deleteLog(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.visible = false
-              this.loadData()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            const params = {
+              machineId: this.machineId,
+              path: this.temp.path
             }
+            // 删除日志
+            deleteLog(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.visible = false
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

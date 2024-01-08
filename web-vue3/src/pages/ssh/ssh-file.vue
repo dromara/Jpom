@@ -225,6 +225,7 @@
 
       <a-modal
         destroyOnClose
+        :confirmLoading="confirmLoading"
         v-model:open="editFileVisible"
         width="80vw"
         title="编辑文件"
@@ -250,6 +251,7 @@
 
           <a-row type="flex" justify="center" v-if="temp.fileFolderName">
             <a-button
+              :loading="confirmLoading"
               type="primary"
               :disabled="temp.fileFolderName.length === 0 || temp.fileFolderName === temp.oldFileFolderName"
               @click="renameFileFolder"
@@ -746,15 +748,19 @@ export default {
         name: this.temp.name,
         content: this.temp.fileContent
       }
-
-      updateFileData(this.baseUrl, params).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg
-          })
-          this.editFileVisible = false
-        }
-      })
+      this.confirmLoading = true
+      updateFileData(this.baseUrl, params)
+        .then((res) => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg
+            })
+            this.editFileVisible = false
+          }
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
     },
     // 修改文件权限
     handleFilePermission(record) {
@@ -810,24 +816,29 @@ export default {
         content: '真的要删除当前文件夹么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 请求参数
-          const params = {
-            id: this.reqDataId,
-            allowPathParent: this.tempNode.allowPathParent,
-            nextPath: this.tempNode.nextPath
-          }
-          // 删除
-          deleteFile(this.baseUrl, params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              // 刷新树
-              this.loadData()
-              this.fileList = []
-              //this.loadFileList();
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 请求参数
+            const params = {
+              id: this.reqDataId,
+              allowPathParent: this.tempNode.allowPathParent,
+              nextPath: this.tempNode.nextPath
             }
+            // 删除
+            deleteFile(this.baseUrl, params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  // 刷新树
+                  this.loadData()
+                  this.fileList = []
+                  //this.loadFileList();
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -840,22 +851,27 @@ export default {
         content: '真的要删除文件么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 请求参数
-          const params = {
-            id: this.reqDataId,
-            allowPathParent: record.allowPathParent,
-            nextPath: record.nextPath,
-            name: record.name
-          }
-          // 删除
-          deleteFile(this.baseUrl, params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadFileList()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 请求参数
+            const params = {
+              id: this.reqDataId,
+              allowPathParent: record.allowPathParent,
+              nextPath: record.nextPath,
+              name: record.name
             }
+            // 删除
+            deleteFile(this.baseUrl, params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadFileList()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -878,15 +894,20 @@ export default {
         allowPathParent: this.temp.allowPathParent,
         nextPath: this.temp.nextPath
       }
-      renameFileFolder(this.baseUrl, params).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg
-          })
-          this.renameFileFolderVisible = false
-          this.loadFileList()
-        }
-      })
+      this.confirmLoading = true
+      renameFileFolder(this.baseUrl, params)
+        .then((res) => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg
+            })
+            this.renameFileFolderVisible = false
+            this.loadFileList()
+          }
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
     }
   }
 }

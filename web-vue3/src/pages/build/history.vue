@@ -419,21 +419,26 @@ export default {
         content: '真的要回滚该构建历史记录么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
+        async onOk() {
           // 重新发布
-          rollback(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+          return await new Promise((resolve, reject) => {
+            rollback(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                  // 弹窗
+                  this.temp = {
+                    id: record.buildDataId,
+                    buildId: res.data
+                  }
+                  this.buildLogVisible = new Date() * Math.random()
+                }
+                resolve()
               })
-              this.loadData()
-              // 弹窗
-              this.temp = {
-                id: record.buildDataId,
-                buildId: res.data
-              }
-              this.buildLogVisible = new Date() * Math.random()
-            }
+              .catch(reject)
           })
         }
       })
@@ -446,15 +451,20 @@ export default {
         content: '真的要删除构建历史记录么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
+        async onOk() {
           // 删除
-          deleteBuildHistory(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+          return await new Promise((resolve, reject) => {
+            deleteBuildHistory(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -473,16 +483,21 @@ export default {
         content: '真的要删除这些构建历史记录么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
+        async onOk() {
           // 删除
-          deleteBuildHistory(this.tableSelections.join(',')).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+          return await new Promise((resolve, reject) => {
+            deleteBuildHistory(this.tableSelections.join(','))
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.tableSelections = []
+                  this.loadData()
+                }
+                resolve()
               })
-              this.tableSelections = []
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })

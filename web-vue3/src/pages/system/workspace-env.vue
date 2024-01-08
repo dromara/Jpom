@@ -9,7 +9,6 @@
       :pagination="envVarPagination"
       @change="changeListeEnvVar"
       bordered
-      :rowKey="(record, index) => index"
       :scroll="{
         x: 'max-content'
       }"
@@ -79,6 +78,7 @@
     <!-- 环境变量编辑区 -->
     <a-modal
       v-model:open="editEnvVisible"
+      :confirmLoading="confirmLoading"
       title="编辑环境变量"
       width="50vw"
       @ok="handleEnvEditOk"
@@ -89,7 +89,7 @@
           <a-input v-model:value="envTemp.name" :maxLength="50" placeholder="变量名称" />
         </a-form-item>
         <a-form-item label="值" :prop="`${envTemp.privacy === 1 ? '' : 'value'}`">
-          <a-input v-model:value="envTemp.value" type="textarea" :rows="5" placeholder="变量值" />
+          <a-textarea v-model:value="envTemp.value" :rows="5" placeholder="变量值" />
         </a-form-item>
         <a-form-item label="描述" name="description">
           <a-textarea v-model:value="envTemp.description" :maxLength="200" :rows="5" placeholder="变量描述" />
@@ -150,7 +150,7 @@
     >
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
-          <template v-slot:tabBarExtraContent>
+          <template v-slot:rightExtra>
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>
@@ -333,17 +333,22 @@ export default {
     handleEnvEditOk() {
       this.$refs['editEnvForm'].validate().then(() => {
         this.envTemp.nodeIds = this.envTemp?.chooseNode?.join(',')
-        editWorkspaceEnv(this.envTemp).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            $notification.success({
-              message: res.msg
-            })
-            this.$refs['editEnvForm'].resetFields()
-            this.editEnvVisible = false
-            this.loadDataEnvVar()
-          }
-        })
+        this.confirmLoading = true
+        editWorkspaceEnv(this.envTemp)
+          .then((res) => {
+            if (res.code === 200) {
+              // 成功
+              $notification.success({
+                message: res.msg
+              })
+              this.$refs['editEnvForm'].resetFields()
+              this.editEnvVisible = false
+              this.loadDataEnvVar()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
       })
     },
     //
@@ -354,18 +359,23 @@ export default {
         content: '真的删除当前变量吗？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          deleteWorkspaceEnv({
-            id: record.id,
-            workspaceId: this.workspaceId
-          }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            deleteWorkspaceEnv({
+              id: record.id,
+              workspaceId: this.workspaceId
+            })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadDataEnvVar()
+                }
+                resolve()
               })
-              this.loadDataEnvVar()
-            }
+              .catch(reject)
           })
         }
       })

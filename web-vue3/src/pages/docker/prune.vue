@@ -131,29 +131,33 @@ export default {
           content: '确定要修剪对应的信息吗？修剪会自动清理对应的数据',
           okText: '确认',
           cancelText: '取消',
-          onOk: () => {
-            // 组装参数
-            const params = {
-              id: this.reqDataId,
-              pruneType: this.pruneForm.pruneType
-            }
+          async onOk() {
+            return await new Promise((resolve, reject) => {
+              // 组装参数
+              const params = {
+                id: this.reqDataId,
+                pruneType: this.pruneForm.pruneType
+              }
 
-            this.pruneTypes[params.pruneType] &&
-              this.pruneTypes[params.pruneType].filters.forEach((element) => {
-                params[element] = this.pruneForm[element]
-              })
-            this.loading = true
-            dockerPrune(this.urlPrefix, params)
-              .then((res) => {
-                if (res.code === 200) {
-                  this.$notification.success({
-                    message: res.msg
-                  })
-                }
-              })
-              .finally(() => {
-                this.loading = false
-              })
+              this.pruneTypes[params.pruneType] &&
+                this.pruneTypes[params.pruneType].filters.forEach((element) => {
+                  params[element] = this.pruneForm[element]
+                })
+              this.loading = true
+              dockerPrune(this.urlPrefix, params)
+                .then((res) => {
+                  if (res.code === 200) {
+                    this.$notification.success({
+                      message: res.msg
+                    })
+                  }
+                  resolve()
+                })
+                .catch(reject)
+                .finally(() => {
+                  this.loading = false
+                })
+            })
           }
         })
       })

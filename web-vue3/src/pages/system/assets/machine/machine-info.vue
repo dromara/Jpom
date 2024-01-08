@@ -935,19 +935,24 @@ export default {
         content: '真的要 Kill 这个进程么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // kill
-          const params = {
-            ...this.idInfo,
-            pid: record.processId
-          }
-          killPid(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadNodeProcess()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // kill
+            const params = {
+              ...this.idInfo,
+              pid: record.processId
             }
+            killPid(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadNodeProcess()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

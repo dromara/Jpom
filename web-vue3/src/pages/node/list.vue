@@ -562,6 +562,7 @@
     <!-- 同步到其他工作空间 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       v-model:open="syncToWorkspaceVisible"
       title="同步到其他工作空间"
       @ok="handleSyncToWorkspace"
@@ -585,7 +586,7 @@
             v-model:value="temp.workspaceId"
             placeholder="请选择工作空间"
           >
-            <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{
+            <a-select-option :disabled="getWorkspaceId() === item.id" v-for="item in workspaceList" :key="item.id">{{
               item.name
             }}</a-select-option>
           </a-select>
@@ -920,15 +921,20 @@ export default {
         content: '真的要删除节点么？删除会检查数据关联性,并且节点不存在项目或者脚本',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          deleteNode(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            deleteNode(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -951,15 +957,20 @@ export default {
         cancelButtonProps: { type: 'primary' },
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          unbind(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            unbind(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -1033,19 +1044,24 @@ export default {
         return false
       }
       // 同步
+      this.confirmLoading = true
       syncToWorkspace({
         ids: this.tableSelections.join(','),
         toWorkspaceId: this.temp.workspaceId
-      }).then((res) => {
-        if (res.code == 200) {
-          this.$notification.success({
-            message: res.msg
-          })
-          this.tableSelections = []
-          this.syncToWorkspaceVisible = false
-          return false
-        }
       })
+        .then((res) => {
+          if (res.code == 200) {
+            this.$notification.success({
+              message: res.msg
+            })
+            this.tableSelections = []
+            this.syncToWorkspaceVisible = false
+            return false
+          }
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
     },
     // 排序
     sortItemHander(record, index, method) {
@@ -1066,21 +1082,25 @@ export default {
         content: msg,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 解锁
-          sortItem({
-            id: record.id,
-            method: method,
-            compareId: compareId
-          }).then((res) => {
-            if (res.code == 200) {
-              this.$notification.success({
-                message: res.msg
-              })
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 解锁
+            sortItem({
+              id: record.id,
+              method: method,
+              compareId: compareId
+            })
+              .then((res) => {
+                if (res.code == 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
 
-              this.loadData()
-              return false
-            }
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

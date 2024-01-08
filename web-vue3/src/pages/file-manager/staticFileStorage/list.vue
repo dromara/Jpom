@@ -452,19 +452,24 @@ export default {
         content: '真的要删除当前文件么？' + record.name,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          delFile({
-            id: record.id,
-            thorough: false
-          }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            delFile({
+              id: record.id,
+              thorough: false
+            })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
 
-              this.loadData()
-            }
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -483,19 +488,24 @@ export default {
         content: '真的要删除这些文件么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          delFile({
-            ids: this.tableSelections.join(','),
-            thorough: false
-          }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            delFile({
+              ids: this.tableSelections.join(','),
+              thorough: false
+            })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.tableSelections = []
+                  this.loadData()
+                }
+                resolve()
               })
-              this.tableSelections = []
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })

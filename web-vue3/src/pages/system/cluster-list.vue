@@ -104,7 +104,14 @@
     </a-table>
 
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model:open="editVisible" title="编辑集群" @ok="handleEditOk" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      :confirmLoading="confirmLoading"
+      v-model:open="editVisible"
+      title="编辑集群"
+      @ok="handleEditOk"
+      :maskClosable="false"
+    >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item label="名称" name="name">
           <a-input v-model:value="temp.name" :maxLength="50" placeholder="工作空间名称" />
@@ -235,7 +242,8 @@ export default {
       editVisible: false,
       temp: {},
       groupList: [],
-      groupMap: {}
+      groupMap: {},
+      confirmLoading: false
     }
   },
   computed: {
@@ -270,18 +278,22 @@ export default {
         content: '真的要删除该集群信息么？1',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          return deleteCluster(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            deleteCluster(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
-        },
-        onCancel: () => {}
+        }
       })
     },
     // 获取所有的分组
@@ -313,17 +325,22 @@ export default {
         }
         delete newData.linkGroups
         newData.linkGroup = linkGroups.join(',')
-        editCluster(newData).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            $notification.success({
-              message: res.msg
-            })
-            this.$refs['editForm'].resetFields()
-            this.editVisible = false
-            this.loadData()
-          }
-        })
+        this.confirmLoading = true
+        editCluster(newData)
+          .then((res) => {
+            if (res.code === 200) {
+              // 成功
+              $notification.success({
+                message: res.msg
+              })
+              this.$refs['editForm'].resetFields()
+              this.editVisible = false
+              this.loadData()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
       })
     },
     //

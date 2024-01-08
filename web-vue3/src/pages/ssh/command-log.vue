@@ -227,15 +227,20 @@ export default {
         content: '真的要删除该执行记录吗？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 删除
-          deleteCommandLog(row.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 删除
+            deleteCommandLog(row.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.getCommandLogData()
+                }
+                resolve()
               })
-              this.getCommandLogData()
-            }
+              .catch(reject)
           })
         }
       })

@@ -209,15 +209,20 @@ export default {
         content: '真的要删除' + tableName + '表中的错误数据吗？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          clearErrorWorkspace({ tableName }).then((res) => {
-            if (res.code === 200) {
-              // 成功
-              $notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            clearErrorWorkspace({ tableName })
+              .then((res) => {
+                if (res.code === 200) {
+                  // 成功
+                  $notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })

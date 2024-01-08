@@ -2,6 +2,7 @@
   <div>
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       :open="true"
       :closable="!uploading"
       :footer="uploading ? null : undefined"
@@ -10,7 +11,6 @@
       :title="'分发项目-' + data.name"
       @ok="handleDispatchOk"
       :maskClosable="false"
-      :confirmLoading="confirmLoading"
       @cancel="
         () => {
           $emit('cancel')
@@ -536,10 +536,7 @@ export default {
         selectProject: (this.temp.selectProjectArray && this.temp.selectProjectArray.join(',')) || ''
       }
       // 检验表单
-      this.$refs['dispatchForm'].validate().then((valid) => {
-        if (!valid) {
-          return false
-        }
+      this.$refs['dispatchForm'].validate().then(() => {
         // const key = this.temp.type;
         if (this.temp.type == 'upload') {
           // 判断文件

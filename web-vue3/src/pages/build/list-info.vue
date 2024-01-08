@@ -568,6 +568,7 @@
     <!-- 构建确认 -->
     <a-modal
       destroyOnClose
+      :confirmLoading="confirmLoading"
       width="40vw"
       v-model:open="buildConfirmVisible"
       title="构建确认弹窗"
@@ -1019,15 +1020,20 @@ export default {
         content: '真的要删除构建信息么？删除也将同步删除所有的构建历史记录信息',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
+        async onOk() {
           // 删除
-          deleteBuild(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+          return await new Promise((resolve, reject) => {
+            deleteBuild(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -1046,15 +1052,20 @@ export default {
         content: '真的要批量删除这些构建信息么？删除也将同步删除所有的构建历史记录信息，如果中途删除失败将终止删除操作',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
+        async onOk() {
           // 删除
-          deleteatchBuild({ ids: this.tableSelections.join(',') }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+          return await new Promise((resolve, reject) => {
+            deleteatchBuild({ ids: this.tableSelections.join(',') })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -1067,14 +1078,19 @@ export default {
         content: '真的要清除构建信息么？',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          clearBuid(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            clearBuid(record.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -1115,6 +1131,7 @@ export default {
       }
     },
     handleStartBuild() {
+      this.confirmLoading = true
       this.reqStartBuild(
         {
           id: this.temp.id,
@@ -1129,9 +1146,13 @@ export default {
             (this.temp.dispatchSelectProjectArray && this.temp.dispatchSelectProjectArray.join(',')) || ''
         },
         true
-      ).then(() => {
-        this.buildConfirmVisible = false
-      })
+      )
+        .then(() => {
+          this.buildConfirmVisible = false
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
     },
     reqStartBuild(data, openLog) {
       return new Promise((resolve) => {
@@ -1161,15 +1182,20 @@ export default {
         content: '确定要取消构建 【名称：' + record.name + '】 吗？注意：取消/停止构建不一定能正常关闭所有关联进程',
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          this.temp = Object.assign({}, record)
-          stopBuild(this.temp.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            this.temp = Object.assign({}, record)
+            stopBuild(this.temp.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })
@@ -1206,21 +1232,25 @@ export default {
         content: msg,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 解锁
-          sortItem({
-            id: record.id,
-            method: method,
-            compareId: compareId
-          }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
+        async onOk() {
+          //
+          return await new Promise((resolve, reject) => {
+            sortItem({
+              id: record.id,
+              method: method,
+              compareId: compareId
+            })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
 
-              this.loadData()
-              return false
-            }
+                  this.loadData()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })

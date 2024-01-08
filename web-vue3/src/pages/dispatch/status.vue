@@ -587,7 +587,6 @@ export default {
     },
     toNode(nodeId) {
       const newpage = this.$router.resolve({
-        name: 'node_' + nodeId,
         path: '/node/list',
         query: {
           ...this.$route.query,
@@ -616,18 +615,23 @@ export default {
         cancelButtonProps: { type: 'primary' },
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          removeProject({
-            nodeId: item.nodeId,
-            projectId: item.projectId,
-            id: this.id
-          }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            removeProject({
+              nodeId: item.nodeId,
+              projectId: item.projectId,
+              id: this.id
+            })
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                }
+                resolve()
               })
-              this.loadData()
-            }
+              .catch(reject)
           })
         }
       })

@@ -88,6 +88,9 @@
               cancelText="清空还原"
               @confirm="recoverNet('', uploadPath)"
               @cancel="recoverNet('clear', uploadPath)"
+              :okButtonProps="{
+                loading: recoverLoading
+              }"
             >
               <template v-slot:icon>
                 <QuestionCircleOutlined style="color: red" />
@@ -143,6 +146,9 @@
                     cancelText="清空还原"
                     @confirm="recoverNet('', record.filename)"
                     @cancel="recoverNet('clear', record.filename)"
+                    :okButtonProps="{
+                      loading: recoverLoading
+                    }"
                   >
                     <template v-slot:icon>
                       <QuestionCircleOutlined style="color: red" />
@@ -151,7 +157,9 @@
                   </a-popconfirm>
                 </template>
                 <template v-else>
-                  <a-button size="small" type="primary" @click="recover(record)">还原</a-button>
+                  <a-button size="small" type="primary" :loading="recoverLoading" @click="recover(record)"
+                    >还原</a-button
+                  >
                 </template>
 
                 <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
@@ -263,7 +271,8 @@ export default {
           align: 'center',
           fixed: 'right'
         }
-      ]
+      ],
+      recoverLoading: false
     }
   },
   computed: {
@@ -438,24 +447,29 @@ export default {
         content: msg,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 请求参数
-          const params = {
-            nodeId: this.nodeId,
-            id: this.projectId,
-            levelName: record.levelName,
-            filename: record.filename,
-            backupId: this.temp.filename
-          }
-          // 删除
-          backupDeleteProjectFile(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadData()
-              this.loadFileList()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 请求参数
+            const params = {
+              nodeId: this.nodeId,
+              id: this.projectId,
+              levelName: record.levelName,
+              filename: record.filename,
+              backupId: this.temp.filename
             }
+            // 删除
+            backupDeleteProjectFile(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadData()
+                  this.loadFileList()
+                }
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -469,23 +483,29 @@ export default {
         content: msg,
         okText: '确认',
         cancelText: '取消',
-        onOk: () => {
-          // 请求参数
-          const params = {
-            nodeId: this.nodeId,
-            id: this.projectId,
-            levelName: '/',
-            filename: '/',
-            backupId: record.filename
-          }
-          // 删除
-          backupDeleteProjectFile(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg
-              })
-              this.loadBackupList()
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 请求参数
+            const params = {
+              nodeId: this.nodeId,
+              id: this.projectId,
+              levelName: '/',
+              filename: '/',
+              backupId: record.filename
             }
+            // 删除
+            backupDeleteProjectFile(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  this.$notification.success({
+                    message: res.msg
+                  })
+                  this.loadBackupList()
+                }
+
+                resolve()
+              })
+              .catch(reject)
           })
         }
       })
@@ -495,25 +515,7 @@ export default {
       this.temp = Object.assign({}, record)
       this.loadData()
     },
-    // recoverPath(filename) {
-    //   // const msg = ;
-    //   this.$confirm({
-    //     title: "系统提示",
-    //     // content: ,
-    //     okText: "覆盖还原",
-    //     cancelText: "清空还原",
-    //     closable: false,
-    //     maskClosable: true,
-    //     onOk: () => {
-    //       // // 请求参数
-    //       this.recoverNet("", filename);
-    //     },
-    //     onCancel: () => {
-    //       this.recoverNet("clear", filename);
-    //     },
-    //   });
-    // },
-    //
+
     recover(record) {
       if (record.isDirectory) {
         this.recoverPath(record.filename)
@@ -524,13 +526,14 @@ export default {
           content: '是否将【' + record.filename + '】此文件还原到项目目录？',
           okText: '确认',
           cancelText: '取消',
-          onOk: () => {
+          onOk() {
             // // 请求参数
             this.recoverNet('', record.filename)
           }
         })
       }
     },
+    // 请求参数
     recoverNet(type, filename) {
       const params = {
         nodeId: this.nodeId,
@@ -540,14 +543,19 @@ export default {
         filename,
         backupId: this.temp.filename
       }
+      this.recoverLoading = true
       // 删除
-      backupRecoverProjectFile(params).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg
-          })
-        }
-      })
+      backupRecoverProjectFile(params)
+        .then((res) => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg
+            })
+          }
+        })
+        .finally(() => {
+          this.recoverLoading = false
+        })
     }
   }
 }
