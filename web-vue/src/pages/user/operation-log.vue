@@ -134,8 +134,8 @@ import { getOperationLogList } from '@/api/operation-log'
 import { getMonitorOperateTypeList } from '@/api/monitor'
 import { getNodeListAll } from '@/api/node'
 import { getUserListAll } from '@/api/user/user'
-import JsonViewer from 'vue3-json-viewer'
-import 'vue3-json-viewer/dist/index.css'
+// import JsonViewer from 'vue3-json-viewer'
+// import 'vue3-json-viewer/dist/index.css'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 
 export default {
