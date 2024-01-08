@@ -17,7 +17,7 @@ pnpm build # 打包
 
 #### Node.js 和 pnpm
 
-开发需要 Node.js 16+ 和 `pnpm` v8。
+开发需要 Node.js 18+ 和 `pnpm` v8。
 
 推荐使用 [`nvm`](https://github.com/nvm-sh/nvm) 管理 Node.js，避免权限问题的同时，还能够随时切换当前使用的 Node.js 的版本。在 Windows 系统下的开发者可以使用 [`nvm-windows`](https://github.com/coreybutler/nvm-windows)。
 
@@ -62,6 +62,8 @@ pnpm build # 打包
 ├── tsconfig.json
 └── type.d.ts
 ```
+
+## 检查依赖版本
 
 npm install -g npm-check-updates
 
