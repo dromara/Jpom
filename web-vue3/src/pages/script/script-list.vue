@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div>
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
@@ -10,6 +10,9 @@
       bordered
       rowKey="id"
       :row-selection="rowSelection"
+      :scroll="{
+        x: 'max-content'
+      }"
     >
       <template v-slot:title>
         <a-space>
@@ -66,70 +69,72 @@
           </a-tooltip>
         </a-space>
       </template>
+      <template #bodyCell="{ column, text, record }">
+        <template v-if="column.dataIndex === 'nodeId'">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ nodeMap[text] }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.tooltip">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'workspaceId'">
+          <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
+          <a-tag v-else>工作空间</a-tag>
+        </template>
+        <template v-else-if="column.dataIndex === 'operation'">
+          <a-space>
+            <template v-if="mode === 'manage'">
+              <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+              <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
+              <a-dropdown>
+                <a @click="(e) => e.preventDefault()">
+                  更多
+                  <DownOutlined />
+                </a>
+                <template v-slot:overlay>
+                  <a-menu>
+                    <a-menu-item>
+                      <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+                    </a-menu-item>
 
-      <template v-slot:nodeId="text">
-        <a-tooltip placement="topLeft" :title="text">
-          <span>{{ nodeMap[text] }}</span>
-        </a-tooltip>
-      </template>
-      <template v-slot:tooltip="text">
-        <a-tooltip placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip>
-      </template>
-      <template v-slot:global="text">
-        <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
-        <a-tag v-else>工作空间</a-tag>
-      </template>
-      <template v-slot:operation="text, record">
-        <a-space>
-          <template v-if="mode === 'manage'">
-            <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
-            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-            <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
-            <a-dropdown>
-              <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-                更多
-                <a-icon type="down" />
-              </a>
-              <template v-slot:overlay>
-                <a-menu>
-                  <a-menu-item>
-                    <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
-                  </a-menu-item>
-
-                  <a-menu-item>
-                    <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a-button
-                      size="small"
-                      type="primary"
-                      danger
-                      :disabled="!record.nodeIds"
-                      @click="handleUnbind(record)"
-                      >解绑</a-button
-                    >
-                  </a-menu-item>
-                </a-menu>
-              </template>
-            </a-dropdown>
-          </template>
-          <template v-else>
-            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-          </template>
-        </a-space>
+                    <a-menu-item>
+                      <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-button
+                        size="small"
+                        type="primary"
+                        danger
+                        :disabled="!record.nodeIds"
+                        @click="handleUnbind(record)"
+                        >解绑</a-button
+                      >
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </template>
+            <template v-else>
+              <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+            </template>
+          </a-space>
+        </template>
       </template>
     </a-table>
     <!-- 编辑区 -->
     <a-modal
-      :zIndex="1009"
       destroyOnClose
-      v-model:value="editScriptVisible"
+      :zIndex="1009"
+      v-model:open="editScriptVisible"
       title="编辑 Script"
       @ok="handleEditScriptOk"
       :maskClosable="false"
       width="80vw"
+      :confirmLoading="confirmLoading"
     >
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
         <a-form-item v-if="temp.id" label="ScriptId" name="id">
@@ -139,41 +144,41 @@
           <a-input :maxLength="50" v-model:value="temp.name" placeholder="名称" />
         </a-form-item>
         <a-form-item label="Script 内容" name="context">
-          <div style="height: 40vh; overflow-y: scroll">
-            <code-editor
-              v-model:value="temp.context"
-              :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"
-            ></code-editor>
-          </div>
+          <a-form-item-rest>
+            <div style="height: 40vh; overflow-y: scroll">
+              <code-editor v-model:content="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }">
+              </code-editor>
+            </div>
+          </a-form-item-rest>
         </a-form-item>
         <!-- <a-form-item label="默认参数" name="defArgs">
             <a-input v-model="temp.defArgs" placeholder="默认参数" />
           </a-form-item> -->
         <a-form-item label="默认参数">
-          <div v-for="(item, index) in commandParams" :key="item.key">
-            <a-row type="flex" justify="center" align="middle">
+          <a-space direction="vertical" style="width: 100%">
+            <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
-                <a-input
-                  :addon-before="`参数${index + 1}描述`"
-                  v-model:value="item.desc"
-                  placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义"
-                />
-                <a-input
-                  :addon-before="`参数${index + 1}值`"
-                  v-model:value="item.value"
-                  placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值"
-                />
+                <a-space direction="vertical" style="width: 100%">
+                  <a-input
+                    :addon-before="`参数${index + 1}描述`"
+                    v-model:value="item.desc"
+                    placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义" />
+                  <a-input
+                    :addon-before="`参数${index + 1}值`"
+                    v-model:value="item.value"
+                    placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值"
+                /></a-space>
               </a-col>
               <a-col :span="2">
                 <a-row type="flex" justify="center" align="middle">
                   <a-col>
-                    <a-icon @click="() => commandParams.splice(index, 1)" type="minus-circle" style="color: #ff0000" />
+                    <MinusCircleOutlined @click="() => commandParams.splice(index, 1)" style="color: #ff0000" />
                   </a-col>
                 </a-row>
               </a-col>
             </a-row>
             <a-divider style="margin: 5px 0" />
-          </div>
+          </a-space>
 
           <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
         </a-form-item>
@@ -181,27 +186,15 @@
           <a-auto-complete
             v-model:value="temp.autoExecCron"
             placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
-            option-label-prop="value"
+            :options="CRON_DATA_SOURCE"
           >
-            <template v-slot:dataSource>
-              <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
-                <template v-slot:label>
-                  <span>
-                    {{ group.title }}
-                  </span>
-                </template>
-                <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value">
-                  {{ opt.title }} {{ opt.value }}
-                </a-select-option>
-              </a-select-opt-group>
-            </template>
+            <template #option="item"> {{ item.title }} {{ item.value }} </template>
           </a-auto-complete>
         </a-form-item>
         <a-form-item label="描述" name="description">
-          <a-input
+          <a-textarea
             v-model:value="temp.description"
             :maxLength="200"
-            type="textarea"
             :rows="3"
             style="resize: none"
             placeholder="详细描述"
@@ -246,7 +239,7 @@
       :title="drawerTitle"
       placement="right"
       width="85vw"
-      :visible="drawerConsoleVisible"
+      :open="drawerConsoleVisible"
       @close="onConsoleClose"
     >
       <script-console v-if="drawerConsoleVisible" :defArgs="temp.defArgs" :id="temp.id" />
@@ -254,12 +247,13 @@
     <!-- 同步到其他工作空间 -->
     <a-modal
       destroyOnClose
-      v-model:value="syncToWorkspaceVisible"
+      :confirmLoading="confirmLoading"
+      v-model:open="syncToWorkspaceVisible"
       title="同步到其他工作空间"
       @ok="handleSyncToWorkspace"
       :maskClosable="false"
     >
-      <a-alert message="温馨提示" type="warning">
+      <a-alert message="温馨提示" type="warning" show-icon>
         <template v-slot:description>
           <ul>
             <li>同步机制采用<b>脚本名称</b>确定是同一个脚本</li>
@@ -287,7 +281,7 @@
     <!-- 触发器 -->
     <a-modal
       destroyOnClose
-      v-model:value="triggerVisible"
+      v-model:open="triggerVisible"
       title="触发器"
       width="50%"
       :footer="null"
@@ -295,13 +289,13 @@
     >
       <a-form ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
-          <template v-slot:tabBarExtraContent>
+          <template v-slot:rightExtra>
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>
           </template>
           <a-tab-pane key="1" tab="执行">
-            <a-space style="display: block" direction="vertical" align="baseline">
+            <a-space direction="vertical" style="width: 100%">
               <a-alert message="温馨提示" type="warning">
                 <template v-slot:description>
                   <ul>
@@ -313,52 +307,18 @@
                   </ul>
                 </template>
               </a-alert>
-              <a-alert
-                v-clipboard:copy="temp.triggerUrl"
-                v-clipboard:success="
-                  () => {
-                    tempVue.prototype.$notification.success({
-                      message: '复制成功'
-                    })
-                  }
-                "
-                v-clipboard:error="
-                  () => {
-                    tempVue.prototype.$notification.error({
-                      message: '复制失败'
-                    })
-                  }
-                "
-                type="info"
-                :message="`单个触发器地址(点击可以复制)`"
-              >
+              <a-alert type="info" :message="`单个触发器地址(点击可以复制)`">
                 <template v-slot:description>
-                  <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
-                  <a-icon type="copy" />
+                  <a-typography-paragraph :copyable="{ text: temp.triggerUrl }">
+                    <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
+                  </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert
-                v-clipboard:copy="temp.batchTriggerUrl"
-                v-clipboard:success="
-                  () => {
-                    tempVue.prototype.$notification.success({
-                      message: '复制成功'
-                    })
-                  }
-                "
-                v-clipboard:error="
-                  () => {
-                    tempVue.prototype.$notification.error({
-                      message: '复制失败'
-                    })
-                  }
-                "
-                type="info"
-                :message="`批量触发器地址(点击可以复制)`"
-              >
+              <a-alert type="info" :message="`批量触发器地址(点击可以复制)`">
                 <template v-slot:description>
-                  <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
-                  <a-icon type="copy" />
+                  <a-typography-paragraph :copyable="{ text: temp.batchTriggerUrl }">
+                    <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
+                  </a-typography-paragraph>
                 </template>
               </a-alert>
             </a-space>
@@ -370,8 +330,8 @@
     <a-drawer
       destroyOnClose
       title="脚本执行历史"
-      width="50vw"
-      :visible="drawerLogVisible"
+      width="70vw"
+      :open="drawerLogVisible"
       @close="
         () => {
           this.drawerLogVisible = false
@@ -380,7 +340,7 @@
     >
       <script-log v-if="drawerLogVisible" :scriptId="temp.id" />
     </a-drawer>
-    <div style="padding-top: 50px" v-if="mode === 'choose'">
+    <!-- <div style="padding-top: 50px" v-if="mode === 'choose'">
       <div
         :style="{
           position: 'absolute',
@@ -407,7 +367,7 @@
           <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
         </a-space>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -425,10 +385,12 @@ import codeEditor from '@/components/codeEditor'
 import { getNodeListAll } from '@/api/node'
 import ScriptConsole from '@/pages/script/script-console'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
-import { mapGetters } from 'vuex'
+
 import { getWorkSpaceListAll } from '@/api/workspace'
-import * as Vue from 'vue'
+
 import ScriptLog from '@/pages/script/script-log'
+import { mapState } from 'pinia'
+import { useAppStore } from '@/stores/app'
 export default {
   components: {
     ScriptConsole,
@@ -456,7 +418,7 @@ export default {
       // choose: this.choose,
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-      cronDataSource: CRON_DATA_SOURCE,
+      CRON_DATA_SOURCE,
       list: [],
       temp: {},
       nodeList: [],
@@ -469,8 +431,8 @@ export default {
           dataIndex: 'id',
           ellipsis: true,
           sorter: true,
-          width: 150,
-          scopedSlots: { customRender: 'tooltip' }
+          width: 50,
+          tooltip: true
         },
         {
           title: '名称',
@@ -478,22 +440,22 @@ export default {
           ellipsis: true,
           sorter: true,
           width: 150,
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
         {
           title: '共享',
           dataIndex: 'workspaceId',
           sorter: true,
           ellipsis: true,
-          scopedSlots: { customRender: 'global' },
+
           width: '90px'
         },
         {
           title: '描述',
           dataIndex: 'description',
           ellipsis: true,
-          width: 300,
-          scopedSlots: { customRender: 'tooltip' }
+          width: 100,
+          tooltip: true
         },
         {
           title: '定时执行',
@@ -501,7 +463,7 @@ export default {
           ellipsis: true,
           sorter: true,
           width: '100px',
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
         {
           title: '修改时间',
@@ -509,7 +471,7 @@ export default {
           sorter: true,
           width: '170px',
           ellipsis: true,
-          customRender: (text) => parseTime(text)
+          customRender: ({ text }) => parseTime(text)
         },
         {
           title: '创建时间',
@@ -517,20 +479,20 @@ export default {
           sorter: true,
           width: '170px',
           ellipsis: true,
-          customRender: (text) => parseTime(text)
+          customRender: ({ text }) => parseTime(text)
         },
         {
           title: '创建人',
           dataIndex: 'createUser',
           ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' },
+          tooltip: true,
           width: '120px'
         },
         {
           title: '修改人',
           dataIndex: 'modifyUser',
           ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' },
+          tooltip: true,
           width: '120px'
         },
         {
@@ -538,14 +500,14 @@ export default {
           dataIndex: 'lastRunUser',
           ellipsis: true,
           width: '120px',
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
         this.mode === 'manage'
           ? {
               title: '操作',
               dataIndex: 'operation',
               align: 'center',
-              scopedSlots: { customRender: 'operation' },
+
               fixed: 'right',
               width: '240px'
             }
@@ -553,7 +515,7 @@ export default {
               title: '操作',
               dataIndex: 'operation',
               align: 'center',
-              scopedSlots: { customRender: 'operation' },
+
               fixed: 'right',
               width: '100px'
             }
@@ -567,11 +529,12 @@ export default {
       workspaceList: [],
       triggerVisible: false,
       commandParams: [],
-      drawerLogVisible: false
+      drawerLogVisible: false,
+      confirmLoading: false
     }
   },
   computed: {
-    ...mapGetters(['getWorkspaceId']),
+    ...mapState(useAppStore, ['getWorkspaceId']),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
     },
@@ -662,10 +625,7 @@ export default {
     // 提交 Script 数据
     handleEditScriptOk() {
       // 检验表单
-      this.$refs['editScriptForm'].validate((valid) => {
-        if (!valid) {
-          return false
-        }
+      this.$refs['editScriptForm'].validate().then(() => {
         if (this.commandParams && this.commandParams.length > 0) {
           for (let i = 0; i < this.commandParams.length; i++) {
             if (!this.commandParams[i].desc) {
@@ -682,18 +642,23 @@ export default {
         // 提交数据
         this.temp.nodeIds = this.temp?.chooseNode?.join(',')
         delete this.temp.nodeList
-        editScript(this.temp).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            this.$notification.success({
-              message: res.msg
-            })
+        this.confirmLoading = true
+        editScript(this.temp)
+          .then((res) => {
+            if (res.code === 200) {
+              // 成功
+              this.$notification.success({
+                message: res.msg
+              })
 
-            this.editScriptVisible = false
-            this.loadData()
-            this.$refs['editScriptForm'].resetFields()
-          }
-        })
+              this.editScriptVisible = false
+              this.loadData()
+              this.$refs['editScriptForm'].resetFields()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
       })
     },
     handleDelete(record) {
@@ -748,9 +713,9 @@ export default {
       this.$confirm({
         title: '危险操作！！！',
         zIndex: 1009,
-        content: h('div', null, [h('p', { domProps: { innerHTML: html } }, null)]),
-        okButtonProps: { props: { type: 'danger', size: 'small' } },
-        cancelButtonProps: { props: { type: 'primary' } },
+        content: h('div', null, [h('p', { innerHTML: html }, null)]),
+        okButtonProps: { type: 'primary', danger: true, size: 'small' },
+        cancelButtonProps: { type: 'primary' },
         okText: '确认',
         cancelText: '取消',
         onOk: () => {
@@ -793,24 +758,29 @@ export default {
         return false
       }
       // 同步
+      this.confirmLoading = true
       syncToWorkspace({
         ids: this.tableSelections.join(','),
         toWorkspaceId: this.temp.workspaceId
-      }).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg
-          })
-          this.tableSelections = []
-          this.syncToWorkspaceVisible = false
-          return false
-        }
       })
+        .then((res) => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg
+            })
+            this.tableSelections = []
+            this.syncToWorkspaceVisible = false
+            return false
+          }
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
     },
     // 触发器
     handleTrigger(record) {
       this.temp = Object.assign({}, record)
-      this.tempVue = Vue
+
       getTriggerUrl({
         id: record.id
       }).then((res) => {
@@ -853,12 +823,12 @@ export default {
         return
       }
       if (this.choose === 'checkbox') {
-        $emit(this, 'confirm', this.tableSelections.join(','))
+        this.$emit('confirm', this.tableSelections.join(','))
       } else {
         const selectData = this.list.filter((item) => {
           return item.id === this.tableSelections[0]
         })[0]
-        $emit(this, 'confirm', `${selectData.id}`)
+        this.$emit('confirm', `${selectData.id}`)
       }
     }
   },

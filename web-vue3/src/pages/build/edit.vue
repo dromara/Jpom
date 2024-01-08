@@ -822,18 +822,6 @@
                 placeholder="如果需要定时自动构建则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
                 :options="CRON_DATA_SOURCE"
               >
-                <!-- <template v-slot:dataSource>
-                <a-select-opt-group v-for="group in CRON_DATA_SOURCE" :key="group.title">
-                  <template v-slot:label>
-                    <span>
-                      {{ group.title }}
-                    </span>
-                  </template>
-                  <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value">
-                    {{ opt.title }} {{ opt.value }}
-                  </a-select-option>
-                </a-select-opt-group>
-              </template> -->
                 <template #option="item"> {{ item.title }} {{ item.value }} </template>
               </a-auto-complete>
             </a-form-item>
@@ -1096,7 +1084,6 @@
             确认
           </a-button>
         </a-space>
-        <!-- </div> -->
       </template>
     </a-drawer>
     <!-- 选择脚本 -->
@@ -1104,17 +1091,19 @@
       destroyOnClose
       :title="`选择脚本`"
       placement="right"
-      :visible="chooseScriptVisible != 0"
-      width="50vw"
+      :open="chooseScriptVisible != 0"
+      width="70vw"
       :zIndex="1009"
       @close="
         () => {
           this.chooseScriptVisible = 0
         }
       "
+      :footer-style="{ textAlign: 'right' }"
     >
       <scriptPage
         v-if="chooseScriptVisible"
+        ref="scriptPage"
         :choose="this.chooseScriptVisible === 1 ? 'checkbox' : 'radio'"
         :choose-val="
           this.chooseScriptVisible === 1
@@ -1140,13 +1129,36 @@
           }
         "
       ></scriptPage>
+      <template #footer>
+        <a-space>
+          <a-button
+            @click="
+              () => {
+                this.chooseScriptVisible = false
+              }
+            "
+          >
+            取消
+          </a-button>
+          <a-button
+            type="primary"
+            @click="
+              () => {
+                this.$refs['scriptPage'].handerConfirm()
+              }
+            "
+          >
+            确认
+          </a-button>
+        </a-space>
+      </template>
     </a-drawer>
 
     <!-- 查看命令示例 -->
     <a-modal
       destroyOnClose
       width="50vw"
-      v-model:value="viewScriptTemplVisible"
+      v-model:open="viewScriptTemplVisible"
       title="构建命令示例"
       :footer="null"
       :maskClosable="false"
@@ -1160,15 +1172,15 @@
       >
         <a-collapse-panel v-for="(group, index) in buildScipts" :key="`${index}`" :header="group.title">
           <a-list size="small" bordered :data-source="group.children">
-            <template v-slot:renderItem="opt">
+            <template #renderItem="{ item }">
               <a-list-item>
                 <a-space>
-                  {{ opt.title }}
+                  {{ item.title }}
 
                   <SwapOutlined
                     @click="
                       () => {
-                        temp = { ...temp, script: opt.value }
+                        temp = { ...temp, script: item.value }
                         viewScriptTemplVisible = false
                       }
                     "

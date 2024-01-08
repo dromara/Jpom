@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div>
     <!-- 数据表格 -->
     <a-table
       size="middle"
@@ -8,17 +8,19 @@
       :pagination="pagination"
       @change="changePage"
       bordered
-      :rowKey="(record, index) => index"
+      :scroll="{
+        x: 'max-content'
+      }"
     >
-      <template #title>
+      <template v-slot:title>
         <a-space>
           <a-input
-            v-model="listQuery['%name%']"
+            v-model:value="listQuery['%name%']"
             @pressEnter="loadData"
             placeholder="监控名称"
             class="search-input-item"
           />
-          <a-select v-model="listQuery.status" allowClear placeholder="开启状态" class="search-input-item">
+          <a-select v-model:value="listQuery.status" allowClear placeholder="开启状态" class="search-input-item">
             <a-select-option :value="1">开启</a-select-option>
             <a-select-option :value="0">关闭</a-select-option>
           </a-select>
@@ -28,33 +30,31 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
         </a-space>
       </template>
-      <a-tooltip #name slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <a-switch
-        #status
-        size="small"
-        slot-scope="text"
-        :checked="text"
-        checked-children="开启"
-        un-checked-children="关闭"
-      />
-      <!-- <a-switch #autoRestart slot-scope="text" :checked="text" checked-children="是" un-checked-children="否" /> -->
-      <!-- <a-switch #alarm slot-scope="text" :checked="text" disabled checked-children="报警中" un-checked-children="未报警" /> -->
-      <a-tooltip #parent slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <template #operation slot-scope="text, record">
-        <a-space>
-          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-        </a-space>
+      <template #bodyCell="{ column, text, record }">
+        <template v-if="column.dataIndex === 'name'">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'status'">
+          <a-switch size="small" :checked="text" checked-children="开启" un-checked-children="关闭" />
+        </template>
+        <!-- <a-switch slot="autoRestart" slot-scope="text" :checked="text" checked-children="是" un-checked-children="否" /> -->
+        <!-- <a-switch slot="alarm" slot-scope="text" :checked="text" disabled checked-children="报警中" un-checked-children="未报警" /> -->
+
+        <template v-else-if="column.dataIndex === 'operation'">
+          <a-space>
+            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+          </a-space>
+        </template>
       </template>
     </a-table>
     <!-- 编辑区 -->
     <a-modal
       destroyOnClose
-      v-model="editOperateMonitorVisible"
+      :confirmLoading="confirmLoading"
+      v-model:open="editOperateMonitorVisible"
       width="50vw"
       title="编辑监控"
       @ok="handleEditOperateMonitorOk"
@@ -62,10 +62,10 @@
     >
       <a-form ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 5 }" :wrapper-col="{ span: 17 }">
         <a-form-item label="监控名称" name="name">
-          <a-input v-model="temp.name" :maxLength="50" placeholder="监控名称" />
+          <a-input v-model:value="temp.name" :maxLength="50" placeholder="监控名称" />
         </a-form-item>
         <a-form-item label="开启状态" name="status">
-          <a-switch v-model="temp.start" checked-children="开" un-checked-children="关" />
+          <a-switch v-model:checked="temp.start" checked-children="开" un-checked-children="关" />
         </a-form-item>
         <a-form-item label="监控用户" name="monitorUser">
           <a-transfer
@@ -101,13 +101,13 @@
           />
         </a-form-item>
         <a-form-item name="notifyUser" class="jpom-monitor-notify">
-          <template #label>
-            报警联系人
-            <a-tooltip v-show="!temp.id">
-              <template #title>
+          <template v-slot:label>
+            <a-tooltip>
+              报警联系人
+              <template v-slot:title>
                 如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。
               </template>
-              <question-circle-filled />
+              <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
           <a-transfer
@@ -124,6 +124,7 @@
     </a-modal>
   </div>
 </template>
+
 <script>
 import {
   deleteMonitorOperate,
@@ -152,14 +153,23 @@ export default {
       methodFeatureKeys: [],
       editOperateMonitorVisible: false,
       columns: [
-        { title: '名称', dataIndex: 'name', scopedSlots: { customRender: 'name' } },
-        { title: '开启状态', dataIndex: 'status', scopedSlots: { customRender: 'status' } },
-        { title: '修改人', dataIndex: 'modifyUser', scopedSlots: { customRender: 'modifyUser' } },
+        {
+          title: '名称',
+          dataIndex: 'name'
+        },
+        {
+          title: '开启状态',
+          dataIndex: 'status'
+        },
+        {
+          title: '修改人',
+          dataIndex: 'modifyUser'
+        },
         {
           title: '修改时间',
           dataIndex: 'modifyTimeMillis',
           sorter: true,
-          customRender: (text) => {
+          customRender: ({ text }) => {
             if (!text || text === '0') {
               return ''
             }
@@ -171,13 +181,20 @@ export default {
           title: '操作',
           dataIndex: 'operation',
           align: 'center',
-          scopedSlots: { customRender: 'operation' },
-          width: 120
+          fixed: 'right',
+          width: '120px'
         }
       ],
       rules: {
-        name: [{ required: true, message: 'Please input monitor name', trigger: 'blur' }]
-      }
+        name: [
+          {
+            required: true,
+            message: '请输入监控名称',
+            trigger: 'blur'
+          }
+        ]
+      },
+      confirmLoading: false
     }
   },
   computed: {
@@ -191,23 +208,6 @@ export default {
     this.loadOptTypeData()
   },
   methods: {
-    // 页面引导
-    introGuide() {
-      this.$store.dispatch('tryOpenGuide', {
-        key: 'operate-log',
-        options: {
-          hidePrev: true,
-          steps: [
-            {
-              title: '导航助手',
-              element: document.querySelector('.jpom-monitor-notify'),
-              intro: '这里面的报警联系人如果无法选择，您需要设置管理员的邮箱地址。'
-            }
-          ]
-        }
-      })
-    },
-
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true
@@ -263,11 +263,6 @@ export default {
       this.monitorUserKeys = []
       this.loadUserList()
       this.editOperateMonitorVisible = true
-      nextTick(() => {
-        setTimeout(() => {
-          this.introGuide()
-        }, 500)
-      })
     },
     // 修改
     handleEdit(record) {
@@ -306,30 +301,27 @@ export default {
     // 提交
     handleEditOperateMonitorOk() {
       // 检验表单
-      this.$refs['editMonitorForm'].validate((valid) => {
-        if (!valid) {
-          return false
-        }
+      this.$refs['editMonitorForm'].validate().then(() => {
         if (this.monitorUserKeys.length === 0) {
-          $notification.error({
+          this.$notification.error({
             message: '请选择监控用户'
           })
           return false
         }
         if (this.methodFeatureKeys.length === 0) {
-          $notification.error({
+          this.$notification.error({
             message: '请选择监控操作'
           })
           return false
         }
         if (this.classFeatureKeys.length === 0) {
-          $notification.error({
+          this.$notification.error({
             message: '请选择监控的功能'
           })
           return false
         }
         if (this.notifyUserKeys.length === 0) {
-          $notification.error({
+          this.$notification.error({
             message: '请选择报警联系人'
           })
           return false
@@ -340,23 +332,29 @@ export default {
         this.temp.monitorFeature = JSON.stringify(this.classFeatureKeys)
         this.temp.notifyUser = JSON.stringify(this.notifyUserKeys)
         this.temp.start ? (this.temp.status = 'on') : (this.temp.status = 'no')
-        editMonitorOperate(this.temp).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            $notification.success({
-              message: res.msg
-            })
-            this.$refs['editMonitorForm'].resetFields()
-            this.editOperateMonitorVisible = false
-            this.loadData()
-          }
-        })
+        this.confirmLoading = false
+        editMonitorOperate(this.temp)
+          .then((res) => {
+            if (res.code === 200) {
+              // 成功
+              this.$notification.success({
+                message: res.msg
+              })
+              this.$refs['editMonitorForm'].resetFields()
+              this.editOperateMonitorVisible = false
+              this.loadData()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
       })
     },
     // 删除
     handleDelete(record) {
-      $confirm({
+      this.$confirm({
         title: '系统提示',
+        zIndex: 1009,
         content: '真的要删除操作监控么？',
         okText: '确认',
         cancelText: '取消',
@@ -364,7 +362,7 @@ export default {
           // 删除
           deleteMonitorOperate(record.id).then((res) => {
             if (res.code === 200) {
-              $notification.success({
+              this.$notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -381,4 +379,3 @@ export default {
   }
 }
 </script>
-<style scoped></style>

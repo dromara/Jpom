@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div>
     <a-table
       size="middle"
       :data-source="commandList"
@@ -13,11 +13,14 @@
         }
       "
       rowKey="id"
+      :scroll="{
+        x: 'max-content'
+      }"
     >
-      <template #title>
+      <template v-slot:title>
         <a-space>
           <a-input
-            v-model="listQuery['%name%']"
+            v-model:value="listQuery['%name%']"
             @pressEnter="loadData"
             placeholder="任务名"
             class="search-input-item"
@@ -25,7 +28,7 @@
           <a-select
             show-search
             option-filter-prop="children"
-            v-model="listQuery.status"
+            v-model:value="listQuery.status"
             allowClear
             placeholder="状态"
             class="search-input-item"
@@ -35,7 +38,7 @@
           <a-select
             show-search
             option-filter-prop="children"
-            v-model="listQuery.taskType"
+            v-model:value="listQuery.taskType"
             allowClear
             placeholder="发布类型"
             class="search-input-item"
@@ -47,45 +50,61 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip #tooltip slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
+      <template #bodyCell="{ column, text, record, index }">
+        <template v-if="column.tooltip">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
 
-      <template #fileId slot-scope="text, item">
-        <a-button type="link" style="padding: 0" @click="handleViewFile(item)" size="small">{{ text }}</a-button>
-      </template>
+        <template v-else-if="column.dataIndex === 'fileId'">
+          <a-tooltip :title="text">
+            <a-button type="link" style="padding: 0" @click="handleViewFile(record)" size="small">{{
+              (text || '').slice(0, 10)
+            }}</a-button>
+          </a-tooltip>
+        </template>
 
-      <template #status slot-scope="text">
-        <a-tag v-if="text === 2" color="green">{{ statusMap[text] || '未知' }}</a-tag>
-        <a-tag v-else-if="text === 0 || text === 1" color="orange">{{ statusMap[text] || '未知' }}</a-tag>
-        <a-tag v-else-if="text === 4" color="blue"> {{ statusMap[text] || '未知' }} </a-tag>
-        <a-tag v-else-if="text === 3" color="red">{{ statusMap[text] || '未知' }}</a-tag>
-        <a-tag v-else>{{ statusMap[text] || '未知' }}</a-tag>
-      </template>
-      <template #taskType slot-scope="text">
-        <span>{{ taskTypeMap[text] || '未知' }}</span>
-      </template>
+        <template v-else-if="column.dataIndex === 'status'">
+          <a-tag v-if="text === 2" color="green">{{ statusMap[text] || '未知' }}</a-tag>
+          <a-tag v-else-if="text === 0 || text === 1" color="orange">{{ statusMap[text] || '未知' }}</a-tag>
+          <a-tag v-else-if="text === 4" color="blue">
+            {{ statusMap[text] || '未知' }}
+          </a-tag>
+          <a-tag v-else-if="text === 3" color="red">{{ statusMap[text] || '未知' }}</a-tag>
+          <a-tag v-else>{{ statusMap[text] || '未知' }}</a-tag>
+        </template>
+        <template v-else-if="column.dataIndex === 'taskType'">
+          <span>{{ taskTypeMap[text] || '未知' }}</span>
+        </template>
+        <template v-else-if="column.dataIndex === 'fileType'">
+          <span v-if="text == 2">静态文件</span>
+          <span v-else>文件中心</span>
+        </template>
 
-      <template #operation slot-scope="text, record">
-        <a-space>
-          <a-button type="primary" size="small" @click="handleView(record)">查看</a-button>
+        <template v-else-if="column.dataIndex === 'operation'">
+          <a-space>
+            <a-button type="primary" size="small" @click="handleView(record)">查看</a-button>
 
-          <a-button type="primary" size="small" @click="handleRetask(record)">重建</a-button>
-          <a-button
-            type="danger"
-            size="small"
-            :disabled="!(record.status === 0 || record.status === 1)"
-            @click="handleCancelTask(record)"
-            >取消</a-button
-          >
-          <a-button
-            type="danger"
-            size="small"
-            :disabled="record.status === 0 || record.status === 1"
-            @click="handleDelete(record)"
-            >删除</a-button
-          >
-        </a-space>
+            <a-button type="primary" size="small" @click="handleRetask(record)">重建</a-button>
+            <a-button
+              type="primary"
+              danger
+              size="small"
+              :disabled="!(record.status === 0 || record.status === 1)"
+              @click="handleCancelTask(record)"
+              >取消</a-button
+            >
+            <a-button
+              type="primary"
+              danger
+              size="small"
+              :disabled="record.status === 0 || record.status === 1"
+              @click="handleDelete(record)"
+              >删除</a-button
+            >
+          </a-space>
+        </template>
       </template>
     </a-table>
     <!-- 任务详情 -->
@@ -93,19 +112,20 @@
       title="任务详情"
       placement="right"
       :width="'80vw'"
-      :visible="detailsVisible"
+      :open="detailsVisible"
       @close="
         () => {
           this.detailsVisible = false
         }
       "
     >
-      <task-details-page v-if="detailsVisible" :taskId="temp.id" />
+      <task-details-page v-if="detailsVisible" :taskId="this.temp.id" />
     </a-drawer>
     <!-- 重建任务 -->
     <a-modal
       destroyOnClose
-      v-model="releaseFileVisible"
+      :confirmLoading="confirmLoading"
+      v-model:open="releaseFileVisible"
       title="发布文件"
       width="50%"
       :maskClosable="false"
@@ -119,11 +139,11 @@
         :wrapper-col="{ span: 20 }"
       >
         <a-form-item label="任务名" name="name">
-          <a-input placeholder="请输入任务名" :maxLength="50" v-model="temp.name" />
+          <a-input placeholder="请输入任务名" :maxLength="50" v-model:value="temp.name" />
         </a-form-item>
 
         <a-form-item label="发布方式" name="taskType">
-          <a-radio-group v-model="temp.taskType" :disabled="true">
+          <a-radio-group v-model:value="temp.taskType" :disabled="true">
             <a-radio :value="0"> SSH </a-radio>
             <a-radio :value="1"> 节点 </a-radio>
           </a-radio-group>
@@ -136,7 +156,7 @@
                 show-search
                 option-filter-prop="children"
                 mode="multiple"
-                v-model="temp.taskDataIds"
+                v-model:value="temp.taskDataIds"
                 placeholder="请选择SSH"
               >
                 <a-select-option v-for="ssh in sshList" :key="ssh.id">
@@ -145,7 +165,7 @@
               </a-select>
             </a-col>
             <a-col :span="1" style="margin-left: 10px">
-              <a-icon type="reload" @click="loadSshList" />
+              <ReloadOutlined @click="loadSshList" />
             </a-col>
           </a-row>
         </a-form-item>
@@ -156,7 +176,7 @@
                 show-search
                 option-filter-prop="children"
                 mode="multiple"
-                v-model="temp.taskDataIds"
+                v-model:value="temp.taskDataIds"
                 placeholder="请选择节点"
               >
                 <a-select-option v-for="ssh in nodeList" :key="ssh.id">
@@ -165,45 +185,55 @@
               </a-select>
             </a-col>
             <a-col :span="1" style="margin-left: 10px">
-              <a-icon type="reload" @click="loadNodeList" />
+              <ReloadOutlined @click="loadNodeList" />
             </a-col>
           </a-row>
         </a-form-item>
 
         <a-form-item name="releasePathParent" label="发布目录">
-          <a-input placeholder="请输入发布目录" :disabled="true" v-model="temp.releasePath" />
+          <a-input placeholder="请输入发布目录" :disabled="true" v-model:value="temp.releasePath" />
         </a-form-item>
 
         <a-form-item name="releasePathParent" label="文件id">
-          <a-input placeholder="请输入发布的文件id" v-model="temp.fileId" />
+          <a-input placeholder="请输入发布的文件id" v-model:value="temp.fileId" />
         </a-form-item>
 
         <a-form-item label="执行脚本" name="releaseBeforeCommand">
-          <a-tabs tabPosition="right">
-            <a-tab-pane key="before" tab="上传前">
-              <div style="height: 40vh; overflow-y: scroll">
-                <code-editor
-                  v-model="temp.beforeScript"
-                  :options="{ mode: temp.taskType === 0 ? 'shell' : '', tabSize: 2, theme: 'abcdef' }"
-                ></code-editor>
-              </div>
-              <div style="margin-top: 10px">文件上传前需要执行的脚本(非阻塞命令)</div>
-            </a-tab-pane>
-            <a-tab-pane key="after" tab="上传后">
-              <div style="height: 40vh; overflow-y: scroll">
-                <code-editor
-                  v-model="temp.afterScript"
-                  :options="{ mode: temp.taskType === 0 ? 'shell' : '', tabSize: 2, theme: 'abcdef' }"
-                ></code-editor>
-              </div>
-              <div style="margin-top: 10px">文件上传成功后需要执行的脚本(非阻塞命令)</div>
-            </a-tab-pane>
-          </a-tabs>
+          <a-form-item-rest>
+            <a-tabs tabPosition="right">
+              <a-tab-pane key="before" tab="上传前">
+                <div style="height: 40vh; overflow-y: scroll">
+                  <code-editor
+                    v-model:content="temp.beforeScript"
+                    :options="{
+                      mode: temp.taskType === 0 ? 'shell' : '',
+                      tabSize: 2,
+                      theme: 'abcdef'
+                    }"
+                  ></code-editor>
+                </div>
+                <div style="margin-top: 10px">文件上传前需要执行的脚本(非阻塞命令)</div>
+              </a-tab-pane>
+              <a-tab-pane key="after" tab="上传后">
+                <div style="height: 40vh; overflow-y: scroll">
+                  <code-editor
+                    v-model:content="temp.afterScript"
+                    :options="{
+                      mode: temp.taskType === 0 ? 'shell' : '',
+                      tabSize: 2,
+                      theme: 'abcdef'
+                    }"
+                  ></code-editor>
+                </div>
+                <div style="margin-top: 10px">文件上传成功后需要执行的脚本(非阻塞命令)</div>
+              </a-tab-pane>
+            </a-tabs>
+          </a-form-item-rest>
         </a-form-item>
       </a-form>
     </a-modal>
     <!-- 查看文件 -->
-    <a-modal destroyOnClose v-model:visible="viewFileVisible" :title="`查看文件`" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model:open="viewFileVisible" :title="`查看文件`" :footer="null" :maskClosable="false">
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="文件名" name="name">
           {{ temp.name }}
@@ -214,10 +244,10 @@
         <a-form-item label="文件大小" name="size">
           {{ renderSize(temp.size) }}
         </a-form-item>
-        <a-form-item label="过期时间" name="keepDay">
+        <a-form-item label="过期时间" name="validUntil" v-if="temp.validUntil">
           {{ parseTime(temp.validUntil) }}
         </a-form-item>
-        <a-form-item label="文件共享" name="global">
+        <a-form-item label="文件共享" name="global" v-if="temp.workspaceId">
           {{ temp.workspaceId === 'GLOBAL' ? '全局' : '工作空间' }}
         </a-form-item>
         <a-form-item label="文件描述" name="description">
@@ -244,7 +274,7 @@ import { getSshListAll } from '@/api/ssh'
 import codeEditor from '@/components/codeEditor'
 import { hasFile } from '@/api/file-manager/file-storage'
 import { getNodeListAll } from '@/api/node'
-
+import { hasStaticFile } from '@/api/file-manager/static-storage'
 export default {
   components: {
     taskDetailsPage,
@@ -259,45 +289,66 @@ export default {
       statusMap,
       taskTypeMap,
       detailsVisible: false,
+      confirmLoading: false,
       columns: [
-        { title: '任务名称', dataIndex: 'name', ellipsis: true, width: 150, scopedSlots: { customRender: 'tooltip' } },
+        {
+          title: '任务名称',
+          dataIndex: 'name',
+          ellipsis: true,
+          width: 150,
+          tooltip: true
+        },
         {
           title: '分发类型',
           dataIndex: 'taskType',
           width: '100px',
-          ellipsis: true,
-          scopedSlots: { customRender: 'taskType' }
+          ellipsis: true
         },
-        { title: '状态', dataIndex: 'status', width: '100px', ellipsis: true, scopedSlots: { customRender: 'status' } },
+        {
+          title: '文件来源',
+          dataIndex: 'fileType',
+          width: '100px',
+          ellipsis: true
+        },
+        {
+          title: '状态',
+          dataIndex: 'status',
+          width: '100px',
+          ellipsis: true
+        },
 
         {
           title: '状态描述',
           dataIndex: 'statusMsg',
           ellipsis: true,
           width: 200,
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
-        { title: '文件ID', dataIndex: 'fileId', ellipsis: true, width: 150, scopedSlots: { customRender: 'fileId' } },
+        {
+          title: '文件ID',
+          dataIndex: 'fileId',
+          ellipsis: true,
+          width: 150
+        },
         {
           title: '发布目录',
           dataIndex: 'releasePath',
           width: '100px',
           ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
         {
           title: '执行人',
           dataIndex: 'modifyUser',
           width: '120px',
-          ellipsis: true,
-          scopedSlots: { customRender: 'modifyUser' }
+          ellipsis: true
         },
         {
           title: '任务时间',
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
-          customRender: (text) => parseTime(text),
+          customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
@@ -305,7 +356,7 @@ export default {
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
-          customRender: (text) => parseTime(text),
+          customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
 
@@ -313,7 +364,7 @@ export default {
           title: '操作',
           dataIndex: 'operation',
           align: 'center',
-          scopedSlots: { customRender: 'operation' },
+
           fixed: 'right',
           width: '230px'
         }
@@ -361,8 +412,9 @@ export default {
 
     //  删除命令
     handleDelete(row) {
-      $confirm({
+      this.$confirm({
         title: '系统提示',
+        zIndex: 1009,
         content: '真的要删除该执行记录吗？',
         okText: '确认',
         cancelText: '取消',
@@ -372,7 +424,7 @@ export default {
             id: row.id
           }).then((res) => {
             if (res.code === 200) {
-              $notification.success({
+              this.$notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -430,27 +482,33 @@ export default {
     },
     // 创建任务
     handleReCrateTask() {
-      this.$refs['releaseFileForm'].validate((valid) => {
-        if (!valid) {
-          return false
-        }
-        reReleaseTask({ ...this.temp, taskDataIds: this.temp.taskDataIds?.join(',') }).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            $notification.success({
-              message: res.msg
-            })
-
-            this.releaseFileVisible = false
-            this.loadData()
-          }
+      this.$refs['releaseFileForm'].validate().then(() => {
+        this.confirmLoading = true
+        reReleaseTask({
+          ...this.temp,
+          taskDataIds: this.temp.taskDataIds?.join(',')
         })
+          .then((res) => {
+            if (res.code === 200) {
+              // 成功
+              this.$notification.success({
+                message: res.msg
+              })
+
+              this.releaseFileVisible = false
+              this.loadData()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
       })
     },
     // 取消
     handleCancelTask(record) {
-      $confirm({
+      this.$confirm({
         title: '系统提示',
+        zIndex: 1009,
         content: '真的取消当前发布任务吗？',
         okText: '确认',
         cancelText: '取消',
@@ -458,7 +516,7 @@ export default {
           // 删除
           cancelReleaseTask({ id: record.id }).then((res) => {
             if (res.code === 200) {
-              $notification.success({
+              this.$notification.success({
                 message: res.msg
               })
               this.loadData()
@@ -469,22 +527,39 @@ export default {
     },
     // 查看文件
     handleViewFile(record) {
-      hasFile({
-        fileSumMd5: record.fileId
-      }).then((res) => {
-        if (res.code === 200) {
-          if (res.data) {
-            this.temp = res.data
-            this.viewFileVisible = true
-          } else {
-            $notification.warning({
-              message: '文件不存在啦'
-            })
+      if (record.fileType === 2) {
+        //
+        hasStaticFile({
+          fileId: record.fileId
+        }).then((res) => {
+          if (res.code === 200) {
+            if (res.data) {
+              this.temp = res.data
+              this.viewFileVisible = true
+            } else {
+              this.$notification.warning({
+                message: '文件不存在啦'
+              })
+            }
           }
-        }
-      })
+        })
+      } else {
+        hasFile({
+          fileSumMd5: record.fileId
+        }).then((res) => {
+          if (res.code === 200) {
+            if (res.data) {
+              this.temp = res.data
+              this.viewFileVisible = true
+            } else {
+              this.$notification.warning({
+                message: '文件不存在啦'
+              })
+            }
+          }
+        })
+      }
     }
   }
 }
 </script>
-<style scoped></style>

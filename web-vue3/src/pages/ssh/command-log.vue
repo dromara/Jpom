@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div>
     <a-table
       size="middle"
       :data-source="commandList"
@@ -7,18 +7,20 @@
       bordered
       :pagination="pagination"
       @change="changePage"
-      :rowKey="(record, index) => index"
+      :scroll="{
+        x: 'max-content'
+      }"
     >
-      <template #title>
+      <template v-slot:title>
         <a-space>
           <a-input
-            v-model="listQuery['%commandName%']"
+            v-model:value="listQuery['%commandName%']"
             @pressEnter="getCommandLogData"
             placeholder="搜索命令名称"
             class="search-input-item"
           />
           <a-input
-            v-model="listQuery['%sshName%']"
+            v-model:value="listQuery['%sshName%']"
             @pressEnter="getCommandLogData"
             placeholder="搜索ssh名称"
             class="search-input-item"
@@ -26,7 +28,7 @@
           <a-select
             show-search
             option-filter-prop="children"
-            v-model="listQuery.status"
+            v-model:value="listQuery.status"
             allowClear
             placeholder="状态"
             class="search-input-item"
@@ -36,7 +38,7 @@
           <a-select
             show-search
             option-filter-prop="children"
-            v-model="listQuery.triggerExecType"
+            v-model:value="listQuery.triggerExecType"
             allowClear
             placeholder="触发类型"
             class="search-input-item"
@@ -48,39 +50,51 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip #sshName slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <a-tooltip #commandName slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <template #status slot-scope="text">
-        <span>{{ statusMap[text] || '未知' }}</span>
-      </template>
-      <template #triggerExecTypeMap slot-scope="text">
-        <span>{{ triggerExecTypeMap[text] || '未知' }}</span>
-      </template>
+      <template #bodyCell="{ column, text, record }">
+        <template v-if="column.dataIndex === 'sshName'">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'commandName'">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'status'">
+          <span>{{ statusMap[text] || '未知' }}</span>
+        </template>
+        <template v-else-if="column.dataIndex === 'triggerExecType'">
+          <span>{{ triggerExecTypeMap[text] || '未知' }}</span>
+        </template>
+        <template v-else-if="column.dataIndex === 'exitCode'">
+          <a-tag v-if="text == 0" color="green">成功</a-tag>
+          <a-tag v-else color="orange">{{ text || '-' }}</a-tag>
+        </template>
 
-      <template #operation slot-scope="text, record">
-        <a-space>
-          <a-button type="primary" size="small" :disabled="!record.hasLog" @click="handleView(record)">查看</a-button>
-          <a-button type="primary" size="small" :disabled="!record.hasLog" @click="handleDownload(record)"
-            ><a-icon type="download" />日志</a-button
-          >
-          <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
-        </a-space>
+        <template v-else-if="column.dataIndex === 'operation'">
+          <a-space>
+            <a-button type="primary" size="small" :disabled="!record.hasLog" @click="handleView(record)">查看</a-button>
+            <a-button type="primary" size="small" :disabled="!record.hasLog" @click="handleDownload(record)"
+              ><DownloadOutlined />日志</a-button
+            >
+            <a-button type="primary" danger size="small" @click="handleDelete(record)">删除</a-button>
+          </a-space>
+        </template>
       </template>
     </a-table>
     <!-- 构建日志 -->
     <a-modal
       destroyOnClose
-      :width="'80vw'"
-      v-model:visible="logVisible"
+      :width="style.width"
+      :bodyStyle="style.bodyStyle"
+      :style="style.style"
+      v-model:open="logVisible"
       title="执行日志"
       :footer="null"
       :maskClosable="false"
     >
-      <command-log v-if="logVisible" :temp="temp" />
+      <command-log :height="style.bodyStyle.height" v-if="logVisible" :temp="temp" />
     </a-modal>
   </div>
 </template>
@@ -89,7 +103,8 @@
 import { deleteCommandLog, downloadLog, getCommandLogList, statusMap, triggerExecTypeMap } from '@/api/command'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import CommandLog from './command-view-log'
-
+import { mapState } from 'pinia'
+import { useGuideStore } from '@/stores/guide'
 export default {
   components: {
     CommandLog
@@ -104,58 +119,80 @@ export default {
       triggerExecTypeMap: triggerExecTypeMap,
       logVisible: false,
       columns: [
-        { title: 'ssh 名称', dataIndex: 'sshName', ellipsis: true, scopedSlots: { customRender: 'sshName' } },
-        { title: '命令名称', dataIndex: 'commandName', ellipsis: true, scopedSlots: { customRender: 'commandName' } },
-        { title: '状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: { customRender: 'status' } },
+        {
+          title: 'ssh 名称',
+          dataIndex: 'sshName',
+          ellipsis: true
+        },
+        {
+          title: '命令名称',
+          dataIndex: 'commandName',
+          ellipsis: true
+        },
+        {
+          title: '状态',
+          dataIndex: 'status',
+          width: 100,
+          ellipsis: true
+        },
+        {
+          title: '退出码',
+          dataIndex: 'exitCode',
+          width: 100,
+          ellipsis: true
+        },
         {
           title: '触发类型',
           dataIndex: 'triggerExecType',
           width: 100,
-          ellipsis: true,
-          scopedSlots: { customRender: 'triggerExecTypeMap' }
+          ellipsis: true
         },
         {
           title: '执行时间',
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
-          customRender: (text) => {
+          customRender: ({ text }) => {
             return parseTime(text)
           },
-          width: 170
+          width: '170px'
         },
         {
           title: '结束时间',
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
-          customRender: (text) => {
+          customRender: ({ text }) => {
             return parseTime(text)
           },
-          width: 170
+          width: '170px'
         },
         {
           title: '执行人',
           dataIndex: 'modifyUser',
           width: 120,
-          ellipsis: true,
-          scopedSlots: { customRender: 'modifyUser' }
+          ellipsis: true
         },
         {
           title: '操作',
           dataIndex: 'operation',
           align: 'center',
-          scopedSlots: { customRender: 'operation' },
-          width: 200
+          fixed: 'right',
+          width: '200px'
         }
       ]
     }
   },
   computed: {
+    ...mapState(useGuideStore, ['getFullscreenViewLogStyle']),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    style() {
+      return this.getFullscreenViewLogStyle()
     }
   },
+  created() {},
   mounted() {
     this.getCommandLogData()
   },
@@ -184,8 +221,9 @@ export default {
     },
     //  删除命令
     handleDelete(row) {
-      $confirm({
+      this.$confirm({
         title: '系统提示',
+        zIndex: 1009,
         content: '真的要删除该执行记录吗？',
         okText: '确认',
         cancelText: '取消',
@@ -193,7 +231,7 @@ export default {
           // 删除
           deleteCommandLog(row.id).then((res) => {
             if (res.code === 200) {
-              $notification.success({
+              this.$notification.success({
                 message: res.msg
               })
               this.getCommandLogData()
@@ -209,4 +247,3 @@ export default {
   }
 }
 </script>
-<style scoped></style>

@@ -1,132 +1,203 @@
 <template>
   <div>
-    <!-- 嵌套表格 -->
-    <a-table
-      :loading="childLoading"
-      :columns="childColumns"
-      size="middle"
-      :bordered="true"
-      :data-source="list"
-      :pagination="false"
-      rowKey="id_no"
+    <a-drawer
+      destroyOnClose
+      :title="`查看 ${name} 状态`"
+      placement="right"
+      width="85vw"
+      :open="true"
+      @close="
+        () => {
+          $emit('close')
+        }
+      "
     >
-      <template #title>
-        <a-space>
-          <div>
-            当前状态：
-            <a-tag v-if="data.status === 2" color="green">{{ statusMap[data.status] || '未知' }}</a-tag>
-            <a-tag v-else-if="data.status === 1 || data.status === 0" color="orange">{{
-              statusMap[data.status] || '未知'
-            }}</a-tag>
-            <a-tag v-else-if="data.status === 3 || data.status === 4" color="red">{{
-              statusMap[data.status] || '未知'
-            }}</a-tag>
-            <a-tag v-else>{{ statusMap[data.status] || '未知' }}</a-tag>
+      <a-tabs v-model:value="tabKey" tab-position="left">
+        <a-tab-pane key="1" tab="状态">
+          <!-- 嵌套表格 -->
+          <a-table
+            :loading="childLoading"
+            :columns="childColumns"
+            size="middle"
+            :bordered="true"
+            :data-source="list"
+            :pagination="false"
+            rowKey="id_no"
+            :scroll="{
+              x: 'max-content'
+            }"
+          >
+            <template #title>
+              <a-space>
+                <div>
+                  当前状态：
+                  <a-tag v-if="data.status === 2" color="green">{{ statusMap[data.status] || '未知' }}</a-tag>
+                  <a-tag v-else-if="data.status === 1 || data.status === 0" color="orange">{{
+                    statusMap[data.status] || '未知'
+                  }}</a-tag>
+                  <a-tag v-else-if="data.status === 3 || data.status === 4" color="red">{{
+                    statusMap[data.status] || '未知'
+                  }}</a-tag>
+                  <a-tag v-else>{{ statusMap[data.status] || '未知' }}</a-tag>
+                </div>
+                <div>状态描述：{{ data.statusMsg || '-' }}</div>
+                <a-button type="primary" size="small" :loading="childLoading" @click="loadData">刷新</a-button>
+
+                <a-statistic-countdown
+                  format=" s 秒"
+                  title="刷新倒计时"
+                  :value="countdownTime"
+                  @finish="silenceLoadData"
+                />
+              </a-space>
+            </template>
+            <template #bodyCell="{ column, text, record, index }">
+              <template v-if="column.dataIndex === 'nodeId'">
+                <a-tooltip placement="topLeft" :title="text">
+                  <a-button type="link" style="padding: 0" size="small" @click="toNode(text)">
+                    <span>{{ nodeNameMap[text] || text }}</span>
+                    <FullscreenOutlined />
+                  </a-button>
+                </a-tooltip>
+              </template>
+              <template v-else-if="column.dataIndex === 'projectName'">
+                <a-tooltip placement="topLeft" :title="text">
+                  <template v-if="record.disabled">
+                    <a-tooltip title="当前项目被禁用">
+                      <EyeInvisibleOutlined />
+                    </a-tooltip>
+                  </template>
+                  <span>{{ text || record.cacheProjectName }}</span>
+                </a-tooltip>
+              </template>
+              <template v-else-if="column.dataIndex === 'outGivingStatus'">
+                <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || '未知' }}</a-tag>
+                <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{
+                  dispatchStatusMap[text] || '未知'
+                }}</a-tag>
+                <a-tag v-else-if="text === 3 || text === 4 || text === 6" color="red">{{
+                  dispatchStatusMap[text] || '未知'
+                }}</a-tag>
+                <a-tag v-else>{{ dispatchStatusMap[text] || '未知' }}</a-tag>
+              </template>
+              <template v-else-if="column.dataIndex === 'outGivingResultMsg'">
+                <a-tooltip placement="topLeft" :title="readJsonStrField(record.outGivingResult, 'msg')">
+                  <span
+                    >{{ readJsonStrField(record.outGivingResult, 'code') }}-{{
+                      readJsonStrField(record.outGivingResult, 'msg') || record.outGivingResult
+                    }}</span
+                  >
+                </a-tooltip>
+              </template>
+              <template v-else-if="column.dataIndex === 'outGivingResultTime'">
+                <a-tooltip placement="topLeft" :title="readJsonStrField(record.outGivingResult, 'upload_duration')">
+                  <span>{{ readJsonStrField(record.outGivingResult, 'upload_duration') }}</span>
+                </a-tooltip>
+              </template>
+              <template v-else-if="column.dataIndex === 'outGivingResultSize'">
+                <a-tooltip placement="topLeft" :title="readJsonStrField(record.outGivingResult, 'upload_file_size')">
+                  {{ readJsonStrField(record.outGivingResult, 'upload_file_size') }}
+                </a-tooltip>
+              </template>
+              <template v-else-if="column.dataIndex === 'outGivingResultMsgData'">
+                <a-tooltip placement="topLeft" :title="`${readJsonStrField(record.outGivingResult, 'data')}`">
+                  <template v-if="record.fileSize">
+                    {{ Math.floor((record.progressSize / record.fileSize) * 100) }}%
+                  </template>
+                  {{ readJsonStrField(record.outGivingResult, 'data') }}
+                </a-tooltip>
+              </template>
+
+              <template v-else-if="column.dataIndex === 'projectStatus'">
+                <a-tooltip v-if="record.errorMsg" :title="record.errorMsg">
+                  <WarningOutlined />
+                </a-tooltip>
+                <a-switch
+                  v-else
+                  :checked="text"
+                  :disabled="true"
+                  size="small"
+                  checked-children="运行中"
+                  un-checked-children="未运行"
+                />
+              </template>
+
+              <template v-else-if="column.dataIndex === 'projectPid'">
+                <a-tooltip
+                  placement="topLeft"
+                  :title="`进程号：${record.projectPid || '-'} / 端口号：${record.projectPort || '-'}`"
+                >
+                  <span>{{ record.projectPid || '-' }}/{{ record.projectPort || '-' }}</span>
+                </a-tooltip>
+              </template>
+
+              <template v-else-if="column.dataIndex === 'child-operation'">
+                <a-space>
+                  <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleFile(record)"
+                    >文件</a-button
+                  >
+                  <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleConsole(record)"
+                    >控制台</a-button
+                  >
+                </a-space>
+              </template>
+            </template>
+          </a-table>
+        </a-tab-pane>
+        <a-tab-pane key="2" tab="配置">
+          <!-- 配置分发 -->
+          <div style="width: 50vw">
+            <draggable v-model="list" :group="`sortValue`" item-key="id" handle=".move" chosenClass="box-shadow">
+              <template #item="{ element }">
+                <a-row class="item-row">
+                  <a-col :span="18">
+                    <span> 节点名： {{ element.nodeName }} </span>
+                    <span> 项目名： {{ element.cacheProjectName }} </span>
+                  </a-col>
+                  <a-col :span="6">
+                    <a-space>
+                      <a-switch
+                        checked-children="启用"
+                        un-checked-children="禁用"
+                        :checked="element.disabled ? false : true"
+                        @change="
+                          (checked) => {
+                            list = list.map((item2) => {
+                              if (element.id === item2.id) {
+                                item2.disabled = !checked
+                              }
+                              return { ...item2 }
+                            })
+                          }
+                        "
+                      />
+
+                      <a-button
+                        type="primary"
+                        danger
+                        size="small"
+                        @click="handleRemoveProject(element)"
+                        :disabled="!list || list.length <= 1"
+                      >
+                        解绑
+                      </a-button>
+                      <a-tooltip placement="left" :title="`长按可以拖动排序`" class="move">
+                        <MenuOutlined />
+                      </a-tooltip>
+                    </a-space>
+                  </a-col>
+                </a-row>
+              </template>
+            </draggable>
+            <a-col style="margin-top: 10px">
+              <a-space>
+                <a-button type="primary" size="small" @click="viewDispatchManagerOk">保存</a-button>
+              </a-space>
+            </a-col>
           </div>
-          <div>状态描述：{{ data.statusMsg || '-' }}</div>
-          <a-button type="primary" :loading="childLoading" @click="loadData">刷新</a-button>
-
-          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
-        </a-space>
-      </template>
-      <a-tooltip #nodeId slot-scope="text" placement="topLeft" :title="text">
-        <a-button type="link" style="padding: 0" size="small" @click="toNode(text)">
-          <span>{{ nodeNameMap[text] || text }}</span>
-          <a-icon type="fullscreen" />
-        </a-button>
-      </a-tooltip>
-      <template #projectName slot-scope="text, item">
-        <template v-if="item.disabled">
-          <a-tooltip title="当前项目被禁用">
-            <a-icon type="eye-invisible" />
-          </a-tooltip>
-        </template>
-        <a-tooltip #projectName placement="topLeft" :title="text">
-          <span>{{ text || item.cacheProjectName }}</span>
-        </a-tooltip>
-      </template>
-      <template #outGivingStatus slot-scope="text">
-        <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || '未知' }}</a-tag>
-        <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{
-          dispatchStatusMap[text] || '未知'
-        }}</a-tag>
-        <a-tag v-else-if="text === 3 || text === 4 || text === 6" color="red">{{
-          dispatchStatusMap[text] || '未知'
-        }}</a-tag>
-        <a-tag v-else>{{ dispatchStatusMap[text] || '未知' }}</a-tag>
-      </template>
-      <a-tooltip
-        #outGivingResultMsg
-        slot-scope="text, item"
-        placement="topLeft"
-        :title="readJsonStrField(item.outGivingResult, 'msg')"
-      >
-        <span
-          >{{ readJsonStrField(item.outGivingResult, 'code') }}-{{
-            readJsonStrField(item.outGivingResult, 'msg') || item.outGivingResult
-          }}</span
-        >
-      </a-tooltip>
-      <a-tooltip
-        #outGivingResultTime
-        slot-scope="text, item"
-        placement="topLeft"
-        :title="readJsonStrField(item.outGivingResult, 'upload_duration')"
-      >
-        <span>{{ readJsonStrField(item.outGivingResult, 'upload_duration') }}</span>
-      </a-tooltip>
-      <a-tooltip
-        #outGivingResultSize
-        slot-scope="text, item"
-        placement="topLeft"
-        :title="readJsonStrField(item.outGivingResult, 'upload_file_size')"
-      >
-        {{ readJsonStrField(item.outGivingResult, 'upload_file_size') }}
-      </a-tooltip>
-      <a-tooltip
-        #outGivingResultMsgData
-        slot-scope="text, item"
-        placement="topLeft"
-        :title="`${readJsonStrField(item.outGivingResult, 'data')}`"
-      >
-        <template v-if="item.fileSize"> {{ Math.floor((item.progressSize / item.fileSize) * 100) }}% </template>
-        {{ readJsonStrField(item.outGivingResult, 'data') }}
-      </a-tooltip>
-
-      <template #projectStatus slot-scope="text, item">
-        <a-tooltip v-if="item.errorMsg" :title="item.errorMsg">
-          <a-icon type="warning" />
-        </a-tooltip>
-        <a-switch
-          v-else
-          :checked="text"
-          :disabled="true"
-          size="small"
-          checked-children="运行中"
-          un-checked-children="未运行"
-        />
-      </template>
-
-      <a-tooltip
-        #projectPid
-        slot-scope="text, record"
-        placement="topLeft"
-        :title="`进程号：${record.projectPid || '-'} / 端口号：${record.projectPort || '-'}`"
-      >
-        <span>{{ record.projectPid || '-' }}/{{ record.projectPort || '-' }}</span>
-      </a-tooltip>
-
-      <template #child-operation slot-scope="text, record">
-        <a-space>
-          <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleFile(record)"
-            >文件</a-button
-          >
-          <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleConsole(record)"
-            >控制台</a-button
-          >
-        </a-space>
-      </template>
-    </a-table>
+        </a-tab-pane>
+      </a-tabs>
+    </a-drawer>
 
     <!-- 项目文件组件 -->
     <a-drawer
@@ -134,7 +205,7 @@
       :title="drawerTitle"
       placement="right"
       width="85vw"
-      :visible="drawerFileVisible"
+      :open="drawerFileVisible"
       @close="onFileClose"
     >
       <file
@@ -152,7 +223,7 @@
       :title="drawerTitle"
       placement="right"
       width="85vw"
-      :visible="drawerConsoleVisible"
+      :open="drawerConsoleVisible"
       @close="onConsoleClose"
     >
       <console
@@ -169,7 +240,7 @@
       :title="drawerTitle"
       placement="right"
       width="85vw"
-      :visible="drawerReadFileVisible"
+      :open="drawerReadFileVisible"
       @close="onReadFileClose"
     >
       <file-read
@@ -183,8 +254,15 @@
     </a-drawer>
   </div>
 </template>
+
 <script>
-import { getDispatchProject, dispatchStatusMap, statusMap } from '@/api/dispatch'
+import {
+  getDispatchProject,
+  dispatchStatusMap,
+  statusMap,
+  removeProject,
+  saveDispatchProjectConfig
+} from '@/api/dispatch'
 import { getNodeListAll } from '@/api/node'
 import { getRuningProjectInfo } from '@/api/node-project'
 import {
@@ -199,25 +277,30 @@ import {
 import File from '@/pages/node/node-layout/project/project-file'
 import Console from '@/pages/node/node-layout/project/project-console'
 import FileRead from '@/pages/node/node-layout/project/project-file-read'
+import draggable from 'vuedraggable-es'
 export default {
   components: {
     File,
     Console,
-    FileRead
+    FileRead,
+    draggable
   },
   props: {
     id: {
+      type: String
+    },
+    name: {
       type: String
     }
   },
   data() {
     return {
-      loading: false,
-      childLoading: false,
+      childLoading: true,
       statusMap,
       dispatchStatusMap,
 
       list: [],
+      tabKey: '1',
       data: {},
       drawerTitle: '',
       drawerFileVisible: false,
@@ -226,82 +309,79 @@ export default {
       nodeNameMap: {},
 
       childColumns: [
-        { title: '节点名称', dataIndex: 'nodeId', width: 120, ellipsis: true, scopedSlots: { customRender: 'nodeId' } },
+        {
+          title: '节点名称',
+          dataIndex: 'nodeId',
+          width: 120,
+          ellipsis: true
+        },
         {
           title: '项目名称',
           dataIndex: 'projectName',
           width: 120,
-          ellipsis: true,
-          scopedSlots: { customRender: 'projectName' }
+          ellipsis: true
         },
         {
           title: '项目状态',
           dataIndex: 'projectStatus',
           width: 120,
-          ellipsis: true,
-          scopedSlots: { customRender: 'projectStatus' }
+          ellipsis: true
         },
         {
           title: '进程/端口',
           dataIndex: 'projectPid',
           width: '120px',
-          ellipsis: true,
-          scopedSlots: { customRender: 'projectPid' }
+          ellipsis: true
         },
         {
           title: '分发状态',
           dataIndex: 'outGivingStatus',
-          width: '120px',
-          scopedSlots: { customRender: 'outGivingStatus' }
+          width: '120px'
         },
         {
           title: '分发结果',
           dataIndex: 'outGivingResultMsg',
           ellipsis: true,
-          width: 120,
-          scopedSlots: { customRender: 'outGivingResultMsg' }
+          width: 120
         },
         {
           title: '分发状态消息',
           dataIndex: 'outGivingResultMsgData',
           ellipsis: true,
-          width: 120,
-          scopedSlots: { customRender: 'outGivingResultMsgData' }
+          width: 120
         },
         {
           title: '分发耗时',
           dataIndex: 'outGivingResultTime',
-          width: '120px',
-          scopedSlots: { customRender: 'outGivingResultTime' }
+          width: '120px'
         },
         {
           title: '文件大小',
           dataIndex: 'outGivingResultSize',
-          width: '100px',
-          scopedSlots: { customRender: 'outGivingResultSize' }
+          width: '100px'
         },
         {
           title: '最后分发时间',
           dataIndex: 'lastTime',
           width: '170px',
           ellipsis: true,
-          customRender: (text) => parseTime(text)
+          customRender: ({ text }) => parseTime(text)
         },
         {
           title: '操作',
           dataIndex: 'child-operation',
           fixed: 'right',
-          scopedSlots: { customRender: 'child-operation' },
+
           width: '140px',
           align: 'center'
         }
       ],
 
       countdownTime: Date.now(),
-      refreshInterval: 5
+      refreshInterval: 5,
+      temp: {}
     }
   },
-
   computed: {},
   watch: {},
   created() {
@@ -337,6 +417,13 @@ export default {
     },
     // 静默
     silenceLoadData() {
+      if (this.tabKey !== '1') {
+        // 避免配置页面数据被刷新
+        // 重新计算倒计时
+        this.countdownTime = Date.now() + this.refreshInterval * 1000
+        return
+      }
+      this.childLoading = true
       this.handleReloadById().then(() => {
         // 重新计算倒计时
         this.countdownTime = Date.now() + this.refreshInterval * 1000
@@ -350,7 +437,10 @@ export default {
             if (res.code === 200 && res.data) {
               let projectList =
                 res.data?.projectList?.map((item) => {
-                  return { ...item, id_no: `${item.id}-${item.nodeId}-${item.projectId}-${new Date().getTime()}` }
+                  return {
+                    ...item,
+                    id_no: `${item.id}-${item.nodeId}-${item.projectId}-${new Date().getTime()}`
+                  }
                 }) || []
               this.data = res.data?.data || {}
               let oldProjectList = this.list
@@ -363,13 +453,14 @@ export default {
               const nodeProjects = itemGroupBy(projectList, 'nodeId')
               this.getRuningProjectInfo(nodeProjects)
             }
-            this.childLoading = false
             resolve()
           })
           .catch(() => {
+            resolve()
+          })
+          .finally(() => {
             // 取消加载中
             this.childLoading = false
-            resolve()
           })
       })
     },
@@ -419,7 +510,12 @@ export default {
                 } else {
                   this.list = this.list.map((element) => {
                     if (element.nodeId === data.type) {
-                      return { ...element, projectStatus: false, projectPid: '-', errorMsg: res2.msg }
+                      return {
+                        ...element,
+                        projectStatus: false,
+                        projectPid: '-',
+                        errorMsg: res2.msg
+                      }
                     }
                     return element
                   })
@@ -430,7 +526,12 @@ export default {
               .catch(() => {
                 this.list = this.list.map((element) => {
                   if (element.nodeId === data.type) {
-                    return { ...element, projectStatus: false, projectPid: '-', errorMsg: '网络异常' }
+                    return {
+                      ...element,
+                      projectStatus: false,
+                      projectPid: '-',
+                      errorMsg: '网络异常'
+                    }
                   }
                   return element
                 })
@@ -496,25 +597,86 @@ export default {
         }
       })
       window.open(newpage.href, '_blank')
+    },
+    // 删除项目
+    handleRemoveProject(item) {
+      const html =
+        "<b style='font-size: 20px;'>真的要释放(删除)当前项目么？</b>" +
+        "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
+        '<li>不会真实请求节点删除项目信息</b></li>' +
+        '<li>一般用于服务器无法连接且已经确定不再使用</li>' +
+        '<li>如果误操作会产生冗余数据！！！</li>' +
+        ' </ul>'
+
+      this.$confirm({
+        title: '危险操作！！！',
+        zIndex: 1009,
+        content: h('div', null, [h('p', { innerHTML: html }, null)]),
+        okButtonProps: { type: 'primary', size: 'small', danger: true },
+        cancelButtonProps: { type: 'primary' },
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          removeProject({
+            nodeId: item.nodeId,
+            projectId: item.projectId,
+            id: this.id
+          }).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg
+              })
+              this.loadData()
+            }
+          })
+        }
+      })
+    },
+    //分发管理
+    viewDispatchManagerOk() {
+      const temp = {
+        data: this.list.map((item, index) => {
+          return {
+            nodeId: item.nodeId,
+            projectId: item.projectId,
+            sortValue: index,
+            disabled: item.disabled
+          }
+        }),
+        id: this.id
+      }
+      saveDispatchProjectConfig(temp).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg
+          })
+        }
+      })
     }
-  }
+  },
+  emits: ['close']
 }
 </script>
+
 <style scoped>
 /deep/ .ant-progress-text {
   width: auto;
 }
-/* .replica-btn-del {
-    position: absolute;
-    right: 0;
-    top: 74px;
-  } */
 /deep/ .ant-statistic div {
   display: inline-block;
 }
-
 /deep/ .ant-statistic-content-value,
 /deep/ .ant-statistic-content {
   font-size: 16px;
+}
+.box-shadow {
+  box-shadow: 0 0 10px 5px rgba(223, 222, 222, 0.5);
+  border-radius: 5px;
+}
+.item-row {
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid #e8e8e8;
+  border-radius: 2px;
 }
 </style>

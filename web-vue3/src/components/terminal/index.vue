@@ -42,8 +42,9 @@ export default {
   },
   computed: {},
   created() {
+    console.log(this.$options._scopeId)
     this.domId =
-      (this.$options._parentVnode?.tag || '' + '-' + this.$options._componentTag || '') + '-' + new Date().getTime()
+      (this.$options._parentVnode?.tag || '' + '-' + this.$options._scopeId || '') + '-' + new Date().getTime()
   },
 
   mounted() {
@@ -97,14 +98,15 @@ export default {
       // this.wp = 100;
       //;
       this.rows = document.querySelector('#' + this.domId).offsetHeight / 16
-      this.cols = document.querySelector('#' + this.domId).offsetWidth / 8
+      this.cols = document.querySelector('#' + this.domId).offsetWidth / 8.4
       this.hp = this.rows * 8
       this.wp = this.cols * 8
       //
       this.terminal = new Terminal({
         fontSize: 14,
         rows: parseInt(this.rows), //行数
-        cols: parseInt(this.cols), // 不指定行数，自动回车后光标从下一行开始
+        // 不指定行数，自动回车后光标从下一行开始
+        cols: parseInt(this.cols),
         convertEol: true, //启用时，光标将设置为下一行的开头
         cursorBlink: true,
         // Whether input should be disabled.
@@ -164,8 +166,8 @@ export default {
 
 <style scoped>
 .flex-100 {
-  display: flex;
-  flex-flow: column;
+  /* display: flex; */
+  /* flex-flow: column; */
   height: 100%;
   flex: 1;
 }
@@ -173,3 +175,4 @@ export default {
   /* box-shadow: inset 0 0 10px 0 #e8e8e8; */
 }
 </style>
+<style></style>

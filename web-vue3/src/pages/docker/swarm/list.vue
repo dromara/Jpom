@@ -20,6 +20,9 @@
       @change="changePage"
       :pagination="pagination"
       bordered
+      :scroll="{
+        x: 'max-content'
+      }"
     >
       <template v-slot:title>
         <a-space>
@@ -40,56 +43,60 @@
           </a-tooltip>
         </a-space>
       </template>
-      <template v-slot:tooltip="text">
-        <a-tooltip placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip>
-      </template>
-      <template v-slot:status="text, record">
-        <template v-if="record.machineDocker">
-          <a-tag color="green" v-if="record.machineDocker.status === 1">正常</a-tag>
-          <a-tooltip v-else :title="record.machineDocker.failureMsg">
-            <a-tag color="red">无法连接</a-tag>
+
+      <template #bodyCell="{ column, text, record }">
+        <template v-if="column.tooltip">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('status')">
+          <template v-if="record.machineDocker">
+            <a-tag color="green" v-if="record.machineDocker.status === 1">正常</a-tag>
+            <a-tooltip v-else :title="record.machineDocker.failureMsg">
+              <a-tag color="red">无法连接</a-tag>
+            </a-tooltip>
+          </template>
+
+          <a-tooltip v-else title="集群关联的 docker 信息丢失,不能继续使用管理功能">
+            <a-tag color="red">信息丢失</a-tag>
           </a-tooltip>
         </template>
 
-        <a-tooltip v-else title="集群关联的 docker 信息丢失,不能继续使用管理功能">
-          <a-tag color="red">信息丢失</a-tag>
-        </a-tooltip>
-      </template>
+        <template v-else-if="column.dataIndex === 'operation'">
+          <a-space>
+            <template v-if="record.machineDocker">
+              <a-button
+                size="small"
+                :disabled="record.machineDocker.status !== 1"
+                type="primary"
+                @click="handleConsole(record, 'server')"
+                >服务</a-button
+              >
+              <a-button
+                size="small"
+                :disabled="record.machineDocker.status !== 1"
+                type="primary"
+                @click="handleConsole(record, 'node')"
+                >节点</a-button
+              >
+            </template>
+            <template v-else>
+              <a-button size="small" :disabled="true" type="primary">服务</a-button>
+              <a-button size="small" :disabled="true" type="primary">节点</a-button>
+            </template>
 
-      <template v-slot:operation="text, record">
-        <a-space>
-          <template v-if="record.machineDocker">
-            <a-button
-              size="small"
-              :disabled="record.machineDocker.status !== 1"
-              type="primary"
-              @click="handleConsole(record, 'server')"
-              >服务</a-button
-            >
-            <a-button
-              size="small"
-              :disabled="record.machineDocker.status !== 1"
-              type="primary"
-              @click="handleConsole(record, 'node')"
-              >节点</a-button
-            >
-          </template>
-          <template v-else>
-            <a-button size="small" :disabled="true" type="primary">服务</a-button>
-            <a-button size="small" :disabled="true" type="primary">节点</a-button>
-          </template>
-
-          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
-        </a-space>
+            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+          </a-space>
+        </template>
       </template>
     </a-table>
-    <!-- 创建集群区 -->
+    <!-- 编辑集群区 -->
     <a-modal
       destroyOnClose
-      v-model:value="editVisible"
+      :confirmLoading="confirmLoading"
+      v-model:open="editVisible"
       title="编辑 Docker 集群"
       @ok="handleEditOk"
       :maskClosable="false"
@@ -106,26 +113,31 @@
     </a-modal>
 
     <!-- 控制台 -->
-    <a-drawer
+    <!-- <a-drawer
       destroyOnClose
       :title="`${temp.name} 控制台`"
       placement="right"
       :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
-      :visible="consoleVisible"
+      :open="consoleVisible"
       @close="
         () => {
           this.consoleVisible = false
         }
       "
-    >
-      <console
-        v-if="consoleVisible"
-        :id="temp.id"
-        :visible="consoleVisible"
-        :initMenu="temp.menuKey"
-        urlPrefix=""
-      ></console>
-    </a-drawer>
+    > -->
+    <console
+      v-if="consoleVisible"
+      :id="temp.id"
+      :visible="consoleVisible"
+      :initMenu="temp.menuKey"
+      urlPrefix=""
+      @close="
+        () => {
+          this.consoleVisible = false
+        }
+      "
+    ></console>
+    <!-- </a-drawer> -->
   </div>
 </template>
 
@@ -154,7 +166,7 @@ export default {
           title: '名称',
           dataIndex: 'name',
           ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
 
         {
@@ -162,57 +174,55 @@ export default {
           dataIndex: 'swarmId',
           ellipsis: true,
           align: 'center',
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
         {
           title: '容器标签',
           dataIndex: 'tag',
           ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
         {
           title: '状态',
-          dataIndex: 'status',
+          dataIndex: ['machineDocker', 'status'],
           ellipsis: true,
           align: 'center',
-          width: '100px',
-          scopedSlots: { customRender: 'status' }
+          width: '100px'
         },
         {
           title: '最后修改人',
           dataIndex: 'modifyUser',
           width: 120,
-          ellipsis: true,
-          scopedSlots: { customRender: 'modifyUser' }
+          ellipsis: true
         },
         {
           title: '修改时间',
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
-          customRender: (text) => parseTime(text),
+          customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
           title: '集群创建时间',
-          dataIndex: 'machineDocker.swarmCreatedAt',
+          dataIndex: ['machineDocker', 'swarmCreatedAt'],
           sorter: true,
           ellipsis: true,
-          customRender: (text) => parseTime(text),
+          customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
           title: '集群修改时间',
-          dataIndex: 'machineDocker.swarmUpdatedAt',
+          dataIndex: ['machineDocker', 'swarmUpdatedAt'],
           sorter: true,
           ellipsis: true,
-          customRender: (text) => parseTime(text),
+          customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
           title: '操作',
           dataIndex: 'operation',
-          scopedSlots: { customRender: 'operation' },
+          fixed: 'right',
           align: 'center',
           width: '220px'
         }
@@ -225,7 +235,8 @@ export default {
           { required: true, message: '请填写关联容器标签', trigger: 'blur' },
           { pattern: /^\w{1,10}$/, message: '标签限制为字母数字且长度 1-10' }
         ]
-      }
+      },
+      confirmLoading: false
     }
   },
   computed: {
@@ -287,55 +298,26 @@ export default {
     // 提交  数据
     handleEditOk() {
       // 检验表单
-      this.$refs['editForm'].validate((valid) => {
-        if (!valid) {
-          return false
-        }
+      this.$refs['editForm'].validate().then(() => {
+        this.confirmLoading = true
 
-        editDockerSwarm(this.temp).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            this.$notification.success({
-              message: res.msg
-            })
-            this.editVisible = false
-            this.loadData()
-          }
-        })
+        editDockerSwarm(this.temp)
+          .then((res) => {
+            if (res.code === 200) {
+              // 成功
+              this.$notification.success({
+                message: res.msg
+              })
+              this.editVisible = false
+              this.loadData()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
       })
     },
-    // // 解绑
-    // handleUnbind(record) {
-    //   const html =
-    //     "<b style='font-size: 20px;'>真的要解绑该集群么？</b>" +
-    //     "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
-    //     "<li>解绑只删除在本系统的关联数据,不会删除容器里面数据</b></li>" +
-    //     " </ul>";
 
-    //   //
-    //   this.$confirm({
-    //     title: "危险操作！！！",
-    //     content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
-    //     okButtonProps: { props: { type: "danger", size: "small" } },
-    //     cancelButtonProps: { props: { type: "primary" } },
-    //     okText: "确认",
-    //     cancelText: "取消",
-    //     onOk: () => {
-    //       // 组装参数
-    //       const params = {
-    //         id: record.id,
-    //       };
-    //       unbindSwarm(params).then((res) => {
-    //         if (res.code === 200) {
-    //           this.$notification.success({
-    //             message: res.msg,
-    //           });
-    //           this.loadData();
-    //         }
-    //       });
-    //     },
-    //   });
-    // },
     // 删除
     handleDelete(record) {
       this.$confirm({

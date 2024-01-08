@@ -1,8 +1,5 @@
 <template>
-  <div class="full-content">
-    <!-- <div ref="filter" class="filter"> -->
-    <!-- <a-button type="primary" @click="handleFilter">刷新</a-button> -->
-    <!-- </div> -->
+  <div>
     <!-- 数据表格 -->
     <a-table
       size="middle"
@@ -11,17 +8,19 @@
       :pagination="pagination"
       @change="changePage"
       bordered
-      :rowKey="(record, index) => index"
+      :scroll="{
+        x: 'max-content'
+      }"
     >
-      <template #title>
+      <template v-slot:title>
         <a-space>
-          <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+          <a-select v-model:value="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
           </a-select>
-          <a-select v-model="listQuery.outGivingId" allowClear placeholder="分发项目" class="search-input-item">
+          <a-select v-model:value="listQuery.outGivingId" allowClear placeholder="分发项目" class="search-input-item">
             <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }}</a-select-option>
           </a-select>
-          <a-select v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
+          <a-select v-model:value="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
             <a-select-option v-for="(item, key) in dispatchStatusMap" :key="key" :value="key">{{
               item
             }}</a-select-option>
@@ -37,91 +36,110 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip #outGivingId slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
+      <template #bodyCell="{ column, text, record, index }">
+        <template v-if="column.dataIndex === 'outGivingId'">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
 
-      <a-tooltip #nodeName slot-scope="text, record" placement="topLeft" :title="text">
-        <span>{{
-          nodeList.filter((item) => item.id === record.nodeId) &&
-          nodeList.filter((item) => item.id === record.nodeId)[0] &&
-          nodeList.filter((item) => item.id === record.nodeId)[0].name
-        }}</span>
-      </a-tooltip>
-      <a-tooltip #projectId slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <a-tooltip
-        #outGivingResultMsg
-        slot-scope="text, item"
-        placement="topLeft"
-        :title="readJsonStrField(item.result, 'msg')"
-      >
-        <span
-          >{{ readJsonStrField(item.result, 'code') }}-{{ readJsonStrField(item.result, 'msg') || item.result }}</span
-        >
-      </a-tooltip>
-      <a-tooltip
-        #outGivingResultTime
-        slot-scope="text, item"
-        placement="topLeft"
-        :title="readJsonStrField(item.result, 'upload_duration')"
-      >
-        <span>{{ readJsonStrField(item.result, 'upload_duration') }}</span>
-      </a-tooltip>
-      <a-tooltip
-        #outGivingResultSize
-        slot-scope="text, item"
-        placement="topLeft"
-        :title="readJsonStrField(item.result, 'upload_file_size')"
-      >
-        {{ readJsonStrField(item.result, 'upload_file_size') }}
-      </a-tooltip>
-      <a-tooltip
-        #outGivingResultMsgData
-        slot-scope="text, item"
-        placement="topLeft"
-        :title="`${readJsonStrField(item.result, 'data')}`"
-      >
-        <template v-if="item.fileSize"> {{ Math.floor((item.progressSize / item.fileSize) * 100) }}% </template>
-        {{ readJsonStrField(item.result, 'data') }}
-      </a-tooltip>
-      <a-tooltip #status slot-scope="text">
-        <!-- {{ dispatchStatusMap[text] || "未知" }} -->
-        <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || '未知' }}</a-tag>
-        <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{
-          dispatchStatusMap[text] || '未知'
-        }}</a-tag>
-        <a-tag v-else-if="text === 3 || text === 4 || text === 6" color="red">{{
-          dispatchStatusMap[text] || '未知'
-        }}</a-tag>
-        <a-tag v-else>{{ dispatchStatusMap[text] || '未知' }}</a-tag>
-      </a-tooltip>
-      <template #operation slot-scope="text, record">
-        <a-button type="primary" size="small" @click="handleDetail(record)">详情</a-button>
+        <template v-else-if="column.dataIndex === 'nodeName'">
+          <a-tooltip
+            placement="topLeft"
+            :title="
+              nodeList.filter((item) => item.id === record.nodeId) &&
+              nodeList.filter((item) => item.id === record.nodeId)[0] &&
+              nodeList.filter((item) => item.id === record.nodeId)[0].name
+            "
+          >
+            <span>{{
+              nodeList.filter((item) => item.id === record.nodeId) &&
+              nodeList.filter((item) => item.id === record.nodeId)[0] &&
+              nodeList.filter((item) => item.id === record.nodeId)[0].name
+            }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'projectId'">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'mode'">
+          <a-tooltip placement="topLeft" :title="`${dispatchMode[text] || ''}  关联数据：${record.modeData || ''}`">
+            <span>{{ dispatchMode[text] || '' }}</span>
+          </a-tooltip>
+        </template>
+
+        <template v-else-if="column.dataIndex === 'outGivingResultMsg'">
+          <a-tooltip placement="topLeft" :title="readJsonStrField(record.result, 'msg')">
+            <span
+              >{{ readJsonStrField(record.result, 'code') }}-{{
+                readJsonStrField(record.result, 'msg') || record.result
+              }}</span
+            >
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'outGivingResultTime'">
+          <a-tooltip placement="topLeft" :title="readJsonStrField(record.result, 'upload_duration')">
+            <span>{{ readJsonStrField(record.result, 'upload_duration') }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'outGivingResultSize'">
+          <a-tooltip placement="topLeft" :title="readJsonStrField(record.result, 'upload_file_size')">
+            {{ readJsonStrField(record.result, 'upload_file_size') }}
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'outGivingResultMsgData'">
+          <a-tooltip placement="topLeft" :title="`${readJsonStrField(record.result, 'data')}`">
+            <template v-if="record.fileSize">
+              {{ Math.floor((record.progressSize / record.fileSize) * 100) }}%
+            </template>
+            {{ readJsonStrField(record.result, 'data') }}
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'status'">
+          <!-- {{ dispatchStatusMap[text] || "未知" }} -->
+          <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || '未知' }}</a-tag>
+          <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{
+            dispatchStatusMap[text] || '未知'
+          }}</a-tag>
+          <a-tag v-else-if="text === 3 || text === 4 || text === 6" color="red">{{
+            dispatchStatusMap[text] || '未知'
+          }}</a-tag>
+          <a-tag v-else>{{ dispatchStatusMap[text] || '未知' }}</a-tag>
+        </template>
+        <template v-else-if="column.dataIndex === 'operation'">
+          <a-button type="primary" size="small" @click="handleDetail(record)">详情</a-button>
+        </template>
       </template>
     </a-table>
     <!-- 详情区 -->
-    <a-modal destroyOnClose v-model:visible="detailVisible" width="600px" title="详情信息" :footer="null">
+    <a-modal destroyOnClose v-model:open="detailVisible" width="600px" title="详情信息" :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">
-        <a-list-item #renderItem slot-scope="item">
-          <a-list-item-meta :description="item.description">
-            <h4 #title>{{ item.title }}</h4>
-          </a-list-item-meta>
-        </a-list-item>
+        <template #renderItem="{ item }">
+          <a-list-item>
+            <a-list-item-meta :description="item.description">
+              <template v-slot:title>
+                <h4>{{ item.title }}</h4>
+              </template>
+            </a-list-item-meta>
+          </a-list-item>
+        </template>
       </a-list>
     </a-modal>
   </div>
 </template>
+
 <script>
 import { getNodeListAll } from '@/api/node'
-import { dispatchStatusMap, getDishPatchListAll, getDishPatchLogList } from '@/api/dispatch'
+import { dispatchStatusMap, getDishPatchListAll, getDishPatchLogList, dispatchMode } from '@/api/dispatch'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, readJsonStrField, parseTime } from '@/utils/const'
 
 export default {
   data() {
     return {
-      loading: false,
+      dispatchMode,
+      loading: true,
       list: [],
       nodeList: [],
       dispatchList: [],
@@ -135,40 +153,54 @@ export default {
         {
           title: '分发项目 ID',
           dataIndex: 'outGivingId',
-          ellipsis: true,
-          scopedSlots: { customRender: 'outGivingId' }
+          width: 100,
+          ellipsis: true
         },
 
-        { title: '节点名称', dataIndex: 'nodeName', ellipsis: true, scopedSlots: { customRender: 'nodeName' } },
-        { title: '项目 ID', dataIndex: 'projectId', ellipsis: true, scopedSlots: { customRender: 'projectId' } },
+        {
+          title: '节点名称',
+          dataIndex: 'nodeName',
+          ellipsis: true,
+          width: 150
+        },
+        {
+          title: '项目 ID',
+          dataIndex: 'projectId',
+          ellipsis: true,
+          width: 100
+        },
+        {
+          title: '分发方式',
+          dataIndex: 'mode',
+          ellipsis: true,
+          width: '100px'
+        },
         {
           title: '分发结果',
           dataIndex: 'outGivingResultMsg',
           ellipsis: true,
-          scopedSlots: { customRender: 'outGivingResultMsg' }
+          width: 200
         },
         {
           title: '分发状态消息',
           dataIndex: 'outGivingResultMsgData',
           ellipsis: true,
-          scopedSlots: { customRender: 'outGivingResultMsgData' }
+          width: 100
         },
         {
           title: '分发耗时',
           dataIndex: 'outGivingResultTime',
-          width: '120px',
-          scopedSlots: { customRender: 'outGivingResultTime' }
+          width: '120px'
         },
         {
           title: '文件大小',
           dataIndex: 'outGivingResultSize',
-          width: '100px',
-          scopedSlots: { customRender: 'outGivingResultSize' }
+          width: '100px'
         },
         {
           title: '开始时间',
           dataIndex: 'startTime',
-          customRender: (text) => {
+          customRender: ({ text }) => {
             return parseTime(text)
           },
           sorter: true,
@@ -178,7 +210,7 @@ export default {
           title: '结束时间',
           dataIndex: 'endTime',
           sorter: true,
-          customRender: (text) => {
+          customRender: ({ text }) => {
             return parseTime(text)
           },
           width: '170px'
@@ -187,11 +219,17 @@ export default {
           title: '操作人',
           dataIndex: 'modifyUser',
           ellipsis: true,
-          scopedSlots: { customRender: 'modifyUser' },
+
           width: 120
         },
-        { title: '状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: { customRender: 'status' } }
-        // { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "100px" },
+        {
+          title: '状态',
+          dataIndex: 'status',
+          width: 100,
+          ellipsis: true,
+          fixed: 'right'
+        },
+        { title: '操作', dataIndex: 'operation', align: 'center', width: '100px', fixed: 'right' }
       ]
     }
   },
@@ -258,4 +296,3 @@ export default {
   }
 }
 </script>
-<style scoped></style>

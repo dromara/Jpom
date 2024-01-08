@@ -468,9 +468,11 @@
           this.certificateVisible = false
         }
       "
+      :footer-style="{ textAlign: 'right' }"
     >
       <certificate
         v-if="certificateVisible"
+        ref="certificate"
         @confirm="
           (certInfo) => {
             this.temp = { ...this.temp, certInfo: certInfo }
@@ -483,6 +485,29 @@
           }
         "
       ></certificate>
+      <template #footer>
+        <a-space>
+          <a-button
+            @click="
+              () => {
+                this.chooseVisible = 0
+              }
+            "
+          >
+            取消
+          </a-button>
+          <a-button
+            type="primary"
+            @click="
+              () => {
+                this.$refs['certificate'].handerConfirm()
+              }
+            "
+          >
+            确认
+          </a-button>
+        </a-space>
+      </template>
     </a-drawer>
   </div>
 </template>
@@ -507,7 +532,7 @@ import { getWorkSpaceListAll } from '@/api/workspace'
 import Console from '@/pages/docker/console'
 import SwarmConsole from '@/pages/docker/swarm/console.vue'
 
-import certificate from './certificate.vue'
+import certificate from '@/pages/certificate/list.vue'
 import CustomSelect from '@/components/customSelect'
 
 export default {

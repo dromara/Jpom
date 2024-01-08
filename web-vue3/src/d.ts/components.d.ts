@@ -168,5 +168,6 @@ declare module 'vue' {
     UserOutlined: typeof import('@ant-design/icons-vue')['UserOutlined']
     ViewPre: typeof import('./../components/logView/view-pre.vue')['default']
     WarningOutlined: typeof import('@ant-design/icons-vue')['WarningOutlined']
+    WarningTwoTone: typeof import('@ant-design/icons-vue')['WarningTwoTone']
   }
 }

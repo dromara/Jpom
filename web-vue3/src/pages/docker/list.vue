@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div>
     <template v-if="this.useSuggestions">
       <a-result
         title="当前工作空间还没有 Docker"
@@ -23,6 +23,9 @@
       bordered
       rowKey="id"
       :row-selection="rowSelection"
+      :scroll="{
+        x: 'max-content'
+      }"
     >
       <template v-slot:title>
         <a-space>
@@ -41,59 +44,68 @@
           >
         </a-space>
       </template>
-      <template v-slot:tooltip="text">
-        <a-tooltip placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip>
-      </template>
-
-      <template v-slot:status="text, record">
-        <template v-if="record.machineDocker">
-          <a-tag color="green" v-if="record.machineDocker.status === 1">正常</a-tag>
-          <a-tooltip v-else :title="record.machineDocker.failureMsg">
-            <a-tag color="red">无法连接</a-tag>
+      <template #bodyCell="{ column, text, record }">
+        <template v-if="column.tooltip">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
           </a-tooltip>
         </template>
 
-        <a-tooltip v-else title="集群关联的 docker 信息丢失,不能继续使用管理功能">
-          <a-tag color="red">信息丢失</a-tag>
-        </a-tooltip>
-      </template>
-      <template v-slot:tags="tags">
-        <a-tooltip
-          :title="
-            (tags || '')
-              .split(':')
-              .filter((item) => item)
-              .join(',')
-          "
-        >
-          <a-tag v-for="item in (tags || '').split(':').filter((item) => item)" :key="item"> {{ item }}</a-tag>
-        </a-tooltip>
-      </template>
-      <template v-slot:operation="text, record">
-        <a-space>
-          <a-button
-            size="small"
-            type="primary"
-            :disabled="!record.machineDocker || record.machineDocker.status !== 1"
-            @click="handleConsole(record)"
-            >控制台</a-button
+        <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('status')">
+          <template v-if="record.machineDocker">
+            <a-tag color="green" v-if="record.machineDocker.status === 1">正常</a-tag>
+            <a-tooltip v-else :title="record.machineDocker.failureMsg">
+              <a-tag color="red">无法连接</a-tag>
+            </a-tooltip>
+          </template>
+
+          <a-tooltip v-else title="集群关联的 docker 信息丢失,不能继续使用管理功能">
+            <a-tag color="red">信息丢失</a-tag>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'tags'">
+          <a-tooltip
+            :title="
+              (text || '')
+                .split(':')
+                .filter((item) => item)
+                .join(',')
+            "
           >
-          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
-        </a-space>
+            <a-tag v-for="item in (text || '').split(':').filter((item) => item)" :key="item"> {{ item }}</a-tag>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'operation'">
+          <a-space>
+            <a-button
+              size="small"
+              type="primary"
+              :disabled="!record.machineDocker || record.machineDocker.status !== 1"
+              @click="handleConsole(record)"
+              >控制台</a-button
+            >
+            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+          </a-space>
+        </template>
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal destroyOnClose v-model:value="editVisible" title="编辑  Docker" @ok="handleEditOk" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      :confirmLoading="confirmLoading"
+      v-model:open="editVisible"
+      title="编辑  Docker"
+      @ok="handleEditOk"
+      :maskClosable="false"
+    >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="容器名称" name="name">
           <a-input v-model:value="temp.name" placeholder="容器名称" />
         </a-form-item>
 
         <a-form-item label="标签" name="tagInput" help="标签用于容器构建选择容器功能（fromTag）">
-          <template>
+          <a-space direction="vertical" style="width: 100%">
             <div>
               <a-tooltip :key="index" :title="tag" v-for="(tag, index) in temp.tagsArray">
                 <a-tag
@@ -109,32 +121,31 @@
                 </a-tag>
               </a-tooltip>
             </div>
-          </template>
-          <a-input
-            v-if="temp.inputVisible"
-            ref="tagInput"
-            type="text"
-            size="small"
-            placeholder="请输入标签名 字母数字 长度 1-10"
-            v-model:value="temp.tagInput"
-            @blur="handleInputConfirm"
-            @keyup.enter="handleInputConfirm"
-          />
-          <template v-else>
-            <a-tag
-              v-if="!temp.tagsArray || temp.tagsArray.length < 10"
-              style="background: #fff; borderstyle: dashed"
-              @click="showInput"
-            >
-              <a-icon type="plus" /> 添加
-            </a-tag>
-          </template>
+
+            <a-input
+              v-if="temp.inputVisible"
+              ref="tagInput"
+              type="text"
+              size="small"
+              placeholder="请输入标签名 字母数字 长度 1-10"
+              v-model:value="temp.tagInput"
+              @blur="handleInputConfirm"
+              @keyup.enter="handleInputConfirm"
+            />
+            <template v-else>
+              <a-tag
+                v-if="!temp.tagsArray || temp.tagsArray.length < 10"
+                style="background: #fff; borderstyle: dashed"
+                @click="showInput"
+              >
+                <PlusOutlined /> 添加
+              </a-tag>
+            </template>
+          </a-space>
         </a-form-item>
       </a-form>
     </a-modal>
 
-    <!-- 控制台 -->
-    <!-- <a-drawer destroyOnClose :title="`${temp.name} 控制台`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="consoleVisible" @close="onClose"> -->
     <console
       v-if="consoleVisible"
       :visible="consoleVisible"
@@ -146,7 +157,8 @@
     <!-- 同步到其他工作空间 -->
     <a-modal
       destroyOnClose
-      v-model:value="syncToWorkspaceVisible"
+      :confirmLoading="confirmLoading"
+      v-model:open="syncToWorkspaceVisible"
       title="同步到其他工作空间"
       @ok="handleSyncToWorkspace"
       :maskClosable="false"
@@ -182,7 +194,7 @@
 <script>
 import { deleteDcoker, dockerList, editDocker, syncToWorkspace } from '@/api/docker-api'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
-import { useGuideStore } from '@/stores/guide'
+
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
 import Console from './console'
@@ -216,46 +228,43 @@ export default {
         },
         {
           title: 'host',
-          dataIndex: 'machineDocker.host',
+          dataIndex: ['machineDocker', 'host'],
           width: 150,
           ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
         {
           title: '状态',
-          dataIndex: 'machineDocker.status',
+          dataIndex: ['machineDocker', 'status'],
           ellipsis: true,
           align: 'center',
-          width: '100px',
-          scopedSlots: { customRender: 'status' }
+          width: '100px'
         },
         {
           title: 'docker版本',
-          dataIndex: 'machineDocker.dockerVersion',
+          dataIndex: ['machineDocker', 'dockerVersion'],
           ellipsis: true,
           width: '120px',
-          scopedSlots: { customRender: 'tooltip' }
+          tooltip: true
         },
         {
           title: '标签',
           dataIndex: 'tags',
           width: 100,
-          ellipsis: true,
-          scopedSlots: { customRender: 'tags' }
+          ellipsis: true
         },
         {
           title: '最后修改人',
           dataIndex: 'modifyUser',
           width: '120px',
-          ellipsis: true,
-          scopedSlots: { customRender: 'modifyUser' }
+          ellipsis: true
         },
         {
           title: '创建时间',
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
-          customRender: (text) => parseTime(text),
+          customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
@@ -263,13 +272,13 @@ export default {
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
-          customRender: (text) => parseTime(text),
+          customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
           title: '操作',
           dataIndex: 'operation',
-          scopedSlots: { customRender: 'operation' },
+
           fixed: 'right',
           align: 'center',
           width: '190px'
@@ -291,11 +300,11 @@ export default {
       },
       workspaceList: [],
       tableSelections: [],
-      syncToWorkspaceVisible: false
+      syncToWorkspaceVisible: false,
+      confirmLoading: false
     }
   },
   computed: {
-    ...mapState(useGuideStore, ['getCollapsed']),
     ...mapState(useUserStore, ['getUserInfo']),
     ...mapState(useAppStore, ['getWorkspaceId']),
     pagination() {
@@ -398,27 +407,28 @@ export default {
     // 提交  数据
     handleEditOk() {
       // 检验表单
-      this.$refs['editForm'].validate((valid) => {
-        if (!valid) {
-          return false
-        }
+      this.$refs['editForm'].validate().then(() => {
         const temp = Object.assign({}, this.temp)
 
         temp.tags = (temp.tagsArray || []).join(',')
         delete temp.tagsArray
         delete temp.inputVisible
         delete temp.tagInput
-
-        editDocker(temp).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            this.$notification.success({
-              message: res.msg
-            })
-            this.editVisible = false
-            this.loadData()
-          }
-        })
+        this.confirmLoading = true
+        editDocker(temp)
+          .then((res) => {
+            if (res.code === 200) {
+              // 成功
+              this.$notification.success({
+                message: res.msg
+              })
+              this.editVisible = false
+              this.loadData()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
       })
     },
     // 删除
@@ -459,14 +469,7 @@ export default {
       })
     },
     handleInputConfirm() {
-      this.$refs['editForm'].validateField('tagInput', (errmsg) => {
-        if (errmsg) {
-          // console.log(err);
-          this.$notification.warn({
-            message: errmsg
-          })
-          return false
-        }
+      this.$refs['editForm'].validateFields('tagInput').then(() => {
         const inputValue = this.temp.tagInput
         let tags = this.temp.tagsArray || []
         if (inputValue && tags.indexOf(inputValue) === -1) {
@@ -480,6 +483,15 @@ export default {
           inputVisible: false
         }
       })
+      // .catch((error) => {
+      //   console.log(error)
+      //   if (errmsgs) {
+      //     this.$notification.warn({
+      //       message: errmsgs
+      //     })
+      //     return false
+      //   }
+      // })
     },
 
     // 加载工作空间数据
@@ -507,19 +519,24 @@ export default {
         return false
       }
       // 同步
+      this.confirmLoading = true
       syncToWorkspace({
         ids: this.tableSelections.join(','),
         toWorkspaceId: this.temp.workspaceId
-      }).then((res) => {
-        if (res.code == 200) {
-          this.$notification.success({
-            message: res.msg
-          })
-          this.tableSelections = []
-          this.syncToWorkspaceVisible = false
-          return false
-        }
       })
+        .then((res) => {
+          if (res.code == 200) {
+            this.$notification.success({
+              message: res.msg
+            })
+            this.tableSelections = []
+            this.syncToWorkspaceVisible = false
+            return false
+          }
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
     }
   }
 }

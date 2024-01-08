@@ -135,6 +135,11 @@ const children = [
     component: () => import('../pages/file-manager/release-task/list.vue')
   },
   {
+    path: '/file-manager/static-file-storage',
+    name: 'static-file-storage',
+    component: () => import('../pages/file-manager/staticFileStorage/list.vue')
+  },
+  {
     path: '/certificate/list',
     name: '/certificate-list',
     component: () => import('../pages/certificate/list.vue')
@@ -160,7 +165,7 @@ const management = [
   {
     path: '/system/assets/repository-list',
     name: 'system-global-repository',
-    component: () => import('../pages/repository/global-repository')
+    component: () => import('../pages/repository/global-repository.vue')
   },
   {
     path: '/user/permission-group',
@@ -276,6 +281,11 @@ const router = createRouter({
       path: '/full-terminal',
       name: 'full-terminal',
       component: () => import('../pages/ssh/full-terminal.vue')
+    },
+    {
+      path: '/ssh-tabs',
+      name: 'ssh-tabs',
+      component: () => import('../pages/ssh/ssh-tabs.vue')
     },
     {
       path: '/*',
