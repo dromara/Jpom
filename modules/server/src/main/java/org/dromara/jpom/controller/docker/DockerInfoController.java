@@ -140,4 +140,18 @@ public class DockerInfoController extends BaseServerController {
         dockerInfoService.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
         return JsonMessage.success("操作成功");
     }
+
+    /**
+     * 查询所有的 tag
+     *
+     * @return msg
+     */
+    @GetMapping(value = "all-tag", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<List<String>> allTag(HttpServletRequest request) {
+        String workspaceId = dockerInfoService.getCheckUserWorkspace(request);
+        //
+        List<String> strings = dockerInfoService.allTag(workspaceId);
+        return JsonMessage.success("", strings);
+    }
 }

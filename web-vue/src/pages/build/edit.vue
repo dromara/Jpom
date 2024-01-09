@@ -1,144 +1,196 @@
 <template>
   <div>
     <a-spin tip="加载构建数据中" :spinning="loading">
-      <a-form ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
-        <a-form-item label="名称" name="name">
-          <a-row>
-            <a-col :span="10">
-              <a-input v-model:value="temp.name" :maxLength="50" placeholder="名称" />
-            </a-col>
-            <a-col :span="4" style="text-align: right">分组名称：</a-col>
+      <a-card>
+        <template #title>
+          <a-steps v-model:current="stepsCurrent" size="small" :items="stepsItems"></a-steps>
+        </template>
+        <a-form ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
+          <div v-show="stepsCurrent === 0">
+            <a-alert message="如何选择构建方式" type="info" show-icon>
+              <template #description>
+                <ul>
+                  <li>
+                    本地构建是指直接在服务端中的服务器执行构建命令
+                    <ul>
+                      <li>注意执行相关命令需要所在服务器中存在对应的环境</li>
+                      <li>并且配置正确的环境变量</li>
+                      <li>如果是在启动服务端后安装并配置的环境变量需要通过终端命令来重启服务端才能生效</li>
+                    </ul>
+                  </li>
+                  <li>
+                    容器构建是指使用 docker 容器执行构建,这样可以达到和宿主机环境隔离不用安装依赖环境
+                    <ul>
+                      <li>使用容器构建，docker 容器所在的宿主机需要有公网,因为需要远程下载环境依赖的 sdk 和镜像</li>
+                    </ul>
+                  </li>
 
-            <a-col :span="10">
-              <a-form-item-rest>
-                <custom-select
-                  :maxLength="50"
-                  v-model:value="temp.group"
-                  :data="groupList"
-                  inputPlaceholder="添加分组"
-                  selectPlaceholder="选择分组"
+                  <li>创建后构建方式不支持修改</li>
+                  <li style="color: red" v-if="this.getExtendPlugins.indexOf('inDocker') > -1">
+                    容器安装的服务端不能使用本地构建（因为本地构建依赖启动服务端本地的环境，容器方式安装不便于管理本地依赖插件）
+                  </li>
+                </ul>
+              </template>
+            </a-alert>
+            <a-form-item :name="['buildMode']">
+              <template #label> 构建方式 </template>
+              <a-space>
+                <a-radio-group
+                  :disabled="temp.id ? true : false"
+                  v-model:value="temp.buildMode"
+                  name="buildMode"
+                  @change="changeBuildMode"
                 >
-                </custom-select>
-              </a-form-item-rest>
-            </a-col>
-          </a-row>
-        </a-form-item>
-        <a-form-item label="源仓库" name="repositoryId">
-          <a-input-search
-            :value="`${tempRepository ? tempRepository.name + '[' + tempRepository.gitUrl + ']' : '请选择仓库'}`"
-            readOnly
-            placeholder="请选择仓库"
-            enter-button="选择仓库"
-            @search="
-              () => {
-                this.repositoryisible = true
-              }
-            "
-          />
-        </a-form-item>
-        <template v-if="tempRepository && tempRepository.repoType === 0">
-          <a-form-item label="分支" name="branchName">
-            <a-row>
-              <a-col :span="10">
-                <custom-select
-                  v-model:value="temp.branchName"
-                  :disabled="temp.branchTagName ? true : false"
-                  :data="branchList"
-                  :canReload="true"
-                  @onRefreshSelect="loadBranchList"
-                  inputPlaceholder="自定义分支通配表达式"
-                  selectPlaceholder="请选择构建对应的分支,必选"
-                  @change="
-                    () => {
-                      this.$refs['editBuildForm'] && this.$refs['editBuildForm'].clearValidate()
-                    }
-                  "
-                >
-                  <template v-slot:inputTips>
-                    <div>
-                      支持通配符(AntPathMatcher)
-                      <ul>
-                        <li>? 匹配一个字符</li>
-                        <li>* 匹配零个或多个字符</li>
-                        <li>** 匹配路径中的零个或多个目录</li>
-                      </ul>
-                    </div>
-                  </template>
-                </custom-select>
-              </a-col>
-              <a-col :span="4" style="text-align: right"> 标签(TAG)：</a-col>
-              <a-col :span="10">
-                <a-form-item-rest>
-                  <custom-select
-                    v-model:value="temp.branchTagName"
-                    :data="branchTagList"
-                    :canReload="true"
-                    @onRefreshSelect="loadBranchList"
-                    inputPlaceholder="自定义标签通配表达式"
-                    selectPlaceholder="选择构建的标签,不选为最新提交"
-                    @change="
+                  <a-radio
+                    v-for="item in buildModeArray"
+                    :disabled="item.disabled"
+                    :key="item.value"
+                    :value="item.value"
+                    >{{ item.name }}</a-radio
+                  >
+                </a-radio-group>
+              </a-space>
+            </a-form-item>
+            <template v-if="temp.buildMode === 1">
+              <a-form-item>
+                <template #help>
+                  <a-button
+                    type="link"
+                    @click="
                       () => {
-                        this.$refs['editBuildForm'] && this.$refs['editBuildForm'].clearValidate()
+                        this.dockerListVisible = 1
                       }
                     "
                   >
-                    <template v-slot:inputTips>
-                      <div>
-                        支持通配符(AntPathMatcher)
-                        <ul>
-                          <li>? 匹配一个字符</li>
-                          <li>* 匹配零个或多个字符</li>
-                          <li>** 匹配路径中的零个或多个目录</li>
-                        </ul>
-                      </div>
-                    </template>
-                  </custom-select></a-form-item-rest
-                >
-              </a-col>
-            </a-row>
-          </a-form-item>
-          <a-form-item v-if="this.getExtendPlugins.indexOf('system-git') > -1" label="克隆深度" name="cloneDepth">
-            <a-input-number
-              style="width: 100%"
-              v-model:value="tempExtraData.cloneDepth"
-              placeholder="自定义克隆深度，避免大仓库全部克隆"
-            />
-          </a-form-item>
-        </template>
+                    查看当前可用容器
+                  </a-button>
+                </template>
+                <template #label> 可用标签 </template>
+                <a-spin tip="加载容器可用标签中...." :spinning="dockerAllTagLoading">
+                  <a-space v-if="dockerAllTagList && dockerAllTagList.length">
+                    <a-tag v-for="(item, index) in dockerAllTagList" :key="index">{{ item }}</a-tag>
+                  </a-space>
+                  <span v-else>还没有容器或者未配置标签不可以使用容器构建奥</span>
+                </a-spin>
+              </a-form-item>
+              <a-alert message="容器构建注意" type="warning" show-icon>
+                <template #description>
+                  <ul>
+                    <li>实现您需要配置 docker 容器到服务端中来管理，并且分配到当前工作空间中</li>
+                    <li>为当前工作空间中的容器配置标签</li>
+                    <li>需要将标签值配置到构建 DSL 中的 <b style="color: red">fromTag</b> 字段</li>
+                  </ul>
+                </template>
+              </a-alert>
+            </template>
+          </div>
+          <div v-show="stepsCurrent === 1">
+            <a-form-item label="名称" name="name">
+              <a-row>
+                <a-col :span="10">
+                  <a-input v-model:value="temp.name" :maxLength="50" placeholder="名称" />
+                </a-col>
+                <a-col :span="4" style="text-align: right">分组名称：</a-col>
 
-        <a-collapse v-model:activeKey="collapseKey" expandIconPosition="right">
-          <a-collapse-panel key="0">
-            <template v-slot:header>
-              <a-form-item name="buildMode" no-style>
-                <a-space>
-                  <a-tooltip>
-                    方式
-                    <template v-slot:title>
-                      <ul>
-                        <li>本地构建是指直接在服务端中的服务器执行构建命令</li>
-                        <li>容器构建是指使用 docker 容器执行构建,这样可以达到和宿主机环境隔离不用安装依赖环境</li>
-                        <li>使用容器构建，docker 容器所在的宿主机需要有公网,因为需要远程下载环境依赖的 sdk 和镜像</li>
-                        <li>创建后构建方式不支持修改</li>
-                        <li v-if="this.getExtendPlugins.indexOf('inDocker') > -1">容器安装的服务端不能使用本地构建</li>
-                      </ul>
-                    </template>
-                    <QuestionCircleOutlined v-if="!temp.id" />
-                  </a-tooltip>
-
-                  <a-radio-group :disabled="temp.id ? true : false" v-model:value="temp.buildMode" name="buildMode">
-                    <a-radio
-                      v-for="item in buildModeArray"
-                      :disabled="item.disabled"
-                      :key="item.value"
-                      :value="item.value"
-                      >{{ item.name }}</a-radio
+                <a-col :span="10">
+                  <a-form-item-rest>
+                    <custom-select
+                      :maxLength="50"
+                      v-model:value="temp.group"
+                      :data="groupList"
+                      inputPlaceholder="添加分组"
+                      selectPlaceholder="选择分组"
                     >
-                  </a-radio-group>
-                </a-space>
+                    </custom-select>
+                  </a-form-item-rest>
+                </a-col>
+              </a-row>
+            </a-form-item>
+            <a-form-item label="源仓库" name="repositoryId">
+              <a-input-search
+                :value="`${tempRepository ? tempRepository.name + '[' + tempRepository.gitUrl + ']' : '请选择仓库'}`"
+                readOnly
+                placeholder="请选择仓库"
+                enter-button="选择仓库"
+                @search="
+                  () => {
+                    this.repositoryisible = true
+                  }
+                "
+              />
+            </a-form-item>
+            <template v-if="tempRepository && tempRepository.repoType === 0">
+              <a-form-item label="分支" name="branchName">
+                <a-row>
+                  <a-col :span="10">
+                    <custom-select
+                      v-model:value="temp.branchName"
+                      :disabled="temp.branchTagName ? true : false"
+                      :data="branchList"
+                      :canReload="true"
+                      @onRefreshSelect="loadBranchList"
+                      inputPlaceholder="自定义分支通配表达式"
+                      selectPlaceholder="请选择构建对应的分支,必选"
+                      @change="
+                        () => {
+                          this.$refs['editBuildForm'] && this.$refs['editBuildForm'].clearValidate()
+                        }
+                      "
+                    >
+                      <template v-slot:inputTips>
+                        <div>
+                          支持通配符(AntPathMatcher)
+                          <ul>
+                            <li>? 匹配一个字符</li>
+                            <li>* 匹配零个或多个字符</li>
+                            <li>** 匹配路径中的零个或多个目录</li>
+                          </ul>
+                        </div>
+                      </template>
+                    </custom-select>
+                  </a-col>
+                  <a-col :span="4" style="text-align: right"> 标签(TAG)：</a-col>
+                  <a-col :span="10">
+                    <a-form-item-rest>
+                      <custom-select
+                        v-model:value="temp.branchTagName"
+                        :data="branchTagList"
+                        :canReload="true"
+                        @onRefreshSelect="loadBranchList"
+                        inputPlaceholder="自定义标签通配表达式"
+                        selectPlaceholder="选择构建的标签,不选为最新提交"
+                        @change="
+                          () => {
+                            this.$refs['editBuildForm'] && this.$refs['editBuildForm'].clearValidate()
+                          }
+                        "
+                      >
+                        <template v-slot:inputTips>
+                          <div>
+                            支持通配符(AntPathMatcher)
+                            <ul>
+                              <li>? 匹配一个字符</li>
+                              <li>* 匹配零个或多个字符</li>
+                              <li>** 匹配路径中的零个或多个目录</li>
+                            </ul>
+                          </div>
+                        </template>
+                      </custom-select></a-form-item-rest
+                    >
+                  </a-col>
+                </a-row>
+              </a-form-item>
+              <a-form-item v-if="this.getExtendPlugins.indexOf('system-git') > -1" label="克隆深度" name="cloneDepth">
+                <a-input-number
+                  style="width: 100%"
+                  v-model:value="tempExtraData.cloneDepth"
+                  placeholder="自定义克隆深度，避免大仓库全部克隆"
+                />
               </a-form-item>
             </template>
-            <div v-if="temp.buildMode === undefined" style="text-align: center">请选择构建方式</div>
+          </div>
 
+          <div v-show="stepsCurrent === 2">
             <a-form-item v-if="temp.buildMode === 0" name="script">
               <template v-slot:label>
                 <a-tooltip>
@@ -273,39 +325,38 @@
                 placeholder="构建产物目录,相对仓库的路径,如 java 项目的 target/xxx.jar vue 项目的 dist"
               />
             </a-form-item>
-          </a-collapse-panel>
-          <a-collapse-panel key="1">
-            <template v-slot:header>
-              <a-form-item name="releaseMethod" no-style>
-                <a-space>
-                  <a-tooltip>
-                    发布操作
-                    <template v-slot:title>
-                      <ul>
-                        <li>发布操作是指,执行完构建命令后将构建产物目录中的文件用不同的方式发布(上传)到对应的地方</li>
-                        <li>节点分发是指,一个项目部署在多个节点中使用节点分发一步完成多个节点中的项目发布操作</li>
-                        <li>项目是指,节点中的某一个项目,需要提前在节点中创建项目</li>
-                        <li>
-                          SSH 是指,通过 SSH 命令的方式对产物进行发布或者执行多条命令来实现发布(需要到 SSH 中提前去添加)
-                        </li>
-                        <li>本地命令是指,在服务端本地执行多条命令来实现发布</li>
-                        <li>
-                          SSH、本地命令发布都执行变量替换,系统预留变量有：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}
-                        </li>
-                        <li>可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称</li>
-                      </ul>
-                    </template>
-                    <QuestionCircleOutlined v-if="!temp.id" />
-                  </a-tooltip>
+            <div v-if="temp.buildMode === undefined">还没有选择构建方式</div>
+          </div>
 
-                  <a-radio-group v-model:value="temp.releaseMethod" name="releaseMethod">
-                    <a-radio v-for="(val, key) in releaseMethodMap" :key="key" :value="parseInt(key)">{{
-                      val
-                    }}</a-radio>
-                  </a-radio-group>
-                </a-space>
-              </a-form-item>
-            </template>
+          <div v-show="stepsCurrent === 3">
+            <a-form-item name="releaseMethod">
+              <template #label>
+                <a-tooltip>
+                  发布操作
+                  <template v-slot:title>
+                    <ul>
+                      <li>发布操作是指,执行完构建命令后将构建产物目录中的文件用不同的方式发布(上传)到对应的地方</li>
+                      <li>节点分发是指,一个项目部署在多个节点中使用节点分发一步完成多个节点中的项目发布操作</li>
+                      <li>项目是指,节点中的某一个项目,需要提前在节点中创建项目</li>
+                      <li>
+                        SSH 是指,通过 SSH 命令的方式对产物进行发布或者执行多条命令来实现发布(需要到 SSH 中提前去添加)
+                      </li>
+                      <li>本地命令是指,在服务端本地执行多条命令来实现发布</li>
+                      <li>
+                        SSH、本地命令发布都执行变量替换,系统预留变量有：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}
+                      </li>
+                      <li>可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称</li>
+                    </ul>
+                  </template>
+                  <QuestionCircleOutlined v-if="!temp.id" />
+                </a-tooltip>
+              </template>
+              <a-space>
+                <a-radio-group v-model:value="temp.releaseMethod" name="releaseMethod">
+                  <a-radio v-for="(val, key) in releaseMethodMap" :key="key" :value="parseInt(key)">{{ val }}</a-radio>
+                </a-radio-group>
+              </a-space>
+            </a-form-item>
             <div v-if="!temp.releaseMethod" style="text-align: center">请选择发布方式</div>
             <template v-else>
               <template v-if="temp.releaseMethod === 0">
@@ -715,11 +766,9 @@
                 </a-form-item>
               </template>
             </template>
-          </a-collapse-panel>
-          <a-collapse-panel key="2">
-            <template v-slot:header>
-              <a-form-item label="" no-style>其他配置</a-form-item>
-            </template>
+          </div>
+
+          <div v-show="stepsCurrent === 4">
             <a-form-item name="cacheBuild">
               <template v-slot:label>
                 <a-tooltip>
@@ -1019,9 +1068,9 @@
                 placeholder="排除发布 ANT 表达式,多个使用逗号分隔"
               />
             </a-form-item>
-          </a-collapse-panel>
-        </a-collapse>
-      </a-form>
+          </div>
+        </a-form>
+      </a-card>
     </a-spin>
     <!-- 选择仓库 -->
     <a-drawer
@@ -1153,6 +1202,22 @@
         </a-space>
       </template>
     </a-drawer>
+    <!-- 查看容器 -->
+    <a-drawer
+      destroyOnClose
+      :title="`查看容器`"
+      placement="right"
+      :open="dockerListVisible != 0"
+      width="70vw"
+      :zIndex="1009"
+      @close="
+        () => {
+          this.dockerListVisible = 0
+        }
+      "
+    >
+      <docker-list v-if="dockerListVisible" ref="dockerlist"></docker-list>
+    </a-drawer>
 
     <!-- 查看命令示例 -->
     <a-modal
@@ -1199,6 +1264,7 @@
 import codeEditor from '@/components/codeEditor'
 import repository from '@/pages/repository/list.vue'
 import scriptPage from '@/pages/script/script-list.vue'
+import DockerList from '@/pages/docker/list'
 import CustomSelect from '@/components/customSelect'
 import { dockerSwarmListAll, dockerSwarmServicesList } from '@/api/docker-swarm'
 import {
@@ -1215,15 +1281,17 @@ import { getNodeListAll, getProjectListAll } from '@/api/node'
 // import { getScriptListAll } from "@/api/server-script";
 import { getDishPatchListAll } from '@/api/dispatch'
 import { itemGroupBy, CRON_DATA_SOURCE, randomStr } from '@/utils/const'
-import { mapState } from 'pinia'
+
 import { useGuideStore } from '@/stores/guide'
 import { afterOptListSimple } from '@/api/dispatch'
+import { dockerAllTag } from '@/api/docker-api'
 export default {
   components: {
     CustomSelect,
     codeEditor,
     repository,
-    scriptPage
+    scriptPage,
+    DockerList
   },
   data() {
     return {
@@ -1318,9 +1386,49 @@ export default {
         branchName: [{ required: true, message: '请选择分支', trigger: 'blur' }],
         script: [{ required: true, message: '请填写构建命令', trigger: 'blur' }],
         resultDirFile: [{ required: true, message: '请填写产物目录', trigger: 'blur' }],
-        releasePath: [{ required: true, message: '请填写发布目录', trigger: 'blur' }],
+        // releasePath: [{ required: true, message: '请填写发布目录', trigger: 'blur' }],
         repositoryId: [{ required: true, message: '请填选择构建的仓库', trigger: 'blur' }]
       },
+      rulesSteps: [
+        ['buildMode'],
+        ['name', 'branchName', 'repositoryId'],
+        ['script', 'resultDirFile'],
+        ['releaseMethod']
+        // name: [{ required: true, message: '请填写构建名称', trigger: 'blur', stepsCurrent: 1 }],
+        // buildMode: [{ required: true, message: '请选择构建方式', trigger: 'blur', stepsCurrent: 0 }],
+        // releaseMethod: [{ required: true, message: '请选择发布操作', trigger: 'blur', stepsCurrent: 3 }],
+        // branchName: [{ required: true, message: '请选择分支', trigger: 'blur', stepsCurrent: 1 }],
+        // script: [{ required: true, message: '请填写构建命令', trigger: 'blur', stepsCurrent: 2 }],
+        // resultDirFile: [{ required: true, message: '请填写产物目录', trigger: 'blur', stepsCurrent: 2 }],
+        // // releasePath: [{ required: true, message: '请填写发布目录', trigger: 'blur' }],
+        // repositoryId: [{ required: true, message: '请填选择构建的仓库', trigger: 'blur', stepsCurrent: 1 }]
+      ],
+      stepsCurrent: 0,
+      stepsItems: [
+        {
+          title: '构建方式'
+        },
+        {
+          title: '基础信息'
+
+          // status: 'process'
+        },
+        {
+          title: '构建流程'
+
+          // status: 'wait'
+        },
+        {
+          title: '发布操作'
+
+          // status: 'wait'
+        },
+        {
+          title: '其他配置'
+
+          // status: 'wait'
+        }
+      ],
       dslDefault:
         '# 基础镜像 目前仅支持 ubuntu-latest\n' +
         'runsOn: ubuntu-latest\n' +
@@ -1366,7 +1474,9 @@ export default {
         'env:\n' +
         '  NODE_OPTIONS: --max-old-space-size=900',
       loading: false,
-      collapseKey: ['0', '1', '2']
+      dockerListVisible: 0,
+      dockerAllTagList: [],
+      dockerAllTagLoading: true
     }
   },
   computed: {
@@ -1442,10 +1552,13 @@ export default {
       this.$refs['editBuildForm']?.resetFields()
     },
     // 修改
-    handleEdit(record) {
+    handleEdit(record, steps) {
       this.$refs['editBuildForm']?.resetFields()
       this.temp = Object.assign({}, record)
       this.temp.buildMode = this.temp.buildMode || 0
+      if (this.temp.buildMode === 1) {
+        this.loadDockerAllTag()
+      }
       // 设置当前临时的 额外构建信息
       this.tempExtraData = JSON.parse(record.extraData) || {}
       if (typeof this.tempExtraData === 'string') {
@@ -1505,6 +1618,8 @@ export default {
           }
         }
       })
+      // 默认打开构建流程
+      this.stepsCurrent = steps === undefined ? 2 : steps
     },
     // // 加载脚本列表
     // loadScriptListList() {
@@ -1579,44 +1694,65 @@ export default {
     // 提交节点数据
     handleEditBuildOk(build) {
       // 检验表单
-      this.$refs['editBuildForm'].validate().then(() => {
-        const tempExtraData = Object.assign({}, this.tempExtraData)
-        // 设置参数
-        if (this.temp.releaseMethod === 2) {
-          if (this.temp.releaseMethodDataIdList.length < 2) {
-            $notification.warn({
-              message: '请选择节点项目,可能是节点中不存在任何项目,需要去节点中创建项目'
-            })
-            return false
+      this.$refs['editBuildForm']
+        .validate()
+        .then(() => {
+          const tempExtraData = Object.assign({}, this.tempExtraData)
+          // 设置参数
+          if (this.temp.releaseMethod === 2) {
+            if (this.temp.releaseMethodDataIdList.length < 2) {
+              $notification.warn({
+                message: '请选择节点项目,可能是节点中不存在任何项目,需要去节点中创建项目'
+              })
+              return false
+            }
+            tempExtraData.releaseMethodDataId_2_node = this.temp.releaseMethodDataIdList[0]
+            tempExtraData.releaseMethodDataId_2_project = this.temp.releaseMethodDataIdList[1]
+          } else if (this.temp.releaseMethod === 3) {
+            //  (this. tempExtraData.releasePath || '').slice(releaseSshDir.length);
+            tempExtraData.releasePath = (
+              (tempExtraData.releaseSshDir || '') +
+              '/' +
+              (tempExtraData.releasePath2 || '')
+            ).replace(new RegExp('//', 'gm'), '/')
+            tempExtraData.releaseMethodDataId_3 = (tempExtraData.releaseMethodDataId_3 || []).join(',')
           }
-          tempExtraData.releaseMethodDataId_2_node = this.temp.releaseMethodDataIdList[0]
-          tempExtraData.releaseMethodDataId_2_project = this.temp.releaseMethodDataIdList[1]
-        } else if (this.temp.releaseMethod === 3) {
-          //  (this. tempExtraData.releasePath || '').slice(releaseSshDir.length);
-          tempExtraData.releasePath = (
-            (tempExtraData.releaseSshDir || '') +
-            '/' +
-            (tempExtraData.releasePath2 || '')
-          ).replace(new RegExp('//', 'gm'), '/')
-          tempExtraData.releaseMethodDataId_3 = (tempExtraData.releaseMethodDataId_3 || []).join(',')
-        }
 
-        this.temp = {
-          ...this.temp,
-          extraData: JSON.stringify(tempExtraData)
-        }
-        // 提交数据
-        editBuild(this.temp).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            $notification.success({
-              message: res.msg
-            })
-            //
-            this.$emit('confirm', build, res.data)
+          this.temp = {
+            ...this.temp,
+            extraData: JSON.stringify(tempExtraData)
+          }
+          // 提交数据
+          editBuild(this.temp).then((res) => {
+            if (res.code === 200) {
+              // 成功
+              $notification.success({
+                message: res.msg
+              })
+              //
+              this.$emit('confirm', build, res.data)
+            }
+          })
+        })
+        .catch(({ errorFields }) => {
+          if (errorFields && errorFields[0]) {
+            const msg = errorFields[0].errors && errorFields[0].errors[0]
+            if (msg) {
+              $notification.warn({
+                message: msg
+              })
+              // console.log(error)
+            }
+            // 切换到对应的流程
+            const filedName = errorFields[0].name && errorFields[0].name[0]
+            filedName &&
+              this.rulesSteps.forEach((item, index) => {
+                if (item.includes(filedName)) {
+                  this.stepsCurrent = index
+                }
+              })
           }
         })
-      })
     },
     // 选择仓库
     changeRepositpry(noPullBranch) {
@@ -1679,6 +1815,24 @@ export default {
           this.groupList = res.data
         }
       })
+    },
+    changeBuildMode(e) {
+      if (e.target.value === 1) {
+        this.loadDockerAllTag()
+      }
+    },
+    // 查询 docker tag
+    loadDockerAllTag() {
+      this.dockerAllTagLoading = true
+      dockerAllTag()
+        .then((res) => {
+          if (res.code === 200) {
+            this.dockerAllTagList = res.data || []
+          }
+        })
+        .finally(() => {
+          this.dockerAllTagLoading = false
+        })
     }
   },
   emits: ['close', 'confirm']
