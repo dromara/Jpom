@@ -236,7 +236,7 @@ export default {
 </script>
 
 <style scoped>
-/deep/ .ant-divider-horizontal {
+:deep(.ant-divider-horizontal) {
   margin: 5px 0;
 }
 </style>

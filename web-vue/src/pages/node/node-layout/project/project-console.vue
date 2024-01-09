@@ -61,7 +61,6 @@
                       <a-button
                         type="link"
                         size="small"
-                        icon="edit"
                         @click="
                           () => {
                             temp = { scriptId: item.scriptId }
@@ -69,7 +68,7 @@
                           }
                         "
                       >
-                        节点脚本
+                        <EditOutlined /> 节点脚本
                       </a-button>
                     </template>
                   </template>

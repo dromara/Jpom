@@ -1409,11 +1409,10 @@ export default {
 .item-info {
   padding: 4px 0;
 }
-/deep/ .ant-statistic div {
+:deep(.ant-statistic div) {
   display: inline-block;
 }
-/deep/ .ant-statistic-content-value,
-/deep/ .ant-statistic-content {
+:deep(.ant-statistic-content-value, .ant-statistic-content) {
   font-size: 16px;
 }
 </style>

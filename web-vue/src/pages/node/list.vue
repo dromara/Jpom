@@ -1150,11 +1150,10 @@ export default {
 </script>
 
 <style scoped>
-.header-statistic /deep/ .ant-statistic div {
+.header-statistic :deep(.ant-statistic div) {
   display: inline-block;
 }
-.header-statistic /deep/ .ant-statistic-content-value,
-.header-statistic /deep/ .ant-statistic-content {
+.header-statistic :deep(.ant-statistic-content-value, .ant-statistic-content) {
   font-size: 16px;
 }
 </style>

@@ -937,7 +937,7 @@ export default {
 </script>
 
 <style scoped>
-/deep/ .ant-progress-text {
+:deep(.ant-progress-text) {
   width: auto;
 }
 </style>

@@ -139,7 +139,7 @@
                     <a-button size="small" type="primary" @click="joinSwarm(record)">加入集群</a-button>
                   </p>
                 </template>
-                <a-button icon="edit" size="small" type="primary">集群</a-button>
+                <a-button size="small" type="primary"><EditOutlined />集群</a-button>
               </a-popover>
             </template>
             <template v-else>
@@ -231,7 +231,6 @@
           <custom-select
             v-model:value="temp.groupName"
             :data="groupList"
-            suffixIcon=""
             inputPlaceholder="添加分组"
             selectPlaceholder="选择分组名"
           >

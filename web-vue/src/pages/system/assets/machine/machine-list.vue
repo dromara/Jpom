@@ -291,7 +291,6 @@
           <custom-select
             v-model:value="temp.groupName"
             :data="groupList"
-            suffixIcon=""
             inputPlaceholder="添加分组"
             selectPlaceholder="选择分组名"
           >

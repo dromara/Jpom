@@ -263,7 +263,7 @@ export default {
   position: relative;
   overflow-y: scroll;
 }
-/deep/ .vue-recycle-scroller__item-wrapper {
+:deep(.vue-recycle-scroller__item-wrapper) {
   white-space: nowrap;
   position: unset;
 }

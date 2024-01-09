@@ -97,7 +97,7 @@ export default {
   padding-bottom: 10px;
   line-height: 0;
 }
-/deep/ .ant-checkbox-group-item {
+:deep(.ant-checkbox-group-item) {
   display: flex;
   align-items: center;
 }

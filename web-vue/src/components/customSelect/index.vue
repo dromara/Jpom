@@ -22,7 +22,7 @@
           </a-button>
         </a-space>
       </template>
-      <a-select-option v-if="selectPlaceholder" value="">{{ selectPlaceholder }}{{ this.canReload }}</a-select-option>
+      <a-select-option v-if="selectPlaceholder" value="">{{ selectPlaceholder }}</a-select-option>
       <a-select-option v-for="item in optionList" :key="item">{{ item }} </a-select-option>
     </Select>
   </div>

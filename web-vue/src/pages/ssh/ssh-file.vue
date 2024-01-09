@@ -125,7 +125,7 @@
                 <template v-slot:overlay>
                   <a-menu>
                     <a-menu-item key="2">
-                      <a-button icon="highlight" @click="handleRenameFile(record)" type="link"> 重命名 </a-button>
+                      <a-button @click="handleRenameFile(record)" type="link"><HighlightOutlined /> 重命名 </a-button>
                     </a-menu-item>
                   </a-menu>
                 </template>
