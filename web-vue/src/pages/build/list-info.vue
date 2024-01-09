@@ -218,7 +218,7 @@
               </a-col>
             </template>
             <a-col v-else :span="24">
-              <a-empty description="没有任何构建" />
+              <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="没有任何构建" />
             </a-col>
           </a-row>
         </a-row>
@@ -717,6 +717,7 @@
 <script>
 import BuildLog from './log'
 import CustomSelect from '@/components/customSelect'
+import { Empty } from 'ant-design-vue'
 import {
   clearBuid,
   deleteBuild,
@@ -774,6 +775,7 @@ export default {
   },
   data() {
     return {
+      Empty,
       sizeOptions: ['8', '12', '16', '20', '24'],
       releaseMethodMap,
       loading: false,

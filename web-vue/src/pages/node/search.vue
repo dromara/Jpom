@@ -403,7 +403,7 @@
             </a-tooltip>
           </template>
           <a-tab-pane key="1" tab="执行">
-            <a-space direction="vertical">
+            <a-space direction="vertical" style="width: 100%">
               <a-alert message="温馨提示" type="warning">
                 <template v-slot:description>
                   <ul>
@@ -494,7 +494,7 @@
       @ok="migrateWorkspaceOk"
       :maskClosable="false"
     >
-      <a-space direction="vertical">
+      <a-space direction="vertical" style="width: 100%">
         <a-alert message="温馨提示" type="warning" show-icon>
           <template v-slot:description>
             项目可能支持关联如下数据：

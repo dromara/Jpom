@@ -70,7 +70,7 @@
               </a-space>
             </a-timeline-item>
           </a-timeline>
-          <a-empty description="您还未构建" v-else />
+          <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="您还未构建" v-else />
         </a-card>
       </a-col>
       <a-col :span="6">
@@ -116,7 +116,7 @@
               </a-space>
             </a-timeline-item>
           </a-timeline>
-          <a-empty description="您还执行操作" v-else />
+          <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="您还执行操作" v-else />
         </a-card>
       </a-col>
     </a-row>
@@ -150,6 +150,7 @@ import UserLog from './user-log.vue'
 import { useUserStore } from '@/stores/user'
 import { mapState } from 'pinia'
 import { statusMap, statusColor, triggerBuildTypeMap } from '@/api/build-info'
+import { Empty } from 'ant-design-vue'
 export default {
   components: {
     UserLog
@@ -157,6 +158,7 @@ export default {
   computed: {},
   data() {
     return {
+      Empty,
       triggerBuildTypeMap,
       statusMap,
       statusColor,

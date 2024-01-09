@@ -120,19 +120,24 @@ public class LoginControl extends BaseServerController implements InitializingBe
      */
     @RequestMapping(value = "rand-code", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public IJsonMessage<String> randCode() {
+    public IJsonMessage<String> randCode(String theme) {
         if (webConfig.isDisabledCaptcha()) {
             return new JsonMessage<>(400, "验证码已禁用");
         }
-        AbstractCaptcha captcha = this.createCaptcha();
+        CircleCaptcha captcha = this.createCaptcha(theme);
         setSessionAttribute(LOGIN_CODE, captcha.getCode());
         String base64Data = captcha.getImageBase64Data();
         return new JsonMessage<>(200, "", base64Data);
     }
 
-    private CircleCaptcha createCaptcha() {
+    private CircleCaptcha createCaptcha(String theme) {
         int height = 50;
         CircleCaptcha circleCaptcha = new CircleCaptcha(100, height, 4, 8);
+        if (StrUtil.equalsIgnoreCase(theme, "dark")) {
+            circleCaptcha.setBackground(Color.darkGray);
+        } else {
+            circleCaptcha.setBackground(Color.white);
+        }
         // 设置为默认字体
         circleCaptcha.setFont(new Font(null, Font.PLAIN, (int) (height * 0.75)));
         circleCaptcha.createCode();
@@ -198,7 +203,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
                 userLoginLogServer.fail(userModel, 4, false, request);
                 return new JsonMessage<>(ServerConst.ACCOUNT_LOCKED, ServerConst.ACCOUNT_LOCKED_TIP);
             }
-            if (!webConfig.isDisabledGuide()) {
+            if (!webConfig.isDisabledCaptcha()) {
                 // 获取验证码
                 String sCode = getSessionAttribute(LOGIN_CODE);
                 Assert.state(StrUtil.equalsIgnoreCase(code, sCode), "请输入正确的验证码");
@@ -438,7 +443,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
     @Override
     public void afterPropertiesSet() throws Exception {
         try {
-            this.createCaptcha();
+            this.createCaptcha(null);
             log.debug("当前服务器验证码可用");
         } catch (Throwable e) {
             log.warn("当前服务器生成验证码异常,自动禁用验证码", e);

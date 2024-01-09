@@ -11,7 +11,7 @@
   >
     <template #title>
       <!-- 集群控制台 -->
-      <a-menu theme="light" mode="horizontal" v-model:selectedKeys="menuKeyArray" @click="menuClick">
+      <a-menu mode="horizontal" v-model:selectedKeys="menuKeyArray" @click="menuClick">
         <a-menu-item key="node">
           <span class="nav-text">集群节点</span>
         </a-menu-item>

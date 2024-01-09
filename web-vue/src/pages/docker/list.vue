@@ -135,7 +135,7 @@
             <template v-else>
               <a-tag
                 v-if="!temp.tagsArray || temp.tagsArray.length < 10"
-                style="background: #fff; borderstyle: dashed"
+                style="borderstyle: dashed"
                 @click="showInput"
               >
                 <PlusOutlined /> 添加

@@ -13,13 +13,7 @@
     >
       <template #title>
         <a-space>
-          <a-menu
-            theme="light"
-            mode="horizontal"
-            class="docker-menu"
-            v-model:selectedKeys="menuKeyArray"
-            @click="menuClick"
-          >
+          <a-menu mode="horizontal" class="docker-menu" v-model:selectedKeys="menuKeyArray" @click="menuClick">
             <a-menu-item key="containers">
               <span class="nav-text">独立容器</span>
             </a-menu-item>

@@ -370,7 +370,7 @@ export default {
     },
 
     goFile() {
-      $emit(this, 'goFile')
+      this.$emit('goFile')
     }
   },
   emits: ['goFile']

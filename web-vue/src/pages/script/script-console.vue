@@ -234,7 +234,7 @@ export default {
 }
 .console {
   padding: 5px;
-  color: #fff;
+  /* color: #fff; */
   font-size: 14px;
   background-color: black;
   width: 100%;

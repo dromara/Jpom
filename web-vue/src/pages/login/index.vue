@@ -32,7 +32,9 @@
         <rect stroke="#CED4D9" x="108" y="1" width="9" height="9" rx="1"></rect>
       </g>
     </svg>
-    <div class="switch" @click="handleToggleBg">{{ dynamicBg ? '关闭动态背景' : '开启动态背景' }}</div>
+    <a-button class="switch" @click="handleToggleBg"
+      ><LeftOutlined />&nbsp;{{ dynamicBg ? '关闭动态背景' : '开启动态背景' }}</a-button
+    >
     <a-card class="login-card" hoverable>
       <a-card-meta :title="`${loginTitle}`" style="text-align: center" description="" />
       <br />
@@ -118,12 +120,18 @@ import sha1 from 'js-sha1'
 import maxkeyImg from '@/assets/images/maxkey.png'
 import giteeImg from '@/assets/images/gitee.svg'
 import githubImg from '@/assets/images/github.png'
+import { useGuideStore } from '@/stores/guide'
 
 interface IFormState {
   loginName: string
   userPwd: string
   code: string
 }
+const guideStore = useGuideStore()
+
+const theme = computed(() => {
+  return guideStore.getThemeView()
+})
 
 const router = useRouter()
 const route = useRoute()
@@ -147,9 +155,13 @@ const dynamicBg = ref(localStorage.getItem('dynamicBg') === 'true')
 const disabledCaptcha = ref(false)
 
 const backgroundImage = computed(() => {
+  const color =
+    theme.value === 'light' ? 'linear-gradient(#1890ff, #66a9c9)' : 'linear-gradient(rgb(38 46 55), rgb(27 33 36))'
+
+  // background: linear-gradient(#1890ff, #66a9c9);
   return dynamicBg.value
-    ? { backgroundImage: `url(https://picsum.photos/${screen.width}/${screen.height}/?random)` }
-    : {}
+    ? { backgroundImage: `url(https://picsum.photos/${screen.width}/${screen.height}/?random)`, background: color }
+    : { background: color }
 })
 
 // 检查是否需要初始化
@@ -168,7 +180,7 @@ const beginCheckSystem = () => {
     if (res.data?.loginTitle) {
       loginTitle.value = res.data.loginTitle
     }
-    disabledCaptcha.value = res.data.disabledCaptcha
+
     checkOauth2()
   })
 }
@@ -184,12 +196,18 @@ const getLoginConfig = () => {
       })
       loginForm.loginName = demo.user
     }
+    disabledCaptcha.value = res.data.disabledCaptcha
     enabledOauth2Provides.value = res.data?.oauth2Provides || []
+
+    changeCode()
   })
 }
 // change Code
 const changeCode = () => {
-  loginRandCode().then((res) => {
+  if (disabledCaptcha.value) {
+    return
+  }
+  loginRandCode({ theme: theme.value, t: new Date().getTime() }).then((res) => {
     if (res.code === 200) {
       randCode.value = res.data
       loginForm.code = ''
@@ -321,7 +339,7 @@ const handleMfa = () => {
 
 onMounted(() => {
   beginCheckSystem()
-  changeCode()
+
   getLoginConfig()
 })
 
@@ -385,7 +403,7 @@ onMounted(() => {
   // width: 100vw;
   height: 100vh;
   /* background-color: #fbefdf; */
-  background: linear-gradient(#1890ff, #66a9c9);
+
   background-size: cover;
   display: flex;
   justify-content: center;
@@ -403,8 +421,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  padding: 0 10px 0 18px;
+  //background: #fff;
+  // padding: 0 10px 0 10px;
   cursor: pointer;
   transform: translateX(105px);
   transition: all 0.3s ease-in-out;
@@ -414,18 +432,6 @@ onMounted(() => {
 
 .switch:hover {
   transform: translateX(0);
-}
-
-.switch::before {
-  content: '';
-  position: absolute;
-  left: 10px;
-  top: 13px;
-  width: 10px;
-  height: 10px;
-  border-right: 1px solid #333;
-  border-bottom: 1px solid #333;
-  transform: rotate(135deg);
 }
 
 .login-card {
