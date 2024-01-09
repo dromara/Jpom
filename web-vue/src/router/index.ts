@@ -288,14 +288,15 @@ const router = createRouter({
       component: () => import('../pages/ssh/ssh-tabs.vue')
     },
     {
-      path: '/*',
+      path: '/404',
       name: '404',
       component: () => import('../pages/404/index.vue')
     },
+
     {
-      path: '/system/ipAccess',
+      path: '/prohibit-access',
       name: 'ipAccess',
-      component: () => import('../pages/system/ipAccess.vue')
+      component: () => import('../pages/layout/ipAccess.vue')
     },
     {
       path: '/system/management',
@@ -313,6 +314,10 @@ const router = createRouter({
         item.meta = meta
         return item
       })
+    },
+    {
+      path: '/*',
+      redirect: '/404'
     }
   ]
 })

@@ -1,7 +1,8 @@
 import { GlobalWindow } from '@/interface/common'
-import { useAppStore } from '@/stores/app'
 import { message, notification, Modal } from 'ant-design-vue'
+import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
+import { useGuideStore } from '@/stores/guide'
 
 export const jpomWindow = window as unknown as GlobalWindow
 // 注册全局的组件
@@ -29,6 +30,10 @@ export const appStore = () => {
 
 export const userStore = () => {
   return useUserStore()
+}
+
+export const guideStore = () => {
+  return useGuideStore()
 }
 
 export const router = () => {
