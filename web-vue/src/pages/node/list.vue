@@ -539,7 +539,7 @@
       :footer="null"
       :maskClosable="false"
     >
-      <terminal v-if="terminalVisible" :sshId="temp.sshId" :nodeId="temp.id" />
+      <terminal1 v-if="terminalVisible" :sshId="temp.sshId" :nodeId="temp.id" />
     </a-modal>
 
     <!-- 快速安装插件端 -->
@@ -622,7 +622,7 @@ import {
 import { getSshListAll } from '@/api/ssh'
 import { syncScript } from '@/api/node-other'
 import NodeFunc from './node-func'
-import Terminal from '@/pages/ssh/terminal'
+import Terminal1 from '@/pages/ssh/terminal'
 import {
   CHANGE_PAGE,
   COMPUTED_PAGINATION,
@@ -644,7 +644,7 @@ import { useAppStore } from '@/stores/app'
 export default {
   components: {
     NodeFunc,
-    Terminal,
+    Terminal1,
     CustomSelect,
     fastInstall,
     NodeTop
