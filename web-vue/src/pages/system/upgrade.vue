@@ -132,8 +132,9 @@ import { useUserStore } from '@/stores/user'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, formatDuration } from '@/utils/const'
 import { getWebSocketUrl } from '@/api/config'
 import { uploadPieces } from '@/utils/upload-pieces'
-import { h } from 'vue'
+
 export default {
+  inject: ['globalLoading'],
   components: {
     upgrade
   },
@@ -524,6 +525,15 @@ export default {
           this.percentage = 0
           uploadPieces({
             file,
+            resolveFileProcess: (msg) => {
+              this.globalLoading({
+                spinning: true,
+                tip: msg
+              })
+            },
+            resolveFileEnd: () => {
+              this.globalLoading(false)
+            },
             process: (process) => {
               this.percentage = Math.max(this.percentage, process)
             },

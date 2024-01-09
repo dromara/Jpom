@@ -19,6 +19,8 @@ interface PiecesPar {
   success: Function
   process: Function
   error: Function
+  resolveFileProcess: Function
+  resolveFileEnd: Function
 }
 
 /**
@@ -30,7 +32,16 @@ interface PiecesPar {
  * @params success {Function} 成功回调函数
  * @params error {Function} 失败回调函数
  */
-export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success, process, error }: PiecesPar) => {
+export const uploadPieces = ({
+  file,
+  uploadCallback,
+  uploadBeforeAbrot,
+  success,
+  process,
+  error,
+  resolveFileProcess,
+  resolveFileEnd
+}: PiecesPar) => {
   // 如果文件传入为空直接 return 返回
   if (!file || file.length < 1) {
     return error('文件不能为空')
@@ -64,10 +75,7 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
     const batch = 1024 * 1024 * 2
     const asyncUpdate = function () {
       if (start < total) {
-        // Vue.prototype.$setLoading({
-        //   spinning: true,
-        //   tip: '解析文件,准备上传中 ' + ((start / total) * 100).toFixed(2) + '%',
-        // })
+        resolveFileProcess && resolveFileProcess('解析文件,准备上传中 ' + ((start / total) * 100).toFixed(2) + '%')
         let end = Math.min(start + batch, total)
         reader.readAsArrayBuffer(blobSlice.call(file, start, end))
         start = end
@@ -143,6 +151,7 @@ export const uploadPieces = ({ file, uploadCallback, uploadBeforeAbrot, success,
    * 并发上传
    **/
   const concurrentUpload = () => {
+    resolveFileEnd && resolveFileEnd()
     const startTime: number = new Date().getTime()
     // 设置初始化进度（避免第一份分片卡顿）
     process(0.01, 1, total, new Date().getTime() - startTime)

@@ -423,11 +423,12 @@ import {
   triggerUrl
 } from '@/api/file-manager/file-storage'
 import { uploadPieces } from '@/utils/upload-pieces'
-import * as Vue from 'vue'
+
 import releaseFile from './releaseFile.vue'
 import { addReleaseTask } from '@/api/file-manager/release-task-log'
 
 export default {
+  inject: ['globalLoading'],
   components: {
     releaseFile
   },
@@ -630,6 +631,15 @@ export default {
         this.confirmLoading = true
         uploadPieces({
           file: this.fileList[0],
+          resolveFileProcess: (msg) => {
+            this.globalLoading({
+              spinning: true,
+              tip: msg
+            })
+          },
+          resolveFileEnd: () => {
+            this.globalLoading(false)
+          },
           uploadBeforeAbrot: (md5) => {
             return new Promise((resolve) => {
               hasFile({

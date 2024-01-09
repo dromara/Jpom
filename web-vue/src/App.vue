@@ -5,12 +5,12 @@
       algorithm: themeAlgorithm
     }"
   >
-    <div>
+    <a-spin v-bind="globalLoadingProps">
       <router-view v-if="routerActivation" />
       <template>
         <a-back-top />
       </template>
-    </div>
+    </a-spin>
   </a-config-provider>
 </template>
 
@@ -43,8 +43,6 @@ const themeAlgorithm = computed(() => {
   return algorithm
 })
 
-onMounted(() => {})
-
 const reload = () => {
   routerActivation.value = false
   nextTick(() => {
@@ -55,8 +53,29 @@ const reload = () => {
   })
 }
 
+const globalLoadingProps = ref({
+  spinning: false,
+  tip: '加载中...',
+  size: 'large',
+  delayTime: 500
+})
+
 // 全局 loading
-const globalLoading = () => {}
+const globalLoading = (props: any) => {
+  let newProps: any = {}
+  if (typeof props === 'boolean') {
+    newProps = { spinning: props }
+  } else if (typeof props === 'string') {
+    newProps = { tip: props }
+  } else if (Object.prototype.toString.call(props) === '[object Object]') {
+    newProps = props
+  } else {
+    console.error('不支持的类型', props, Object.prototype.toString.call(props))
+  }
+  // 避免无法弹窗
+  newProps.wrapperClassName = newProps.spinning ? 'globalLoading' : ''
+  globalLoadingProps.value = { ...globalLoadingProps.value, ...newProps }
+}
 
 provide('reload', reload)
 provide('globalLoading', globalLoading)
@@ -70,40 +89,17 @@ body {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  // color: #2c3e50;
   margin: 0;
   padding: 0;
 }
 
-.full-content {
-  min-height: calc(100vh - 120px);
-  padding-bottom: 20px;
-}
-
-.node-full-content {
-  min-height: calc(100vh - 130px) !important;
-}
-
 .globalLoading {
-  height: 100vh;
-  width: 100vw;
-  padding: 20vh;
-  background-color: rgba(0, 0, 0, 0.7);
-  position: fixed !important;
   z-index: 99999;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-}
-
-.ant-spin-text {
-  text-shadow: 0 0 black !important;
-}
-
-.search-wrapper {
-  margin-bottom: 20px;
+  // background-color: #1f1f1f;
+  // background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(140, 140, 140, 0.3);
+  opacity: 0.8;
 }
 
 @color-border-last: rgba(140, 140, 140, 0.3);

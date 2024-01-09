@@ -1,13 +1,17 @@
 <template>
   <a-layout id="app-layout">
-    <a-layout-sider :theme="menuTheme" v-model:collapsed="collapsed" :trigger="null" collapsible>
+    <a-layout-sider class="sider" :theme="menuTheme" v-model:collapsed="collapsed" :trigger="null" collapsible>
       <a-tooltip placement="right" title="点击可以折叠左侧菜单栏">
-        <div class="logo" @click="changeCollapsed()" :style="`color:${menuTheme === 'light' ? '#000' : '#fff'}`">
+        <div
+          class="logo"
+          @click="changeCollapsed()"
+          :style="`color:${menuTheme === 'light' && theme === 'light' ? '#000' : '#fff'}`"
+        >
           <img :src="logoUrl || defaultLogo" alt="logo" />
           {{ !collapsed ? subTitle : '' }}
         </div>
       </a-tooltip>
-      <side-menu class="side-menu" :mode="mode" :theme="menuTheme" />
+      <side-menu :mode="mode" :theme="menuTheme" />
     </a-layout-sider>
     <a-layout>
       <div class="app-header" :style="`background-color:${theme === 'light' ? '#fff' : ''}`">
@@ -152,6 +156,10 @@ const changeCollapsed = () => {
   /* background: #fff; */
   padding: 10px 10px 0;
   height: auto;
+}
+
+.sider {
+  border-inline-end: 1px solid rgba(5, 5, 5, 0.06);
 }
 /*
 .sider-scroll {

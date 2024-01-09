@@ -430,6 +430,7 @@ import projectFileBackup from './project-file-backup.vue'
 import { uploadPieces } from '@/utils/upload-pieces'
 
 export default {
+  inject: ['globalLoading'],
   components: {
     codeEditor,
     projectFileBackup
@@ -731,6 +732,15 @@ export default {
           return new Promise((resolve, reject) => {
             uploadPieces({
               file,
+              resolveFileProcess: (msg) => {
+                this.globalLoading({
+                  spinning: true,
+                  tip: msg
+                })
+              },
+              resolveFileEnd: () => {
+                this.globalLoading(false)
+              },
               process: (process, end, total, duration) => {
                 this.percentage = Math.max(this.percentage, process)
                 this.percentageInfo = { end, total, duration }
@@ -843,6 +853,15 @@ export default {
       const file = this.uploadFileList[0]
       uploadPieces({
         file,
+        resolveFileProcess: (msg) => {
+          this.globalLoading({
+            spinning: true,
+            tip: msg
+          })
+        },
+        resolveFileEnd: () => {
+          this.globalLoading(false)
+        },
         process: (process, end, total, duration) => {
           this.percentage = Math.max(this.percentage, process)
           this.percentageInfo = { end, total, duration }
