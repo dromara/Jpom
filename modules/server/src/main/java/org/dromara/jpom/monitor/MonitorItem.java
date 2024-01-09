@@ -49,6 +49,7 @@ import org.dromara.jpom.service.monitor.MonitorService;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.dromara.jpom.service.user.UserService;
+import org.dromara.jpom.webhook.DefaultWebhookPluginImpl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -272,6 +273,7 @@ public class MonitorItem implements Task {
         }
         IPlugin plugin = PluginFactory.getPlugin("webhook");
         Map<String, Object> map = new HashMap<>(10);
+        map.put("JPOM_WEBHOOK_EVENT", DefaultWebhookPluginImpl.WebhookEvent.MONITOR);
         map.put("monitorId", monitorModel.getId());
         map.put("monitorName", monitorModel.getName());
         map.put("nodeId", monitorNotifyLog.getNodeId());

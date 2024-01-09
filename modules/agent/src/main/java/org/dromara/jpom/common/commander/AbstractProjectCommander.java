@@ -55,6 +55,7 @@ import org.dromara.jpom.socket.AgentFileTailWatcher;
 import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JvmUtil;
+import org.dromara.jpom.webhook.DefaultWebhookPluginImpl;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -354,6 +355,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         map.put("projectId", nodeProjectInfoModel.getId());
         map.put("projectName", nodeProjectInfoModel.getName());
         map.put("type", type);
+        map.put("JPOM_WEBHOOK_EVENT", DefaultWebhookPluginImpl.WebhookEvent.PROJECT);
 
         for (int i = 0; i < other.length; i += 2) {
             map.put(other[i].toString(), other[i + 1]);

@@ -55,6 +55,7 @@ import org.dromara.jpom.service.outgiving.OutGivingServer;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.StrictSyncFinisher;
 import org.dromara.jpom.util.SyncFinisherUtil;
+import org.dromara.jpom.webhook.DefaultWebhookPluginImpl;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -367,6 +368,7 @@ public class OutGivingRun {
                     map.put("executeTime", SystemClock.now());
                     try {
                         IPlugin plugin = PluginFactory.getPlugin("webhook");
+                        map.put("JPOM_WEBHOOK_EVENT", DefaultWebhookPluginImpl.WebhookEvent.DISTRIBUTE);
                         plugin.execute(webhook, map);
                     } catch (Exception e) {
                         log.error("WebHooks 调用错误", e);

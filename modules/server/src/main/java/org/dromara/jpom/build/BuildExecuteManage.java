@@ -69,6 +69,7 @@ import org.dromara.jpom.util.AntPathUtil;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.FileUtils;
 import org.dromara.jpom.util.LogRecorder;
+import org.dromara.jpom.webhook.DefaultWebhookPluginImpl;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -921,6 +922,7 @@ public class BuildExecuteManage implements Runnable {
                 ThreadUtil.execute(() -> {
                     try {
                         IPlugin plugin = PluginFactory.getPlugin("webhook");
+                        map.put("JPOM_WEBHOOK_EVENT", DefaultWebhookPluginImpl.WebhookEvent.BUILD);
                         plugin.execute(s, map);
                     } catch (Exception e) {
                         log.error("WebHooks 调用错误", e);
