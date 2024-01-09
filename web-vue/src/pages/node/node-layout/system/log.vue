@@ -8,7 +8,7 @@
     </a-layout-sider>
     <!-- 单个文件内容 -->
     <a-layout-content class="log-content">
-      <log-view2 :ref="`logView`" height="calc(100vh - 165px)">
+      <log-view2 :ref="`logView`" height="calc(100vh - 160px - 30px)">
         <template v-slot:before>
           <a-space>
             <a-button type="primary" size="small" @click="loadData">刷新</a-button>
@@ -215,13 +215,14 @@ export default {
 .log-sider {
   border: 1px solid #e2e2e2;
   overflow-x: auto;
+  height: calc(100vh - 110px);
   /* width: max-content; */
 }
 .log-content {
-  margin: 0;
-  padding-left: 15px;
+  /* margin: 0; */
+  padding: 15px;
   /* background: #fff; */
-  height: calc(100vh - 130px);
+  /* height: calc(100vh - 130px); */
   overflow-y: auto;
 }
 </style>

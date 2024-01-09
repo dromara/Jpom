@@ -157,8 +157,8 @@ public class ScriptController extends BaseAgentController {
      */
     @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> getNowLog(@ValidatorItem() String id,
-                                             @ValidatorItem() String executeId,
-                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
+                                              @ValidatorItem() String executeId,
+                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
         NodeScriptModel item = nodeScriptServer.getItem(id);
         Assert.notNull(item, "没有对应数据");
         File logFile = item.logFile(executeId);
@@ -179,7 +179,7 @@ public class ScriptController extends BaseAgentController {
      */
     @RequestMapping(value = "del_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Object> delLog(@ValidatorItem() String id,
-                                      @ValidatorItem() String executeId) {
+                                       @ValidatorItem() String executeId) {
         NodeScriptModel item = nodeScriptServer.getItem(id);
         if (item == null) {
             return JsonMessage.success("对应的脚本模版已经不存在拉");
@@ -256,5 +256,19 @@ public class ScriptController extends BaseAgentController {
             }
         }
         return JsonMessage.success("删除成功");
+    }
+
+    @RequestMapping(value = "change-workspace-id", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<Object> changeWorkspaceId(@ValidatorItem() String id, String newWorkspaceId, String newNodeId) {
+        Assert.hasText(newWorkspaceId, "请选择要修改的工作空间");
+        Assert.hasText(newWorkspaceId, "请选择要修改的节");
+        NodeScriptModel item = nodeScriptServer.getItem(id);
+        Assert.notNull(item, "找不到对应的脚本信息");
+        //
+        NodeScriptModel update = new NodeScriptModel();
+        update.setNodeId(newNodeId);
+        update.setWorkspaceId(newWorkspaceId);
+        nodeScriptServer.updateById(update, item.getId());
+        return JsonMessage.success("修改成功");
     }
 }

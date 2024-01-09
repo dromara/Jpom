@@ -39,6 +39,7 @@ import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.exception.AgentAuthorizeException;
 import org.dromara.jpom.exception.AgentException;
+import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.model.BaseNodeModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
@@ -120,6 +121,54 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
     }
 
     /**
+     * 检查孤独数据
+     *
+     * @param jsonArray 数据
+     * @param machineId 机器 ID
+     * @return list
+     */
+    protected List<T> checkLonelyDataArray(JSONArray jsonArray, String machineId) {
+        if (CollUtil.isEmpty(jsonArray)) {
+            return null;
+        }
+        // 分组
+        Map<String, List<T>> map = jsonArray.stream().map(o -> {
+            JSONObject jsonObject = (JSONObject) o;
+            return jsonObject.to(tClass);
+        }).collect(Collectors.groupingBy(
+            t -> StrUtil.emptyToDefault(t.getNodeId(), StrUtil.EMPTY) + StrUtil.COMMA + t.getWorkspaceId(),
+            Collectors.mapping(t -> t, Collectors.toList())
+        ));
+        // 查询不存在的节点
+        return map.entrySet()
+            .stream()
+            .filter(entry -> {
+                String key = entry.getKey();
+                if (StrUtil.startWith(key, StrUtil.COMMA)) {
+                    // 旧数据没有节点 ID
+                    List<String> list = StrUtil.splitTrim(key, StrUtil.COMMA);
+                    String workspaceId = CollUtil.getLast(list);
+                    NodeModel nodeModel = new NodeModel();
+                    nodeModel.setMachineId(machineId);
+                    nodeModel.setWorkspaceId(workspaceId);
+                    return true;
+                    //return !nodeService.exists(nodeModel);
+                }
+                List<String> list = StrUtil.splitTrim(key, StrUtil.COMMA);
+                if (CollUtil.size(list) != 2) {
+                    return true;
+                }
+                NodeModel nodeModel = new NodeModel();
+                nodeModel.setId(list.get(0));
+                nodeModel.setWorkspaceId(list.get(1));
+                return !nodeService.exists(nodeModel);
+
+            })
+            .flatMap(entry -> entry.getValue().stream())
+            .collect(Collectors.toList());
+    }
+
+    /**
      * 同步执行 同步节点信息
      *
      * @param nodeModel 节点信息
@@ -152,27 +201,31 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                 .map(BaseNodeModel::dataId)
                 .collect(Collectors.toSet());
             // 转换数据修改时间
-            List<T> projectInfoModels = jsonArray.stream().map(o -> {
+            List<T> projectInfoModels = jsonArray.stream()
+                .map(o -> {
                     // modifyTime,createTime
                     JSONObject jsonObject = (JSONObject) o;
                     T t = jsonObject.to(tClass);
-                    Opt.ofBlankAble(jsonObject.getString("createTime")).map(s -> {
-                        try {
-                            return DateUtil.parse(s);
-                        } catch (Exception e) {
-                            log.warn("数据创建时间格式不正确 {} {}", s, jsonObject);
-                            return null;
-                        }
-                    }).ifPresent(s -> t.setCreateTimeMillis(s.getTime()));
+                    Opt.ofBlankAble(jsonObject.getString("createTime"))
+                        .map(s -> {
+                            try {
+                                return DateUtil.parse(s);
+                            } catch (Exception e) {
+                                log.warn("数据创建时间格式不正确 {} {}", s, jsonObject);
+                                return null;
+                            }
+                        }).ifPresent(s -> t.setCreateTimeMillis(s.getTime()));
                     //
-                    Opt.ofBlankAble(jsonObject.getString("modifyTime")).map(s -> {
-                        try {
-                            return DateUtil.parse(s);
-                        } catch (Exception e) {
-                            log.warn("数据修改时间格式不正确 {} {}", s, jsonObject);
-                            return null;
-                        }
-                    }).ifPresent(s -> t.setModifyTimeMillis(s.getTime()));
+                    Opt.ofBlankAble(jsonObject.getString("modifyTime"))
+                        .map(s -> {
+                            try {
+                                return DateUtil.parse(s);
+                            } catch (Exception e) {
+                                log.warn("数据修改时间格式不正确 {} {}", s, jsonObject);
+                                return null;
+                            }
+                        })
+                        .ifPresent(s -> t.setModifyTimeMillis(s.getTime()));
                     return t;
                 })
                 .peek(item -> this.fullData(item, nodeModel))
@@ -384,4 +437,12 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
      * @return json
      */
     public abstract JSONArray getLitDataArray(NodeModel nodeModel);
+
+    /**
+     * 查询孤立的数据
+     *
+     * @param machineNodeModel 资产
+     * @return json
+     */
+    public abstract List<T> lonelyDataArray(MachineNodeModel machineNodeModel);
 }

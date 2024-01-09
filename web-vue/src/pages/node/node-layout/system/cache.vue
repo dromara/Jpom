@@ -61,7 +61,82 @@
         </a-timeline>
       </a-tab-pane>
       <a-tab-pane key="2" tab="定时任务"> <task-stat :taskList="taskList" @refresh="loadData" /></a-tab-pane>
+      <a-tab-pane key="3" tab="孤独数据">
+        <a-space direction="vertical" style="width: 100%">
+          <a-alert message="何为孤独数据" type="warning" show-icon>
+            <template #description>
+              <ul>
+                <li>
+                  孤独数据是值机器几点里面存在数据，但是无非和当前系统绑定上关系（关闭绑定节点ID+工作空间ID对应才行），一般情况下不会出现这样的数据
+                </li>
+                <li>通常情况为项目迁移工作空间、迁移物理机器等一些操作可能产生孤独数据</li>
+                <li>如果孤独数据被工作空间下的其他功能关联，修正后关联的数据将失效对应功能无非查询到关联数据</li>
+              </ul>
+            </template>
+          </a-alert>
+          <a-list size="small" bordered :data-source="machineLonelyData.projects">
+            <template #renderItem="{ item }">
+              <a-list-item>
+                <a-space>
+                  <span>项目名称：{{ item.name }}</span>
+                  <span>项目ID：{{ item.id }}</span>
+                  <span>工作空间ID：{{ item.workspaceId }}</span>
+                  <span>节点ID：{{ item.nodeId }}</span>
+                  <a-button type="primary" size="small" danger @click="openCorrectLonely(item.id, 'project')"
+                    >修正</a-button
+                  >
+                </a-space>
+              </a-list-item>
+            </template>
+            <template #header>
+              <div>项目孤独数据</div>
+            </template>
+          </a-list>
+          <a-list size="small" bordered :data-source="machineLonelyData.scripts">
+            <template #renderItem="{ item }">
+              <a-list-item
+                ><a-space>
+                  <span>脚本名称：{{ item.name }}</span>
+                  <span>脚本ID：{{ item.id }}</span>
+                  <span>工作空间ID：{{ item.workspaceId }}</span>
+                  <span>节点ID：{{ item.nodeId }}</span>
+                  <a-button type="primary" size="small" danger @click="openCorrectLonely(item.id, 'script')"
+                    >修正</a-button
+                  >
+                </a-space>
+              </a-list-item>
+            </template>
+            <template #header>
+              <div>脚本孤独数据</div>
+            </template>
+          </a-list></a-space
+        >
+      </a-tab-pane>
     </a-tabs>
+    <!-- 分配到其他工作空间 -->
+    <a-modal
+      destroyOnClose
+      :confirmLoading="confirmLoading"
+      v-model:open="correctLonelyOpen"
+      title="修正孤独数据"
+      @ok="handleCorrectLonely"
+      :maskClosable="false"
+    >
+      <a-space direction="vertical" style="width: 100%">
+        <a-alert message="温馨提示" type="warning">
+          <template #description>修改后如果有原始关联数据将失效，需要重新配置关联 </template>
+        </a-alert>
+        <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+          <a-form-item label="选择节点" name="nodeId">
+            <a-select show-search option-filter-prop="children" v-model:value="temp.toNodeId" placeholder="请选择节点">
+              <a-select-option v-for="item in nodeList" :key="item.id">
+                【{{ item.workspace && item.workspace.name }}】{{ item.name }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-form>
+      </a-space>
+    </a-modal>
   </div>
 </template>
 
@@ -69,6 +144,7 @@
 import { getNodeCache, clearCache } from '@/api/system'
 import TaskStat from '@/pages/system/taskStat'
 import { renderSize } from '@/utils/const'
+import { machineLonelyData, machineCorrectLonelyData, machineListNode } from '@/api/system/assets-machine'
 export default {
   components: {
     TaskStat
@@ -81,11 +157,18 @@ export default {
   data() {
     return {
       temp: {},
-      taskList: []
+      taskList: [],
+      machineLonelyDataLoading: true,
+      machineLonelyData: {},
+      correctLonelyOpen: false,
+      confirmLoading: false,
+      nodeList: [],
+      temp: {}
     }
   },
   mounted() {
     this.loadData()
+    this.listMachineLonelyData()
   },
   methods: {
     // parseTime,
@@ -116,6 +199,60 @@ export default {
           this.loadData()
         }
       })
+    },
+    // 查询孤独数据
+    listMachineLonelyData() {
+      this.machineLonelyDataLoading = true
+      machineLonelyData({
+        id: this.machineId
+      })
+        .then((res) => {
+          if (res.code === 200 && res.data) {
+            this.machineLonelyData = res.data
+          }
+        })
+        .finally(() => {
+          this.machineLonelyDataLoading = false
+        })
+    },
+    // 查询机器关联的节点
+    listMachineNode() {
+      machineListNode({
+        id: this.machineId
+      }).then((res) => {
+        if (res.code === 200) {
+          this.nodeList = res.data
+        }
+      })
+    },
+    // 打开修正窗口
+    openCorrectLonely(dataId, type) {
+      this.temp = { type: type, id: this.machineId, dataId: dataId }
+      this.correctLonelyOpen = true
+      this.listMachineNode()
+    },
+    //确认修正
+    handleCorrectLonely() {
+      if (!this.temp.toNodeId) {
+        $notification.warn({
+          message: '请选择节点'
+        })
+        return false
+      }
+      this.confirmLoading = true
+      machineCorrectLonelyData(this.temp)
+        .then((res) => {
+          if (res.code == 200) {
+            $notification.success({
+              message: res.msg
+            })
+            this.correctLonelyOpen = false
+            this.listMachineLonelyData()
+          }
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
     }
   }
 }

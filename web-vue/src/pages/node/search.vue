@@ -1341,7 +1341,8 @@ export default {
 :deep(.ant-statistic div) {
   display: inline-block;
 }
-:deep(.ant-statistic-content-value .ant-statistic-content) {
+
+:deep(.ant-statistic-content-value, .ant-statistic-content) {
   font-size: 16px;
 }
 </style>
