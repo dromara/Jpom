@@ -24,6 +24,7 @@ import codeEditor from '@/components/codeEditor'
 import { RESTART_UPGRADE_WAIT_TIME_COUNT } from '@/utils/const'
 
 export default {
+  inject: ['globalLoading'],
   components: {
     codeEditor
   },
@@ -78,7 +79,7 @@ export default {
     },
     startCheckRestartStatus(msg) {
       this.checkCount = 0
-      window.$vueApp.config.globalProperties.$setLoading({
+      this.globalLoading({
         spinning: true,
         tip: (msg || '重启中，请稍候...') + ',请耐心等待暂时不用刷新页面,重启成功后会自动刷新'
       })
@@ -89,7 +90,7 @@ export default {
             .then((res) => {
               if (res.code === 200) {
                 clearInterval(this.timer)
-                window.$vueApp.config.globalProperties.$setLoading(false)
+                this.globalLoading(false)
                 $notification.success({
                   message: '重启成功'
                 })
@@ -102,7 +103,7 @@ export default {
                   $notification.warning({
                     message: '未重启成功：' + (res.msg || '')
                   })
-                  window.$vueApp.config.globalProperties.$setLoading(false)
+                  this.globalLoading(false)
                   clearInterval(this.timer)
                 }
               }
@@ -110,7 +111,7 @@ export default {
             .catch((error) => {
               console.error(error)
               if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
-                window.$vueApp.config.globalProperties.$setLoading(false)
+                this.globalLoading(false)
                 $notification.error({
                   message: '重启超时,请去服务器查看控制台日志排查问题'
                 })

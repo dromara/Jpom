@@ -424,6 +424,7 @@ import { getBuildGet } from '@/api/build-info'
 import { hasFile } from '@/api/file-manager/file-storage'
 import { hasStaticFile } from '@/api/file-manager/static-storage'
 export default {
+  inject: ['globalLoading'],
   components: {
     BuildList,
     BuildHistory,
@@ -556,6 +557,15 @@ export default {
             process: (process, end, total, duration) => {
               this.percentage = Math.max(this.percentage, process)
               this.percentageInfo = { end, total, duration }
+            },
+            resolveFileProcess: (msg) => {
+              this.globalLoading({
+                spinning: true,
+                tip: msg
+              })
+            },
+            resolveFileEnd: () => {
+              this.globalLoading(false)
             },
             success: (uploadData) => {
               // 准备合并

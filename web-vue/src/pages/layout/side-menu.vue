@@ -7,6 +7,7 @@
       v-model:value="mangerMenuOpenkeys"
       @click="mangerMenuClick"
       :openKeys="mangerMenuOpenkeys"
+      class="menu"
     >
       <a-menu-item key="admin-manager">
         <template v-if="mode === 'normal'">
@@ -27,6 +28,7 @@
       v-model:selectedKeys="selectedKeys"
       @openChange="openChange"
       :openKeys="getMenuOpenKeys2"
+      class="menu"
     >
       <template v-for="menu in getMenus">
         <template v-if="menu.childs && menu.childs.length">
@@ -158,3 +160,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+.menu {
+  border-inline-end: 0 !important;
+}
+</style>

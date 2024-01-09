@@ -1,115 +1,111 @@
 <template>
   <div>
-    <a-spin :tip="upgradeSpin.tip" :spinning="upgradeSpin.spinning">
-      <a-timeline>
-        <a-timeline-item>
-          <span class="layui-elem-quote">
-            当前程序打包时间：{{ temp.timeStamp }}
-            <a-tag v-if="this.nodeId || this.machineId">agent</a-tag>
-            <a-tag v-else>server</a-tag>
-          </span>
-        </a-timeline-item>
-        <a-timeline-item>
-          <span class="layui-elem-quote">当前前端打包时间：{{ temp.vueTimeStamp }}</span>
-        </a-timeline-item>
-        <a-timeline-item v-if="!this.nodeId && !this.machineId">
-          <span class="layui-elem-quote">beta计划：</span>
-          <a-space>
-            <a-switch
-              checked-children="加入"
-              un-checked-children="未加入"
-              :disabled="true"
-              v-model:checked="temp.joinBetaRelease"
-            />
-            <template v-if="temp.joinBetaRelease">
-              <a-button type="link" @click="handleChangeBetaRelease(false)">关闭 beta 计划</a-button>
-            </template>
-            <template v-else>
-              <a-tooltip>
-                <template #title>
-                  加入 beta 计划可以及时获取到最新的功能、一些优化功能、最快修复 bug 的版本，但是 beta
-                  版也可能在部分新功能上存在不稳定的情况。您需要根据您业务情况来评估是否可以加入 beta，在使用 beta
-                  版过程中遇到问题可以随时反馈给我们，我们会尽快为您解答。
-                </template>
-                <a-button type="link" @click="handleChangeBetaRelease(true)"
-                  ><QuestionCircleOutlined />我要加入</a-button
-                >
-              </a-tooltip>
-            </template>
-          </a-space>
-        </a-timeline-item>
-        <a-timeline-item>
-          <a-space>
-            <span class="layui-elem-quote">当前版本号：{{ temp.version }} </span>
-            <template v-if="temp.upgrade !== undefined">
-              <a-tag v-if="temp.upgrade" color="pink" @click="upgrageVerion"
-                >新版本：{{ temp.newVersion }} {{ temp.newBeta ? '/beta' : '' }} <DownloadOutlined />
-              </a-tag>
-              <a-tag v-else color="orange" @click="checkVersion">
-                <RocketOutlined />
-              </a-tag>
-            </template>
-          </a-space>
-        </a-timeline-item>
-        <a-timeline-item>
-          <span class="layui-elem-quote">已经运行时间：{{ formatDuration(temp.upTime) }}</span>
-        </a-timeline-item>
-        <a-timeline-item>
-          <span class="layui-elem-quote"
-            >端口号：<a-tag>{{ temp.port }}</a-tag></span
-          >
-          <span class="layui-elem-quote">&nbsp;&nbsp;</span>
-          <span class="layui-elem-quote"
-            >进程号：<a-tag>{{ temp.pid }}</a-tag></span
-          >
-        </a-timeline-item>
-        <a-timeline-item>
-          <a-alert
-            message="请勿手动删除数据目录下面文件,如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除"
-            type="warning"
-            show-icon
+    <a-timeline>
+      <a-timeline-item>
+        <span class="layui-elem-quote">
+          当前程序打包时间：{{ temp.timeStamp }}
+          <a-tag v-if="this.nodeId || this.machineId">agent</a-tag>
+          <a-tag v-else>server</a-tag>
+        </span>
+      </a-timeline-item>
+      <a-timeline-item>
+        <span class="layui-elem-quote">当前前端打包时间：{{ temp.vueTimeStamp }}</span>
+      </a-timeline-item>
+      <a-timeline-item v-if="!this.nodeId && !this.machineId">
+        <span class="layui-elem-quote">beta计划：</span>
+        <a-space>
+          <a-switch
+            checked-children="加入"
+            un-checked-children="未加入"
+            :disabled="true"
+            v-model:checked="temp.joinBetaRelease"
           />
-        </a-timeline-item>
-        <a-timeline-item>
-          <span class="layui-elem-quote">
-            数据存储目录：
-            <a-tag>{{ temp.dataPath }}</a-tag>
-          </span>
-          <span class="layui-elem-quote" v-if="temp.jarFile">
-            运行的Jar包：
-            <a-tag>{{ temp.jarFile }}</a-tag>
-          </span>
-        </a-timeline-item>
-      </a-timeline>
+          <template v-if="temp.joinBetaRelease">
+            <a-button type="link" @click="handleChangeBetaRelease(false)">关闭 beta 计划</a-button>
+          </template>
+          <template v-else>
+            <a-tooltip>
+              <template #title>
+                加入 beta 计划可以及时获取到最新的功能、一些优化功能、最快修复 bug 的版本，但是 beta
+                版也可能在部分新功能上存在不稳定的情况。您需要根据您业务情况来评估是否可以加入 beta，在使用 beta
+                版过程中遇到问题可以随时反馈给我们，我们会尽快为您解答。
+              </template>
+              <a-button type="link" @click="handleChangeBetaRelease(true)"><QuestionCircleOutlined />我要加入</a-button>
+            </a-tooltip>
+          </template>
+        </a-space>
+      </a-timeline-item>
+      <a-timeline-item>
+        <a-space>
+          <span class="layui-elem-quote">当前版本号：{{ temp.version }} </span>
+          <template v-if="temp.upgrade !== undefined">
+            <a-tag v-if="temp.upgrade" color="pink" @click="upgrageVerion"
+              >新版本：{{ temp.newVersion }} {{ temp.newBeta ? '/beta' : '' }} <DownloadOutlined />
+            </a-tag>
+            <a-tag v-else color="orange" @click="checkVersion">
+              <RocketOutlined />
+            </a-tag>
+          </template>
+        </a-space>
+      </a-timeline-item>
+      <a-timeline-item>
+        <span class="layui-elem-quote">已经运行时间：{{ formatDuration(temp.upTime) }}</span>
+      </a-timeline-item>
+      <a-timeline-item>
+        <span class="layui-elem-quote"
+          >端口号：<a-tag>{{ temp.port }}</a-tag></span
+        >
+        <span class="layui-elem-quote">&nbsp;&nbsp;</span>
+        <span class="layui-elem-quote"
+          >进程号：<a-tag>{{ temp.pid }}</a-tag></span
+        >
+      </a-timeline-item>
+      <a-timeline-item>
+        <a-alert
+          message="请勿手动删除数据目录下面文件,如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除"
+          type="warning"
+          show-icon
+        />
+      </a-timeline-item>
+      <a-timeline-item>
+        <span class="layui-elem-quote">
+          数据存储目录：
+          <a-tag>{{ temp.dataPath }}</a-tag>
+        </span>
+        <span class="layui-elem-quote" v-if="temp.jarFile">
+          运行的Jar包：
+          <a-tag>{{ temp.jarFile }}</a-tag>
+        </span>
+      </a-timeline-item>
+    </a-timeline>
 
-      <a-row>
-        <a-col span="22">
-          <a-space direction="vertical" style="width: 100%">
-            <a-upload
-              :file-list="fileList"
-              :disabled="!!percentage"
-              :before-upload="beforeUpload"
-              @remove="handleRemove"
-              accept=".jar,.zip"
-            >
-              <LoadingOutlined v-if="percentage" />
-              <a-button v-else><UploadOutlined />选择升级文件</a-button>
-            </a-upload>
-            <a-row v-if="percentage">
-              <a-col span="20">
-                <a-progress :percent="percentage" style="width: 100%"></a-progress>
-              </a-col>
-            </a-row>
-            <a-button type="primary" :disabled="fileList.length === 0 || !!percentage" @click="startUpload">
-              上传升级包
-            </a-button>
-          </a-space>
-        </a-col>
-      </a-row>
+    <a-row>
+      <a-col span="22">
+        <a-space direction="vertical" style="width: 100%">
+          <a-upload
+            :file-list="fileList"
+            :disabled="!!percentage"
+            :before-upload="beforeUpload"
+            @remove="handleRemove"
+            accept=".jar,.zip"
+          >
+            <LoadingOutlined v-if="percentage" />
+            <a-button v-else><UploadOutlined />选择升级文件</a-button>
+          </a-upload>
+          <a-row v-if="percentage">
+            <a-col span="20">
+              <a-progress :percent="percentage" style="width: 100%"></a-progress>
+            </a-col>
+          </a-row>
+          <a-button type="primary" :disabled="fileList.length === 0 || !!percentage" @click="startUpload">
+            上传升级包
+          </a-button>
+        </a-space>
+      </a-col>
+    </a-row>
 
-      <a-divider dashed />
-      <div v-html="changelog"></div>
-    </a-spin>
+    <a-divider dashed />
+    <div v-html="changelog"></div>
   </div>
 </template>
 
@@ -126,7 +122,7 @@ import {
 
 import markdownit from 'markdown-it'
 // import 'markdown-it-vue/dist/markdown-it-vue.css'
-import { h } from 'vue'
+
 import {
   RESTART_UPGRADE_WAIT_TIME_COUNT,
   parseTime,
@@ -139,6 +135,7 @@ import { executionRequest } from '@/api/external'
 
 export default {
   name: 'Upgrade',
+  inject: ['globalLoading'],
   components: {
     // MarkdownItVue
   },
@@ -159,11 +156,7 @@ export default {
       checkCount: 0,
       fileList: [],
       percentage: 0,
-      changelog: '',
-      upgradeSpin: {
-        spinning: false,
-        tip: ''
-      }
+      changelog: ''
     }
   },
   mounted() {
@@ -289,6 +282,15 @@ export default {
           this.percentage = 0
           uploadPieces({
             file,
+            resolveFileProcess: (msg) => {
+              this.globalLoading({
+                spinning: true,
+                tip: msg
+              })
+            },
+            resolveFileEnd: () => {
+              this.globalLoading(false)
+            },
             process: (process) => {
               this.percentage = Math.max(this.percentage, process)
             },
@@ -355,10 +357,10 @@ export default {
     startCheckUpgradeStatus(msg) {
       this.checkCount = 0
 
-      this.upgradeSpin = {
+      this.globalLoading({
         spinning: true,
         tip: (msg || '升级中，请稍候...') + ',请耐心等待暂时不用刷新页面,升级成功后会自动刷新'
-      }
+      })
       //
       this.timer = setInterval(() => {
         systemInfo({
@@ -368,10 +370,9 @@ export default {
           .then((res) => {
             let manifest = res.data?.manifest
             if (res.code === 200 && manifest?.timeStamp !== this.temp.timeStamp) {
-              this.upgradeSpin = {
-                spinning: false,
-                tip: ''
-              }
+              this.globalLoading({
+                spinning: false
+              })
               clearInterval(this.timer)
               $notification.success({
                 message: '升级成功'
@@ -385,10 +386,9 @@ export default {
                 $notification.warning({
                   message: '未升级成功：' + (res.msg || '')
                 })
-                this.upgradeSpin = {
-                  spinning: false,
-                  tip: ''
-                }
+                this.globalLoading({
+                  spinning: false
+                })
                 clearInterval(this.timer)
               }
             }
@@ -396,19 +396,18 @@ export default {
           .catch((error) => {
             console.error(error)
             if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
-              this.upgradeSpin = {
-                spinning: false,
-                tip: ''
-              }
+              this.globalLoading({
+                spinning: false
+              })
               clearInterval(this.timer)
               $notification.error({
                 message: '升级超时,请去服务器查看控制台日志排查问题'
               })
             } else {
-              this.upgradeSpin = {
+              this.globalLoading({
                 spinning: true,
                 tip: (msg || '升级中，请稍候...') + ',请耐心等待暂时不用刷新页面,升级成功后会自动刷新'
-              }
+              })
             }
           })
         this.checkCount = this.checkCount + 1
