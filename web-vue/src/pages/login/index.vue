@@ -118,12 +118,18 @@ import sha1 from 'js-sha1'
 import maxkeyImg from '@/assets/images/maxkey.png'
 import giteeImg from '@/assets/images/gitee.svg'
 import githubImg from '@/assets/images/github.png'
+import { useGuideStore } from '@/stores/guide'
 
 interface IFormState {
   loginName: string
   userPwd: string
   code: string
 }
+const guideStore = useGuideStore()
+
+const theme = computed(() => {
+  return guideStore.getThemeView()
+})
 
 const router = useRouter()
 const route = useRoute()
@@ -147,9 +153,12 @@ const dynamicBg = ref(localStorage.getItem('dynamicBg') === 'true')
 const disabledCaptcha = ref(false)
 
 const backgroundImage = computed(() => {
+  const color =
+    theme === 'light' ? 'linear-gradient(#1890ff, #66a9c9)' : 'linear-gradient(rgb(38 46 55), rgb(27 33 36))'
+  // background: linear-gradient(#1890ff, #66a9c9);
   return dynamicBg.value
-    ? { backgroundImage: `url(https://picsum.photos/${screen.width}/${screen.height}/?random)` }
-    : {}
+    ? { backgroundImage: `url(https://picsum.photos/${screen.width}/${screen.height}/?random)`, background: color }
+    : { background: color }
 })
 
 // 检查是否需要初始化
@@ -168,7 +177,7 @@ const beginCheckSystem = () => {
     if (res.data?.loginTitle) {
       loginTitle.value = res.data.loginTitle
     }
-    disabledCaptcha.value = res.data.disabledCaptcha
+
     checkOauth2()
   })
 }
@@ -184,12 +193,18 @@ const getLoginConfig = () => {
       })
       loginForm.loginName = demo.user
     }
+    disabledCaptcha.value = res.data.disabledCaptcha
     enabledOauth2Provides.value = res.data?.oauth2Provides || []
+
+    changeCode()
   })
 }
 // change Code
 const changeCode = () => {
-  loginRandCode().then((res) => {
+  if (disabledCaptcha.value) {
+    return
+  }
+  loginRandCode({ theme: theme.value, t: new Date().getTime() }).then((res) => {
     if (res.code === 200) {
       randCode.value = res.data
       loginForm.code = ''
@@ -321,7 +336,7 @@ const handleMfa = () => {
 
 onMounted(() => {
   beginCheckSystem()
-  changeCode()
+
   getLoginConfig()
 })
 
@@ -385,7 +400,7 @@ onMounted(() => {
   // width: 100vw;
   height: 100vh;
   /* background-color: #fbefdf; */
-  background: linear-gradient(#1890ff, #66a9c9);
+
   background-size: cover;
   display: flex;
   justify-content: center;
