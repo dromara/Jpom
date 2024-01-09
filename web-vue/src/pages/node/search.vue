@@ -371,7 +371,7 @@
     <!-- 批量操作状态 -->
     <a-modal destroyOnClose v-model:value="batchVisible" :title="temp.title" :footer="null" @cancel="batchClose">
       <a-list bordered :data-source="temp.data">
-        <template v-slot:renderItem="item">
+        <template v-slot:renderItem="{ item }">
           <a-list-item>
             <a-list-item-meta>
               <!-- <template #description> :="item.whitelistDirectory" </template> -->

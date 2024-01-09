@@ -429,7 +429,7 @@
       <a-tabs>
         <a-tab-pane key="1" tab="docker">
           <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.dockerList">
-            <template v-slot:renderItem="item">
+            <template v-slot:renderItem="{ item }">
               <a-list-item style="display: block">
                 <a-row>
                   <a-col :span="10">Docker 名称：{{ item.name }}</a-col>
@@ -442,7 +442,7 @@
         </a-tab-pane>
         <a-tab-pane key="2" tab="集群">
           <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.swarmList">
-            <template v-slot:renderItem="item">
+            <template v-slot:renderItem="{ item }">
               <a-list-item style="display: block">
                 <a-row>
                   <a-col :span="10">集群名称：{{ item.name }}</a-col>
