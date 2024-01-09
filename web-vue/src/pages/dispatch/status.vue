@@ -663,14 +663,13 @@ export default {
 </script>
 
 <style scoped>
-/deep/ .ant-progress-text {
+:deep(.ant-progress-text) {
   width: auto;
 }
-/deep/ .ant-statistic div {
+:deep(.ant-statistic div) {
   display: inline-block;
 }
-/deep/ .ant-statistic-content-value,
-/deep/ .ant-statistic-content {
+:deep(.ant-statistic-content-value, .ant-statistic-content) {
   font-size: 16px;
 }
 .box-shadow {

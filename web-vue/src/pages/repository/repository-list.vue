@@ -173,7 +173,6 @@
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            suffixIcon=""
             inputPlaceholder="添加分组"
             selectPlaceholder="选择分组名"
           >
@@ -375,7 +374,7 @@
                   <a-select-option :value="item" v-for="item in Object.keys(providerData)" :key="item"> {{ item }}</a-select-option>
                 </a-select>
 
-                <a-button slot="addonAfter" size="small" type="primary" icon="search" @click="handleGiteeImportFormOk"></a-button>
+
               </a-input> -->
               <a-input-group compact>
                 <a-select style="width: 10%" @change="importChange" v-model:value="giteeImportForm.type">

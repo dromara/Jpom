@@ -56,7 +56,7 @@
                       :key="index"
                     >
                       <a-button type="link" :disabled="item.id === selectWorkspace.id">
-                        {{ item.name }}
+                        {{ item.name || '未配置' }}
                         <template v-if="myClusterList.length > 1 && item.clusterInfoId">
                           【{{
                             myClusterList.find((item2) => {
@@ -69,7 +69,7 @@
                         </template>
                       </a-button>
                     </a-menu-item>
-                    <a-menu-divider v-if="index < myWorkspaceList.length" :key="`${item.id}-divider`" />
+                    <a-menu-divider v-if="index < myWorkspaceList[0].children.length - 1" :key="`${item.id}-divider`" />
                   </template>
                 </template>
                 <template v-if="myWorkspaceList.length > 1">
@@ -77,7 +77,7 @@
                     <a-sub-menu>
                       <template #title>
                         <a-button type="link">
-                          {{ item1.value }}
+                          {{ item1.value || '未配置' }}
                         </a-button>
                       </template>
                       <template v-for="(item, index) in item1.children">
@@ -1096,17 +1096,6 @@ export default {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-}
-
-/deep/ .ant-dropdown-menu-submenu-arrow {
-  position: relative;
-}
-
-/deep/ .ant-dropdown-menu-item-divider,
-/deep/ .ant-dropdown-menu-submenu-title-divider,
-.ant-dropdown-menu-item-divider,
-.ant-dropdown-menu-submenu-title-divider {
-  margin: 0;
 }
 
 .qrcode {

@@ -266,16 +266,7 @@
       </a-table>
     </template>
     <template v-else-if="this.type === 'compose'">
-      <a-table
-        :data-source="list"
-        size="middle"
-        :columns="parentColumns"
-        :pagination="false"
-        bordered
-        :scroll="{
-          x: 'max-content'
-        }"
-      >
+      <a-card>
         <template v-slot:title>
           <a-space>
             <a-input
@@ -304,268 +295,293 @@
             <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="autoUpdate" />
           </a-space>
         </template>
+        <a-collapse>
+          <a-collapse-panel v-for="(item2, index) in list" :key="index">
+            <template #header>
+              <a-space>
+                <span>{{ item2.name }}</span>
+                <span>
+                  <span style="display: none">
+                    {{
+                      (array = (item2.child || []).map((item) => {
+                        return item.state
+                      }))
+                    }}
+                    {{
+                      (runningCount = array
+                        .map((item) => {
+                          return item === 'running' ? 1 : 0
+                        })
+                        .reduce((prev, curr) => {
+                          return prev + curr
+                        }, 0))
+                    }}</span
+                  >
+                  <span v-if="runningCount">Running({{ runningCount }}/{{ array.length }})</span>
+                  <span v-else>Exited</span>
+                </span>
+              </a-space>
+            </template>
+            <a-table
+              :data-source="item2.child"
+              size="middle"
+              :columns="columns"
+              :pagination="false"
+              bordered
+              rowKey="id"
+              :scroll="{
+                x: 'max-content'
+              }"
+            >
+              <template #bodyCell="{ column, text, record }">
+                <template v-if="column.dataIndex === 'names'">
+                  <a-popover :title="`容器名称：${(text || []).join(',')}`">
+                    <template v-slot:content>
+                      <p>容器Id: {{ record.id }}</p>
+                      <p>镜像：{{ record.image }}</p>
+                      <p>镜像Id: {{ record.imageId }}</p>
+                    </template>
+
+                    <span>{{ (text || []).join(',') }}</span>
+                  </a-popover>
+                </template>
+
+                <template v-else-if="column.dataIndex === 'labels'">
+                  <a-popover :title="`容器名标签`">
+                    <template v-slot:content>
+                      <template v-if="record.labels">
+                        <p v-for="(value, key) in record.labels" :key="key">
+                          {{ key }}
+
+                          <ArrowRightOutlined />
+                          {{ value }}
+                        </p>
+                      </template>
+                    </template>
+                    <template v-if="record.labels && Object.keys(record.labels).length">
+                      <span>{{ (record.labels && Object.keys(record.labels).length) || 0 }} <TagsOutlined /></span>
+                    </template>
+                    <template v-else>-</template>
+                  </a-popover>
+                </template>
+                <template v-else-if="column.dataIndex === 'mounts'">
+                  <a-popover :title="`挂载`">
+                    <template v-slot:content>
+                      <template v-if="record.mounts">
+                        <div v-for="(item, index) in record.mounts" :key="index">
+                          <p>
+                            名称：{{ item.name }}
+                            <a-tag>{{ item.rw ? '读写' : '读' }}</a-tag>
+                          </p>
+                          <p>路径：{{ item.source }}(宿主机) => {{ item.destination }}(容器)</p>
+                          <a-divider></a-divider>
+                        </div>
+                      </template>
+                    </template>
+                    <template v-if="record.mounts && Object.keys(record.mounts).length">
+                      <span>{{ (record.mounts && Object.keys(record.mounts).length) || 0 }} <ApiOutlined /></span>
+                    </template>
+                    <template v-else>-</template>
+                  </a-popover>
+                </template>
+
+                <template v-else-if="column.tooltip">
+                  <a-tooltip placement="topLeft" :title="text">
+                    <span>{{ text }}</span>
+                  </a-tooltip>
+                </template>
+
+                <template v-else-if="column.showid">
+                  <a-tooltip placement="topLeft" :title="text">
+                    <span style="display: none"> {{ (array = text.split(':')) }}</span>
+                    <span>{{ array[array.length - 1].slice(0, 12) }}</span>
+                  </a-tooltip>
+                </template>
+
+                <template v-else-if="column.dataIndex === 'ports'">
+                  <a-popover placement="topLeft">
+                    <template #title>
+                      网络端口
+                      <ul>
+                        <li v-for="(item, index) in text || []" :key="index">
+                          {{
+                            item.type + ' ' + (item.ip || '') + ':' + (item.publicPort || '') + ':' + item.privatePort
+                          }}
+                        </li>
+                      </ul>
+                    </template>
+                    <template v-slot:content>
+                      <template v-if="record.networkSettings">
+                        <template v-if="record.networkSettings.networks">
+                          <template v-if="record.networkSettings.networks.bridge">
+                            桥接模式：
+                            <p v-if="record.networkSettings.networks.bridge.ipAddress">
+                              IP:
+                              <a-tag>{{ record.networkSettings.networks.bridge.ipAddress }}</a-tag>
+                            </p>
+                            <p v-if="record.networkSettings.networks.bridge.macAddress">
+                              MAC:
+                              <a-tag>{{ record.networkSettings.networks.bridge.macAddress }}</a-tag>
+                            </p>
+                            <p v-if="record.networkSettings.networks.bridge.gateway">
+                              网关:
+                              <a-tag>{{ record.networkSettings.networks.bridge.gateway }}</a-tag>
+                            </p>
+                            <p v-if="record.networkSettings.networks.bridge.networkID">
+                              networkID:
+                              <a-tag>{{ record.networkSettings.networks.bridge.networkID }}</a-tag>
+                            </p>
+                            <p v-if="record.networkSettings.networks.bridge.endpointId">
+                              endpointId:
+                              <a-tag>{{ record.networkSettings.networks.bridge.endpointId }}</a-tag>
+                            </p>
+                          </template>
+                          <template v-if="record.networkSettings.networks.ingress">
+                            <p v-if="record.networkSettings.networks.ingress.ipAddress">
+                              IP:
+                              <a-tag>{{ record.networkSettings.networks.ingress.ipAddress }}</a-tag>
+                            </p>
+                            <p v-if="record.networkSettings.networks.ingress.macAddress">
+                              MAC:
+                              <a-tag>{{ record.networkSettings.networks.ingress.macAddress }}</a-tag>
+                            </p>
+                            <p v-if="record.networkSettings.networks.ingress.gateway">
+                              网关:
+                              <a-tag>{{ record.networkSettings.networks.ingress.gateway }}</a-tag>
+                            </p>
+                            <p v-if="record.networkSettings.networks.ingress.networkID">
+                              networkID:
+                              <a-tag>{{ record.networkSettings.networks.ingress.networkID }}</a-tag>
+                            </p>
+                            <p v-if="record.networkSettings.networks.ingress.endpointId">
+                              endpointId:
+                              <a-tag>{{ record.networkSettings.networks.ingress.endpointId }}</a-tag>
+                            </p>
+                          </template>
+                        </template>
+                      </template>
+                    </template>
+                    <span>{{
+                      (text || [])
+                        .map((item) => {
+                          return item.type + ' ' + (item.publicPort || '') + ':' + item.privatePort
+                        })
+                        .join('/')
+                    }}</span>
+                  </a-popover>
+                </template>
+
+                <template v-else-if="column.dataIndex === 'state'">
+                  <a-tooltip :title="(record.status || '') + ' 点击查看日志'" @click="viewLog(record)">
+                    <a-switch :checked="record.state === 'running'" :disabled="true">
+                      <template v-slot:checkedChildren>
+                        <CheckCircleOutlined />
+                      </template>
+                      <template v-slot:unCheckedChildren>
+                        <WarningOutlined />
+                      </template>
+                    </a-switch>
+                  </a-tooltip>
+                </template>
+                <template v-else-if="column.dataIndex === 'operation'">
+                  <a-space>
+                    <template v-if="record.state === 'running'">
+                      <a-tooltip title="容器是运行中可以进入终端">
+                        <a-button size="small" type="link" @click="handleTerminal(record)"><CodeOutlined /></a-button>
+                      </a-tooltip>
+                      <a-tooltip title="停止">
+                        <a-button size="small" type="link" @click="doAction(record, 'stop')"><StopOutlined /></a-button>
+                      </a-tooltip>
+                      <a-tooltip title="重启">
+                        <a-button size="small" type="link" @click="doAction(record, 'restart')">
+                          <ReloadOutlined />
+                        </a-button>
+                      </a-tooltip>
+                    </template>
+                    <template v-else>
+                      <a-tooltip title="启动">
+                        <a-button size="small" type="link" @click="doAction(record, 'start')">
+                          <PlayCircleOutlined />
+                        </a-button>
+                      </a-tooltip>
+                      <a-tooltip title="停止">
+                        <a-button size="small" type="link" :disabled="true"><StopOutlined /></a-button>
+                      </a-tooltip>
+                      <a-tooltip title="重启">
+                        <a-button size="small" type="link" :disabled="true"><ReloadOutlined /></a-button>
+                      </a-tooltip>
+                    </template>
+
+                    <a-dropdown>
+                      <a @click="(e) => e.preventDefault()">
+                        <MoreOutlined />
+                      </a>
+                      <template v-slot:overlay>
+                        <a-menu>
+                          <a-menu-item>
+                            <a-tooltip title="修改容器配置，重新运行">
+                              <a-button size="small" type="link" @click="rebuild(record)"
+                                ><RedoOutlined />重建</a-button
+                              >
+                            </a-tooltip>
+                          </a-menu-item>
+                          <a-menu-item>
+                            <a-tooltip title="编辑容器的一些基础参数">
+                              <a-button
+                                size="small"
+                                type="link"
+                                :disabled="record.state !== 'running'"
+                                @click="editContainer(record)"
+                              >
+                                <EditOutlined />编辑
+                              </a-button>
+                            </a-tooltip>
+                          </a-menu-item>
+                          <a-menu-item>
+                            <a-tooltip title="点击查看日志">
+                              <a-button size="small" type="link" @click="viewLog(record)">
+                                <MessageOutlined />日志
+                              </a-button>
+                            </a-tooltip>
+                          </a-menu-item>
+                          <a-menu-item>
+                            <a-tooltip title="强制删除">
+                              <a-button size="small" type="link" @click="doAction(record, 'remove')">
+                                <DeleteOutlined />删除
+                              </a-button>
+                            </a-tooltip>
+                          </a-menu-item>
+                        </a-menu>
+                      </template>
+                    </a-dropdown>
+                  </a-space>
+                </template>
+              </template>
+            </a-table>
+          </a-collapse-panel>
+        </a-collapse>
+      </a-card>
+
+      <!-- <a-table
+        :data-source="list"
+        size="middle"
+        :columns="parentColumns"
+        :pagination="false"
+        bordered
+        :scroll="{
+          x: 'max-content'
+        }"
+      >
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.tooltip">
             <a-tooltip placement="topLeft" :title="text">
               <span>{{ text }}</span>
             </a-tooltip>
           </template>
-          <template v-else-if="column.dataIndex === 'state'">
-            <span style="display: none">
-              {{
-                (array = (record.child || []).map((item) => {
-                  return item.state
-                }))
-              }}
-              {{
-                (runningCount = array
-                  .map((item) => {
-                    return item === 'running' ? 1 : 0
-                  })
-                  .reduce((prev, curr) => {
-                    return prev + curr
-                  }, 0))
-              }}</span
-            >
-            <span v-if="runningCount">Running({{ runningCount }}/{{ array.length }})</span>
-            <span v-else>Exited</span>
-          </template>
+          <template v-else-if="column.dataIndex === 'state'"> </template>
         </template>
-        <template #expandedRowRender="{ record }">
-          <a-table
-            :data-source="record.child"
-            size="middle"
-            :columns="columns"
-            :pagination="false"
-            bordered
-            rowKey="id"
-            :scroll="{
-              x: 'max-content'
-            }"
-          >
-            <template #bodyCell="{ column, text, record }">
-              <template v-if="column.dataIndex === 'names'">
-                <a-popover :title="`容器名称：${(text || []).join(',')}`">
-                  <template v-slot:content>
-                    <p>容器Id: {{ record.id }}</p>
-                    <p>镜像：{{ record.image }}</p>
-                    <p>镜像Id: {{ record.imageId }}</p>
-                  </template>
-
-                  <span>{{ (text || []).join(',') }}</span>
-                </a-popover>
-              </template>
-
-              <template v-else-if="column.dataIndex === 'labels'">
-                <a-popover :title="`容器名标签`">
-                  <template v-slot:content>
-                    <template v-if="record.labels">
-                      <p v-for="(value, key) in record.labels" :key="key">
-                        {{ key }}
-
-                        <ArrowRightOutlined />
-                        {{ value }}
-                      </p>
-                    </template>
-                  </template>
-                  <template v-if="record.labels && Object.keys(record.labels).length">
-                    <span>{{ (record.labels && Object.keys(record.labels).length) || 0 }} <TagsOutlined /></span>
-                  </template>
-                  <template v-else>-</template>
-                </a-popover>
-              </template>
-              <template v-else-if="column.dataIndex === 'mounts'">
-                <a-popover :title="`挂载`">
-                  <template v-slot:content>
-                    <template v-if="record.mounts">
-                      <div v-for="(item, index) in record.mounts" :key="index">
-                        <p>
-                          名称：{{ item.name }}
-                          <a-tag>{{ item.rw ? '读写' : '读' }}</a-tag>
-                        </p>
-                        <p>路径：{{ item.source }}(宿主机) => {{ item.destination }}(容器)</p>
-                        <a-divider></a-divider>
-                      </div>
-                    </template>
-                  </template>
-                  <template v-if="record.mounts && Object.keys(record.mounts).length">
-                    <span>{{ (record.mounts && Object.keys(record.mounts).length) || 0 }} <ApiOutlined /></span>
-                  </template>
-                  <template v-else>-</template>
-                </a-popover>
-              </template>
-
-              <template v-else-if="column.tooltip">
-                <a-tooltip placement="topLeft" :title="text">
-                  <span>{{ text }}</span>
-                </a-tooltip>
-              </template>
-
-              <template v-else-if="column.showid">
-                <a-tooltip placement="topLeft" :title="text">
-                  <span style="display: none"> {{ (array = text.split(':')) }}</span>
-                  <span>{{ array[array.length - 1].slice(0, 12) }}</span>
-                </a-tooltip>
-              </template>
-
-              <template v-else-if="column.dataIndex === 'ports'">
-                <a-popover placement="topLeft">
-                  <template #title>
-                    网络端口
-                    <ul>
-                      <li v-for="(item, index) in text || []" :key="index">
-                        {{ item.type + ' ' + (item.ip || '') + ':' + (item.publicPort || '') + ':' + item.privatePort }}
-                      </li>
-                    </ul>
-                  </template>
-                  <template v-slot:content>
-                    <template v-if="record.networkSettings">
-                      <template v-if="record.networkSettings.networks">
-                        <template v-if="record.networkSettings.networks.bridge">
-                          桥接模式：
-                          <p v-if="record.networkSettings.networks.bridge.ipAddress">
-                            IP:
-                            <a-tag>{{ record.networkSettings.networks.bridge.ipAddress }}</a-tag>
-                          </p>
-                          <p v-if="record.networkSettings.networks.bridge.macAddress">
-                            MAC:
-                            <a-tag>{{ record.networkSettings.networks.bridge.macAddress }}</a-tag>
-                          </p>
-                          <p v-if="record.networkSettings.networks.bridge.gateway">
-                            网关:
-                            <a-tag>{{ record.networkSettings.networks.bridge.gateway }}</a-tag>
-                          </p>
-                          <p v-if="record.networkSettings.networks.bridge.networkID">
-                            networkID:
-                            <a-tag>{{ record.networkSettings.networks.bridge.networkID }}</a-tag>
-                          </p>
-                          <p v-if="record.networkSettings.networks.bridge.endpointId">
-                            endpointId:
-                            <a-tag>{{ record.networkSettings.networks.bridge.endpointId }}</a-tag>
-                          </p>
-                        </template>
-                        <template v-if="record.networkSettings.networks.ingress">
-                          <p v-if="record.networkSettings.networks.ingress.ipAddress">
-                            IP:
-                            <a-tag>{{ record.networkSettings.networks.ingress.ipAddress }}</a-tag>
-                          </p>
-                          <p v-if="record.networkSettings.networks.ingress.macAddress">
-                            MAC:
-                            <a-tag>{{ record.networkSettings.networks.ingress.macAddress }}</a-tag>
-                          </p>
-                          <p v-if="record.networkSettings.networks.ingress.gateway">
-                            网关:
-                            <a-tag>{{ record.networkSettings.networks.ingress.gateway }}</a-tag>
-                          </p>
-                          <p v-if="record.networkSettings.networks.ingress.networkID">
-                            networkID:
-                            <a-tag>{{ record.networkSettings.networks.ingress.networkID }}</a-tag>
-                          </p>
-                          <p v-if="record.networkSettings.networks.ingress.endpointId">
-                            endpointId:
-                            <a-tag>{{ record.networkSettings.networks.ingress.endpointId }}</a-tag>
-                          </p>
-                        </template>
-                      </template>
-                    </template>
-                  </template>
-                  <span>{{
-                    (text || [])
-                      .map((item) => {
-                        return item.type + ' ' + (item.publicPort || '') + ':' + item.privatePort
-                      })
-                      .join('/')
-                  }}</span>
-                </a-popover>
-              </template>
-
-              <template v-else-if="column.dataIndex === 'state'">
-                <a-tooltip :title="(record.status || '') + ' 点击查看日志'" @click="viewLog(record)">
-                  <a-switch :checked="record.status === 'running'" :disabled="true">
-                    <template v-slot:checkedChildren>
-                      <CheckCircleOutlined />
-                    </template>
-                    <template v-slot:unCheckedChildren>
-                      <WarningOutlined />
-                    </template>
-                  </a-switch>
-                </a-tooltip>
-              </template>
-              <template v-else-if="column.dataIndex === 'operation'">
-                <a-space>
-                  <template v-if="record.state === 'running'">
-                    <a-tooltip title="容器是运行中可以进入终端">
-                      <a-button size="small" type="link" @click="handleTerminal(record)"><CodeOutlined /></a-button>
-                    </a-tooltip>
-                    <a-tooltip title="停止">
-                      <a-button size="small" type="link" @click="doAction(record, 'stop')"><StopOutlined /></a-button>
-                    </a-tooltip>
-                    <a-tooltip title="重启">
-                      <a-button size="small" type="link" @click="doAction(record, 'restart')">
-                        <ReloadOutlined />
-                      </a-button>
-                    </a-tooltip>
-                  </template>
-                  <template v-else>
-                    <a-tooltip title="启动">
-                      <a-button size="small" type="link" @click="doAction(record, 'start')">
-                        <PlayCircleOutlined />
-                      </a-button>
-                    </a-tooltip>
-                    <a-tooltip title="停止">
-                      <a-button size="small" type="link" :disabled="true"><StopOutlined /></a-button>
-                    </a-tooltip>
-                    <a-tooltip title="重启">
-                      <a-button size="small" type="link" :disabled="true"><ReloadOutlined /></a-button>
-                    </a-tooltip>
-                  </template>
-
-                  <a-dropdown>
-                    <a @click="(e) => e.preventDefault()">
-                      <MoreOutlined />
-                    </a>
-                    <template v-slot:overlay>
-                      <a-menu>
-                        <a-menu-item>
-                          <a-tooltip title="修改容器配置，重新运行">
-                            <a-button size="small" type="link" @click="rebuild(record)"><RedoOutlined />重建</a-button>
-                          </a-tooltip>
-                        </a-menu-item>
-                        <a-menu-item>
-                          <a-tooltip title="编辑容器的一些基础参数">
-                            <a-button
-                              size="small"
-                              type="link"
-                              :disabled="record.state !== 'running'"
-                              @click="editContainer(record)"
-                            >
-                              <EditOutlined />编辑
-                            </a-button>
-                          </a-tooltip>
-                        </a-menu-item>
-                        <a-menu-item>
-                          <a-tooltip title="点击查看日志">
-                            <a-button size="small" type="link" @click="viewLog(record)">
-                              <MessageOutlined />日志
-                            </a-button>
-                          </a-tooltip>
-                        </a-menu-item>
-                        <a-menu-item>
-                          <a-tooltip title="强制删除">
-                            <a-button size="small" type="link" @click="doAction(record, 'remove')">
-                              <DeleteOutlined />删除
-                            </a-button>
-                          </a-tooltip>
-                        </a-menu-item>
-                      </a-menu>
-                    </template>
-                  </a-dropdown>
-                </a-space>
-              </template>
-            </template>
-          </a-table>
-        </template>
-      </a-table>
+        <template #expandedRowRender="{ record }"> </template>
+      </a-table> -->
     </template>
     <!-- 日志 -->
 
@@ -958,11 +974,10 @@ export default {
 </script>
 
 <style scoped>
-/deep/ .ant-statistic div {
+:deep(.ant-statistic div) {
   display: inline-block;
 }
-/deep/ .ant-statistic-content-value,
-/deep/ .ant-statistic-content {
+:deep(.ant-statistic-content-value, .ant-statistic-content) {
   font-size: 16px;
 }
 </style>

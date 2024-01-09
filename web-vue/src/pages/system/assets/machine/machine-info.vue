@@ -184,7 +184,6 @@
                     :popupContainerParent="false"
                     inputPlaceholder="自定义进程类型"
                     selectPlaceholder="选择进程名"
-                    suffixIcon=""
                   >
                     <template v-slot:suffixIcon> <DownOutlined /></template>
                   </custom-select>
@@ -1029,11 +1028,10 @@ export default {
 #history-chart {
   height: 60vh;
 }
-/deep/ .ant-statistic div {
+:deep(.ant-statistic div) {
   /* display: inline-block; */
 }
-/deep/ .ant-statistic-content-value,
-/deep/ .ant-statistic-content {
+:deep(.ant-statistic-content-value, .ant-statistic-content) {
   font-size: 12px;
 }
 </style>

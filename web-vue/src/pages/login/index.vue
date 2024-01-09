@@ -461,11 +461,11 @@ onMounted(() => {
   margin: 10px 0;
 }
 
-/deep/ .ant-card-meta-title {
+:deep(.ant-card-meta-title) {
   font-size: 30px;
 }
 
-/deep/ .ant-card-body {
+:deep(.ant-card-body) {
   padding: 30px;
 }
 

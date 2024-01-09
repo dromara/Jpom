@@ -38,7 +38,6 @@
             <a-col :span="10">
               <a-form-item-rest>
                 <custom-select
-                  suffixIcon=""
                   :maxLength="50"
                   v-model:value="temp.group"
                   :data="groupList"
@@ -114,14 +113,13 @@
               <a-button
                 type="link"
                 size="small"
-                icon="info-circle"
                 @click="
                   () => {
                     configDir = true
                   }
                 "
               >
-                快速配置
+                <InfoCircleOutlined /> 快速配置
               </a-button>
             </template>
             <a-input-group compact>

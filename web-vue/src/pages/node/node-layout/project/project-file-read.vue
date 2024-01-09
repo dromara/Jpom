@@ -1,24 +1,5 @@
 <template>
   <div>
-    <!-- <div ref="filter" class="filter">
-        <template>
-          <a-space>
-            |
-
-            <a-input-group compact style="width: 200px">
-              <a-select   v-model="logScroll">
-                <a-select-option value="true"> 自动滚动 </a-select-option>
-                <a-select-option value="false"> 关闭滚动 </a-select-option>
-              </a-select>
-              <a-input style="width: 50%" v-model="logShowLine" placeholder="显示行数" />
-            </a-input-group>
-            <a-tag> 文件: {{ this.readFilePath }}</a-tag>
-            <a-button type="link" @click="clearLogCache" icon="delete"> 清空 </a-button>
-            <a-input-search placeholder="搜索关键词" style="width: 200px" @search="onSearch" />
-          </a-space>
-        </template>
-      </div> -->
-    <!-- console -->
     <log-view1 :ref="`logView`" height="calc(100vh - 140px)">
       <template v-slot:before> <a-button type="primary" size="small" @click="goFile">文件管理</a-button></template>
     </log-view1>
