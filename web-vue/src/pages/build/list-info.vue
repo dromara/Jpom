@@ -201,8 +201,28 @@
                           </a-menu>
                         </template>
                       </a-dropdown>
-
-                      <a-button size="small" type="primary" @click="handleEdit(item)">编辑</a-button>
+                      <a-dropdown>
+                        <a-button size="small" type="primary" @click="handleEdit(item)">编辑</a-button>
+                        <template #overlay>
+                          <a-menu>
+                            <a-menu-item @click="handleEdit(item, 0)">
+                              <a href="javascript:;">构建方式</a>
+                            </a-menu-item>
+                            <a-menu-item @click="handleEdit(item, 1)">
+                              <a href="javascript:;">基础信息</a>
+                            </a-menu-item>
+                            <a-menu-item @click="handleEdit(item, 2)">
+                              <a href="javascript:;">构建流程</a>
+                            </a-menu-item>
+                            <a-menu-item @click="handleEdit(item, 3)">
+                              <a href="javascript:;">发布操作</a>
+                            </a-menu-item>
+                            <a-menu-item @click="handleEdit(item, 4)">
+                              <a href="javascript:;">其他配置</a>
+                            </a-menu-item>
+                          </a-menu>
+                        </template>
+                      </a-dropdown>
                       <a-button size="small" @click="handleDelete(item)">删除</a-button>
                       <a-tooltip
                         placement="leftBottom"
@@ -363,7 +383,28 @@
                     </a-menu>
                   </template>
                 </a-dropdown>
-                <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+                <a-dropdown>
+                  <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+                  <template #overlay>
+                    <a-menu>
+                      <a-menu-item @click="handleEdit(record, 0)">
+                        <a href="javascript:;">构建方式</a>
+                      </a-menu-item>
+                      <a-menu-item @click="handleEdit(record, 1)">
+                        <a href="javascript:;">基础信息</a>
+                      </a-menu-item>
+                      <a-menu-item @click="handleEdit(record, 2)">
+                        <a href="javascript:;">构建流程</a>
+                      </a-menu-item>
+                      <a-menu-item @click="handleEdit(record, 3)">
+                        <a href="javascript:;">发布操作</a>
+                      </a-menu-item>
+                      <a-menu-item @click="handleEdit(record, 4)">
+                        <a href="javascript:;">其他配置</a>
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
                 <a-dropdown>
                   <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
                     更多
@@ -986,13 +1027,13 @@ export default {
       delete temp.id
       delete temp.triggerToken
       temp.name = temp.name + '副本'
-      this.handleEdit(temp)
+      this.handleEdit(temp, 1)
     },
-    handleEdit(record) {
+    handleEdit(record, steps) {
       this.editBuildVisible = 2
       this.temp = { id: record.id, triggerToken: record.triggerToken }
       this.$nextTick(() => {
-        this.$refs.editBuild.handleEdit({ ...record })
+        this.$refs.editBuild.handleEdit({ ...record }, steps)
       })
     },
     handleDetails(record) {
