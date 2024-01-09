@@ -34,7 +34,7 @@
       <!-- 表格 -->
       <a-layout-content class="file-content">
         <div class="log-filter" v-if="temp.cacheData">
-          <a-space direction="vertical">
+          <a-space direction="vertical" style="width: 100%">
             <!-- direction="vertical" -->
             <a-space>
               <div>

@@ -69,7 +69,7 @@
             </a-tooltip>
           </template>
           <a-form-item-rest>
-            <a-space direction="vertical">
+            <a-space direction="vertical" style="width: 100%">
               <div v-for="(item, index) in temp.prohibitExecuteArray" :key="item.key">
                 <a-space direction="vertical" class="item-info" style="width: 100%">
                   <a-range-picker
@@ -139,7 +139,7 @@
             </a-tooltip>
           </template>
           <a-form-item-rest>
-            <a-space direction="vertical">
+            <a-space direction="vertical" style="width: 100%">
               <div v-for="(item, index) in temp.allowExecuteArray" :key="item.key">
                 <a-space direction="vertical" class="item-info" style="width: 100%">
                   <div>

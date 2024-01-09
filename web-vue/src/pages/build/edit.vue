@@ -153,7 +153,7 @@
               </template>
               <a-popover title="辅助操作">
                 <template v-slot:content>
-                  <a-space direction="vertical">
+                  <a-space direction="vertical" style="width: 100%">
                     <a-button
                       type="link"
                       @click="
@@ -222,7 +222,7 @@
                 <a-tab-pane key="1" tab="DSL 配置">
                   <div style="height: 40vh">
                     <code-editor
-                      v-model:value="temp.script"
+                      v-model:content="temp.script"
                       :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"
                     ></code-editor>
                   </div>
@@ -230,7 +230,7 @@
                 <a-tab-pane key="2" tab="配置示例">
                   <div style="height: 40vh">
                     <code-editor
-                      v-model:value="dslDefault"
+                      v-model:content="dslDefault"
                       :options="{
                         mode: 'yaml',
                         tabSize: 2,
