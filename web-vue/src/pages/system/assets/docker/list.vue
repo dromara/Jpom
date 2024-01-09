@@ -191,7 +191,7 @@
       :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-space direction="vertical">
+        <a-space direction="vertical" style="width: 100%">
           <a-alert banner>
             <template v-slot:message>
               <template v-if="temp.enableSsh">

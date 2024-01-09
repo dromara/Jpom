@@ -66,7 +66,7 @@
       <a-divider v-if="listQuery.total > 0" dashed>构建历史</a-divider>
       <a-timeline mode="alternate" style="width: 100%">
         <a-timeline-item v-for="item in this.historyList" :key="item.id" :color="statusColor[item.status]">
-          <a-space direction="vertical">
+          <a-space direction="vertical" style="width: 100%">
             <div>
               <a-space>
                 <span :style="`color: ${statusColor[item.status]};`" @click="handleBuildLog(item)"

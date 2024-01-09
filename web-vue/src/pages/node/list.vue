@@ -442,7 +442,7 @@
               </a-col>
             </template>
             <a-col v-else :span="24">
-              <a-empty description="没有任何节点" />
+              <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="没有任何节点" />
             </a-col>
           </a-row>
 
@@ -609,6 +609,7 @@
 
 <script>
 import { mapState } from 'pinia'
+import { Empty } from 'ant-design-vue'
 import {
   deleteNode,
   editNode,
@@ -652,7 +653,7 @@ export default {
   data() {
     return {
       loading: true,
-
+      Empty,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       statusMap,
       sshList: [],

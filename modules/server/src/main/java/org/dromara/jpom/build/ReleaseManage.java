@@ -362,7 +362,8 @@ public class ReleaseManage {
         try {
             return (boolean) plugin.execute("buildImage", map);
         } catch (Exception e) {
-            logRecorder.systemError("构建镜像调用容器异常", e);
+            log.error("构建镜像调用容器异常", e);
+            logRecorder.error("构建镜像调用容器异常", e);
             return false;
         }
     }

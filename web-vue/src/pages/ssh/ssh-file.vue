@@ -45,7 +45,7 @@
           </a-dropdown>
         </a-space>
       </a-row>
-      <a-empty v-if="treeList.length === 0" />
+      <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" v-if="treeList.length === 0" />
       <a-directory-tree :treeData="treeList" :fieldNames="replaceFields" @select="onSelect"> </a-directory-tree>
     </a-layout-sider>
     <!-- 表格 -->
@@ -347,7 +347,7 @@ import {
 
 import codeEditor from '@/components/codeEditor'
 import { ZIP_ACCEPT, renderSize, parseTime } from '@/utils/const'
-
+import { Empty } from 'ant-design-vue'
 export default {
   props: {
     sshId: {
@@ -364,6 +364,7 @@ export default {
   },
   data() {
     return {
+      Empty,
       loading: false,
       treeList: [],
       fileList: [],
@@ -926,12 +927,12 @@ export default {
 }
 .sider {
   border: 1px solid #e2e2e2;
-  overflow-x: auto;
+  /* overflow-x: auto; */
 }
 .file-content {
   margin: 10px 10px 0;
   padding: 10px;
-  background-color: #fff;
+  /* background-color: #fff; */
 }
 .title {
   font-weight: 600;

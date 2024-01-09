@@ -84,7 +84,7 @@
 
       <a-row>
         <a-col span="22">
-          <a-space direction="vertical">
+          <a-space direction="vertical" style="width: 100%">
             <a-upload
               :file-list="fileList"
               :disabled="!!percentage"

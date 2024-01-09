@@ -20,7 +20,12 @@ interface IStateGuideCache {
   menuMultipleFlag: boolean
   fullscreenViewLog: boolean
   close: boolean
+  compactView: boolean
+  themeView: string
+  menuThemeView: string
 }
+
+const allowThemeView = ['light', 'dark']
 
 export const useGuideStore = defineStore('guide', {
   state: (): IStateCache => ({
@@ -80,6 +85,30 @@ export const useGuideStore = defineStore('guide', {
         resolve(cache.fullscreenViewLog)
       })
     },
+    toggleCompactView(): Promise<boolean> {
+      return new Promise((resolve) => {
+        const cache = this.getGuideCache
+        cache.compactView = !cache.compactView
+        this.setGuideCache(cache)
+        resolve(cache.compactView)
+      })
+    },
+    toggleThemeView(themeView: string): Promise<string> {
+      return new Promise((resolve) => {
+        const cache = this.getGuideCache
+        cache.themeView = themeView
+        this.setGuideCache(cache)
+        resolve(cache.themeView)
+      })
+    },
+    toggleMenuThemeView(menuThemeView: string): Promise<string> {
+      return new Promise((resolve) => {
+        const cache = this.getGuideCache
+        cache.menuThemeView = menuThemeView
+        this.setGuideCache(cache)
+        resolve(cache.menuThemeView)
+      })
+    },
     // 重置导航
     restGuide(): Promise<boolean> {
       return new Promise((resolve) => {
@@ -101,6 +130,24 @@ export const useGuideStore = defineStore('guide', {
     },
     getExtendPlugins(state) {
       return state.extendPlugins
+    },
+    getThemeView: (state) => {
+      return () => {
+        const themeView = state.guideCache.themeView || 'light'
+        if (allowThemeView.includes(themeView)) {
+          return themeView
+        }
+        return 'light'
+      }
+    },
+    getMenuThemeView: (state) => {
+      return () => {
+        const menuThemeView = state.guideCache.menuThemeView || 'dark'
+        if (allowThemeView.includes(menuThemeView)) {
+          return menuThemeView
+        }
+        return 'dark'
+      }
     },
     // 计算弹窗全屏样式
     getFullscreenViewLogStyle: (state) => {

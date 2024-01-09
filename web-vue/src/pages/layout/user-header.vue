@@ -38,11 +38,7 @@
         </div>
       </a-button>
       <a-dropdown>
-        <a-button type="primary" class="btn-group-item"><DownOutlined /> </a-button>
-        <a @click.prevent>
-          Hover me
-          <DownOutlined />
-        </a>
+        <a-button type="primary" class="btn-group-item"><DownOutlined /></a-button>
         <template #overlay>
           <a-menu>
             <!-- 工作空间信息 -->
@@ -368,13 +364,13 @@
         </a-form-item> -->
         <a-form-item label="菜单配置">
           <a-space>
-            同时展开多个：
             <a-switch
               checked-children="是"
               @click="toggleMenuMultiple"
               :checked="this.menuMultipleFlag"
               un-checked-children="否"
             />
+            同时展开多个
           </a-space>
         </a-form-item>
         <!-- <a-form-item label="页面配置">
@@ -401,13 +397,43 @@
         </a-form-item> -->
         <a-form-item label="全屏日志">
           <a-space>
-            全屏查看日志：
             <a-switch
               checked-children="全屏"
               @click="toggleFullscreenViewLog"
               :checked="this.fullscreenViewLog"
               un-checked-children="非全屏"
             />
+            全屏查看日志
+          </a-space>
+        </a-form-item>
+        <a-form-item label="内容主题">
+          <a-space>
+            <a-radio-group v-model:value="themeView" button-style="solid">
+              <a-radio-button value="light">浅色</a-radio-button>
+              <a-radio-button value="dark">深色</a-radio-button>
+            </a-radio-group>
+            内容区域主题切换
+          </a-space>
+        </a-form-item>
+        <a-form-item label="菜单主题">
+          <a-space>
+            <a-radio-group v-model:value="menuThemeView" button-style="solid">
+              <a-radio-button value="light">浅色</a-radio-button>
+              <a-radio-button value="dark">深色</a-radio-button>
+            </a-radio-group>
+            左边菜单栏主题切换
+          </a-space>
+        </a-form-item>
+
+        <a-form-item label="紧凑模式">
+          <a-space>
+            <a-switch
+              checked-children="紧凑"
+              @click="toggleCompactView"
+              :checked="this.compactView"
+              un-checked-children="宽松"
+            />
+            字体间距调整(仅在深色模式生效)
           </a-space>
         </a-form-item>
       </a-form>
@@ -532,7 +558,7 @@ export default {
   computed: {
     ...mapState(useUserStore, ['getToken', 'getUserInfo']),
     ...mapState(useAppStore, ['getWorkspaceId']),
-    ...mapState(useGuideStore, ['getGuideCache', 'getDisabledGuide']),
+    ...mapState(useGuideStore, ['getGuideCache', 'getDisabledGuide', 'getThemeView', 'getMenuThemeView']),
 
     showCode() {
       return this.getUserInfo.email !== this.temp.email
@@ -548,6 +574,25 @@ export default {
     },
     scrollbarFlag() {
       return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag
+    },
+    compactView() {
+      return this.getGuideCache.compactView === undefined ? false : this.getGuideCache.compactView
+    },
+    themeView: {
+      set: function (value) {
+        useGuideStore().toggleThemeView(value)
+      },
+      get: function () {
+        return this.getThemeView()
+      }
+    },
+    menuThemeView: {
+      set: function (value) {
+        useGuideStore().toggleMenuThemeView(value)
+      },
+      get: function () {
+        return this.getMenuThemeView()
+      }
     },
     fullscreenViewLog() {
       return !!this.getGuideCache.fullscreenViewLog
@@ -700,6 +745,21 @@ export default {
           } else {
             $notification.success({
               message: '日志弹窗会非全屏打开'
+            })
+          }
+        })
+    },
+    toggleCompactView() {
+      useGuideStore()
+        .toggleCompactView()
+        .then((compact) => {
+          if (compact) {
+            $notification.success({
+              message: '页面启用紧凑模式'
+            })
+          } else {
+            $notification.success({
+              message: '页面启用宽松模式'
             })
           }
         })

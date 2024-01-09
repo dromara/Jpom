@@ -34,7 +34,7 @@
           <div class="layui-elem-quote">
             集群信息：
             <div style="padding-left: 10px">
-              <a-space direction="vertical">
+              <a-space direction="vertical" style="width: 100%">
                 <div>
                   本地状态：<a-tag v-if="temp.swarm.nodeAddr">{{ temp.swarm.nodeAddr }}</a-tag>
                   <a-tag>{{ temp.swarm.localNodeState }}</a-tag>
