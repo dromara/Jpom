@@ -32,7 +32,9 @@
         <rect stroke="#CED4D9" x="108" y="1" width="9" height="9" rx="1"></rect>
       </g>
     </svg>
-    <div class="switch" @click="handleToggleBg">{{ dynamicBg ? '关闭动态背景' : '开启动态背景' }}</div>
+    <a-button class="switch" @click="handleToggleBg"
+      ><LeftOutlined />&nbsp;{{ dynamicBg ? '关闭动态背景' : '开启动态背景' }}</a-button
+    >
     <a-card class="login-card" hoverable>
       <a-card-meta :title="`${loginTitle}`" style="text-align: center" description="" />
       <br />
@@ -154,7 +156,8 @@ const disabledCaptcha = ref(false)
 
 const backgroundImage = computed(() => {
   const color =
-    theme === 'light' ? 'linear-gradient(#1890ff, #66a9c9)' : 'linear-gradient(rgb(38 46 55), rgb(27 33 36))'
+    theme.value === 'light' ? 'linear-gradient(#1890ff, #66a9c9)' : 'linear-gradient(rgb(38 46 55), rgb(27 33 36))'
+
   // background: linear-gradient(#1890ff, #66a9c9);
   return dynamicBg.value
     ? { backgroundImage: `url(https://picsum.photos/${screen.width}/${screen.height}/?random)`, background: color }
@@ -419,7 +422,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   //background: #fff;
-  padding: 0 10px 0 18px;
+  // padding: 0 10px 0 10px;
   cursor: pointer;
   transform: translateX(105px);
   transition: all 0.3s ease-in-out;
@@ -429,18 +432,6 @@ onMounted(() => {
 
 .switch:hover {
   transform: translateX(0);
-}
-
-.switch::before {
-  content: '';
-  position: absolute;
-  left: 10px;
-  top: 13px;
-  width: 10px;
-  height: 10px;
-  border-right: 1px solid #333;
-  border-bottom: 1px solid #333;
-  transform: rotate(135deg);
 }
 
 .login-card {
