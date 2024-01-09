@@ -1,7 +1,7 @@
 <template>
   <div>
     <a-menu
-      theme="dark"
+      :theme="theme"
       v-if="getUserInfo && getUserInfo.systemUser"
       mode="inline"
       v-model:value="mangerMenuOpenkeys"
@@ -22,7 +22,7 @@
       </a-menu-item>
     </a-menu>
     <a-menu
-      theme="dark"
+      :theme="theme"
       mode="inline"
       v-model:selectedKeys="selectedKeys"
       @openChange="openChange"
@@ -70,6 +70,9 @@ export default {
   },
   props: {
     mode: {
+      type: String
+    },
+    theme: {
       type: String
     }
   },
