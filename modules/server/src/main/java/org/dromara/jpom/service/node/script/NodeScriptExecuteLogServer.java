@@ -34,6 +34,7 @@ import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.exception.AgentException;
+import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.model.BaseDbModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
@@ -91,7 +92,11 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<NodeScriptExecut
             }
         }
         return jsonArray;
+    }
 
+    @Override
+    public List<NodeScriptExecuteLogCacheModel> lonelyDataArray(MachineNodeModel machineNodeModel) {
+        throw new IllegalStateException("不支持的模式，script log");
     }
 
     @Override

@@ -1,14 +1,14 @@
 <template>
   <a-layout class="log-layout">
     <!-- 侧边栏 文件树 -->
-    <a-layout-sider theme="light" class="" width="20%">
+    <a-layout-sider theme="light" class="sider" width="20%">
       <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" v-if="list.length === 0" />
       <a-directory-tree :treeData="list" :fieldNames="replaceFields" @select="select" default-expand-all>
       </a-directory-tree>
     </a-layout-sider>
     <!-- 单个文件内容 -->
     <a-layout-content class="log-content">
-      <log-view2 :ref="`logView`" height="calc(100vh - 165px)">
+      <log-view2 :ref="`logView`" height="calc(100vh - 140px)">
         <template #before>
           <a-space>
             <a-button type="primary" size="small" @click="loadData">刷新</a-button>
@@ -197,14 +197,14 @@ export default {
 }
 .sider {
   border: 1px solid #e2e2e2;
-  height: calc(100vh - 110px);
+  height: calc(100vh - 80px);
   overflow-y: auto;
 }
 .log-content {
   margin: 0;
   padding-left: 15px;
   /* background: #fff; */
-  height: calc(100vh - 110px);
+  /* height: calc(100vh - 80px); */
   overflow-y: auto;
 }
 </style>

@@ -145,6 +145,7 @@ public enum NodeUrl {
 
 
     Script_List("/script/list.json"),
+    Script_ChangeWorkspaceId("/script/change-workspace-id"),
     SCRIPT_PULL_EXEC_LOG("/script/pull_exec_log"),
     SCRIPT_DEL_EXEC_LOG("/script/del_exec_log"),
     Script_Item("/script/item.json"),

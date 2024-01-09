@@ -140,7 +140,7 @@ import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } 
 
 export default {
   components: {
-    JsonViewer
+    // JsonViewer
   },
   data() {
     return {

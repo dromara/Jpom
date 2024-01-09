@@ -4,6 +4,8 @@
 
 ### 🐣 新增功能
 
+1. 【all】新增 孤独数据管理（查看孤独数据、修正孤独数据）（感谢[@陈旭](https://gitee.com/chenxu8989) [Gitee issues I8UNXZ](https://gitee.com/dromara/Jpom/issues/I8UNXZ)）
+
 ### 🐞 解决BUG、优化功能
 
 1. 【server】优化 上传文件前解析文件信息采用全局 loading

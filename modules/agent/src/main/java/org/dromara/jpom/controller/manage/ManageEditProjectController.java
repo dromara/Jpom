@@ -198,6 +198,7 @@ public class ManageEditProjectController extends BaseAgentController {
             // 预检查数据
             return JsonMessage.success("检查通过");
         } else {
+            exits.setNodeId(projectInfo.getNodeId());
             exits.setName(projectInfo.getName());
             exits.setGroup(projectInfo.getGroup());
             exits.setAutoStart(projectInfo.getAutoStart());
