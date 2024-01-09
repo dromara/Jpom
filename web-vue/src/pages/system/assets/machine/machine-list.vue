@@ -458,7 +458,7 @@
       :maskClosable="false"
     >
       <a-list bordered :data-source="nodeList">
-        <template v-slot:renderItem="item">
+        <template v-slot:renderItem="{ item }">
           <a-list-item style="display: block">
             <a-row>
               <a-col :span="10">节点名称：{{ item.name }}</a-col>

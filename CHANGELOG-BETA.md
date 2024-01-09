@@ -8,6 +8,8 @@
 
 1. 【server】优化 上传文件前解析文件信息采用全局 loading
 2. 【server】优化 构建流程交互（采用步骤条）
+3. 【server】修复 部分 icon 未更新、部分弹窗列表数据不能正常显示
+4. 【server】修复 docker-compose 容器状态无非正确显示
 
 ------
 
