@@ -196,7 +196,7 @@ export default {
   margin: 0;
 }
 .sider {
-  /* border: 1px solid #e2e2e2; */
+  border: 1px solid #e2e2e2;
   height: calc(100vh - 110px);
   overflow-y: auto;
 }

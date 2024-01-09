@@ -926,7 +926,7 @@ export default {
   border-bottom: 1px solid #eee;
 }
 .sider {
-  /* border: 1px solid #e2e2e2; */
+  border: 1px solid #e2e2e2;
   /* overflow-x: auto; */
 }
 .file-content {
