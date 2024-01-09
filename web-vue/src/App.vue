@@ -39,7 +39,6 @@ const themeAlgorithm = computed(() => {
   } else if (themeDiy === 'dark') {
     algorithm.push(theme.darkAlgorithm)
   }
-  console.log(algorithm)
 
   return algorithm
 })
@@ -103,9 +102,9 @@ body {
   margin-bottom: 20px;
 }
 
-@color-border-last: rgba(140, 140, 140, 1);
+@color-border-last: rgba(140, 140, 140, 0.3);
 @color-neutral-last: rgba(140, 140, 140, 0.2);
-@scrollbar-size: 5px;
+@scrollbar-size: 4px;
 
 // 兼容火狐
 * {

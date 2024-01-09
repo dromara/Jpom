@@ -22,6 +22,7 @@ interface IStateGuideCache {
   close: boolean
   compactView: boolean
   themeView: string
+  menuThemeView: string
 }
 
 const allowThemeView = ['light', 'dark']
@@ -92,12 +93,20 @@ export const useGuideStore = defineStore('guide', {
         resolve(cache.compactView)
       })
     },
-    toggleThemeView(themeView: string): Promise<boolean> {
+    toggleThemeView(themeView: string): Promise<string> {
       return new Promise((resolve) => {
         const cache = this.getGuideCache
         cache.themeView = themeView
         this.setGuideCache(cache)
-        resolve(cache.compactView)
+        resolve(cache.themeView)
+      })
+    },
+    toggleMenuThemeView(menuThemeView: string): Promise<string> {
+      return new Promise((resolve) => {
+        const cache = this.getGuideCache
+        cache.menuThemeView = menuThemeView
+        this.setGuideCache(cache)
+        resolve(cache.menuThemeView)
       })
     },
     // 重置导航
@@ -129,6 +138,15 @@ export const useGuideStore = defineStore('guide', {
           return themeView
         }
         return 'light'
+      }
+    },
+    getMenuThemeView: (state) => {
+      return () => {
+        const menuThemeView = state.guideCache.menuThemeView || 'dark'
+        if (allowThemeView.includes(menuThemeView)) {
+          return menuThemeView
+        }
+        return 'dark'
       }
     },
     // 计算弹窗全屏样式

@@ -38,11 +38,7 @@
         </div>
       </a-button>
       <a-dropdown>
-        <a-button type="primary" class="btn-group-item"><DownOutlined /> </a-button>
-        <a @click.prevent>
-          Hover me
-          <DownOutlined />
-        </a>
+        <a-button type="primary" class="btn-group-item"><DownOutlined /></a-button>
         <template #overlay>
           <a-menu>
             <!-- 工作空间信息 -->
@@ -410,13 +406,22 @@
             全屏查看日志
           </a-space>
         </a-form-item>
-        <a-form-item label="主题">
+        <a-form-item label="内容主题">
           <a-space>
             <a-radio-group v-model:value="themeView" button-style="solid">
               <a-radio-button value="light">浅色</a-radio-button>
               <a-radio-button value="dark">深色</a-radio-button>
             </a-radio-group>
-            主题切换
+            内容区域主题切换
+          </a-space>
+        </a-form-item>
+        <a-form-item label="菜单主题">
+          <a-space>
+            <a-radio-group v-model:value="menuThemeView" button-style="solid">
+              <a-radio-button value="light">浅色</a-radio-button>
+              <a-radio-button value="dark">深色</a-radio-button>
+            </a-radio-group>
+            左边菜单栏主题切换
           </a-space>
         </a-form-item>
 
@@ -553,7 +558,7 @@ export default {
   computed: {
     ...mapState(useUserStore, ['getToken', 'getUserInfo']),
     ...mapState(useAppStore, ['getWorkspaceId']),
-    ...mapState(useGuideStore, ['getGuideCache', 'getDisabledGuide', 'getThemeView']),
+    ...mapState(useGuideStore, ['getGuideCache', 'getDisabledGuide', 'getThemeView', 'getMenuThemeView']),
 
     showCode() {
       return this.getUserInfo.email !== this.temp.email
@@ -579,6 +584,14 @@ export default {
       },
       get: function () {
         return this.getThemeView()
+      }
+    },
+    menuThemeView: {
+      set: function (value) {
+        useGuideStore().toggleMenuThemeView(value)
+      },
+      get: function () {
+        return this.getMenuThemeView()
       }
     },
     fullscreenViewLog() {
