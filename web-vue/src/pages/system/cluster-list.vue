@@ -19,7 +19,7 @@
       rowKey="id"
     >
       <template #title>
-        <a-space direction="vertical">
+        <a-space direction="vertical" style="width: 100%">
           <div>
             <template v-for="(val, key) in groupMap" :key="key">
               <span>{{ key }}：</span>

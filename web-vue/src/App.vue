@@ -55,7 +55,11 @@ const reload = () => {
   })
 }
 
+// 全局 loading
+const globalLoading = () => {}
+
 provide('reload', reload)
+provide('globalLoading', globalLoading)
 </script>
 
 <style lang="less">

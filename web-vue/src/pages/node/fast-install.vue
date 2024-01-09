@@ -61,7 +61,7 @@
             @close="clearPullFastInstallResult(item.id)"
           >
             <template v-slot:description>
-              <a-space direction="vertical">
+              <a-space direction="vertical" style="width: 100%">
                 <div v-if="item.type === 'canUseIpEmpty'">
                   <a-tag color="orange">不能和节点正常通讯</a-tag>
                 </div>
