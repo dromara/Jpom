@@ -48,19 +48,10 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       alias: {
         '@/': `${path.resolve(__dirname, 'src')}/`
       },
-      // dedupe: ['vue'],
-      // preserveSymlinks: false,
+
       // 忽略后缀名的配置选项
       extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
     },
-    // rollupOptions: {
-    //   external: ['vue'],
-    //   output: {
-    //     globals: {
-    //       vue: 'Vue'
-    //     }
-    //   }
-    // },
     build: {
       sourcemap: mode !== 'production', // 非生产环境都生成sourcemap
       outDir: '../modules/server/src/main/resources/dist'

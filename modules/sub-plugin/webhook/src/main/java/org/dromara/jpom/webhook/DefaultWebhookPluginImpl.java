@@ -43,11 +43,35 @@ import java.util.Map;
 @Slf4j
 public class DefaultWebhookPluginImpl implements IDefaultPlugin {
 
+    public enum WebhookEvent {
+        /**
+         * 构建
+         */
+        BUILD,
+        /**
+         * 项目
+         */
+        PROJECT,
+        /**
+         * 监控
+         */
+        MONITOR,
+        /**
+         * 分发
+         */
+        DISTRIBUTE,
+    }
+
     @Override
     public Object execute(Object main, Map<String, Object> parameter) {
         String webhook = StrUtil.toStringOrNull(main);
         if (StrUtil.isEmpty(webhook)) {
             return null;
+        }
+        Object jpomWebhookEvent = parameter.remove("JPOM_WEBHOOK_EVENT");
+        if (jpomWebhookEvent instanceof WebhookEvent) {
+            WebhookEvent webhookEvent = (WebhookEvent) jpomWebhookEvent;
+            log.debug("webhook event: [{}]{}", webhookEvent, webhook);
         }
         try {
             HttpRequest httpRequest = HttpUtil.createGet(webhook, true);
