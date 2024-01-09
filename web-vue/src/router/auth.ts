@@ -10,10 +10,14 @@ import Qs from 'qs'
 import { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
 
 // 不需要鉴权的名单
-const whiteList: string[] = ['/login', '/install', '/system/ipAccess']
+const whiteList: string[] = ['/login', '/install', '/prohibit-access', '/404']
 const noTabs: string[] = ['/full-terminal', '/ssh-tabs']
 
 router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+  if (to.matched.length === 0) {
+    next('*')
+    return
+  }
   // 检测白名单
   if (whiteList.indexOf(to.path) !== -1) {
     next()

@@ -173,7 +173,7 @@ const beginCheckSystem = () => {
       })
     }
     if (res.code === 999) {
-      router.push('/system/ipAccess')
+      router.push('/prohibit-access')
     } else if (res.code === 222) {
       router.push('/install')
     }

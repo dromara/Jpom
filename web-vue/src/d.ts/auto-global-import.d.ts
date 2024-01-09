@@ -13,6 +13,7 @@ declare global {
   const $success: typeof import('./global/global')['$success']
   const $warning: typeof import('./global/global')['$warning']
   const appStore: typeof import('./global/global')['appStore']
+  const guideStore: typeof import('./global/global')['guideStore']
   const jpomWindow: typeof import('./global/global')['jpomWindow']
   const route: typeof import('./global/global')['route']
   const router: typeof import('./global/global')['router']

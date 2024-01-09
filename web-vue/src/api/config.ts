@@ -131,7 +131,7 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
       message: '禁止访问',
       description: '禁止访问,当前IP限制访问'
     })
-    window.location.href = jpomWindow.routerBase + '/system/ipAccess'
+    window.location.href = jpomWindow.routerBase + '/prohibit-access'
     return Promise.reject(data)
   }
 
