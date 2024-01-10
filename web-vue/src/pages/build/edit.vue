@@ -203,38 +203,52 @@
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
-              <a-popover title="辅助操作">
-                <template v-slot:content>
-                  <a-space direction="vertical" style="width: 100%">
-                    <a-button
-                      type="link"
-                      @click="
-                        () => {
-                          this.viewScriptTemplVisible = true
-                        }
-                      "
-                    >
-                      常见构建命令示例 <FullscreenOutlined />
-                    </a-button>
-                    <a-button
-                      type="link"
-                      @click="
-                        () => {
-                          this.chooseScriptVisible = 2
-                        }
-                      "
-                    >
-                      引用脚本模板
-                    </a-button>
-                  </a-space>
-                </template>
-                <a-textarea
+              <template #help>
+                构建执行的命令(非阻塞命令)，如：mvn clean package、npm run
+                build。支持变量：${BUILD_ID}、${BUILD_NAME}、${BUILD_SOURCE_FILE}、${BUILD_NUMBER_ID}、仓库目录下
+                .env、工作空间变量
+              </template>
+
+              <!-- <a-textarea
                   v-model:value="temp.script"
                   :auto-size="{ minRows: 2, maxRows: 6 }"
                   allow-clear
                   placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build。支持变量：${BUILD_ID}、${BUILD_NAME}、${BUILD_SOURCE_FILE}、${BUILD_NUMBER_ID}、仓库目录下 .env、工作空间变量"
-                />
-              </a-popover>
+                /> -->
+              <a-form-item-rest>
+                <div style="height: 40vh">
+                  <code-editor
+                    v-model:content="temp.script"
+                    :showTool="true"
+                    :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"
+                  >
+                    <template #tool_before>
+                      <a-space>
+                        <a-button
+                          type="link"
+                          @click="
+                            () => {
+                              this.viewScriptTemplVisible = true
+                            }
+                          "
+                        >
+                          常见构建命令示例
+                        </a-button>
+                        <a-button
+                          type="link"
+                          @click="
+                            () => {
+                              this.chooseScriptVisible = 2
+                            }
+                          "
+                        >
+                          引用脚本模板
+                        </a-button>
+                      </a-space>
+                    </template>
+                  </code-editor>
+                </div>
+              </a-form-item-rest>
             </a-form-item>
             <a-form-item v-if="temp.buildMode === 1" name="script">
               <template v-slot:label>
@@ -272,25 +286,29 @@
               </template>
               <a-tabs>
                 <a-tab-pane key="1" tab="DSL 配置">
-                  <div style="height: 40vh">
-                    <code-editor
-                      v-model:content="temp.script"
-                      :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"
-                    ></code-editor>
-                  </div>
+                  <a-form-item-rest>
+                    <div style="height: 40vh">
+                      <code-editor
+                        v-model:content="temp.script"
+                        :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"
+                      ></code-editor>
+                    </div>
+                  </a-form-item-rest>
                 </a-tab-pane>
                 <a-tab-pane key="2" tab="配置示例">
-                  <div style="height: 40vh">
-                    <code-editor
-                      v-model:content="dslDefault"
-                      :options="{
-                        mode: 'yaml',
-                        tabSize: 2,
-                        theme: 'abcdef',
-                        readOnly: true
-                      }"
-                    ></code-editor>
-                  </div>
+                  <a-form-item-rest>
+                    <div style="height: 40vh">
+                      <code-editor
+                        v-model:content="dslDefault"
+                        :options="{
+                          mode: 'yaml',
+                          tabSize: 2,
+                          theme: 'abcdef',
+                          readOnly: true
+                        }"
+                      ></code-editor>
+                    </div>
+                  </a-form-item-rest>
                 </a-tab-pane>
               </a-tabs>
             </a-form-item>
@@ -1069,6 +1087,32 @@
               />
             </a-form-item>
           </div>
+
+          <a-form-item label="">
+            <a-flex justify="center" align="center">
+              <a-space>
+                <a-button
+                  type="primary"
+                  :disabled="stepsCurrent === 0"
+                  @click="
+                    () => {
+                      stepsCurrent = stepsCurrent - 1
+                    }
+                  "
+                  >上一步</a-button
+                ><a-button
+                  type="primary"
+                  :disabled="stepsCurrent === 4"
+                  @click="
+                    () => {
+                      stepsCurrent = stepsCurrent + 1
+                    }
+                  "
+                  >下一步</a-button
+                ></a-space
+              ></a-flex
+            >
+          </a-form-item>
         </a-form>
       </a-card>
     </a-spin>

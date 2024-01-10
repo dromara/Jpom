@@ -279,20 +279,22 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
             return UserBindWorkspaceModel.PermissionResult.builder().state(UserBindWorkspaceModel.PermissionResultEnum.SUCCESS).build();
         }
         // 拼接限制规则
-        String ruleStr = allowExecuteListRule.stream().map(jsonObject -> {
-            JSONArray week = jsonObject.getJSONArray("week");
-            String weekStr = week.stream()
-                .map(o -> Convert.toInt(o, 0))
-                .map(weekInt -> {
-                    DayOfWeek dayOfWeek = DayOfWeek.of(weekInt);
-                    return Week.of(dayOfWeek);
-                })
-                .map(week1 -> week1.toChinese(StrUtil.EMPTY))
-                .collect(Collectors.joining(StrUtil.COMMA));
-            String startTime = jsonObject.getString("startTime");
-            String endTime = jsonObject.getString("endTime");
-            return StrUtil.format("周{} 的 {} 至 {}", weekStr, startTime, endTime);
-        }).collect(Collectors.joining(StrUtil.SPACE));
+        String ruleStr = allowExecuteListRule.stream()
+            .map(jsonObject -> {
+                JSONArray week = jsonObject.getJSONArray("week");
+                String weekStr = week.stream()
+                    .map(o -> Convert.toInt(o, 0))
+                    .map(weekInt -> {
+                        DayOfWeek dayOfWeek = DayOfWeek.of(weekInt);
+                        return Week.of(dayOfWeek);
+                    })
+                    .map(week1 -> week1.toChinese(StrUtil.EMPTY))
+                    .collect(Collectors.joining(StrUtil.COMMA));
+                String startTime = jsonObject.getString("startTime");
+                String endTime = jsonObject.getString("endTime");
+                return StrUtil.format("周{} 的 {} 至 {}", weekStr, startTime, endTime);
+            })
+            .collect(Collectors.joining(StrUtil.SPACE));
         return UserBindWorkspaceModel.PermissionResult.builder()
             .state(UserBindWorkspaceModel.PermissionResultEnum.MISS_PERIOD)
             .msg("【禁止操作】当前时间不在可执行的时间段内,限制时间段:" + ruleStr)

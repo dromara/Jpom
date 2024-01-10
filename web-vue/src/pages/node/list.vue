@@ -124,7 +124,7 @@
             <template v-else-if="column.dataIndex === 'name'">
               <template v-if="record.openStatus !== 1">
                 <a-tooltip :title="`${text}`">
-                  <span>{{ (text || '').slice(0, 10) }}</span>
+                  <span>{{ text || '' }}</span>
                 </a-tooltip>
               </template>
               <template v-else>

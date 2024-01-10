@@ -25,14 +25,17 @@ package org.dromara.jpom.service.manage;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import org.dromara.jpom.common.AgentConst;
+import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.service.BaseWorkspaceOptService;
+import org.dromara.jpom.service.system.AgentWorkspaceEnvVarService;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * 项目管理
@@ -42,8 +45,11 @@ import java.io.File;
 @Service
 public class ProjectInfoService extends BaseWorkspaceOptService<NodeProjectInfoModel> {
 
-    public ProjectInfoService() {
+    private final AgentWorkspaceEnvVarService agentWorkspaceEnvVarService;
+
+    public ProjectInfoService(AgentWorkspaceEnvVarService agentWorkspaceEnvVarService) {
         super(AgentConst.PROJECT);
+        this.agentWorkspaceEnvVarService = agentWorkspaceEnvVarService;
     }
 
     @Override
@@ -180,4 +186,14 @@ public class ProjectInfoService extends BaseWorkspaceOptService<NodeProjectInfoM
         return FileUtil.file(logPath, "back");
     }
 
+    /**
+     * 获取环境变量
+     *
+     * @param workspaceId 工作空间ID
+     * @return map
+     */
+    public Map<String, String> getEnv(String workspaceId) {
+        EnvironmentMapBuilder env = agentWorkspaceEnvVarService.getEnv(workspaceId);
+        return env.environment();
+    }
 }

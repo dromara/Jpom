@@ -172,14 +172,15 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
             if (command == null) {
                 return CommandOpResult.of(false, "没有需要执行的命令");
             }
+            Map<String, String> env = projectInfoService.getEnv(nodeProjectInfoModel.getWorkspaceId());
             // 执行命令
             ThreadUtil.execute(() -> {
                 try {
                     File file = projectInfoService.resolveLibFile(nodeProjectInfoModel);
                     if (SystemUtil.getOsInfo().isWindows()) {
-                        CommandUtil.execSystemCommand(command, file);
+                        CommandUtil.execSystemCommand(command, file, env);
                     } else {
-                        CommandUtil.asyncExeLocalCommand(command, file);
+                        CommandUtil.asyncExeLocalCommand(command, file, env);
                     }
                 } catch (Exception e) {
                     log.error("执行命令失败", e);

@@ -60,7 +60,7 @@
         <template v-else-if="column.dataIndex === 'fileId'">
           <a-tooltip :title="text">
             <a-button type="link" style="padding: 0" @click="handleViewFile(record)" size="small">{{
-              (text || '').slice(0, 10)
+              (text || '').slice(0, 8)
             }}</a-button>
           </a-tooltip>
         </template>

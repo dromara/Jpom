@@ -294,9 +294,7 @@
           <template #bodyCell="{ column, text, record, index }">
             <template v-if="column.dataIndex === 'name'">
               <a-tooltip placement="topLeft" @click="handleDetails(record)" :title="`名称：${text} 点击查看详情`">
-                <a-button type="link" style="padding: 0" size="small">
-                  <FullscreenOutlined />{{ (text || '').slice(0, 10) }}</a-button
-                >
+                <a-button type="link" style="padding: 0" size="small"> <FullscreenOutlined />{{ text }}</a-button>
               </a-tooltip>
             </template>
             <template v-else-if="column.dataIndex === 'branchName'">
@@ -312,7 +310,7 @@
                   </div>
                 </template>
                 <span v-if="record.branchTagName"><TagOutlined />{{ record.branchTagName }}</span>
-                <span v-else>{{ (text || '').slice(0, 10) }}</span>
+                <span v-else>{{ text }}</span>
               </a-tooltip>
             </template>
             <!-- <a-tooltip slot="resultDirFile" slot-scope="text" placement="topLeft" :title="text">
@@ -351,7 +349,7 @@
             </template>
             <template v-else-if="column.tooltip">
               <a-tooltip placement="topLeft" :title="text">
-                <span>{{ (text || '').slice(0, 10) }}</span>
+                <span>{{ text || '' }}</span>
               </a-tooltip>
             </template>
             <template v-else-if="column.dataIndex === 'operation'">
@@ -855,13 +853,7 @@ export default {
           ellipsis: true,
           width: 100
         },
-        {
-          title: '产物',
-          dataIndex: 'resultDirFile',
-          width: 100,
-          ellipsis: true,
-          tooltip: true
-        },
+
         {
           title: '方式',
           dataIndex: 'buildMode',
@@ -890,6 +882,13 @@ export default {
           dataIndex: 'releaseMethod',
           width: '100px',
           ellipsis: true
+        },
+        {
+          title: '产物',
+          dataIndex: 'resultDirFile',
+          width: 100,
+          ellipsis: true,
+          tooltip: true
         },
         {
           title: '定时构建',
