@@ -23,6 +23,7 @@
 package org.dromara.jpom.func.files.controller;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
@@ -77,26 +78,40 @@ public class FileReleaseTaskController extends BaseServerController {
     @PostMapping(value = "add-task", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> addTask(@ValidatorItem String fileId,
-                                       @ValidatorItem String name,
-                                       @ValidatorItem(value = ValidatorRule.NUMBERS) int taskType,
-                                       @ValidatorItem String taskDataIds,
-                                       @ValidatorItem String releasePathParent,
-                                       @ValidatorItem String releasePathSecondary,
-                                       String beforeScript,
-                                       String afterScript,
-                                       HttpServletRequest request) {
+                                        @ValidatorItem(value = ValidatorRule.NUMBERS) Integer fileType,
+                                        @ValidatorItem String name,
+                                        @ValidatorItem(value = ValidatorRule.NUMBERS) int taskType,
+                                        @ValidatorItem String taskDataIds,
+                                        @ValidatorItem String releasePathParent,
+                                        @ValidatorItem String releasePathSecondary,
+                                        String beforeScript,
+                                        String afterScript,
+                                        HttpServletRequest request) {
         // 判断参数
         ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(request);
-        List<String> whitelistServerOutGiving = configDeNewInstance.outGiving();
-        Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, releasePathParent), "请选择正确的项目路径,或者还没有配置白名单");
+        List<String> whitelistServerOutGiving = configDeNewInstance.getOutGiving();
+        Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, releasePathParent), "请选择正确的项目路径,或者还没有配置授权");
         Assert.hasText(releasePathSecondary, "请填写发布文件的二级目录");
 
         String releasePath = FileUtil.normalize(releasePathParent + StrUtil.SLASH + releasePathSecondary);
 
-        return fileReleaseTaskService.addTask(fileId, name, taskType, taskDataIds, releasePath, beforeScript, afterScript, null, request);
+        return fileReleaseTaskService.addTask(fileId, fileType, name, taskType, taskDataIds, releasePath, beforeScript, afterScript, null, request);
     }
 
 
+    /**
+     * 重建-重新发布
+     *
+     * @param fileId       文件id
+     * @param name         任务名
+     * @param taskType     任务类型
+     * @param taskDataIds  任务关联数据id
+     * @param parentTaskId 父级任务id
+     * @param beforeScript 发布之前的脚步
+     * @param afterScript  发布之后的脚步
+     * @param request      请求
+     * @return json
+     */
     @PostMapping(value = "re-task", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> reTask(@ValidatorItem String fileId,
@@ -109,7 +124,9 @@ public class FileReleaseTaskController extends BaseServerController {
                                        HttpServletRequest request) {
         FileReleaseTaskLogModel parentTask = fileReleaseTaskService.getByKey(parentTaskId, request);
         Assert.notNull(parentTask, "父任务不存在");
-        return fileReleaseTaskService.addTask(fileId, name, taskType, taskDataIds, parentTask.getReleasePath(), beforeScript, afterScript, null, request);
+        Integer fileType = parentTask.getFileType();
+        fileType = ObjectUtil.defaultIfNull(fileType, 1);
+        return fileReleaseTaskService.addTask(fileId, fileType, name, taskType, taskDataIds, parentTask.getReleasePath(), beforeScript, afterScript, null, request);
     }
 
     /**
@@ -202,8 +219,8 @@ public class FileReleaseTaskController extends BaseServerController {
     @GetMapping(value = "log-list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> log(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-                                       @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line,
-                                       HttpServletRequest request) {
+                                        @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line,
+                                        HttpServletRequest request) {
         FileReleaseTaskLogModel item = fileReleaseTaskService.getByKey(id, request);
         Assert.notNull(item, "没有对应数据");
         File file = fileReleaseTaskService.logFile(item);

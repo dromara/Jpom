@@ -58,10 +58,8 @@ import java.util.function.Function;
  */
 @Slf4j
 public class ExtConfigBean {
-
-
     /**
-     *
+     * 控制台日志编码
      */
     private static Charset consoleLogCharset;
 

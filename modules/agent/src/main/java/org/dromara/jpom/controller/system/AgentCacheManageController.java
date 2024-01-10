@@ -37,6 +37,7 @@ import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.model.system.WorkspaceEnvVarModel;
 import org.dromara.jpom.plugin.PluginFactory;
+import org.dromara.jpom.service.script.NodeScriptExecLogServer;
 import org.dromara.jpom.service.system.AgentWorkspaceEnvVarService;
 import org.dromara.jpom.socket.AgentFileTailWatcher;
 import org.dromara.jpom.util.CommandUtil;
@@ -63,15 +64,18 @@ public class AgentCacheManageController extends BaseAgentController implements I
 
     private final AgentWorkspaceEnvVarService agentWorkspaceEnvVarService;
     private final JpomApplication configBean;
+    private final NodeScriptExecLogServer nodeScriptExecLogServer;
 
     private long dataSize;
     private long oldJarsSize;
     private long tempFileSize;
 
     public AgentCacheManageController(AgentWorkspaceEnvVarService agentWorkspaceEnvVarService,
-                                      JpomApplication configBean) {
+                                      JpomApplication configBean,
+                                      NodeScriptExecLogServer nodeScriptExecLogServer) {
         this.agentWorkspaceEnvVarService = agentWorkspaceEnvVarService;
         this.configBean = configBean;
+        this.nodeScriptExecLogServer = nodeScriptExecLogServer;
     }
 
     /**
@@ -102,6 +106,9 @@ public class AgentCacheManageController extends BaseAgentController implements I
         }
         jsonObject.put("dateTime", DateTime.now().toString());
         jsonObject.put("timeZoneId", TimeZone.getDefault().getID());
+        // 待同步待日志数
+        int size = nodeScriptExecLogServer.size();
+        jsonObject.put("scriptExecLogSize", size);
         //
         return JsonMessage.success("ok", jsonObject);
     }

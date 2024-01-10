@@ -1,8 +1,7 @@
 /* 全局样式，重置样式 */
 html,
 body {
-  // 宽度 100vw 会出现横向滚动条
-  // width: 100vw;
+  width: 100vw;
   height: 100vh;
   margin: 0;
   padding: 0;
@@ -29,7 +28,7 @@ body {
 .filter {
   margin-bottom: 10px;
 }
-/*
+/* 
 .ant-btn {
   margin-right: 10px;
 } */
@@ -71,9 +70,9 @@ pre {
   scrollbar-width: none;
 }
 
-@color-border-last: rgba(140, 140, 140, 1);
-@color-neutral-last: rgba(140, 140, 140, 0.2);
-@scrollbar-size: 5px;
+@color-border-last: #e5e5e5;
+@color-neutral-last: #f7f8fa;
+@scrollbar-size: 4px;
 
 // 兼容火狐
 * {
@@ -81,57 +80,24 @@ pre {
   scrollbar-color: @color-border-last @color-neutral-last;
 }
 // 滚动条样式
-::-webkit-scrollbar {
+.ant-table-body::-webkit-scrollbar {
   width: @scrollbar-size;
-  height: @scrollbar-size;
-  border-radius: @scrollbar-size;
+  // height: @scrollbar-size;
+  //  width: 10px;
+  height: 10px;
+  // width: 2px;
+  border-radius: 2px;
   background-color: transparent;
 }
 // 滚动条-活动按钮
-::-webkit-scrollbar-thumb {
+.ant-table-body::-webkit-scrollbar-thumb {
   background: @color-border-last;
-  border-radius: @scrollbar-size;
-  box-shadow: outset 0 0 @scrollbar-size @color-border-last;
+  border-radius: 2px;
+  box-shadow: inset 0 0 6px @color-border-last;
 }
 // 滚动条背景
-::-webkit-scrollbar-track {
+.ant-table-body::-webkit-scrollbar-track {
   background-color: @color-neutral-last;
-  border-radius: @scrollbar-size;
-  box-shadow: outset 0 0 @scrollbar-size @color-neutral-last;
-}
-
-// 兼容火狐
-.force-scrollbar * {
-  scrollbar-width: thin;
-  scrollbar-color: @color-border-last @color-neutral-last;
-}
-// 滚动条样式
-.force-scrollbar *::-webkit-scrollbar {
-  width: @scrollbar-size !important;
-  height: @scrollbar-size !important;
-  border-radius: @scrollbar-size !important;
-  background-color: transparent !important;
-  display: block !important;
-}
-// 滚动条-活动按钮
-.force-scrollbar *::-webkit-scrollbar-thumb {
-  background: @color-border-last !important;
-  border-radius: @scrollbar-size !important;
-  box-shadow: outset 0 0 @scrollbar-size @color-border-last !important;
-}
-// 滚动条背景
-.force-scrollbar *::-webkit-scrollbar-track {
-  background-color: @color-neutral-last !important;
-  border-radius: @scrollbar-size !important;
-  box-shadow: outset 0 0 @scrollbar-size @color-neutral-last !important;
-}
-
-.ant-space {
-  flex-wrap: wrap;
-  gap: 10px 0;
-}
-.text-overflow-hidden {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  border-radius: 2px;
+  box-shadow: inset 0 0 6px @color-neutral-last;
 }

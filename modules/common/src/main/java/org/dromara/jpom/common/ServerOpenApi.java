@@ -62,6 +62,10 @@ public class ServerOpenApi {
      */
     public static final String FILE_STORAGE_DOWNLOAD = API + "file-storage/download/{id}/{token}";
     /**
+     * 静态文件下载
+     */
+    public static final String STATIC_FILE_STORAGE_DOWNLOAD = API + "file-storage/static/download/{id}/{token}";
+    /**
      * 获取当前构建状态
      */
     public static final String BUILD_TRIGGER_STATUS = API + "build_status";

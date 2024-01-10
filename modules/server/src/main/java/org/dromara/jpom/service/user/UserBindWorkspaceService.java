@@ -57,10 +57,6 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
     private final UserPermissionGroupServer userPermissionGroupServer;
 
     /**
-     * 节点管理员
-     */
-    public static final String SYSTEM_USER = "-systemUser";
-    /**
      * ssh 终端没有任何限制
      */
     public static final String SSH_COMMAND_NOT_LIMITED = "-sshCommandNotLimited";
@@ -82,7 +78,6 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
         List<UserBindWorkspaceModel> list = new HashSet<>(workspace).stream()
             .filter(s -> {
                 // 过滤
-                s = StrUtil.removeSuffix(s, SYSTEM_USER);
                 s = StrUtil.removeSuffix(s, SSH_COMMAND_NOT_LIMITED);
                 MethodFeature[] values = MethodFeature.values();
                 for (MethodFeature value : values) {

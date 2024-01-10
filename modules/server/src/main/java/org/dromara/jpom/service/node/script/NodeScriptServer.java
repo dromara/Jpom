@@ -27,6 +27,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.node.NodeScriptCacheModel;
 import org.dromara.jpom.service.ITriggerToken;
@@ -76,7 +77,21 @@ public class NodeScriptServer extends BaseNodeService<NodeScriptCacheModel> impl
     }
 
     @Override
+    public List<NodeScriptCacheModel> lonelyDataArray(MachineNodeModel machineNodeModel) {
+        JSONArray jsonArray = NodeForward.requestData(machineNodeModel, NodeUrl.Script_List, null, JSONArray.class);
+        return this.checkLonelyDataArray(jsonArray, machineNodeModel.getId());
+    }
+
+    @Override
     public String typeName() {
         return getTableName();
+    }
+
+    @Override
+    protected void refreshCacheStat(String nodeId, int dataCount) {
+        NodeModel nodeModel = new NodeModel();
+        nodeModel.setId(nodeId);
+        nodeModel.setJpomScriptCount(dataCount);
+        nodeService.updateById(nodeModel);
     }
 }

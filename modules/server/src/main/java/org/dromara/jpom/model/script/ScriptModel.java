@@ -23,6 +23,7 @@
 package org.dromara.jpom.model.script;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
@@ -37,6 +38,7 @@ import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.FileUtils;
 
 import java.io.File;
+import java.io.InputStream;
 
 /**
  * @author bwcx_jzy
@@ -104,15 +106,19 @@ public class ScriptModel extends BaseWorkspaceModel {
         return FileUtil.file(path, "log", executeId + ".log");
     }
 
+    /**
+     * 加载脚本文件
+     *
+     * @return file
+     */
     public File scriptFile() {
+        InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
+        String defaultTemplate = IoUtil.readUtf8(templateInputStream);
+
         String dataPath = JpomApplication.getInstance().getDataPath();
 
         File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
-        FileUtils.writeScript(this.getContext(), scriptFile, ExtConfigBean.getConsoleLogCharset());
-//        File path = this.scriptPath();
-//        File file = FileUtil.file(path, StrUtil.format("script.{}", CommandUtil.SUFFIX));
-//        //
-//        FileUtil.writeString(getContext(), file, ExtConfigBean.getConsoleLogCharset());
+        FileUtils.writeScript(defaultTemplate + this.getContext(), scriptFile, ExtConfigBean.getConsoleLogCharset());
         return scriptFile;
     }
 

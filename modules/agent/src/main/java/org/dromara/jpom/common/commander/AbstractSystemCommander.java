@@ -22,11 +22,6 @@
  */
 package org.dromara.jpom.common.commander;
 
-import cn.hutool.system.SystemUtil;
-import org.dromara.jpom.common.commander.impl.LinuxSystemCommander;
-import org.dromara.jpom.common.commander.impl.MacOsSystemCommander;
-import org.dromara.jpom.common.commander.impl.WindowsSystemCommander;
-import org.dromara.jpom.system.JpomRuntimeException;
 import org.dromara.jpom.util.CommandUtil;
 
 import java.io.File;
@@ -37,27 +32,8 @@ import java.io.File;
  * @author bwcx_jzy
  * @since 2019/4/16
  */
-public abstract class AbstractSystemCommander {
+public abstract class AbstractSystemCommander implements SystemCommander {
 
-    private static AbstractSystemCommander abstractSystemCommander = null;
-
-    public static AbstractSystemCommander getInstance() {
-        if (abstractSystemCommander != null) {
-            return abstractSystemCommander;
-        }
-        if (SystemUtil.getOsInfo().isLinux()) {
-            // Linux系统
-            abstractSystemCommander = new LinuxSystemCommander();
-        } else if (SystemUtil.getOsInfo().isWindows()) {
-            // Windows系统
-            abstractSystemCommander = new WindowsSystemCommander();
-        } else if (SystemUtil.getOsInfo().isMac()) {
-            abstractSystemCommander = new MacOsSystemCommander();
-        } else {
-            throw new JpomRuntimeException("不支持的：" + SystemUtil.getOsInfo().getName());
-        }
-        return abstractSystemCommander;
-    }
 
     /**
      * 清空文件内容
@@ -67,29 +43,29 @@ public abstract class AbstractSystemCommander {
      */
     public abstract String emptyLogFile(File file);
 
-    /**
-     * 查询服务状态
-     *
-     * @param serviceName 服务名称
-     * @return true 运行中
-     */
-    public abstract boolean getServiceStatus(String serviceName);
-
-    /**
-     * 启动服务
-     *
-     * @param serviceName 服务名称
-     * @return 结果
-     */
-    public abstract String startService(String serviceName);
-
-    /**
-     * 关闭服务
-     *
-     * @param serviceName 服务名称
-     * @return 结果
-     */
-    public abstract String stopService(String serviceName);
+//    /**
+//     * 查询服务状态
+//     *
+//     * @param serviceName 服务名称
+//     * @return true 运行中
+//     */
+//    public abstract boolean getServiceStatus(String serviceName);
+//
+//    /**
+//     * 启动服务
+//     *
+//     * @param serviceName 服务名称
+//     * @return 结果
+//     */
+//    public abstract String startService(String serviceName);
+//
+//    /**
+//     * 关闭服务
+//     *
+//     * @param serviceName 服务名称
+//     * @return 结果
+//     */
+//    public abstract String stopService(String serviceName);
 
     /**
      * 构建kill 命令

@@ -31,23 +31,21 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.exception.AgentAuthorizeException;
+import org.dromara.jpom.exception.AgentException;
+import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.model.BaseNodeModel;
-import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.system.WorkspaceService;
-import org.dromara.jpom.system.AgentException;
-import org.dromara.jpom.system.AuthorizeException;
-import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -74,24 +72,17 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
         this.dataName = dataName;
     }
 
-    public PageResultDto<T> listPageNode(HttpServletRequest request) {
-        // 验证工作空间权限
-        Map<String, String> paramMap = ServletUtil.getParamMap(request);
+    @Override
+    public List<T> listByWorkspace(HttpServletRequest request) {
         String workspaceId = this.getCheckUserWorkspace(request);
-        // 验证节点
-        String nodeId = paramMap.get(BaseServerController.NODE_ID);
-        Assert.notNull(nodeId, "没有选择节点ID");
-        NodeService nodeService = SpringUtil.getBean(NodeService.class);
-        NodeModel nodeModel = nodeService.getByKey(nodeId);
-        Assert.notNull(nodeModel, "不存在对应的节点");
-        Assert.state(StrUtil.equals(workspaceId, nodeModel.getWorkspaceId()), "节点的工作空间和操作的工作空间补一致");
-        paramMap.remove("workspaceId");
-        paramMap.put("nodeId", nodeId);
-        paramMap.put("workspaceId:in", workspaceId + StrUtil.COMMA + ServerConst.WORKSPACE_GLOBAL);
-
-        return super.listPage(paramMap);
+        Map<String, String> paramMap = ServletUtil.getParamMap(request);
+        String nodeId = paramMap.get("nodeId");
+        Entity entity = Entity.create();
+        entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL));
+        Opt.ofBlankAble(nodeId).ifPresent(s -> entity.set("nodeId", s));
+        List<Entity> entities = super.queryList(entity);
+        return super.entityToBeanList(entities);
     }
-
 
     /**
      * 同步所有节点的项目
@@ -130,6 +121,81 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
     }
 
     /**
+     * 检查孤独数据
+     *
+     * @param jsonArray 数据
+     * @param machineId 机器 ID
+     * @return list
+     */
+    protected List<T> checkLonelyDataArray(JSONArray jsonArray, String machineId) {
+        if (CollUtil.isEmpty(jsonArray)) {
+            return null;
+        }
+        // 分组
+        Map<String, List<T>> map = jsonArray.stream().map(o -> {
+            JSONObject jsonObject = (JSONObject) o;
+            return jsonObject.to(tClass);
+        }).collect(Collectors.groupingBy(
+            t -> StrUtil.emptyToDefault(t.getNodeId(), StrUtil.EMPTY) + StrUtil.COMMA + t.getWorkspaceId(),
+            Collectors.mapping(t -> t, Collectors.toList())
+        ));
+        // 查询不存在的节点
+        Map<String, String> nodeIdMap = new HashMap<>();
+        return map.entrySet()
+            .stream()
+            .filter(entry -> {
+                String key = entry.getKey();
+                if (StrUtil.startWith(key, StrUtil.COMMA)) {
+                    // 旧数据没有节点 ID
+                    List<String> list = StrUtil.splitTrim(key, StrUtil.COMMA);
+                    String workspaceId = CollUtil.getLast(list);
+                    NodeModel nodeModel = new NodeModel();
+                    nodeModel.setMachineId(machineId);
+                    nodeModel.setWorkspaceId(workspaceId);
+                    // 更新推荐节点ID
+                    NodeModel queryByBean = nodeService.queryByBean(nodeModel);
+                    if (queryByBean != null) {
+                        String beanId = queryByBean.getId();
+                        String s = nodeIdMap.put(key, beanId);
+                        if (StrUtil.isNotEmpty(s) && !StrUtil.equals(s, beanId)) {
+                            // 对比已经存在的数据
+                            log.error("项目数据工作空间ID[{}]查询出节点ID不一致, 旧数据: {}, 新数据: {}", key, s, beanId);
+                        }
+                    }
+                    return true;
+                }
+                List<String> list = StrUtil.splitTrim(key, StrUtil.COMMA);
+                if (CollUtil.size(list) != 2) {
+                    return true;
+                }
+                String workspaceId = list.get(1);
+                String id = list.get(0);
+                if (StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL)) {
+                    // 判断全局工作空间ID ,判断节点不存在
+                    return !nodeService.exists(id);
+                }
+                NodeModel nodeModel = new NodeModel();
+                nodeModel.setId(id);
+                nodeModel.setWorkspaceId(workspaceId);
+                return !nodeService.exists(nodeModel);
+
+            })
+            .peek(entry -> {
+                String key = entry.getKey();
+                String nodeId = nodeIdMap.get(key);
+                if (nodeId != null) {
+                    // 更新节点ID
+                    List<T> value = entry.getValue();
+                    for (T t : value) {
+                        t.setNodeId(nodeId);
+                    }
+                }
+            })
+            .flatMap(entry -> entry.getValue().stream())
+            .collect(Collectors.toList());
+    }
+
+    /**
      * 同步执行 同步节点信息
      *
      * @param nodeModel 节点信息
@@ -162,30 +228,33 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                 .map(BaseNodeModel::dataId)
                 .collect(Collectors.toSet());
             // 转换数据修改时间
-            List<T> projectInfoModels = jsonArray.stream().map(o -> {
-                // modifyTime,createTime
-                JSONObject jsonObject = (JSONObject) o;
-                T t = jsonObject.to(tClass);
-                Opt.ofBlankAble(jsonObject.getString("createTime")).map(s -> {
-                    try {
-                        return DateUtil.parse(s);
-                    } catch (Exception e) {
-                        log.warn("数据创建时间格式不正确 {} {}", s, jsonObject);
-                        return null;
-                    }
-                }).ifPresent(s -> t.setCreateTimeMillis(s.getTime()));
-                //
-                Opt.ofBlankAble(jsonObject.getString("modifyTime")).map(s -> {
-                    try {
-                        return DateUtil.parse(s);
-                    } catch (Exception e) {
-                        log.warn("数据修改时间格式不正确 {} {}", s, jsonObject);
-                        return null;
-                    }
-                }).ifPresent(s -> t.setModifyTimeMillis(s.getTime()));
-                return t;
-            }).collect(Collectors.toList());
-            List<T> models = projectInfoModels.stream()
+            List<T> projectInfoModels = jsonArray.stream()
+                .map(o -> {
+                    // modifyTime,createTime
+                    JSONObject jsonObject = (JSONObject) o;
+                    T t = jsonObject.to(tClass);
+                    Opt.ofBlankAble(jsonObject.getString("createTime"))
+                        .map(s -> {
+                            try {
+                                return DateUtil.parse(s);
+                            } catch (Exception e) {
+                                log.warn("数据创建时间格式不正确 {} {}", s, jsonObject);
+                                return null;
+                            }
+                        }).ifPresent(s -> t.setCreateTimeMillis(s.getTime()));
+                    //
+                    Opt.ofBlankAble(jsonObject.getString("modifyTime"))
+                        .map(s -> {
+                            try {
+                                return DateUtil.parse(s);
+                            } catch (Exception e) {
+                                log.warn("数据修改时间格式不正确 {} {}", s, jsonObject);
+                                return null;
+                            }
+                        })
+                        .ifPresent(s -> t.setModifyTimeMillis(s.getTime()));
+                    return t;
+                })
                 .peek(item -> this.fullData(item, nodeModel))
                 // 只保留自己节点的数据
                 .filter(t -> StrUtil.equals(t.getNodeId(), nodeModel.getId()))
@@ -219,7 +288,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
             // 设置 临时缓存，便于放行检查
             BaseServerController.resetInfo(UserModel.EMPTY);
             //
-            models.forEach(BaseNodeService.super::upsert);
+            projectInfoModels.forEach(BaseNodeService.super::upsert);
             // 删除项目
             int delCount = 0;
             Set<String> strings = cacheIds.stream()
@@ -232,12 +301,14 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
             if (CollUtil.isNotEmpty(needDelete)) {
                 delCount = super.delByKey(needDelete, null);
             }
+            int size = CollUtil.size(projectInfoModels);
             String format = StrUtil.format(
-                "{} 节点拉取到 {} 个{},已经缓存 {} 个{},更新 {} 个{},删除 {} 个缓存",
+                "{} 物理节点拉取到 {} 个{},当前工作空间逻辑节点已经缓存 {} 个{},更新 {} 个{},删除 {} 个缓存",
                 nodeModelName, CollUtil.size(jsonArray), dataName,
                 CollUtil.size(cacheAll), dataName,
-                CollUtil.size(models), dataName,
+                size, dataName,
                 delCount);
+            this.refreshCacheStat(nodeModel.getId(), size);
             log.debug(format);
             return format;
         } catch (Exception e) {
@@ -247,15 +318,25 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
         }
     }
 
+    /**
+     * 刷新缓存统计
+     *
+     * @param nodeId    节点id
+     * @param dataCount 数据总数
+     */
+    protected void refreshCacheStat(String nodeId, int dataCount) {
+
+    }
+
     protected String checkException(Exception e, String nodeModelName) {
         if (e instanceof AgentException) {
             AgentException agentException = (AgentException) e;
             log.error("{} 同步失败 {}", nodeModelName, agentException.getMessage());
             return "同步失败" + agentException.getMessage();
-        } else if (e instanceof AuthorizeException) {
-            AuthorizeException authorizeException = (AuthorizeException) e;
-            log.error("{} 授权异常 {}", nodeModelName, authorizeException.getMessage());
-            return "授权异常" + authorizeException.getMessage();
+        } else if (e instanceof AgentAuthorizeException) {
+            AgentAuthorizeException agentAuthorizeException = (AgentAuthorizeException) e;
+            log.error("{} 授权异常 {}", nodeModelName, agentAuthorizeException.getMessage());
+            return "授权异常" + agentAuthorizeException.getMessage();
         }
 //        else if (e instanceof JSONException) {
 //            log.error("{} 消息解析失败 {}", nodeModelName, e.getMessage());
@@ -383,4 +464,12 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
      * @return json
      */
     public abstract JSONArray getLitDataArray(NodeModel nodeModel);
+
+    /**
+     * 查询孤立的数据
+     *
+     * @param machineNodeModel 资产
+     * @return json
+     */
+    public abstract List<T> lonelyDataArray(MachineNodeModel machineNodeModel);
 }

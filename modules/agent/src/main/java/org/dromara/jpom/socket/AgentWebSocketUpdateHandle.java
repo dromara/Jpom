@@ -33,7 +33,7 @@ import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.model.AgentFileModel;
 import org.dromara.jpom.model.UploadFileModel;
 import org.dromara.jpom.model.WebSocketMessageModel;
-import org.dromara.jpom.system.AgentConfig;
+import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.servlet.MultipartProperties;
@@ -66,6 +66,7 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
     public void init(AgentConfig agentConfig, MultipartProperties multipartProperties) {
         AgentWebSocketUpdateHandle.agentConfig = agentConfig;
         AgentWebSocketUpdateHandle.multipartProperties = multipartProperties;
+        setAgentAuthorize(agentConfig.getAuthorize());
     }
 
     @OnOpen
@@ -157,8 +158,8 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
 
     @Override
     @OnClose
-    public void onClose(Session session) {
-        super.onClose(session);
+    public void onClose(Session session, CloseReason closeReason) {
+        super.onClose(session, closeReason);
         UPLOAD_FILE_INFO.remove(session.getId());
     }
 

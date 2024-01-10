@@ -22,9 +22,14 @@
  */
 package org.dromara.jpom.common.commander;
 
-import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
+import lombok.Lombok;
+import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.configuration.ProjectConfig;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
+import org.dromara.jpom.service.manage.ProjectInfoService;
+import org.dromara.jpom.service.script.DslScriptServer;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JvmUtil;
 
@@ -40,46 +45,63 @@ import java.util.Optional;
  * @author bwcx_jzy
  * @since 2021/12/17
  */
+@Slf4j
 public abstract class BaseUnixProjectCommander extends AbstractProjectCommander {
 
-
-    public BaseUnixProjectCommander(Charset fileCharset) {
-        super(fileCharset);
+    public BaseUnixProjectCommander(Charset fileCharset,
+                                    SystemCommander systemCommander,
+                                    ProjectConfig projectConfig,
+                                    DslScriptServer dslScriptServer,
+                                    ProjectInfoService projectInfoService) {
+        super(fileCharset, systemCommander, projectConfig, dslScriptServer, projectInfoService);
     }
 
     @Override
-    public String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel) {
-        String path = NodeProjectInfoModel.getClassPathLib(nodeProjectInfoModel);
+    public String buildRunCommand(NodeProjectInfoModel nodeProjectInfoModel) {
+        NodeProjectInfoModel infoModel = projectInfoService.resolveModel(nodeProjectInfoModel);
+        return this.buildRunCommand(nodeProjectInfoModel, infoModel);
+    }
+
+
+    @Override
+    public String buildRunCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
+        String lib = projectInfoService.resolveLibPath(originalModel);
+        String path = this.getClassPathLib(originalModel, lib);
         if (StrUtil.isBlank(path)) {
             return null;
         }
         String tag = nodeProjectInfoModel.getId();
+        String absoluteLog = projectInfoService.resolveAbsoluteLog(nodeProjectInfoModel, originalModel);
         return StrUtil.format("nohup {} {} {} {} {} {} >> {} 2>&1 &",
             getRunJavaPath(nodeProjectInfoModel, false),
             Optional.ofNullable(nodeProjectInfoModel.getJvm()).orElse(StrUtil.EMPTY),
-            JvmUtil.getJpomPidTag(tag, nodeProjectInfoModel.allLib()),
+            JvmUtil.getJpomPidTag(tag, lib),
             path,
-            Optional.ofNullable(nodeProjectInfoModel.getMainClass()).orElse(StrUtil.EMPTY),
+            Optional.ofNullable(originalModel.mainClass()).orElse(StrUtil.EMPTY),
             Optional.ofNullable(nodeProjectInfoModel.getArgs()).orElse(StrUtil.EMPTY),
-            nodeProjectInfoModel.getAbsoluteLog());
+            absoluteLog);
     }
 
     @Override
-    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, int pid) throws Exception {
-        File file = FileUtil.file(nodeProjectInfoModel.allLib());
+    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel, int pid) {
+        File file = projectInfoService.resolveLibFile(originalModel);
         List<String> result = new ArrayList<>();
         boolean success = false;
-        String kill = AbstractSystemCommander.getInstance().kill(file, pid);
+        String kill = systemCommander.kill(file, pid);
         result.add(kill);
-        if (this.loopCheckRun(nodeProjectInfoModel, false)) {
+        if (this.loopCheckRun(nodeProjectInfoModel, originalModel, false)) {
             success = true;
         } else {
             // 强制杀进程
             result.add("Kill not completed, test kill -9");
             String cmd = String.format("kill -9 %s", pid);
-            CommandUtil.asyncExeLocalCommand(file, cmd);
+            try {
+                CommandUtil.asyncExeLocalCommand(cmd, file);
+            } catch (Exception e) {
+                throw Lombok.sneakyThrow(e);
+            }
             //
-            if (this.loopCheckRun(nodeProjectInfoModel, 5, false)) {
+            if (this.loopCheckRun(nodeProjectInfoModel, originalModel, 5, false)) {
                 success = true;
             } else {
                 result.add("Kill -9 not completed, kill -9 failed ");
@@ -88,5 +110,25 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
         String tag = nodeProjectInfoModel.getId();
         return CommandOpResult.of(success, status(tag)).appendMsg(result);
 //        return status(tag) + StrUtil.SPACE + kill;
+    }
+
+    /**
+     * 尝试ps -ef | grep  中查看进程id
+     *
+     * @param tag 进程标识
+     * @return 运行标识
+     */
+    @Override
+    protected String bySystemPs(String tag) {
+        String execSystemCommand = CommandUtil.execSystemCommand("ps -ef | grep " + tag);
+        log.debug("getPsStatus {} {}", tag, execSystemCommand);
+        List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
+        for (String item : list) {
+            if (JvmUtil.checkCommandLineIsJpom(item, tag)) {
+                String[] split = StrUtil.splitToArray(item, StrUtil.SPACE);
+                return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, split[1]);
+            }
+        }
+        return AbstractProjectCommander.STOP_TAG;
     }
 }

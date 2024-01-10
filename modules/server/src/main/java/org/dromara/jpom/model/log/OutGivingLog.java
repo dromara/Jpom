@@ -79,4 +79,16 @@ public class OutGivingLog extends BaseWorkspaceModel {
      * 进度信息
      */
     private Long progressSize;
+    /**
+     * 分发方式
+     * upload: "手动上传",
+     * download: "远程下载",
+     * "build-trigger": "构建触发",
+     * "use-build": "构建产物",
+     */
+    private String mode;
+    /**
+     * 数据
+     */
+    private String modeData;
 }

@@ -59,6 +59,12 @@ public class FileReleaseTaskLogModel extends BaseWorkspaceModel {
      */
     private String fileId;
     /**
+     * 文件来源类型
+     * 1 文件中心
+     * 2 静态文件
+     */
+    private Integer fileType;
+    /**
      * 任务类型 0 ssh 1 节点
      */
     private Integer taskType;

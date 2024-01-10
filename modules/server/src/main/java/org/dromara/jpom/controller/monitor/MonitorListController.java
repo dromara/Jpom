@@ -49,7 +49,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -85,8 +84,8 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "getMonitorList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<MonitorModel>> getMonitorList() {
-        PageResultDto<MonitorModel> pageResultDto = monitorService.listPage(getRequest());
+    public IJsonMessage<PageResultDto<MonitorModel>> getMonitorList(HttpServletRequest request) {
+        PageResultDto<MonitorModel> pageResultDto = monitorService.listPage(request);
         return JsonMessage.success("", pageResultDto);
     }
 
@@ -98,9 +97,9 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<Object> deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id) throws SQLException {
+    public IJsonMessage<Object> deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id, HttpServletRequest request) {
         //
-        HttpServletRequest request = getRequest();
+
         int delByKey = monitorService.delByKey(id, request);
         if (delByKey > 0) {
             // 删除日志
@@ -121,9 +120,10 @@ public class MonitorListController extends BaseServerController {
     @RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Object> updateMonitor(String id,
-                                             @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空") String name,
-                                             @ValidatorItem(msg = "请配置监控周期") String execCron,
-                                             String notifyUser, String webhook) {
+                                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空") String name,
+                                              @ValidatorItem(msg = "请配置监控周期") String execCron,
+                                              String notifyUser, String webhook,
+                                              HttpServletRequest request) {
         String status = getParameter("status");
         String autoRestart = getParameter("autoRestart");
 
@@ -171,7 +171,7 @@ public class MonitorListController extends BaseServerController {
             monitorService.insert(monitorModel);
             return JsonMessage.success("添加成功");
         }
-        HttpServletRequest request = getRequest();
+
         monitorService.updateById(monitorModel, request);
         return JsonMessage.success("修改成功");
     }

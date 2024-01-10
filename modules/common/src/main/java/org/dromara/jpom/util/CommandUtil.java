@@ -23,6 +23,7 @@
 package org.dromara.jpom.util;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
@@ -38,6 +39,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 /**
@@ -172,8 +174,13 @@ public class CommandUtil {
             String[] cmd = commands.toArray(new String[]{});
             result = exec(cmd, file);
         } catch (Exception e) {
-            log.error("执行命令异常", e);
-            result += e.getMessage();
+            if (ExceptionUtil.isCausedBy(e, InterruptedException.class)) {
+                log.warn("执行被中断：{}", command);
+                result += "执行被中断";
+            } else {
+                log.error("执行命令异常", e);
+                result += e.getMessage();
+            }
         }
         return result;
     }
@@ -266,7 +273,7 @@ public class CommandUtil {
      * @param command 命令
      * @throws IOException 异常
      */
-    public static void asyncExeLocalCommand(File file, String command) throws Exception {
+    public static void asyncExeLocalCommand(String command, File file) throws Exception {
         String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
         newCommand = StrUtil.replace(newCommand, StrUtil.LF, StrUtil.SPACE);
         //
@@ -350,6 +357,18 @@ public class CommandUtil {
         return false;
     }
 
+    /**
+     * 执行脚本
+     *
+     * @param scriptFile 脚本文件
+     * @param baseDir    基础路径
+     * @param env        环境变量
+     * @param args       参数
+     * @param consumer   回调
+     * @return 退出码
+     * @throws IOException          io
+     * @throws InterruptedException 异常
+     */
     public static int execWaitFor(File scriptFile, File baseDir, Map<String, String> env, String args, BiConsumer<String, Process> consumer) throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder();
         //
@@ -362,16 +381,49 @@ public class CommandUtil {
         processBuilder.command(command);
         Optional.ofNullable(baseDir).ifPresent(processBuilder::directory);
         Map<String, String> environment = processBuilder.environment();
-        // 新增逻辑,将env和environment里value==null替换成空字符,防止putAll出现空指针报错
-        env.replaceAll((k, v) -> Optional.ofNullable(v).orElse(StrUtil.EMPTY));
         environment.replaceAll((k, v) -> Optional.ofNullable(v).orElse(StrUtil.EMPTY));
-        // 环境变量
-        Optional.ofNullable(env).ifPresent(environment::putAll);
+        // 新增逻辑,将env和environment里value==null替换成空字符,防止putAll出现空指针报错
+        if (env != null) {
+            // 环境变量
+            env.replaceAll((k, v) -> Optional.ofNullable(v).orElse(StrUtil.EMPTY));
+            environment.putAll(env);
+        }
         //
         Process process = processBuilder.start();
         try (InputStream inputStream = process.getInputStream()) {
             IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> consumer.accept(line, process));
         }
         return process.waitFor();
+    }
+
+    /**
+     * 关闭 Process实例
+     *
+     * @param process Process
+     */
+    public static void kill(Process process) {
+        if (process == null) {
+            return;
+        }
+        while (true) {
+            Object handle = tryGetProcessId(process);
+            process.destroy();
+            if (process.isAlive()) {
+                process.destroyForcibly();
+                try {
+                    process.waitFor(500, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException ignored) {
+                }
+                log.info("等待关闭[Process]进程：{}", handle);
+            } else {
+                break;
+            }
+        }
+    }
+
+    public static Object tryGetProcessId(Process process) {
+        Object handle = ReflectUtil.getFieldValue(process, "handle");
+        Object pid = ReflectUtil.getFieldValue(process, "pid");
+        return Optional.ofNullable(handle).orElse(pid);
     }
 }

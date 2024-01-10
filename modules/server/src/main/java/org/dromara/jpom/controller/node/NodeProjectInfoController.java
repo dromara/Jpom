@@ -24,7 +24,6 @@ package org.dromara.jpom.controller.node;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Entity;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +39,6 @@ import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
-import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
@@ -73,18 +71,6 @@ public class NodeProjectInfoController extends BaseServerController {
         this.triggerTokenLogServer = triggerTokenLogServer;
     }
 
-    /**
-     * @return json
-     * @author Hotstrip
-     * load node project list
-     * 加载节点项目列表
-     */
-    @PostMapping(value = "node_project_list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<PageResultDto<ProjectInfoCacheModel>> nodeProjectList() {
-        PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPageNode(getRequest());
-        return JsonMessage.success("success", resultDto);
-    }
-
 
     /**
      * load node project list
@@ -94,8 +80,8 @@ public class NodeProjectInfoController extends BaseServerController {
      * @author Hotstrip
      */
     @PostMapping(value = "project_list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<PageResultDto<ProjectInfoCacheModel>> projectList() {
-        PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPage(getRequest());
+    public IJsonMessage<PageResultDto<ProjectInfoCacheModel>> projectList(HttpServletRequest request) {
+        PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPage(request);
         return JsonMessage.success("success", resultDto);
     }
 
@@ -107,8 +93,8 @@ public class NodeProjectInfoController extends BaseServerController {
      * @author Hotstrip
      */
     @GetMapping(value = "project_list_all", produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<List<ProjectInfoCacheModel>> projectListAll() {
-        List<ProjectInfoCacheModel> projectInfoCacheModels = projectInfoCacheService.listByWorkspace(getRequest());
+    public IJsonMessage<List<ProjectInfoCacheModel>> projectListAll(HttpServletRequest request) {
+        List<ProjectInfoCacheModel> projectInfoCacheModels = projectInfoCacheService.listByWorkspace(request);
         return JsonMessage.success("", projectInfoCacheModels);
     }
 
@@ -131,27 +117,12 @@ public class NodeProjectInfoController extends BaseServerController {
      */
     @GetMapping(value = "sync_project", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
-    public IJsonMessage<Object> syncProject(String nodeId) {
+    public IJsonMessage<Object> syncProject(String nodeId, HttpServletRequest request) {
         NodeModel nodeModel = nodeService.getByKey(nodeId);
         Assert.notNull(nodeModel, "对应的节点不存在");
-        int count = projectInfoCacheService.delCache(nodeId, getRequest());
+        int count = projectInfoCacheService.delCache(nodeId, request);
         String msg = projectInfoCacheService.syncExecuteNode(nodeModel);
         return JsonMessage.success("主动清除：" + count + StrUtil.SPACE + msg);
-    }
-
-    /**
-     * 删除节点缓存的所有项目
-     *
-     * @return json
-     */
-    @GetMapping(value = "clear_all_project", produces = MediaType.APPLICATION_JSON_VALUE)
-    @SystemPermission(superUser = true)
-    @Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
-    public IJsonMessage<Object> clearAll() {
-        Entity where = Entity.create();
-        where.set("id", " <> id");
-        int del = projectInfoCacheService.del(where);
-        return JsonMessage.success("成功删除" + del + "条项目缓存");
     }
 
     /**
@@ -164,8 +135,7 @@ public class NodeProjectInfoController extends BaseServerController {
      */
     @GetMapping(value = "project-sort-item", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId) {
-        HttpServletRequest request = getRequest();
+    public IJsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId, HttpServletRequest request) {
         if (StrUtil.equalsIgnoreCase(method, "top")) {
             projectInfoCacheService.sortToTop(id, request);
         } else if (StrUtil.equalsIgnoreCase(method, "up")) {
@@ -186,28 +156,28 @@ public class NodeProjectInfoController extends BaseServerController {
      */
     @RequestMapping(value = "project-trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
-        ProjectInfoCacheModel item = projectInfoCacheService.getByKey(id, getRequest());
+    public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
+        ProjectInfoCacheModel item = projectInfoCacheService.getByKey(id, request);
         UserModel user = getUser();
         ProjectInfoCacheModel updateItem;
         if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
             updateItem = new ProjectInfoCacheModel();
             updateItem.setId(id);
             updateItem.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), projectInfoCacheService.typeName(),
-                    item.getId(), user.getId()));
+                item.getId(), user.getId()));
             projectInfoCacheService.updateById(updateItem);
         } else {
             updateItem = item;
         }
-        Map<String, String> map = this.getBuildToken(updateItem);
+        Map<String, String> map = this.getBuildToken(updateItem, request);
         return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
-    private Map<String, String> getBuildToken(ProjectInfoCacheModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
+    private Map<String, String> getBuildToken(ProjectInfoCacheModel item, HttpServletRequest request) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
         String url = ServerOpenApi.SERVER_PROJECT_TRIGGER_URL.
-                replace("{id}", item.getId()).
-                replace("{token}", item.getTriggerToken());
+            replace("{id}", item.getId()).
+            replace("{token}", item.getTriggerToken());
         String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
         Map<String, String> map = new HashMap<>(10);
         map.put("triggerUrl", FileUtil.normalize(triggerBuildUrl));

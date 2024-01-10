@@ -1,0 +1,70 @@
+<!--
+
+    The MIT License (MIT)
+
+    Copyright (c) 2019 Code Technology Studio
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of
+    this software and associated documentation files (the "Software"), to deal in
+    the Software without restriction, including without limitation the rights to
+    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+    the Software, and to permit persons to whom the Software is furnished to do so,
+    subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org.1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="keywords" content="Jpom,Java项目运维,Jar管理,Java运维系统,服务器项目运维"/>
+    <meta name="description" content="Jpom 项目运维系统,简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <meta name="build-time" content="<%= htmlWebpackPlugin.options.build %>">
+    <meta name="build-env" content="<%= htmlWebpackPlugin.options.env %>">
+    <meta name="jpom-version" content="<%= htmlWebpackPlugin.options.buildVersion %>">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <style>
+        .first-loading-wrp {display: flex;justify-content: center;align-items: center;flex-direction: column;min-height: 420px;height: 100% }.first-loading-wrp > h1 {font-size: 128px }.first-loading-wrp .loading-wrp {padding: 98px;display: flex;justify-content: center;align-items: center }.dot {animation: antRotate 1.2s infinite linear;transform: rotate(45deg);position: relative;display: inline-block;font-size: 32px;width: 32px;height: 32px;box-sizing: border-box }.dot i {width: 14px;height: 14px;position: absolute;display: block;background-color: #1890ff;border-radius: 100%;transform: scale(.75);transform-origin: 50% 50%;opacity: .3;animation: antSpinMove 1s infinite linear alternate }.dot i:nth-child(1) {top: 0;left: 0 }.dot i:nth-child(2) {top: 0;right: 0;-webkit-animation-delay: .4s;animation-delay: .4s }.dot i:nth-child(3) {right: 0;bottom: 0;-webkit-animation-delay: .8s;animation-delay: .8s }.dot i:nth-child(4) {bottom: 0;left: 0;-webkit-animation-delay: 1.2s;animation-delay: 1.2s }@keyframes antRotate {to {-webkit-transform: rotate(405deg);transform: rotate(405deg) }}@-webkit-keyframes antRotate {to {-webkit-transform: rotate(405deg);transform: rotate(405deg) }}@keyframes antSpinMove {to {opacity: 1 }}@-webkit-keyframes antSpinMove {to {opacity: 1 }}
+    </style>
+</head>
+<body>
+<noscript>
+    <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+</noscript>
+<script>
+    window.routerBase = "<routerBase>";
+    window.apiTimeout = "<apiTimeout>";
+    window.uploadFileSliceSize = "<uploadFileSliceSize>";
+    window.uploadFileConcurrent = "<uploadFileConcurrent>";
+    window.oauth2Provide = "<oauth2Provide>";
+</script>
+<div id="app">
+    <div class="first-loading-wrp">
+
+        <div class="loading-wrp">
+            <span class="dot dot-spin"><i></i><i></i><i></i><i></i></span>
+        </div>
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <%= htmlWebpackPlugin.options.title %>
+        </div>
+    </div>
+</div>
+<!-- built files will be auto injected -->
+<div id="jpomCommonJs"><!--Don't delete this line, place for public JS --></div>
+</body>
+</html>

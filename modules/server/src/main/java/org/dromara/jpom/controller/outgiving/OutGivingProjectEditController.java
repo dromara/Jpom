@@ -106,15 +106,15 @@ public class OutGivingProjectEditController extends BaseServerController {
      */
     @RequestMapping(value = "save_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<String> save(@ValidatorItem String id, String type) {
+    public IJsonMessage<String> save(@ValidatorItem String id, String type, HttpServletRequest request) {
         if ("add".equalsIgnoreCase(type)) {
             //boolean general = StringUtil.isGeneral(id, 2, 20);
             //Assert.state(general, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
             String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
             Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
-            return addOutGiving(id);
+            return addOutGiving(id, request);
         } else {
-            return updateGiving(id);
+            return updateGiving(id, request);
         }
     }
 
@@ -126,8 +126,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      */
     @RequestMapping(value = "delete_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<String> delete(String id, String thorough) {
-        HttpServletRequest request = getRequest();
+    public IJsonMessage<String> delete(String id, String thorough, HttpServletRequest request) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
         Assert.notNull(outGivingModel, "没有对应的分发项目");
 
@@ -159,7 +158,8 @@ public class OutGivingProjectEditController extends BaseServerController {
         return JsonMessage.success("删除成功");
     }
 
-    private IJsonMessage<String> addOutGiving(String id) {
+    private IJsonMessage<String> addOutGiving(String id, HttpServletRequest request) {
+        // 全局判断 id
         OutGivingModel outGivingModel = outGivingServer.getByKey(id);
         Assert.isNull(outGivingModel, "分发id已经存在啦");
 
@@ -167,7 +167,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         outGivingModel.setOutGivingProject(true);
         outGivingModel.setId(id);
         //
-        List<Tuple> tuples = doData(outGivingModel, false);
+        List<Tuple> tuples = doData(outGivingModel, false, request);
 
         outGivingServer.insert(outGivingModel);
         IJsonMessage<String> error = saveNodeData(outGivingModel, tuples, false);
@@ -175,10 +175,10 @@ public class OutGivingProjectEditController extends BaseServerController {
     }
 
 
-    private IJsonMessage<String> updateGiving(String id) {
-        OutGivingModel outGivingModel = outGivingServer.getByKey(id, getRequest());
+    private IJsonMessage<String> updateGiving(String id, HttpServletRequest request) {
+        OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
         Assert.notNull(outGivingModel, "没有找到对应的分发id");
-        List<Tuple> tuples = doData(outGivingModel, true);
+        List<Tuple> tuples = doData(outGivingModel, true, request);
 
         outGivingServer.updateById(outGivingModel);
         IJsonMessage<String> error = saveNodeData(outGivingModel, tuples, true);
@@ -278,7 +278,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      * @param edit           是否为编辑模式
      * @return String为有异常
      */
-    private JSONObject getDefData(OutGivingModel outGivingModel, boolean edit) {
+    private JSONObject getDefData(OutGivingModel outGivingModel, boolean edit, HttpServletRequest request) {
         JSONObject defData = new JSONObject();
         defData.put("id", outGivingModel.getId());
         defData.put("name", outGivingModel.getName());
@@ -299,14 +299,14 @@ public class OutGivingProjectEditController extends BaseServerController {
             defData.put("dslContent", getParameter("dslContent"));
         }
         String whitelistDirectory = getParameter("whitelistDirectory");
-        ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(getRequest());
-        List<String> whitelistServerOutGiving = configDeNewInstance.outGiving();
-        Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, whitelistDirectory), "请选择正确的项目路径,或者还没有配置白名单");
+        ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(request);
+        List<String> whitelistServerOutGiving = configDeNewInstance.getOutGiving();
+        Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, whitelistDirectory), "请选择正确的项目路径,或者还没有配置授权");
 
         defData.put("whitelistDirectory", whitelistDirectory);
         String logPath = getParameter("logPath");
         if (StrUtil.isNotEmpty(logPath)) {
-            Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, logPath), "请选择正确的日志路径,或者还没有配置白名单");
+            Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, logPath), "请选择正确的日志路径,或者还没有配置授权");
             defData.put("logPath", logPath);
         }
         String lib = getParameter("lib");
@@ -325,7 +325,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      * @param outGivingModel 分发实体
      * @param edit           是否为编辑模式
      */
-    private List<Tuple> doData(OutGivingModel outGivingModel, boolean edit) {
+    private List<Tuple> doData(OutGivingModel outGivingModel, boolean edit, HttpServletRequest request) {
         outGivingModel.setName(getParameter("name"));
         outGivingModel.setGroup(getParameter("group"));
         Assert.hasText(outGivingModel.getName(), "分发名称不能为空");
@@ -336,7 +336,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         //
         String nodeIdsStr = getParameter("nodeIds");
         List<String> nodeIds = StrUtil.splitTrim(nodeIdsStr, StrUtil.COMMA);
-        //List<NodeModel> nodeModelList = nodeService.listByWorkspace(getRequest());
+        //List<NodeModel> nodeModelList = nodeService.listByWorkspace(request);
         Assert.notEmpty(nodeIds, "没有任何节点信息");
 
         //
@@ -344,7 +344,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
         outGivingModel.setAfterOpt(afterOpt1.getCode());
-        JSONObject defData = getDefData(outGivingModel, edit);
+        JSONObject defData = getDefData(outGivingModel, edit, request);
 
         //
         List<OutGivingModel> outGivingModels = outGivingServer.list();

@@ -39,12 +39,14 @@ import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
+import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
 import org.dromara.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -60,11 +62,14 @@ public class UserListController extends BaseServerController {
 
     private final UserService userService;
     private final UserBindWorkspaceService userBindWorkspaceService;
+    private final TriggerTokenLogServer triggerTokenLogServer;
 
     public UserListController(UserService userService,
-                              UserBindWorkspaceService userBindWorkspaceService) {
+                              UserBindWorkspaceService userBindWorkspaceService,
+                              TriggerTokenLogServer triggerTokenLogServer) {
         this.userService = userService;
         this.userBindWorkspaceService = userBindWorkspaceService;
+        this.triggerTokenLogServer = triggerTokenLogServer;
     }
 
     /**
@@ -74,8 +79,8 @@ public class UserListController extends BaseServerController {
      */
     @RequestMapping(value = "get_user_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<UserModel>> getUserList() {
-        PageResultDto<UserModel> userModelPageResultDto = userService.listPage(getRequest());
+    public IJsonMessage<PageResultDto<UserModel>> getUserList(HttpServletRequest request) {
+        PageResultDto<UserModel> userModelPageResultDto = userService.listPage(request);
         userModelPageResultDto.each(userModel -> {
             boolean bindMfa = userService.hasBindMfa(userModel.getId());
             if (bindMfa) {
@@ -217,6 +222,8 @@ public class UserListController extends BaseServerController {
         userService.delByKey(id);
         // 删除工作空间
         userBindWorkspaceService.deleteByUserId(id);
+        //
+        triggerTokenLogServer.delByUserId(id);
         return JsonMessage.success("删除成功");
     }
 

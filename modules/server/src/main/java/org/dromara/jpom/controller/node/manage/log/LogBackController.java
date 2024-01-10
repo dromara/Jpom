@@ -60,7 +60,7 @@ public class LogBackController extends BaseServerController {
         this.projectInfoCacheService = projectInfoCacheService;
     }
 
-    @RequestMapping(value = "export.html", method = RequestMethod.GET)
+    @RequestMapping(value = "export", method = RequestMethod.GET)
     @ResponseBody
     @Feature(method = MethodFeature.DOWNLOAD)
     public void export(HttpServletRequest request, HttpServletResponse response) {
@@ -77,8 +77,8 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "log-back-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<JSONObject> logBackList() {
-        JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, getRequest(), JSONObject.class);
+    public IJsonMessage<JSONObject> logBackList(HttpServletRequest request) {
+        JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, request, JSONObject.class);
         return JsonMessage.success("success", jsonObject);
     }
 
@@ -92,8 +92,8 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.DEL)
-    public String clear(HttpServletRequest request) {
-        return NodeForward.request(getNode(), request, NodeUrl.Manage_Log_logBack_delete).toString();
+    public IJsonMessage<Object> clear(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_Log_logBack_delete);
     }
 
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -111,7 +111,7 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.DEL)
-    public String resetLog() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_ResetLog).toString();
+    public IJsonMessage<Object> resetLog(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_Log_ResetLog);
     }
 }

@@ -55,10 +55,7 @@ import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.node.ProjectInfoCacheModel;
-import org.dromara.jpom.permission.ClassFeature;
-import org.dromara.jpom.permission.Feature;
-import org.dromara.jpom.permission.MethodFeature;
-import org.dromara.jpom.permission.NodeDataPermission;
+import org.dromara.jpom.permission.*;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.dblog.RepositoryService;
@@ -66,6 +63,7 @@ import org.dromara.jpom.service.monitor.MonitorService;
 import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.dromara.jpom.service.outgiving.LogReadServer;
 import org.dromara.jpom.service.outgiving.OutGivingServer;
+import org.dromara.jpom.service.system.WhitelistDirectoryService;
 import org.dromara.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -86,6 +84,8 @@ import java.util.stream.Collectors;
  * 项目管理
  *
  * @author Administrator
+ * @author bwcx_jzy
+ * @since 2018/9/29
  */
 @RestController
 @RequestMapping(value = "/node/manage/")
@@ -102,6 +102,7 @@ public class ProjectManageControl extends BaseServerController {
     private final ProjectInfoCacheService projectInfoCacheService;
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
     private final ServerConfig serverConfig;
+    private final WhitelistDirectoryService whitelistDirectoryService;
 
     public ProjectManageControl(OutGivingServer outGivingServer,
                                 LogReadServer logReadServer,
@@ -110,7 +111,8 @@ public class ProjectManageControl extends BaseServerController {
                                 RepositoryService repositoryService,
                                 ProjectInfoCacheService projectInfoCacheService,
                                 DbBuildHistoryLogService dbBuildHistoryLogService,
-                                ServerConfig serverConfig) {
+                                ServerConfig serverConfig,
+                                WhitelistDirectoryService whitelistDirectoryService) {
         this.outGivingServer = outGivingServer;
         this.logReadServer = logReadServer;
         this.monitorService = monitorService;
@@ -119,6 +121,76 @@ public class ProjectManageControl extends BaseServerController {
         this.projectInfoCacheService = projectInfoCacheService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.serverConfig = serverConfig;
+        this.whitelistDirectoryService = whitelistDirectoryService;
+    }
+
+
+    private void checkProjectPermission(String id, HttpServletRequest request, NodeModel node) {
+        if (StrUtil.isEmpty(id)) {
+            return;
+        }
+        String workspaceId = projectInfoCacheService.getCheckUserWorkspace(request);
+        String fullId = ProjectInfoCacheModel.fullId(workspaceId, node.getId(), id);
+        boolean exists = projectInfoCacheService.exists(fullId);
+        Assert.state(exists, "没有对应的数据或者没有此数据权限");
+    }
+
+    @RequestMapping(value = "getProjectData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<JSONObject> getProjectData(@ValidatorItem String id, HttpServletRequest request) {
+        NodeModel node = getNode();
+        this.checkProjectPermission(id, request, node);
+        JSONObject projectInfo = projectInfoCacheService.getItem(node, id);
+        return JsonMessage.success("", projectInfo);
+    }
+
+    /**
+     * get project access list
+     * 获取项目的授权
+     *
+     * @return json
+     * @author Hotstrip
+     */
+    @RequestMapping(value = "project-access-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<List<String>> projectAccessList() {
+        List<String> jsonArray = whitelistDirectoryService.getProjectDirectory(getNode());
+        return JsonMessage.success("success", jsonArray);
+    }
+
+    /**
+     * 保存项目
+     *
+     * @param id id
+     * @return json
+     */
+    @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public IJsonMessage<String> saveProject(String id, HttpServletRequest request) {
+        NodeModel node = getNode();
+        this.checkProjectPermission(id, request, node);
+        //
+        JsonMessage<String> jsonMessage = NodeForward.request(node, request, NodeUrl.Manage_SaveProject, "outGivingProject");
+        if (jsonMessage.success()) {
+            projectInfoCacheService.syncNode(node, id);
+        }
+        return jsonMessage;
+    }
+
+
+    /**
+     * 释放分发
+     *
+     * @return json
+     */
+    @RequestMapping(value = "release-outgiving", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public IJsonMessage<String> releaseOutgiving(String id, HttpServletRequest request) {
+        NodeModel node = getNode();
+        this.checkProjectPermission(id, request, node);
+        JsonMessage<String> jsonMessage = NodeForward.request(getNode(), request, NodeUrl.Manage_ReleaseOutGiving);
+        if (jsonMessage.success()) {
+            projectInfoCacheService.syncNode(node, id);
+        }
+        return jsonMessage;
     }
 
     /**
@@ -156,7 +228,7 @@ public class ProjectManageControl extends BaseServerController {
 
                                               HttpServletRequest request) {
         NodeModel nodeModel = getNode();
-
+        this.checkProjectPermission(id, request, nodeModel);
         // 检查节点分发
         outGivingServer.checkNodeProject(nodeModel.getId(), id, request, "当前项目存在节点分发，不能直接删除");
         // 检查日志阅读
@@ -274,6 +346,7 @@ public class ProjectManageControl extends BaseServerController {
      */
     @PostMapping(value = "migrate-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
+    @SystemPermission
     public IJsonMessage<String> migrateWorkspace(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id,
                                                  @ValidatorItem(value = ValidatorRule.NOT_BLANK) String toWorkspaceId,
                                                  @ValidatorItem(value = ValidatorRule.NOT_BLANK) String toNodeId,
@@ -350,47 +423,17 @@ public class ProjectManageControl extends BaseServerController {
     }
 
     /**
-     * 重启项目
+     * 操作项目
      * <p>
      * nodeId,id
      *
      * @return json
      */
-    @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "operate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<Object> restart(HttpServletRequest request) {
+    public IJsonMessage<Object> operate(HttpServletRequest request) {
         NodeModel nodeModel = getNode();
-        return NodeForward.request(nodeModel, request, NodeUrl.Manage_Restart);
-    }
-
-
-    /**
-     * 启动项目
-     * <p>
-     * nodeId,id
-     *
-     * @return json
-     */
-    @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<Object> start(HttpServletRequest request) {
-        NodeModel nodeModel = getNode();
-        return NodeForward.request(nodeModel, request, NodeUrl.Manage_Start);
-    }
-
-
-    /**
-     * 关闭项目项目
-     * <p>
-     * nodeId,id
-     *
-     * @return json
-     */
-    @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<Object> stop(HttpServletRequest request) {
-        NodeModel nodeModel = getNode();
-        return NodeForward.request(nodeModel, request, NodeUrl.Manage_Stop);
+        return NodeForward.request(nodeModel, request, NodeUrl.Manage_Operate);
     }
 
 

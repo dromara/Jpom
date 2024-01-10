@@ -27,12 +27,15 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.node.ProjectInfoCacheModel;
 import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseNodeService;
 import org.dromara.jpom.service.system.WorkspaceService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author bwcx_jzy
@@ -109,7 +112,23 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoCacheMod
     }
 
     @Override
+    public List<ProjectInfoCacheModel> lonelyDataArray(MachineNodeModel machineNodeModel) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("notStatus", true);
+        JsonMessage<JSONArray> tJsonMessage = NodeForward.request(machineNodeModel, NodeUrl.Manage_GetProjectInfo, jsonObject);
+        return this.checkLonelyDataArray(tJsonMessage.getData(), machineNodeModel.getId());
+    }
+
+    @Override
     public String typeName() {
         return getTableName();
+    }
+
+    @Override
+    protected void refreshCacheStat(String nodeId, int dataCount) {
+        NodeModel nodeModel = new NodeModel();
+        nodeModel.setId(nodeId);
+        nodeModel.setJpomProjectCount(dataCount);
+        nodeService.updateById(nodeModel);
     }
 }

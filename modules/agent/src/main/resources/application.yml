@@ -6,9 +6,6 @@ jpom:
     agent-name: jpomAgent
     # agent 端管理密码，非必填，如果为空Jpom 会自动生成一串随机字符串当密码
     agent-pwd:
-  whitelist:
-    # 白名单目录是否验证包含关系
-    check-starts-with: true
   project:
     # 停止、启动项目(项目状态检测)等待的时长 单位秒
     status-wait-time: 10

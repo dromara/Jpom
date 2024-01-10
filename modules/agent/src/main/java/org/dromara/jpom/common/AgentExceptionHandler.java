@@ -23,6 +23,7 @@
 package org.dromara.jpom.common;
 
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.exception.BaseExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**

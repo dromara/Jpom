@@ -36,6 +36,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 监控列表
  *
@@ -60,8 +62,8 @@ public class MonitorLogController extends BaseServerController {
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<MonitorNotifyLog>> listData() {
-        PageResultDto<MonitorNotifyLog> pageResult = dbMonitorNotifyLogService.listPage(getRequest());
+    public IJsonMessage<PageResultDto<MonitorNotifyLog>> listData(HttpServletRequest request) {
+        PageResultDto<MonitorNotifyLog> pageResult = dbMonitorNotifyLogService.listPage(request);
         return JsonMessage.success("获取成功", pageResult);
     }
 }

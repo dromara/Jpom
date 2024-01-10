@@ -29,6 +29,7 @@ import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.func.cert.service.CertificateInfoService;
 import org.dromara.jpom.func.files.service.FileReleaseTaskService;
 import org.dromara.jpom.func.files.service.FileStorageService;
+import org.dromara.jpom.func.files.service.StaticFileStorageService;
 import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.func.user.server.UserLoginLogServer;
 import org.dromara.jpom.service.dblog.*;
@@ -42,7 +43,7 @@ import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.dromara.jpom.service.node.script.NodeScriptExecuteLogServer;
 import org.dromara.jpom.service.node.script.NodeScriptServer;
 import org.dromara.jpom.service.node.ssh.CommandExecLogService;
-import org.dromara.jpom.service.node.ssh.CommandService;
+import org.dromara.jpom.service.node.ssh.SshCommandService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.service.outgiving.DbOutGivingLogService;
 import org.dromara.jpom.service.outgiving.LogReadServer;
@@ -74,12 +75,12 @@ public enum ClassFeature {
     SSH_FILE("SSH文件管理", SshService.class),
     SSH_TERMINAL("SSH终端", SshService.class),
     SSH_TERMINAL_LOG("SSH终端日志", SshTerminalExecuteLogService.class),
-    SSH_COMMAND("SSH命令管理", CommandService.class),
+    SSH_COMMAND("SSH命令管理", SshCommandService.class),
     SSH_COMMAND_LOG("SSH命令日志", CommandExecLogService.class),
     OUTGIVING("分发管理", OutGivingServer.class),
     LOG_READ("日志阅读", LogReadServer.class),
     OUTGIVING_LOG("分发日志", DbOutGivingLogService.class),
-    OUTGIVING_CONFIG_WHITELIST("分发白名单配置"),
+    OUTGIVING_CONFIG_WHITELIST("授权配置"),
     MONITOR("项目监控", MonitorService.class),
     MONITOR_LOG("监控日志", DbMonitorNotifyLogService.class),
     OPT_MONITOR("操作监控", MonitorUserOptService.class),
@@ -95,6 +96,7 @@ public enum ClassFeature {
     USER_LOG("操作日志", DbUserOperateLogService.class),
     USER_LOGIN_LOG("登录日志", UserLoginLogServer.class),
     FILE_STORAGE("文件存储中心", FileStorageService.class),
+    STATIC_FILE_STORAGE("静态文件存储", StaticFileStorageService.class),
     FILE_STORAGE_RELEASE("文件发布", FileReleaseTaskService.class),
     CERTIFICATE_INFO("证书管理", CertificateInfoService.class),
     USER_PERMISSION_GROUP("权限分组", UserPermissionGroupServer.class),
@@ -108,9 +110,9 @@ public enum ClassFeature {
     SYSTEM_ASSETS_MACHINE_DOCKER("DOCKER资产管理", MachineDockerServer.class),
     SYSTEM_CONFIG("服务端系统配置"),
     SYSTEM_EXT_CONFIG("系统配置目录"),
-    SYSTEM_CONFIG_IP("系统配置IP白名单"),
+    SYSTEM_CONFIG_IP("系统配置IP授权"),
     //    SYSTEM_CONFIG_MENUS("系统菜单配置"),
-    SYSTEM_NODE_WHITELIST("节点白名单分发"),
+    SYSTEM_NODE_WHITELIST("节点授权分发"),
     SYSTEM_BACKUP("数据库备份", BackupInfoService.class),
     SYSTEM_WORKSPACE("工作空间", WorkspaceService.class),
     SYSTEM_WORKSPACE_ENV("环境变量", WorkspaceEnvVarService.class),
@@ -132,8 +134,8 @@ public enum ClassFeature {
 //    TOMCAT_LOG("Tomcat log", ClassFeature.NODE),
 
 
-    NODE_CONFIG_WHITELIST("节点白名单配置", ClassFeature.NODE),
-    NODE_CONFIG("节点白名单配置", ClassFeature.NODE),
+    NODE_CONFIG_WHITELIST("节点授权配置", ClassFeature.NODE),
+    NODE_CONFIG("节点授权配置", ClassFeature.NODE),
     NODE_CACHE("节点缓存", ClassFeature.NODE),
     NODE_LOG("节点系统日志", ClassFeature.NODE),
     NODE_UPGRADE("节点在线升级", ClassFeature.NODE),

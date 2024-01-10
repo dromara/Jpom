@@ -28,6 +28,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.exception.AgentException;
 import org.dromara.jpom.model.BaseNodeModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserBindWorkspaceModel;
@@ -37,7 +38,6 @@ import org.dromara.jpom.service.h2db.BaseNodeService;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
-import org.dromara.jpom.system.AgentException;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
@@ -181,21 +181,9 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
             this.errorMsg(response, "您不是超级管理员没有权限:-2");
             return false;
         }
-        NodeModel node = (NodeModel) request.getAttribute("node");
-        if (node == null) {
-            // 服务端
-            if (!userModel.isSystemUser()) {
-                this.errorMsg(response, "您没有服务端管理权限:-2");
-                return false;
-            }
-        } else {
-            // 判断节点管理权限
-            String workspaceId = BaseWorkspaceService.getWorkspaceId(request);
-            UserBindWorkspaceModel.PermissionResult permissionResult = userBindWorkspaceService.checkPermission(userModel, workspaceId + UserBindWorkspaceService.SYSTEM_USER);
-            if (!permissionResult.isSuccess()) {
-                this.errorMsg(response, permissionResult.errorMsg("节点管理"));
-                return false;
-            }
+        if (!userModel.isSystemUser()) {
+            this.errorMsg(response, "您没有服务端管理权限:-2");
+            return false;
         }
         return true;
     }

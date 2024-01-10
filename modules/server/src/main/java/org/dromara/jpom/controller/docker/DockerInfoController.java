@@ -133,11 +133,25 @@ public class DockerInfoController extends BaseServerController {
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public IJsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
-        String nowWorkspaceId = dockerInfoService.getCheckUserWorkspace(getRequest());
+    public IJsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId, HttpServletRequest request) {
+        String nowWorkspaceId = dockerInfoService.getCheckUserWorkspace(request);
         //
         dockerInfoService.checkUserWorkspace(toWorkspaceId);
         dockerInfoService.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
         return JsonMessage.success("操作成功");
+    }
+
+    /**
+     * 查询所有的 tag
+     *
+     * @return msg
+     */
+    @GetMapping(value = "all-tag", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<List<String>> allTag(HttpServletRequest request) {
+        String workspaceId = dockerInfoService.getCheckUserWorkspace(request);
+        //
+        List<String> strings = dockerInfoService.allTag(workspaceId);
+        return JsonMessage.success("", strings);
     }
 }

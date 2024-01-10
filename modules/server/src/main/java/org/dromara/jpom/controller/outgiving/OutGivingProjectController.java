@@ -34,15 +34,24 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.build.BuildExtraModule;
+import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
+import org.dromara.jpom.func.files.model.FileStorageModel;
+import org.dromara.jpom.func.files.model.StaticFileStorageModel;
+import org.dromara.jpom.func.files.service.FileStorageService;
+import org.dromara.jpom.func.files.service.StaticFileStorageService;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.BaseEnum;
 import org.dromara.jpom.model.BaseNodeModel;
+import org.dromara.jpom.model.EnvironmentMapBuilder;
+import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.ServerWhitelist;
+import org.dromara.jpom.model.log.BuildHistoryLog;
 import org.dromara.jpom.model.log.OutGivingLog;
 import org.dromara.jpom.model.node.ProjectInfoCacheModel;
 import org.dromara.jpom.model.outgiving.BaseNodeProject;
@@ -52,6 +61,8 @@ import org.dromara.jpom.outgiving.OutGivingRun;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
+import org.dromara.jpom.service.dblog.BuildInfoService;
+import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.dromara.jpom.service.outgiving.DbOutGivingLogService;
 import org.dromara.jpom.service.outgiving.OutGivingServer;
@@ -89,17 +100,29 @@ public class OutGivingProjectController extends BaseServerController {
     private final ServerConfig serverConfig;
     private final DbOutGivingLogService dbOutGivingLogService;
     private final ProjectInfoCacheService projectInfoCacheService;
+    private final BuildInfoService buildInfoService;
+    private final DbBuildHistoryLogService dbBuildHistoryLogService;
+    private final FileStorageService fileStorageService;
+    private final StaticFileStorageService staticFileStorageService;
 
     public OutGivingProjectController(OutGivingServer outGivingServer,
                                       OutGivingWhitelistService outGivingWhitelistService,
                                       ServerConfig serverConfig,
                                       DbOutGivingLogService dbOutGivingLogService,
-                                      ProjectInfoCacheService projectInfoCacheService) {
+                                      ProjectInfoCacheService projectInfoCacheService,
+                                      BuildInfoService buildInfoService,
+                                      DbBuildHistoryLogService dbBuildHistoryLogService,
+                                      FileStorageService fileStorageService,
+                                      StaticFileStorageService staticFileStorageService) {
         this.outGivingServer = outGivingServer;
         this.outGivingWhitelistService = outGivingWhitelistService;
         this.serverConfig = serverConfig;
         this.dbOutGivingLogService = dbOutGivingLogService;
         this.projectInfoCacheService = projectInfoCacheService;
+        this.buildInfoService = buildInfoService;
+        this.dbBuildHistoryLogService = dbBuildHistoryLogService;
+        this.fileStorageService = fileStorageService;
+        this.staticFileStorageService = staticFileStorageService;
     }
 
     @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -177,13 +200,14 @@ public class OutGivingProjectController extends BaseServerController {
     @RequestMapping(value = "upload-sharding", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD, log = false)
     public IJsonMessage<Object> uploadSharding(String id,
-                                              MultipartFile file,
-                                              String sliceId,
-                                              Integer totalSlice,
-                                              Integer nowSlice,
-                                              String fileSumMd5) throws IOException {
+                                               MultipartFile file,
+                                               String sliceId,
+                                               Integer totalSlice,
+                                               Integer nowSlice,
+                                               String fileSumMd5,
+                                               HttpServletRequest request) throws IOException {
         // 状态判断
-        this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
+        this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
         File userTempPath = serverConfig.getUserTempPath();
         // 保存文件
         this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumMd5);
@@ -203,12 +227,12 @@ public class OutGivingProjectController extends BaseServerController {
     @RequestMapping(value = "upload-sharding-merge", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
     public IJsonMessage<Object> upload(String id, String afterOpt, String clearOld, String autoUnzip,
-                                      String secondaryDirectory, String stripComponents,
-                                      String selectProject,
-                                      String sliceId,
-                                      Integer totalSlice,
-                                      String fileSumMd5) throws IOException {
-        this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
+                                       String secondaryDirectory, String stripComponents,
+                                       String selectProject,
+                                       String sliceId,
+                                       Integer totalSlice,
+                                       String fileSumMd5, HttpServletRequest request) throws IOException {
+        this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
         //
@@ -228,7 +252,8 @@ public class OutGivingProjectController extends BaseServerController {
         outGivingModel.setClearOld(Convert.toBool(clearOld, false));
         outGivingModel.setAfterOpt(afterOpt1.getCode());
         outGivingModel.setSecondaryDirectory(secondaryDirectory);
-
+        outGivingModel.setMode("upload");
+        outGivingModel.setModeData(successFile.getName());
         outGivingServer.updateById(outGivingModel);
         int stripComponentsValue = Convert.toInt(stripComponents, 0);
         // 开启
@@ -237,13 +262,15 @@ public class OutGivingProjectController extends BaseServerController {
             .file(dest)
             .userModel(getUser())
             .unzip(unzip)
+            .mode(outGivingModel.getMode())
+            .modeData(outGivingModel.getModeData())
             .stripComponents(stripComponentsValue);
         outGivingRunBuilder.build().startRun(selectProject);
         return JsonMessage.success("上传成功,开始分发!");
     }
 
-    private OutGivingModel check(String id, BiConsumer<OutGivingModel.Status, OutGivingModel> consumer) {
-        OutGivingModel outGivingModel = outGivingServer.getByKey(id, getRequest());
+    private OutGivingModel check(String id, BiConsumer<OutGivingModel.Status, OutGivingModel> consumer, HttpServletRequest request) {
+        OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
         Assert.notNull(outGivingModel, "上传失败,没有找到对应的分发项目");
         // 检查状态
         Integer statusCode = outGivingModel.getStatus();
@@ -263,11 +290,13 @@ public class OutGivingProjectController extends BaseServerController {
     @PostMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
     public IJsonMessage<String> remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip,
-                                              String secondaryDirectory,
-                                              String stripComponents,
-                                              String selectProject,
-                                              HttpServletRequest request) {
-        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
+                                               String secondaryDirectory,
+                                               String stripComponents,
+                                               String selectProject,
+                                               HttpServletRequest request) {
+        Assert.hasText(url, "填写下载地址");
+        Assert.state(StrUtil.length(url) <= 200, "url 长度不能超过 200");
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
         // 验证远程 地址
@@ -278,30 +307,177 @@ public class OutGivingProjectController extends BaseServerController {
         outGivingModel.setClearOld(Convert.toBool(clearOld, false));
         outGivingModel.setAfterOpt(afterOpt1.getCode());
         outGivingModel.setSecondaryDirectory(secondaryDirectory);
+        outGivingModel.setMode("download");
+        outGivingModel.setModeData(url);
         outGivingServer.updateById(outGivingModel);
         //下载
         File file = FileUtil.file(serverConfig.getUserTempPath(), ServerConst.OUTGIVING_FILE, id);
         FileUtil.mkdir(file);
         File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
+        this.startTask(outGivingModel, downloadFile, autoUnzip, stripComponents, selectProject);
+        return JsonMessage.success("下载成功,开始分发!");
+    }
+
+    /**
+     * 通过构建历史分发
+     *
+     * @param id       分发id
+     * @param afterOpt 之后的操作
+     * @return json
+     */
+    @PostMapping(value = "use-build", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public IJsonMessage<String> useBuild(String id, String afterOpt, String clearOld, String buildId, String buildNumberId,
+                                         String secondaryDirectory,
+                                         String stripComponents,
+                                         String selectProject,
+                                         HttpServletRequest request) {
+
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
+        AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
+        Assert.notNull(afterOpt1, "请选择分发后的操作");
+
+        BuildInfoModel infoModel = buildInfoService.getByKey(buildId, request);
+        Assert.notNull(infoModel, "没有对应的构建");
+        BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
+        buildHistoryLog.setBuildDataId(infoModel.getId());
+        Integer numberId = Convert.toInt(buildNumberId, 0);
+        buildHistoryLog.setBuildNumberId(numberId);
+        BuildHistoryLog historyLog = dbBuildHistoryLogService.queryByBean(buildHistoryLog);
+        Assert.notNull(historyLog, "没有对应的构建记录");
+        BuildExtraModule buildExtraModule = BuildExtraModule.build(historyLog);
+        //String resultDirFileStr = buildExtraModule.getResultDirFile();
+        EnvironmentMapBuilder environmentMapBuilder = buildHistoryLog.toEnvironmentMapBuilder();
+        boolean tarGz = environmentMapBuilder.getBool(BuildUtil.USE_TAR_GZ, false);
+        int stripComponentsValue = Convert.toInt(stripComponents, 0);
+        //
+        outGivingModel.setClearOld(Convert.toBool(clearOld, false));
+        outGivingModel.setAfterOpt(afterOpt1.getCode());
+        outGivingModel.setSecondaryDirectory(secondaryDirectory);
+        outGivingModel.setMode("use-build");
+        outGivingModel.setModeData(buildId + ":" + buildNumberId);
+        File resultDirFile = buildExtraModule.resultDirFile(numberId);
+        outGivingServer.updateById(outGivingModel);
+        //
+        BuildUtil.loadDirPackage(infoModel.getId(), numberId, resultDirFile, tarGz, (unZip, zipFile) -> {
+            OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
+                .id(outGivingModel.getId())
+                .file(zipFile)
+                .userModel(getUser())
+                .unzip(unZip)
+                // 由构建配置决定是否删除
+                .doneDeleteFile(false)
+                .mode(outGivingModel.getMode())
+                .modeData(outGivingModel.getModeData())
+                .stripComponents(stripComponentsValue);
+            return outGivingRunBuilder.build().startRun(selectProject);
+        });
+        return JsonMessage.success("开始分发!");
+    }
+
+    /**
+     * 文件中心分发文件
+     *
+     * @param id       分发id
+     * @param afterOpt 之后的操作
+     * @return json
+     */
+    @PostMapping(value = "use-file-storage", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public IJsonMessage<String> useFileStorage(String id, String afterOpt, String clearOld, String fileId, String autoUnzip,
+                                               String secondaryDirectory,
+                                               String stripComponents,
+                                               String selectProject,
+                                               HttpServletRequest request) {
+
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
+        AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
+        Assert.notNull(afterOpt1, "请选择分发后的操作");
+        FileStorageModel storageModel = fileStorageService.getByKey(fileId, request);
+        Assert.notNull(storageModel, "对应的文件不存在");
+        //
+        outGivingModel.setClearOld(Convert.toBool(clearOld, false));
+        outGivingModel.setAfterOpt(afterOpt1.getCode());
+        outGivingModel.setSecondaryDirectory(secondaryDirectory);
+        outGivingModel.setMode("file-storage");
+        outGivingModel.setModeData(fileId);
+        outGivingServer.updateById(outGivingModel);
+        File storageSavePath = serverConfig.fileStorageSavePath();
+        File file = FileUtil.file(storageSavePath, storageModel.getPath());
+        this.startTask(outGivingModel, file, autoUnzip, stripComponents, selectProject);
+        return JsonMessage.success("开始分发!");
+    }
+
+    /**
+     * 静态文件分发文件
+     *
+     * @param id       分发id
+     * @param afterOpt 之后的操作
+     * @return json
+     */
+    @PostMapping(value = "use-static-file-storage", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public IJsonMessage<String> useStaticFileStorage(String id, String afterOpt, String clearOld, String fileId, String autoUnzip,
+                                                     String secondaryDirectory,
+                                                     String stripComponents,
+                                                     String selectProject,
+                                                     HttpServletRequest request) {
+
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
+        AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
+        Assert.notNull(afterOpt1, "请选择分发后的操作");
+        StaticFileStorageModel storageModel = staticFileStorageService.getByKey(fileId);
+        String workspaceId = outGivingServer.getCheckUserWorkspace(request);
+        staticFileStorageService.checkStaticDir(storageModel, workspaceId);
+        //
+        outGivingModel.setClearOld(Convert.toBool(clearOld, false));
+        outGivingModel.setAfterOpt(afterOpt1.getCode());
+        outGivingModel.setSecondaryDirectory(secondaryDirectory);
+        outGivingModel.setMode("static-file-storage");
+        outGivingModel.setModeData(fileId);
+        outGivingServer.updateById(outGivingModel);
+
+        File file = FileUtil.file(storageModel.getAbsolutePath());
+        this.startTask(outGivingModel, file, autoUnzip, stripComponents, selectProject);
+        return JsonMessage.success("开始分发!");
+    }
+
+    /**
+     * 开始发布任务
+     *
+     * @param outGivingModel  分发对象
+     * @param file            文件
+     * @param autoUnzip       是否解压
+     * @param stripComponents 剔除目录
+     * @param selectProject   选择指定项目
+     */
+    private void startTask(OutGivingModel outGivingModel, File file, String autoUnzip,
+                           String stripComponents,
+                           String selectProject) {
+        Assert.state(FileUtil.isFile(file), "当前文件丢失不能执行发布任务");
+        //
         boolean unzip = BooleanUtil.toBoolean(autoUnzip);
         //
-        this.checkZip(downloadFile, unzip);
+        this.checkZip(file, unzip);
         int stripComponentsValue = Convert.toInt(stripComponents, 0);
         // 开启
         OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
             .id(outGivingModel.getId())
-            .file(downloadFile)
+            .file(file)
             .userModel(getUser())
             .unzip(unzip)
+            .mode(outGivingModel.getMode())
+            .modeData(outGivingModel.getModeData())
+            // 可以不再设置-会查询最新的
+            //            .projectSecondaryDirectory(secondaryDirectory)
             .stripComponents(stripComponentsValue);
         outGivingRunBuilder.build().startRun(selectProject);
-        return JsonMessage.success("下载成功,开始分发!");
     }
 
     @PostMapping(value = "cancel", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<String> cancel(@ValidatorItem String id) {
-        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status == OutGivingModel.Status.ING, "当前状态不是分发中"));
+    public IJsonMessage<String> cancel(@ValidatorItem String id, HttpServletRequest request) {
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status == OutGivingModel.Status.ING, "当前状态不是分发中"), request);
         OutGivingRun.cancel(outGivingModel.getId(), getUser());
         //
         return JsonMessage.success("取消成功");
@@ -336,9 +512,9 @@ public class OutGivingProjectController extends BaseServerController {
     @GetMapping(value = "remove-project", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> removeProject(@ValidatorItem String id,
-                                             @ValidatorItem String nodeId,
-                                             @ValidatorItem String projectId,
-                                             HttpServletRequest request) {
+                                              @ValidatorItem String nodeId,
+                                              @ValidatorItem String projectId,
+                                              HttpServletRequest request) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
         Assert.notNull(outGivingModel, "没有找到对应的分发项目");
         List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.outGivingNodeProjectList();

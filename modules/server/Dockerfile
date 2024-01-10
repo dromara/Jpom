@@ -34,7 +34,7 @@ ARG JPOM_VERSION
 ENV USE_JPOM_VERSION=${JPOM_VERSION}${TEMP_VERSION}
 RUN --mount=type=cache,target=/root/.m2  bash ./script/replaceVersion.sh "${USE_JPOM_VERSION}" "release"
 
-ENV NODE_VERSION 16.13.1
+ENV NODE_VERSION 18.19.0
 
 RUN set -eux; \
     ARCH="$(dpkg --print-architecture)"; \

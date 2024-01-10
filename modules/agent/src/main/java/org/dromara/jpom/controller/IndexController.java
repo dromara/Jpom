@@ -33,8 +33,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.RemoteVersion;
-import org.dromara.jpom.common.commander.AbstractProjectCommander;
-import org.dromara.jpom.common.commander.AbstractSystemCommander;
+import org.dromara.jpom.common.commander.ProjectCommander;
+import org.dromara.jpom.common.commander.SystemCommander;
 import org.dromara.jpom.common.interceptor.NotAuthorize;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.model.data.NodeScriptModel;
@@ -50,7 +50,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -65,11 +67,17 @@ public class IndexController extends BaseAgentController {
 
     private final ProjectInfoService projectInfoService;
     private final NodeScriptServer nodeScriptServer;
+    private final SystemCommander systemCommander;
+    private final ProjectCommander projectCommander;
 
     public IndexController(ProjectInfoService projectInfoService,
-                           NodeScriptServer nodeScriptServer) {
+                           NodeScriptServer nodeScriptServer,
+                           SystemCommander systemCommander,
+                           ProjectCommander projectCommander) {
         this.projectInfoService = projectInfoService;
         this.nodeScriptServer = nodeScriptServer;
+        this.systemCommander = systemCommander;
+        this.projectCommander = projectCommander;
     }
 
     @RequestMapping(value = {"index", "", "index.html", "/"}, produces = MediaType.TEXT_PLAIN_VALUE)
@@ -125,9 +133,33 @@ public class IndexController extends BaseAgentController {
         jsonObject.put("totalMemory", SystemUtil.getTotalMemory());
         //
         jsonObject.put("freeMemory", SystemUtil.getFreeMemory());
+        Map<String, JSONObject> workspaceMap = new HashMap<>(4);
         //
-        jsonObject.put("projectCount", CollUtil.size(nodeProjectInfoModels));
-        jsonObject.put("scriptCount", CollUtil.size(list));
+        {
+            for (NodeProjectInfoModel model : nodeProjectInfoModels) {
+                JSONObject jsonObject1 = workspaceMap.computeIfAbsent(model.getWorkspaceId(), s -> {
+                    JSONObject jsonObject11 = new JSONObject();
+                    jsonObject11.put("projectCount", 0);
+                    jsonObject11.put("scriptCount", 0);
+                    return jsonObject11;
+                });
+                jsonObject1.merge("projectCount", 1, (v1, v2) -> Integer.sum((Integer) v1, (Integer) v2));
+            }
+            jsonObject.put("projectCount", CollUtil.size(nodeProjectInfoModels));
+        }
+        {
+            for (NodeScriptModel model : list) {
+                JSONObject jsonObject1 = workspaceMap.computeIfAbsent(model.getWorkspaceId(), s -> {
+                    JSONObject jsonObject11 = new JSONObject();
+                    jsonObject11.put("projectCount", 0);
+                    jsonObject11.put("scriptCount", 0);
+                    return jsonObject11;
+                });
+                jsonObject1.merge("scriptCount", 1, (v1, v2) -> Integer.sum((Integer) v1, (Integer) v2));
+            }
+            jsonObject.put("scriptCount", CollUtil.size(list));
+        }
+        jsonObject.put("workspaceStat", workspaceMap);
         return jsonObject;
     }
 
@@ -139,7 +171,7 @@ public class IndexController extends BaseAgentController {
         processes = processes.stream()
             .peek(jsonObject -> {
                 int processId = jsonObject.getIntValue("processId");
-                String port = AbstractProjectCommander.getInstance().getMainPort(processId);
+                String port = projectCommander.getMainPort(processId);
                 jsonObject.put("port", port);
                 //
             })
@@ -152,7 +184,7 @@ public class IndexController extends BaseAgentController {
     public IJsonMessage<String> kill(int pid) {
         long jpomAgentId = JpomManifest.getInstance().getPid();
         Assert.state(!StrUtil.equals(StrUtil.toString(jpomAgentId), StrUtil.toString(pid)), "不支持在线关闭 Agent 进程");
-        String result = AbstractSystemCommander.getInstance().kill(null, pid);
+        String result = systemCommander.kill(null, pid);
         if (StrUtil.isEmpty(result)) {
             result = "成功kill";
         }

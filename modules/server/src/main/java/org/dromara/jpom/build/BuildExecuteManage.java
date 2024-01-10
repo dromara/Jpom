@@ -44,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.exception.LogRecorderCloseException;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.model.data.BuildInfoModel;
@@ -68,6 +69,7 @@ import org.dromara.jpom.util.AntPathUtil;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.FileUtils;
 import org.dromara.jpom.util.LogRecorder;
+import org.dromara.jpom.webhook.DefaultWebhookPluginImpl;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -115,6 +117,7 @@ public class BuildExecuteManage implements Runnable {
     private LogRecorder logRecorder;
     private File gitFile;
     private Thread currentThread;
+    private ReleaseManage releaseManage;
 
     /**
      * 提交任务时间
@@ -197,7 +200,7 @@ public class BuildExecuteManage implements Runnable {
      * 取消任务
      */
     private void cancelTask(String desc) {
-        Optional.ofNullable(process).ifPresent(Process::destroy);
+        CommandUtil.kill(process);
         Integer buildMode = taskData.buildInfoModel.getBuildMode();
         if (buildMode != null && buildMode == 1) {
             // 容器构建 删除容器
@@ -220,6 +223,7 @@ public class BuildExecuteManage implements Runnable {
         buildExecuteService.updateStatus(buildId, logId, taskData.buildInfoModel.getBuildId(), BuildStatus.Cancel, desc);
         Optional.ofNullable(currentThread).ifPresent(Thread::interrupt);
         BUILD_MANAGE_MAP.remove(buildId);
+        IoUtil.close(logRecorder);
     }
 
     /**
@@ -556,7 +560,7 @@ public class BuildExecuteManage implements Runnable {
         String buildInfoModelId = buildInfoModel.getId();
         taskData.buildContainerId = "jpom-build-" + buildInfoModelId;
         map.put("dockerName", taskData.buildContainerId);
-        map.put("logFile", logRecorder.getFile());
+        map.put("logRecorder", logRecorder);
         //
         List<String> copy = ObjectUtil.defaultIfNull(dockerYmlDsl.getCopy(), new ArrayList<>());
         // 将仓库文件上传到容器
@@ -626,11 +630,15 @@ public class BuildExecuteManage implements Runnable {
             int waitFor = JpomApplication.getInstance()
                 .execScript(s1 + script, file -> {
                     try {
-                        return CommandUtil.execWaitFor(file, this.gitFile, environment, StrUtil.EMPTY, (s, process) -> logRecorder.info(s));
+                        return CommandUtil.execWaitFor(file, this.gitFile, environment, StrUtil.EMPTY, (s, process) -> {
+                            BuildExecuteManage.this.process = process;
+                            logRecorder.info(s);
+                        });
                     } catch (IOException | InterruptedException e) {
                         throw Lombok.sneakyThrow(e);
                     }
                 });
+            BuildExecuteManage.this.process = null;
             logRecorder.system("执行脚本的退出码是：{}", waitFor);
             // 判断是否为严格执行
             if (buildExtraModule.strictlyEnforce()) {
@@ -652,7 +660,7 @@ public class BuildExecuteManage implements Runnable {
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
         UserModel userModel = taskData.userModel;
         // 发布文件
-        ReleaseManage releaseManage = ReleaseManage.builder()
+        this.releaseManage = ReleaseManage.builder()
             .buildNumberId(buildInfoModel.getBuildId())
             .buildExtraModule(buildExtraModule)
             .userModel(userModel)
@@ -781,9 +789,7 @@ public class BuildExecuteManage implements Runnable {
         File historyPackageZipFile = BuildUtil.getHistoryPackageZipFile(buildExtraModule.getId(), buildInfoModel1.getBuildId());
         CommandUtil.systemFastDel(historyPackageZipFile);
         // 计算文件占用大小
-        File file = logRecorder.getFile();
-        long size = FileUtil.size(file);
-
+        long size = logRecorder.size();
         BuildHistoryLog buildInfoModel = new BuildHistoryLog();
         buildInfoModel.setId(logId);
         buildInfoModel.setResultFileSize(taskData.resultFileSize);
@@ -850,6 +856,8 @@ public class BuildExecuteManage implements Runnable {
             if (!stop) { // 没有执行 stop
                 this.asyncWebHooks("success");
             }
+        } catch (LogRecorderCloseException logRecorderCloseException) {
+            log.warn("构建日志记录器已关闭,可能手动取消停止构建,流程:{}", processName);
         } catch (DiyInterruptException diyInterruptException) {
             // 主动中断
             this.asyncWebHooks("stop", "process", processName);
@@ -866,6 +874,7 @@ public class BuildExecuteManage implements Runnable {
             this.clearResources();
             logRecorder.system("构建结束-累计耗时:{}", DateUtil.formatBetween(SystemClock.now() - startTime));
             this.asyncWebHooks("done");
+            IoUtil.close(logRecorder);
             BaseServerController.removeAll();
         }
     }
@@ -913,6 +922,7 @@ public class BuildExecuteManage implements Runnable {
                 ThreadUtil.execute(() -> {
                     try {
                         IPlugin plugin = PluginFactory.getPlugin("webhook");
+                        map.put("JPOM_WEBHOOK_EVENT", DefaultWebhookPluginImpl.WebhookEvent.BUILD);
                         plugin.execute(s, map);
                     } catch (Exception e) {
                         log.error("WebHooks 调用错误", e);
@@ -1017,6 +1027,7 @@ public class BuildExecuteManage implements Runnable {
                 FileUtil.del(scriptFile);
             } catch (Exception ignored) {
             }
+            IoUtil.close(scriptLog);
         }
     }
 

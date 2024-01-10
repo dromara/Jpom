@@ -285,13 +285,42 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     }
 
     /**
-     * 根据主键生成
+     * 同步 bean 删除
+     *
+     * @param info bean
+     * @return 影响行数
+     */
+    public int delByBean(T info) {
+        Entity where = this.dataBeanToEntity(info);
+        Assert.state(!where.isEmpty(), "没有添加任何参数:-2");
+        return this.del(where);
+    }
+
+
+    /**
+     * 根据主键删除
      *
      * @param keyValue 主键值
      * @return 影响行数
      */
     public int delByKey(String keyValue) {
+        if (StrUtil.isEmpty(keyValue)) {
+            return 0;
+        }
         return this.delByKey(keyValue, null);
+    }
+
+    /**
+     * 根据主键删除
+     *
+     * @param ids 主键值
+     * @return 影响行数
+     */
+    public int delByKey(List<String> ids) {
+        if (CollUtil.isEmpty(ids)) {
+            return 0;
+        }
+        return this.delByKey(ids, null);
     }
 
     /**
@@ -309,7 +338,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         if (consumer != null) {
             consumer.accept(where);
         }
-        Assert.state(where.size() > 0, "没有添加任何参数:-1");
+        Assert.state(!where.isEmpty(), "没有添加任何参数:-1");
         return del(where);
     }
 
@@ -322,6 +351,19 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     public boolean exists(T data) {
         Entity entity = this.dataBeanToEntity(data);
         return this.exists(entity);
+    }
+
+    /**
+     * 判断是否存在
+     *
+     * @param dataId 数据id
+     * @return true 存在
+     */
+    public boolean exists(String dataId) {
+        Entity entity = Entity.create();
+        entity.set(ID_STR, dataId);
+        long count = this.count(entity);
+        return count > 0;
     }
 
     /**

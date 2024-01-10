@@ -77,13 +77,16 @@ public class ProjectTriggerApiController extends BaseJpomController {
 
     private NodeUrl resolveAction(String action) {
         if (StrUtil.equalsIgnoreCase(action, "stop")) {
-            return NodeUrl.Manage_Stop;
+            return NodeUrl.Manage_Operate;
         }
         if (StrUtil.equalsIgnoreCase(action, "start")) {
-            return NodeUrl.Manage_Start;
+            return NodeUrl.Manage_Operate;
         }
         if (StrUtil.equalsIgnoreCase(action, "restart")) {
-            return NodeUrl.Manage_Restart;
+            return NodeUrl.Manage_Operate;
+        }
+        if (StrUtil.equalsIgnoreCase(action, "reload")) {
+            return NodeUrl.Manage_Operate;
         }
         return NodeUrl.Manage_GetProjectStatus;
     }
@@ -93,7 +96,7 @@ public class ProjectTriggerApiController extends BaseJpomController {
         //
         NodeModel nodeModel = nodeService.getByKey(item.getNodeId());
         return NodeForward.request(nodeModel, resolveAction,
-            "id", item.getProjectId(), "getCopy", "true");
+            "id", item.getProjectId(), "opt", action);
     }
 
     /**

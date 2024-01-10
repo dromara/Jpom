@@ -66,8 +66,8 @@ public class NodeScriptLogController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<PageResultDto<NodeScriptExecuteLogCacheModel>> scriptList() {
-        PageResultDto<NodeScriptExecuteLogCacheModel> pageResultDto = nodeScriptExecuteLogServer.listPageNode(getRequest());
+    public IJsonMessage<PageResultDto<NodeScriptExecuteLogCacheModel>> scriptList(HttpServletRequest request) {
+        PageResultDto<NodeScriptExecuteLogCacheModel> pageResultDto = nodeScriptExecuteLogServer.listPage(request);
         return JsonMessage.success("", pageResultDto);
     }
 
@@ -78,9 +78,9 @@ public class NodeScriptLogController extends BaseServerController {
      */
     @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String log() {
+    public IJsonMessage<Object> log(HttpServletRequest request) {
         NodeModel node = getNode();
-        return NodeForward.request(node, getRequest(), NodeUrl.SCRIPT_LOG).toString();
+        return NodeForward.request(node, request, NodeUrl.SCRIPT_LOG);
     }
 
     /**

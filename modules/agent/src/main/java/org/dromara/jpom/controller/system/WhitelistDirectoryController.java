@@ -30,7 +30,6 @@ import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseJpomController;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.service.WhitelistDirectoryService;
-import org.dromara.jpom.system.AgentConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,12 +48,9 @@ import java.util.List;
 public class WhitelistDirectoryController extends BaseJpomController {
 
     private final WhitelistDirectoryService whitelistDirectoryService;
-    private final AgentConfig agentConfig;
 
-    public WhitelistDirectoryController(WhitelistDirectoryService whitelistDirectoryService,
-                                        AgentConfig agentConfig) {
+    public WhitelistDirectoryController(WhitelistDirectoryService whitelistDirectoryService) {
         this.whitelistDirectoryService = whitelistDirectoryService;
-        this.agentConfig = agentConfig;
     }
 
     @RequestMapping(value = "whitelistDirectory_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -69,7 +65,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
 
 
                                                          String allowEditSuffix) {
-        List<String> list = AgentWhitelist.parseToList(project, true, "项目路径白名单不能为空");
+        List<String> list = AgentWhitelist.parseToList(project, true, "项目路径授权不能为空");
         //
         List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
         return save(list, allowEditSuffixList);
@@ -81,9 +77,9 @@ public class WhitelistDirectoryController extends BaseJpomController {
                                      List<String> allowEditSuffixList) {
         List<String> projectArray;
         {
-            projectArray = AgentWhitelist.covertToArray(projects, "项目路径白名单不能位于Jpom目录下");
-            String error = findStartsWith(projectArray, 0);
-            Assert.isNull(error, "白名单目录中不能存在包含关系：" + error);
+            projectArray = AgentWhitelist.covertToArray(projects, "项目路径授权不能位于Jpom目录下");
+            String error = findStartsWith(projectArray);
+            Assert.isNull(error, "授权目录中不能存在包含关系：" + error);
         }
 
         //
@@ -110,30 +106,12 @@ public class WhitelistDirectoryController extends BaseJpomController {
     }
 
     /**
-     * 检查白名单包含关系
+     * 检查授权包含关系
      *
      * @param jsonArray 要检查的对象
-     * @param start     检查的坐标
      * @return null 正常
      */
-    private String findStartsWith(List<String> jsonArray, int start) {
-        if (jsonArray == null || !agentConfig.getWhitelist().isCheckStartsWith()) {
-            return null;
-        }
-        String str = jsonArray.get(start);
-        int len = jsonArray.size();
-        for (int i = 0; i < len; i++) {
-            if (i == start) {
-                continue;
-            }
-            String findStr = jsonArray.get(i);
-            if (findStr.startsWith(str)) {
-                return str;
-            }
-        }
-        if (start < len - 1) {
-            return findStartsWith(jsonArray, start + 1);
-        }
-        return null;
+    private String findStartsWith(List<String> jsonArray) {
+        return AgentWhitelist.findStartsWith(jsonArray);
     }
 }

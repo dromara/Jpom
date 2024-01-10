@@ -44,12 +44,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.configuration.NodeConfig;
+import org.dromara.jpom.exception.AgentAuthorizeException;
+import org.dromara.jpom.exception.AgentException;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserModel;
-import org.dromara.jpom.system.AgentException;
-import org.dromara.jpom.system.AuthorizeException;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.transport.*;
 import org.dromara.jpom.util.StrictSyncFinisher;
@@ -650,7 +650,7 @@ public class NodeForward {
         if (data instanceof JsonMessage) {
             JsonMessage<?> jsonMessage = (JsonMessage<?>) data;
             if (jsonMessage.getCode() == Const.AUTHORIZE_ERROR) {
-                throw new AuthorizeException(new JsonMessage<>(jsonMessage.getCode(), jsonMessage.getMsg()));
+                throw new AgentAuthorizeException(new JsonMessage<>(jsonMessage.getCode(), jsonMessage.getMsg()));
             }
         } else {
             throw new IllegalStateException("消息转换异常");

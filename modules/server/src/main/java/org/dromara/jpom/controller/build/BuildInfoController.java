@@ -472,6 +472,12 @@ public class BuildInfoController extends BaseServerController {
     @PostMapping(value = "/build/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id, HttpServletRequest request) {
+        this.delById(id, request);
+        return JsonMessage.success("删除成功,并且清理历史构建产物成功");
+    }
+
+
+    private void delById(String id, HttpServletRequest request) {
         // 查询构建信息
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
         Objects.requireNonNull(buildInfoModel, "没有对应数据");
@@ -488,6 +494,21 @@ public class BuildInfoController extends BaseServerController {
         Assert.state(!fastDel, "清理历史构建产物失败,已经重新尝试");
         // 删除构建信息数据
         buildInfoService.delByKey(buildInfoModel.getId(), request);
+    }
+
+    /**
+     * 批量删除构建信息
+     *
+     * @param ids 构建ID
+     * @return json
+     */
+    @PostMapping(value = "/build/batch-delete", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public IJsonMessage<Object> batchDelete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String ids, HttpServletRequest request) {
+        List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
+        for (String s : list) {
+            this.delById(s, request);
+        }
         return JsonMessage.success("删除成功,并且清理历史构建产物成功");
     }
 

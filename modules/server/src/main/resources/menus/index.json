@@ -1,5 +1,10 @@
 [
   {
+    "title": "概括总览",
+    "icon_v3": "laptop",
+    "id": "overview"
+  },
+  {
     "title": "节点&项目",
     "icon_v3": "apartment",
     "id": "outgiving",
@@ -22,7 +27,7 @@
       },
       {
         "id": "outgivingWhitelistDirectory",
-        "title": "分发白名单",
+        "title": "授权配置",
         "role": "system"
       },
       {
@@ -134,6 +139,10 @@
       {
         "id": "fileStorage",
         "title": "文件列表"
+      },
+      {
+        "id": "staticFileStorage",
+        "title": "静态文件"
       },
       {
         "id": "fileReleaseTask",

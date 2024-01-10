@@ -43,7 +43,7 @@ import org.dromara.jpom.model.BaseWorkspaceModel;
 @TableName(value = "FILE_STORAGE", name = "文件管理中心")
 @Data
 @NoArgsConstructor
-public class FileStorageModel extends BaseWorkspaceModel {
+public class FileStorageModel extends BaseWorkspaceModel implements IFileStorage {
 
     @Override
     public void setId(String id) {

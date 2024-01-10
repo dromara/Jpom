@@ -30,7 +30,7 @@ package org.dromara.jpom.common;
  */
 public class AgentConst {
     /**
-     * 白名单文件
+     * 授权文件
      */
     public static final String WHITELIST_DIRECTORY = "whitelistDirectory.json";
     /**

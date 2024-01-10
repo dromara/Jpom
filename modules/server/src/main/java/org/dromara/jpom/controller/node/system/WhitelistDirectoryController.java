@@ -32,6 +32,7 @@ import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
+import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.service.system.WhitelistDirectoryService;
 import org.springframework.http.MediaType;
@@ -47,7 +48,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 白名单目录
+ * 授权目录
  *
  * @author bwcx_jzy
  * @since 2019/2/28
@@ -55,7 +56,6 @@ import java.util.Map;
 @RestController
 @RequestMapping(value = "/node/system")
 @Feature(cls = ClassFeature.NODE_CONFIG_WHITELIST)
-@SystemPermission
 public class WhitelistDirectoryController extends BaseServerController {
 
     private final WhitelistDirectoryService whitelistDirectoryService;
@@ -67,13 +67,12 @@ public class WhitelistDirectoryController extends BaseServerController {
 
     /**
      * get whiteList data
-     * 白名单数据接口
+     * 授权数据接口
      *
      * @return json
      * @author Hotstrip
      */
     @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @SystemPermission
     public IJsonMessage<Map<String, String>> whiteList(String machineId) {
         NodeModel nodeModel = tryGetNode();
         AgentWhitelist agentWhitelist;
@@ -111,8 +110,9 @@ public class WhitelistDirectoryController extends BaseServerController {
      */
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
+    @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> whitelistDirectorySubmit(HttpServletRequest request, String machineId) {
-        JsonMessage<String> objectJsonMessage = this.tryRequestMachine(machineId, request, NodeUrl.WhitelistDirectory_Submit);
+        JsonMessage<String> objectJsonMessage = this.tryRequestNode(machineId, request, NodeUrl.WhitelistDirectory_Submit);
         Assert.notNull(objectJsonMessage, "请选择节点");
         return objectJsonMessage;
     }

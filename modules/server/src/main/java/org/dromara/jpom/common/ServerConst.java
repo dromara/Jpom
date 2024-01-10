@@ -75,4 +75,8 @@ public class ServerConst extends Const {
     public static final String ACCOUNT_LOCKED_TIP = "账号已经被禁用,不能使用";
 
     public static final String CHECK_SYSTEM = "check-system";
+
+    public static final String RSA = "RSA";
+
+    public static final String EC = "EC";
 }
