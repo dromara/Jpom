@@ -90,7 +90,7 @@ public class EnvironmentMapBuilder {
         Map<String, String> map = new LinkedHashMap<>(this.map.size());
         for (Map.Entry<String, Item> entry : this.map.entrySet()) {
             Item entryValue = entry.getValue();
-            if (entryValue.value == null) {
+            if (entryValue.value == null || entry.getKey() == null) {
                 // 值不能为 null
                 continue;
             }
@@ -99,7 +99,7 @@ public class EnvironmentMapBuilder {
         Optional.ofNullable(appendMap).ifPresent(objectMap -> {
             for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
                 Object value = entry.getValue();
-                if (value == null) {
+                if (value == null || entry.getKey() == null) {
                     continue;
                 }
                 map.put(entry.getKey(), StrUtil.toStringOrNull(value));
