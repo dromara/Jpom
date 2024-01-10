@@ -5,7 +5,7 @@
         <a-button type="primary" @click="initSocket">重连 </a-button>
       </template>
     </a-result>
-    <div class="flex-100 br" :id="domId" v-else></div>
+    <div :id="domId" v-else class="flex-100"></div>
   </div>
 </template>
 
@@ -166,8 +166,8 @@ export default {
 
 <style scoped>
 .flex-100 {
-  /* display: flex; */
-  /* flex-flow: column; */
+  display: flex;
+  flex-flow: column;
   height: 100%;
   flex: 1;
 }
