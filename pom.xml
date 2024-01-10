@@ -141,7 +141,7 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>4.1</version>
+                <version>4.3</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
@@ -165,11 +165,12 @@
 
                         <exclude>docs/**</exclude>
                         <exclude>web-vue/**</exclude>
-                        <exclude>web-vue3/**</exclude>
+                        <exclude>web-vue2/**</exclude>
                         <exclude>**/*.yml</exclude>
                         <exclude>**/*.md</exclude>
                         <exclude>**/*.txt</exclude>
-                        <exclude>modules/server/src/main/resources/dist/assets/**</exclude>
+<!--                        <exclude>**/dist/assets/**</exclude>-->
+<!--                        <exclude>**/dist/assets/**</exclude>-->
                     </excludes>
                     <!--严格检查-->
                     <strictCheck>true</strictCheck>
