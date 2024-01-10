@@ -131,7 +131,7 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return StrUtil.emptyToDefault(javaExtDirsCp, StrUtil.EMPTY);
     }
 
-    public boolean isOutGivingProject() {
+    public boolean outGivingProject() {
         return outGivingProject != null && outGivingProject;
     }
 
