@@ -54,6 +54,8 @@ export const useUserStore = defineStore('user', {
       // 调用其他 action
       menuStore.clearTabs('normal', { key: 'all' })
       menuStore.clearTabs('management', { key: 'all' })
+      // 重置，避免信息没有刷新
+      this.reloadUserInfo = false
       //
       return loginOut({})
     }
