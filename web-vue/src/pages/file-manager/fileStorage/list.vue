@@ -682,8 +682,8 @@ export default {
                 setTimeout(() => {
                   this.percentage = 0
                   this.percentageInfo = {}
-                  this.uploadVisible = false
                 }, 2000)
+                this.uploadVisible = false
                 this.uploading = false
               })
               .catch(() => {

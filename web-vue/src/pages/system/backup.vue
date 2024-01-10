@@ -144,8 +144,8 @@
       v-model:open="uploadSqlFileVisible"
       width="300px"
       title="上传 SQL 文件"
-      :footer="null"
       :maskClosable="true"
+      @ok="startSqlUpload"
     >
       <a-upload :file-list="uploadFileList" @remove="handleSqlRemove" :before-upload="beforeSqlUpload" accept=".sql">
         <a-button><UploadOutlined />选择 SQL 文件</a-button>
@@ -156,14 +156,6 @@
           <a-radio :value="1">部分备份</a-radio>
         </a-radio-group>
         <br /> -->
-
-      <br />
-      <a-space>
-        <a-button type="primary" :disabled="fileUploadDisabled" @click="startSqlUpload">开始上传</a-button>
-        <a-tag color="green" v-if="successSize !== 0" :closable="true" class="successTag">
-          上传成功: {{ successSize }} 个文件!
-        </a-tag>
-      </a-space>
     </a-modal>
   </div>
 </template>
@@ -200,11 +192,9 @@ export default {
       temp: {},
       createBackupVisible: false,
       uploadSqlFileVisible: false,
-      // 是否是上传状态
-      uploading: false,
-      percentage: 0,
+
       backupType: 0,
-      successSize: 0,
+
       columns: [
         {
           title: '备份名称',
@@ -279,10 +269,6 @@ export default {
     }
   },
   computed: {
-    // 计算上传文件是否禁用
-    fileUploadDisabled() {
-      return this.uploadFileList.length === 0 || this.uploading
-    },
     // 分页
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
@@ -436,12 +422,10 @@ export default {
     },
     // 上传压缩文件
     handleSqlUpload() {
-      this.successSize = 0
       this.uploadSqlFileVisible = true
       // clearInterval(this.timer)
-      // this.percentage = 0
+
       this.uploadFileList = []
-      this.uploading = false
     },
     handleSqlRemove() {
       this.handleSqlUpload()
@@ -453,14 +437,12 @@ export default {
     },
     // 开始上传 SQL 文件
     startSqlUpload() {
-      $notification.info({
-        message: '正在上传文件，请稍后...'
-      })
-      // 设置上传状态
-      this.uploading = true
-      // this.timer = setInterval(() => {
-      //   this.percentage = this.percentage > 99 ? 99 : this.percentage + 1
-      // }, 1000)
+      if (this.uploadFileList.length != 1) {
+        $notification.warning({
+          message: '请选择一个文件'
+        })
+        return
+      }
 
       // 上传文件
       const file = this.uploadFileList[0]
@@ -475,13 +457,9 @@ export default {
             $notification.success({
               message: res.msg
             })
-            this.successSize++
-            this.percentage = 100
-            setTimeout(() => {
-              this.handleSqlRemove()
-              this.loadData()
-              this.uploadSqlFileVisible = false
-            }, 1000)
+
+            this.uploadSqlFileVisible = false
+            this.loadData()
           }
         })
         .finally(() => {
