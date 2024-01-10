@@ -3,7 +3,7 @@
     <a-spin tip="加载构建数据中" :spinning="loading">
       <a-card>
         <template #title>
-          <a-steps v-model:current="stepsCurrent" size="small" :items="stepsItems"></a-steps>
+          <a-steps v-model:current="stepsCurrent" size="small" :items="stepsItems" @change="stepsChange"></a-steps>
         </template>
         <a-form ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
           <div v-show="stepsCurrent === 0">
@@ -220,7 +220,7 @@
                   <code-editor
                     v-model:content="temp.script"
                     :showTool="true"
-                    :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"
+                    :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"
                   >
                     <template #tool_before>
                       <a-space>
@@ -516,13 +516,27 @@
                     <QuestionCircleOutlined v-if="!temp.id" />
                   </a-tooltip>
                 </template>
-                <a-textarea
+                <template #help>
+                  发布前执行的命令(非阻塞命令),一般是关闭项目命令
+                  ,支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}
+                </template>
+                <!-- <a-textarea
                   v-model:value="tempExtraData.releaseBeforeCommand"
                   allow-clear
                   :auto-size="{ minRows: 2, maxRows: 10 }"
                   :rows="3"
-                  placeholder="发布前执行的命令(非阻塞命令),一般是关闭项目命令 ,支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}"
-                />
+                  placeholder=""
+                /> -->
+                <a-form-item-rest>
+                  <div style="height: 40vh">
+                    <code-editor
+                      v-model:content="tempExtraData.releaseBeforeCommand"
+                      :showTool="true"
+                      :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"
+                    >
+                    </code-editor>
+                  </div>
+                </a-form-item-rest>
               </a-form-item>
               <a-form-item v-if="temp.releaseMethod === 3 || temp.releaseMethod === 4" name="releaseCommand">
                 <!-- sshCommand LocalCommand -->
@@ -539,13 +553,20 @@
                     <QuestionCircleOutlined v-if="!temp.id" />
                   </a-tooltip>
                 </template>
-                <a-textarea
-                  v-model:value="tempExtraData.releaseCommand"
-                  allow-clear
-                  :auto-size="{ minRows: 2, maxRows: 10 }"
-                  :rows="3"
-                  placeholder="发布后执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java,支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}"
-                />
+                <template #help>
+                  发布后执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep
+                  java,支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}
+                </template>
+                <a-form-item-rest>
+                  <div style="height: 40vh">
+                    <code-editor
+                      v-model:content="tempExtraData.releaseCommand"
+                      :showTool="true"
+                      :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"
+                    >
+                    </code-editor>
+                  </div>
+                </a-form-item-rest>
               </a-form-item>
 
               <a-form-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" name="clearOld">
@@ -1087,32 +1108,6 @@
               />
             </a-form-item>
           </div>
-
-          <a-form-item label="">
-            <a-flex justify="center" align="center">
-              <a-space>
-                <a-button
-                  type="primary"
-                  :disabled="stepsCurrent === 0"
-                  @click="
-                    () => {
-                      stepsCurrent = stepsCurrent - 1
-                    }
-                  "
-                  >上一步</a-button
-                ><a-button
-                  type="primary"
-                  :disabled="stepsCurrent === 4"
-                  @click="
-                    () => {
-                      stepsCurrent = stepsCurrent + 1
-                    }
-                  "
-                  >下一步</a-button
-                ></a-space
-              ></a-flex
-            >
-          </a-form-item>
         </a-form>
       </a-card>
     </a-spin>
@@ -1337,6 +1332,20 @@ export default {
     scriptPage,
     DockerList
   },
+  props: {
+    id: {
+      type: String,
+      default: ''
+    },
+    data: {
+      type: Object,
+      default: null
+    },
+    editSteps: {
+      type: Number,
+      default: 0
+    }
+  },
   data() {
     return {
       //   afterOptList,
@@ -1438,14 +1447,14 @@ export default {
         ['name', 'branchName', 'repositoryId'],
         ['script', 'resultDirFile'],
         ['releaseMethod']
-        // name: [{ required: true, message: '请填写构建名称', trigger: 'blur', stepsCurrent: 1 }],
-        // buildMode: [{ required: true, message: '请选择构建方式', trigger: 'blur', stepsCurrent: 0 }],
-        // releaseMethod: [{ required: true, message: '请选择发布操作', trigger: 'blur', stepsCurrent: 3 }],
-        // branchName: [{ required: true, message: '请选择分支', trigger: 'blur', stepsCurrent: 1 }],
-        // script: [{ required: true, message: '请填写构建命令', trigger: 'blur', stepsCurrent: 2 }],
-        // resultDirFile: [{ required: true, message: '请填写产物目录', trigger: 'blur', stepsCurrent: 2 }],
+        // name: [{ required: true, message: '请填写构建名称', trigger: 'blur', : 1 }],
+        // buildMode: [{ required: true, message: '请选择构建方式', trigger: 'blur', : 0 }],
+        // releaseMethod: [{ required: true, message: '请选择发布操作', trigger: 'blur', : 3 }],
+        // branchName: [{ required: true, message: '请选择分支', trigger: 'blur', : 1 }],
+        // script: [{ required: true, message: '请填写构建命令', trigger: 'blur', : 2 }],
+        // resultDirFile: [{ required: true, message: '请填写产物目录', trigger: 'blur', : 2 }],
         // // releasePath: [{ required: true, message: '请填写发布目录', trigger: 'blur' }],
-        // repositoryId: [{ required: true, message: '请填选择构建的仓库', trigger: 'blur', stepsCurrent: 1 }]
+        // repositoryId: [{ required: true, message: '请填选择构建的仓库', trigger: 'blur', : 1 }]
       ],
       stepsCurrent: 0,
       stepsItems: [
@@ -1556,7 +1565,25 @@ export default {
       })
     }
   },
+  watch: {
+    editSteps: {
+      handler(v) {
+        this.stepsCurrent = v
+      },
+      immediate: true
+    }
+  },
   created() {
+    if (this.id) {
+      this.refresh()
+    } else {
+      if (Object.keys(this.data).length) {
+        // 复制
+        this.handleEdit(this.data)
+      } else {
+        this.handleAdd()
+      }
+    }
     this.loadGroupList()
   },
   methods: {
@@ -1564,7 +1591,7 @@ export default {
     refresh() {
       this.loading = true
       getBuildGet({
-        id: this.temp.id
+        id: this.id
       })
         .then((res) => {
           if (res.data) {
@@ -1596,7 +1623,7 @@ export default {
       this.$refs['editBuildForm']?.resetFields()
     },
     // 修改
-    handleEdit(record, steps) {
+    handleEdit(record) {
       this.$refs['editBuildForm']?.resetFields()
       this.temp = Object.assign({}, record)
       this.temp.buildMode = this.temp.buildMode || 0
@@ -1604,7 +1631,7 @@ export default {
         this.loadDockerAllTag()
       }
       // 设置当前临时的 额外构建信息
-      this.tempExtraData = JSON.parse(record.extraData) || {}
+      this.tempExtraData = JSON.parse(record.extraData || '{}') || {}
       if (typeof this.tempExtraData === 'string') {
         this.tempExtraData = JSON.parse(this.tempExtraData)
       }
@@ -1663,7 +1690,7 @@ export default {
         }
       })
       // 默认打开构建流程
-      this.stepsCurrent = steps === undefined ? 2 : steps
+      // this.stepsCurrent = this.editSteps
     },
     // // 加载脚本列表
     // loadScriptListList() {
@@ -1764,7 +1791,8 @@ export default {
 
           this.temp = {
             ...this.temp,
-            extraData: JSON.stringify(tempExtraData)
+            extraData: JSON.stringify(tempExtraData),
+            resultKeepDay: this.temp.resultKeepDay || 0
           }
           // 提交数据
           editBuild(this.temp).then((res) => {
@@ -1792,7 +1820,7 @@ export default {
             filedName &&
               this.rulesSteps.forEach((item, index) => {
                 if (item.includes(filedName)) {
-                  this.stepsCurrent = index
+                  this.stepsChange(index)
                 }
               })
           }
@@ -1877,8 +1905,11 @@ export default {
         .finally(() => {
           this.dockerAllTagLoading = false
         })
+    },
+    stepsChange(current) {
+      this.$emit('update:editSteps', current)
     }
   },
-  emits: ['close', 'confirm']
+  emits: ['confirm', 'update:editSteps']
 }
 </script>

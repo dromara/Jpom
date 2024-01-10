@@ -219,7 +219,9 @@ export default {
   },
   computed: {},
   created() {
-    this.refresh()
+    if (this.id) {
+      this.refresh()
+    }
   },
   methods: {
     parseTime,

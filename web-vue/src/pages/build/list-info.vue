@@ -382,7 +382,7 @@
                   </template>
                 </a-dropdown>
                 <a-dropdown>
-                  <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+                  <a-button size="small" type="primary" @click="handleEdit(record, 1)">编辑</a-button>
                   <template #overlay>
                     <a-menu>
                       <a-menu-item @click="handleEdit(record, 0)">
@@ -481,118 +481,28 @@
     </a-card>
 
     <!-- 编辑区 -->
-    <a-drawer
-      destroyOnClose
-      :open="editBuildVisible != 0"
+    <build-item
+      v-if="editBuildVisible != 0"
+      :visibleType="editBuildVisible"
+      :editSteps="editSteps"
+      :id="temp.id"
+      :data="temp"
       @close="
         () => {
           this.editBuildVisible = 0
         }
       "
-      :headerStyle="{
-        width: '100%'
-      }"
-      :bodyStyle="{
-        padding: '20px 20px'
-      }"
-      width="70vw"
-      :title="`${temp.id ? '构建详情' : '添加构建'}`"
-      :maskClosable="false"
-      :footer-style="{ textAlign: 'right' }"
-    >
-      <template v-if="temp.id">
-        <a-tabs v-model:activeKey="editBuildVisible" tabPosition="top" size="small">
-          <a-tab-pane :key="1">
-            <template v-slot:tab>
-              <span>
-                <InfoOutlined />
-                构建信息
-              </span>
-            </template>
-            <detailsPage :id="this.temp.id" />
-          </a-tab-pane>
-
-          <a-tab-pane :key="2" forceRender>
-            <template v-slot:tab>
-              <span>
-                <EditOutlined />
-                编辑构建
-              </span>
-            </template>
-            <editBuildPage
-              ref="editBuild"
-              @confirm="
-                (build, buildId) => {
-                  this.editBuildVisible = 0
-                  this.loadData()
-                  this.loadGroupList()
-                  if (build) {
-                    reqStartBuild({ id: buildId }, true)
-                  }
-                }
-              "
-              @close="
-                () => {
-                  this.editBuildVisible = 0
-                }
-              "
-            ></editBuildPage>
-          </a-tab-pane>
-          <a-tab-pane :key="3">
-            <template v-slot:tab>
-              <span>
-                <ApiOutlined />
-                触发器
-              </span>
-            </template>
-            <triggerPage :id="this.temp.id" :triggerToken="this.temp.triggerToken" />
-          </a-tab-pane>
-        </a-tabs>
-      </template>
-      <template v-else>
-        <editBuildPage
-          ref="editBuild"
-          @confirm="
-            (build, buildId) => {
-              this.editBuildVisible = 0
-              this.loadData()
-              this.loadGroupList()
-              if (build) {
-                reqStartBuild({ id: buildId }, true)
-              }
-            }
-          "
-          @close="
-            () => {
-              this.editBuildVisible = 0
-            }
-          "
-        ></editBuildPage>
-      </template>
-
-      <template #footer v-if="editBuildVisible == 2 || !temp.id">
-        <a-space>
-          <a-button
-            @click="
-              () => {
-                this.editBuildVisible = 0
-              }
-            "
-          >
-            取消
-          </a-button>
-          <a-tooltip
-            v-if="temp.id"
-            title="如果当前构建信息已经在其他页面更新过，需要点击刷新按钮来获取最新的信息，点击刷新后未保存的数据也将丢失"
-          >
-            <a-button @click="$refs.editBuild.refresh()"> 刷新</a-button>
-          </a-tooltip>
-          <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(false)"> 保存 </a-button>
-          <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(true)"> 保存并构建 </a-button>
-        </a-space>
-      </template>
-    </a-drawer>
-
+      @build="
+        (build, buildId) => {
+          this.editBuildVisible = 0
+          this.loadData()
+          this.loadGroupList()
+          if (build) {
+            reqStartBuild({ id: buildId }, true)
+          }
+        }
+      "
+    ></build-item>
     <!-- 构建日志 -->
     <build-log
       v-if="buildLogVisible > 0"
@@ -721,40 +631,12 @@
         </a-form-item>
       </a-form>
     </a-modal>
-    <!-- 选择确认区域
-    <div style="padding-top: 50px" v-if="this.choose">
-      <div
-        :style="{
-          position: 'absolute',
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          borderTop: '1px solid #e9e9e9',
-          padding: '10px 16px',
-          background: '#fff',
-          textAlign: 'right',
-          zIndex: 1
-        }"
-      >
-        <a-space>
-          <a-button
-            @click="
-              () => {
-                this.$emit('cancel')
-              }
-            "
-          >
-            取消
-          </a-button>
-          <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
-        </a-space>
-      </div>
-    </div> -->
   </div>
 </template>
 
 <script>
 import BuildLog from './log'
+import BuildItem from './item'
 import CustomSelect from '@/components/customSelect'
 import { Empty } from 'ant-design-vue'
 import {
@@ -773,9 +655,7 @@ import {
   deleteatchBuild
 } from '@/api/build-info'
 import { getDispatchProject } from '@/api/dispatch'
-import detailsPage from './details.vue'
-import editBuildPage from './edit.vue'
-import triggerPage from './trigger.vue'
+
 import {
   CHANGE_PAGE,
   COMPUTED_PAGINATION,
@@ -788,10 +668,8 @@ import {
 export default {
   components: {
     BuildLog,
-    editBuildPage,
-    CustomSelect,
-    detailsPage,
-    triggerPage
+    BuildItem,
+    CustomSelect
   },
   props: {
     repositoryId: {
@@ -829,7 +707,7 @@ export default {
       temp: {},
       // 页面控制变量
       editBuildVisible: 0,
-
+      editSteps: null,
       buildLogVisible: 0,
       buildConfirmVisible: false,
       columns: [
@@ -919,6 +797,12 @@ export default {
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '160px'
+        },
+        {
+          title: '排序值',
+          dataIndex: 'sortValue',
+          sorter: true,
+          width: '80px'
         },
         {
           title: '操作',
@@ -1016,9 +900,7 @@ export default {
     handleAdd() {
       this.temp = {}
       this.editBuildVisible = 2
-      this.$nextTick(() => {
-        this.$refs.editBuild.handleAdd()
-      })
+      this.editSteps = 0
     },
     // 复制
     copyItem(record) {
@@ -1026,21 +908,20 @@ export default {
       delete temp.id
       delete temp.triggerToken
       temp.name = temp.name + '副本'
-      this.handleEdit(temp, 1)
+      this.temp = temp
+      this.editBuildVisible = 2
+      this.editSteps = 1
+      // this.handleEdit(temp, 1)
     },
     handleEdit(record, steps) {
+      this.temp = { id: record.id }
       this.editBuildVisible = 2
-      this.temp = { id: record.id, triggerToken: record.triggerToken }
-      this.$nextTick(() => {
-        this.$refs.editBuild.handleEdit({ ...record }, steps)
-      })
+
+      this.editSteps = steps
     },
     handleDetails(record) {
       this.editBuildVisible = 1
-      this.temp = { id: record.id, triggerToken: record.triggerToken }
-      this.$nextTick(() => {
-        this.$refs.editBuild.handleEdit({ ...record })
-      })
+      this.temp = { id: record.id }
     },
     loadBranchListById(id) {
       this.branchList = []
