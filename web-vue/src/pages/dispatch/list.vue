@@ -80,7 +80,7 @@
       <template #bodyCell="{ column, text, record, index }">
         <template v-if="column.tooltip">
           <a-tooltip placement="topLeft" :title="text">
-            <span>{{ (text || '').slice(0, 10) }}</span>
+            <span>{{ text || '' }}</span>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'id'">
@@ -792,7 +792,7 @@
                 />
                 插件端启动时自动检查项目如未启动将尝试启动
               </a-form-item>
-              <a-form-item name="dslEnv" label="DSL环境变量">
+              <a-form-item name="dslEnv" label="DSL环境变量" v-if="temp.runMode === 'Dsl'">
                 <a-input
                   v-model:checked="temp[`${nodeId}_dslEnv`]"
                   placeholder="DSL环境变量,如：key1=values1&keyvalue2"

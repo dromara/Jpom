@@ -16,6 +16,7 @@
       :pagination="pagination"
       @change="changePage"
       :row-selection="rowSelection"
+      rowKey="id"
       :scroll="{
         x: 'max-content'
       }"
@@ -146,7 +147,7 @@
 
         <template v-else-if="column.tooltip">
           <a-tooltip placement="topLeft" :title="text">
-            <span>{{ (text || '').slice(0, 10) }}</span>
+            <span>{{ text || '' }}</span>
           </a-tooltip>
         </template>
 
@@ -369,7 +370,7 @@
       />
     </a-drawer>
     <!-- 批量操作状态 -->
-    <a-modal destroyOnClose v-model:value="batchVisible" :title="temp.title" :footer="null" @cancel="batchClose">
+    <a-modal destroyOnClose v-model:open="batchVisible" :title="temp.title" :footer="null" @cancel="batchClose">
       <a-list bordered :data-source="temp.data">
         <template v-slot:renderItem="{ item }">
           <a-list-item>
@@ -940,14 +941,19 @@ export default {
      * 将选中的 key 转为 data
      */
     selectedRowKeysToId() {
-      return this.selectedRowKeys.map((item) => {
-        return {
-          projectId: this.projList[item]?.projectId,
-          nodeId: this.projList[item]?.nodeId,
-          runMode: this.projList[item]?.runMode,
-          name: this.projList[item]?.name
-        }
-      })
+      return this.projList
+        .filter((item) => {
+          return this.selectedRowKeys.includes(item.id)
+        })
+        .map((item) => {
+          return {
+            projectId: item.projectId,
+            nodeId: item.nodeId,
+            runMode: item.runMode,
+            name: item.name
+          }
+        })
+      // return this.selectedRowKeys.map((item) => {})
     },
     // 更新数据
     updateBatchData(index, data2) {
@@ -1042,10 +1048,10 @@ export default {
     // 获取复选框属性 判断是否可以勾选
     getCheckboxProps(record) {
       return {
-        props: {
-          disabled: record.runMode === 'File',
-          name: record.name
-        }
+        // props: {
+        disabled: record.runMode === 'File',
+        name: record.name
+        // }
       }
     },
     // 分页、排序、筛选变化时触发

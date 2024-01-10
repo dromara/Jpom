@@ -44,6 +44,12 @@ public class AgentWorkspaceEnvVarService extends BaseOperService<WorkspaceEnvVar
         super(AgentConst.WORKSPACE_ENV_VAR);
     }
 
+    /**
+     * 获取指定工作空间的环境变量
+     *
+     * @param workspaceId 工作空间
+     * @return env
+     */
     public EnvironmentMapBuilder getEnv(String workspaceId) {
         WorkspaceEnvVarModel item = this.getItem(workspaceId);
         Map<String, EnvironmentMapBuilder.Item> objectMap = Optional.ofNullable(item)
@@ -51,8 +57,9 @@ public class AgentWorkspaceEnvVarService extends BaseOperService<WorkspaceEnvVar
             .map(map -> CollStreamUtil.toMap(map.values(), WorkspaceEnvVarModel.WorkspaceEnvVarItemModel::getName, workspaceEnvVarItemModel -> {
                 // 需要考虑兼容之前没有隐私变量字段，默认为隐私字段
                 Integer privacy = workspaceEnvVarItemModel.getPrivacy();
-                return new EnvironmentMapBuilder.Item(workspaceEnvVarItemModel.getName(), privacy == null || privacy == 1);
-            })).orElse(new HashMap<>(1));
+                return new EnvironmentMapBuilder.Item(workspaceEnvVarItemModel.getValue(), privacy == null || privacy == 1);
+            }))
+            .orElse(new HashMap<>(1));
         return EnvironmentMapBuilder.builder(objectMap);
     }
 }
