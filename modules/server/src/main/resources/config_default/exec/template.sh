@@ -23,7 +23,7 @@
 #
 
 # Mistakenly deleted !!!!!!!!!!!
-# Init script templates for local build, local publish, script template, ssh publish, ssh command template and other related functions
+# Init script templates for local build, local publish, script template and other related functions
 
 user="$(id -un 2>/dev/null || true)"
 
@@ -44,3 +44,5 @@ for element in "${userProfiles[@]}"; do
 		source "$element"
 	fi
 done
+
+# Do not delete the following content (leave at least one blank line)! ! ! ! !

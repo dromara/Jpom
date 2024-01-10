@@ -24,7 +24,6 @@ package org.dromara.jpom.controller.node.script;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Entity;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
@@ -37,12 +36,14 @@ import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.node.NodeScriptCacheModel;
+import org.dromara.jpom.model.node.ProjectInfoCacheModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.*;
 import org.dromara.jpom.service.node.script.NodeScriptExecuteLogServer;
 import org.dromara.jpom.service.node.script.NodeScriptServer;
 import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -74,18 +75,6 @@ public class NodeScriptController extends BaseServerController {
     }
 
     /**
-     * get script list
-     *
-     * @return json
-     * @author Hotstrip
-     */
-    @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<PageResultDto<NodeScriptCacheModel>> scriptList(HttpServletRequest request) {
-        PageResultDto<NodeScriptCacheModel> pageResultDto = nodeScriptServer.listPageNode(request);
-        return JsonMessage.success("success", pageResultDto);
-    }
-
-    /**
      * load node script list
      * 加载节点脚本列表
      *
@@ -99,10 +88,32 @@ public class NodeScriptController extends BaseServerController {
     }
 
 
+    private void checkProjectPermission(String id, HttpServletRequest request, NodeModel node) {
+        if (StrUtil.isEmpty(id)) {
+            return;
+        }
+        String workspaceId = nodeScriptServer.getCheckUserWorkspace(request);
+        String fullId = ProjectInfoCacheModel.fullId(workspaceId, node.getId(), id);
+        boolean exists = nodeScriptServer.exists(fullId);
+        if (!exists) {
+            // 判断全局脚本
+            NodeScriptCacheModel nodeScriptCacheModel = new NodeScriptCacheModel();
+            nodeScriptCacheModel.setScriptId(id);
+            nodeScriptCacheModel.setWorkspaceId(ServerConst.WORKSPACE_GLOBAL);
+            exists = nodeScriptServer.exists(nodeScriptCacheModel);
+            if (exists) {
+                return;
+            }
+        }
+        Assert.state(exists, "没有对应的数据或者没有此数据权限");
+    }
+
     @GetMapping(value = "item.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String item(HttpServletRequest request) {
-        return NodeForward.request(getNode(), request, NodeUrl.Script_Item).toString();
+    public IJsonMessage<Object> item(HttpServletRequest request, String id) {
+        NodeModel node = getNode();
+        this.checkProjectPermission(id, request, node);
+        return NodeForward.request(node, request, NodeUrl.Script_Item);
     }
 
     /**
@@ -112,8 +123,9 @@ public class NodeScriptController extends BaseServerController {
      */
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<Object> save(String autoExecCron, HttpServletRequest request) {
+    public IJsonMessage<Object> save(String id, String autoExecCron, HttpServletRequest request) {
         NodeModel node = getNode();
+        this.checkProjectPermission(id, request, node);
         this.checkCron(autoExecCron);
         JsonMessage<Object> jsonMessage = NodeForward.request(node, request, NodeUrl.Script_Save, new String[]{}, "nodeId", node.getId());
         if (jsonMessage.success()) {
@@ -126,6 +138,7 @@ public class NodeScriptController extends BaseServerController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<Object> del(@ValidatorItem String id, HttpServletRequest request) {
         NodeModel node = getNode();
+        this.checkProjectPermission(id, request, node);
         JsonMessage<Object> requestData = NodeForward.request(node, request, NodeUrl.Script_Del);
         if (requestData.success()) {
             nodeScriptServer.syncNode(node);
@@ -148,21 +161,6 @@ public class NodeScriptController extends BaseServerController {
         int cache = nodeScriptServer.delCache(node.getId(), request);
         String msg = nodeScriptServer.syncExecuteNode(node);
         return JsonMessage.success("主动清除 " + cache + StrUtil.SPACE + msg);
-    }
-
-    /**
-     * 删除节点缓存的所有脚本模版
-     *
-     * @return json
-     */
-    @GetMapping(value = "clear_all", produces = MediaType.APPLICATION_JSON_VALUE)
-    @SystemPermission(superUser = true)
-    @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<Object> clearAll() {
-        Entity where = Entity.create();
-        where.set("id", " <> id");
-        int del = nodeScriptServer.del(where);
-        return JsonMessage.success("成功删除" + del + "条脚本模版缓存");
     }
 
     /**
@@ -200,12 +198,12 @@ public class NodeScriptController extends BaseServerController {
         } else {
             updateInfo = item;
         }
-        Map<String, String> map = this.getBuildToken(updateInfo);
+        Map<String, String> map = this.getBuildToken(updateInfo, request);
         return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
-    private Map<String, String> getBuildToken(NodeScriptCacheModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
+    private Map<String, String> getBuildToken(NodeScriptCacheModel item, HttpServletRequest request) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
         String url = ServerOpenApi.NODE_SCRIPT_TRIGGER_URL.
             replace("{id}", item.getId()).
             replace("{token}", item.getTriggerToken());

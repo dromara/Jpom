@@ -5,7 +5,7 @@
     :visible="visible"
     @close="
       () => {
-        $emit('close');
+        $emit('close')
       }
     "
   >
@@ -14,35 +14,39 @@
         <span v-if="status">
           当前状态：
           <a-tooltip :title="`当前状态：${statusMap[status]} ${statusMsg ? '状态消息：' + statusMsg : ''} `">
-            <a-tag :color="statusColor[status]" style="margin-right: 0"> {{ statusMap[status] || "未知状态" }}</a-tag>
+            <a-tag :color="statusColor[status]" style="margin-right: 0"> {{ statusMap[status] || '未知状态' }}</a-tag>
           </a-tooltip>
         </span>
         <span>
           构建ID：
           <a-tag>{{ temp && temp.buildId }}</a-tag>
         </span>
-        <a-button type="primary" icon="download" :disabled="!logId" size="small" @click="handleDownload"> 下载 </a-button>
+        <a-button type="primary" :disabled="!logId" size="small" @click="handleDownload"
+          ><DownloadOutlined />
+          下载
+        </a-button>
         |
       </a-space>
     </template>
   </log-view>
 </template>
-<script>
-import LogView from "@/components/logView";
 
-import { loadBuildLog, downloadBuildLog, statusColor, statusMap } from "@/api/build-info";
+<script>
+import LogView from '@/components/logView'
+
+import { loadBuildLog, downloadBuildLog, statusColor, statusMap } from '@/api/build-info'
 export default {
   components: {
-    LogView,
+    LogView
   },
   props: {
     temp: {
-      type: Object,
+      type: Object
     },
     visible: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   data() {
     return {
@@ -51,66 +55,66 @@ export default {
       logTimer: null,
       // logText: "loading...",
       line: 1,
-      logId: "",
+      logId: '',
       status: null,
-      statusMsg: "",
-    };
+      statusMsg: ''
+    }
   },
-  beforeDestroy() {
-    this.logTimer && clearTimeout(this.logTimer);
+  beforeUnmount() {
+    this.logTimer && clearTimeout(this.logTimer)
   },
   created() {},
   mounted() {
-    this.pullLog();
+    this.pullLog()
   },
   methods: {
     nextPull() {
       if (this.logTimer) {
-        clearTimeout(this.logTimer);
+        clearTimeout(this.logTimer)
       }
       // 加载构建日志
       this.logTimer = setTimeout(() => {
-        this.pullLog();
-      }, 2000);
+        this.pullLog()
+      }, 2000)
     },
     // 加载日志内容
     pullLog() {
       const params = {
         id: this.temp.id,
         buildId: this.temp.buildId,
-        line: this.line,
-      };
+        line: this.line
+      }
       loadBuildLog(params).then((res) => {
-        let next = true;
+        let next = true
         if (res.code === 200) {
           // 停止请求
           if (res.data.run === false) {
-            clearInterval(this.logTimer);
-            next = false;
+            clearInterval(this.logTimer)
+            next = false
           }
-          this.$refs.logView.appendLine(res.data.dataLines);
-          this.line = res.data.line;
-          this.logId = res.data.logId;
-          this.status = res.data.status;
-          this.statusMsg = res.data.statusMsg;
+          this.$refs.logView.appendLine(res.data.dataLines)
+          this.line = res.data.line
+          this.logId = res.data.logId
+          this.status = res.data.status
+          this.statusMsg = res.data.statusMsg
         } else if (res.code !== 201) {
           // 201 是当前构建且没有日志
-          this.$notification.warn({
-            message: res.msg,
-          });
-          clearInterval(this.logTimer);
-          next = false;
-          this.$refs.logView.appendLine(res.msg);
+          $notification.warn({
+            message: res.msg
+          })
+          clearInterval(this.logTimer)
+          next = false
+          this.$refs.logView.appendLine(res.msg)
         }
         // 继续拉取日志
-        if (next) this.nextPull();
-      });
+        if (next) this.nextPull()
+      })
     },
     // 下载构建日志
     handleDownload() {
-      window.open(downloadBuildLog(this.logId), "_blank");
-    },
+      window.open(downloadBuildLog(this.logId), '_blank')
+    }
   },
-};
+  emits: ['close']
+}
 </script>
-<style scoped></style>

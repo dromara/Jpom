@@ -32,10 +32,13 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.commander.CommandOpResult;
+import org.dromara.jpom.common.commander.ProjectCommander;
+import org.dromara.jpom.configuration.ProjectLogConfig;
+import org.dromara.jpom.model.RunMode;
+import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
-import org.dromara.jpom.service.manage.ConsoleService;
 import org.dromara.jpom.service.manage.ProjectInfoService;
-import org.dromara.jpom.system.AgentConfig;
+import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.util.FileSearchUtil;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,16 +62,17 @@ import java.nio.charset.Charset;
 public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 
     private static ProjectInfoService projectInfoService;
-    private static ConsoleService consoleService;
-    private static AgentConfig.ProjectConfig.LogConfig logConfig;
+    private static ProjectLogConfig logConfig;
+    private static ProjectCommander projectCommander;
 
     @Autowired
     public void init(ProjectInfoService projectInfoService,
-                     ConsoleService consoleService,
-                     AgentConfig agentConfig) {
+                     AgentConfig agentConfig,
+                     ProjectCommander projectCommander) {
         AgentWebSocketConsoleHandle.projectInfoService = projectInfoService;
-        AgentWebSocketConsoleHandle.consoleService = consoleService;
         AgentWebSocketConsoleHandle.logConfig = agentConfig.getProject().getLog();
+        AgentWebSocketConsoleHandle.projectCommander = projectCommander;
+        setAgentAuthorize(agentConfig.getAuthorize());
     }
 
     @OnOpen
@@ -139,6 +143,14 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         if (nodeProjectInfoModel == null) {
             return;
         }
+        // DSL
+        RunMode runMode = nodeProjectInfoModel.getRunMode();
+        if (runMode == RunMode.Dsl) {
+            // 判断是否可以执行 reload 事件
+            DslYmlDto dslYmlDto = nodeProjectInfoModel.mustDslConfig();
+            boolean b = dslYmlDto.hasRunProcess(ConsoleCommandOp.reload.name());
+            json.put("canReload", b);
+        }
         runMsg(consoleCommandOp, session, nodeProjectInfoModel, json);
     }
 
@@ -153,28 +165,20 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             switch (consoleCommandOp) {
                 case start:
                 case restart:
+                case stop:
+                case reload:
                     logUser = true;
-                    strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel);
+                    strResult = projectCommander.execCommand(consoleCommandOp, nodeProjectInfoModel);
                     if (strResult.isSuccess()) {
                         resultData = new JsonMessage<>(200, "操作成功", strResult);
                     } else {
                         resultData = new JsonMessage<>(400, strResult.msgStr());
                     }
                     break;
-                case stop: {
-                    logUser = true;
-                    // 停止项目
-                    strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel);
-                    if (strResult.isSuccess()) {
-                        resultData = new JsonMessage<>(200, "操作成功", strResult);
-                    } else {
-                        resultData = new JsonMessage<>(400, strResult.msgStr());
-                    }
-                    break;
-                }
+
                 case status: {
                     // 获取项目状态
-                    strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel);
+                    strResult = projectCommander.execCommand(consoleCommandOp, nodeProjectInfoModel);
                     if (strResult.isSuccess()) {
                         resultData = new JsonMessage<>(200, "运行中", strResult);
                     } else {
@@ -204,17 +208,16 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         } finally {
             if (logUser) {
                 // 记录操作人
-                NodeProjectInfoModel newNodeProjectInfoModel = projectInfoService.getItem(nodeProjectInfoModel.getId());
+                NodeProjectInfoModel update = new NodeProjectInfoModel();
                 String name = getOptUserName(session);
-                newNodeProjectInfoModel.setModifyUser(name);
-                projectInfoService.updateItem(newNodeProjectInfoModel);
+                update.setModifyUser(name);
+                projectInfoService.updateById(update, nodeProjectInfoModel.getId());
             }
         }
         // 返回数据
         if (resultData != null) {
             reqJson.putAll(resultData.toJson());
             reqJson.put(Const.SOCKET_MSG_TAG, Const.SOCKET_MSG_TAG);
-            log.info(reqJson.toString());
             SocketSessionUtil.send(session, reqJson.toString());
         }
     }
@@ -242,7 +245,8 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
     private JsonMessage<Object> searchLog(Session session, NodeProjectInfoModel nodeProjectInfoModel, JSONObject reqJson) {
         //
         String fileName = reqJson.getString("logFile");
-        File file = FileUtil.file(nodeProjectInfoModel.allLib(), fileName);
+        File libFile = projectInfoService.resolveLibFile(nodeProjectInfoModel);
+        File file = FileUtil.file(libFile, fileName);
         if (!FileUtil.isFile(file)) {
             return new JsonMessage<>(404, "文件不存在");
         }
@@ -281,9 +285,10 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         String fileName = reqJson.getString("fileName");
         File file;
         if (StrUtil.isEmpty(fileName)) {
-            file = new File(nodeProjectInfoModel.getLog());
+            file = projectInfoService.resolveAbsoluteLogFile(nodeProjectInfoModel);
         } else {
-            file = FileUtil.file(nodeProjectInfoModel.allLib(), fileName);
+            File libFile = projectInfoService.resolveLibFile(nodeProjectInfoModel);
+            file = FileUtil.file(libFile, fileName);
         }
         try {
             Charset charset = logConfig.getFileCharset();
@@ -299,8 +304,8 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 
     @Override
     @OnClose
-    public void onClose(Session session) {
-        super.onClose(session);
+    public void onClose(Session session, CloseReason closeReason) {
+        super.onClose(session, closeReason);
         AgentFileTailWatcher.offline(session);
     }
 

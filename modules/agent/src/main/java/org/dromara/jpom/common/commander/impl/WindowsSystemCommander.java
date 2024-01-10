@@ -22,9 +22,11 @@
  */
 package org.dromara.jpom.common.commander.impl;
 
-import cn.hutool.core.util.StrUtil;
 import org.dromara.jpom.common.commander.AbstractSystemCommander;
+import org.dromara.jpom.common.commander.Commander;
 import org.dromara.jpom.util.CommandUtil;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 
@@ -34,6 +36,8 @@ import java.io.File;
  * @author bwcx_jzy
  * @since 2019/4/16
  */
+@Conditional(Commander.Windows.class)
+@Service
 public class WindowsSystemCommander extends AbstractSystemCommander {
 
     @Override
@@ -42,23 +46,23 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
     }
 
 
-    @Override
-    public boolean getServiceStatus(String serviceName) {
-        String result = CommandUtil.execSystemCommand("sc query " + serviceName);
-        return StrUtil.containsIgnoreCase(result, "RUNNING");
-    }
-
-    @Override
-    public String startService(String serviceName) {
-        String format = StrUtil.format("net start {}", serviceName);
-        return CommandUtil.execSystemCommand(format);
-    }
-
-    @Override
-    public String stopService(String serviceName) {
-        String format = StrUtil.format("net stop {}", serviceName);
-        return CommandUtil.execSystemCommand(format);
-    }
+//    @Override
+//    public boolean getServiceStatus(String serviceName) {
+//        String result = CommandUtil.execSystemCommand("sc query " + serviceName);
+//        return StrUtil.containsIgnoreCase(result, "RUNNING");
+//    }
+//
+//    @Override
+//    public String startService(String serviceName) {
+//        String format = StrUtil.format("net start {}", serviceName);
+//        return CommandUtil.execSystemCommand(format);
+//    }
+//
+//    @Override
+//    public String stopService(String serviceName) {
+//        String format = StrUtil.format("net stop {}", serviceName);
+//        return CommandUtil.execSystemCommand(format);
+//    }
 
     @Override
     public String buildKill(int pid) {

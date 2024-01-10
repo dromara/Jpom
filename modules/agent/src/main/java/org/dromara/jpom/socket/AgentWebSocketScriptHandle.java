@@ -26,6 +26,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.model.data.NodeScriptModel;
 import org.dromara.jpom.script.NodeScriptProcessBuilder;
 import org.dromara.jpom.service.script.NodeScriptServer;
@@ -51,8 +52,9 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
     private static NodeScriptServer nodeScriptServer;
 
     @Autowired
-    public void init(NodeScriptServer nodeScriptServer) {
+    public void init(NodeScriptServer nodeScriptServer, AgentConfig agentConfig) {
         AgentWebSocketScriptHandle.nodeScriptServer = nodeScriptServer;
+        setAgentAuthorize(agentConfig.getAuthorize());
     }
 
     @OnOpen
@@ -137,8 +139,8 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
 
     @Override
     @OnClose
-    public void onClose(Session session) {
-        super.onClose(session);
+    public void onClose(Session session, CloseReason closeReason) {
+        super.onClose(session, closeReason);
         NodeScriptProcessBuilder.stopWatcher(session);
     }
 

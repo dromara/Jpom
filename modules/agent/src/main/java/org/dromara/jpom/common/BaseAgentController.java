@@ -28,12 +28,12 @@ import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.service.manage.ProjectInfoService;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Objects;
 
 /**
  * agent 端
@@ -42,6 +42,7 @@ import java.util.Objects;
  * @since 2019/4/17
  */
 public abstract class BaseAgentController extends BaseJpomController {
+
     @Resource
     protected ProjectInfoService projectInfoService;
 
@@ -83,8 +84,9 @@ public abstract class BaseAgentController extends BaseJpomController {
      * @return NodeProjectInfoModel
      */
     protected NodeProjectInfoModel getProjectInfoModel() {
-        NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
-        Objects.requireNonNull(nodeProjectInfoModel, "获取项目信息失败");
+        String id = getParameter("id");
+        NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel(id);
+        Assert.notNull(nodeProjectInfoModel, "获取项目信息失败:" + id);
         return nodeProjectInfoModel;
     }
 
@@ -95,7 +97,7 @@ public abstract class BaseAgentController extends BaseJpomController {
      */
     protected NodeProjectInfoModel getProjectInfoModel(String id) {
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel(id);
-        Objects.requireNonNull(nodeProjectInfoModel, "获取项目信息失败");
+        Assert.notNull(nodeProjectInfoModel, "获取项目信息失败:" + id);
         return nodeProjectInfoModel;
     }
 
@@ -105,10 +107,9 @@ public abstract class BaseAgentController extends BaseJpomController {
     }
 
     protected NodeProjectInfoModel tryGetProjectInfoModel(String id) {
-        NodeProjectInfoModel nodeProjectInfoModel = null;
         if (StrUtil.isNotEmpty(id)) {
-            nodeProjectInfoModel = projectInfoService.getItem(id);
+            return projectInfoService.getItem(id);
         }
-        return nodeProjectInfoModel;
+        return null;
     }
 }

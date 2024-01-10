@@ -107,6 +107,11 @@ jpom:
   fileStorage:
     # 文件中心存储路径
     save-pah:
+    scan-static-dir-cron: 0 0/1 * * *
+    # 是否开启静态文件目录监听
+    watch-monitor-static-dir: true
+    # 监听静态文件目录层级
+    watch-monitor-max-depth: 5
   assets:
     ssh:
       monitor-cron: 0 0/1 * * * ?

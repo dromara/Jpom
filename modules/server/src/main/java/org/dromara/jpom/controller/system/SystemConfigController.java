@@ -186,7 +186,7 @@ public class SystemConfigController extends BaseServerController {
 
 
     /**
-     * 加载服务端的 ip 白名单配置
+     * 加载服务端的 ip 授权配置
      *
      * @return json
      */

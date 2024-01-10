@@ -12,7 +12,7 @@ trim_trailing_whitespace = true
 insert_final_newline = true
 max_line_length = 200
 
-[*.{json, yml}]
+[*.{json,yml}]
 indent_style = space
 indent_size = 2
 
@@ -20,7 +20,7 @@ indent_size = 2
 insert_final_newline = false
 trim_trailing_whitespace = false
 
-[*.vue]
+[*.{vue,js,ts}]
 indent_style = space
 indent_size = 2
 

@@ -49,6 +49,7 @@ import org.dromara.jpom.service.monitor.MonitorService;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.dromara.jpom.service.user.UserService;
+import org.dromara.jpom.webhook.DefaultWebhookPluginImpl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -118,7 +119,7 @@ public class MonitorItem implements Task {
             String context;
             try {
                 //查询项目运行状态
-                JsonMessage<JSONObject> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", id, "getCopy", true);
+                JsonMessage<JSONObject> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", id);
                 if (jsonMessage.success()) {
                     JSONObject jsonObject = jsonMessage.getData();
                     int pid = jsonObject.getIntValue("pId");
@@ -195,7 +196,7 @@ public class MonitorItem implements Task {
             if (monitorModel.autoRestart()) {
                 // 执行重启
                 try {
-                    JsonMessage<String> reJson = NodeForward.request(nodeModel, NodeUrl.Manage_Restart, "id", id);
+                    JsonMessage<String> reJson = NodeForward.request(nodeModel, NodeUrl.Manage_Operate, "id", id, "opt", "restart");
                     if (reJson.success()) {
                         // 重启成功
                         runStatus = true;
@@ -272,6 +273,7 @@ public class MonitorItem implements Task {
         }
         IPlugin plugin = PluginFactory.getPlugin("webhook");
         Map<String, Object> map = new HashMap<>(10);
+        map.put("JPOM_WEBHOOK_EVENT", DefaultWebhookPluginImpl.WebhookEvent.MONITOR);
         map.put("monitorId", monitorModel.getId());
         map.put("monitorName", monitorModel.getName());
         map.put("nodeId", monitorNotifyLog.getNodeId());

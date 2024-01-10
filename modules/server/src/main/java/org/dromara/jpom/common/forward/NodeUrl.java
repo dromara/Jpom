@@ -91,11 +91,7 @@ public enum NodeUrl {
 
     Manage_GetProjectStatus("/manage/getProjectStatus"),
 
-    Manage_Restart("/manage/restart"),
-
-    Manage_Start("/manage/start"),
-
-    Manage_Stop("/manage/stop"),
+    Manage_Operate("/manage/operate"),
 
     Manage_GetProjectPort("/manage/getProjectPort"),
 
@@ -145,10 +141,11 @@ public enum NodeUrl {
 
     Manage_Log_logBack("/manage/log/logBack"),
 
-    Manage_Log_export("/manage/log/export.html", true),
+    Manage_Log_export("/manage/log/export", true),
 
 
     Script_List("/script/list.json"),
+    Script_ChangeWorkspaceId("/script/change-workspace-id"),
     SCRIPT_PULL_EXEC_LOG("/script/pull_exec_log"),
     SCRIPT_DEL_EXEC_LOG("/script/del_exec_log"),
     Script_Item("/script/item.json"),

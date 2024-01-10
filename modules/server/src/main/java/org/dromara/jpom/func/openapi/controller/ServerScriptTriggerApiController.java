@@ -84,7 +84,7 @@ public class ServerScriptTriggerApiController extends BaseJpomController {
      * @return json
      */
     @RequestMapping(value = ServerOpenApi.SERVER_SCRIPT_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token) {
+    public IJsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token, HttpServletRequest request) {
         ScriptModel item = scriptServer.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
@@ -96,7 +96,7 @@ public class ServerScriptTriggerApiController extends BaseJpomController {
         try {
             BaseServerController.resetInfo(userModel);
             // 解析参数
-            Map<String, String> paramMap = ServletUtil.getParamMap(getRequest());
+            Map<String, String> paramMap = ServletUtil.getParamMap(request);
             Map<String, String> newParamMap = new HashMap<>(10);
             for (Map.Entry<String, String> entry : paramMap.entrySet()) {
                 String key = StrUtil.format("trigger_{}", entry.getKey());

@@ -1,20 +1,60 @@
 <template>
-  <div class="full-content">
+  <div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id" :row-selection="rowSelection">
-      <template slot="title">
+    <a-table
+      :data-source="list"
+      size="middle"
+      :columns="columns"
+      @change="changePage"
+      :pagination="pagination"
+      bordered
+      rowKey="id"
+      :row-selection="rowSelection"
+      :scroll="{
+        x: 'max-content'
+      }"
+    >
+      <template v-slot:title>
         <a-space>
-          <a-input v-model="listQuery['id']" placeholder="脚本ID" @pressEnter="loadData" allowClear class="search-input-item" />
-          <a-input v-model="listQuery['%name%']" placeholder="名称" @pressEnter="loadData" allowClear class="search-input-item" />
-          <a-input v-model="listQuery['%description%']" placeholder="描述" @pressEnter="loadData" class="search-input-item" />
-          <a-input v-model="listQuery['%autoExecCron%']" placeholder="定时执行" @pressEnter="loadData" class="search-input-item" />
+          <a-input
+            v-model:value="listQuery['id']"
+            placeholder="脚本ID"
+            @pressEnter="loadData"
+            allowClear
+            class="search-input-item"
+          />
+          <a-input
+            v-model:value="listQuery['%name%']"
+            placeholder="名称"
+            @pressEnter="loadData"
+            allowClear
+            class="search-input-item"
+          />
+          <a-input
+            v-model:value="listQuery['%description%']"
+            placeholder="描述"
+            @pressEnter="loadData"
+            class="search-input-item"
+          />
+          <a-input
+            v-model:value="listQuery['%autoExecCron%']"
+            placeholder="定时执行"
+            @pressEnter="loadData"
+            class="search-input-item"
+          />
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="createScript">新建脚本</a-button>
-          <a-button type="primary" v-if="mode === 'manage'" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
+          <a-button
+            type="primary"
+            v-if="mode === 'manage'"
+            :disabled="!tableSelections || !tableSelections.length"
+            @click="syncToWorkspaceShow"
+            >工作空间同步</a-button
+          >
           <a-tooltip>
-            <template slot="title">
+            <template v-slot:title>
               <div>脚本模版是存储在服务端中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
 
               <div>
@@ -25,137 +65,197 @@
                 </ul>
               </div>
             </template>
-            <a-icon type="question-circle" theme="filled" />
+            <QuestionCircleOutlined />
           </a-tooltip>
         </a-space>
       </template>
+      <template #bodyCell="{ column, text, record }">
+        <template v-if="column.dataIndex === 'nodeId'">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ nodeMap[text] }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.tooltip">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'workspaceId'">
+          <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
+          <a-tag v-else>工作空间</a-tag>
+        </template>
+        <template v-else-if="column.dataIndex === 'operation'">
+          <a-space>
+            <template v-if="mode === 'manage'">
+              <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+              <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
+              <a-dropdown>
+                <a @click="(e) => e.preventDefault()">
+                  更多
+                  <DownOutlined />
+                </a>
+                <template v-slot:overlay>
+                  <a-menu>
+                    <a-menu-item>
+                      <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+                    </a-menu-item>
 
-      <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ nodeMap[text] }}</span>
-      </a-tooltip>
-      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <template slot="global" slot-scope="text">
-        <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
-        <a-tag v-else>工作空间</a-tag>
-      </template>
-      <template slot="operation" slot-scope="text, record">
-        <a-space>
-          <template v-if="mode === 'manage'">
-            <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
-            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-            <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
-            <a-dropdown>
-              <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-                更多
-                <a-icon type="down" />
-              </a>
-              <a-menu slot="overlay">
-                <a-menu-item>
-                  <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
-                </a-menu-item>
-
-                <a-menu-item>
-                  <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
-                </a-menu-item>
-                <a-menu-item>
-                  <a-button size="small" type="danger" :disabled="!record.nodeIds" @click="handleUnbind(record)">解绑</a-button>
-                </a-menu-item>
-              </a-menu>
-            </a-dropdown>
-          </template>
-          <template v-else>
-            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-          </template>
-        </a-space>
+                    <a-menu-item>
+                      <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-button
+                        size="small"
+                        type="primary"
+                        danger
+                        :disabled="!record.nodeIds"
+                        @click="handleUnbind(record)"
+                        >解绑</a-button
+                      >
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </template>
+            <template v-else>
+              <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+            </template>
+          </a-space>
+        </template>
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal :zIndex="1009" destroyOnClose v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="80vw">
-      <a-form-model ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
-        <a-form-model-item v-if="temp.id" label="ScriptId" prop="id">
-          <a-input v-model="temp.id" disabled readOnly />
-        </a-form-model-item>
-        <a-form-model-item label="Script 名称" prop="name">
-          <a-input :maxLength="50" v-model="temp.name" placeholder="名称" />
-        </a-form-model-item>
-        <a-form-model-item label="Script 内容" prop="context">
-          <div style="height: 40vh; overflow-y: scroll">
-            <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
-          </div>
-        </a-form-model-item>
-        <!-- <a-form-model-item label="默认参数" prop="defArgs">
-          <a-input v-model="temp.defArgs" placeholder="默认参数" />
-        </a-form-model-item> -->
-        <a-form-model-item label="默认参数">
-          <div v-for="(item, index) in commandParams" :key="item.key">
-            <a-row type="flex" justify="center" align="middle">
+    <a-modal
+      destroyOnClose
+      :zIndex="1009"
+      v-model:open="editScriptVisible"
+      title="编辑 Script"
+      @ok="handleEditScriptOk"
+      :maskClosable="false"
+      width="80vw"
+      :confirmLoading="confirmLoading"
+    >
+      <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
+        <a-form-item v-if="temp.id" label="ScriptId" name="id">
+          <a-input v-model:value="temp.id" disabled readOnly />
+        </a-form-item>
+        <a-form-item label="Script 名称" name="name">
+          <a-input :maxLength="50" v-model:value="temp.name" placeholder="名称" />
+        </a-form-item>
+        <a-form-item label="Script 内容" name="context">
+          <a-form-item-rest>
+            <div style="height: 40vh; overflow-y: scroll">
+              <code-editor v-model:content="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }">
+              </code-editor>
+            </div>
+          </a-form-item-rest>
+        </a-form-item>
+        <!-- <a-form-item label="默认参数" name="defArgs">
+            <a-input v-model="temp.defArgs" placeholder="默认参数" />
+          </a-form-item> -->
+        <a-form-item label="默认参数">
+          <a-space direction="vertical" style="width: 100%">
+            <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
-                <a-input :addon-before="`参数${index + 1}描述`" v-model="item.desc" placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义" />
-                <a-input :addon-before="`参数${index + 1}值`" v-model="item.value" placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值" />
+                <a-space direction="vertical" style="width: 100%">
+                  <a-input
+                    :addon-before="`参数${index + 1}描述`"
+                    v-model:value="item.desc"
+                    placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义" />
+                  <a-input
+                    :addon-before="`参数${index + 1}值`"
+                    v-model:value="item.value"
+                    placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值"
+                /></a-space>
               </a-col>
               <a-col :span="2">
                 <a-row type="flex" justify="center" align="middle">
                   <a-col>
-                    <a-icon @click="() => commandParams.splice(index, 1)" type="minus-circle" style="color: #ff0000" />
+                    <MinusCircleOutlined @click="() => commandParams.splice(index, 1)" style="color: #ff0000" />
                   </a-col>
                 </a-row>
               </a-col>
             </a-row>
             <a-divider style="margin: 5px 0" />
-          </div>
+          </a-space>
 
           <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
-        </a-form-model-item>
-        <a-form-model-item label="定时执行" prop="autoExecCron">
-          <a-auto-complete v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
-            <template slot="dataSource">
-              <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
-                <span slot="label">
-                  {{ group.title }}
-                </span>
-                <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value"> {{ opt.title }} {{ opt.value }} </a-select-option>
-              </a-select-opt-group>
-            </template>
+        </a-form-item>
+        <a-form-item label="定时执行" name="autoExecCron">
+          <a-auto-complete
+            v-model:value="temp.autoExecCron"
+            placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
+            :options="CRON_DATA_SOURCE"
+          >
+            <template #option="item"> {{ item.title }} {{ item.value }} </template>
           </a-auto-complete>
-        </a-form-model-item>
-        <a-form-model-item label="描述" prop="description">
-          <a-input v-model="temp.description" :maxLength="200" type="textarea" :rows="3" style="resize: none" placeholder="详细描述" />
-        </a-form-model-item>
-        <a-form-model-item label="共享" prop="global">
-          <a-radio-group v-model="temp.global">
+        </a-form-item>
+        <a-form-item label="描述" name="description">
+          <a-textarea
+            v-model:value="temp.description"
+            :maxLength="200"
+            :rows="3"
+            style="resize: none"
+            placeholder="详细描述"
+          />
+        </a-form-item>
+        <a-form-item label="共享" name="global">
+          <a-radio-group v-model:value="temp.global">
             <a-radio :value="true"> 全局</a-radio>
             <a-radio :value="false"> 当前工作空间</a-radio>
           </a-radio-group>
-        </a-form-model-item>
-        <a-form-model-item v-if="temp.prohibitSync" label="禁用分发节点">
-          <a-tag v-for="(item, index) in temp.nodeList" :key="index">节点名称：{{ item.nodeName }} 工作空间：{{ item.workspaceName }}</a-tag>
-        </a-form-model-item>
-        <a-form-model-item v-else>
-          <template slot="label">
-            分发节点
-            <a-tooltip v-show="!temp.id">
-              <template slot="title"> 分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本中 </template>
-              <a-icon type="question-circle" theme="filled" />
+        </a-form-item>
+        <a-form-item v-if="temp.prohibitSync" label="禁用分发节点">
+          <template #help>需要到原始工作空间中去控制节点分发</template>
+          <a-tag v-for="(item, index) in temp.nodeList" :key="index"
+            >节点名称：{{ item.nodeName }} 工作空间：{{ item.workspaceName }}</a-tag
+          >
+        </a-form-item>
+        <a-form-item v-else>
+          <template v-slot:label>
+            <a-tooltip>
+              分发节点
+              <template v-slot:title> 分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本中 </template>
+              <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
-          <a-select show-search option-filter-prop="children" placeholder="请选择分发到的节点" mode="multiple" v-model="temp.chooseNode">
+          <a-select
+            show-search
+            option-filter-prop="children"
+            placeholder="请选择分发到的节点"
+            mode="multiple"
+            v-model:value="temp.chooseNode"
+          >
             <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
               {{ item.name }}
             </a-select-option>
           </a-select>
-        </a-form-model-item>
-      </a-form-model>
+        </a-form-item>
+      </a-form>
     </a-modal>
     <!-- 脚本控制台组件 -->
-    <a-drawer destroyOnClose :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
+    <a-drawer
+      destroyOnClose
+      :title="drawerTitle"
+      placement="right"
+      width="85vw"
+      :open="drawerConsoleVisible"
+      @close="onConsoleClose"
+    >
       <script-console v-if="drawerConsoleVisible" :defArgs="temp.defArgs" :id="temp.id" />
     </a-drawer>
     <!-- 同步到其他工作空间 -->
-    <a-modal destroyOnClose v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
-      <a-alert message="温馨提示" type="warning">
-        <template slot="description">
+    <a-modal
+      destroyOnClose
+      :confirmLoading="confirmLoading"
+      v-model:open="syncToWorkspaceVisible"
+      title="同步到其他工作空间"
+      @ok="handleSyncToWorkspace"
+      :maskClosable="false"
+    >
+      <a-alert message="温馨提示" type="warning" show-icon>
+        <template v-slot:description>
           <ul>
             <li>同步机制采用<b>脚本名称</b>确定是同一个脚本</li>
             <li>当目标工作空间不存在对应的 脚本 时候将自动创建一个新的 脚本</li>
@@ -163,95 +263,85 @@
           </ul>
         </template>
       </a-alert>
-      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-        <a-form-model-item> </a-form-model-item>
-        <a-form-model-item label="选择工作空间" prop="workspaceId">
-          <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
-            <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
+      <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+        <a-form-item> </a-form-item>
+        <a-form-item label="选择工作空间" name="workspaceId">
+          <a-select
+            show-search
+            option-filter-prop="children"
+            v-model:value="temp.workspaceId"
+            placeholder="请选择工作空间"
+          >
+            <a-select-option :disabled="getWorkspaceId() === item.id" v-for="item in workspaceList" :key="item.id">{{
+              item.name
+            }}</a-select-option>
           </a-select>
-        </a-form-model-item>
-      </a-form-model>
+        </a-form-item>
+      </a-form>
     </a-modal>
     <!-- 触发器 -->
-    <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
-      <a-form-model ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+    <a-modal
+      destroyOnClose
+      v-model:open="triggerVisible"
+      title="触发器"
+      width="50%"
+      :footer="null"
+      :maskClosable="false"
+    >
+      <a-form ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
-          <template slot="tabBarExtraContent">
+          <template v-slot:rightExtra>
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>
           </template>
           <a-tab-pane key="1" tab="执行">
-            <a-space style="display: block" direction="vertical" align="baseline">
+            <a-space direction="vertical" style="width: 100%">
               <a-alert message="温馨提示" type="warning">
-                <template slot="description">
+                <template v-slot:description>
                   <ul>
                     <li>单个触发器地址中：第一个随机字符串为脚本ID，第二个随机字符串为 token</li>
-                    <li>重置为重新生成触发地址,重置成功后之前的触发器地址将失效,触发器绑定到生成触发器到操作人上,如果将对应的账号删除触发器将失效</li>
+                    <li>
+                      重置为重新生成触发地址,重置成功后之前的触发器地址将失效,触发器绑定到生成触发器到操作人上,如果将对应的账号删除触发器将失效
+                    </li>
                     <li>批量触发参数 BODY json： [ { "id":"1", "token":"a" } ]</li>
                   </ul>
                 </template>
               </a-alert>
-              <a-alert
-                v-clipboard:copy="temp.triggerUrl"
-                v-clipboard:success="
-                  () => {
-                    tempVue.prototype.$notification.success({ message: '复制成功' });
-                  }
-                "
-                v-clipboard:error="
-                  () => {
-                    tempVue.prototype.$notification.error({ message: '复制失败' });
-                  }
-                "
-                type="info"
-                :message="`单个触发器地址(点击可以复制)`"
-              >
-                <template slot="description">
-                  <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
-                  <a-icon type="copy" />
+              <a-alert type="info" :message="`单个触发器地址(点击可以复制)`">
+                <template v-slot:description>
+                  <a-typography-paragraph :copyable="{ text: temp.triggerUrl }">
+                    <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
+                  </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert
-                v-clipboard:copy="temp.batchTriggerUrl"
-                v-clipboard:success="
-                  () => {
-                    tempVue.prototype.$notification.success({ message: '复制成功' });
-                  }
-                "
-                v-clipboard:error="
-                  () => {
-                    tempVue.prototype.$notification.error({ message: '复制失败' });
-                  }
-                "
-                type="info"
-                :message="`批量触发器地址(点击可以复制)`"
-              >
-                <template slot="description">
-                  <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
-                  <a-icon type="copy" />
+              <a-alert type="info" :message="`批量触发器地址(点击可以复制)`">
+                <template v-slot:description>
+                  <a-typography-paragraph :copyable="{ text: temp.batchTriggerUrl }">
+                    <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
+                  </a-typography-paragraph>
                 </template>
               </a-alert>
             </a-space>
           </a-tab-pane>
         </a-tabs>
-      </a-form-model>
+      </a-form>
     </a-modal>
     <!-- 脚本日志 -->
     <a-drawer
       destroyOnClose
       title="脚本执行历史"
-      width="50vw"
-      :visible="drawerLogVisible"
+      width="70vw"
+      :open="drawerLogVisible"
       @close="
         () => {
-          this.drawerLogVisible = false;
+          this.drawerLogVisible = false
         }
       "
     >
       <script-log v-if="drawerLogVisible" :scriptId="temp.id" />
     </a-drawer>
-    <div style="padding-top: 50px" v-if="mode === 'choose'">
+    <!-- <div style="padding-top: 50px" v-if="mode === 'choose'">
       <div
         :style="{
           position: 'absolute',
@@ -262,14 +352,14 @@
           padding: '10px 16px',
           background: '#fff',
           textAlign: 'right',
-          zIndex: 1,
+          zIndex: 1
         }"
       >
         <a-space>
           <a-button
             @click="
               () => {
-                this.$emit('cancel');
+                this.$emit('cancel')
               }
             "
           >
@@ -278,85 +368,162 @@
           <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
         </a-space>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
+
 <script>
-import { deleteScript, editScript, getScriptList, syncToWorkspace, unbindScript, getTriggerUrl, getScriptItem } from "@/api/server-script";
-import codeEditor from "@/components/codeEditor";
-import { getNodeListAll } from "@/api/node";
-import ScriptConsole from "@/pages/script/script-console";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
-import { mapGetters } from "vuex";
-import { getWorkSpaceListAll } from "@/api/workspace";
-import Vue from "vue";
-import ScriptLog from "@/pages/script/script-log";
+import {
+  deleteScript,
+  editScript,
+  getScriptList,
+  syncToWorkspace,
+  unbindScript,
+  getTriggerUrl,
+  getScriptItem
+} from '@/api/server-script'
+import codeEditor from '@/components/codeEditor'
+import { getNodeListAll } from '@/api/node'
+import ScriptConsole from '@/pages/script/script-console'
+import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
+
+import { getWorkSpaceListAll } from '@/api/workspace'
+
+import ScriptLog from '@/pages/script/script-log'
+import { mapState } from 'pinia'
+import { useAppStore } from '@/stores/app'
 export default {
   components: {
     ScriptConsole,
     codeEditor,
-    ScriptLog,
+    ScriptLog
   },
   props: {
     choose: {
       type: String,
-      default: "checkbox",
+      default: 'checkbox'
       // "radio" ,"checkbox"
     },
     mode: {
       // choose、manage
       type: String,
-      default: "manage",
+      default: 'manage'
     },
     chooseVal: {
       type: String,
-      default: "",
-    },
+      default: ''
+    }
   },
   data() {
     return {
       // choose: this.choose,
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-      cronDataSource: CRON_DATA_SOURCE,
+      CRON_DATA_SOURCE,
       list: [],
       temp: {},
       nodeList: [],
       editScriptVisible: false,
-      drawerTitle: "",
+      drawerTitle: '',
       drawerConsoleVisible: false,
       columns: [
-        { title: "id", dataIndex: "id", ellipsis: true, sorter: true, width: 150, scopedSlots: { customRender: "tooltip" } },
-        { title: "名称", dataIndex: "name", ellipsis: true, sorter: true, width: 150, scopedSlots: { customRender: "tooltip" } },
-        { title: "共享", dataIndex: "workspaceId", sorter: true, ellipsis: true, scopedSlots: { customRender: "global" }, width: "90px" },
-        { title: "描述", dataIndex: "description", ellipsis: true, width: 300, scopedSlots: { customRender: "tooltip" } },
-        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, sorter: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
         {
-          title: "修改时间",
-          dataIndex: "modifyTimeMillis",
-          sorter: true,
-          width: "170px",
+          title: 'id',
+          dataIndex: 'id',
           ellipsis: true,
-          customRender: (text) => parseTime(text),
+          sorter: true,
+          width: 50,
+          tooltip: true
         },
         {
-          title: "创建时间",
-          dataIndex: "createTimeMillis",
-          sorter: true,
-          width: "170px",
+          title: '名称',
+          dataIndex: 'name',
           ellipsis: true,
-          customRender: (text) => parseTime(text),
+          sorter: true,
+          width: 150,
+          tooltip: true
         },
-        { title: "创建人", dataIndex: "createUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
-        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "tooltip" }, width: "120px" },
-        { title: "最后执行人", dataIndex: "lastRunUser", ellipsis: true, width: "120px", scopedSlots: { customRender: "tooltip" } },
-        this.mode === "manage"
-          ? { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "240px" }
-          : { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, fixed: "right", width: "100px" },
+        {
+          title: '共享',
+          dataIndex: 'workspaceId',
+          sorter: true,
+          ellipsis: true,
+
+          width: '90px'
+        },
+        {
+          title: '描述',
+          dataIndex: 'description',
+          ellipsis: true,
+          width: 100,
+          tooltip: true
+        },
+        {
+          title: '定时执行',
+          dataIndex: 'autoExecCron',
+          ellipsis: true,
+          sorter: true,
+          width: '100px',
+          tooltip: true
+        },
+        {
+          title: '修改时间',
+          dataIndex: 'modifyTimeMillis',
+          sorter: true,
+          width: '170px',
+          ellipsis: true,
+          customRender: ({ text }) => parseTime(text)
+        },
+        {
+          title: '创建时间',
+          dataIndex: 'createTimeMillis',
+          sorter: true,
+          width: '170px',
+          ellipsis: true,
+          customRender: ({ text }) => parseTime(text)
+        },
+        {
+          title: '创建人',
+          dataIndex: 'createUser',
+          ellipsis: true,
+          tooltip: true,
+          width: '120px'
+        },
+        {
+          title: '修改人',
+          dataIndex: 'modifyUser',
+          ellipsis: true,
+          tooltip: true,
+          width: '120px'
+        },
+        {
+          title: '最后执行人',
+          dataIndex: 'lastRunUser',
+          ellipsis: true,
+          width: '120px',
+          tooltip: true
+        },
+        this.mode === 'manage'
+          ? {
+              title: '操作',
+              dataIndex: 'operation',
+              align: 'center',
+
+              fixed: 'right',
+              width: '240px'
+            }
+          : {
+              title: '操作',
+              dataIndex: 'operation',
+              align: 'center',
+
+              fixed: 'right',
+              width: '100px'
+            }
       ],
       rules: {
-        name: [{ required: true, message: "请输入脚本名称", trigger: "blur" }],
-        context: [{ required: true, message: "请输入脚本内容", trigger: "blur" }],
+        name: [{ required: true, message: '请输入脚本名称', trigger: 'blur' }],
+        context: [{ required: true, message: '请输入脚本内容', trigger: 'blur' }]
       },
       tableSelections: [],
       syncToWorkspaceVisible: false,
@@ -364,34 +531,38 @@ export default {
       triggerVisible: false,
       commandParams: [],
       drawerLogVisible: false,
-    };
+      confirmLoading: false
+    }
   },
   computed: {
-    ...mapGetters(["getWorkspaceId"]),
+    ...mapState(useAppStore, ['getWorkspaceId']),
     pagination() {
-      return COMPUTED_PAGINATION(this.listQuery);
+      return COMPUTED_PAGINATION(this.listQuery)
     },
     rowSelection() {
       return {
         onChange: (selectedRowKeys) => {
-          this.tableSelections = selectedRowKeys;
+          this.tableSelections = selectedRowKeys
         },
         selectedRowKeys: this.tableSelections,
-        type: this.choose,
-      };
-    },
+        type: this.choose
+      }
+    }
   },
   watch: {
     chooseVal: {
+      deep: true,
+
       handler(v) {
         if (v) {
-          this.tableSelections = v.split(",");
+          this.tableSelections = v.split(',')
         } else {
-          this.tableSelections = [];
+          this.tableSelections = []
         }
       },
-      immediate: true,
-    },
+
+      immediate: true
+    }
   },
   created() {
     // this.columns.push(
@@ -400,260 +571,281 @@ export default {
   mounted() {
     // this.calcTableHeight();
 
-    this.loadData();
+    this.loadData()
   },
   methods: {
     // 加载数据
     loadData(pointerEvent) {
-      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
-      this.loading = true;
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
+      this.loading = true
       getScriptList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data.result;
-          this.listQuery.total = res.data.total;
+          this.list = res.data.result
+          this.listQuery.total = res.data.total
         }
-        this.loading = false;
-      });
+        this.loading = false
+      })
     },
     parseTime,
     // 获取所有节点
     getAllNodeList() {
       getNodeListAll().then((res) => {
-        this.nodeList = res.data || [];
-      });
+        this.nodeList = res.data || []
+      })
     },
     createScript() {
-      this.temp = {};
-      this.commandParams = [];
-      this.editScriptVisible = true;
-      this.getAllNodeList();
+      this.temp = {}
+      this.commandParams = []
+      this.editScriptVisible = true
+      this.getAllNodeList()
     },
     // 修改
     handleEdit(record) {
       getScriptItem({
-        id: record.id,
+        id: record.id
       }).then((res) => {
         if (res.code === 200) {
-          const data = res.data.data;
-          this.temp = Object.assign({}, data);
+          const data = res.data.data
+          this.temp = Object.assign({}, data)
 
-          this.commandParams = data?.defArgs ? JSON.parse(data.defArgs) : [];
+          this.commandParams = data?.defArgs ? JSON.parse(data.defArgs) : []
 
           this.temp = {
             ...this.temp,
             prohibitSync: res.data.prohibitSync,
             nodeList: res.data.nodeList,
-            chooseNode: data?.nodeIds ? data.nodeIds.split(",") : [],
-            global: data.workspaceId === "GLOBAL",
-            workspaceId: "",
-          };
-          this.editScriptVisible = true;
-          this.getAllNodeList();
+            chooseNode: data?.nodeIds ? data.nodeIds.split(',') : [],
+            global: data.workspaceId === 'GLOBAL',
+            workspaceId: ''
+          }
+          this.editScriptVisible = true
+          this.getAllNodeList()
         }
-      });
+      })
     },
     // 提交 Script 数据
     handleEditScriptOk() {
       // 检验表单
-      this.$refs["editScriptForm"].validate((valid) => {
-        if (!valid) {
-          return false;
-        }
+      this.$refs['editScriptForm'].validate().then(() => {
         if (this.commandParams && this.commandParams.length > 0) {
           for (let i = 0; i < this.commandParams.length; i++) {
             if (!this.commandParams[i].desc) {
-              this.$notification.error({
-                message: "请填写第" + (i + 1) + "个参数的描述",
-              });
-              return false;
+              $notification.error({
+                message: '请填写第' + (i + 1) + '个参数的描述'
+              })
+              return false
             }
           }
-          this.temp.defArgs = JSON.stringify(this.commandParams);
+          this.temp.defArgs = JSON.stringify(this.commandParams)
         } else {
-          this.temp.defArgs = "";
+          this.temp.defArgs = ''
         }
         // 提交数据
-        this.temp.nodeIds = this.temp?.chooseNode?.join(",");
-        delete this.temp.nodeList;
-        editScript(this.temp).then((res) => {
-          if (res.code === 200) {
-            // 成功
-            this.$notification.success({
-              message: res.msg,
-            });
+        this.temp.nodeIds = this.temp?.chooseNode?.join(',')
+        delete this.temp.nodeList
+        this.confirmLoading = true
+        editScript(this.temp)
+          .then((res) => {
+            if (res.code === 200) {
+              // 成功
+              $notification.success({
+                message: res.msg
+              })
 
-            this.editScriptVisible = false;
-            this.loadData();
-            this.$refs["editScriptForm"].resetFields();
-          }
-        });
-      });
+              this.editScriptVisible = false
+              this.loadData()
+              this.$refs['editScriptForm'].resetFields()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
+      })
     },
     handleDelete(record) {
+      const that = this
       this.$confirm({
-        title: "系统提示",
-        content: "真的要删除脚本么？",
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          // 组装参数
-          const params = {
-            id: record.id,
-          };
-          // 删除
-          deleteScript(params).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.loadData();
+        title: '系统提示',
+        content: '真的要删除脚本么？',
+        zIndex: 1009,
+        okText: '确认',
+        cancelText: '取消',
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 组装参数
+            const params = {
+              id: record.id
             }
-          });
-        },
-      });
+            // 删除
+            deleteScript(params)
+              .then((res) => {
+                if (res.code === 200) {
+                  $notification.success({
+                    message: res.msg
+                  })
+                  that.loadData()
+                }
+
+                resolve()
+              })
+              .catch(reject)
+          })
+        }
+      })
     },
     // 执行 Script
     handleExec(record) {
-      this.temp = Object.assign(record);
-      this.drawerTitle = `控制台(${this.temp.name})`;
-      this.drawerConsoleVisible = true;
+      this.temp = Object.assign(record)
+      this.drawerTitle = `控制台(${this.temp.name})`
+      this.drawerConsoleVisible = true
     },
     // 关闭 console
     onConsoleClose() {
-      this.drawerConsoleVisible = false;
+      this.drawerConsoleVisible = false
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
-      this.loadData();
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
+      this.loadData()
     },
     // 解绑
     handleUnbind(record) {
       const html =
         "<b style='font-size: 20px;'>真的要解绑脚本关联的节点么？</b>" +
         "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
-        "<li>解绑不会真实请求节点删除脚本信息</b></li>" +
-        "<li>一般用于服务器无法连接且已经确定不再使用</li>" +
-        "<li>如果误操作会产生冗余数据！！！</li>" +
-        " </ul>";
-
-      const h = this.$createElement;
+        '<li>解绑不会真实请求节点删除脚本信息</b></li>' +
+        '<li>一般用于服务器无法连接且已经确定不再使用</li>' +
+        '<li>如果误操作会产生冗余数据！！！</li>' +
+        ' </ul>'
+      const that = this
       this.$confirm({
-        title: "危险操作！！！",
-        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
-        okButtonProps: { props: { type: "danger", size: "small" } },
-        cancelButtonProps: { props: { type: "primary" } },
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          // 解绑
-          unbindScript({
-            id: record.id,
-          }).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.loadData();
-            }
-          });
-        },
-      });
+        title: '危险操作！！！',
+        zIndex: 1009,
+        content: h('div', null, [h('p', { innerHTML: html }, null)]),
+        okButtonProps: { type: 'primary', danger: true, size: 'small' },
+        cancelButtonProps: { type: 'primary' },
+        okText: '确认',
+        cancelText: '取消',
+        async onOk() {
+          return await new Promise((resolve, reject) => {
+            // 解绑
+            unbindScript({
+              id: record.id
+            })
+              .then((res) => {
+                if (res.code === 200) {
+                  $notification.success({
+                    message: res.msg
+                  })
+                  that.loadData()
+                }
+
+                resolve()
+              })
+              .catch(reject)
+          })
+        }
+      })
     },
     // 加载工作空间数据
     loadWorkSpaceListAll() {
       getWorkSpaceListAll().then((res) => {
         if (res.code === 200) {
-          this.workspaceList = res.data;
+          this.workspaceList = res.data
         }
-      });
+      })
     },
     // 同步到其他工作情况
     syncToWorkspaceShow() {
-      this.syncToWorkspaceVisible = true;
-      this.loadWorkSpaceListAll();
+      this.syncToWorkspaceVisible = true
+      this.loadWorkSpaceListAll()
       this.temp = {
-        workspaceId: undefined,
-      };
+        workspaceId: undefined
+      }
     },
     //
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
-        this.$notification.warn({
-          message: "请选择工作空间",
-        });
-        return false;
+        $notification.warn({
+          message: '请选择工作空间'
+        })
+        return false
       }
       // 同步
+      this.confirmLoading = true
       syncToWorkspace({
-        ids: this.tableSelections.join(","),
-        toWorkspaceId: this.temp.workspaceId,
-      }).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg,
-          });
-          this.tableSelections = [];
-          this.syncToWorkspaceVisible = false;
-          return false;
-        }
-      });
+        ids: this.tableSelections.join(','),
+        toWorkspaceId: this.temp.workspaceId
+      })
+        .then((res) => {
+          if (res.code === 200) {
+            $notification.success({
+              message: res.msg
+            })
+            this.tableSelections = []
+            this.syncToWorkspaceVisible = false
+            return false
+          }
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
     },
     // 触发器
     handleTrigger(record) {
-      this.temp = Object.assign({}, record);
-      this.tempVue = Vue;
+      this.temp = Object.assign({}, record)
+
       getTriggerUrl({
-        id: record.id,
+        id: record.id
       }).then((res) => {
         if (res.code === 200) {
-          this.fillTriggerResult(res);
-          this.triggerVisible = true;
+          this.fillTriggerResult(res)
+          this.triggerVisible = true
         }
-      });
+      })
     },
     // 重置触发器
     resetTrigger() {
       getTriggerUrl({
         id: this.temp.id,
-        rest: "rest",
+        rest: 'rest'
       }).then((res) => {
         if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg,
-          });
-          this.fillTriggerResult(res);
+          $notification.success({
+            message: res.msg
+          })
+          this.fillTriggerResult(res)
         }
-      });
+      })
     },
     fillTriggerResult(res) {
-      this.temp.triggerUrl = `${location.protocol}//${location.host}${res.data.triggerUrl}`;
-      this.temp.batchTriggerUrl = `${location.protocol}//${location.host}${res.data.batchTriggerUrl}`;
+      this.temp.triggerUrl = `${location.protocol}//${location.host}${res.data.triggerUrl}`
+      this.temp.batchTriggerUrl = `${location.protocol}//${location.host}${res.data.batchTriggerUrl}`
 
-      this.temp = { ...this.temp };
+      this.temp = { ...this.temp }
     },
     handleLog(record) {
-      this.temp = Object.assign({}, record);
+      this.temp = Object.assign({}, record)
 
-      this.drawerLogVisible = true;
+      this.drawerLogVisible = true
     },
     handerConfirm() {
       if (!this.tableSelections.length) {
-        this.$notification.warning({
-          message: "请选择要使用的脚本",
-        });
-        return;
+        $notification.warning({
+          message: '请选择要使用的脚本'
+        })
+        return
       }
-      if (this.choose === "checkbox") {
-        this.$emit("confirm", this.tableSelections.join(","));
+      if (this.choose === 'checkbox') {
+        this.$emit('confirm', this.tableSelections.join(','))
       } else {
         const selectData = this.list.filter((item) => {
-          return item.id === this.tableSelections[0];
-        })[0];
-        this.$emit("confirm", `${selectData.id}`);
+          return item.id === this.tableSelections[0]
+        })[0]
+        this.$emit('confirm', `${selectData.id}`)
       }
-    },
+    }
   },
-};
+  emits: ['cancel', 'confirm']
+}
 </script>
-<style scoped></style>

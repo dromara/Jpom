@@ -86,9 +86,9 @@ public class LogManageController extends BaseServerController {
     @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> logData(String nodeId,
-                                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
+                                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path, HttpServletRequest request) {
         if (StrUtil.isNotEmpty(nodeId)) {
-            return NodeForward.request(getNode(), getRequest(), NodeUrl.DelSystemLog);
+            return NodeForward.request(getNode(), request, NodeUrl.DelSystemLog);
         }
         File file = FileUtil.file(LogbackConfig.getPath(), path);
         // 判断修改时间

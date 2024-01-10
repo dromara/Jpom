@@ -305,8 +305,8 @@ public class CertificateInfoController extends BaseServerController {
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> edit(@ValidatorItem String id,
-                                    String description,
-                                    HttpServletRequest request) throws IOException {
+                                     String description,
+                                     HttpServletRequest request) throws IOException {
         // 验证权限
         certificateInfoService.getByKeyAndGlobal(id, request);
 
@@ -345,18 +345,18 @@ public class CertificateInfoController extends BaseServerController {
     @PostMapping(value = "deploy", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> addTask(@ValidatorItem String id,
-                                       @ValidatorItem String name,
-                                       @ValidatorItem(value = ValidatorRule.NUMBERS) int taskType,
-                                       @ValidatorItem String taskDataIds,
-                                       @ValidatorItem String releasePathParent,
-                                       @ValidatorItem String releasePathSecondary,
-                                       String beforeScript,
-                                       String afterScript,
-                                       HttpServletRequest request) {
+                                        @ValidatorItem String name,
+                                        @ValidatorItem(value = ValidatorRule.NUMBERS) int taskType,
+                                        @ValidatorItem String taskDataIds,
+                                        @ValidatorItem String releasePathParent,
+                                        @ValidatorItem String releasePathSecondary,
+                                        String beforeScript,
+                                        String afterScript,
+                                        HttpServletRequest request) {
         // 判断参数
         ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(request);
-        List<String> whitelistServerOutGiving = configDeNewInstance.outGiving();
-        Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, releasePathParent), "请选择正确的项目路径,或者还没有配置白名单");
+        List<String> whitelistServerOutGiving = configDeNewInstance.getOutGiving();
+        Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, releasePathParent), "请选择正确的项目路径,或者还没有配置授权");
         Assert.hasText(releasePathSecondary, "请填写发布文件的二级目录");
         // 判断证书是否存在
         CertificateInfoModel model = certificateInfoService.getByKeyAndGlobal(id, request);
@@ -376,7 +376,7 @@ public class CertificateInfoController extends BaseServerController {
             // 创建发布任务
             Map<String, String> env = new HashMap<>();
             env.put("CERT_SERIAL_NUMBER_STR", model.getSerialNumberStr());
-            return fileReleaseTaskService.addTask(fileId, name, taskType, taskDataIds, releasePath, beforeScript, afterScript, env, request);
+            return fileReleaseTaskService.addTask(fileId, 1, name, taskType, taskDataIds, releasePath, beforeScript, afterScript, env, request);
         } finally {
             FileUtil.del(tempSave);
         }

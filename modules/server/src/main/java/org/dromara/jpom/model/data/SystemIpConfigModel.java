@@ -33,7 +33,7 @@ public class SystemIpConfigModel extends BaseJsonModel {
 	public static final String ID = "IP_CONFIG";
 
 	/**
-	 * ip 白名单  允许访问
+	 * ip 授权  允许访问
 	 */
 	private String allowed;
 

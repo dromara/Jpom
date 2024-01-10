@@ -35,7 +35,7 @@ import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.interceptor.NotLogin;
 import org.dromara.jpom.model.data.CommandModel;
 import org.dromara.jpom.model.user.UserModel;
-import org.dromara.jpom.service.node.ssh.CommandService;
+import org.dromara.jpom.service.node.ssh.SshCommandService;
 import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -59,12 +59,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SshCommandTriggerApiController extends BaseJpomController {
 
-    private final CommandService commandService;
+    private final SshCommandService sshCommandService;
     private final TriggerTokenLogServer triggerTokenLogServer;
 
-    public SshCommandTriggerApiController(CommandService commandService,
+    public SshCommandTriggerApiController(SshCommandService sshCommandService,
                                           TriggerTokenLogServer triggerTokenLogServer) {
-        this.commandService = commandService;
+        this.sshCommandService = sshCommandService;
         this.triggerTokenLogServer = triggerTokenLogServer;
     }
 
@@ -77,19 +77,19 @@ public class SshCommandTriggerApiController extends BaseJpomController {
      */
     @RequestMapping(value = ServerOpenApi.SSH_COMMAND_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token) {
-        CommandModel item = commandService.getByKey(id);
+        CommandModel item = sshCommandService.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
         //
         Assert.hasText(item.getSshIds(), "当前脚本未绑定 SSH 节点，不能使用触发器执行");
-        UserModel userModel = triggerTokenLogServer.getUserByToken(token, commandService.typeName());
+        UserModel userModel = triggerTokenLogServer.getUserByToken(token, sshCommandService.typeName());
         //
         Assert.notNull(userModel, "触发token错误,或者已经失效:-1");
 
         String batchId;
         try {
             BaseServerController.resetInfo(userModel);
-            batchId = commandService.executeBatch(item, item.getDefParams(), item.getSshIds(), 2);
+            batchId = sshCommandService.executeBatch(item, item.getDefParams(), item.getSshIds(), 2);
         } catch (Exception e) {
             log.error("触发自动执行SSH命令模版异常", e);
             return new JsonMessage<>(500, "执行异常：" + e.getMessage());
@@ -130,12 +130,12 @@ public class SshCommandTriggerApiController extends BaseJpomController {
                 JSONObject jsonObject = (JSONObject) o;
                 String id = jsonObject.getString("id");
                 String token = jsonObject.getString("token");
-                CommandModel item = commandService.getByKey(id);
+                CommandModel item = sshCommandService.getByKey(id);
                 if (item == null) {
                     jsonObject.put("msg", "没有对应数据");
                     return;
                 }
-                UserModel userModel = triggerTokenLogServer.getUserByToken(token, commandService.typeName());
+                UserModel userModel = triggerTokenLogServer.getUserByToken(token, sshCommandService.typeName());
                 if (userModel == null) {
                     jsonObject.put("msg", "对应的用户不存在,触发器已失效");
                     return;
@@ -148,7 +148,7 @@ public class SshCommandTriggerApiController extends BaseJpomController {
                 BaseServerController.resetInfo(userModel);
                 String batchId = null;
                 try {
-                    batchId = commandService.executeBatch(item, item.getDefParams(), item.getSshIds(), 2);
+                    batchId = sshCommandService.executeBatch(item, item.getDefParams(), item.getSshIds(), 2);
                 } catch (Exception e) {
                     log.error("触发自动执行命令模版异常", e);
                     jsonObject.put("msg", "执行异常：" + e.getMessage());

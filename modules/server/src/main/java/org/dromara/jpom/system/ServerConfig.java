@@ -24,15 +24,17 @@ package org.dromara.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.configuration.*;
 import org.dromara.jpom.model.AgentFileModel;
 import org.dromara.jpom.model.user.UserModel;
+import org.dromara.jpom.util.BaseFileTailWatcher;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -44,12 +46,17 @@ import java.util.Optional;
  * @author bwcx_jzy
  * @since 2022/12/17
  */
-@EqualsAndHashCode(callSuper = true)
 @Configuration
 @ConfigurationProperties("jpom")
-@EnableConfigurationProperties({ClusterConfig.class, SystemConfig.class, NodeConfig.class, UserConfig.class, FileStorageConfig.class, WebConfig.class})
+@EnableConfigurationProperties({
+    ClusterConfig.class,
+    SystemConfig.class,
+    NodeConfig.class,
+    UserConfig.class,
+    FileStorageConfig.class,
+    WebConfig.class})
 @Data
-public class ServerConfig extends BaseExtConfig implements InitializingBean {
+public class ServerConfig implements InitializingBean {
 
     private final JpomApplication configBean;
 
@@ -57,6 +64,15 @@ public class ServerConfig extends BaseExtConfig implements InitializingBean {
         this.configBean = configBean;
     }
 
+    /**
+     * 数据目录
+     */
+    private String path;
+
+    /**
+     * 初始读取日志文件行号
+     */
+    private Integer initReadLine = 10;
     /**
      * 集群 配置信息
      */
@@ -80,7 +96,7 @@ public class ServerConfig extends BaseExtConfig implements InitializingBean {
     /**
      * 文件中心配置
      */
-    private FileStorageConfig fileStorage;
+    private FileStorageConfig fileStorage = new FileStorageConfig();
 
     public SystemConfig getSystem() {
         return Optional.ofNullable(this.system).orElseGet(() -> {
@@ -181,6 +197,10 @@ public class ServerConfig extends BaseExtConfig implements InitializingBean {
         if (!Validator.isGeneral(clusterId1, 1, 20)) {
             throw new JpomRuntimeException("请配置正确的集群Id,【jpom.clusterId】");
         }
+
+        int initReadLine = ObjectUtil.defaultIfNull(this.initReadLine, 10);
+        BaseFileTailWatcher.setInitReadLine(initReadLine);
+        ExtConfigBean.setPath(path);
     }
 
 
@@ -190,9 +210,6 @@ public class ServerConfig extends BaseExtConfig implements InitializingBean {
      * @return path
      */
     public File fileStorageSavePath() {
-        if (fileStorage == null) {
-            fileStorage = new FileStorageConfig();
-        }
         String savePah = fileStorage.getSavePah();
         if (StrUtil.isEmpty(savePah)) {
             String dataPath = configBean.getDataPath();

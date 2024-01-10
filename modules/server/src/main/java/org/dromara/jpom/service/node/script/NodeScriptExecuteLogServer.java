@@ -33,6 +33,8 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.exception.AgentException;
+import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.model.BaseDbModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
@@ -41,7 +43,6 @@ import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.h2db.BaseNodeService;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.system.WorkspaceService;
-import org.dromara.jpom.system.AgentException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -91,7 +92,11 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<NodeScriptExecut
             }
         }
         return jsonArray;
+    }
 
+    @Override
+    public List<NodeScriptExecuteLogCacheModel> lonelyDataArray(MachineNodeModel machineNodeModel) {
+        throw new IllegalStateException("不支持的模式，script log");
     }
 
     @Override
@@ -118,7 +123,8 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<NodeScriptExecut
                 return null;
             }
             //
-            List<NodeScriptExecuteLogCacheModel> models = jsonArray.toJavaList(this.tClass).stream()
+            List<NodeScriptExecuteLogCacheModel> models = jsonArray.toJavaList(this.tClass)
+                .stream()
                 .filter(item -> {
                     if (StrUtil.equals(item.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL)) {
                         return true;
@@ -139,7 +145,7 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<NodeScriptExecut
             //
             models.forEach(NodeScriptExecuteLogServer.super::upsert);
             String format = StrUtil.format(
-                "{} 节点拉取到 {} 个执行记录,更新 {} 个执行记录",
+                "{} 物理节点拉取到 {} 个执行记录,更新 {} 个执行记录",
                 nodeModelName, CollUtil.size(jsonArray),
                 CollUtil.size(models));
             log.debug(format);

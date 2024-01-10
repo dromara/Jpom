@@ -32,7 +32,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * 白名单
+ * 授权
  *
  * @author bwcx_jzy
  * @since 2019/4/16
@@ -49,7 +49,7 @@ public class WhitelistDirectoryService {
     }
 
     /**
-     * 获取项目路径白名单
+     * 获取项目路径授权
      *
      * @param model 实体
      * @return project

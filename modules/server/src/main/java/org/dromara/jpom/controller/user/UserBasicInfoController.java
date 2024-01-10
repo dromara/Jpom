@@ -30,6 +30,9 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
+import cn.hutool.db.sql.Direction;
+import cn.hutool.db.sql.Order;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
@@ -47,11 +50,11 @@ import org.dromara.jpom.func.user.server.UserLoginLogServer;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.MailAccountModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
+import org.dromara.jpom.model.log.BuildHistoryLog;
 import org.dromara.jpom.model.log.UserOperateLogV1;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.monitor.EmailUtil;
-import org.dromara.jpom.permission.Feature;
-import org.dromara.jpom.permission.MethodFeature;
+import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.dblog.DbUserOperateLogService;
 import org.dromara.jpom.service.system.SystemParametersServer;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
@@ -88,6 +91,7 @@ public class UserBasicInfoController extends BaseServerController {
     private final UserLoginLogServer userLoginLogServer;
     private final DbUserOperateLogService dbUserOperateLogService;
     private final ClusterInfoService clusterInfoService;
+    private final DbBuildHistoryLogService dbBuildHistoryLogService;
 
     public UserBasicInfoController(SystemParametersServer systemParametersServer,
                                    UserBindWorkspaceService userBindWorkspaceService,
@@ -95,7 +99,8 @@ public class UserBasicInfoController extends BaseServerController {
                                    ServerConfig serverConfig,
                                    UserLoginLogServer userLoginLogServer,
                                    DbUserOperateLogService dbUserOperateLogService,
-                                   ClusterInfoService clusterInfoService) {
+                                   ClusterInfoService clusterInfoService,
+                                   DbBuildHistoryLogService dbBuildHistoryLogService) {
         this.systemParametersServer = systemParametersServer;
         this.userBindWorkspaceService = userBindWorkspaceService;
         this.userService = userService;
@@ -103,6 +108,7 @@ public class UserBasicInfoController extends BaseServerController {
         this.userLoginLogServer = userLoginLogServer;
         this.dbUserOperateLogService = dbUserOperateLogService;
         this.clusterInfoService = clusterInfoService;
+        this.dbBuildHistoryLogService = dbBuildHistoryLogService;
     }
 
 
@@ -122,6 +128,8 @@ public class UserBasicInfoController extends BaseServerController {
         map.put("id", userModel.getId());
         map.put("name", userModel.getName());
         map.put("systemUser", userModel.isSystemUser());
+        map.put("superSystemUser", userModel.isSuperSystemUser());
+        map.put("demoUser", userModel.isDemoUser());
         map.put("email", userModel.getEmail());
         map.put("dingDing", userModel.getDingDing());
         map.put("workWx", userModel.getWorkWx());
@@ -295,7 +303,6 @@ public class UserBasicInfoController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "list-login-log-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<UserLoginLogModel>> listLoginLogData(HttpServletRequest request) {
         UserModel user = getUser();
         PageResultDto<UserLoginLogModel> pageResult = userLoginLogServer.listPageByUserId(request, user.getId());
@@ -308,11 +315,38 @@ public class UserBasicInfoController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "list-operate-log-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<UserOperateLogV1>> listOperateLogData(HttpServletRequest request) {
         UserModel user = getUser();
         PageResultDto<UserOperateLogV1> pageResult = dbUserOperateLogService.listPageByUserId(request, user.getId());
         return JsonMessage.success("", pageResult);
+    }
+
+    @RequestMapping(value = "recent-log-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<JSONObject> recentData(HttpServletRequest request) {
+        UserModel user = getUser();
+        JSONObject jsonObject = new JSONObject();
+        {
+            Entity entity = Entity.create();
+            entity.set("userId", user.getId());
+            List<UserOperateLogV1> operateLog = dbUserOperateLogService.queryList(entity, 10, new Order("createTimeMillis", Direction.DESC));
+            jsonObject.put("operateLog", operateLog);
+        }
+        {
+            Entity entity = Entity.create();
+            entity.set("modifyUser", user.getId());
+            List<UserLoginLogModel> loginLog = userLoginLogServer.queryList(entity, 10, new Order("createTimeMillis", Direction.DESC));
+
+            jsonObject.put("loginLog", loginLog);
+        }
+        {
+            String workspaceId = dbBuildHistoryLogService.getCheckUserWorkspace(request);
+            Entity entity = Entity.create();
+            entity.set("workspaceId", workspaceId);
+            entity.set("modifyUser", user.getId());
+            List<BuildHistoryLog> loginLog = dbBuildHistoryLogService.queryList(entity, 10, new Order("createTimeMillis", Direction.DESC));
+            jsonObject.put("buildLog", loginLog);
+        }
+        return JsonMessage.success("", jsonObject);
     }
 
     /**

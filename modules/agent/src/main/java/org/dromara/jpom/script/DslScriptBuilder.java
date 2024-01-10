@@ -28,36 +28,18 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
-import cn.hutool.core.lang.Opt;
-import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.net.url.UrlQuery;
-import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.IllegalArgument2Exception;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
-import org.dromara.jpom.model.data.DslYmlDto;
-import org.dromara.jpom.model.data.NodeProjectInfoModel;
-import org.dromara.jpom.model.data.NodeScriptModel;
-import org.dromara.jpom.service.script.NodeScriptServer;
-import org.dromara.jpom.service.system.AgentWorkspaceEnvVarService;
-import org.dromara.jpom.system.AgentConfig;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.util.CommandUtil;
-import org.dromara.jpom.util.FileUtils;
 
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
 
 /**
  * dsl 执行脚本
@@ -76,11 +58,11 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
     private boolean autoDelete;
     private EnvironmentMapBuilder environmentMapBuilder;
 
-    private DslScriptBuilder(String action,
-                             EnvironmentMapBuilder environmentMapBuilder,
-                             String args,
-                             String log,
-                             Charset charset) {
+    public DslScriptBuilder(String action,
+                            EnvironmentMapBuilder environmentMapBuilder,
+                            String args,
+                            String log,
+                            Charset charset) {
         super(FileUtil.file(log), charset);
         this.action = action;
         this.environmentMapBuilder = environmentMapBuilder;
@@ -139,10 +121,14 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 
     /**
      * 执行
+     * <p>
+     * 0 退出码
+     * 1 日志
      */
-    public List<String> syncExecute() {
+    public Tuple syncExecute() {
         ProcessBuilder processBuilder = this.init();
         List<String> result = new ArrayList<>();
+        int waitFor = -100;
         try {
             //
             process = processBuilder.start();
@@ -150,18 +136,17 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 
             IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> result.add(this.formatLine(line)));
             //
-            int waitFor = process.waitFor();
+            waitFor = process.waitFor();
             // 插入第一行
-            result.add(0, this.formatLine(StrUtil.format("执行结束: {}", waitFor)));
+            result.add(0, this.formatLine(StrUtil.format("本次执行退出码: {}", waitFor)));
             //
-            return result;
         } catch (Exception e) {
             log.error("执行异常", e);
             result.add(this.formatLine(StrUtil.format("执行异常：", e.getMessage())));
         } finally {
             this.close();
         }
-        return result;
+        return new Tuple(waitFor, result);
     }
 
     @Override
@@ -186,94 +171,5 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         }
     }
 
-    /**
-     * 异步执行
-     *
-     * @param scriptProcess 脚本流程
-     * @param log           日志
-     */
-    public static void run(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log, boolean sync) throws Exception {
-        DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, action, log);
-        Future<?> execute = ThreadUtil.execAsync(builder);
-        if (sync) {
-            execute.get();
-        }
-    }
 
-    /**
-     * 同步执行
-     *
-     * @param scriptProcess 脚本流程
-     */
-    public static List<String> syncRun(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action) {
-        try (DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, action, null)) {
-            return builder.syncExecute();
-        }
-    }
-
-    private static DslScriptBuilder create(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log) {
-        NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
-        AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
-        AgentConfig.ProjectConfig.LogConfig logConfig = agentConfig.getProject().getLog();
-        String scriptId = scriptProcess.getScriptId();
-        cn.hutool.core.lang.Assert.notBlank(scriptId, () -> new IllegalArgument2Exception("请填写脚本模板id"));
-
-        NodeScriptModel item = nodeScriptServer.getItem(scriptId);
-        EnvironmentMapBuilder environment = DslScriptBuilder.environment(nodeProjectInfoModel, scriptProcess);
-        File scriptFile;
-        boolean autoDelete = false;
-        if (item == null) {
-            scriptFile = FileUtil.file(nodeProjectInfoModel.allLib(), scriptId);
-            cn.hutool.core.lang.Assert.isTrue(FileUtil.isFile(scriptFile), () -> new IllegalArgument2Exception("脚本模版不存在:" + scriptProcess.getScriptId()));
-        } else {
-            scriptFile = DslScriptBuilder.initScriptFile(item);
-            // 系统生成的脚本需要自动删除
-            autoDelete = true;
-        }
-        DslScriptBuilder builder = new DslScriptBuilder(action, environment, scriptProcess.getScriptArgs(), log, logConfig.getFileCharset());
-        builder.setScriptFile(scriptFile);
-        builder.setAutoDelete(autoDelete);
-        return builder;
-    }
-
-    /**
-     * 创建脚本文件
-     *
-     * @param scriptModel 脚本对象
-     * @return file
-     */
-    private static File initScriptFile(NodeScriptModel scriptModel) {
-        String dataPath = JpomApplication.getInstance().getDataPath();
-        File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
-        // 替换内容
-        String context = scriptModel.getContext();
-        FileUtils.writeScript(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
-        return scriptFile;
-    }
-
-    private static EnvironmentMapBuilder environment(NodeProjectInfoModel nodeProjectInfoModel, DslYmlDto.BaseProcess scriptProcess) {
-        //
-        AgentWorkspaceEnvVarService workspaceService = SpringUtil.getBean(AgentWorkspaceEnvVarService.class);
-        EnvironmentMapBuilder environmentMapBuilder = workspaceService.getEnv(nodeProjectInfoModel.getWorkspaceId());
-        // 项目配置的环境变量
-        String dslEnv = nodeProjectInfoModel.getDslEnv();
-        Opt.ofBlankAble(dslEnv)
-            .map(s -> UrlQuery.of(s, CharsetUtil.CHARSET_UTF_8))
-            .map(UrlQuery::getQueryMap)
-            .map(map -> {
-                Map<String, String> map1 = MapUtil.newHashMap();
-                for (Map.Entry<CharSequence, CharSequence> entry : map.entrySet()) {
-                    map1.put(StrUtil.toString(entry.getKey()), StrUtil.toString(entry.getValue()));
-                }
-                return map1;
-            })
-            .ifPresent(environmentMapBuilder::putStr);
-        //
-        environmentMapBuilder
-            .putStr(scriptProcess.getScriptEnv())
-            .put("PROJECT_ID", nodeProjectInfoModel.getId())
-            .put("PROJECT_NAME", nodeProjectInfoModel.getName())
-            .put("PROJECT_PATH", nodeProjectInfoModel.allLib());
-        return environmentMapBuilder;
-    }
 }

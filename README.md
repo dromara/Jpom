@@ -6,6 +6,9 @@
 <p align="center">
 	<strong>🚀简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件</strong>
 </p>
+<p align="center">
+   <strong>更是一款原生 ops 软件</strong>
+</p>
 
 <p align="center">
 	<a target="_blank" href="https://gitee.com/dromara/Jpom">
@@ -26,13 +29,7 @@
     <a target="_blank" href="https://www.codacy.com/gh/dromara/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dromara/Jpom&amp;utm_campaign=Badge_Grade">
       <img src="https://app.codacy.com/project/badge/Grade/843b953f1446449c9a075e44ea778336" alt="codacy"/>
     </a>
-	<a target="_blank" href="https://jpom.top/pages/praise/join/">
-		<img src='https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4(%E8%AF%B7%E5%A4%87%E6%B3%A8%3AJpom)-jpom66-yellowgreen.svg' alt='jpom66 请备注jpom'/>
-	</a>
-</p>
-
-<p align="center">
-    <a target="_blank" href="https://jpom.top/pages/changelog/new/">
+  <a target="_blank" href="https://jpom.top/pages/changelog/new/">
 		<img src="https://img.shields.io/github/v/release/dromara/Jpom.svg" alt="docker pull"/>
     </a>
     <a target="_blank" href="https://hub.docker.com/repository/docker/jpomdocker/jpom">
@@ -68,7 +65,7 @@
 	3. 账号可以开启 **MFA 两步验证**提高账号安全性
 - 界面形式实时查看项目运行状态、控制台日志、管理项目文件
 	1. 在线修改项目文本文件
-- Docker 容器管理、Docker swarm 集群管理（**Docker ui**）
+- Docker 容器管理、Docker Swarm 集群管理（**Docker UI**）
 - **在线 SSH 终端**，让您在没有 Xshell、FinalShell 等软件也能轻松管理服务器
 	1. 登录 Jpom 系统后不需要知道服务器密码
 	2. 能指定 SSH 禁止执行的命令，避免执行高风险命令，并且能自动执行命令日志
@@ -88,7 +85,7 @@
 - 项目状态监控异常自动报警、自动尝试重启
 	1. 支持邮件 + 钉钉群 + 微信群通知，主动感知项目运行状况
 - 节点脚本模版+定时执行或者触发器，拓展更多功能
-- 重要路径白名单模式，杜绝用户误操作系统文件
+- 重要路径授权配置，杜绝用户误操作系统文件
 
 ### 🔔️ 特别提醒
 
@@ -379,6 +376,26 @@ docker-compose -f docker-compose.yml up
 2. 服务端示例：
    [`logback.xml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/config_default/logback.xml)
 
+## 📝 常见问题、操作说明
+
+- [文档主页](https://jpom.top/)
+- [FQA](https://jpom.top/pages/FQA/)
+- [名词解释](https://jpom.top/pages/FQA/proper-noun/)
+
+### 实践案例
+
+> 里面有部分图片加载可能比较慢
+
+1. [本地构建 + SSH 发布 java 项目](https://jpom.top/pages/practice/build-java-ssh-release/)
+2. [本地构建 + 项目发布 node 项目](https://jpom.top/pages/practice/build-node-release/)
+3. [本地构建 + SSH 发布 node 项目](https://jpom.top/pages/practice/build-node-ssh-release/)
+4. [本地构建 + 自定义管理 python 项目](https://jpom.top/pages/practice/project-dsl-python/)
+5. [自定义管理 java 项目](https://jpom.top/pages/practice/project-dsl-java/)
+6. [管理编译安装的 nginx](https://jpom.top/pages/practice/node-nginx/)
+7. [管理 docker](https://jpom.top/pages/practice/docker-cli/)
+8. [容器构建 + 项目发布 java 项目](https://jpom.top/pages/practice/build-docker-java-node-release/)
+9. [更新实践案例>>](https://jpom.top/pages/practice/)
+
 ## 构建案例仓库代码
 
 1. [Jboot 案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/jboot-test)
@@ -400,29 +417,36 @@ yarn --cwd xxxx/ build
 mvn -f xxxx/pom.xml clean package
 ```
 
-## 📝 常见问题、操作说明
-
-- [文档主页](https://jpom.top/)
-- [FQA](https://jpom.top/pages/FQA/)
-- [名词解释](https://jpom.top/pages/FQA/proper-noun/)
-
-### 实践案例
-
-> 里面有部分图片加载可能比较慢
-
-1. [本地构建 + SSH 发布 java 项目](https://jpom.top/pages/practice/build-java-ssh-release/)
-2. [本地构建 + 项目发布 node 项目](https://jpom.top/pages/practice/build-node-release/)
-3. [本地构建 + SSH 发布 node 项目](https://jpom.top/pages/practice/build-node-ssh-release/)
-4. [本地构建 + 自定义管理 python 项目](https://jpom.top/pages/practice/project-dsl-python/)
-5. [自定义管理 java 项目](https://jpom.top/pages/practice/project-dsl-java/)
-6. [管理编译安装的 nginx](https://jpom.top/pages/practice/node-nginx/)
-7. [管理 docker](https://jpom.top/pages/practice/docker-cli/)
-8. [容器构建 + 项目发布 java 项目](https://jpom.top/pages/practice/build-docker-java-node-release/)
-9. [更新实践案例>>](https://jpom.top/pages/practice/)
-
 ## 🛠️ 整体架构
 
 ![jpom-func-arch](https://jpom.top/images/jpom-func-arch.png)
+
+
+## 🐞 交流讨论 、反馈 BUG、提出建议等
+
+1. 快扫描下方左侧微信群二维码和我们一起交流讨论吧！（添加小助手：备注 Jpom 进群）
+2. 开源项目离不开社区的支持，如果项目帮助到了你，并且想给我们加个餐。
+   欢迎扫描下方[微信、支付宝收款码赞赏](https://jpom.top/images/praise-qrcorde.png)
+   或通过[码云赞赏](https://gitee.com/dromara/Jpom)
+   （在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom.top/pages/praise/publicity/)
+3. 购买开源周边商品：[周边介绍](https://jpom.top/pages/shop/)
+4. 企业技术服务请单独与我们联系沟通服务方案
+5. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
+6. 参与贡献，请查看[贡献指南](#贡献指南)。
+
+感谢所有赞赏以及参与贡献的小伙伴，你们的支持是我们不断更新前进的动力！
+
+![wx-qrcode-praise.png](https://jpom.top/images/praise-qrcorde.png)
+
+## 💖 周边商品
+
+为了更好地维持开源项目，我们决定推出周边商品。
+
+购买支持我们这样您既获得了一份小商品我们也获得了您购买商品的利润（周边商品的价格会比市场价稍高，介意请勿下单）
+
+<p align="center">
+<img  src="https://jpom.top/images/gift-shop/shop-home.jpg" style="zoom: 80%;box-shadow: 0px 0px 20px 10px rgba(0,0,0,0.06);" alt="shop home">
+</p>
 
 ## 🔨贡献指南
 
@@ -473,21 +497,6 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 
 > 目前用到的主要是 dev 和 docs 分支，接受 PR 修改，其他的分支为归档分支，贡献者可以不用管。
 
-## 🐞 交流讨论 、反馈 BUG、提出建议等
-
-1. 快扫描下方左侧微信群二维码和我们一起交流讨论吧！（添加小助手：备注 Jpom 进群）
-2. 开源项目离不开社区的支持，如果项目帮助到了你，并且想给我们加个餐。
-   欢迎扫描下方[微信、支付宝收款码赞赏](https://jpom.top/images/praise-qrcorde.png)
-   或通过[码云赞赏](https://gitee.com/dromara/Jpom)
-   （在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom.top/pages/praise/publicity/)
-3. 企业技术服务请单独与我们联系沟通服务方案
-4. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
-5. 参与贡献，请查看[贡献指南](#贡献指南)。
-
-感谢所有赞赏以及参与贡献的小伙伴，你们的支持是我们不断更新前进的动力！
-
-![wx-qrcode-praise.png](https://jpom.top/images/praise-qrcorde.png)
-
 ## 🌍 知识星球
 
 <p align="center">
@@ -505,7 +514,7 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 | hippo4j       | [https://gitee.com/magegoofy/hippo4j](https://gitee.com/magegoofy/hippo4j) | 强大的动态线程池框架，附带监控报警功能。                          |
 | HertzBeat     | [https://gitee.com/dromara/hertzbeat](https://gitee.com/dromara/hertzbeat) | 易用友好的云监控系统, 无需 Agent, 强大自定义监控能力。              |
 
-## 鸣谢
+## 🤝 鸣谢
 
 - 感谢 JetBrains 提供的免费开源 License：
 

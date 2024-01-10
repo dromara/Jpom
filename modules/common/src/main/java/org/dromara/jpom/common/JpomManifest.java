@@ -141,8 +141,15 @@ public class JpomManifest {
         // Windows NT 10.0; Win64; x64
         OsInfo osInfo = SystemUtil.getOsInfo();
         JavaInfo javaInfo = SystemUtil.getJavaInfo();
+        boolean inDocker = StrUtil.isNotEmpty(SystemUtil.get("JPOM_PKG"));
+        String osName = Opt.ofBlankAble(osInfo.getName()).orElseGet(() -> {
+            if (inDocker) {
+                return "docker";
+            }
+            return UserAgentInfo.NameUnknown;
+        });
         return StrUtil.format("{} {}; {}; {}",
-            Opt.ofBlankAble(osInfo.getName()).orElse(UserAgentInfo.NameUnknown),
+            osName,
             Opt.ofBlankAble(osInfo.getVersion()).orElse("0"),
             Opt.ofBlankAble(osInfo.getArch()).orElse(UserAgentInfo.NameUnknown),
             Opt.ofBlankAble(javaInfo.getVersion()).orElse(UserAgentInfo.NameUnknown)

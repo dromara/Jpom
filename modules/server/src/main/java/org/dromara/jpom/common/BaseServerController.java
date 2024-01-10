@@ -71,11 +71,8 @@ public abstract class BaseServerController extends BaseJpomController {
     }
 
     protected NodeModel tryGetNode() {
-        String nodeId = getParameter(NODE_ID);
-        if (StrUtil.isEmpty(nodeId)) {
-            return null;
-        }
-        return nodeService.getByKey(nodeId);
+        HttpServletRequest request = getRequest();
+        return (NodeModel) request.getAttribute("node");
     }
 
     /**
@@ -89,6 +86,29 @@ public abstract class BaseServerController extends BaseJpomController {
      * @return data
      */
     protected <T> JsonMessage<T> tryRequestMachine(String machineId, HttpServletRequest request, NodeUrl nodeUrl, String... pars) {
+        if (StrUtil.isNotEmpty(machineId)) {
+            MachineNodeModel model = machineNodeServer.getByKey(machineId);
+            Assert.notNull(model, "没有找到对应的机器");
+            return NodeForward.request(model, request, nodeUrl, new String[]{}, pars);
+        }
+        return null;
+    }
+
+    /**
+     * 判断是否传入机器 id 或者节点id
+     *
+     * @param machineId 机器id
+     * @param request   请求
+     * @param nodeUrl   节点 url
+     * @param pars      参数
+     * @param <T>       泛型
+     * @return data
+     */
+    protected <T> JsonMessage<T> tryRequestNode(String machineId, HttpServletRequest request, NodeUrl nodeUrl, String... pars) {
+        NodeModel nodeModel = tryGetNode();
+        if (nodeModel != null) {
+            return NodeForward.request(nodeModel, request, nodeUrl, new String[]{}, pars);
+        }
         if (StrUtil.isNotEmpty(machineId)) {
             MachineNodeModel model = machineNodeServer.getByKey(machineId);
             Assert.notNull(model, "没有找到对应的机器");

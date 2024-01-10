@@ -36,6 +36,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 分发日志
  *
@@ -56,8 +58,8 @@ public class OutGivingLogController extends BaseServerController {
 
     @RequestMapping(value = "log_list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<OutGivingLog>> listData() {
-        PageResultDto<OutGivingLog> pageResult = dbOutGivingLogService.listPage(getRequest());
+    public IJsonMessage<PageResultDto<OutGivingLog>> listData(HttpServletRequest request) {
+        PageResultDto<OutGivingLog> pageResult = dbOutGivingLogService.listPage(request);
         return JsonMessage.success("获取成功", pageResult);
     }
 }

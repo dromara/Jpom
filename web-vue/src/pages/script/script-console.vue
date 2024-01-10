@@ -3,63 +3,88 @@
     <!-- <div ref="filter" class="filter"></div> -->
     <!-- console -->
     <div>
-      <!-- <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none" /> -->
-      <log-view ref="logView" height="calc(100vh - 140px)">
-        <template slot="before">
+      <log-view1 ref="logView" height="calc(100vh - 140px)">
+        <template v-slot:before>
           <a-space>
-            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">执行</a-button>
-            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">停止</a-button>
+            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start"
+              >执行</a-button
+            >
+            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop"
+              >停止</a-button
+            >
           </a-space>
         </template>
-      </log-view>
+      </log-view1>
     </div>
 
-    <!--远程下载  -->
-    <a-modal destroyOnClose v-model="editArgs" title="添加运行参数" @ok="startExecution" :maskClosable="false">
-      <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" ref="ruleForm">
-        <!-- <a-form-model-item label="执行参数" prop="args">
-          <a-input v-model="temp.args" placeholder="执行参数,没有参数可以不填写" />
-        </a-form-model-item> -->
-        <a-form-model-item label="命令参数" :help="`${commandParams.length ? '所有参数将拼接成字符串以空格分隔形式执行脚本,需要注意参数顺序和未填写值的参数将自动忽略' : ''}`">
-          <a-row v-for="(item, index) in commandParams" :key="item.key">
-            <a-col :span="22">
-              <a-input :addon-before="`参数${index + 1}值`" v-model="item.value" :placeholder="`参数值 ${item.desc ? ',' + item.desc : ''}`">
-                <template slot="suffix">
-                  <a-tooltip v-if="item.desc" :title="item.desc">
-                    <a-icon type="info-circle" style="color: rgba(0, 0, 0, 0.45)" />
-                  </a-tooltip>
-                </template>
-              </a-input>
-            </a-col>
+    <!--  -->
+    <a-modal
+      destroyOnClose
+      v-model:open="editArgs"
+      title="添加运行参数"
+      :confirmLoading="confirmLoading"
+      @ok="startExecution"
+      :maskClosable="false"
+    >
+      <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" ref="ruleForm">
+        <!-- <a-form-item label="执行参数" name="args">
+            <a-input v-model="temp.args" placeholder="执行参数,没有参数可以不填写" />
+          </a-form-item> -->
+        <a-form-item
+          label="命令参数"
+          :help="`${
+            commandParams.length
+              ? '所有参数将拼接成字符串以空格分隔形式执行脚本,需要注意参数顺序和未填写值的参数将自动忽略'
+              : ''
+          }`"
+        >
+          <a-space direction="vertical" style="width: 100%">
+            <a-row v-for="(item, index) in commandParams" :key="item.key">
+              <a-col :span="22">
+                <a-input
+                  :addon-before="`参数${index + 1}值`"
+                  v-model:value="item.value"
+                  :placeholder="`参数值 ${item.desc ? ',' + item.desc : ''}`"
+                >
+                  <template v-slot:suffix>
+                    <a-tooltip v-if="item.desc" :title="item.desc">
+                      <InfoCircleOutlined />
+                    </a-tooltip>
+                  </template>
+                </a-input>
+              </a-col>
 
-            <a-col v-if="!item.desc" :span="2">
-              <a-row type="flex" justify="center" align="middle">
-                <a-col>
-                  <a-icon type="minus-circle" @click="() => commandParams.splice(index, 1)" style="color: #ff0000" />
-                </a-col>
-              </a-row>
-            </a-col>
-          </a-row>
-          <a-button type="primary" size="small" @click="() => commandParams.push({})">添加参数</a-button>
-        </a-form-model-item>
-      </a-form-model>
+              <a-col v-if="!item.desc" :span="2">
+                <a-row type="flex" justify="center" align="middle">
+                  <a-col>
+                    <MinusCircleOutlined @click="() => commandParams.splice(index, 1)" style="color: #ff0000" />
+                  </a-col>
+                </a-row>
+              </a-col>
+            </a-row>
+            <a-button type="primary" size="small" @click="() => commandParams.push({})">添加参数</a-button>
+          </a-space>
+        </a-form-item>
+      </a-form>
     </a-modal>
   </div>
 </template>
-<script>
-import { mapGetters } from "vuex";
-import { getWebSocketUrl } from "@/utils/const";
-import LogView from "@/components/logView/index2";
 
+<script>
+import LogView1 from '@/components/logView/index2'
+import { getWebSocketUrl } from '@/api/config'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/stores/user'
+import { useAppStore } from '@/stores/app'
 export default {
   components: {
-    LogView,
+    LogView1
   },
   props: {
     id: {
-      type: String,
+      type: String
     },
-    defArgs: { type: String },
+    defArgs: { type: String }
   },
   data() {
     return {
@@ -75,97 +100,107 @@ export default {
       // logContext: "loading ...",
       btnLoading: true,
       commandParams: [],
-    };
+      confirmLoading: false
+    }
   },
   computed: {
-    ...mapGetters(["getLongTermToken", "getWorkspaceId"]),
+    ...mapState(useUserStore, ['getLongTermToken']),
+    ...mapState(useAppStore, ['getWorkspaceId']),
     socketUrl() {
-      return getWebSocketUrl("/socket/script_run", `userId=${this.getLongTermToken}&id=${this.id}&type=script&nodeId=system&workspaceId=${this.getWorkspaceId}`);
-    },
+      return getWebSocketUrl(
+        '/socket/script_run',
+        `userId=${this.getLongTermToken}&id=${this.id}&type=script&nodeId=system&workspaceId=${this.getWorkspaceId()}`
+      )
+    }
   },
   mounted() {
-    this.initWebSocket();
-    if (typeof this.defArgs === "string" && this.defArgs) {
-      this.commandParams = JSON.parse(this.defArgs);
+    this.initWebSocket()
+    if (typeof this.defArgs === 'string' && this.defArgs) {
+      this.commandParams = JSON.parse(this.defArgs)
     } else {
-      this.commandParams = [];
+      this.commandParams = []
     }
     // 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
     window.onbeforeunload = () => {
-      this.close();
-    };
+      this.close()
+    }
   },
-  beforeDestroy() {
-    this.close();
+  beforeUnmount() {
+    this.close()
   },
   methods: {
     close() {
-      this.socket?.close();
+      this.socket?.close()
 
-      clearInterval(this.heart);
+      clearInterval(this.heart)
     },
     // 初始化
     initWebSocket() {
-      this.logContext = "";
-      if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
-        this.socket = new WebSocket(this.socketUrl);
+      this.logContext = ''
+      if (
+        !this.socket ||
+        this.socket.readyState !== this.socket.OPEN ||
+        this.socket.readyState !== this.socket.CONNECTING
+      ) {
+        this.socket = new WebSocket(this.socketUrl)
       }
       // 连接成功后
       this.socket.onopen = () => {
         // this.logContext = "connect success......\r\n";
-        this.btnLoading = false;
-      };
+        this.btnLoading = false
+      }
       this.socket.onerror = (err) => {
-        console.error(err);
-        this.$notification.error({
-          message: "web socket 错误,请检查是否开启 ws 代理",
-        });
-        this.btnLoading = true;
-      };
+        console.error(err)
+        $notification.error({
+          message: 'web socket 错误,请检查是否开启 ws 代理'
+        })
+        this.btnLoading = true
+      }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
-        console.error(err);
-        this.$message.warning("会话已经关闭[script-console]");
-        clearInterval(this.heart);
-        this.btnLoading = true;
-      };
+        console.error(err)
+        this.$message.warning('会话已经关闭[script-console]')
+        clearInterval(this.heart)
+        this.btnLoading = true
+      }
       this.socket.onmessage = (msg) => {
-        if (msg.data.indexOf("JPOM_MSG") > -1 && msg.data.indexOf("op") > -1) {
-          const res = JSON.parse(msg.data);
+        if (msg.data.indexOf('JPOM_MSG') > -1 && msg.data.indexOf('op') > -1) {
+          const res = JSON.parse(msg.data)
           if (res.code === 200) {
-            this.$notification.success({
-              message: res.msg,
-            });
+            $notification.success({
+              message: res.msg
+            })
             // 如果操作是启动或者停止
-            if (res.op === "stop") {
-              this.scriptStatus = 0;
+            if (res.op === 'stop') {
+              this.scriptStatus = 0
             }
-            if (res.op === "start") {
-              this.scriptStatus = 1;
+            if (res.op === 'start') {
+              this.scriptStatus = 1
             }
             if (res.executeId) {
-              this.temp = { ...this.temp, executeId: res.executeId };
+              this.temp = { ...this.temp, executeId: res.executeId }
             }
           } else {
-            this.$notification.error({
-              message: res.msg,
-            });
-            this.scriptStatus = 0;
+            $notification.error({
+              message: res.msg
+            })
+            this.scriptStatus = 0
           }
-          return;
+          return
         }
         // this.logContext += `${msg.data}\r\n`;
-        this.$refs.logView.appendLine(msg.data);
-        clearInterval(this.heart);
+        this.$refs.logView.appendLine(msg.data)
+        clearInterval(this.heart)
         // 创建心跳，防止掉线
         this.heart = setInterval(() => {
-          this.sendMsg("heart");
-        }, 5000);
-      };
+          this.sendMsg('heart')
+        }, 5000)
+      }
     },
     startExecution() {
-      this.editArgs = false;
-      this.sendMsg("start");
+      this.editArgs = false
+      this.sendMsg('start')
+      this.confirmLoading = false
     },
     // 发送消息
     sendMsg(op) {
@@ -173,34 +208,33 @@ export default {
         op: op,
         id: this.id,
         args: JSON.stringify(this.commandParams),
-        executeId: this.temp.executeId,
-      };
-      this.socket.send(JSON.stringify(data));
+        executeId: this.temp.executeId
+      }
+      this.socket.send(JSON.stringify(data))
     },
     // 启动
     start() {
-      this.editArgs = true;
+      this.editArgs = true
     },
     // 停止
     stop() {
-      this.sendMsg("stop");
-    },
-  },
-};
+      this.sendMsg('stop')
+    }
+  }
+}
 </script>
+
 <style scoped>
 .script-console-layout {
   padding: 0;
   margin: 0;
 }
-
 .filter {
   margin: 0 0 10px;
 }
-
 .console {
   padding: 5px;
-  color: #fff;
+  /* color: #fff; */
   font-size: 14px;
   background-color: black;
   width: 100%;

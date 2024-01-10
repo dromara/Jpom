@@ -96,6 +96,7 @@ public abstract class BaseHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         destroy(session);
+        log.debug("会话[{}]关闭原因：{}", session.getId(), status);
     }
 
     /**

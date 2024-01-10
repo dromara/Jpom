@@ -22,7 +22,9 @@
  */
 package org.dromara.jpom.service.docker;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
 import cn.hutool.db.sql.Condition;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.model.docker.DockerInfoModel;
@@ -30,7 +32,11 @@ import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -85,6 +91,26 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> {
     public int countByTag(String workspaceId, String tag) {
         String sql = StrUtil.format("SELECT * FROM {} where workspaceId=? and instr(tags,?)", super.getTableName());
         return (int) super.count(sql, workspaceId, StrUtil.wrap(tag, StrUtil.COLON));
+    }
+
+    /**
+     * 根据 tag 查询 容器
+     *
+     * @param workspaceId 工作空间
+     * @return count
+     */
+    public List<String> allTag(String workspaceId) {
+        String sql = StrUtil.format("SELECT tags FROM {} where workspaceId=?", super.getTableName());
+        List<Entity> query = super.query(sql, workspaceId);
+        if (CollUtil.isEmpty(query)) {
+            return new ArrayList<>();
+        }
+        return query.stream()
+            .map(entity -> entity.getStr("tags"))
+            .flatMap((Function<String, Stream<String>>) s -> StrUtil.splitTrim(s, StrUtil.COLON).stream())
+            .filter(StrUtil::isNotEmpty)
+            .distinct()
+            .collect(Collectors.toList());
     }
 
     /**

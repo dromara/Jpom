@@ -28,7 +28,8 @@ import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.system.AgentConfig;
+import org.dromara.jpom.configuration.AgentConfig;
+import org.dromara.jpom.configuration.SystemConfig;
 import org.dromara.jpom.system.LogbackConfig;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,13 +52,14 @@ import java.util.Map;
 @Slf4j
 public class AgentWebSocketSystemLogHandle extends BaseAgentWebSocketHandle {
 
-    private static AgentConfig.SystemConfig systemConfig;
+    private static SystemConfig systemConfig;
 
     private static final Map<String, File> CACHE_FILE = new SafeConcurrentHashMap<>();
 
     @Autowired
     public void init(AgentConfig agentConfig) {
         AgentWebSocketSystemLogHandle.systemConfig = agentConfig.getSystem();
+        setAgentAuthorize(agentConfig.getAuthorize());
     }
 
     @OnOpen
@@ -115,8 +117,8 @@ public class AgentWebSocketSystemLogHandle extends BaseAgentWebSocketHandle {
 
     @Override
     @OnClose
-    public void onClose(Session session) {
-        super.onClose(session);
+    public void onClose(Session session, CloseReason closeReason) {
+        super.onClose(session, closeReason);
     }
 
     @OnError

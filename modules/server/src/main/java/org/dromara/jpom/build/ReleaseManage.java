@@ -116,8 +116,9 @@ public class ReleaseManage {
     private final BuildExtConfig buildExtConfig;
     private EnvironmentMapBuilder buildEnv;
 
-    private LogRecorder logRecorder;
+    private final LogRecorder logRecorder;
     private File resultFile;
+    private Process process;
 
 
     private Integer getRealBuildNumberId() {
@@ -125,11 +126,11 @@ public class ReleaseManage {
     }
 
     private void init() {
-        if (this.logRecorder == null) {
-            // 回滚的时候需要重新创建对象
-            File logFile = BuildUtil.getLogFile(buildExtraModule.getId(), this.buildNumberId);
-            this.logRecorder = LogRecorder.builder().file(logFile).build();
-        }
+//        if (this.logRecorder == null) {
+//            // 回滚的时候需要重新创建对象
+//            File logFile = BuildUtil.getLogFile(buildExtraModule.getId(), this.buildNumberId);
+//            this.logRecorder = LogRecorder.builder().file(logFile).build();
+//        }
         Assert.notNull(buildEnv, "没有找到任何环境变量");
     }
 
@@ -305,7 +306,7 @@ public class ReleaseManage {
                     logRecorder.system("start push to repository in({}),{} {}{}", map.get("name"), StrUtil.emptyToDefault((String) map.get("registryUrl"), StrUtil.EMPTY), repositoryItem, System.lineSeparator());
                     //
                     map.put("repository", repositoryItem);
-                    Consumer<String> logConsumer = s -> logRecorder.info(s);
+                    Consumer<String> logConsumer = logRecorder::info;
                     map.put("logConsumer", logConsumer);
                     IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
                     try {
@@ -355,13 +356,14 @@ public class ReleaseManage {
         map.put("noCache", extraModule.getDockerNoCache());
         map.put("labels", extraModule.getDockerImagesLabels());
         map.put("env", envMap);
-        Consumer<String> logConsumer = s -> logRecorder.append(s);
+        Consumer<String> logConsumer = logRecorder::append;
         map.put("logConsumer", logConsumer);
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         try {
             return (boolean) plugin.execute("buildImage", map);
         } catch (Exception e) {
-            logRecorder.systemError("构建镜像调用容器异常", e);
+            log.error("构建镜像调用容器异常", e);
+            logRecorder.error("构建镜像调用容器异常", e);
             return false;
         }
     }
@@ -386,11 +388,15 @@ public class ReleaseManage {
         int waitFor = JpomApplication.getInstance()
             .execScript(s1 + releaseCommand, file -> {
                 try {
-                    return CommandUtil.execWaitFor(file, sourceFile, envFileMap, StrUtil.EMPTY, (s, process) -> logRecorder.info(s));
+                    return CommandUtil.execWaitFor(file, sourceFile, envFileMap, StrUtil.EMPTY, (s, process) -> {
+                        ReleaseManage.this.process = process;
+                        logRecorder.info(s);
+                    });
                 } catch (IOException | InterruptedException e) {
                     throw Lombok.sneakyThrow(e);
                 }
             });
+        ReleaseManage.this.process = null;
         logRecorder.system("执行发布脚本的退出码是：{}", waitFor);
         // 判断是否为严格执行
         if (buildExtraModule.strictlyEnforce()) {
@@ -615,6 +621,8 @@ public class ReleaseManage {
                 .file(zipFile)
                 .logRecorder(logRecorder)
                 .userModel(userModel)
+                .mode("build-trigger")
+                .modeData(buildExtraModule.getId())
                 .unzip(unZip)
                 // 由构建配置决定是否删除
                 .doneDeleteFile(false)
@@ -638,7 +646,7 @@ public class ReleaseManage {
             BaseServerController.resetInfo(userModel);
             this.init();
             //
-            buildEnv.eachStr(s -> logRecorder.system(s));
+            buildEnv.eachStr(logRecorder::system);
             logRecorder.system("开始回滚：{}", DateTime.now());
             //
             String errorMsg = this.start(null, item);
@@ -652,6 +660,8 @@ public class ReleaseManage {
             log.error("执行发布异常", e);
             logRecorder.error("执行发布异常", e);
             this.updateStatus(BuildStatus.PubError, e.getMessage());
+        } finally {
+            IoUtil.close(this.logRecorder);
         }
     }
 }

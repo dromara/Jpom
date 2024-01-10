@@ -55,6 +55,7 @@ import org.dromara.jpom.service.outgiving.OutGivingServer;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.StrictSyncFinisher;
 import org.dromara.jpom.util.SyncFinisherUtil;
+import org.dromara.jpom.webhook.DefaultWebhookPluginImpl;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -90,6 +91,15 @@ public class OutGivingRun {
     private UserModel userModel;
     private boolean unzip;
     private int stripComponents;
+    /**
+     * 分发方式
+     * upload: "手动上传",
+     * download: "远程下载",
+     * "build-trigger": "构建触发",
+     * "use-build": "构建产物",
+     */
+    private String mode;
+    private String modeData;
     /**
      * 是否删除发布文件
      */
@@ -306,6 +316,9 @@ public class OutGivingRun {
                 outGivingLog.setModifyUser(userId);
                 outGivingLog.setStartTime(SystemClock.now());
                 outGivingLog.setStatus(OutGivingNodeProject.Status.Prepare.getCode());
+                outGivingLog.setMode(mode);
+                // 限制最大长度
+                outGivingLog.setModeData(StrUtil.maxLength(modeData, 400));
                 return outGivingLog;
             })
             .collect(Collectors.toList());
@@ -355,6 +368,7 @@ public class OutGivingRun {
                     map.put("executeTime", SystemClock.now());
                     try {
                         IPlugin plugin = PluginFactory.getPlugin("webhook");
+                        map.put("JPOM_WEBHOOK_EVENT", DefaultWebhookPluginImpl.WebhookEvent.DISTRIBUTE);
                         plugin.execute(webhook, map);
                     } catch (Exception e) {
                         log.error("WebHooks 调用错误", e);

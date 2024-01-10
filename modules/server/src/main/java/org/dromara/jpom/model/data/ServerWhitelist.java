@@ -23,18 +23,21 @@
 package org.dromara.jpom.model.data;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.model.BaseJsonModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.util.Assert;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 节点分发白名单
+ * 节点分发授权
  *
  * @author bwcx_jzy
  * @since 2019/4/22
@@ -56,7 +59,7 @@ public class ServerWhitelist extends BaseJsonModel {
     }
 
     /**
-     * 项目的白名单
+     * 项目的授权
      */
     private List<String> outGiving;
 
@@ -65,13 +68,47 @@ public class ServerWhitelist extends BaseJsonModel {
      */
     private Set<String> allowRemoteDownloadHost;
 
-    public List<String> outGiving() {
-        return AgentWhitelist.useConvert(outGiving);
+    /**
+     * 静态目录
+     */
+    private List<String> staticDir;
+
+    /**
+     * 规范化路径
+     *
+     * @return list
+     */
+    public List<String> staticDir() {
+        if (staticDir == null) {
+            return new ArrayList<>();
+        }
+        return staticDir.stream()
+            .map(s -> {
+                // 规范化
+                File file = FileUtil.file(s);
+                String absolutePath = file.getAbsolutePath();
+                return FileUtil.normalize(absolutePath);
+            })
+            .collect(Collectors.toList());
     }
 
+    /**
+     * 验证静态目录权限
+     */
+    public void checkStaticDir(String path) {
+        List<String> dir = this.staticDir;
+        boolean contains = CollUtil.contains(dir, path);
+        Assert.state(contains, "没有当前静态目录权限");
+    }
+
+    /**
+     * 判断指定 url 是否在授权范围
+     *
+     * @param url url 地址
+     */
     public void checkAllowRemoteDownloadHost(String url) {
         Set<String> allowRemoteDownloadHost = this.getAllowRemoteDownloadHost();
-        Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), "还没有配置运行的远程地址");
+        Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), "还没有配置允许的远程地址");
         List<String> collect = allowRemoteDownloadHost.stream()
             .filter(s -> StrUtil.startWith(url, s))
             .collect(Collectors.toList());

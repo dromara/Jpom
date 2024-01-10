@@ -39,4 +39,18 @@ public class FileStorageConfig {
      * 文件中心存储路径
      */
     private String savePah;
+    /**
+     * 静态目录扫描周期
+     * <p>
+     * 0 0/1 * * *
+     */
+    private String scanStaticDirCron = "0 0/1 * * *";
+    /**
+     * 开启静态目录监听
+     */
+    private Boolean watchMonitorStaticDir = true;
+    /**
+     * 监听深度
+     */
+    private Integer watchMonitorMaxDepth = 1;
 }

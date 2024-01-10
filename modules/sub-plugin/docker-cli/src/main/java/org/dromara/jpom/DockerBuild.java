@@ -70,11 +70,10 @@ public class DockerBuild implements AutoCloseable {
 
     public int build() {
 
-        File logFile = (File) parameter.get("logFile");
+        LogRecorder logRecorder = (LogRecorder) parameter.get("logRecorder");
         File tempDir = (File) parameter.get("tempDir");
         // 生成临时目录
         tempDir = FileUtil.file(tempDir, "docker-temp", IdUtil.fastSimpleUUID());
-        LogRecorder logRecorder = LogRecorder.builder().file(logFile).build();
         List<String> copy = (List<String>) parameter.get("copy");
         String resultFile = (String) parameter.get("resultFile");
         String resultFileOut = (String) parameter.get("resultFileOut");

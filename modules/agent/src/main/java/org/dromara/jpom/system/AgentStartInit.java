@@ -41,11 +41,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.RemoteVersion;
-import org.dromara.jpom.common.commander.AbstractProjectCommander;
+import org.dromara.jpom.common.commander.ProjectCommander;
+import org.dromara.jpom.configuration.AgentAuthorize;
+import org.dromara.jpom.configuration.AgentConfig;
+import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.cron.CronUtils;
+import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.script.BaseRunScript;
 import org.dromara.jpom.service.manage.ProjectInfoService;
+import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.util.CommandUtil;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -75,23 +80,26 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
     private final AgentConfig agentConfig;
     private final AgentAuthorize agentAuthorize;
     private final JpomApplication jpomApplication;
+    private final ProjectCommander projectCommander;
+    private final ProjectLogConfig projectLogConfig;
 
 
     public AgentStartInit(ProjectInfoService projectInfoService,
                           AgentConfig agentConfig,
-                          AgentAuthorize agentAuthorize,
-                          JpomApplication jpomApplication) {
+                          JpomApplication jpomApplication,
+                          ProjectCommander projectCommander) {
         this.projectInfoService = projectInfoService;
         this.agentConfig = agentConfig;
-        this.agentAuthorize = agentAuthorize;
+        this.agentAuthorize = agentConfig.getAuthorize();
         this.jpomApplication = jpomApplication;
+        this.projectCommander = projectCommander;
+        projectLogConfig = agentConfig.getProject().getLog();
     }
 
 
     private void startAutoBackLog() {
-        AgentConfig.ProjectConfig.LogConfig logConfig = agentConfig.getProject().getLog();
         // 获取cron 表达式
-        String cron = Opt.ofBlankAble(logConfig.getAutoBackupConsoleCron()).orElse("0 0/10 * * * ?");
+        String cron = Opt.ofBlankAble(projectLogConfig.getAutoBackupConsoleCron()).orElse("0 0/10 * * * ?");
         //
         CronUtils.upsert(ID, cron, () -> {
             try {
@@ -108,28 +116,27 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
     }
 
     private void checkProject(NodeProjectInfoModel nodeProjectInfoModel) {
-        File file = new File(nodeProjectInfoModel.getLog());
+        File file = projectInfoService.resolveAbsoluteLogFile(nodeProjectInfoModel);
         if (!file.exists()) {
             return;
         }
-        AgentConfig.ProjectConfig.LogConfig logConfig = agentConfig.getProject().getLog();
-        DataSize autoBackSize = logConfig.getAutoBackupSize();
+        DataSize autoBackSize = projectLogConfig.getAutoBackupSize();
         autoBackSize = Optional.ofNullable(autoBackSize).orElseGet(() -> DataSize.ofMegabytes(50));
         long len = file.length();
         if (len > autoBackSize.toBytes()) {
             try {
-                AbstractProjectCommander.getInstance().backLog(nodeProjectInfoModel);
+                projectCommander.backLog(nodeProjectInfoModel);
             } catch (Exception e) {
                 log.warn("auto back log", e);
             }
         }
         // 清理过期的文件
-        File logFile = nodeProjectInfoModel.getLogBack();
+        File logFile = projectInfoService.resolveLogBack(nodeProjectInfoModel);
         DateTime nowTime = DateTime.now();
         List<File> files = FileUtil.loopFiles(logFile, pathname -> {
             DateTime dateTime = DateUtil.date(pathname.lastModified());
             long days = DateUtil.betweenDay(dateTime, nowTime, false);
-            long saveDays = logConfig.getSaveDays();
+            long saveDays = projectLogConfig.getSaveDays();
             return days > saveDays;
         });
         files.forEach(FileUtil::del);
@@ -162,25 +169,54 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
         }
     }
 
+    /**
+     * 尝试开启项目
+     */
     private void autoStartProject() {
-        List<NodeProjectInfoModel> list = projectInfoService.list();
-        if (CollUtil.isEmpty(list)) {
+        List<NodeProjectInfoModel> allProject = projectInfoService.list();
+        if (CollUtil.isEmpty(allProject)) {
             return;
         }
-        list = list.stream().filter(nodeProjectInfoModel -> nodeProjectInfoModel.getAutoStart() != null && nodeProjectInfoModel.getAutoStart()).collect(Collectors.toList());
-        List<NodeProjectInfoModel> finalList = list;
+        List<NodeProjectInfoModel> startList = allProject.stream()
+            .filter(nodeProjectInfoModel -> nodeProjectInfoModel.getAutoStart() != null && nodeProjectInfoModel.getAutoStart())
+            .collect(Collectors.toList());
         ThreadUtil.execute(() -> {
-            AbstractProjectCommander instance = AbstractProjectCommander.getInstance();
-            for (NodeProjectInfoModel nodeProjectInfoModel : finalList) {
+            for (NodeProjectInfoModel nodeProjectInfoModel : startList) {
                 try {
-                    if (!instance.isRun(nodeProjectInfoModel)) {
-                        instance.start(nodeProjectInfoModel);
+                    if (!projectCommander.isRun(nodeProjectInfoModel)) {
+                        projectCommander.execCommand(ConsoleCommandOp.start, nodeProjectInfoModel);
                     }
                 } catch (Exception e) {
                     log.warn("自动启动项目失败：{} {}", nodeProjectInfoModel.getId(), e.getMessage());
                 }
             }
         });
+        // 迁移备份日志文件
+        allProject.stream()
+            .filter(nodeProjectInfoModel -> nodeProjectInfoModel.getRunMode() != RunMode.Link)
+            .filter(nodeProjectInfoModel -> StrUtil.isEmpty(nodeProjectInfoModel.getLogPath()))
+            .forEach(nodeProjectInfoModel -> {
+                String logPath = new File(nodeProjectInfoModel.allLib()).getParent();
+                String log1 = FileUtil.normalize(String.format("%s/%s.log", logPath, nodeProjectInfoModel.getId()));
+                File logBack = new File(log1 + "_back");
+                if (FileUtil.isDirectory(logBack)) {
+                    File resolveLogBack = projectInfoService.resolveLogBack(nodeProjectInfoModel);
+                    FileUtil.mkdir(resolveLogBack);
+                    log.info("自动迁移存在备份日志 {} -> {}", logBack.getAbsolutePath(), resolveLogBack);
+                    FileUtil.moveContent(logBack, resolveLogBack, true);
+                    FileUtil.del(logBack);
+                }
+                if (FileUtil.isFile(log1)) {
+                    if (projectCommander.isRun(nodeProjectInfoModel)) {
+                        log.warn("存在旧版项目日志但项目在运行中需要停止运行后手动迁移：{} {}", nodeProjectInfoModel.getName(), log1);
+                    } else {
+                        File resolveLogBack = projectInfoService.resolveLogBack(nodeProjectInfoModel);
+                        FileUtil.mkdir(resolveLogBack);
+                        log.info("自动迁移存在日志 {} -> {}", log1, resolveLogBack);
+                        FileUtil.move(FileUtil.file(log1), resolveLogBack, true);
+                    }
+                }
+            });
     }
 
 
