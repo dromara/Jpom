@@ -207,6 +207,7 @@
           </a-radio-group>
         </a-form-item>
         <a-form-item v-if="temp.prohibitSync" label="禁用分发节点">
+          <template #help>需要到原始工作空间中去控制节点分发</template>
           <a-tag v-for="(item, index) in temp.nodeList" :key="index"
             >节点名称：{{ item.nodeName }} 工作空间：{{ item.workspaceName }}</a-tag
           >

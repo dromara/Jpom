@@ -24,6 +24,7 @@ package org.dromara.jpom.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.thread.lock.LockUtil;
@@ -66,7 +67,12 @@ public abstract class BaseOperService<T extends BaseModel> {
      * @return list
      */
     public List<T> list() {
-        return (List<T>) list(typeArgument);
+        return list(typeArgument);
+    }
+
+    public int size() {
+        List<T> list = this.list();
+        return CollUtil.size(list);
     }
 
     public <E> List<E> list(Class<E> cls) {

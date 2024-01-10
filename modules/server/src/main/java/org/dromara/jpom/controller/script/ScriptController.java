@@ -231,10 +231,11 @@ public class ScriptController extends BaseServerController {
             })
             .collect(Collectors.toList());
         // 判断是否可以编辑节点
-        boolean prohibitSync = nodeList.stream().anyMatch(jsonObject -> {
-            String workspaceId11 = (String) jsonObject.get("workspaceId");
-            return !StrUtil.equals(workspaceId11, workspaceId);
-        });
+        boolean prohibitSync = nodeList.stream()
+            .anyMatch(jsonObject -> {
+                String workspaceId11 = (String) jsonObject.get("workspaceId");
+                return !StrUtil.equals(workspaceId11, workspaceId);
+            });
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("data", server);
         jsonObject.put("nodeList", nodeList);
