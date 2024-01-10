@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div class="">
     <!-- 表格 -->
     <a-table
       size="middle"

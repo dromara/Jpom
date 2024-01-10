@@ -28,7 +28,7 @@
           overflowY: 'scroll',
           backgroundColor: theme === 'light' ? '#fff' : ''
         }"
-        :class="`layout-content`"
+        class="layout-content"
       >
         <router-view v-slot="{ Component }">
           <keep-alive> <component :is="Component" /> </keep-alive>
@@ -161,6 +161,10 @@ const changeCollapsed = () => {
 .sider {
   border-inline-end: 1px solid rgba(5, 5, 5, 0.06);
 }
+.layout-content {
+  padding: 15px;
+  /* margin: 15px; */
+}
 /*
 .sider-scroll {
   min-height: 100vh;
@@ -183,15 +187,15 @@ const changeCollapsed = () => {
 </style>
 
 <style>
-.layout-content {
-  margin: 0;
-  padding: 15px 15px 0;
-  /* background: #fff; */
-  /* min-height: 280px; */
-}
+/* .layout-content { */
+/* margin: 0; */
+/* padding: 15px 15px 0; */
+/* background: #fff; */
+/* min-height: 280px; */
+/* } */
 
-.drawer-layout-content {
-  /* min-height: calc(100vh - 85px); */
-  overflow-y: auto;
-}
+/* .drawer-layout-content { */
+/* min-height: calc(100vh - 85px); */
+/* overflow-y: auto; */
+/* } */
 </style>

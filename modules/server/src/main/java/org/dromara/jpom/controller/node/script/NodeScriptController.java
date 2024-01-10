@@ -36,12 +36,14 @@ import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.node.NodeScriptCacheModel;
+import org.dromara.jpom.model.node.ProjectInfoCacheModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.*;
 import org.dromara.jpom.service.node.script.NodeScriptExecuteLogServer;
 import org.dromara.jpom.service.node.script.NodeScriptServer;
 import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -86,10 +88,22 @@ public class NodeScriptController extends BaseServerController {
     }
 
 
+    private void checkProjectPermission(String id, HttpServletRequest request, NodeModel node) {
+        if (StrUtil.isNotEmpty(id)) {
+            return;
+        }
+        String workspaceId = nodeScriptServer.getCheckUserWorkspace(request);
+        String fullId = ProjectInfoCacheModel.fullId(workspaceId, node.getId(), id);
+        NodeScriptCacheModel byKey = nodeScriptServer.getByKey(fullId, request);
+        Assert.notNull(byKey, "没有对应的数据或者没有此数据权限");
+    }
+
     @GetMapping(value = "item.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String item(HttpServletRequest request) {
-        return NodeForward.request(getNode(), request, NodeUrl.Script_Item).toString();
+    public IJsonMessage<Object> item(HttpServletRequest request, String id) {
+        NodeModel node = getNode();
+        this.checkProjectPermission(id, request, node);
+        return NodeForward.request(node, request, NodeUrl.Script_Item);
     }
 
     /**
@@ -99,8 +113,9 @@ public class NodeScriptController extends BaseServerController {
      */
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<Object> save(String autoExecCron, HttpServletRequest request) {
+    public IJsonMessage<Object> save(String id, String autoExecCron, HttpServletRequest request) {
         NodeModel node = getNode();
+        this.checkProjectPermission(id, request, node);
         this.checkCron(autoExecCron);
         JsonMessage<Object> jsonMessage = NodeForward.request(node, request, NodeUrl.Script_Save, new String[]{}, "nodeId", node.getId());
         if (jsonMessage.success()) {
@@ -113,6 +128,7 @@ public class NodeScriptController extends BaseServerController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<Object> del(@ValidatorItem String id, HttpServletRequest request) {
         NodeModel node = getNode();
+        this.checkProjectPermission(id, request, node);
         JsonMessage<Object> requestData = NodeForward.request(node, request, NodeUrl.Script_Del);
         if (requestData.success()) {
             nodeScriptServer.syncNode(node);

@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div class="">
     <a-form ref="editForm" :model="temp" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
       <a-form-item label="SMTP 服务器" name="host">
         <a-auto-complete v-model:value="temp.host" :options="hostDataSource" placeholder="SMTP 服务器域名">

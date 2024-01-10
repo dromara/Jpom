@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div class="">
     <!-- 数据表格 -->
     <a-table
       :data-source="list"

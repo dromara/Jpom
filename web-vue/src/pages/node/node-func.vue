@@ -9,19 +9,21 @@
       }
     "
     :headerStyle="{
-      padding: '10px 20px'
+      padding: '0 10px'
+    }"
+    :bodyStyle="{
+      padding: '0'
     }"
     :open="true"
   >
     <template #title>
       <a-space>
-        {{ name }}
-        <div style="display: inline-block">
+        <!-- {{ name }} -->
+        <div>
           <a-tabs
             v-model:activeKey="current"
             :tabBarStyle="{
-              margin: '0',
-              borderBottom: '0'
+              margin: '0'
             }"
           >
             <a-tab-pane v-if="tabs.includes('project')" key="project" tab="项目管理"></a-tab-pane>
@@ -31,10 +33,11 @@
         </div>
       </a-space>
     </template>
-
-    <project-search v-if="current === 'project'" :nodeId="this.id" />
-    <script-list v-else-if="current === 'scripct'" :nodeId="this.id"></script-list>
-    <script-log v-else-if="current === 'scripct-log'" :nodeId="this.id"></script-log>
+    <div class="layout-content">
+      <project-search v-if="current === 'project'" :nodeId="this.id" />
+      <script-list v-else-if="current === 'scripct'" :nodeId="this.id"></script-list>
+      <script-log v-else-if="current === 'scripct-log'" :nodeId="this.id"></script-log>
+    </div>
   </a-drawer>
 </template>
 
@@ -79,3 +82,12 @@ export default {
   emits: ['close']
 }
 </script>
+<style scoped>
+.layout-content {
+  padding: 0;
+  margin: 15px;
+}
+:deep(.ant-tabs-nav::before) {
+  border-bottom: 0;
+}
+</style>

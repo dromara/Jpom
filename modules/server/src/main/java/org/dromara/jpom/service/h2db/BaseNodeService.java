@@ -140,6 +140,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
             Collectors.mapping(t -> t, Collectors.toList())
         ));
         // 查询不存在的节点
+        Map<String, String> nodeIdMap = new HashMap<>();
         return map.entrySet()
             .stream()
             .filter(entry -> {
@@ -151,8 +152,17 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                     NodeModel nodeModel = new NodeModel();
                     nodeModel.setMachineId(machineId);
                     nodeModel.setWorkspaceId(workspaceId);
+                    // 更新推荐节点ID
+                    NodeModel queryByBean = nodeService.queryByBean(nodeModel);
+                    if (queryByBean != null) {
+                        String beanId = queryByBean.getId();
+                        String s = nodeIdMap.put(key, beanId);
+                        if (StrUtil.isNotEmpty(s) && !StrUtil.equals(s, beanId)) {
+                            // 对比已经存在的数据
+                            log.error("项目数据工作空间ID[{}]查询出节点ID不一致, 旧数据: {}, 新数据: {}", key, s, beanId);
+                        }
+                    }
                     return true;
-                    //return !nodeService.exists(nodeModel);
                 }
                 List<String> list = StrUtil.splitTrim(key, StrUtil.COMMA);
                 if (CollUtil.size(list) != 2) {
@@ -163,6 +173,17 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                 nodeModel.setWorkspaceId(list.get(1));
                 return !nodeService.exists(nodeModel);
 
+            })
+            .peek(entry -> {
+                String key = entry.getKey();
+                String nodeId = nodeIdMap.get(key);
+                if (nodeId != null) {
+                    // 更新节点ID
+                    List<T> value = entry.getValue();
+                    for (T t : value) {
+                        t.setNodeId(nodeId);
+                    }
+                }
             })
             .flatMap(entry -> entry.getValue().stream())
             .collect(Collectors.toList());
