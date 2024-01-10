@@ -19,7 +19,7 @@
               placeholder="请选择皮肤"
               style="width: 150px"
             >
-              <a-select-option v-for="item in themeList" :key="item">{{ item }}</a-select-option>
+              <a-select-option v-for="item in themeList" :key="item.theme">{{ item.name }}</a-select-option>
             </a-select>
           </div>
           <div>
@@ -28,13 +28,12 @@
               v-model:value="cmOptions.mode"
               @select="handleSelectMode"
               show-search
-              option-filter-prop="children"
               :filter-option="filterOption"
               placeholder="请选择语言模式"
               style="width: 150px"
             >
               <a-select-option value="">请选择语言模式</a-select-option>
-              <a-select-option v-for="item in modeList" :key="item">{{ item }}</a-select-option>
+              <a-select-option v-for="item in modeList" :key="item.mode">{{ item.name }}</a-select-option>
             </a-select>
           </div>
 
@@ -71,33 +70,227 @@
 
 <script>
 import Codemirror from 'codemirror-editor-vue3'
-
-// placeholder
-import 'codemirror/addon/display/placeholder.js'
+import 'codemirror/lib/codemirror.css'
 
 // language
 import 'codemirror/mode/javascript/javascript.js'
+import 'codemirror/mode/css/css.js'
+import 'codemirror/mode/diff/diff.js'
+import 'codemirror/mode/dockerfile/dockerfile.js'
+import 'codemirror/mode/go/go.js'
+import 'codemirror/mode/groovy/groovy.js'
+import 'codemirror/mode/http/http.js'
+import 'codemirror/mode/python/python.js'
+import 'codemirror/mode/rpm/rpm.js'
+import 'codemirror/mode/sass/sass.js'
+import 'codemirror/mode/ruby/ruby.js'
+import 'codemirror/mode/shell/shell.js'
+import 'codemirror/mode/vue/vue.js'
+import 'codemirror/mode/xml/xml.js'
+import 'codemirror/mode/yaml/yaml.js'
+import 'codemirror/mode/vb/vb.js'
+import 'codemirror/mode/sql/sql.js'
+import 'codemirror/mode/powershell/powershell.js'
+import 'codemirror/mode/nginx/nginx.js'
+import 'codemirror/mode/cmake/cmake.js'
+import 'codemirror/mode/properties/properties.js'
+import 'codemirror/mode/php/php.js'
+import 'codemirror/mode/htmlmixed/htmlmixed.js'
+import 'codemirror/mode/yaml-frontmatter/yaml-frontmatter.js'
+const modes = [
+  { name: 'shell', mode: 'shell' },
+  { name: 'python', mode: 'python' },
+  { name: 'powershell', mode: 'powershell' },
+  { name: 'nginx', mode: 'nginx' },
+  { name: 'dockerfile', mode: 'dockerfile' },
+  { name: 'yaml', mode: 'yaml' },
+  { name: 'properties', mode: 'properties' },
+  { name: 'htmlmixed', mode: 'htmlmixed' },
+  { name: 'go', mode: 'go' },
+  { name: 'php', mode: 'php' },
+  { name: 'rpm', mode: 'rpm' },
+  { name: 'sass', mode: 'sass' },
+  { name: 'vue', mode: 'vue' },
+  { name: 'xml', mode: 'xml' },
+  { name: 'sql', mode: 'sql' },
+  { name: 'javascript', mode: 'javascript' },
+  { name: 'css', mode: 'css' },
+  { name: 'diff', mode: 'diff' },
+  { name: 'vb', mode: 'vb' },
+  { name: 'http', mode: 'http' },
+  { name: 'ruby', mode: 'ruby' },
+  { name: 'groovy', mode: 'groovy' },
+  { name: 'cmake', mode: 'cmake' }
+]
+//
+
+// theme
+import 'codemirror/theme/3024-day.css'
+import 'codemirror/theme/3024-night.css'
+import 'codemirror/theme/abcdef.css'
+import 'codemirror/theme/ambiance-mobile.css'
+import 'codemirror/theme/ayu-dark.css'
+import 'codemirror/theme/ambiance.css'
+import 'codemirror/theme/ayu-mirage.css'
+import 'codemirror/theme/abbott.css'
+import 'codemirror/theme/base16-dark.css'
+import 'codemirror/theme/base16-light.css'
+import 'codemirror/theme/bespin.css'
+import 'codemirror/theme/blackboard.css'
+import 'codemirror/theme/cobalt.css'
+import 'codemirror/theme/colorforth.css'
+import 'codemirror/theme/darcula.css'
+import 'codemirror/theme/dracula.css'
+import 'codemirror/theme/duotone-dark.css'
+import 'codemirror/theme/duotone-light.css'
+import 'codemirror/theme/eclipse.css'
+import 'codemirror/theme/elegant.css'
+import 'codemirror/theme/erlang-dark.css'
+import 'codemirror/theme/gruvbox-dark.css'
+import 'codemirror/theme/hopscotch.css'
+import 'codemirror/theme/icecoder.css'
+import 'codemirror/theme/idea.css'
+import 'codemirror/theme/isotope.css'
+import 'codemirror/theme/juejin.css'
+import 'codemirror/theme/lesser-dark.css'
+import 'codemirror/theme/liquibyte.css'
+import 'codemirror/theme/lucario.css'
+import 'codemirror/theme/material-darker.css'
+import 'codemirror/theme/material-palenight.css'
+import 'codemirror/theme/material-ocean.css'
+import 'codemirror/theme/material.css'
+import 'codemirror/theme/mbo.css'
+import 'codemirror/theme/mdn-like.css'
+import 'codemirror/theme/midnight.css'
+import 'codemirror/theme/monokai.css'
+import 'codemirror/theme/moxer.css'
+import 'codemirror/theme/neat.css'
+import 'codemirror/theme/neo.css'
+import 'codemirror/theme/night.css'
+import 'codemirror/theme/nord.css'
+import 'codemirror/theme/oceanic-next.css'
+import 'codemirror/theme/panda-syntax.css'
+import 'codemirror/theme/paraiso-dark.css'
+import 'codemirror/theme/paraiso-light.css'
+import 'codemirror/theme/pastel-on-dark.css'
+import 'codemirror/theme/railscasts.css'
+import 'codemirror/theme/rubyblue.css'
+import 'codemirror/theme/seti.css'
+import 'codemirror/theme/shadowfox.css'
+import 'codemirror/theme/solarized.css'
+import 'codemirror/theme/ssms.css'
+import 'codemirror/theme/the-matrix.css'
+import 'codemirror/theme/tomorrow-night-bright.css'
+import 'codemirror/theme/tomorrow-night-eighties.css'
+import 'codemirror/theme/ttcn.css'
+import 'codemirror/theme/twilight.css'
+import 'codemirror/theme/vibrant-ink.css'
+import 'codemirror/theme/xq-dark.css'
+import 'codemirror/theme/xq-light.css'
+import 'codemirror/theme/yeti.css'
+import 'codemirror/theme/yonce.css'
+import 'codemirror/theme/zenburn.css'
+const theme = [
+  // { name: '深色', theme: 'dracula' },
+  // { name: '浅色', theme: 'eclipse' },
+  // { name: '深色2', theme: 'blackboard' },
+  // { name: '', theme: 'abbott' },
+  // { name: '深白', theme: 'abcdef' },
+  // { name: '黑白', theme: 'ambiance' },
+  // { name: 'ayu深', theme: 'ayu-dark' },
+  // { name: 'ayu深2', theme: 'ayu-mirage' },
+  // { name: '浅灰', theme: 'bespin' }
+
+  { name: '灰绿 abbott', theme: 'abbott' },
+  { name: '灰绿 abcdef', theme: 'abcdef' },
+  { name: '黑白 ambiance-mobile', theme: 'ambiance-mobile' },
+  { name: '黑白 ambiance', theme: 'ambiance' },
+  { name: '深色 dracula', theme: 'dracula' },
+  { name: '浅色 eclipse', theme: 'eclipse' },
+  { name: '深色2 blackboard', theme: 'blackboard' },
+  { name: 'ayu-dark', theme: 'ayu-dark' },
+  { name: 'ayu-mirage', theme: 'ayu-mirage' },
+  { name: 'base16-dark', theme: 'base16-dark' },
+  { name: 'base16-light', theme: 'base16-light' },
+  { name: 'bespin', theme: 'bespin' },
+
+  { name: 'cobalt', theme: 'cobalt' },
+  { name: 'colorforth', theme: 'colorforth' },
+
+  { name: 'duotone-dark', theme: 'duotone-dark' },
+  { name: 'duotone-light', theme: 'duotone-light' },
+
+  { name: 'elegant', theme: 'elegant' },
+  { name: 'erlang-dark', theme: 'erlang-dark' },
+  { name: 'gruvbox-dark', theme: 'gruvbox-dark' },
+  { name: 'hopscotch', theme: 'hopscotch' },
+  { name: 'icecoder', theme: 'icecoder' },
+  { name: 'idea', theme: 'idea' },
+  { name: 'isotope', theme: 'isotope' },
+  { name: 'juejin', theme: 'juejin' },
+  { name: 'lesser-dark', theme: 'lesser-dark' },
+  { name: 'liquibyte', theme: 'liquibyte' },
+  { name: 'lucario', theme: 'lucario' },
+  { name: 'material-darker', theme: 'material-darker' },
+  { name: 'material-ocean', theme: 'material-ocean' },
+  { name: 'material-palenight', theme: 'material-palenight' },
+  { name: 'material', theme: 'material' },
+  { name: 'mbo', theme: 'mbo' },
+  { name: 'mdn-like', theme: 'mdn-like' },
+  { name: 'midnight', theme: 'midnight' },
+  { name: 'monokai', theme: 'monokai' },
+  { name: 'moxer', theme: 'moxer' },
+  { name: 'neat', theme: 'neat' },
+  { name: 'neo', theme: 'neo' },
+  { name: 'night', theme: 'night' },
+  { name: 'nord', theme: 'nord' },
+  { name: 'oceanic-next', theme: 'oceanic-next' },
+  { name: 'panda-syntax', theme: 'panda-syntax' },
+  { name: 'paraiso-dark', theme: 'paraiso-dark' },
+  { name: 'paraiso-light', theme: 'paraiso-light' },
+  { name: 'pastel-on-dark', theme: 'pastel-on-dark' },
+  { name: 'railscasts', theme: 'railscasts' },
+  { name: 'rubyblue', theme: 'rubyblue' },
+  { name: 'seti', theme: 'seti' },
+  { name: 'shadowfox', theme: 'shadowfox' },
+  { name: 'solarized', theme: 'solarized' },
+  { name: 'ssms', theme: 'ssms' },
+  { name: 'the-matrix', theme: 'the-matrix' },
+  { name: 'tomorrow-night-bright', theme: 'tomorrow-night-bright' },
+  { name: 'tomorrow-night-eighties', theme: 'tomorrow-night-eighties' },
+  { name: 'ttcn', theme: 'ttcn' },
+  { name: 'twilight', theme: 'twilight' },
+  { name: 'vibrant-ink', theme: 'vibrant-ink' },
+  { name: 'xq-dark', theme: 'xq-dark' },
+  { name: 'xq-light', theme: 'xq-light' },
+  { name: 'yeti', theme: 'yeti' },
+  { name: 'yonce', theme: 'yonce' },
+  { name: 'zenburn', theme: 'zenburn' },
+  { name: '3024-day', theme: '3024-day' },
+  { name: '3024-night', theme: '3024-night' }
+]
+//
+//
+//
+//
+//
+
 // placeholder
 import 'codemirror/addon/display/placeholder.js'
-// theme
-// import 'codemirror/theme/dracula.css'
-// import 'codemirror/theme/blackboard.css'
-// import 'codemirror/theme/eclipse.css'
-import 'codemirror/lib/codemirror.css'
 
-import 'codemirror/addon/hint/show-hint.css'
-import 'codemirror/addon/hint/show-hint.js'
-import 'codemirror/addon/hint/javascript-hint.js'
-import 'codemirror/addon/hint/xml-hint.js'
-import 'codemirror/addon/hint/css-hint.js'
-import 'codemirror/addon/hint/html-hint.js'
-import 'codemirror/addon/hint/sql-hint.js'
-import 'codemirror/addon/hint/anyword-hint.js'
-import 'codemirror/addon/lint/lint.css'
-import 'codemirror/addon/lint/lint.js'
-import 'codemirror/addon/lint/json-lint'
+// import 'codemirror/addon/hint/show-hint.css'
+// import 'codemirror/addon/hint/show-hint.js'
+// import 'codemirror/addon/hint/javascript-hint.js'
+// import 'codemirror/addon/hint/xml-hint.js'
+// import 'codemirror/addon/hint/css-hint.js'
+// import 'codemirror/addon/hint/html-hint.js'
+// import 'codemirror/addon/hint/sql-hint.js'
+// import 'codemirror/addon/hint/anyword-hint.js'
 // 自动提示
-import 'codemirror/addon/lint/javascript-lint.js'
+// import 'codemirror/addon/lint/lint.css'
+// import 'codemirror/addon/lint/lint.js'
+// import 'codemirror/addon/lint/json-lint'
+// import 'codemirror/addon/lint/javascript-lint.js'
 // 代码折叠
 import 'codemirror/addon/fold/foldcode.js'
 import 'codemirror/addon/fold/foldgutter.js'
@@ -268,33 +461,40 @@ export default {
         enableAutoFormatJson: true,
         defaultJsonIndentation: 2
       },
-      modeList: [],
-      themeList: [],
+      modeList: modes,
+      themeList: theme,
       loading: true
     }
   },
   mounted() {
     // https://juejin.cn/post/7218032919008624700
-    const modules = import.meta.glob('/node_modules/codemirror/mode/**/*.js', { import: 'setup' })
-    // const requireAll = (requireContext) => requireContext.keys().map(requireContext)
-    // requireAll(modules)
-    for (const path in modules) {
-      modules[path]().then((mod) => {
-        // console.log(path, mod)
-        // console.log(path, mod)
-        import(/* @vite-ignore */ path).then(() => {})
-        const paths = path.split('/')
-        this.modeList.push(paths[paths.length - 1].split('.')[0])
-      })
-    }
-    const themes = import.meta.glob('/node_modules/codemirror/theme/**/*.css', { query: '?inline' })
-    for (const path in themes) {
-      themes[path]().then((mod) => {
-        import(/* @vite-ignore */ path).then(() => {})
-        const paths = path.split('/')
-        this.themeList.push(paths[paths.length - 1].split('.')[0])
-      })
-    }
+    // const modules = import.meta.glob('/node_modules/codemirror/mode/**/*.js', { import: 'setup' })
+    // // const requireAll = (requireContext) => requireContext.keys().map(requireContext)
+    // // requireAll(modules)
+    // for (const path in modules) {
+    //   modules[path]().then((mod) => {
+    //     const paths = path.split('/')
+    //     console.log(path, paths[paths.length - 1].split('.')[0])
+    //     // console.log(path, mod)
+    //     import(/* @vite-ignore */ path).then(() => {})
+
+    //     this.modeList.push(paths[paths.length - 1].split('.')[0])
+    //   })
+    // }
+    // const themes = import.meta.glob('/node_modules/codemirror/theme/**/*.css', { query: '?inline' })
+    // const array = []
+    // for (const path in themes) {
+    //   themes[path]().then((mod) => {
+    //     console.log(`import '${path.replace('/node_modules/', '')}'`)
+    //     console.log(path, mod)
+    //     import(/* @vite-ignore */ path).then(() => {})
+    //     const paths = path.split('/')
+    //     array.push({ name: paths[paths.length - 1].split('.')[0], theme: paths[paths.length - 1].split('.')[0] })
+    //     this.themeList.push(paths[paths.length - 1].split('.')[0])
+    //     console.log(JSON.stringify(array))
+    //   })
+    // }
+
     // 延迟渲染，等待资源加载完成
     setTimeout(() => {
       this.loading = false
