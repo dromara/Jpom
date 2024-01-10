@@ -80,7 +80,7 @@
       <template #bodyCell="{ column, text, record, index }">
         <template v-if="column.tooltip">
           <a-tooltip placement="topLeft" :title="text">
-            <span>{{ (text || '').slice(0, 10) }}</span>
+            <span>{{ text || '' }}</span>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'id'">
