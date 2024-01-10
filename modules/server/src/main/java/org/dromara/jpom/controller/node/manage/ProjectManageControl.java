@@ -132,6 +132,17 @@ public class ProjectManageControl extends BaseServerController {
         String workspaceId = projectInfoCacheService.getCheckUserWorkspace(request);
         String fullId = ProjectInfoCacheModel.fullId(workspaceId, node.getId(), id);
         boolean exists = projectInfoCacheService.exists(fullId);
+        if (!exists) {
+            // 判断如果项目 id 不存在则表示新增
+            ProjectInfoCacheModel projectInfoCacheModel = new ProjectInfoCacheModel();
+            projectInfoCacheModel.setProjectId(id);
+            projectInfoCacheModel.setNodeId(node.getId());
+            boolean exists1 = projectInfoCacheService.exists(projectInfoCacheModel);
+            if (!exists1) {
+                // 新增数据
+                return;
+            }
+        }
         Assert.state(exists, "没有对应的数据或者没有此数据权限");
     }
 
