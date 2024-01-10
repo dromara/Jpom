@@ -37,6 +37,7 @@ import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseDbService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -84,6 +85,8 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> im
         if (tokenLogBean != null) {
             UserModel userModel = userService.getByKey(tokenLogBean.getUserId());
             if (userModel != null && StrUtil.equals(type, tokenLogBean.getType())) {
+                boolean demoUser = userModel.isDemoUser();
+                Assert.state(!demoUser, "当前用户触发器不可以");
                 return userModel;
             }
         }
