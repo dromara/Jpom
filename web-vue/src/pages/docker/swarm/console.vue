@@ -8,10 +8,13 @@
     :bodyStyle="{
       padding: '0'
     }"
+    :headerStyle="{
+      padding: '0 10px'
+    }"
   >
     <template #title>
       <!-- 集群控制台 -->
-      <a-menu mode="horizontal" v-model:selectedKeys="menuKeyArray" @click="menuClick">
+      <a-menu mode="horizontal" class="docker-menu" v-model:selectedKeys="menuKeyArray" @click="menuClick">
         <a-menu-item key="node">
           <span class="nav-text">集群节点</span>
         </a-menu-item>
@@ -23,22 +26,14 @@
         </a-menu-item>
       </a-menu></template
     >
-    <a-layout>
-      <!-- <a-layout-header style="height: 48px; padding: 0"> </a-layout-header> -->
 
-      <a-layout class="layout-content">
-        <a-layout-content>
-          <swarm-node v-if="menuKey === 'node'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
-          <swarm-service
-            v-if="menuKey === 'server'"
-            :id="this.id"
-            :visible="this.visible"
-            :urlPrefix="this.urlPrefix"
-          />
-          <swarm-task v-if="menuKey === 'task'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
-        </a-layout-content>
-      </a-layout>
-    </a-layout>
+    <!-- <a-layout-header style="height: 48px; padding: 0"> </a-layout-header> -->
+
+    <div class="layout-content">
+      <swarm-node v-if="menuKey === 'node'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+      <swarm-service v-if="menuKey === 'server'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+      <swarm-task v-if="menuKey === 'task'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+    </div>
   </a-drawer>
 </template>
 
@@ -95,4 +90,12 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.docker-menu {
+  border-bottom: 0;
+}
+.layout-content {
+  padding: 0;
+  margin: 15px;
+}
+</style>

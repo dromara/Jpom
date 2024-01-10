@@ -86,7 +86,7 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> im
             UserModel userModel = userService.getByKey(tokenLogBean.getUserId());
             if (userModel != null && StrUtil.equals(type, tokenLogBean.getType())) {
                 boolean demoUser = userModel.isDemoUser();
-                Assert.state(!demoUser, "当前用户触发器不可以");
+                Assert.state(!demoUser, "当前用户触发器不可用");
                 return userModel;
             }
         }

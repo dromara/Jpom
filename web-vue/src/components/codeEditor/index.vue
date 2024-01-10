@@ -57,7 +57,13 @@
         </a-space>
       </div>
       <div :style="{ height: codeMirrorHeight }">
-        <Codemirror v-model:value="data" :options="cmOptions" @change="onCmCodeChanges" placeholder="请输入内容" />
+        <Codemirror
+          v-model:value="data"
+          :options="cmOptions"
+          @change="onCmCodeChanges"
+          @ready="onReady"
+          placeholder="请输入内容"
+        />
       </div>
     </template>
   </div>
@@ -90,8 +96,9 @@ import 'codemirror/addon/hint/anyword-hint.js'
 import 'codemirror/addon/lint/lint.css'
 import 'codemirror/addon/lint/lint.js'
 import 'codemirror/addon/lint/json-lint'
+// 自动提示
 import 'codemirror/addon/lint/javascript-lint.js'
-
+// 代码折叠
 import 'codemirror/addon/fold/foldcode.js'
 import 'codemirror/addon/fold/foldgutter.js'
 import 'codemirror/addon/fold/foldgutter.css'
@@ -105,7 +112,7 @@ import 'codemirror/addon/edit/closebrackets.js'
 import 'codemirror/addon/edit/closetag.js'
 import 'codemirror/addon/edit/matchtags.js'
 import 'codemirror/addon/edit/matchbrackets.js'
-
+// 当前行高亮
 import 'codemirror/addon/selection/active-line.js'
 import 'codemirror/addon/search/jump-to-line.js'
 import 'codemirror/addon/dialog/dialog.js'
@@ -233,6 +240,18 @@ export default {
         viewportMargin: 10,
         lint: { esversion: '8' },
         gutters: ['CodeMirror-lint-markers', 'CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+        // extraKeys: {
+        //   'Alt-Q': 'autocomplete',
+        //   'Ctrl-Alt-L': () => {
+        //     try {
+        //       if (this.cmOptions.mode == 'json' && this.editorValue) {
+        //         this.editorValue = this.formatStrInJson(this.editorValue)
+        //       }
+        //     } catch (e) {
+        //       this.$message.error('格式化代码出错：' + e.toString())
+        //     }
+        //   }
+        // },
         foldGutter: true,
         autoCloseBrackets: true,
         autoCloseTags: true,
@@ -298,6 +317,21 @@ export default {
     // 过滤选项
     filterOption(input, option) {
       return option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0
+    },
+    onReady(editor) {
+      // console.log(editor)
+      // // 绑定其他快捷键, 格式化编辑器代码做示例
+      // let autoFormatSelection = () => {
+      //   const script_length = editor.getValue().length
+      //   const startPos = { line: 0, ch: 0, sticky: null }
+      //   const endPos = editor.doc.posFromIndex(script_length)
+      //   editor.setSelection(startPos, endPos)
+      //   editor.autoFormatRange(startPos, endPos)
+      //   editor.commentRange(false, startPos, endPos)
+      // }
+      // editor.addKeyMap({
+      //   'Ctrl-Alt-L': autoFormatSelection
+      // })
     }
   }
 }

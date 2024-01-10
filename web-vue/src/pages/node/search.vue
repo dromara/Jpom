@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div class="">
     <template v-if="this.useSuggestions">
       <a-result
         title="当前工作空间还没有项目并且也没有任何节点"

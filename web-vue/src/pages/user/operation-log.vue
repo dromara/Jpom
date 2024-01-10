@@ -108,18 +108,13 @@
       <a-list item-layout="horizontal" :data-source="detailData">
         <template #renderItem="{ item }">
           <a-list-item>
-            <!-- <template #title>
-              <h4 v-if="item.json">{{ item.title }}</h4>
-
-
-            </template> -->
             <a-list-item-meta>
               <template #title>
                 <h4>{{ item.title }}</h4>
               </template>
               <template #description>
                 <div v-if="item.description">{{ item.description }}</div>
-                <div v-if="item.json" v-html="item.value" :expand-depth="4" sort />
+                <pre v-if="item.json" style="overflow: scroll">{{ item.value }}</pre>
               </template>
             </a-list-item-meta>
           </a-list-item>
@@ -134,14 +129,10 @@ import { getOperationLogList } from '@/api/operation-log'
 import { getMonitorOperateTypeList } from '@/api/monitor'
 import { getNodeListAll } from '@/api/node'
 import { getUserListAll } from '@/api/user/user'
-// import JsonViewer from 'vue3-json-viewer'
-// import 'vue3-json-viewer/dist/index.css'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 
 export default {
-  components: {
-    // JsonViewer
-  },
+  components: {},
   data() {
     return {
       loading: false,
@@ -287,7 +278,7 @@ export default {
     // 查看详情
     handleDetail(record) {
       this.detailData = []
-      this.detailVisible = true
+
       this.temp = Object.assign({}, record)
       try {
         this.temp.reqData = JSON.parse(this.temp.reqData)
@@ -307,13 +298,14 @@ export default {
       this.detailData.push({
         title: '请求参数',
         json: true,
-        value: JSON.stringify(this.temp.reqData, null, 4)
+        value: this.temp.reqData
       })
       this.detailData.push({
         title: '响应结果',
         json: true,
-        value: JSON.stringify(this.temp.resultMsg, null, 4)
+        value: this.temp.resultMsg
       })
+      this.detailVisible = true
     }
   }
 }

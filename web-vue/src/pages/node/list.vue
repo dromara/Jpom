@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div class="">
     <template v-if="this.useSuggestions">
       <a-result title="当前工作空间还没有节点">
         <template v-slot:subTitle> 需要您在需要被管理的服务器中安装 agent ，并将 agent 信息添加到系统中 </template>

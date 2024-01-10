@@ -220,7 +220,7 @@ export default {
 }
 .log-content {
   /* margin: 0; */
-  padding: 15px;
+  padding-left: 15px;
   /* background: #fff; */
   /* height: calc(100vh - 130px); */
   overflow-y: auto;

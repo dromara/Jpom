@@ -71,6 +71,7 @@
                 </li>
                 <li>通常情况为项目迁移工作空间、迁移物理机器等一些操作可能产生孤独数据</li>
                 <li>如果孤独数据被工作空间下的其他功能关联，修正后关联的数据将失效对应功能无非查询到关联数据</li>
+                <li>低版本项目数据未存储节点ID，对应项目数据也将出来在孤独数据中（此类数据不影响使用）</li>
               </ul>
             </template>
           </a-alert>
@@ -82,7 +83,7 @@
                   <span>项目ID：{{ item.id }}</span>
                   <span>工作空间ID：{{ item.workspaceId }}</span>
                   <span>节点ID：{{ item.nodeId }}</span>
-                  <a-button type="primary" size="small" danger @click="openCorrectLonely(item.id, 'project')"
+                  <a-button type="primary" size="small" danger @click="openCorrectLonely(item, 'project')"
                     >修正</a-button
                   >
                 </a-space>
@@ -100,7 +101,7 @@
                   <span>脚本ID：{{ item.id }}</span>
                   <span>工作空间ID：{{ item.workspaceId }}</span>
                   <span>节点ID：{{ item.nodeId }}</span>
-                  <a-button type="primary" size="small" danger @click="openCorrectLonely(item.id, 'script')"
+                  <a-button type="primary" size="small" danger @click="openCorrectLonely(item, 'script')"
                     >修正</a-button
                   >
                 </a-space>
@@ -124,11 +125,22 @@
     >
       <a-space direction="vertical" style="width: 100%">
         <a-alert message="温馨提示" type="warning">
-          <template #description>修改后如果有原始关联数据将失效，需要重新配置关联 </template>
+          <template #description>
+            <ul>
+              <li>修改后如果有原始关联数据将失效，需要重新配置关联</li>
+              <li>如果节点选项是禁用，则表示对应数据有推荐关联节点（低版本项目数据可能出现此情况）</li>
+            </ul>
+          </template>
         </a-alert>
         <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
           <a-form-item label="选择节点" name="nodeId">
-            <a-select show-search option-filter-prop="children" v-model:value="temp.toNodeId" placeholder="请选择节点">
+            <a-select
+              show-search
+              option-filter-prop="children"
+              :disabled="temp.toNodeId && temp.recommend"
+              v-model:value="temp.toNodeId"
+              placeholder="请选择节点"
+            >
               <a-select-option v-for="item in nodeList" :key="item.id">
                 【{{ item.workspace && item.workspace.name }}】{{ item.name }}
               </a-select-option>
@@ -216,20 +228,28 @@ export default {
         })
     },
     // 查询机器关联的节点
-    listMachineNode() {
+    listMachineNode(item) {
       machineListNode({
         id: this.machineId
       }).then((res) => {
         if (res.code === 200) {
-          this.nodeList = res.data
+          this.nodeList = res.data || []
+          if (item) {
+            const find = this.nodeList.filter((node) => {
+              return node.id === item.nodeId && node.workspaceId === item.workspaceId
+            })
+            if (find && find.length === 1) {
+              this.temp = { ...this.temp, toNodeId: find[0].id, recommend: true }
+            }
+          }
         }
       })
     },
     // 打开修正窗口
-    openCorrectLonely(dataId, type) {
-      this.temp = { type: type, id: this.machineId, dataId: dataId }
+    openCorrectLonely(item, type) {
+      this.temp = { type: type, id: this.machineId, dataId: item.id }
       this.correctLonelyOpen = true
-      this.listMachineNode()
+      this.listMachineNode(item)
     },
     //确认修正
     handleCorrectLonely() {
