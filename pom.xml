@@ -169,8 +169,8 @@
                         <exclude>**/*.yml</exclude>
                         <exclude>**/*.md</exclude>
                         <exclude>**/*.txt</exclude>
-<!--                        <exclude>**/dist/assets/**</exclude>-->
-<!--                        <exclude>**/dist/assets/**</exclude>-->
+                        <exclude>**/dist/assets/**</exclude>
+                        <exclude>**/dist/assets/**</exclude>
                     </excludes>
                     <!--严格检查-->
                     <strictCheck>true</strictCheck>
