@@ -156,39 +156,37 @@ export default {
       checkCount: 0,
       fileList: [],
       percentage: 0,
-      changelog: ''
+      changelog: '',
+      markdownit: null
     }
   },
   mounted() {
     this.loadData()
-    // console.log(markdownit)
-    // markdownit.block.ruler.before('paragraph', 'my_rule', function replace(state) {
-    //   //...
-    // })
-    // var defaultRender =
-    //   markdownit.renderer.rules.link_open ||
-    //   function (tokens, idx, options, env, self) {
-    //     return self.renderToken(tokens, idx, options)
-    //   }
+    const md = markdownit()
+    const proxy = (tokens, idx, options, env, self) => self.renderToken(tokens, idx, options)
+    const defaultBulletListOpenRenderer = md.renderer.rules.link_open || proxy
 
-    // markdownit.renderer.rules.link_open = function (tokens, idx, options, env, self) {
-    //   // If you are sure other plugins can't add `target` - drop check below
-    //   var aIndex = tokens[idx].attrIndex('target')
+    md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
+      var aIndex = tokens[idx].attrIndex('target')
 
-    //   if (aIndex < 0) {
-    //     tokens[idx].attrPush(['target', '_blank']) // add new attribute
-    //   } else {
-    //     tokens[idx].attrs[aIndex][1] = '_blank' // replace value of existing attr
-    //   }
-
-    //   // pass token to default renderer.
-    //   return defaultRender(tokens, idx, options, env, self)
-    // }
+      if (aIndex < 0) {
+        tokens[idx].attrPush(['target', '_blank']) // add new attribute
+      } else {
+        tokens[idx].attrs[aIndex][1] = '_blank' // replace value of existing attr
+      }
+      // Make your changes here ...
+      // ... then render it using the existing logic
+      return defaultBulletListOpenRenderer(tokens, idx, options, env, self)
+    }
+    this.markdownit = md
   },
   beforeUnmount() {},
   methods: {
     uploadPieces,
     formatDuration,
+    renderMarkdown(markdown) {
+      return (this.markdownit && this.markdownit.render(markdown)) || '未初始化'
+    },
     // 加载数据
     loadData() {
       systemInfo({
@@ -208,24 +206,7 @@ export default {
           nodeId: this.nodeId,
           machineId: this.machineId
         }).then((resLog) => {
-          const md = markdownit()
-          const proxy = (tokens, idx, options, env, self) => self.renderToken(tokens, idx, options)
-          const defaultBulletListOpenRenderer = md.renderer.rules.link_open || proxy
-
-          md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
-            var aIndex = tokens[idx].attrIndex('target')
-
-            if (aIndex < 0) {
-              tokens[idx].attrPush(['target', '_blank']) // add new attribute
-            } else {
-              tokens[idx].attrs[aIndex][1] = '_blank' // replace value of existing attr
-            }
-            // Make your changes here ...
-            // ... then render it using the existing logic
-            return defaultBulletListOpenRenderer(tokens, idx, options, env, self)
-          }
-          this.changelog = md.render(resLog.data)
-
+          this.changelog = this.renderMarkdown(resLog.data)
           //
           // res.data.
           this.showVersion(false, res.data?.remoteVersion).then((upgrade) => {
@@ -478,7 +459,7 @@ export default {
         }
 
         if (this.temp.upgrade && data.changelog) {
-          this.changelog = data.changelog
+          this.changelog = this.renderMarkdown(data.changelog)
         }
         if (tip) {
           $notification.success({

@@ -26,10 +26,6 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
   // 判断 token 是否存在
   if (!userStore().getToken) {
     if (from.path !== '/') {
-      // notification.error({
-      //   message: "未登录，无法访问！",
-      //   description: `from: ${from.path} ==> to: ${to.path}`,
-      // });
       console.warn(`from: ${from.path} ==> to: ${to.path}`)
     }
     next({
