@@ -94,8 +94,18 @@ public class NodeScriptController extends BaseServerController {
         }
         String workspaceId = nodeScriptServer.getCheckUserWorkspace(request);
         String fullId = ProjectInfoCacheModel.fullId(workspaceId, node.getId(), id);
-        NodeScriptCacheModel byKey = nodeScriptServer.getByKey(fullId, request);
-        Assert.notNull(byKey, "没有对应的数据或者没有此数据权限");
+        boolean exists = nodeScriptServer.exists(fullId);
+        if (!exists) {
+            // 判断全局脚本
+            NodeScriptCacheModel nodeScriptCacheModel = new NodeScriptCacheModel();
+            nodeScriptCacheModel.setScriptId(id);
+            nodeScriptCacheModel.setWorkspaceId(ServerConst.WORKSPACE_GLOBAL);
+            exists = nodeScriptServer.exists(nodeScriptCacheModel);
+            if (exists) {
+                return;
+            }
+        }
+        Assert.state(exists, "没有对应的数据或者没有此数据权限");
     }
 
     @GetMapping(value = "item.json", produces = MediaType.APPLICATION_JSON_VALUE)
