@@ -168,9 +168,15 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                 if (CollUtil.size(list) != 2) {
                     return true;
                 }
+                String workspaceId = list.get(1);
+                String id = list.get(0);
+                if (StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL)) {
+                    // 判断全局工作空间ID ,判断节点不存在
+                    return !nodeService.exists(id);
+                }
                 NodeModel nodeModel = new NodeModel();
-                nodeModel.setId(list.get(0));
-                nodeModel.setWorkspaceId(list.get(1));
+                nodeModel.setId(id);
+                nodeModel.setWorkspaceId(workspaceId);
                 return !nodeService.exists(nodeModel);
 
             })

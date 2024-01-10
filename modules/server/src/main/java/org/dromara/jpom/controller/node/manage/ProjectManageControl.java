@@ -131,8 +131,8 @@ public class ProjectManageControl extends BaseServerController {
         }
         String workspaceId = projectInfoCacheService.getCheckUserWorkspace(request);
         String fullId = ProjectInfoCacheModel.fullId(workspaceId, node.getId(), id);
-        ProjectInfoCacheModel byKey = projectInfoCacheService.getByKey(fullId, request);
-        Assert.notNull(byKey, "没有对应的数据或者没有此数据权限");
+        boolean exists = projectInfoCacheService.exists(fullId);
+        Assert.state(exists, "没有对应的数据或者没有此数据权限");
     }
 
     @RequestMapping(value = "getProjectData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

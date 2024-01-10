@@ -38,10 +38,9 @@
               >
             </a-space>
           </a-timeline-item>
-          <!-- <a-timeline-item>
-          <span class="layui-elem-quote">错误进程缓存：{{temp.pidError}}</span>
-          <a-button type="primary" class="btn" @click="clear('pidError')">清空</a-button>
-        </a-timeline-item> -->
+          <a-timeline-item>
+            <span class="layui-elem-quote">脚本日志数：{{ temp.scriptExecLogSize }}</span>
+          </a-timeline-item>
           <a-timeline-item>
             <span class="layui-elem-quote">在读取的日志文件数：{{ temp.readFileOnLineCount }}</span>
           </a-timeline-item>
@@ -72,6 +71,7 @@
                 <li>通常情况为项目迁移工作空间、迁移物理机器等一些操作可能产生孤独数据</li>
                 <li>如果孤独数据被工作空间下的其他功能关联，修正后关联的数据将失效对应功能无非查询到关联数据</li>
                 <li>低版本项目数据未存储节点ID，对应项目数据也将出来在孤独数据中（此类数据不影响使用）</li>
+                <li>一个物理节点被多个服务端绑定也会产生孤独数据奥</li>
               </ul>
             </template>
           </a-alert>
