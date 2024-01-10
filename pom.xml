@@ -169,6 +169,7 @@
                         <exclude>**/*.yml</exclude>
                         <exclude>**/*.md</exclude>
                         <exclude>**/*.txt</exclude>
+                        <exclude>modules/server/src/main/resources/dist/assets/**</exclude>
                     </excludes>
                     <!--严格检查-->
                     <strictCheck>true</strictCheck>

@@ -37,14 +37,12 @@ export default {
       wp: 0,
       hp: 0,
       disconnect: false,
-      domId: 'xterm'
+      domId: ''
     }
   },
   computed: {},
   created() {
-    // console.log(this.$options._scopeId)
-    this.domId =
-      (this.$options._parentVnode?.tag || '' + '-' + this.$options._scopeId || '') + '-' + new Date().getTime()
+    this.domId = 'xterm-' + new Date().getTime()
   },
 
   mounted() {
