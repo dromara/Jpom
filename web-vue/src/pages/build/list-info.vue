@@ -853,13 +853,7 @@ export default {
           ellipsis: true,
           width: 100
         },
-        {
-          title: '产物',
-          dataIndex: 'resultDirFile',
-          width: 100,
-          ellipsis: true,
-          tooltip: true
-        },
+
         {
           title: '方式',
           dataIndex: 'buildMode',
@@ -888,6 +882,13 @@ export default {
           dataIndex: 'releaseMethod',
           width: '100px',
           ellipsis: true
+        },
+        {
+          title: '产物',
+          dataIndex: 'resultDirFile',
+          width: 100,
+          ellipsis: true,
+          tooltip: true
         },
         {
           title: '定时构建',
