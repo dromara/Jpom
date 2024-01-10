@@ -286,7 +286,7 @@
     <a-modal
       destroyOnClose
       :style="{
-        maxWidth: '100vw',
+        // maxWidth: '100vw',
         top: this.terminalFullscreen ? 0 : false,
         paddingBottom: 0
       }"
@@ -302,9 +302,9 @@
       :footer="null"
       :maskClosable="false"
     >
-      <div :style="`height: ${this.terminalFullscreen ? 'calc(100vh - 70px - 20px)' : 'calc(70vh - 20px)'}`">
-        <terminal1 v-if="terminalVisible" :sshId="temp.id" />
-      </div>
+      <!-- <div :style="`height: ${this.terminalFullscreen ? 'calc(100vh - 70px - 20px)' : 'calc(70vh - 20px)'}`"> -->
+      <terminal1 v-if="terminalVisible" :sshId="temp.id" />
+      <!-- </div> -->
     </a-modal>
     <!-- 操作日志 -->
     <a-modal
