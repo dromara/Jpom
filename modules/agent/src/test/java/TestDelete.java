@@ -20,14 +20,17 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.io.FileUtil;
+import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.junit.Test;
 
 /**
  * @author bwcx_jzy
  * @since 2023/3/14
  */
-public class TestDeltete {
+public class TestDelete {
 
     @Test
     public void test() {
@@ -39,5 +42,15 @@ public class TestDeltete {
     public void test2() {
         boolean del = FileUtil.del("D:\\data\\jpom\\a");
         System.out.println(del);
+    }
+
+    @Test
+    public void testBeanCopy(){
+        NodeProjectInfoModel nodeProjectInfoModel = new NodeProjectInfoModel();
+        nodeProjectInfoModel.setName("ss");
+        NodeProjectInfoModel nodeProjectInfoModel1 = new NodeProjectInfoModel();
+        nodeProjectInfoModel1.setOutGivingProject(true);
+        BeanUtil.copyProperties(nodeProjectInfoModel, nodeProjectInfoModel1, CopyOptions.create().ignoreNullValue());
+        System.out.println(nodeProjectInfoModel1.toString());
     }
 }
