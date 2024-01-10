@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="this.triggerToken || this.triggerVisible">
+    <div v-if="this.triggerVisible">
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1" type="card">
           <template v-slot:rightExtra>
@@ -125,10 +125,6 @@ export default {
   props: {
     id: {
       type: String
-    },
-    triggerToken: {
-      type: String,
-      default: ''
     }
   },
   data() {
@@ -139,7 +135,7 @@ export default {
     }
   },
   created() {
-    if (this.triggerToken) {
+    if (this.id) {
       this.handleTrigger()
     }
   },
