@@ -42,10 +42,11 @@ public class TestPluginGit {
         Map<String, Object> map = new HashMap<>();
 //        map.put("gitProcessType", "JGit");
         map.put("gitProcessType", "SystemGit");
-        map.put("url", "git@gitee.com:keepbx/Jpom-demo-case.git");//git@github.com:emqx/emqx-operator.git
-//        map.put("url", "https://gitee.com/keepbx/Jpom-demo-case");
+//        map.put("url", "git@gitee.com:keepbx/Jpom-demo-case.git");//git@github.com:emqx/emqx-operator.git
+        map.put("url", "https://gitee.com/keepbx/Jpom-demo-case");
         map.put("reduceProgressRatio", 1);
         map.put("timeout", 60);
+        map.put("depth", 0);
         map.put("protocol", 1);
         map.put("username", "");
         map.put("password", "");
@@ -54,9 +55,9 @@ public class TestPluginGit {
         map.put("branchName", "master");
         map.put("tagName", "1.1");
         map.put("logWriter", new PrintWriter("C:\\Users\\hong_\\Desktop\\test\\aaa.txt"));
-        Object obj = new DefaultGitPluginImpl().execute("branchAndTagList", map);
+//        Object obj = new DefaultGitPluginImpl().execute("branchAndTagList", map);
 //        Object obj = new DefaultGitPluginImpl().execute("pull", map);
-//        Object obj = new DefaultGitPluginImpl().execute("pullByTag", map);
+        Object obj = new DefaultGitPluginImpl().execute("pullByTag", map);
         if (obj instanceof String[]) {
             String[] strs = (String[]) obj;
             for (String str : strs) {

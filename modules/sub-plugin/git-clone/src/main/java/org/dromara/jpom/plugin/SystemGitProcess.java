@@ -168,6 +168,10 @@ public class SystemGitProcess extends AbstractGitProcess {
                 printWriter.println(line);
                 printWriter.flush();
             }, "git", "fetch", "--all");
+            CommandUtil.exec(saveFile, null, line -> {
+                printWriter.println(line);
+                printWriter.flush();
+            }, "git", "reset", "--hard", branchOrTag);
 
             CommandUtil.exec(saveFile, null, line -> {
                 printWriter.println(line);
