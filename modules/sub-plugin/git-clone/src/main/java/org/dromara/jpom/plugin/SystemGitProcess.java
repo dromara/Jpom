@@ -160,10 +160,14 @@ public class SystemGitProcess extends AbstractGitProcess {
         File saveFile = getSaveFile();
         {
             // 更新
+            /*CommandUtil.exec(saveFile, null, line -> {
+                printWriter.println(line);
+                printWriter.flush();
+            }, "git", "pull");*/
             CommandUtil.exec(saveFile, null, line -> {
                 printWriter.println(line);
                 printWriter.flush();
-            }, "git", "pull");
+            }, "git", "fetch", "--all");
 
             CommandUtil.exec(saveFile, null, line -> {
                 printWriter.println(line);
