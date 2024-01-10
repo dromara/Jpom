@@ -165,6 +165,17 @@ public class CommandUtil {
      * @return msg
      */
     public static String execSystemCommand(String command, File file) {
+        return execSystemCommand(command, file, null);
+    }
+
+    /**
+     * 在指定文件夹下执行命令
+     *
+     * @param command 命令
+     * @param file    文件夹
+     * @return msg
+     */
+    public static String execSystemCommand(String command, File file, Map<String, String> map) {
         String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
         newCommand = StrUtil.replace(newCommand, StrUtil.LF, StrUtil.SPACE);
         String result = "error";
@@ -172,7 +183,7 @@ public class CommandUtil {
             List<String> commands = getCommand();
             commands.add(newCommand);
             String[] cmd = commands.toArray(new String[]{});
-            result = exec(cmd, file);
+            result = exec(cmd, file, map);
         } catch (Exception e) {
             if (ExceptionUtil.isCausedBy(e, InterruptedException.class)) {
                 log.warn("执行被中断：{}", command);
@@ -193,6 +204,17 @@ public class CommandUtil {
      * @throws IOException IO
      */
     private static String exec(String[] cmd, File file) throws IOException {
+        return exec(cmd, file, null);
+    }
+
+    /**
+     * 执行命令
+     *
+     * @param cmd 命令行
+     * @return 结果
+     * @throws IOException IO
+     */
+    private static String exec(String[] cmd, File file, Map<String, String> env) throws IOException {
         List<String> resultList = new ArrayList<>();
         boolean isLog;
         Charset charset;
@@ -205,7 +227,7 @@ public class CommandUtil {
             // 直接执行，使用默认编码格式
             charset = CharsetUtil.systemCharset();
         }
-        int code = exec(file, null, charset, resultList::add, cmd);
+        int code = exec(file, env, charset, resultList::add, cmd);
         String result = String.join(StrUtil.LF, resultList);
         if (isLog) {
             log.debug("exec[{}] {} {} {}", code, charset.name(), Arrays.toString(cmd), result);
@@ -274,6 +296,17 @@ public class CommandUtil {
      * @throws IOException 异常
      */
     public static void asyncExeLocalCommand(String command, File file) throws Exception {
+        asyncExeLocalCommand(command, file, null);
+    }
+
+    /**
+     * 异步执行命令
+     *
+     * @param file    文件夹
+     * @param command 命令
+     * @throws IOException 异常
+     */
+    public static void asyncExeLocalCommand(String command, File file, Map<String, String> env) throws Exception {
         String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
         newCommand = StrUtil.replace(newCommand, StrUtil.LF, StrUtil.SPACE);
         //
@@ -283,6 +316,10 @@ public class CommandUtil {
         ProcessBuilder pb = new ProcessBuilder(commands);
         if (file != null) {
             pb.directory(file);
+        }
+        Map<String, String> environment = pb.environment();
+        if (env != null) {
+            environment.putAll(env);
         }
         pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
