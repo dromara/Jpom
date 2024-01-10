@@ -140,17 +140,17 @@ public class SystemGitProcess extends AbstractGitProcess {
     public String[] pull() throws Exception {
         String branchName = (String) parameter.get("branchName");
         Assert.hasText(branchName, "没有 branch name");
-        return pull(parameter, branchName);
+        return pull(branchName);
     }
 
     @Override
     public String[] pullByTag() throws Exception {
         String tagName = (String) parameter.get("tagName");
         Assert.hasText(tagName, "没有 tag name");
-        return pull(parameter, tagName);
+        return pull(tagName);
     }
 
-    private String[] pull(Map<String, Object> map, String branchOrTag) throws IOException {
+    private String[] pull(String branchOrTag) throws IOException {
         PrintWriter printWriter = (PrintWriter) parameter.get("logWriter");
         boolean needClone = this.needClone();
         if (needClone) {
@@ -158,25 +158,36 @@ public class SystemGitProcess extends AbstractGitProcess {
             this.reClone(printWriter, branchOrTag);
         }
         File saveFile = getSaveFile();
+
         {
+            Boolean strictlyEnforce = (Boolean) parameter.get("strictlyEnforce");
+            strictlyEnforce = strictlyEnforce != null && strictlyEnforce;
             // 更新
             /*CommandUtil.exec(saveFile, null, line -> {
                 printWriter.println(line);
                 printWriter.flush();
             }, "git", "pull");*/
-            CommandUtil.exec(saveFile, null, line -> {
+            int code = CommandUtil.exec(saveFile, null, line -> {
                 printWriter.println(line);
                 printWriter.flush();
             }, "git", "fetch", "--all");
-            CommandUtil.exec(saveFile, null, line -> {
+            if (code != 0 && strictlyEnforce) {
+                return new String[]{null, null, "git fetch失败状态码:" + code};
+            }
+            code = CommandUtil.exec(saveFile, null, line -> {
                 printWriter.println(line);
                 printWriter.flush();
-            }, "git", "reset", "--hard", branchOrTag);
-
-            CommandUtil.exec(saveFile, null, line -> {
+            }, "git", "reset", "--hard", "origin/" + branchOrTag);
+            if (code != 0 && strictlyEnforce) {
+                return new String[]{null, null, "git reset --hard失败状态码:" + code};
+            }
+            code = CommandUtil.exec(saveFile, null, line -> {
                 printWriter.println(line);
                 printWriter.flush();
             }, "git", "submodule", "update", "--init", "--remote", "-f", "--recursive");
+            if (code != 0 && strictlyEnforce) {
+                return new String[]{null, null, "git submodule update 失败状态码:" + code};
+            }
         }
         // 获取提交日志
         String[] command = {"git", "log", "-1", branchOrTag};

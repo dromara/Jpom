@@ -446,6 +446,7 @@ public class BuildExecuteManage implements Runnable {
                 map.put("reduceProgressRatio", buildExtConfig.getLogReduceProgressRatio());
                 map.put("logWriter", logRecorder.getPrintWriter());
                 map.put("savePath", gitFile);
+                map.put("strictlyEnforce", buildExtraModule.strictlyEnforce());
                 // 模糊匹配 标签
                 String branchTagName = buildInfoModel.getBranchTagName();
                 String[] result;
@@ -481,6 +482,12 @@ public class BuildExecuteManage implements Runnable {
                     result = (String[]) plugin.execute("pull", map);
                 }
                 msg = result[1];
+                // 判断是否执行失败
+                String errorMsg = ArrayUtil.get(result, 2);
+                if (errorMsg != null) {
+                    logRecorder.systemError("拉取代码失败：{}", errorMsg);
+                    return errorMsg;
+                }
                 // 判断hash 码和上次构建是否一致
                 if (checkRepositoryDiff != null && checkRepositoryDiff) {
                     if (StrUtil.equals(repositoryLastCommitId, result[0])) {
