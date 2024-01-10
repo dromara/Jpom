@@ -126,7 +126,7 @@ public class ProjectManageControl extends BaseServerController {
 
 
     private void checkProjectPermission(String id, HttpServletRequest request, NodeModel node) {
-        if (StrUtil.isNotEmpty(id)) {
+        if (StrUtil.isEmpty(id)) {
             return;
         }
         String workspaceId = projectInfoCacheService.getCheckUserWorkspace(request);

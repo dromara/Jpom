@@ -89,7 +89,7 @@ public class NodeScriptController extends BaseServerController {
 
 
     private void checkProjectPermission(String id, HttpServletRequest request, NodeModel node) {
-        if (StrUtil.isNotEmpty(id)) {
+        if (StrUtil.isEmpty(id)) {
             return;
         }
         String workspaceId = nodeScriptServer.getCheckUserWorkspace(request);
