@@ -80,6 +80,11 @@
             <span>{{ text }}</span>
           </a-tooltip>
         </template>
+        <template v-else-if="column.dataIndex === 'name'">
+          <a-tooltip @click="handleEdit(record)" placement="topLeft" :title="text">
+            <a-button type="link" style="padding: 0" size="small">{{ text }}</a-button>
+          </a-tooltip>
+        </template>
         <template v-else-if="column.dataIndex === 'workspaceId'">
           <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
           <a-tag v-else>工作空间</a-tag>
@@ -166,7 +171,7 @@
                   <a-input
                     :addon-before="`参数${index + 1}值`"
                     v-model:value="item.value"
-                    placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值"
+                    placeholder="参数值,新增默认参数后在手动执行脚本时需要填写参数值"
                 /></a-space>
               </a-col>
               <a-col :span="2">
@@ -180,7 +185,7 @@
             <a-divider style="margin: 5px 0" />
           </a-space>
 
-          <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
+          <a-button type="primary" @click="() => commandParams.push({})">新增参数</a-button>
         </a-form-item>
         <a-form-item label="定时执行" name="autoExecCron">
           <a-auto-complete
@@ -458,8 +463,7 @@ export default {
           dataIndex: 'name',
           ellipsis: true,
           sorter: true,
-          width: 150,
-          tooltip: true
+          width: 150
         },
         {
           title: '共享',

@@ -124,7 +124,7 @@
                   temp.prohibitExecuteArray.push({})
                 }
               "
-              >添加
+              >新增
             </a-button>
           </a-form-item-rest>
         </a-form-item>
@@ -191,7 +191,7 @@
                   temp.allowExecuteArray.push({})
                 }
               "
-              >添加
+              >新增
             </a-button>
           </a-form-item-rest>
         </a-form-item>

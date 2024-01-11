@@ -83,7 +83,7 @@ export const useAllMenuStore = defineStore('menu2', {
       this[mode + '_tabList'] = list
       localStorage.setItem(tabListKey[mode], JSON.stringify(list))
     },
-    // 添加 tab
+    // 新增 tab
     addTab(mode: any, tab: any) {
       return new Promise((resolve) => {
         // 从 store 里面拿到 menus 匹配 path 得到当前的菜单，设置 tab 的标题
@@ -132,7 +132,7 @@ export const useAllMenuStore = defineStore('menu2', {
           resolve(firstMenu)
           return
         }
-        // 获取下标 -1 表示可以添加 否则就是已经存在
+        // 获取下标 -1 表示可以新增 否则就是已经存在
         const index = tabList.findIndex((ele: any) => ele.key === tab.key)
         //
         tab.title = currentMenu.title

@@ -43,7 +43,7 @@
         banner
       />
       <a-alert
-        message="如果配置错误需要重启服务端并添加命令行参数 --rest:ip_config 将恢复默认配置"
+        message="如果配置错误需要重启服务端并新增命令行参数 --rest:ip_config 将恢复默认配置"
         style="margin-top: 10px"
         banner
       />
@@ -167,7 +167,7 @@
                     }
                   }
                 "
-                >添加</a-button
+                >新增</a-button
               >
               <a-button type="primary" @click="saveProxyConfigHannder">保存</a-button>
             </a-space>

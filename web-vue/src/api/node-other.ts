@@ -1,4 +1,4 @@
-import axios from "./config";
+import axios from './config'
 
 /************************** */
 
@@ -7,46 +7,46 @@ import axios from "./config";
  */
 export function getScriptListAll(params) {
   return axios({
-    url: "/node/script/list_all",
-    method: "post",
-    data: params,
-  });
+    url: '/node/script/list_all',
+    method: 'post',
+    data: params
+  })
 }
 
 // 脚本模版日志列表
 export function getScriptLogList(params) {
   return axios({
-    url: "/node/script_log/list",
-    method: "post",
-    data: params,
-  });
+    url: '/node/script_log/list',
+    method: 'post',
+    data: params
+  })
 }
 
 // 删除执行记录
 export function scriptDel(params) {
   return axios({
-    url: "/node/script_log/del",
-    method: "post",
-    data: params,
-  });
+    url: '/node/script_log/del',
+    method: 'post',
+    data: params
+  })
 }
 
 //执行记录 详情
 export function scriptLog(params) {
   return axios({
-    url: "/node/script_log/log",
-    method: "post",
+    url: '/node/script_log/log',
+    method: 'post',
     data: params,
     headers: {
-      tip: "no",
-    },
-  });
+      tip: 'no'
+    }
+  })
 }
 
 /**
  * Script 编辑
  * @param {nodeId, id, name, path, port, appBase} params
- * params.type: add 表示添加
+ * params.type: add 表示新增
  * params.nodeId 节点 ID
  * params.id 编辑修改时判断 ID
  * params.name 名称
@@ -54,32 +54,32 @@ export function scriptLog(params) {
  */
 export function editScript(params) {
   return axios({
-    url: "/node/script/save.json",
-    method: "post",
-    data: params,
-  });
+    url: '/node/script/save.json',
+    method: 'post',
+    data: params
+  })
 }
 
 export function itemScript(params) {
   return axios({
-    url: "/node/script/item.json",
-    method: "get",
-    params: params,
-  });
+    url: '/node/script/item.json',
+    method: 'get',
+    params: params
+  })
 }
 
 export function syncScript(params) {
   return axios({
-    url: "/node/script/sync",
-    method: "get",
-    params: params,
-  });
+    url: '/node/script/sync',
+    method: 'get',
+    params: params
+  })
 }
 export const triggerExecTypeMap = {
-  0: "手动",
-  1: "自动",
-  2: "触发器",
-};
+  0: '手动',
+  1: '自动',
+  2: '触发器'
+}
 
 /**
  * 获取触发器地址
@@ -87,10 +87,10 @@ export const triggerExecTypeMap = {
  */
 export function getTriggerUrl(data) {
   return axios({
-    url: "/node/script/trigger-url",
-    method: "post",
-    data: data,
-  });
+    url: '/node/script/trigger-url',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -101,10 +101,10 @@ export function getTriggerUrl(data) {
  */
 export function deleteScript(params) {
   return axios({
-    url: "/node/script/del.json",
-    method: "post",
-    data: params,
-  });
+    url: '/node/script/del.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -115,8 +115,8 @@ export function deleteScript(params) {
  */
 export function unbindScript(params) {
   return axios({
-    url: "/node/script/unbind.json",
-    method: "get",
-    params: params,
-  });
+    url: '/node/script/unbind.json',
+    method: 'get',
+    params: params
+  })
 }

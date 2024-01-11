@@ -349,7 +349,7 @@ export default {
       })
     },
 
-    // 添加
+    // 新增
     handleAdd() {
       this.temp = {}
       this.editCertVisible = true

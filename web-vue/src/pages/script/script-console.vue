@@ -19,7 +19,7 @@
     <a-modal
       destroyOnClose
       v-model:open="editArgs"
-      title="添加运行参数"
+      title="新增运行参数"
       :confirmLoading="confirmLoading"
       @ok="startExecution"
       :maskClosable="false"
@@ -60,7 +60,7 @@
                 </a-row>
               </a-col>
             </a-row>
-            <a-button type="primary" size="small" @click="() => commandParams.push({})">添加参数</a-button>
+            <a-button type="primary" size="small" @click="() => commandParams.push({})">新增参数</a-button>
           </a-space>
         </a-form-item>
       </a-form>

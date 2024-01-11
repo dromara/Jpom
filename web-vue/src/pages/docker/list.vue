@@ -3,7 +3,7 @@
     <template v-if="this.useSuggestions">
       <a-result
         title="当前工作空间还没有 Docker"
-        sub-title="请到【系统管理】-> 【资产管理】-> 【Docker管理】添加Docker，或者将已添加的Docker授权关联、分配到此工作空间"
+        sub-title="请到【系统管理】-> 【资产管理】-> 【Docker管理】新增Docker，或者将已新增的Docker授权关联、分配到此工作空间"
       >
         <template #extra>
           <router-link to="/system/assets/docker-list">
@@ -138,7 +138,7 @@
                 style="borderstyle: dashed"
                 @click="showInput"
               >
-                <PlusOutlined /> 添加
+                <PlusOutlined /> 新增
               </a-tag>
             </template>
           </a-space>
@@ -371,7 +371,7 @@ export default {
         this.loading = false
       })
     },
-    // 添加
+    // 新增
     handleAdd() {
       this.temp = {}
       this.editVisible = true

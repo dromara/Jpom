@@ -36,7 +36,7 @@
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="getCommandData">搜索</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="createCommand">新建命令</a-button>
+          <a-button type="primary" @click="createCommand">新增</a-button>
           <a-dropdown>
             <a @click="(e) => e.preventDefault()"> 更多 <DownOutlined /> </a>
             <template v-slot:overlay>
@@ -173,7 +173,7 @@
                     <a-input
                       :addon-before="`参数${index + 1}值`"
                       v-model:value="item.value"
-                      placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值"
+                      placeholder="参数值,新增默认参数后在手动执行脚本时需要填写参数值"
                     />
                   </a-space>
                 </a-col>
@@ -186,7 +186,7 @@
                   </a-row>
                 </a-col>
               </a-row>
-              <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
+              <a-button type="primary" @click="() => commandParams.push({})">新增参数</a-button>
             </a-space>
           </a-form-item-rest>
         </a-form-item>
@@ -280,7 +280,7 @@
                 </a-row>
               </a-col>
             </a-row>
-            <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
+            <a-button type="primary" @click="() => commandParams.push({})">新增参数</a-button>
           </a-space>
         </a-form-item>
       </a-form>

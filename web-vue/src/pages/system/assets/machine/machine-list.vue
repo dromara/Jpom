@@ -54,7 +54,7 @@
             <a-select-option value="createTimeMillis">创建时间</a-select-option>
           </a-select>
           <a-button :loading="loading" type="primary" @click="getMachineList">搜索</a-button>
-          <a-button type="primary" @click="addMachine">添加机器</a-button>
+          <a-button type="primary" @click="addMachine">新增</a-button>
 
           <a-dropdown v-if="this.layoutType === 'table'">
             <template v-slot:overlay>
@@ -300,7 +300,7 @@
           <custom-select
             v-model:value="temp.groupName"
             :data="groupList"
-            inputPlaceholder="添加分组"
+            inputPlaceholder="新增分组"
             selectPlaceholder="选择分组名"
           >
           </custom-select>

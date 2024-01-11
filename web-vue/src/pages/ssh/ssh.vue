@@ -3,7 +3,7 @@
     <template v-if="this.useSuggestions">
       <a-result
         title="当前工作空间还没有SSH"
-        sub-title="请到【系统管理】-> 【资产管理】-> 【SSH管理】添加SSH，或者将已添加的SSH授权关联、分配到此工作空间"
+        sub-title="请到【系统管理】-> 【资产管理】-> 【SSH管理】新增SSH，或者将已新增的SSH授权关联、分配到此工作空间"
       >
         <template #extra>
           <router-link to="/system/assets/ssh-list">
@@ -207,7 +207,7 @@
             <template v-else>
               <a-tooltip
                 placement="topLeft"
-                title="如果按钮不可用,请去资产管理 ssh 列表的关联中添加当前工作空间允许管理的授权文件夹"
+                title="如果按钮不可用,请去资产管理 ssh 列表的关联中新增当前工作空间允许管理的授权文件夹"
               >
                 <a-button size="small" type="primary" :disabled="true">文件</a-button>
               </a-tooltip>
@@ -268,7 +268,7 @@
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            inputPlaceholder="添加分组"
+            inputPlaceholder="新增分组"
             selectPlaceholder="选择分组名"
           >
           </custom-select>

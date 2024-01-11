@@ -2,19 +2,19 @@
   <div class="">
     <template v-if="this.useSuggestions">
       <a-result title="当前工作空间还没有节点">
-        <template v-slot:subTitle> 需要您在需要被管理的服务器中安装 agent ，并将 agent 信息添加到系统中 </template>
+        <template v-slot:subTitle> 需要您在需要被管理的服务器中安装 agent ，并将 agent 信息新增到系统中 </template>
         <template #extra>
           <a-button type="primary" @click="fastInstallNodeShow">快速安装 </a-button>
           <router-link to="/system/assets/machine-list">
-            <a-button key="console" type="primary">手动添加</a-button></router-link
+            <a-button key="console" type="primary">手动新增</a-button></router-link
           >
         </template>
         <a-alert message="解决办法" type="info" show-icon>
           <template #description>
             <ol>
-              <li>【推荐】使用快速安装方式导入机器并自动添加逻辑节点</li>
+              <li>【推荐】使用快速安装方式导入机器并自动新增逻辑节点</li>
               <li>
-                请到【系统管理】-> 【资产管理】-> 【机器管理】添加节点，或者将已添加的机器授权关联、分配到此工作空间
+                请到【系统管理】-> 【资产管理】-> 【机器管理】新增节点，或者将已新增的机器授权关联、分配到此工作空间
               </li>
             </ol>
           </template>
@@ -499,7 +499,7 @@
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            inputPlaceholder="添加分组"
+            inputPlaceholder="新增分组"
             selectPlaceholder="选择分组名"
           >
           </custom-select>

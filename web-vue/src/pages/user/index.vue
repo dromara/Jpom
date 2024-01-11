@@ -404,7 +404,7 @@ export default {
             if (res.code === 200) {
               if (paramsTemp.type === 'add') {
                 this.temp = {
-                  title: '账号添加成功',
+                  title: '账号新增成功',
                   randomPwd: res.data.randomPwd
                 }
 

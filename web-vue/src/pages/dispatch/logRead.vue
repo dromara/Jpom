@@ -126,7 +126,7 @@
               </a-col>
             </a-row>
 
-            <a-button type="primary" @click="() => temp.projectList.push({})">添加</a-button>
+            <a-button type="primary" @click="() => temp.projectList.push({})">新增</a-button>
           </a-space>
         </a-form-item>
       </a-form>

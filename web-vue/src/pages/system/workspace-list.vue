@@ -185,7 +185,7 @@
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            inputPlaceholder="添加分组"
+            inputPlaceholder="新增分组"
             selectPlaceholder="选择分组名"
           >
           </custom-select>

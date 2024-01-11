@@ -56,11 +56,11 @@
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">添加</a-button>
+          <a-button type="primary" @click="handleAdd">新增</a-button>
           <a-button :disabled="!this.tableSelections.length" @click="syncToWorkspaceShow()" type="primary">
             批量分配</a-button
           >
-          <a-tooltip title="自动检测服务端所在服务器中是否存在 docker，如果存在将自动添加到列表中">
+          <a-tooltip title="自动检测服务端所在服务器中是否存在 docker，如果存在将自动新增到列表中">
             <a-button type="dashed" @click="handleTryLocalDocker"> <QuestionCircleOutlined />自动探测 </a-button>
           </a-tooltip>
         </a-space>
@@ -240,7 +240,7 @@
           <custom-select
             v-model:value="temp.groupName"
             :data="groupList"
-            inputPlaceholder="添加分组"
+            inputPlaceholder="新增分组"
             selectPlaceholder="选择分组名"
           >
           </custom-select>
@@ -760,7 +760,7 @@ export default {
         this.loading = false
       })
     },
-    // 添加
+    // 新增
     handleAdd() {
       this.temp = {}
       this.editVisible = true

@@ -98,7 +98,7 @@
                       :maxLength="50"
                       v-model:value="temp.group"
                       :data="groupList"
-                      inputPlaceholder="添加分组"
+                      inputPlaceholder="新增分组"
                       selectPlaceholder="选择分组"
                     >
                     </custom-select>
@@ -357,7 +357,7 @@
                       <li>节点分发是指,一个项目部署在多个节点中使用节点分发一步完成多个节点中的项目发布操作</li>
                       <li>项目是指,节点中的某一个项目,需要提前在节点中创建项目</li>
                       <li>
-                        SSH 是指,通过 SSH 命令的方式对产物进行发布或者执行多条命令来实现发布(需要到 SSH 中提前去添加)
+                        SSH 是指,通过 SSH 命令的方式对产物进行发布或者执行多条命令来实现发布(需要到 SSH 中提前去新增)
                       </li>
                       <li>本地命令是指,在服务端本地执行多条命令来实现发布</li>
                       <li>
@@ -977,7 +977,7 @@
                   附加环境变量
                   <template v-slot:title>
                     <ul>
-                      <li>附加环境变量是指读取仓库指定环境变量文件来添加到执行构建运行时</li>
+                      <li>附加环境变量是指读取仓库指定环境变量文件来新增到执行构建运行时</li>
                       <li>比如常见的 .env 文件</li>
                       <li>文件内容格式要求：env_name=xxxxx 不满足格式的行将自动忽略</li>
                       <li>也支持 URL 参数格式：test_par=123abc&test_par2=abc21</li>
@@ -991,7 +991,7 @@
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
-              <a-input v-model:value="tempExtraData.attachEnv" placeholder="附加环境变量  .env 添加多个使用逗号分隔" />
+              <a-input v-model:value="tempExtraData.attachEnv" placeholder="附加环境变量  .env 新增多个使用逗号分隔" />
             </a-form-item>
             <a-form-item name="cacheBuild">
               <template v-slot:label>
@@ -1529,7 +1529,7 @@ export default {
         '# dirChildrenOnly = true will create /var/data/titi and /var/data/tata dirChildrenOnly = false will create /var/data/root/titi and /var/data/root/tata\n' +
         '# copy:\n' +
         '#  - /Users/user/.m2/settings.xml:/root/.m2/:false\n' +
-        '# 给容器添加环境变量\n' +
+        '# 给容器新增环境变量\n' +
         'env:\n' +
         '  NODE_OPTIONS: --max-old-space-size=900',
       loading: false,
@@ -1608,7 +1608,7 @@ export default {
           this.loading = false
         })
     },
-    // 添加
+    // 新增
     handleAdd() {
       this.temp = { resultKeepDay: 0 }
       this.branchList = []

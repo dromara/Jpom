@@ -41,7 +41,7 @@
                   :maxLength="50"
                   v-model:value="temp.group"
                   :data="groupList"
-                  inputPlaceholder="添加分组"
+                  inputPlaceholder="新增分组"
                   selectPlaceholder="选择分组"
                 >
                 </custom-select>
@@ -466,7 +466,7 @@ export default {
             this.loading = false
           })
       } else {
-        // 添加
+        // 新增
         this.temp = {
           type: 'add',
           logPath: ''
