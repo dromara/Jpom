@@ -9,17 +9,16 @@
             <a-button key="console" type="primary">手动添加</a-button></router-link
           >
         </template>
-        <div class="desc">
-          <p style="font-size: 16px">
-            <strong>解决办法</strong>
-          </p>
-          <ol>
-            <li>【推荐】使用快速安装方式导入机器并自动添加逻辑节点</li>
-            <li>
-              请到【系统管理】-> 【资产管理】-> 【机器管理】添加节点，或者将已添加的机器授权关联、分配到此工作空间
-            </li>
-          </ol>
-        </div>
+        <a-alert message="解决办法" type="info" show-icon>
+          <template #description>
+            <ol>
+              <li>【推荐】使用快速安装方式导入机器并自动添加逻辑节点</li>
+              <li>
+                请到【系统管理】-> 【资产管理】-> 【机器管理】添加节点，或者将已添加的机器授权关联、分配到此工作空间
+              </li>
+            </ol>
+          </template>
+        </a-alert>
       </a-result>
     </template>
     <template v-else>
@@ -177,9 +176,6 @@
                 >
               </a-tooltip>
             </template>
-            <!-- <a-tooltip slot="freeMemory" slot-scope="text" placement="topLeft" :title="renderSize(text)">
-          <span>{{ renderSize(text) }}</span>
-        </a-tooltip> -->
 
             <template v-else-if="column.dataIndex === 'runTime'">
               <a-tooltip

@@ -4,7 +4,7 @@
       <!-- 工作空间信息 -->
       <a-button v-if="mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
-          <a-tooltip :title="`工作空间名称：${selectWorkspace.name} 【分组名：${selectWorkspace.group}】`">
+          <a-tooltip :title="`工作空间名称：${selectWorkspace.name} 【分组名：${selectWorkspace.group || '未配置'}】`">
             <SwitcherOutlined />
             {{ selectWorkspace.name }}
             <template v-if="myClusterList.length > 1 && selectWorkspace.clusterInfoId">

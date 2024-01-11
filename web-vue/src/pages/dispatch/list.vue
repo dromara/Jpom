@@ -571,18 +571,7 @@
               </a-button>
             </template>
           </a-form-item>
-          <!-- <a-form-item name="lib">
-            <template slot="label">
-              项目文件夹
-              <a-tooltip v-show="temp.type !== 'edit'">
-                <template slot="title">
-                  <ul></ul>
-                </template>
-                <QuestionCircleOutlined />
-              </a-tooltip>
-            </template>
 
-          </a-form-item> -->
           <a-form-item v-show="filePath !== ''" label="项目完整目录">
             <a-alert :message="filePath" type="success" />
           </a-form-item>

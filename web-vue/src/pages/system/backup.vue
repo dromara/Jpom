@@ -78,12 +78,7 @@
             <a-tag color="#108ee9">{{ renderSizeFormat(text) }}</a-tag>
           </a-tooltip>
         </template>
-        <!-- <a-tooltip slot="filePath" slot-scope="text, record" placement="topLeft" :title="text + ' ' + (record.sha1Sum || '')">
-          <span
 
-            >{{ text }}
-          </span>
-        </a-tooltip> -->
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button
