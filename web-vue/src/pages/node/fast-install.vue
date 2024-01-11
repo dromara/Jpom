@@ -3,7 +3,7 @@
     <div v-if="fastInstallInfo">
       <a-collapse v-model:activeKey="fastInstallActiveKey">
         <a-collapse-panel key="1" header="温馨提示">
-          <a-alert message="温馨提示" type="warning" show-icon>
+          <a-alert message="" type="warning" show-icon>
             <template v-slot:description>
               <ul>
                 <li>
@@ -80,7 +80,7 @@
                   >
                 </div>
                 <div v-if="item.type === 'multiIp'">
-                  能通讯的IP:
+                  能通讯的IP(需要手动确认):
                   <a-tag
                     @click="confirmFastInstall(item.id, itemIp, item.port)"
                     v-for="(itemIp, indexIp) in item.canUseIp"
