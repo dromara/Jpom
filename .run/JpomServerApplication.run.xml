@@ -12,4 +12,12 @@
       <option name="Make" enabled="true" />
     </method>
   </configuration>
+  <configuration default="false" name="JpomServerApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="server" />
+    <option name="PROGRAM_PARAMETERS" value="--h2-migrate-mysql1 --h2-user=jpom --h2-pass=jpom" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="org.dromara.jpom.JpomServerApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
 </component>

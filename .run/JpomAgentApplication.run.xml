@@ -13,4 +13,12 @@
       <option name="Make" enabled="true" />
     </method>
   </configuration>
+  <configuration default="false" name="JpomAgentApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <module name="agent" />
+    <option name="PROGRAM_PARAMETERS" value="--sss=sss" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="org.dromara.jpom.JpomAgentApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
 </component>
