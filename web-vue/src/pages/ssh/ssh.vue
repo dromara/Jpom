@@ -286,7 +286,7 @@
     <a-modal
       destroyOnClose
       :style="{
-        // maxWidth: '100vw',
+        maxWidth: '100vw',
         top: this.terminalFullscreen ? 0 : false,
         paddingBottom: 0
       }"
