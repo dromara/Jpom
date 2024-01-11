@@ -215,12 +215,19 @@
                       <template v-slot:overlay>
                         <a-menu>
                           <a-menu-item key="1">
-                            <a-button size="small" type="primary" @click="reqStartBuild({ id: item.id }, true)"
+                            <a-button
+                              size="small"
+                              type="primary"
+                              @click="reqStartBuild({ id: item.id, buildEnvParameter: item.buildEnvParameter }, true)"
                               >直接构建
                             </a-button>
                           </a-menu-item>
                           <a-menu-item key="2">
-                            <a-button size="small" type="primary" @click="reqStartBuild({ id: item.id }, false)">
+                            <a-button
+                              size="small"
+                              type="primary"
+                              @click="reqStartBuild({ id: item.id, buildEnvParameter: item.buildEnvParameter }, false)"
+                            >
                               后台构建
                             </a-button>
                           </a-menu-item>
@@ -392,12 +399,18 @@
                   <template v-slot:overlay>
                     <a-menu>
                       <a-menu-item key="1">
-                        <a-button size="small" type="primary" @click="reqStartBuild({ id: record.id }, true)"
+                        <a-button
+                          size="small"
+                          type="primary"
+                          @click="reqStartBuild({ id: record.id, buildEnvParameter: record.buildEnvParameter }, true)"
                           >直接构建</a-button
                         >
                       </a-menu-item>
                       <a-menu-item key="2">
-                        <a-button size="small" type="primary" @click="reqStartBuild({ id: record.id }, false)"
+                        <a-button
+                          size="small"
+                          type="primary"
+                          @click="reqStartBuild({ id: record.id, buildEnvParameter: record.buildEnvParameter }, false)"
                           >后台构建</a-button
                         >
                       </a-menu-item>
@@ -516,12 +529,12 @@
         }
       "
       @build="
-        (build, buildId) => {
+        (build, buildId, buildEnvParameter) => {
           this.editBuildVisible = 0
           this.loadData()
           this.loadGroupList()
           if (build) {
-            reqStartBuild({ id: buildId }, true)
+            reqStartBuild({ id: buildId, buildEnvParameter: buildEnvParameter || temp.buildEnvParameter }, true)
           }
         }
       "
@@ -937,14 +950,14 @@ export default {
       // this.handleEdit(temp, 1)
     },
     handleEdit(record, steps) {
-      this.temp = { id: record.id }
+      this.temp = { id: record.id, buildEnvParameter: record.buildEnvParameter }
       this.editBuildVisible = 2
 
       this.editSteps = steps
     },
     handleDetails(record) {
       this.editBuildVisible = 1
-      this.temp = { id: record.id }
+      this.temp = { id: record.id, buildEnvParameter: record.buildEnvParameter }
     },
     loadBranchListById(id) {
       this.branchList = []

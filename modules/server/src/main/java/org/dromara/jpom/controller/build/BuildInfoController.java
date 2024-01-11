@@ -201,6 +201,7 @@ public class BuildInfoController extends BaseServerController {
                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "构建方式不正确") int buildMode,
                                             String aliasCode,
                                             @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "请填写正确的保留天数") Integer resultKeepDay,
+                                            String buildEnvParameter,
                                             HttpServletRequest request) {
         // 根据 repositoryId 查询仓库信息
         RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, request);
@@ -251,6 +252,7 @@ public class BuildInfoController extends BaseServerController {
         buildInfoModel.setGroup(group);
         buildInfoModel.setResultKeepDay(resultKeepDay);
         buildInfoModel.setBuildMode(buildMode);
+        buildInfoModel.setBuildEnvParameter(buildEnvParameter);
         // 发布方式
         BuildReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildReleaseMethod.class, releaseMethod);
         Assert.notNull(releaseMethod1, "发布方法不正确");

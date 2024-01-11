@@ -27,16 +27,10 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
-import cn.hutool.db.handler.RsHandler;
-import cn.hutool.db.sql.Direction;
-import cn.hutool.db.sql.Order;
 import cn.keepbx.jpom.event.ISystemTask;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.db.StorageServiceFactory;
-import org.dromara.jpom.model.BaseDbModel;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.user.TriggerTokenLogBean;
 import org.dromara.jpom.model.user.UserModel;
@@ -45,12 +39,8 @@ import org.dromara.jpom.service.h2db.BaseDbService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
