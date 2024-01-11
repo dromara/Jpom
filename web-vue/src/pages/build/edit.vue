@@ -70,7 +70,7 @@
                   <a-space v-if="dockerAllTagList && dockerAllTagList.length">
                     <a-tag v-for="(item, index) in dockerAllTagList" :key="index">{{ item }}</a-tag>
                   </a-space>
-                  <span v-else>还没有容器或者未配置标签不可以使用容器构建奥</span>
+                  <span v-else style="color: red; font-weight: bold">还没有容器或者未配置标签不可以使用容器构建奥</span>
                 </a-spin>
               </a-form-item>
               <a-alert message="容器构建注意" type="warning" show-icon>
