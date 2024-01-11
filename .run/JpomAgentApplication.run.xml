@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="JpomAgentApplication" type="Application" factoryName="Application" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="org.dromara.jpom.JpomAgentApplication" />
+    <module name="agent" />
+    <option name="PROGRAM_PARAMETERS" value="--auto-push-to-server \'http://127.0.0.1:3000/api/node/receive_push?token=78d5537e17d8c9fa726b539091b63876434e7770\&amp;workspaceId=DEFAULT\'" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="org.dromara.jpom.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
