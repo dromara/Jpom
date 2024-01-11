@@ -190,6 +190,7 @@
             </template>
           </div>
 
+          <!-- 构建流程 -->
           <div v-show="stepsCurrent === 2">
             <a-form-item v-if="temp.buildMode === 0" name="script">
               <template v-slot:label>
@@ -343,7 +344,15 @@
                 placeholder="构建产物目录,相对仓库的路径,如 java 项目的 target/xxx.jar vue 项目的 dist"
               />
             </a-form-item>
-            <div v-if="temp.buildMode === undefined">还没有选择构建方式</div>
+
+            <a-alert v-if="temp.buildMode === undefined" message="还没有选择构建方式" banner />
+            <a-form-item label="环境变量" v-else name="buildEnvParameter">
+              <a-textarea
+                v-model:value="temp.buildEnvParameter"
+                placeholder="请输入构建环境变量：xx=abc 多个变量回车换行即可"
+                :auto-size="{ minRows: 3, maxRows: 5 }"
+              />
+            </a-form-item>
           </div>
 
           <div v-show="stepsCurrent === 3">
@@ -1808,7 +1817,7 @@ export default {
                 message: res.msg
               })
               //
-              this.$emit('confirm', build, res.data)
+              this.$emit('confirm', build, res.data, this.temp.buildEnvParameter)
             }
           })
         })

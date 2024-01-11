@@ -51,8 +51,8 @@
           :data="data"
           v-model:editSteps="stepsCurrent"
           @confirm="
-            (build, buildId) => {
-              $emit('build', build, buildId)
+            (build, buildId, buildEnvParameter) => {
+              $emit('build', build, buildId, buildEnvParameter)
             }
           "
           @changeEditSteps="
