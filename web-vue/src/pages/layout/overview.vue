@@ -79,7 +79,7 @@
           <template v-slot:extra>
             <a href="#" @click="handleUserlog(2)">more</a>
           </template>
-          <a-timeline>
+          <a-timeline v-if="loginLog && loginLog.length">
             <a-timeline-item :color="item.success ? 'green' : 'red'" v-for="(item, index) in loginLog" :key="index">
               <a-space direction="vertical" :size="1">
                 <div>{{ parseTime(item.createTimeMillis) }}</div>
@@ -90,6 +90,7 @@
               </a-space>
             </a-timeline-item>
           </a-timeline>
+          <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="您还未登录过" v-else />
         </a-card>
       </a-col>
       <a-col :span="6">
@@ -116,7 +117,7 @@
               </a-space>
             </a-timeline-item>
           </a-timeline>
-          <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="您还执行操作" v-else />
+          <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="您还未执行操作" v-else />
         </a-card>
       </a-col>
     </a-row>

@@ -233,8 +233,8 @@
                 <template v-if="temp.needVerify">
                   <a-form-item label="二维码">
                     <a-row>
-                      <a-col :span="14" class="qrcode">
-                        <qrcode-vue :value="temp.url" :size="120" level="H" />
+                      <a-col :span="14">
+                        <a-qrcode :value="temp.url" :status="temp.url ? 'active' : 'loading'" />
                       </a-col>
                     </a-row>
                   </a-form-item>
@@ -494,12 +494,11 @@ import { mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
 import { useGuideStore } from '@/stores/guide'
-import QrcodeVue from 'qrcode.vue'
+
 import { useAllMenuStore } from '@/stores/menu2'
 export default {
   components: {
-    UserLog,
-    QrcodeVue
+    UserLog
   },
   props: {
     mode: {
@@ -1096,12 +1095,5 @@ export default {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-}
-
-.qrcode {
-  margin-left: 15px;
-  width: 120px;
-  height: 120px;
-  margin-bottom: 20px;
 }
 </style>
