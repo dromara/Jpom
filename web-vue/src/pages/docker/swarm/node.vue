@@ -47,7 +47,6 @@
           </a-tooltip>
         </template>
 
-        <!-- <a-popover :title="`状态信息：${TASK_STATE[text]}`" slot="desiredState" slot-scope="text, item" placement="topLeft"> -->
         <template v-else-if="column.dataIndex === 'hostname'">
           <a-popover placement="topLeft" :title="`主机名：${record.description && record.description.hostname}`">
             <template v-slot:content>

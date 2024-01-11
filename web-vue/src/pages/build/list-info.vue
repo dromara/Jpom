@@ -311,9 +311,7 @@
                 <span v-else>{{ text }}</span>
               </a-tooltip>
             </template>
-            <!-- <a-tooltip slot="resultDirFile" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip> -->
+
             <template v-else-if="column.dataIndex === 'buildMode'">
               <a-tooltip placement="topLeft" :title="text === 1 ? '容器构建' : '本地构建'">
                 <CloudOutlined v-if="text === 1" />

@@ -247,6 +247,7 @@
         :choose="'radio'"
         mode="choose"
         ref="buildHistory"
+        :buildId="chooseBuildInfo.id"
         @confirm="
           (data) => {
             this.chooseBuildInfo = {

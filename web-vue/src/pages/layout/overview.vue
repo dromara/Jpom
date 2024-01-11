@@ -2,7 +2,7 @@
   <div>
     <a-page-header :backIcon="false">
       <template #title> 欢迎【{{ getUserInfo.name }}】您使用本系统</template>
-      <!-- <template #subTitle>当前您在【】工作空间中 </template> -->
+      <template #subTitle>可以管理{{ (myWorkspaceList && myWorkspaceList.length) || 0 }}个工作空间 </template>
       <template v-slot:tags>
         <a-tag color="blue">
           <template v-if="getUserInfo.demoUser">演示账号</template>
@@ -18,21 +18,7 @@
       </template>
     </a-page-header>
     <a-divider dashed />
-    <a-row>
-      <a-col :span="4">
-        <!-- <a-list bordered :data-source="myWorkspaceList">
-            <a-list-item slot="renderItem" slot-scope="item"> <a-tag color="blue" v-if="getWorkspaceId() === item.id">当前</a-tag>{{ item.name }} </a-list-item>
-            <div slot="header">
-              <b>您的工作空间</b>
-            </div>
-          </a-list> -->
-        <!-- <a-card size="small" title="您的工作空间"> -->
-        <!-- <a slot="extra" href="#">more</a> -->
 
-        <!-- <p v-for="(item, index) in myWorkspaceList" :key="index">{{ item.name }}</p> -->
-        <!-- </a-card> -->
-      </a-col>
-    </a-row>
     <a-row :gutter="[16, 16]">
       <a-col :span="6">
         <a-card size="small">

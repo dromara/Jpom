@@ -39,8 +39,6 @@
         <template v-else-if="column.dataIndex === 'status'">
           <a-switch size="small" :checked="text" checked-children="开启" un-checked-children="关闭" />
         </template>
-        <!-- <a-switch slot="autoRestart" slot-scope="text" :checked="text" checked-children="是" un-checked-children="否" /> -->
-        <!-- <a-switch slot="alarm" slot-scope="text" :checked="text" disabled checked-children="报警中" un-checked-children="未报警" /> -->
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>

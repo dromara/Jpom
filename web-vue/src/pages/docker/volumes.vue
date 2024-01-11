@@ -45,9 +45,6 @@
           {{ text }}
         </a-tooltip>
       </template>
-      <!-- <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="renderSize(text) + ' ' + renderSize(record.virtualSize)">
-        <span>{{ renderSize(text) }}</span>
-      </a-tooltip> -->
 
       <template v-else-if="column.tooltip">
         <a-tooltip placement="topLeft" :title="text">

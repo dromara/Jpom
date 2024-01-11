@@ -326,16 +326,7 @@
             <a-radio :value="false"> 当前工作空间</a-radio>
           </a-radio-group>
         </a-form-item>
-        <!-- <a-form-item v-if="temp.id" name="restHideField">
-            <template slot="label">
-              隐藏字段
-              <a-tooltip>
-                <template slot="title"> 密码字段和私钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我 </template>
-                <QuestionCircleOutlined />
-              </a-tooltip>
-            </template>
-            <a-button style="margin-left: 10px" type="primary" danger @click="restHideField(temp)">清除</a-button>
-          </a-form-item> -->
+
         <a-form-item label="超时时间(s)" name="timeout">
           <a-input-number
             v-model:value="temp.timeout"
@@ -369,13 +360,6 @@
         >
           <a-form-item-rest>
             <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder[giteeImportForm.type]}`">
-              <!-- <a-input v-model="giteeImportForm.token" :placeholder="importTypePlaceholder[giteeImportForm.type]">
-                <a-select slot="addonBefore" style="width: 100px" @change="importChange" v-model="giteeImportForm.type">
-                  <a-select-option :value="item" v-for="item in Object.keys(providerData)" :key="item"> {{ item }}</a-select-option>
-                </a-select>
-
-
-              </a-input> -->
               <a-input-group compact>
                 <a-select style="width: 10%" @change="importChange" v-model:value="giteeImportForm.type">
                   <a-select-option :value="item" v-for="item in Object.keys(providerData)" :key="item">

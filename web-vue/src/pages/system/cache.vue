@@ -17,7 +17,7 @@
           <a-descriptions-item label="数据目录占用空间" :span="1">
             {{ renderSize(temp.dataSize) }} (10分钟刷新一次)
             <a-tooltip>
-              <template slot="title">
+              <template #title>
                 <ul>
                   <li>数据目录是指程序在运行过程中产生的文件以及数据存储目录</li>
                   <li>数据目录大小包含：临时文件、在线构建文件、数据库文件等</li>
@@ -42,7 +42,7 @@
           <a-descriptions-item label="在线构建文件占用空间">
             {{ renderSize(temp.cacheBuildFileSize) }} (10分钟刷新一次)
             <a-tooltip>
-              <template slot="title">
+              <template #title>
                 <ul>
                   <li>
                     在线构建文件主要保存，仓库文件，构建历史产物等。不支持主动清除，如果文件占用过大可以配置保留规则和对单个构建配置是否保存仓库、产物文件等

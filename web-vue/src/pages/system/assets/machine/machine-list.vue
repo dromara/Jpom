@@ -431,9 +431,6 @@
       @ok="handleSyncToWorkspace"
       :maskClosable="false"
     >
-      <!-- <a-alert message="温馨提示" type="warning">
-          <template slot="description"> </template>
-        </a-alert> -->
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item label="选择工作空间" name="workspaceId">
           <a-select
