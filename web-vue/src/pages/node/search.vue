@@ -3,7 +3,7 @@
     <template v-if="this.useSuggestions">
       <a-result
         title="当前工作空间还没有项目并且也没有任何节点"
-        sub-title="需要您先添加资产机器再分配机器节点（逻辑节点）到当前工作空间"
+        sub-title="需要您先新增资产机器再分配机器节点（逻辑节点）到当前工作空间"
       >
       </a-result>
     </template>
@@ -73,7 +73,7 @@
           </a-dropdown>
           <a-button v-else type="primary" :disabled="true"> 操作 <DownOutlined /> </a-button>
 
-          <a-button type="primary" @click="openAdd">创建</a-button>
+          <a-button type="primary" @click="openAdd">新增</a-button>
           <template v-if="!nodeId">
             <a-dropdown v-if="nodeMap && Object.keys(nodeMap).length">
               <a-button type="primary" danger> 同步 <DownOutlined /></a-button>

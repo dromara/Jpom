@@ -18,7 +18,7 @@
             <template #icon>
               <plus-outlined />
             </template>
-            添加
+            新增
           </a-button>
         </a-space>
       </template>

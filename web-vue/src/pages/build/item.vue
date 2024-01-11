@@ -36,7 +36,7 @@
         <template v-else>
           <a-menu mode="horizontal" class="menu" v-model:selectedKeys="menuKey" @click="menuClick">
             <a-menu-item key="edit">
-              <span> <EditOutlined /> 添加构建</span>
+              <span> <EditOutlined /> 新增构建</span>
             </a-menu-item>
           </a-menu>
         </template>

@@ -55,8 +55,8 @@
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleLink">添加关联</a-button>
-          <a-button type="primary" @click="handleAdd">创建分发</a-button>
+          <a-button type="primary" @click="handleLink">新增关联</a-button>
+          <a-button type="primary" @click="handleAdd">新增分发</a-button>
           <a-tooltip>
             <template v-slot:title>
               <div>
@@ -65,7 +65,7 @@
 
               <div>
                 <ul>
-                  <li>添加关联项目是指,将已经在节点中创建好的项目关联为节点分发项目来实现统一管理</li>
+                  <li>新增关联项目是指,将已经在节点中创建好的项目关联为节点分发项目来实现统一管理</li>
                   <li>
                     创建分发项目是指,全新创建一个属于节点分发到项目,创建成功后项目信息将自动同步到对应的节点中,修改节点分发信息也自动同步到对应的节点中
                   </li>
@@ -197,13 +197,13 @@
         </template>
       </template>
     </a-table>
-    <!-- 添加/编辑关联项目 -->
+    <!-- 新增/编辑关联项目 -->
     <a-modal
       destroyOnClose
       :confirmLoading="confirmLoading"
       v-model:open="linkDispatchVisible"
       width="900px"
-      :title="temp.type === 'edit' ? '编辑关联项目' : '添加关联项目'"
+      :title="temp.type === 'edit' ? '编辑关联项目' : '新增关联项目'"
       @ok="handleLinkDispatchOk"
       :maskClosable="false"
       @cancel="clearDispatchList"
@@ -255,7 +255,7 @@
                   :maxLength="50"
                   v-model:value="temp.group"
                   :data="groupList"
-                  inputPlaceholder="添加分组"
+                  inputPlaceholder="新增分组"
                   selectPlaceholder="选择分组"
                 >
                 </custom-select>
@@ -269,7 +269,7 @@
             item-layout="horizontal"
             :data-source="dispatchList"
             :locale="{
-              emptyText: '暂无数据,请先添加节点项目数据'
+              emptyText: '暂无数据,请先新增节点项目数据'
             }"
             :rowKey="
               (item) => {
@@ -335,7 +335,7 @@
               </a-list-item>
             </template>
           </a-list>
-          <a-button type="primary" @click="addDispachList" size="small">添加</a-button>
+          <a-button type="primary" @click="addDispachList" size="small">新增</a-button>
         </a-form-item>
         <a-form-item label="分发后操作" name="afterOpt">
           <a-select v-model:value="temp.afterOpt" placeholder="请选择发布后操作">
@@ -487,7 +487,7 @@
                     :maxLength="50"
                     v-model:value="temp.group"
                     :data="groupList"
-                    inputPlaceholder="添加分组"
+                    inputPlaceholder="新增分组"
                     selectPlaceholder="选择分组"
                   >
                   </custom-select>
@@ -1261,7 +1261,7 @@ export default {
           })
       })
     },
-    // 添加分发项目
+    // 新增分发项目
     handleAdd() {
       this.loadNodeList(() => {
         this.temp = {
@@ -1327,9 +1327,9 @@ export default {
                 webhook: record.webhook
               }
             }
-            // 添加 nodeIdList
+            // 新增 nodeIdList
             this.temp.nodeIdList.push(ele.nodeId)
-            // 添加 jvm token args
+            // 新增 jvm token args
             this.temp[`${ele.nodeId}_jvm`] = res.data.jvm || ''
             this.temp[`${ele.nodeId}_token`] = res.data.token || ''
             this.temp[`${ele.nodeId}_args`] = res.data.args || ''
@@ -1526,7 +1526,7 @@ export default {
     handleProjectChange(value, index) {
       this.dispatchList[index].projectId = value
     },
-    // 添加分发
+    // 新增分发
     addDispachList() {
       if (this.dispatchList.length >= this.totalProjectNum) {
         $notification.error({

@@ -182,7 +182,7 @@
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            inputPlaceholder="添加分组"
+            inputPlaceholder="新增分组"
             selectPlaceholder="选择分组名"
           >
           </custom-select>
@@ -308,7 +308,7 @@
                     -----END RSA PRIVATE KEY-----
                   </p>
                   <p>
-                    2. 私钥文件绝对路径（绝对路径前面添加 file: 前缀) 如:
+                    2. 私钥文件绝对路径（绝对路径前面新增 file: 前缀) 如:
                     <br />file:/Users/Hotstrip/.ssh/id_rsa
                   </p>
                 </div>
@@ -437,7 +437,7 @@
 
           <template v-else-if="column.dataIndex === 'operation'">
             <a-button type="primary" size="small" :disabled="record.exists" @click="handleGiteeRepoAdd(record)">{{
-              record.exists ? '已存在' : '添加'
+              record.exists ? '已存在' : '新增'
             }}</a-button>
           </template>
         </template>
@@ -774,7 +774,7 @@ export default {
     // handleFilter() {
     //   this.loadData();
     // },
-    // 添加
+    // 新增
     handleAdd() {
       this.temp = {
         repoType: 0,

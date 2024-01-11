@@ -21,7 +21,7 @@
         label="限定时间"
         v-if="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].filters.includes('until')"
       >
-        <template #help><a-tag color="#f50"> 建议添加指定时间范围,否则将删除满足条件的所有数据</a-tag> </template>
+        <template #help><a-tag color="#f50"> 建议新增指定时间范围,否则将删除满足条件的所有数据</a-tag> </template>
         <a-tooltip
           title="可以是 Unix 时间戳、日期格式的时间戳或 Go 持续时间字符串（例如 10m、1h30m），相对于守护进程机器的时间计算。"
         >

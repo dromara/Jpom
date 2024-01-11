@@ -54,7 +54,7 @@
                     <a-input
                       :addon-before="`参数${index + 1}值`"
                       v-model:value="item.value"
-                      placeholder="参数值,添加默认参数后在手动执行脚本时需要填写参数值"
+                      placeholder="参数值,新增默认参数后在手动执行脚本时需要填写参数值"
                     />
                   </a-space>
                 </a-col>
@@ -66,7 +66,7 @@
                   </a-row>
                 </a-col>
               </a-row>
-              <a-button type="primary" @click="() => commandParams.push({})">添加参数</a-button>
+              <a-button type="primary" @click="() => commandParams.push({})">新增参数</a-button>
             </a-space>
           </a-form-item>
           <a-form-item label="共享" name="global">
