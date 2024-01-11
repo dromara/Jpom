@@ -28,10 +28,16 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Db;
+import cn.hutool.db.Entity;
+import cn.hutool.db.Page;
 import cn.hutool.db.handler.RsHandler;
+import cn.hutool.db.sql.Direction;
+import cn.hutool.db.sql.Order;
 import cn.keepbx.jpom.event.ISystemTask;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.db.StorageServiceFactory;
+import org.dromara.jpom.model.BaseDbModel;
+import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.user.TriggerTokenLogBean;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.ITriggerToken;
@@ -44,6 +50,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -150,36 +157,40 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> im
     private void cleanTriggerToken() {
         // 统计删除条数
         int delCount = 0;
-        int fetchSize = StorageServiceFactory.get().getFetchSize();
         for (ITriggerToken triggerToken : triggerTokens) {
             TriggerTokenLogBean tokenLogBean = new TriggerTokenLogBean();
             tokenLogBean.setType(triggerToken.typeName());
             try {
-                delCount += Db.use(this.getDataSource())
-                    .query((conn -> {
-                        PreparedStatement ps = conn.prepareStatement("select dataId,id from " + this.getTableName() + " where type=?",
-                            ResultSet.TYPE_FORWARD_ONLY,
-                            ResultSet.CONCUR_READ_ONLY);
-                        ps.setString(1, triggerToken.typeName());
-                        ps.setFetchSize(fetchSize);
-                        ps.setFetchDirection(ResultSet.FETCH_FORWARD);
-                        return ps;
-                    }), (RsHandler<Integer>) rs -> {
-                        List<String> ids = new ArrayList<>();
-                        while (rs.next()) {
-                            //
-                            String dataId = rs.getString("dataId");
-                            if (triggerToken.exists(dataId)) {
-                                continue;
-                            }
-                            String id = rs.getString("id");
-                            ids.add(id);
+                int pageNumber = 1;
+                while (true) {
+                    Page page = new Page(pageNumber, 50);
+                    Entity entity = new Entity();
+                    entity.set("type", triggerToken.typeName());
+                    entity.setFieldNames("id", "dataId");
+                    PageResultDto<TriggerTokenLogBean> pageResult = this.listPage(entity, page);
+                    if (pageResult.isEmpty()) {
+                        break;
+                    }
+                    List<String> ids = new ArrayList<>();
+                    List<TriggerTokenLogBean> result = pageResult.getResult();
+                    for (TriggerTokenLogBean bean : result) {
+                        //
+                        String dataId = bean.getDataId();
+                        if (triggerToken.exists(dataId)) {
+                            continue;
                         }
-                        // 删除 token
-                        this.delByKey(ids);
-                        return ids.size();
-                    });
-            } catch (SQLException e) {
+                        String id = bean.getId();
+                        ids.add(id);
+                    }
+                    // 删除 token
+                    this.delByKey(ids);
+                    if (pageResult.getTotalPage() <= pageNumber) {
+                        break;
+                    }
+                    pageNumber++;
+                    delCount += ids.size();
+                }
+            } catch (Exception e) {
                 log.error("执行清理 token[{}] 异常", triggerToken.typeName(), e);
             }
         }
