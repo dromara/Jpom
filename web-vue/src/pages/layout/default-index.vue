@@ -56,7 +56,7 @@ defineProps({
 const collapsed = ref(false)
 const subTitle = ref('项目运维')
 const logoUrl = ref('')
-const fullScreenFlag = ref(false)
+
 const appStore = useAppStore()
 const guideStore = useGuideStore()
 onMounted(() => {
