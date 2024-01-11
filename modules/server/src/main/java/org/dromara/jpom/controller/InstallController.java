@@ -35,7 +35,7 @@ import org.dromara.jpom.common.interceptor.NotLogin;
 import org.dromara.jpom.common.validator.ValidatorConfig;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
-import org.dromara.jpom.model.data.WorkspaceModel;
+import org.dromara.jpom.controller.user.UserWorkspaceModel;
 import org.dromara.jpom.model.dto.UserLoginDto;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
@@ -115,7 +115,7 @@ public class InstallController extends BaseServerController {
         //自动登录
         setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
         UserLoginDto userLoginDto = userService.getUserJwtId(userModel);
-        List<WorkspaceModel> bindWorkspaceModels = userBindWorkspaceService.listUserWorkspaceInfo(userModel);
+        List<UserWorkspaceModel> bindWorkspaceModels = userService.myWorkspace(userModel);
         userLoginDto.setBindWorkspaceModels(bindWorkspaceModels);
         // 二次验证信息
         JSONObject jsonObject = new JSONObject();

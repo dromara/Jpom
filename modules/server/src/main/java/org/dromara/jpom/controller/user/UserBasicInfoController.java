@@ -200,34 +200,7 @@ public class UserBasicInfoController extends BaseServerController {
     @GetMapping(value = "my-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<List<UserWorkspaceModel>> myWorkspace() {
         UserModel user = getUser();
-        List<WorkspaceModel> models = userBindWorkspaceService.listUserWorkspaceInfo(user);
-        Assert.notEmpty(models, "当前账号没有绑定任何工作空间，请联系管理员处理");
-        JSONObject parametersServerConfig = systemParametersServer.getConfig("user-my-workspace-" + user.getId(), JSONObject.class);
-        List<UserWorkspaceModel> userWorkspaceModels = models.stream()
-            .map(workspaceModel -> {
-                UserWorkspaceModel userWorkspaceModel = new UserWorkspaceModel();
-                userWorkspaceModel.setId(workspaceModel.getId());
-                userWorkspaceModel.setName(workspaceModel.getName());
-                userWorkspaceModel.setGroup(workspaceModel.getGroup());
-                userWorkspaceModel.setOriginalName(workspaceModel.getName());
-                userWorkspaceModel.setClusterInfoId(workspaceModel.getClusterInfoId());
-                Long createTimeMillis = workspaceModel.getCreateTimeMillis();
-                userWorkspaceModel.setSort((int) (ObjectUtil.defaultIfNull(createTimeMillis, 0L) / 1000L));
-                return userWorkspaceModel;
-            })
-            .peek(userWorkspaceModel -> {
-                if (parametersServerConfig == null) {
-                    return;
-                }
-                UserWorkspaceModel userConfig = parametersServerConfig.getObject(userWorkspaceModel.getId(), UserWorkspaceModel.class);
-                if (userConfig == null) {
-                    return;
-                }
-                userWorkspaceModel.setName(StrUtil.emptyToDefault(userConfig.getName(), userWorkspaceModel.getName()));
-                userWorkspaceModel.setSort(ObjectUtil.defaultIfNull(userConfig.getSort(), userWorkspaceModel.getSort()));
-            })
-            .sorted((o1, o2) -> CompareUtil.compare(o1.getSort(), o2.getSort()))
-            .collect(Collectors.toList());
+        List<UserWorkspaceModel> userWorkspaceModels = userService.myWorkspace(user);
         return JsonMessage.success("", userWorkspaceModels);
     }
 
