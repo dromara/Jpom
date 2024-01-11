@@ -86,10 +86,8 @@
                 @finish="handleMfaSure"
                 class="init-form"
               >
-                <a-form-item label="二维码" style="margin-bottom: 5px">
-                  <div class="qrcode">
-                    <qrcode-vue :value="qrCode.value" :size="qrCode.size" level="H" />
-                  </div>
+                <a-form-item label="二维码">
+                  <a-qrcode :value="qrCode.value" :status="qrCode.value ? 'active' : 'loading'" />
                 </a-form-item>
                 <a-form-item label="MFA key" name="mfa">
                   <a-input-group compact>
@@ -143,7 +141,7 @@ import sha1 from 'js-sha1'
 import { checkSystem } from '@/api/install'
 import { initInstall } from '@/api/install'
 // import { onMounted, reactive, ref } from 'vue'
-import QrcodeVue from 'qrcode.vue'
+
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
 import defaultBg from '@/pages/layout/default-bg.vue'
@@ -162,8 +160,8 @@ const setpCurrent = ref(0)
 const canInstall = ref(true)
 
 const qrCode = reactive({
-  value: '',
-  size: 120
+  value: ''
+  // size: 120
 })
 
 const loading = ref(false)
@@ -243,11 +241,4 @@ onMounted(() => {
   })
 })
 </script>
-<style scoped>
-.qrcode {
-  margin-left: 15px;
-  width: 120px;
-  height: 120px;
-  margin-bottom: 20px;
-}
-</style>
+<style scoped></style>

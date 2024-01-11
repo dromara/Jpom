@@ -43,16 +43,18 @@
 
           <a-button type="primary" @click="handleEdit()">新增</a-button>
 
-          <a-dropdown v-if="!nodeId">
-            <a-button type="primary" danger> 同步缓存<DownOutlined /></a-button>
-            <template v-slot:overlay>
-              <a-menu>
-                <a-menu-item v-for="(nodeName, key) in nodeMap" :key="key" @click="sync(key)">
-                  <a href="javascript:;">{{ nodeName }} <SyncOutlined /></a>
-                </a-menu-item>
-              </a-menu>
-            </template>
-          </a-dropdown>
+          <template v-if="!nodeId">
+            <a-dropdown v-if="nodeMap && Object.keys(nodeMap).length">
+              <a-button type="primary" danger> 同步缓存<DownOutlined /></a-button>
+              <template v-slot:overlay>
+                <a-menu>
+                  <a-menu-item v-for="(nodeName, key) in nodeMap" :key="key" @click="sync(key)">
+                    <a href="javascript:;">{{ nodeName }} <SyncOutlined /></a>
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </template>
           <a-button v-else type="primary" danger @click="sync(nodeId)"> <SyncOutlined />同步缓存 </a-button>
 
           <a-tooltip>

@@ -433,6 +433,15 @@
           :label-col="{ span: 4 }"
           :wrapper-col="{ span: 18 }"
         >
+          <a-alert
+            v-if="!nodeList || !nodeList.length"
+            message="提醒"
+            type="warning"
+            show-icon
+            style="margin-bottom: 10px"
+          >
+            <template #description>当前工作空间还没有逻辑节点不能创建节点分发奥</template>
+          </a-alert>
           <a-form-item name="id">
             <template v-slot:label>
               <a-tooltip>

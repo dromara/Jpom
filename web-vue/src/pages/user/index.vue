@@ -138,6 +138,15 @@
       @ok="handleEditUserOk"
       :maskClosable="false"
     >
+      <a-alert
+        v-if="!permissionGroup || !permissionGroup.length"
+        message="提醒"
+        type="warning"
+        show-icon
+        style="margin-bottom: 10px"
+      >
+        <template #description>还没有配置权限组不能创建用户奥</template>
+      </a-alert>
       <a-form ref="editUserForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="登录名称" name="id">
           <a-input
