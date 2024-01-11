@@ -2,7 +2,7 @@
   <configuration default="false" name="JpomAgentApplication" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="org.dromara.jpom.JpomAgentApplication" />
     <module name="agent" />
-    <option name="PROGRAM_PARAMETERS" value="--auto-push-to-server \'http://127.0.0.1:3000/api/node/receive_push?token=78d5537e17d8c9fa726b539091b63876434e7770\&amp;workspaceId=DEFAULT\'" />
+    <option name="PROGRAM_PARAMETERS" value="--auto-push-to-server http://127.0.0.1:2122/api/node/receive_push?token=a15a014ab0aa6526296b8b0312c62b0ae3436806&amp;workspaceId=DEFAULT" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="org.dromara.jpom.*" />
