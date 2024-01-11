@@ -207,6 +207,11 @@
                 <ul>
                   <li>SSH 方式连接 docker 是通过终端实现，每次操作 docker 相关 api 需要登录一次终端</li>
                   <li>docker 版本需要大于 18.09 才能使用 SSH 方式连接</li>
+                  <li>如果使用 SSH 方式但是 SSH 无法选择，是表示系统没有监测到 docker 服务</li>
+                  <li>
+                    如果您 SSH 机器中存在 docker 但是系统没有监测到，您需要到【配置管理】->【系统配置目录】中修改
+                    <b>ssh/monitor-script.sh</b> 文件来兼容您的机器
+                  </li>
                 </ul>
               </template>
               <template v-else>
