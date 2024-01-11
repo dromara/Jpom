@@ -127,7 +127,16 @@
           </template>
           <a-select
             show-search
-            option-filter-prop="children"
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
             placeholder="请选择分发到的节点"
             mode="multiple"
             v-model:value="envTemp.chooseNode"

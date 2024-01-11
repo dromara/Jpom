@@ -451,7 +451,16 @@
                     <a-col :span="22">
                       <a-select
                         show-search
-                        option-filter-prop="children"
+                        :filter-option="
+                          (input, option) => {
+                            const children = option.children && option.children()
+                            return (
+                              children &&
+                              children[0].children &&
+                              children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                            )
+                          }
+                        "
                         mode="multiple"
                         v-model:value="tempExtraData.releaseMethodDataId_3"
                         placeholder="请选择SSH"
@@ -961,9 +970,6 @@
                   </span>
                 </template>
               </a-input-search>
-              <!-- <a-select allowClear show-search option-filter-prop="children" placeholder="构建过程执行对应的脚本" v-model="tempExtraData.noticeScriptId">
-                <a-select-option v-for="item2 in scriptList" :key="item2.id">{{ item2.name }}</a-select-option>
-              </a-select> -->
             </a-form-item>
             <a-form-item name="attachEnv">
               <template v-slot:label>

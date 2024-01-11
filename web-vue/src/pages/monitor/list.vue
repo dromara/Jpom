@@ -118,7 +118,16 @@
             mode="multiple"
             placeholder="选择要监控的项目,file 类型项目不可以监控"
             show-search
-            option-filter-prop="children"
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
           >
             <a-select-opt-group
               :label="nodeMap[nodeItem.node].name"

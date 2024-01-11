@@ -14,7 +14,16 @@
           <a-select
             show-search
             allowClear
-            option-filter-prop="children"
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
             v-model:value="listQuery.status"
             placeholder="状态"
             class="search-input-item"
@@ -23,7 +32,16 @@
           </a-select>
           <a-select
             show-search
-            option-filter-prop="children"
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
             v-model:value="listQuery.releaseMethod"
             allowClear
             placeholder="发布方式"
@@ -33,7 +51,16 @@
           </a-select>
           <a-select
             show-search
-            option-filter-prop="children"
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
             v-model:value="listQuery.group"
             allowClear
             placeholder="分组"
