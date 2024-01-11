@@ -251,6 +251,14 @@ export function statWorkspace() {
   })
 }
 
+export function statSystemOverview() {
+  return axios({
+    url: '/stat/system',
+    method: 'get',
+    params: {}
+  })
+}
+
 /**
  * 我的集群
  *

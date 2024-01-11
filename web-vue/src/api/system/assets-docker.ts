@@ -1,4 +1,4 @@
-import axios from "@/api/config";
+import axios from '@/api/config'
 
 /**
  * 容器列表
@@ -6,30 +6,30 @@ import axios from "@/api/config";
  */
 export function dockerList(params) {
   return axios({
-    url: "/system/assets/docker/list-data",
-    method: "post",
-    data: params,
-  });
+    url: '/system/assets/docker/list-data',
+    method: 'post',
+    data: params
+  })
 }
 
 export function dockerImportTls(formData) {
   return axios({
-    url: "/system/assets/docker/import-tls",
+    url: '/system/assets/docker/import-tls',
     headers: {
-      "Content-Type": "multipart/form-data;charset=UTF-8",
+      'Content-Type': 'multipart/form-data;charset=UTF-8'
     },
-    method: "post",
+    method: 'post',
     timeout: 0,
-    data: formData,
-  });
+    data: formData
+  })
 }
 
 export function editDocker(data) {
   return axios({
-    url: "/system/assets/docker/edit",
-    method: "post",
-    data: data,
-  });
+    url: '/system/assets/docker/edit',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -40,10 +40,10 @@ export function editDocker(data) {
  */
 export function tryLocalDocker(params) {
   return axios({
-    url: "/system/assets/docker/try-local-docker",
-    method: "get",
-    params,
-  });
+    url: '/system/assets/docker/try-local-docker',
+    method: 'get',
+    params
+  })
 }
 
 /**
@@ -54,42 +54,42 @@ export function tryLocalDocker(params) {
  */
 export function deleteDcoker(params) {
   return axios({
-    url: "/system/assets/docker/del",
-    method: "get",
-    params,
-  });
+    url: '/system/assets/docker/del',
+    method: 'get',
+    params
+  })
 }
 
 export function dockerListGroup(params) {
   return axios({
-    url: "/system/assets/docker/list-group",
-    method: "get",
-    params: params,
-  });
+    url: '/system/assets/docker/list-group',
+    method: 'get',
+    params: params
+  })
 }
 
 export function initDockerSwarm(data) {
   return axios({
-    url: "/system/assets/docker/init",
-    method: "post",
-    data: data,
-  });
+    url: '/system/assets/docker/init',
+    method: 'post',
+    data: data
+  })
 }
 
 export function joinDockerSwarm(data) {
   return axios({
-    url: "/system/assets/docker/join",
-    method: "post",
-    data: data,
-  });
+    url: '/system/assets/docker/join',
+    method: 'post',
+    data: data
+  })
 }
 
 export function dockerSwarmListAll(params) {
   return axios({
-    url: "/system/assets/docker/swarm/list-all",
-    method: "get",
-    params: params,
-  });
+    url: '/system/assets/docker/swarm/list-all',
+    method: 'get',
+    params: params
+  })
 }
 
 /**
@@ -100,10 +100,10 @@ export function dockerSwarmListAll(params) {
  */
 export function dcokerSwarmLeaveForce(params) {
   return axios({
-    url: "/system/assets/docker/leave-force",
-    method: "get",
-    params,
-  });
+    url: '/system/assets/docker/leave-force',
+    method: 'get',
+    params
+  })
 }
 
 /**
@@ -112,24 +112,29 @@ export function dcokerSwarmLeaveForce(params) {
  */
 export function dockerSwarmNodeLeave(params) {
   return axios({
-    url: "/system/assets/docker/leave-node",
-    method: "get",
-    params: params,
-  });
+    url: '/system/assets/docker/leave-node',
+    method: 'get',
+    params: params
+  })
 }
 
 export function machineDockerDistribute(params) {
   return axios({
-    url: "/system/assets/docker/distribute",
-    method: "post",
-    data: params,
-  });
+    url: '/system/assets/docker/distribute',
+    method: 'post',
+    data: params
+  })
 }
 
 export function dockerListWorkspace(params) {
   return axios({
-    url: "/system/assets/docker/list-workspace-docker",
-    method: "get",
-    params: params,
-  });
+    url: '/system/assets/docker/list-workspace-docker',
+    method: 'get',
+    params: params
+  })
+}
+
+export const statusMap = {
+  0: { desc: '无法连接', color: 'red' },
+  1: { desc: '正常连接', color: 'green' }
 }

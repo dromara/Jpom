@@ -122,7 +122,8 @@ public class CacheManageController extends BaseServerController implements ICach
         map.put("timeZoneId", TimeZone.getDefault().getID());
         map.put("errorWorkspace", dataInitEvent.getErrorWorkspaceTable());
         map.put("clusterId", clusterConfig.getId());
-        map.put("installId", JpomManifest.getInstance().getInstallId());
+        JpomManifest jpomManifest = JpomManifest.getInstance();
+        map.put("installId", jpomManifest.getInstallId());
         //
         return JsonMessage.success("", map);
     }

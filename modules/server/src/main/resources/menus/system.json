@@ -1,5 +1,10 @@
 [
   {
+    "title": "资产总览",
+    "icon_v3": "laptop",
+    "id": "system-overview"
+  },
+  {
     "title": "资产管理",
     "icon_v3": "hdd",
     "id": "assets-manager",

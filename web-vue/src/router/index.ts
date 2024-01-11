@@ -148,6 +148,11 @@ const children = [
 
 const management = [
   {
+    path: '/system/overview',
+    name: 'system-overview',
+    component: () => import('../pages/system/overview.vue')
+  },
+  {
     path: '/system/assets/machine-list',
     name: 'system-machine-list',
     component: () => import('../pages/system/assets/machine/machine-list.vue')
@@ -302,7 +307,7 @@ const router = createRouter({
       path: '/system/management',
       name: 'sys-management',
       component: () => import('../pages/layout/management.vue'),
-      redirect: '/system/workspace',
+      redirect: '/system/overview',
       children: management.map((item: any) => {
         const props = item.props || {}
         props.routerUrl = item.path

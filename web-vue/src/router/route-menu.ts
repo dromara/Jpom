@@ -55,7 +55,8 @@ const routeMenuMap: Record<string, string> = {
   fileReleaseTask: '/file-manager/release-task',
   certificate: '/certificate/list',
   authConfig: '/system/oauth-config',
-  overview: '/overview'
+  overview: '/overview',
+  'system-overview': '/system/overview'
 }
 
 export default routeMenuMap

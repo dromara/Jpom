@@ -128,9 +128,8 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'status'">
-          <a-tag color="green" v-if="record.status === 1">正常</a-tag>
-          <a-tooltip v-else :title="record.failureMsg">
-            <a-tag color="red">无法连接</a-tag>
+          <a-tooltip :title="record.failureMsg">
+            <a-tag :color="statusMap[record.status].color">{{ statusMap[record.status].desc || '未知' }}</a-tag>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
@@ -556,7 +555,8 @@ import {
   dcokerSwarmLeaveForce,
   machineDockerDistribute,
   dockerListWorkspace,
-  dockerListGroup
+  dockerListGroup,
+  statusMap
 } from '@/api/system/assets-docker'
 import { machineSshListData } from '@/api/system/assets-ssh'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
@@ -579,6 +579,7 @@ export default {
     return {
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
+      statusMap,
       list: [],
       groupList: [],
       temp: {},
