@@ -340,9 +340,11 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         //
         File file = FileUtil.file(JpomApplication.getInstance().getDataPath(), Const.REMOTE_VERSION);
         SystemUtil.set("JPOM_REMOTE_VERSION_CACHE_FILE", file.getAbsolutePath());
-        SystemUtil.set("JPOM_IS_DEBUG", String.valueOf(JpomManifest.getInstance().isDebug()));
-        SystemUtil.set("JPOM_TYPE", JpomManifest.getInstance().getType().name());
-        SystemUtil.set("JPOM_VERSION", JpomManifest.getInstance().getVersion());
+        JpomManifest jpomManifest = JpomManifest.getInstance();
+        SystemUtil.set("JPOM_IS_DEBUG", String.valueOf(jpomManifest.isDebug()));
+        SystemUtil.set("JPOM_TYPE", jpomManifest.getType().name());
+        SystemUtil.set("JPOM_VERSION", jpomManifest.getVersion());
+        SystemUtil.set("JPOM_INSTALL_ID", jpomManifest.getInstallId());
         // 检查目录权限
         this.checkPath();
         this.install();

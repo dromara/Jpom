@@ -117,7 +117,7 @@ export default {
       this.$nextTick(() => {
         this.mangerMenuOpenkeys = []
         this.$router.push({
-          path: this.mode == 'normal' ? '/system/management' : '/overview'
+          path: this.mode == 'normal' ? '/system/overview' : '/overview'
         })
       })
     },
