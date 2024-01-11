@@ -105,7 +105,12 @@
     </a-row>
 
     <a-divider dashed />
-    <div v-html="changelog"></div>
+    <div
+      v-html="changelog"
+      :style="{
+        color: getThemeStyle().color
+      }"
+    ></div>
   </div>
 </template>
 
@@ -119,7 +124,7 @@ import {
   uploadUpgradeFileMerge,
   changBetaRelease
 } from '@/api/system'
-
+import { useGuideStore } from '@/stores/guide'
 import markdownit from 'markdown-it'
 // import 'markdown-it-vue/dist/markdown-it-vue.css'
 
@@ -148,6 +153,9 @@ export default {
       type: String,
       default: ''
     }
+  },
+  computed: {
+    ...mapState(useGuideStore, ['getThemeStyle'])
   },
   data() {
     return {
@@ -547,3 +555,5 @@ export default {
   }
 }
 </script>
+<style scoped>
+</style>

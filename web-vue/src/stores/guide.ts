@@ -12,6 +12,7 @@ interface IState {
 
 interface IStateCache extends IState {
   guideCache: IStateGuideCache
+  getThemeView: Function
 }
 
 interface IStateGuideCache {
@@ -138,6 +139,14 @@ export const useGuideStore = defineStore('guide', {
           return themeView
         }
         return 'light'
+      }
+    },
+    getThemeStyle: (state) => {
+      return () => {
+        const theme = state.getThemeView()
+        return {
+          color: theme === 'light' ? 'rgba(0, 0, 0, 0.88)' : '#fff'
+        }
       }
     },
     getMenuThemeView: (state) => {

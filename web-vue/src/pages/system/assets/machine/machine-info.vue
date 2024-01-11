@@ -281,38 +281,29 @@
         </a-table>
       </a-tab-pane>
       <a-tab-pane key="hw-disk" tab="硬件硬盘">
-        <a-table
-          size="middle"
-          :columns="hwDiskColumns"
-          :data-source="hwDiskList"
-          bordered
-          :pagination="false"
-          :scroll="{
-            x: 'max-content'
-          }"
-        >
-          <template #bodyCell="{ column, text, record }">
-            <template v-if="column.tooltip">
-              <a-tooltip placement="topLeft" :title="text">
-                {{ text }}
-              </a-tooltip>
+        <a-collapse>
+          <a-collapse-panel :key="item.uuid" v-for="item in hwDiskList">
+            <template #header>
+              <a-page-header :title="item.name" :backIcon="false">
+                <template #subTitle> {{ item.model }} </template>
+                <a-descriptions size="small" :column="4">
+                  <a-descriptions-item label="序号">{{ item.serial }}</a-descriptions-item>
+                  <a-descriptions-item label="大小">{{ renderSize(item.size) }}</a-descriptions-item>
+                  <a-descriptions-item label="运行时间">{{ formatDuration(item.transferTime) }}</a-descriptions-item>
+                  <a-descriptions-item label="队列数"> {{ item.currentQueueLength }} </a-descriptions-item>
+                </a-descriptions>
+                <a-descriptions size="small" :column="4">
+                  <a-descriptions-item label="写入大小"> {{ renderSize(item.writeBytes) }} </a-descriptions-item>
+                  <a-descriptions-item label="写入次数">{{ item.writes }}</a-descriptions-item>
+                  <a-descriptions-item label="读取大小"> {{ renderSize(item.readBytes) }} </a-descriptions-item>
+                  <a-descriptions-item label="读取次数">{{ item.reads }}</a-descriptions-item>
+                </a-descriptions>
+              </a-page-header>
             </template>
-            <template v-else-if="column.sizeTooltip">
-              <a-tooltip placement="topLeft" :title="renderSize(text)">
-                {{ renderSize(text) }}
-              </a-tooltip>
-            </template>
-            <template v-else-if="column.durationTooltip">
-              <a-tooltip placement="topLeft" :title="formatDuration(text)">
-                {{ formatDuration(text, '', 2) }}
-              </a-tooltip>
-            </template>
-          </template>
-          <template #expandedRowRender="{ record }">
             <a-table
               size="middle"
               :columns="hwDiskPartitionColumns"
-              :data-source="record.partition"
+              :data-source="item.partition"
               :pagination="false"
               :scroll="{
                 x: 'max-content'
@@ -329,8 +320,8 @@
                 </a-tooltip>
               </template>
             </a-table>
-          </template>
-        </a-table>
+          </a-collapse-panel>
+        </a-collapse>
       </a-tab-pane>
       <a-tab-pane key="networkInterfaces" tab="网卡信息">
         <a-collapse v-if="networkInterfaces && networkInterfaces.length">
@@ -683,68 +674,7 @@ export default {
           tooltip: true
         }
       ],
-      hwDiskColumns: [
-        {
-          title: '名称',
-          dataIndex: 'name',
-          ellipsis: true,
-          tooltip: true
-        },
-        {
-          title: '型号',
-          dataIndex: 'model',
-          ellipsis: true,
-          tooltip: true
-        },
-        {
-          title: '序号',
-          dataIndex: 'serial',
-          ellipsis: true,
-          tooltip: true
-        },
-        {
-          title: '大小',
-          dataIndex: 'size',
-          ellipsis: true,
-          sizeTooltip: true
-        },
-        {
-          title: '写入大小',
-          dataIndex: 'writeBytes',
-          ellipsis: true,
-          sizeTooltip: true
-        },
-        {
-          title: '读取大小',
-          dataIndex: 'readBytes',
-          ellipsis: true,
-          sizeTooltip: true
-        },
-        {
-          title: '写入次数',
-          dataIndex: 'writes',
-          ellipsis: true,
-          sizeTooltip: true
-        },
-        {
-          title: '读取次数',
-          dataIndex: 'reads',
-          ellipsis: true,
-          sizeTooltip: true
-        },
-        {
-          title: '运行时间',
-          dataIndex: 'transferTime',
-          ellipsis: true,
-          durationTooltip: true
-        },
-        {
-          title: '队列数',
-          dataIndex: 'currentQueueLength',
-          ellipsis: true,
-          tooltip: true
-        }
-      ],
+
       hwDiskPartitionColumns: [
         {
           title: '分区ID',
@@ -1033,5 +963,13 @@ export default {
 }
 :deep(.ant-statistic-content-value, .ant-statistic-content) {
   font-size: 12px;
+}
+
+:deep(.ant-page-header),
+:deep(.ant-page-header-content) {
+  padding: 0;
+}
+:deep(.ant-page-header-heading-left) {
+  margin: 0;
 }
 </style>

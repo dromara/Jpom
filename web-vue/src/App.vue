@@ -18,16 +18,15 @@
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
 import { theme } from 'ant-design-vue'
 import { useGuideStore } from '@/stores/guide'
-// theme.defaultAlgorithm
-// theme.darkAlgorithm
-// theme.compactAlgorithm
+
 const routerActivation = ref(true)
 const guideStore = useGuideStore()
 const getGuideCache = guideStore.getGuideCache
-// const scrollbarFlag = computed(() => {
-//   return getGuideCache.scrollbarFlag ?? true
-// })
 
+// https://www.antdv.com/docs/vue/customize-theme-cn
+// theme.defaultAlgorithm
+// theme.darkAlgorithm
+// theme.compactAlgorithm
 const themeAlgorithm = computed(() => {
   const algorithm: any = []
   if (getGuideCache.compactView) {
