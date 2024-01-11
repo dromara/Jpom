@@ -208,20 +208,20 @@ function installMvnFn() {
 		echo "不存在 mvn 环境,开始尝试安装"
 		useDir=$(mustMkdir /usr/maven/ maven)
 		userProfileName=$(findProfile)
-		if grep -q "$useDir/apache-maven-3.6.3/" /etc/profile; then
+		if grep -q "$useDir/apache-maven-3.9.6/" /etc/profile; then
 			errorExit "系统环境变量中已经存在 mvn 路径，请检查配置是否正确.或者终端是否重新加载环境变量：source $userProfileName"
 		fi
 		if grep -q "MAVEN_HOME" /etc/profile; then
 			errorExit "系统环境变量中已经存在 MAVEN_HOME，请检查配置是否正确.或者终端是否重新加载环境变量：source $userProfileName"
 		fi
-		curl -LfSo maven.tar.gz https://mirrors.aliyun.com/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+		curl -LfSo maven.tar.gz https://mirrors.aliyun.com/apache/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz
 		#
 		tar -zxf maven.tar.gz -C "$useDir"
 		#
-		echo "安装maven,路径 $useDir/apache-maven-3.6.3/"
+		echo "安装maven,路径 $useDir/apache-maven-3.9.6/"
 		cat >>"$userProfileName" <<EOF
 
-export MAVEN_HOME=$useDir/apache-maven-3.6.3/
+export MAVEN_HOME=$useDir/apache-maven-3.9.6/
 export PATH=\$PATH:\$MAVEN_HOME/bin
 EOF
 		echo "use profile $userProfileName"
