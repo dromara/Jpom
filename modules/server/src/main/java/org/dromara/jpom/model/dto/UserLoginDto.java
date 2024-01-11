@@ -23,7 +23,7 @@
 package org.dromara.jpom.model.dto;
 
 import lombok.Data;
-import org.dromara.jpom.model.data.WorkspaceModel;
+import org.dromara.jpom.controller.user.UserWorkspaceModel;
 
 import java.util.List;
 
@@ -38,7 +38,7 @@ public class UserLoginDto {
 
 	private String longTermToken;
 
-	private List<WorkspaceModel> bindWorkspaceModels;
+	private List<UserWorkspaceModel> bindWorkspaceModels;
 
 
 	public UserLoginDto() {

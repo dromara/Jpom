@@ -25,7 +25,6 @@ package org.dromara.jpom.controller;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.LFUCache;
 import cn.hutool.cache.impl.TimedCache;
-import cn.hutool.captcha.AbstractCaptcha;
 import cn.hutool.captcha.CircleCaptcha;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.BetweenFormatter;
@@ -55,13 +54,12 @@ import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.configuration.UserConfig;
 import org.dromara.jpom.configuration.WebConfig;
+import org.dromara.jpom.controller.user.UserWorkspaceModel;
 import org.dromara.jpom.func.user.server.UserLoginLogServer;
-import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.model.dto.UserLoginDto;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.oauth2.BaseOauth2Config;
 import org.dromara.jpom.oauth2.Oauth2Factory;
-import org.dromara.jpom.service.user.UserBindWorkspaceService;
 import org.dromara.jpom.service.user.UserService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.util.JwtUtil;
@@ -99,17 +97,14 @@ public class LoginControl extends BaseServerController implements InitializingBe
     private static final String LOGIN_CODE = "login_code";
 
     private final UserService userService;
-    private final UserBindWorkspaceService userBindWorkspaceService;
     private final UserConfig userConfig;
     private final WebConfig webConfig;
     private final UserLoginLogServer userLoginLogServer;
 
     public LoginControl(UserService userService,
-                        UserBindWorkspaceService userBindWorkspaceService,
                         ServerConfig serverConfig,
                         UserLoginLogServer userLoginLogServer) {
         this.userService = userService;
-        this.userBindWorkspaceService = userBindWorkspaceService;
         this.userConfig = serverConfig.getUser();
         this.webConfig = serverConfig.getWeb();
         this.userLoginLogServer = userLoginLogServer;
@@ -351,7 +346,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
 
     private UserLoginDto createToken(UserModel userModel) {
         // 判断工作空间
-        List<WorkspaceModel> bindWorkspaceModels = userBindWorkspaceService.listUserWorkspaceInfo(userModel);
+        List<UserWorkspaceModel> bindWorkspaceModels = userService.myWorkspace(userModel);
         Assert.notEmpty(bindWorkspaceModels, "当前账号没有绑定任何工作空间，请联系管理员处理");
         UserLoginDto userLoginDto = userService.getUserJwtId(userModel);
         //					UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);

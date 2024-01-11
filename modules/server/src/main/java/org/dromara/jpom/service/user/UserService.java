@@ -23,21 +23,28 @@
 package org.dromara.jpom.service.user;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.comparator.CompareUtil;
 import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
+import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.controller.user.UserWorkspaceModel;
+import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.model.dto.UserLoginDto;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.h2db.BaseDbService;
+import org.dromara.jpom.service.system.SystemParametersServer;
 import org.dromara.jpom.util.JwtUtil;
 import org.dromara.jpom.util.TwoFactorAuthUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -45,6 +52,14 @@ import java.util.List;
  */
 @Service
 public class UserService extends BaseDbService<UserModel> {
+    private final SystemParametersServer systemParametersServer;
+    private final UserBindWorkspaceService userBindWorkspaceService;
+
+    public UserService(SystemParametersServer systemParametersServer,
+                       UserBindWorkspaceService userBindWorkspaceService) {
+        this.systemParametersServer = systemParametersServer;
+        this.userBindWorkspaceService = userBindWorkspaceService;
+    }
 
     /**
      * 是否需要初始化
@@ -244,5 +259,36 @@ public class UserService extends BaseDbService<UserModel> {
             throw new IllegalStateException("当前账号没有开启两步验证");
         }
         return TwoFactorAuthUtils.validateTFACode(byKey.getTwoFactorAuthKey(), code);
+    }
+
+    public List<UserWorkspaceModel> myWorkspace(UserModel user) {
+        List<WorkspaceModel> models = userBindWorkspaceService.listUserWorkspaceInfo(user);
+        Assert.notEmpty(models, "当前账号没有绑定任何工作空间，请联系管理员处理");
+        JSONObject parametersServerConfig = systemParametersServer.getConfig("user-my-workspace-" + user.getId(), JSONObject.class);
+        return models.stream()
+            .map(workspaceModel -> {
+                UserWorkspaceModel userWorkspaceModel = new UserWorkspaceModel();
+                userWorkspaceModel.setId(workspaceModel.getId());
+                userWorkspaceModel.setName(workspaceModel.getName());
+                userWorkspaceModel.setGroup(workspaceModel.getGroup());
+                userWorkspaceModel.setOriginalName(workspaceModel.getName());
+                userWorkspaceModel.setClusterInfoId(workspaceModel.getClusterInfoId());
+                Long createTimeMillis = workspaceModel.getCreateTimeMillis();
+                userWorkspaceModel.setSort((int) (ObjectUtil.defaultIfNull(createTimeMillis, 0L) / 1000L));
+                return userWorkspaceModel;
+            })
+            .peek(userWorkspaceModel -> {
+                if (parametersServerConfig == null) {
+                    return;
+                }
+                UserWorkspaceModel userConfig = parametersServerConfig.getObject(userWorkspaceModel.getId(), UserWorkspaceModel.class);
+                if (userConfig == null) {
+                    return;
+                }
+                userWorkspaceModel.setName(StrUtil.emptyToDefault(userConfig.getName(), userWorkspaceModel.getName()));
+                userWorkspaceModel.setSort(ObjectUtil.defaultIfNull(userConfig.getSort(), userWorkspaceModel.getSort()));
+            })
+            .sorted((o1, o2) -> CompareUtil.compare(o1.getSort(), o2.getSort()))
+            .collect(Collectors.toList());
     }
 }
