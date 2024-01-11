@@ -228,6 +228,8 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
         commandExecLogModel.setTriggerExecType(triggerExecType);
         if (sshModel != null) {
             commandExecLogModel.setSshName(sshModel.getName());
+        } else {
+            commandExecLogModel.setSshName("SSH不存在");
         }
         commandExecLogModel.setStatus(CommandExecLogModel.Status.ING.getCode());
         // 拼接参数
@@ -258,6 +260,7 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
         try (LogRecorder logRecorder = LogRecorder.builder().file(file).charset(CharsetUtil.CHARSET_UTF_8).build()) {
             if (sshModel == null) {
                 logRecorder.systemError("ssh 不存在");
+                this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.ERROR, -100);
                 return;
             }
             EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.getEnv(commandModel.getWorkspaceId());
