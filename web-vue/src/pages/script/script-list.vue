@@ -45,7 +45,7 @@
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="createScript">新建脚本</a-button>
+          <a-button type="primary" @click="createScript">新增</a-button>
           <a-button
             type="primary"
             v-if="mode === 'manage'"
