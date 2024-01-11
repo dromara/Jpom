@@ -214,7 +214,16 @@
         <a-form-item label="权限组" name="permissionGroup">
           <a-select
             show-search
-            option-filter-prop="children"
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
             placeholder="请选择用户的权限组"
             v-model:value="temp.permissionGroup"
             mode="multiple"

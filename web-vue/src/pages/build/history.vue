@@ -25,7 +25,16 @@
           />
           <a-select
             show-search
-            option-filter-prop="children"
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
             v-model:value="listQuery.status"
             allowClear
             placeholder="请选择状态"
@@ -35,7 +44,16 @@
           </a-select>
           <a-select
             show-search
-            option-filter-prop="children"
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
             v-model:value="listQuery.triggerBuildType"
             allowClear
             placeholder="请选择触发类型"

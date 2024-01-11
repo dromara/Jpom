@@ -139,7 +139,16 @@
         <a-form-item label="SSH节点">
           <a-select
             show-search
-            option-filter-prop="children"
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
             placeholder="请选择SSH节点"
             mode="multiple"
             v-model:value="chooseSsh"
@@ -219,7 +228,16 @@
         <a-form-item label="SSH节点" required>
           <a-select
             show-search
-            option-filter-prop="children"
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
             mode="multiple"
             v-model:value="chooseSsh"
             placeholder="请选择 SSH节点"
@@ -301,7 +319,16 @@
         <a-form-item label="选择工作空间" name="workspaceId">
           <a-select
             show-search
-            option-filter-prop="children"
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
             v-model:value="temp.workspaceId"
             placeholder="请选择工作空间"
           >

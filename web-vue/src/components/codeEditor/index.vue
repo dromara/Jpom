@@ -14,8 +14,16 @@
               v-model:value="cmOptions.theme"
               @select="handleSelectTheme"
               show-search
-              option-filter-prop="children"
-              :filter-option="filterOption"
+              :filter-option="
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
               placeholder="请选择皮肤"
               style="width: 150px"
             >
@@ -28,7 +36,16 @@
               v-model:value="cmOptions.mode"
               @select="handleSelectMode"
               show-search
-              :filter-option="filterOption"
+              :filter-option="
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
               placeholder="请选择语言模式"
               style="width: 150px"
             >
@@ -514,10 +531,7 @@ export default {
       this.cmOptions = { ...this.cmOptions, theme: v }
       localStorage.setItem('editorTheme', v)
     },
-    // 过滤选项
-    filterOption(input, option) {
-      return option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0
-    },
+
     onReady(editor) {
       // console.log(editor)
       // // 绑定其他快捷键, 格式化编辑器代码做示例

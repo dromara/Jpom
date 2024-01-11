@@ -29,7 +29,16 @@
 
             <a-select
               show-search
-              option-filter-prop="children"
+              :filter-option="
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
               v-model:value="listQuery.group"
               allowClear
               placeholder="分组"
@@ -510,7 +519,21 @@
           />
         </a-form-item>
         <a-form-item label="绑定 SSH " name="sshId">
-          <a-select show-search option-filter-prop="children" v-model:value="temp.sshId" placeholder="请选择SSH">
+          <a-select
+            show-search
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
+            v-model:value="temp.sshId"
+            placeholder="请选择SSH"
+          >
             <a-select-option value="">不绑定</a-select-option>
             <a-select-option v-for="ssh in sshList" :key="ssh.id" :disabled="ssh.disabled">{{
               ssh.name
@@ -578,7 +601,16 @@
         <a-form-item label="选择工作空间" name="workspaceId">
           <a-select
             show-search
-            option-filter-prop="children"
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
             v-model:value="temp.workspaceId"
             placeholder="请选择工作空间"
           >

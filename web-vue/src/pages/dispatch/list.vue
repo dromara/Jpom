@@ -746,7 +746,16 @@
           <a-form-item label="分发节点" name="nodeId">
             <a-select
               show-search
-              option-filter-prop="children"
+              :filter-option="
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
               v-model:value="temp.nodeIdList"
               mode="multiple"
               placeholder="请选择分发节点"

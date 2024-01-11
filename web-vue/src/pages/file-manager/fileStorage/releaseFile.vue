@@ -23,7 +23,16 @@
           <a-col :span="22">
             <a-select
               show-search
-              option-filter-prop="children"
+              :filter-option="
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
               mode="multiple"
               v-model:value="temp.taskDataIds"
               placeholder="请选择SSH"
@@ -43,7 +52,16 @@
           <a-col :span="22">
             <a-select
               show-search
-              option-filter-prop="children"
+              :filter-option="
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
               mode="multiple"
               v-model:value="temp.taskDataIds"
               placeholder="请选择节点"
