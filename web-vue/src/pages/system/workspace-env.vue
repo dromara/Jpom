@@ -68,7 +68,9 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="handleEnvEdit(record)">编辑</a-button>
-            <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+            <a-button size="small" type="primary" :disabled="record.privacy === 1" @click="handleTrigger(record)"
+              >触发器</a-button
+            >
             <a-button size="small" type="primary" danger @click="handleEnvDelete(record)">删除</a-button>
           </a-space>
         </template>
