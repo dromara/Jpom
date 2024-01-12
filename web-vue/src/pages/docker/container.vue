@@ -806,34 +806,33 @@ export default {
           width: '160px'
         }
       ],
-      parentColumns: [
-        {
-          title: '序号',
-          width: '80px',
-          ellipsis: true,
-          align: 'center',
-          customRender: ({ text, record, index }) => `${index + 1}`
-        },
-        {
-          title: '名称',
-          width: 200,
-          dataIndex: 'name',
-          ellipsis: true,
-          tooltip: true
-        },
-        {
-          title: '状态',
-          dataIndex: 'state',
-          width: '150px',
-          ellipsis: true
-        },
-        {
-          title: '操作',
-          width: '80px',
-          ellipsis: true,
-          scopedSlots: { customRender: 'pids' }
-        }
-      ],
+      // parentColumns: [
+      //   {
+      //     title: '序号',
+      //     width: '80px',
+      //     ellipsis: true,
+      //     align: 'center',
+      //     customRender: ({ text, record, index }) => `${index + 1}`
+      //   },
+      //   {
+      //     title: '名称',
+      //     width: 200,
+      //     dataIndex: 'name',
+      //     ellipsis: true,
+      //     tooltip: true
+      //   },
+      //   {
+      //     title: '状态',
+      //     dataIndex: 'state',
+      //     width: '150px',
+      //     ellipsis: true
+      //   },
+      //   {
+      //     title: '操作',
+      //     width: '80px',
+      //     ellipsis: true
+      //   }
+      // ],
       action: {
         remove: {
           msg: '您确定要删除当前容器吗？',

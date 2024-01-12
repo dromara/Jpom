@@ -565,7 +565,7 @@ export default {
         this.menusConfigData = res.data
 
         this.menusConfigData.serverMenus = this.menusConfigData?.serverMenus.map((item) => {
-          item.scopedSlots = { icon: 'custom' }
+          // item.scopedSlots = { icon: 'custom' }
           item.childs?.map((item2) => {
             item2.id = item.id + ':' + item2.id
             return item2

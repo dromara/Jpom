@@ -650,7 +650,7 @@ export default {
           sorter: true,
           ellipsis: true
         },
-        // { title: "Port", dataIndex: "port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        // { title: "Port", dataIndex: "port", sorter: true, width: 80, ellipsis: true,},
         {
           title: '用户名',
           dataIndex: 'user',
@@ -687,7 +687,7 @@ export default {
           width: '100px',
           ellipsis: true
         },
-        // { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        // { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true,},
         {
           title: '连接状态',
           dataIndex: 'status',
@@ -728,7 +728,7 @@ export default {
         {
           title: '操作',
           dataIndex: 'operation',
-          scopedSlots: { customRender: 'operation' },
+
           width: '310px',
           align: 'center',
           // ellipsis: true,

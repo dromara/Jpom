@@ -46,7 +46,6 @@
             placeholder="执行命令"
           />
           <a-range-picker
-            class="filter-item search-input-item"
             :show-time="{ format: 'HH:mm:ss' }"
             format="YYYY-MM-DD HH:mm:ss"
             @change="onchangeListLogTime"
@@ -60,7 +59,7 @@
             <a-typography-paragraph
               v-if="text"
               :copyable="{ tooltip: false, text: text }"
-              style="display: inline-block"
+              style="display: inline-block; margin-bottom: 0"
             >
             </a-typography-paragraph>
             {{ text }}
@@ -149,12 +148,7 @@ export default {
         {
           title: 'userAgent',
           dataIndex: 'userAgent',
-          /*width: 240,*/ ellipsis: true
-        },
-        {
-          title: '是否成功',
-          dataIndex: 'refuse',
-          width: '100px',
+          width: 240,
           ellipsis: true
         },
 
@@ -166,6 +160,13 @@ export default {
             return parseTime(text)
           },
           width: '180px'
+        },
+        {
+          title: '是否成功',
+          dataIndex: 'refuse',
+          width: '100px',
+          ellipsis: true,
+          fixed: 'right'
         }
       ]
     }

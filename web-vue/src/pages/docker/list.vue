@@ -232,8 +232,7 @@ export default {
           title: '名称',
           dataIndex: 'name',
           ellipsis: true,
-          width: 100,
-          scopedSlots: { customRender: 'tooltip' }
+          width: 100
         },
         {
           title: 'host',

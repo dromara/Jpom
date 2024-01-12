@@ -195,22 +195,19 @@ export default {
           title: '实时版本号',
           dataIndex: 'version',
           width: '100px',
-          ellipsis: true,
-          scopedSlots: { customRender: 'version' }
+          ellipsis: true
         },
         {
           title: '打包时间',
           dataIndex: 'timeStamp',
           width: '170px',
-          ellipsis: true,
-          scopedSlots: { customRender: 'timeStamp' }
+          ellipsis: true
         },
         {
           title: '运行时间',
           dataIndex: 'upTime',
           width: '110px',
-          ellipsis: true,
-          scopedSlots: { customRender: 'upTime' }
+          ellipsis: true
         },
 
         {
@@ -218,7 +215,7 @@ export default {
           dataIndex: 'updateStatus',
           ellipsis: true
         },
-        // {title: '自动更新', dataIndex: 'autoUpdate', ellipsis: true, scopedSlots: {customRender: 'autoUpdate'}},
+        // {title: '自动更新', dataIndex: 'autoUpdate', ellipsis: true,},
         {
           title: '操作',
           dataIndex: 'operation',

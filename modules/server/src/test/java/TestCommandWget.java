@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
@@ -37,7 +38,7 @@ public class TestCommandWget {
     public void test() throws IOException, InterruptedException {
         File userHomeDir = FileUtil.getUserHomeDir();
         String url = "https://mirrors.aliyun.com/apache/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz";
-        File file = FileUtil.file(userHomeDir, ".jpom", "test-curl.sh");
+        File file = FileUtil.file(userHomeDir, ".jpom", "test-curl." + CommandUtil.SUFFIX);
         // curl -LfSo maven.tar.gz https://mirrors.aliyun.com/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
         FileUtil.writeUtf8String(StrUtil.format("curl -LfSo {}/maven.tar.gz {}", userHomeDir.getAbsolutePath(), url), file);
 //

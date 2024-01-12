@@ -597,7 +597,7 @@ export default {
           title: '名称',
           dataIndex: ['spec', 'name'],
           ellipsis: true,
-          scopedSlots: { customRender: 'tooltip' },
+
           tooltip: true
         },
         {
@@ -607,7 +607,7 @@ export default {
           width: 120,
           tooltip: true
         },
-        // { title: "网络模式", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 120, scopedSlots: { customRender: "tooltip" } },
+        // { title: "网络模式", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 120, },
         {
           title: '副本数',
           dataIndex: ['spec', 'mode', 'replicated', 'replicas'],

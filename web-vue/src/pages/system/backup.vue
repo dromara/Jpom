@@ -63,7 +63,7 @@
         <template v-else-if="column.dataIndex === 'status'">
           <a-tooltip v-if="record.fileExist" :title="`${backupStatusMap[text]} 点击复制文件路径`">
             <div>
-              <a-typography-paragraph :copyable="{ tooltip: false, text: record.filePath }">
+              <a-typography-paragraph :copyable="{ tooltip: false, text: record.filePath }" style="margin-bottom: 0">
                 {{ backupStatusMap[text] }}
               </a-typography-paragraph>
             </div>
@@ -231,7 +231,7 @@ export default {
         //   dataIndex: "filePath",
         //   // width: 150,
         //   ellipsis: true,
-        //   scopedSlots: { customRender: "filePath" },
+
         // },
         {
           title: '修改人',

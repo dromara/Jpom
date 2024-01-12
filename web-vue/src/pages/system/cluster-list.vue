@@ -164,43 +164,37 @@ export default {
           title: '安装ID',
           dataIndex: 'id',
           ellipsis: true,
-          width: '100px',
-          scopedSlots: { customRender: 'tooltip' }
+          width: '100px'
         },
         {
           title: '集群ID',
           dataIndex: 'clusterId',
           ellipsis: true,
-          width: '100px',
-          scopedSlots: { customRender: 'tooltip' }
+          width: '100px'
         },
         {
           title: '名称',
           dataIndex: 'name',
           ellipsis: true,
-          width: 200,
-          scopedSlots: { customRender: 'tooltip' }
+          width: 200
         },
         {
           title: '集群地址',
           dataIndex: 'url',
           ellipsis: true,
-          width: 200,
-          scopedSlots: { customRender: 'url' }
+          width: 200
         },
         {
           title: '集群主机名',
           dataIndex: 'localHostName',
           ellipsis: true,
-          width: '100px',
-          scopedSlots: { customRender: 'tooltip' }
+          width: '100px'
         },
         {
           title: '版本号',
           dataIndex: 'jpomVersion',
           ellipsis: true,
-          width: '100px',
-          scopedSlots: { customRender: 'tooltip' }
+          width: '100px'
         },
         {
           title: '最后心跳时间',
@@ -214,7 +208,7 @@ export default {
           title: '修改人',
           dataIndex: 'modifyUser',
           ellipsis: true,
-          scopedSlots: { customRender: 'modifyUser' },
+
           width: 120
         },
 

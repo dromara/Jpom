@@ -593,7 +593,7 @@ export default {
           title: '共享',
           dataIndex: 'workspaceId',
           ellipsis: true,
-          // scopedSlots: { customRender: 'global' },
+
           width: '90px'
         },
         {

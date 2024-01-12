@@ -25,12 +25,7 @@
               item
             }}</a-select-option>
           </a-select>
-          <a-range-picker
-            class="search-input-item"
-            :show-time="{ format: 'HH:mm:ss' }"
-            format="YYYY-MM-DD HH:mm:ss"
-            @change="onchangeTime"
-          />
+          <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
           </a-tooltip>
@@ -181,12 +176,7 @@ export default {
           ellipsis: true,
           width: 200
         },
-        {
-          title: '分发状态消息',
-          dataIndex: 'outGivingResultMsgData',
-          ellipsis: true,
-          width: 100
-        },
+
         {
           title: '分发耗时',
           dataIndex: 'outGivingResultTime',
@@ -214,6 +204,12 @@ export default {
             return parseTime(text)
           },
           width: '170px'
+        },
+        {
+          title: '分发状态消息',
+          dataIndex: 'outGivingResultMsgData',
+          ellipsis: true,
+          width: 100
         },
         {
           title: '操作人',

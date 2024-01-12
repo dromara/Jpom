@@ -229,7 +229,7 @@ export default {
           align: 'center',
           customRender: ({ text, record, index }) => `${index + 1}`
         },
-        // { title: "节点Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        // { title: "节点Id", dataIndex: "id", ellipsis: true, },
         {
           title: '主机名',
           dataIndex: 'hostname',
@@ -265,7 +265,7 @@ export default {
         //   title: "资源",
         //   dataIndex: "description.resources",
         //   ellipsis: true,
-        //   scopedSlots: { customRender: "resources" },
+
         //   width: 170,
         // },
         {

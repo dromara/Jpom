@@ -300,7 +300,7 @@ export default {
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
-          scopedSlots: { customRender: 'operation' },
+
           width: '180px'
         }
       ],

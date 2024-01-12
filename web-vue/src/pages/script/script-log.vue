@@ -158,58 +158,52 @@ export default {
           title: '名称',
           dataIndex: 'scriptName',
           width: 100,
-          ellipsis: true,
-          scopedSlots: { customRender: 'scriptName' }
+          ellipsis: true
         },
         {
           title: '执行时间',
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
-          width: '160px',
-          scopedSlots: { customRender: 'createTimeMillis' }
+          width: '160px'
         },
         {
           title: '触发类型',
           dataIndex: 'triggerExecType',
           width: 100,
-          ellipsis: true,
-          scopedSlots: { customRender: 'triggerExecTypeMap' }
+          ellipsis: true
         },
         {
           title: '状态',
           dataIndex: 'status',
           width: 100,
-          ellipsis: true,
-          scopedSlots: { customRender: 'status' }
+          ellipsis: true
         },
         {
           title: '执行域',
           dataIndex: 'workspaceId',
           ellipsis: true,
-          scopedSlots: { customRender: 'global' },
+
           width: '90px'
         },
         {
           title: '退出码',
           dataIndex: 'exitCode',
           width: 100,
-          ellipsis: true,
-          scopedSlots: { customRender: 'exitCode' }
+          ellipsis: true
         },
         {
           title: '执行人',
           dataIndex: 'modifyUser',
           ellipsis: true,
-          width: '100px',
-          scopedSlots: { customRender: 'modifyUser' }
+          width: '100px'
         },
         {
           title: '操作',
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
-          scopedSlots: { customRender: 'operation' },
+
           width: '150px'
         }
       ]
