@@ -7,7 +7,6 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    AAffix: typeof import('ant-design-vue/es')['Affix']
     AAlert: typeof import('ant-design-vue/es')['Alert']
     AAutoComplete: typeof import('ant-design-vue/es')['AutoComplete']
     ABackTop: typeof import('ant-design-vue/es')['BackTop']
@@ -29,9 +28,6 @@ declare module 'vue' {
     ADrawer: typeof import('ant-design-vue/es')['Drawer']
     ADropdown: typeof import('ant-design-vue/es')['Dropdown']
     AEmpty: typeof import('ant-design-vue/es')['Empty']
-    AFlex: typeof import('ant-design-vue/es')['Flex']
-    AFloatButton: typeof import('ant-design-vue/es')['FloatButton']
-    AFloatButtonGroup: typeof import('ant-design-vue/es')['FloatButtonGroup']
     AForm: typeof import('ant-design-vue/es')['Form']
     AFormItem: typeof import('ant-design-vue/es')['FormItem']
     AFormItemRest: typeof import('ant-design-vue/es')['FormItemRest']
@@ -103,9 +99,7 @@ declare module 'vue' {
     ClusterOutlined: typeof import('@ant-design/icons-vue')['ClusterOutlined']
     CodeEditor: typeof import('./../components/codeEditor/index.vue')['default']
     CodeOutlined: typeof import('@ant-design/icons-vue')['CodeOutlined']
-    CommentOutlined: typeof import('@ant-design/icons-vue')['CommentOutlined']
     CompositionTransfer: typeof import('./../components/compositionTransfer/composition-transfer.vue')['default']
-    CustomerServiceOutlined: typeof import('@ant-design/icons-vue')['CustomerServiceOutlined']
     CustomInput: typeof import('./../components/customInput/index.vue')['default']
     CustomSelect: typeof import('./../components/customSelect/index.vue')['default']
     DeleteOutlined: typeof import('@ant-design/icons-vue')['DeleteOutlined']
