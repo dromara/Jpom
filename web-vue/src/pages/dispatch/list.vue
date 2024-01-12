@@ -610,7 +610,7 @@
               </a-button>
             </template>
             <a-form-item-rest>
-              <a-tabs>
+              <!-- <a-tabs>
                 <a-tab-pane key="1" tab="DSL 配置">
                   <code-editor
                     height="40vh"
@@ -628,8 +628,44 @@
                       readOnly: true
                     }"
                   ></code-editor>
-                </a-tab-pane> </a-tabs
-            ></a-form-item-rest>
+                </a-tab-pane>
+              </a-tabs> -->
+              <code-editor
+                height="40vh"
+                :showTool="true"
+                v-model:content="temp.dslContent"
+                :options="{ mode: 'yaml', tabSize: 2 }"
+                v-show="dslEditTabKey === 'content'"
+                placeholder="请填写项目 DSL 配置内容,可以点击上方切换 tab 查看配置示例"
+              >
+                <template #tool_before>
+                  <a-segmented
+                    v-model:value="dslEditTabKey"
+                    :options="[
+                      { label: 'DSL 配置', value: 'content' },
+                      { label: '配置示例', value: 'demo' }
+                    ]"
+                  />
+                </template>
+              </code-editor>
+              <code-editor
+                v-show="dslEditTabKey === 'demo'"
+                height="40vh"
+                :showTool="true"
+                v-model:content="PROJECT_DSL_DEFATUL"
+                :options="{ mode: 'yaml', tabSize: 2, readOnly: true }"
+              >
+                <template #tool_before>
+                  <a-segmented
+                    v-model:value="dslEditTabKey"
+                    :options="[
+                      { label: 'DSL 配置', value: 'content' },
+                      { label: '配置示例', value: 'demo' }
+                    ]"
+                  />
+                </template>
+              </code-editor>
+            </a-form-item-rest>
           </a-form-item>
           <a-form-item v-show="noFileModes.includes(temp.runMode)">
             <template v-slot:label>
@@ -1071,7 +1107,7 @@ export default {
       refreshInterval: 5,
 
       viewDispatchManager: false,
-
+      dslEditTabKey: 'content',
       drawerStatusVisible: false
     }
   },

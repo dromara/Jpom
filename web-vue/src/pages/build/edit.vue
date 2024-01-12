@@ -279,7 +279,7 @@
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
-              <a-tabs>
+              <!-- <a-tabs>
                 <a-tab-pane key="1" tab="DSL 配置">
                   <a-form-item-rest>
                     <code-editor
@@ -303,7 +303,42 @@
                     ></code-editor>
                   </a-form-item-rest>
                 </a-tab-pane>
-              </a-tabs>
+              </a-tabs> -->
+              <code-editor
+                height="40vh"
+                :showTool="true"
+                v-model:content="temp.script"
+                :options="{ mode: 'yaml', tabSize: 2 }"
+                v-show="dslEditTabKey === 'content'"
+                placeholder="请填写构建 DSL 配置内容,可以点击上方切换 tab 查看配置示例"
+              >
+                <template #tool_before>
+                  <a-segmented
+                    v-model:value="dslEditTabKey"
+                    :options="[
+                      { label: 'DSL 配置', value: 'content' },
+                      { label: '配置示例', value: 'demo' }
+                    ]"
+                  />
+                </template>
+              </code-editor>
+              <code-editor
+                v-show="dslEditTabKey === 'demo'"
+                height="40vh"
+                :showTool="true"
+                v-model:content="dslDefault"
+                :options="{ mode: 'yaml', tabSize: 2, readOnly: true }"
+              >
+                <template #tool_before>
+                  <a-segmented
+                    v-model:value="dslEditTabKey"
+                    :options="[
+                      { label: 'DSL 配置', value: 'content' },
+                      { label: '配置示例', value: 'demo' }
+                    ]"
+                  />
+                </template>
+              </code-editor>
             </a-form-item>
             <a-form-item v-if="temp.buildMode !== undefined" name="resultDirFile" class="jpom-target-dir">
               <template v-slot:label>
@@ -1534,7 +1569,8 @@ export default {
       loading: false,
       dockerListVisible: 0,
       dockerAllTagList: [],
-      dockerAllTagLoading: true
+      dockerAllTagLoading: true,
+      dslEditTabKey: 'content'
     }
   },
   computed: {

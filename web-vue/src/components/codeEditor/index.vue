@@ -83,7 +83,7 @@
           :options="cmOptions"
           @change="onCmCodeChanges"
           @ready="onReady"
-          placeholder="请输入内容"
+          :placeholder="placeholder"
         />
       </div>
     </template>
@@ -121,13 +121,13 @@ import 'codemirror/mode/htmlmixed/htmlmixed.js'
 import 'codemirror/mode/yaml-frontmatter/yaml-frontmatter.js'
 const modes = [
   { name: 'shell', mode: 'shell' },
-  { name: 'python', mode: 'python' },
   { name: 'powershell', mode: 'powershell' },
-  { name: 'nginx', mode: 'nginx' },
   { name: 'dockerfile', mode: 'dockerfile' },
   { name: 'yaml', mode: 'yaml' },
   { name: 'properties', mode: 'properties' },
   { name: 'htmlmixed', mode: 'htmlmixed' },
+  { name: 'nginx', mode: 'nginx' },
+  { name: 'python', mode: 'python' },
   { name: 'go', mode: 'go' },
   { name: 'php', mode: 'php' },
   { name: 'rpm', mode: 'rpm' },
@@ -382,6 +382,10 @@ export default {
     showTool: {
       type: Boolean,
       default: false
+    },
+    placeholder: {
+      type: String,
+      default: '请输入内容'
     }
   },
   watch: {
