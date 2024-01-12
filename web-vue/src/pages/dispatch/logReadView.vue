@@ -147,9 +147,9 @@
           </a-space>
         </div>
 
-        <a-tabs v-if="temp.cacheData" v-model:value="activeTagKey" :tabBarStyle="{ marginBottom: 0 }">
+        <a-tabs v-if="temp.cacheData" v-model:activeKey="activeTagKey" :tabBarStyle="{ marginBottom: 0 }">
           <template v-for="item in temp.projectList">
-            <a-tab-pane forceRender v-if="nodeName[item.nodeId]">
+            <a-tab-pane forceRender v-if="nodeName[item.nodeId]" :key="`${item.nodeId},${item.projectId}`">
               <template v-slot:tab>
                 【{{ nodeName[item.nodeId] && nodeName[item.nodeId].name }}】
                 {{
