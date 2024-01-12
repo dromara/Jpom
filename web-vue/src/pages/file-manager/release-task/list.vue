@@ -238,29 +238,25 @@
           <a-form-item-rest>
             <a-tabs tabPosition="right">
               <a-tab-pane key="before" tab="上传前">
-                <div style="height: 40vh; overflow-y: scroll">
-                  <code-editor
-                    v-model:content="temp.beforeScript"
-                    :options="{
-                      mode: temp.taskType === 0 ? 'shell' : '',
-                      tabSize: 2,
-                      theme: 'abcdef'
-                    }"
-                  ></code-editor>
-                </div>
+                <code-editor
+                  height="40vh"
+                  v-model:content="temp.beforeScript"
+                  :options="{
+                    mode: 'shell'
+                  }"
+                ></code-editor>
+
                 <div style="margin-top: 10px">文件上传前需要执行的脚本(非阻塞命令)</div>
               </a-tab-pane>
               <a-tab-pane key="after" tab="上传后">
-                <div style="height: 40vh; overflow-y: scroll">
-                  <code-editor
-                    v-model:content="temp.afterScript"
-                    :options="{
-                      mode: temp.taskType === 0 ? 'shell' : '',
-                      tabSize: 2,
-                      theme: 'abcdef'
-                    }"
-                  ></code-editor>
-                </div>
+                <code-editor
+                  height="40vh"
+                  v-model:content="temp.afterScript"
+                  :options="{
+                    mode: 'shell'
+                  }"
+                ></code-editor>
+
                 <div style="margin-top: 10px">文件上传成功后需要执行的脚本(非阻塞命令)</div>
               </a-tab-pane>
             </a-tabs>

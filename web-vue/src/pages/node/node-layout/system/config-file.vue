@@ -1,16 +1,23 @@
 <template>
   <div class="">
     <a-form ref="editForm" :model="temp">
-      <a-form-item class="node-content-config">
-        <code-editor v-model:content="temp.content" :options="{ mode: 'yaml', tabSize: 2 }" :showTool="true">
+      <a-form-item>
+        <code-editor
+          height="calc(100vh - 200px)"
+          v-model:content="temp.content"
+          :options="{ mode: 'yaml', tabSize: 2 }"
+          :showTool="true"
+        >
           <template #tool_before>
             <a-alert show-icon v-if="temp.file" :message="`配置文件路径:${temp.file}`" />
           </template>
         </code-editor>
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
-        <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit(false)">保存</a-button>
-        <a-button type="primary" danger class="btn" :disabled="submitAble" @click="onSubmit(true)">保存并重启</a-button>
+        <a-space>
+          <a-button type="primary" :disabled="submitAble" @click="onSubmit(false)">保存</a-button>
+          <a-button type="primary" danger :disabled="submitAble" @click="onSubmit(true)">保存并重启</a-button>
+        </a-space>
       </a-form-item>
     </a-form>
   </div>
@@ -124,12 +131,4 @@ export default {
 }
 </script>
 
-<style scoped>
-.node-content-config {
-  height: calc(100vh - 260px);
-  overflow-y: scroll;
-}
-.btn {
-  margin-left: 20px;
-}
-</style>
+<style scoped></style>

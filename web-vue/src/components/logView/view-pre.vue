@@ -17,23 +17,6 @@
             &nbsp;
           </template>
         </div>
-        <!-- <code-editor
-            ref="codemirror"
-            v-model="item.text"
-            :options="{
-              theme: 'panda-syntax',
-              mode: 'verilog',
-              // maxHighlightLength: 5,
-              viewportMargin: 1,
-              cursorBlinkRate: -1,
-              tabSize: 2,
-              readOnly: true,
-              styleActiveLine: true,
-              lineNumbers: true,
-              firstLineNumber: index + 1,
-              lineWrapping: config.wordBreak,
-            }"
-          ></code-editor> -->
       </template>
     </RecycleScroller>
   </div>

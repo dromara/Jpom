@@ -9,12 +9,13 @@
       </template>
 
       <a-form ref="editForm" :model="temp">
-        <a-form-item class="config-editor">
+        <a-form-item>
           <code-editor
             v-model:content="temp.content"
             fileSuffix="conf.yml"
             :options="{ mode: 'yaml', tabSize: 2 }"
             :showTool="true"
+            height="calc(100vh - 200px)"
           >
             <template #tool_before>
               <a-alert show-icon v-if="temp.file" :message="`配置文件路径:${temp.file}`" />
@@ -386,10 +387,4 @@ export default {
 }
 </script>
 
-<style scoped>
-.config-editor {
-  height: calc(100vh - 300px);
-  width: 100%;
-  overflow-y: scroll;
-}
-</style>
+<style scoped></style>

@@ -248,6 +248,7 @@
       v-model:open="configDir"
       :title="`配置授权目录`"
       :footer="null"
+      width="60vw"
       :maskClosable="false"
       @cancel="
         () => {

@@ -612,25 +612,22 @@
             <a-form-item-rest>
               <a-tabs>
                 <a-tab-pane key="1" tab="DSL 配置">
-                  <div style="height: 40vh; overflow-y: scroll">
-                    <code-editor
-                      v-model:value="temp.dslContent"
-                      :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"
-                    ></code-editor>
-                  </div>
+                  <code-editor
+                    height="40vh"
+                    v-model:content="temp.dslContent"
+                    :options="{ mode: 'yaml', tabSize: 2 }"
+                  ></code-editor>
                 </a-tab-pane>
                 <a-tab-pane key="2" tab="配置示例">
-                  <div style="height: 40vh; overflow-y: scroll">
-                    <code-editor
-                      v-model:value="PROJECT_DSL_DEFATUL"
-                      :options="{
-                        mode: 'yaml',
-                        tabSize: 2,
-                        theme: 'abcdef',
-                        readOnly: true
-                      }"
-                    ></code-editor>
-                  </div>
+                  <code-editor
+                    height="40vh"
+                    v-model:content="PROJECT_DSL_DEFATUL"
+                    :options="{
+                      mode: 'yaml',
+                      tabSize: 2,
+                      readOnly: true
+                    }"
+                  ></code-editor>
                 </a-tab-pane> </a-tabs
             ></a-form-item-rest>
           </a-form-item>
