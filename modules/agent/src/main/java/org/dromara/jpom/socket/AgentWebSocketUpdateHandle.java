@@ -27,6 +27,7 @@ import cn.keepbx.jpom.Type;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.websocket.Constants;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.JpomManifest;
@@ -121,7 +122,13 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
         //session.sendMessage(new TextMessage(model.toString()));
     }
 
-    @OnMessage
+    /**
+     * @param message byte 消息
+     * @param session 会话
+     * @throws Exception 异常
+     * @see Constants#DEFAULT_BUFFER_SIZE
+     */
+    @OnMessage(maxMessageSize = 5 * 1024 * 1024)
     public void onMessage(byte[] message, Session session) throws Exception {
         UploadFileModel uploadFileModel = UPLOAD_FILE_INFO.get(session.getId());
         uploadFileModel.save(message);
