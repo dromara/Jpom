@@ -48,7 +48,7 @@
                 <a-tooltip v-if="item.statusMsg" :title="item.statusMsg"><InfoCircleOutlined /></a-tooltip>
               </template>
             </template>
-            <log-view :ref="`logView-${item.id}`" height="60vh" />
+            <log-view1 :ref="`logView-${item.id}`" height="60vh" />
           </a-tab-pane>
         </a-tabs>
       </a-form-item>
@@ -88,14 +88,14 @@
 
 <script>
 import { taskDetails, statusMap, taskLogInfoList } from '@/api/file-manager/release-task-log'
-import LogView from '@/components/logView/index2'
+import LogView1 from '@/components/logView/index2'
 import codeEditor from '@/components/codeEditor'
 import { getSshListAll } from '@/api/ssh'
 import { getNodeListAll } from '@/api/node'
 
 export default {
   components: {
-    LogView,
+    LogView1,
     codeEditor
   },
   props: {
