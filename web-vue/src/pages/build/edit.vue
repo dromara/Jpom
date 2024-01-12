@@ -1211,7 +1211,7 @@
         :choose-val="
           this.chooseScriptVisible === 1
             ? this.tempExtraData.noticeScriptId
-            : this.temp.script.indexOf('$ref.script.') != -1
+            : this.temp.script && this.temp.script.indexOf('$ref.script.') != -1
             ? this.temp.script.replace('$ref.script.')
             : ''
         "
@@ -1907,6 +1907,7 @@ export default {
       if (e.target.value === 1) {
         this.loadDockerAllTag()
       }
+      this.temp = { ...this.temp, script: '' }
     },
     // 查询 docker tag
     loadDockerAllTag() {
