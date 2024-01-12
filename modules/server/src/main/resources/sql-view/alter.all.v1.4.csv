@@ -10,3 +10,5 @@ ADD,OUT_GIVING,modeData,String,500,,分发方式数据
 ADD,FILE_RELEASE_TASK_LOG,fileType,TINYINT,,,文件类型
 ADD,NODE_INFO,jpomProjectCount,Integer,,,jpom项目数,
 ADD,NODE_INFO,jpomScriptCount,Integer,,,jpom脚本数,
+ALTER,STATIC_FILE_STORAGE,parentAbsolutePath,String,300,,父级文件路径,false
+ALTER,STATIC_FILE_STORAGE,absolutePath,String,300,,文件路径,false
