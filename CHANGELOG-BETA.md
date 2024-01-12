@@ -129,7 +129,7 @@
 1. 【server】优化 支持批量删除构建信息（感谢@奇奇） 
 2. 【server】修复 删除项目、删除分发检查关联构建失败问题
 3. 【all】优化 关闭 Process 方式
-4. 【server】优化 节点方法相关页面问题（感谢[@陈旭](https://gitee.com/chenxu8989) [Gitee issues I8TMDW](https://gitee.com/dromara/Jpom/issues/I8TMDW)）
+4. 【server】优化 节点分发相关页面问题（感谢[@陈旭](https://gitee.com/chenxu8989) [Gitee issues I8TMDW](https://gitee.com/dromara/Jpom/issues/I8TMDW)）
 
 ------
 
