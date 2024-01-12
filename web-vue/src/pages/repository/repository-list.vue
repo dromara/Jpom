@@ -625,6 +625,12 @@ export default {
           width: '170px'
         },
         {
+          title: '排序值',
+          dataIndex: 'sortValue',
+          sorter: true,
+          width: '80px'
+        },
+        {
           title: '操作',
           dataIndex: 'operation',
           fixed: 'right',

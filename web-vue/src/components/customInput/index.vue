@@ -1,7 +1,12 @@
 <template>
   <div>
-    <template v-if="inputData.indexOf(refTag) == -1 && type == 'password'">
-      <a-input-password :placeholder="placeholder" v-model:value="inputData" @change="inputChange">
+    <template v-if="inputData.indexOf(refTag) === -1 && type == 'password'">
+      <a-input-password
+        :placeholder="placeholder"
+        :disabled="!!selectData"
+        v-model:value="inputData"
+        @change="inputChange"
+      >
         <template v-slot:addonBefore>
           <a-tooltip>
             <template #title>
@@ -11,7 +16,7 @@
                 当前没有可以引用的环境变量
               </ul>
             </template>
-            <a-select placeholder="引用环境变量" style="width: 120px" @change="selectChange">
+            <a-select placeholder="引用环境变量" style="width: 120px" v-model:value="selectData" @change="selectChange">
               <a-select-option value="">不引用环境变量</a-select-option>
               <a-select-option v-for="item in envList" :key="item.id" :value="item.name"
                 >{{ item.name }}
@@ -22,7 +27,7 @@
       </a-input-password>
     </template>
     <template v-else>
-      <a-input :placeholder="placeholder" v-model:value="inputData" @change="inputChange">
+      <a-input :placeholder="placeholder" :disabled="!!selectData" v-model:value="inputData" @change="inputChange">
         <template v-slot:addonBefore>
           <a-tooltip>
             <template #title>
@@ -31,7 +36,7 @@
                 当前没有可以引用的环境变量
               </ul>
             </template>
-            <a-select placeholder="引用环境变量" style="width: 120px" @change="selectChange">
+            <a-select placeholder="引用环境变量" style="width: 120px" v-model:value="selectData" @change="selectChange">
               <a-select-option value="">引用环境变量</a-select-option>
               <a-select-option v-for="item in envList" :key="item.id" :value="item.name"
                 >{{ item.name }}
@@ -50,7 +55,8 @@ export default {
   data() {
     return {
       inputData: '',
-      refTag: '$ref.wEnv.'
+      refTag: '$ref.wEnv.',
+      selectData: null
     }
   },
   props: {
@@ -77,6 +83,11 @@ export default {
 
       handler(v) {
         this.inputData = v
+        if (v.indexOf(this.refTag) == -1) {
+          this.selectData = null
+        } else {
+          // this.selectData = v.replace(this.refTag)
+        }
       },
 
       immediate: true
@@ -84,6 +95,7 @@ export default {
   },
   methods: {
     selectChange(v) {
+      this.selectData = v
       const newV = v ? this.refTag + v : ''
       this.$emit('change', newV)
     },

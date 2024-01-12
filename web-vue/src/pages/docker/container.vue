@@ -975,6 +975,7 @@ export default {
 <style scoped>
 :deep(.ant-statistic div) {
   display: inline-block;
+  font-weight: normal;
 }
 :deep(.ant-statistic-content-value, .ant-statistic-content) {
   font-size: 16px;

@@ -100,6 +100,7 @@ export default {
   methods: {
     selectChange(v) {
       this.$emit('update:value', v)
+      this.$emit('change', v)
     },
     addInput(v) {
       if (!v) {
@@ -113,11 +114,12 @@ export default {
       this.selected = v
       //
       this.selectChange(v)
+      this.$emit('addOption', this.optionList)
     },
     refreshSelect() {
       this.$emit('onRefreshSelect')
     }
   },
-  emits: ['update:value', 'onRefreshSelect']
+  emits: ['update:value', 'onRefreshSelect', 'change', 'addOption']
 }
 </script>
