@@ -220,13 +220,16 @@ public class InitDb implements DisposableBean, ILoadEvent {
                 // 分隔后执行，mysql 不能执行多条 sql 语句
                 List<String> list = StrUtil.isEmpty(sqlBuilderService.delimiter()) ?
                     CollUtil.newArrayList(sql) : StrUtil.splitTrim(sql, sqlBuilderService.delimiter());
-                int rows = list.stream().mapToInt(value -> {
-                    try {
-                        return parameter.execute(value);
-                    } catch (SQLException e) {
-                        throw Lombok.sneakyThrow(e);
-                    }
-                }).sum();
+                int rows = list.stream()
+                    .mapToInt(value -> {
+                        try {
+                            return parameter.execute(value);
+                        } catch (SQLException e) {
+                            log.warn("错误 sql:{}", value);
+                            throw Lombok.sneakyThrow(e);
+                        }
+                    })
+                    .sum();
                 log.info("exec init SQL file: {} complete, and affected rows is: {}", name, rows);
             });
         } catch (SQLException e) {
