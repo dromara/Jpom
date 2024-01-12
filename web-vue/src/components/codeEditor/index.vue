@@ -225,6 +225,7 @@ const theme = [
   { name: '深色 dracula', theme: 'dracula' },
   { name: '浅色 eclipse', theme: 'eclipse' },
   { name: '深色2 blackboard', theme: 'blackboard' },
+  { name: '浅色 idea', theme: 'idea' },
   { name: 'ayu-dark', theme: 'ayu-dark' },
   { name: 'ayu-mirage', theme: 'ayu-mirage' },
   { name: 'base16-dark', theme: 'base16-dark' },
@@ -242,7 +243,7 @@ const theme = [
   { name: 'gruvbox-dark', theme: 'gruvbox-dark' },
   { name: 'hopscotch', theme: 'hopscotch' },
   { name: 'icecoder', theme: 'icecoder' },
-  { name: 'idea', theme: 'idea' },
+
   { name: 'isotope', theme: 'isotope' },
   { name: 'juejin', theme: 'juejin' },
   { name: 'lesser-dark', theme: 'lesser-dark' },

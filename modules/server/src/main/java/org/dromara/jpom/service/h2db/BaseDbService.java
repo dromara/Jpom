@@ -81,7 +81,8 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      */
     private static final Order[] DEFAULT_ORDERS = new Order[]{
         new Order("createTimeMillis", Direction.DESC),
-        new Order("modifyTimeMillis", Direction.DESC)
+        new Order("modifyTimeMillis", Direction.DESC),
+        new Order("id", Direction.DESC)
     };
 
     public BaseDbService() {

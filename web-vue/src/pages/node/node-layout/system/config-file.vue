@@ -8,7 +8,11 @@
         banner
       />
       <a-form-item class="node-content-config">
-        <code-editor v-model:content="temp.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
+        <code-editor
+          v-model:content="temp.content"
+          :options="{ mode: 'yaml', tabSize: 2 }"
+          :showTool="true"
+        ></code-editor>
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
         <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit(false)">保存</a-button>

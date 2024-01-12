@@ -66,7 +66,8 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
     private static final Order[] SORT_DEFAULT_ORDERS = new Order[]{
         new Order("sortValue", Direction.DESC),
         new Order("createTimeMillis", Direction.DESC),
-        new Order("modifyTimeMillis", Direction.DESC)
+        new Order("modifyTimeMillis", Direction.DESC),
+        new Order("id", Direction.DESC)
     };
 
     public BaseWorkspaceService() {
