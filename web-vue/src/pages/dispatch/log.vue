@@ -113,9 +113,12 @@
       <a-list item-layout="horizontal" :data-source="detailData">
         <template #renderItem="{ item }">
           <a-list-item>
-            <a-list-item-meta :description="item.description">
+            <a-list-item-meta>
               <template v-slot:title>
                 <h4>{{ item.title }}</h4>
+              </template>
+              <template #description>
+                <code>{{ item.description }}</code>
               </template>
             </a-list-item-meta>
           </a-list-item>
@@ -282,6 +285,7 @@ export default {
       this.detailData = []
       this.detailVisible = true
       this.temp = Object.assign({}, record)
+
       this.detailData.push({ title: '分发结果', description: this.temp.result })
     },
     // 分页、排序、筛选变化时触发

@@ -7,12 +7,7 @@
           服务端系统配置
         </span>
       </template>
-      <a-alert
-        v-if="temp.file"
-        :message="`配置文件路径:${temp.file}`"
-        style="margin-top: 10px; margin-bottom: 20px"
-        banner
-      />
+
       <a-form ref="editForm" :model="temp">
         <a-form-item class="config-editor">
           <code-editor
@@ -20,7 +15,11 @@
             fileSuffix="conf.yml"
             :options="{ mode: 'yaml', tabSize: 2 }"
             :showTool="true"
-          ></code-editor>
+          >
+            <template #tool_before>
+              <a-alert show-icon v-if="temp.file" :message="`配置文件路径:${temp.file}`" />
+            </template>
+          </code-editor>
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
           <a-space>
@@ -388,13 +387,9 @@ export default {
 </script>
 
 <style scoped>
-textarea {
-  resize: none;
-}
 .config-editor {
   height: calc(100vh - 300px);
   width: 100%;
   overflow-y: scroll;
-  border: 1px solid #d9d9d9;
 }
 </style>

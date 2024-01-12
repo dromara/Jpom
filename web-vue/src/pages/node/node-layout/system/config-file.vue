@@ -1,18 +1,12 @@
 <template>
   <div class="">
     <a-form ref="editForm" :model="temp">
-      <a-alert
-        v-if="temp.file"
-        :message="`配置文件路径:${temp.file}`"
-        style="margin-top: 10px; margin-bottom: 20px"
-        banner
-      />
       <a-form-item class="node-content-config">
-        <code-editor
-          v-model:content="temp.content"
-          :options="{ mode: 'yaml', tabSize: 2 }"
-          :showTool="true"
-        ></code-editor>
+        <code-editor v-model:content="temp.content" :options="{ mode: 'yaml', tabSize: 2 }" :showTool="true">
+          <template #tool_before>
+            <a-alert show-icon v-if="temp.file" :message="`配置文件路径:${temp.file}`" />
+          </template>
+        </code-editor>
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
         <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit(false)">保存</a-button>

@@ -12,7 +12,7 @@
         }
       "
     >
-      <a-tabs v-model:value="tabKey" tab-position="left">
+      <a-tabs v-model:activeKey="tabKey" tab-position="left">
         <a-tab-pane key="1" tab="状态">
           <!-- 嵌套表格 -->
           <a-table
