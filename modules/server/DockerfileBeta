@@ -52,7 +52,7 @@ RUN curl -LfSo ${JPOM_HOME}/${JPOM_PKG} https://download.jpom.top/beta/${JPOM_PK
 RUN curl -LfsSo ${JPOM_HOME}/${SHA1_NAME} https://download.jpom.top/beta/${JPOM_PKG_VERSION}/${SHA1_NAME} && \
     ESUM=`cat ${JPOM_HOME}/${SHA1_NAME}` && \
     echo "${ESUM} ${JPOM_HOME}/${JPOM_PKG}" | sha1sum -c -;
-RUN tar -xvf ${JPOM_HOME}/${JPOM_PKG} -C ${JPOM_HOME}
+RUN tar -zxvf ${JPOM_HOME}/${JPOM_PKG} -C ${JPOM_HOME}
 RUN rm -rf ${JPOM_HOME}/${JPOM_PKG}
 
 # 将配置文件暂存默认目录，避免无法挂载
