@@ -1,5 +1,10 @@
 <template>
-  <div class="code-mirror-div">
+  <div
+    class="code-mirror-div"
+    :style="{
+      height: height
+    }"
+  >
     <a-spin tip="加载编辑器中" :spinning="loading" v-if="loading">
       <a-skeleton />
     </a-spin>
@@ -357,12 +362,10 @@ const fileSuffixToModeMap = {
 export default {
   components: { Codemirror },
   props: {
-    // cmHintOptions: {
-    //   type: Object,
-    //   default() {
-    //     return {}
-    //   }
-    // },
+    height: {
+      type: String,
+      default: '100%'
+    },
     content: {
       type: String,
       default: ''
@@ -438,7 +441,7 @@ export default {
         // // 是否应滚动或换行以显示长行
         lineWrapping: true,
         lineNumbers: true,
-        autofocus: true,
+        autofocus: false,
         // 自动缩进，设置是否根据上下文自动缩进（和上一行相同的缩进量）。默认为true
         smartIndent: false,
         autocorrect: true,

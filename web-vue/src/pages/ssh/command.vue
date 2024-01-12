@@ -127,14 +127,14 @@
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
-          <div style="height: 40vh; overflow-y: scroll">
-            <a-form-item-rest>
-              <code-editor
-                v-model:content="temp.command"
-                :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"
-              ></code-editor>
-            </a-form-item-rest>
-          </div>
+
+          <a-form-item-rest>
+            <code-editor
+              height="40vh"
+              v-model:content="temp.command"
+              :options="{ mode: 'shell', tabSize: 2 }"
+            ></code-editor>
+          </a-form-item-rest>
         </a-form-item>
         <a-form-item label="SSH节点">
           <a-select

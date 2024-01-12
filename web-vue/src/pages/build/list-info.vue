@@ -957,6 +957,7 @@ export default {
     },
     handleDetails(record) {
       this.editBuildVisible = 1
+      this.editSteps = 2
       this.temp = { id: record.id, buildEnvParameter: record.buildEnvParameter }
     },
     loadBranchListById(id) {

@@ -150,10 +150,8 @@
         </a-form-item>
         <a-form-item label="Script 内容" name="context">
           <a-form-item-rest>
-            <div style="height: 40vh; overflow-y: scroll">
-              <code-editor v-model:content="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }">
-              </code-editor>
-            </div>
+            <code-editor height="40vh" v-model:content="temp.context" :options="{ mode: 'shell', tabSize: 2 }">
+            </code-editor>
           </a-form-item-rest>
         </a-form-item>
         <!-- <a-form-item label="默认参数" name="defArgs">

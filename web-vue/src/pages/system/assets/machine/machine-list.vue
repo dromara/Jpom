@@ -588,8 +588,12 @@
           </a-select>
         </a-form-item>
 
-        <a-form-item class="config-editor" :wrapper-col="{ span: 24 }">
-          <code-editor v-model:content="temp.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
+        <a-form-item :wrapper-col="{ span: 24 }">
+          <code-editor
+            height="40vh"
+            v-model:content="temp.content"
+            :options="{ mode: 'yaml', tabSize: 2 }"
+          ></code-editor>
         </a-form-item>
       </a-form>
     </a-modal>
@@ -1132,11 +1136,5 @@ export default {
 .item-info .title {
 }
 .item-info .content {
-}
-.config-editor {
-  height: 40vh;
-  width: 100%;
-  overflow-y: scroll;
-  border: 1px solid #d9d9d9;
 }
 </style>

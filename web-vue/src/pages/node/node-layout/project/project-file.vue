@@ -291,14 +291,13 @@
           :maskClosable="true"
           @cancel="handleCloseModal"
         >
-          <div style="height: 60vh">
-            <code-editor
-              showTool
-              v-if="editFileVisible"
-              v-model:content="fileContent"
-              :fileSuffix="filename"
-            ></code-editor>
-          </div>
+          <code-editor
+            height="60vh"
+            showTool
+            v-if="editFileVisible"
+            v-model:content="fileContent"
+            :fileSuffix="filename"
+          ></code-editor>
 
           <template v-slot:footer>
             <a-button @click="handleCloseModal"> 关闭 </a-button>

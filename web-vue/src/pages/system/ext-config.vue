@@ -15,15 +15,19 @@
       </a-col>
       <a-col span="18" style="padding-left: 5px">
         <a-space direction="vertical" style="display: flex">
-          <div class="config-editor">
-            <code-editor :showTool="temp.name ? true : false" v-model:content="temp.content" :fileSuffix="temp.name">
-              <template v-slot:tool_before>
-                <div v-show="temp.name">
-                  名称： <a-tag color="red">{{ temp.name }}</a-tag>
-                </div>
-              </template>
-            </code-editor>
-          </div>
+          <code-editor
+            height="calc(100vh - 170px)"
+            :showTool="true"
+            v-model:content="temp.content"
+            :fileSuffix="temp.name"
+          >
+            <template v-slot:tool_before>
+              <div v-show="temp.name">
+                名称： <a-tag color="red">{{ temp.name }}</a-tag>
+              </div>
+            </template>
+          </code-editor>
+
           <a-row type="flex" justify="center">
             <a-space>
               <a-button type="primary" danger :disabled="!temp || !temp.name" @click="saveData">保存</a-button>
@@ -145,10 +149,4 @@ export default {
 }
 </script>
 
-<style scoped>
-.config-editor {
-  height: calc(100vh - 170px);
-  width: 100%;
-  overflow-y: scroll;
-}
-</style>
+<style scoped></style>

@@ -217,38 +217,32 @@
                   placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build。支持变量：${BUILD_ID}、${BUILD_NAME}、${BUILD_SOURCE_FILE}、${BUILD_NUMBER_ID}、仓库目录下 .env、工作空间变量"
                 /> -->
               <a-form-item-rest>
-                <div style="height: 40vh">
-                  <code-editor
-                    v-model:content="temp.script"
-                    :showTool="true"
-                    :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"
-                  >
-                    <template #tool_before>
-                      <a-space>
-                        <a-button
-                          type="link"
-                          @click="
-                            () => {
-                              this.viewScriptTemplVisible = true
-                            }
-                          "
-                        >
-                          常见构建命令示例
-                        </a-button>
-                        <a-button
-                          type="link"
-                          @click="
-                            () => {
-                              this.chooseScriptVisible = 2
-                            }
-                          "
-                        >
-                          引用脚本模板
-                        </a-button>
-                      </a-space>
-                    </template>
-                  </code-editor>
-                </div>
+                <code-editor v-model:content="temp.script" :showTool="true" :options="{ mode: 'shell' }" height="40vh">
+                  <template #tool_before>
+                    <a-space>
+                      <a-button
+                        type="link"
+                        @click="
+                          () => {
+                            this.viewScriptTemplVisible = true
+                          }
+                        "
+                      >
+                        常见构建命令示例
+                      </a-button>
+                      <a-button
+                        type="link"
+                        @click="
+                          () => {
+                            this.chooseScriptVisible = 2
+                          }
+                        "
+                      >
+                        引用脚本模板
+                      </a-button>
+                    </a-space>
+                  </template>
+                </code-editor>
               </a-form-item-rest>
             </a-form-item>
             <a-form-item v-if="temp.buildMode === 1" name="script">
@@ -288,27 +282,25 @@
               <a-tabs>
                 <a-tab-pane key="1" tab="DSL 配置">
                   <a-form-item-rest>
-                    <div style="height: 40vh">
-                      <code-editor
-                        v-model:content="temp.script"
-                        :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"
-                      ></code-editor>
-                    </div>
+                    <code-editor
+                      height="40vh"
+                      v-model:content="temp.script"
+                      :options="{ mode: 'yaml', tabSize: 2 }"
+                    ></code-editor>
                   </a-form-item-rest>
                 </a-tab-pane>
                 <a-tab-pane key="2" tab="配置示例">
                   <a-form-item-rest>
-                    <div style="height: 40vh">
-                      <code-editor
-                        v-model:content="dslDefault"
-                        :options="{
-                          mode: 'yaml',
-                          tabSize: 2,
-                          theme: 'abcdef',
-                          readOnly: true
-                        }"
-                      ></code-editor>
-                    </div>
+                    <code-editor
+                      height="40vh"
+                      v-model:content="dslDefault"
+                      :options="{
+                        mode: 'yaml',
+                        tabSize: 2,
+
+                        readOnly: true
+                      }"
+                    ></code-editor>
                   </a-form-item-rest>
                 </a-tab-pane>
               </a-tabs>
@@ -546,14 +538,13 @@
                   placeholder=""
                 /> -->
                 <a-form-item-rest>
-                  <div style="height: 40vh">
-                    <code-editor
-                      v-model:content="tempExtraData.releaseBeforeCommand"
-                      :showTool="true"
-                      :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"
-                    >
-                    </code-editor>
-                  </div>
+                  <code-editor
+                    height="40vh"
+                    v-model:content="tempExtraData.releaseBeforeCommand"
+                    :showTool="true"
+                    :options="{ mode: 'shell' }"
+                  >
+                  </code-editor>
                 </a-form-item-rest>
               </a-form-item>
               <a-form-item v-if="temp.releaseMethod === 3 || temp.releaseMethod === 4" name="releaseCommand">
@@ -576,14 +567,13 @@
                   java,支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}
                 </template>
                 <a-form-item-rest>
-                  <div style="height: 40vh">
-                    <code-editor
-                      v-model:content="tempExtraData.releaseCommand"
-                      :showTool="true"
-                      :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"
-                    >
-                    </code-editor>
-                  </div>
+                  <code-editor
+                    height="40vh"
+                    v-model:content="tempExtraData.releaseCommand"
+                    :showTool="true"
+                    :options="{ mode: 'shell' }"
+                  >
+                  </code-editor>
                 </a-form-item-rest>
               </a-form-item>
 

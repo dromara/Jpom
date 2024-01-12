@@ -55,30 +55,24 @@
       <a-form-item label="执行脚本" name="releaseBeforeCommand">
         <a-tabs tabPosition="right">
           <a-tab-pane key="before" tab="上传前">
-            <div style="height: 40vh; overflow-y: scroll">
-              <code-editor
-                :content="temp.taskData && temp.taskData.beforeScript"
-                :options="{
-                  mode: temp.taskData && temp.taskData.taskType === 0 ? 'shell' : '',
-                  tabSize: 2,
-                  theme: 'abcdef',
-                  readOnly: true
-                }"
-              ></code-editor>
-            </div>
+            <code-editor
+              height="40vh"
+              :content="temp.taskData && temp.taskData.beforeScript"
+              :options="{
+                mode: 'shell',
+                readOnly: true
+              }"
+            ></code-editor>
           </a-tab-pane>
           <a-tab-pane key="after" tab="上传后">
-            <div style="height: 40vh; overflow-y: scroll">
-              <code-editor
-                :content="temp.taskData && temp.taskData.afterScript"
-                :options="{
-                  mode: temp.taskData && temp.taskData.taskType === 0 ? 'shell' : '',
-                  tabSize: 2,
-                  theme: 'abcdef',
-                  readOnly: true
-                }"
-              ></code-editor>
-            </div>
+            <code-editor
+              height="40vh"
+              :content="temp.taskData && temp.taskData.afterScript"
+              :options="{
+                mode: 'shell',
+                readOnly: true
+              }"
+            ></code-editor>
           </a-tab-pane>
         </a-tabs>
       </a-form-item>

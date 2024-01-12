@@ -233,9 +233,7 @@
         :maskClosable="true"
         @ok="updateFileData"
       >
-        <div style="height: 60vh">
-          <code-editor showTool v-model:content="temp.fileContent" :fileSuffix="temp.name"></code-editor>
-        </div>
+        <code-editor height="60vh" showTool v-model:content="temp.fileContent" :fileSuffix="temp.name"></code-editor>
       </a-modal>
       <!-- 从命名文件/文件夹 -->
       <a-modal
