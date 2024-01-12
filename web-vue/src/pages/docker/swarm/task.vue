@@ -220,9 +220,9 @@ export default {
           width: 120,
           tooltip: true
         },
-        // { title: "副本数", dataIndex: "spec.mode.replicated.replicas", width: 90, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        // { title: "端点", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
-        // { title: "节点地址", width: 150, dataIndex: "status.address", ellipsis: true, scopedSlots: { customRender: "address" } },
+        // { title: "副本数", dataIndex: "spec.mode.replicated.replicas", width: 90, ellipsis: true,  },
+        // { title: "端点", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, },
+        // { title: "节点地址", width: 150, dataIndex: "status.address", ellipsis: true,  },
         {
           title: '状态',
           width: 140,
@@ -244,13 +244,13 @@ export default {
           tooltip: true
         },
 
-        // { title: "系统类型", width: 140, align: "center", dataIndex: "description.platform.os", ellipsis: true, scopedSlots: { customRender: "os" } },
+        // { title: "系统类型", width: 140, align: "center", dataIndex: "description.platform.os", ellipsis: true,  },
         // {
         //   title: "创建时间",
         //   dataIndex: "createdAt",
 
         //   ellipsis: true,
-        //   scopedSlots: { customRender: "tooltip" },
+
         //   width: 170,
         // },
         {

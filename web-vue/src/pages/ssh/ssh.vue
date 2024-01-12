@@ -438,7 +438,7 @@ export default {
           width: 100,
           ellipsis: true
         },
-        // { title: "Port", dataIndex: "machineSsh.port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        // { title: "Port", dataIndex: "machineSsh.port", sorter: true, width: 80, ellipsis: true, },
         {
           title: '用户名',
           dataIndex: ['machineSsh', 'user'],
@@ -452,29 +452,26 @@ export default {
           width: 80,
           ellipsis: true
         },
-        // { title: "系统版本", dataIndex: "machineSsh.osVersion", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        // { title: "系统版本", dataIndex: "machineSsh.osVersion", sorter: true, ellipsis: true,},
         {
           title: 'CPU',
           dataIndex: ['machineSsh', 'osOccupyCpu'],
           width: 80,
           ellipsis: true
-          // scopedSlots: { customRender: 'osOccupyCpu' }
         },
         {
           title: '内存',
           dataIndex: ['machineSsh', 'osOccupyMemory'],
           width: 80,
           ellipsis: true
-          // scopedSlots: { customRender: 'osOccupyMemory' }
         },
         {
           title: '硬盘',
           dataIndex: ['machineSsh', 'osMaxOccupyDisk'],
           width: 80,
-          ellipsis: true,
-          scopedSlots: { customRender: 'osMaxOccupyDisk' }
+          ellipsis: true
         },
-        // { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        // { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true,  },
         {
           title: '连接状态',
           dataIndex: ['machineSsh', 'status'],
@@ -482,7 +479,7 @@ export default {
           align: 'center',
           width: '90px'
         },
-        // { title: "编码格式", dataIndex: "machineSsh.charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        // { title: "编码格式", dataIndex: "machineSsh.charset", sorter: true, width: 120, ellipsis: true, },
         {
           title: '关联节点',
           dataIndex: 'nodeId',

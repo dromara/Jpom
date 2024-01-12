@@ -717,7 +717,6 @@ export default {
           width: '100px',
           ellipsis: true,
           percent2Number: true
-          // scopedSlots: { customRender: 'percent2Number' }
         },
         {
           title: '内存占用',
@@ -727,7 +726,6 @@ export default {
           width: '100px',
           ellipsis: true,
           percent2Number: true
-          // scopedSlots: { customRender: 'percent2Number' }
         },
         {
           title: '硬盘占用',
@@ -737,7 +735,6 @@ export default {
           width: '100px',
           ellipsis: true,
           percent2Number: true
-          // scopedSlots: { customRender: 'percent2Number' }
         },
         {
           title: '插件版本号',

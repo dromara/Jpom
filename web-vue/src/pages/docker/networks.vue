@@ -148,7 +148,7 @@ export default {
           sortDirections: ['descend', 'ascend'],
           defaultSortOrder: 'descend'
         }
-        // { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
+        // { title: "操作", dataIndex: "operation", width: 80 },
       ],
       action: {
         remove: {

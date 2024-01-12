@@ -742,7 +742,7 @@ export default {
           width: 100,
           ellipsis: true
         },
-        // { title: "JVM 剩余内存", dataIndex: "machineNodeData.jvmFreeMemory", ellipsis: true, scopedSlots: { customRender: "freeMemory" } },
+        // { title: "JVM 剩余内存", dataIndex: "machineNodeData.jvmFreeMemory", ellipsis: true, },
 
         {
           title: '项目数',

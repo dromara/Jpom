@@ -641,7 +641,7 @@ export default {
           dataIndex: 'swarmId',
           ellipsis: true
         },
-        // { title: "apiVersion", dataIndex: "apiVersion", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        // { title: "apiVersion", dataIndex: "apiVersion", width: 100, ellipsis: true, },
         {
           title: '最后修改人',
           dataIndex: 'modifyUser',
@@ -667,7 +667,7 @@ export default {
         {
           title: '操作',
           dataIndex: 'operation',
-          scopedSlots: { customRender: 'operation' },
+
           fixed: 'right',
           align: 'center',
           width: '320px'

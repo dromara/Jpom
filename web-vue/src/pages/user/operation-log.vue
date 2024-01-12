@@ -211,7 +211,7 @@ export default {
           ellipsis: true,
           tooltip: true
         },
-        // { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        // { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true, },
         {
           title: '操作功能',
           dataIndex: 'classFeature',
