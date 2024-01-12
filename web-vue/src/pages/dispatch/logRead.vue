@@ -357,7 +357,7 @@ export default {
                   })
                   that.loadData()
                 }
-                resLog()
+                resolve()
               })
               .catch(reject)
           })
