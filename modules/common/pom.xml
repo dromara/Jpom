@@ -97,5 +97,12 @@
             <version>1.0.5</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-exec</artifactId>
+            <version>1.4.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 </project>
