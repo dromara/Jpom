@@ -15,6 +15,10 @@ export default [
         text: "大版本升级",
         items: [
           {
+            text: "v2.10.X迁移到v2.11.X指南",
+            link: "/pages/upgrade/2.10.x-to-2.11.x/",
+          },
+          {
             text: "v2.9.X迁移到v2.10.X指南",
             link: "/pages/upgrade/2.9.x-to-2.10.x/",
           },
