@@ -53,7 +53,7 @@ const htmlModule: VdoingThemeConfig["htmlModules"] = {
   `,
   // 万维广告
   pageT: `
-  <div class="wwads-cn wwads-horizontal page-wwads" data-id="188"></div>
+  <div class="wwads-cn wwads-horizontal page-wwads" data-id="188" style="display: block !important"></div>
   <style>
       .page-wwads{
         width:100%!important;
