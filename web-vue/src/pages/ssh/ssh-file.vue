@@ -233,7 +233,19 @@
         :maskClosable="true"
         @ok="updateFileData"
       >
-        <code-editor height="60vh" showTool v-model:content="temp.fileContent" :fileSuffix="temp.name"></code-editor>
+        <code-editor height="60vh" showTool v-model:content="temp.fileContent" :fileSuffix="temp.name">
+          <template #tool_before>
+            <a-tag>
+              {{
+                ((temp.allowPathParent || '/ ') + '/' + (temp.nextPath || '/') + '/' + (temp.name || '/')).replace(
+                  new RegExp('//+', 'gm'),
+                  '/'
+                )
+              }}
+              <!-- {{ temp.name }} -->
+            </a-tag>
+          </template>
+        </code-editor>
       </a-modal>
       <!-- 从命名文件/文件夹 -->
       <a-modal
