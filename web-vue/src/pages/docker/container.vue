@@ -295,7 +295,7 @@
             <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="autoUpdate" />
           </a-space>
         </template>
-        <a-collapse>
+        <a-collapse v-if="list && list.length">
           <a-collapse-panel v-for="(item2, index) in list" :key="index">
             <template #header>
               <a-space>
@@ -560,6 +560,9 @@
             </a-table>
           </a-collapse-panel>
         </a-collapse>
+        <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" v-else>
+          <template #description>暂无数据</template>
+        </a-empty>
       </a-card>
 
       <!-- <a-table
@@ -684,7 +687,7 @@ import LogView2 from '@/pages/docker/log-view'
 import Terminal2 from '@/pages/docker/terminal'
 import editContainer from './editContainer.vue'
 import BuildContainer from './buildContainer.vue'
-
+import { Empty } from 'ant-design-vue'
 export default {
   name: 'container',
   components: {
@@ -717,6 +720,7 @@ export default {
   },
   data() {
     return {
+      Empty,
       list: [],
       loading: false,
       listQuery: {

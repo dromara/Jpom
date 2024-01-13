@@ -43,7 +43,7 @@
       <div class="layout-content">
         <!-- <a-layout-content> -->
         <container
-          v-if="menuKey === 'containers'"
+          v-show="menuKey === 'containers'"
           type="container"
           :id="this.id"
           :machineDockerId="this.machineDockerId"
@@ -51,7 +51,7 @@
           :urlPrefix="this.urlPrefix"
         />
         <container
-          v-else-if="menuKey === 'docker-compose'"
+          v-show="menuKey === 'docker-compose'"
           type="compose"
           :id="this.id"
           :machineDockerId="this.machineDockerId"
@@ -59,7 +59,7 @@
           :urlPrefix="this.urlPrefix"
         />
         <images
-          v-if="menuKey === 'images'"
+          v-show="menuKey === 'images'"
           :id="this.id"
           :machineDockerId="this.machineDockerId"
           :visible="this.visible"
@@ -73,21 +73,21 @@
           :urlPrefix="this.urlPrefix"
         />
         <info
-          v-if="menuKey === 'info'"
+          v-show="menuKey === 'info'"
           :id="this.id"
           :machineDockerId="this.machineDockerId"
           :visible="this.visible"
           :urlPrefix="this.urlPrefix"
         />
         <networks
-          v-if="menuKey === 'networks'"
+          v-show="menuKey === 'networks'"
           :id="this.id"
           :machineDockerId="this.machineDockerId"
           :visible="this.visible"
           :urlPrefix="this.urlPrefix"
         />
         <prune
-          v-if="menuKey === 'prune'"
+          v-show="menuKey === 'prune'"
           :id="this.id"
           :machineDockerId="this.machineDockerId"
           :visible="this.visible"

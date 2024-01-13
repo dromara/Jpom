@@ -24,15 +24,15 @@
         <a-menu-item key="task">
           <span class="nav-text">集群任务</span>
         </a-menu-item>
-      </a-menu></template
-    >
+      </a-menu>
+    </template>
 
     <!-- <a-layout-header style="height: 48px; padding: 0"> </a-layout-header> -->
 
     <div class="layout-content">
-      <swarm-node v-if="menuKey === 'node'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
-      <swarm-service v-if="menuKey === 'server'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
-      <swarm-task v-if="menuKey === 'task'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+      <swarm-node v-show="menuKey === 'node'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+      <swarm-service v-show="menuKey === 'server'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+      <swarm-task v-show="menuKey === 'task'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
     </div>
   </a-drawer>
 </template>

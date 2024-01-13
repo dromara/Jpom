@@ -297,7 +297,14 @@
             v-if="editFileVisible"
             v-model:content="fileContent"
             :fileSuffix="filename"
-          ></code-editor>
+          >
+            <template #tool_before>
+              <a-tag>
+                {{ filename }}
+                <!-- {{ temp.name }} -->
+              </a-tag>
+            </template>
+          </code-editor>
 
           <template v-slot:footer>
             <a-button @click="handleCloseModal"> 关闭 </a-button>
