@@ -258,15 +258,18 @@
               <a-tooltip :title="`${item.name}(${item.host})`">
                 <template #title>
                   {{ item.name }}({{ item.host }})[{{
-                    item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version
+                    (item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version) ||
+                    '未获取到 Docker 或者禁用监控'
                   }}]
                 </template>
                 {{ item.name }}({{ item.host }}) [{{
-                  item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version
+                  (item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version) ||
+                  '未获取到 Docker 或者禁用监控'
                 }}]</a-tooltip
               >
             </a-select-option>
           </a-select>
+          <template #help>需要 SSH 监控中能获取到 docker 信息</template>
         </a-form-item>
         <template v-if="!temp.enableSsh">
           <a-form-item label="host" name="host">
