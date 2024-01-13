@@ -28,11 +28,11 @@ export default ({
    */
   if (!isServer) {
     // 如果开启了私密文章验证
-    if (
-      siteData.themeConfig.privatePage &&
-      siteData.themeConfig.privatePage.openPrivate
-    ) {
-      router.beforeEach((to, from, next) => {
+    router.beforeEach((to, from, next) => {
+      if (
+        siteData.themeConfig.privatePage &&
+        siteData.themeConfig.privatePage.openPrivate
+      ) {
         try {
           let {
             username,
@@ -171,8 +171,9 @@ export default ({
             });
           }
         } catch (e) {}
-        next();
-      });
+      }
+
+      next();
       docReady(function () {
         console.log(
           "\n %c Jpom %c " + `${location.protocol}//${location.host}` + " \n",
@@ -181,7 +182,10 @@ export default ({
         );
         //check if wwads' fire function was blocked after document is ready with 3s timeout (waiting the ad loading)
         setTimeout(function () {
-          if (window._AdBlockInit === undefined) {
+          if (
+            window._AdBlockInit === undefined ||
+            $(".wwads-cn").children().length === 0
+          ) {
             ABDetected();
           }
         }, 3000);
@@ -202,7 +206,41 @@ export default ({
           pageAD.style.display = "flex";
         }
       }, 900);
-    }
+    });
+
+    router.afterEach((to, form) => {
+      docReady(function () {
+        // 图片悬停显示描述
+        imgAddLayerTip();
+      });
+    });
+  }
+
+  function imgAddLayerTip() {
+    loopExecute(function () {
+      var $hover = $(".hover-alt[alt]");
+      if (!$hover.length) {
+        return false;
+      }
+      $hover.hover(
+        function () {
+          var msg = $(this).attr("alt");
+          if (msg) {
+            window.msgLayer = layer.tips(msg, $(this), {
+              tips: 1,
+              time: 0,
+            });
+          }
+        },
+        function () {
+          var index = window.msgLayer;
+          setTimeout(function () {
+            layer.close(index);
+          }, 1000);
+        }
+      );
+      return true;
+    }, 20);
   }
   /**
    * 检查 loginInfo 里的用户名和密码，userInfo 为曾经登录的信息

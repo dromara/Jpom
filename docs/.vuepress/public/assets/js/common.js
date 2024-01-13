@@ -17,32 +17,6 @@
 })();
 
 $(function () {
-  // 图片悬停显示描述
-  loopExecute(function () {
-    var $hover = $(".hover-alt[alt]");
-    if (!$hover.length) {
-      return false;
-    }
-    $hover.hover(
-      function () {
-        var msg = $(this).attr("alt");
-        if (msg) {
-          window.msgLayer = layer.tips(msg, $(this), {
-            tips: 1,
-            time: 0,
-          });
-        }
-      },
-      function () {
-        var index = window.msgLayer;
-        setTimeout(function () {
-          layer.close(index);
-        }, 1000);
-      }
-    );
-    return true;
-  }, 20);
-
   // 检查域名
   const localHosts = [
     "localhost",
@@ -115,7 +89,7 @@ $(function () {
       // 本地环境不显示
       return;
     }
-    console.error("_AdBlockInit");
+    // console.error("_AdBlockInit");
     var adBlockDetected_div = document.createElement("div");
     document.body.appendChild(adBlockDetected_div);
     var navbar = document.querySelector(".navbar");
@@ -141,7 +115,10 @@ $(function () {
   //check if wwads' fire function was blocked after document is ready with 3s timeout (waiting the ad loading)
   docReady(function () {
     setTimeout(function () {
-      if (window._AdBlockInit === undefined) {
+      if (
+        window._AdBlockInit === undefined ||
+        $(".wwads-cn").children().length === 0
+      ) {
         ABDetected();
       }
     }, 3000);

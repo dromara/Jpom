@@ -17,6 +17,7 @@ export default [
           { text: "一键安装", link: "/pages/fe28e9/" },
           { text: "下载安装", link: "/pages/db3065/" },
           { text: "容器安装", link: "/pages/820286/" },
+          { text: "安装服务", link: "/pages/929085/" },
         ],
       },
       {
