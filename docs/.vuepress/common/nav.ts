@@ -12,6 +12,14 @@ export default [
     link: "/pages/install/",
     items: [
       {
+        text: "上手安装",
+        items: [
+          { text: "一键安装", link: "/pages/fe28e9/" },
+          { text: "下载安装", link: "/pages/db3065/" },
+          { text: "容器安装", link: "/pages/820286/" },
+        ],
+      },
+      {
         text: "大版本升级",
         items: [
           {
@@ -30,7 +38,7 @@ export default [
         ],
       },
       {
-        text: "索引",
+        text: "文档碎片",
         items: [
           { text: "分类", link: "/categories/" },
           { text: "标签", link: "/tags/" },
@@ -59,8 +67,11 @@ export default [
     link: "/pages/FQA/",
     items: [
       { text: "名词解释", link: "/pages/FQA/proper-noun/" },
-      { text: "什么是 DSL", link: "/pages/FQA/DSL/" },
+      { text: "账户相关", link: "/pages/839836/" },
+      { text: "构建相关", link: "/pages/6a1f29/" },
+      { text: "工作空间", link: "/pages/d3f985/" },
       { text: "权限说明", link: "/pages/ca90a5/" },
+      { text: "资产说明", link: "/pages/350118/" },
     ],
   },
   {

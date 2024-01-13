@@ -49,21 +49,57 @@ $(function () {
     "127.0.0.1",
     "jpom.top",
     "webcache.googleusercontent.com",
+    "192.168.",
   ];
 
   function checkDomain() {
     if (localHosts.includes(location.hostname)) {
       return;
     }
-    if (location.hostname.indexOf("192.168.") > -1) {
-      console.log("本地");
-      return;
+    for (let item in localHosts) {
+      if (location.hostname.indexOf(localHosts[item]) > -1) {
+        return;
+      }
     }
     console.log(location.host + "  =>  jpom.top");
-    location.href = `https://jpom.top${location.pathname}${location.search}${location.hash}`;
+    layer.msg("当前访问的地址不是主站，2秒后自动切换到主站", {
+      offset: "t",
+      anim: 2,
+    });
+    setTimeout(function () {
+      location.href = `https://jpom.top${location.pathname}${location.search}${location.hash}`;
+    }, 2000);
   }
 
   checkDomain();
+
+  // 滚动左边菜单到可视区域
+  loopExecute(function () {
+    const $dom = $(".sidebar-links .active");
+    if (!$dom.length) {
+      return false;
+    }
+    $dom.get(0).scrollIntoView({ block: "center" });
+    return true;
+  }, 20);
+
+  // 提醒 star
+  loopExecute(function () {
+    let $themDom = $(".theme-mode-but");
+    if (!$themDom.length) {
+      return false;
+    }
+    layer.msg(
+      '欢迎您 Star Jpom <a href="https://gitee.com/dromara/Jpom/stargazers" target="_blank">Gitee</a>/' +
+        '<a href="https://github.com/dromara/Jpom" target="_blank">Github</a>',
+      {
+        offset: "rb",
+        time: 1000 * 60 * 60,
+        anim: 6,
+      }
+    );
+    return true;
+  }, 20);
 });
 
 (function () {
