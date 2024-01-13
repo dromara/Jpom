@@ -50,7 +50,7 @@
             <span>{{ text }}</span>
           </a-tooltip>
         </template>
-        <template v-else-if="column.dataIndex === 'name'">
+        <template v-else-if="column.dataIndex === 'serialNumberStr'">
           <a-popover title="证书描述">
             <template v-slot:content>
               <p>描述：{{ record.description }}</p>
@@ -171,7 +171,8 @@ import {
   deleteCert,
   downloadCert,
   certificateEdit,
-  certificateDeploy
+  certificateDeploy,
+  certListAll
 } from '@/api/tools/certificate'
 import { parseTime, CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from '@/utils/const'
 import releaseFile from '@/pages/file-manager/fileStorage/releaseFile.vue'
@@ -179,7 +180,12 @@ export default {
   components: {
     releaseFile
   },
-  props: {},
+  props: {
+    showAll: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       loading: false,
@@ -340,7 +346,8 @@ export default {
       this.loading = true
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
       this.loading = true
-      certList(this.listQuery).then((res) => {
+      const api = this.showAll ? certListAll : certList
+      api(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result
           this.listQuery.total = res.data.total
