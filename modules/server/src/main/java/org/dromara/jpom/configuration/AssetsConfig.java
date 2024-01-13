@@ -39,17 +39,28 @@ import java.util.List;
 @ConfigurationProperties("jpom.assets")
 @Data
 @Configuration
-@EnableConfigurationProperties({AssetsConfig.SshConfig.class})
+@EnableConfigurationProperties({AssetsConfig.SshConfig.class, AssetsConfig.DockerConfig.class})
 public class AssetsConfig {
     /**
      * ssh 资产配置
      */
     private SshConfig ssh;
+    /**
+     * docker 资产配置
+     */
+    private DockerConfig docker;
 
     public SshConfig getSsh() {
         return ObjectUtil.defaultIfNull(this.ssh, () -> {
             this.ssh = new SshConfig();
             return ssh;
+        });
+    }
+
+    public DockerConfig getDocker() {
+        return ObjectUtil.defaultIfNull(this.docker, () -> {
+            this.docker = new DockerConfig();
+            return docker;
         });
     }
 
@@ -69,5 +80,18 @@ public class AssetsConfig {
          */
         private List<String> disableMonitorGroupName;
 
+    }
+
+    /**
+     * docker 配置
+     */
+    @Data
+    @ConfigurationProperties("jpom.assets.docker")
+    public static class DockerConfig {
+
+        /**
+         * 监控频率
+         */
+        private String monitorCron;
     }
 }

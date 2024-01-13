@@ -109,6 +109,10 @@ jpom:
       # 指定分组不启用监控功能（如果想禁用所有配置 * 即可）
       disable-monitor-group-name:
         - 禁用监控
+    # docker 资产
+    docker:
+      # 监控频率
+      monitor-cron: 0 0/1 * * * ?
 server:
   #运行端口号
   port: 2122

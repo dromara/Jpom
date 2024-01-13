@@ -117,6 +117,8 @@ jpom:
       monitor-cron: 0 0/1 * * * ?
       disable-monitor-group-name:
         - 禁用监控
+    docker:
+      monitor-cron: 0 0/1 * * * ?
 server:
   #运行端口号
   port: 2122

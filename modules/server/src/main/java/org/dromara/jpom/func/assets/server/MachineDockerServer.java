@@ -28,6 +28,7 @@ import cn.hutool.core.comparator.CompareUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -40,6 +41,7 @@ import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ILoadEvent;
+import org.dromara.jpom.configuration.AssetsConfig;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
@@ -75,7 +77,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     private final DockerInfoService dockerInfoService;
     private final DockerSwarmInfoService dockerSwarmInfoService;
     private final ClusterInfoService clusterInfoService;
-
+    private final AssetsConfig.DockerConfig dockerConfig;
     @Resource
     @Lazy
     private CertificateInfoService certificateInfoService;
@@ -84,11 +86,13 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     public MachineDockerServer(MachineSshServer machineSshServer,
                                DockerInfoService dockerInfoService,
                                DockerSwarmInfoService dockerSwarmInfoService,
-                               ClusterInfoService clusterInfoService) {
+                               ClusterInfoService clusterInfoService,
+                               AssetsConfig assetsConfig) {
         this.machineSshServer = machineSshServer;
         this.dockerInfoService = dockerInfoService;
         this.dockerSwarmInfoService = dockerSwarmInfoService;
         this.clusterInfoService = clusterInfoService;
+        this.dockerConfig = assetsConfig.getDocker();
     }
 
     @Override
@@ -158,7 +162,9 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
 
     @Override
     public void startLoad() {
-        CronUtils.add(CRON_ID, "0 0/1 * * * ?", () -> MachineDockerServer.this);
+        String monitorCron = dockerConfig.getMonitorCron();
+        String cron = Opt.ofBlankAble(monitorCron).orElse("0 0/1 * * * ?");
+        CronUtils.add(CRON_ID, cron, () -> MachineDockerServer.this);
     }
 
     @Override
