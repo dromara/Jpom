@@ -507,6 +507,7 @@
       <certificate
         v-if="certificateVisible"
         ref="certificate"
+        :showAll="true"
         @confirm="
           (certInfo) => {
             this.temp = { ...this.temp, certInfo: certInfo }
@@ -524,7 +525,7 @@
           <a-button
             @click="
               () => {
-                this.chooseVisible = 0
+                this.certificateVisible = false
               }
             "
           >
