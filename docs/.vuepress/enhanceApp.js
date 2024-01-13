@@ -285,6 +285,7 @@ export default ({
     const wwadsContentEl = document.querySelector(".wwads-content");
     if (wwadsEl[0] && !wwadsContentEl) {
       wwadsEl[0].innerHTML = h;
+      wwadsEl[0].style.display = "inline-block !important;";
     }
   }
 
