@@ -125,9 +125,11 @@
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="服务名称" name="name">
+          <template #help><span v-if="!temp.serviceId">创建后不支持修改</span></template>
           <a-input v-model:value="temp.name" :disabled="temp.serviceId ? true : false" placeholder="服务名称" />
         </a-form-item>
         <a-form-item label="运行模式" name="mode">
+          <template #help><span v-if="!temp.serviceId">创建后不支持修改</span></template>
           <a-radio-group name="mode" v-model:value="temp.mode" :disabled="temp.serviceId ? true : false">
             <a-radio value="REPLICATED">副本</a-radio>
             <a-radio value="GLOBAL">独立 </a-radio>

@@ -8,7 +8,7 @@
           $emit('cancelBtnClick')
         }
       "
-      width="60vw"
+      width="80vw"
       title="重建容器"
       :maskClosable="false"
       :footer-style="{ textAlign: 'right' }"
@@ -48,160 +48,168 @@
 
         <a-form-item label="端口">
           <a-form-item-rest>
-            <a-row v-for="(item, index) in temp.exposedPorts" :key="index">
-              <a-col :span="21">
-                <a-space>
-                  <a-input-group>
-                    <a-row>
-                      <a-col :span="8">
-                        <a-input addon-before="IP" placeholder="宿主机ip" v-model:value="item.ip"> </a-input>
-                      </a-col>
-                      <a-col :span="6" :offset="1">
-                        <a-input addon-before="端口" placeholder="端口" v-model:value="item.publicPort"> </a-input>
-                      </a-col>
-                      <a-col :span="8" :offset="1">
-                        <a-input
-                          addon-before="容器"
-                          :disabled="item.disabled"
-                          v-model:value="item.port"
-                          placeholder="容器端口"
-                        >
-                          <template v-slot:addonAfter>
-                            <a-select :disabled="item.disabled" v-model:value="item.scheme" placeholder="端口协议">
-                              <a-select-option value="tcp">tcp</a-select-option>
-                              <a-select-option value="udp">udp</a-select-option>
-                              <a-select-option value="sctp">sctp</a-select-option>
-                            </a-select>
-                          </template>
-                        </a-input>
-                      </a-col>
-                    </a-row>
-                  </a-input-group>
-                </a-space>
-              </a-col>
-              <a-col :span="2" :offset="1">
-                <a-space>
-                  <MinusCircleOutlined
-                    v-if="temp.exposedPorts && temp.exposedPorts.length > 1"
-                    @click="
-                      () => {
-                        temp.exposedPorts.splice(index, 1)
-                      }
-                    "
-                  />
+            <a-space direction="vertical" style="width: 100%">
+              <a-row v-for="(item, index) in temp.exposedPorts" :key="index">
+                <a-col :span="21">
+                  <a-space>
+                    <a-input-group>
+                      <a-row>
+                        <a-col :span="8">
+                          <a-input addon-before="IP" placeholder="宿主机ip" v-model:value="item.ip"> </a-input>
+                        </a-col>
+                        <a-col :span="6" :offset="1">
+                          <a-input addon-before="端口" placeholder="端口" v-model:value="item.publicPort"> </a-input>
+                        </a-col>
+                        <a-col :span="8" :offset="1">
+                          <a-input
+                            addon-before="容器"
+                            :disabled="item.disabled"
+                            v-model:value="item.port"
+                            placeholder="容器端口"
+                          >
+                            <template v-slot:addonAfter>
+                              <a-select :disabled="item.disabled" v-model:value="item.scheme" placeholder="端口协议">
+                                <a-select-option value="tcp">tcp</a-select-option>
+                                <a-select-option value="udp">udp</a-select-option>
+                                <a-select-option value="sctp">sctp</a-select-option>
+                              </a-select>
+                            </template>
+                          </a-input>
+                        </a-col>
+                      </a-row>
+                    </a-input-group>
+                  </a-space>
+                </a-col>
+                <a-col :span="2" :offset="1">
+                  <a-space>
+                    <MinusCircleOutlined
+                      v-if="temp.exposedPorts && temp.exposedPorts.length > 1"
+                      @click="
+                        () => {
+                          temp.exposedPorts.splice(index, 1)
+                        }
+                      "
+                    />
 
-                  <PlusSquareOutlined
-                    @click="
-                      () => {
-                        temp.exposedPorts.push({
-                          scheme: 'tcp',
-                          ip: '0.0.0.0'
-                        })
-                      }
-                    "
-                  />
-                </a-space>
-              </a-col>
-            </a-row>
+                    <PlusSquareOutlined
+                      @click="
+                        () => {
+                          temp.exposedPorts.push({
+                            scheme: 'tcp',
+                            ip: '0.0.0.0'
+                          })
+                        }
+                      "
+                    />
+                  </a-space>
+                </a-col>
+              </a-row>
+            </a-space>
           </a-form-item-rest>
         </a-form-item>
 
         <a-form-item label="挂载卷">
           <a-form-item-rest>
-            <a-row v-for="(item, index) in temp.volumes" :key="index">
-              <a-col :span="10">
-                <a-input addon-before="宿主" v-model:value="item.host" placeholder="宿主机目录" />
-              </a-col>
-              <a-col :span="10" :offset="1">
-                <a-input
-                  addon-before="容器"
-                  :disabled="item.disabled"
-                  v-model:value="item.container"
-                  placeholder="容器目录"
-                />
-              </a-col>
-              <a-col :span="2" :offset="1">
-                <a-space>
-                  <MinusCircleOutlined
-                    v-if="temp.volumes && temp.volumes.length > 1"
-                    @click="
-                      () => {
-                        temp.volumes.splice(index, 1)
-                      }
-                    "
+            <a-space direction="vertical" style="width: 100%">
+              <a-row v-for="(item, index) in temp.volumes" :key="index">
+                <a-col :span="10">
+                  <a-input addon-before="宿主" v-model:value="item.host" placeholder="宿主机目录" />
+                </a-col>
+                <a-col :span="10" :offset="1">
+                  <a-input
+                    addon-before="容器"
+                    :disabled="item.disabled"
+                    v-model:value="item.container"
+                    placeholder="容器目录"
                   />
+                </a-col>
+                <a-col :span="2" :offset="1">
+                  <a-space>
+                    <MinusCircleOutlined
+                      v-if="temp.volumes && temp.volumes.length > 1"
+                      @click="
+                        () => {
+                          temp.volumes.splice(index, 1)
+                        }
+                      "
+                    />
 
-                  <PlusSquareOutlined
-                    @click="
-                      () => {
-                        temp.volumes.push({})
-                      }
-                    "
-                  />
-                </a-space>
-              </a-col>
-            </a-row>
+                    <PlusSquareOutlined
+                      @click="
+                        () => {
+                          temp.volumes.push({})
+                        }
+                      "
+                    />
+                  </a-space>
+                </a-col>
+              </a-row>
+            </a-space>
           </a-form-item-rest>
         </a-form-item>
         <a-form-item label="环境变量">
           <a-form-item-rest>
-            <a-row v-for="(item, index) in temp.env" :key="index">
-              <a-col :span="10">
-                <a-input v-model:value="item.key" placeholder="变量名" />
-              </a-col>
-              <a-col :span="10" :offset="1">
-                <a-input v-model:value="item.value" placeholder="变量值" />
-              </a-col>
-              <a-col :span="2" :offset="1">
-                <a-space>
-                  <MinusCircleOutlined
-                    v-if="temp.env && temp.env.length > 1"
-                    @click="
-                      () => {
-                        temp.env.splice(index, 1)
-                      }
-                    "
-                  />
+            <a-space direction="vertical" style="width: 100%">
+              <a-row v-for="(item, index) in temp.env" :key="index">
+                <a-col :span="10">
+                  <a-input v-model:value="item.key" placeholder="变量名" />
+                </a-col>
+                <a-col :span="10" :offset="1">
+                  <a-input v-model:value="item.value" placeholder="变量值" />
+                </a-col>
+                <a-col :span="2" :offset="1">
+                  <a-space>
+                    <MinusCircleOutlined
+                      v-if="temp.env && temp.env.length > 1"
+                      @click="
+                        () => {
+                          temp.env.splice(index, 1)
+                        }
+                      "
+                    />
 
-                  <PlusSquareOutlined
-                    @click="
-                      () => {
-                        temp.env.push({})
-                      }
-                    "
-                  />
-                </a-space>
-              </a-col>
-            </a-row>
+                    <PlusSquareOutlined
+                      @click="
+                        () => {
+                          temp.env.push({})
+                        }
+                      "
+                    />
+                  </a-space>
+                </a-col>
+              </a-row>
+            </a-space>
           </a-form-item-rest>
         </a-form-item>
         <a-form-item label="命令">
           <a-form-item-rest>
-            <a-row v-for="(item, index) in temp.commands" :key="index">
-              <a-col :span="20">
-                <a-input addon-before="命令值" v-model:value="item.value" placeholder="填写运行命令" />
-              </a-col>
+            <a-space direction="vertical" style="width: 100%">
+              <a-row v-for="(item, index) in temp.commands" :key="index">
+                <a-col :span="20">
+                  <a-input addon-before="命令值" v-model:value="item.value" placeholder="填写运行命令" />
+                </a-col>
 
-              <a-col :span="2" :offset="1">
-                <a-space>
-                  <MinusCircleOutlined
-                    v-if="temp.commands && temp.commands.length > 1"
-                    @click="
-                      () => {
-                        temp.commands.splice(index, 1)
-                      }
-                    "
-                  />
-                  <PlusSquareOutlined
-                    @click="
-                      () => {
-                        temp.commands.push({})
-                      }
-                    "
-                  />
-                </a-space>
-              </a-col>
-            </a-row>
+                <a-col :span="2" :offset="1">
+                  <a-space>
+                    <MinusCircleOutlined
+                      v-if="temp.commands && temp.commands.length > 1"
+                      @click="
+                        () => {
+                          temp.commands.splice(index, 1)
+                        }
+                      "
+                    />
+                    <PlusSquareOutlined
+                      @click="
+                        () => {
+                          temp.commands.push({})
+                        }
+                      "
+                    />
+                  </a-space>
+                </a-col>
+              </a-row>
+            </a-space>
           </a-form-item-rest>
         </a-form-item>
         <a-form-item label="hostname" name="hostname">
