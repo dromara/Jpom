@@ -340,10 +340,18 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 
 <br/>
 
+## 🍭架构图
+
+<img class="no-zoom" :src="$withBase('/images/jpom-func-arch.png')" style="zoom: 120%" alt="jpom-func-arch">
+
+<br/>
+
 ## 🏡代码托管
 
 - [Gitee ![star](https://gitee.com/dromara/Jpom/badge/star.svg?theme=gvp)](https://gitee.com/dromara/Jpom/)
 - [Github![star](https://img.shields.io/github/stars/dromara/Jpom.svg?style=social)](https://github.com/dromara/Jpom)
+
+`开源不易请大家多多支持，请给个 star 支持一下，谢谢！`
 
 <br/>
 
@@ -354,12 +362,6 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 如果想贡献，请先查看[贡献准则](/pages/dc18b8/)。
 
 [贡献成员列表](/pages/praise/friends/)
-
-<br/>
-
-## 🍭架构图
-
-<img class="no-zoom" :src="$withBase('/images/jpom-func-arch.png')" style="zoom: 120%" alt="jpom-func-arch">
 
 <br/>
 

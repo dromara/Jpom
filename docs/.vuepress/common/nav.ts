@@ -1,18 +1,20 @@
 export default [
   {
-    text: "🔖首页",
-    link: "/",
-  },
-  {
-    text: "💻演示",
+    text: "💻演示系统",
     link: "/pages/2e4ffc/",
+    items: [
+      {
+        text: "🔖回到首页",
+        link: "/",
+      },
+    ],
   },
   {
-    text: "📖文档",
+    text: "📖安装文档",
     link: "/pages/install/",
     items: [
       {
-        text: "上手安装",
+        text: "立马上手安装",
         items: [
           { text: "一键安装", link: "/pages/fe28e9/" },
           { text: "下载安装", link: "/pages/db3065/" },
@@ -61,6 +63,15 @@ export default [
           { text: "离线安装教程", link: "/pages/af288b/" },
         ],
       },
+      {
+        text: "通用教程",
+        items: [
+          { text: "Jpom 为 Jpom 发版", link: "/pages/practice/build-jpom/" },
+          { text: "自定义第三方通知", link: "/pages/ea3667/" },
+          { text: "DSL 项目来管理 NGINX", link: "/pages/dc2837/" },
+          { text: "管理证书文件", link: "/pages/jpom-server-cert-manage/" },
+        ],
+      },
     ],
   },
   {
@@ -78,18 +89,33 @@ export default [
   {
     text: "💡DSL说明",
     link: "/pages/FQA/DSL/",
+    items: [
+      { text: "万能的 DSL 项目模板（Java）", link: "/pages/4756ec/" },
+      {
+        text: "本地构建 + 自定义管理 python 项目",
+        link: "/pages/practice/project-dsl-python/",
+      },
+      {
+        text: "DSL 项目接口探活监控报警",
+        link: "/pages/610387/",
+      },
+      {
+        text: "DSL 项目来管理 NGINX",
+        link: "/pages/dc2837/",
+      },
+    ],
   },
   {
-    text: "💖周边",
+    text: "💖开源周边",
     link: "/pages/shop/",
     items: [
-      { text: "赞赏支持", link: "/pages/praise/" },
-      { text: "赞赏记录", link: "/pages/praise/publicity/" },
-      { text: "加入社区讨论", link: "/pages/praise/join/" },
-      { text: "如何贡献", link: "/pages/dc18b8/" },
-      { text: "贡献者们", link: "/pages/praise/friends/" },
+      { text: "🔋赞赏支持💰", link: "/pages/praise/" },
+      { text: "📑赞赏记录", link: "/pages/praise/publicity/" },
+      { text: "💬社群讨论", link: "/pages/praise/join/" },
+      { text: "💪🏻如何贡献", link: "/pages/dc18b8/" },
+      { text: "👥贡献者们", link: "/pages/praise/friends/" },
       {
-        text: " 🚩用户",
+        text: " 🚩我们用户",
         link: "/pages/user/",
       },
       {
@@ -102,10 +128,25 @@ export default [
   {
     text: "📰更新记录",
     link: "/pages/changelog/new/",
-    items: [{ text: "下载中心", link: "/pages/all-downloads/" }],
+    items: [
+      {
+        text: "发版日志",
+        items: [
+          { text: "稳定版本-release", link: "/pages/changelog/new/" },
+          { text: "内测版本-beta", link: "/pages/changelog/new-beta/" },
+        ],
+      },
+      {
+        text: "下载中心",
+        items: [
+          { text: "稳定版本-release", link: "/pages/all-downloads/" },
+          { text: "内测版本-beta", link: "/pages/all-beta-downloads/" },
+        ],
+      },
+    ],
   },
   {
-    text: "📦仓库",
+    text: "📦开源仓库",
     items: [
       { text: "Gitee", link: "https://gitee.com/dromara/Jpom" },
       { text: "Github", link: "https://github.com/dromara/Jpom" },
