@@ -44,6 +44,7 @@ import { mapState } from 'pinia'
 import { getWebSocketUrl } from '@/api/config'
 import { dockerContainerDownloaLog } from '@/api/docker-api'
 import { useUserStore } from '@/stores/user'
+import { useAppStore } from '@/stores/app'
 import LogView2 from '@/components/logView'
 
 export default {
@@ -77,7 +78,8 @@ export default {
     }
   },
   computed: {
-    ...mapState(useUserStore, ['getLongTermToken', 'getWorkspaceId']),
+    ...mapState(useUserStore, ['getLongTermToken']),
+    ...mapState(useAppStore, ['getWorkspaceId']),
     socketUrl() {
       return getWebSocketUrl(
         '/socket/docker_log',

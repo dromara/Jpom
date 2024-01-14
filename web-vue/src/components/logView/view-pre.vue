@@ -191,6 +191,9 @@ export default {
         return
       }
       const tempArray = (Array.isArray(data) ? data : [data])
+        .flatMap((item) => {
+          return item.split('\r\n')
+        })
         .map((item) => {
           return {
             text: ansiparse(item)
