@@ -17,6 +17,7 @@
 })();
 
 $(function () {
+  window.JPOM_RELEASE_VERSION = "2.11.0";
   // 检查域名
   const localHosts = [
     "localhost",
@@ -68,7 +69,7 @@ $(function () {
         '<a href="https://github.com/dromara/Jpom" target="_blank">Github</a>',
       {
         offset: "rb",
-        time: 1000 * 60 * 60,
+        time: 0,
         anim: 6,
       }
     );

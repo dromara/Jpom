@@ -79,6 +79,7 @@ if [ "$2" == "release" ]; then
 	sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/docs/.vuepress/public/docs/release-versions.json"
 	sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/package.json"
 	sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/docs/.vuepress/public/docs/versions.show"
+	sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/docs/.vuepress/public/assets/js/common.js"
 	downloads="01.下载链接.md"
 elif [ "$2" == "beta" ]; then
 	# 替换远程更新包的版本号

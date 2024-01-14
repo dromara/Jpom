@@ -1,66 +1,116 @@
-@require '~vuepress-plugin-tabs/dist/themes/default.styl'
+@require '~vuepress-plugin-tabs/dist/themes/default.styl';
 
 // 评论区颜色重置
-.gt-container
-  .gt-ico-tip
-    &::after
-      content: '。( Win + . ) 或 ( ⌃ + ⌘ + ␣ ) 打开表情'
-      color: #999
-      font-size: .8rem
-  .gt-meta
-    border-color var(--borderColor)!important
-  .gt-comments-null
-    color var(--textColor)
-    opacity .5
-  .gt-header-textarea
-    color var(--textColor)
-    background rgba(180,180,180,0.1)!important
-  .gt-btn
-    border-color $accentColor!important
-    background-color $accentColor!important
-  .gt-btn-preview
-    background-color rgba(255,255,255,0)!important
-    color $accentColor!important
-  a
-    color $accentColor!important
-  .gt-svg svg
-    fill $accentColor!important
-  .gt-comment-content,.gt-comment-admin .gt-comment-content
-    background-color rgba(150,150,150,0.1)!important
-    &:hover
-      box-shadow 0 0 25px rgba(150,150,150,.5)!important
-    .gt-comment-body
-      color var(--textColor)!important
+.gt-container {
+	.gt-ico-tip {
+		&::after {
+			content: '。( Win + . ) 或 ( ⌃ + ⌘ + ␣ ) 打开表情';
+			color: #999;
+			font-size: 0.8rem;
+		}
+	}
 
+	.gt-meta {
+		border-color: var(--borderColor) !important;
+	}
+
+	.gt-comments-null {
+		color: var(--textColor);
+		opacity: 0.5;
+	}
+
+	.gt-header-textarea {
+		color: var(--textColor);
+		background: rgba(180, 180, 180, 0.1) !important;
+	}
+
+	.gt-btn {
+		border-color: $accentColor !important;
+		background-color: $accentColor !important;
+	}
+
+	.gt-btn-preview {
+		background-color: rgba(255, 255, 255, 0) !important;
+		color: $accentColor !important;
+	}
+
+	a {
+		color: $accentColor !important;
+	}
+
+	.gt-svg svg {
+		fill: $accentColor !important;
+	}
+
+	.gt-comment-content, .gt-comment-admin .gt-comment-content {
+		background-color: rgba(150, 150, 150, 0.1) !important;
+
+		&:hover {
+			box-shadow: 0 0 25px rgba(150, 150, 150, 0.5) !important;
+		}
+
+		.gt-comment-body {
+			color: var(--textColor) !important;
+		}
+	}
+}
 
 // qq徽章
-.qq
-  position: relative;
-.qq::after
-  content: "可撩";
-  background: $accentColor;
-  color:#fff;
-  padding: 0 5px;
-  border-radius: 10px;
-  font-size:12px;
-  position: absolute;
-  top: -4px;
-  right: -35px;
-  transform:scale(0.85);
+.qq {
+	position: relative;
+}
+
+.qq::after {
+	content: '可撩';
+	background: $accentColor;
+	color: #fff;
+	padding: 0 5px;
+	border-radius: 10px;
+	font-size: 12px;
+	position: absolute;
+	top: -4px;
+	right: -35px;
+	transform: scale(0.85);
+}
 
 // demo模块图标颜色
-body .vuepress-plugin-demo-block__wrapper
-  &,.vuepress-plugin-demo-block__display
-    border-color rgba(160,160,160,.3)
-  .vuepress-plugin-demo-block__footer:hover
-    .vuepress-plugin-demo-block__expand::before
-      border-top-color: $accentColor !important;
-      border-bottom-color: $accentColor !important;
-    svg
-      fill: $accentColor !important;
+body .vuepress-plugin-demo-block__wrapper {
+	&, .vuepress-plugin-demo-block__display {
+		border-color: rgba(160, 160, 160, 0.3);
+	}
 
+	.vuepress-plugin-demo-block__footer:hover {
+		.vuepress-plugin-demo-block__expand::before {
+			border-top-color: $accentColor !important;
+			border-bottom-color: $accentColor !important;
+		}
 
-// 自定义class
+		svg {
+			fill: $accentColor !important;
+		}
+	}
+}
 
+.page-wwads {
+	width: 100% !important;
+	min-height: 0;
+	margin: 0;
+	align-items: center;
+}
 
+.page-wwads .wwads-img img {
+	width: 80px !important;
+}
 
+.page-wwads .wwads-poweredby {
+	width: 40px;
+	position: absolute;
+	right: 25px;
+	bottom: 3px;
+}
+
+.wwads-content .wwads-text, .page-wwads .wwads-text {
+	height: 100%;
+	padding-top: 5px;
+	display: block;
+}
