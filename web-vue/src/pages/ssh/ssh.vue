@@ -643,7 +643,7 @@ export default {
       this.$confirm({
         title: '系统提示',
         zIndex: 1009,
-        content: '真的要删除 SSH 么？',
+        content: '真的要删除 SSH 么？当前 ssh 关联的脚本在删除后均将失效',
         okText: '确认',
         cancelText: '取消',
         async onOk() {
