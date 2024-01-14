@@ -351,7 +351,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 - [Gitee ![star](https://gitee.com/dromara/Jpom/badge/star.svg?theme=gvp)](https://gitee.com/dromara/Jpom/)
 - [Github![star](https://img.shields.io/github/stars/dromara/Jpom.svg?style=social)](https://github.com/dromara/Jpom)
 
-`开源不易请大家多多支持，请给个 star 支持一下，谢谢！`
+`开源不易请大家多多支持，有了您的支持我们会更有动力持续迭代，请给个 star 支持一下，谢谢！`
 
 <br/>
 
