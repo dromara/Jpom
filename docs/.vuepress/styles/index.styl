@@ -93,9 +93,17 @@ body .vuepress-plugin-demo-block__wrapper {
 
 .page-wwads {
 	width: 100% !important;
-	min-height: 0;
 	margin: 0;
+}
+
+.wwads-sticky, .page-wwads {
+	border: 1px solid var(--borderColor, #ccc);
+	min-height: 0 !important;
 	align-items: center;
+}
+
+.wwads-cn:empty {
+	border: none;
 }
 
 .page-wwads .wwads-img img {

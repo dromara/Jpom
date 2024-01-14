@@ -149,7 +149,7 @@ notices-2: # 可选的
 :::
 
 
-<div class="wwads-cn wwads-horizontal wwads-sticky" data-id="188" style="display: flex !important;align-items:center;"></div>
+<div class="wwads-cn wwads-horizontal wwads-sticky" data-id="188" style="display: flex !important;"></div>
 <style>
 .become-sponsor-join{
   padding: 8px 20px;
