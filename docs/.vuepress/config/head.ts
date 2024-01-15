@@ -4,6 +4,7 @@ import baidutj from "../common/baidutj.js";
 // head
 export default <HeadTags>[
   ["link", { rel: "icon", href: "/favicon.ico" }], //favicons，资源放在public文件夹
+  ["link", { rel: "shortcut icon", href: "/favicon.ico" }], //favicons，资源放在public文件夹
   [
     "meta",
     {
@@ -25,13 +26,21 @@ export default <HeadTags>[
         "Jpom-项目管理系统,一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件",
     },
   ],
+  // 阿里在线矢量库
   [
     "link",
     {
       rel: "stylesheet",
       href: "//at.alicdn.com/t/font_3114978_qe0b39no76.css",
     },
-  ], // 阿里在线矢量库
+  ],
+  // 解决 Chrome 网站统计不准确问题
+  ["meta", { name: "referrer", content: "no-referrer-when-downgrade" }],
+  [
+    "noscript",
+    {},
+    '<meta http-equiv="refresh" content="0; url=https://jpom.io/noscript.html"><style>.theme-vdoing-content { display:none }',
+  ],
   // <meta name="baidu-site-verification" content="code-te8iliecTI" />
   ["meta", { name: "baidu-site-verification", content: "code-te8iliecTI" }],
   // <meta name="360-site-verification" content="0a5e4a367ff77232a3c1e9bc83edf7ba" />

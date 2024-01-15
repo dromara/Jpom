@@ -60,8 +60,8 @@ $(function () {
 
   // 提醒 star
   loopExecute(function () {
-    let $themDom = $(".theme-mode-but");
-    if (!$themDom.length) {
+    let $navItems = $(".nav-item");
+    if (!$navItems.length) {
       return false;
     }
     layer.msg(
@@ -94,7 +94,9 @@ $(function () {
     var adBlockDetected_div = document.createElement("div");
     document.body.appendChild(adBlockDetected_div);
     var navbar = document.querySelector(".navbar");
-    navbar.style.cssText = "transition:top 300ms;top:33px";
+    //var sidebar = document.querySelector(".sidebar");
+    navbar && (navbar.style.cssText = "transition:top 300ms;top:33px");
+    //sidebar && (sidebar.style.cssText = "transition:top 300ms;top:33px");
     adBlockDetected_div.style.cssText =
       "position: fixed; top: 0; left: 0; width: 100%; background: #E01E5A; color: #fff; z-index: 9999999999; font-size: 14px; text-align: center; line-height: 1.5; font-weight: bold; padding-top: 6px; padding-bottom: 6px;";
     adBlockDetected_div.innerHTML =
@@ -115,14 +117,21 @@ $(function () {
 
   //check if wwads' fire function was blocked after document is ready with 3s timeout (waiting the ad loading)
   docReady(function () {
-    setTimeout(function () {
-      if (
-        window._AdBlockInit === undefined ||
-        $(".wwads-cn").children().length === 0
-      ) {
+    loopExecute(
+      function () {
+        if (
+          window._AdBlockInit === undefined ||
+          $(".wwads-cn").children().length === 0
+        ) {
+          return false;
+        }
+        return true;
+      },
+      10,
+      function () {
         ABDetected();
       }
-    }, 3000);
+    );
   });
 })();
 
@@ -132,16 +141,17 @@ function docReady(t) {
     : document.addEventListener("DOMContentLoaded", t);
 }
 
-function loopExecute(fn, loopCount = 20) {
+function loopExecute(fn, loopCount, fail) {
   if (fn && fn()) {
     // 执行成功
     return;
   }
   if (loopCount <= 0) {
+    fail && fail();
     // 结束执行
     return;
   }
   setTimeout(() => {
-    loopExecute(fn, loopCount - 1);
+    loopExecute(fn, loopCount - 1, fail);
   }, 500);
 }

@@ -181,31 +181,24 @@ export default ({
           "background: #030307; padding:5px 0;"
         );
         //check if wwads' fire function was blocked after document is ready with 3s timeout (waiting the ad loading)
-        setTimeout(function () {
-          if (
-            window._AdBlockInit === undefined ||
-            $(".wwads-cn").children().length === 0
-          ) {
+        loopExecute(
+          function () {
+            if (
+              window._AdBlockInit === undefined ||
+              $(".wwads-cn").children().length === 0
+            ) {
+              return false;
+            }
+            changeAdHideEvent();
+            return true;
+          },
+          10,
+          function () {
             ABDetected();
+            changeAdHideEvent();
           }
-        }, 3000);
+        );
       });
-
-      // 删除事件改为隐藏事件
-      setTimeout(() => {
-        const pageAD = document.querySelector(".page-ad");
-        if (!pageAD) return;
-        const btnEl = pageAD.querySelector(".wwads-hide");
-        if (btnEl) {
-          btnEl.onclick = () => {
-            pageAD.style.display = "none";
-          };
-        }
-        // 显示广告模块
-        if (pageAD.style.display === "none") {
-          pageAD.style.display = "flex";
-        }
-      }, 900);
     });
 
     router.afterEach((to, form) => {
@@ -214,6 +207,24 @@ export default ({
         imgAddLayerTip();
       });
     });
+  }
+
+  function changeAdHideEvent() {
+    // 删除事件改为隐藏事件
+    setTimeout(() => {
+      const pageAD = document.querySelector(".wwads-cn");
+      if (!pageAD) return;
+      const btnEl = pageAD.querySelector(".wwads-hide");
+      if (btnEl) {
+        btnEl.onclick = () => {
+          pageAD.style.display = "none";
+        };
+      }
+      // 显示广告模块
+      if (pageAD.style.display === "none") {
+        $(pageAD).css("cssText", "display:flex !important");
+      }
+    }, 900);
   }
 
   function titleShowVersion() {
