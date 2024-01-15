@@ -5,8 +5,8 @@ import { useAllMenuStore } from './menu2'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    token: localStorage.getItem(TOKEN_KEY) || '',
-    longTermToken: localStorage.getItem(LONG_TERM_TOKEN) || '',
+    //token: localStorage.getItem(TOKEN_KEY) || '',
+    // longTermToken: localStorage.getItem(LONG_TERM_TOKEN) || '',
     userInfo: localStorage.getItem(USER_INFO_KEY) ? JSON.parse(localStorage.getItem(USER_INFO_KEY)!) : {},
     reloadUserInfo: false
   }),
@@ -32,14 +32,14 @@ export const useUserStore = defineStore('user', {
     },
     // 登录 data = {token: 'xxx', userName: 'name'}
     async login(data: any) {
-      this.token = data.token || ''
-      this.longTermToken = data.longTermToken || ''
-      if (this.token) {
+      const token = data.token || ''
+      const longTermToken = data.longTermToken || ''
+      if (token) {
         localStorage.setItem(TOKEN_KEY, data.token)
       } else {
         localStorage.removeItem(TOKEN_KEY)
       }
-      if (this.longTermToken) {
+      if (longTermToken) {
         localStorage.setItem(LONG_TERM_TOKEN, data.longTermToken)
       } else {
         localStorage.removeItem(LONG_TERM_TOKEN)
@@ -50,6 +50,7 @@ export const useUserStore = defineStore('user', {
     // 退出登录 移除对应的 store
     async logOut() {
       localStorage.removeItem(TOKEN_KEY)
+      localStorage.removeItem(LONG_TERM_TOKEN)
       const menuStore = useAllMenuStore()
       // 调用其他 action
       menuStore.clearTabs('normal', { key: 'all' })
@@ -64,10 +65,10 @@ export const useUserStore = defineStore('user', {
   },
   getters: {
     getToken(state) {
-      return state.token
+      return localStorage.getItem(TOKEN_KEY) || ''
     },
     getLongTermToken(state) {
-      return state.longTermToken
+      return localStorage.getItem(LONG_TERM_TOKEN) || ''
     },
     getUserInfo(state) {
       return state.userInfo
