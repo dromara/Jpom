@@ -36,7 +36,7 @@ export default {
     socketUrl() {
       return getWebSocketUrl(
         '/socket/docker_cli',
-        `userId=${this.getLongTermToken}&id=${this.id}&machineDockerId=${
+        `userId=${this.getLongTermToken()}&id=${this.id}&machineDockerId=${
           this.machineDockerId
         }&nodeId=system&type=docker&containerId=${this.containerId}&workspaceId=${this.getWorkspaceId()}`
       )

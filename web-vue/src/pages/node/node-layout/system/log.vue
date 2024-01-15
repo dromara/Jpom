@@ -67,7 +67,7 @@ export default {
     socketUrl() {
       return getWebSocketUrl(
         '/socket/agent_log',
-        `userId=${this.getLongTermToken}&machineId=${this.machineId}&nodeId=system&type=agentLog`
+        `userId=${this.getLongTermToken()}&machineId=${this.machineId}&nodeId=system&type=agentLog`
       )
     }
   },

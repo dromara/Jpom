@@ -35,7 +35,7 @@ instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const userStore = useUserStore()
 
   const { headers } = config
-  headers[TOKEN_HEADER_KEY] = userStore.token
+  headers[TOKEN_HEADER_KEY] = userStore.getToken()
   headers[CACHE_WORKSPACE_ID] = appStore.getWorkspaceId()
 
   if (routerBase) {

@@ -257,7 +257,7 @@ export default {
         })[0]
         const socketUrl = getWebSocketUrl(
           '/socket/console',
-          `userId=${this.getLongTermToken}&id=${itemProjectData.id}&nodeId=${
+          `userId=${this.getLongTermToken()}&id=${itemProjectData.id}&nodeId=${
             item.nodeId
           }&type=console&workspaceId=${this.getWorkspaceId()}`
         )

@@ -34,7 +34,7 @@ export default {
     socketUrl() {
       return getWebSocketUrl(
         '/socket/ssh',
-        `userId=${this.getLongTermToken}&id=${this.sshId}&machineSshId=${
+        `userId=${this.getLongTermToken()}&id=${this.sshId}&machineSshId=${
           this.machineSshId
         }&nodeId=system&type=ssh&workspaceId=${this.getWorkspaceId()}`
       )
