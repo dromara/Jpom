@@ -6,19 +6,20 @@
       <a-layout-sider theme="light" class="sider" width="25%">
         <div class="dir-container">
           <template v-if="temp.projectList && temp.cacheData">
-            <div>
-              节点：
-              <a-select
-                :value="`${temp.cacheData.useNodeId},${temp.cacheData.useProjectId}`"
-                style="width: 200px"
-                @change="nodeChange"
-                placeholder="请选择节点"
-              >
-                <a-select-option v-for="item in temp.projectList" :key="`${item.nodeId},${item.projectId}`">
-                  {{ nodeName[item.nodeId] && nodeName[item.nodeId].name }}
-                </a-select-option>
-              </a-select>
-            </div>
+            <a-form layout="inline" autocomplete="off">
+              <a-form-item label="节点">
+                <a-select
+                  :value="`${temp.cacheData.useNodeId},${temp.cacheData.useProjectId}`"
+                  style="width: 200px"
+                  @change="nodeChange"
+                  placeholder="请选择节点"
+                >
+                  <a-select-option v-for="item in temp.projectList" :key="`${item.nodeId},${item.projectId}`">
+                    {{ nodeName[item.nodeId] && nodeName[item.nodeId].name }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-form>
           </template>
           <!-- <a-button size="small" type="primary" @click="loadFileData">刷新目录</a-button> -->
         </div>
@@ -36,114 +37,114 @@
         <div class="log-filter" v-if="temp.cacheData">
           <a-space direction="vertical" style="width: 100%">
             <!-- direction="vertical" -->
-            <a-space>
-              <div>
-                <!-- 关键词： -->
-                <!-- ^.*\d+.*$ -->
-                <!-- .*(0999996|0999995).*   .*(a|b).* -->
-                <a-tooltip placement="right" title="关键词高亮,支持正则(正则可能影响性能请酌情使用)">
-                  <a-input
-                    placeholder="关键词,支持正则"
-                    :style="`width: 250px`"
-                    v-model:value="temp.cacheData.keyword"
-                    @pressEnter="sendSearchLog"
-                  >
-                  </a-input>
-                </a-tooltip>
-              </div>
-              <div>
-                显示前N行
-                <a-input-number
-                  id="inputNumber"
-                  v-model:value="temp.cacheData.beforeCount"
-                  :min="0"
-                  :max="1000"
-                  @pressEnter="sendSearchLog"
-                />
-              </div>
-              <div>
-                显示后N行
-                <a-input-number
-                  id="inputNumber"
-                  v-model:value="temp.cacheData.afterCount"
-                  :min="0"
-                  :max="1000"
-                  @pressEnter="sendSearchLog"
-                />
-              </div>
-              <a-popover title="正则语法参考">
-                <template v-slot:content>
-                  <ul>
-                    <li><b>^.*\d+.*$</b> - 匹配包含数字的行</li>
-                    <li><b>.*(a|b).*</b> - 匹配包含 a 或者 b 的行</li>
-                    <li><b>.*(异常).*</b> - 匹配包含 异常 的行</li>
-                  </ul>
-                </template>
-                <a-button type="link" style="padding: 0"
-                  ><UnorderedListOutlined /><span style="margin-left: 2px">语法参考</span></a-button
-                >
-              </a-popover>
-            </a-space>
-            <a-space>
-              <div>
-                <!-- 搜索模式 -->
-                <a-tooltip
-                  placement="right"
-                  title="搜索模式,默认查看文件最后多少行，从头搜索指从指定行往下搜索，从尾搜索指从文件尾往上搜索多少行"
-                >
-                  <a-select
-                    :style="`width: 250px`"
-                    :value="temp.cacheData.first"
-                    @change="
-                      (value) => {
-                        const cacheData = { ...temp.cacheData, first: value }
-                        temp = { ...temp, cacheData: cacheData }
-                        sendSearchLog()
-                      }
-                    "
-                  >
-                    <a-select-option value="false">从尾搜索</a-select-option>
-                    <a-select-option value="true">从头搜索 </a-select-option>
-                  </a-select>
-                </a-tooltip>
-              </div>
-              <div>
-                文件前N行
-                <a-input-number
-                  id="inputNumber"
-                  v-model:value="temp.cacheData.head"
-                  :min="0"
-                  :max="1000"
-                  @pressEnter="sendSearchLog"
-                />
-              </div>
-              <div>
-                文件后N行
-                <a-input-number
-                  id="inputNumber"
-                  v-model:value="temp.cacheData.tail"
-                  :min="0"
-                  :max="1000"
-                  @pressEnter="sendSearchLog"
-                />
-              </div>
-              <a-popover title="搜索配置参考">
-                <template v-slot:content>
-                  <ul>
-                    <li><b>从尾搜索、文件前0行、文件后3行</b> - 在文件最后 3 行中搜索</li>
-                    <li><b>从头搜索、文件前0行、文件后3行</b> - 在文件第 3 - 2147483647 行中搜索</li>
-                    <li><b>从尾搜索、文件前2行、文件后3行</b> - 在文件第 1 - 2 行中搜索</li>
-                    <li><b>从尾搜索、文件前100行、文件后100行</b> - 在文件第 1 - 100 行中搜索</li>
-                    <li><b>从头搜索、文件前2行、文件后3行</b> - 在文件第 2 - 2 行中搜索</li>
-                    <li><b>从尾搜索、文件前20行、文件后3行</b> - 在文件第 17 - 20 行中搜索</li>
-                    <li><b>从头搜索、文件前20行、文件后3行</b> - 在文件第 3 - 20 行中搜索</li>
-                  </ul>
-                </template>
-                <a-button type="link" style="padding: 0"
-                  ><UnorderedListOutlined /><span style="margin-left: 2px">搜索参考</span></a-button
-                >
-              </a-popover>
-            </a-space>
+            <a-form layout="inline" autocomplete="off">
+              <a-space direction="vertical" style="width: 100%">
+                <a-space>
+                  <a-form-item label="搜关键词">
+                    <!-- 关键词： -->
+                    <!-- ^.*\d+.*$ -->
+                    <!-- .*(0999996|0999995).*   .*(a|b).* -->
+                    <a-tooltip placement="right" title="关键词高亮,支持正则(正则可能影响性能请酌情使用)">
+                      <a-input
+                        placeholder="关键词,支持正则"
+                        :style="`width: 250px`"
+                        v-model:value="temp.cacheData.keyword"
+                        @pressEnter="sendSearchLog"
+                      >
+                      </a-input>
+                    </a-tooltip>
+                  </a-form-item>
+                  <a-form-item label="显示前N行">
+                    <a-input-number
+                      id="inputNumber"
+                      v-model:value="temp.cacheData.beforeCount"
+                      :min="0"
+                      :max="1000"
+                      @pressEnter="sendSearchLog"
+                    />
+                  </a-form-item>
+                  <a-form-item label="显示后N行">
+                    <a-input-number
+                      id="inputNumber"
+                      v-model:value="temp.cacheData.afterCount"
+                      :min="0"
+                      :max="1000"
+                      @pressEnter="sendSearchLog"
+                    />
+                  </a-form-item>
+                  <a-popover title="正则语法参考">
+                    <template v-slot:content>
+                      <ul>
+                        <li><b>^.*\d+.*$</b> - 匹配包含数字的行</li>
+                        <li><b>.*(a|b).*</b> - 匹配包含 a 或者 b 的行</li>
+                        <li><b>.*(异常).*</b> - 匹配包含 异常 的行</li>
+                      </ul>
+                    </template>
+                    <a-button type="link" style="padding: 0"
+                      ><UnorderedListOutlined /><span style="margin-left: 2px">语法参考</span></a-button
+                    >
+                  </a-popover>
+                </a-space>
+                <a-space>
+                  <a-form-item label="搜索模式">
+                    <!--  -->
+                    <a-tooltip
+                      placement="right"
+                      title="搜索模式,默认查看文件最后多少行，从头搜索指从指定行往下搜索，从尾搜索指从文件尾往上搜索多少行"
+                    >
+                      <a-select
+                        :style="`width: 250px`"
+                        :value="temp.cacheData.first"
+                        @change="
+                          (value) => {
+                            const cacheData = { ...temp.cacheData, first: value }
+                            temp = { ...temp, cacheData: cacheData }
+                            sendSearchLog()
+                          }
+                        "
+                      >
+                        <a-select-option value="false">从尾搜索</a-select-option>
+                        <a-select-option value="true">从头搜索 </a-select-option>
+                      </a-select>
+                    </a-tooltip>
+                  </a-form-item>
+                  <a-form-item label="文件前N行">
+                    <a-input-number
+                      id="inputNumber"
+                      v-model:value="temp.cacheData.head"
+                      :min="0"
+                      :max="1000"
+                      @pressEnter="sendSearchLog"
+                    />
+                  </a-form-item>
+                  <a-form-item label="文件后N行">
+                    <a-input-number
+                      id="inputNumber"
+                      v-model:value="temp.cacheData.tail"
+                      :min="0"
+                      :max="1000"
+                      @pressEnter="sendSearchLog"
+                    />
+                  </a-form-item>
+                  <a-popover title="搜索配置参考">
+                    <template v-slot:content>
+                      <ul>
+                        <li><b>从尾搜索、文件前0行、文件后3行</b> - 在文件最后 3 行中搜索</li>
+                        <li><b>从头搜索、文件前0行、文件后3行</b> - 在文件第 3 - 2147483647 行中搜索</li>
+                        <li><b>从尾搜索、文件前2行、文件后3行</b> - 在文件第 1 - 2 行中搜索</li>
+                        <li><b>从尾搜索、文件前100行、文件后100行</b> - 在文件第 1 - 100 行中搜索</li>
+                        <li><b>从头搜索、文件前2行、文件后3行</b> - 在文件第 2 - 2 行中搜索</li>
+                        <li><b>从尾搜索、文件前20行、文件后3行</b> - 在文件第 17 - 20 行中搜索</li>
+                        <li><b>从头搜索、文件前20行、文件后3行</b> - 在文件第 3 - 20 行中搜索</li>
+                      </ul>
+                    </template>
+                    <a-button type="link" style="padding: 0"
+                      ><UnorderedListOutlined /><span style="margin-left: 2px">搜索参考</span></a-button
+                    >
+                  </a-popover>
+                </a-space></a-space
+              >
+            </a-form>
           </a-space>
         </div>
 
@@ -252,12 +253,12 @@ export default {
       this.loadFileData()
       //   console.log(this.nodeProjectList);
       this.temp.projectList.forEach((item) => {
-        const itemProjectData = this.nodeProjectList[item.nodeId].projects.filter((projectData) => {
+        const itemProjectData = this.nodeProjectList[item.nodeId]?.projects?.filter((projectData) => {
           return item.projectId === projectData.projectId
         })[0]
         const socketUrl = getWebSocketUrl(
           '/socket/console',
-          `userId=${this.getLongTermToken()}&id=${itemProjectData.id}&nodeId=${
+          `userId=${this.getLongTermToken()}&id=${itemProjectData?.id}&nodeId=${
             item.nodeId
           }&type=console&workspaceId=${this.getWorkspaceId()}`
         )
@@ -317,7 +318,7 @@ export default {
         console.error(err)
         $notification.info({
           key: 'log-read-close',
-          message: '会话已经关闭[tail-log]'
+          message: '会话已经关闭[tail-log]-' + id
         })
         clearInterval(this.socketCache[id].heart)
       }
@@ -431,7 +432,7 @@ export default {
     loadFileData() {
       const key = 'root-' + new Date().getTime()
       const temp = this.temp
-      const projectName = this.nodeProjectList[temp.cacheData.useNodeId].projects.filter(
+      const projectName = this.nodeProjectList[temp.cacheData.useNodeId]?.projects?.filter(
         (item) => item.projectId === temp.cacheData.useProjectId
       )[0].name
       this.treeList = [

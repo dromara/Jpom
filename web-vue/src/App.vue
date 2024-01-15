@@ -3,6 +3,9 @@
     :locale="zhCN"
     :theme="{
       algorithm: themeAlgorithm
+      // token: {
+      //   colorBgLayout: token.colorBgContainer
+      // }
     }"
   >
     <a-spin v-bind="globalLoadingProps">
@@ -22,6 +25,10 @@ import { useGuideStore } from '@/stores/guide'
 const routerActivation = ref(true)
 const guideStore = useGuideStore()
 const getGuideCache = guideStore.getGuideCache
+// const { useToken } = theme
+// const { token } = useToken()
+// console.log(token.value)
+//console.log(theme)
 
 // https://www.antdv.com/docs/vue/customize-theme-cn
 // theme.defaultAlgorithm

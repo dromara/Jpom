@@ -121,7 +121,7 @@ import maxkeyImg from '@/assets/images/maxkey.png'
 import giteeImg from '@/assets/images/gitee.svg'
 import githubImg from '@/assets/images/github.png'
 import { useGuideStore } from '@/stores/guide'
-
+import { Button } from 'ant-design-vue'
 interface IFormState {
   loginName: string
   userPwd: string
@@ -280,14 +280,14 @@ const startDispatchLogin = (res: any) => {
       })
   }
 }
+const useUserStore = userStore()
+
 const dispatchLogin = (data: any) => {
   // 调用 store action 存储当前登录的用户名和 token
-  userStore()
-    .login({ token: data.token, longTermToken: data.longTermToken })
-    .then(() => {
-      // 跳转主页面
-      router.push({ path: '/' })
-    })
+  useUserStore.login({ token: data.token, longTermToken: data.longTermToken }).then(() => {
+    // 跳转主页面
+    router.push({ path: '/' })
+  })
 }
 
 // Controls the background display or hiding
@@ -337,10 +337,44 @@ const handleMfa = () => {
   })
 }
 
+const checkHasLoginInfo = () => {
+  const key = `tipHasLoginInfo`
+  if (useUserStore.userInfo && useUserStore.getToken()) {
+    const p = h('p', { innerHTML: `当前登录的账号是：<b>${useUserStore.userInfo.name}</b> 是否自动跳转到系统页面` }, [])
+    $notification.open({
+      message: '检测到当前已经登录账号',
+      description: h('div', {}, [p]),
+      btn: () =>
+        h(
+          Button,
+          {
+            type: 'primary',
+            size: 'small',
+            onClick: () => {
+              $notification.close(key)
+              router.push({ path: '/' })
+            }
+          },
+          { default: () => '跳转' }
+        ),
+      key,
+      duration: null
+    })
+  }
+}
+
 onMounted(() => {
   beginCheckSystem()
 
   getLoginConfig()
+  checkHasLoginInfo()
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      //this.hidden()
+    } else {
+      checkHasLoginInfo()
+    }
+  })
 })
 
 // export default {

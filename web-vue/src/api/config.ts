@@ -55,6 +55,7 @@ instance.interceptors.response.use(
     // 无响应体
     if (!error.response) {
       $notification.error({
+        key: 'network-error-no-response',
         message: 'Network Error No response',
         description: '网络开了小差！请重试...:' + error
       })
@@ -62,11 +63,13 @@ instance.interceptors.response.use(
       const { status, statusText, data } = error.response
       if (!status) {
         $notification.error({
+          key: 'network-error-no-response',
           message: 'Network Error',
           description: '网络开了小差！请重试...:' + error
         })
       } else {
         $notification.error({
+          key: 'network-error-status-' + status,
           message: '状态码错误 ' + status,
           description: (statusText || '') + (data || '')
         })
@@ -110,8 +113,9 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
       return Promise.reject(data)
     }
     $notification.info({
-      message: '登录信息过期，尝试自动续签...',
-      description: '如果不需要自动续签，请修改配置文件。该续签将不会影响页面。'
+      key: 'login-timeout',
+      message: '登录信息过期',
+      description: '尝试自动续签...'
     })
     refreshTokenIng = true
     await redoRequest(response.config)
@@ -128,6 +132,7 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
   // 禁止访问
   if (data.code === 999) {
     $notification.error({
+      key: 'prohibit-access',
       message: '禁止访问',
       description: '禁止访问,当前IP限制访问'
     })
