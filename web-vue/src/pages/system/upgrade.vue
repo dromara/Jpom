@@ -243,7 +243,7 @@ export default {
       }
     },
     socketUrl() {
-      return getWebSocketUrl('/socket/node_update', `userId=${this.getLongTermToken}&nodeId=system&type=nodeUpdate`)
+      return getWebSocketUrl('/socket/node_update', `userId=${this.getLongTermToken()}&nodeId=system&type=nodeUpdate`)
     },
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)

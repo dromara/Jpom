@@ -57,7 +57,7 @@ export default {
   computed: {
     ...mapState(useUserStore, ['getLongTermToken']),
     socketUrl() {
-      return getWebSocketUrl('/socket/system_log', `userId=${this.getLongTermToken}&nodeId=system&type=systemLog`)
+      return getWebSocketUrl('/socket/system_log', `userId=${this.getLongTermToken()}&nodeId=system&type=systemLog`)
     }
   },
   watch: {},

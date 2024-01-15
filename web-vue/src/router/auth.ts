@@ -24,7 +24,7 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
     return
   }
   // 判断 token 是否存在
-  if (!userStore().getToken) {
+  if (!userStore().getToken()) {
     if (from.path !== '/') {
       console.warn(`from: ${from.path} ==> to: ${to.path}`)
     }

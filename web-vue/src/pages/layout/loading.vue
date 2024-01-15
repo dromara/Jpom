@@ -10,8 +10,8 @@ const route = useRoute()
 onMounted(() => {
   const userStore = useUserStore()
 
-  if (userStore.userInfo && userStore.token) {
-    router.push({ path: '/node/list' })
+  if (userStore.userInfo && userStore.getToken()) {
+    router.push({ path: '/overview' })
   } else {
     // 将参数携带进去
     router.push({

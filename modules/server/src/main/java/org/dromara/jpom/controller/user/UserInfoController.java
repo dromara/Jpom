@@ -78,19 +78,15 @@ public class UserInfoController extends BaseServerController {
         Assert.state(!StrUtil.equals(oldPwd, newPwd), "新旧密码一致");
         UserModel userName = getUser();
         Assert.state(!userName.isDemoUser(), "当前账户为演示账号，不支持修改密码");
-        try {
-            UserModel userModel = userService.simpleLogin(userName.getId(), oldPwd);
-            Assert.notNull(userModel, "旧密码不正确！");
-            Assert.state(ObjectUtil.defaultIfNull(userModel.getPwdErrorCount(), 0) <= 0, "当前账号被锁定中，不能修改密码");
 
-            userService.updatePwd(userName.getId(), newPwd);
-            // 如果修改成功，则销毁会话
-            session.invalidate();
-            return JsonMessage.success("修改密码成功！");
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new JsonMessage<>(500, "系统异常：" + e.getMessage());
-        }
+        UserModel userModel = userService.simpleLogin(userName.getId(), oldPwd);
+        Assert.notNull(userModel, "旧密码不正确！");
+        Assert.state(ObjectUtil.defaultIfNull(userModel.getPwdErrorCount(), 0) <= 0, "当前账号被锁定中，不能修改密码");
+
+        userService.updatePwd(userName.getId(), newPwd);
+        // 如果修改成功，则销毁会话
+        session.invalidate();
+        return JsonMessage.success("修改密码成功！");
     }
 
     /**

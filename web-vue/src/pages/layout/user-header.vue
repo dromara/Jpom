@@ -174,31 +174,33 @@
     >
       <a-tabs v-model="temp.tabActiveKey" @change="tabChange">
         <a-tab-pane :key="1" tab="修改密码">
-          <a-form
-            ref="pwdForm"
-            @finish="handleUpdatePwdOk"
-            :rules="rules"
-            :model="temp"
-            :label-col="{ span: 6 }"
-            :wrapper-col="{ span: 14 }"
-          >
-            <a-form-item label="原密码" name="oldPwd">
-              <a-input-password v-model:value="temp.oldPwd" placeholder="请输入原密码" />
-            </a-form-item>
-            <a-form-item label="新密码" name="newPwd">
-              <a-input-password v-model:value="temp.newPwd" placeholder="请输入新密码" />
-            </a-form-item>
-            <a-form-item label="确认密码" name="confirmPwd">
-              <a-input-password v-model:value="temp.confirmPwd" placeholder="请输入确认密码" />
-            </a-form-item>
-            <a-form-item>
-              <a-row type="flex" justify="center">
-                <a-col :span="2">
-                  <a-button type="primary" html-type="submit">确认重置</a-button>
-                </a-col>
-              </a-row>
-            </a-form-item>
-          </a-form>
+          <a-spin tip="Loading..." :spinning="confirmLoading">
+            <a-form
+              ref="pwdForm"
+              @finish="handleUpdatePwdOk"
+              :rules="rules"
+              :model="temp"
+              :label-col="{ span: 6 }"
+              :wrapper-col="{ span: 14 }"
+            >
+              <a-form-item label="原密码" name="oldPwd">
+                <a-input-password v-model:value="temp.oldPwd" placeholder="请输入原密码" />
+              </a-form-item>
+              <a-form-item label="新密码" name="newPwd">
+                <a-input-password v-model:value="temp.newPwd" placeholder="请输入新密码" />
+              </a-form-item>
+              <a-form-item label="确认密码" name="confirmPwd">
+                <a-input-password v-model:value="temp.confirmPwd" placeholder="请输入确认密码" />
+              </a-form-item>
+              <a-form-item>
+                <a-row type="flex" justify="center">
+                  <a-col :span="2">
+                    <a-button type="primary" html-type="submit" :loading="confirmLoading">确认重置</a-button>
+                  </a-col>
+                </a-row>
+              </a-form-item>
+            </a-form>
+          </a-spin>
         </a-tab-pane>
         <a-tab-pane :key="2" tab="两步验证">
           <a-row>
@@ -834,6 +836,7 @@ export default {
     },
     // 退出登录
     logOut() {
+      const that = this
       this.$confirm({
         title: '系统提示',
         zIndex: 1009,
@@ -849,8 +852,8 @@ export default {
                 $notification.success({
                   message: '退出登录成功'
                 })
-                const query = Object.assign({}, $route.query)
-                $router.replace({
+                const query = Object.assign({}, that.$route.query)
+                that.$router.replace({
                   path: '/login',
                   query: query
                 })
@@ -880,22 +883,27 @@ export default {
         oldPwd: sha1(this.temp.oldPwd),
         newPwd: sha1(this.temp.newPwd)
       }
-      updatePwd(params).then((res) => {
-        // 修改成功
-        if (res.code === 200) {
-          // 退出登录
-          userStore()
-            .logOut()
-            .then(() => {
-              $notification.success({
-                message: res.msg
-              })
+      this.confirmLoading = true
+      updatePwd(params)
+        .then((res) => {
+          // 修改成功
+          if (res.code === 200) {
+            // 退出登录
+            userStore()
+              .logOut()
+              .then(() => {
+                $notification.success({
+                  message: res.msg
+                })
 
-              this.updateNameVisible = false
-              this.$router.push('/login')
-            })
-        }
-      })
+                this.updateNameVisible = false
+                this.$router.push('/login')
+              })
+          }
+        })
+        .finally(() => {
+          this.confirmLoading = false
+        })
       // })
     },
     // 加载修改用户资料对话框
@@ -903,7 +911,7 @@ export default {
       getUserInfo().then((res) => {
         if (res.code === 200) {
           this.temp = res.data
-          this.temp.token = this.getToken
+          this.temp.token = this.getToken()
           //this.temp.md5Token = res.data.md5Token;
           this.updateUserVisible = true
         }
