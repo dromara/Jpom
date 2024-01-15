@@ -536,27 +536,32 @@
           @ok="handleSyncToWorkspace"
           :maskClosable="false"
         >
-          <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-            <a-form-item label="选择工作空间" name="workspaceId">
-              <a-select
-                show-search
-                :filter-option="
-                  (input, option) => {
-                    const children = option.children && option.children()
-                    return (
-                      children &&
-                      children[0].children &&
-                      children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                    )
-                  }
-                "
-                v-model:value="temp.workspaceId"
-                placeholder="请选择工作空间"
-              >
-                <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
-              </a-select>
-            </a-form-item>
-          </a-form>
+          <a-space direction="vertical" style="width: 100%">
+            <a-alert message="注意" type="warning" show-icon>
+              <template #description>分配到工作空间后还需要到关联中进行配置对应工作空间才能完美使用奥</template>
+            </a-alert>
+            <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+              <a-form-item label="选择工作空间" name="workspaceId">
+                <a-select
+                  show-search
+                  :filter-option="
+                    (input, option) => {
+                      const children = option.children && option.children()
+                      return (
+                        children &&
+                        children[0].children &&
+                        children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                      )
+                    }
+                  "
+                  v-model:value="temp.workspaceId"
+                  placeholder="请选择工作空间"
+                >
+                  <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-form>
+          </a-space>
         </a-modal>
       </a-tab-pane>
       <a-tab-pane key="2" tab="命令日志"> <OperationLog type="machinessh"></OperationLog></a-tab-pane>

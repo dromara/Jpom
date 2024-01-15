@@ -138,7 +138,7 @@
         </a-card>
       </a-tab-pane>
       <a-tab-pane key="stat" tab="统计趋势">
-        <a-space direction="vertical" style="display: block">
+        <a-space direction="vertical" style="width: 100%">
           <a-card size="small" title="基础信息">
             <template v-slot:extra>
               <a-button size="small" v-if="historyChart" type="primary" @click="handleHistory">
