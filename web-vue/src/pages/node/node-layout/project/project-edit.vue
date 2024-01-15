@@ -109,18 +109,20 @@
               </a-tooltip>
             </template>
             <template #help>
-              需要提前为机器配置授权目录
-              <a-button
-                type="link"
-                size="small"
-                @click="
-                  () => {
-                    configDir = true
-                  }
-                "
-              >
-                <InfoCircleOutlined /> 快速配置
-              </a-button>
+              <div>
+                需要提前为机器配置授权目录
+                <a-button
+                  type="link"
+                  size="small"
+                  @click="
+                    () => {
+                      configDir = true
+                    }
+                  "
+                >
+                  <InfoCircleOutlined /> 快速配置
+                </a-button>
+              </div>
             </template>
             <a-input-group compact>
               <a-select style="width: 50%" v-model:value="temp.whitelistDirectory" placeholder="请选择项目授权路径">

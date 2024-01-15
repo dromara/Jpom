@@ -264,7 +264,7 @@ export default {
         )
         const domId = `pre-dom-${item.nodeId},${item.projectId}`
         this.socketCache = { ...this.socketCache, [domId]: {} }
-        const socket = this.initWebSocket(domId, socketUrl)
+        const socket = this.initWebSocket(domId, socketUrl, item)
 
         this.socketCache = {
           ...this.socketCache,
@@ -302,7 +302,7 @@ export default {
         this.socketCache[item].socket?.close()
       })
     },
-    initWebSocket(id, url) {
+    initWebSocket(id, url, item) {
       const socket = new WebSocket(url)
 
       socket.onerror = (err) => {
@@ -318,7 +318,7 @@ export default {
         console.error(err)
         $notification.info({
           key: 'log-read-close',
-          message: '会话已经关闭[tail-log]-' + id
+          message: ((this.nodeName[item.nodeId] && this.nodeName[item.nodeId].name) || '') + ' 会话已经关闭[tail-log]-'
         })
         clearInterval(this.socketCache[id].heart)
       }

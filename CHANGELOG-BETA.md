@@ -7,6 +7,7 @@
 1. 【server】修复 docker TLS 证书无法查看全部、证书无法编辑（新版遗漏）
 2. 【server】优化 docker 资产监控支持自定义配置 cron `jpom.assets.docker.monitor-cron`
 3. 【server】修复 容器终端、容器日志无法正常使用
+4. 【server】修复 新版本页面多处无法正常使用相关问题（优化部分提示说明）
 
 ------
 
