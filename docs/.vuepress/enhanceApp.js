@@ -252,6 +252,9 @@ export default ({
     } else {
       layer.close(window["mainTitleTipsIndex"]);
     }
+    if (!$(".hero img").hasClass("animationLogo")) {
+      $(".hero img").addClass("animationLogo");
+    }
   }
 
   function imgAddLayerTip() {

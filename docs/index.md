@@ -320,7 +320,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 
 ## 🍭架构图
 
-<img class="no-zoom" :src="$withBase('/images/jpom-func-arch.png')" style="zoom: 120%" alt="jpom-func-arch">
+<img class="no-zoom" :src="$withBase('/images/jpom-func-arch.png')" style="zoom: 120%;margin: auto;display: block;" alt="jpom-func-arch">
 
 <br/>
 
@@ -343,12 +343,6 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 
 <br/>
 
-## 🌍 精彩分享
-
-<div>
-<img class="no-zoom" style="height:200px;display: inline-block;" :src="$withBase('/images/zsxq.jpg')" alt="扫码加入知识星球，了解学习更多知识">
-
-</div>
 
 ## 🤝 dromara 组织项目
 
@@ -433,6 +427,11 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/akali-logo.png')" alt="轻量级本地化热点检测/降级框架">
 </a>
 </p>
+
+<div>
+<img class="no-zoom" style="height:200px;display: inline-block;" :src="$withBase('/images/zsxq.jpg')" alt="扫码加入知识星球，了解学习更多知识">
+
+</div>
 
 ## 🧲友情链接
 <div class="friends-item" style="background-color: var(--imgBgColor);">
