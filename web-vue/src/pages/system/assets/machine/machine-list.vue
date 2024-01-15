@@ -723,7 +723,7 @@ export default {
           percent2Number: true
         },
         {
-          title: '内存占用',
+          title: '实际内存占用',
           sorter: true,
           align: 'center',
           dataIndex: 'osOccupyMemory',

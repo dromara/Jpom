@@ -95,7 +95,7 @@ export function generateNodeTopChart(data) {
     smooth: true
   }
   const memoryItem = {
-    name: '内存占用',
+    name: '实际内存占用',
     type: 'line',
     data: [],
     showSymbol: false,
@@ -126,8 +126,22 @@ export function generateNodeTopChart(data) {
 
     scales.push(parseTime(item.monitorTime))
   }
-
-  const series = [cpuItem, memoryItem, diskItem, swapMemory, virtualMemory]
+  //swapMemory, virtualMemory
+  const series = [cpuItem, memoryItem, diskItem]
+  if (
+    swapMemory.data.filter((item) => {
+      return item !== -0.1
+    }).length
+  ) {
+    series.push(swapMemory)
+  }
+  if (
+    virtualMemory.data.filter((item) => {
+      return item !== -0.1
+    }).length
+  ) {
+    series.push(virtualMemory)
+  }
 
   const legends = series.map((data) => {
     return data.name
@@ -146,8 +160,8 @@ export function generateNodeTopChart(data) {
       axisLabel: {
         // 设置y轴数值为%
         formatter: '{value} %'
-      },
-      max: 100
+      }
+      // max: 100
     },
     tooltip: {
       trigger: 'axis',

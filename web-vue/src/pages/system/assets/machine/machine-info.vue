@@ -115,7 +115,7 @@
                   :percent="formatPercent2Number((machineInfo && machineInfo.osOccupyDisk) || 0)"
                 />
               </a-descriptions-item>
-              <a-descriptions-item label="内存占用" :span="4">
+              <a-descriptions-item label="实际内存占用" :span="4">
                 <a-progress
                   :stroke-color="{
                     '0%': '#87d068',
