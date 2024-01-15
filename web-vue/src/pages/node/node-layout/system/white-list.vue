@@ -78,6 +78,7 @@ export default {
             $notification.success({
               message: res.msg
             })
+            this.$emit('cancel')
           }
         })
         .finally(() => {
@@ -85,6 +86,7 @@ export default {
           this.submitAble = false
         })
     }
-  }
+  },
+  emits: ['cancel']
 }
 </script>
