@@ -1,8 +1,15 @@
 <template>
   <div>
     <a-space direction="vertical" style="width: 100%">
-      <a-alert message="节点分发的授权路径配置" type="info" />
-      <a-alert message="路径需要配置绝对路径,不支持软链" type="info" />
+      <a-alert message="温馨提醒" type="info" show-icon>
+        <template #description>
+          <ul>
+            <li>当前为节点分发的授权路径配置</li>
+            <li>路径需要配置绝对路径</li>
+          </ul>
+        </template>
+      </a-alert>
+      <!-- <a-alert message=",不支持软链" type="info" /> -->
 
       <a-form ref="editForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }" @finish="onSubmit">
         <a-form-item label="授权路径" name="outGiving">
