@@ -91,6 +91,66 @@ body .vuepress-plugin-demo-block__wrapper {
 	}
 }
 
+.animationLogo {
+	animation: 5s ease 0s infinite backwards bounce;
+}
+
+/* 主要是通过控制translateY的值来操作y轴的距离实现弹跳效果 */
+@keyframes bounce {
+	0% {
+		transform: translateY(-10px);
+		animation-timing-function: ease-in;
+		opacity: 1;
+	}
+
+	0% {
+		transform: translateY(-20px);
+		animation-timing-function: ease-in;
+		opacity: 1;
+	}
+
+	10% {
+		transform: translateY(-32px);
+		animation-timing-function: ease-in;
+		opacity: 1;
+	}
+
+	24% {
+		opacity: 1;
+	}
+
+	40% {
+		transform: translateY(-32px);
+		animation-timing-function: ease-in;
+	}
+
+	62% {
+		transform: translateY(-16px);
+		animation-timing-function: ease-in;
+	}
+
+	82% {
+		transform: translateY(-8px);
+		animation-timing-function: ease-in;
+	}
+
+	92% {
+		transform: translateY(-4px);
+		animation-timing-function: ease-in;
+	}
+
+	25%, 55%, 75%, 90% {
+		transform: translateY(0);
+		animation-timing-function: ease-out;
+	}
+
+	100% {
+		transform: translateY(0);
+		animation-timing-function: ease-out;
+		opacity: 1;
+	}
+}
+
 .page-wwads {
 	width: 100% !important;
 	margin: 0;
