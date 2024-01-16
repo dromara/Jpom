@@ -232,7 +232,7 @@
         <releaseFile ref="releaseFile" v-if="releaseFileVisible" @commit="handleCommitTask"></releaseFile>
       </a-modal>
     </div>
-    />
+
     <!-- 配置工作空间授权目录 -->
     <a-modal
       destroyOnClose

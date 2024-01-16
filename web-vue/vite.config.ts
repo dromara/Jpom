@@ -25,7 +25,7 @@ import { ConfigEnv, defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import { createHtmlPlugin } from 'vite-plugin-html'
-
+import { visualizer } from 'rollup-plugin-visualizer'
 //自动导入vue中hook reactive ref等
 import AutoImport from 'unplugin-auto-import/vite'
 //自动导入ui-组件 比如说ant-design-vue  element-plus等
@@ -62,7 +62,12 @@ export default defineConfig(({ mode }: ConfigEnv) => {
           chunkFileNames: 'assets/js/[name].[hash].js', // 用于输出静态资源的命名，[ext]表示文件扩展名
           assetFileNames: 'assets/[ext]/[name].[hash].[ext]'
         }
-      }
+      },
+      //打包前清空文件，默认true
+      emptyOutDir: true,
+      modulePreload: { polyfill: true },
+      polyfillModulePreload: true,
+      manifest: false
     },
     server: {
       port: Number(JPOM_PORT),
@@ -110,6 +115,11 @@ export default defineConfig(({ mode }: ConfigEnv) => {
             buildVersion: process.env.npm_package_version
           }
         }
+      }),
+      visualizer({
+        emitFile: false,
+        // file: 'states.html',
+        open: true
       })
     ]
   }

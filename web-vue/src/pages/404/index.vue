@@ -9,10 +9,10 @@
                 <HomeOutlined />
                 <span>回到主页</span>
               </a-button>
-              <a-button type="primary" @click="goBack">
+              <!-- <a-button type="primary" @click="goBack">
                 <left-outlined />
                 <span>返回上一页</span>
-              </a-button>
+              </a-button> -->
             </a-space>
           </a-result>
         </template>
