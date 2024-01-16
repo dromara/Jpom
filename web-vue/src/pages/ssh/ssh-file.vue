@@ -822,7 +822,7 @@ export default {
     // 删除文件夹
     handleDeletePath() {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除当前文件夹么？',
@@ -858,7 +858,7 @@ export default {
     // 删除
     handleDelete(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除文件么？',

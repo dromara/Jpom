@@ -499,7 +499,7 @@ export default {
         '<li>一般情况下不建议降级操作</li>' +
         ' </ul>'
 
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
@@ -521,7 +521,7 @@ export default {
         '<li>上传前请检查包是否完整,否则可能出现更新后无法正常启动的情况！！</li>' +
         ' </ul>'
 
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
@@ -593,7 +593,7 @@ export default {
         '<li>如果升级失败需要手动恢复奥</li>' +
         ' </ul>'
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),

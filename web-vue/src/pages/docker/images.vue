@@ -293,7 +293,7 @@ export default {
         return
       }
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: action.msg,
@@ -433,7 +433,7 @@ export default {
     batchDelete() {
       let ids = this.tableSelections
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要批量删除选择的镜像吗？已经被容器使用的镜像无法删除！',

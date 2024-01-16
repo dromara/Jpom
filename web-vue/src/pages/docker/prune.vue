@@ -126,7 +126,7 @@ export default {
       this.$refs['ruleForm'].validate().then(() => {
         //
         const that = this
-        this.$confirm({
+        $confirm({
           title: '系统提示',
           zIndex: 1009,
           content: '确定要修剪对应的信息吗？修剪会自动清理对应的数据',

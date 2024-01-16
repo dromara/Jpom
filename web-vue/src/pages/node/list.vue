@@ -954,7 +954,7 @@ export default {
     },
     handleDelete(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除节点么？删除会检查数据关联性,并且节点不存在项目或者脚本',
@@ -988,7 +988,7 @@ export default {
         '<li>如果误操作会产生冗余数据！！！</li>' +
         ' </ul>'
       const that = this
-      this.$confirm({
+      $confirm({
         title: '危险操作！！！',
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
@@ -1116,7 +1116,7 @@ export default {
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: msg,

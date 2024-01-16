@@ -216,7 +216,7 @@ export default {
     },
     handleDelete(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除执行记录么？',

@@ -342,7 +342,7 @@ export default {
     //
     handleLeava(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要在该集群剔除此节点么？',

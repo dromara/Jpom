@@ -755,7 +755,7 @@ export default {
     // 删除文件
     handleDelete(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除当前文件么？' + record.name,
@@ -791,7 +791,7 @@ export default {
         return
       }
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除这些文件么？',

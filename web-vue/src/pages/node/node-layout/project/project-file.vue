@@ -1040,7 +1040,7 @@ export default {
         ? '真的要清空 【' + this.uploadPath + '】目录和文件么？'
         : '真的要清空项目目录和文件么？'
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: msg,
         okText: '确认',
@@ -1091,7 +1091,7 @@ export default {
         ? '真的要删除【' + record.filename + '】文件夹么？'
         : '真的要删除【' + record.filename + '】文件么？'
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: msg,
         okText: '确认',

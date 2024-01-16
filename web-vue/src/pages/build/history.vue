@@ -432,7 +432,7 @@ export default {
     // 回滚
     handleRollback(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要回滚该构建历史记录么？',
@@ -465,7 +465,7 @@ export default {
     // 删除
     handleDelete(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除构建历史记录么？',
@@ -498,7 +498,7 @@ export default {
         return
       }
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除这些构建历史记录么？',

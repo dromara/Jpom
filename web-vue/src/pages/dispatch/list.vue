@@ -1433,7 +1433,7 @@ export default {
     handleDelete(record, thorough) {
       const that = this
       if (record.outGivingProject) {
-        this.$confirm({
+        $confirm({
           title: '系统提示',
           zIndex: 1009,
           content: thorough
@@ -1461,7 +1461,7 @@ export default {
         })
         return
       }
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要释放分发信息么？释放之后节点下面的项目信息还会保留，如需删除项目还需要到节点管理中操作',
@@ -1496,7 +1496,7 @@ export default {
         '<li>如果误操作会产生冗余数据！！！</li>' +
         ' </ul>'
       const that = this
-      this.$confirm({
+      $confirm({
         title: '危险操作！！！',
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
@@ -1590,7 +1590,7 @@ export default {
     // 取消
     handleCancel(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的取消当前分发吗？',

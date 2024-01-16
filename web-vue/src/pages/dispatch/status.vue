@@ -607,7 +607,7 @@ export default {
         '<li>如果误操作会产生冗余数据！！！</li>' +
         ' </ul>'
       const that = this
-      this.$confirm({
+      $confirm({
         title: '危险操作！！！',
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),

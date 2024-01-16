@@ -867,7 +867,7 @@ export default {
     // 删除
     handleDelete(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除该 Docker 么？删除只会检查本地系统的数据关联,不会删除 docker 容器中数据',
@@ -905,7 +905,7 @@ export default {
         '<li>操作不能撤回奥</li>' +
         ' </ul>'
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),

@@ -879,7 +879,7 @@ export default {
     // 删除
     handleDelete(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除机器 SSH 么？',
         zIndex: 1009,
@@ -967,7 +967,7 @@ export default {
     // 删除工作空间的数据
     handleDeleteWorkspaceItem(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除对应工作空间的 SSH 么？',
@@ -1052,7 +1052,7 @@ export default {
     // 清除隐藏字段
     handerRestHideField(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要清除 SSH 隐藏字段信息么？（密码，私钥）',

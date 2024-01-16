@@ -976,7 +976,7 @@ export default {
     // 删除
     handleDelete(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除构建信息么？删除也将同步删除所有的构建历史记录信息',
@@ -1009,7 +1009,7 @@ export default {
         return
       }
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要批量删除这些构建信息么？删除也将同步删除所有的构建历史记录信息，如果中途删除失败将终止删除操作',
@@ -1036,7 +1036,7 @@ export default {
     // 清除构建
     handleClear(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要清除构建信息么？',
@@ -1141,7 +1141,7 @@ export default {
     // 停止构建
     handleStopBuild(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '确定要取消构建 【名称：' + record.name + '】 吗？注意：取消/停止构建不一定能正常关闭所有关联进程',
@@ -1192,7 +1192,7 @@ export default {
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: msg,
@@ -1233,7 +1233,7 @@ export default {
         })
         return
       }
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content:
@@ -1263,7 +1263,7 @@ export default {
         })
         return
       }
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '确定要取批量消选中的构建吗？注意：取消/停止构建不一定能正常关闭所有关联进程',

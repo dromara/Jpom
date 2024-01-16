@@ -442,7 +442,7 @@ export default {
         ? '真的要删除【' + record.filename + '】文件夹么？'
         : '真的要删除【' + record.filename + '】文件么？'
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: msg,
@@ -479,7 +479,7 @@ export default {
     handlBackupeDelete(record) {
       const msg = '真的要删除【' + record.filename + '】备份文件夹么？'
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: msg,
@@ -522,7 +522,7 @@ export default {
       if (record.isDirectory) {
         this.recoverPath(record.filename)
       } else {
-        this.$confirm({
+        $confirm({
           title: '系统提示',
           zIndex: 1009,
           content: '是否将【' + record.filename + '】此文件还原到项目目录？',
