@@ -837,12 +837,12 @@ export default {
         const temp = Object.assign({}, this.temp)
         if (temp.enableSsh) {
           if (!temp.machineSshId) {
-            this.$message.warning('请选择SSH连接信息')
+            $message.warning('请选择SSH连接信息')
             return false
           }
         } else {
           if (!temp.host) {
-            this.$message.warning('请输入host')
+            $message.warning('请输入host')
             return false
           }
         }

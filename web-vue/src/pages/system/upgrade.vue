@@ -334,8 +334,8 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        this.$message.warning('会话已经关闭[upgrade]')
         clearInterval(this.heart)
+        $message.warning('会话已经关闭[upgrade]')
       }
     },
     checkAgentFileVersion() {

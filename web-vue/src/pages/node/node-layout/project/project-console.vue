@@ -240,7 +240,7 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        this.$message.warning('会话已经关闭[project-console]')
+        $message.warning('会话已经关闭[project-console]')
         clearInterval(this.heart)
       }
       this.socket.onmessage = (msg) => {
@@ -255,7 +255,7 @@ export default {
             res.op === 'reload'
           ) {
             this.optButtonLoading = false
-            this.$message.info(res.msg)
+            $message.info(res.msg)
             if (res.code === 200) {
               // 如果操作是启动或者停止
               if (res.op === 'stop') {

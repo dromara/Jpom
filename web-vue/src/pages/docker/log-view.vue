@@ -128,8 +128,8 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        this.$message.warning('会话已经关闭[docker-log]')
         clearInterval(this.heart)
+        $message.warning('会话已经关闭[docker-log]')
       }
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf('code') > -1 && msg.data.indexOf('msg') > -1) {

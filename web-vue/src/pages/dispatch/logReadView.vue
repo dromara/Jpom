@@ -415,7 +415,7 @@ export default {
           this.sendSearchLog()
         } else {
           //
-          this.$message.error('当前文件不可读,需要配置可读文件授权')
+          $message.error('当前文件不可读,需要配置可读文件授权')
         }
       }
     },
