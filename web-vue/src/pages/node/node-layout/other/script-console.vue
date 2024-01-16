@@ -165,9 +165,9 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        this.$message.warning('会话已经关闭[node-script-consloe]')
         clearInterval(this.heart)
         this.btnLoading = true
+        $message.warning('会话已经关闭[node-script-consloe]')
       }
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf('JPOM_MSG') > -1 && msg.data.indexOf('op') > -1) {

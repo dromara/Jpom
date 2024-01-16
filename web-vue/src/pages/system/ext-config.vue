@@ -103,7 +103,7 @@ export default {
       getDefaultItem({ name: this.temp.name }).then((res) => {
         if (res.code === 200) {
           this.temp = { ...this.temp, content: res.data }
-          this.$message.success({ content: '已经读取默认配置文件到编辑器中' })
+          $message.success({ content: '已经读取默认配置文件到编辑器中' })
         }
       })
     },

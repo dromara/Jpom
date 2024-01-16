@@ -420,6 +420,7 @@
       destroyOnClose
       :confirmLoading="confirmLoading"
       v-model:open="editDispatchVisible"
+      :zIndex="900"
       width="60vw"
       :title="temp.type === 'edit' ? '编辑分发项目' : '创建分发项目'"
       @ok="handleEditDispatchOk"
@@ -556,19 +557,21 @@
               /></a-form-item-rest>
             </a-input-group>
             <template v-slot:help>
-              需要提前为工作空间配置授权目录
+              <div>
+                需要提前为工作空间配置授权目录
 
-              <a-button
-                size="small"
-                type="link"
-                @click="
-                  () => {
-                    this.configDir = true
-                  }
-                "
-              >
-                <InfoCircleOutlined /> 配置目录
-              </a-button>
+                <a-button
+                  size="small"
+                  type="link"
+                  @click="
+                    () => {
+                      this.configDir = true
+                    }
+                  "
+                >
+                  <InfoCircleOutlined /> 配置目录
+                </a-button>
+              </div>
             </template>
           </a-form-item>
 
@@ -596,18 +599,20 @@
               </a-tooltip>
             </template>
             <template #help>
-              scriptId建议使用服务端脚本分发到脚本：
-              <a-button
-                type="link"
-                size="small"
-                @click="
-                  () => {
-                    viewScriptVisible = true
-                  }
-                "
-              >
-                查看服务端脚本
-              </a-button>
+              <div>
+                scriptId建议使用服务端脚本分发到脚本：
+                <a-button
+                  type="link"
+                  size="small"
+                  @click="
+                    () => {
+                      viewScriptVisible = true
+                    }
+                  "
+                >
+                  查看服务端脚本
+                </a-button>
+              </div>
             </template>
             <a-form-item-rest>
               <!-- <a-tabs>
@@ -916,7 +921,7 @@
       placement="right"
       :open="viewScriptVisible"
       width="70vw"
-      :zIndex="1009"
+      :zIndex="1109"
       @close="
         () => {
           this.viewScriptVisible = false
