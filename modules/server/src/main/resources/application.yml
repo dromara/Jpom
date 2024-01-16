@@ -148,6 +148,8 @@ spring:
   web:
     resources:
       static-locations: classpath:/dist/
+      cache:
+        period: 1D
   mvc:
     throw-exception-if-no-handler-found: true
     log-request-details: true
