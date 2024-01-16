@@ -242,6 +242,7 @@ export const PROJECT_DSL_DEFATUL =
   '#    scriptArgs: reload\r\n' +
   '#    scriptEnv:\r\n' +
   '#      "boot_active": test\r\n' +
+  '#  fileChangeReload: true\r\n' +
   'file:\r\n' +
   '# 备份文件保留个数\r\n' +
   '#  backupCount: 5\r\n' +
@@ -468,7 +469,7 @@ export function formatPercent2(point, keep = 2) {
   if (null == point) {
     return '-'
   }
-  var percent = Number(point).toFixed(keep)
+  var percent = Number(Number(point).toFixed(keep))
   percent += '%'
   return percent
 }
