@@ -1,6 +1,20 @@
 import axios from './config'
 import { parseTime, formatPercent2, renderSize, formatDuration } from '@/utils/const'
-import * as echarts from 'echarts'
+import * as echarts from 'echarts/core'
+import { GridComponent, TitleComponent, LegendComponent, TooltipComponent, DataZoomComponent } from 'echarts/components'
+import { LineChart } from 'echarts/charts'
+import { UniversalTransition } from 'echarts/features'
+import { CanvasRenderer } from 'echarts/renderers'
+echarts.use([
+  GridComponent,
+  LineChart,
+  CanvasRenderer,
+  UniversalTransition,
+  TitleComponent,
+  LegendComponent,
+  TooltipComponent,
+  DataZoomComponent
+])
 
 // 获取机器信息
 export function machineInfo(params) {
@@ -142,8 +156,10 @@ export function generateNodeTopChart(data) {
   ) {
     series.push(virtualMemory)
   }
-
+  let maxVlaue = 0
   const legends = series.map((data) => {
+    const itemMax = Math.max(...data.data)
+    maxVlaue = Math.max(itemMax, maxVlaue)
     return data.name
   })
 
@@ -160,8 +176,8 @@ export function generateNodeTopChart(data) {
       axisLabel: {
         // 设置y轴数值为%
         formatter: '{value} %'
-      }
-      // max: 100
+      },
+      max: maxVlaue
     },
     tooltip: {
       trigger: 'axis',
@@ -311,7 +327,7 @@ export function generateNodeNetworkTimeChart(data) {
  * @param {String} domId
  * @returns
  */
-export function drawChart(data, domId, parseFn) {
+export function drawChart(data, domId, parseFn, theme) {
   const historyChartDom = document.getElementById(domId, domId)
   if (!historyChartDom) {
     return
@@ -323,7 +339,7 @@ export function drawChart(data, domId, parseFn) {
     return myChart
   }
   // 绘制图表
-  const historyChart = echarts.init(historyChartDom)
+  const historyChart = echarts.init(historyChartDom, theme)
   historyChart.setOption(option)
   return historyChart
 }
