@@ -236,6 +236,12 @@ export const PROJECT_DSL_DEFATUL =
   '#    scriptArgs: restart\r\n' +
   '#    scriptEnv:\r\n' +
   '#      "boot_active": test\r\n' +
+  '#  reload:\r\n' +
+  '##    scriptId: project.sh\r\n' +
+  '#    scriptId: \r\n' +
+  '#    scriptArgs: reload\r\n' +
+  '#    scriptEnv:\r\n' +
+  '#      "boot_active": test\r\n' +
   'file:\r\n' +
   '# 备份文件保留个数\r\n' +
   '#  backupCount: 5\r\n' +
