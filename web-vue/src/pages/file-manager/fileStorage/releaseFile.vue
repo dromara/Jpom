@@ -115,29 +115,37 @@
       </a-form-item>
 
       <a-form-item label="执行脚本" name="releaseBeforeCommand">
+        <template #help>
+          <div v-if="scriptTabKey === 'before'">文件上传前需要执行的脚本(非阻塞命令)</div>
+          <div v-else-if="scriptTabKey === 'after'">文件上传成功后需要执行的脚本(非阻塞命令)</div>
+        </template>
         <a-form-item-rest>
-          <a-tabs tabPosition="right">
+          <a-tabs tabPosition="right" type="card" v-model:activeKey="scriptTabKey">
             <a-tab-pane key="before" tab="上传前">
               <code-editor
                 height="40vh"
                 v-model:content="temp.beforeScript"
+                :showTool="true"
                 :options="{
                   mode: 'shell'
                 }"
-              ></code-editor>
-
-              <div style="margin-top: 10px">文件上传前需要执行的脚本(非阻塞命令)</div>
+              >
+                <template #tool_before>
+                  <a-tag><b>上传前</b>执行</a-tag>
+                </template>
+              </code-editor>
             </a-tab-pane>
             <a-tab-pane key="after" tab="上传后">
               <code-editor
                 height="40vh"
+                :showTool="true"
                 v-model:content="temp.afterScript"
                 :options="{
                   mode: 'shell'
                 }"
-              ></code-editor>
-
-              <div style="margin-top: 10px">文件上传成功后需要执行的脚本(非阻塞命令)</div>
+              >
+                <template #tool_before> <a-tag>上传后执行</a-tag></template>
+              </code-editor>
             </a-tab-pane>
           </a-tabs>
         </a-form-item-rest>
@@ -198,7 +206,8 @@ export default {
       sshList: [],
       accessList: [],
       nodeList: [],
-      configDir: false
+      configDir: false,
+      scriptTabKey: 'before'
     }
   },
   created() {
@@ -257,3 +266,8 @@ export default {
   emits: ['commit']
 }
 </script>
+<style scoped>
+:deep(.ant-tabs-tabpane) {
+  padding-right: 0 !important;
+}
+</style>

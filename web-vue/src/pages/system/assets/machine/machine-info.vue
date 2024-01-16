@@ -455,7 +455,8 @@ import {
   machineNetworkInterfaces
 } from '@/api/node-stat'
 import { statusMap } from '@/api/system/assets-machine'
-
+import { useGuideStore } from '@/stores/guide'
+import { mapState } from 'pinia'
 export default {
   components: {
     CustomSelect,
@@ -470,6 +471,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(useGuideStore, ['getThemeView']),
     idInfo() {
       return {
         nodeId: this.nodeId,
@@ -824,9 +826,14 @@ export default {
     loadNodeTop() {
       nodeMonitorData({ ...this.idInfo }, false).then((res) => {
         if (res.code === 200) {
-          this.historyChart = drawChart(res.data, 'top-chart', generateNodeTopChart)
-          this.netHistoryChart = drawChart(res.data, 'net-chart', generateNodeNetChart)
-          this.networkDelayChart = drawChart(res.data, 'network-delay-chart', generateNodeNetworkTimeChart)
+          this.historyChart = drawChart(res.data, 'top-chart', generateNodeTopChart, this.getThemeView())
+          this.netHistoryChart = drawChart(res.data, 'net-chart', generateNodeNetChart, this.getThemeView())
+          this.networkDelayChart = drawChart(
+            res.data,
+            'network-delay-chart',
+            generateNodeNetworkTimeChart,
+            this.getThemeView()
+          )
         }
       })
     },

@@ -320,7 +320,8 @@
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
-          <a-input v-model:value="temp.jpomUrl" placeholder="节点地址 (127.0.0.1:2123)">
+          <template #help>节点地址格式为：IP:PORT (示例：192.168.1.100:2123)</template>
+          <a-input v-model:value="temp.jpomUrl" placeholder="节点地址 (192.168.1.100:2123)">
             <template v-slot:addonBefore>
               <a-select
                 placeholder="协议类型"
@@ -337,6 +338,7 @@
 
         <a-form-item label="节点账号" name="loginName">
           <a-input v-model:value="temp.jpomUsername" placeholder="节点账号,请查看节点启动输出的信息" />
+          <template #help>默认账号为：jpomAgent</template>
         </a-form-item>
         <a-form-item :name="`${temp.id ? 'loginPwd-update' : 'loginPwd'}`">
           <template v-slot:label>
