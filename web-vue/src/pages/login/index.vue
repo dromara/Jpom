@@ -214,15 +214,16 @@ const changeCode = () => {
     }
   })
 }
+const jpomWindow_ = jpomWindow()
 
 const parseOauth2Provide = () => {
-  if (jpomWindow.oauth2Provide === '<oauth2Provide>') {
+  if (jpomWindow_.oauth2Provide === '<oauth2Provide>') {
     const pathname = location.pathname.substring(1)
     const pathArray = pathname.split('-')
     return pathArray[pathArray.length - 1]
     // console.log(location.pathname.substring(1))
   }
-  return jpomWindow.oauth2Provide
+  return jpomWindow_.oauth2Provide
 }
 
 const checkOauth2 = () => {

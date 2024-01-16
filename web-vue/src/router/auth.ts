@@ -14,6 +14,8 @@ const whiteList: string[] = ['/login', '/install', '/prohibit-access', '/404']
 const noTabs: string[] = ['/full-terminal', '/ssh-tabs']
 
 router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+  const useAppStore = appStore()
+  useAppStore.pageLoading(true)
   if (to.matched.length === 0) {
     next('*')
     return
@@ -74,7 +76,9 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
 })
 
 router.afterEach((to: RouteLocationNormalized) => {
-  appStore().showInfo(to)
+  const useAppStore = appStore()
+  useAppStore.pageLoading(false)
+  useAppStore.showInfo(to)
   const params = Qs.parse(location.search.substring(1))
   if (Object.keys(params).length) {
     //地址栏参数转 hash 参数

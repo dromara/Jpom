@@ -4,13 +4,15 @@ import { NO_NOTIFY_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID } from '@/utils/con
 import { refreshToken } from './user/user'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
+import { GlobalWindow } from '@/interface/common'
 
 import Qs from 'qs'
 import router from '../router'
 const delTimeout: number = 20 * 1000
-const apiTimeout: number = Number(jpomWindow.apiTimeout === '<apiTimeout>' ? delTimeout : jpomWindow.apiTimeout)
+const jpomWindow_ = window as unknown as GlobalWindow
+const apiTimeout: number = Number(jpomWindow_.apiTimeout === '<apiTimeout>' ? delTimeout : jpomWindow_.apiTimeout)
 // debug routerBase
-const routerBase: string = jpomWindow.routerBase === '<routerBase>' ? '' : jpomWindow.routerBase
+const routerBase: string = jpomWindow_.routerBase === '<routerBase>' ? '' : jpomWindow_.routerBase
 
 const pro: boolean = process.env.NODE_ENV === 'production'
 
@@ -136,7 +138,7 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
       message: '禁止访问',
       description: '禁止访问,当前IP限制访问'
     })
-    window.location.href = jpomWindow.routerBase + '/prohibit-access'
+    window.location.href = jpomWindow_.routerBase + '/prohibit-access'
     return Promise.reject(data)
   }
 

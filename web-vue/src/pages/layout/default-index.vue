@@ -75,12 +75,12 @@ const menuTheme = computed(() => {
 const theme = computed(() => {
   return guideStore.getThemeView()
 })
-
+const jpomWindow_ = jpomWindow()
 // 检查是否需要初始化
 const checkSystemHannder = () => {
   checkSystem().then((res) => {
     if (res.data) {
-      jpomWindow.routerBase = res.data.routerBase || ''
+      jpomWindow_.routerBase = res.data.routerBase || ''
       if (res.data.subTitle) {
         subTitle.value = res.data.subTitle
       }

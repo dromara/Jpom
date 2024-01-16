@@ -12,10 +12,15 @@ export const useAppStore = defineStore('app', {
     workspaceId: localStorage.getItem(CACHE_WORKSPACE_ID),
     // 菜单折叠
     isCollapsed: localStorage.getItem('collapsed') === 'true',
-    isShowInfo: false
+    isShowInfo: false,
+    loading: 0
   }),
 
   actions: {
+    // 页面加载（路由切换）
+    pageLoading(loading: boolean) {
+      this.loading = loading ? 1 : 2
+    },
     // 切换工作空间
     changeWorkspace(workspaceId: string) {
       return new Promise((resolve) => {
