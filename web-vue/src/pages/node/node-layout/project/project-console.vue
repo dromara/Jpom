@@ -336,7 +336,7 @@ export default {
     },
     // 重启
     restart() {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要重启项目么？',
@@ -349,7 +349,7 @@ export default {
     },
     // 停止
     stop() {
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要停止项目么？',

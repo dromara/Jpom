@@ -284,7 +284,7 @@ export default {
     // 回滚
     handleRollback(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要回滚该构建历史记录么？',
         okText: '确认',

@@ -466,7 +466,7 @@ export default {
         //         this.editorValue = this.formatStrInJson(this.editorValue)
         //       }
         //     } catch (e) {
-        //       this.$message.error('格式化代码出错：' + e.toString())
+        //       $message.error('格式化代码出错：' + e.toString())
         //     }
         //   }
         // },

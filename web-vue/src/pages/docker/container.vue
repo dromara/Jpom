@@ -924,7 +924,7 @@ export default {
         return
       }
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: action.msg,

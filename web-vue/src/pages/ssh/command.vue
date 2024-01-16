@@ -590,7 +590,7 @@ export default {
     //  删除命令
     handleDelete(row) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除“' + row.name + '”命令？',

@@ -900,7 +900,7 @@ export default {
     // 删除
     handleDelete(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除仓库信息么？',
         okText: '确认',
@@ -936,7 +936,7 @@ export default {
     // 清除隐藏字段
     restHideField(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要清除仓库隐藏字段信息么？（密码，私钥）',
         okText: '确认',
@@ -975,7 +975,7 @@ export default {
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: msg,
         okText: '确认',

@@ -878,7 +878,7 @@ export default {
     // 删除机器
     deleteMachineInfo(item) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除机器么？删除会检查数据关联性',
@@ -1092,7 +1092,7 @@ export default {
     // submit
     onNodeSubmit(restart) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: restart
           ? '真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！ 保存成功后请及时关注重启状态！！'

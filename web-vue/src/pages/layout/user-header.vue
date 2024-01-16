@@ -807,7 +807,7 @@ export default {
     // 切换账号登录
     logOutSwap() {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要退出并切换账号登录么？',
@@ -837,7 +837,7 @@ export default {
     // 退出登录
     logOut() {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要退出系统么？',

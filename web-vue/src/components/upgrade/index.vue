@@ -260,7 +260,7 @@ export default {
         '<li>如果升级失败需要手动恢复奥</li>' +
         ' </ul>'
 
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okText: '确认',
@@ -487,7 +487,7 @@ export default {
         '<li>如果升级失败需要手动恢复奥</li>' +
         ' </ul>'
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okText: '确认',
@@ -525,7 +525,7 @@ export default {
           ' </ul>'
         : '确认要关闭 beta 计划吗？'
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: h('div', {}, [h('p', { innerHTML: html })]),
         okText: '确认',
@@ -555,5 +555,4 @@ export default {
   }
 }
 </script>
-<style scoped>
-</style>
+<style scoped></style>

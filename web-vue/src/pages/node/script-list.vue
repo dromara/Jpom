@@ -407,7 +407,7 @@ export default {
 
     handleDelete(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除脚本么？',
@@ -500,7 +500,7 @@ export default {
         '<li>如果误操作会产生冗余数据！！！</li>' +
         ' </ul>'
       const that = this
-      this.$confirm({
+      $confirm({
         title: '危险操作！！！',
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),

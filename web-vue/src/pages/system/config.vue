@@ -245,7 +245,7 @@ export default {
     // submit
     onSubmit(restart) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！',
@@ -328,7 +328,7 @@ export default {
     // submit ip config
     onSubmitIp() {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content:

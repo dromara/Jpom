@@ -1092,7 +1092,7 @@ export default {
     },
     reSyncProject(nodeId) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '确定要重新同步当前节点项目缓存信息吗？',
@@ -1130,7 +1130,7 @@ export default {
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.projList[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: msg,
@@ -1240,7 +1240,7 @@ export default {
     // 删除
     handleDelete(record, thorough) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: thorough

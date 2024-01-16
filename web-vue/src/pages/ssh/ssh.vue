@@ -640,7 +640,7 @@ export default {
     // 删除
     handleDelete(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除 SSH 么？当前 ssh 关联的脚本在删除后均将失效',

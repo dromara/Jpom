@@ -427,7 +427,7 @@ export default {
     // 删除用户
     handleDelete(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要删除用户么？',
         zIndex: 1009,
@@ -454,7 +454,7 @@ export default {
     // 解锁
     handleUnlock(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的要解锁用户么？',
         zIndex: 1009,
@@ -481,7 +481,7 @@ export default {
     //
     handleCloseMfa(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         content: '真的关闭当前用户的两步验证么？',
         zIndex: 1009,
@@ -513,7 +513,7 @@ export default {
     //
     checkTipUserName() {
       if (this.temp?.id === 'demo') {
-        this.$confirm({
+        $confirm({
           title: '系统提示',
           zIndex: 1009,
           content:
@@ -530,7 +530,7 @@ export default {
     //
     restUserPwdHander(record) {
       const that = this
-      this.$confirm({
+      $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '确定要重置用户密码吗？',
