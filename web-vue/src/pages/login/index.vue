@@ -340,7 +340,11 @@ const handleMfa = () => {
 const checkHasLoginInfo = () => {
   const key = `tipHasLoginInfo`
   if (useUserStore.userInfo && useUserStore.getToken()) {
-    const p = h('p', { innerHTML: `当前登录的账号是：<b>${useUserStore.userInfo.name}</b> 是否自动跳转到系统页面` }, [])
+    const p = h(
+      'p',
+      { innerHTML: `当前登录的账号是：<b>${useUserStore.userInfo.name || ''}</b> 是否自动跳转到系统页面` },
+      []
+    )
     $notification.open({
       message: '检测到当前已经登录账号',
       description: h('div', {}, [p]),
@@ -360,6 +364,16 @@ const checkHasLoginInfo = () => {
       key,
       duration: null
     })
+  } else {
+    $notification.close(key)
+  }
+}
+
+const listener = () => {
+  if (document.hidden || document.visibilityState === 'hidden') {
+    //this.hidden()
+  } else {
+    checkHasLoginInfo()
   }
 }
 
@@ -368,13 +382,15 @@ onMounted(() => {
 
   getLoginConfig()
   checkHasLoginInfo()
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      //this.hidden()
-    } else {
-      checkHasLoginInfo()
-    }
-  })
+  document.addEventListener('visibilitychange', listener)
+  if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+    window.addEventListener('pageshow', checkHasLoginInfo)
+  }
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('visibilitychange', listener)
+  window.removeEventListener('pageshow', checkHasLoginInfo)
 })
 
 // export default {
