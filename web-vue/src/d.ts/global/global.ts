@@ -4,7 +4,9 @@ import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { useGuideStore } from '@/stores/guide'
 
-export const jpomWindow = window as unknown as GlobalWindow
+export const jpomWindow = () => {
+  return window as unknown as GlobalWindow
+}
 // 注册全局的组件
 export const $message = message
 export const $notification = notification

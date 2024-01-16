@@ -10,9 +10,8 @@
   >
     <a-spin v-bind="globalLoadingProps">
       <router-view v-if="routerActivation" />
-      <template>
-        <a-back-top />
-      </template>
+      <div v-if="pageloading" class="pageLoading"></div>
+      <a-back-top />
     </a-spin>
   </a-config-provider>
 </template>
@@ -20,11 +19,10 @@
 <script setup lang="ts">
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
 import { theme } from 'ant-design-vue'
-import { useGuideStore } from '@/stores/guide'
 
 const routerActivation = ref(true)
-const guideStore = useGuideStore()
-const getGuideCache = guideStore.getGuideCache
+const useGuideStore = guideStore()
+const getGuideCache = useGuideStore.getGuideCache
 // const { useToken } = theme
 // const { token } = useToken()
 // console.log(token.value)
@@ -39,7 +37,7 @@ const themeAlgorithm = computed(() => {
   if (getGuideCache.compactView) {
     algorithm.push(theme.compactAlgorithm)
   }
-  const themeDiy = guideStore.getThemeView()
+  const themeDiy = useGuideStore.getThemeView()
   if (themeDiy === 'light') {
     algorithm.push(theme.defaultAlgorithm)
   } else if (themeDiy === 'dark') {
@@ -47,6 +45,29 @@ const themeAlgorithm = computed(() => {
   }
 
   return algorithm
+})
+
+const pageloading = ref(true)
+const pageLoadingTimeout = ref()
+
+const useAppStore = appStore()
+useAppStore.$subscribe((mutation, state) => {
+  const events: any = mutation.events
+  if (events.key === 'loading') {
+    if (events.newValue === 2) {
+      clearTimeout(pageLoadingTimeout.value)
+      globalLoading(false)
+      pageloading.value = false
+    } else {
+      pageLoadingTimeout.value = setTimeout(() => {
+        pageloading.value = true
+        globalLoading({
+          spinning: true,
+          tip: '页面资源加载中....'
+        })
+      }, 500)
+    }
+  }
 })
 
 const reload = () => {
@@ -166,5 +187,17 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+</style>
+
+<style scoped>
+.pageLoading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: 100vh;
+  height: 100%;
+  flex: 1;
 }
 </style>
