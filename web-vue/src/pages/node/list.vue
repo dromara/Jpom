@@ -369,7 +369,10 @@
                       </a-tooltip>
                     </a-col>
                     <a-col :span="8" style="text-align: center">
-                      <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`内存占用率：${item.occupyMemory}%`">
+                      <a-tooltip
+                        @click="handleHistory(item, 'nodeTop')"
+                        :title="`实际内存占用率：${item.occupyMemory}%`"
+                      >
                         <a-progress
                           :size="80"
                           type="circle"

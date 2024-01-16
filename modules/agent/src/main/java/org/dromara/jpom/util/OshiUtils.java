@@ -117,6 +117,11 @@ public class OshiUtils {
         jsonObject.put("cpu", cpuInfo.getUsed());
         //
         GlobalMemory globalMemory = OshiUtil.getMemory();
+        // 在不使用交换空间的情况下，启动一个新的应用最大可用内存的大小，
+        // 计算方式：MemFree+Active(file)+Inactive(file)-(watermark+min(watermark,Active(file)+Inactive(file)/2))
+        // https://langzi989.github.io/2016/12/19/%E9%80%9A%E8%BF%87-proc-meminfo%E5%AE%9E%E6%97%B6%E8%8E%B7%E5%8F%96%E7%B3%BB%E7%BB%9F%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8%E6%83%85%E5%86%B5/
+        // https://www.cnblogs.com/aalan/p/17026258.html
+        // https://lotabout.me/2021/Linux-Available-Memory/
         jsonObject.put("memory", NumberUtil.div(globalMemory.getTotal() - globalMemory.getAvailable(), globalMemory.getTotal(), 2) * 100);
         VirtualMemory virtualMemory = globalMemory.getVirtualMemory();
         long swapTotal = virtualMemory.getSwapTotal();
