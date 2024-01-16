@@ -46,12 +46,12 @@ public class StaticFileStorageModel extends BaseUserModifyDbModel implements IFi
     private String name;
 
     /**
-     * 只保留 240 字符
+     * 只保留 100 字符
      *
      * @param name 名称
      */
     public void setName(String name) {
-        this.name = StrUtil.maxLength(name, 240);
+        this.name = StrUtil.maxLength(name, 100);
     }
 
     /**

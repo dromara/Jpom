@@ -55,6 +55,17 @@
             >
               批量删除
             </a-button>
+            <a-button
+              size="small"
+              type="link"
+              @click="
+                () => {
+                  this.configDir = true
+                }
+              "
+            >
+              <InfoCircleOutlined /> 配置目录
+            </a-button>
           </a-space>
         </template>
         <template #bodyCell="{ column, text, record, index }">
@@ -221,36 +232,31 @@
         <releaseFile ref="releaseFile" v-if="releaseFileVisible" @commit="handleCommitTask"></releaseFile>
       </a-modal>
     </div>
-    <!-- 选择确认区域
-    <div style="padding-top: 50px" v-if="this.choose">
-      <div
-        :style="{
-          position: 'absolute',
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          borderTop: '1px solid #e9e9e9',
-          padding: '10px 16px',
-          background: '#fff',
-          textAlign: 'right',
-          zIndex: 1
-        }"
-      >
-        <a-space>
-          <a-button
-            @click="
-              () => {
-                this.$emit('cancel')
-              }
-            "
-          >
-            取消
-          </a-button>
-          <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
-        </a-space>
-      </div>
-    </div>
-    -->
+    />
+    <!-- 配置工作空间授权目录 -->
+    <a-modal
+      destroyOnClose
+      v-model:open="configDir"
+      :title="`配置授权目录`"
+      :footer="null"
+      width="50vw"
+      :maskClosable="false"
+      @cancel="
+        () => {
+          this.configDir = false
+        }
+      "
+    >
+      <whiteList
+        v-if="configDir"
+        @cancel="
+          () => {
+            this.configDir = false
+            this.loadData()
+          }
+        "
+      ></whiteList>
+    </a-modal>
   </div>
 </template>
 
@@ -269,10 +275,11 @@ import { staticFileStorageList, delFile, triggerUrl, fileEdit, staticScanner } f
 
 import releaseFile from '@/pages/file-manager/fileStorage/releaseFile'
 import { addReleaseTask } from '@/api/file-manager/release-task-log'
-
+import whiteList from '@/pages/dispatch/white-list'
 export default {
   components: {
-    releaseFile
+    releaseFile,
+    whiteList
   },
   props: {
     choose: {
@@ -369,7 +376,7 @@ export default {
       uploading: false,
       uploadVisible: false,
       editVisible: false,
-
+      configDir: false,
       triggerVisible: false,
       releaseFileVisible: false,
       tableSelections: [],

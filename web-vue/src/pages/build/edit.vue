@@ -579,6 +579,7 @@
                     :showTool="true"
                     :options="{ mode: 'shell' }"
                   >
+                    <template #tool_before> <a-tag>非必填</a-tag></template>
                   </code-editor>
                 </a-form-item-rest>
               </a-form-item>
@@ -608,6 +609,7 @@
                     :showTool="true"
                     :options="{ mode: 'shell' }"
                   >
+                    <template #tool_before> <a-tag>必填</a-tag></template>
                   </code-editor>
                 </a-form-item-rest>
               </a-form-item>
