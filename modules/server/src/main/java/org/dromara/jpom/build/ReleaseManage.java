@@ -468,7 +468,7 @@ public class ReleaseManage {
             }
             // 执行发布后命令
             if (StrUtil.isEmpty(this.buildExtraModule.getReleaseCommand())) {
-                logRecorder.systemWarning("没有需要执行的ssh命令");
+                logRecorder.systemWarning("没有需要执行发布后的ssh命令");
                 return;
             }
             //

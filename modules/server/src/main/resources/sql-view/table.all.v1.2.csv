@@ -15,7 +15,7 @@ STATIC_FILE_STORAGE,id,String,50,,true,true,id,静态文件管理
 STATIC_FILE_STORAGE,createTimeMillis,Long,,,false,false,数据创建时间,
 STATIC_FILE_STORAGE,modifyTimeMillis,Long,,,false,false,数据修改时间,
 STATIC_FILE_STORAGE,modifyUser,String,50,,false,false,修改人,
-STATIC_FILE_STORAGE,name,String,50,,true,false,集群名称,
+STATIC_FILE_STORAGE,name,String,50,,true,false,文件名,
 STATIC_FILE_STORAGE,description,String,255,,false,false,描述,
 STATIC_FILE_STORAGE,extName,String,50,,false,false,扩展名,
 STATIC_FILE_STORAGE,absolutePath,String,300,,false,false,文件路径,
