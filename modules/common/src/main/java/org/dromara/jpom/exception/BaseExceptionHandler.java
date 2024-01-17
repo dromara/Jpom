@@ -24,6 +24,8 @@ package org.dromara.jpom.exception;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.exceptions.ValidateException;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +79,8 @@ public abstract class BaseExceptionHandler {
     @ResponseBody
     public IJsonMessage<String> defNullPointerExceptionHandler(HttpServletRequest request, Exception e) {
         log.error("global NullPointerException: {}", request.getRequestURI(), e);
-        return new JsonMessage<>(500, "程序错误,空指针");
+        String jpomType = SystemUtil.get("JPOM_TYPE", StrUtil.EMPTY);
+        return new JsonMessage<>(500, jpomType + "程序错误,空指针");
     }
 
     /**

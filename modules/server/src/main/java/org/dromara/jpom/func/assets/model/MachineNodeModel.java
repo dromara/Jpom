@@ -124,7 +124,7 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
     /**
      * 节点连接状态
      * <p>
-     * 状态{0，无法连接，1 正常, 2 授权信息错误, 3 状态码错误}
+     * 状态{0，无法连接，1 正常, 2 授权信息错误, 3 状态码错误，4 资源监控异常}
      */
     private Integer status;
     /**
