@@ -98,6 +98,20 @@ public class DockerYmlDsl extends BaseJsonModel {
      * 环境变量
      */
     private Map<String, String> env;
+    /**
+     * <a href="https://docs.docker.com/engine/api/v1.43/#tag/Container/operation/ContainerCreate">https://docs.docker.com/engine/api/v1.43/#tag/Container/operation/ContainerCreate</a>
+     * <p>
+     * cpuCount
+     * <p>
+     * cpuPercent
+     * <p>
+     * memoryReservation
+     * <p>
+     * cpusetCpus 允许执行的CPU（例如，0-3, 0,1）。
+     * <p>
+     * cpuShares
+     */
+    private Map<String, String> hostConfig;
 
     /**
      * 验证信息是否正确
