@@ -22,14 +22,17 @@
  */
 package org.dromara.jpom.service.user;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.keepbx.jpom.event.ISystemTask;
+import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.user.TriggerTokenLogBean;
@@ -41,6 +44,8 @@ import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -52,11 +57,58 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> im
 
     private final UserService userService;
     private final List<ITriggerToken> triggerTokens;
+    private final Map<String, ITriggerToken> triggerTokenMap;
 
     public TriggerTokenLogServer(UserService userService,
                                  List<ITriggerToken> triggerTokens) {
         this.userService = userService;
         this.triggerTokens = triggerTokens;
+        triggerTokenMap = CollStreamUtil.toMap(triggerTokens, ITriggerToken::typeName, iTriggerToken -> iTriggerToken);
+    }
+
+    /**
+     * 获取类型
+     *
+     * @param type 类型名称
+     * @return 接口
+     */
+    public ITriggerToken getByType(String type) {
+        return MapUtil.get(triggerTokenMap, type, ITriggerToken.class);
+    }
+
+    /**
+     * 删除触发器
+     *
+     * @param id Id
+     */
+    public void delete(String id) {
+        TriggerTokenLogBean tokenLogBean = this.getByKey(id);
+        if (tokenLogBean == null) {
+            return;
+        }
+        ITriggerToken token = triggerTokens.stream()
+            .filter(iTriggerToken -> StrUtil.equals(iTriggerToken.typeName(), tokenLogBean.getType()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("没有对应的触发器类型：" + tokenLogBean.getType()));
+        String sql = "update " + tokenLogBean.getType() + " set triggerToken='' where id=?";
+        this.execute(sql, tokenLogBean.getDataId());
+        this.delByKey(id);
+    }
+
+    /**
+     * 获取所有类型
+     *
+     * @return list
+     */
+    public List<JSONObject> allType() {
+        return triggerTokens.stream()
+            .map(iTriggerToken -> {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("name", iTriggerToken.typeName());
+                jsonObject.put("desc", iTriggerToken.getDataDesc());
+                return jsonObject;
+            })
+            .collect(Collectors.toList());
     }
 
     /**
@@ -84,6 +136,9 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> im
             if (userModel != null && StrUtil.equals(type, tokenLogBean.getType())) {
                 boolean demoUser = userModel.isDemoUser();
                 Assert.state(!demoUser, "当前用户触发器不可用");
+                // 修改触发次数
+                String sql = "update " + this.getTableName() + " set triggerCount=ifnull(triggerCount,0)+1 where id=?";
+                int execute = this.execute(sql, tokenLogBean.getId());
                 return userModel;
             }
         }

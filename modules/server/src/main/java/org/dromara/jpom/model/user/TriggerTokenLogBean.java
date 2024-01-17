@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom.model.user;
 
+import cn.hutool.core.annotation.PropIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.db.TableName;
@@ -55,6 +56,11 @@ public class TriggerTokenLogBean extends BaseDbModel {
      * 关联数据ID
      */
     private String dataId;
+    /**
+     * 关联数据名称
+     */
+    @PropIgnore
+    private String dataName;
 
     /**
      * 用户ID
@@ -62,4 +68,8 @@ public class TriggerTokenLogBean extends BaseDbModel {
      * @see UserModel#getId()
      */
     private String userId;
+    /**
+     * 触发次数
+     */
+    private Integer triggerCount;
 }

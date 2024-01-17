@@ -149,18 +149,23 @@
         </a-timeline> -->
       </a-tab-pane>
       <a-tab-pane key="2" tab="运行中的定时任务" force-render>
-        <task-stat :taskList="taskList" @refresh="loadData"
-      /></a-tab-pane>
+        <task-stat :taskList="taskList" @refresh="loadData" />
+      </a-tab-pane>
+      <a-tab-pane key="3" tab="触发器管理">
+        <TriggerToken />
+      </a-tab-pane>
     </a-tabs>
   </div>
 </template>
 <script>
 import { getServerCache, clearCache, clearErrorWorkspace } from '@/api/system'
 import TaskStat from '@/pages/system/taskStat'
+import TriggerToken from '@/pages/system/trigger-token'
 import { renderSize, formatDuration } from '@/utils/const'
 export default {
   components: {
-    TaskStat
+    TaskStat,
+    TriggerToken
   },
   data() {
     return {

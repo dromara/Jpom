@@ -13,3 +13,4 @@ ADD,NODE_INFO,jpomScriptCount,Integer,,,jpom脚本数,
 ALTER,STATIC_FILE_STORAGE,parentAbsolutePath,String,300,,父级文件路径,false
 ALTER,STATIC_FILE_STORAGE,absolutePath,String,300,,文件路径,false
 ALTER,STATIC_FILE_STORAGE,name,String,100,,文件名,false
+ADD,TRIGGER_TOKEN_LOG,triggerCount,Integer,,,触发次数
