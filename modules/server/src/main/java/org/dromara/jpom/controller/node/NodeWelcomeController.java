@@ -73,8 +73,7 @@ public class NodeWelcomeController extends BaseServerController {
     public IJsonMessage<List<MachineNodeStatLogModel>> nodeMonitorJson(String machineId) {
         NodeModel node = tryGetNode();
         List<MachineNodeStatLogModel> list = this.getList(node, machineId);
-        Assert.notEmpty(list, "没有查询到任何数据");
-        return JsonMessage.success("ok", list);
+        return JsonMessage.success("", list);
     }
 
     private List<MachineNodeStatLogModel> getList(NodeModel node, String machineId) {

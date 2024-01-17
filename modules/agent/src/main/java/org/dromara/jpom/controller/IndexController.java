@@ -115,7 +115,8 @@ public class IndexController extends BaseAgentController {
 
             JSONObject systemInfo = org.dromara.jpom.util.OshiUtils.getSystemInfo();
             jsonObject.put("systemInfo", systemInfo);
-        } catch (Exception e) {
+            //jsonObject.put("oshiError", "测试异常");
+        } catch (Throwable e) {
             log.error("oshi 系统监控异常", e);
             jsonObject.put("oshiError", e.getMessage());
         }
@@ -182,7 +183,7 @@ public class IndexController extends BaseAgentController {
                 })
                 .collect(Collectors.toList());
             return JsonMessage.success("", processes);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("oshi 系统进程监控异常", e);
             throw new IllegalStateException("系统进程监控异常：" + e.getMessage());
         }
@@ -205,7 +206,7 @@ public class IndexController extends BaseAgentController {
         try {
             List<JSONObject> list = org.dromara.jpom.util.OshiUtils.fileStores();
             return JsonMessage.success("", list);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("oshi 文件系统资源监控异常", e);
             throw new IllegalStateException("文件系统监控异常：" + e.getMessage());
         }
@@ -216,7 +217,7 @@ public class IndexController extends BaseAgentController {
         try {
             List<JSONObject> list = org.dromara.jpom.util.OshiUtils.diskStores();
             return JsonMessage.success("", list);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("oshi 硬盘资源监控异常", e);
             throw new IllegalStateException("硬盘资源监控异常：" + e.getMessage());
         }
@@ -227,7 +228,7 @@ public class IndexController extends BaseAgentController {
         try {
             List<JSONObject> list = org.dromara.jpom.util.OshiUtils.networkInterfaces();
             return JsonMessage.success("", list);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("oshi 网卡资源监控异常", e);
             throw new IllegalStateException("网卡资源监控异常：" + e.getMessage());
         }

@@ -123,7 +123,7 @@ export function generateNodeTopChart(data) {
     smooth: true
   }
   const swapMemory = {
-    name: '交互内存占用',
+    name: '交换内存占用',
     type: 'line',
     data: [],
     showSymbol: false,
@@ -328,8 +328,9 @@ export function generateNodeNetworkTimeChart(data) {
  * @returns
  */
 export function drawChart(data, domId, parseFn, theme) {
-  const historyChartDom = document.getElementById(domId, domId)
+  const historyChartDom = document.getElementById(domId)
   if (!historyChartDom) {
+    // console.error('dom 节点不存在', domId)
     return
   }
   const option = parseFn(data)
