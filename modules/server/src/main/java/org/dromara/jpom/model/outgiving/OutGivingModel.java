@@ -115,6 +115,8 @@ public class OutGivingModel extends BaseGroupModel {
      * download: "远程下载",
      * "build-trigger": "构建触发",
      * "use-build": "构建产物",
+     * "file-storage":"文件中心"
+     * "static-file-storage“ 静态文件
      */
     private String mode;
     private String modeData;

@@ -30,12 +30,12 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.log.ILogRecorder;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.exception.LogRecorderCloseException;
 import org.springframework.util.Assert;
 
-import java.io.File;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.charset.Charset;
 
 /**
@@ -45,18 +45,22 @@ import java.nio.charset.Charset;
  * @since 2022/1/26
  */
 @Slf4j
-public class LogRecorder implements ILogRecorder, AutoCloseable {
+@Getter
+public class LogRecorder extends OutputStream implements ILogRecorder, AutoCloseable {
 
     private File file;
     private PrintWriter writer;
+    private final Charset charset;
 
-    public LogRecorder(File file, Charset charset) {
+    private LogRecorder(File file, Charset charset) {
         if (file == null) {
             this.writer = null;
             this.file = null;
+            this.charset = charset;
             return;
         }
         this.file = file;
+        this.charset = charset;
         this.writer = FileWriter.create(file, charset).getPrintWriter(true);
     }
 
@@ -184,5 +188,13 @@ public class LogRecorder implements ILogRecorder, AutoCloseable {
     public long size() {
         Assert.notNull(writer, "日志记录器未启用");
         return FileUtil.size(this.file);
+    }
+
+    @Override
+    public void write(int b) throws IOException {
+        if (writer == null) {
+            throw new LogRecorderCloseException();
+        }
+        writer.write((byte) b);
     }
 }

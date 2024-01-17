@@ -394,6 +394,14 @@ public class CommandUtil {
         return false;
     }
 
+    public static List<String> build(File scriptFile, String args) {
+        List<String> command = StrUtil.splitTrim(args, StrUtil.SPACE);
+        String script = FileUtil.getAbsolutePath(scriptFile);
+        command.add(0, script);
+        CommandUtil.paddingPrefix(command);
+        return command;
+    }
+
     /**
      * 执行脚本
      *
@@ -409,10 +417,7 @@ public class CommandUtil {
     public static int execWaitFor(File scriptFile, File baseDir, Map<String, String> env, String args, BiConsumer<String, Process> consumer) throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder();
         //
-        List<String> command = StrUtil.splitTrim(args, StrUtil.SPACE);
-        String script = FileUtil.getAbsolutePath(scriptFile);
-        command.add(0, script);
-        CommandUtil.paddingPrefix(command);
+        List<String> command = build(scriptFile, args);
         log.debug(CollUtil.join(command, StrUtil.SPACE));
         processBuilder.redirectErrorStream(true);
         processBuilder.command(command);

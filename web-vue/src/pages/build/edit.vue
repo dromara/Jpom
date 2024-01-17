@@ -380,6 +380,12 @@
                 :auto-size="{ minRows: 3, maxRows: 5 }"
               />
             </a-form-item>
+            <a-form-item label="执行方式" v-else name="commandExecMode">
+              <a-radio-group v-model:value="tempExtraData.commandExecMode" button-style="solid">
+                <a-radio-button value="default">默认</a-radio-button>
+                <a-radio-button value="apache_exec">多线程</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
           </div>
 
           <div v-show="stepsCurrent === 3">
