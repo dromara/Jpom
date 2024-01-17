@@ -50,7 +50,7 @@ public class ApacheExecUtil {
      */
     public static int exec(String execId, File scriptFile, File baseDir, Map<String, String> env, String args, LogRecorder logRecorder) throws IOException {
         List<String> build = CommandUtil.build(scriptFile, args);
-        String join = String.join(StrUtil.SLASH, build);
+        String join = String.join(StrUtil.SPACE, build);
         CommandLine commandLine = CommandLine.parse(join);
         log.debug(join);
         Charset charset;
