@@ -22,6 +22,8 @@
  */
 package org.dromara.jpom.service;
 
+import cn.keepbx.jpom.model.BaseIdModel;
+
 /**
  * 带有触发器 token 相关实现服务
  *
@@ -38,6 +40,13 @@ public interface ITriggerToken {
     String typeName();
 
     /**
+     * 数据描述
+     *
+     * @return 描述
+     */
+    String getDataDesc();
+
+    /**
      * 判断是否存在
      *
      * @param dataId 数据id
@@ -45,4 +54,5 @@ public interface ITriggerToken {
      */
     boolean exists(String dataId);
 
+    BaseIdModel getByKey(String keyValue);
 }

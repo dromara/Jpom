@@ -83,6 +83,12 @@ public abstract class BaseDbCommonService<T> {
         this.tableName = annotation.value();
     }
 
+    public String getDataDesc() {
+        TableName annotation = tClass.getAnnotation(TableName.class);
+        Assert.notNull(annotation, "请配置 table Name");
+        return annotation.name();
+    }
+
     protected DataSource getDataSource() {
         DSFactory dsFactory = StorageServiceFactory.get().getDsFactory();
         return dsFactory.getDataSource();
