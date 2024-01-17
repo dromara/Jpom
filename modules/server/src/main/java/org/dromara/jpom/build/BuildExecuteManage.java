@@ -529,11 +529,14 @@ public class BuildExecuteManage implements Runnable {
         Opt.ofBlankAble(attachEnv).ifPresent(s -> {
             UrlQuery of = UrlQuery.of(attachEnv, CharsetUtil.CHARSET_UTF_8);
             Map<CharSequence, CharSequence> queryMap = of.getQueryMap();
-            logRecorder.system("读取附件变量：{} {}", attachEnv, CollUtil.size(queryMap));
+            logRecorder.system("读取附加变量：{} {}", attachEnv, CollUtil.size(queryMap));
             //
             Optional.ofNullable(queryMap).ifPresent(map -> {
                 for (Map.Entry<CharSequence, CharSequence> entry : map.entrySet()) {
-                    taskData.environmentMapBuilder.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+                    CharSequence value = entry.getValue();
+                    if (value != null) {
+                        taskData.environmentMapBuilder.put(String.valueOf(entry.getKey()), String.valueOf(value));
+                    }
                 }
             });
             Map<String, String> envFileMap = FileUtils.readEnvFile(this.gitFile, s);
