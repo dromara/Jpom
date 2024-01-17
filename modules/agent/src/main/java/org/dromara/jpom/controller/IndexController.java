@@ -42,7 +42,6 @@ import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.manage.ProjectInfoService;
 import org.dromara.jpom.service.script.NodeScriptServer;
 import org.dromara.jpom.util.JvmUtil;
-import org.dromara.jpom.util.OshiUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -108,17 +107,22 @@ public class IndexController extends BaseAgentController {
     @PostMapping(value = "get-stat-info", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> getDirectTop() {
         JSONObject jsonObject = new JSONObject();
-        JSONObject topInfo = OshiUtils.getSimpleInfo();
-        jsonObject.put("simpleStatus", topInfo);
-        // 系统固定休眠时间
-        jsonObject.put("systemSleep", OshiUtils.NET_STAT_SLEEP + OshiUtils.CPU_STAT_SLEEP);
+        try {
+            JSONObject topInfo = org.dromara.jpom.util.OshiUtils.getSimpleInfo();
+            jsonObject.put("simpleStatus", topInfo);
+            // 系统固定休眠时间
+            jsonObject.put("systemSleep", org.dromara.jpom.util.OshiUtils.NET_STAT_SLEEP + org.dromara.jpom.util.OshiUtils.CPU_STAT_SLEEP);
 
-        JSONObject systemInfo = OshiUtils.getSystemInfo();
-        jsonObject.put("systemInfo", systemInfo);
+            JSONObject systemInfo = org.dromara.jpom.util.OshiUtils.getSystemInfo();
+            jsonObject.put("systemInfo", systemInfo);
+        } catch (Exception e) {
+            log.error("oshi 系统监控异常", e);
+            jsonObject.put("oshiError", e.getMessage());
+        }
 
         JSONObject jpomInfo = this.getJpomInfo();
         jsonObject.put("jpomInfo", jpomInfo);
-        return JsonMessage.success("ok", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
     private JSONObject getJpomInfo() {
@@ -166,17 +170,22 @@ public class IndexController extends BaseAgentController {
 
     @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<List<JSONObject>> getProcessList(String processName, Integer count) {
-        processName = StrUtil.emptyToDefault(processName, "java");
-        List<JSONObject> processes = OshiUtils.getProcesses(processName, Convert.toInt(count, 20));
-        processes = processes.stream()
-            .peek(jsonObject -> {
-                int processId = jsonObject.getIntValue("processId");
-                String port = projectCommander.getMainPort(processId);
-                jsonObject.put("port", port);
-                //
-            })
-            .collect(Collectors.toList());
-        return JsonMessage.success("ok", processes);
+        try {
+            processName = StrUtil.emptyToDefault(processName, "java");
+            List<JSONObject> processes = org.dromara.jpom.util.OshiUtils.getProcesses(processName, Convert.toInt(count, 20));
+            processes = processes.stream()
+                .peek(jsonObject -> {
+                    int processId = jsonObject.getIntValue("processId");
+                    String port = projectCommander.getMainPort(processId);
+                    jsonObject.put("port", port);
+                    //
+                })
+                .collect(Collectors.toList());
+            return JsonMessage.success("", processes);
+        } catch (Exception e) {
+            log.error("oshi 系统进程监控异常", e);
+            throw new IllegalStateException("系统进程监控异常：" + e.getMessage());
+        }
     }
 
 
@@ -193,19 +202,34 @@ public class IndexController extends BaseAgentController {
 
     @PostMapping(value = "disk-info", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<List<JSONObject>> diskInfo() {
-        List<JSONObject> list = OshiUtils.fileStores();
-        return JsonMessage.success("", list);
+        try {
+            List<JSONObject> list = org.dromara.jpom.util.OshiUtils.fileStores();
+            return JsonMessage.success("", list);
+        } catch (Exception e) {
+            log.error("oshi 文件系统资源监控异常", e);
+            throw new IllegalStateException("文件系统监控异常：" + e.getMessage());
+        }
     }
 
     @PostMapping(value = "hw-disk--info", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<List<JSONObject>> hwDiskInfo() {
-        List<JSONObject> list = OshiUtils.diskStores();
-        return JsonMessage.success("", list);
+        try {
+            List<JSONObject> list = org.dromara.jpom.util.OshiUtils.diskStores();
+            return JsonMessage.success("", list);
+        } catch (Exception e) {
+            log.error("oshi 硬盘资源监控异常", e);
+            throw new IllegalStateException("硬盘资源监控异常：" + e.getMessage());
+        }
     }
 
     @PostMapping(value = "network-interfaces", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<List<JSONObject>> networkInterfaces() {
-        List<JSONObject> list = OshiUtils.networkInterfaces();
-        return JsonMessage.success("", list);
+        try {
+            List<JSONObject> list = org.dromara.jpom.util.OshiUtils.networkInterfaces();
+            return JsonMessage.success("", list);
+        } catch (Exception e) {
+            log.error("oshi 网卡资源监控异常", e);
+            throw new IllegalStateException("网卡资源监控异常：" + e.getMessage());
+        }
     }
 }

@@ -274,8 +274,14 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     private void saveStatInfo(MachineNodeModel machineNode, JSONObject data) {
         MachineNodeModel machineNodeModel = new MachineNodeModel();
         machineNodeModel.setId(machineNode.getId());
-        machineNodeModel.setStatus(1);
-        machineNodeModel.setStatusMsg("ok");
+        String oshiError = data.getString("oshiError");
+        if (StrUtil.isEmpty(oshiError)) {
+            machineNodeModel.setStatus(1);
+            machineNodeModel.setStatusMsg("ok");
+        } else {
+            machineNodeModel.setStatus(4);
+            machineNodeModel.setStatusMsg(oshiError);
+        }
         int networkDelay = data.getIntValue("networkDelay");
         int systemSleep = data.getIntValue("systemSleep");
         // 减去系统固定休眠时间
