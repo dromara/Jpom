@@ -2,6 +2,7 @@ package org.dromara.jpom.util;
 
 import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.*;
 import org.apache.commons.exec.environment.EnvironmentUtils;
@@ -10,6 +11,7 @@ import org.dromara.jpom.system.ExtConfigBean;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,9 +49,10 @@ public class ApacheExecUtil {
      * @throws IOException io
      */
     public static int exec(String execId, File scriptFile, File baseDir, Map<String, String> env, String args, LogRecorder logRecorder) throws IOException {
-        CommandLine commandLine = new CommandLine(scriptFile);
-        commandLine.addArgument(args);
-        log.debug(commandLine.toString());
+        List<String> build = CommandUtil.build(scriptFile, args);
+        String join = String.join(StrUtil.SLASH, build);
+        CommandLine commandLine = CommandLine.parse(join);
+        log.debug(join);
         Charset charset;
         try {
             charset = ExtConfigBean.getConsoleLogCharset();
