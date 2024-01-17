@@ -53,7 +53,7 @@ const pageLoadingTimeout = ref()
 const useAppStore = appStore()
 useAppStore.$subscribe((mutation, state) => {
   const events: any = mutation.events
-  if (events.key === 'loading') {
+  if (events && events.key === 'loading') {
     if (events.newValue === 2) {
       clearTimeout(pageLoadingTimeout.value)
       globalLoading(false)
