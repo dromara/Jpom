@@ -27,11 +27,10 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.system.SystemUtil;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -39,11 +38,13 @@ import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.*;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,6 +55,7 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2022/2/7
  */
+@Slf4j
 public class DockerBuild implements AutoCloseable {
 
     private final Map<String, Object> parameter;
@@ -163,10 +165,11 @@ public class DockerBuild implements AutoCloseable {
         String workingDir = (String) parameter.get("workingDir");
         String dockerName = (String) parameter.get("dockerName");
         List<String> binds = (List<String>) parameter.get("binds");
-
+        Map<String, String> hostConfigMap = (Map<String, String>) parameter.get("hostConfig");
         Map<String, String> env = (Map<String, String>) parameter.get("env");
         CreateContainerCmd containerCmd = dockerClient.createContainerCmd(image);
         containerCmd.withName(dockerName).withWorkingDir(workingDir);
+
         //
         List<Bind> bindList = new ArrayList<>();
         if (CollUtil.isNotEmpty(binds)) {
@@ -176,7 +179,38 @@ public class DockerBuild implements AutoCloseable {
         }
 
         HostConfig hostConfig = HostConfig.newHostConfig()
-            .withMounts(mounts).withBinds(bindList);
+            .withMounts(mounts)
+            .withBinds(bindList);
+        if (hostConfigMap != null) {
+            Set<Map.Entry<String, String>> entrySet = hostConfigMap.entrySet();
+            for (Map.Entry<String, String> entry : entrySet) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                Field[] fields = ReflectUtil.getFields(HostConfig.class);
+                Field field = ArrayUtil.firstMatch(field1 -> {
+                    boolean equals = key.equals(ReflectUtil.getFieldName(field1));
+                    if (equals) {
+                        return true;
+                    }
+                    JsonProperty jsonProperty = field1.getAnnotation(JsonProperty.class);
+                    if (jsonProperty != null) {
+                        return jsonProperty.value().equals(key);
+                    }
+                    return false;
+                }, fields);
+                if (field != null) {
+                    Class<?> type = field.getType();
+                    Object typeValue = Convert.convert(type, value);
+                    if (typeValue != null) {
+                        ReflectUtil.setFieldValue(hostConfig, field, typeValue);
+                    } else {
+                        log.warn("容器构建 hostConfig 参数 {} 转换失败：{}", key, value);
+                    }
+                } else {
+                    log.warn("容器构建 hostConfig 字段【{}】不存在", key);
+                }
+            }
+        }
         // 一定不能使用 auto remove 否则无法下载容器构建产物
         // hostConfig.withAutoRemove(true);
         containerCmd.withHostConfig(hostConfig);

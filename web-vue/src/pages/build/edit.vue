@@ -1573,7 +1573,10 @@ export default {
         '#  - /Users/user/.m2/settings.xml:/root/.m2/:false\n' +
         '# 给容器新增环境变量\n' +
         'env:\n' +
-        '  NODE_OPTIONS: --max-old-space-size=900',
+        '  NODE_OPTIONS: --max-old-space-size=900\n' +
+        '#配置说明：https://docs.docker.com/engine/api/v1.43/#tag/Container/operation/ContainerCreate\n' +
+        '#hostConfig:\n' +
+        '#  CpuShares: 1',
       loading: false,
       dockerListVisible: 0,
       dockerAllTagList: [],

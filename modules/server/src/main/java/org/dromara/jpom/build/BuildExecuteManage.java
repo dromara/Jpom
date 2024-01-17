@@ -561,6 +561,7 @@ public class BuildExecuteManage implements Runnable {
 
         map.put("runsOn", dockerYmlDsl.getRunsOn());
         map.put("workingDir", workingDir);
+        map.put("hostConfig", dockerYmlDsl.getHostConfig());
         map.put("tempDir", JpomApplication.getInstance().getTempPath());
         String buildInfoModelId = buildInfoModel.getId();
         taskData.buildContainerId = "jpom-build-" + buildInfoModelId;
