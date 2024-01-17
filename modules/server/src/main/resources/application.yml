@@ -122,6 +122,7 @@ jpom:
 server:
   #运行端口号
   port: 2122
+#  address: 127.0.0.1
   servlet:
     session:
       cookie:

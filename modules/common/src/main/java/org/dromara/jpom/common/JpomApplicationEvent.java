@@ -28,6 +28,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
@@ -250,7 +251,8 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
     private void success() {
         Type type = JpomManifest.getInstance().getType();
         int port = configBean.getPort();
-        String localhostStr = NetUtil.getLocalhostStr();
+        String address = configBean.getAddress();
+        String localhostStr = Opt.ofBlankAble(address).orElseGet(NetUtil::getLocalhostStr);
         String url = StrUtil.format("http://{}:{}", localhostStr, port);
         if (type == Type.Server) {
             log.info("{} Successfully started,Can use happily => {} 【The current address is for reference only】", type, url);

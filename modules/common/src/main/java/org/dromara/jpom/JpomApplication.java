@@ -33,6 +33,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.JpomAppType;
 import cn.keepbx.jpom.Type;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.JpomManifest;
@@ -62,21 +63,21 @@ import java.util.function.Function;
  */
 @Slf4j
 @Configuration
+@Getter
 public class JpomApplication implements DisposableBean, InitializingBean {
     /**
      * 程序端口
      */
     @Value("${server.port}")
     private int port;
+
+    @Value("${server.address:}")
+    private String address;
     /**
      * 数据目录缓存大小
      */
     private long dataSizeCache;
 
-
-    public int getPort() {
-        return port;
-    }
 
     private static volatile JpomApplication jpomApplication;
 
@@ -172,10 +173,6 @@ public class JpomApplication implements DisposableBean, InitializingBean {
      */
     public File getScriptPath() {
         return FileUtil.file(this.getDataPath(), Const.SCRIPT_DIRECTORY);
-    }
-
-    public long getDataSizeCache() {
-        return dataSizeCache;
     }
 
     /**
