@@ -314,7 +314,7 @@ public class OutGivingProjectController extends BaseServerController {
         File file = FileUtil.file(serverConfig.getUserTempPath(), ServerConst.OUTGIVING_FILE, id);
         FileUtil.mkdir(file);
         File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
-        this.startTask(outGivingModel, downloadFile, autoUnzip, stripComponents, selectProject);
+        this.startTask(outGivingModel, downloadFile, autoUnzip, stripComponents, selectProject, true);
         return JsonMessage.success("下载成功,开始分发!");
     }
 
@@ -404,7 +404,7 @@ public class OutGivingProjectController extends BaseServerController {
         outGivingServer.updateById(outGivingModel);
         File storageSavePath = serverConfig.fileStorageSavePath();
         File file = FileUtil.file(storageSavePath, storageModel.getPath());
-        this.startTask(outGivingModel, file, autoUnzip, stripComponents, selectProject);
+        this.startTask(outGivingModel, file, autoUnzip, stripComponents, selectProject, false);
         return JsonMessage.success("开始分发!");
     }
 
@@ -438,7 +438,7 @@ public class OutGivingProjectController extends BaseServerController {
         outGivingServer.updateById(outGivingModel);
 
         File file = FileUtil.file(storageModel.getAbsolutePath());
-        this.startTask(outGivingModel, file, autoUnzip, stripComponents, selectProject);
+        this.startTask(outGivingModel, file, autoUnzip, stripComponents, selectProject, false);
         return JsonMessage.success("开始分发!");
     }
 
@@ -453,7 +453,8 @@ public class OutGivingProjectController extends BaseServerController {
      */
     private void startTask(OutGivingModel outGivingModel, File file, String autoUnzip,
                            String stripComponents,
-                           String selectProject) {
+                           String selectProject,
+                           boolean deleteFile) {
         Assert.state(FileUtil.isFile(file), "当前文件丢失不能执行发布任务");
         //
         boolean unzip = BooleanUtil.toBoolean(autoUnzip);
@@ -468,6 +469,8 @@ public class OutGivingProjectController extends BaseServerController {
             .unzip(unzip)
             .mode(outGivingModel.getMode())
             .modeData(outGivingModel.getModeData())
+            // 是否删除
+            .doneDeleteFile(deleteFile)
             // 可以不再设置-会查询最新的
             //            .projectSecondaryDirectory(secondaryDirectory)
             .stripComponents(stripComponentsValue);
