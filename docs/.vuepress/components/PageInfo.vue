@@ -2,6 +2,18 @@
 
 <script>
 import fetch from "../webSiteInfo/busuanzi";
+const busuanziKey = [
+  {
+    className: "page-view",
+    id: "busuanzi_value_page_pv",
+    title: "本文浏览量",
+  },
+  {
+    className: "page-site-view",
+    id: "busuanzi_value_site_pv",
+    title: "本站访问量",
+  },
+];
 export default {
   mounted() {
     // 首页不初始页面信息
@@ -62,31 +74,38 @@ export default {
       // 如果只需要第一次获取数据（可能获取失败），可注释掉 setTimeout 内容，此内容是第一次获取失败后，重新获取访问量
       // 可能会导致访问量再次 + 1 原因：取决于 setTimeout 的时间（需求调节），setTimeout 太快导致第一个获取的数据没返回，就第二次获取，导致结果返回 + 2 的数据
       setTimeout(() => {
-        let pageView = document.querySelector(".view-data");
-        if (pageView && pageView.innerText == "") {
-          let interval = setInterval(() => {
-            // 再次判断原因：防止进入 setInterval 的瞬间，访问量获取成功
-            if (pageView && pageView.innerText == "") {
-              i += iterationTime;
-              if (i > iterationTime * 5) {
-                pageView.innerText = defaultCouter;
-                clearInterval(interval); // 5 次后无法获取，则取消获取
-              }
-              if (pageView.innerText == "") {
-                // 手动获取访问量
-                fetch();
+        let pageViewAll = document.querySelectorAll(".view-data");
+        if (pageViewAll) {
+          let pageView = pageViewAll[0];
+          // console.log(pageView);
+          if (pageView && pageView.innerText == "") {
+            let interval = setInterval(() => {
+              // 再次判断原因：防止进入 setInterval 的瞬间，访问量获取成功
+              if (pageView && pageView.innerText == "") {
+                i += iterationTime;
+                if (i > iterationTime * 5) {
+                  pageViewAll.forEach((item) => {
+                    item.innerText = defaultCouter;
+                  });
+
+                  clearInterval(interval); // 5 次后无法获取，则取消获取
+                }
+                if (pageView.innerText == "") {
+                  // 手动获取访问量
+                  fetch();
+                } else {
+                  clearInterval(interval);
+                }
               } else {
                 clearInterval(interval);
               }
-            } else {
+            }, iterationTime);
+            // 绑定 beforeDestroy 生命钩子，清除定时器
+            this.$once("hook:beforeDestroy", () => {
               clearInterval(interval);
-            }
-          }, iterationTime);
-          // 绑定 beforeDestroy 生命钩子，清除定时器
-          this.$once("hook:beforeDestroy", () => {
-            clearInterval(interval);
-            interval = null;
-          });
+              interval = null;
+            });
+          }
         }
       }, iterationTime);
     },
@@ -94,23 +113,28 @@ export default {
      * 添加浏览量元素
      */
     addPageView() {
-      let pageView = document.querySelector(".page-view");
-      if (pageView) {
-        pageView.innerHTML =
-          '<a style="color: #888; margin-left: 3px" href="javascript:;" id="busuanzi_value_page_pv" class="view-data"><i title="正在获取..." class="loading iconfont icon-loading"></i></a>';
-      } else {
-        // 创建访问量的元素
-        let template = document.createElement("div");
-        template.title = "浏览量";
-        template.className = "page-view iconfont icon-view";
-        template.style.float = "left";
-        template.style.marginLeft = "20px";
-        template.style.fontSize = "0.8rem";
-        template.innerHTML =
-          '<a style="color: #888; margin-left: 3px" href="javascript:;" id="busuanzi_value_page_pv" class="view-data"><i title="正在获取..." class="loading iconfont icon-loading"></i></a>';
-        // 添加 loading 效果
-        let style = document.createElement("style");
-        style.innerHTML = `@keyframes turn {
+      busuanziKey.forEach((item) => {
+        let pageView = document.querySelector("." + item.className);
+        if (pageView) {
+          pageView.innerHTML =
+            '<a style="color: #888; margin-left: 3px" href="javascript:;" id="' +
+            item.id +
+            '" class="view-data"><i title="正在获取..." class="loading iconfont icon-loading"></i></a>';
+        } else {
+          // 创建访问量的元素
+          let template = document.createElement("div");
+          template.title = item.title;
+          template.className = item.className + " iconfont icon-view";
+          template.style.float = "left";
+          template.style.marginLeft = "20px";
+          template.style.fontSize = "0.8rem";
+          template.innerHTML =
+            '<a style="color: #888; margin-left: 3px" href="javascript:;" id="' +
+            item.id +
+            '" class="view-data"><i title="正在获取..." class="loading iconfont icon-loading"></i></a>';
+          // 添加 loading 效果
+          let style = document.createElement("style");
+          style.innerHTML = `@keyframes turn {
         0% {
           transform: rotate(0deg);
         }
@@ -123,9 +147,10 @@ export default {
         animation: turn 1s linear infinite;
         -webkit-animation: turn 1s linear infinite;
       }`;
-        document.head.appendChild(style);
-        this.mountedView(template);
-      }
+          document.head.appendChild(style);
+          this.mountedView(template);
+        }
+      });
     },
     /**
      * 添加当前文章页的字数元素
@@ -218,7 +243,10 @@ export default {
   },
   // 防止重写编译时，导致页面信息重复出现问题
   beforeMount() {
-    this.removeElement(".page-view");
+    busuanziKey.forEach((item) => {
+      this.removeElement("." + item.className);
+    });
+
     this.removeElement(".book-words");
     this.removeElement(".reading-time");
   },
