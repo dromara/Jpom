@@ -44,7 +44,14 @@
         </a-tooltip>
       </a-space>
     </div>
-    <div id="historyChart" class="historyChart">loading...</div>
+    <div v-if="nodeMonitorLoadStatus == 1" id="historyChart" class="historyChart">loading...</div>
+    <a-empty
+      v-else-if="nodeMonitorLoadStatus == -1"
+      :image="Empty.PRESENTED_IMAGE_SIMPLE"
+      description="未查询到任何数据"
+    >
+    </a-empty>
+    <a-skeleton v-else />
   </div>
 </template>
 
@@ -54,6 +61,7 @@ import { drawChart, generateNodeTopChart, generateNodeNetworkTimeChart, generate
 import dayjs from 'dayjs'
 import { useGuideStore } from '@/stores/guide'
 import { mapState } from 'pinia'
+import { Empty } from 'ant-design-vue'
 export default {
   components: {},
   props: {
@@ -69,9 +77,11 @@ export default {
   },
   data() {
     return {
+      Empty,
       timeRange: null,
       historyData: [],
-      historyChart: null
+      historyChart: null,
+      nodeMonitorLoadStatus: 0
     }
   },
   computed: {
@@ -95,17 +105,34 @@ export default {
         time: this.timeRange
       }
       // 加载数据
-      nodeMonitorData(params).then((res) => {
-        if (res.code === 200) {
-          if (this.type === 'networkDelay') {
-            this.historyChart = drawChart(res.data, 'historyChart', generateNodeNetworkTimeChart, this.getThemeView())
-          } else if (this.type === 'network-stat') {
-            this.historyChart = drawChart(res.data, 'historyChart', generateNodeNetChart, this.getThemeView())
-          } else {
-            this.historyChart = drawChart(res.data, 'historyChart', generateNodeTopChart, this.getThemeView())
+      nodeMonitorData(params)
+        .then((res) => {
+          if (res.code === 200) {
+            if (res.data && res.data.length) {
+              this.nodeMonitorLoadStatus = 1
+              this.$nextTick(() => {
+                if (this.type === 'networkDelay') {
+                  this.historyChart = drawChart(
+                    res.data,
+                    'historyChart',
+                    generateNodeNetworkTimeChart,
+                    this.getThemeView()
+                  )
+                } else if (this.type === 'network-stat') {
+                  this.historyChart = drawChart(res.data, 'historyChart', generateNodeNetChart, this.getThemeView())
+                } else {
+                  this.historyChart = drawChart(res.data, 'historyChart', generateNodeTopChart, this.getThemeView())
+                }
+              })
+
+              return
+            }
           }
-        }
-      })
+          this.nodeMonitorLoadStatus = -1
+        })
+        .catch(() => {
+          this.nodeMonitorLoadStatus = -1
+        })
     },
     resize() {
       this.historyChart?.resize()

@@ -70,7 +70,7 @@
               <a-descriptions-item label="虚拟内存"
                 >{{ renderSize(machineInfo && machineInfo.osVirtualMax) }}
               </a-descriptions-item>
-              <a-descriptions-item label="交互内存"
+              <a-descriptions-item label="交换内存"
                 >{{ renderSize(machineInfo && machineInfo.osSwapTotal) }}
               </a-descriptions-item>
               <a-descriptions-item label="硬盘"
@@ -138,10 +138,10 @@
         </a-card>
       </a-tab-pane>
       <a-tab-pane key="stat" tab="统计趋势">
-        <a-space direction="vertical" style="width: 100%">
+        <a-space v-if="nodeMonitorLoadStatus === 1" direction="vertical" style="width: 100%">
           <a-card size="small" title="基础信息">
             <template v-slot:extra>
-              <a-button size="small" v-if="historyChart" type="primary" @click="handleHistory">
+              <a-button size="small" v-if="historyChart" type="primary" @click="handleHistory('')">
                 <AreaChartOutlined />历史监控图表
               </a-button>
             </template>
@@ -167,6 +167,13 @@
             <div id="network-delay-chart" class="chart">loading...</div>
           </a-card>
         </a-space>
+        <a-empty
+          v-else-if="nodeMonitorLoadStatus === -1"
+          :image="Empty.PRESENTED_IMAGE_SIMPLE"
+          description="当前机器还未监控到任何数据"
+        >
+        </a-empty>
+        <a-skeleton v-else />
       </a-tab-pane>
       <a-tab-pane key="process" tab="系统进程">
         <a-card size="small">
@@ -454,6 +461,7 @@ import {
   generateNodeNetworkTimeChart,
   machineNetworkInterfaces
 } from '@/api/node-stat'
+import { Empty } from 'ant-design-vue'
 import { statusMap } from '@/api/system/assets-machine'
 import { useGuideStore } from '@/stores/guide'
 import { mapState } from 'pinia'
@@ -481,6 +489,7 @@ export default {
   },
   data() {
     return {
+      Empty,
       loading: false,
       diskLoading: false,
       statusMap,
@@ -733,7 +742,8 @@ export default {
       networkDelayChart: null,
       countdownTime: Date.now(),
       machineInfo: null,
-      networkInterfaces: []
+      networkInterfaces: [],
+      nodeMonitorLoadStatus: 0
     }
   },
   mounted() {
@@ -821,20 +831,35 @@ export default {
     resize() {
       this.historyChart?.resize()
       this.netHistoryChart?.resize()
+      this.networkDelayChart?.resize()
     },
     // 请求 top 命令绘制图表
     loadNodeTop() {
-      nodeMonitorData({ ...this.idInfo }, false).then((res) => {
-        if (res.code === 200) {
-          this.historyChart = drawChart(res.data, 'top-chart', generateNodeTopChart, this.getThemeView())
-          this.netHistoryChart = drawChart(res.data, 'net-chart', generateNodeNetChart, this.getThemeView())
-          this.networkDelayChart = drawChart(
-            res.data,
-            'network-delay-chart',
-            generateNodeNetworkTimeChart,
-            this.getThemeView()
-          )
-        }
+      nodeMonitorData({ ...this.idInfo }, false)
+        .then((res) => {
+          if (res.code === 200) {
+            if (res.data && res.data.length) {
+              this.nodeMonitorLoadStatus = 1
+              this.handleChartData(res.data)
+              return
+            }
+          }
+          this.nodeMonitorLoadStatus = -1
+        })
+        .catch(() => {
+          this.nodeMonitorLoadStatus = -1
+        })
+    },
+    handleChartData(data) {
+      this.$nextTick(() => {
+        this.historyChart = drawChart(data, 'top-chart', generateNodeTopChart, this.getThemeView())
+        this.netHistoryChart = drawChart(data, 'net-chart', generateNodeNetChart, this.getThemeView())
+        this.networkDelayChart = drawChart(
+          data,
+          'network-delay-chart',
+          generateNodeNetworkTimeChart,
+          this.getThemeView()
+        )
       })
     },
     // 加载节点进程列表

@@ -346,7 +346,9 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             machineNodeModel.setOsFileStoreTotal(jsonObject.getLong("osFileStoreTotal"));
         });
         this.updateById(machineNodeModel);
-        machineNodeStatLogServer.insert(machineNodeStatLogModel);
+        if (machineNodeStatLogModel.getMonitorTime() != null) {
+            machineNodeStatLogServer.insert(machineNodeStatLogModel);
+        }
         //
         Optional.ofNullable(jpomInfo).ifPresent(jsonObject -> {
             JSONObject workspaceStat = jsonObject.getJSONObject("workspaceStat");
