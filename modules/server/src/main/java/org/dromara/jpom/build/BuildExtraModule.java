@@ -199,6 +199,10 @@ public class BuildExtraModule extends BaseModel {
      * 文件中心保留天数
      */
     private Integer fileStorageKeepDay;
+    /**
+     * 本地构建执行命令方式
+     */
+    private String commandExecMode;
 
     public boolean strictlyEnforce() {
         return strictlyEnforce != null && strictlyEnforce;

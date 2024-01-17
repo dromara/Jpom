@@ -65,10 +65,7 @@ import org.dromara.jpom.service.script.ScriptExecuteLogServer;
 import org.dromara.jpom.service.script.ScriptServer;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.system.extconf.BuildExtConfig;
-import org.dromara.jpom.util.AntPathUtil;
-import org.dromara.jpom.util.CommandUtil;
-import org.dromara.jpom.util.FileUtils;
-import org.dromara.jpom.util.LogRecorder;
+import org.dromara.jpom.util.*;
 import org.dromara.jpom.webhook.DefaultWebhookPluginImpl;
 import org.springframework.util.Assert;
 
@@ -201,6 +198,7 @@ public class BuildExecuteManage implements Runnable {
      */
     private void cancelTask(String desc) {
         CommandUtil.kill(process);
+        ApacheExecUtil.kill(this.logId);
         Integer buildMode = taskData.buildInfoModel.getBuildMode();
         if (buildMode != null && buildMode == 1) {
             // 容器构建 删除容器
@@ -637,10 +635,16 @@ public class BuildExecuteManage implements Runnable {
             int waitFor = JpomApplication.getInstance()
                 .execScript(s1 + script, file -> {
                     try {
-                        return CommandUtil.execWaitFor(file, this.gitFile, environment, StrUtil.EMPTY, (s, process) -> {
-                            BuildExecuteManage.this.process = process;
-                            logRecorder.info(s);
-                        });
+                        String execMode = this.buildExtraModule.getCommandExecMode();
+                        // ApacheExecUtil.exec
+                        if (StrUtil.equals(execMode, "apache_exec")) {
+                            return ApacheExecUtil.exec(this.logId, file, this.gitFile, environment, StrUtil.EMPTY, logRecorder);
+                        } else {
+                            return CommandUtil.execWaitFor(file, this.gitFile, environment, StrUtil.EMPTY, (s, process) -> {
+                                BuildExecuteManage.this.process = process;
+                                logRecorder.info(s);
+                            });
+                        }
                     } catch (IOException | InterruptedException e) {
                         throw Lombok.sneakyThrow(e);
                     }

@@ -22,34 +22,28 @@
  */
 package cn;
 
-import cn.hutool.core.thread.GlobalThreadPool;
-import cn.hutool.core.thread.ThreadUtil;
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteWatchdog;
-import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.exec.*;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * <a href="https://blog.51cto.com/u_75269/7968284">https://blog.51cto.com/u_75269/7968284</a>
  */
 public class TestApacheExec {
+    private ShutdownHookProcessDestroyer shutdownHookProcessDestroyer = new ShutdownHookProcessDestroyer();
+
 
     @Test
     public void test() throws IOException {
-        ThreadPoolExecutor executorService = (ThreadPoolExecutor) GlobalThreadPool.getExecutor();
-        ThreadFactory threadFactory = executorService.getThreadFactory();
+
 
         CommandLine commandLine = CommandLine.parse("ping baidu.com");
 
         // 重定向stdout和stderr到文件
         PumpStreamHandler pumpStreamHandler = new PumpStreamHandler();
+
         // 超时终止：1秒
         ExecuteWatchdog executeWatchdog = ExecuteWatchdog.builder().setTimeout(Duration.ofSeconds(10)).get();
 
@@ -57,6 +51,22 @@ public class TestApacheExec {
         DefaultExecutor executor = DefaultExecutor.builder()
             .setExecuteStreamHandler(pumpStreamHandler)
             .get();
+        executor.setProcessDestroyer(new ProcessDestroyer() {
+            @Override
+            public boolean add(Process process) {
+                return shutdownHookProcessDestroyer.add(process);
+            }
+
+            @Override
+            public boolean remove(Process process) {
+                return shutdownHookProcessDestroyer.remove(process);
+            }
+
+            @Override
+            public int size() {
+                return shutdownHookProcessDestroyer.size();
+            }
+        });
         executor.setWatchdog(executeWatchdog);
 
         // 执行，打印退出码
