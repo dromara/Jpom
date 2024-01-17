@@ -51,24 +51,45 @@ const pageloading = ref(true)
 const pageLoadingTimeout = ref()
 
 const useAppStore = appStore()
-useAppStore.$subscribe((mutation, state) => {
-  const events: any = mutation.events
-  if (events && events.key === 'loading') {
-    if (events.newValue === 2) {
-      clearTimeout(pageLoadingTimeout.value)
-      globalLoading(false)
-      pageloading.value = false
-    } else {
-      pageLoadingTimeout.value = setTimeout(() => {
-        pageloading.value = true
-        globalLoading({
-          spinning: true,
-          tip: '页面资源加载中....'
-        })
-      }, 500)
-    }
+
+const pageLoading = computed(() => {
+  return useAppStore.loading
+})
+watch(pageLoading, (newValue, oldValue) => {
+  //
+  if (newValue === 2) {
+    clearTimeout(pageLoadingTimeout.value)
+    globalLoading(false)
+    pageloading.value = false
+  } else {
+    pageLoadingTimeout.value = setTimeout(() => {
+      pageloading.value = true
+      globalLoading({
+        spinning: true,
+        tip: '页面资源加载中....'
+      })
+    }, 500)
   }
 })
+// 打包后无效
+// useAppStore.$subscribe((mutation, state) => {
+//   const events: any = mutation.events
+//   if (events && events.key === 'loading') {
+//     if (events.newValue === 2) {
+//       clearTimeout(pageLoadingTimeout.value)
+//       globalLoading(false)
+//       pageloading.value = false
+//     } else {
+//       pageLoadingTimeout.value = setTimeout(() => {
+//         pageloading.value = true
+//         globalLoading({
+//           spinning: true,
+//           tip: '页面资源加载中....'
+//         })
+//       }, 500)
+//     }
+//   }
+// })
 
 const reload = () => {
   routerActivation.value = false
