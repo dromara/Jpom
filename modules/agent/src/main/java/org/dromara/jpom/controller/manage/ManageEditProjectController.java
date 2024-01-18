@@ -239,6 +239,7 @@ public class ManageEditProjectController extends BaseAgentController {
                 // 正在运行的项目不能修改路径
                 this.projectMustNotRun(old, "正在运行的项目不能修改路径");
                 if (oldLib.exists()) {
+                    FileUtil.mkdir(newLib);
                     FileUtils.tempMoveContent(oldLib, newLib);
                 }
             }
@@ -258,6 +259,7 @@ public class ManageEditProjectController extends BaseAgentController {
                 File oldLogBack = projectInfoService.resolveLogBack(old);
                 if (oldLogBack.exists()) {
                     File logBack = projectInfoService.resolveLogBack(news);
+                    FileUtil.mkdir(logBack);
                     FileUtils.tempMoveContent(oldLogBack, logBack);
                 }
             }
