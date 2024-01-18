@@ -278,7 +278,7 @@
                     <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button size="small" type="primary" danger @click="handleDelete(record)">逻辑删除</a-button>
+                    <a-button size="small" type="primary" danger @click="handleDelete(record, '')">逻辑删除</a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="handleDelete(record, 'thorough')"
