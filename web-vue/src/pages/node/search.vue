@@ -44,7 +44,13 @@
           <a-input
             v-model:value="listQuery['%name%']"
             @pressEnter="getNodeProjectData"
-            placeholder="搜索项目"
+            placeholder="搜索项目名"
+            class="search-input-item"
+          />
+          <a-input
+            v-model:value="listQuery['%projectId%']"
+            @pressEnter="getNodeProjectData"
+            placeholder="搜索项目ID"
             class="search-input-item"
           />
 
@@ -651,9 +657,16 @@ export default {
 
       columns: [
         {
+          title: '项目ID',
+          dataIndex: 'projectId',
+          width: 100,
+          ellipsis: true
+        },
+
+        {
           title: '项目名称',
           dataIndex: 'name',
-          width: 200,
+          // width: 200,
           ellipsis: true
         },
         {
@@ -699,7 +712,7 @@ export default {
         {
           title: 'webhook',
           dataIndex: 'token',
-          width: 120,
+          // width: 120,
           ellipsis: true,
           tooltip: true
         },
