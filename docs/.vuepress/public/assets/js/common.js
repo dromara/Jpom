@@ -17,7 +17,7 @@
 })();
 
 $(function () {
-  window.JPOM_RELEASE_VERSION = "2.11.0";
+  window.JPOM_RELEASE_VERSION = "2.11.1";
   // 检查域名
   const localHosts = [
     "localhost",
