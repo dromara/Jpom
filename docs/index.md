@@ -98,7 +98,8 @@ notices-2: # 可选的
 }
 
 .friends-item {
-  width: 10em;
+  width: 38%;
+  max-width: 8em;
   height:3em;
   flex:1;
   text-align: center;
@@ -112,7 +113,7 @@ notices-2: # 可选的
 
 .friends-item-img {
   object-fit: contain;
-  max-width:150px !important;
+  /* max-width:150px !important; */
   height: 100%;
 }
 </style>
