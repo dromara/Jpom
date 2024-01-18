@@ -60,18 +60,7 @@ public abstract class BaseWorkspaceModel extends BaseModel {
      */
     private String createUser;
 
-    public String getModifyUser() {
-        if (StrUtil.isEmpty(modifyUser)) {
-            return StrUtil.DASHED;
-        }
-        return modifyUser;
-    }
-
     public boolean global() {
         return StrUtil.equals(this.workspaceId, Const.WORKSPACE_GLOBAL);
-    }
-
-    public String getWorkspaceId() {
-        return StrUtil.emptyToDefault(workspaceId, Const.WORKSPACE_DEFAULT_ID);
     }
 }

@@ -22,6 +22,7 @@
  */
 package org.dromara.jpom.socket;
 
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.data.NodeModel;
+import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.transport.*;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.springframework.web.socket.TextMessage;
@@ -87,6 +89,8 @@ public abstract class BaseProxyHandler extends BaseHandler {
         MachineNodeModel machine = (MachineNodeModel) attributes.get("machine");
 
         Object[] parameters = this.getParameters(attributes);
+        UserModel userModel = (UserModel) attributes.get("userInfo");
+        parameters = ArrayUtil.append(parameters, "optUser", userModel.getId());
         // 连接节点
         INodeInfo nodeInfo = Optional.ofNullable(machine)
             .map(NodeForward::coverNodeInfo)

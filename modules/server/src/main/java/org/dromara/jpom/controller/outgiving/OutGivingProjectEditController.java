@@ -390,7 +390,7 @@ public class OutGivingProjectEditController extends BaseServerController {
             String autoStart = getParameter(StrUtil.format("{}_autoStart", nodeModel.getId()));
             allData.put("autoStart", Convert.toBool(autoStart, false));
             allData.put("dslEnv", getParameter(StrUtil.format("{}_dslEnv", nodeModel.getId())));
-
+            allData.put("nodeId", nodeModel.getId());
             JsonMessage<String> jsonMessage = this.sendData(nodeModel, allData, false);
             Assert.state(jsonMessage.success(), nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
             tuples.add(new Tuple(nodeModel, allData));
