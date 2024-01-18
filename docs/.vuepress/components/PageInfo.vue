@@ -8,17 +8,19 @@ const busuanziKey = [
     id: "busuanzi_value_page_pv",
     title: "本文浏览量",
   },
-  {
-    className: "page-site-view",
-    id: "busuanzi_value_site_pv",
-    title: "本站访问量",
-  },
+  // {
+  //   className: "page-site-view",
+  //   id: "busuanzi_value_site_pv",
+  //   title: "本站访问量",
+  // },
 ];
 export default {
   mounted() {
     // 首页不初始页面信息
     if (this.$route.path != "/") {
       this.initPageInfo();
+    } else {
+      this.getPageViewCouter();
     }
   },
   watch: {

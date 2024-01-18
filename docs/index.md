@@ -118,7 +118,7 @@ notices-2: # 可选的
 }
 </style>
 
-## 🌈特别赞助
+## 🌈特别赞助 【 [成为赞助商](/pages/589c8e/) 】
 
 ::: cardList
 ```yaml
@@ -151,19 +151,7 @@ notices-2: # 可选的
 
 
 <div class="wwads-cn wwads-horizontal wwads-sticky" data-id="188" style="display: flex !important;"></div>
-<style>
-.become-sponsor-join{
-  padding: 8px 20px;
-  display: inline-block;
-  color: #E01E5A;
-  border-radius: 30px;
-  box-sizing: border-box;
-  border: 2px solid #E01E5A;
-}
-</style>
-<p align="center">
-  <a class="become-sponsor-join" href="/pages/589c8e/">成为赞助商</a>
-</p>
+
 
 ## 😭 日常开发中，您是否有以下痛点？
 
@@ -351,7 +339,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 <b><a href="https://dromara.org/zh/projects/" target="_blank">为往圣继绝学，一个人或许能走的更快，但一群人会走的更远。</a></b>
 </p>
 
-<p >
+<p align="center">
 <a class="friends-item" href="https://hutool.cn/" target="_blank">
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/hutool2.png')" alt="🍬小而全的Java工具类库，使Java拥有函数式语言般的优雅，让Java语言也可以“甜甜的”。">
 </a>
@@ -435,6 +423,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 </div>
 
 ## 🧲友情链接
+<div align="center">
 <div class="friends-item" style="background-color: var(--imgBgColor);">
     <a href="https://shop108037867.taobao.com" target="_blank">
         <img :src="$withBase('/images/friends/yuanlaiyishe.png')" class="no-zoom friends-item-img hover-alt" alt="yuanlaiyishe">
@@ -485,5 +474,5 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
         <img :src="$withBase('/images/friends/springdoc.cn.png')" class="no-zoom friends-item-img hover-alt"  alt="spring 中文网">
     </a>
 </div>
-<br/>
+</div>
 <br/>

@@ -59,12 +59,11 @@ $(function () {
   }, 20);
 
   // 提醒 star
-  loopExecute(function () {
-    let $navItems = $(".nav-item");
-    if (!$navItems.length) {
-      return false;
-    }
-    layer.msg(
+  openTipStar();
+
+  function openTipStar() {
+    layer.close(window["tipStarIndex"]);
+    window["tipStarIndex"] = layer.msg(
       '欢迎您 Star Jpom <a href="https://gitee.com/dromara/Jpom/stargazers" target="_blank">Gitee</a>/' +
         '<a href="https://github.com/dromara/Jpom" target="_blank">Github</a>',
       {
@@ -73,8 +72,9 @@ $(function () {
         anim: 6,
       }
     );
-    return true;
-  }, 20);
+  }
+
+  window.addEventListener("resize", openTipStar);
 });
 
 function docReady(t) {

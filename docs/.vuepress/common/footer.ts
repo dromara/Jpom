@@ -9,8 +9,11 @@ export default <Footer>{
   // 页脚信息
   createYear: 2019,
   copyrightInfo:
-    penName +
     " | " +
+    penName +
     footerTitle +
-    '<br> <a href="http://beian.miit.gov.cn/" target="_blank">京ICP备17044819号</a>',
+    " | " +
+    "<span id='busuanzi_container_site_pv'>本站访问量：<span id='busuanzi_value_site_pv'>-</span></span>" +
+    " | " +
+    ' <a href="http://beian.miit.gov.cn/" target="_blank">京ICP备17044819号</a>',
 };
