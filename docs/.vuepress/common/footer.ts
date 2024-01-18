@@ -12,8 +12,8 @@ export default <Footer>{
     " | " +
     penName +
     footerTitle +
-    " | " +
-    "<span id='busuanzi_container_site_pv'>本站访问量：<span id='busuanzi_value_site_pv'>-</span></span>" +
+    // " | " +
+    "<span id='busuanzi_container_site_pv'> | 本站访问量：<span id='busuanzi_value_site_pv'>-</span></span>" +
     " | " +
     ' <a href="http://beian.miit.gov.cn/" target="_blank">京ICP备17044819号</a>',
 };

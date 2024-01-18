@@ -59,7 +59,11 @@ $(function () {
   }, 20);
 
   // 提醒 star
-  openTipStar();
+  docReady(() => {
+    setTimeout(() => {
+      openTipStar();
+    }, 2000);
+  });
 
   function openTipStar() {
     layer.close(window["tipStarIndex"]);
