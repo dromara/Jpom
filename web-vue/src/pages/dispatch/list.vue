@@ -178,7 +178,7 @@
                     >
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
+                    <a-button type="primary" danger size="small" @click="handleDelete(record, '')">{{
                       record.outGivingProject ? '删除' : '释放'
                     }}</a-button>
                   </a-menu-item>
