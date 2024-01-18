@@ -58,7 +58,7 @@
                 </template>
               </a-dropdown>
               <a-dropdown :disabled="!Object.keys(this.tempNode).length">
-                <a-button size="small" type="primary" @click="(e) => e.preventDefault()">新建</a-button>
+                <a-button size="small" type="primary" @click="(e) => e.preventDefault()"><PlusOutlined />新建</a-button>
                 <template v-slot:overlay>
                   <a-menu>
                     <a-menu-item @click="handleAddFile(1)">
