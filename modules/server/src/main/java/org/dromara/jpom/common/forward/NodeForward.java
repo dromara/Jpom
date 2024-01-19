@@ -642,6 +642,27 @@ public class NodeForward {
         });
     }
 
+    /**
+     * 下载文件消息转发
+     *
+     * @param nodeModel 节点
+     * @param request   请求
+     * @param response  响应
+     * @param nodeUrl   节点的url
+     */
+    public static void requestDownload(MachineNodeModel nodeModel, HttpServletRequest request, HttpServletResponse response, NodeUrl nodeUrl) {
+        //
+        Map<String, String> params = ServletUtil.getParamMap(request);
+        INodeInfo nodeInfo = coverNodeInfo(nodeModel);
+        IUrlItem iUrlItem = parseUrlItem(nodeInfo, StrUtil.EMPTY, nodeUrl);
+        TransportServerFactory.get().download(nodeInfo, iUrlItem, params, downloadCallback -> {
+            Opt.ofBlankAble(downloadCallback.getContentDisposition())
+                .ifPresent(s -> response.setHeader(HttpHeaders.CONTENT_DISPOSITION, s));
+            response.setContentType(downloadCallback.getContentType());
+            ServletUtil.write(response, downloadCallback.getInputStream());
+        });
+    }
+
     public static <T> T toJsonMessage(String body, TypeReference<T> tTypeReference) {
         if (StrUtil.isEmpty(body)) {
             throw new AgentException("agent 端响应内容为空");

@@ -233,6 +233,7 @@ public class FileUtils {
             FileUtil.del(tempMv);
             // 子目录不需要删除
         } else {
+            FileUtil.mkdir(target);
             FileUtil.moveContent(src, target, true);
             // 删除文件夹
             FileUtil.del(src);

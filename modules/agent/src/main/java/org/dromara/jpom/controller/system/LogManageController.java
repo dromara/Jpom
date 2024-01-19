@@ -70,8 +70,9 @@ public class LogManageController extends BaseAgentController {
         // 判断修改时间
         long modified = file.lastModified();
         Assert.state(System.currentTimeMillis() - modified > TimeUnit.DAYS.toMillis(1), "不能删除近一天相关的日志(文件修改时间)");
+        AgentFileTailWatcher.offlineFile(file);
         if (FileUtil.del(file)) {
-            AgentFileTailWatcher.offlineFile(file);
+            FileUtil.cleanEmpty(file.getParentFile());
             return JsonMessage.success("删除成功");
         }
         return new JsonMessage<>(500, "删除失败");
