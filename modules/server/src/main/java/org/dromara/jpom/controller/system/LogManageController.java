@@ -33,6 +33,7 @@ import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
+import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
@@ -70,52 +71,56 @@ public class LogManageController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<List<JSONObject>> logData(String machineId, HttpServletRequest request) {
         IJsonMessage<List<JSONObject>> message = this.tryRequestMachine(machineId, request, NodeUrl.SystemLog);
-        return Optional.ofNullable(message).orElseGet(() -> {
-            List<JSONObject> data = DirTreeUtil.getTreeData(LogbackConfig.getPath());
-            return JsonMessage.success("", data);
-        });
+        return Optional.ofNullable(message)
+            .orElseGet(() -> {
+                List<JSONObject> data = DirTreeUtil.getTreeData(LogbackConfig.getPath());
+                return JsonMessage.success("", data);
+            });
     }
 
     /**
      * 删除 需要验证是否最后修改时间
      *
-     * @param nodeId 节点
-     * @param path   路径
+     * @param path 路径
      * @return json
      */
     @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<String> logData(String nodeId,
-                                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path, HttpServletRequest request) {
-        if (StrUtil.isNotEmpty(nodeId)) {
-            return NodeForward.request(getNode(), request, NodeUrl.DelSystemLog);
-        }
-        File file = FileUtil.file(LogbackConfig.getPath(), path);
-        // 判断修改时间
-        long modified = file.lastModified();
-        Assert.state(System.currentTimeMillis() - modified > TimeUnit.DAYS.toMillis(1), "不能删除近一天相关的日志(文件修改时间)");
-
-        if (FileUtil.del(file)) {
+    public IJsonMessage<String> logData(String machineId,
+                                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path,
+                                        HttpServletRequest request) {
+        JsonMessage<String> jsonMessage = this.tryRequestMachine(machineId, request, NodeUrl.DelSystemLog);
+        return Optional.ofNullable(jsonMessage).orElseGet(() -> {
+            File file = FileUtil.file(LogbackConfig.getPath(), path);
+            // 判断修改时间
+            long modified = file.lastModified();
+            Assert.state(System.currentTimeMillis() - modified > TimeUnit.DAYS.toMillis(1), "不能删除近一天相关的日志(文件修改时间)");
             // 离线上一个日志
             ServiceFileTailWatcher.offlineFile(file);
-            return JsonMessage.success("删除成功");
-        }
-        return new JsonMessage<>(500, "删除失败");
+            if (FileUtil.del(file)) {
+                FileUtil.cleanEmpty(file.getParentFile());
+                return new JsonMessage<>(200, "删除成功");
+            }
+            return new JsonMessage<>(500, "删除失败");
+        });
     }
 
 
     @RequestMapping(value = "log_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void logDownload(String nodeId,
+    public void logDownload(String machineId,
                             @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path,
                             HttpServletResponse response,
                             HttpServletRequest request) {
-        if (StrUtil.isNotEmpty(nodeId)) {
-            NodeForward.requestDownload(getNode(), request, response, NodeUrl.DownloadSystemLog);
+        if (StrUtil.isNotEmpty(machineId)) {
+            MachineNodeModel model = machineNodeServer.getByKey(machineId);
+            Assert.notNull(model, "没有找到对应的机器");
+            NodeForward.requestDownload(model, request, response, NodeUrl.DownloadSystemLog);
             return;
         }
         File file = FileUtil.file(LogbackConfig.getPath(), path);
         if (file.isFile()) {
+            FileUtil.cleanEmpty(file.getParentFile());
             ServletUtil.write(response, file);
         }
     }
