@@ -458,7 +458,7 @@
             <a-divider v-if="listQuery.total / listQuery.limit > 1" dashed />
             <a-col>
               <a-pagination
-                v-model:value="listQuery.page"
+                v-model:current="listQuery.page"
                 :showTotal="
                   (total) => {
                     return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery)
@@ -466,7 +466,7 @@
                 "
                 :showSizeChanger="true"
                 :pageSizeOptions="sizeOptions"
-                :pageSize="listQuery.limit"
+                v-model:pageSize="listQuery.limit"
                 :total="listQuery.total"
                 :hideOnSinglePage="true"
                 @showSizeChange="
