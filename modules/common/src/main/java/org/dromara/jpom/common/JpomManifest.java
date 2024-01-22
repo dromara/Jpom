@@ -473,10 +473,6 @@ public class JpomManifest {
         //
         JsonFileUtil.saveJson(upgrade, jsonObject);
         FileUtil.writeString(newFile, FileUtil.file(runPath, Const.RUN_JAR), CharsetUtil.CHARSET_UTF_8);
-        if (SystemUtil.getOsInfo().isWindows()) {
-            String format = StrUtil.format("stdout_{}.log", System.currentTimeMillis());
-            FileUtil.writeString(format, FileUtil.file(runPath, "run.log"), CharsetUtil.CHARSET_UTF_8);
-        }
     }
 
     /**
