@@ -24,6 +24,7 @@ package org.dromara.jpom.plugin;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.system.SystemUtil;
 import org.dromara.jpom.system.JpomRuntimeException;
 import org.dromara.jpom.util.CommandUtil;
 import org.tmatesoft.svn.core.*;
@@ -31,6 +32,7 @@ import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
+import org.tmatesoft.svn.core.internal.io.svn.ssh.SessionPoolFactory;
 import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
 import org.tmatesoft.svn.core.internal.wc.SVNFileUtil;
 import org.tmatesoft.svn.core.wc.*;
@@ -49,6 +51,8 @@ import java.util.Map;
 public class SvnKitUtil {
 
     static {
+        // 指定使用 trilead 不使用 apache
+        SystemUtil.set(SessionPoolFactory.SVNKIT_SSH_CLIENT, SessionPoolFactory.TRILEAD);
         // 初始化库。 必须先执行此操作。具体操作封装在setupLibrary方法中。
         /*
          * For using over http:// and https://
