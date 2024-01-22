@@ -10,6 +10,7 @@
 4. 【server】升级 apache-sshd 版本（感谢@*斌）
 5. 【server】优化 项目列表 file 类型正常排序（不再排序到最后）（感谢[@pal865](https://gitee.com/pal865) [Gitee issues I8XU32](https://gitee.com/dromara/Jpom/issues/I8XU32) ）
 6. 【all】修复 windows 环境保存配置并重启失败（感谢[@Robot](https://gitee.com/robot1937) [Gitee issues I8Y01T](https://gitee.com/dromara/Jpom/issues/I8Y01T) ）
+7. 【server】修复 新版本页面部分分页切换失效（构建详情、资产机器、逻辑节点）（感谢@zac）
 
 ------
 
