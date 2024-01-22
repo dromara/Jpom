@@ -338,6 +338,7 @@
         v-if="drawerFileVisible"
         :nodeId="temp.nodeId"
         :projectId="temp.projectId"
+        :runMode="temp.runMode"
         @goConsole="goConsole"
         @goReadFile="goReadFile"
       />
@@ -836,9 +837,9 @@ export default {
           if (res.code === 200) {
             const resultList = res.data.result
 
-            const tempList = resultList.filter((item) => item.runMode !== 'File')
-            const fileList = resultList.filter((item) => item.runMode === 'File')
-            this.projList = tempList.concat(fileList)
+            // const tempList = resultList.filter((item) => item.runMode !== 'File')
+            // const fileList = resultList.filter((item) => item.runMode === 'File')
+            this.projList = resultList // tempList.concat(fileList)
 
             this.listQuery.total = res.data.total
 
