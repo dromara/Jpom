@@ -66,7 +66,24 @@
                     <groupId>com.trilead</groupId>
                     <artifactId>trilead-ssh2</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.sshd</groupId>
+                    <artifactId>sshd-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.sshd</groupId>
+                    <artifactId>sshd-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.trilead</groupId>
+                    <artifactId>trilead-ssh2</artifactId>
+                </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sshd</groupId>
+            <artifactId>sshd-core</artifactId>
+            <version>2.12.0</version>
         </dependency>
         <dependency>
             <groupId>com.trilead</groupId>
