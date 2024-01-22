@@ -7,14 +7,9 @@
         <div class="dir-container">
           <a-space>
             <a-button size="small" type="primary" @click="loadData">刷新目录</a-button>
-            <a-button
-              size="small"
-              type="primary"
-              v-if="showConsole"
-              @click="goConsole"
-              v-show="noFileModes.includes(runMode)"
-              >控制台</a-button
-            >
+            <a-button size="small" type="primary" @click="goConsole" v-show="noFileModes.includes(runMode)">
+              控制台
+            </a-button>
             <a-button size="small" type="primary" @click="backupList">备份列表</a-button>
           </a-space>
         </div>
@@ -453,10 +448,6 @@ export default {
     },
     absPath: {
       type: String
-    },
-    showConsole: {
-      type: Boolean,
-      default: true
     }
   },
   data() {

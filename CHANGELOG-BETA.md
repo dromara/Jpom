@@ -8,6 +8,7 @@
 2. 【server】修复 节点机器日志无法下载（感谢@Again...）
 3. 【all】升级 hutool 版本
 4. 【server】升级 apache-sshd 版本（感谢@*斌）
+5. 【server】优化 项目列表 file 类型正常排序（不再排序到最后）（感谢[@pal865](https://gitee.com/pal865) [Gitee issues I8XU32](https://gitee.com/dromara/Jpom/issues/I8XU32)）
 
 ------
 

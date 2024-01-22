@@ -35,7 +35,6 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.crypto.SecureUtil;
@@ -404,17 +403,30 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
      */
     private WatchKey getWatchKey(Path path) {
         File file = path.toFile();
-        String staticPath = this.absNormalize(file);
-        WatchMonitor watchMonitor1 = MapUtil.get(watchMonitor, staticPath, WatchMonitor.class);
-        Assert.notNull(watchMonitor1, "监听任务丢失");
-        Map<WatchKey, Path> keyPathMap = (Map<WatchKey, Path>) ReflectUtil.getFieldValue(watchMonitor1, "watchKeyPathMap");
-        Assert.notNull(keyPathMap, "没有找到监听的key");
-        for (Map.Entry<WatchKey, Path> entry : keyPathMap.entrySet()) {
-            if (entry.getValue().equals(path)) {
-                return entry.getKey();
+        WatchMonitor watchMonitor1;
+        while (true) {
+            String staticPath = this.absNormalize(file);
+            watchMonitor1 = MapUtil.get(watchMonitor, staticPath, WatchMonitor.class);
+            if (watchMonitor1 == null) {
+                File parentFile = file.getParentFile();
+                if (parentFile == null || FileUtil.equals(parentFile, file)) {
+                    break;
+                }
+                file = parentFile;
+            } else {
+                break;
             }
         }
-        throw new IllegalArgumentException("没有找到监听 key");
+        if (watchMonitor1 == null) {
+            log.warn("监听任务丢失或者未找到：{}", path);
+            return null;
+        }
+        WatchKey watchKey = watchMonitor1.getWatchKey(path);
+        if (watchKey == null) {
+            log.warn("没有找到监听 key" + path.getFileName());
+            return null;
+        }
+        return watchKey;
     }
 
     /**
@@ -426,6 +438,9 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
      */
     private Path fullPath(Path currentPath, Object context) {
         WatchKey watchKey = getWatchKey(currentPath);
+        if (watchKey == null) {
+            return null;
+        }
         Path watchablePath = (Path) watchKey.watchable();
         return watchablePath.resolve((Path) context);
     }
@@ -446,8 +461,10 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
         Object context = event.context();
         if (context instanceof Path) {
             Path path = this.fullPath(currentPath, context);
-            log.debug("文件全路径：{}", path);
-            this.doFile(path, currentPath);
+            if (path != null) {
+                log.debug("文件全路径：{}", path);
+                this.doFile(path, currentPath);
+            }
         } else {
             log.warn("不支持的事件类型：{}", context.getClass().getName());
         }
@@ -459,14 +476,15 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
         Object context = event.context();
         if (context instanceof Path) {
             Path path = this.fullPath(currentPath, context);
-            File file = path.toFile();
-            try {
-                // 处理文件删除事件
-                this.delete(file);
-            } catch (Exception e) {
-                log.error("处理文件删除异常", e);
+            if (path != null) {
+                File file = path.toFile();
+                try {
+                    // 处理文件删除事件
+                    this.delete(file);
+                } catch (Exception e) {
+                    log.error("处理文件删除异常", e);
+                }
             }
-
         } else {
             log.warn("不支持的事件类型：{}", context.getClass().getName());
         }
