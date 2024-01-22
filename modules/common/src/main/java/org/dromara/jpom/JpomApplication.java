@@ -27,9 +27,11 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.JpomAppType;
 import cn.keepbx.jpom.Type;
@@ -38,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.system.ExtConfigBean;
+import org.dromara.jpom.system.JpomRuntimeException;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.beans.factory.DisposableBean;
@@ -201,8 +204,21 @@ public class JpomApplication implements DisposableBean, InitializingBean {
     /**
      * 重启自身
      * 分发会延迟2秒执行正式升级 重启命令
+     *
+     * @see JpomManifest#releaseJar
      */
     public static void restart() {
+        File runFile = JpomManifest.getRunPath();
+        File runPath = runFile.getParentFile();
+        if (!runPath.isDirectory()) {
+            throw new JpomRuntimeException(runPath.getAbsolutePath() + " error");
+        }
+        OsInfo osInfo = SystemUtil.getOsInfo();
+        if (osInfo.isWindows()) {
+            // 需要重新变更 stdout_log 文件来保证进程不被占用
+            String format = StrUtil.format("stdout_{}.log", System.currentTimeMillis());
+            FileUtil.writeString(format, FileUtil.file(runPath, "run.log"), CharsetUtil.CHARSET_UTF_8);
+        }
         File scriptFile = JpomManifest.getScriptFile();
         ThreadUtil.execute(() -> {
             // Waiting for method caller,For example, the interface response
@@ -210,7 +226,7 @@ public class JpomApplication implements DisposableBean, InitializingBean {
             try {
                 String command = CommandUtil.generateCommand(scriptFile, "restart upgrade");
                 File parentFile = scriptFile.getParentFile();
-                if (SystemUtil.getOsInfo().isWindows()) {
+                if (osInfo.isWindows()) {
                     //String result = CommandUtil.execSystemCommand(command, scriptFile.getParentFile());
                     //log.debug("windows restart {}", result);
                     CommandUtil.asyncExeLocalCommand("start /b" + command, parentFile);
