@@ -301,7 +301,7 @@ docker-compose -f docker-compose.yml up
 	2. 服务端默认运行端口：`2122`
 4. 构建 vue 页面，切换到 `web-vue` 目录（前提需要本地开发环境有 node、npm 环境）
 5. 安装项目 vue 依赖，控制台执行 `npm install`
-6. 启动开发模式，控制台执行 `npm run serve`
+6. 启动开发模式，控制台执行 `npm run dev`
 7. 根据控制台输出的地址访问前端页面：`http://127.0.0.1:3000/`（非本机访问把 127.0.0.1 换成你的服务器 IP 地址）
 
 ## 管理 Jpom 命令
