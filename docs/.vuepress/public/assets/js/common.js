@@ -23,6 +23,7 @@ $(function () {
     "localhost",
     "127.0.0.1",
     "jpom.top",
+    "jops.top",
     "webcache.googleusercontent.com",
     "192.168.",
   ];
