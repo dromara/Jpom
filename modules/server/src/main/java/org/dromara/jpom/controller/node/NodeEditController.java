@@ -159,7 +159,7 @@ public class NodeEditController extends BaseServerController {
         boolean checkNode = outGivingServer.checkNode(id, request);
         Assert.state(!checkNode, "该节点存在分发项目，不能" + msg);
         boolean checkLogRead = logReadServer.checkNode(id, request);
-        Assert.state(!checkLogRead, "该日志阅读项目，不能" + msg);
+        Assert.state(!checkLogRead, "该节点存在日志搜索（阅读）项目，不能" + msg);
         // 监控
         boolean checkNode1 = monitorService.checkNode(id);
         Assert.state(!checkNode1, "该节点存在监控项，不能" + msg);

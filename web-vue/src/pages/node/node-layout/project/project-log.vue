@@ -192,7 +192,7 @@ export default {
                   $notification.success({
                     message: res.msg
                   })
-                  that.handleLogBack()
+                  that.loadData()
                 }
                 resolve()
               })
