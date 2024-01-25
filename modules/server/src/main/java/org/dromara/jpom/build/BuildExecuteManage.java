@@ -875,7 +875,7 @@ public class BuildExecuteManage implements Runnable {
             log.warn("构建日志记录器已关闭,可能手动取消停止构建,流程:{}", processName);
         } catch (DiyInterruptException diyInterruptException) {
             // 主动中断
-            this.asyncWebHooks("stop", "process", processName);
+            this.asyncWebHooks("stop", "process", processName, "statusMsg", diyInterruptException.getMessage());
             buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Interrupt, diyInterruptException.getMessage());
         } catch (java.util.concurrent.CancellationException interruptException) {
             // 异常中断
