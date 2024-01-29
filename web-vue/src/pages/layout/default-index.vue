@@ -1,17 +1,23 @@
 <template>
   <a-layout id="app-layout">
-    <a-layout-sider class="sider" :theme="menuTheme" v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <a-tooltip placement="right" title="点击可以折叠左侧菜单栏">
-        <div
-          class="logo"
-          @click="changeCollapsed()"
-          :style="`color:${menuTheme === 'light' && theme === 'light' ? '#000' : '#fff'}`"
-        >
-          <img :src="logoUrl || defaultLogo" alt="logo" />
-          {{ !collapsed ? subTitle : '' }}
+    <a-layout-sider :theme="menuTheme" v-model:collapsed="collapsed" :trigger="null" collapsible>
+      <a-layout-sider class="sider" :theme="menuTheme" v-model:collapsed="collapsed" :trigger="null" collapsible>
+        <div class="sider-content">
+          <a-tooltip placement="right" title="点击可以折叠左侧菜单栏">
+            <div
+              class="logo"
+              @click="changeCollapsed()"
+              :style="`color:${menuTheme === 'light' && theme === 'light' ? '#000' : '#fff'}`"
+            >
+              <img :src="logoUrl || defaultLogo" alt="logo" />
+              {{ !collapsed ? subTitle : '' }}
+            </div>
+          </a-tooltip>
+          <div class="sider-menu">
+            <side-menu :mode="mode" :theme="menuTheme" />
+          </div>
         </div>
-      </a-tooltip>
-      <side-menu :mode="mode" :theme="menuTheme" />
+      </a-layout-sider>
     </a-layout-sider>
     <a-layout>
       <div class="app-header" :style="`background-color:${theme === 'light' ? '#fff' : ''}`">
@@ -135,6 +141,7 @@ const changeCollapsed = () => {
   color: #1890ff;
 }
 #app-layout .logo {
+  flex-shrink: 0;
   width: 100%;
   cursor: pointer;
   height: 32px;
@@ -160,6 +167,19 @@ const changeCollapsed = () => {
 
 .sider {
   border-inline-end: 1px solid rgba(5, 5, 5, 0.06);
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+}
+.sider-content {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+.sider-menu {
+  flex: 1;
+  overflow-y: auto;
 }
 .layout-content {
   padding: 15px;
