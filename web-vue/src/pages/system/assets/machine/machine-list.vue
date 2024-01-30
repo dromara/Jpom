@@ -323,12 +323,7 @@
           <template #help>节点地址格式为：IP:PORT (示例：192.168.1.100:2123)</template>
           <a-input v-model:value="temp.jpomUrl" placeholder="节点地址 (192.168.1.100:2123)">
             <template v-slot:addonBefore>
-              <a-select
-                placeholder="协议类型"
-                v-model:value="temp.jpomProtocol"
-                default-value="Http://"
-                style="width: 160px"
-              >
+              <a-select placeholder="协议类型" v-model:value="temp.jpomProtocol" style="width: 160px">
                 <a-select-option value="Http"> Http:// </a-select-option>
                 <a-select-option value="Https"> Https:// </a-select-option>
               </a-select>
@@ -838,7 +833,10 @@ export default {
       this.getMachineList()
     },
     addMachine() {
-      this.temp = {}
+      this.temp = {
+        // 默认设置节点地址协议
+        jpomProtocol: 'Http'
+      }
       this.editVisible = true
     },
     // 修改
