@@ -22,7 +22,7 @@
       }"
     >
       <template v-slot:title>
-        <a-space>
+        <a-space wrap class="search-box">
           <a-select
             v-if="!nodeId"
             v-model:value="listQuery.nodeId"

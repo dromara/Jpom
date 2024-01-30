@@ -11,7 +11,7 @@
       }"
     >
       <template v-slot:title>
-        <a-space>
+        <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['nodeId']"
             @pressEnter="loadData"

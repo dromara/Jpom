@@ -14,7 +14,7 @@
       }"
     >
       <template v-slot:title>
-        <a-space>
+        <a-space wrap class="search-box">
           <a-input v-model:value="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
           <a-select
             show-search

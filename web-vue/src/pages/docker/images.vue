@@ -13,7 +13,7 @@
       }"
     >
       <template v-slot:title>
-        <a-space>
+        <a-space wrap class="search-box">
           <!-- <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" /> -->
           <div>
             显示所有

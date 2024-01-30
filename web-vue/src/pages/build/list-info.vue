@@ -3,7 +3,7 @@
     <!-- 表格 -->
     <a-card :bodyStyle="{ padding: '10px' }">
       <template v-slot:title>
-        <a-space>
+        <a-space wrap class="search-box">
           <a-input
             allowClear
             class="search-input-item"
