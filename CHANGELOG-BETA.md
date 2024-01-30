@@ -6,6 +6,8 @@
 
 1. 【server】优化 构建代码未变动流程打断触发器未传入原因（statusMsg）（感谢@烛孩） 
 2. 【server】修复 项目控制台日志删除弹窗未能正常关闭（感谢@%）
+3. 【server】修复 脚本日志时间筛选不生效（感谢[@zhaozxc2010](https://gitee.com/zhaozxc2010) [Gitee issues I8ZNKL](https://gitee.com/dromara/Jpom/issues/I8ZNKL) ）
+
 ------
 
 ## 2.11.2.0 (2024-01-22)
