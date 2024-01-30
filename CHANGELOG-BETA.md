@@ -8,7 +8,7 @@
 2. 【server】修复 项目控制台日志删除弹窗未能正常关闭（感谢@%）
 3. 【server】修复 脚本日志时间筛选不生效（感谢[@zhaozxc2010](https://gitee.com/zhaozxc2010) [Gitee issues I8ZNKL](https://gitee.com/dromara/Jpom/issues/I8ZNKL) ）
 4. 【server】优化 页面左侧菜单固定悬浮不跟随屏幕滚动条滚动（感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I8ZOOB](https://gitee.com/dromara/Jpom/issues/I8ZOOB) / [Gitee Pr 201](https://gitee.com/dromara/Jpom/pulls/201) ）
-5. 【server】优化 新增集群节点提示未选择协议（感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I8ZDZT](https://gitee.com/dromara/Jpom/issues/I8ZDZT) / [Gitee Pr 202](https://gitee.com/dromara/Jpom/pulls/202) ） 
+5. 【server】优化 新增机器节点提示未选择协议（感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I8ZDZT](https://gitee.com/dromara/Jpom/issues/I8ZDZT) / [Gitee Pr 202](https://gitee.com/dromara/Jpom/pulls/202) ） 
 
 ------
 
