@@ -1,8 +1,8 @@
 import '@/assets/style.less'
-import '@/assets/reset.less'
+// 暂时不引入
+// import '@/assets/reset.less'
 import App from './App.vue'
 import router from './router'
-// import 'ant-design-vue/dist/antd.css'
 import '@/router/auth'
 const pinia = createPinia()
 
