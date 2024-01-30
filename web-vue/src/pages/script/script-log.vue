@@ -61,7 +61,15 @@
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-range-picker
-            v-model:value="listQuery['createTimeMillis']"
+            @change="
+              (value, dateString) => {
+                if (!dateString[0] || !dateString[1]) {
+                  this.listQuery.createTimeMillis = ''
+                } else {
+                  this.listQuery.createTimeMillis = `${dateString[0]} ~ ${dateString[1]}`
+                }
+              }
+            "
             allowClear
             inputReadOnly
             :show-time="{ format: 'HH:mm:ss' }"
