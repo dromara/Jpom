@@ -177,11 +177,11 @@
             <template v-else-if="column.dataIndex === 'osMaxOccupyDisk'">
               <a-popover title="硬盘信息">
                 <template v-slot:content>
-                  <p>硬盘总量：{{ renderSize(record.osMoneyTotal) }}</p>
+                  <p>硬盘总量：{{ renderSize(record.osFileStoreTotal) }}</p>
                   <p>硬盘最大的使用率：{{ formatPercent(record.osMaxOccupyDisk) }}</p>
                   <p>使用率最大的分区：{{ record.osMaxOccupyDiskName }}</p>
                 </template>
-                <span>{{ formatPercent(record.osMaxOccupyDisk) }} / {{ renderSize(record.osMoneyTotal) }}</span>
+                <span>{{ formatPercent(record.osMaxOccupyDisk) }} / {{ renderSize(record.osFileStoreTotal) }}</span>
               </a-popover>
             </template>
 
