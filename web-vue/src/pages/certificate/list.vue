@@ -21,7 +21,7 @@
       }"
     >
       <template v-slot:title>
-        <a-space>
+        <a-space wrap class="search-box">
           <a-space>
             <a-input
               allowClear

@@ -14,7 +14,7 @@
       }"
     >
       <template v-slot:title>
-        <a-space>
+        <a-space wrap class="search-box">
           <a-select
             show-search
             :filter-option="

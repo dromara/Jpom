@@ -18,7 +18,7 @@
       }"
     >
       <template v-slot:title>
-        <a-space>
+        <a-space wrap class="search-box">
           <a-input
             class="search-input-item"
             @pressEnter="loadData"
