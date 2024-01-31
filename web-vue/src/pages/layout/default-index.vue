@@ -25,6 +25,9 @@
         :class="{
           'app-header-dark': theme == 'dark'
         }"
+        :style="{
+          background: theme === 'light' ? '#fff' : '#141414'
+        }"
       >
         <content-tab
           :mode="mode"
@@ -171,15 +174,10 @@ const changeCollapsed = () => {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #fff;
-  border-bottom: 1px solid #eee;
-  box-shadow: 0 0px 8px 0px rgba(0, 0, 0, 0.18);
-}
-/** TODO: 本次仅解决 app-header 固定问题。关于明暗切换问题 后续重构 */
-.app-header-dark {
-  border-bottom: 1px solid #303030;
-  box-shadow: 0 0px 8px 0px rgba(95, 95, 95, 0.18);
-  background: #141414;
+  // 背景色由计算属性实现
+  // background: #fff;
+  // border-bottom: 1px solid #eee;
+  // box-shadow: 0 0px 8px 0px rgba(0, 0, 0, 0.18);
 }
 
 .sider {
