@@ -507,7 +507,7 @@ export default {
       getRootFileList(this.baseUrl, this.reqDataId).then((res) => {
         if (res.code === 200) {
           this.treeList = res.data
-            .map((element) => {
+            .map((element, index) => {
               return {
                 key: element.id,
                 name: element.allowPathParent,
@@ -516,7 +516,8 @@ export default {
                 isLeaf: false,
                 // 配置的授权目录可能不存在
                 disabled: !!element.error,
-                modifyTime: element.modifyTime
+                modifyTime: element.modifyTime,
+                activeKey: [index]
               }
             })
             .sort((a, b) => {
@@ -527,7 +528,50 @@ export default {
         }
         this.loading = false
       })
-    }, // 选中目录
+    },
+    /**
+     * 更新树节点的方法抽离封装
+     * @param keys
+     * @param value
+     */
+    updateTreeChildren(keys, value) {
+      let node = this.treeList[keys[0]]
+      for (let key of keys.slice(1)) {
+        if (key >= 0 && key < node.children.length) {
+          node = node.children[key]
+        } else {
+          throw new Error('Invalid key: ' + key)
+        }
+      }
+      node.children = value
+    },
+    /**
+     * 文件列表转树结构
+     * @param data
+     */
+    fileList2TreeData(data) {
+      const node = this.tempNode
+      const children = data
+        .filter((element) => element.dir)
+        .map((element) => ({
+          key: element.id,
+          name: element.name,
+          allowPathParent: node.allowPathParent,
+          nextPath: (element.nextPath + '/' + element.name).replace(new RegExp('//+', 'gm'), '/'),
+          isLeaf: !element.dir,
+          // 可能有错误
+          disabled: !!element.error,
+          modifyTime: element.modifyTime
+        }))
+        .sort((a, b) => {
+          const aV = a[this.sortMethod.key] || ''
+          const bV = b[this.sortMethod.key] || ''
+          return this.sortMethod.asc ? bV.localeCompare(aV) : aV.localeCompare(bV)
+        })
+        .map((element, index) => ({ ...element, activeKey: node.activeKey.concat(index) }))
+      this.updateTreeChildren(node.activeKey, children)
+    },
+    // 选中目录
     onSelect(selectedKeys, { node }) {
       if (node.dataRef.disabled) {
         return
@@ -558,16 +602,6 @@ export default {
                   ...element
                 })
               }
-              children.push({
-                key: element.id,
-                name: element.name,
-                allowPathParent: node.dataRef.allowPathParent,
-                nextPath: (element.nextPath + '/' + element.name).replace(new RegExp('//+', 'gm'), '/'),
-                isLeaf: !element.dir,
-                // 可能有错误
-                disabled: !!element.error,
-                modifyTime: element.modifyTime
-              })
             } else {
               // 设置文件表格
               this.fileList.push({
@@ -576,13 +610,8 @@ export default {
               })
             }
           })
-          // 设置目录树
-          node.dataRef.children = children.sort((a, b) => {
-            const aV = a[this.sortMethod.key] || ''
-            const bV = b[this.sortMethod.key] || ''
-            return this.sortMethod.asc ? bV.localeCompare(aV) : aV.localeCompare(bV)
-          })
-          this.treeList = [...this.treeList]
+          //  更新tree 方法抽离封装
+          this.fileList2TreeData(res.data)
         }
         this.loading = false
       })
@@ -625,6 +654,8 @@ export default {
                 ...element
               }
             })
+          // 更新tree
+          this.fileList2TreeData(res.data)
         }
         this.loading = false
       })
