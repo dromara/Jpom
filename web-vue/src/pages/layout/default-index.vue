@@ -20,7 +20,12 @@
       </a-layout-sider>
     </a-layout-sider>
     <a-layout>
-      <div class="app-header" :style="`background-color:${theme === 'light' ? '#fff' : ''}`">
+      <div
+        class="app-header"
+        :class="{
+          'app-header-dark': theme == 'dark'
+        }"
+      >
         <content-tab
           :mode="mode"
           :style="{
@@ -124,7 +129,7 @@ const changeCollapsed = () => {
   appStore.collapsed(collapsed.value)
 }
 </script>
-<style scoped>
+<style scoped lang="less">
 #app-layout {
   min-height: 100vh;
 }
@@ -163,6 +168,18 @@ const changeCollapsed = () => {
   /* background: #fff; */
   padding: 10px 10px 0;
   height: auto;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  box-shadow: 0 0px 8px 0px rgba(0, 0, 0, 0.18);
+}
+/** TODO: 本次仅解决 app-header 固定问题。关于明暗切换问题 后续重构 */
+.app-header-dark {
+  border-bottom: 1px solid #303030;
+  box-shadow: 0 0px 8px 0px rgba(95, 95, 95, 0.18);
+  background: #141414;
 }
 
 .sider {
