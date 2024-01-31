@@ -46,7 +46,13 @@
         </a-space>
       </a-row>
       <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" v-if="treeList.length === 0" />
-      <a-directory-tree :treeData="treeList" :fieldNames="replaceFields" @select="onSelect"> </a-directory-tree>
+      <a-directory-tree
+        v-model:selectedKeys="selectedKeys"
+        :treeData="treeList"
+        :fieldNames="replaceFields"
+        @select="onSelect"
+      >
+      </a-directory-tree>
     </a-layout-sider>
     <!-- 表格 -->
     <a-layout-content class="file-content">
@@ -462,7 +468,8 @@ export default {
         key: 'name',
         asc: true
       },
-      confirmLoading: false
+      confirmLoading: false,
+      selectedKeys: []
     }
   },
   mounted() {
@@ -530,11 +537,11 @@ export default {
       })
     },
     /**
-     * 更新树节点的方法抽离封装
+     * 根据key获取树节点
      * @param keys
-     * @param value
+     * @returns {*}
      */
-    updateTreeChildren(keys, value) {
+    getTreeNode(keys) {
       let node = this.treeList[keys[0]]
       for (let key of keys.slice(1)) {
         if (key >= 0 && key < node.children.length) {
@@ -543,6 +550,15 @@ export default {
           throw new Error('Invalid key: ' + key)
         }
       }
+      return node
+    },
+    /**
+     * 更新树节点的方法抽离封装
+     * @param keys
+     * @param value
+     */
+    updateTreeChildren(keys, value) {
+      const node = this.getTreeNode(keys)
       node.children = value
     },
     /**
@@ -571,21 +587,16 @@ export default {
         .map((element, index) => ({ ...element, activeKey: node.activeKey.concat(index) }))
       this.updateTreeChildren(node.activeKey, children)
     },
-    // 选中目录
-    onSelect(selectedKeys, { node }) {
-      if (node.dataRef.disabled) {
-        return
-      }
-      // console.log(node.dataRef, this.tempNode.key);
-      if (node.dataRef.key === this.tempNode.key) {
-        return
-      }
-      this.tempNode = node.dataRef
+    /**
+     * 加载文件列表
+     */
+    loadTreeNode() {
+      const { allowPathParent, nextPath } = this.tempNode
       // 请求参数
       const params = {
         id: this.reqDataId,
-        allowPathParent: node.dataRef.allowPathParent,
-        nextPath: node.dataRef.nextPath
+        allowPathParent: allowPathParent,
+        nextPath: nextPath
       }
       this.fileList = []
       this.loading = true
@@ -615,6 +626,18 @@ export default {
         }
         this.loading = false
       })
+    },
+    // 选中目录
+    onSelect(selectedKeys, { node }) {
+      if (node.dataRef.disabled) {
+        return
+      }
+      // console.log(node.dataRef, this.tempNode.key);
+      if (node.dataRef.key === this.tempNode.key) {
+        return
+      }
+      this.tempNode = node.dataRef
+      this.loadTreeNode()
     },
     changeListShowDir() {
       this.loadFileList()
@@ -859,7 +882,7 @@ export default {
         content: '真的要删除当前文件夹么？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
+        onOk: async () => {
           return await new Promise((resolve, reject) => {
             // 请求参数
             const params = {
@@ -875,7 +898,16 @@ export default {
                     message: res.msg
                   })
                   // 刷新树
-                  that.loadData()
+                  const activeKey = this.tempNode.activeKey
+                  // 获取上一级节点
+                  const parentNode = this.getTreeNode(activeKey.slice(0, activeKey.length - 1))
+                  // 设置当前选中
+                  this.selectedKeys = [parentNode.key]
+                  // 设置缓存节点
+                  this.tempNode = parentNode
+                  // 加载上一级文件列表
+                  this.loadTreeNode()
+
                   that.fileList = []
                   //this.loadFileList();
                 }
