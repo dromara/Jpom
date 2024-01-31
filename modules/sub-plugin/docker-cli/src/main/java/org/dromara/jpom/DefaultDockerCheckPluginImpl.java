@@ -30,6 +30,7 @@ import cn.keepbx.jpom.plugins.PluginConfig;
 import com.alibaba.fastjson2.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.PingCmd;
+import com.github.dockerjava.api.exception.UnauthorizedException;
 import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.api.model.AuthResponse;
 import com.github.dockerjava.api.model.Info;
@@ -195,6 +196,9 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
             DockerClient dockerClient = DockerUtil.get(parameter);
             dockerClient.pingCmd().exec();
             return null;
+        } catch (UnauthorizedException unauthorizedException) {
+            log.warn("docker 授权失败:{}", unauthorizedException.getMessage());
+            return "授权失败:" + unauthorizedException.getMessage();
         } catch (Exception e) {
             log.warn("检查 docker url 异常 {}", e.getMessage());
             if (ExceptionUtil.isCausedBy(e, SSLHandshakeException.class)) {
