@@ -9,14 +9,14 @@
 3. 【server】修复 脚本日志时间筛选不生效（感谢[@zhaozxc2010](https://gitee.com/zhaozxc2010) [Gitee issues I8ZNKL](https://gitee.com/dromara/Jpom/issues/I8ZNKL) ）
 4. 【server】优化 页面左侧菜单固定悬浮不跟随屏幕滚动条滚动（感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I8ZOOB](https://gitee.com/dromara/Jpom/issues/I8ZOOB) / [Gitee Pr 201](https://gitee.com/dromara/Jpom/pulls/201) ）
 5. 【server】优化 新增机器节点提示未选择协议（感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I8ZDZT](https://gitee.com/dromara/Jpom/issues/I8ZDZT) / [Gitee Pr 202](https://gitee.com/dromara/Jpom/pulls/202) ）
-6. 【server】修复 SSH 资产硬盘信息显示错误（感谢[@zhaozxc2010](https://gitee.com/zhaozxc2010) [Gitee issues I8ZY7K](https://gitee.com/dromara/Jpom/issues/I8ZY7K) ）
-7. 【server】优化 表格搜索区域小屏幕适配 （感谢[@zhaozxc2010](https://gitee.com/zhaozxc2010) [Gitee issues I8ZY0B](https://gitee.com/dromara/Jpom/issues/I8ZY0B) ）
-8. 【server】优化 SSH 文件管理树操作优化 （感谢[@zhaozxc2010](https://gitee.com/zhaozxc2010) [Gitee issues I9054L](https://gitee.com/dromara/Jpom/issues/I9054L) / [Gitee issues I9054L](https://gitee.com/dromara/Jpom/issues/I9054L) ）
-9. 【server】优化 整体页面顶部菜单吸顶效果（感谢[@zhaozxc2010](https://gitee.com/zhaozxc2010) [Gitee issues I907Y8](https://gitee.com/dromara/Jpom/issues/I9054L) ）
+6. 【server】修复 SSH 资产硬盘信息显示错误（感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I8ZY7K](https://gitee.com/dromara/Jpom/issues/I8ZY7K) ）
+7. 【server】优化 表格搜索区域小屏幕适配 （感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I8ZY0B](https://gitee.com/dromara/Jpom/issues/I8ZY0B) ）
+8. 【server】优化 SSH 文件管理树操作优化 （感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I9054L](https://gitee.com/dromara/Jpom/issues/I9054L) / [Gitee issues I5DMKG](https://gitee.com/dromara/Jpom/issues/I5DMKG) ）
+9. 【server】优化 整体页面顶部菜单吸顶效果（感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I907Y8](https://gitee.com/dromara/Jpom/issues/I907Y8) ）
 
 ### 🤝致谢
 
-感谢[@zhaozxc2010](https://gitee.com/zhaozxc2010) 大佬帮助优化 Jpom 前端部分老大难问题。
+感谢 [@a20070322](https://gitee.com/a20070322) / Controllers 大佬帮助优化 Jpom 前端部分老大难问题。
 
 ------
 
