@@ -147,14 +147,14 @@
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('osMaxOccupyDisk')">
           <a-popover title="硬盘信息">
             <template v-slot:content>
-              <p>内存总量：{{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</p>
+              <p>硬盘总量：{{ renderSize(record.machineSsh && record.machineSsh.osFileStoreTotal) }}</p>
               <p>硬盘最大的使用率：{{ formatPercent(record.machineSsh && record.machineSsh.osMaxOccupyDisk) }}</p>
               <p>使用率最大的分区：{{ record.machineSsh && record.machineSsh.osMaxOccupyDiskName }}</p>
             </template>
             <span
               >{{ formatPercent(record.machineSsh && record.machineSsh.osMaxOccupyDisk) }}
               /
-              {{ renderSize(record.machineSsh && record.machineSsh.osMoneyTotal) }}</span
+              {{ renderSize(record.machineSsh && record.machineSsh.osFileStoreTotal) }}</span
             >
           </a-popover>
         </template>
