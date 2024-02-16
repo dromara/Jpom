@@ -64,7 +64,7 @@ import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.service.script.ScriptExecuteLogServer;
 import org.dromara.jpom.service.script.ScriptServer;
 import org.dromara.jpom.system.ExtConfigBean;
-import org.dromara.jpom.system.extconf.BuildExtConfig;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.util.*;
 import org.dromara.jpom.webhook.DefaultWebhookPluginImpl;
 import org.springframework.util.Assert;

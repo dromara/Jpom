@@ -51,6 +51,7 @@ import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.configuration.AssetsConfig;
 import org.dromara.jpom.cron.CronUtils;
+import org.dromara.jpom.func.assets.AssetsExecutorPoolService;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.model.data.SshModel;
@@ -88,13 +89,16 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
     private final JpomApplication jpomApplication;
     private final ClusterInfoService clusterInfoService;
     private final AssetsConfig.SshConfig sshConfig;
+    private final AssetsExecutorPoolService assetsExecutorPoolService;
 
     public MachineSshServer(JpomApplication jpomApplication,
                             ClusterInfoService clusterInfoService,
-                            AssetsConfig assetsConfig) {
+                            AssetsConfig assetsConfig,
+                            AssetsExecutorPoolService assetsExecutorPoolService) {
         this.jpomApplication = jpomApplication;
         this.clusterInfoService = clusterInfoService;
         this.sshConfig = assetsConfig.getSsh();
+        this.assetsExecutorPoolService = assetsExecutorPoolService;
     }
 
     @Override
@@ -208,7 +212,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
     }
 
     private void checkList(List<MachineSshModel> monitorModels) {
-        monitorModels.forEach(monitorModel -> ThreadUtil.execute(() -> this.updateMonitor(monitorModel)));
+        monitorModels.forEach(monitorModel -> assetsExecutorPoolService.execute(() -> this.updateMonitor(monitorModel)));
     }
 
     /**

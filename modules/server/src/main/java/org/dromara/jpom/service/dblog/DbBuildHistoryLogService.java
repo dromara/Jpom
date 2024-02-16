@@ -44,7 +44,7 @@ import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.log.BuildHistoryLog;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
-import org.dromara.jpom.system.extconf.BuildExtConfig;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.File;

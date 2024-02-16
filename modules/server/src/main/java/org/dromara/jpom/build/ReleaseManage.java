@@ -73,7 +73,7 @@ import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.system.JpomRuntimeException;
-import org.dromara.jpom.system.extconf.BuildExtConfig;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.MySftp;

@@ -40,7 +40,7 @@ import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.plugins.JschLogger;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
-import org.dromara.jpom.system.extconf.BuildExtConfig;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.MySftp;
 import org.springframework.context.annotation.Lazy;

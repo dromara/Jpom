@@ -64,7 +64,7 @@ import org.dromara.jpom.service.dblog.RepositoryService;
 import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.service.script.ScriptServer;
-import org.dromara.jpom.system.extconf.BuildExtConfig;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.http.MediaType;

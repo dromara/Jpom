@@ -60,7 +60,7 @@ import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
 import org.dromara.jpom.system.ServerConfig;
-import org.dromara.jpom.system.extconf.BuildExtConfig;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.transport.*;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.MySftp;

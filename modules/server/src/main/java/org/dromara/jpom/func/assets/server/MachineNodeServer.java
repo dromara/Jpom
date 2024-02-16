@@ -49,6 +49,7 @@ import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.exception.AgentAuthorizeException;
 import org.dromara.jpom.exception.AgentException;
+import org.dromara.jpom.func.assets.AssetsExecutorPoolService;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.model.MachineNodeStatLogModel;
 import org.dromara.jpom.func.system.service.ClusterInfoService;
@@ -83,17 +84,20 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     private final NodeConfig nodeConfig;
     private final MachineNodeStatLogServer machineNodeStatLogServer;
     private final ClusterInfoService clusterInfoService;
+    private final AssetsExecutorPoolService assetsExecutorPoolService;
 
     private static final String TASK_ID = "system_monitor_node";
 
     public MachineNodeServer(NodeService nodeService,
                              ServerConfig serverConfig,
                              MachineNodeStatLogServer machineNodeStatLogServer,
-                             ClusterInfoService clusterInfoService) {
+                             ClusterInfoService clusterInfoService,
+                             AssetsExecutorPoolService assetsExecutorPoolService) {
         this.nodeService = nodeService;
         this.nodeConfig = serverConfig.getNode();
         this.machineNodeStatLogServer = machineNodeStatLogServer;
         this.clusterInfoService = clusterInfoService;
+        this.assetsExecutorPoolService = assetsExecutorPoolService;
     }
 
     @Override
@@ -235,7 +239,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             // 超时时间统一，避免长时间无响应
             machineNodeModel.setJpomTimeout(30);
             //
-            ThreadUtil.execute(() -> {
+            assetsExecutorPoolService.execute(() -> {
                 try {
                     BaseServerController.resetInfo(UserModel.EMPTY);
                     long timeMillis = SystemClock.now();
