@@ -50,6 +50,7 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.files.service.FileStorageService;
@@ -73,7 +74,6 @@ import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.system.JpomRuntimeException;
-import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.MySftp;
@@ -109,23 +109,32 @@ public class ReleaseManage {
     private Integer fromBuildNumberId;
     private final BuildExtraModule buildExtraModule;
     private final String logId;
-    private final BuildExecuteService buildExecuteService;
-    private final DockerInfoService dockerInfoService;
-    private final MachineDockerServer machineDockerServer;
-    private final FileStorageService fileStorageService;
-    private final BuildExtConfig buildExtConfig;
     private EnvironmentMapBuilder buildEnv;
 
     private final LogRecorder logRecorder;
     private File resultFile;
     private Process process;
 
+    private static BuildExecuteService buildExecuteService;
+    private static DockerInfoService dockerInfoService;
+    private static MachineDockerServer machineDockerServer;
+    private static BuildExtConfig buildExtConfig;
+    private static FileStorageService fileStorageService;
+
+    private void loadService() {
+        buildExecuteService = ObjectUtil.defaultIfNull(buildExecuteService, () -> SpringUtil.getBean(BuildExecuteService.class));
+        dockerInfoService = ObjectUtil.defaultIfNull(dockerInfoService, () -> SpringUtil.getBean(DockerInfoService.class));
+        machineDockerServer = ObjectUtil.defaultIfNull(machineDockerServer, () -> SpringUtil.getBean(MachineDockerServer.class));
+        buildExtConfig = ObjectUtil.defaultIfNull(buildExtConfig, () -> SpringUtil.getBean(BuildExtConfig.class));
+        fileStorageService = ObjectUtil.defaultIfNull(fileStorageService, () -> SpringUtil.getBean(FileStorageService.class));
+    }
 
     private Integer getRealBuildNumberId() {
         return ObjectUtil.defaultIfNull(this.fromBuildNumberId, this.buildNumberId);
     }
 
     private void init() {
+        this.loadService();
 //        if (this.logRecorder == null) {
 //            // 回滚的时候需要重新创建对象
 //            File logFile = BuildUtil.getLogFile(buildExtraModule.getId(), this.buildNumberId);

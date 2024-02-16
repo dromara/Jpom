@@ -20,56 +20,66 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.dromara.jpom.func.assets;
+package org.dromara.jpom.build;
 
 import cn.hutool.core.thread.ExecutorBuilder;
-import cn.hutool.core.util.RuntimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.configuration.AssetsConfig;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 @Slf4j
-public class AssetsExecutorPoolService {
+public class BuildExecutorPoolService {
     /**
-     * 监控线程池
+     * 构建线程池
      */
     private volatile ThreadPoolExecutor threadPoolExecutor;
+    private final BuildExtConfig buildExtConfig;
 
-    private final AssetsConfig assetsConfig;
+    public BuildExecutorPoolService(BuildExtConfig buildExtConfig) {
+        this.buildExtConfig = buildExtConfig;
+    }
 
-    public AssetsExecutorPoolService(AssetsConfig assetsConfig) {
-        this.assetsConfig = assetsConfig;
+    public ThreadPoolExecutor getThreadPoolExecutor() {
+        this.initPool();
+        return threadPoolExecutor;
     }
 
     public void execute(Runnable command) {
-        this.createPool();
+        this.initPool();
         threadPoolExecutor.execute(command);
     }
 
-    private void createPool() {
+    /**
+     * 创建构建线程池
+     */
+    private void initPool() {
         if (threadPoolExecutor == null) {
-            synchronized (AssetsExecutorPoolService.class) {
+            synchronized (BuildExecutorPoolService.class) {
                 if (threadPoolExecutor == null) {
                     ExecutorBuilder executorBuilder = ExecutorBuilder.create();
-                    int poolSize = assetsConfig.getMonitorPoolSize();
+                    int poolSize = buildExtConfig.getPoolSize();
                     if (poolSize > 0) {
-                        // 获取 CPU 核心数
-                        poolSize = RuntimeUtil.getProcessorCount();
+                        executorBuilder.setCorePoolSize(poolSize).setMaxPoolSize(poolSize);
                     }
-                    executorBuilder.setCorePoolSize(poolSize).setMaxPoolSize(poolSize);
-                    executorBuilder.useArrayBlockingQueue(Math.max(assetsConfig.getMonitorPoolWaitQueue(), 1));
+                    executorBuilder.useArrayBlockingQueue(Math.max(buildExtConfig.getPoolWaitQueue(), 1));
                     executorBuilder.setHandler(new ThreadPoolExecutor.DiscardPolicy() {
                         @Override
                         public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
-                            log.warn("资产监控线程池拒绝了任务：{}", r.getClass());
+                            if (r instanceof BuildExecuteManage) {
+                                // 取消任务
+                                BuildExecuteManage buildExecuteManage = (BuildExecuteManage) r;
+                                buildExecuteManage.rejectedExecution();
+                            } else {
+                                log.warn("构建线程池拒绝了未知任务：{}", r.getClass());
+                            }
                         }
                     });
                     threadPoolExecutor = executorBuilder.build();
-                    JpomApplication.register("assets-monitor", threadPoolExecutor);
+                    JpomApplication.register("build", threadPoolExecutor);
                 }
             }
         }
