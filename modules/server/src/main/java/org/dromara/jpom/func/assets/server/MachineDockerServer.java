@@ -43,6 +43,7 @@ import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.configuration.AssetsConfig;
 import org.dromara.jpom.cron.CronUtils;
+import org.dromara.jpom.func.assets.AssetsExecutorPoolService;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.cert.service.CertificateInfoService;
@@ -78,6 +79,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     private final DockerSwarmInfoService dockerSwarmInfoService;
     private final ClusterInfoService clusterInfoService;
     private final AssetsConfig.DockerConfig dockerConfig;
+    private final AssetsExecutorPoolService assetsExecutorPoolService;
     @Resource
     @Lazy
     private CertificateInfoService certificateInfoService;
@@ -87,12 +89,14 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
                                DockerInfoService dockerInfoService,
                                DockerSwarmInfoService dockerSwarmInfoService,
                                ClusterInfoService clusterInfoService,
-                               AssetsConfig assetsConfig) {
+                               AssetsConfig assetsConfig,
+                               AssetsExecutorPoolService assetsExecutorPoolService) {
         this.machineSshServer = machineSshServer;
         this.dockerInfoService = dockerInfoService;
         this.dockerSwarmInfoService = dockerSwarmInfoService;
         this.clusterInfoService = clusterInfoService;
         this.dockerConfig = assetsConfig.getDocker();
+        this.assetsExecutorPoolService = assetsExecutorPoolService;
     }
 
     @Override
@@ -189,7 +193,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     }
 
     private void checkList(List<MachineDockerModel> monitorModels) {
-        monitorModels.forEach(monitorModel -> ThreadUtil.execute(() -> this.updateMonitor(monitorModel)));
+        monitorModels.forEach(monitorModel -> assetsExecutorPoolService.execute(() -> this.updateMonitor(monitorModel)));
     }
 
     /**

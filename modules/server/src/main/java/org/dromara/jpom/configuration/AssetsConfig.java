@@ -42,6 +42,15 @@ import java.util.List;
 @EnableConfigurationProperties({AssetsConfig.SshConfig.class, AssetsConfig.DockerConfig.class})
 public class AssetsConfig {
     /**
+     * 监控线程池大小,小于等于0 为CPU核心数
+     */
+    private int monitorPoolSize = 0;
+
+    /**
+     * 监控任务等待数量，超过此数量将取消监控任务，值最小为 1
+     */
+    private int monitorPoolWaitQueue = 500;
+    /**
      * ssh 资产配置
      */
     private SshConfig ssh;

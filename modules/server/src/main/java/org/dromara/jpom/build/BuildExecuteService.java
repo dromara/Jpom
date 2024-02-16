@@ -46,7 +46,7 @@ import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.service.script.ScriptExecuteLogServer;
 import org.dromara.jpom.service.script.ScriptServer;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
-import org.dromara.jpom.system.extconf.BuildExtConfig;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;

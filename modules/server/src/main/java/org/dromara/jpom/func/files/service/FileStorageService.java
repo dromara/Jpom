@@ -45,7 +45,7 @@ import org.dromara.jpom.service.IStatusRecover;
 import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseGlobalOrWorkspaceService;
 import org.dromara.jpom.system.ServerConfig;
-import org.dromara.jpom.system.extconf.BuildExtConfig;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.File;

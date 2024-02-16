@@ -102,6 +102,10 @@ jpom:
     # 监听静态文件目录层级
     watch-monitor-max-depth: 5
   assets:
+    # 监控线程池大小,小于等于0 为CPU核心数
+    monitor-pool-size: 0
+    # 监控任务等待数量，超过此数量将取消监控任务，值最小为 1
+    monitor-pool-wait-queue: 500
     # ssh 资产
     ssh:
       # 监控频率
