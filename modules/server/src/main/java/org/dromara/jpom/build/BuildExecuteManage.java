@@ -33,9 +33,9 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.net.url.UrlQuery;
-import cn.hutool.core.thread.ExecutorBuilder;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.model.BaseIdModel;
 import cn.keepbx.jpom.plugins.IPlugin;
 import lombok.Builder;
@@ -44,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.exception.LogRecorderCloseException;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.files.service.FileStorageService;
@@ -64,7 +65,6 @@ import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.service.script.ScriptExecuteLogServer;
 import org.dromara.jpom.service.script.ScriptServer;
 import org.dromara.jpom.system.ExtConfigBean;
-import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.util.*;
 import org.dromara.jpom.webhook.DefaultWebhookPluginImpl;
 import org.springframework.util.Assert;
@@ -85,13 +85,6 @@ import java.util.stream.Collectors;
 @Builder
 @Slf4j
 public class BuildExecuteManage implements Runnable {
-
-    /**
-     * 构建线程池
-     */
-    private static ThreadPoolExecutor threadPoolExecutor;
-
-
     /**
      * 缓存构建中
      */
@@ -100,15 +93,6 @@ public class BuildExecuteManage implements Runnable {
     private final TaskData taskData;
     private final BuildExtraModule buildExtraModule;
     private final String logId;
-    private final BuildExecuteService buildExecuteService;
-    private final ScriptServer scriptServer;
-    private final ScriptExecuteLogServer scriptExecuteLogServer;
-    private final BuildInfoService buildService;
-    private final DbBuildHistoryLogService dbBuildHistoryLogService;
-    private final DockerInfoService dockerInfoService;
-    private final MachineDockerServer machineDockerServer;
-    private final BuildExtConfig buildExtConfig;
-    private final FileStorageService fileStorageService;
     //
     private Process process;
     private LogRecorder logRecorder;
@@ -121,6 +105,29 @@ public class BuildExecuteManage implements Runnable {
      */
     private Long submitTaskTime;
 
+    private static BuildExecuteService buildExecuteService;
+    private static ScriptServer scriptServer;
+    private static ScriptExecuteLogServer scriptExecuteLogServer;
+    private static BuildInfoService buildService;
+    private static DbBuildHistoryLogService dbBuildHistoryLogService;
+    private static DockerInfoService dockerInfoService;
+    private static MachineDockerServer machineDockerServer;
+    private static BuildExtConfig buildExtConfig;
+    private static FileStorageService fileStorageService;
+    private static BuildExecutorPoolService buildExecutorPoolService;
+
+    private void loadService() {
+        buildExecuteService = ObjectUtil.defaultIfNull(buildExecuteService, () -> SpringUtil.getBean(BuildExecuteService.class));
+        scriptServer = ObjectUtil.defaultIfNull(scriptServer, () -> SpringUtil.getBean(ScriptServer.class));
+        scriptExecuteLogServer = ObjectUtil.defaultIfNull(scriptExecuteLogServer, () -> SpringUtil.getBean(ScriptExecuteLogServer.class));
+        buildService = ObjectUtil.defaultIfNull(buildService, () -> SpringUtil.getBean(BuildInfoService.class));
+        dbBuildHistoryLogService = ObjectUtil.defaultIfNull(dbBuildHistoryLogService, () -> SpringUtil.getBean(DbBuildHistoryLogService.class));
+        dockerInfoService = ObjectUtil.defaultIfNull(dockerInfoService, () -> SpringUtil.getBean(DockerInfoService.class));
+        machineDockerServer = ObjectUtil.defaultIfNull(machineDockerServer, () -> SpringUtil.getBean(MachineDockerServer.class));
+        buildExtConfig = ObjectUtil.defaultIfNull(buildExtConfig, () -> SpringUtil.getBean(BuildExtConfig.class));
+        fileStorageService = ObjectUtil.defaultIfNull(fileStorageService, () -> SpringUtil.getBean(FileStorageService.class));
+        buildExecutorPoolService = ObjectUtil.defaultIfNull(buildExecutorPoolService, () -> SpringUtil.getBean(BuildExecutorPoolService.class));
+    }
 
     /**
      * 正在构建的数量
@@ -131,42 +138,15 @@ public class BuildExecuteManage implements Runnable {
         return BUILD_MANAGE_MAP.keySet();
     }
 
-    /**
-     * 创建构建线程池
-     */
-    private synchronized void initPool() {
-        if (threadPoolExecutor != null) {
-            return;
-        }
-        ExecutorBuilder executorBuilder = ExecutorBuilder.create();
-        int poolSize = buildExtConfig.getPoolSize();
-        if (poolSize > 0) {
-            executorBuilder.setCorePoolSize(poolSize).setMaxPoolSize(poolSize);
-        }
-        executorBuilder.useArrayBlockingQueue(Math.max(buildExtConfig.getPoolWaitQueue(), 1));
-        executorBuilder.setHandler(new ThreadPoolExecutor.DiscardPolicy() {
-            @Override
-            public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
-                if (r instanceof BuildExecuteManage) {
-                    // 取消任务
-                    BuildExecuteManage buildExecuteManage = (BuildExecuteManage) r;
-                    buildExecuteManage.rejectedExecution();
-                } else {
-                    log.warn("构建线程池拒绝了未知任务：{}", r.getClass());
-                }
-            }
-        });
-        threadPoolExecutor = executorBuilder.build();
-        JpomApplication.register("build", threadPoolExecutor);
-    }
 
     /**
      * 提交任务
      */
     public void submitTask() {
+        this.loadService();
         submitTaskTime = SystemClock.now();
         // 创建线程池
-        initPool();
+        ThreadPoolExecutor threadPoolExecutor = buildExecutorPoolService.getThreadPoolExecutor();
         //
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
         File logFile = BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
@@ -184,7 +164,8 @@ public class BuildExecuteManage implements Runnable {
     /**
      * 取消任务(拒绝执行)
      */
-    private void rejectedExecution() {
+    public void rejectedExecution() {
+        ThreadPoolExecutor threadPoolExecutor = buildExecutorPoolService.getThreadPoolExecutor();
         int queueSize = threadPoolExecutor.getQueue().size();
         int limitPoolSize = threadPoolExecutor.getPoolSize();
         int corePoolSize = threadPoolExecutor.getCorePoolSize();
@@ -680,12 +661,7 @@ public class BuildExecuteManage implements Runnable {
             .buildExtraModule(buildExtraModule)
             .userModel(userModel)
             .logId(logId)
-            .dockerInfoService(dockerInfoService)
-            .machineDockerServer(machineDockerServer)
             .buildEnv(taskData.environmentMapBuilder)
-            .fileStorageService(fileStorageService)
-            .buildExecuteService(buildExecuteService)
-            .buildExtConfig(buildExtConfig)
             .logRecorder(logRecorder)
             .build();
         try {

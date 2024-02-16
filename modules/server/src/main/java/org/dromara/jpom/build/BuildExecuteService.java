@@ -25,13 +25,10 @@ package org.dromara.jpom.build;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.lang.Opt;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.func.assets.server.MachineDockerServer;
-import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.model.BaseEnum;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.BuildInfoModel;
@@ -42,11 +39,7 @@ import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.dblog.RepositoryService;
-import org.dromara.jpom.service.docker.DockerInfoService;
-import org.dromara.jpom.service.script.ScriptExecuteLogServer;
-import org.dromara.jpom.service.script.ScriptServer;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
-import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
@@ -67,34 +60,19 @@ public class BuildExecuteService {
     private final BuildInfoService buildService;
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
     private final RepositoryService repositoryService;
-    private final DockerInfoService dockerInfoService;
-    private final MachineDockerServer machineDockerServer;
     private final WorkspaceEnvVarService workspaceEnvVarService;
-    private final ScriptServer scriptServer;
-    private final ScriptExecuteLogServer scriptExecuteLogServer;
-    private final BuildExtConfig buildExtConfig;
-    private final FileStorageService fileStorageService;
+    private final BuildExecutorPoolService buildExecutorPoolService;
 
     public BuildExecuteService(BuildInfoService buildService,
                                DbBuildHistoryLogService dbBuildHistoryLogService,
                                RepositoryService repositoryService,
-                               DockerInfoService dockerInfoService,
                                WorkspaceEnvVarService workspaceEnvVarService,
-                               ScriptServer scriptServer,
-                               ScriptExecuteLogServer scriptExecuteLogServer,
-                               BuildExtConfig buildExtConfig,
-                               MachineDockerServer machineDockerServer,
-                               FileStorageService fileStorageService) {
+                               BuildExecutorPoolService buildExecutorPoolService) {
         this.buildService = buildService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.repositoryService = repositoryService;
-        this.dockerInfoService = dockerInfoService;
         this.workspaceEnvVarService = workspaceEnvVarService;
-        this.scriptServer = scriptServer;
-        this.scriptExecuteLogServer = scriptExecuteLogServer;
-        this.buildExtConfig = buildExtConfig;
-        this.machineDockerServer = machineDockerServer;
-        this.fileStorageService = fileStorageService;
+        this.buildExecutorPoolService = buildExecutorPoolService;
     }
 
 
@@ -228,20 +206,15 @@ public class BuildExecuteService {
                 .buildExtraModule(buildExtraModule)
                 .logId(buildHistoryLog.getId())
                 .userModel(userModel)
-                .machineDockerServer(machineDockerServer)
-                .dockerInfoService(dockerInfoService)
-                .fileStorageService(fileStorageService)
-                .buildExtConfig(buildExtConfig)
                 .buildNumberId(buildHistoryLog.getBuildNumberId())
                 .fromBuildNumberId(fromBuildNumberId)
-                .buildExecuteService(this)
                 .logRecorder(logRecorder)
                 .buildEnv(environmentMapBuilder)
                 .build();
             //
             logRecorder.system("开始准备回滚：{} -> {}", fromBuildNumberId, buildId);
             //
-            ThreadUtil.execute(() -> manage.rollback(item));
+            buildExecutorPoolService.execute(() -> manage.rollback(item));
             return buildId;
         }
     }
@@ -268,16 +241,7 @@ public class BuildExecuteService {
         BuildExecuteManage.BuildExecuteManageBuilder builder = BuildExecuteManage.builder()
             .taskData(taskData)
             .logId(logId)
-            .scriptServer(scriptServer)
-            .dockerInfoService(dockerInfoService)
-            .machineDockerServer(machineDockerServer)
-            .fileStorageService(fileStorageService)
-            .buildService(buildService)
-            .scriptExecuteLogServer(scriptExecuteLogServer)
-            .buildExtConfig(buildExtConfig)
-            .dbBuildHistoryLogService(dbBuildHistoryLogService)
-            .buildExtraModule(buildExtraModule)
-            .buildExecuteService(this);
+            .buildExtraModule(buildExtraModule);
         builder.build().submitTask();
     }
 
