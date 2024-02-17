@@ -15,7 +15,8 @@
 9. 【server】优化 整体页面顶部菜单吸顶效果（感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I907Y8](https://gitee.com/dromara/Jpom/issues/I907Y8) ）
 10. 【server】优化 资产监控线程池独立管理（感谢[@singlethread](https://gitee.com/zengwei_joni) [Gitee issues I918AB](https://gitee.com/dromara/Jpom/issues/I918AB) ）
 11. 【server】优化 构建回滚使用构建独立线程池
-12. 【all】优化 升级 hutool 版本（主要解决版本号排序异常）（感谢 [@Tom Xin](https://gitee.com/meiMingle) [Gitee issues I8Z3TI](https://gitee.com/dromara/Jpom/issues/I8Z3TI) / [Hutool issues I8Z3VE](https://gitee.com/dromara/Jpom/issues/I8Z3VE)）
+12. 【all】优化 升级 hutool 版本（主要解决版本号排序异常）（感谢 [@Tom Xin](https://gitee.com/meiMingle) [Gitee issues I8Z3TI](https://gitee.com/dromara/Jpom/issues/I8Z3TI) / [Hutool issues I8Z3VE](https://gitee.com/dromara/hutool/issues/I8Z3VE)）
+13. 【all】优化 升级 fastjson 版本
 
 ### 🤝致谢
 
