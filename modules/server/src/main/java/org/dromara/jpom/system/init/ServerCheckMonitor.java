@@ -32,6 +32,7 @@ import org.dromara.jpom.common.RemoteVersion;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.cron.CronUtils;
+import org.dromara.jpom.func.assets.AssetsExecutorPoolService;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.script.BaseRunScript;
 import org.dromara.jpom.service.node.NodeService;
@@ -56,13 +57,16 @@ public class ServerCheckMonitor implements ILoadEvent, ISystemTask {
     private final NodeService nodeService;
     private final NodeScriptServer nodeScriptServer;
     private final NodeScriptExecuteLogServer nodeScriptExecuteLogServer;
+    private final AssetsExecutorPoolService assetsExecutorPoolService;
 
     public ServerCheckMonitor(NodeService nodeService,
                               NodeScriptServer nodeScriptServer,
-                              NodeScriptExecuteLogServer nodeScriptExecuteLogServer) {
+                              NodeScriptExecuteLogServer nodeScriptExecuteLogServer,
+                              AssetsExecutorPoolService assetsExecutorPoolService) {
         this.nodeService = nodeService;
         this.nodeScriptServer = nodeScriptServer;
         this.nodeScriptExecuteLogServer = nodeScriptExecuteLogServer;
+        this.assetsExecutorPoolService = assetsExecutorPoolService;
     }
 
     /**
@@ -104,7 +108,7 @@ public class ServerCheckMonitor implements ILoadEvent, ISystemTask {
                 if (nodeModel == null) {
                     continue;
                 }
-                ThreadUtil.execute(() -> this.pullScriptLogItem(nodeModel));
+                assetsExecutorPoolService.execute(() -> this.pullScriptLogItem(nodeModel));
             }
         });
     }
