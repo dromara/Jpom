@@ -130,9 +130,6 @@ provide('globalLoading', globalLoading)
 </script>
 
 <style lang="less">
-body {
-  margin: 0;
-}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -149,70 +146,11 @@ body {
   background-color: rgba(140, 140, 140, 0.3);
   opacity: 0.8;
 }
-
-@color-border-last: rgba(140, 140, 140, 0.3);
-@color-neutral-last: rgba(140, 140, 140, 0.2);
-@scrollbar-size: 4px;
-
-// 兼容火狐
-* {
-  scrollbar-width: thin;
-  scrollbar-color: @color-border-last @color-neutral-last;
-}
-// 滚动条样式
-::-webkit-scrollbar {
-  width: @scrollbar-size;
-  height: @scrollbar-size;
-  border-radius: @scrollbar-size;
-  background-color: transparent;
-}
-// 滚动条-活动按钮
-::-webkit-scrollbar-thumb {
-  background: @color-border-last;
-  border-radius: @scrollbar-size;
-  box-shadow: outset 0 0 @scrollbar-size @color-border-last;
-}
-// 滚动条背景
-::-webkit-scrollbar-track {
-  background-color: @color-neutral-last;
-  border-radius: @scrollbar-size;
-  box-shadow: outset 0 0 @scrollbar-size @color-neutral-last;
-}
-
-.search-input-item {
-  width: 140px;
-  /* margin-right: 10px; */
-}
-
-.hide-scrollbar *::-webkit-scrollbar {
-  width: 0 !important;
-  display: none;
-}
-
-.hide-scrollbar * {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.hide-scrollbar pre::-webkit-scrollbar {
-  width: 0 !important;
-  display: none;
-}
-
-.hide-scrollbar pre {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.text-overflow-hidden {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 </style>
 
 <style scoped>
 .pageLoading {
+  position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;

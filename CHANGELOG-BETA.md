@@ -17,6 +17,7 @@
 11. 【server】优化 构建回滚使用构建独立线程池
 12. 【all】优化 升级 hutool 版本（主要解决版本号排序异常）（感谢 [@Tom Xin](https://gitee.com/meiMingle) [Gitee issues I8Z3TI](https://gitee.com/dromara/Jpom/issues/I8Z3TI) / [Hutool issues I8Z3VE](https://gitee.com/dromara/hutool/issues/I8Z3VE)）
 13. 【all】优化 升级 fastjson 版本
+14. 【server】优化 页面整体滚动条兼容高版本浏览器（感谢@Controllers）
 
 ### 🤝致谢
 

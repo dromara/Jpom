@@ -39,7 +39,7 @@
       <a-layout-content
         :style="{
           width: collapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 210px)',
-          overflowY: 'scroll',
+          overflowY: 'auto',
           backgroundColor: theme === 'light' ? '#fff' : ''
         }"
         class="layout-content"
@@ -197,6 +197,7 @@ const changeCollapsed = () => {
   overflow-y: auto;
 }
 .layout-content {
+  overflow-x: auto;
   padding: 15px;
   /* margin: 15px; */
 }

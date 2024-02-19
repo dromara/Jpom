@@ -56,7 +56,7 @@ public class AssetsExecutorPoolService {
                 if (threadPoolExecutor == null) {
                     ExecutorBuilder executorBuilder = ExecutorBuilder.create();
                     int poolSize = assetsConfig.getMonitorPoolSize();
-                    if (poolSize > 0) {
+                    if (poolSize <= 0) {
                         // 获取 CPU 核心数
                         poolSize = RuntimeUtil.getProcessorCount();
                     }
