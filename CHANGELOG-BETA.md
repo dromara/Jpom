@@ -1,5 +1,14 @@
 # 🚀 版本日志
 
+## 2.11.2.2
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】优化 升级 docker-java、jgit 版本
+2. 【all】优化 升级 commons-compress 版本
+3. 【agent】优化 升级 oshi 版本
+------
+
 ## 2.11.2.1
 
 ### 🐞 解决BUG、优化功能
