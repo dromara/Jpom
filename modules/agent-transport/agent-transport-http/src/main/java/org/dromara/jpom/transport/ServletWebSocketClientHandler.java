@@ -24,6 +24,7 @@ package org.dromara.jpom.transport;
 
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.SystemPropsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 import org.springframework.util.unit.DataSize;
@@ -76,8 +77,11 @@ public class ServletWebSocketClientHandler extends AbstractWebSocketHandler impl
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         // 发送消息时间限制 60 秒
-        // 缓存 5m 消息
-        this.session = new ConcurrentWebSocketSessionDecorator(session, 60 * 1000, (int) DataSize.ofMegabytes(5).toBytes());
+        long messageSizeLimit = SystemPropsUtil.getLong("JPOM_NODE_WEB_SOCKET_MESSAGE_SIZE_LIMIT", DataSize.ofMegabytes(5).toBytes());
+        this.session = new ConcurrentWebSocketSessionDecorator(session, 60 * 1000, (int) messageSizeLimit);
+        // 消息大小限制
+        this.session.setTextMessageSizeLimit((int) messageSizeLimit);
+        this.session.setBinaryMessageSizeLimit((int) messageSizeLimit);
     }
 
     @Override
