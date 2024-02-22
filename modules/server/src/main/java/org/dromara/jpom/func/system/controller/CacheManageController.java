@@ -27,10 +27,13 @@ import cn.hutool.cache.impl.LFUCache;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.event.ICacheTask;
+import cn.keepbx.jpom.event.ISystemTask;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.build.BuildExecuteManage;
 import org.dromara.jpom.build.BuildUtil;
@@ -73,7 +76,8 @@ import java.util.TimeZone;
 @RequestMapping(value = "system")
 @Feature(cls = ClassFeature.SYSTEM_CACHE)
 @SystemPermission
-public class CacheManageController extends BaseServerController implements ICacheTask {
+@Slf4j
+public class CacheManageController extends BaseServerController implements ICacheTask, ISystemTask {
 
     private long dataSize;
     private long oldJarsSize;
@@ -82,6 +86,10 @@ public class CacheManageController extends BaseServerController implements ICach
     private final JpomApplication jpomApplication;
     private final DataInitEvent dataInitEvent;
     private final ClusterConfig clusterConfig;
+    /**
+     * 标记是否正在刷新缓存
+     */
+    private boolean refreshCacheIng = false;
 
     public CacheManageController(JpomApplication jpomApplication,
                                  DataInitEvent dataInitEvent,
@@ -191,13 +199,33 @@ public class CacheManageController extends BaseServerController implements ICach
         return JsonMessage.success("清理成功");
     }
 
+    @GetMapping(value = "async-refresh-cache", produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<String> refresh() {
+        Assert.state(!this.refreshCacheIng, "正在刷新缓存中,请勿重复刷新");
+        ThreadUtil.execute(() -> {
+            try {
+                this.refreshCacheIng = true;
+                this.executeTask();
+            } catch (Exception e) {
+                log.error("手动刷新缓存异常", e);
+            } finally {
+                this.refreshCacheIng = false;
+            }
+        });
+        return JsonMessage.success("异步刷新中请稍后刷新页面查看");
+    }
+
     @Override
     public void refreshCache() {
         File file = jpomApplication.getTempPath();
         this.tempFileSize = FileUtil.size(file);
-        this.dataSize = jpomApplication.dataSize();
         File oldJarsPath = JpomManifest.getOldJarsPath();
         this.oldJarsSize = FileUtil.size(oldJarsPath);
+    }
+
+    @Override
+    public void executeTask() {
+        this.dataSize = jpomApplication.dataSize();
         BuildUtil.reloadCacheSize();
     }
 }

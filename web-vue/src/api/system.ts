@@ -1,5 +1,5 @@
-import axios from "./config";
-import { loadRouterBase } from "./config";
+import axios from './config'
+import { loadRouterBase } from './config'
 
 /**
  * 日志列表
@@ -7,10 +7,10 @@ import { loadRouterBase } from "./config";
  */
 export function getLogList(params) {
   return axios({
-    url: "/system/log_data.json",
-    method: "post",
-    data: params,
-  });
+    url: '/system/log_data.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -19,7 +19,7 @@ export function getLogList(params) {
  * @param {nodeId, path} params
  */
 export function downloadFile(params) {
-  return loadRouterBase("/system/log_download", params);
+  return loadRouterBase('/system/log_download', params)
 }
 
 /**
@@ -28,10 +28,10 @@ export function downloadFile(params) {
  */
 export function deleteLog(params) {
   return axios({
-    url: "/system/log_del.json",
-    method: "post",
-    data: params,
-  });
+    url: '/system/log_del.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -39,9 +39,9 @@ export function deleteLog(params) {
  */
 export function getServerCache() {
   return axios({
-    url: "/system/server-cache",
-    method: "post",
-  });
+    url: '/system/server-cache',
+    method: 'post'
+  })
 }
 
 /**
@@ -50,10 +50,10 @@ export function getServerCache() {
  */
 export function getNodeCache(data) {
   return axios({
-    url: "/system/node_cache.json",
-    method: "post",
-    data,
-  });
+    url: '/system/node_cache.json',
+    method: 'post',
+    data
+  })
 }
 
 /**
@@ -65,10 +65,19 @@ export function getNodeCache(data) {
  */
 export function clearCache(params) {
   return axios({
-    url: "/system/clearCache.json",
-    method: "post",
-    data: params,
-  });
+    url: '/system/clearCache.json',
+    method: 'post',
+    data: params
+  })
+}
+
+export function asyncRefreshCache(params) {
+  return axios({
+    url: '/system/async-refresh-cache',
+    method: 'get',
+    headers: {},
+    params
+  })
 }
 
 /**
@@ -77,12 +86,12 @@ export function clearCache(params) {
  */
 export function clearErrorWorkspace(params) {
   return axios({
-    url: "/system/clear-error-workspace",
-    method: "get",
+    url: '/system/clear-error-workspace',
+    method: 'get',
 
     headers: {},
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -91,10 +100,10 @@ export function clearErrorWorkspace(params) {
  */
 export function getConfigData(data) {
   return axios({
-    url: "/system/config-data",
-    method: "post",
-    data: data,
-  });
+    url: '/system/config-data',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -102,10 +111,10 @@ export function getConfigData(data) {
  */
 export function getIpConfigData() {
   return axios({
-    url: "/system/ip-config-data",
-    method: "post",
-    data: {},
-  });
+    url: '/system/ip-config-data',
+    method: 'post',
+    data: {}
+  })
 }
 
 /**
@@ -117,10 +126,10 @@ export function getIpConfigData() {
  */
 export function editIpConfig(params) {
   return axios({
-    url: "/system/save_ip_config.json",
-    method: "post",
-    data: params,
-  });
+    url: '/system/save_ip_config.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -133,10 +142,10 @@ export function editIpConfig(params) {
  */
 export function editConfig(params) {
   return axios({
-    url: "/system/save_config.json",
-    method: "post",
-    data: params,
-  });
+    url: '/system/save_config.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -144,25 +153,25 @@ export function editConfig(params) {
  */
 export function getMailConfigData() {
   return axios({
-    url: "/system/mail-config-data",
-    method: "post",
-  });
+    url: '/system/mail-config-data',
+    method: 'post'
+  })
 }
 
 export function oauthConfigOauth2(params) {
   return axios({
-    url: "/system/oauth-config/oauth2",
-    method: "get",
-    params,
-  });
+    url: '/system/oauth-config/oauth2',
+    method: 'get',
+    params
+  })
 }
 
 export function oauthConfigOauth2Save(params) {
   return axios({
-    url: "/system/oauth-config/oauth2-save",
-    method: "post",
-    data: params,
-  });
+    url: '/system/oauth-config/oauth2-save',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -179,10 +188,10 @@ export function oauthConfigOauth2Save(params) {
  */
 export function editMailConfig(params) {
   return axios({
-    url: "/system/mailConfig_save.json",
-    method: "post",
-    data: params,
-  });
+    url: '/system/mailConfig_save.json',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -191,14 +200,14 @@ export function editMailConfig(params) {
  */
 export function systemInfo(data) {
   return axios({
-    url: "/system/info",
-    method: "post",
+    url: '/system/info',
+    method: 'post',
     headers: {
-      tip: "no",
-      loading: "no",
+      tip: 'no',
+      loading: 'no'
     },
-    data,
-  });
+    data
+  })
 }
 
 /**
@@ -210,16 +219,16 @@ export function systemInfo(data) {
  */
 export function uploadUpgradeFile(formData) {
   return axios({
-    url: "/system/upload-jar-sharding",
+    url: '/system/upload-jar-sharding',
     headers: {
-      "Content-Type": "multipart/form-data;charset=UTF-8",
-      loading: "no",
+      'Content-Type': 'multipart/form-data;charset=UTF-8',
+      loading: 'no'
     },
-    method: "post",
+    method: 'post',
     // 0 表示无超时时间
     timeout: 0,
-    data: formData,
-  });
+    data: formData
+  })
 }
 
 /**
@@ -228,13 +237,13 @@ export function uploadUpgradeFile(formData) {
  */
 export function uploadUpgradeFileMerge(data) {
   return axios({
-    url: "/system/upload-jar-sharding-merge",
-    method: "post",
+    url: '/system/upload-jar-sharding-merge',
+    method: 'post',
     headers: {},
     data: data,
     // 0 表示无超时时间
-    timeout: 0,
-  });
+    timeout: 0
+  })
 }
 
 /**
@@ -243,20 +252,20 @@ export function uploadUpgradeFileMerge(data) {
  */
 export function changelog(data) {
   return axios({
-    url: "/system/change_log",
-    method: "post",
+    url: '/system/change_log',
+    method: 'post',
     headers: {},
-    data,
-  });
+    data
+  })
 }
 
 export function changBetaRelease(params) {
   return axios({
-    url: "/system/change-beta-release",
-    method: "get",
+    url: '/system/change-beta-release',
+    method: 'get',
     headers: {},
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -265,11 +274,11 @@ export function changBetaRelease(params) {
  */
 export function checkVersion(data) {
   return axios({
-    url: "/system/check_version.json",
-    method: "post",
+    url: '/system/check_version.json',
+    method: 'post',
     headers: {},
-    data,
-  });
+    data
+  })
 }
 
 /**
@@ -278,12 +287,12 @@ export function checkVersion(data) {
  */
 export function remoteUpgrade(params) {
   return axios({
-    url: "/system/remote_upgrade.json",
-    method: "get",
+    url: '/system/remote_upgrade.json',
+    method: 'get',
     timeout: 0,
     headers: {},
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -291,10 +300,10 @@ export function remoteUpgrade(params) {
  */
 export function getProxyConfig() {
   return axios({
-    url: "/system/get_proxy_config",
-    method: "get",
-    params: {},
-  });
+    url: '/system/get_proxy_config',
+    method: 'get',
+    params: {}
+  })
 }
 
 /**
@@ -302,11 +311,11 @@ export function getProxyConfig() {
  */
 export function saveProxyConfig(data) {
   return axios({
-    url: "/system/save_proxy_config",
-    method: "post",
+    url: '/system/save_proxy_config',
+    method: 'post',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json'
     },
-    data: data,
-  });
+    data: data
+  })
 }

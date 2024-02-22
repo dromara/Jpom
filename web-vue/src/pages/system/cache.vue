@@ -3,7 +3,15 @@
     <a-tabs default-active-key="1">
       <a-tab-pane key="1" tab="缓存信息">
         <a-descriptions bordered title="" layout="vertical" size="middle">
-          <a-descriptions-item label="提示" :span="3">
+          <a-descriptions-item :span="3">
+            <template #label>
+              <a-row>
+                <a-col :span="12"> 提示 </a-col>
+                <a-col :span="12" style="text-align: right">
+                  <a-button size="small" type="link" @click="refreshCache">手动刷新统计<ReloadOutlined /></a-button>
+                </a-col>
+              </a-row>
+            </template>
             <div style="color: red; font-weight: bold; font-size: 16px">
               <p>请勿手动删除数据目录下面文件 !!!!</p>
               <p>如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除 !!!!</p>
@@ -15,7 +23,7 @@
             {{ temp.dateTime }} <a-tag>{{ temp.timeZoneId }}</a-tag>
           </a-descriptions-item>
           <a-descriptions-item label="数据目录占用空间" :span="1">
-            {{ renderSize(temp.dataSize) }} (10分钟刷新一次)
+            {{ renderSize(temp.dataSize) }} (每天0/12点刷新一次)
             <a-tooltip>
               <template #title>
                 <ul>
@@ -40,7 +48,7 @@
             </a-space>
           </a-descriptions-item>
           <a-descriptions-item label="在线构建文件占用空间">
-            {{ renderSize(temp.cacheBuildFileSize) }} (10分钟刷新一次)
+            {{ renderSize(temp.cacheBuildFileSize) }} (每天0/12点刷新一次)
             <a-tooltip>
               <template #title>
                 <ul>
@@ -158,7 +166,7 @@
   </div>
 </template>
 <script>
-import { getServerCache, clearCache, clearErrorWorkspace } from '@/api/system'
+import { getServerCache, clearCache, clearErrorWorkspace, asyncRefreshCache } from '@/api/system'
 import TaskStat from '@/pages/system/taskStat'
 import TriggerToken from '@/pages/system/trigger-token'
 import { renderSize, formatDuration } from '@/utils/const'
@@ -186,6 +194,16 @@ export default {
         if (res.code === 200) {
           this.temp = res.data
           this.taskList = res.data?.taskList
+        }
+      })
+    },
+    refreshCache() {
+      asyncRefreshCache().then((res) => {
+        if (res.code === 200) {
+          // 成功
+          $notification.success({
+            message: res.msg
+          })
         }
       })
     },
