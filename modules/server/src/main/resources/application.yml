@@ -67,6 +67,8 @@ jpom:
     disabled-captcha: false
     # 前端消息弹出位置，可选 topLeft topRight bottomLeft bottomRight
     notification-placement:
+    # 前端消息传输需要编码或者加密 目前支持：NONE、BASE64
+    transport-encryption: NONE
   # 查看日志时初始读取最后多少行（默认10，0不读取）
   init-read-line: 10
   db:

@@ -20,17 +20,14 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.dromara.jpom.common.interceptor;
+package org.dromara.jpom.common.transport;
 
 import cn.hutool.core.util.ArrayUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.encrypt.Encryptor;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -41,13 +38,13 @@ import java.util.Map;
  * @since 2023/3/13
  */
 @Slf4j
-public class MultipartRequestWrapper extends StandardMultipartHttpServletRequest {
+public class ParameterRequestWrapper extends HttpServletRequestWrapper {
 
     private final Map<String, String[]> parameterMap;
 
-    public MultipartRequestWrapper(HttpServletRequest request, Encryptor encryptor) {
+    public ParameterRequestWrapper(HttpServletRequest request, Encryptor encryptor) {
         super(request);
-        Map<String, String[]> parameterMap = super.getParameterMap();
+        Map<String, String[]> parameterMap = request.getParameterMap();
         Map<String, String[]> decryptMap = new HashMap<>();
         try {
             for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
@@ -62,19 +59,7 @@ public class MultipartRequestWrapper extends StandardMultipartHttpServletRequest
             log.error("解密失败", e);
         }
         this.parameterMap = decryptMap;
-        // 处理文件名
-        MultiValueMap<String, MultipartFile> multipartFiles = super.getMultipartFiles();
-        try {
-            MultiValueMap<String, MultipartFile> files = new LinkedMultiValueMap<>(multipartFiles.size());
-            for (String key : multipartFiles.keySet()) {
-                files.put(encryptor.decrypt(key), multipartFiles.remove(key));
-            }
-            setMultipartFiles(files);
-        } catch (Exception e) {
-            log.error("解密失败", e);
-        }
     }
-
 
     @Override
     public Map<String, String[]> getParameterMap() {

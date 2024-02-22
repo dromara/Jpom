@@ -103,5 +103,11 @@
             <version>1.4.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.dromara.jpom.plugins</groupId>
+            <artifactId>encrypt</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
     </dependencies>
 </project>
