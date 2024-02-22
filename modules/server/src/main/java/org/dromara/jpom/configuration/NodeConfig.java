@@ -25,6 +25,7 @@ package org.dromara.jpom.configuration;
 import cn.hutool.core.util.RuntimeUtil;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.unit.DataSize;
 
 /**
  * @author bwcx_jzy
@@ -56,6 +57,10 @@ public class NodeConfig {
      * 节点文件分片上传并发数,最小1 最大 服务端 CPU 核心数
      */
     private int uploadFileConcurrent = 2;
+    /**
+     * web socket 消息最大长度
+     */
+    private DataSize webSocketMessageSizeLimit = DataSize.ofMegabytes(5);
 
     public int getUploadFileTimeout() {
         return Math.max(this.uploadFileTimeout, 5);

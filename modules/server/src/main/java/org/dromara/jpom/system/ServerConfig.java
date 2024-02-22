@@ -26,6 +26,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.system.SystemUtil;
 import lombok.Data;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
@@ -34,10 +35,10 @@ import org.dromara.jpom.model.AgentFileModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.util.BaseFileTailWatcher;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.unit.DataSize;
 
 import java.io.File;
 import java.util.Optional;
@@ -201,6 +202,11 @@ public class ServerConfig implements InitializingBean {
         int initReadLine = ObjectUtil.defaultIfNull(this.initReadLine, 10);
         BaseFileTailWatcher.setInitReadLine(initReadLine);
         ExtConfigBean.setPath(path);
+        //
+        NodeConfig nodeConfig = getNode();
+        DataSize messageSizeLimit = nodeConfig.getWebSocketMessageSizeLimit();
+        messageSizeLimit = ObjectUtil.defaultIfNull(messageSizeLimit, DataSize.ofMegabytes(5));
+        SystemUtil.set("JPOM_NODE_WEB_SOCKET_MESSAGE_SIZE_LIMIT", messageSizeLimit.toBytes() + "");
     }
 
 

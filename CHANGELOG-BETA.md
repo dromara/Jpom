@@ -7,6 +7,8 @@
 1. 【server】优化 升级 docker-java、jgit 版本
 2. 【all】优化 升级 commons-compress 版本
 3. 【agent】优化 升级 oshi 版本
+4. 【server】优化 新增配置节点 websocket 通讯消息大小限制（jpom.node.web-socket-message-size-limit）（感谢@长弘）
+
 ------
 
 ## 2.11.2.1
