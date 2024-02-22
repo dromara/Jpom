@@ -66,7 +66,7 @@
         <fastjson-version>2.0.46</fastjson-version>
         <jna-version>5.12.1</jna-version>
         <mwiede.jsch-version>0.2.16</mwiede.jsch-version>
-        <oshi.version>6.4.11</oshi.version>
+        <oshi.version>6.4.12</oshi.version>
     </properties>
     <dependencies>
         <dependency>

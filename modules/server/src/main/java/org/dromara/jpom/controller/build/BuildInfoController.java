@@ -231,7 +231,7 @@ public class BuildInfoController extends BaseServerController {
         }
         if (buildExtConfig.isCheckDeleteCommand()) {
             // 判断删除命令
-            Assert.state(!CommandUtil.checkContainsDel(script), "不能包含删除命令");
+            Assert.state(!CommandUtil.checkContainsDel(script), "构建命令不能包含删除命令");
         }
         // 查询构建信息
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
