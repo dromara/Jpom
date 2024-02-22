@@ -67,12 +67,6 @@
             <version>${oshi.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.dromara.jpom.plugins</groupId>
-            <artifactId>encrypt</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
     </dependencies>
     <build>
         <plugins>
