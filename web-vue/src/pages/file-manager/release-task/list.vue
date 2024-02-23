@@ -145,7 +145,7 @@
       :confirmLoading="confirmLoading"
       v-model:open="releaseFileVisible"
       title="发布文件"
-      width="50%"
+      width="60%"
       :maskClosable="false"
       @ok="handleReCrateTask"
     >

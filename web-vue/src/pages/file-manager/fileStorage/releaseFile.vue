@@ -16,6 +16,11 @@
           <a-radio :value="0"> SSH </a-radio>
           <a-radio :value="1"> 节点 </a-radio>
         </a-radio-group>
+        <template #help>
+          <template v-if="temp.taskType === 0"
+            >发布后的文件名是：文件ID.后缀，并非文件真实名称 （可以使用上传后脚本随意修改）</template
+          >
+        </template>
       </a-form-item>
 
       <a-form-item name="taskDataIds" label="发布的SSH" v-if="temp.taskType === 0">
@@ -114,7 +119,20 @@
         </a-input-group>
       </a-form-item>
 
-      <a-form-item label="执行脚本" name="releaseBeforeCommand">
+      <a-form-item name="releaseBeforeCommand">
+        <template #label>
+          执行脚本
+          <a-tooltip>
+            <template v-slot:title>
+              <ul>
+                <li>支持变量引用：${TASK_ID}、${FILE_ID}、${FILE_NAME}、${FILE_EXT_NAME}</li>
+                <li>可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称</li>
+                <li>建议在上传后的脚本中对文件进行自定义更名，SSH 上传默认为：${FILE_ID}.${FILE_EXT_NAME}</li>
+              </ul>
+            </template>
+            <QuestionCircleOutlined />
+          </a-tooltip>
+        </template>
         <template #help>
           <div v-if="scriptTabKey === 'before'">文件上传前需要执行的脚本(非阻塞命令)</div>
           <div v-else-if="scriptTabKey === 'after'">文件上传成功后需要执行的脚本(非阻塞命令)</div>
