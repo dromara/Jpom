@@ -22,7 +22,7 @@
  */
 package org.dromara.jpom.common.interceptor;
 
-import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
@@ -31,8 +31,10 @@ import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.dromara.jpom.common.transport.BodyRewritingRequestWrapper;
 import org.dromara.jpom.common.transport.MultipartRequestWrapper;
 import org.dromara.jpom.common.transport.ParameterRequestWrapper;
+import org.dromara.jpom.configuration.WebConfig;
 import org.dromara.jpom.encrypt.EncryptFactory;
 import org.dromara.jpom.encrypt.Encryptor;
+import org.dromara.jpom.system.ServerConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
@@ -42,27 +44,47 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
 
 /**
- * @author loyal.f
- * @since 2023/3/13
+ * @author bwcx_jzy
+ * @since 2024/2/22
  */
 @Configuration
 @Slf4j
 @Order(1)
-public class DecryptionFilter implements Filter {
+public class ServerDecryptionFilter implements Filter {
+
+    private final Encryptor encryptor;
+
+    public ServerDecryptionFilter(ServerConfig serverConfig) {
+        Encryptor encryptor1;
+        WebConfig config = serverConfig.getWeb();
+        String transportEncryption = config.getTransportEncryption();
+        transportEncryption = ObjectUtil.defaultIfNull(transportEncryption, StrUtil.EMPTY).toUpperCase();
+        switch (transportEncryption) {
+            case "NONE":
+                encryptor1 = null;
+                break;
+            case "BASE64":
+                try {
+                    encryptor1 = EncryptFactory.createEncryptor(1);
+                } catch (Exception e) {
+                    log.error("获取解密实现失败", e);
+                    encryptor1 = null;
+                }
+                break;
+            default:
+                log.warn("不支持的编码方式：{}", transportEncryption);
+                encryptor1 = null;
+                break;
+        }
+        encryptor = encryptor1;
+    }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
-        String transportEncryption = request.getHeader("transport-encryption");
-        // 兼容没有没有传入
-        Encryptor encryptor;
-        try {
-            encryptor = EncryptFactory.createEncryptor(Convert.toInt(transportEncryption, 0));
-        } catch (NoSuchAlgorithmException e) {
-            log.error("获取解密分发失败", e);
+        if (encryptor == null) {
             chain.doFilter(servletRequest, response);
             return;
         }

@@ -1,4 +1,4 @@
-import { number } from "echarts"
+import { number } from 'echarts'
 
 export interface IPageQuery {
   page: number
@@ -23,4 +23,5 @@ export interface GlobalWindow {
   uploadFileSliceSize: string
   uploadFileConcurrent: string
   oauth2Provide: string
+  transportEncryption: string
 }

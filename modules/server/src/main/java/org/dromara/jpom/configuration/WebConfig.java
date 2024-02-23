@@ -80,6 +80,13 @@ public class WebConfig {
      * 前端消息弹出位置，可选 topLeft topRight bottomLeft bottomRight
      */
     private String notificationPlacement;
+    /**
+     * 消息传输加密或者编码
+     * NONE
+     * <p>
+     * BASE64
+     */
+    private String transportEncryption = "NONE";
 
     public String getName() {
         return StrUtil.emptyToDefault(name, "Jpom项目运维系统");
