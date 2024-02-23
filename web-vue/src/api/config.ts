@@ -18,6 +18,14 @@ const pro: boolean = process.env.NODE_ENV === 'production'
 
 const baseURL = import.meta.env.JPOM_BASE_API_URL
 
+const parseTransportEncryption = () => {
+  if (jpomWindow_.transportEncryption === '<transportEncryption>') {
+    return 'NONE'
+  }
+  return jpomWindow_.transportEncryption || 'NONE'
+}
+console.log(parseTransportEncryption())
+
 // 创建实例
 const instance: AxiosInstance = axios.create({
   baseURL: baseURL,
