@@ -5,6 +5,7 @@ import { refreshToken } from './user/user'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { GlobalWindow } from '@/interface/common'
+import CryptoJS from 'crypto-js'
 
 import Qs from 'qs'
 import router from '../router'
@@ -31,6 +32,14 @@ const instance: AxiosInstance = axios.create({
 
 let refreshTokenIng = false
 
+const obj2base64 = (obj: { [x: string]: any }) => {
+  const keys = Object.keys(obj)
+  for (const key of keys) {
+    obj[key] = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(obj[key]))
+  }
+  return obj
+}
+
 // 请求拦截
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const appStore = useAppStore()
@@ -43,6 +52,13 @@ instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (routerBase) {
     // 防止 url 出现 //
     config.url = (routerBase + config.url).replace(new RegExp('//', 'gm'), '/')
+  }
+  // TODO 根据后端返回值做调整
+  if (config.data) {
+    config.data = obj2base64(config.data)
+  }
+  if (config.params) {
+    config.params = obj2base64(config.params)
   }
   return config
 })
