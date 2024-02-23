@@ -49,11 +49,9 @@ import org.dromara.jpom.common.interceptor.NotLogin;
 import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.configuration.WebConfig;
 import org.dromara.jpom.db.DbExtConfig;
-import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.plugin.PluginFactory;
-import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.service.system.SystemParametersServer;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
 import org.dromara.jpom.service.user.UserService;
@@ -151,6 +149,7 @@ public class IndexControl extends BaseServerController {
         html = StrUtil.replace(html, "<uploadFileSliceSize>", String.valueOf(nodeConfig.getUploadFileSliceSize()));
         html = StrUtil.replace(html, "<uploadFileConcurrent>", String.valueOf(nodeConfig.getUploadFileConcurrent()));
         html = StrUtil.replace(html, "<oauth2Provide>", oauth2Provide);
+        html = StrUtil.replace(html, "<transportEncryption>", webConfig.getTransportEncryption());
         // 修改网页标题
         String title = ReUtil.get("<title>.*?</title>", html, 0);
         if (StrUtil.isNotEmpty(title)) {
