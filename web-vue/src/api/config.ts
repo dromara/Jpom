@@ -5,10 +5,9 @@ import { refreshToken } from './user/user'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { GlobalWindow } from '@/interface/common'
-import CryptoJS from 'crypto-js'
-
 import Qs from 'qs'
 import router from '../router'
+import { base64Encode } from '@/utils/check-type'
 
 const delTimeout: number = 20 * 1000
 const jpomWindow_ = window as unknown as GlobalWindow
@@ -45,7 +44,7 @@ const obj2base64 = (obj: any) => {
   if (Array.isArray(obj)) {
     return obj.map((item: any) => {
       if (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean') {
-        item = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(String(item)))
+        item = base64Encode(String(item))
       }
     })
   }
@@ -55,9 +54,7 @@ const obj2base64 = (obj: any) => {
     for (const key of keys) {
       const item = obj[key]
       if (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean') {
-        newData[CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(String(key)))] = CryptoJS.enc.Base64.stringify(
-          CryptoJS.enc.Utf8.parse(String(item))
-        )
+        newData[base64Encode(String(key))] = base64Encode(String(item))
       }
     }
     return newData

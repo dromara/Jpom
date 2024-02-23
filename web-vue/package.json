@@ -16,9 +16,9 @@
     "@codemirror/lang-javascript": "^6.2.1",
     "ant-design-vue": "^4.1.0",
     "axios": "^1.6.5",
+    "base64-js": "^1.5.1",
     "codemirror": "^5.65.16",
     "codemirror-editor-vue3": "^2.4.1",
-    "crypto-js": "^4.2.0",
     "dayjs": "^1.11.10",
     "echarts": "^5.4.3",
     "js-sha1": "^0.6.0",
@@ -36,7 +36,6 @@
     "xterm-addon-fit": "^0.8.0"
   },
   "devDependencies": {
-    "@types/crypto-js": "^4.2.2",
     "@types/node": "^20.10.8",
     "@typescript-eslint/eslint-plugin": "^6.18.1",
     "@typescript-eslint/parser": "^6.18.1",
