@@ -41,13 +41,6 @@ const instance: AxiosInstance = axios.create({
 let refreshTokenIng = false
 
 const obj2base64 = (obj: any) => {
-  if (Array.isArray(obj)) {
-    return obj.map((item: any) => {
-      if (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean') {
-        item = base64Encode(String(item))
-      }
-    })
-  }
   if (obj instanceof Object && obj.constructor === Object) {
     const keys = Object.keys(obj)
     const newData: any = {}
@@ -58,6 +51,25 @@ const obj2base64 = (obj: any) => {
       }
     }
     return newData
+  } else if (obj instanceof FormData) {
+    const newFormData: any = new FormData()
+    for (var key of (obj as any).keys()) {
+      const item = obj.get(key)
+      if (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean') {
+        newFormData.append(base64Encode(String(key)), base64Encode(String(item)))
+      } else {
+        newFormData.append(base64Encode(String(key)), item)
+      }
+    }
+    return newFormData
+  }
+  if (Array.isArray(obj)) {
+    return obj.map((item: any) => {
+      if (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean') {
+        item = base64Encode(String(item))
+      }
+      return item
+    })
   }
   return obj
 }
@@ -76,11 +88,17 @@ instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     config.url = (routerBase + config.url).replace(new RegExp('//', 'gm'), '/')
   }
   if (transportEncryption == 'BASE64') {
-    if (config.data) {
-      config.data = obj2base64(config.data)
-    }
-    if (config.params) {
-      config.params = obj2base64(config.params)
+    if (headers['Content-Type'] === 'application/json') {
+      if (config.data) {
+        config.data = base64Encode(JSON.stringify(config.data))
+      }
+    } else {
+      if (config.data) {
+        config.data = obj2base64(config.data)
+      }
+      if (config.params) {
+        config.params = obj2base64(config.params)
+      }
     }
   }
 

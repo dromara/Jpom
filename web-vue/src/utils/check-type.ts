@@ -1,19 +1,20 @@
 import { fromByteArray } from 'base64-js'
-const isBlob = (data: any) => {
-  return data instanceof Blob
-}
 
-const isArrayBuffer = (data: any) => {
-  return data instanceof ArrayBuffer
-}
+// const isBlob = (data: any) => {
+//   return data instanceof Blob
+// }
 
-const isFile = (mimeType: any) => {
-  return mimeType instanceof File
-}
+// const isArrayBuffer = (data: any) => {
+//   return data instanceof ArrayBuffer
+// }
 
-const isImageType = (mimeType: any) => {
-  return mimeType.startsWith('image/')
-}
+// const isFile = (mimeType: any) => {
+//   return mimeType instanceof File
+// }
+
+// const isImageType = (mimeType: any) => {
+//   return mimeType.startsWith('image/')
+// }
 
 export const base64Encode = (data: string) => {
   // 将字符串转换为 UTF-8 字节数组
