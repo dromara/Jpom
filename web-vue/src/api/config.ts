@@ -9,7 +9,7 @@ import CryptoJS from 'crypto-js'
 
 import Qs from 'qs'
 import router from '../router'
-import { type } from 'os'
+
 const delTimeout: number = 20 * 1000
 const jpomWindow_ = window as unknown as GlobalWindow
 const apiTimeout: number = Number(jpomWindow_.apiTimeout === '<apiTimeout>' ? delTimeout : jpomWindow_.apiTimeout)
@@ -26,7 +26,7 @@ const parseTransportEncryption = () => {
   }
   return jpomWindow_.transportEncryption || 'NONE'
 }
-console.log(parseTransportEncryption())
+const transportEncryption = parseTransportEncryption()
 
 // 创建实例
 const instance: AxiosInstance = axios.create({
@@ -51,13 +51,16 @@ const obj2base64 = (obj: any) => {
   }
   if (obj instanceof Object && obj.constructor === Object) {
     const keys = Object.keys(obj)
+    const newData: any = {}
     for (const key of keys) {
       const item = obj[key]
       if (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean') {
-        obj[key] = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(String(item)))
+        newData[CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(String(key)))] = CryptoJS.enc.Base64.stringify(
+          CryptoJS.enc.Utf8.parse(String(item))
+        )
       }
     }
-    return obj
+    return newData
   }
   return obj
 }
@@ -75,7 +78,7 @@ instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     // 防止 url 出现 //
     config.url = (routerBase + config.url).replace(new RegExp('//', 'gm'), '/')
   }
-  if (parseTransportEncryption() == 'BASE64') {
+  if (transportEncryption == 'BASE64') {
     if (config.data) {
       config.data = obj2base64(config.data)
     }
