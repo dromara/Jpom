@@ -9,6 +9,7 @@ import CryptoJS from 'crypto-js'
 
 import Qs from 'qs'
 import router from '../router'
+import { type } from 'os'
 const delTimeout: number = 20 * 1000
 const jpomWindow_ = window as unknown as GlobalWindow
 const apiTimeout: number = Number(jpomWindow_.apiTimeout === '<apiTimeout>' ? delTimeout : jpomWindow_.apiTimeout)
@@ -40,10 +41,23 @@ const instance: AxiosInstance = axios.create({
 
 let refreshTokenIng = false
 
-const obj2base64 = (obj: { [x: string]: any }) => {
-  const keys = Object.keys(obj)
-  for (const key of keys) {
-    obj[key] = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(obj[key]))
+const obj2base64 = (obj: any) => {
+  if (Array.isArray(obj)) {
+    return obj.map((item: any) => {
+      if (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean') {
+        item = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(String(item)))
+      }
+    })
+  }
+  if (obj instanceof Object && obj.constructor === Object) {
+    const keys = Object.keys(obj)
+    for (const key of keys) {
+      const item = obj[key]
+      if (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean') {
+        obj[key] = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(String(item)))
+      }
+    }
+    return obj
   }
   return obj
 }
@@ -61,13 +75,15 @@ instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     // 防止 url 出现 //
     config.url = (routerBase + config.url).replace(new RegExp('//', 'gm'), '/')
   }
-  // TODO 根据后端返回值做调整
-  if (config.data) {
-    config.data = obj2base64(config.data)
+  if (parseTransportEncryption() == 'BASE64') {
+    if (config.data) {
+      config.data = obj2base64(config.data)
+    }
+    if (config.params) {
+      config.params = obj2base64(config.params)
+    }
   }
-  if (config.params) {
-    config.params = obj2base64(config.params)
-  }
+
   return config
 })
 
