@@ -131,6 +131,10 @@ public class BuildExecuteManage implements Runnable {
         return BUILD_MANAGE_MAP.keySet();
     }
 
+
+    private final static String TARGET_DIR = "target";
+
+
     /**
      * 创建构建线程池
      */
@@ -251,7 +255,7 @@ public class BuildExecuteManage implements Runnable {
         };
         if (buildMode != null && buildMode == 1) {
             // 容器构建直接下载到 结果目录
-            File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFileAction.getPath());
+            File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), TARGET_DIR);
             if (!FileUtil.exist(toFile)) {
                 String format = StrUtil.format("{} 不存在，处理构建产物失败", resultDirFileAction.getPath());
                 logRecorder.systemError(format);
@@ -589,7 +593,7 @@ public class BuildExecuteManage implements Runnable {
         String resultFile = FileUtil.normalize(workingDir + StrUtil.SLASH + resultDirFile);
         map.put("resultFile", resultFile);
         // 产物输出目录
-        File toFile = BuildUtil.getHistoryPackageFile(buildInfoModelId, buildInfoModel.getBuildId(), resultDirFile);
+        File toFile = BuildUtil.getHistoryPackageFile(buildInfoModelId, buildInfoModel.getBuildId(), TARGET_DIR);
         map.put("resultFileOut", FileUtil.getAbsolutePath(toFile));
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         try {
