@@ -355,7 +355,7 @@ public class NodeForward {
         NodeConfig nodeConfig = serverConfig.getNode();
         long length = file.length();
         String fileName = fileNameFn.apply(file);
-        Assert.state(length > 0, "空文件不能上传");
+        Assert.state(length > 0, "空文件不能上传" + file.getAbsolutePath());
         String md5 = SecureUtil.md5(file);
         int fileSliceSize = nodeConfig.getUploadFileSliceSize();
         //如果小数点大于1，整数加一 例如4.1 =》5
