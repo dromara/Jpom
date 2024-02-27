@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 2019/07/21
  */
 @Slf4j
-public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
+public class ServiceFileTailWatcher<T extends AutoCloseable> extends BaseFileTailWatcher<T> {
     private static final ConcurrentHashMap<File, ServiceFileTailWatcher<WebSocketSession>> CONCURRENT_HASH_MAP = new SafeConcurrentHashMap<>();
 
     private static Charset charset;
@@ -143,8 +143,8 @@ public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
     }
 
     @Override
-    protected void send(T session, String msg) throws IOException {
-        SocketSessionUtil.send((WebSocketSession) session, msg);
+    protected boolean send(T session, String msg) throws IOException {
+        return SocketSessionUtil.send((WebSocketSession) session, msg);
     }
 
     /**

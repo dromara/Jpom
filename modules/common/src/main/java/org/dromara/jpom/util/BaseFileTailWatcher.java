@@ -23,6 +23,7 @@
 package org.dromara.jpom.util;
 
 import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.file.Tailer;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -44,7 +45,7 @@ import java.util.Set;
  * @since 2019/7/21
  */
 @Slf4j
-public abstract class BaseFileTailWatcher<T> {
+public abstract class BaseFileTailWatcher<T extends AutoCloseable> {
 
     private static int initReadLine = 10;
 
@@ -75,9 +76,10 @@ public abstract class BaseFileTailWatcher<T> {
      *
      * @param session 会话
      * @param msg     消息内容
+     * @return 是否发送成功
      * @throws IOException io
      */
-    protected abstract void send(T session, String msg) throws IOException;
+    protected abstract boolean send(T session, String msg) throws IOException;
 
     /**
      * 有新的日志
@@ -89,15 +91,32 @@ public abstract class BaseFileTailWatcher<T> {
         while (iterator.hasNext()) {
             T socketSession = iterator.next();
             try {
-                this.send(socketSession, msg);
+                boolean send = this.send(socketSession, msg);
+                if (!send) {
+                    //
+                    this.errorAutoClose(socketSession);
+                    iterator.remove();
+                }
             } catch (Exception e) {
                 log.error("发送消息失败", e);
+                this.errorAutoClose(socketSession);
                 iterator.remove();
             }
         }
         if (this.socketSessions.isEmpty()) {
             this.close();
         }
+    }
+
+    private void errorAutoClose(T socketSession) {
+        log.warn("消息发送失败,自动移除此会话:{}", this.getId(socketSession));
+        IoUtil.close(socketSession);
+    }
+
+    private String getId(T session) {
+        Method byName = ReflectUtil.getMethodByName(session.getClass(), "getId");
+        Assert.notNull(byName, "没有  getId 方法");
+        return ReflectUtil.invoke(session, byName);
     }
 
     /**
@@ -107,13 +126,13 @@ public abstract class BaseFileTailWatcher<T> {
      * @param session 会话
      */
     protected boolean add(T session, String name) throws IOException {
+        String id = getId(session);
         Method byName = ReflectUtil.getMethodByName(session.getClass(), "getId");
-        Assert.notNull(byName, "没有  getId 方法");
-        String id = ReflectUtil.invoke(session, byName);
-        boolean match = this.socketSessions.stream().anyMatch(t -> {
-            String itemId = ReflectUtil.invoke(t, byName);
-            return StrUtil.equals(id, itemId);
-        });
+        boolean match = this.socketSessions.stream()
+            .anyMatch(t -> {
+                String itemId = ReflectUtil.invoke(t, byName);
+                return StrUtil.equals(id, itemId);
+            });
         if (match) {
             return false;
         }

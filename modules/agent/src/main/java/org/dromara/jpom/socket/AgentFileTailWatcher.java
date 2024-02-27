@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 2019/3/16
  */
 @Slf4j
-public class AgentFileTailWatcher<T> extends BaseFileTailWatcher<T> {
+public class AgentFileTailWatcher<T extends AutoCloseable> extends BaseFileTailWatcher<T> {
     private static final ConcurrentHashMap<File, AgentFileTailWatcher<Session>> CONCURRENT_HASH_MAP = new SafeConcurrentHashMap<>();
 
 
@@ -154,12 +154,13 @@ public class AgentFileTailWatcher<T> extends BaseFileTailWatcher<T> {
     }
 
     @Override
-    protected void send(T session, String msg) throws IOException {
+    protected boolean send(T session, String msg) throws IOException {
 //        try {
         SocketSessionUtil.send((Session) session, msg);
 //        } catch (Exception e) {
 //            log.error("发送消息异常", e);
 //        }
+        return true;
     }
 
     /**
