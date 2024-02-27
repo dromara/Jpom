@@ -5,8 +5,9 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】优化 系统文件占用空间统计周期调整为每天2次（感谢[@singlethread](https://gitee.com/zengwei_joni) [Gitee issues I9302U](https://gitee.com/dromara/Jpom/issues/I9302U) ）
-2. 【server】优化 支持配置前端所有参数编码来规则部分安全规则检查（感谢[@zhaozxc2010](https://gitee.com/zhaozxc2010) [Gitee issues I8Z1VJ](https://gitee.com/dromara/Jpom/issues/I8Z1VJ) ）
+2. 【server】优化 支持配置前端所有参数编码来规避部分安全规则检查（感谢[@zhaozxc2010](https://gitee.com/zhaozxc2010) [Gitee issues I8Z1VJ](https://gitee.com/dromara/Jpom/issues/I8Z1VJ) ）
 3. 【server】优化 上传文件空文件提示文件路径（感谢[@SchuckBate](https://gitee.com/skBate) [Gitee issues I93FI6](https://gitee.com/dromara/Jpom/issues/I93FI6) ）
+4. 【server】优化 监听日志文件消息发送失败后自动移除会话（感谢[@singlethread](https://gitee.com/zengwei_joni) [Gitee issues I93ZFX](https://gitee.com/dromara/Jpom/issues/I93ZFX) ）
 
 ------
 

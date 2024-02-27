@@ -44,18 +44,35 @@ public class SocketSessionUtil {
 
     private static final Map<String, WebSocketSession> SOCKET_MAP = new SafeConcurrentHashMap<>();
 
-    public static void send(WebSocketSession session, String msg) throws IOException {
-        send(session, new TextMessage(msg));
+    /**
+     * 发送文本消息
+     *
+     * @param session 会话
+     * @param msg     消息
+     * @return 是否发送成功
+     * @throws IOException io
+     */
+    public static boolean send(WebSocketSession session, String msg) throws IOException {
+        return send(session, new TextMessage(msg));
     }
 
-    public static void send(WebSocketSession session, WebSocketMessage<?> message) throws IOException {
+    /**
+     * 发送消息
+     *
+     * @param session 会话
+     * @param message 消息
+     * @return 是否发送成功
+     * @throws IOException io
+     */
+    public static boolean send(WebSocketSession session, WebSocketMessage<?> message) throws IOException {
         if (!session.isOpen()) {
             // 会话关闭不能发送消息 @author jzy 21-08-04
             log.warn("会话已经关闭啦，不能发送消息：{}", message.getPayload());
-            return;
+            return false;
         }
         WebSocketSession webSocketSession = SOCKET_MAP.computeIfAbsent(session.getId(), s -> new ConcurrentWebSocketSessionDecorator(session, 60 * 1000, (int) DataSize.ofMegabytes(5).toBytes()));
         webSocketSession.sendMessage(message);
+        return true;
     }
 
     public static void close(WebSocketSession session) {
