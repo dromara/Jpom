@@ -19,6 +19,7 @@
 <script setup lang="ts">
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
 import { theme } from 'ant-design-vue'
+import { onMounted, onUnmounted } from 'vue'
 
 const routerActivation = ref(true)
 const useGuideStore = guideStore()
@@ -27,6 +28,18 @@ const getGuideCache = useGuideStore.getGuideCache
 // const { token } = useToken()
 // console.log(token.value)
 //console.log(theme)
+
+// 监听系统主题模式
+const onMatchMediaChange = (e: MediaQueryListEvent) => {
+  useGuideStore.setSystemIsDark(e.matches)
+}
+onMounted(() => {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', onMatchMediaChange)
+})
+
+onUnmounted(() => {
+  window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', onMatchMediaChange)
+})
 
 // https://www.antdv.com/docs/vue/customize-theme-cn
 // theme.defaultAlgorithm
