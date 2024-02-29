@@ -12,7 +12,9 @@ interface IState {
 
 interface IStateCache extends IState {
   guideCache: IStateGuideCache
-  getThemeView: Function
+  systemIsDark: boolean
+  getThemeView?: Function
+  getCatchThemeView?: Function
 }
 
 interface IStateGuideCache {
@@ -26,17 +28,21 @@ interface IStateGuideCache {
   menuThemeView: string
 }
 
-const allowThemeView = ['light', 'dark']
+const allowThemeView = ['light', 'dark', 'auto']
 
 export const useGuideStore = defineStore('guide', {
   state: (): IStateCache => ({
     // 引导缓存
     guideCache: localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)!) : {},
+    systemIsDark: window.matchMedia('(prefers-color-scheme: dark)').matches,
     disabledGuide: false,
     extendPlugins: []
   }),
 
   actions: {
+    setSystemIsDark(bool: boolean) {
+      this.systemIsDark = bool
+    },
     setGuideCache(cache: IStateGuideCache) {
       this.guideCache = cache
       localStorage.setItem(key, JSON.stringify(cache))
@@ -132,18 +138,33 @@ export const useGuideStore = defineStore('guide', {
     getExtendPlugins(state) {
       return state.extendPlugins
     },
+    getCatchThemeView: (state) => {
+      return () => {
+        // 新用户未设置过为跟随系统
+        return state.guideCache.themeView || 'auto'
+      }
+    },
     getThemeView: (state) => {
       return () => {
-        const themeView = state.guideCache.themeView || 'light'
+        const themeView = state?.getCatchThemeView ? state.getCatchThemeView() : 'light'
         if (allowThemeView.includes(themeView)) {
-          return themeView
+          if (themeView === 'auto') {
+            if (state.systemIsDark) {
+              return 'dark'
+            } else {
+              return 'light'
+            }
+          } else {
+            return themeView
+          }
+        } else {
+          return 'light'
         }
-        return 'light'
       }
     },
     getThemeStyle: (state) => {
       return () => {
-        const theme = state.getThemeView()
+        const theme = state?.getThemeView ? state?.getThemeView() : 'light'
         return {
           color: theme === 'light' ? 'rgba(0, 0, 0, 0.88)' : '#fff'
         }
