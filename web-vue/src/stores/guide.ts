@@ -140,7 +140,8 @@ export const useGuideStore = defineStore('guide', {
     },
     getCatchThemeView: (state) => {
       return () => {
-        return state.guideCache.themeView || 'light'
+        // 新用户未设置过为跟随系统
+        return state.guideCache.themeView || 'auto'
       }
     },
     getThemeView: (state) => {
