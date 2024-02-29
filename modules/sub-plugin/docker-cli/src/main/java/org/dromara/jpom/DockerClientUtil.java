@@ -10,6 +10,7 @@
 package org.dromara.jpom;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
@@ -89,29 +90,50 @@ public class DockerClientUtil {
      */
     public static void copyArchiveFromContainerCmd(DockerClient dockerClient, String containerId, LogRecorder logRecorder, String resultFile, String resultFileOut) {
         logRecorder.system("download file from : {}", resultFile);
-        try (InputStream stream = dockerClient.copyArchiveFromContainerCmd(containerId, resultFile).exec();
-             TarArchiveInputStream tarStream = new TarArchiveInputStream(stream)) {
-            TarArchiveEntry tarArchiveEntry;
-            while ((tarArchiveEntry = tarStream.getNextTarEntry()) != null) {
-                if (!tarStream.canReadEntryData(tarArchiveEntry)) {
-                    logRecorder.systemWarning("不能读取tarArchiveEntry {}", tarArchiveEntry.getName());
+        File tmpDir = FileUtil.getTmpDir();
+        File fileArchive = FileUtil.file(tmpDir, "jpom", "docker-temp-archive", containerId);
+        try {
+            try (InputStream stream = dockerClient.copyArchiveFromContainerCmd(containerId, resultFile).exec();
+                 TarArchiveInputStream tarStream = new TarArchiveInputStream(stream)) {
+                TarArchiveEntry tarArchiveEntry;
+                while ((tarArchiveEntry = tarStream.getNextEntry()) != null) {
+                    if (!tarStream.canReadEntryData(tarArchiveEntry)) {
+                        logRecorder.systemWarning("不能读取tarArchiveEntry {}", tarArchiveEntry.getName());
+                    }
+                    if (tarArchiveEntry.isDirectory()) {
+                        continue;
+                    }
+                    String archiveEntryName = tarArchiveEntry.getName();
+                    // 截取第一级目录
+                    archiveEntryName = StrUtil.subAfter(archiveEntryName, StrUtil.SLASH, false);
+                    // 可能中包含文件 使用原名称
+                    archiveEntryName = StrUtil.emptyToDefault(archiveEntryName, tarArchiveEntry.getName());
+                    File currentFile = FileUtil.file(fileArchive, archiveEntryName);
+                    FileUtil.mkParentDirs(currentFile);
+                    FileUtil.writeFromStream(tarStream, currentFile, false);
                 }
-                if (tarArchiveEntry.isDirectory()) {
-                    continue;
-                }
-                String archiveEntryName = tarArchiveEntry.getName();
-                // 截取第一级目录
-                archiveEntryName = StrUtil.subAfter(archiveEntryName, StrUtil.SLASH, false);
-                // 可能中包含文件 使用原名称
-                archiveEntryName = StrUtil.emptyToDefault(archiveEntryName, tarArchiveEntry.getName());
-                File currentFile = FileUtil.file(resultFileOut, archiveEntryName);
-                FileUtil.mkParentDirs(currentFile);
-                FileUtil.writeFromStream(tarStream, currentFile, false);
+            } catch (NotFoundException notFoundException) {
+                logRecorder.systemWarning("容器中没有找到执行结果文件: {}", notFoundException.getMessage());
+            } catch (Exception e) {
+                logRecorder.error("无法获取容器执行结果文件", e);
             }
-        } catch (NotFoundException notFoundException) {
-            logRecorder.systemWarning("容器中没有找到执行结果文件: {}", notFoundException.getMessage());
-        } catch (Exception e) {
-            logRecorder.error("无法获取容器执行结果文件", e);
+            // github pr 71
+            // https://github.com/dromara/Jpom/pull/71
+            File[] files = fileArchive.listFiles();
+            if (files == null) {
+                logRecorder.systemWarning("临时结果文件不存在: {}", fileArchive.getAbsolutePath());
+                return;
+            }
+            File resultFileOutFile = FileUtil.file(resultFileOut);
+            if (ArrayUtil.length(files) == 1) {
+                FileUtil.mkParentDirs(resultFileOutFile);
+                FileUtil.move(files[0], resultFileOutFile, true);
+            } else {
+                FileUtil.mkdir(resultFileOutFile);
+                FileUtil.moveContent(fileArchive, resultFileOutFile, true);
+            }
+        } finally {
+            FileUtil.del(fileArchive);
         }
     }
 
