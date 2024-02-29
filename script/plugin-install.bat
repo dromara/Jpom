@@ -1,5 +1,5 @@
 @REM
-@REM Copyright (c) 2019 Code Technology Studio
+@REM Copyright (c) 2019 Of Him Code Technology Studio
 @REM Jpom is licensed under Mulan PSL v2.
 @REM You can use this software according to the terms and conditions of the Mulan PSL v2.
 @REM You may obtain a copy of Mulan PSL v2 at:
