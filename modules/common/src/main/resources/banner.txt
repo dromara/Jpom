@@ -6,6 +6,5 @@
   \____/| .__/ \___/|_| |_| |_|
         | |
         |_|
-
- ➜ Jpom \﻿ (•◡•) / (v2.11.2.3)
-
+ ➜ Jpom is licensed under Mulan PSL v2.
+ ➜ \﻿ (•◡•) / current version v2.11.2.3
