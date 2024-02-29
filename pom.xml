@@ -32,6 +32,47 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>4.3</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>remove</goal>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <quiet>true</quiet>
+                    <!--HEADER文件-->
+                    <header>HEADER-LICENSE</header>
+                    <includes>
+                        <!--取消默认排除-->
+                        <include>**/node/**</include>
+                        <include>web-vue/index.html</include>
+                    </includes>
+                    <!--排除文件-->
+                    <excludes>
+                        <!-- https://github.com/mathieucarbou/license-maven-plugin/blob/master/license-maven-plugin/src/main/java/com/mycila/maven/plugin/license/Default.java-->
+
+                        <!-- <exclude>docs/**</exclude>-->
+                        <exclude>web-vue/src/**</exclude>
+                        <!-- <exclude>web-vue2/**</exclude>-->
+                        <!-- <exclude>**/*.yml</exclude>-->
+                        <exclude>**/*.md</exclude>
+                        <exclude>**/*.txt</exclude>
+                        <exclude>**/dist/assets/**</exclude>
+                    </excludes>
+                    <!--严格检查-->
+                    <strictCheck>true</strictCheck>
+                    <mapping>
+                        <java>SLASHSTAR_STYLE</java>
+                    </mapping>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
