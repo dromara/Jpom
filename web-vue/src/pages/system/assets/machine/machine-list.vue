@@ -114,7 +114,7 @@
                     <a-col :span="7" style="text-align: right" class="text-overflow-hidden">
                       <a-tooltip
                         :title="`当前状态：${statusMap[item.status]} ${
-                          item.statusMsg ? '状态消息：' + item.statusMsg : ''
+                          item.statusMsg ? '状态消息：' + item.statusMsg : '还没有状态消息'
                         } `"
                       >
                         <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0">
@@ -248,7 +248,7 @@
             <template v-else-if="column.dataIndex === 'status'">
               <a-tooltip
                 :title="`当前状态：${statusMap[record.status]} ${
-                  record.statusMsg ? '状态消息：' + record.statusMsg : ''
+                  record.statusMsg ? '状态消息：' + record.statusMsg : '还没有状态消息'
                 } `"
               >
                 <a-tag :color="record.status === 1 ? 'green' : 'pink'" style="margin-right: 0">

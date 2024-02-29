@@ -152,7 +152,7 @@
               <template v-else>-</template>
             </template>
             <template v-else-if="column.dataIndex === 'status'">
-              <a-tooltip :title="record.statusMsg">
+              <a-tooltip :title="`${record.statusMsg || '还没有状态消息'}`">
                 <a-tag :color="statusMap[record.status] && statusMap[record.status].color">{{
                   (statusMap[record.status] && statusMap[record.status].desc) || '未知'
                 }}</a-tag>
