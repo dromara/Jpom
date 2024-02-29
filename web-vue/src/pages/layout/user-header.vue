@@ -344,7 +344,7 @@
     </a-modal>
     <!-- 个性配置区 -->
     <a-modal destroyOnClose v-model:open="customizeVisible" title="个性配置区" :footer="null" :maskClosable="false">
-      <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-alert banner>
           <template #message> 下列配置信息仅在当前浏览器生效,清空浏览器缓存配置将恢复默认 </template>
         </a-alert>
@@ -413,6 +413,7 @@
             <a-radio-group v-model:value="themeView" button-style="solid">
               <a-radio-button value="light">浅色</a-radio-button>
               <a-radio-button value="dark">深色</a-radio-button>
+              <a-radio-button value="auto">跟随系统</a-radio-button>
             </a-radio-group>
             内容区域主题切换
           </a-space>
@@ -584,7 +585,8 @@ export default {
         useGuideStore().toggleThemeView(value)
       },
       get: function () {
-        return this.getThemeView()
+        return useGuideStore().guideCache.themeView
+        // return this.getThemeView()
       }
     },
     menuThemeView: {
