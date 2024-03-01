@@ -146,6 +146,7 @@
                         <!--取消默认排除-->
                         <include>**/node/**</include>
                         <include>web-vue/index.html</include>
+                        <exclude>**/dist/index.html</exclude>
                     </includes>
                     <!--排除文件-->
                     <excludes>
