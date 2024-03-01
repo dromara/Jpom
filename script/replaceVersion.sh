@@ -49,7 +49,7 @@ fi
 
 echo "替换配置文件版本号 $new_version"
 
-if [[ "$tag" == "release" ]]; then
+if [ "$tag" == "release" ]; then
 	# 替换 Dockerfile 中的版本
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/Dockerfile"
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/agent/Dockerfile"
