@@ -83,7 +83,7 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
             result.add("Kill not completed, test kill -9");
             String cmd = String.format("kill -9 %s", pid);
             try {
-                CommandUtil.asyncExeLocalCommand(cmd, file);
+                CommandUtil.asyncExeLocalCommand(cmd, file, null, true);
             } catch (Exception e) {
                 throw Lombok.sneakyThrow(e);
             }

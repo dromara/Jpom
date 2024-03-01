@@ -39,6 +39,8 @@ jpom:
     console-charset:
     # 在线升级允许降级-操作
     allowed-downgrade: false
+    # 执行系统主要命名是否填充 sudo(sudo xxx) 使用前提需要配置 sudo 免密
+    command-use-sudo: false
 server:
   #运行端口号
   port: 2123
