@@ -17,9 +17,9 @@
  	<a target="_blank" href="https://github.com/dromara/Jpom">
 		<img src="https://img.shields.io/github/stars/dromara/Jpom.svg?style=social" alt="github star"/>
     </a>
-    <a target="_blank" href="https://gitee.com/dromara/Jpom">
-        <img src='https://img.shields.io/github/license/dromara/Jpom?style=flat' alt='license'/>
-    </a>
+    <a target="_blank" href="https://license.coscl.org.cn/MulanPSL2">
+		<img src="https://img.shields.io/:license-MulanPSL2-blue.svg" alt="license"/>
+	  </a>
     <a target="_blank" href="https://gitee.com/dromara/Jpom">
         <img src='https://img.shields.io/badge/JDK-1.8.0_40+-green.svg' alt='jdk'/>
     </a>
