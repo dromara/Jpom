@@ -1,7 +1,7 @@
 {
   "name": "jpom-vue3",
   "private": true,
-  "version": "2.11.2",
+  "version": "2.11.3",
   "type": "module",
   "scripts": {
     "dev": "vite --mode dev",
