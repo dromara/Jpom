@@ -86,9 +86,8 @@ cat >"$base/modules/common/src/main/resources/banner.txt" <<EOF
   \____/| .__/ \___/|_| |_| |_|
         | |
         |_|
-
- ➜ Jpom \﻿ (•◡•) / (v$new_version)
-
+ ➜ Jpom is licensed under Mulan PSL v2.
+ ➜ \﻿ (•◡•) / (v$new_version)
 EOF
 
 # 保留新版本号
