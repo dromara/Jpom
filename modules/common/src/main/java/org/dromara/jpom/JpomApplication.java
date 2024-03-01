@@ -223,7 +223,7 @@ public class JpomApplication implements DisposableBean, InitializingBean {
                         CommandUtil.asyncExeLocalCommand(command, parentFile);
                     } else {
                         // 使用了服务
-                        CommandUtil.asyncExeLocalCommand("systemctl restart " + jpomService, parentFile);
+                        CommandUtil.asyncExeLocalCommand("systemctl restart " + jpomService, parentFile, null, true);
                     }
                 }
             } catch (Exception e) {

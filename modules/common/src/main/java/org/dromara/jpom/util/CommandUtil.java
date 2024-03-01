@@ -290,12 +290,29 @@ public class CommandUtil {
      * 异步执行命令
      *
      * @param file    文件夹
+     * @param env     环境变量
      * @param command 命令
      * @throws IOException 异常
      */
     public static void asyncExeLocalCommand(String command, File file, Map<String, String> env) throws Exception {
+        asyncExeLocalCommand(command, file, env, false);
+    }
+
+    /**
+     * 异步执行命令
+     *
+     * @param file    文件夹
+     * @param env     环境变量
+     * @param useSudo 是否填充 sudo
+     * @param command 命令
+     * @throws IOException 异常
+     */
+    public static void asyncExeLocalCommand(String command, File file, Map<String, String> env, boolean useSudo) throws Exception {
         String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
         newCommand = StrUtil.replace(newCommand, StrUtil.LF, StrUtil.SPACE);
+        if (useSudo) {
+            newCommand = StrUtil.addPrefixIfNot(newCommand, "sudo ");
+        }
         //
         log.debug(newCommand);
         List<String> commands = getCommand();
@@ -313,6 +330,7 @@ public class CommandUtil {
         pb.redirectInput(ProcessBuilder.Redirect.INHERIT);
         pb.start();
     }
+
 
     /**
      * 判断是否包含删除命令
