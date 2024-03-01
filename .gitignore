@@ -50,3 +50,5 @@ functions/*
 screenshot
 .firebase
 .eslintcache
+
+web-vue/stats.html
