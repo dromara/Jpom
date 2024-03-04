@@ -588,7 +588,7 @@ export default {
           width: 80,
           ellipsis: true,
           align: 'center',
-          customRender: ({ text, record, index }) => `${index + 1}`
+          customRender: ({ index }) => `${index + 1}`
         },
         {
           title: '服务Id',

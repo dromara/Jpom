@@ -61,7 +61,6 @@ import { checkSystem, loadingLogo } from '@/api/install'
 import { useAppStore } from '@/stores/app'
 import { useGuideStore } from '@/stores/guide'
 import defaultLogo from '@/assets/images/jpom.svg'
-import { use } from 'echarts'
 import { useAllMenuStore } from '@/stores/menu2'
 
 defineProps({
@@ -128,7 +127,7 @@ onMounted(() => {
 })
 
 const router = useRouter()
-const route = useRoute()
+// const route = useRoute()
 
 const menuTheme = computed(() => {
   return guideStore.getMenuThemeView()
@@ -161,7 +160,6 @@ const checkSystemHannder = () => {
       $notification.warn({
         message: res.msg
       })
-    } else {
     }
     if (res.code === 999) {
       router.push('/prohibit-access')

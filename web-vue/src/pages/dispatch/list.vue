@@ -1597,17 +1597,19 @@ export default {
         async onOk() {
           return await new Promise((resolve, reject) => {
             // 删除
-            cancelOutgiving({ id: record.id }).then((res) => {
-              if (res.code === 200) {
-                $notification.success({
-                  message: res.msg
-                })
-                that.loadData()
-                that.silenceLoadData()
-              }
-              resolve()
-            })
-          }).catch(reject)
+            cancelOutgiving({ id: record.id })
+              .then((res) => {
+                if (res.code === 200) {
+                  $notification.success({
+                    message: res.msg
+                  })
+                  that.loadData()
+                  that.silenceLoadData()
+                }
+                resolve()
+              })
+              .catch(reject)
+          })
         }
       })
     },
