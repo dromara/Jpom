@@ -66,13 +66,16 @@ export default {
   components: {},
   props: {
     nodeId: {
-      type: String
+      type: String,
+      default: ''
     },
     machineId: {
-      type: String
+      type: String,
+      default: ''
     },
     type: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {
