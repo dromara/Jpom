@@ -28,6 +28,8 @@
     // 禁止使用 var，而应该用 let 或 const
     "no-var": "error",
     "@typescript-eslint/no-unused-vars": ["error", { "args": "none" }],
-    "vue/multi-word-component-names": "off"
+    "vue/multi-word-component-names": "off",
+    // 处理换行
+    "endOfLine": 0
   }
 }
