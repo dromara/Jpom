@@ -7,44 +7,44 @@
         size="middle"
         :columns="columns"
         :pagination="pagination"
-        @change="
-          (pagination, filters, sorter) => {
-            this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
-            this.loadData()
-          }
-        "
         bordered
-        rowKey="id"
+        row-key="id"
         :row-selection="rowSelection"
         :scroll="{
           x: 'max-content'
         }"
+        @change="
+          (pagination, filters, sorter) => {
+            listQuery = CHANGE_PAGE(listQuery, { pagination, sorter })
+            loadData()
+          }
+        "
       >
-        <template v-slot:title>
+        <template #title>
           <a-space>
             <a-input
               v-model:value="listQuery['%name%']"
-              @pressEnter="loadData"
               placeholder="文件名称"
               class="search-input-item"
+              @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['%aliasCode%']"
-              @pressEnter="loadData"
               placeholder="别名码"
               class="search-input-item"
+              @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['extName']"
-              @pressEnter="loadData"
               placeholder="后缀,精准搜索"
               class="search-input-item"
+              @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['id']"
-              @pressEnter="loadData"
               placeholder="文件id,精准搜索"
               class="search-input-item"
+              @press-enter="loadData"
             />
             <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
               <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
@@ -75,14 +75,14 @@
           </template>
           <template v-else-if="column.dataIndex === 'name'">
             <a-popover title="文件信息">
-              <template v-slot:content>
+              <template #content>
                 <p>文件名：{{ text }}</p>
                 <p>文件描述：{{ record.description }}</p>
                 <p v-if="record.status !== undefined">下载状态：{{ statusMap[record.status] || '未知' }}</p>
                 <p v-if="record.progressDesc">状态描述：{{ record.progressDesc }}</p>
               </template>
               <!-- {{ text }} -->
-              <a-button type="link" style="padding: 0" @click="handleEdit(record)" size="small">{{ text }}</a-button>
+              <a-button type="link" style="padding: 0" size="small" @click="handleEdit(record)">{{ text }}</a-button>
             </a-popover>
           </template>
 
@@ -121,15 +121,15 @@
       </a-table>
       <!-- 上传文件 -->
       <a-modal
-        destroyOnClose
-        :confirmLoading="confirmLoading"
         v-model:open="uploadVisible"
+        destroy-on-close
+        :confirm-loading="confirmLoading"
         :closable="!uploading"
         :footer="uploading ? null : undefined"
         :keyboard="false"
         :title="`上传文件`"
+        :mask-closable="false"
         @ok="handleUploadOk"
-        :maskClosable="false"
       >
         <a-form ref="form" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <a-form-item label="选择文件" name="file">
@@ -144,17 +144,17 @@
             <a-upload
               :file-list="fileList"
               :disabled="!!percentage"
-              @remove="
-                (file) => {
-                  this.fileList = []
-                  return true
-                }
-              "
               :before-upload="
                 (file) => {
                   // 只允许上传单个文件
-                  this.fileList = [file]
+                  fileList = [file]
                   return false
+                }
+              "
+              @remove="
+                (file) => {
+                  fileList = []
+                  return true
                 }
               "
             >
@@ -178,16 +178,16 @@
           </a-form-item>
           <a-form-item label="别名码" name="aliasCode" help="用于区别文件是否为同一类型,可以针对同类型进行下载管理">
             <a-input-search
-              :maxLength="50"
               v-model:value="temp.aliasCode"
+              :max-length="50"
               placeholder="请输入别名码"
               @search="
                 () => {
-                  this.temp = { ...this.temp, aliasCode: randomStr(6) }
+                  temp = { ...temp, aliasCode: randomStr(6) }
                 }
               "
             >
-              <template v-slot:enterButton>
+              <template #enterButton>
                 <a-button type="primary"> 随机生成 </a-button>
               </template>
             </a-input-search>
@@ -199,16 +199,16 @@
       </a-modal>
       <!-- 编辑文件 -->
       <a-modal
-        destroyOnClose
-        :confirmLoading="confirmLoading"
         v-model:open="editVisible"
+        destroy-on-close
+        :confirm-loading="confirmLoading"
         :title="`修改文件`"
+        :mask-closable="false"
         @ok="handleEditOk"
-        :maskClosable="false"
       >
         <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <a-form-item label="文件名" name="name">
-            <a-input placeholder="文件名" v-model:value="temp.name" />
+            <a-input v-model:value="temp.name" placeholder="文件名" />
           </a-form-item>
           <a-form-item label="保留天数" name="keepDay">
             <a-input-number
@@ -226,16 +226,16 @@
           </a-form-item>
           <a-form-item label="别名码" name="aliasCode" help="用于区别文件是否为同一类型,可以针对同类型进行下载管理">
             <a-input-search
-              :maxLength="50"
               v-model:value="temp.aliasCode"
+              :max-length="50"
               placeholder="请输入别名码"
               @search="
                 () => {
-                  this.temp = { ...this.temp, aliasCode: randomStr(6) }
+                  temp = { ...temp, aliasCode: randomStr(6) }
                 }
               "
             >
-              <template v-slot:enterButton>
+              <template #enterButton>
                 <a-button type="primary"> 随机生成 </a-button>
               </template>
             </a-input-search>
@@ -247,14 +247,14 @@
       </a-modal>
       <!--远程下载  -->
       <a-modal
-        destroyOnClose
         v-model:open="uploadRemoteFileVisible"
+        destroy-on-close
         title="远程下载文件"
+        :mask-closable="false"
+        :confirm-loading="confirmLoading"
         @ok="handleRemoteUpload"
-        :maskClosable="false"
-        :confirmLoading="confirmLoading"
       >
-        <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }" :rules="rules" ref="remoteForm">
+        <a-form ref="remoteForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }" :rules="rules">
           <a-form-item label="远程下载URL" name="url">
             <a-input v-model:value="temp.url" placeholder="远程下载地址" />
           </a-form-item>
@@ -274,16 +274,16 @@
           </a-form-item>
           <a-form-item label="别名码" name="aliasCode" help="用于区别文件是否为同一类型,可以针对同类型进行下载管理">
             <a-input-search
-              :maxLength="50"
               v-model:value="temp.aliasCode"
+              :max-length="50"
               placeholder="请输入别名码"
               @search="
                 () => {
-                  this.temp = { ...this.temp, aliasCode: randomStr(6) }
+                  temp = { ...temp, aliasCode: randomStr(6) }
                 }
               "
             >
-              <template v-slot:enterButton>
+              <template #enterButton>
                 <a-button type="primary"> 随机生成 </a-button>
               </template>
             </a-input-search>
@@ -295,16 +295,16 @@
       </a-modal>
       <!-- 断点下载 -->
       <a-modal
-        destroyOnClose
         v-model:open="triggerVisible"
+        destroy-on-close
         title="断点/分片下载"
         width="50%"
         :footer="null"
-        :maskClosable="false"
+        :mask-closable="false"
       >
         <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-tabs default-active-key="1">
-            <template v-slot:rightExtra>
+            <template #rightExtra>
               <a-tooltip title="重置下载 token 信息,重置后之前的下载 token 将失效">
                 <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
               </a-tooltip>
@@ -312,7 +312,7 @@
             <a-tab-pane key="1" tab="断点/分片单文件下载">
               <a-space direction="vertical" style="width: 100%">
                 <a-alert type="info" :message="`下载地址(点击可以复制)`">
-                  <template v-slot:description>
+                  <template #description>
                     <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerDownloadUrl }">
                       <a-tag>GET</a-tag>
                       <span>{{ `${temp.triggerDownloadUrl}` }} </span>
@@ -324,10 +324,10 @@
                 </a>
               </a-space>
             </a-tab-pane>
-            <a-tab-pane tab="断点/分片别名下载" v-if="temp.triggerAliasDownloadUrl">
+            <a-tab-pane v-if="temp.triggerAliasDownloadUrl" tab="断点/分片别名下载">
               <a-space direction="vertical" style="width: 100%">
                 <a-alert message="温馨提示" type="warning">
-                  <template v-slot:description>
+                  <template #description>
                     <ul>
                       <li>
                         支持自定义排序字段：sort=createTimeMillis:desc
@@ -340,7 +340,7 @@
                   </template>
                 </a-alert>
                 <a-alert type="info" :message="`下载地址(点击可以复制)`">
-                  <template v-slot:description>
+                  <template #description>
                     <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerAliasDownloadUrl }">
                       <a-tag>GET</a-tag>
                       <span>{{ `${temp.triggerAliasDownloadUrl}` }} </span>
@@ -357,19 +357,19 @@
       </a-modal>
       <!-- 发布文件 -->
       <a-modal
-        destroyOnClose
-        :confirmLoading="confirmLoading"
         v-model:open="releaseFileVisible"
+        destroy-on-close
+        :confirm-loading="confirmLoading"
         title="发布文件"
         width="60%"
-        :maskClosable="false"
+        :mask-closable="false"
         @ok="releaseFileOk()"
       >
-        <releaseFile ref="releaseFile" v-if="releaseFileVisible" @commit="handleCommitTask"></releaseFile>
+        <releaseFile v-if="releaseFileVisible" ref="releaseFile" @commit="handleCommitTask"></releaseFile>
       </a-modal>
     </div>
     <!-- 选择确认区域 -->
-    <div style="padding-top: 50px" v-if="this.choose">
+    <div v-if="choose" style="padding-top: 50px">
       <div
         :style="{
           position: 'absolute',
@@ -387,7 +387,7 @@
           <a-button
             @click="
               () => {
-                this.$emit('cancel')
+                $emit('cancel')
               }
             "
           >
@@ -428,10 +428,10 @@ import releaseFile from './releaseFile.vue'
 import { addReleaseTask } from '@/api/file-manager/release-task-log'
 
 export default {
-  inject: ['globalLoading'],
   components: {
     releaseFile
   },
+  inject: ['globalLoading'],
   props: {
     choose: {
       // "radio"
@@ -439,6 +439,7 @@ export default {
       default: ''
     }
   },
+  emits: ['cancel', 'confirm'],
   data() {
     return {
       loading: false,
@@ -931,8 +932,7 @@ export default {
       }
       this.$emit('confirm', selectData)
     }
-  },
-  emits: ['cancel', 'confirm']
+  }
 }
 </script>
 

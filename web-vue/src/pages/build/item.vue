@@ -2,26 +2,26 @@
   <div>
     <!-- 编辑区 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :open="true"
+      :body-style="{
+        padding: '0'
+      }"
+      :header-style="{
+        padding: '0 10px'
+      }"
+      width="70vw"
+      :mask-closable="false"
+      :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
           $emit('close')
         }
       "
-      :bodyStyle="{
-        padding: '0'
-      }"
-      :headerStyle="{
-        padding: '0 10px'
-      }"
-      width="70vw"
-      :maskClosable="false"
-      :footer-style="{ textAlign: 'right' }"
     >
       <template #title>
         <template v-if="id">
-          <a-menu mode="horizontal" class="menu" v-model:selectedKeys="menuKey" @click="menuClick">
+          <a-menu v-model:selectedKeys="menuKey" mode="horizontal" class="menu" @click="menuClick">
             <a-menu-item key="info">
               <span><InfoOutlined /> 构建信息</span>
             </a-menu-item>
@@ -34,7 +34,7 @@
           </a-menu>
         </template>
         <template v-else>
-          <a-menu mode="horizontal" class="menu" v-model:selectedKeys="menuKey" @click="menuClick">
+          <a-menu v-model:selectedKeys="menuKey" mode="horizontal" class="menu" @click="menuClick">
             <a-menu-item key="edit">
               <span> <EditOutlined /> 新增构建</span>
             </a-menu-item>
@@ -43,29 +43,29 @@
       </template>
 
       <div class="layout-content">
-        <detailsPage v-if="id" :id="id" v-show="menuKey.includes('info')" />
+        <detailsPage v-if="id" v-show="menuKey.includes('info')" :id="id" />
         <editBuildPage
           v-show="menuKey.includes('edit')"
-          ref="editBuild"
           :id="id"
-          :data="data"
+          ref="editBuild"
           v-model:editSteps="stepsCurrent"
+          :data="data"
           @confirm="
             (build, buildId, buildEnvParameter) => {
               $emit('build', build, buildId, buildEnvParameter)
             }
           "
-          @changeEditSteps="
+          @change-edit-steps="
             (current) => {
-              this.stepsCurrent = current
+              stepsCurrent = current
             }
           "
         ></editBuildPage>
-        <triggerPage v-if="id" :id="id" v-show="menuKey.includes('trigger')" />
+        <triggerPage v-if="id" v-show="menuKey.includes('trigger')" :id="id" />
       </div>
       <!-- <template> </template> -->
 
-      <template #footer v-if="menuKey.includes('edit')">
+      <template v-if="menuKey.includes('edit')" #footer>
         <a-space>
           <a-button
             @click="
@@ -139,6 +139,7 @@ export default {
       default: 0
     }
   },
+  emits: ['close', 'build'],
   data() {
     return {
       menuKey: ['info'],
@@ -160,8 +161,7 @@ export default {
     onClose() {
       this.$emit('close')
     }
-  },
-  emits: ['close', 'build']
+  }
 }
 </script>
 <style scoped>

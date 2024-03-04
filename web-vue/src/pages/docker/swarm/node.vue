@@ -10,21 +10,22 @@
         x: 'max-content'
       }"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['nodeId']"
-            @pressEnter="loadData"
             placeholder="id"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['nodeName']"
-            @pressEnter="loadData"
             placeholder="名称"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-select
+            v-model:value="listQuery['nodeRole']"
             show-search
             :filter-option="
               (input, option) => {
@@ -36,8 +37,7 @@
                 )
               }
             "
-            v-model:value="listQuery['nodeRole']"
-            allowClear
+            allow-clear
             placeholder="角色"
             class="search-input-item"
           >
@@ -45,7 +45,7 @@
             <a-select-option key="manager">管理节点</a-select-option>
           </a-select>
 
-          <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="loadData" />
         </a-space>
       </template>
@@ -58,7 +58,7 @@
 
         <template v-else-if="column.dataIndex === 'hostname'">
           <a-popover placement="topLeft" :title="`主机名：${record.description && record.description.hostname}`">
-            <template v-slot:content>
+            <template #content>
               <p>
                 节点Id: <a-tag>{{ record.id }}</a-tag>
               </p>
@@ -164,22 +164,22 @@
     </a-table>
     <!-- 编辑节点 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="编辑节点"
+      :mask-closable="false"
       @ok="handleEditOk"
-      :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="角色" name="role">
-          <a-radio-group name="role" v-model:value="temp.role" :disabled="temp.leader">
+          <a-radio-group v-model:value="temp.role" name="role" :disabled="temp.leader">
             <a-radio value="WORKER"> 工作节点</a-radio>
             <a-radio value="MANAGER"> 管理节点 </a-radio>
           </a-radio-group>
         </a-form-item>
         <a-form-item label="状态" name="availability">
-          <a-radio-group name="availability" v-model:value="temp.availability">
+          <a-radio-group v-model:value="temp.availability" name="availability">
             <a-radio value="ACTIVE"> 活跃</a-radio>
             <a-radio value="PAUSE"> 暂停 </a-radio>
             <a-radio value="DRAIN"> 排空 </a-radio>

@@ -10,22 +10,22 @@
         x: 'max-content'
       }"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['serviceId']"
-            @pressEnter="loadData"
             placeholder="id"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['serviceName']"
-            @pressEnter="loadData"
             placeholder="名称"
             class="search-input-item"
+            @press-enter="loadData"
           />
 
-          <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           <a-button type="primary" @click="handleAdd">创建</a-button>
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="loadData" />
         </a-space>
@@ -115,13 +115,13 @@
     </a-table>
     <!-- 编辑节点 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="编辑服务"
       width="70vw"
+      :mask-closable="false"
       @ok="handleEditOk"
-      :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="服务名称" name="name">
@@ -130,7 +130,7 @@
         </a-form-item>
         <a-form-item label="运行模式" name="mode">
           <template #help><span v-if="!temp.serviceId">创建后不支持修改</span></template>
-          <a-radio-group name="mode" v-model:value="temp.mode" :disabled="temp.serviceId ? true : false">
+          <a-radio-group v-model:value="temp.mode" name="mode" :disabled="temp.serviceId ? true : false">
             <a-radio value="REPLICATED">副本</a-radio>
             <a-radio value="GLOBAL">独立 </a-radio>
           </a-radio-group>
@@ -153,8 +153,8 @@
               <a-tab-pane key="port" tab="端口">
                 <a-form-item label="解析模式" name="endpointResolutionMode">
                   <a-radio-group
-                    name="endpointResolutionMode"
                     v-model:value="temp.endpointResolutionMode"
+                    name="endpointResolutionMode"
                     @change="
                       () => {
                         temp.exposedPorts = temp.exposedPorts.map((item) => {
@@ -176,7 +176,7 @@
                       <a-input-group>
                         <a-row>
                           <a-col :span="7">
-                            <a-radio-group name="publishMode" v-model:value="item.publishMode">
+                            <a-radio-group v-model:value="item.publishMode" name="publishMode">
                               <a-radio value="ingress" :disabled="temp.endpointResolutionMode === 'DNSRR'"
                                 >路由</a-radio
                               >
@@ -184,12 +184,12 @@
                             </a-radio-group>
                           </a-col>
                           <a-col :span="7">
-                            <a-input addon-before="端口" placeholder="端口" v-model:value="item.publishedPort">
+                            <a-input v-model:value="item.publishedPort" addon-before="端口" placeholder="端口">
                             </a-input>
                           </a-col>
                           <a-col :span="8" :offset="1">
-                            <a-input addon-before="容器" v-model:value="item.targetPort" placeholder="容器端口">
-                              <template v-slot:addonAfter>
+                            <a-input v-model:value="item.targetPort" addon-before="容器" placeholder="容器端口">
+                              <template #addonAfter>
                                 <a-select v-model:value="item.protocol" placeholder="端口协议">
                                   <a-select-option value="TCP">TCP</a-select-option>
                                   <a-select-option value="UDP">UDP</a-select-option>
@@ -235,16 +235,16 @@
                       <a-input-group>
                         <a-row>
                           <a-col :span="7">
-                            <a-radio-group name="publishMode" v-model:value="item.type">
+                            <a-radio-group v-model:value="item.type" name="publishMode">
                               <a-radio value="VOLUME">VOLUME</a-radio>
                               <a-radio value="BIND">BIND</a-radio>
                             </a-radio-group>
                           </a-col>
                           <a-col :span="7">
-                            <a-input addon-before="宿主" v-model:value="item.source" placeholder="宿主机目录" />
+                            <a-input v-model:value="item.source" addon-before="宿主" placeholder="宿主机目录" />
                           </a-col>
                           <a-col :span="8" :offset="1">
-                            <a-input addon-before="容器" v-model:value="item.target" placeholder="容器目录" />
+                            <a-input v-model:value="item.target" addon-before="容器" placeholder="容器目录" />
                           </a-col>
                         </a-row>
                       </a-input-group>
@@ -277,7 +277,7 @@
                 <a-form-item>
                   <a-row v-for="(item, index) in temp.args" :key="index">
                     <a-col :span="20">
-                      <a-input addon-before="参数值" v-model:value="item.value" placeholder="填写运行参数" />
+                      <a-input v-model:value="item.value" addon-before="参数值" placeholder="填写运行参数" />
                     </a-col>
 
                     <a-col :span="2" :offset="1">
@@ -307,7 +307,7 @@
                 <a-form-item>
                   <a-row v-for="(item, index) in temp.commands" :key="index">
                     <a-col :span="20">
-                      <a-input addon-before="命令值" v-model:value="item.value" placeholder="填写运行命令" />
+                      <a-input v-model:value="item.value" addon-before="命令值" placeholder="填写运行命令" />
                     </a-col>
 
                     <a-col :span="2" :offset="1">
@@ -336,10 +336,10 @@
                 <a-form-item>
                   <a-row v-for="(item, index) in temp.envs" :key="index">
                     <a-col :span="10">
-                      <a-input addon-before="名称" v-model:value="item.name" placeholder="变量名称" />
+                      <a-input v-model:value="item.name" addon-before="名称" placeholder="变量名称" />
                     </a-col>
                     <a-col :span="10" :offset="1">
-                      <a-input addon-before="变量值" v-model:value="item.value" placeholder="变量值" />
+                      <a-input v-model:value="item.value" addon-before="变量值" placeholder="变量值" />
                     </a-col>
                     <a-col :span="2" :offset="1">
                       <a-space>
@@ -364,12 +364,12 @@
                   </a-row>
                 </a-form-item>
               </a-tab-pane>
-              <a-tab-pane tab="升级策略" v-if="temp.update">
+              <a-tab-pane v-if="temp.update" tab="升级策略">
                 <a-form-item label="并行度" name="parallelism">
                   <a-input-number
+                    v-model:value="temp.update.parallelism"
                     style="width: 80%"
                     :min="0"
-                    v-model:value="temp.update.parallelism"
                     placeholder="并行度,同一时间升级的容器数量"
                   />
                 </a-form-item>
@@ -378,48 +378,48 @@
                     <span style="padding-left: 20%">单位 ns 秒</span>
                   </template>
                   <a-input-number
+                    v-model:value="temp.update.delay"
                     style="width: 80%"
                     :min="1"
-                    v-model:value="temp.update.delay"
                     placeholder="延迟,容器升级间隔时间"
                   />
                 </a-form-item>
                 <a-form-item label="失败率" name="maxFailureRatio">
                   <a-input-number
+                    v-model:value="temp.update.maxFailureRatio"
                     style="width: 80%"
                     :min="0"
-                    v-model:value="temp.update.maxFailureRatio"
                     placeholder="失败率,更新期间允许的失败率"
                   />
                 </a-form-item>
                 <a-form-item label="失败策略" name="failureAction">
-                  <a-radio-group name="failureAction" v-model:value="temp.update.failureAction">
+                  <a-radio-group v-model:value="temp.update.failureAction" name="failureAction">
                     <a-radio value="PAUSE">暂停</a-radio>
                     <a-radio value="CONTINUE">继续</a-radio>
                     <a-radio value="ROLLBACK">回滚</a-radio>
                   </a-radio-group>
                 </a-form-item>
                 <a-form-item label="执行顺序" name="order">
-                  <a-radio-group name="order" v-model:value="temp.update.order">
+                  <a-radio-group v-model:value="temp.update.order" name="order">
                     <a-radio value="STOP_FIRST">先停止</a-radio>
                     <a-radio value="START_FIRST">先启动</a-radio>
                   </a-radio-group>
                 </a-form-item>
                 <a-form-item label="监控" name="monitor">
                   <a-input-number
+                    v-model:value="temp.update.monitor"
                     style="width: 80%"
                     :min="1"
-                    v-model:value="temp.update.monitor"
                     placeholder="更新完成后确实成功的时间"
                   />
                 </a-form-item>
               </a-tab-pane>
-              <a-tab-pane tab="回滚策略" v-if="temp.rollback">
+              <a-tab-pane v-if="temp.rollback" tab="回滚策略">
                 <a-form-item label="并行度" name="parallelism">
                   <a-input-number
+                    v-model:value="temp.rollback.parallelism"
                     style="width: 80%"
                     :min="0"
-                    v-model:value="temp.rollback.parallelism"
                     placeholder="并行度,同一时间升级的容器数量"
                   />
                 </a-form-item>
@@ -428,56 +428,56 @@
                     <span style="padding-left: 20%">单位 ns 秒</span>
                   </template>
                   <a-input-number
+                    v-model:value="temp.rollback.delay"
                     style="width: 80%"
                     :min="1"
-                    v-model:value="temp.rollback.delay"
                     placeholder="延迟,容器回滚间隔时间"
                   />
                 </a-form-item>
                 <a-form-item label="失败率" name="maxFailureRatio">
                   <a-input-number
+                    v-model:value="temp.rollback.maxFailureRatio"
                     style="width: 80%"
                     :min="0"
-                    v-model:value="temp.rollback.maxFailureRatio"
                     placeholder="失败率,更新期间允许的失败率"
                   />
                 </a-form-item>
                 <a-form-item label="失败策略" name="failureAction">
-                  <a-radio-group name="failureAction" v-model:value="temp.rollback.failureAction">
+                  <a-radio-group v-model:value="temp.rollback.failureAction" name="failureAction">
                     <a-radio value="PAUSE">暂停</a-radio>
                     <a-radio value="CONTINUE">继续</a-radio>
                     <a-radio value="ROLLBACK">回滚</a-radio>
                   </a-radio-group>
                 </a-form-item>
                 <a-form-item label="执行顺序" name="order">
-                  <a-radio-group name="order" v-model:value="temp.rollback.order">
+                  <a-radio-group v-model:value="temp.rollback.order" name="order">
                     <a-radio value="STOP_FIRST">先停止</a-radio>
                     <a-radio value="START_FIRST">先启动</a-radio>
                   </a-radio-group>
                 </a-form-item>
                 <a-form-item label="监控" name="monitor">
                   <a-input-number
+                    v-model:value="temp.rollback.monitor"
                     style="width: 80%"
                     :min="1"
-                    v-model:value="temp.rollback.monitor"
                     placeholder="更新完成后确实成功的时间"
                   />
                 </a-form-item>
               </a-tab-pane>
-              <a-tab-pane tab="资源" v-if="temp.resources">
+              <a-tab-pane v-if="temp.resources" tab="资源">
                 <a-form-item label="预占资源">
                   <a-row>
                     <a-col :span="8">
                       <a-input
-                        addon-before="CPUs"
                         v-model:value="temp.resources.reservations.nanoCPUs"
+                        addon-before="CPUs"
                         placeholder="nanoCPUs 最小 1000000"
                       />
                     </a-col>
                     <a-col :span="8" :offset="1">
                       <a-input
-                        addon-before="memory"
                         v-model:value="temp.resources.reservations.memoryBytes"
+                        addon-before="memory"
                         placeholder="memory 最小 4M"
                       />
                     </a-col>
@@ -487,15 +487,15 @@
                   <a-row>
                     <a-col :span="8">
                       <a-input
-                        addon-before="CPUs"
                         v-model:value="temp.resources.limits.nanoCPUs"
+                        addon-before="CPUs"
                         placeholder="nanoCPUs 最小 1000000"
                       />
                     </a-col>
                     <a-col :span="8" :offset="1">
                       <a-input
-                        addon-before="memory"
                         v-model:value="temp.resources.limits.memoryBytes"
+                        addon-before="memory"
                         placeholder="memory 最小 4M"
                       />
                     </a-col>
@@ -509,36 +509,36 @@
     </a-modal>
     <!-- 查看任务 -->
     <a-modal
-      destroyOnClose
       v-model:open="taskVisible"
+      destroy-on-close
       title="查看任务"
       width="80vw"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
       <swarm-task
         v-if="taskVisible"
+        :id="id"
         :visible="taskVisible"
-        :taskState="this.temp.state"
-        :id="this.id"
-        :serviceId="this.temp.id"
-        :urlPrefix="this.urlPrefix"
+        :task-state="temp.state"
+        :service-id="temp.id"
+        :url-prefix="urlPrefix"
       />
     </a-modal>
     <!-- 查看日志 -->
 
     <pull-log
       v-if="logVisible > 0"
+      :id="id"
       :visible="logVisible != 0"
+      :data-id="temp.id"
+      type="service"
+      :url-prefix="urlPrefix"
       @close="
         () => {
           logVisible = 0
         }
       "
-      :id="this.id"
-      :dataId="this.temp.id"
-      type="service"
-      :urlPrefix="this.urlPrefix"
     />
   </div>
 </template>
@@ -645,9 +645,9 @@ export default {
       countdownTime: Date.now()
     }
   },
+  computed: {},
 
   beforeUnmount() {},
-  computed: {},
   mounted() {
     this.loadData()
   },

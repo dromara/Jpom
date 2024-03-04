@@ -27,7 +27,7 @@
             <a-input v-model:value="maxkey.userInfoUri" type="text" placeholder="请输入用户信息 url [userInfoUri]" />
           </a-form-item>
           <a-form-item label="回调 url" name="redirectUri">
-            <template v-slot:help>参考地址：{{ `${this.host}/oauth2-maxkey` }}</template>
+            <template #help>参考地址：{{ `${host}/oauth2-maxkey` }}</template>
             <a-input v-model:value="maxkey.redirectUri" type="text" placeholder="请输入回调重定向 url [redirectUri]" />
           </a-form-item>
           <!-- <a-form-item label="登录url">
@@ -57,7 +57,7 @@
             <a-input-password v-model:value="gitee.clientSecret" placeholder="请输入客户端密钥 [clientSecret]" />
           </a-form-item>
           <a-form-item label="回调 url" name="redirectUri">
-            <template v-slot:help>参考地址：{{ `${this.host}/oauth2-gitee` }}</template>
+            <template #help>参考地址：{{ `${host}/oauth2-gitee` }}</template>
             <a-input v-model:value="gitee.redirectUri" type="text" placeholder="请输入回调重定向 url [redirectUri]" />
           </a-form-item>
           <!-- <a-form-item label="登录url">
@@ -89,7 +89,7 @@
           </a-form-item>
 
           <a-form-item label="回调 url" name="redirectUri">
-            <template v-slot:help>参考地址：{{ `${this.host}/oauth2-github` }}</template>
+            <template #help>参考地址：{{ `${host}/oauth2-github` }}</template>
             <a-input v-model:value="github.redirectUri" type="text" placeholder="请输入回调重定向 url [redirectUri]" />
           </a-form-item>
           <!-- <a-form-item label="登录url">

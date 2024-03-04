@@ -5,7 +5,7 @@
         <a-button type="primary" @click="initSocket">重连 </a-button>
       </template>
     </a-result>
-    <div :id="domId" v-else class="flex-100"></div>
+    <div v-else :id="domId" class="flex-100"></div>
   </div>
 </template>
 

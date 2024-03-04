@@ -10,36 +10,37 @@
         x: 'max-content'
       }"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
+            v-if="!serviceId"
             v-model:value="listQuery['serviceId']"
-            @pressEnter="loadData"
-            v-if="!this.serviceId"
             placeholder="服务id"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['taskName']"
-            @pressEnter="loadData"
             placeholder="任务名称"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['taskId']"
-            @pressEnter="loadData"
             placeholder="任务id"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['taskNode']"
-            @pressEnter="loadData"
             placeholder="节点id"
             class="search-input-item"
+            @press-enter="loadData"
           />
 
           <a-tooltip :title="TASK_STATE[listQuery['taskState']]">
             <a-select
+              v-model:value="listQuery['taskState']"
               show-search
               :filter-option="
                 (input, option) => {
@@ -51,16 +52,15 @@
                   )
                 }
               "
-              v-model:value="listQuery['taskState']"
-              allowClear
+              allow-clear
               placeholder="状态"
               class="search-input-item"
             >
-              <a-select-option :key="key" v-for="(item, key) in TASK_STATE">{{ item }}- {{ key }}</a-select-option>
+              <a-select-option v-for="(item, key) in TASK_STATE" :key="key">{{ item }}- {{ key }}</a-select-option>
               <a-select-option value="">状态</a-select-option>
             </a-select>
           </a-tooltip>
-          <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="loadData" />
         </a-space>
       </template>
@@ -81,7 +81,7 @@
         </template>
         <template v-else-if="column.dataIndex === 'desiredState'">
           <a-popover :title="`状态信息：${TASK_STATE[text]}`" placement="topLeft">
-            <template v-slot:content>
+            <template #content>
               <p>
                 当前状态：<a-tag>{{ text }}-{{ TASK_STATE[text] }}</a-tag>
               </p>
@@ -135,16 +135,16 @@
 
     <pull-log
       v-if="logVisible > 0"
+      :id="id"
       :visible="logVisible != 0"
+      :data-id="temp.id"
+      type="taks"
+      :url-prefix="urlPrefix"
       @close="
         () => {
           logVisible = 0
         }
       "
-      :id="this.id"
-      :dataId="this.temp.id"
-      type="taks"
-      :urlPrefix="this.urlPrefix"
     />
   </div>
 </template>

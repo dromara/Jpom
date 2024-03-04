@@ -5,56 +5,56 @@
       :data-source="list"
       size="middle"
       :columns="columns"
-      @change="changePage"
       :pagination="pagination"
       bordered
-      rowKey="id"
+      row-key="id"
       :row-selection="rowSelection"
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['id']"
             placeholder="脚本ID"
-            @pressEnter="loadData"
-            allowClear
+            allow-clear
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%name%']"
             placeholder="名称"
-            @pressEnter="loadData"
-            allowClear
+            allow-clear
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%description%']"
             placeholder="描述"
-            @pressEnter="loadData"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%autoExecCron%']"
             placeholder="定时执行"
-            @pressEnter="loadData"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="createScript">新增</a-button>
           <a-button
-            type="primary"
             v-if="mode === 'manage'"
+            type="primary"
             :disabled="!tableSelections || !tableSelections.length"
             @click="syncToWorkspaceShow"
             >工作空间同步</a-button
           >
           <a-tooltip>
-            <template v-slot:title>
+            <template #title>
               <div>脚本模版是存储在服务端中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
 
               <div>
@@ -81,7 +81,7 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'name'">
-          <a-tooltip @click="handleEdit(record)" placement="topLeft" :title="text">
+          <a-tooltip placement="topLeft" :title="text" @click="handleEdit(record)">
             <a-button type="link" style="padding: 0" size="small">{{ text }}</a-button>
           </a-tooltip>
         </template>
@@ -100,7 +100,7 @@
                   更多
                   <DownOutlined />
                 </a>
-                <template v-slot:overlay>
+                <template #overlay>
                   <a-menu>
                     <a-menu-item>
                       <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
@@ -132,25 +132,25 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal
-      destroyOnClose
-      :zIndex="1009"
       v-model:open="editScriptVisible"
+      destroy-on-close
+      :z-index="1009"
       title="编辑 Script"
-      @ok="handleEditScriptOk"
-      :maskClosable="false"
+      :mask-closable="false"
       width="80vw"
-      :confirmLoading="confirmLoading"
+      :confirm-loading="confirmLoading"
+      @ok="handleEditScriptOk"
     >
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
         <a-form-item v-if="temp.id" label="ScriptId" name="id">
-          <a-input v-model:value="temp.id" disabled readOnly />
+          <a-input v-model:value="temp.id" disabled read-only />
         </a-form-item>
         <a-form-item label="Script 名称" name="name">
-          <a-input :maxLength="50" v-model:value="temp.name" placeholder="名称" />
+          <a-input v-model:value="temp.name" :max-length="50" placeholder="名称" />
         </a-form-item>
         <a-form-item label="Script 内容" name="context">
           <a-form-item-rest>
-            <code-editor height="40vh" v-model:content="temp.context" :options="{ mode: 'shell', tabSize: 2 }">
+            <code-editor v-model:content="temp.context" height="40vh" :options="{ mode: 'shell', tabSize: 2 }">
             </code-editor>
           </a-form-item-rest>
         </a-form-item>
@@ -163,19 +163,19 @@
               <a-col :span="22">
                 <a-space direction="vertical" style="width: 100%">
                   <a-input
-                    :addon-before="`参数${index + 1}描述`"
                     v-model:value="item.desc"
+                    :addon-before="`参数${index + 1}描述`"
                     placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义" />
                   <a-input
-                    :addon-before="`参数${index + 1}值`"
                     v-model:value="item.value"
+                    :addon-before="`参数${index + 1}值`"
                     placeholder="参数值,新增默认参数后在手动执行脚本时需要填写参数值"
                 /></a-space>
               </a-col>
               <a-col :span="2">
                 <a-row type="flex" justify="center" align="middle">
                   <a-col>
-                    <MinusCircleOutlined @click="() => commandParams.splice(index, 1)" style="color: #ff0000" />
+                    <MinusCircleOutlined style="color: #ff0000" @click="() => commandParams.splice(index, 1)" />
                   </a-col>
                 </a-row>
               </a-col>
@@ -197,7 +197,7 @@
         <a-form-item label="描述" name="description">
           <a-textarea
             v-model:value="temp.description"
-            :maxLength="200"
+            :max-length="200"
             :rows="3"
             style="resize: none"
             placeholder="详细描述"
@@ -216,14 +216,15 @@
           >
         </a-form-item>
         <a-form-item v-else>
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               分发节点
-              <template v-slot:title> 分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本中 </template>
+              <template #title> 分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本中 </template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
           <a-select
+            v-model:value="temp.chooseNode"
             show-search
             :filter-option="
               (input, option) => {
@@ -237,7 +238,6 @@
             "
             placeholder="请选择分发到的节点"
             mode="multiple"
-            v-model:value="temp.chooseNode"
           >
             <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
               {{ item.name }}
@@ -248,26 +248,26 @@
     </a-modal>
     <!-- 脚本控制台组件 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="drawerTitle"
       placement="right"
       width="85vw"
       :open="drawerConsoleVisible"
       @close="onConsoleClose"
     >
-      <script-console v-if="drawerConsoleVisible" :defArgs="temp.defArgs" :id="temp.id" />
+      <script-console v-if="drawerConsoleVisible" :id="temp.id" :def-args="temp.defArgs" />
     </a-drawer>
     <!-- 同步到其他工作空间 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="syncToWorkspaceVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="同步到其他工作空间"
+      :mask-closable="false"
       @ok="handleSyncToWorkspace"
-      :maskClosable="false"
     >
       <a-alert message="温馨提示" type="warning" show-icon>
-        <template v-slot:description>
+        <template #description>
           <ul>
             <li>同步机制采用<b>脚本名称</b>确定是同一个脚本</li>
             <li>当目标工作空间不存在对应的 脚本 时候将自动创建一个新的 脚本</li>
@@ -279,6 +279,7 @@
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" name="workspaceId">
           <a-select
+            v-model:value="temp.workspaceId"
             show-search
             :filter-option="
               (input, option) => {
@@ -290,10 +291,9 @@
                 )
               }
             "
-            v-model:value="temp.workspaceId"
             placeholder="请选择工作空间"
           >
-            <a-select-option :disabled="getWorkspaceId() === item.id" v-for="item in workspaceList" :key="item.id">{{
+            <a-select-option v-for="item in workspaceList" :key="item.id" :disabled="getWorkspaceId() === item.id">{{
               item.name
             }}</a-select-option>
           </a-select>
@@ -302,16 +302,16 @@
     </a-modal>
     <!-- 触发器 -->
     <a-modal
-      destroyOnClose
       v-model:open="triggerVisible"
+      destroy-on-close
       title="触发器"
       width="50%"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
       <a-form ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
-          <template v-slot:rightExtra>
+          <template #rightExtra>
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>
@@ -319,7 +319,7 @@
           <a-tab-pane key="1" tab="执行">
             <a-space direction="vertical" style="width: 100%">
               <a-alert message="温馨提示" type="warning">
-                <template v-slot:description>
+                <template #description>
                   <ul>
                     <li>单个触发器地址中：第一个随机字符串为脚本ID，第二个随机字符串为 token</li>
                     <li>
@@ -330,14 +330,14 @@
                 </template>
               </a-alert>
               <a-alert type="info" :message="`单个触发器地址(点击可以复制)`">
-                <template v-slot:description>
+                <template #description>
                   <a-typography-paragraph :copyable="{ text: temp.triggerUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   </a-typography-paragraph>
                 </template>
               </a-alert>
               <a-alert type="info" :message="`批量触发器地址(点击可以复制)`">
-                <template v-slot:description>
+                <template #description>
                   <a-typography-paragraph :copyable="{ text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
                   </a-typography-paragraph>
@@ -350,17 +350,17 @@
     </a-modal>
     <!-- 脚本日志 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       title="脚本执行历史"
       width="70vw"
       :open="drawerLogVisible"
       @close="
         () => {
-          this.drawerLogVisible = false
+          drawerLogVisible = false
         }
       "
     >
-      <script-log v-if="drawerLogVisible" :scriptId="temp.id" />
+      <script-log v-if="drawerLogVisible" :script-id="temp.id" />
     </a-drawer>
     <!-- <div style="padding-top: 50px" v-if="mode === 'choose'">
       <div

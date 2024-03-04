@@ -276,9 +276,9 @@ export function concurrentExecution(list, limit, asyncHandle) {
     })
   }
   // 创建新的并发数组
-  let listCopy = [].concat(list)
+  const listCopy = [].concat(list)
   // 正在进行的所有并发异步操作
-  let asyncList = []
+  const asyncList = []
   limit = limit > listCopy.length ? listCopy.length : limit
 
   while (limit--) {
@@ -371,14 +371,14 @@ export function formatUnits(value, base, unitArr, defaultValue = '-') {
     return defaultValue
   }
 
-  var index = 0
-  var srcsize = parseFloat(value)
+  let index = 0
+  const srcsize = parseFloat(value)
   if (srcsize <= 0) {
     return defaultValue
   }
   // console.log(value, srcsize);
   index = Math.floor(Math.log(srcsize) / Math.log(base))
-  var size = srcsize / Math.pow(base, index)
+  let size = srcsize / Math.pow(base, index)
   size = size.toFixed(2) //保留的小数位数
   return size + unitArr[index]
 }
@@ -393,7 +393,7 @@ Array.prototype.groupBy = function (group) {
     ? Array.prototype.reduce.call(
         this,
         function (c, v) {
-          var k = group(v)
+          const k = group(v)
           c[k] = v
           return c
         },
@@ -469,7 +469,7 @@ export function formatPercent2(point, keep = 2) {
   if (null == point) {
     return '-'
   }
-  var percent = Number(Number(point).toFixed(keep))
+  let percent = Number(Number(point).toFixed(keep))
   percent += '%'
   return percent
 }
@@ -503,8 +503,8 @@ export function compareVersion(version1, version2) {
   const minLength = Math.min(v1s.length, v2s.length) // 取最小长度值
 
   for (let i = 0; i < minLength; i++) {
-    let v1 = v1s[i]
-    let v2 = v2s[i]
+    const v1 = v1s[i]
+    const v2 = v2s[i]
     // 先比较长度
     diff = v1.length - v2.length
     if (0 === diff) {

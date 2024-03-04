@@ -1,5 +1,5 @@
 <template>
-  <repository workspaceId="GLOBAL"> </repository>
+  <repository workspace-id="GLOBAL"> </repository>
 </template>
 
 <script>

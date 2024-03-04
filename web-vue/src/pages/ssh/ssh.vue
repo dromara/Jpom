@@ -1,6 +1,6 @@
 <template>
   <div>
-    <template v-if="this.useSuggestions">
+    <template v-if="useSuggestions">
       <a-result
         title="当前工作空间还没有SSH"
         sub-title="请到【系统管理】-> 【资产管理】-> 【SSH管理】新增SSH，或者将已新增的SSH授权关联、分配到此工作空间"
@@ -19,23 +19,24 @@
       :columns="columns"
       size="middle"
       :pagination="pagination"
-      @change="changePage"
       bordered
-      rowKey="id"
+      row-key="id"
       :row-selection="rowSelection"
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
-            class="search-input-item"
-            @pressEnter="loadData"
             v-model:value="listQuery['%name%']"
+            class="search-input-item"
             placeholder="ssh名称"
+            @press-enter="loadData"
           />
           <a-select
+            v-model:value="listQuery.group"
             show-search
             :filter-option="
               (input, option) => {
@@ -47,8 +48,7 @@
                 )
               }
             "
-            v-model:value="listQuery.group"
-            allowClear
+            allow-clear
             placeholder="分组"
             class="search-input-item"
           >
@@ -63,7 +63,7 @@
           >
           <a-button type="primary" @click="toSshTabs">管理面板</a-button>
           <a-tooltip>
-            <template v-slot:title>
+            <template #title>
               <div>
                 <ul>
                   <li>关联节点数据是异步获取有一定时间延迟</li>
@@ -105,7 +105,7 @@
         </template>
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('osName')">
           <a-popover title="系统信息">
-            <template v-slot:content>
+            <template #content>
               <p>系统名：{{ record.machineSsh && record.machineSsh.osName }}</p>
               <p>系统版本：{{ record.machineSsh && record.machineSsh.osVersion }}</p>
               <p>CPU型号：{{ record.machineSsh && record.machineSsh.osCpuIdentifierName }}</p>
@@ -146,7 +146,7 @@
 
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('osMaxOccupyDisk')">
           <a-popover title="硬盘信息">
-            <template v-slot:content>
+            <template #content>
               <p>硬盘总量：{{ renderSize(record.machineSsh && record.machineSsh.osFileStoreTotal) }}</p>
               <p>硬盘最大的使用率：{{ formatPercent(record.machineSsh && record.machineSsh.osMaxOccupyDisk) }}</p>
               <p>使用率最大的分区：{{ record.machineSsh && record.machineSsh.osMaxOccupyDiskName }}</p>
@@ -180,7 +180,7 @@
               <a-button size="small" type="primary" @click="handleTerminal(record, false)"
                 >终端<DownOutlined
               /></a-button>
-              <template v-slot:overlay>
+              <template #overlay>
                 <a-menu>
                   <a-menu-item key="1">
                     <a-button size="small" type="primary" @click="handleTerminal(record, true)"
@@ -218,7 +218,7 @@
                 更多
                 <DownOutlined />
               </a>
-              <template v-slot:overlay>
+              <template #overlay>
                 <a-menu>
                   <a-menu-item>
                     <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -238,18 +238,18 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal
-      destroyOnClose
       v-model:open="editSshVisible"
+      destroy-on-close
       width="600px"
       title="编辑 SSH"
+      :mask-closable="false"
+      :confirm-loading="confirmLoading"
       @ok="handleEditSshOk"
-      :maskClosable="false"
-      :confirmLoading="confirmLoading"
     >
       <a-form ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <template v-if="this.getUserInfo && this.getUserInfo.systemUser">
+        <template v-if="getUserInfo && getUserInfo.systemUser">
           <a-alert type="info" show-icon style="width: 100%; margin-bottom: 10px">
-            <template v-slot:message>
+            <template #message>
               <ul>
                 <li>此编辑仅能编辑当前 SSH 在此工作空间的名称信息</li>
                 <li>如果要配置 SSH 请到【系统管理】-> 【资产管理】-> 【SSH 管理】中去配置。</li>
@@ -262,14 +262,14 @@
           </a-alert>
         </template>
         <a-form-item label="SSH 名称" name="name">
-          <a-input v-model:value="temp.name" :maxLength="50" placeholder="SSH 名称" />
+          <a-input v-model:value="temp.name" :max-length="50" placeholder="SSH 名称" />
         </a-form-item>
         <a-form-item label="分组名称" name="group">
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            inputPlaceholder="新增分组"
-            selectPlaceholder="选择分组名"
+            input-placeholder="新增分组"
+            select-placeholder="选择分组名"
           >
           </custom-select>
         </a-form-item>
@@ -278,65 +278,65 @@
 
     <!-- 文件管理 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :open="drawerVisible"
-      @close="
-        () => {
-          this.drawerVisible = false
-        }
-      "
-      :title="`${this.temp.name} 文件管理`"
+      :title="`${temp.name} 文件管理`"
       placement="right"
       width="90vw"
+      @close="
+        () => {
+          drawerVisible = false
+        }
+      "
     >
-      <ssh-file v-if="drawerVisible" :sshId="temp.id" />
+      <ssh-file v-if="drawerVisible" :ssh-id="temp.id" />
     </a-drawer>
     <!-- Terminal -->
     <a-modal
-      destroyOnClose
+      v-model:open="terminalVisible"
+      destroy-on-close
       :style="{
         maxWidth: '100vw',
-        top: this.terminalFullscreen ? 0 : false,
+        top: terminalFullscreen ? 0 : false,
         paddingBottom: 0
       }"
-      :width="this.terminalFullscreen ? '100vw' : '80vw'"
-      :bodyStyle="{
+      :width="terminalFullscreen ? '100vw' : '80vw'"
+      :body-style="{
         padding: '0 5px',
         paddingTop: '10px',
         marginRight: '10px',
-        height: `${this.terminalFullscreen ? 'calc(100vh - 80px)' : '70vh'}`
+        height: `${terminalFullscreen ? 'calc(100vh - 80px)' : '70vh'}`
       }"
-      v-model:open="terminalVisible"
       :title="temp.name"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
       <!-- <div :style="`height: ${this.terminalFullscreen ? 'calc(100vh - 70px - 20px)' : 'calc(70vh - 20px)'}`"> -->
-      <terminal1 v-if="terminalVisible" :sshId="temp.id" />
+      <terminal1 v-if="terminalVisible" :ssh-id="temp.id" />
       <!-- </div> -->
     </a-modal>
     <!-- 操作日志 -->
     <a-modal
-      destroyOnClose
       v-model:open="viewOperationLog"
+      destroy-on-close
       title="操作日志"
       width="80vw"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
-      <OperationLog v-if="viewOperationLog" :sshId="temp.id"></OperationLog>
+      <OperationLog v-if="viewOperationLog" :ssh-id="temp.id"></OperationLog>
     </a-modal>
     <!-- 同步到其他工作空间 -->
     <a-modal
-      destroyOnClose
       v-model:open="syncToWorkspaceVisible"
+      destroy-on-close
       title="同步到其他工作空间"
-      :confirmLoading="confirmLoading"
+      :confirm-loading="confirmLoading"
+      :mask-closable="false"
       @ok="handleSyncToWorkspace"
-      :maskClosable="false"
     >
       <a-alert message="温馨提示" type="warning" show-icon>
-        <template v-slot:description>
+        <template #description>
           <ul>
             <li>同步机制采用 IP+PORT+连接方式 确定是同一个服务器</li>
             <li>当目标工作空间不存在对应的 SSH 时候将自动创建一个新的 SSH</li>
@@ -348,6 +348,7 @@
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" name="workspaceId">
           <a-select
+            v-model:value="temp.workspaceId"
             show-search
             :filter-option="
               (input, option) => {
@@ -359,10 +360,9 @@
                 )
               }
             "
-            v-model:value="temp.workspaceId"
             placeholder="请选择工作空间"
           >
-            <a-select-option :disabled="getWorkspaceId() === item.id" v-for="item in workspaceList" :key="item.id">{{
+            <a-select-option v-for="item in workspaceList" :key="item.id" :disabled="getWorkspaceId() === item.id">{{
               item.name
             }}</a-select-option>
           </a-select>

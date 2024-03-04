@@ -1,5 +1,5 @@
 <template>
-  <terminal :url="this.socketUrl" />
+  <terminal :url="socketUrl" />
 </template>
 
 <script>

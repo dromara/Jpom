@@ -7,21 +7,21 @@
       :columns="columns"
       :pagination="pagination"
       bordered
-      rowKey="id"
-      @change="change"
+      row-key="id"
       :scroll="{
         x: 'max-content'
       }"
+      @change="change"
     >
       <template #title>
         <a-space>
           <a-input
             v-model="listQuery['%username%']"
-            @pressEnter="loadData"
             placeholder="用户名"
             class="search-input-item"
+            @press-enter="loadData"
           />
-          <a-input v-model="listQuery['%ip%']" @pressEnter="loadData" placeholder="登录IP" class="search-input-item" />
+          <a-input v-model="listQuery['%ip%']" placeholder="登录IP" class="search-input-item" @press-enter="loadData" />
           <a-range-picker
             class="search-input-item"
             style="width: 220px"

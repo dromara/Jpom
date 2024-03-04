@@ -76,7 +76,7 @@ export const uploadPieces = ({
     const asyncUpdate = function () {
       if (start < total) {
         resolveFileProcess && resolveFileProcess('解析文件,准备上传中 ' + ((start / total) * 100).toFixed(2) + '%')
-        let end = Math.min(start + batch, total)
+        const end = Math.min(start + batch, total)
         reader.readAsArrayBuffer(blobSlice.call(file, start, end))
         start = end
       } else {
@@ -138,9 +138,9 @@ export const uploadPieces = ({
    * 获取每一个分片的详情
    **/
   const getChunkInfo = (file: File, currentChunk: number, chunkSize: number) => {
-    let start: number = currentChunk * chunkSize
-    let end: number = Math.min(file.size, start + chunkSize)
-    let chunk: Blob = blobSlice.call(file, start, end)
+    const start: number = currentChunk * chunkSize
+    const end: number = Math.min(file.size, start + chunkSize)
+    const chunk: Blob = blobSlice.call(file, start, end)
     return <IChunkInfo>{
       start,
       end,

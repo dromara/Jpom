@@ -53,7 +53,7 @@ const obj2base64 = (obj: any) => {
     return newData
   } else if (obj instanceof FormData) {
     const newFormData: any = new FormData()
-    for (var key of (obj as any).keys()) {
+    for (const key of (obj as any).keys()) {
       const item = obj.get(key)
       if (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean') {
         newFormData.append(base64Encode(String(key)), base64Encode(String(item)))

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div v-if="this.triggerVisible">
+    <div v-if="triggerVisible">
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1" type="card">
-          <template v-slot:rightExtra>
+          <template #rightExtra>
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>
@@ -11,7 +11,7 @@
           <a-tab-pane key="1" tab="执行构建">
             <a-space direction="vertical" style="width: 100%">
               <a-alert message="温馨提示" type="warning" show-icon>
-                <template v-slot:description>
+                <template #description>
                   <ul>
                     <li>单个触发器地址中：第一个随机字符串为构建ID，第二个随机字符串为 token</li>
                     <li>
@@ -37,14 +37,14 @@
                 </template>
               </a-alert>
               <a-alert type="info" :message="`单个触发器地址(点击可以复制)`">
-                <template v-slot:description>
+                <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerBuildUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.triggerBuildUrl }} </span>
                   </a-typography-paragraph>
                 </template>
               </a-alert>
               <a-alert type="info" :message="`批量触发器地址(点击可以复制)`">
-                <template v-slot:description>
+                <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerBuildUrl }">
                     <a-tag>POST</a-tag>
                     <span>{{ temp.batchTriggerBuildUrl }} </span>
@@ -56,7 +56,7 @@
           <a-tab-pane key="2" tab="查看当前状态">
             <a-space direction="vertical" style="width: 100%">
               <a-alert message="温馨提示" type="warning" show-icon>
-                <template v-slot:description>
+                <template #description>
                   <ul>
                     <li>批量构建参数 BODY json： [ { "id":"1", "token":"a" } ]</li>
                     <li>参数中的 id 、token 和触发构建一致</li>
@@ -70,7 +70,7 @@
                 </template>
               </a-alert>
               <a-alert type="info" :message="`获取单个构建状态地址(点击可以复制)`">
-                <template v-slot:description>
+                <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchBuildStatusUrl2 }">
                     <a-tag>GET</a-tag>
                     <span>{{ temp.batchBuildStatusUrl2 }} </span>
@@ -78,7 +78,7 @@
                 </template>
               </a-alert>
               <a-alert type="info" :message="`批量获取构建状态地址(点击可以复制)`">
-                <template v-slot:description>
+                <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchBuildStatusUrl }">
                     <a-tag>POST</a-tag>
                     <span>{{ temp.batchBuildStatusUrl }} </span>
@@ -90,7 +90,7 @@
           <a-tab-pane key="3" tab="查看构建日志">
             <a-space direction="vertical" style="width: 100%">
               <a-alert message="温馨提示" type="warning" show-icon>
-                <template v-slot:description>
+                <template #description>
                   <ul>
                     <li>参数中的 id 、token 和触发构建一致、buildNumId 构建序号id</li>
                     <li>构建序号id需要跟进实际情况替换</li>
@@ -98,7 +98,7 @@
                 </template>
               </a-alert>
               <a-alert type="info" :message="`获取单个构建日志地址(点击可以复制)`">
-                <template v-slot:description>
+                <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.buildLogUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.buildLogUrl }} </span>
                   </a-typography-paragraph>

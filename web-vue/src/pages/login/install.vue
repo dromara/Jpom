@@ -17,7 +17,7 @@
       </template>
 
       <a-row type="flex" justify="center">
-        <a-col :span="16" v-if="setpCurrent === 0">
+        <a-col v-if="setpCurrent === 0" :span="16">
           <a-card-meta title="初始化系统账户" style="textalign: center">
             <template #description>
               <ol>
@@ -36,8 +36,8 @@
             name="login"
             :label-col="{ span: 0 }"
             :wrapper-col="{ span: 24 }"
-            @finish="handleLogin"
             class="init-form"
+            @finish="handleLogin"
           >
             <a-form-item class="init-user-name" name="userName" :rules="[{ required: true, message: '请输入账户名' }]">
               <a-input v-model:value="loginForm.userName" placeholder="账户名称" />
@@ -60,7 +60,7 @@
             </a-form-item>
           </a-form>
         </a-col>
-        <a-col :span="22" v-if="setpCurrent === 1">
+        <a-col v-if="setpCurrent === 1" :span="22">
           <a-alert banner>
             <template #message>
               <ul class="maf-tips">
@@ -83,8 +83,8 @@
                 :model="mfaForm"
                 :label-col="{ span: 5 }"
                 :wrapper-col="{ span: 18 }"
-                @finish="handleMfaSure"
                 class="init-form"
+                @finish="handleMfaSure"
               >
                 <a-form-item label="二维码">
                   <a-qrcode :value="qrCode.value" :status="qrCode.value ? 'active' : 'loading'" />

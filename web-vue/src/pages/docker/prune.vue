@@ -6,20 +6,20 @@
       </a-form-item>
       <a-form-item label="修剪类型" :help="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].help">
         <a-select v-model:value="pruneForm.pruneType" placeholder="请选择修剪类型">
-          <a-select-option :key="key" v-for="(item, key) in pruneTypes">
+          <a-select-option v-for="(item, key) in pruneTypes" :key="key">
             {{ item.name }}
           </a-select-option>
         </a-select>
       </a-form-item>
       <a-form-item
-        label="悬空类型"
         v-if="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].filters.includes('dangling')"
+        label="悬空类型"
       >
         <a-switch v-model:checked="pruneForm.dangling" checked-children="悬空" un-checked-children="非悬空" />
       </a-form-item>
       <a-form-item
-        label="限定时间"
         v-if="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].filters.includes('until')"
+        label="限定时间"
       >
         <template #help><a-tag color="#f50"> 建议新增指定时间范围,否则将删除满足条件的所有数据</a-tag> </template>
         <a-tooltip
@@ -30,8 +30,8 @@
       </a-form-item>
 
       <a-form-item
-        label="指定标签"
         v-if="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].filters.includes('labels')"
+        label="指定标签"
       >
         <a-tooltip title="示例：key,key1 或者 key=value,key1=value1">
           <a-input v-model:value="pruneForm.labels" placeholder="修剪具有指定标签的对象,多个使用逗号分隔" />

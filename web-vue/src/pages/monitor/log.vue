@@ -12,16 +12,16 @@
       }"
       @change="change"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
-          <a-select v-model:value="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+          <a-select v-model:value="listQuery.nodeId" allow-clear placeholder="请选择节点" class="search-input-item">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
-          <a-select v-model:value="listQuery.status" allowClear placeholder="报警状态" class="search-input-item">
+          <a-select v-model:value="listQuery.status" allow-clear placeholder="报警状态" class="search-input-item">
             <a-select-option :value="1">正常</a-select-option>
             <a-select-option :value="0">异常</a-select-option>
           </a-select>
-          <a-select v-model:value="listQuery.notifyStatus" allowClear placeholder="通知状态" class="search-input-item">
+          <a-select v-model:value="listQuery.notifyStatus" allow-clear placeholder="通知状态" class="search-input-item">
             <a-select-option :value="1">成功</a-select-option>
             <a-select-option :value="0">失败</a-select-option>
           </a-select>
@@ -57,12 +57,12 @@
       </template>
     </a-table>
     <!-- 详情区 -->
-    <a-modal destroyOnClose v-model:open="detailVisible" width="600px" title="详情信息" :footer="null">
+    <a-modal v-model:open="detailVisible" destroy-on-close width="600px" title="详情信息" :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">
         <template #renderItem="{ item }">
           <a-list-item>
             <a-list-item-meta :description="item.description">
-              <template v-slot:title>
+              <template #title>
                 <h4>{{ item.title }}</h4>
               </template>
             </a-list-item-meta>

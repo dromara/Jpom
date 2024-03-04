@@ -5,23 +5,23 @@
         <a-row>
           <a-space style="display: inline">
             <a-input v-model:value="addName" placeholder="创建文件 /xxx/xxx/xxx" style="width: 100%">
-              <template v-slot:addonAfter>
+              <template #addonAfter>
                 <a-button type="primary" size="small" :disabled="!addName" @click="addItemHander">确认 </a-button>
               </template>
             </a-input>
           </a-space>
         </a-row>
-        <a-directory-tree :treeData="treeData" :fieldNames="replaceFields" @select="select"> </a-directory-tree>
+        <a-directory-tree :tree-data="treeData" :field-names="replaceFields" @select="select"> </a-directory-tree>
       </a-col>
       <a-col span="18" style="padding-left: 5px">
         <a-space direction="vertical" style="display: flex">
           <code-editor
-            height="calc(100vh - 170px)"
-            :showTool="true"
             v-model:content="temp.content"
-            :fileSuffix="temp.name"
+            height="calc(100vh - 170px)"
+            :show-tool="true"
+            :file-suffix="temp.name"
           >
-            <template v-slot:tool_before>
+            <template #tool_before>
               <div v-show="temp.name">
                 名称： <a-tag color="red">{{ temp.name }}</a-tag>
               </div>
@@ -31,7 +31,7 @@
           <a-row type="flex" justify="center">
             <a-space>
               <a-button type="primary" danger :disabled="!temp || !temp.name" @click="saveData">保存</a-button>
-              <a-button type="primary" v-if="temp.hasDefault" :disabled="!temp || !temp.name" @click="readeDefault">
+              <a-button v-if="temp.hasDefault" type="primary" :disabled="!temp || !temp.name" @click="readeDefault">
                 读取默认
               </a-button>
             </a-space>

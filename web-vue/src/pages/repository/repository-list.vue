@@ -6,38 +6,39 @@
       :columns="columns"
       :data-source="list"
       bordered
-      rowKey="id"
-      :row-selection="this.choose ? rowSelection : null"
+      row-key="id"
+      :row-selection="choose ? rowSelection : null"
       :pagination="pagination"
       :scroll="{
         x: 'max-content'
       }"
       @change="
         (pagination, filters, sorter) => {
-          this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
-          this.loadData()
+          listQuery = CHANGE_PAGE(listQuery, { pagination, sorter })
+          loadData()
         }
       "
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
-            class="search-input-item"
-            @pressEnter="loadData"
             v-model:value="listQuery['%name%']"
+            class="search-input-item"
             placeholder="仓库名称"
+            @press-enter="loadData"
           />
           <a-input
-            class="search-input-item"
-            @pressEnter="loadData"
             v-model:value="listQuery['%gitUrl%']"
+            class="search-input-item"
             placeholder="仓库地址"
+            @press-enter="loadData"
           />
-          <a-select v-model:value="listQuery.repoType" allowClear placeholder="仓库类型" class="search-input-item">
+          <a-select v-model:value="listQuery.repoType" allow-clear placeholder="仓库类型" class="search-input-item">
             <a-select-option :value="'0'">GIT</a-select-option>
             <a-select-option :value="'1'">SVN</a-select-option>
           </a-select>
           <a-select
+            v-model:value="listQuery.group"
             show-search
             :filter-option="
               (input, option) => {
@@ -49,8 +50,7 @@
                 )
               }
             "
-            v-model:value="listQuery.group"
-            allowClear
+            allow-clear
             placeholder="分组"
             class="search-input-item"
           >
@@ -62,7 +62,7 @@
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
           <a-tooltip>
-            <template v-slot:title
+            <template #title
               >使用 Access Token 一次导入多个项目<br />点击<a
                 target="_blank"
                 href="https://jpom.top/pages/jpom-server-import-multi-repos/"
@@ -73,7 +73,7 @@
           </a-tooltip>
           <a-button type="primary" @click="handlerExportData">导出</a-button>
           <a-dropdown>
-            <template v-slot:overlay>
+            <template #overlay>
               <a-menu>
                 <a-menu-item key="1">
                   <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button>
@@ -85,7 +85,7 @@
               name="file"
               accept=".csv"
               action=""
-              :showUploadList="false"
+              :show-upload-list="false"
               :multiple="false"
               :before-upload="beforeUpload"
             >
@@ -119,7 +119,7 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
-            <a-button type="primary" v-if="global" size="small" @click="viewBuild(record)">关联</a-button>
+            <a-button v-if="global" type="primary" size="small" @click="viewBuild(record)">关联</a-button>
             <a-button type="primary" danger size="small" @click="handleDelete(record)">删除</a-button>
 
             <a-dropdown>
@@ -127,7 +127,7 @@
                 更多
                 <DownOutlined />
               </a>
-              <template v-slot:overlay>
+              <template #overlay>
                 <a-menu>
                   <a-menu-item>
                     <a-button
@@ -166,36 +166,36 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal
-      :zIndex="1009"
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
+      :z-index="1009"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="编辑仓库"
+      :mask-closable="false"
       @ok="handleEditOk"
-      :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="仓库名称" name="name">
-          <a-input v-model:value="temp.name" :maxLength="50" placeholder="仓库名称" />
+          <a-input v-model:value="temp.name" :max-length="50" placeholder="仓库名称" />
         </a-form-item>
         <a-form-item label="分组" name="group">
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            inputPlaceholder="新增分组"
-            selectPlaceholder="选择分组名"
+            input-placeholder="新增分组"
+            select-placeholder="选择分组名"
           >
           </custom-select>
         </a-form-item>
         <a-form-item label="仓库地址" name="gitUrl">
           <a-input-group compact>
             <a-form-item-rest>
-              <a-select style="width: 20%" v-model:value="temp.repoType" name="repoType" placeholder="仓库类型">
+              <a-select v-model:value="temp.repoType" style="width: 20%" name="repoType" placeholder="仓库类型">
                 <a-select-option :value="0">GIT</a-select-option>
                 <a-select-option :value="1">SVN</a-select-option>
               </a-select>
             </a-form-item-rest>
-            <a-input style="width: 80%" :maxLength="250" v-model:value="temp.gitUrl" placeholder="仓库地址" />
+            <a-input v-model:value="temp.gitUrl" style="width: 80%" :max-length="250" placeholder="仓库地址" />
           </a-input-group>
         </a-form-item>
         <a-form-item label="协议" name="protocol">
@@ -210,14 +210,14 @@
             <template #label>
               <a-tooltip>
                 账号
-                <template v-slot:title> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                <template #title> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
                 <QuestionCircleOutlined v-if="!temp.id" />
               </a-tooltip>
             </template>
 
             <custom-input
               :input="temp.userName"
-              :envList="envVarList"
+              :env-list="envVarList"
               type="text"
               :placeholder="`登录用户`"
               @change="
@@ -232,14 +232,14 @@
             <template #label>
               <a-tooltip>
                 密码
-                <template v-slot:title> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                <template #title> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
                 <QuestionCircleOutlined v-if="!temp.id" />
               </a-tooltip>
             </template>
 
             <custom-input
               :input="temp.password"
-              :envList="envVarList"
+              :env-list="envVarList"
               :placeholder="`${!temp.id ? '登录密码' : '此处不填不会修改密码'}`"
               @change="
                 (v) => {
@@ -259,10 +259,10 @@
         </template>
         <a-form-item v-if="temp.repoType === 1 && temp.protocol === 1" label="账号" name="userName">
           <a-input v-model:value="temp.userName" placeholder="svn ssh 必填登录用户">
-            <template v-slot:prefix>
+            <template #prefix>
               <UserOutlined />
             </template>
-            <template v-slot:suffix>
+            <template #suffix>
               <a-tooltip v-if="temp.id" title=" 密码字段和密钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我">
                 <a-button size="small" type="primary" danger @click="restHideField(temp)">清除</a-button>
               </a-tooltip>
@@ -275,13 +275,13 @@
             <template #label>
               <a-tooltip>
                 密码
-                <template v-slot:title> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                <template #title> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
                 <QuestionCircleOutlined v-if="!temp.id" />
               </a-tooltip>
             </template>
             <custom-input
               :input="temp.password"
-              :envList="envVarList"
+              :env-list="envVarList"
               :placeholder="`证书密码`"
               @change="
                 (v) => {
@@ -293,7 +293,7 @@
           </a-form-item>
           <a-form-item label="私钥" name="rsaPrv">
             <a-tooltip placement="topLeft">
-              <template v-slot:title>
+              <template #title>
                 <div>
                   <p style="color: #faa">
                     注意：目前对 SSH key 访问 git 仓库地址不支持使用 ssh-keygen -t rsa -C "邮箱" 方式生成的 SSH key
@@ -314,22 +314,22 @@
                 </div>
               </template>
               <a-textarea
-                :auto-size="{ minRows: 3, maxRows: 3 }"
                 v-model:value="temp.rsaPrv"
+                :auto-size="{ minRows: 3, maxRows: 3 }"
                 placeholder="私钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"
               ></a-textarea>
             </a-tooltip>
           </a-form-item>
           <!-- 公钥暂时没用到 -->
-          <a-form-item label="公钥" name="rsaPub" v-if="false">
+          <a-form-item v-if="false" label="公钥" name="rsaPub">
             <a-textarea
-              :auto-size="{ minRows: 3, maxRows: 3 }"
               v-model:value="temp.rsaPub"
+              :auto-size="{ minRows: 3, maxRows: 3 }"
               placeholder="公钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"
             ></a-textarea>
           </a-form-item>
         </template>
-        <a-form-item label="共享" name="global" v-if="this.workspaceId !== 'GLOBAL'">
+        <a-form-item v-if="workspaceId !== 'GLOBAL'" label="共享" name="global">
           <a-radio-group v-model:value="temp.global">
             <a-radio :value="true"> 全局</a-radio>
             <a-radio :value="false"> 当前工作空间</a-radio>
@@ -347,19 +347,19 @@
       </a-form>
     </a-modal>
     <a-modal
-      :zIndex="1009"
-      destroyOnClose
       v-model:open="giteeImportVisible"
+      :z-index="1009"
+      destroy-on-close
       title="通过私人令牌导入仓库"
       width="80%"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
       <a-form
+        ref="giteeImportForm"
         :label-col="{ span: 4 }"
         :rules="giteeImportFormRules"
         :model="giteeImportForm"
-        ref="giteeImportForm"
         :wrapper-col="{ span: 20 }"
       >
         <a-form-item
@@ -370,19 +370,19 @@
           <a-form-item-rest>
             <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder[giteeImportForm.type]}`">
               <a-input-group compact>
-                <a-select style="width: 10%" @change="importChange" v-model:value="giteeImportForm.type">
-                  <a-select-option :value="item" v-for="item in Object.keys(providerData)" :key="item">
+                <a-select v-model:value="giteeImportForm.type" style="width: 10%" @change="importChange">
+                  <a-select-option v-for="item in Object.keys(providerData)" :key="item" :value="item">
                     {{ item }}</a-select-option
                   >
                 </a-select>
 
                 <a-input-search
+                  v-model:value="giteeImportForm.token"
                   style="width: 90%; margin-top: 1px"
                   enter-button
                   :loading="importLoading"
-                  v-model:value="giteeImportForm.token"
-                  @search="handleGiteeImportFormOk"
                   :placeholder="importTypePlaceholder[giteeImportForm.type]"
+                  @search="handleGiteeImportFormOk"
                 />
               </a-input-group>
             </a-tooltip>
@@ -392,10 +392,10 @@
           <a-input v-model:value="giteeImportForm.address" placeholder="请填写平台地址" />
         </a-form-item>
         <a-form-item
+          v-if="providerData[giteeImportForm.type].query"
           name="condition"
           label="搜索"
           help="输入仓库名称或者仓库路径进行搜索"
-          v-if="providerData[giteeImportForm.type].query"
         >
           <a-input v-model:value="giteeImportForm.condition" placeholder="输入仓库名称或者仓库路径进行搜索" />
         </a-form-item>
@@ -406,9 +406,9 @@
         :columns="reposColumns"
         :data-source="repos"
         bordered
-        rowKey="full_name"
-        @change="reposChange"
+        row-key="full_name"
         :pagination="reposPagination"
+        @change="reposChange"
       >
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'private'">
@@ -474,14 +474,14 @@
     <!-- </div> -->
     <!-- 关联构建 -->
     <a-modal
-      destroyOnClose
       v-model:open="viewBuildVisible"
+      destroy-on-close
       width="80vw"
       title="当前工作空间关联构建"
-      :maskClosable="false"
+      :mask-closable="false"
       :footer="null"
     >
-      <buildList-component v-if="viewBuildVisible" :repositoryId="temp.id" :fullContent="false" />
+      <buildList-component v-if="viewBuildVisible" :repository-id="temp.id" :full-content="false" />
       <a-spin v-else>loading....</a-spin>
     </a-modal>
   </div>
@@ -529,6 +529,7 @@ export default {
       default: ''
     }
   },
+  emits: ['cancel', 'confirm'],
   data() {
     return {
       loading: false,
@@ -1024,8 +1025,7 @@ export default {
       this.temp = { id: data.id }
       this.viewBuildVisible = true
     }
-  },
-  emits: ['cancel', 'confirm']
+  }
 }
 </script>
 

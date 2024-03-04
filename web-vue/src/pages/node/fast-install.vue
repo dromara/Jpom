@@ -4,7 +4,7 @@
       <a-collapse v-model:activeKey="fastInstallActiveKey">
         <a-collapse-panel key="1" header="温馨提示">
           <a-alert message="" type="warning" show-icon>
-            <template v-slot:description>
+            <template #description>
               <ul>
                 <li>
                   复制下面任意一条命令到还未安装插件端的服务器中去执行,执行前需要放行<b>防火墙端口</b>,<b>安全组规则</b>等网络端口限制
@@ -28,10 +28,10 @@
         </a-collapse-panel>
         <a-collapse-panel key="2" header="快速安装">
           <a-tabs :default-active-key="0">
-            <a-tab-pane v-for="(item, index) in fastInstallInfo.shUrls" :tab="item.name" :key="index">
+            <a-tab-pane v-for="(item, index) in fastInstallInfo.shUrls" :key="index" :tab="item.name">
               <div>
                 <a-alert type="info" :message="`命令内容`">
-                  <template v-slot:description>
+                  <template #description>
                     <a-typography-paragraph :copyable="{ tooltip: false, text: item.allText }">
                       <span>{{ item.allText }} </span>
                     </a-typography-paragraph>
@@ -43,7 +43,7 @@
         </a-collapse-panel>
         <a-collapse-panel key="3" header="快速绑定">
           <a-alert type="info" :message="`命令内容(命令路径请修改为您的服务器中的实际路径)`">
-            <template v-slot:description>
+            <template #description>
               <a-typography-paragraph :copyable="{ tooltip: false, text: fastInstallInfo.bindCommand }">
                 <span>{{ fastInstallInfo.bindCommand }} </span>
               </a-typography-paragraph>
@@ -53,14 +53,14 @@
         <a-collapse-panel key="4" header="执行结果">
           <div v-if="!pullFastInstallResultData || !pullFastInstallResultData.length">还没有任何结果</div>
           <a-alert
-            :message="`第 ${index + 1} 个结果`"
-            :type="`${item.type === 'success' ? 'success' : item.type === 'exists' ? 'error' : 'warning'}`"
             v-for="(item, index) in pullFastInstallResultData"
             :key="`${index}-${new Date().getTime()}`"
+            :message="`第 ${index + 1} 个结果`"
+            :type="`${item.type === 'success' ? 'success' : item.type === 'exists' ? 'error' : 'warning'}`"
             closable
             @close="clearPullFastInstallResult(item.id)"
           >
-            <template v-slot:description>
+            <template #description>
               <a-space direction="vertical" style="width: 100%">
                 <div v-if="item.type === 'canUseIpEmpty'">
                   <a-tag color="orange">不能和节点正常通讯</a-tag>
@@ -82,9 +82,9 @@
                 <div v-if="item.type === 'multiIp'">
                   能通讯的IP(需要手动确认):
                   <a-tag
-                    @click="confirmFastInstall(item.id, itemIp, item.port)"
                     v-for="(itemIp, indexIp) in item.canUseIp"
                     :key="indexIp"
+                    @click="confirmFastInstall(item.id, itemIp, item.port)"
                     >{{ itemIp }}:{{ item.port }}<ApiOutlined
                   /></a-tag>
                 </div>

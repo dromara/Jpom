@@ -57,7 +57,7 @@
         <a-descriptions-item label="产物" :span="3">
           {{ data.resultDirFile }}
         </a-descriptions-item>
-        <a-descriptions-item label="源仓库" :span="3" v-if="tempRepository">{{
+        <a-descriptions-item v-if="tempRepository" label="源仓库" :span="3">{{
           `${tempRepository ? tempRepository.name + '[' + tempRepository.gitUrl + ']' : ''}`
         }}</a-descriptions-item>
         <a-descriptions-item label="仓库lastcommit" :span="3">{{ data.repositoryLastCommitId }}</a-descriptions-item>
@@ -65,33 +65,33 @@
 
       <!-- <a-row type="flex" justify="center"> -->
       <!-- <a-divider v-if="listQuery.total > 0" dashed> 构建历史 </a-divider> -->
-      <a-card title="构建历史" v-if="listQuery.total > 0" size="small">
+      <a-card v-if="listQuery.total > 0" title="构建历史" size="small">
         <template #extra>
           <a-pagination
-            size="small"
             v-model:current="listQuery.page"
-            :showTotal="
+            v-model:pageSize="listQuery.limit"
+            size="small"
+            :show-total="
               (total) => {
                 return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery)
               }
             "
-            :showSizeChanger="true"
-            :pageSizeOptions="PAGE_DEFAULT_SIZW_OPTIONS"
-            v-model:pageSize="listQuery.limit"
+            :show-size-changer="true"
+            :page-size-options="PAGE_DEFAULT_SIZW_OPTIONS"
             :total="listQuery.total"
-            :hideOnSinglePage="true"
-            @showSizeChange="
+            :hide-on-single-page="true"
+            show-less-items
+            @show-size-change="
               (current, size) => {
-                this.listQuery.limit = size
-                this.listHistory()
+                listQuery.limit = size
+                listHistory()
               }
             "
-            @change="this.listHistory"
-            show-less-items
+            @change="listHistory"
           />
         </template>
         <a-timeline mode="alternate" style="width: 100%">
-          <a-timeline-item v-for="item in this.historyList" :key="item.id" :color="statusColor[item.status]">
+          <a-timeline-item v-for="item in historyList" :key="item.id" :color="statusColor[item.status]">
             <a-space direction="vertical" style="width: 100%">
               <div>
                 <a-space>
@@ -203,13 +203,13 @@ import { getRepositoryInfo } from '@/api/repository'
 import BuildLog from './log'
 
 export default {
+  components: {
+    BuildLog
+  },
   props: {
     id: {
       type: String
     }
-  },
-  components: {
-    BuildLog
   },
   data() {
     return {

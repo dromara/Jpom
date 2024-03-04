@@ -7,39 +7,39 @@
         size="middle"
         :columns="columns"
         :pagination="pagination"
-        @change="
-          (pagination, filters, sorter) => {
-            this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
-            this.loadData()
-          }
-        "
         bordered
-        rowKey="id"
+        row-key="id"
         :row-selection="rowSelection"
         :scroll="{
           x: 'max-content'
         }"
+        @change="
+          (pagination, filters, sorter) => {
+            listQuery = CHANGE_PAGE(listQuery, { pagination, sorter })
+            loadData()
+          }
+        "
       >
-        <template v-slot:title>
+        <template #title>
           <a-space>
             <a-input
               v-model:value="listQuery['%name%']"
-              @pressEnter="loadData"
               placeholder="文件名称"
               class="search-input-item"
+              @press-enter="loadData"
             />
 
             <a-input
               v-model:value="listQuery['extName']"
-              @pressEnter="loadData"
               placeholder="后缀,精准搜索"
               class="search-input-item"
+              @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['id']"
-              @pressEnter="loadData"
               placeholder="文件id,精准搜索"
               class="search-input-item"
+              @press-enter="loadData"
             />
             <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
               <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
@@ -60,7 +60,7 @@
               type="link"
               @click="
                 () => {
-                  this.configDir = true
+                  configDir = true
                 }
               "
             >
@@ -82,13 +82,13 @@
           </template>
           <template v-else-if="column.dataIndex === 'name'">
             <a-popover title="文件信息">
-              <template v-slot:content>
+              <template #content>
                 <p>文件ID：{{ record.id }}</p>
                 <p>文件名：{{ text }}</p>
                 <p>文件描述：{{ record.description }}</p>
               </template>
               <!-- {{ text }} -->
-              <a-button type="link" style="padding: 0" @click="handleEdit(record)" size="small">{{ text }}</a-button>
+              <a-button type="link" style="padding: 0" size="small" @click="handleEdit(record)">{{ text }}</a-button>
             </a-popover>
           </template>
 
@@ -139,16 +139,16 @@
 
       <!-- 编辑文件 -->
       <a-modal
-        destroyOnClose
         v-model:open="editVisible"
+        destroy-on-close
         :title="`修改文件`"
-        :confirmLoading="confirmLoading"
+        :confirm-loading="confirmLoading"
+        :mask-closable="false"
         @ok="handleEditOk"
-        :maskClosable="false"
       >
         <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <a-form-item label="文件名" name="name">
-            <a-input placeholder="文件名" :disabled="true" v-model:value="temp.name" />
+            <a-input v-model:value="temp.name" placeholder="文件名" :disabled="true" />
           </a-form-item>
 
           <a-form-item label="文件描述" name="description">
@@ -159,16 +159,16 @@
 
       <!-- 断点下载 -->
       <a-modal
-        destroyOnClose
         v-model:open="triggerVisible"
+        destroy-on-close
         title="断点/分片下载"
         width="50%"
         :footer="null"
-        :maskClosable="false"
+        :mask-closable="false"
       >
         <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-tabs default-active-key="1">
-            <template v-slot:rightExtra>
+            <template #rightExtra>
               <a-tooltip title="重置下载 token 信息,重置后之前的下载 token 将失效">
                 <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
               </a-tooltip>
@@ -176,7 +176,7 @@
             <a-tab-pane key="1" tab="断点/分片单文件下载">
               <a-space direction="vertical" style="width: 100%">
                 <a-alert type="info" :message="`下载地址(点击可以复制)`">
-                  <template v-slot:description>
+                  <template #description>
                     <a-typography-paragraph :copyable="{ text: temp.triggerDownloadUrl }">
                       <a-tag>GET</a-tag>
                       <span>{{ `${temp.triggerDownloadUrl}` }} </span>
@@ -188,10 +188,10 @@
                 </a>
               </a-space>
             </a-tab-pane>
-            <a-tab-pane tab="断点/分片别名下载" v-if="temp.triggerAliasDownloadUrl">
+            <a-tab-pane v-if="temp.triggerAliasDownloadUrl" tab="断点/分片别名下载">
               <a-space direction="vertical" style="width: 100%">
                 <a-alert message="温馨提示" type="warning">
-                  <template v-slot:description>
+                  <template #description>
                     <ul>
                       <li>
                         支持自定义排序字段：sort=createTimeMillis:desc
@@ -204,7 +204,7 @@
                   </template>
                 </a-alert>
                 <a-alert type="info" :message="`下载地址(点击可以复制)`">
-                  <template v-slot:description>
+                  <template #description>
                     <a-typography-paragraph :copyable="{ text: temp.triggerAliasDownloadUrl }">
                       <a-tag>GET</a-tag>
                       <span>{{ `${temp.triggerAliasDownloadUrl}` }} </span>
@@ -221,29 +221,29 @@
       </a-modal>
       <!-- 发布文件 -->
       <a-modal
-        destroyOnClose
         v-model:open="releaseFileVisible"
+        destroy-on-close
         title="发布文件"
         width="50%"
-        :maskClosable="false"
-        :confirmLoading="confirmLoading"
+        :mask-closable="false"
+        :confirm-loading="confirmLoading"
         @ok="releaseFileOk()"
       >
-        <releaseFile ref="releaseFile" v-if="releaseFileVisible" @commit="handleCommitTask"></releaseFile>
+        <releaseFile v-if="releaseFileVisible" ref="releaseFile" @commit="handleCommitTask"></releaseFile>
       </a-modal>
     </div>
 
     <!-- 配置工作空间授权目录 -->
     <a-modal
-      destroyOnClose
       v-model:open="configDir"
+      destroy-on-close
       :title="`配置授权目录`"
       :footer="null"
       width="50vw"
-      :maskClosable="false"
+      :mask-closable="false"
       @cancel="
         () => {
-          this.configDir = false
+          configDir = false
         }
       "
     >
@@ -251,8 +251,8 @@
         v-if="configDir"
         @cancel="
           () => {
-            this.configDir = false
-            this.loadData()
+            configDir = false
+            loadData()
           }
         "
       ></whiteList>
@@ -288,6 +288,7 @@ export default {
       default: ''
     }
   },
+  emits: ['cancel', 'confirm'],
   data() {
     return {
       loading: true,
@@ -615,8 +616,7 @@ export default {
         }
       })
     }
-  },
-  emits: ['cancel', 'confirm']
+  }
 }
 </script>
 

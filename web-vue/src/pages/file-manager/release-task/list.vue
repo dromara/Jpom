@@ -6,26 +6,27 @@
       :columns="columns"
       bordered
       :pagination="pagination"
-      @change="
-        (pagination, filters, sorter) => {
-          this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
-          this.loadData()
-        }
-      "
-      rowKey="id"
+      row-key="id"
       :scroll="{
         x: 'max-content'
       }"
+      @change="
+        (pagination, filters, sorter) => {
+          listQuery = CHANGE_PAGE(listQuery, { pagination, sorter })
+          loadData()
+        }
+      "
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            @pressEnter="loadData"
             placeholder="任务名"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-select
+            v-model:value="listQuery.status"
             show-search
             :filter-option="
               (input, option) => {
@@ -37,14 +38,14 @@
                 )
               }
             "
-            v-model:value="listQuery.status"
-            allowClear
+            allow-clear
             placeholder="状态"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-select
+            v-model:value="listQuery.taskType"
             show-search
             :filter-option="
               (input, option) => {
@@ -56,8 +57,7 @@
                 )
               }
             "
-            v-model:value="listQuery.taskType"
-            allowClear
+            allow-clear
             placeholder="发布类型"
             class="search-input-item"
           >
@@ -77,7 +77,7 @@
 
         <template v-else-if="column.dataIndex === 'fileId'">
           <a-tooltip :title="text">
-            <a-button type="link" style="padding: 0" @click="handleViewFile(record)" size="small">{{
+            <a-button type="link" style="padding: 0" size="small" @click="handleViewFile(record)">{{
               (text || '').slice(0, 8)
             }}</a-button>
           </a-tooltip>
@@ -133,20 +133,20 @@
       :open="detailsVisible"
       @close="
         () => {
-          this.detailsVisible = false
+          detailsVisible = false
         }
       "
     >
-      <task-details-page v-if="detailsVisible" :taskId="this.temp.id" />
+      <task-details-page v-if="detailsVisible" :task-id="temp.id" />
     </a-drawer>
     <!-- 重建任务 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="releaseFileVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="发布文件"
       width="60%"
-      :maskClosable="false"
+      :mask-closable="false"
       @ok="handleReCrateTask"
     >
       <a-form
@@ -157,7 +157,7 @@
         :wrapper-col="{ span: 20 }"
       >
         <a-form-item label="任务名" name="name">
-          <a-input placeholder="请输入任务名" :maxLength="50" v-model:value="temp.name" />
+          <a-input v-model:value="temp.name" placeholder="请输入任务名" :max-length="50" />
         </a-form-item>
 
         <a-form-item label="发布方式" name="taskType">
@@ -167,10 +167,11 @@
           </a-radio-group>
         </a-form-item>
 
-        <a-form-item name="taskDataIds" label="发布的SSH" v-if="temp.taskType === 0">
+        <a-form-item v-if="temp.taskType === 0" name="taskDataIds" label="发布的SSH">
           <a-row>
             <a-col :span="22">
               <a-select
+                v-model:value="temp.taskDataIds"
                 show-search
                 :filter-option="
                   (input, option) => {
@@ -183,7 +184,6 @@
                   }
                 "
                 mode="multiple"
-                v-model:value="temp.taskDataIds"
                 placeholder="请选择SSH"
               >
                 <a-select-option v-for="ssh in sshList" :key="ssh.id">
@@ -196,10 +196,11 @@
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item name="taskDataIds" label="发布的节点" v-else-if="temp.taskType === 1">
+        <a-form-item v-else-if="temp.taskType === 1" name="taskDataIds" label="发布的节点">
           <a-row>
             <a-col :span="22">
               <a-select
+                v-model:value="temp.taskDataIds"
                 show-search
                 :filter-option="
                   (input, option) => {
@@ -212,7 +213,6 @@
                   }
                 "
                 mode="multiple"
-                v-model:value="temp.taskDataIds"
                 placeholder="请选择节点"
               >
                 <a-select-option v-for="ssh in nodeList" :key="ssh.id">
@@ -227,20 +227,20 @@
         </a-form-item>
 
         <a-form-item name="releasePathParent" label="发布目录">
-          <a-input placeholder="请输入发布目录" :disabled="true" v-model:value="temp.releasePath" />
+          <a-input v-model:value="temp.releasePath" placeholder="请输入发布目录" :disabled="true" />
         </a-form-item>
 
         <a-form-item name="releasePathParent" label="文件id">
-          <a-input placeholder="请输入发布的文件id" v-model:value="temp.fileId" />
+          <a-input v-model:value="temp.fileId" placeholder="请输入发布的文件id" />
         </a-form-item>
 
         <a-form-item label="执行脚本" name="releaseBeforeCommand">
           <a-form-item-rest>
-            <a-tabs tabPosition="right">
+            <a-tabs tab-position="right">
               <a-tab-pane key="before" tab="上传前">
                 <code-editor
-                  height="40vh"
                   v-model:content="temp.beforeScript"
+                  height="40vh"
                   :options="{
                     mode: 'shell'
                   }"
@@ -250,8 +250,8 @@
               </a-tab-pane>
               <a-tab-pane key="after" tab="上传后">
                 <code-editor
-                  height="40vh"
                   v-model:content="temp.afterScript"
+                  height="40vh"
                   :options="{
                     mode: 'shell'
                   }"
@@ -265,7 +265,7 @@
       </a-form>
     </a-modal>
     <!-- 查看文件 -->
-    <a-modal destroyOnClose v-model:open="viewFileVisible" :title="`查看文件`" :footer="null" :maskClosable="false">
+    <a-modal v-model:open="viewFileVisible" destroy-on-close :title="`查看文件`" :footer="null" :mask-closable="false">
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="文件名" name="name">
           {{ temp.name }}
@@ -276,10 +276,10 @@
         <a-form-item label="文件大小" name="size">
           {{ renderSize(temp.size) }}
         </a-form-item>
-        <a-form-item label="过期时间" name="validUntil" v-if="temp.validUntil">
+        <a-form-item v-if="temp.validUntil" label="过期时间" name="validUntil">
           {{ parseTime(temp.validUntil) }}
         </a-form-item>
-        <a-form-item label="文件共享" name="global" v-if="temp.workspaceId">
+        <a-form-item v-if="temp.workspaceId" label="文件共享" name="global">
           {{ temp.workspaceId === 'GLOBAL' ? '全局' : '工作空间' }}
         </a-form-item>
         <a-form-item label="文件描述" name="description">
