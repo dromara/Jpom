@@ -6,20 +6,20 @@
       size="middle"
       :columns="columns"
       :pagination="pagination"
-      @change="changePage"
       bordered
-      rowKey="id"
+      row-key="id"
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            @pressEnter="loadData"
             placeholder="名称"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
@@ -27,7 +27,7 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
         </a-space></template
       >
-      <template #bodyCell="{ column, text, record }">
+      <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -38,33 +38,33 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       width="60vw"
       title="编辑"
+      :mask-closable="false"
       @ok="handleEditUserOk"
-      :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="名称" name="name">
-          <a-input v-model:value="temp.name" :maxLength="50" placeholder="名称" />
+          <a-input v-model:value="temp.name" :max-length="50" placeholder="名称" />
         </a-form-item>
         <a-form-item name="workspace">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               工作空间
-              <template v-slot:title> 配置工作空间权限,用户限制用户只能对应的工作空间里面操作对应的功能</template>
+              <template #title> 配置工作空间权限,用户限制用户只能对应的工作空间里面操作对应的功能</template>
               <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
           </template>
-          <transfer ref="transferRef" :tree-data="workspaceList" :editKey="temp.targetKeys" />
+          <transfer ref="transferRef" :tree-data="workspaceList" :edit-key="temp.targetKeys" />
         </a-form-item>
         <a-form-item name="prohibitExecute">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               禁用时段
-              <template v-slot:title> 配置后可以控制想要在某个时间段禁止用户操作某些功能，优先判断禁用时段</template>
+              <template #title> 配置后可以控制想要在某个时间段禁止用户操作某些功能，优先判断禁用时段</template>
               <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
           </template>
@@ -73,8 +73,8 @@
               <div v-for="(item, index) in temp.prohibitExecuteArray" :key="item.key">
                 <a-space direction="vertical" class="item-info" style="width: 100%">
                   <a-range-picker
-                    style="width: 100%"
                     v-model:value="item.moments"
+                    style="width: 100%"
                     :disabled-date="
                       (current) => {
                         if (current < dayjs().subtract(1, 'days')) {
@@ -96,7 +96,7 @@
                     "
                     :show-time="{ format: 'HH:mm:ss' }"
                     format="YYYY-MM-DD HH:mm:ss"
-                    valueFormat="YYYY-MM-DD HH:mm:ss"
+                    value-format="YYYY-MM-DD HH:mm:ss"
                     :placeholder="['开始时间', '结束时间']"
                   />
 
@@ -129,10 +129,10 @@
           </a-form-item-rest>
         </a-form-item>
         <a-form-item name="allowExecute">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               允许时段
-              <template v-slot:title>
+              <template #title>
                 优先判断禁用时段,再判断允许时段。配置允许时段后用户只能在对应的时段执行相应功能的操作</template
               >
               <QuestionCircleOutlined v-if="!temp.id" />
@@ -144,8 +144,8 @@
                 <a-space direction="vertical" class="item-info" style="width: 100%">
                   <div>
                     <a-select
-                      placeholder="请选择可以执行的星期"
                       v-model:value="item.week"
+                      placeholder="请选择可以执行的星期"
                       mode="multiple"
                       style="width: 100%"
                     >
@@ -167,8 +167,8 @@
                   </div>
                   <div>
                     <a-space>
-                      <a-time-picker placeholder="开始时间" v-model:value="item.startTime" valueFormat="HH:mm:ss" />
-                      <a-time-picker placeholder="结束时间" v-model:value="item.endTime" valueFormat="HH:mm:ss" />
+                      <a-time-picker v-model:value="item.startTime" placeholder="开始时间" value-format="HH:mm:ss" />
+                      <a-time-picker v-model:value="item.endTime" placeholder="结束时间" value-format="HH:mm:ss" />
                     </a-space>
                   </div>
                 </a-space>
@@ -197,7 +197,7 @@
         </a-form-item>
 
         <a-form-item label="描述" name="description">
-          <a-textarea v-model:value="temp.description" :maxLength="200" :rows="5" placeholder="描述" />
+          <a-textarea v-model:value="temp.description" :max-length="200" :rows="5" placeholder="描述" />
         </a-form-item>
       </a-form>
     </a-modal>

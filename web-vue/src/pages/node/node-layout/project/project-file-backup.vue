@@ -14,7 +14,7 @@
       >
         <template v-if="backupListData.path" #title> 备份文件存储目录：{{ backupListData.path }} </template>
 
-        <template #bodyCell="{ column, text, record, index }">
+        <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'filename'">
             <a-tooltip placement="topLeft" :title="text">
               <span>{{ text }}</span>
@@ -60,10 +60,10 @@
         </div>
 
         <a-directory-tree
-          :fieldNames="treeReplaceFields"
+          :field-names="treeReplaceFields"
+          :load-data="onTreeData"
+          :tree-data="treeList"
           @select="nodeClick"
-          :loadData="onTreeData"
-          :treeData="treeList"
         ></a-directory-tree>
       </a-layout-sider>
       <!-- 表格 -->
@@ -79,20 +79,20 @@
             x: 'max-content'
           }"
         >
-          <template v-slot:title>
+          <template #title>
             <a-popconfirm
               :title="`${
                 uploadPath ? '将还原【' + uploadPath + '】目录,' : ''
               } 请选择还原方式,清空还原将会先删除项目目录中的文件再将对应备份文件恢复至当前目录`"
-              okText="覆盖还原"
-              cancelText="清空还原"
-              @confirm="recoverNet('', uploadPath)"
-              @cancel="recoverNet('clear', uploadPath)"
-              :okButtonProps="{
+              ok-text="覆盖还原"
+              cancel-text="清空还原"
+              :ok-button-props="{
                 loading: recoverLoading
               }"
+              @confirm="recoverNet('', uploadPath)"
+              @cancel="recoverNet('clear', uploadPath)"
             >
-              <template v-slot:icon>
+              <template #icon>
                 <QuestionCircleOutlined style="color: red" />
               </template>
               <!-- @click="recoverPath(uploadPath)" -->
@@ -100,11 +100,11 @@
             </a-popconfirm>
 
             <a-space>
-              <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath || '' }}</a-tag>
+              <a-tag v-if="uploadPath" color="#2db7f5">当前目录: {{ uploadPath || '' }}</a-tag>
             </a-space>
           </template>
 
-          <template #bodyCell="{ column, text, record, index }">
+          <template #bodyCell="{ column, text, record }">
             <!-- <template v-if="column.dataIndex === 'filename'"> -->
             <template v-if="column.dataIndex === 'filename'">
               <a-tooltip placement="topLeft" :title="text">
@@ -142,15 +142,15 @@
                     :title="`${
                       record.filename ? '将还原【' + record.filename + '】目录,' : ''
                     } 请选择还原方式,清空还原将会先删除项目目录中的文件再将对应备份文件恢复至当前目录`"
-                    okText="覆盖还原"
-                    cancelText="清空还原"
-                    @confirm="recoverNet('', record.filename)"
-                    @cancel="recoverNet('clear', record.filename)"
-                    :okButtonProps="{
+                    ok-text="覆盖还原"
+                    cancel-text="清空还原"
+                    :ok-button-props="{
                       loading: recoverLoading
                     }"
+                    @confirm="recoverNet('', record.filename)"
+                    @cancel="recoverNet('clear', record.filename)"
                   >
-                    <template v-slot:icon>
+                    <template #icon>
                       <QuestionCircleOutlined style="color: red" />
                     </template>
                     <a-button size="small" type="primary">还原</a-button>

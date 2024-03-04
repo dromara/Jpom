@@ -38,9 +38,9 @@
             <a-space>
               <span>{{ renderSize(temp.cacheFileSize) }} (10分钟刷新一次)</span>
               <a-button
+                v-if="temp.cacheFileSize !== '0'"
                 size="small"
                 type="primary"
-                v-if="temp.cacheFileSize !== '0'"
                 class="btn"
                 @click="clear('serviceCacheFileSize')"
                 >清空</a-button
@@ -64,8 +64,8 @@
             <a-space>
               <span>{{ renderSize(temp.oldJarsSize) }}</span>
               <a-button
-                size="small"
                 v-if="temp.oldJarsSize !== '0'"
+                size="small"
                 type="primary"
                 class="btn"
                 @click="clear('serviceOldJarsSize')"
@@ -90,9 +90,9 @@
                 <UnorderedListOutlined />
               </a-popover>
               <a-button
+                v-if="temp.errorIp && temp.errorIp.length"
                 size="small"
                 type="primary"
-                v-if="temp.errorIp && temp.errorIp.length"
                 class="btn"
                 @click="clear('serviceIpSize')"
                 >清空</a-button
@@ -130,7 +130,7 @@
             <a-popover title="错误的工作空间数据">
               <template #content>
                 <a-collapse>
-                  <a-collapse-panel :header="key" v-for="(item, key) in temp.errorWorkspace" :key="key">
+                  <a-collapse-panel v-for="(item, key) in temp.errorWorkspace" :key="key" :header="key">
                     <p v-for="(item2, index) in item" :key="index">{{ item2 }}</p>
                     <template #extra>
                       <DeleteOutlined
@@ -157,7 +157,7 @@
         </a-timeline> -->
       </a-tab-pane>
       <a-tab-pane key="2" tab="运行中的定时任务" force-render>
-        <task-stat :taskList="taskList" @refresh="loadData" />
+        <task-stat :task-list="taskList" @refresh="loadData" />
       </a-tab-pane>
       <a-tab-pane key="3" tab="触发器管理">
         <TriggerToken />

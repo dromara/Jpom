@@ -1,9 +1,9 @@
 <template>
   <div>
-    <a-page-header :backIcon="false">
+    <a-page-header :back-icon="false">
       <template #title> 欢迎【{{ getUserInfo.name }}】您使用本系统</template>
       <template #subTitle>可以管理{{ (myWorkspaceList && myWorkspaceList.length) || 0 }}个工作空间 </template>
-      <template v-slot:tags>
+      <template #tags>
         <a-tag color="blue">
           <template v-if="getUserInfo.demoUser">演示账号</template>
           <template v-else-if="getUserInfo.superSystemUser">超级管理员</template>
@@ -11,7 +11,7 @@
           <template v-else>普通用户</template>
         </a-tag>
       </template>
-      <template v-slot:extra>
+      <template #extra>
         <a-button @click="init">
           <template #icon><ReloadOutlined /></template>
         </a-button>
@@ -56,17 +56,17 @@
               </a-space>
             </a-timeline-item>
           </a-timeline>
-          <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="您还未构建" v-else />
+          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" description="您还未构建" />
         </a-card>
       </a-col>
       <a-col :span="6">
         <a-card size="small">
           <template #title> 登录日志 </template>
-          <template v-slot:extra>
+          <template #extra>
             <a href="#" @click="handleUserlog(2)">more</a>
           </template>
           <a-timeline v-if="loginLog && loginLog.length">
-            <a-timeline-item :color="item.success ? 'green' : 'red'" v-for="(item, index) in loginLog" :key="index">
+            <a-timeline-item v-for="(item, index) in loginLog" :key="index" :color="item.success ? 'green' : 'red'">
               <a-space direction="vertical" :size="1">
                 <div>{{ parseTime(item.createTimeMillis) }}</div>
                 <a-space>
@@ -76,7 +76,7 @@
               </a-space>
             </a-timeline-item>
           </a-timeline>
-          <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="您还未登录过" v-else />
+          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" description="您还未登录过" />
         </a-card>
       </a-col>
       <a-col :span="6">
@@ -85,14 +85,14 @@
             操作日志
             <a-tooltip title="系统中您所有操作日志"><QuestionCircleOutlined /></a-tooltip>
           </template>
-          <template v-slot:extra>
+          <template #extra>
             <a href="#" @click="handleUserlog(1)">more</a>
           </template>
           <a-timeline v-if="operateLog && operateLog.length">
             <a-timeline-item
-              :color="item.optStatus === 200 ? 'green' : 'red'"
               v-for="(item, index) in operateLog"
               :key="index"
+              :color="item.optStatus === 200 ? 'green' : 'red'"
             >
               <a-space direction="vertical" :size="1">
                 <div>{{ parseTime(item.createTimeMillis) }}</div>
@@ -103,26 +103,26 @@
               </a-space>
             </a-timeline-item>
           </a-timeline>
-          <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="您还未执行操作" v-else />
+          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" description="您还未执行操作" />
         </a-card>
       </a-col>
     </a-row>
     <!-- 查看操作日志 -->
     <a-modal
       v-if="viewLogVisible > 0"
+      destroy-on-close
+      :open="viewLogVisible > 0"
+      :width="'90vw'"
+      title="操作日志"
+      :footer="null"
+      :mask-closable="false"
       @cancel="
         () => {
           viewLogVisible = 0
         }
       "
-      destroyOnClose
-      :open="viewLogVisible > 0"
-      :width="'90vw'"
-      title="操作日志"
-      :footer="null"
-      :maskClosable="false"
     >
-      <user-log v-if="viewLogVisible > 0" :openTab="viewLogVisible"></user-log>
+      <user-log v-if="viewLogVisible > 0" :open-tab="viewLogVisible"></user-log>
     </a-modal>
   </div>
 </template>
@@ -142,7 +142,6 @@ export default {
   components: {
     UserLog
   },
-  computed: {},
   data() {
     return {
       Empty,

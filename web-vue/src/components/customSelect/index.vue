@@ -1,19 +1,19 @@
 <template>
   <div>
-    <Select
+    <a-select
       v-model:value="selected"
       :style="selStyle"
       :disabled="disabled"
-      showSearch
-      @change="selectChange"
+      show-search
       :placeholder="selectPlaceholder"
+      @change="selectChange"
     >
-      <template #suffixIcon v-if="canReload"> <ReloadOutlined @click="refreshSelect" /></template>
+      <template v-if="canReload" #suffixIcon> <ReloadOutlined @click="refreshSelect" /></template>
       <template #dropdownRender="{ menuNode: menu }">
         <v-nodes :vnodes="menu" />
         <a-divider />
         <a-space>
-          <a-input ref="inputRef" :maxLength="maxLength" v-model:value="selectInput" :placeholder="inputPlaceholder" />
+          <a-input ref="inputRef" v-model:value="selectInput" :max-length="maxLength" :placeholder="inputPlaceholder" />
           <a-button type="text" @click="addInput(selectInput)">
             <template #icon>
               <plus-outlined />
@@ -24,7 +24,7 @@
       </template>
       <a-select-option v-if="selectPlaceholder" value="">{{ selectPlaceholder }}</a-select-option>
       <a-select-option v-for="item in optionList" :key="item">{{ item }} </a-select-option>
-    </Select>
+    </a-select>
   </div>
 </template>
 
@@ -33,7 +33,7 @@ import { Select } from 'ant-design-vue'
 
 export default {
   components: {
-    Select,
+    ASelect: Select,
     VNodes: {
       props: {
         vnodes: {
@@ -44,15 +44,6 @@ export default {
       render() {
         return this.vnodes
       }
-    }
-  },
-
-  data() {
-    return {
-      selectInput: '',
-
-      optionList: [],
-      selected: ''
     }
   },
   props: {
@@ -79,6 +70,16 @@ export default {
     canReload: {
       type: Boolean,
       default: false
+    }
+  },
+  emits: ['update:value', 'onRefreshSelect', 'change', 'addOption'],
+
+  data() {
+    return {
+      selectInput: '',
+
+      optionList: [],
+      selected: ''
     }
   },
   watch: {
@@ -119,7 +120,6 @@ export default {
     refreshSelect() {
       this.$emit('onRefreshSelect')
     }
-  },
-  emits: ['update:value', 'onRefreshSelect', 'change', 'addOption']
+  }
 }
 </script>

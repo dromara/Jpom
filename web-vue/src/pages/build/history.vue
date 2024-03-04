@@ -7,23 +7,24 @@
       :columns="columns"
       :pagination="pagination"
       bordered
-      rowKey="id"
-      @change="change"
+      row-key="id"
       :row-selection="rowSelection"
       :scroll="{
         x: 'max-content'
       }"
+      @change="change"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
-            allowClear
-            class="search-input-item"
-            @pressEnter="loadData"
             v-model:value="listQuery['%buildName%']"
+            allow-clear
+            class="search-input-item"
             placeholder="构建名称"
+            @press-enter="loadData"
           />
           <a-select
+            v-model:value="listQuery.status"
             show-search
             :filter-option="
               (input, option) => {
@@ -35,14 +36,14 @@
                 )
               }
             "
-            v-model:value="listQuery.status"
-            allowClear
+            allow-clear
             placeholder="请选择状态"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-select
+            v-model:value="listQuery.triggerBuildType"
             show-search
             :filter-option="
               (input, option) => {
@@ -54,8 +55,7 @@
                 )
               }
             "
-            v-model:value="listQuery.triggerBuildType"
-            allowClear
+            allow-clear
             placeholder="请选择触发类型"
             class="search-input-item"
           >
@@ -74,7 +74,7 @@
             批量删除
           </a-button>
           <a-tooltip>
-            <template v-slot:title>
+            <template #title>
               <div>构建历史是用于记录每次构建的信息,可以保留构建产物信息,构建日志。同时还可以快速回滚发布</div>
               <div>如果不需要保留较多构建历史信息可以到服务端修改构建相关配置参数</div>
               <div>构建历史可能占有较多硬盘空间,建议根据实际情况配置保留个数</div>
@@ -83,7 +83,7 @@
           </a-tooltip>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record, index }">
+      <template #bodyCell="{ column, text, record }">
         <template v-if="column.tooltip">
           <a-tooltip :title="text">
             <span>{{ text || '' }}</span>
@@ -159,7 +159,7 @@
                 更多
                 <DownOutlined />
               </a>
-              <template v-slot:overlay>
+              <template #overlay>
                 <a-menu>
                   <a-menu-item>
                     <template v-if="record.releaseMethod !== 5">
@@ -267,6 +267,7 @@ export default {
       default: ''
     }
   },
+  emits: ['cancel', 'confirm'],
   data() {
     return {
       releaseMethodMap,
@@ -565,7 +566,6 @@ export default {
       }
       this.$emit('confirm', selectData)
     }
-  },
-  emits: ['cancel', 'confirm']
+  }
 }
 </script>

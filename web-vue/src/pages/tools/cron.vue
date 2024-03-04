@@ -90,8 +90,8 @@
             </a-collapse-panel>
           </a-collapse>
           <a-form
-            :model="temp"
             ref="form"
+            :model="temp"
             :rules="rules"
             :label-col="{ span: 4 }"
             :wrapper-col="{ span: 18 }"
@@ -113,10 +113,10 @@
             </a-form-item>
             <a-form-item label="时间范围" name="date" help="默认是当前时间到今年结束">
               <a-range-picker
-                format="YYYY-MM-DD"
-                valueFormat="YYYY-MM-DD"
-                separator="至"
                 v-model:value="temp.date"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+                separator="至"
                 style="width: 100%"
               />
             </a-form-item>
@@ -135,7 +135,7 @@
               {{ parseTime(item, 'YYYY-MM-DD HH:mm:ss') }}
             </a-list-item>
           </template>
-          <template v-slot:header>
+          <template #header>
             <div>结果</div>
           </template>
         </a-list>

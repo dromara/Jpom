@@ -3,7 +3,7 @@
     <a-spin :spinning="spinning">
       <a-card
         size="small"
-        :bodyStyle="{
+        :body-style="{
           height: `calc(100vh - 45px)`
         }"
       >
@@ -20,10 +20,10 @@
           </template>
           <template v-else>loading</template>
         </template>
-        <template v-slot:extra>
+        <template #extra>
           <a href="#"></a>
         </template>
-        <terminal1 v-if="sshData" :sshId="sshData.id" />
+        <terminal1 v-if="sshData" :ssh-id="sshData.id" />
         <template v-else>
           <a-result status="404" title="不能操作" sub-title="没有对应的SSH">
             <template #extra>
@@ -36,11 +36,11 @@
       </a-card>
     </a-spin>
     <!-- 文件管理 -->
-    <a-drawer destroyOnClose v-if="sshData" placement="right" width="90vw" :open="drawerVisible" @close="onClose">
+    <a-drawer v-if="sshData" destroy-on-close placement="right" width="90vw" :open="drawerVisible" @close="onClose">
       <template #title>
         {{ sshData.name }}<template v-if="sshData.host"> ({{ sshData.host }}) </template>文件管理
       </template>
-      <ssh-file v-if="drawerVisible" :sshId="sshData.id" />
+      <ssh-file v-if="drawerVisible" :ssh-id="sshData.id" />
     </a-drawer>
   </div>
 </template>

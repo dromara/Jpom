@@ -6,21 +6,21 @@
       :data-source="list"
       :columns="columns"
       :pagination="pagination"
-      @change="changePage"
       bordered
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
-          <a-select v-model:value="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+          <a-select v-model:value="listQuery.nodeId" allow-clear placeholder="请选择节点" class="search-input-item">
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
           </a-select>
-          <a-select v-model:value="listQuery.outGivingId" allowClear placeholder="分发项目" class="search-input-item">
+          <a-select v-model:value="listQuery.outGivingId" allow-clear placeholder="分发项目" class="search-input-item">
             <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }}</a-select-option>
           </a-select>
-          <a-select v-model:value="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
+          <a-select v-model:value="listQuery.status" allow-clear placeholder="请选择状态" class="search-input-item">
             <a-select-option v-for="(item, key) in dispatchStatusMap" :key="key" :value="key">{{
               item
             }}</a-select-option>
@@ -31,7 +31,7 @@
           </a-tooltip>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record, index }">
+      <template #bodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'outGivingId'">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
@@ -109,12 +109,12 @@
       </template>
     </a-table>
     <!-- 详情区 -->
-    <a-modal destroyOnClose v-model:open="detailVisible" width="600px" title="详情信息" :footer="null">
+    <a-modal v-model:open="detailVisible" destroy-on-close width="600px" title="详情信息" :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">
         <template #renderItem="{ item }">
           <a-list-item>
             <a-list-item-meta>
-              <template v-slot:title>
+              <template #title>
                 <h4>{{ item.title }}</h4>
               </template>
               <template #description>

@@ -1,17 +1,17 @@
 <template>
   <div>
-    <a-tabs @change="changeTabs" tab-position="left">
-      <template v-slot:leftExtra>
+    <a-tabs tab-position="left" @change="changeTabs">
+      <template #leftExtra>
         <a-space>
           <a-statistic-countdown format=" s 秒后刷新" title="" :value="countdownTime" @finish="pullNodeData" />
         </a-space>
       </template>
       <a-tab-pane key="info" tab="基础信息">
         <a-card size="small">
-          <template v-slot:title>
+          <template #title>
             {{ machineInfo && machineInfo.name }}
           </template>
-          <template v-slot:extra>
+          <template #extra>
             <a-tag
               v-if="machineInfo"
               :color="machineInfo && machineInfo.status === 1 ? 'green' : 'pink'"
@@ -29,7 +29,7 @@
               show-icon
             />
             <a-descriptions :column="4" :bordered="true">
-              <template v-slot:title> </template>
+              <template #title> </template>
 
               <a-descriptions-item label="系统名" :span="2">{{
                 machineInfo && machineInfo.osName
@@ -50,7 +50,7 @@
                 <template v-if="machineInfo && machineInfo.ipv4List && machineInfo.ipv4List.length">
                   {{ machineInfo && machineInfo.ipv4List[0] }}
                   <a-popover title="所有的IPV4列表">
-                    <template v-slot:content>
+                    <template #content>
                       <p v-for="item in machineInfo && machineInfo.ipv4List" :key="item">
                         {{ item }}
                       </p>
@@ -140,8 +140,8 @@
       <a-tab-pane key="stat" tab="统计趋势">
         <a-space v-if="nodeMonitorLoadStatus === 1" direction="vertical" style="width: 100%">
           <a-card size="small" title="基础信息">
-            <template v-slot:extra>
-              <a-button size="small" v-if="historyChart" type="primary" @click="handleHistory('')">
+            <template #extra>
+              <a-button v-if="historyChart" size="small" type="primary" @click="handleHistory('')">
                 <AreaChartOutlined />历史监控图表
               </a-button>
             </template>
@@ -149,8 +149,8 @@
             <div id="top-chart" class="chart">loading...</div>
           </a-card>
           <a-card size="small" title="网络流量信息">
-            <template v-slot:extra>
-              <a-button size="small" v-if="netHistoryChart" type="primary" @click="handleHistory('network-stat')">
+            <template #extra>
+              <a-button v-if="netHistoryChart" size="small" type="primary" @click="handleHistory('network-stat')">
                 <AreaChartOutlined />历史监控图表
               </a-button>
             </template>
@@ -158,8 +158,8 @@
             <div id="net-chart" class="chart">loading...</div>
           </a-card>
           <a-card size="small" title="机器延迟">
-            <template v-slot:extra>
-              <a-button size="small" v-if="networkDelayChart" type="primary" @click="handleHistory('networkDelay')">
+            <template #extra>
+              <a-button v-if="networkDelayChart" size="small" type="primary" @click="handleHistory('networkDelay')">
                 <AreaChartOutlined />历史监控图表
               </a-button>
             </template>
@@ -182,17 +182,17 @@
               <a-col :span="18">
                 <a-space>
                   <custom-select
-                    class="search-input-item"
-                    selStyle="width: 200px !important"
-                    @change="loadNodeProcess"
-                    @addOption="addNodeProcess"
                     v-model:value="processSearch.processName"
+                    class="search-input-item"
+                    sel-style="width: 200px !important"
                     :data="processNames"
-                    :popupContainerParent="false"
-                    inputPlaceholder="自定义进程类型"
-                    selectPlaceholder="选择进程名"
+                    :popup-container-parent="false"
+                    input-placeholder="自定义进程类型"
+                    select-placeholder="选择进程名"
+                    @change="loadNodeProcess"
+                    @add-option="addNodeProcess"
                   >
-                    <template v-slot:suffixIcon> <DownOutlined /></template>
+                    <template #suffixIcon> <DownOutlined /></template>
                   </custom-select>
                   <a-tooltip title="查看的进程数量">
                     <a-input-number v-model:value="processSearch.processCount" :min="1" @change="loadNodeProcess" />
@@ -211,7 +211,7 @@
             :columns="processColumns"
             :data-source="processList"
             bordered
-            rowKey="processId"
+            row-key="processId"
             :scroll="{
               x: 'max-content'
             }"
@@ -258,7 +258,7 @@
           :columns="diskColumns"
           :data-source="diskList"
           bordered
-          rowKey="uuid"
+          row-key="uuid"
           :scroll="{
             x: 'max-content'
           }"
@@ -289,9 +289,9 @@
       </a-tab-pane>
       <a-tab-pane key="hw-disk" tab="硬件硬盘">
         <a-collapse>
-          <a-collapse-panel :key="item.uuid" v-for="item in hwDiskList">
+          <a-collapse-panel v-for="item in hwDiskList" :key="item.uuid">
             <template #header>
-              <a-page-header :title="item.name" :backIcon="false">
+              <a-page-header :title="item.name" :back-icon="false">
                 <template #subTitle> {{ item.model }} </template>
                 <a-descriptions size="small" :column="4">
                   <a-descriptions-item label="序号">{{ item.serial }}</a-descriptions-item>
@@ -332,7 +332,7 @@
       </a-tab-pane>
       <a-tab-pane key="networkInterfaces" tab="网卡信息">
         <a-collapse v-if="networkInterfaces && networkInterfaces.length">
-          <a-collapse-panel :key="index" v-for="(item, index) in networkInterfaces">
+          <a-collapse-panel v-for="(item, index) in networkInterfaces" :key="index">
             <template #header>
               {{ item.name }}
               <a-tag>
@@ -400,10 +400,10 @@
               <a-descriptions-item label="虚拟MAC">{{ item.knownVmMacAddr ? '是' : '否' }} </a-descriptions-item>
 
               <a-descriptions-item label="IPV4" :span="4">
-                <a-tag :key="ipItem" v-for="ipItem in item.ipv4addr || []">{{ ipItem }}</a-tag>
+                <a-tag v-for="ipItem in item.ipv4addr || []" :key="ipItem">{{ ipItem }}</a-tag>
               </a-descriptions-item>
               <a-descriptions-item label="IPV6" :span="4">
-                <a-tag :key="ipItem" v-for="ipItem in item.ipv6addr || []">{{ ipItem }}</a-tag>
+                <a-tag v-for="ipItem in item.ipv6addr || []" :key="ipItem">{{ ipItem }}</a-tag>
               </a-descriptions-item>
               <a-descriptions-item label="接收包">{{ item.packetsRecv }} </a-descriptions-item>
               <a-descriptions-item label="接收大小">{{ renderSize(item.bytesRecv) }} </a-descriptions-item>
@@ -422,17 +422,17 @@
 
     <!-- 历史监控 -->
     <a-modal
-      destroyOnClose
       v-model:open="monitorVisible.visible"
+      destroy-on-close
       width="75%"
       title="历史监控图表"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
       <node-top
         v-if="monitorVisible && monitorVisible.visible"
-        :nodeId="this.nodeId"
-        :machineId="this.machineId"
+        :node-id="nodeId"
+        :machine-id="machineId"
         :type="monitorVisible.type"
       ></node-top>
     </a-modal>
@@ -746,14 +746,6 @@ export default {
       nodeMonitorLoadStatus: 0
     }
   },
-  mounted() {
-    this.processNames = Object.assign([], this.defaultProcessNames)
-    this.initData()
-    window.addEventListener('resize', this.resize)
-  },
-  unmounted() {
-    window.removeEventListener('resize', this.resize)
-  },
   watch: {
     refreshInterval: {
       deep: true,
@@ -761,6 +753,14 @@ export default {
         this.cacheNodeProcess()
       }
     }
+  },
+  mounted() {
+    this.processNames = Object.assign([], this.defaultProcessNames)
+    this.initData()
+    window.addEventListener('resize', this.resize)
+  },
+  unmounted() {
+    window.removeEventListener('resize', this.resize)
   },
   methods: {
     formatPercent,

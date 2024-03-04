@@ -8,7 +8,7 @@
       :wrapper-col="{ span: 20 }"
     >
       <a-form-item label="任务名" name="name">
-        <a-input placeholder="请输入任务名" :maxLength="50" v-model:value="temp.name" />
+        <a-input v-model:value="temp.name" placeholder="请输入任务名" :max-length="50" />
       </a-form-item>
 
       <a-form-item label="发布方式" name="taskType">
@@ -23,10 +23,11 @@
         </template>
       </a-form-item>
 
-      <a-form-item name="taskDataIds" label="发布的SSH" v-if="temp.taskType === 0">
+      <a-form-item v-if="temp.taskType === 0" name="taskDataIds" label="发布的SSH">
         <a-row>
           <a-col :span="22">
             <a-select
+              v-model:value="temp.taskDataIds"
               show-search
               :filter-option="
                 (input, option) => {
@@ -39,7 +40,6 @@
                 }
               "
               mode="multiple"
-              v-model:value="temp.taskDataIds"
               placeholder="请选择SSH"
             >
               <a-select-option v-for="ssh in sshList" :key="ssh.id">
@@ -52,10 +52,11 @@
           </a-col>
         </a-row>
       </a-form-item>
-      <a-form-item name="taskDataIds" label="发布的节点" v-else-if="temp.taskType === 1">
+      <a-form-item v-else-if="temp.taskType === 1" name="taskDataIds" label="发布的节点">
         <a-row>
           <a-col :span="22">
             <a-select
+              v-model:value="temp.taskDataIds"
               show-search
               :filter-option="
                 (input, option) => {
@@ -68,7 +69,6 @@
                 }
               "
               mode="multiple"
-              v-model:value="temp.taskDataIds"
               placeholder="请选择节点"
             >
               <a-select-option v-for="ssh in nodeList" :key="ssh.id">
@@ -83,14 +83,14 @@
       </a-form-item>
 
       <a-form-item name="releasePathParent" label="发布目录">
-        <template v-slot:help>
+        <template #help>
           <a-tooltip title="需要配置授权目录（授权才能正常使用发布）,授权目录主要是用于确定可以发布到哪些目录中"
             ><a-button
               size="small"
               type="link"
               @click="
                 () => {
-                  this.configDir = true
+                  configDir = true
                 }
               "
             >
@@ -100,21 +100,21 @@
         </template>
         <a-input-group compact>
           <a-select
-            show-search
-            allowClear
-            style="width: 30%"
             v-model:value="temp.releasePathParent"
+            show-search
+            allow-clear
+            style="width: 30%"
             placeholder="请选择发布的一级目录"
           >
             <a-select-option v-for="item in accessList" :key="item">
               <a-tooltip :title="item">{{ item }}</a-tooltip>
             </a-select-option>
-            <template v-slot:suffixIcon>
+            <template #suffixIcon>
               <ReloadOutlined @click="loadAccesList" />
             </template>
           </a-select>
           <a-form-item-rest>
-            <a-input style="width: 70%" v-model:value="temp.releasePathSecondary" placeholder="请填写发布的二级目录" />
+            <a-input v-model:value="temp.releasePathSecondary" style="width: 70%" placeholder="请填写发布的二级目录" />
           </a-form-item-rest>
         </a-input-group>
       </a-form-item>
@@ -123,7 +123,7 @@
         <template #label>
           执行脚本
           <a-tooltip>
-            <template v-slot:title>
+            <template #title>
               <ul>
                 <li>支持变量引用：${TASK_ID}、${FILE_ID}、${FILE_NAME}、${FILE_EXT_NAME}</li>
                 <li>可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称</li>
@@ -138,12 +138,12 @@
           <div v-else-if="scriptTabKey === 'after'">文件上传成功后需要执行的脚本(非阻塞命令)</div>
         </template>
         <a-form-item-rest>
-          <a-tabs tabPosition="right" type="card" v-model:activeKey="scriptTabKey">
+          <a-tabs v-model:activeKey="scriptTabKey" tab-position="right" type="card">
             <a-tab-pane key="before" tab="上传前">
               <code-editor
-                height="40vh"
                 v-model:content="temp.beforeScript"
-                :showTool="true"
+                height="40vh"
+                :show-tool="true"
                 :options="{
                   mode: 'shell'
                 }"
@@ -155,9 +155,9 @@
             </a-tab-pane>
             <a-tab-pane key="after" tab="上传后">
               <code-editor
-                height="40vh"
-                :showTool="true"
                 v-model:content="temp.afterScript"
+                height="40vh"
+                :show-tool="true"
                 :options="{
                   mode: 'shell'
                 }"
@@ -171,14 +171,14 @@
     </a-form>
 
     <a-modal
-      destroyOnClose
       v-model:value="configDir"
+      destroy-on-close
       :title="`配置授权目录`"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
       @cancel="
         () => {
-          this.configDir = false
+          configDir = false
         }
       "
     >
@@ -186,8 +186,8 @@
         v-if="configDir"
         @cancel="
           () => {
-            this.configDir = false
-            this.loadAccesList()
+            configDir = false
+            loadAccesList()
           }
         "
       ></whiteList>
@@ -206,6 +206,7 @@ export default {
     codeEditor,
     whiteList
   },
+  emits: ['commit'],
   data() {
     return {
       temp: {},
@@ -280,8 +281,7 @@ export default {
         }
       })
     }
-  },
-  emits: ['commit']
+  }
 }
 </script>
 <style scoped>

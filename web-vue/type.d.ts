@@ -1,1 +1,1 @@
-declare module 'vue3-json-viewer';
+declare module 'vue3-json-viewer'

@@ -5,11 +5,11 @@
       height: height
     }"
   >
-    <a-spin tip="加载编辑器中" :spinning="loading" v-if="loading">
+    <a-spin v-if="loading" tip="加载编辑器中" :spinning="loading">
       <a-skeleton />
     </a-spin>
     <template v-else>
-      <div class="tool-bar" ref="toolBar" v-if="showTool">
+      <div v-if="showTool" ref="toolBar" class="tool-bar">
         <slot name="tool_before" />
 
         <a-space class="tool-bar-end">
@@ -17,7 +17,6 @@
             皮肤：
             <a-select
               v-model:value="cmOptions.theme"
-              @select="handleSelectTheme"
               show-search
               :filter-option="
                 (input, option) => {
@@ -31,6 +30,7 @@
               "
               placeholder="请选择皮肤"
               style="width: 150px"
+              @select="handleSelectTheme"
             >
               <a-select-option v-for="item in themeList" :key="item.theme">{{ item.name }}</a-select-option>
             </a-select>
@@ -39,7 +39,6 @@
             语言：
             <a-select
               v-model:value="cmOptions.mode"
-              @select="handleSelectMode"
               show-search
               :filter-option="
                 (input, option) => {
@@ -53,6 +52,7 @@
               "
               placeholder="请选择语言模式"
               style="width: 150px"
+              @select="handleSelectMode"
             >
               <a-select-option value="">请选择语言模式</a-select-option>
               <a-select-option v-for="item in modeList" :key="item.mode">{{ item.name }}</a-select-option>
@@ -60,7 +60,7 @@
           </div>
 
           <a-tooltip>
-            <template v-slot:title>
+            <template #title>
               <ul>
                 <li>Ctrl-F / Cmd-F Start searching</li>
                 <li>Ctrl-G / Cmd-G Find next</li>
@@ -81,9 +81,9 @@
         <Codemirror
           v-model:value="data"
           :options="cmOptions"
+          :placeholder="placeholder"
           @change="onCmCodeChanges"
           @ready="onReady"
-          :placeholder="placeholder"
         />
       </div>
     </template>
@@ -388,53 +388,6 @@ export default {
       default: '请输入内容'
     }
   },
-  watch: {
-    fileSuffix: {
-      handler(v) {
-        if (!v) {
-          return
-        }
-        if (v.indexOf('.') > -1) {
-          const textArr = v.split('.')
-          const suffix = textArr.length ? textArr[textArr.length - 1] : v
-          const newMode = fileSuffixToModeMap[suffix]
-          if (newMode) {
-            this.cmOptions = { ...this.cmOptions, mode: newMode }
-          }
-        } else {
-          const v2 = v.toLowerCase()
-          for (let key in fileSuffixToModeMap) {
-            if (v2.endsWith(key)) {
-              const newMode = fileSuffixToModeMap[key]
-              if (newMode) {
-                this.cmOptions = { ...this.cmOptions, mode: newMode }
-              }
-              break
-            }
-          }
-        }
-      },
-      deep: true,
-      immediate: true
-    },
-    options: {
-      handler(n) {
-        if (Object.keys(n).length) {
-          const options = JSON.parse(JSON.stringify(n))
-          this.cmOptions = { ...this.cmOptions, ...options }
-        }
-      },
-      deep: true,
-      immediate: true
-    },
-    content: {
-      handler(v) {
-        this.data = v || ''
-        this.codeMirrorHeight = this.showTool ? `calc( 100% -  50px )` : '100%'
-      },
-      immediate: true
-    }
-  },
   data() {
     return {
       codeMirrorHeight: '',
@@ -491,6 +444,53 @@ export default {
       loading: true
     }
   },
+  watch: {
+    fileSuffix: {
+      handler(v) {
+        if (!v) {
+          return
+        }
+        if (v.indexOf('.') > -1) {
+          const textArr = v.split('.')
+          const suffix = textArr.length ? textArr[textArr.length - 1] : v
+          const newMode = fileSuffixToModeMap[suffix]
+          if (newMode) {
+            this.cmOptions = { ...this.cmOptions, mode: newMode }
+          }
+        } else {
+          const v2 = v.toLowerCase()
+          for (let key in fileSuffixToModeMap) {
+            if (v2.endsWith(key)) {
+              const newMode = fileSuffixToModeMap[key]
+              if (newMode) {
+                this.cmOptions = { ...this.cmOptions, mode: newMode }
+              }
+              break
+            }
+          }
+        }
+      },
+      deep: true,
+      immediate: true
+    },
+    options: {
+      handler(n) {
+        if (Object.keys(n).length) {
+          const options = JSON.parse(JSON.stringify(n))
+          this.cmOptions = { ...this.cmOptions, ...options }
+        }
+      },
+      deep: true,
+      immediate: true
+    },
+    content: {
+      handler(v) {
+        this.data = v || ''
+        this.codeMirrorHeight = this.showTool ? `calc( 100% -  50px )` : '100%'
+      },
+      immediate: true
+    }
+  },
   mounted() {
     // https://juejin.cn/post/7218032919008624700
     // const modules = import.meta.glob('/node_modules/codemirror/mode/**/*.js', { import: 'setup' })
@@ -540,7 +540,7 @@ export default {
       localStorage.setItem('editorTheme', v)
     },
 
-    onReady(editor) {
+    onReady() {
       // console.log(editor)
       // // 绑定其他快捷键, 格式化编辑器代码做示例
       // let autoFormatSelection = () => {

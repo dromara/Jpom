@@ -33,7 +33,7 @@
           <a-timeline-item>
             <a-space>
               <span class="layui-elem-quote">进程端口缓存：{{ temp.pidPort }}</span>
-              <a-button size="small" v-if="temp.pidPort" type="primary" class="btn" @click="clear('pidPort')"
+              <a-button v-if="temp.pidPort" size="small" type="primary" class="btn" @click="clear('pidPort')"
                 >清空</a-button
               >
             </a-space>
@@ -59,7 +59,7 @@
           </a-timeline-item>
         </a-timeline>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="定时任务"> <task-stat :taskList="taskList" @refresh="loadData" /></a-tab-pane>
+      <a-tab-pane key="2" tab="定时任务"> <task-stat :task-list="taskList" @refresh="loadData" /></a-tab-pane>
       <a-tab-pane key="3" tab="孤独数据">
         <a-space direction="vertical" style="width: 100%">
           <a-alert message="何为孤独数据" type="warning" show-icon>
@@ -116,12 +116,12 @@
     </a-tabs>
     <!-- 分配到其他工作空间 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="correctLonelyOpen"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="修正孤独数据"
+      :mask-closable="false"
       @ok="handleCorrectLonely"
-      :maskClosable="false"
     >
       <a-space direction="vertical" style="width: 100%">
         <a-alert message="温馨提示" type="warning">
@@ -135,6 +135,7 @@
         <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
           <a-form-item label="选择节点" name="nodeId">
             <a-select
+              v-model:value="temp.toNodeId"
               show-search
               :filter-option="
                 (input, option) => {
@@ -147,7 +148,6 @@
                 }
               "
               :disabled="temp.toNodeId && temp.recommend"
-              v-model:value="temp.toNodeId"
               placeholder="请选择节点"
             >
               <a-select-option v-for="item in nodeList" :key="item.id">
@@ -172,7 +172,8 @@ export default {
   },
   props: {
     machineId: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -183,8 +184,7 @@ export default {
       machineLonelyData: {},
       correctLonelyOpen: false,
       confirmLoading: false,
-      nodeList: [],
-      temp: {}
+      nodeList: []
     }
   },
   mounted() {

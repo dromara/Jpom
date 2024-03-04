@@ -1,16 +1,16 @@
 <template>
   <a-modal
-    destroyOnClose
     v-model:open="visibleModel"
+    destroy-on-close
     :width="style.width"
-    :bodyStyle="style.bodyStyle"
+    :body-style="style.bodyStyle"
     :style="style.style"
     :footer="null"
-    :maskClosable="false"
+    :mask-closable="false"
     @cancel="close"
   >
     <template #title>
-      <a-page-header :title="titleName" :backIcon="false" style="padding: 0">
+      <a-page-header :title="titleName" :back-icon="false" style="padding: 0">
         <template #subTitle>
           <a-row type="flex" align="middle">
             <a-col>
@@ -40,7 +40,7 @@
       </a-page-header>
     </template>
 
-    <viewPre ref="viewPre" :height="`calc(${style.bodyStyle.height} - 40px)`" :config="this.temp"></viewPre>
+    <viewPre ref="viewPre" :height="`calc(${style.bodyStyle.height} - 40px)`" :config="temp"></viewPre>
   </a-modal>
 </template>
 
@@ -84,6 +84,7 @@ export default {
       default: false
     }
   },
+  emits: ['close'],
   data() {
     return {
       temp: {
@@ -120,8 +121,7 @@ export default {
       this.visibleModel = false
       this.$emit('close')
     }
-  },
-  emits: ['close']
+  }
 }
 </script>
 

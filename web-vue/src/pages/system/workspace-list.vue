@@ -7,29 +7,30 @@
       size="middle"
       :pagination="pagination"
       bordered
-      @change="changePage"
-      rowKey="id"
+      row-key="id"
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
       <template #title>
         <a-space>
           <a-input
             v-model:value="listQuery['id']"
-            @pressEnter="loadData"
             placeholder="空间ID(全匹配)"
-            allowClear
+            allow-clear
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%name%']"
-            @pressEnter="loadData"
             placeholder="工作空间名称"
-            allowClear
+            allow-clear
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-select
+            v-model:value="listQuery.group"
             show-search
             :filter-option="
               (input, option) => {
@@ -41,14 +42,14 @@
                 )
               }
             "
-            v-model:value="listQuery.group"
-            allowClear
+            allow-clear
             placeholder="分组"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
           <a-select
+            v-model:value="listQuery.clusterInfoId"
             show-search
             :filter-option="
               (input, option) => {
@@ -60,8 +61,7 @@
                 )
               }
             "
-            v-model:value="listQuery.clusterInfoId"
-            allowClear
+            allow-clear
             placeholder="集群"
             class="search-input-item"
           >
@@ -134,12 +134,12 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="编辑工作空间"
+      :mask-closable="false"
       @ok="handleEditOk"
-      :maskClosable="false"
     >
       <a-alert message="温馨提醒" type="info" show-icon>
         <template #description>
@@ -159,10 +159,11 @@
         style="padding-top: 15px"
       >
         <a-form-item label="名称" name="name">
-          <a-input v-model:value="temp.name" :maxLength="50" placeholder="工作空间名称" />
+          <a-input v-model:value="temp.name" :max-length="50" placeholder="工作空间名称" />
         </a-form-item>
         <a-form-item label="绑定集群" name="clusterInfoId">
           <a-select
+            v-model:value="temp.clusterInfoId"
             show-search
             :filter-option="
               (input, option) => {
@@ -174,8 +175,7 @@
                 )
               }
             "
-            v-model:value="temp.clusterInfoId"
-            allowClear
+            allow-clear
             placeholder="绑定集群"
           >
             <a-select-option v-for="item in clusterList" :key="item.id">{{ item.name }}</a-select-option>
@@ -185,36 +185,36 @@
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            inputPlaceholder="新增分组"
-            selectPlaceholder="选择分组名"
+            input-placeholder="新增分组"
+            select-placeholder="选择分组名"
           >
           </custom-select>
         </a-form-item>
 
         <a-form-item label="描述" name="description">
-          <a-textarea v-model:value="temp.description" :maxLength="200" :rows="5" placeholder="工作空间描述" />
+          <a-textarea v-model:value="temp.description" :max-length="200" :rows="5" placeholder="工作空间描述" />
         </a-form-item>
       </a-form>
     </a-modal>
     <!-- 环境变量 -->
     <a-modal
-      destroyOnClose
       v-model:open="envVarListVisible"
+      destroy-on-close
       :title="`${temp.name} 工作空间环境变量`"
       width="80vw"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
-      <workspaceEnv v-if="envVarListVisible" ref="workspaceEnv" :workspaceId="temp.id" />
+      <workspaceEnv v-if="envVarListVisible" ref="workspaceEnv" :workspace-id="temp.id" />
     </a-modal>
     <!-- 工作空间菜单 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="configMenuVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       :title="`${temp.name} 工作空间菜单`"
+      :mask-closable="false"
       @ok="onSubmitMenus"
-      :maskClosable="false"
     >
       <a-form ref="editWhiteForm" :model="menusConfigData">
         <a-row type="flex" justify="center">
@@ -226,12 +226,12 @@
           <a-col :span="20">
             <a-card title="服务端菜单" :bordered="true">
               <a-tree
-                show-icon
                 v-if="menusConfigData.serverMenus"
+                v-model:checkedKeys="menusConfigData.serverMenuKeys"
+                show-icon
                 checkable
                 :tree-data="menusConfigData.serverMenus"
-                :fieldNames="replaceFields"
-                v-model:checkedKeys="menusConfigData.serverMenuKeys"
+                :field-names="replaceFields"
               >
                 <template #icon="{ dataRef }">
                   <icon :type="dataRef.icon_v3" />
@@ -244,39 +244,39 @@
     </a-modal>
     <!-- 配置授权目录 -->
     <a-modal
-      destroyOnClose
       v-model:open="configDir"
+      destroy-on-close
       :title="`配置授权目录`"
       :footer="null"
       width="60vw"
-      :maskClosable="false"
+      :mask-closable="false"
       @cancel="
         () => {
-          this.configDir = false
+          configDir = false
         }
       "
     >
       <whiteList
         v-if="configDir"
-        :workspaceId="temp.id"
+        :workspace-id="temp.id"
         @cancel="
           () => {
-            this.configDir = false
+            configDir = false
           }
         "
       ></whiteList>
     </a-modal>
     <!-- 删除工作空间检查 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="preDeleteVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       :title="`删除工作空间确认`"
-      :maskClosable="false"
+      :mask-closable="false"
       @ok="handleDeleteOk"
       @cancel="
         () => {
-          this.preDeleteVisible = false
+          preDeleteVisible = false
         }
       "
     >
@@ -284,7 +284,7 @@
         <template #description> 真的当前工作空间么,删除前需要将关联数据都删除后才能删除当前工作空间？</template>
       </a-alert>
 
-      <a-tree :tree-data="treeData" default-expand-all :fieldNames="preDeleteReplaceFields" :show-line="true">
+      <a-tree :tree-data="treeData" default-expand-all :field-names="preDeleteReplaceFields" :show-line="true">
         <template #title="{ dataRef }">
           <CheckOutlined v-if="dataRef.count === 0" style="color: green" />
 

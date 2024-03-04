@@ -8,19 +8,19 @@
           <div class="dir-container">
             <a-space>
               <a-button size="small" type="primary" @click="loadData">刷新目录</a-button>
-              <a-button size="small" type="primary" @click="goConsole" v-show="noFileModes.includes(runMode)">
+              <a-button v-show="noFileModes.includes(runMode)" size="small" type="primary" @click="goConsole">
                 控制台
               </a-button>
               <a-button size="small" type="primary" @click="backupList"> 备份列表 </a-button>
             </a-space>
           </div>
           <a-directory-tree
-            autoExpandParent
             v-model:selectedKeys="selectedKeys"
             v-model:expandedKeys="expandedKeys"
-            :fieldNames="treeReplaceFields"
+            auto-expand-parent
+            :field-names="treeReplaceFields"
+            :tree-data="treeList"
             @select="nodeClick"
-            :treeData="treeList"
           ></a-directory-tree>
           <!--   :loadData="onTreeData" -->
         </a-layout-sider>
@@ -37,14 +37,14 @@
               x: 'max-content'
             }"
           >
-            <template v-slot:title>
+            <template #title>
               <!-- <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
               <a-space>
-                <a-dropdown :disabled="!Object.keys(this.tempNode).length">
+                <a-dropdown :disabled="!Object.keys(tempNode).length">
                   <a-button size="small" type="primary" @click="(e) => e.preventDefault()"
                     ><UploadOutlined />上传</a-button
                   >
-                  <template v-slot:overlay>
+                  <template #overlay>
                     <a-menu>
                       <a-menu-item @click="handleUpload">
                         <a-space><FileOutlined />上传文件</a-space>
@@ -55,11 +55,11 @@
                     </a-menu>
                   </template>
                 </a-dropdown>
-                <a-dropdown :disabled="!Object.keys(this.tempNode).length">
+                <a-dropdown :disabled="!Object.keys(tempNode).length">
                   <a-button size="small" type="primary" @click="(e) => e.preventDefault()"
                     ><PlusOutlined />新建</a-button
                   >
-                  <template v-slot:overlay>
+                  <template #overlay>
                     <a-menu>
                       <a-menu-item @click="handleAddFile(1)">
                         <a-space>
@@ -88,7 +88,7 @@
                   <a-button size="small" type="primary" danger @click="clearFile"><DeleteOutlined /></a-button>
                 </a-tooltip>
 
-                <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath || '' }}</a-tag>
+                <a-tag v-if="uploadPath" color="#2db7f5">当前目录: {{ uploadPath || '' }}</a-tag>
                 <div>文件名栏支持右键菜单</div>
               </a-space>
             </template>
@@ -98,15 +98,15 @@
                 <a-tooltip placement="topLeft" :title="text">
                   <a-dropdown :trigger="['contextmenu']">
                     <div>{{ text }}</div>
-                    <template v-slot:overlay>
+                    <template #overlay>
                       <a-menu>
                         <a-menu-item key="1">
-                          <a-button @click="goReadFile(record)" :disabled="!record.textFileEdit" type="link">
+                          <a-button :disabled="!record.textFileEdit" type="link" @click="goReadFile(record)">
                             <BarsOutlined /> 跟踪文件
                           </a-button>
                         </a-menu-item>
                         <a-menu-item key="2">
-                          <a-button @click="handleRenameFile(record)" type="link">
+                          <a-button type="link" @click="handleRenameFile(record)">
                             <HighlightOutlined />重命名
                           </a-button>
                         </a-menu-item>
@@ -158,38 +158,38 @@
           </a-table>
           <!-- 批量上传文件 -->
           <a-modal
-            destroyOnClose
             v-model:open="uploadFileVisible"
+            destroy-on-close
             :closable="!uploading"
             :keyboard="false"
             width="35vw"
             title="上传项目文件"
             :footer="null"
-            :maskClosable="false"
+            :mask-closable="false"
           >
             <a-space direction="vertical" size="large" style="width: 100%">
               <a-upload
                 :file-list="uploadFileList"
-                @remove="
-                  (file) => {
-                    const index = this.uploadFileList.indexOf(file)
-                    //const newFileList = this.uploadFileList.slice();
-
-                    this.uploadFileList.splice(index, 1)
-                    return true
-                  }
-                "
                 :before-upload="
                   (file) => {
-                    this.uploadFileList = [...this.uploadFileList, file]
+                    uploadFileList = [...uploadFileList, file]
                     return false
                   }
                 "
                 multiple
                 :disabled="!!percentage"
+                @remove="
+                  (file) => {
+                    const index = uploadFileList.indexOf(file)
+                    //const newFileList = this.uploadFileList.slice();
+
+                    uploadFileList.splice(index, 1)
+                    return true
+                  }
+                "
               >
                 <template v-if="percentage">
-                  <LoadingOutlined v-if="this.uploadFileList.length" />
+                  <LoadingOutlined v-if="uploadFileList.length" />
                   <span v-else>-</span>
                 </template>
 
@@ -219,32 +219,32 @@
           </a-modal>
           <!-- 上传压缩文件 -->
           <a-modal
-            destroyOnClose
             v-model:open="uploadZipFileVisible"
+            destroy-on-close
             :closable="!uploading"
             :keyboard="false"
             width="35vw"
             title="上传压缩文件"
             :footer="null"
-            :maskClosable="false"
+            :mask-closable="false"
           >
             <a-space direction="vertical" size="large" style="width: 100%">
               <a-upload
                 :file-list="uploadFileList"
-                @remove="
-                  () => {
-                    this.uploadFileList = []
-                    return true
-                  }
-                "
                 :disabled="!!percentage"
                 :before-upload="
                   (file) => {
-                    this.uploadFileList = [file]
+                    uploadFileList = [file]
                     return false
                   }
                 "
                 :accept="ZIP_ACCEPT"
+                @remove="
+                  () => {
+                    uploadFileList = []
+                    return true
+                  }
+                "
               >
                 <LoadingOutlined v-if="percentage" />
                 <a-button v-else><UploadOutlined />选择压缩文件</a-button>
@@ -275,8 +275,8 @@
               />
 
               <a-input-number
-                style="width: 100%"
                 v-model:value="uploadData.stripComponents"
+                style="width: 100%"
                 :min="0"
                 placeholder="解压时候自动剔除压缩包里面多余的文件夹名"
               />
@@ -286,19 +286,19 @@
           </a-modal>
 
           <a-modal
-            destroyOnClose
             v-model:open="editFileVisible"
+            destroy-on-close
             width="80vw"
             :title="`编辑文件 ${filename}`"
-            :maskClosable="true"
+            :mask-closable="true"
             @cancel="handleCloseModal"
           >
             <code-editor
-              height="60vh"
-              showTool
               v-if="editFileVisible"
               v-model:content="fileContent"
-              :fileSuffix="filename"
+              height="60vh"
+              show-tool
+              :file-suffix="filename"
             >
               <template #tool_before>
                 <a-tag>
@@ -308,7 +308,7 @@
               </template>
             </code-editor>
 
-            <template v-slot:footer>
+            <template #footer>
               <a-button @click="handleCloseModal"> 关闭 </a-button>
               <a-button type="primary" @click="updateFileData"> 保存 </a-button>
               <a-button
@@ -326,20 +326,20 @@
           </a-modal>
           <!--远程下载  -->
           <a-modal
-            destroyOnClose
-            :confirmLoading="confirmLoading"
             v-model:open="uploadRemoteFileVisible"
+            destroy-on-close
+            :confirm-loading="confirmLoading"
             title="远程下载文件"
+            :mask-closable="false"
             @ok="handleRemoteUpload"
             @cancel="closeRemoteUpload"
-            :maskClosable="false"
           >
             <a-form
+              ref="ruleForm"
               :model="remoteDownloadData"
               :label-col="{ span: 6 }"
               :wrapper-col="{ span: 18 }"
               :rules="rules"
-              ref="ruleForm"
             >
               <a-form-item label="远程下载URL" name="url">
                 <a-input v-model:value="remoteDownloadData.url" placeholder="远程下载地址" />
@@ -347,10 +347,10 @@
               <a-form-item label="是否为压缩包">
                 <a-switch v-model:checked="remoteDownloadData.unzip" checked-children="是" un-checked-children="否" />
               </a-form-item>
-              <a-form-item label="剔除文件夹" v-if="remoteDownloadData.unzip">
+              <a-form-item v-if="remoteDownloadData.unzip" label="剔除文件夹">
                 <a-input-number
-                  style="width: 100%"
                   v-model:value="remoteDownloadData.stripComponents"
+                  style="width: 100%"
                   :min="0"
                   placeholder="解压时候自动剔除压缩包里面多余的文件夹名"
                 />
@@ -359,12 +359,12 @@
           </a-modal>
           <!-- 创建文件/文件夹 -->
           <a-modal
-            destroyOnClose
             v-model:open="addFileFolderVisible"
+            destroy-on-close
             width="300px"
             :title="addFileOrFolderType === 1 ? '新增目录' : '新建文件'"
             :footer="null"
-            :maskClosable="true"
+            :mask-closable="true"
           >
             <a-space direction="vertical" style="width: 100%">
               <span v-if="uploadPath">当前目录:{{ uploadPath }}</span>
@@ -380,12 +380,12 @@
           </a-modal>
           <!-- 从命名文件/文件夹 -->
           <a-modal
-            destroyOnClose
             v-model:open="renameFileFolderVisible"
+            destroy-on-close
             width="300px"
             :title="`重命名`"
             :footer="null"
-            :maskClosable="true"
+            :mask-closable="true"
           >
             <a-space direction="vertical" style="width: 100%">
               <a-input v-model:value="fileFolderName" placeholder="输入新名称" />
@@ -402,20 +402,20 @@
     </a-spin>
     <!-- 查看备份列表 -->
     <a-modal
-      destroyOnClose
       v-model:open="backupListVisible"
+      destroy-on-close
       width="80vw"
       height="80vh"
       title="备份列表"
       :footer="null"
-      :maskClosable="true"
+      :mask-closable="true"
       @cancel="
         () => {
           loadData()
         }
       "
     >
-      <projectFileBackup v-if="backupListVisible" :nodeId="this.nodeId" :projectId="this.projectId"></projectFileBackup>
+      <projectFileBackup v-if="backupListVisible" :node-id="nodeId" :project-id="projectId"></projectFileBackup>
     </a-modal>
   </div>
 </template>
@@ -440,11 +440,11 @@ import projectFileBackup from './project-file-backup.vue'
 import { uploadPieces } from '@/utils/upload-pieces'
 
 export default {
-  inject: ['globalLoading'],
   components: {
     codeEditor,
     projectFileBackup
   },
+  inject: ['globalLoading'],
   props: {
     nodeId: {
       type: String
@@ -459,6 +459,7 @@ export default {
       type: String
     }
   },
+  emits: ['goReadFile', 'goConsole'],
   data() {
     return {
       ZIP_ACCEPT,
@@ -1181,8 +1182,7 @@ export default {
     backupList() {
       this.backupListVisible = true
     }
-  },
-  emits: ['goReadFile', 'goConsole']
+  }
 }
 </script>
 

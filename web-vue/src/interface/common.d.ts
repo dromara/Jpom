@@ -1,5 +1,3 @@
-import { number } from 'echarts'
-
 export interface IPageQuery {
   page: number
   limit: number

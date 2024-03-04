@@ -1,19 +1,20 @@
 <template>
   <div>
     <!-- 表格 -->
-    <a-card :bodyStyle="{ padding: '10px' }">
-      <template v-slot:title>
+    <a-card :body-style="{ padding: '10px' }">
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
-            allowClear
-            class="search-input-item"
-            @pressEnter="loadData"
             v-model:value="listQuery['%name%']"
+            allow-clear
+            class="search-input-item"
             placeholder="构建名称"
+            @press-enter="loadData"
           />
           <a-select
+            v-model:value="listQuery.status"
             show-search
-            allowClear
+            allow-clear
             :filter-option="
               (input, option) => {
                 const children = option.children && option.children()
@@ -24,13 +25,13 @@
                 )
               }
             "
-            v-model:value="listQuery.status"
             placeholder="状态"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-select
+            v-model:value="listQuery.releaseMethod"
             show-search
             :filter-option="
               (input, option) => {
@@ -42,14 +43,14 @@
                 )
               }
             "
-            v-model:value="listQuery.releaseMethod"
-            allowClear
+            allow-clear
             placeholder="发布方式"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in releaseMethodMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-select
+            v-model:value="listQuery.group"
             show-search
             :filter-option="
               (input, option) => {
@@ -61,30 +62,29 @@
                 )
               }
             "
-            v-model:value="listQuery.group"
-            allowClear
+            allow-clear
             placeholder="分组"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
           <a-input
-            allowClear
-            class="search-input-item"
-            @pressEnter="loadData"
             v-model:value="listQuery['%resultDirFile%']"
+            allow-clear
+            class="search-input-item"
             placeholder="产物目录"
+            @press-enter="loadData"
           />
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-          <template v-if="this.layoutType === 'table'">
+          <template v-if="layoutType === 'table'">
             <template v-if="!tableSelections || tableSelections.length <= 0">
               <a-button type="primary" :disabled="true"> 操作 <DownOutlined /> </a-button>
             </template>
             <a-dropdown v-else>
-              <template v-slot:overlay>
+              <template #overlay>
                 <a-menu>
                   <a-menu-item key="1" @click="batchBuild"> 批量构建 </a-menu-item>
                   <a-menu-item key="2" @click="batchCancel"> 批量取消 </a-menu-item>
@@ -103,7 +103,7 @@
               <LayoutOutlined v-if="layoutType === 'card'" />
               <TableOutlined v-else />
             </template>
-            {{ this.layoutType === 'card' ? '卡片' : '表格' }}
+            {{ layoutType === 'card' ? '卡片' : '表格' }}
           </a-button>
 
           <a-statistic-countdown
@@ -115,12 +115,12 @@
           />
         </a-space>
       </template>
-      <template v-if="this.layoutType === 'card'">
+      <template v-if="layoutType === 'card'">
         <template v-if="list && list.length">
           <a-row :gutter="[16, 16]">
             <a-col v-for="item in list" :key="item.id" :span="6">
-              <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
-                <template v-slot:title>
+              <a-card :head-style="{ padding: '0 6px' }" :body-style="{ padding: '10px' }">
+                <template #title>
                   <a-row :gutter="[4, 0]">
                     <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
                       <a-button type="link" style="padding: 0" size="small" @click="handleDetails(item)">
@@ -142,7 +142,7 @@
                 </template>
 
                 <a-tooltip>
-                  <template v-slot:title>
+                  <template #title>
                     <div v-if="item.branchTagName">
                       <div>标签名称：{{ item.branchTagName }}</div>
                       <div>上次构建基于 commitId：{{ item.repositoryLastCommitId }}</div>
@@ -200,10 +200,10 @@
                 <a-row type="flex" align="middle" justify="center" style="margin-top: 10px">
                   <a-button-group>
                     <a-button
+                      v-if="item.status === 1 || item.status === 4 || item.status === 9"
                       size="small"
                       type="primary"
                       danger
-                      v-if="item.status === 1 || item.status === 4 || item.status === 9"
                       @click="handleStopBuild(item)"
                       >停止
                     </a-button>
@@ -212,7 +212,7 @@
                         构建
                         <DownOutlined />
                       </a-button>
-                      <template v-slot:overlay>
+                      <template #overlay>
                         <a-menu>
                           <a-menu-item key="1">
                             <a-button
@@ -279,59 +279,59 @@
           <a-col>
             <a-pagination
               v-model:current="listQuery.page"
-              :showTotal="
+              v-model:pageSize="listQuery.limit"
+              :show-total="
                 (total) => {
                   return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery)
                 }
               "
-              :showSizeChanger="true"
-              :pageSizeOptions="sizeOptions"
-              v-model:pageSize="listQuery.limit"
+              :show-size-changer="true"
+              :page-size-options="sizeOptions"
               :total="listQuery.total"
-              :hideOnSinglePage="true"
-              @showSizeChange="
+              :hide-on-single-page="true"
+              show-less-items
+              @show-size-change="
                 (current, size) => {
-                  this.listQuery.limit = size
-                  this.loadData()
+                  listQuery.limit = size
+                  loadData()
                 }
               "
-              @change="this.loadData"
-              show-less-items
+              @change="loadData"
             />
           </a-col>
         </a-row>
       </template>
-      <template v-else-if="this.layoutType === 'table'">
+      <template v-else-if="layoutType === 'table'">
         <a-table
           size="middle"
           :columns="columns"
           :data-source="list"
           bordered
-          rowKey="id"
+          row-key="id"
           :pagination="pagination"
           :scroll="{
             x: 'max-content'
           }"
+          :row-selection="rowSelection"
           @change="
             (pagination, filters, sorter) => {
-              this.listQuery = CHANGE_PAGE(this.listQuery, {
+              listQuery = CHANGE_PAGE(listQuery, {
                 pagination,
                 sorter
               })
-              this.loadData()
+              loadData()
             }
           "
-          :row-selection="rowSelection"
         >
           <template #bodyCell="{ column, text, record, index }">
             <template v-if="column.dataIndex === 'name'">
-              <a-tooltip placement="topLeft" @click="handleDetails(record)" :title="`名称：${text} 点击查看详情`">
+              <a-tooltip placement="topLeft" :title="`名称：${text} 点击查看详情`" @click="handleDetails(record)">
                 <a-button type="link" style="padding: 0" size="small"> <FullscreenOutlined />{{ text }}</a-button>
               </a-tooltip>
             </template>
             <template v-else-if="column.dataIndex === 'branchName'">
               <a-tooltip placement="topLeft">
-                <template v-slot:title>
+                <template #title>
                   <div v-if="record.branchTagName">
                     <div>标签名称：{{ record.branchTagName }}</div>
                     <div>上次构建基于 commitId：{{ record.repositoryLastCommitId }}</div>
@@ -354,7 +354,7 @@
             </template>
             <template v-else-if="column.dataIndex === 'releaseMethod'">
               <a-tooltip>
-                <template v-slot:title>
+                <template #title>
                   <ul>
                     <li>发布方式：{{ releaseMethodMap[text] }}</li>
                     <li>产物目录：{{ record.resultDirFile }}</li>
@@ -385,10 +385,10 @@
             <template v-else-if="column.dataIndex === 'operation'">
               <a-space>
                 <a-button
+                  v-if="record.status === 1 || record.status === 4 || record.status === 9"
                   size="small"
                   type="primary"
                   danger
-                  v-if="record.status === 1 || record.status === 4 || record.status === 9"
                   @click="handleStopBuild(record)"
                   >停止
                 </a-button>
@@ -396,7 +396,7 @@
                   <a-button size="small" type="primary" @click="handleConfirmStartBuild(record)"
                     >构建<DownOutlined
                   /></a-button>
-                  <template v-slot:overlay>
+                  <template #overlay>
                     <a-menu>
                       <a-menu-item key="1">
                         <a-button
@@ -444,7 +444,7 @@
                     更多
                     <DownOutlined />
                   </a>
-                  <template v-slot:overlay>
+                  <template #overlay>
                     <a-menu>
                       <a-menu-item>
                         <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
@@ -519,20 +519,20 @@
     <!-- 编辑区 -->
     <build-item
       v-if="editBuildVisible != 0"
-      :visibleType="editBuildVisible"
-      :editSteps="editSteps"
       :id="temp.id"
+      :visible-type="editBuildVisible"
+      :edit-steps="editSteps"
       :data="temp"
       @close="
         () => {
-          this.editBuildVisible = 0
+          editBuildVisible = 0
         }
       "
       @build="
         (build, buildId, buildEnvParameter) => {
-          this.editBuildVisible = 0
-          this.loadData()
-          this.loadGroupList()
+          editBuildVisible = 0
+          loadData()
+          loadGroupList()
           if (build) {
             reqStartBuild({ id: buildId, buildEnvParameter: buildEnvParameter || temp.buildEnvParameter }, true)
           }
@@ -552,29 +552,29 @@
     />
     <!-- 构建确认 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
-      width="40vw"
       v-model:open="buildConfirmVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
+      width="40vw"
       title="构建确认弹窗"
+      :mask-closable="false"
       @ok="handleStartBuild"
-      :maskClosable="false"
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="名称" name="name">
-          <a-input readOnly disabled v-model:value="temp.name" />
+          <a-input v-model:value="temp.name" read-only disabled />
         </a-form-item>
         <a-form-item label="分支" name="branchName">
           <custom-select
             v-model:value="temp.branchName"
             :data="branchList"
             :disabled="temp.branchTagName ? true : false"
-            @onRefreshSelect="loadBranchListById(temp.repositoryId)"
-            :canReload="true"
-            inputPlaceholder="自定义分支通配表达式"
-            selectPlaceholder="请选择构建对应的分支"
+            :can-reload="true"
+            input-placeholder="自定义分支通配表达式"
+            select-placeholder="请选择构建对应的分支"
+            @on-refresh-select="loadBranchListById(temp.repositoryId)"
           >
-            <template v-slot:inputTips>
+            <template #inputTips>
               <div>
                 支持通配符(AntPathMatcher)
                 <ul>
@@ -594,12 +594,12 @@
           <custom-select
             v-model:value="temp.branchTagName"
             :data="branchTagList"
-            @onRefreshSelect="loadBranchListById(temp.repositoryId)"
-            :canReload="true"
-            inputPlaceholder="自定义标签通配表达式"
-            selectPlaceholder="选择构建的标签,不选为最新提交"
+            :can-reload="true"
+            input-placeholder="自定义标签通配表达式"
+            select-placeholder="选择构建的标签,不选为最新提交"
+            @on-refresh-select="loadBranchListById(temp.repositoryId)"
           >
-            <template v-slot:inputTips>
+            <template #inputTips>
               <div>
                 支持通配符(AntPathMatcher)
                 <ul>
@@ -619,7 +619,7 @@
             <a-switch v-model:checked="temp.checkRepositoryDiff" checked-children="是" un-checked-children="否" />
             <span>
               <a-tooltip>
-                <template v-slot:title> 差异构建是指构建时候是否判断仓库代码有变动，如果没有变动则不执行构建 </template>
+                <template #title> 差异构建是指构建时候是否判断仓库代码有变动，如果没有变动则不执行构建 </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
               该选项仅本次构建生效
@@ -644,7 +644,7 @@
         <a-form-item label="构建备注" name="buildRemark" help="填写备注仅本次构建生效">
           <a-textarea
             v-model:value="temp.buildRemark"
-            :maxLength="240"
+            :max-length="240"
             placeholder="请输入构建备注,长度小于 240"
             :auto-size="{ minRows: 2, maxRows: 5 }"
           />
@@ -655,7 +655,7 @@
           label="筛选项目"
           help="筛选之后本次发布操作只发布筛选项,并且只对本次操作生效"
         >
-          <a-select mode="multiple" v-model:value="temp.dispatchSelectProjectArray" placeholder="请选择指定发布的项目">
+          <a-select v-model:value="temp.dispatchSelectProjectArray" mode="multiple" placeholder="请选择指定发布的项目">
             <a-select-option
               v-for="item in dispatchProjectList"
               :key="item.id"
@@ -726,6 +726,7 @@ export default {
       default: ''
     }
   },
+  emits: ['cancel', 'confirm'],
   data() {
     return {
       Empty,
@@ -1317,8 +1318,7 @@ export default {
       }
       this.$emit('confirm', selectData)
     }
-  },
-  emits: ['cancel', 'confirm']
+  }
 }
 </script>
 

@@ -1,8 +1,8 @@
 /**
  * 节点管理 api
  */
-import axios from "./config";
-import { loadRouterBase } from "./config";
+import axios from './config'
+import { loadRouterBase } from './config'
 
 /**
  * 项目列表
@@ -13,10 +13,10 @@ import { loadRouterBase } from "./config";
  */
 export function getProjectList(params) {
   return axios({
-    url: "/node/manage/get_project_info",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/get_project_info',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -28,15 +28,15 @@ export function getProjectList(params) {
  */
 export function getRuningProjectInfo(params, noTip) {
   return axios({
-    url: "/node/manage/getProjectPort",
-    method: "post",
+    url: '/node/manage/getProjectPort',
+    method: 'post',
     data: params,
     timeout: 0,
     headers: {
-      loading: "no",
-      tip: noTip ? "no" : "",
-    },
-  });
+      loading: 'no',
+      tip: noTip ? 'no' : ''
+    }
+  })
 }
 
 /**
@@ -48,13 +48,13 @@ export function getRuningProjectInfo(params, noTip) {
  */
 export function getProjectData(params, loading) {
   return axios({
-    url: "/node/manage/getProjectData.json",
-    method: "post",
+    url: '/node/manage/getProjectData.json',
+    method: 'post',
     data: params,
     headers: {
-      loading: loading === false ? "no" : "",
-    },
-  });
+      loading: loading === false ? 'no' : ''
+    }
+  })
 }
 
 /**
@@ -63,10 +63,10 @@ export function getProjectData(params, loading) {
  */
 export function getProjectAccessList(nodeId) {
   return axios({
-    url: "/node/manage/project-access-list",
-    method: "post",
-    data: { nodeId },
-  });
+    url: '/node/manage/project-access-list',
+    method: 'post',
+    data: { nodeId }
+  })
 }
 
 /**
@@ -102,13 +102,13 @@ export function editProject(params) {
     autoStart: params.autoStart,
     dslContent: params.dslContent,
     dslEnv: params.dslEnv,
-    linkId: params.linkId,
-  };
+    linkId: params.linkId
+  }
   return axios({
-    url: "/node/manage/saveProject",
-    method: "post",
-    data,
-  });
+    url: '/node/manage/saveProject',
+    method: 'post',
+    data
+  })
 }
 
 /**
@@ -121,26 +121,26 @@ export function editProject(params) {
  */
 export function deleteProject(params) {
   return axios({
-    url: "/node/manage/deleteProject",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/deleteProject',
+    method: 'post',
+    data: params
+  })
 }
 
 export function migrateWorkspace(params) {
   return axios({
-    url: "/node/manage/migrate-workspace",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/migrate-workspace',
+    method: 'post',
+    data: params
+  })
 }
 
 export function releaseOutgiving(params) {
   return axios({
-    url: "/node/manage/release-outgiving",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/release-outgiving',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -152,13 +152,13 @@ export function releaseOutgiving(params) {
  */
 export function getFileList(params) {
   return axios({
-    url: "/node/manage/file/getFileList",
-    method: "post",
+    url: '/node/manage/file/getFileList',
+    method: 'post',
     headers: {
-      loading: "no",
+      loading: 'no'
     },
-    data: params,
-  });
+    data: params
+  })
 }
 
 /**
@@ -171,7 +171,7 @@ export function getFileList(params) {
  * } params
  */
 export function downloadProjectFile(params) {
-  return loadRouterBase("/node/manage/file/download", params);
+  return loadRouterBase('/node/manage/file/download', params)
   // return axios({
   //   url: "/node/manage/file/download",
   //   method: "get",
@@ -183,27 +183,27 @@ export function downloadProjectFile(params) {
 
 export function readFile(formData) {
   return axios({
-    url: "/node/manage/file/read_file",
-    method: "get",
-    params: formData,
-  });
+    url: '/node/manage/file/read_file',
+    method: 'get',
+    params: formData
+  })
 }
 
 export function remoteDownload(formData) {
   return axios({
-    url: "/node/manage/file/remote_download",
-    method: "get",
+    url: '/node/manage/file/remote_download',
+    method: 'get',
     timeout: 0,
-    params: formData,
-  });
+    params: formData
+  })
 }
 
 export function updateFile(formData) {
   return axios({
-    url: "/node/manage/file/update_config_file",
-    method: "post",
-    data: formData,
-  });
+    url: '/node/manage/file/update_config_file',
+    method: 'post',
+    data: formData
+  })
 }
 
 /**
@@ -219,16 +219,16 @@ export function updateFile(formData) {
  */
 export function uploadProjectFile(formData) {
   return axios({
-    url: "/node/manage/file/upload-sharding",
+    url: '/node/manage/file/upload-sharding',
     headers: {
-      "Content-Type": "multipart/form-data;charset=UTF-8",
-      loading: "no",
+      'Content-Type': 'multipart/form-data;charset=UTF-8',
+      loading: 'no'
     },
-    method: "post",
+    method: 'post',
     // 0 表示无超时时间
     timeout: 0,
-    data: formData,
-  });
+    data: formData
+  })
 }
 
 /**
@@ -244,13 +244,13 @@ export function uploadProjectFile(formData) {
  */
 export function shardingMerge(formData) {
   return axios({
-    url: "/node/manage/file/sharding-merge",
+    url: '/node/manage/file/sharding-merge',
     headers: {},
-    method: "post",
+    method: 'post',
     // 0 表示无超时时间
     timeout: 0,
-    data: formData,
-  });
+    data: formData
+  })
 }
 
 /**
@@ -265,10 +265,10 @@ export function shardingMerge(formData) {
  */
 export function deleteProjectFile(params) {
   return axios({
-    url: "/node/manage/file/deleteFile",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/file/deleteFile',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -281,13 +281,13 @@ export function deleteProjectFile(params) {
  */
 export function getProjectLogSize(params) {
   return axios({
-    url: "/node/manage/log/logSize",
-    method: "post",
+    url: '/node/manage/log/logSize',
+    method: 'post',
     data: params,
     headers: {
-      loading: "no",
-    },
-  });
+      loading: 'no'
+    }
+  })
 }
 
 /**
@@ -299,7 +299,7 @@ export function getProjectLogSize(params) {
  * } params
  */
 export function downloadProjectLogFile(params) {
-  return loadRouterBase("/node/manage/log/export", params);
+  return loadRouterBase('/node/manage/log/export', params)
 }
 
 /**
@@ -311,10 +311,10 @@ export function downloadProjectLogFile(params) {
  */
 export function getLogBackList(params) {
   return axios({
-    url: "/node/manage/log/log-back-list",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/log/log-back-list',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -327,7 +327,7 @@ export function getLogBackList(params) {
  * } params
  */
 export function downloadProjectLogBackFile(params) {
-  return loadRouterBase("/node/manage/log/logBack_download", params);
+  return loadRouterBase('/node/manage/log/logBack_download', params)
 }
 
 /**
@@ -341,10 +341,10 @@ export function downloadProjectLogBackFile(params) {
  */
 export function deleteProjectLogBackFile(params) {
   return axios({
-    url: "/node/manage/log/logBack_delete",
-    method: "post",
-    data: params,
-  });
+    url: '/node/manage/log/logBack_delete',
+    method: 'post',
+    data: params
+  })
 }
 
 /**
@@ -357,11 +357,11 @@ export function deleteProjectLogBackFile(params) {
  */
 export function getInternalData(params) {
   return axios({
-    url: "/node/manage/getInternalData",
-    method: "post",
+    url: '/node/manage/getInternalData',
+    method: 'post',
     timeout: 0,
-    data: params,
-  });
+    data: params
+  })
 }
 
 // /**
@@ -440,14 +440,14 @@ export function getInternalData(params) {
  */
 export function operateProject(params) {
   return axios({
-    url: "/node/manage/operate",
-    method: "post",
+    url: '/node/manage/operate',
+    method: 'post',
     data: params,
     headers: {
-      loading: "no",
-      tip: "no",
-    },
-  });
+      loading: 'no',
+      tip: 'no'
+    }
+  })
 }
 
 /**
@@ -456,10 +456,10 @@ export function operateProject(params) {
  */
 export function getProjectTriggerUrl(data) {
   return axios({
-    url: "/node/project-trigger-url",
-    method: "post",
-    data: data,
-  });
+    url: '/node/project-trigger-url',
+    method: 'post',
+    data: data
+  })
 }
 
 /**
@@ -469,10 +469,10 @@ export function getProjectTriggerUrl(data) {
  */
 export function newFileFolder(params) {
   return axios({
-    url: "/node/manage/file/new_file_folder",
-    method: "get",
-    params,
-  });
+    url: '/node/manage/file/new_file_folder',
+    method: 'get',
+    params
+  })
 }
 
 /**
@@ -482,10 +482,10 @@ export function newFileFolder(params) {
  */
 export function renameFileFolder(params) {
   return axios({
-    url: "/node/manage/file/rename_file_folder",
-    method: "get",
-    params,
-  });
+    url: '/node/manage/file/rename_file_folder',
+    method: 'get',
+    params
+  })
 }
 
 /**
@@ -493,47 +493,47 @@ export function renameFileFolder(params) {
  */
 export function getProjectGroupAll() {
   return axios({
-    url: "/node/list-project-group-all",
-    method: "get",
-  });
+    url: '/node/list-project-group-all',
+    method: 'get'
+  })
 }
 
 /**
  * 所有的运行模式
  */
-export const runModeList = ["Dsl", "ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File", "Link"];
+export const runModeList = ['Dsl', 'ClassPath', 'Jar', 'JarWar', 'JavaExtDirsCp', 'File', 'Link']
 
 export const runModeArray = [
-  { name: "Dsl", desc: "自定义脚本项目（python、nodejs、go、接口探活、es）【推荐】" },
-  { name: "ClassPath", desc: "Java 项目（java -classpath）" },
-  { name: "Jar", desc: "Java 项目（java -jar xxx）" },
-  { name: "JavaExtDirsCp", desc: "Java 项目（java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS）" },
-  { name: "File", desc: "静态文件项目（前端、日志等）" },
+  { name: 'Dsl', desc: '自定义脚本项目（python、nodejs、go、接口探活、es）【推荐】' },
+  { name: 'ClassPath', desc: 'Java 项目（java -classpath）' },
+  { name: 'Jar', desc: 'Java 项目（java -jar xxx）' },
+  { name: 'JavaExtDirsCp', desc: 'Java 项目（java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS）' },
+  { name: 'File', desc: '静态文件项目（前端、日志等）' },
   {
-    name: "Link",
-    desc: "软链项目（类似于项目副本使用相关路径的文件）",
+    name: 'Link',
+    desc: '软链项目（类似于项目副本使用相关路径的文件）',
     // 仅有节点有此项目（节点分发不支持）
-    onlyNode: true,
+    onlyNode: true
   },
-  { name: "JarWar", desc: "Java 项目（java -jar Springboot war）【不推荐】" },
-];
+  { name: 'JarWar', desc: 'Java 项目（java -jar Springboot war）【不推荐】' }
+]
 
 /**
  * java 项目的运行模式
  */
-export const javaModes = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp"];
+export const javaModes = ['ClassPath', 'Jar', 'JarWar', 'JavaExtDirsCp']
 
 /**
  * 有状态管理的运行模式
  */
-export const noFileModes = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "Dsl", "Link"];
+export const noFileModes = ['ClassPath', 'Jar', 'JarWar', 'JavaExtDirsCp', 'Dsl', 'Link']
 
 /*
  * 下载导入模板
  *
  */
 export function importTemplate(data) {
-  return loadRouterBase("/node/manage/import-template", data);
+  return loadRouterBase('/node/manage/import-template', data)
 }
 
 /*
@@ -541,18 +541,18 @@ export function importTemplate(data) {
  *
  */
 export function exportData(data) {
-  return loadRouterBase("/node/manage/export-data", data);
+  return loadRouterBase('/node/manage/export-data', data)
 }
 // 导入数据
 export function importData(formData) {
   return axios({
-    url: "/node/manage/import-data",
+    url: '/node/manage/import-data',
     headers: {
-      "Content-Type": "multipart/form-data;charset=UTF-8",
+      'Content-Type': 'multipart/form-data;charset=UTF-8'
     },
-    method: "post",
+    method: 'post',
     // 0 表示无超时时间
     timeout: 0,
-    data: formData,
-  });
+    data: formData
+  })
 }

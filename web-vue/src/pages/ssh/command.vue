@@ -6,32 +6,32 @@
       size="middle"
       bordered
       :pagination="pagination"
-      @change="changePage"
       :row-selection="rowSelection"
-      rowKey="id"
+      row-key="id"
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            @pressEnter="getCommandData"
             placeholder="搜索命令"
             class="search-input-item"
+            @press-enter="getCommandData"
           />
           <a-input
             v-model:value="listQuery['%desc%']"
-            @pressEnter="getCommandData"
             placeholder="描述"
             class="search-input-item"
+            @press-enter="getCommandData"
           />
           <a-input
             v-model:value="listQuery['%autoExecCron%']"
-            @pressEnter="getCommandData"
             placeholder="定时执行"
             class="search-input-item"
+            @press-enter="getCommandData"
           />
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="getCommandData">搜索</a-button>
@@ -39,7 +39,7 @@
           <a-button type="primary" @click="createCommand">新增</a-button>
           <a-dropdown>
             <a @click="(e) => e.preventDefault()"> 更多 <DownOutlined /> </a>
-            <template v-slot:overlay>
+            <template #overlay>
               <a-menu>
                 <a-menu-item>
                   <a-button
@@ -53,7 +53,7 @@
             </template>
           </a-dropdown>
           <a-tooltip>
-            <template v-slot:title>
+            <template #title>
               <div>命令模版是用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
 
               <div>
@@ -99,27 +99,27 @@
     </a-table>
     <!-- 编辑命令 -->
     <a-modal
-      destroyOnClose
       v-model:open="editCommandVisible"
+      destroy-on-close
       width="80vw"
       title="编辑 命令"
+      :mask-closable="false"
+      :confirm-loading="confirmLoading"
       @ok="handleEditCommandOk"
-      :maskClosable="false"
-      :confirmLoading="confirmLoading"
     >
       <a-form ref="editCommandForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="命令名称" name="name">
-          <a-input v-model:value="temp.name" :maxLength="100" placeholder="命令名称" />
+          <a-input v-model:value="temp.name" :max-length="100" placeholder="命令名称" />
         </a-form-item>
 
         <a-form-item
           name="command"
           help="脚本存放路径：${user.home}/.jpom/xxxx.sh，执行脚本路径：${user.home}，执行脚本方式：bash ${user.home}/.jpom/xxxx.sh par1 par2"
         >
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               命令内容
-              <template v-slot:title>
+              <template #title>
                 <ul>
                   <li>可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称</li>
                 </ul>
@@ -130,14 +130,15 @@
 
           <a-form-item-rest>
             <code-editor
-              height="40vh"
               v-model:content="temp.command"
+              height="40vh"
               :options="{ mode: 'shell', tabSize: 2 }"
             ></code-editor>
           </a-form-item-rest>
         </a-form-item>
         <a-form-item label="SSH节点">
           <a-select
+            v-model:value="chooseSsh"
             show-search
             :filter-option="
               (input, option) => {
@@ -151,7 +152,6 @@
             "
             placeholder="请选择SSH节点"
             mode="multiple"
-            v-model:value="chooseSsh"
           >
             <a-select-option v-for="item in sshList" :key="item.id" :value="item.id">
               {{ item.name }}
@@ -166,13 +166,13 @@
                 <a-col :span="22">
                   <a-space direction="vertical" style="width: 100%">
                     <a-input
-                      :addon-before="`参数${index + 1}描述`"
                       v-model:value="item.desc"
+                      :addon-before="`参数${index + 1}描述`"
                       placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义"
                     />
                     <a-input
-                      :addon-before="`参数${index + 1}值`"
                       v-model:value="item.value"
+                      :addon-before="`参数${index + 1}值`"
                       placeholder="参数值,新增默认参数后在手动执行脚本时需要填写参数值"
                     />
                   </a-space>
@@ -181,7 +181,7 @@
                 <a-col :span="2">
                   <a-row type="flex" justify="center" align="middle">
                     <a-col>
-                      <MinusCircleOutlined @click="() => commandParams.splice(index, 1)" style="color: #ff0000" />
+                      <MinusCircleOutlined style="color: #ff0000" @click="() => commandParams.splice(index, 1)" />
                     </a-col>
                   </a-row>
                 </a-col>
@@ -202,7 +202,7 @@
         <a-form-item label="命令描述" name="desc">
           <a-textarea
             v-model:value="temp.desc"
-            :maxLength="255"
+            :max-length="255"
             :rows="3"
             style="resize: none"
             placeholder="命令详细描述"
@@ -212,13 +212,13 @@
     </a-modal>
 
     <a-modal
-      destroyOnClose
       v-model:open="executeCommandVisible"
+      destroy-on-close
       width="600px"
       title="执行 命令"
+      :mask-closable="false"
+      :confirm-loading="confirmLoading"
       @ok="handleExecuteCommandOk"
-      :maskClosable="false"
-      :confirmLoading="confirmLoading"
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="命令名称" name="name">
@@ -227,6 +227,7 @@
 
         <a-form-item label="SSH节点" required>
           <a-select
+            v-model:value="chooseSsh"
             show-search
             :filter-option="
               (input, option) => {
@@ -239,7 +240,6 @@
               }
             "
             mode="multiple"
-            v-model:value="chooseSsh"
             placeholder="请选择 SSH节点"
           >
             <a-select-option v-for="item in sshList" :key="item.id" :value="item.id">
@@ -260,11 +260,11 @@
             <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
                 <a-input
-                  :addon-before="`参数${index + 1}值`"
                   v-model:value="item.value"
+                  :addon-before="`参数${index + 1}值`"
                   :placeholder="`参数值 ${item.desc ? ',' + item.desc : ''}`"
                 >
-                  <template v-slot:suffix>
+                  <template #suffix>
                     <a-tooltip v-if="item.desc" :title="item.desc">
                       <InfoCircleOutlined />
                     </a-tooltip>
@@ -287,26 +287,26 @@
     </a-modal>
     <!-- 执行日志 -->
     <a-modal
-      destroyOnClose
-      :width="'80vw'"
       v-model:open="logVisible"
+      destroy-on-close
+      :width="'80vw'"
       title="执行日志"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
       <command-log v-if="logVisible" :temp="temp" />
     </a-modal>
     <!-- 同步到其他工作空间 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="syncToWorkspaceVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="同步到其他工作空间"
+      :mask-closable="false"
       @ok="handleSyncToWorkspace"
-      :maskClosable="false"
     >
       <a-alert message="温馨提示" type="warning" show-icon>
-        <template v-slot:description>
+        <template #description>
           <ul>
             <li>同步机制采用<b>脚本名称</b>确定是同一个脚本</li>
             <li>当目标工作空间不存在对应的 脚本 时候将自动创建一个新的 脚本</li>
@@ -318,6 +318,7 @@
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" name="workspaceId">
           <a-select
+            v-model:value="temp.workspaceId"
             show-search
             :filter-option="
               (input, option) => {
@@ -329,10 +330,9 @@
                 )
               }
             "
-            v-model:value="temp.workspaceId"
             placeholder="请选择工作空间"
           >
-            <a-select-option :disabled="getWorkspaceId() === item.id" v-for="item in workspaceList" :key="item.id">{{
+            <a-select-option v-for="item in workspaceList" :key="item.id" :disabled="getWorkspaceId() === item.id">{{
               item.name
             }}</a-select-option>
           </a-select>
@@ -342,16 +342,16 @@
 
     <!-- 触发器 -->
     <a-modal
-      destroyOnClose
       v-model:open="triggerVisible"
+      destroy-on-close
       title="触发器"
       width="50%"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
       <a-form ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
-          <template v-slot:rightExtra>
+          <template #rightExtra>
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>
@@ -359,7 +359,7 @@
           <a-tab-pane key="1" tab="执行">
             <a-space direction="vertical" style="width: 100%">
               <a-alert message="温馨提示" type="warning">
-                <template v-slot:description>
+                <template #description>
                   <ul>
                     <li>单个触发器地址中：第一个随机字符串为命令脚本ID，第二个随机字符串为 token</li>
                     <li>
@@ -370,14 +370,14 @@
                 </template>
               </a-alert>
               <a-alert type="info" :message="`单个触发器地址(点击可以复制)`">
-                <template v-slot:description>
+                <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   </a-typography-paragraph>
                 </template>
               </a-alert>
               <a-alert type="info" :message="`批量触发器地址(点击可以复制)`">
-                <template v-slot:description>
+                <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
                   </a-typography-paragraph>

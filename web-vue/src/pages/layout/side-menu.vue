@@ -1,13 +1,13 @@
 <template>
   <div>
     <a-menu
-      :theme="theme"
       v-if="getUserInfo && getUserInfo.systemUser"
-      mode="inline"
       v-model:value="mangerMenuOpenkeys"
-      @click="mangerMenuClick"
-      :openKeys="mangerMenuOpenkeys"
+      :theme="theme"
+      mode="inline"
+      :open-keys="mangerMenuOpenkeys"
       class="menu"
+      @click="mangerMenuClick"
     >
       <a-menu-item key="admin-manager">
         <template v-if="mode === 'normal'">
@@ -23,17 +23,17 @@
       </a-menu-item>
     </a-menu>
     <a-menu
+      v-model:selectedKeys="selectedKeys"
       :theme="theme"
       mode="inline"
-      v-model:selectedKeys="selectedKeys"
-      @openChange="openChange"
-      :openKeys="getMenuOpenKeys2"
+      :open-keys="getMenuOpenKeys2"
       class="menu"
+      @open-change="openChange"
     >
       <template v-for="menu in getMenus">
         <template v-if="menu.childs && menu.childs.length">
           <a-sub-menu :key="menu.id">
-            <template v-slot:title>
+            <template #title>
               <span>
                 <icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
                 <span>{{ menu.title }}</span>

@@ -11,8 +11,8 @@
                 <a-select
                   :value="`${temp.cacheData.useNodeId},${temp.cacheData.useProjectId}`"
                   style="width: 200px"
-                  @change="nodeChange"
                   placeholder="请选择节点"
+                  @change="nodeChange"
                 >
                   <a-select-option v-for="item in temp.projectList" :key="`${item.nodeId},${item.projectId}`">
                     {{ nodeName[item.nodeId] && nodeName[item.nodeId].name }}
@@ -25,16 +25,16 @@
         </div>
 
         <a-directory-tree
-          :fieldNames="treeReplaceFields"
+          :field-names="treeReplaceFields"
+          :load-data="onTreeData"
+          :tree-data="treeList"
           @select="nodeClick"
-          :loadData="onTreeData"
-          :treeData="treeList"
         >
         </a-directory-tree>
       </a-layout-sider>
       <!-- 表格 -->
       <a-layout-content class="file-content">
-        <div class="log-filter" v-if="temp.cacheData">
+        <div v-if="temp.cacheData" class="log-filter">
           <a-space direction="vertical" style="width: 100%">
             <!-- direction="vertical" -->
             <a-form layout="inline" autocomplete="off">
@@ -46,10 +46,10 @@
                     <!-- .*(0999996|0999995).*   .*(a|b).* -->
                     <a-tooltip placement="right" title="关键词高亮,支持正则(正则可能影响性能请酌情使用)">
                       <a-input
+                        v-model:value="temp.cacheData.keyword"
                         placeholder="关键词,支持正则"
                         :style="`width: 250px`"
-                        v-model:value="temp.cacheData.keyword"
-                        @pressEnter="sendSearchLog"
+                        @press-enter="sendSearchLog"
                       >
                       </a-input>
                     </a-tooltip>
@@ -60,7 +60,7 @@
                       v-model:value="temp.cacheData.beforeCount"
                       :min="0"
                       :max="1000"
-                      @pressEnter="sendSearchLog"
+                      @press-enter="sendSearchLog"
                     />
                   </a-form-item>
                   <a-form-item label="显示后N行">
@@ -69,11 +69,11 @@
                       v-model:value="temp.cacheData.afterCount"
                       :min="0"
                       :max="1000"
-                      @pressEnter="sendSearchLog"
+                      @press-enter="sendSearchLog"
                     />
                   </a-form-item>
                   <a-popover title="正则语法参考">
-                    <template v-slot:content>
+                    <template #content>
                       <ul>
                         <li><b>^.*\d+.*$</b> - 匹配包含数字的行</li>
                         <li><b>.*(a|b).*</b> - 匹配包含 a 或者 b 的行</li>
@@ -114,7 +114,7 @@
                       v-model:value="temp.cacheData.head"
                       :min="0"
                       :max="1000"
-                      @pressEnter="sendSearchLog"
+                      @press-enter="sendSearchLog"
                     />
                   </a-form-item>
                   <a-form-item label="文件后N行">
@@ -123,11 +123,11 @@
                       v-model:value="temp.cacheData.tail"
                       :min="0"
                       :max="1000"
-                      @pressEnter="sendSearchLog"
+                      @press-enter="sendSearchLog"
                     />
                   </a-form-item>
                   <a-popover title="搜索配置参考">
-                    <template v-slot:content>
+                    <template #content>
                       <ul>
                         <li><b>从尾搜索、文件前0行、文件后3行</b> - 在文件最后 3 行中搜索</li>
                         <li><b>从头搜索、文件前0行、文件后3行</b> - 在文件第 3 - 2147483647 行中搜索</li>
@@ -148,10 +148,10 @@
           </a-space>
         </div>
 
-        <a-tabs v-if="temp.cacheData" v-model:activeKey="activeTagKey" :tabBarStyle="{ marginBottom: 0 }">
+        <a-tabs v-if="temp.cacheData" v-model:activeKey="activeTagKey" :tab-bar-style="{ marginBottom: 0 }">
           <template v-for="item in temp.projectList">
-            <a-tab-pane forceRender v-if="nodeName[item.nodeId]" :key="`${item.nodeId},${item.projectId}`">
-              <template v-slot:tab>
+            <a-tab-pane v-if="nodeName[item.nodeId]" :key="`${item.nodeId},${item.projectId}`" force-render>
+              <template #tab>
                 【{{ nodeName[item.nodeId] && nodeName[item.nodeId].name }}】
                 {{
                   nodeProjectList[item.nodeId] &&
@@ -160,8 +160,8 @@
                 }}
               </template>
               <viewPre
-                :ref="`pre-dom-${item.nodeId},${item.projectId}`"
                 :id="`pre-dom-${item.nodeId},${item.projectId}`"
+                :ref="`pre-dom-${item.nodeId},${item.projectId}`"
                 height="calc(100vh - 80px - 85px - 43px)"
                 :config="{
                   logScroll: true,

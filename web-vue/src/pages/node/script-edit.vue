@@ -1,13 +1,13 @@
 <template>
   <div>
     <a-modal
-      destroyOnClose
+      destroy-on-close
       :open="true"
       title="编辑 Script"
-      @ok="handleEditScriptOk"
-      :confirmLoading="confirmLoading"
-      :maskClosable="false"
+      :confirm-loading="confirmLoading"
+      :mask-closable="false"
       width="80vw"
+      @ok="handleEditScriptOk"
       @cancel="
         () => {
           $emit('close')
@@ -18,9 +18,9 @@
         <template #description>当前工作空间还没有逻辑节点不能创建节点脚本奥</template>
       </a-alert>
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
-        <a-alert v-if="this.temp.scriptType === 'server-sync'" message="服务端同步的脚本不能在此修改" banner />
+        <a-alert v-if="temp.scriptType === 'server-sync'" message="服务端同步的脚本不能在此修改" banner />
         <a-form-item label="选择节点">
-          <a-select v-model:value="temp.nodeId" :disabled="!!temp.nodeId" allowClear placeholder="请选择节点">
+          <a-select v-model:value="temp.nodeId" :disabled="!!temp.nodeId" allow-clear placeholder="请选择节点">
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
           </a-select>
         </a-form-item>
@@ -30,7 +30,7 @@
           </a-form-item>
           <a-form-item label="Script 内容" name="context">
             <a-form-item-rest>
-              <code-editor height="40vh" v-model:content="temp.context" :options="{ mode: 'shell' }"></code-editor>
+              <code-editor v-model:content="temp.context" height="40vh" :options="{ mode: 'shell' }"></code-editor>
             </a-form-item-rest>
           </a-form-item>
           <!-- <a-form-item label="默认参数" name="defArgs">
@@ -42,13 +42,13 @@
                 <a-col :span="22">
                   <a-space style="width: 100%" direction="vertical">
                     <a-input
-                      :addon-before="`参数${index + 1}描述`"
                       v-model:value="item.desc"
+                      :addon-before="`参数${index + 1}描述`"
                       placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义"
                     />
                     <a-input
-                      :addon-before="`参数${index + 1}值`"
                       v-model:value="item.value"
+                      :addon-before="`参数${index + 1}值`"
                       placeholder="参数值,新增默认参数后在手动执行脚本时需要填写参数值"
                     />
                   </a-space>
@@ -56,7 +56,7 @@
                 <a-col :span="2">
                   <a-row type="flex" justify="center" align="middle">
                     <a-col>
-                      <MinusCircleOutlined @click="() => commandParams.splice(index, 1)" style="color: #ff0000" />
+                      <MinusCircleOutlined style="color: #ff0000" @click="() => commandParams.splice(index, 1)" />
                     </a-col>
                   </a-row>
                 </a-col>
@@ -107,6 +107,7 @@ export default {
       default: ''
     }
   },
+  emits: ['close'],
   data() {
     return {
       temp: {},
@@ -202,7 +203,6 @@ export default {
           })
       })
     }
-  },
-  emits: ['close']
+  }
 }
 </script>

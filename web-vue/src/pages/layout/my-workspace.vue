@@ -6,19 +6,19 @@
           <draggable
             v-model="myWorkspaceList"
             :group="`sort`"
-            @end="sortFieldEnd()"
             handle=".move"
-            chosenClass="box-shadow"
+            chosen-class="box-shadow"
             item-key="id"
+            @end="sortFieldEnd()"
           >
             <template #item="{ element }">
               <a-row class="item-row">
                 <a-col :span="18">
                   <template v-if="element.edit">
                     <a-input-search
+                      v-model:value="element.name"
                       placeholder="请输入工作空间备注,留空使用默认的名称"
                       enter-button="确定"
-                      v-model:value="element.name"
                       @search="editOk(element)"
                     />
                   </template>

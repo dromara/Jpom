@@ -6,21 +6,21 @@
       :data-source="list"
       :columns="columns"
       :pagination="pagination"
-      @change="changePage"
       bordered
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            @pressEnter="loadData"
             placeholder="监控名称"
             class="search-input-item"
+            @press-enter="loadData"
           />
-          <a-select v-model:value="listQuery.status" allowClear placeholder="开启状态" class="search-input-item">
+          <a-select v-model:value="listQuery.status" allow-clear placeholder="开启状态" class="search-input-item">
             <a-select-option :value="1">开启</a-select-option>
             <a-select-option :value="0">关闭</a-select-option>
           </a-select>
@@ -50,17 +50,17 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editOperateMonitorVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       width="50vw"
       title="编辑监控"
+      :mask-closable="false"
       @ok="handleEditOperateMonitorOk"
-      :maskClosable="false"
     >
       <a-form ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 5 }" :wrapper-col="{ span: 17 }">
         <a-form-item label="监控名称" name="name">
-          <a-input v-model:value="temp.name" :maxLength="50" placeholder="监控名称" />
+          <a-input v-model:value="temp.name" :max-length="50" placeholder="监控名称" />
         </a-form-item>
         <a-form-item label="开启状态" name="status">
           <a-switch v-model:checked="temp.start" checked-children="开" un-checked-children="关" />
@@ -99,10 +99,10 @@
           />
         </a-form-item>
         <a-form-item name="notifyUser" class="jpom-monitor-notify">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               报警联系人
-              <template v-slot:title>
+              <template #title>
                 如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。
               </template>
               <QuestionCircleOutlined v-show="!temp.id" />

@@ -2,7 +2,7 @@
   <div>
     <!-- console -->
     <log-view2 :ref="`logView`" height="calc(100vh - 140px)">
-      <template v-slot:before>
+      <template #before>
         <a-space>
           <a-button size="small" :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start"
             >启动</a-button
@@ -28,7 +28,7 @@
           <template v-if="project.runMode === 'Dsl'">
             <template v-if="canReload">
               <a-popover title="上次重载结果">
-                <template v-slot:content>
+                <template #content>
                   <template v-if="project.lastReloadResult">
                     <p>
                       <a-tag v-if="project.lastReloadResult.success" color="green">成功</a-tag>
@@ -49,7 +49,7 @@
           </template>
           <a-button size="small" type="primary" @click="goFile">文件管理</a-button>
           <a-dropdown v-if="project.dslProcessInfo">
-            <template v-slot:overlay>
+            <template #overlay>
               <a-menu>
                 <a-menu-item v-for="(item, index) in project.dslProcessInfo" :key="index">
                   <template v-if="item.status">
@@ -109,20 +109,20 @@
     </log-view2>
     <!-- 日志备份 -->
     <a-modal
-      destroyOnClose
       v-model:open="lobbackVisible"
+      destroy-on-close
       title="日志备份列表"
       width="850px"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
-      <ProjectLog v-if="lobbackVisible" :nodeId="this.nodeId" :projectId="this.projectId"></ProjectLog>
+      <ProjectLog v-if="lobbackVisible" :node-id="nodeId" :project-id="projectId"></ProjectLog>
     </a-modal>
     <!-- 编辑区 -->
     <ScriptEdit
       v-if="editScriptVisible"
-      :nodeId="this.nodeId"
-      :scriptId="temp.scriptId"
+      :node-id="nodeId"
+      :script-id="temp.scriptId"
       @close="
         () => {
           editScriptVisible = false

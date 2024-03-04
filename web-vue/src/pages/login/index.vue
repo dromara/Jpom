@@ -1,80 +1,82 @@
 <template>
-  <defaultBg #content>
-    <a-card class="login-card" hoverable>
-      <a-card-meta :title="`${loginTitle}`" style="text-align: center" description="" />
-      <br />
-      <template v-if="action === 'login'">
-        <a-form :model="loginForm" :label-col="{ span: 0 }" :wrapper-col="{ span: 24 }" @finish="handleLogin">
-          <a-form-item name="loginName" :rules="[{ required: true, message: '请输入用户名' }]">
-            <a-input autocomplete="true" v-model:value="loginForm.loginName" placeholder="用户名" />
-          </a-form-item>
-          <a-form-item name="userPwd" :rules="[{ required: true, message: '请输入密码' }]">
-            <a-input-password autocomplete="true" v-model:value="loginForm.userPwd" placeholder="密码" />
-          </a-form-item>
-          <a-form-item v-if="!disabledCaptcha" name="code" :rules="[{ required: true, message: '请输入验证码' }]">
-            <a-row>
-              <a-col :span="14">
-                <a-input v-model:value="loginForm.code" placeholder="验证码" />
-              </a-col>
-              <a-col :offset="2" :span="8">
-                <div class="rand-code">
-                  <img v-if="randCode" :src="randCode" @click="changeCode" />
-                  <loading-outlined v-else />
-                </div>
-              </a-col>
-            </a-row>
-          </a-form-item>
-          <a-form-item :wrapper-col="{ span: 24 }">
-            <a-button type="primary" html-type="submit" class="btn-login" :loading="loading"> 登录 </a-button>
-          </a-form-item>
-          <template v-if="enabledOauth2Provides.length">
-            <a-divider>第三方登录</a-divider>
-            <a-form-item :wrapper-col="{ span: 24 }">
-              <a-space :size="20">
-                <div class="oauth2-item" v-if="enabledOauth2Provides.includes('gitee')">
-                  <a-tooltip @click="toOauth2Url('gitee')" title="gitee">
-                    <img alt="gitee" :src="giteeImg" />
-                  </a-tooltip>
-                </div>
-                <div class="oauth2-item" v-if="enabledOauth2Provides.includes('maxkey')">
-                  <a-tooltip @click="toOauth2Url('maxkey')" title="maxkey">
-                    <img alt="maxkey" :src="maxkeyImg" />
-                  </a-tooltip>
-                </div>
-                <div class="oauth2-item" v-if="enabledOauth2Provides.includes('github')">
-                  <a-tooltip @click="toOauth2Url('github')" title="github">
-                    <img alt="github" :src="githubImg" />
-                  </a-tooltip>
-                </div>
-              </a-space>
+  <defaultBg>
+    <template #content>
+      <a-card class="login-card" hoverable>
+        <a-card-meta :title="`${loginTitle}`" style="text-align: center" description="" />
+        <br />
+        <template v-if="action === 'login'">
+          <a-form :model="loginForm" :label-col="{ span: 0 }" :wrapper-col="{ span: 24 }" @finish="handleLogin">
+            <a-form-item name="loginName" :rules="[{ required: true, message: '请输入用户名' }]">
+              <a-input v-model:value="loginForm.loginName" autocomplete="true" placeholder="用户名" />
             </a-form-item>
-          </template>
-        </a-form>
-      </template>
-      <template v-if="action === 'mfa'">
-        <a-form
-          ref="mfaDataForm"
-          :label-col="{ span: 5 }"
-          :wrapper-col="{ span: 19 }"
-          :model="mfaData"
-          @finish="handleMfa"
-        >
-          <a-form-item
-            label="验证码"
-            name="mfaCode"
-            help="需要验证 MFA"
-            :rules="[
-              { required: true, message: '请输入两步验证码' },
-              { pattern: /^\d{6}$/, message: '验证码 6 为纯数字' }
-            ]"
+            <a-form-item name="userPwd" :rules="[{ required: true, message: '请输入密码' }]">
+              <a-input-password v-model:value="loginForm.userPwd" autocomplete="true" placeholder="密码" />
+            </a-form-item>
+            <a-form-item v-if="!disabledCaptcha" name="code" :rules="[{ required: true, message: '请输入验证码' }]">
+              <a-row>
+                <a-col :span="14">
+                  <a-input v-model:value="loginForm.code" placeholder="验证码" />
+                </a-col>
+                <a-col :offset="2" :span="8">
+                  <div class="rand-code">
+                    <img v-if="randCode" :src="randCode" @click="changeCode" />
+                    <loading-outlined v-else />
+                  </div>
+                </a-col>
+              </a-row>
+            </a-form-item>
+            <a-form-item :wrapper-col="{ span: 24 }">
+              <a-button type="primary" html-type="submit" class="btn-login" :loading="loading"> 登录 </a-button>
+            </a-form-item>
+            <template v-if="enabledOauth2Provides.length">
+              <a-divider>第三方登录</a-divider>
+              <a-form-item :wrapper-col="{ span: 24 }">
+                <a-space :size="20">
+                  <div v-if="enabledOauth2Provides.includes('gitee')" class="oauth2-item">
+                    <a-tooltip title="gitee" @click="toOauth2Url('gitee')">
+                      <img alt="gitee" :src="giteeImg" />
+                    </a-tooltip>
+                  </div>
+                  <div v-if="enabledOauth2Provides.includes('maxkey')" class="oauth2-item">
+                    <a-tooltip title="maxkey" @click="toOauth2Url('maxkey')">
+                      <img alt="maxkey" :src="maxkeyImg" />
+                    </a-tooltip>
+                  </div>
+                  <div v-if="enabledOauth2Provides.includes('github')" class="oauth2-item">
+                    <a-tooltip title="github" @click="toOauth2Url('github')">
+                      <img alt="github" :src="githubImg" />
+                    </a-tooltip>
+                  </div>
+                </a-space>
+              </a-form-item>
+            </template>
+          </a-form>
+        </template>
+        <template v-if="action === 'mfa'">
+          <a-form
+            ref="mfaDataForm"
+            :label-col="{ span: 5 }"
+            :wrapper-col="{ span: 19 }"
+            :model="mfaData"
+            @finish="handleMfa"
           >
-            <a-input v-model:value="mfaData.mfaCode" placeholder="mfa 验证码" />
-          </a-form-item>
+            <a-form-item
+              label="验证码"
+              name="mfaCode"
+              help="需要验证 MFA"
+              :rules="[
+                { required: true, message: '请输入两步验证码' },
+                { pattern: /^\d{6}$/, message: '验证码 6 为纯数字' }
+              ]"
+            >
+              <a-input v-model:value="mfaData.mfaCode" placeholder="mfa 验证码" />
+            </a-form-item>
 
-          <a-button type="primary" html-type="submit" class="btn-login"> 确认 </a-button>
-        </a-form>
-      </template>
-    </a-card>
+            <a-button type="primary" html-type="submit" class="btn-login"> 确认 </a-button>
+          </a-form>
+        </template>
+      </a-card>
+    </template>
   </defaultBg>
 </template>
 <script setup lang="ts">
@@ -116,16 +118,15 @@ const action = ref<'mfa' | 'login'>('login')
 const enabledOauth2Provides = ref<string[]>([])
 
 const randCode = ref('')
-const dynamicBg = ref(localStorage.getItem('dynamicBg') === 'true')
+// const dynamicBg = ref(localStorage.getItem('dynamicBg') === 'true')
 const disabledCaptcha = ref(false)
 
-const backgroundImage = computed(() => {
-  const color =
-    theme.value === 'light' ? 'linear-gradient(#1890ff, #66a9c9)' : 'linear-gradient(rgb(38 46 55), rgb(27 33 36))'
-
-  // background: linear-gradient(#1890ff, #66a9c9);
-  return { background: color }
-})
+// const backgroundImage = computed(() => {
+//   const color =
+//     theme.value === 'light' ? 'linear-gradient(#1890ff, #66a9c9)' : 'linear-gradient(rgb(38 46 55), rgb(27 33 36))'
+//   // background: linear-gradient(#1890ff, #66a9c9);
+//   return { background: color }
+// })
 
 // 检查是否需要初始化
 const beginCheckSystem = () => {

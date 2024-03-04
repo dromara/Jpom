@@ -68,7 +68,7 @@ const useAppStore = appStore()
 const pageLoading = computed(() => {
   return useAppStore.loading
 })
-watch(pageLoading, (newValue, oldValue) => {
+watch(pageLoading, (newValue) => {
   //
   if (newValue === 2) {
     clearTimeout(pageLoadingTimeout.value)

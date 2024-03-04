@@ -1,21 +1,21 @@
 <template>
   <div>
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :open="true"
+      width="80vw"
+      title="重建容器"
+      :mask-closable="false"
+      :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
           $emit('cancelBtnClick')
         }
       "
-      width="80vw"
-      title="重建容器"
-      :maskClosable="false"
-      :footer-style="{ textAlign: 'right' }"
     >
       <a-alert
-        style="margin-bottom: 10px"
         v-if="containerData && Object.keys(containerData).length"
+        style="margin-bottom: 10px"
         message="操作提示"
         type="warning"
         show-icon
@@ -55,20 +55,20 @@
                     <a-input-group>
                       <a-row>
                         <a-col :span="8">
-                          <a-input addon-before="IP" placeholder="宿主机ip" v-model:value="item.ip"> </a-input>
+                          <a-input v-model:value="item.ip" addon-before="IP" placeholder="宿主机ip"> </a-input>
                         </a-col>
                         <a-col :span="6" :offset="1">
-                          <a-input addon-before="端口" placeholder="端口" v-model:value="item.publicPort"> </a-input>
+                          <a-input v-model:value="item.publicPort" addon-before="端口" placeholder="端口"> </a-input>
                         </a-col>
                         <a-col :span="8" :offset="1">
                           <a-input
+                            v-model:value="item.port"
                             addon-before="容器"
                             :disabled="item.disabled"
-                            v-model:value="item.port"
                             placeholder="容器端口"
                           >
-                            <template v-slot:addonAfter>
-                              <a-select :disabled="item.disabled" v-model:value="item.scheme" placeholder="端口协议">
+                            <template #addonAfter>
+                              <a-select v-model:value="item.scheme" :disabled="item.disabled" placeholder="端口协议">
                                 <a-select-option value="tcp">tcp</a-select-option>
                                 <a-select-option value="udp">udp</a-select-option>
                                 <a-select-option value="sctp">sctp</a-select-option>
@@ -113,13 +113,13 @@
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.volumes" :key="index">
                 <a-col :span="10">
-                  <a-input addon-before="宿主" v-model:value="item.host" placeholder="宿主机目录" />
+                  <a-input v-model:value="item.host" addon-before="宿主" placeholder="宿主机目录" />
                 </a-col>
                 <a-col :span="10" :offset="1">
                   <a-input
+                    v-model:value="item.container"
                     addon-before="容器"
                     :disabled="item.disabled"
-                    v-model:value="item.container"
                     placeholder="容器目录"
                   />
                 </a-col>
@@ -186,7 +186,7 @@
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.commands" :key="index">
                 <a-col :span="20">
-                  <a-input addon-before="命令值" v-model:value="item.value" placeholder="填写运行命令" />
+                  <a-input v-model:value="item.value" addon-before="命令值" placeholder="填写运行命令" />
                 </a-col>
 
                 <a-col :span="2" :offset="1">
@@ -318,7 +318,7 @@
               /></a-col>
               <a-col :span="4" style="text-align: right">
                 <a-tooltip>
-                  <template v-slot:title>
+                  <template #title>
                     <p>--privileged</p>
                     <ul>
                       privileged=true|false 介绍
@@ -359,7 +359,7 @@
           <a-button
             @click="
               () => {
-                this.$emit('cancelBtnClick')
+                $emit('cancelBtnClick')
               }
             "
           >
@@ -406,6 +406,7 @@ export default {
       default: () => ({})
     }
   },
+  emits: ['cancelBtnClick', 'confirmBtnClick'],
   data() {
     return {
       temp: {},
@@ -658,7 +659,6 @@ export default {
         }
       })
     }
-  },
-  emits: ['cancelBtnClick', 'confirmBtnClick']
+  }
 }
 </script>

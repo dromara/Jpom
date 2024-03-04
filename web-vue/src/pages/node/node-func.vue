@@ -1,20 +1,20 @@
 <template>
   <a-drawer
-    destroyOnClose
+    destroy-on-close
     placement="right"
     :width="`${getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
+    :header-style="{
+      padding: '0 10px'
+    }"
+    :body-style="{
+      padding: '0'
+    }"
+    :open="true"
     @close="
       () => {
         $emit('close')
       }
     "
-    :headerStyle="{
-      padding: '0 10px'
-    }"
-    :bodyStyle="{
-      padding: '0'
-    }"
-    :open="true"
   >
     <template #title>
       <a-space>
@@ -22,7 +22,7 @@
         <div>
           <a-tabs
             v-model:activeKey="current"
-            :tabBarStyle="{
+            :tab-bar-style="{
               margin: '0'
             }"
           >
@@ -34,9 +34,9 @@
       </a-space>
     </template>
     <div class="layout-content">
-      <project-search v-if="current === 'project'" :nodeId="this.id" />
-      <script-list v-else-if="current === 'scripct'" :nodeId="this.id"></script-list>
-      <script-log v-else-if="current === 'scripct-log'" :nodeId="this.id"></script-log>
+      <project-search v-if="current === 'project'" :node-id="id" />
+      <script-list v-else-if="current === 'scripct'" :node-id="id"></script-list>
+      <script-log v-else-if="current === 'scripct-log'" :node-id="id"></script-log>
     </div>
   </a-drawer>
 </template>
@@ -74,12 +74,12 @@ export default {
     //
     this.current = this.tabs[0]
   },
+  emits: ['close'],
   data() {
     return {
       current: null
     }
-  },
-  emits: ['close']
+  }
 }
 </script>
 <style scoped>

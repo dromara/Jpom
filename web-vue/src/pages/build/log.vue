@@ -1,7 +1,7 @@
 <template>
   <log-view
     :ref="`logView`"
-    titleName="构建日志"
+    title-name="构建日志"
     :visible="visible"
     @close="
       () => {
@@ -48,6 +48,7 @@ export default {
       default: false
     }
   },
+  emits: ['close'],
   data() {
     return {
       statusMap,
@@ -114,7 +115,6 @@ export default {
     handleDownload() {
       window.open(downloadBuildLog(this.logId), '_blank')
     }
-  },
-  emits: ['close']
+  }
 }
 </script>

@@ -130,7 +130,7 @@ export function generateNodeTopChart(data) {
     smooth: true
   }
   const scales = []
-  for (var i = data.length - 1; i >= 0; i--) {
+  for (let i = data.length - 1; i >= 0; i--) {
     const item = data[i]
     cpuItem.data.push(parseFloat(item.occupyCpu))
     diskItem.data.push(parseFloat(item.occupyDisk))
@@ -183,8 +183,8 @@ export function generateNodeTopChart(data) {
       trigger: 'axis',
       show: true,
       formatter: function (params) {
-        var html = params[0].name + '<br>'
-        for (var i = 0; i < params.length; i++) {
+        let html = params[0].name + '<br>'
+        for (let i = 0; i < params.length; i++) {
           html += params[i].marker + params[i].seriesName + ':' + formatPercent2(params[i].value) + '<br>'
         }
         return html
@@ -216,7 +216,7 @@ export function generateNodeNetChart(data) {
     smooth: true
   }
   const scales = []
-  for (var i = data.length - 1; i >= 0; i--) {
+  for (let i = data.length - 1; i >= 0; i--) {
     const item = data[i]
     txItem.data.push(item.netTxBytes)
     rxItem.data.push(item.netRxBytes)
@@ -252,8 +252,8 @@ export function generateNodeNetChart(data) {
       trigger: 'axis',
       show: true,
       formatter: function (params) {
-        var html = params[0].name + '<br>'
-        for (var i = 0; i < params.length; i++) {
+        let html = params[0].name + '<br>'
+        for (let i = 0; i < params.length; i++) {
           html += params[i].marker + params[i].seriesName + ':' + renderSize(params[i].value) + '/s <br>'
         }
         return html
@@ -278,7 +278,7 @@ export function generateNodeNetworkTimeChart(data) {
     smooth: true
   }
   const scales = []
-  for (var i = data.length - 1; i >= 0; i--) {
+  for (let i = data.length - 1; i >= 0; i--) {
     const item = data[i]
     dataArray.data.push(parseFloat(item.networkDelay))
     scales.push(parseTime(item.monitorTime))
@@ -310,8 +310,8 @@ export function generateNodeNetworkTimeChart(data) {
       trigger: 'axis',
       show: true,
       formatter: function (params) {
-        var html = params[0].name + '<br>'
-        for (var i = 0; i < params.length; i++) {
+        let html = params[0].name + '<br>'
+        for (let i = 0; i < params.length; i++) {
           html += params[i].marker + params[i].seriesName + ':' + formatDuration(params[i].value) + ' <br>'
         }
         return html
@@ -334,7 +334,7 @@ export function drawChart(data, domId, parseFn, theme) {
     return
   }
   const option = parseFn(data)
-  let myChart = echarts.getInstanceByDom(historyChartDom)
+  const myChart = echarts.getInstanceByDom(historyChartDom)
   if (myChart) {
     myChart.setOption(option)
     return myChart

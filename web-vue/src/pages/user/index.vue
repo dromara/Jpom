@@ -6,26 +6,26 @@
       size="middle"
       :columns="columns"
       :pagination="pagination"
-      @change="changePage"
       bordered
-      rowKey="id"
+      row-key="id"
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery.id"
-            @pressEnter="loadData"
             placeholder="用户名ID"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%name%']"
-            @pressEnter="loadData"
             placeholder="用户名"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
@@ -39,7 +39,7 @@
             <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
             <a-dropdown>
               <a @click="(e) => e.preventDefault()"> 更多 <DownOutlined /> </a>
-              <template v-slot:overlay>
+              <template #overlay>
                 <a-menu>
                   <a-menu-item>
                     <a-button
@@ -130,13 +130,13 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editUserVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       width="60vw"
       title="编辑用户"
+      :mask-closable="false"
       @ok="handleEditUserOk"
-      :maskClosable="false"
     >
       <a-alert
         v-if="!permissionGroup || !permissionGroup.length"
@@ -150,22 +150,22 @@
       <a-form ref="editUserForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="登录名称" name="id">
           <a-input
-            @change="checkTipUserName"
-            :maxLength="50"
             v-model:value="temp.id"
+            :max-length="50"
             placeholder="登录名称,账号,创建之后不能修改"
             :disabled="createOption == false"
+            @change="checkTipUserName"
           />
         </a-form-item>
 
         <a-form-item label="昵称" name="name">
-          <a-input v-model:value="temp.name" :maxLength="50" placeholder="昵称" />
+          <a-input v-model:value="temp.name" :max-length="50" placeholder="昵称" />
         </a-form-item>
         <a-form-item name="systemUser">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               管理员
-              <template v-slot:title> 管理员拥有：管理服务端的部分权限 </template>
+              <template #title> 管理员拥有：管理服务端的部分权限 </template>
               <QuestionCircleOutlined v-if="createOption" />
             </a-tooltip>
           </template>
@@ -174,21 +174,21 @@
               <a-tooltip title="管理员拥有：管理服务端的部分权限">
                 <a-switch
                   :checked="temp.systemUser == 1"
+                  :disabled="temp.parent === 'sys'"
+                  checked-children="是"
+                  un-checked-children="否"
+                  default-checked
                   @change="
                     (checked) => {
                       temp.systemUser = checked ? 1 : 0
                     }
                   "
-                  :disabled="temp.parent === 'sys'"
-                  checked-children="是"
-                  un-checked-children="否"
-                  default-checked
                 />
               </a-tooltip>
             </a-col>
             <a-col :span="4" style="text-align: right">
               <a-tooltip>
-                <template v-slot:title> 禁用后该用户不能登录平台 </template>
+                <template #title> 禁用后该用户不能登录平台 </template>
                 <QuestionCircleOutlined v-if="createOption" />
                 状态：
               </a-tooltip>
@@ -197,15 +197,15 @@
               <a-form-item-rest>
                 <a-switch
                   :checked="temp.status != 0"
+                  :disabled="temp.parent === 'sys'"
+                  checked-children="启用"
+                  un-checked-children="禁用"
+                  default-checked
                   @change="
                     (checked) => {
                       temp.status = checked ? 1 : 0
                     }
                   "
-                  :disabled="temp.parent === 'sys'"
-                  checked-children="启用"
-                  un-checked-children="禁用"
-                  default-checked
                 />
               </a-form-item-rest>
             </a-col>
@@ -213,6 +213,7 @@
         </a-form-item>
         <a-form-item label="权限组" name="permissionGroup">
           <a-select
+            v-model:value="temp.permissionGroup"
             show-search
             :filter-option="
               (input, option) => {
@@ -225,7 +226,6 @@
               }
             "
             placeholder="请选择用户的权限组"
-            v-model:value="temp.permissionGroup"
             mode="multiple"
           >
             <a-select-option v-for="item in permissionGroup" :key="item.id">
@@ -235,8 +235,8 @@
         </a-form-item>
       </a-form>
     </a-modal>
-    <a-modal destroyOnClose v-model:open="showUserPwd" title="用户密码提示" :maskClosable="false" :footer="null">
-      <a-result status="success" :title="this.temp.title">
+    <a-modal v-model:open="showUserPwd" destroy-on-close title="用户密码提示" :mask-closable="false" :footer="null">
+      <a-result status="success" :title="temp.title">
         <template #subTitle>
           <div>
             账号新密码为：

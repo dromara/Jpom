@@ -9,22 +9,22 @@
       x: 'max-content'
     }"
   >
-    <template v-slot:title>
+    <template #title>
       <a-space>
         <a-input
           v-model:value="listQuery['name']"
-          @pressEnter="loadData"
           placeholder="名称"
           class="search-input-item"
+          @press-enter="loadData"
         />
         <a-input
           v-model:value="listQuery['networkId']"
-          @pressEnter="loadData"
           placeholder="id"
           class="search-input-item"
+          @press-enter="loadData"
         />
 
-        <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+        <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
       </a-space>
     </template>
     <template #bodyCell="{ column, text, record }">
@@ -109,7 +109,7 @@ export default {
           width: 80,
           ellipsis: true,
           align: 'center',
-          customRender: ({ text, record, index }) => `${index + 1}`
+          customRender: ({ index }) => `${index + 1}`
         },
         {
           title: '名称',

@@ -1,13 +1,13 @@
 <template>
   <a-layout id="app-layout">
-    <a-layout-sider :theme="menuTheme" v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <a-layout-sider class="sider" :theme="menuTheme" v-model:collapsed="collapsed" :trigger="null" collapsible>
+    <a-layout-sider v-model:collapsed="collapsed" :theme="menuTheme" :trigger="null" collapsible>
+      <a-layout-sider v-model:collapsed="collapsed" class="sider" :theme="menuTheme" :trigger="null" collapsible>
         <div class="sider-content">
           <a-tooltip placement="right" title="点击可以折叠左侧菜单栏">
             <div
               class="logo"
-              @click="changeCollapsed()"
               :style="`color:${menuTheme === 'light' && theme === 'light' ? '#000' : '#fff'}`"
+              @click="changeCollapsed()"
             >
               <img :src="logoUrl || defaultLogo" alt="logo" />
               {{ !collapsed ? subTitle : '' }}
@@ -61,7 +61,6 @@ import { checkSystem, loadingLogo } from '@/api/install'
 import { useAppStore } from '@/stores/app'
 import { useGuideStore } from '@/stores/guide'
 import defaultLogo from '@/assets/images/jpom.svg'
-import { use } from 'echarts'
 import { useAllMenuStore } from '@/stores/menu2'
 
 defineProps({
@@ -128,7 +127,7 @@ onMounted(() => {
 })
 
 const router = useRouter()
-const route = useRoute()
+// const route = useRoute()
 
 const menuTheme = computed(() => {
   return guideStore.getMenuThemeView()
@@ -161,7 +160,6 @@ const checkSystemHannder = () => {
       $notification.warn({
         message: res.msg
       })
-    } else {
     }
     if (res.code === 999) {
       router.push('/prohibit-access')

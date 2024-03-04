@@ -1,4 +1,4 @@
-import axios from "./config";
+import axios from './config'
 
 /**
  *
@@ -6,8 +6,8 @@ import axios from "./config";
  */
 export function cronTools(data) {
   return axios({
-    url: "/tools/cron",
-    method: "get",
-    params: data,
-  });
+    url: '/tools/cron',
+    method: 'get',
+    params: data
+  })
 }
