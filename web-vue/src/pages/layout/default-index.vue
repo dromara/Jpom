@@ -44,8 +44,10 @@
         }"
         class="layout-content"
       >
-        <router-view v-slot="{ Component }">
-          <keep-alive> <component :is="Component" /> </keep-alive>
+        <router-view v-slot="{ Component, route }">
+          <keep-alive :include="menuTabKeyList">
+            <component :is="wrap(String(route.name), Component)" :key="String(route.name)" />
+          </keep-alive>
         </router-view>
       </a-layout-content>
     </a-layout>
@@ -59,6 +61,8 @@ import { checkSystem, loadingLogo } from '@/api/install'
 import { useAppStore } from '@/stores/app'
 import { useGuideStore } from '@/stores/guide'
 import defaultLogo from '@/assets/images/jpom.svg'
+import { use } from 'echarts'
+import { useAllMenuStore } from '@/stores/menu2'
 
 defineProps({
   mode: {
@@ -66,6 +70,50 @@ defineProps({
     required: true
   }
 })
+
+// 页面缓存对象
+const wrapperMap = shallowRef(new Map())
+// 组件套壳，动态添加name属性
+const wrap = (name: string, component: any) => {
+  let wrapper
+  const wrapperName = name
+  if (wrapperMap.value.has(wrapperName)) {
+    wrapper = wrapperMap.value.get(wrapperName)
+  } else {
+    //包裹组件
+    wrapper = {
+      name: wrapperName,
+      render() {
+        return h('div', component)
+      }
+    }
+    wrapperMap.value.set(wrapperName, wrapper)
+  }
+  return h(wrapper)
+}
+const menuStore = useAllMenuStore()
+// 获取两个菜单中的tab key
+const menuTabKeyList = computed(() => {
+  return [...menuStore.normal_tabList, ...menuStore.management_tabList].map((item: { key: string }) => item.key)
+})
+// 监听menuTabKeyList变化
+watch(
+  menuTabKeyList,
+  (newKeys, oldKeys) => {
+    // 获取已被删除的key
+    oldKeys
+      ?.filter((key) => {
+        return !newKeys.includes(key)
+      })
+      .forEach((key) => {
+        // 删除缓存
+        wrapperMap.value.delete(key)
+      })
+  },
+  {
+    immediate: true
+  }
+)
 
 const collapsed = ref(false)
 const subTitle = ref('项目运维')
