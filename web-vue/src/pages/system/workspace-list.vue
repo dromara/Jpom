@@ -325,18 +325,7 @@ export default {
     workspaceEnv,
     CustomSelect,
     whiteList,
-    Icon,
-    VNodes: {
-      props: {
-        vnodes: {
-          type: Object,
-          required: true
-        }
-      },
-      render() {
-        return this.vnodes
-      }
-    }
+    Icon
   },
   data() {
     return {
