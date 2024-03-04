@@ -28,7 +28,7 @@
         <div class="workspace-name">
           <a-tooltip :title="`集群名称：${selectCluster && selectCluster.name}`">
             <ClusterOutlined />
-            {{ this.selectCluster && selectCluster.name }}
+            {{ selectCluster && selectCluster.name }}
           </a-tooltip>
         </div>
       </a-button>
@@ -51,9 +51,9 @@
                   <template v-for="(item, index) in myWorkspaceList[0].children">
                     <a-menu-item
                       v-if="index != -1"
+                      :key="index"
                       :disabled="item.id === selectWorkspace.id"
                       @click="handleWorkspaceChange(item)"
-                      :key="index"
                     >
                       <a-button type="link" :disabled="item.id === selectWorkspace.id">
                         {{ item.name || '未配置' }}
@@ -83,9 +83,9 @@
                       <template v-for="(item, index) in item1.children">
                         <a-menu-item
                           v-if="index != -1"
+                          :key="index"
                           :disabled="item.id === selectWorkspace.id"
                           @click="handleWorkspaceChange(item)"
-                          :key="index"
                         >
                           <a-button type="link" :disabled="item.id === selectWorkspace.id">
                             {{ item.name }}
@@ -119,9 +119,9 @@
                 <template v-for="(item, index) in myClusterList">
                   <a-menu-item
                     v-if="index != -1"
+                    :key="index"
                     :disabled="item.id === selectCluster.id || !item.url"
                     @click="handleClusterChange(item)"
-                    :key="index"
                   >
                     <a-button type="link" :disabled="item.id === selectCluster.id || !item.url">
                       {{ item.name }}
@@ -165,23 +165,23 @@
 
     <!-- 修改密码区 -->
     <a-modal
-      destroyOnClose
       v-model:open="updateNameVisible"
+      destroy-on-close
       :width="'60vw'"
       title="安全管理"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
       <a-tabs v-model="temp.tabActiveKey" @change="tabChange">
         <a-tab-pane :key="1" tab="修改密码">
           <a-spin tip="Loading..." :spinning="confirmLoading">
             <a-form
               ref="pwdForm"
-              @finish="handleUpdatePwdOk"
               :rules="rules"
               :model="temp"
               :label-col="{ span: 6 }"
               :wrapper-col="{ span: 14 }"
+              @finish="handleUpdatePwdOk"
             >
               <a-form-item label="原密码" name="oldPwd">
                 <a-input-password v-model:value="temp.oldPwd" placeholder="请输入原密码" />
@@ -205,7 +205,7 @@
         <a-tab-pane :key="2" tab="两步验证">
           <a-row>
             <a-col :span="24">
-              <a-alert type="warning" v-if="temp.needVerify">
+              <a-alert v-if="temp.needVerify" type="warning">
                 <template #message> 提示 </template>
                 <template #description>
                   <ul style="color: red">
@@ -226,10 +226,10 @@
               >
                 <a-form-item label="当前状态" name="status">
                   <a-switch
+                    v-model:checked="temp.status"
                     checked-children="开启中"
                     disabled
                     un-checked-children="关闭中"
-                    v-model:checked="temp.status"
                   />
                 </a-form-item>
                 <template v-if="temp.needVerify">
@@ -241,7 +241,7 @@
                     </a-row>
                   </a-form-item>
                   <a-form-item label="MFA key">
-                    <a-input readOnly disabled v-model:value="temp.mfaKey">
+                    <a-input v-model:value="temp.mfaKey" read-only disabled>
                       <template #suffix>
                         <a-typography-paragraph
                           style="margin-bottom: 0"
@@ -254,7 +254,7 @@
                 </template>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
                 <a-form-item v-if="temp.needVerify" label="验证码" name="twoCode">
-                  <a-input v-model:value="temp.twoCode" ref="twoCode" placeholder="两步验证码" />
+                  <a-input ref="twoCode" v-model:value="temp.twoCode" placeholder="两步验证码" />
                 </a-form-item>
                 <a-form-item v-if="temp.needVerify">
                   <a-row type="flex" justify="center">
@@ -265,7 +265,7 @@
                 </a-form-item>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
                 <a-form-item v-if="!temp.needVerify && temp.status" label="验证码" name="twoCode">
-                  <a-input v-model:value="temp.twoCode" ref="twoCode" placeholder="两步验证码" />
+                  <a-input ref="twoCode" v-model:value="temp.twoCode" placeholder="两步验证码" />
                 </a-form-item>
                 <a-form-item v-if="!temp.needVerify && temp.status">
                   <a-row type="flex" justify="center">
@@ -294,16 +294,16 @@
     </a-modal>
     <!-- 修改用户资料区 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="updateUserVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="修改用户资料"
+      :mask-closable="false"
       @ok="handleUpdateUserOk"
-      :maskClosable="false"
     >
       <a-form ref="userForm" :rules="rules" :model="temp" :label-col="{ span: 8 }" :wrapper-col="{ span: 15 }">
         <a-form-item label="临时token" name="token">
-          <a-input disabled v-model:value="temp.token" placeholder="Token">
+          <a-input v-model:value="temp.token" disabled placeholder="Token">
             <template #suffix>
               <a-typography-paragraph style="margin-bottom: 0" :copyable="{ tooltip: true, text: temp.token }">
               </a-typography-paragraph>
@@ -311,7 +311,7 @@
           </a-input>
         </a-form-item>
         <a-form-item label="长期token" name="md5Token">
-          <a-input disabled v-model:value="temp.md5Token" placeholder="Token">
+          <a-input v-model:value="temp.md5Token" disabled placeholder="Token">
             <template #suffix>
               <a-typography-paragraph style="margin-bottom: 0" :copyable="{ tooltip: true, text: temp.md5Token }">
               </a-typography-paragraph>
@@ -343,7 +343,7 @@
       </a-form>
     </a-modal>
     <!-- 个性配置区 -->
-    <a-modal destroyOnClose v-model:open="customizeVisible" title="个性配置区" :footer="null" :maskClosable="false">
+    <a-modal v-model:open="customizeVisible" destroy-on-close title="个性配置区" :footer="null" :mask-closable="false">
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-alert banner>
           <template #message> 下列配置信息仅在当前浏览器生效,清空浏览器缓存配置将恢复默认 </template>
@@ -368,9 +368,9 @@
           <a-space>
             <a-switch
               checked-children="是"
-              @click="toggleMenuMultiple"
-              :checked="this.menuMultipleFlag"
+              :checked="menuMultipleFlag"
               un-checked-children="否"
+              @click="toggleMenuMultiple"
             />
             同时展开多个
           </a-space>
@@ -401,9 +401,9 @@
           <a-space>
             <a-switch
               checked-children="全屏"
-              @click="toggleFullscreenViewLog"
-              :checked="this.fullscreenViewLog"
+              :checked="fullscreenViewLog"
               un-checked-children="非全屏"
+              @click="toggleFullscreenViewLog"
             />
             全屏查看日志
           </a-space>
@@ -432,9 +432,9 @@
           <a-space>
             <a-switch
               checked-children="紧凑"
-              @click="toggleCompactView"
-              :checked="this.compactView"
+              :checked="compactView"
               un-checked-children="宽松"
+              @click="toggleCompactView"
             />
             字体间距调整(仅在深色模式生效)
           </a-space>
@@ -443,11 +443,11 @@
     </a-modal>
     <!-- mfa 提示 -->
     <a-modal
-      destroyOnClose
       v-model:open="bindMfaTip"
+      destroy-on-close
       title="安全提醒"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
       :closable="false"
       :keyboard="false"
     >
@@ -465,12 +465,12 @@
     </a-modal>
     <!-- 查看操作日志 -->
     <a-modal
-      destroyOnClose
       v-model:open="viewLogVisible"
+      destroy-on-close
       :width="'90vw'"
       title="操作日志"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
       <user-log v-if="viewLogVisible"></user-log>
     </a-modal>

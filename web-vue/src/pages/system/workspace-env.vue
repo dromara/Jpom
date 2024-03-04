@@ -7,34 +7,34 @@
       :loading="envVarLoading"
       :columns="envVarColumns"
       :pagination="envVarPagination"
-      @change="changeListeEnvVar"
       bordered
       :scroll="{
         x: 'max-content'
       }"
+      @change="changeListeEnvVar"
     >
       <template #title>
         <a-space>
           <a-input
             v-model:value="envVarListQuery['%name%']"
             placeholder="名称"
-            @pressEnter="loadDataEnvVar"
-            allowClear
+            allow-clear
             class="search-input-item"
+            @press-enter="loadDataEnvVar"
           />
           <a-input
             v-model:value="envVarListQuery['%value%']"
             placeholder="值"
-            @pressEnter="loadDataEnvVar"
-            allowClear
+            allow-clear
             class="search-input-item"
+            @press-enter="loadDataEnvVar"
           />
           <a-input
             v-model:value="envVarListQuery['%description%']"
             placeholder="描述"
-            @pressEnter="loadDataEnvVar"
-            allowClear
+            allow-clear
             class="search-input-item"
+            @press-enter="loadDataEnvVar"
           />
           <a-button type="primary" @click="loadDataEnvVar">搜索</a-button>
           <a-button type="primary" @click="addEnvVar">新增</a-button>
@@ -80,27 +80,27 @@
     <!-- 环境变量编辑区 -->
     <a-modal
       v-model:open="editEnvVisible"
-      :confirmLoading="confirmLoading"
+      :confirm-loading="confirmLoading"
       title="编辑环境变量"
       width="50vw"
+      :mask-closable="false"
       @ok="handleEnvEditOk"
-      :maskClosable="false"
     >
       <a-form ref="editEnvForm" :rules="rulesEnv" :model="envTemp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="名称" name="name">
-          <a-input v-model:value="envTemp.name" :maxLength="50" placeholder="变量名称" />
+          <a-input v-model:value="envTemp.name" :max-length="50" placeholder="变量名称" />
         </a-form-item>
         <a-form-item label="值" :prop="`${envTemp.privacy === 1 ? '' : 'value'}`">
           <a-textarea v-model:value="envTemp.value" :rows="5" placeholder="变量值" />
         </a-form-item>
         <a-form-item label="描述" name="description">
-          <a-textarea v-model:value="envTemp.description" :maxLength="200" :rows="5" placeholder="变量描述" />
+          <a-textarea v-model:value="envTemp.description" :max-length="200" :rows="5" placeholder="变量描述" />
         </a-form-item>
         <a-form-item name="privacy">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               隐私变量
-              <template v-slot:title>
+              <template #title>
                 隐私变量是指一些密码字段或者关键密钥等重要信息，隐私字段只能修改不能查看（编辑弹窗中无法看到对应值）。
                 隐私字段一旦创建后将不能切换为非隐私字段
               </template>
@@ -109,25 +109,26 @@
           </template>
           <a-switch
             :checked="envTemp.privacy === 1"
+            :disabled="envTemp.id !== undefined"
+            checked-children="隐私"
+            un-checked-children="非隐私"
             @change="
               (checked) => {
                 envTemp = { ...envTemp, privacy: checked ? 1 : 0 }
               }
             "
-            :disabled="envTemp.id !== undefined"
-            checked-children="隐私"
-            un-checked-children="非隐私"
           />
         </a-form-item>
         <a-form-item>
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               分发节点
-              <template v-slot:title> 分发节点是指将变量同步到对应节点，在节点脚本中也可以使用当前变量</template>
+              <template #title> 分发节点是指将变量同步到对应节点，在节点脚本中也可以使用当前变量</template>
               <QuestionCircleOutlined v-show="!envTemp.id" />
             </a-tooltip>
           </template>
           <a-select
+            v-model:value="envTemp.chooseNode"
             show-search
             :filter-option="
               (input, option) => {
@@ -141,7 +142,6 @@
             "
             placeholder="请选择分发到的节点"
             mode="multiple"
-            v-model:value="envTemp.chooseNode"
           >
             <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
               {{ item.name }}
@@ -152,16 +152,16 @@
     </a-modal>
     <!-- 触发器 -->
     <a-modal
-      destroyOnClose
       v-model:open="triggerVisible"
+      destroy-on-close
       title="触发器"
       width="50%"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
-          <template v-slot:rightExtra>
+          <template #rightExtra>
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>

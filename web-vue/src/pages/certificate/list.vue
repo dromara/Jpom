@@ -7,35 +7,35 @@
       :loading="loading"
       :columns="columns"
       :pagination="pagination"
-      @change="
-        (pagination, filters, sorter) => {
-          this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
-          this.loadData()
-        }
-      "
       bordered
-      rowKey="id"
+      row-key="id"
       :row-selection="rowSelection"
       :scroll="{
         x: 'max-content'
       }"
+      @change="
+        (pagination, filters, sorter) => {
+          listQuery = CHANGE_PAGE(listQuery, { pagination, sorter })
+          loadData()
+        }
+      "
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-space>
             <a-input
-              allowClear
-              class="search-input-item"
-              @pressEnter="loadData"
               v-model:value="listQuery['%issuerDnName%']"
+              allow-clear
+              class="search-input-item"
               placeholder="颁发者"
+              @press-enter="loadData"
             />
             <a-input
-              allowClear
-              class="search-input-item"
-              @pressEnter="loadData"
               v-model:value="listQuery['%subjectDnName%']"
+              allow-clear
+              class="search-input-item"
               placeholder="主题"
+              @press-enter="loadData"
             />
             <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
               <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
@@ -52,11 +52,11 @@
         </template>
         <template v-else-if="column.dataIndex === 'serialNumberStr'">
           <a-popover title="证书描述">
-            <template v-slot:content>
+            <template #content>
               <p>描述：{{ record.description }}</p>
             </template>
             <!-- {{ text }} -->
-            <a-button type="link" style="padding: 0" @click="handleEdit(record)" size="small">{{ text }}</a-button>
+            <a-button type="link" style="padding: 0" size="small" @click="handleEdit(record)">{{ text }}</a-button>
           </a-popover>
         </template>
         <template v-else-if="column.dataIndex === 'fileExists'">
@@ -78,13 +78,13 @@
     </a-table>
     <!-- 导入 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editCertVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       width="700px"
       title="导入证书"
+      :mask-closable="false"
       @ok="handleEditCertOk"
-      :maskClosable="false"
     >
       <a-form ref="importCertForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="证书类型" name="type">
@@ -99,19 +99,19 @@
           <a-upload
             v-if="temp.type"
             :file-list="uploadFileList"
+            :before-upload="
+              (file) => {
+                uploadFileList = [file]
+                return false
+              }
+            "
+            :accept="typeAccept[temp.type]"
             @remove="
               () => {
                 uploadFileList = []
                 return true
               }
             "
-            :before-upload="
-              (file) => {
-                this.uploadFileList = [file]
-                return false
-              }
-            "
-            :accept="typeAccept[temp.type]"
           >
             <a-button><UploadOutlined />选择文件</a-button>
           </a-upload>
@@ -129,12 +129,12 @@
     </a-modal>
     <!-- 编辑证书 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       :title="`编辑证书`"
+      :mask-closable="false"
       @ok="handleEditOk"
-      :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="证书共享" name="global">
@@ -150,16 +150,16 @@
     </a-modal>
     <!-- 发布文件 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="releaseFileVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="部署证书"
       width="50%"
-      :maskClosable="false"
+      :mask-closable="false"
       @ok="releaseFileOk()"
     >
       <a-alert message="证书将打包成 zip 文件上传到对应的文件夹" type="info" show-icon style="margin-bottom: 10px" />
-      <releaseFile ref="releaseFile" v-if="releaseFileVisible" @commit="handleCommitTask"></releaseFile>
+      <releaseFile v-if="releaseFileVisible" ref="releaseFile" @commit="handleCommitTask"></releaseFile>
     </a-modal>
   </div>
 </template>

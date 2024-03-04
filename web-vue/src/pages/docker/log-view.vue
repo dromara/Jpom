@@ -3,7 +3,7 @@
   <div>
     <log-view2
       ref="logView"
-      titleName="容器日志"
+      title-name="容器日志"
       :visible="visible"
       @close="
         () => {
@@ -11,7 +11,7 @@
         }
       "
     >
-      <template v-slot:before>
+      <template #before>
         <a-space>
           <div>
             <a-input-number v-model:value="tail" placeholder="读取行数" style="width: 150px">
@@ -29,7 +29,7 @@
           </div>
           <a-button type="primary" size="small" @click="initWebSocket"><ReloadOutlined /> 刷新 </a-button>
           |
-          <a-button type="primary" :disabled="!this.logId" size="small" @click="download">
+          <a-button type="primary" :disabled="!logId" size="small" @click="download">
             <DownloadOutlined /> 下载
           </a-button>
           |

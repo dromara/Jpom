@@ -1,16 +1,16 @@
 <template>
   <div>
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       :open="true"
       :closable="!uploading"
       :footer="uploading ? null : undefined"
       width="50%"
       :keyboard="false"
       :title="'分发项目-' + data.name"
+      :mask-closable="false"
       @ok="handleDispatchOk"
-      :maskClosable="false"
       @cancel="
         () => {
           $emit('cancel')
@@ -28,7 +28,7 @@
           </a-radio-group>
         </a-form-item>
         <!-- 手动上传 -->
-        <a-form-item label="选择分发文件" name="clearOld" v-if="temp.type === 'upload'">
+        <a-form-item v-if="temp.type === 'upload'" label="选择分发文件" name="clearOld">
           <a-progress v-if="percentage" :percent="percentage">
             <template #format="percent">
               {{ percent }}%
@@ -37,13 +37,13 @@
             </template>
           </a-progress>
 
-          <a-upload :file-list="fileList" :disabled="!!percentage" @remove="handleRemove" :before-upload="beforeUpload">
+          <a-upload :file-list="fileList" :disabled="!!percentage" :before-upload="beforeUpload" @remove="handleRemove">
             <LoadingOutlined v-if="percentage" />
             <a-button v-else type="primary"><UploadOutlined />选择文件</a-button>
           </a-upload>
         </a-form-item>
         <!-- 远程下载 -->
-        <a-form-item label="远程下载URL" name="url" v-else-if="temp.type === 'download'">
+        <a-form-item v-else-if="temp.type === 'download'" label="远程下载URL" name="url">
           <a-input v-model:value="temp.url" placeholder="远程下载地址" />
         </a-form-item>
         <!-- 在线构建 -->
@@ -117,10 +117,10 @@
           </a-form-item></template
         >
         <a-form-item name="clearOld">
-          <template v-slot:label>
+          <template #label>
             清空发布
             <a-tooltip>
-              <template v-slot:title>
+              <template #title>
                 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件
               </template>
               <QuestionCircleOutlined />
@@ -128,11 +128,11 @@
           </template>
           <a-switch v-model:checked="temp.clearOld" checked-children="是" un-checked-children="否" />
         </a-form-item>
-        <a-form-item name="unzip" v-if="temp.type !== 'use-build'">
-          <template v-slot:label>
+        <a-form-item v-if="temp.type !== 'use-build'" name="unzip">
+          <template #label>
             是否解压
             <a-tooltip>
-              <template v-slot:title>
+              <template #title>
                 如果上传的压缩文件是否自动解压 支持的压缩包类型有 tar.bz2, tar.gz, tar, bz2, zip, gz</template
               >
               <QuestionCircleOutlined />
@@ -140,10 +140,10 @@
           </template>
           <a-switch v-model:checked="temp.autoUnzip" checked-children="是" un-checked-children="否" />
         </a-form-item>
-        <a-form-item label="剔除文件夹" v-if="temp.autoUnzip">
+        <a-form-item v-if="temp.autoUnzip" label="剔除文件夹">
           <a-input-number
-            style="width: 100%"
             v-model:value="temp.stripComponents"
+            style="width: 100%"
             :min="0"
             placeholder="解压时候自动剔除压缩包里面多余的文件夹名"
           />
@@ -158,7 +158,7 @@
           <a-input v-model:value="temp.secondaryDirectory" placeholder="不填写则发布至项目的根目录" />
         </a-form-item>
         <a-form-item name="selectProject" label="筛选项目" help="筛选之后本次发布操作只发布筛选项,并且只对本次操作生效">
-          <a-select mode="multiple" v-model:value="temp.selectProjectArray" placeholder="请选择指定发布的项目">
+          <a-select v-model:value="temp.selectProjectArray" mode="multiple" placeholder="请选择指定发布的项目">
             <a-select-option v-for="item in itemProjectList" :key="item.id" :value="`${item.projectId}@${item.nodeId}`">
               {{ item.nodeName }}-{{ item.cacheProjectName || item.projectId }}
             </a-select-option>
@@ -168,37 +168,37 @@
     </a-modal>
     <!-- 选择构建 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="`选择构建`"
       placement="right"
       :open="chooseVisible === 1"
       width="80vw"
-      :zIndex="1009"
+      :z-index="1009"
+      :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
-          this.chooseVisible = 0
+          chooseVisible = 0
         }
       "
-      :footer-style="{ textAlign: 'right' }"
     >
       <build-list
         v-if="chooseVisible === 1"
+        ref="buildList"
         :choose="'radio'"
         layout="table"
         mode="choose"
-        ref="buildList"
         @confirm="
           (data) => {
-            this.chooseBuildInfo = {
+            chooseBuildInfo = {
               id: data[0].id,
               name: data[0].name
             }
-            this.chooseVisible = 0
+            chooseVisible = 0
           }
         "
         @cancel="
           () => {
-            this.chooseVisible = 0
+            chooseVisible = 0
           }
         "
       ></build-list>
@@ -207,7 +207,7 @@
           <a-button
             @click="
               () => {
-                this.chooseVisible = 0
+                chooseVisible = 0
               }
             "
           >
@@ -217,7 +217,7 @@
             type="primary"
             @click="
               () => {
-                this.$refs['buildList'].handerConfirm()
+                $refs['buildList'].handerConfirm()
               }
             "
           >
@@ -228,38 +228,38 @@
     </a-drawer>
     <!-- 选择构建产物 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="`选择构建产物`"
       placement="right"
       :open="chooseVisible === 2"
       width="80vw"
-      :zIndex="1009"
+      :z-index="1009"
+      :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
-          this.chooseVisible = 0
+          chooseVisible = 0
         }
       "
-      :footer-style="{ textAlign: 'right' }"
     >
       <!-- 选择构建产物 -->
       <build-history
         v-if="chooseVisible === 2"
+        ref="buildHistory"
         :choose="'radio'"
         mode="choose"
-        ref="buildHistory"
-        :buildId="chooseBuildInfo.id"
+        :build-id="chooseBuildInfo.id"
         @confirm="
           (data) => {
-            this.chooseBuildInfo = {
-              ...this.chooseBuildInfo,
+            chooseBuildInfo = {
+              ...chooseBuildInfo,
               buildNumberId: data[0]
             }
-            this.chooseVisible = 0
+            chooseVisible = 0
           }
         "
         @cancel="
           () => {
-            this.chooseVisible = 0
+            chooseVisible = 0
           }
         "
       ></build-history>
@@ -268,7 +268,7 @@
           <a-button
             @click="
               () => {
-                this.chooseVisible = 0
+                chooseVisible = 0
               }
             "
           >
@@ -278,7 +278,7 @@
             type="primary"
             @click="
               () => {
-                this.$refs['buildHistory'].handerConfirm()
+                $refs['buildHistory'].handerConfirm()
               }
             "
           >
@@ -289,34 +289,34 @@
     </a-drawer>
     <!-- 选择文件 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="`选择文件`"
       placement="right"
       :open="chooseVisible === 3"
       width="80vw"
-      :zIndex="1009"
+      :z-index="1009"
+      :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
-          this.chooseVisible = 0
+          chooseVisible = 0
         }
       "
-      :footer-style="{ textAlign: 'right' }"
     >
       <!-- 选择文件 -->
       <file-storage
         v-if="chooseVisible === 3"
+        ref="fileStorage"
         :choose="'radio'"
         mode="choose"
-        ref="fileStorage"
         @confirm="
           (data) => {
-            this.chooseFileInfo = { id: data[0].id, name: data[0].name }
-            this.chooseVisible = 0
+            chooseFileInfo = { id: data[0].id, name: data[0].name }
+            chooseVisible = 0
           }
         "
         @cancel="
           () => {
-            this.chooseVisible = 0
+            chooseVisible = 0
           }
         "
       ></file-storage>
@@ -325,7 +325,7 @@
           <a-button
             @click="
               () => {
-                this.chooseVisible = 0
+                chooseVisible = 0
               }
             "
           >
@@ -335,7 +335,7 @@
             type="primary"
             @click="
               () => {
-                this.$refs['fileStorage'].handerConfirm()
+                $refs['fileStorage'].handerConfirm()
               }
             "
           >
@@ -346,34 +346,34 @@
     </a-drawer>
     <!-- 选择静态文件 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="`选择静态文件`"
       placement="right"
       :open="chooseVisible === 4"
       width="80vw"
-      :zIndex="1009"
+      :z-index="1009"
+      :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
-          this.chooseVisible = 0
+          chooseVisible = 0
         }
       "
-      :footer-style="{ textAlign: 'right' }"
     >
       <!-- 选择静态文件 -->
       <static-file-storage
         v-if="chooseVisible === 4"
+        ref="staticFileStorage"
         :choose="'radio'"
         mode="choose"
-        ref="staticFileStorage"
         @confirm="
           (data) => {
-            this.chooseFileInfo = { id: data[0].id, name: data[0].name }
-            this.chooseVisible = 0
+            chooseFileInfo = { id: data[0].id, name: data[0].name }
+            chooseVisible = 0
           }
         "
         @cancel="
           () => {
-            this.chooseVisible = 0
+            chooseVisible = 0
           }
         "
       ></static-file-storage>
@@ -382,7 +382,7 @@
           <a-button
             @click="
               () => {
-                this.chooseVisible = 0
+                chooseVisible = 0
               }
             "
           >
@@ -392,7 +392,7 @@
             type="primary"
             @click="
               () => {
-                this.$refs['staticFileStorage'].handerConfirm()
+                $refs['staticFileStorage'].handerConfirm()
               }
             "
           >
@@ -425,16 +425,17 @@ import { getBuildGet } from '@/api/build-info'
 import { hasFile } from '@/api/file-manager/file-storage'
 import { hasStaticFile } from '@/api/file-manager/static-storage'
 export default {
-  inject: ['globalLoading'],
   components: {
     BuildList,
     BuildHistory,
     FileStorage,
     StaticFileStorage
   },
+  inject: ['globalLoading'],
   props: {
     data: Object
   },
+  emits: ['cancel'],
   data() {
     return {
       afterOptList,
@@ -739,8 +740,7 @@ export default {
       }
       this.$refs['dispatchForm'] && this.$refs['dispatchForm'].clearValidate()
     }
-  },
-  emits: ['cancel']
+  }
 }
 </script>
 

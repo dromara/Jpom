@@ -41,6 +41,7 @@ export default {
       default: ''
     }
   },
+  emits: ['cancel'],
   data() {
     return {
       temp: {},
@@ -86,7 +87,6 @@ export default {
           this.submitAble = false
         })
     }
-  },
-  emits: ['cancel']
+  }
 }
 </script>

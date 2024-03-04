@@ -7,15 +7,16 @@
       :columns="columns"
       :pagination="pagination"
       bordered
-      rowKey="id"
-      @change="change"
+      row-key="id"
       :scroll="{
         x: 'max-content'
       }"
+      @change="change"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-select
+            v-model:value="listQuery.userId"
             show-search
             :filter-option="
               (input, option) => {
@@ -27,14 +28,14 @@
                 )
               }
             "
-            v-model:value="listQuery.userId"
-            allowClear
+            allow-clear
             placeholder="请选择操作者"
             class="search-input-item"
           >
             <a-select-option v-for="item in userList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
           <a-select
+            v-model:value="listQuery.nodeId"
             show-search
             :filter-option="
               (input, option) => {
@@ -46,14 +47,14 @@
                 )
               }
             "
-            v-model:value="listQuery.nodeId"
-            allowClear
+            allow-clear
             placeholder="请选择节点"
             class="search-input-item"
           >
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
           </a-select>
           <a-select
+            v-model:value="listQuery.classFeature"
             show-search
             :filter-option="
               (input, option) => {
@@ -65,14 +66,14 @@
                 )
               }
             "
-            v-model:value="listQuery.classFeature"
-            allowClear
+            allow-clear
             placeholder="操作功能"
             class="search-input-item"
           >
             <a-select-option v-for="item in classFeature" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
           <a-select
+            v-model:value="listQuery.methodFeature"
             show-search
             :filter-option="
               (input, option) => {
@@ -84,8 +85,7 @@
                 )
               }
             "
-            v-model:value="listQuery.methodFeature"
-            allowClear
+            allow-clear
             placeholder="操作方法"
             class="search-input-item"
           >
@@ -140,7 +140,7 @@
       </template>
     </a-table>
     <!-- 详情区 -->
-    <a-modal destroyOnClose v-model:open="detailVisible" width="600px" title="详情信息" :footer="null">
+    <a-modal v-model:open="detailVisible" destroy-on-close width="600px" title="详情信息" :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">
         <template #renderItem="{ item }">
           <a-list-item>

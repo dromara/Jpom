@@ -70,8 +70,8 @@
             <template #renderItem="{ item }">
               <a-list-item>
                 {{ item }}
-                <a-tag color="green" v-if="temp.registryConfig.indexConfigs[item].official">官方</a-tag
-                ><a-tag color="green" v-if="temp.registryConfig.indexConfigs[item].secure">安全</a-tag>
+                <a-tag v-if="temp.registryConfig.indexConfigs[item].official" color="green">官方</a-tag
+                ><a-tag v-if="temp.registryConfig.indexConfigs[item].secure" color="green">安全</a-tag>
                 <a-tag v-for="(item1, index) in temp.registryConfig.indexConfigs[item].mirrors" :key="index">{{
                   item1
                 }}</a-tag>

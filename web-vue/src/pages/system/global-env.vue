@@ -1,14 +1,14 @@
 <template>
   <div>
-    <workspaceEnv workspaceId="GLOBAL" />
+    <workspaceEnv workspace-id="GLOBAL" />
   </div>
 </template>
 <script>
-import workspaceEnv from "./workspace-env.vue";
+import workspaceEnv from './workspace-env.vue'
 
 export default {
   components: {
-    workspaceEnv,
-  },
-};
+    workspaceEnv
+  }
+}
 </script>

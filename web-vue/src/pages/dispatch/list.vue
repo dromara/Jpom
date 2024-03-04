@@ -5,35 +5,35 @@
       size="middle"
       :data-source="list"
       bordered
-      rowKey="id"
+      row-key="id"
       :pagination="pagination"
-      @change="
-        (pagination, filters, sorter) => {
-          this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
-          this.loadData()
-        }
-      "
       :scroll="{
         x: 'max-content'
       }"
+      @change="
+        (pagination, filters, sorter) => {
+          listQuery = CHANGE_PAGE(listQuery, { pagination, sorter })
+          loadData()
+        }
+      "
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
-            class="search-input-item"
-            @pressEnter="loadData"
             v-model:value="listQuery['%id%']"
+            class="search-input-item"
             placeholder="分发id"
+            @press-enter="loadData"
           />
           <a-input
-            class="search-input-item"
-            @pressEnter="loadData"
             v-model:value="listQuery['%name%']"
+            class="search-input-item"
             placeholder="名称"
+            @press-enter="loadData"
           />
           <a-select
             v-model:value="listQuery.group"
-            allowClear
+            allow-clear
             placeholder="请选择分组"
             class="search-input-item"
             @change="loadData"
@@ -42,14 +42,14 @@
           </a-select>
           <a-select
             v-model:value="listQuery.outGivingProject"
-            allowClear
+            allow-clear
             placeholder="分发类型"
             class="search-input-item"
           >
             <a-select-option :value="1">独立</a-select-option>
             <a-select-option :value="0">关联</a-select-option>
           </a-select>
-          <a-select v-model:value="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
+          <a-select v-model:value="listQuery.status" allow-clear placeholder="请选择状态" class="search-input-item">
             <a-select-option v-for="(name, key) in statusMap" :key="key">{{ name }}</a-select-option>
           </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
@@ -58,7 +58,7 @@
           <a-button type="primary" @click="handleLink">新增关联</a-button>
           <a-button type="primary" @click="handleAdd">新增分发</a-button>
           <a-tooltip>
-            <template v-slot:title>
+            <template #title>
               <div>
                 节点分发是指,一个项目运行需要在多个节点(服务器)中运行,使用节点分发来统一管理这个项目(可以实现分布式项目管理功能)
               </div>
@@ -86,14 +86,14 @@
         <template v-else-if="column.dataIndex === 'id'">
           <a-tooltip placement="topLeft" :title="text">
             <a-button
+              v-if="record.outGivingProject"
               size="small"
               style="padding: 0"
               type="link"
-              v-if="record.outGivingProject"
               @click="handleEditDispatchProject(record)"
               >{{ text }}</a-button
             >
-            <a-button size="small" style="padding: 0" type="link" v-else @click="handleEditDispatch(record)">{{
+            <a-button v-else size="small" style="padding: 0" type="link" @click="handleEditDispatch(record)">{{
               text
             }}</a-button>
           </a-tooltip>
@@ -152,20 +152,20 @@
             <a-button size="small" type="primary" @click="handleDispatch(record)">分发文件</a-button>
 
             <a-button
+              v-if="record.outGivingProject"
               size="small"
               type="primary"
-              v-if="record.outGivingProject"
               @click="handleEditDispatchProject(record)"
               >编辑</a-button
             >
-            <a-button size="small" type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
+            <a-button v-else size="small" type="primary" @click="handleEditDispatch(record)">编辑</a-button>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
                 更多
                 <DownOutlined />
               </a>
-              <template v-slot:overlay>
+              <template #overlay>
                 <a-menu>
                   <a-menu-item>
                     <a-button
@@ -199,43 +199,43 @@
     </a-table>
     <!-- 新增/编辑关联项目 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="linkDispatchVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       width="900px"
       :title="temp.type === 'edit' ? '编辑关联项目' : '新增关联项目'"
+      :mask-closable="false"
       @ok="handleLinkDispatchOk"
-      :maskClosable="false"
       @cancel="clearDispatchList"
     >
       <a-form ref="linkDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item name="id">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               分发 ID
-              <template v-slot:title>分发 ID 等同于项目 ID</template>
+              <template #title>分发 ID 等同于项目 ID</template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
           <a-input
-            :maxLength="50"
-            v-model:value="temp.id"
             v-if="temp.type === 'edit'"
+            v-model:value="temp.id"
+            :max-length="50"
             :disabled="temp.type === 'edit'"
             placeholder="创建之后不能修改"
           />
           <template v-else>
             <a-input-search
-              :maxLength="50"
               v-model:value="temp.id"
+              :max-length="50"
               placeholder="创建之后不能修改"
               @search="
                 () => {
-                  this.temp = { ...this.temp, id: randomStr(6) }
+                  temp = { ...temp, id: randomStr(6) }
                 }
               "
             >
-              <template v-slot:enterButton>
+              <template #enterButton>
                 <a-button type="primary"> 随机生成 </a-button>
               </template>
             </a-input-search>
@@ -246,17 +246,17 @@
         <a-form-item label="分发名称" name="name">
           <a-row>
             <a-col :span="10">
-              <a-input v-model:value="temp.name" :maxLength="50" placeholder="分发名称" />
+              <a-input v-model:value="temp.name" :max-length="50" placeholder="分发名称" />
             </a-col>
             <a-col :span="4" style="text-align: right">分组名称：</a-col>
             <a-col :span="10">
               <a-form-item-rest>
                 <custom-select
-                  :maxLength="50"
                   v-model:value="temp.group"
+                  :max-length="50"
                   :data="groupList"
-                  inputPlaceholder="新增分组"
-                  selectPlaceholder="选择分组"
+                  input-placeholder="新增分组"
+                  select-placeholder="选择分组"
                 >
                 </custom-select>
               </a-form-item-rest>
@@ -271,7 +271,7 @@
             :locale="{
               emptyText: '暂无数据,请先新增节点项目数据'
             }"
-            :rowKey="
+            :row-key="
               (item) => {
                 return item.nodeId + item.projectId + item.index
               }
@@ -283,13 +283,13 @@
                   <div>节点:</div>
                   <a-select
                     placeholder="请选择节点"
-                    notFoundContent="暂无节点信息"
+                    not-found-content="暂无节点信息"
                     style="width: 140px"
                     :value="item.nodeId ? item.nodeId : undefined"
-                    @change="(nodeId) => handleNodeListChange(nodeId, index)"
                     :disabled="
                       item.nodeId || (nodeIdMap[item.nodeId] && nodeIdMap[item.nodeId].openStatus !== 1) ? true : false
                     "
+                    @change="(nodeId) => handleNodeListChange(nodeId, index)"
                   >
                     <a-select-option
                       v-for="nodeList in nodeProjectsList"
@@ -303,15 +303,16 @@
                   <a-select
                     style="width: 300px"
                     :placeholder="item.placeholder"
-                    :defaultValue="item.projectId ? item.projectId : undefined"
-                    notFoundContent="此节点暂无项目"
-                    @change="(projectId) => handleProjectChange(projectId, index)"
+                    :default-value="item.projectId ? item.projectId : undefined"
+                    not-found-content="此节点暂无项目"
                     :disabled="dispatchList[index].disabled"
+                    @change="(projectId) => handleProjectChange(projectId, index)"
                   >
                     <a-select-option
-                      :value="project.projectId"
                       v-for="project in nodeProjectsList.filter((nitem) => nitem.id == item.nodeId)[0] &&
                       nodeProjectsList.filter((nitem) => nitem.id == item.nodeId)[0].projects"
+                      :key="project.projectId"
+                      :value="project.projectId"
                       :disabled="
                         project.outGivingProject ||
                         dispatchList.filter((item, nowIndex) => {
@@ -320,7 +321,6 @@
                           )
                         }).length > 0
                       "
-                      :key="project.projectId"
                     >
                       <a-tooltip :title="`${project.outGivingProject ? '【独立分发】' : ''} ${project.name}`">
                         {{ project.outGivingProject ? '【独立分发】' : '' }}
@@ -328,25 +328,25 @@
                       </a-tooltip>
                     </a-select-option>
                   </a-select>
-                  <a-button type="primary" danger @click="delDispachList(index)" size="small"
+                  <a-button type="primary" danger size="small" @click="delDispachList(index)"
                     ><DeleteOutlined />
                   </a-button>
                 </a-space>
               </a-list-item>
             </template>
           </a-list>
-          <a-button type="primary" @click="addDispachList" size="small">新增</a-button>
+          <a-button type="primary" size="small" @click="addDispachList">新增</a-button>
         </a-form-item>
         <a-form-item label="分发后操作" name="afterOpt">
           <a-select v-model:value="temp.afterOpt" placeholder="请选择发布后操作">
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item name="intervalTime" v-if="temp.afterOpt === 2 || temp.afterOpt === 3">
-          <template v-slot:label>
+        <a-form-item v-if="temp.afterOpt === 2 || temp.afterOpt === 3" name="intervalTime">
+          <template #label>
             <a-tooltip>
               间隔时间
-              <template v-slot:title>
+              <template #title>
                 在执行多节点分发时候使用 顺序重启、完整顺序重启
                 时候需要保证项目能正常重启,并等待上一个项目启动完成才能关闭下一个项目,请根据自身项目启动时间来配置
                 <li>一般建议 10 秒以上</li>
@@ -355,8 +355,8 @@
             </a-tooltip>
           </template>
           <a-input-number
-            :min="0"
             v-model:value="temp.intervalTime"
+            :min="0"
             placeholder="分发间隔时间 （顺序重启、完整顺序重启）方式才生效"
             style="width: 100%"
           />
@@ -365,10 +365,10 @@
           <a-input v-model:value="temp.secondaryDirectory" placeholder="不填写则发布至项目的根目录" />
         </a-form-item>
         <a-form-item name="clearOld">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               清空发布
-              <template v-slot:title>
+              <template #title>
                 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
@@ -381,7 +381,7 @@
 
             <a-col :span="4" style="text-align: right">
               <a-tooltip v-if="temp.type !== 'edit'">
-                <template v-slot:title>
+                <template #title>
                   发布前停止是指在发布文件到项目文件时先将项目关闭，再进行文件替换。避免 windows
                   环境下出现文件被占用的情况
                 </template>
@@ -397,9 +397,9 @@
           </a-row>
         </a-form-item>
         <a-form-item name="webhook">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
-              <template v-slot:title>
+              <template #title>
                 <ul>
                   <li>分发过程请求对应的地址,开始分发,分发完成,分发失败,取消分发</li>
                   <li>传入参数有：outGivingId、outGivingName、status、statusMsg、executeTime</li>
@@ -417,14 +417,14 @@
     </a-modal>
     <!-- 创建/编辑分发项目 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editDispatchVisible"
-      :zIndex="900"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
+      :z-index="900"
       width="60vw"
       :title="temp.type === 'edit' ? '编辑分发项目' : '创建分发项目'"
+      :mask-closable="false"
       @ok="handleEditDispatchOk"
-      :maskClosable="false"
     >
       <a-spin tip="加载数据中" :spinning="editDispatchLoading">
         <a-form
@@ -444,32 +444,32 @@
             <template #description>当前工作空间还没有逻辑节点不能创建节点分发奥</template>
           </a-alert>
           <a-form-item name="id">
-            <template v-slot:label>
+            <template #label>
               <a-tooltip>
                 分发 ID
-                <template v-slot:title>分发 ID 等同于项目 ID</template>
+                <template #title>分发 ID 等同于项目 ID</template>
                 <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
               </a-tooltip>
             </template>
             <a-input
-              :maxLength="50"
-              v-model:value="temp.id"
               v-if="temp.type === 'edit'"
+              v-model:value="temp.id"
+              :max-length="50"
               :disabled="temp.type === 'edit'"
               placeholder="创建之后不能修改,分发 ID 等同于项目 ID"
             />
             <template v-else>
               <a-input-search
-                :maxLength="50"
                 v-model:value="temp.id"
+                :max-length="50"
                 placeholder="创建之后不能修改,分发 ID 等同于项目 ID"
                 @search="
                   () => {
-                    this.temp = { ...this.temp, id: randomStr(6) }
+                    temp = { ...temp, id: randomStr(6) }
                   }
                 "
               >
-                <template v-slot:enterButton>
+                <template #enterButton>
                   <a-button type="primary"> 随机生成 </a-button>
                 </template>
               </a-input-search>
@@ -479,17 +479,17 @@
           <a-form-item label="分发名称" name="name">
             <a-row>
               <a-col :span="10">
-                <a-input v-model:value="temp.name" :maxLength="50" placeholder="分发名称（项目名称）" />
+                <a-input v-model:value="temp.name" :max-length="50" placeholder="分发名称（项目名称）" />
               </a-col>
               <a-col :span="4" style="text-align: right">分组名称：</a-col>
               <a-col :span="10">
                 <a-form-item-rest>
                   <custom-select
-                    :maxLength="50"
                     v-model:value="temp.group"
+                    :max-length="50"
                     :data="groupList"
-                    inputPlaceholder="新增分组"
-                    selectPlaceholder="选择分组"
+                    input-placeholder="新增分组"
+                    select-placeholder="选择分组"
                   >
                   </custom-select>
                 </a-form-item-rest>
@@ -498,10 +498,10 @@
           </a-form-item>
 
           <a-form-item name="runMode">
-            <template v-slot:label>
+            <template #label>
               <a-tooltip>
                 运行方式
-                <template v-slot:title>
+                <template #title>
                   <ul>
                     <li><b>Dsl</b> 配合脚本模版实现自定义项目管理</li>
                     <li><b>ClassPath</b> java -classpath xxx 运行项目</li>
@@ -530,10 +530,10 @@
           </a-form-item>
 
           <a-form-item name="whitelistDirectory" class="jpom-project-whitelist">
-            <template v-slot:label>
+            <template #label>
               <a-tooltip>
                 项目路径
-                <template v-slot:title>
+                <template #title>
                   <ul>
                     <li>授权路径是指项目文件存放到服务中的文件夹</li>
                     <li>可以到【节点分发】=>【分发授权配置】修改</li>
@@ -545,7 +545,7 @@
               </a-tooltip>
             </template>
             <a-input-group compact>
-              <a-select style="width: 50%" v-model:value="temp.whitelistDirectory" placeholder="请选择项目授权路径">
+              <a-select v-model:value="temp.whitelistDirectory" style="width: 50%" placeholder="请选择项目授权路径">
                 <a-select-option v-for="access in accessList" :key="access">
                   <a-tooltip :title="access">
                     {{ access }}
@@ -553,10 +553,10 @@
                 </a-select-option>
               </a-select>
               <a-form-item-rest>
-                <a-input style="width: 50%" v-model:value="temp.lib" placeholder="项目存储的文件夹，jar 包存放的文件夹"
+                <a-input v-model:value="temp.lib" style="width: 50%" placeholder="项目存储的文件夹，jar 包存放的文件夹"
               /></a-form-item-rest>
             </a-input-group>
-            <template v-slot:help>
+            <template #help>
               <div>
                 需要提前为工作空间配置授权目录
 
@@ -565,7 +565,7 @@
                   type="link"
                   @click="
                     () => {
-                      this.configDir = true
+                      configDir = true
                     }
                   "
                 >
@@ -579,10 +579,10 @@
             <a-alert :message="filePath" type="success" />
           </a-form-item>
           <a-form-item v-show="temp.runMode === 'Dsl'" name="dslContent">
-            <template v-slot:label>
+            <template #label>
               <a-tooltip>
                 DSL 内容
-                <template v-slot:title>
+                <template #title>
                   <p>
                     以 yaml/yml 格式配置,scriptId
                     为项目路径下的脚本文件的相对路径或者服务端脚本模版ID，可以到服务端脚本模版编辑弹窗中查看 scriptId
@@ -636,11 +636,11 @@
                 </a-tab-pane>
               </a-tabs> -->
               <code-editor
-                height="40vh"
-                :showTool="true"
-                v-model:content="temp.dslContent"
-                :options="{ mode: 'yaml', tabSize: 2 }"
                 v-show="dslEditTabKey === 'content'"
+                v-model:content="temp.dslContent"
+                height="40vh"
+                :show-tool="true"
+                :options="{ mode: 'yaml', tabSize: 2 }"
                 placeholder="请填写项目 DSL 配置内容,可以点击上方切换 tab 查看配置示例"
               >
                 <template #tool_before>
@@ -655,9 +655,9 @@
               </code-editor>
               <code-editor
                 v-show="dslEditTabKey === 'demo'"
-                height="40vh"
-                :showTool="true"
                 v-model:content="PROJECT_DSL_DEFATUL"
+                height="40vh"
+                :show-tool="true"
                 :options="{ mode: 'yaml', tabSize: 2, readOnly: true }"
               >
                 <template #tool_before>
@@ -673,10 +673,10 @@
             </a-form-item-rest>
           </a-form-item>
           <a-form-item v-show="noFileModes.includes(temp.runMode)">
-            <template v-slot:label>
+            <template #label>
               <a-tooltip>
                 日志目录
-                <template v-slot:title>
+                <template #title>
                   <ul>
                     <li>日志目录是指控制台日志存储目录</li>
                     <li>默认是在插件端数据目录/${projectId}/${projectId}.log</li>
@@ -692,16 +692,16 @@
             </a-select>
           </a-form-item>
           <a-form-item
+            v-show="javaModes.includes(temp.runMode) && temp.runMode !== 'Jar'"
             label="Main Class"
             name="mainClass"
-            v-show="javaModes.includes(temp.runMode) && temp.runMode !== 'Jar'"
           >
             <a-input v-model:value="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)" />
           </a-form-item>
           <a-form-item
+            v-show="javaModes.includes(temp.runMode) && temp.runMode === 'JavaExtDirsCp'"
             label="JavaExtDirsCp"
             name="javaExtDirsCp"
-            v-show="javaModes.includes(temp.runMode) && temp.runMode === 'JavaExtDirsCp'"
           >
             <a-input v-model:value="temp.javaExtDirsCp" placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】" />
           </a-form-item>
@@ -710,11 +710,11 @@
               <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
             </a-select>
           </a-form-item>
-          <a-form-item name="intervalTime" v-if="temp.afterOpt === 2 || temp.afterOpt === 3">
-            <template v-slot:label>
+          <a-form-item v-if="temp.afterOpt === 2 || temp.afterOpt === 3" name="intervalTime">
+            <template #label>
               <a-tooltip>
                 间隔时间
-                <template v-slot:title>
+                <template #title>
                   在执行多节点分发时候使用 顺序重启、完整顺序重启
                   时候需要保证项目能正常重启,并等待上一个项目启动完成才能关闭下一个项目,请根据自身项目启动时间来配置
                   <li>一般建议 10 秒以上</li>
@@ -723,8 +723,8 @@
               </a-tooltip>
             </template>
             <a-input-number
-              :min="0"
               v-model:value="temp.intervalTime"
+              :min="0"
               placeholder="分发间隔时间 （顺序重启、完整顺序重启）方式才生效"
               style="width: 100%"
             />
@@ -733,10 +733,10 @@
             <a-input v-model:value="temp.secondaryDirectory" placeholder="不填写则发布至项目的根目录" />
           </a-form-item>
           <a-form-item name="clearOld">
-            <template v-slot:label>
+            <template #label>
               <a-tooltip>
                 清空发布
-                <template v-slot:title>
+                <template #title>
                   清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件
                 </template>
                 <QuestionCircleOutlined v-if="temp.type !== 'edit'" />
@@ -748,7 +748,7 @@
               </a-col>
               <a-col :span="4" style="text-align: right">
                 <a-tooltip v-if="temp.type !== 'edit'">
-                  <template v-slot:title>
+                  <template #title>
                     发布前停止是指在发布文件到项目文件时先将项目关闭，再进行文件替换。避免 windows
                     环境下出现文件被占用的情况
                   </template>
@@ -764,10 +764,10 @@
             </a-row>
           </a-form-item>
           <a-form-item name="webhook">
-            <template v-slot:label>
+            <template #label>
               <a-tooltip>
                 WebHooks
-                <template v-slot:title>
+                <template #title>
                   <ul>
                     <li>分发过程请求对应的地址,开始分发,分发完成,分发失败,取消分发</li>
                     <li>传入参数有：outGivingId、outGivingName、status、statusMsg、executeTime</li>
@@ -783,6 +783,7 @@
           <!-- 节点 -->
           <a-form-item label="分发节点" name="nodeId">
             <a-select
+              v-model:value="temp.nodeIdList"
               show-search
               :filter-option="
                 (input, option) => {
@@ -794,7 +795,6 @@
                   )
                 }
               "
-              v-model:value="temp.nodeIdList"
               mode="multiple"
               placeholder="请选择分发节点"
             >
@@ -803,27 +803,25 @@
           </a-form-item>
           <a-collapse v-show="noFileModes.includes(temp.runMode)">
             <a-collapse-panel v-for="nodeId in temp.nodeIdList" :key="nodeId" :header="nodeNameMap[nodeId] || nodeId">
-              <a-form-item label="JVM 参数" name="jvm" v-show="javaModes.includes(temp.runMode)">
+              <a-form-item v-show="javaModes.includes(temp.runMode)" label="JVM 参数" name="jvm">
                 <a-textarea
                   v-model:value="temp[`${nodeId}_jvm`]"
                   :auto-size="{ minRows: 3, maxRows: 3 }"
                   placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m"
                 />
               </a-form-item>
-              <a-form-item label="args 参数" name="args" v-show="javaModes.includes(temp.runMode)">
+              <a-form-item v-show="javaModes.includes(temp.runMode)" label="args 参数" name="args">
                 <a-textarea
                   v-model:value="temp[`${nodeId}_args`]"
                   :auto-size="{ minRows: 3, maxRows: 3 }"
                   placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080"
                 />
               </a-form-item>
-              <a-form-item name="autoStart" v-show="noFileModes.includes(temp.runMode)">
-                <template v-slot:label>
+              <a-form-item v-show="noFileModes.includes(temp.runMode)" name="autoStart">
+                <template #label>
                   <a-tooltip>
                     自启动
-                    <template v-slot:title
-                      >插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template
-                    >
+                    <template #title>插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template>
                     <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
                   </a-tooltip>
                 </template>
@@ -837,16 +835,16 @@
                 />
                 插件端启动时自动检查项目如未启动将尝试启动
               </a-form-item>
-              <a-form-item name="dslEnv" label="DSL环境变量" v-if="temp.runMode === 'Dsl'">
+              <a-form-item v-if="temp.runMode === 'Dsl'" name="dslEnv" label="DSL环境变量">
                 <a-input
                   v-model:checked="temp[`${nodeId}_dslEnv`]"
                   placeholder="DSL环境变量,如：key1=values1&keyvalue2"
                 />
               </a-form-item>
-              <a-form-item name="token" v-show="noFileModes.includes(temp.runMode)">
-                <template v-slot:label>
+              <a-form-item v-show="noFileModes.includes(temp.runMode)" name="token">
+                <template #label>
                   <a-tooltip>
-                    <template v-slot:title>
+                    <template #title>
                       <ul>
                         <li>项目启动,停止,重启都将请求对应的地址</li>
                         <li>传入参数有：projectId、projectName、type、result</li>
@@ -869,8 +867,8 @@
     </a-modal>
     <!-- 分发项目 -->
     <start-dispatch
-      :data="temp"
       v-if="dispatchVisible"
+      :data="temp"
       @cancel="
         () => {
           dispatchVisible = false
@@ -886,21 +884,21 @@
       :name="temp.name"
       @close="
         () => {
-          this.drawerStatusVisible = false
+          drawerStatusVisible = false
         }
       "
     />
     <!-- 配置工作空间授权目录 -->
     <a-modal
-      destroyOnClose
       v-model:open="configDir"
+      destroy-on-close
       :title="`配置授权目录`"
       :footer="null"
       width="50vw"
-      :maskClosable="false"
+      :mask-closable="false"
       @cancel="
         () => {
-          this.configDir = false
+          configDir = false
         }
       "
     >
@@ -908,23 +906,23 @@
         v-if="configDir"
         @cancel="
           () => {
-            this.configDir = false
-            this.loadAccesList()
+            configDir = false
+            loadAccesList()
           }
         "
       ></whiteList>
     </a-modal>
     <!-- 查看服务端脚本 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="`查看脚本`"
       placement="right"
       :open="viewScriptVisible"
       width="70vw"
-      :zIndex="1109"
+      :z-index="1109"
       @close="
         () => {
-          this.viewScriptVisible = false
+          viewScriptVisible = false
         }
       "
     >
@@ -933,7 +931,7 @@
         choose="checkbox"
         @cancel="
           () => {
-            this.viewScriptVisible = false
+            viewScriptVisible = false
           }
         "
       ></scriptPage>

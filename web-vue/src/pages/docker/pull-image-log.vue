@@ -1,9 +1,9 @@
 <template>
   <div>
     <log-view
-      titleName="pull日志"
-      :visible="visible"
       :ref="`logView`"
+      title-name="pull日志"
+      :visible="visible"
       @close="
         () => {
           $emit('close')
@@ -18,34 +18,35 @@ import LogView from '@/components/logView'
 import { dockerImagePullImageLog } from '@/api/docker-api'
 export default {
   components: {
-    LogView,
+    LogView
   },
   props: {
     id: {
-      type: String,
+      type: String
     },
     machineDockerId: {
       type: String,
-      default: '',
+      default: ''
     },
     urlPrefix: {
-      type: String,
+      type: String
     },
     visible: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
-  computed: {
-    reqDataId() {
-      return this.id || this.machineDockerId
-    },
-  },
+  emits: ['close'],
   data() {
     return {
       logTimer: null,
       // logText: "loading...",
-      line: 1,
+      line: 1
+    }
+  },
+  computed: {
+    reqDataId() {
+      return this.id || this.machineDockerId
     }
   },
   beforeUnmount() {
@@ -66,18 +67,14 @@ export default {
     pullLog() {
       const params = {
         id: this.reqDataId,
-        line: this.line,
+        line: this.line
       }
       dockerImagePullImageLog(this.urlPrefix, params).then((res) => {
         let next = true
         if (res.code === 200) {
           // 停止请求
           const dataLines = res.data.dataLines
-          if (
-            dataLines &&
-            dataLines.length &&
-            dataLines[dataLines.length - 1].indexOf('pull end') > -1
-          ) {
+          if (dataLines && dataLines.length && dataLines[dataLines.length - 1].indexOf('pull end') > -1) {
             this.logTimer && clearTimeout(this.logTimer)
             next = false
           }
@@ -88,8 +85,7 @@ export default {
         // 继续拉取日志
         if (next) this.nextPull()
       })
-    },
-  },
-  emits: ['close'],
+    }
+  }
 }
 </script>

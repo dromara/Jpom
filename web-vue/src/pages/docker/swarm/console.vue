@@ -1,20 +1,20 @@
 <template>
   <a-drawer
-    destroyOnClose
+    destroy-on-close
     placement="right"
-    :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
+    :width="`${getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
     :open="true"
-    @close="onClose1"
-    :bodyStyle="{
+    :body-style="{
       padding: '0'
     }"
-    :headerStyle="{
+    :header-style="{
       padding: '0 10px'
     }"
+    @close="onClose1"
   >
     <template #title>
       <!-- 集群控制台 -->
-      <a-menu mode="horizontal" class="docker-menu" v-model:selectedKeys="menuKeyArray" @click="menuClick">
+      <a-menu v-model:selectedKeys="menuKeyArray" mode="horizontal" class="docker-menu" @click="menuClick">
         <a-menu-item key="node">
           <span class="nav-text">集群节点</span>
         </a-menu-item>
@@ -30,9 +30,9 @@
     <!-- <a-layout-header style="height: 48px; padding: 0"> </a-layout-header> -->
 
     <div class="layout-content">
-      <swarm-node v-show="menuKey === 'node'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
-      <swarm-service v-show="menuKey === 'server'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
-      <swarm-task v-show="menuKey === 'task'" :id="this.id" :visible="this.visible" :urlPrefix="this.urlPrefix" />
+      <swarm-node v-show="menuKey === 'node'" :id="id" :visible="visible" :url-prefix="urlPrefix" />
+      <swarm-service v-show="menuKey === 'server'" :id="id" :visible="visible" :url-prefix="urlPrefix" />
+      <swarm-task v-show="menuKey === 'task'" :id="id" :visible="visible" :url-prefix="urlPrefix" />
     </div>
   </a-drawer>
 </template>
@@ -44,6 +44,11 @@ import SwarmTask from './task'
 import { mapState } from 'pinia'
 import { useGuideStore } from '@/stores/guide'
 export default {
+  components: {
+    SwarmNode,
+    SwarmService,
+    SwarmTask
+  },
   props: {
     id: {
       type: String
@@ -59,11 +64,6 @@ export default {
     urlPrefix: {
       type: String
     }
-  },
-  components: {
-    SwarmNode,
-    SwarmService,
-    SwarmTask
   },
   data() {
     return {

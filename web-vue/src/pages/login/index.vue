@@ -6,10 +6,10 @@
       <template v-if="action === 'login'">
         <a-form :model="loginForm" :label-col="{ span: 0 }" :wrapper-col="{ span: 24 }" @finish="handleLogin">
           <a-form-item name="loginName" :rules="[{ required: true, message: '请输入用户名' }]">
-            <a-input autocomplete="true" v-model:value="loginForm.loginName" placeholder="用户名" />
+            <a-input v-model:value="loginForm.loginName" autocomplete="true" placeholder="用户名" />
           </a-form-item>
           <a-form-item name="userPwd" :rules="[{ required: true, message: '请输入密码' }]">
-            <a-input-password autocomplete="true" v-model:value="loginForm.userPwd" placeholder="密码" />
+            <a-input-password v-model:value="loginForm.userPwd" autocomplete="true" placeholder="密码" />
           </a-form-item>
           <a-form-item v-if="!disabledCaptcha" name="code" :rules="[{ required: true, message: '请输入验证码' }]">
             <a-row>
@@ -31,18 +31,18 @@
             <a-divider>第三方登录</a-divider>
             <a-form-item :wrapper-col="{ span: 24 }">
               <a-space :size="20">
-                <div class="oauth2-item" v-if="enabledOauth2Provides.includes('gitee')">
-                  <a-tooltip @click="toOauth2Url('gitee')" title="gitee">
+                <div v-if="enabledOauth2Provides.includes('gitee')" class="oauth2-item">
+                  <a-tooltip title="gitee" @click="toOauth2Url('gitee')">
                     <img alt="gitee" :src="giteeImg" />
                   </a-tooltip>
                 </div>
-                <div class="oauth2-item" v-if="enabledOauth2Provides.includes('maxkey')">
-                  <a-tooltip @click="toOauth2Url('maxkey')" title="maxkey">
+                <div v-if="enabledOauth2Provides.includes('maxkey')" class="oauth2-item">
+                  <a-tooltip title="maxkey" @click="toOauth2Url('maxkey')">
                     <img alt="maxkey" :src="maxkeyImg" />
                   </a-tooltip>
                 </div>
-                <div class="oauth2-item" v-if="enabledOauth2Provides.includes('github')">
-                  <a-tooltip @click="toOauth2Url('github')" title="github">
+                <div v-if="enabledOauth2Provides.includes('github')" class="oauth2-item">
+                  <a-tooltip title="github" @click="toOauth2Url('github')">
                     <img alt="github" :src="githubImg" />
                   </a-tooltip>
                 </div>

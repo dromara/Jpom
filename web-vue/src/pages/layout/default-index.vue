@@ -1,13 +1,13 @@
 <template>
   <a-layout id="app-layout">
-    <a-layout-sider :theme="menuTheme" v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <a-layout-sider class="sider" :theme="menuTheme" v-model:collapsed="collapsed" :trigger="null" collapsible>
+    <a-layout-sider v-model:collapsed="collapsed" :theme="menuTheme" :trigger="null" collapsible>
+      <a-layout-sider v-model:collapsed="collapsed" class="sider" :theme="menuTheme" :trigger="null" collapsible>
         <div class="sider-content">
           <a-tooltip placement="right" title="点击可以折叠左侧菜单栏">
             <div
               class="logo"
-              @click="changeCollapsed()"
               :style="`color:${menuTheme === 'light' && theme === 'light' ? '#000' : '#fff'}`"
+              @click="changeCollapsed()"
             >
               <img :src="logoUrl || defaultLogo" alt="logo" />
               {{ !collapsed ? subTitle : '' }}

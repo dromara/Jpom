@@ -9,11 +9,11 @@
 ///
 
 // https://github.com/hua1995116/ansi-color-parse
-const ansiparse:any = function (str:any) {
+const ansiparse: any = function (str: any) {
   //
   // I'm terrible at writing parsers.
   //
-  var matchingControl = null,
+  let matchingControl = null,
     matchingData = null,
     matchingText: string = '',
     ansiState: any[] = [],
@@ -36,7 +36,7 @@ const ansiparse:any = function (str:any) {
   // Erases a char from the output
   //
   eraseChar = function () {
-    var index, text
+    let index, text
     if (matchingText.length) {
       matchingText = matchingText.substr(0, matchingText.length - 1)
     } else if (result.length) {
@@ -53,7 +53,7 @@ const ansiparse:any = function (str:any) {
     }
   }
 
-  for (var i = 0; i < str.length; i++) {
+  for (let i = 0; i < str.length; i++) {
     if (matchingControl != null) {
       if (matchingControl == '\x1b' && str[i] == '[') {
         //
@@ -156,7 +156,7 @@ ansiparse.foregroundColors = {
   35: 'magenta',
   36: 'cyan',
   37: 'white',
-  90: 'grey',
+  90: 'grey'
 }
 
 ansiparse.backgroundColors = {
@@ -167,13 +167,13 @@ ansiparse.backgroundColors = {
   44: 'blue',
   45: 'magenta',
   46: 'cyan',
-  47: 'white',
+  47: 'white'
 }
 
 ansiparse.styles = {
   1: 'bold',
   3: 'italic',
-  4: 'underline',
+  4: 'underline'
 }
 
 export default ansiparse

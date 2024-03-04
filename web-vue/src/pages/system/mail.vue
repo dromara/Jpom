@@ -14,13 +14,13 @@
       <a-form-item label="用户名" name="user">
         <a-input v-model:value="temp.user" type="text" placeholder="发件人名称" />
       </a-form-item>
-      <a-form-item label="密码" :name="`${this.temp.type === 'add' ? 'pass' : 'pass-update'}`">
+      <a-form-item label="密码" :name="`${temp.type === 'add' ? 'pass' : 'pass-update'}`">
         <a-input-password v-model:value="temp.pass" type="text" placeholder="邮箱密码或者授权码" />
       </a-form-item>
       <a-form-item label="邮箱账号" name="from">
         <!-- <a-input v-model="temp.from" type="text" placeholder="发送方邮箱账号" /> -->
         <a-tooltip>
-          <template v-slot:title>
+          <template #title>
             支持配置发送方：遵循RFC-822标准 发件人可以是以下形式：
             <ul>
               <li>1. user@xxx.xx</li>
@@ -46,9 +46,9 @@
       </a-form-item>
       <a-form-item label="超时时间" name="timeout">
         <a-input-number
+          v-model:value="temp.timeout"
           style="width: 100%"
           :min="3"
-          v-model:value="temp.timeout"
           type="text"
           placeholder="单位秒，默认 10 秒,最小 3 秒"
         />

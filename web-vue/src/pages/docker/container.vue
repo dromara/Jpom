@@ -1,49 +1,49 @@
 <template>
   <div>
-    <template v-if="this.type === 'container'">
+    <template v-if="type === 'container'">
       <a-table
         :data-source="list"
         size="middle"
         :columns="columns"
         :pagination="false"
         bordered
-        rowKey="id"
+        row-key="id"
         :scroll="{
           x: 'max-content'
         }"
       >
-        <template v-slot:title>
+        <template #title>
           <a-space>
             <a-input
               v-model:value="listQuery['name']"
-              @pressEnter="loadData"
               placeholder="名称"
               class="search-input-item"
+              @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['containerId']"
-              @pressEnter="loadData"
               placeholder="容器id"
               class="search-input-item"
+              @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['imageId']"
-              @keyup.enter="loadData"
               placeholder="镜像id"
               class="search-input-item"
+              @keyup.enter="loadData"
             />
             <div>
               查看
-              <a-switch checked-children="所有" un-checked-children="运行中" v-model:checked="listQuery['showAll']" />
+              <a-switch v-model:checked="listQuery['showAll']" checked-children="所有" un-checked-children="运行中" />
             </div>
-            <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
             <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="autoUpdate" />
           </a-space>
         </template>
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'names'">
             <a-popover :title="`容器名称：${(text || []).join(',')}`">
-              <template v-slot:content>
+              <template #content>
                 <p>容器Id: {{ record.id }}</p>
                 <p>镜像：{{ record.image }}</p>
                 <p>镜像Id: {{ record.imageId }}</p>
@@ -55,7 +55,7 @@
 
           <template v-else-if="column.dataIndex === 'labels'">
             <a-popover :title="`容器名标签`">
-              <template v-slot:content>
+              <template #content>
                 <template v-if="record.labels">
                   <p v-for="(value, key) in record.labels" :key="key">
                     {{ key }}
@@ -73,7 +73,7 @@
           </template>
           <template v-else-if="column.dataIndex === 'mounts'">
             <a-popover :title="`挂载`">
-              <template v-slot:content>
+              <template #content>
                 <template v-if="record.mounts">
                   <div v-for="(item, index) in record.mounts" :key="index">
                     <p>
@@ -115,7 +115,7 @@
                   </li>
                 </ul>
               </template>
-              <template v-slot:content>
+              <template #content>
                 <template v-if="record.networkSettings">
                   <template v-if="record.networkSettings.networks">
                     <template v-if="record.networkSettings.networks.bridge">
@@ -180,10 +180,10 @@
           <template v-else-if="column.dataIndex === 'state'">
             <a-tooltip :title="(record.status || '') + ' 点击查看日志'" @click="viewLog(record)">
               <a-switch :checked="text === 'running'" :disabled="true">
-                <template v-slot:checkedChildren>
+                <template #checkedChildren>
                   <CheckCircleOutlined />
                 </template>
-                <template v-slot:unCheckedChildren>
+                <template #unCheckedChildren>
                   <WarningOutlined />
                 </template>
               </a-switch>
@@ -226,7 +226,7 @@
                 <a @click="(e) => e.preventDefault()">
                   <MoreOutlined />
                 </a>
-                <template v-slot:overlay>
+                <template #overlay>
                   <a-menu>
                     <a-menu-item>
                       <a-tooltip title="修改容器配置，重新运行">
@@ -265,33 +265,33 @@
         </template>
       </a-table>
     </template>
-    <template v-else-if="this.type === 'compose'">
+    <template v-else-if="type === 'compose'">
       <a-card>
-        <template v-slot:title>
+        <template #title>
           <a-space>
             <a-input
               v-model:value="listQuery['name']"
-              @pressEnter="loadData"
               placeholder="名称"
               class="search-input-item"
+              @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['containerId']"
-              @pressEnter="loadData"
               placeholder="容器id"
               class="search-input-item"
+              @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['imageId']"
-              @keyup.enter="loadData"
               placeholder="镜像id"
               class="search-input-item"
+              @keyup.enter="loadData"
             />
             <div>
               查看
-              <a-switch checked-children="所有" un-checked-children="运行中" v-model:checked="listQuery['showAll']" />
+              <a-switch v-model:checked="listQuery['showAll']" checked-children="所有" un-checked-children="运行中" />
             </div>
-            <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
             <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="autoUpdate" />
           </a-space>
         </template>
@@ -328,7 +328,7 @@
               :columns="columns"
               :pagination="false"
               bordered
-              rowKey="id"
+              row-key="id"
               :scroll="{
                 x: 'max-content'
               }"
@@ -336,7 +336,7 @@
               <template #bodyCell="{ column, text, record }">
                 <template v-if="column.dataIndex === 'names'">
                   <a-popover :title="`容器名称：${(text || []).join(',')}`">
-                    <template v-slot:content>
+                    <template #content>
                       <p>容器Id: {{ record.id }}</p>
                       <p>镜像：{{ record.image }}</p>
                       <p>镜像Id: {{ record.imageId }}</p>
@@ -348,7 +348,7 @@
 
                 <template v-else-if="column.dataIndex === 'labels'">
                   <a-popover :title="`容器名标签`">
-                    <template v-slot:content>
+                    <template #content>
                       <template v-if="record.labels">
                         <p v-for="(value, key) in record.labels" :key="key">
                           {{ key }}
@@ -366,7 +366,7 @@
                 </template>
                 <template v-else-if="column.dataIndex === 'mounts'">
                   <a-popover :title="`挂载`">
-                    <template v-slot:content>
+                    <template #content>
                       <template v-if="record.mounts">
                         <div v-for="(item, index) in record.mounts" :key="index">
                           <p>
@@ -410,7 +410,7 @@
                         </li>
                       </ul>
                     </template>
-                    <template v-slot:content>
+                    <template #content>
                       <template v-if="record.networkSettings">
                         <template v-if="record.networkSettings.networks">
                           <template v-if="record.networkSettings.networks.bridge">
@@ -474,10 +474,10 @@
                 <template v-else-if="column.dataIndex === 'state'">
                   <a-tooltip :title="(record.status || '') + ' 点击查看日志'" @click="viewLog(record)">
                     <a-switch :checked="record.state === 'running'" :disabled="true">
-                      <template v-slot:checkedChildren>
+                      <template #checkedChildren>
                         <CheckCircleOutlined />
                       </template>
-                      <template v-slot:unCheckedChildren>
+                      <template #unCheckedChildren>
                         <WarningOutlined />
                       </template>
                     </a-switch>
@@ -516,7 +516,7 @@
                       <a @click="(e) => e.preventDefault()">
                         <MoreOutlined />
                       </a>
-                      <template v-slot:overlay>
+                      <template #overlay>
                         <a-menu>
                           <a-menu-item>
                             <a-tooltip title="修改容器配置，重新运行">
@@ -560,7 +560,7 @@
             </a-table>
           </a-collapse-panel>
         </a-collapse>
-        <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" v-else>
+        <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE">
           <template #description>暂无数据</template>
         </a-empty>
       </a-card>
@@ -590,23 +590,23 @@
 
     <log-view2
       v-if="logVisible > 0"
+      :id="id"
       :visible="logVisible != 0"
+      :url-prefix="urlPrefix"
+      :machine-docker-id="machineDockerId"
+      :container-id="temp.id"
       @close="
         () => {
           logVisible = 0
         }
       "
-      :id="this.id"
-      :urlPrefix="this.urlPrefix"
-      :machineDockerId="this.machineDockerId"
-      :containerId="temp.id"
     />
 
     <!-- Terminal -->
     <a-modal
       v-model:open="terminalVisible"
       width="80vw"
-      :bodyStyle="{
+      :body-style="{
         padding: '0 10px',
         paddingTop: '10px',
         marginRight: '10px',
@@ -614,59 +614,59 @@
       }"
       :title="`docker cli ${(temp.names || []).join(',')}`"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
-      <terminal2 v-if="terminalVisible" :id="this.id" :machineDockerId="this.machineDockerId" :containerId="temp.id" />
+      <terminal2 v-if="terminalVisible" :id="id" :machine-docker-id="machineDockerId" :container-id="temp.id" />
     </a-modal>
     <!-- 编辑容器配置 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       width="60vw"
       title="配置容器"
+      :mask-closable="false"
       @ok="
         () => {
-          this.$refs.editContainer
+          $refs.editContainer
             .handleEditOk()
             .then(() => {
-              this.editVisible = false
-              this.loadData()
+              editVisible = false
+              loadData()
             })
             .finally(() => {
-              this.confirmLoading = false
+              confirmLoading = false
             })
         }
       "
-      :maskClosable="false"
     >
       <editContainer
+        :id="id"
         ref="editContainer"
-        :id="this.id"
-        :machineDockerId="this.machineDockerId"
-        :urlPrefix="this.urlPrefix"
-        :containerId="temp.id"
+        :machine-docker-id="machineDockerId"
+        :url-prefix="urlPrefix"
+        :container-id="temp.id"
       ></editContainer>
     </a-modal>
     <!-- rebuild container -->
 
     <BuildContainer
       v-if="buildVisible"
-      :id="this.id"
-      :imageId="this.temp.imageId"
-      :machineDockerId="this.machineDockerId"
-      :urlPrefix="this.urlPrefix"
-      :containerId="this.temp.id"
-      :containerData="this.temp"
-      @cancelBtnClick="
+      :id="id"
+      :image-id="temp.imageId"
+      :machine-docker-id="machineDockerId"
+      :url-prefix="urlPrefix"
+      :container-id="temp.id"
+      :container-data="temp"
+      @cancel-btn-click="
         () => {
-          this.buildVisible = false
+          buildVisible = false
         }
       "
-      @confirmBtnClick="
+      @confirm-btn-click="
         () => {
-          this.buildVisible = false
-          this.loadData()
+          buildVisible = false
+          loadData()
         }
       "
     />
@@ -689,7 +689,7 @@ import editContainer from './editContainer.vue'
 import BuildContainer from './buildContainer.vue'
 import { Empty } from 'ant-design-vue'
 export default {
-  name: 'container',
+  name: 'Container',
   components: {
     LogView2,
     Terminal2,
@@ -862,12 +862,12 @@ export default {
       buildVisible: false
     }
   },
-  beforeUnmount() {},
   computed: {
     reqDataId() {
       return this.id || this.machineDockerId
     }
   },
+  beforeUnmount() {},
   mounted() {
     this.autoUpdate()
   },

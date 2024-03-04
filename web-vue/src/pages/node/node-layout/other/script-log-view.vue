@@ -1,8 +1,8 @@
 <template>
   <div>
     <log-view1
-      titleName="执行日志"
       :ref="`logView`"
+      title-name="执行日志"
       :visible="visible"
       @close="
         () => {
@@ -29,6 +29,7 @@ export default {
       default: false
     }
   },
+  emits: ['close'],
   data() {
     return {
       logTimer: null,
@@ -79,7 +80,6 @@ export default {
         }
       })
     }
-  },
-  emits: ['close']
+  }
 }
 </script>

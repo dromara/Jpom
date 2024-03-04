@@ -1,4 +1,4 @@
-import axios from "@/api/config";
+import axios from '@/api/config'
 
 /*
  * 集群列表
@@ -7,10 +7,10 @@ import axios from "@/api/config";
  */
 export function getClusterList(params) {
   return axios({
-    url: "/cluster/list",
-    method: "post",
-    data: params,
-  });
+    url: '/cluster/list',
+    method: 'post',
+    data: params
+  })
 }
 
 /*
@@ -20,10 +20,10 @@ export function getClusterList(params) {
  */
 export function deleteCluster(id) {
   return axios({
-    url: "/cluster/delete",
-    method: "get",
-    params: { id: id },
-  });
+    url: '/cluster/delete',
+    method: 'get',
+    params: { id: id }
+  })
 }
 
 /*
@@ -33,24 +33,24 @@ export function deleteCluster(id) {
  */
 export function listLinkGroups(params) {
   return axios({
-    url: "/cluster/list-link-groups",
-    method: "get",
-    params: params,
-  });
+    url: '/cluster/list-link-groups',
+    method: 'get',
+    params: params
+  })
 }
 
 export function listClusterAll(params) {
   return axios({
-    url: "/cluster/list-all",
-    method: "get",
-    params: params,
-  });
+    url: '/cluster/list-all',
+    method: 'get',
+    params: params
+  })
 }
 
 export function editCluster(params) {
   return axios({
-    url: "/cluster/edit",
-    method: "post",
-    data: params,
-  });
+    url: '/cluster/edit',
+    method: 'post',
+    data: params
+  })
 }

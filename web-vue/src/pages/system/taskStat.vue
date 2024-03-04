@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-table size="middle" rowKey="taskId" :columns="taskColumns" bordered :data-source="taskList" :pagination="false">
+    <a-table size="middle" row-key="taskId" :columns="taskColumns" bordered :data-source="taskList" :pagination="false">
       <template #title>
         <a-button size="small" type="primary" @click="refresh"><ReloadOutlined /></a-button>
       </template>
@@ -12,7 +12,7 @@
           <span>{{ parseTime(text) }}</span>
         </a-tooltip>
         <a-tooltip v-else-if="column.dataIndex === 'cron'" placement="topLeft" :title="text">
-          <a-button type="link" v-if="text" style="padding: 0" size="small" @click="toCronTaskList(text)">
+          <a-button v-if="text" type="link" style="padding: 0" size="small" @click="toCronTaskList(text)">
             {{ text }} <UnorderedListOutlined />
           </a-button>
         </a-tooltip>

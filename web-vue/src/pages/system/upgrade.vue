@@ -8,13 +8,13 @@
           :data-source="list"
           bordered
           size="middle"
-          rowKey="id"
+          row-key="id"
           :pagination="pagination"
-          @change="changePage"
           :row-selection="rowSelection"
           :scroll="{
             x: 'max-content'
           }"
+          @change="changePage"
         >
           <template #title>
             <a-row v-if="percentage">
@@ -22,24 +22,25 @@
             </a-row>
             <a-space>
               <a-input
-                class="search-input-item"
-                @pressEnter="getNodeList"
                 v-model:value="listQuery['%name%']"
+                class="search-input-item"
                 placeholder="节点名称"
+                @press-enter="getNodeList"
               />
               <a-input
-                class="search-input-item"
-                @pressEnter="getNodeList"
                 v-model:value="listQuery['%jpomUrl%']"
+                class="search-input-item"
                 placeholder="节点地址"
+                @press-enter="getNodeList"
               />
               <a-input
-                class="search-input-item"
-                @pressEnter="getNodeList"
                 v-model:value="listQuery['%jpomVersion%']"
+                class="search-input-item"
                 placeholder="插件版本"
+                @press-enter="getNodeList"
               />
               <a-select
+                v-model:value="listQuery.groupName"
                 show-search
                 :filter-option="
                   (input, option) => {
@@ -51,8 +52,7 @@
                     )
                   }
                 "
-                v-model:value="listQuery.groupName"
-                allowClear
+                allow-clear
                 placeholder="分组"
                 class="search-input-item"
               >
@@ -71,12 +71,12 @@
                 accept=".jar,.zip"
                 action=""
                 :disabled="!!percentage"
-                :showUploadList="false"
+                :show-upload-list="false"
                 :multiple="false"
                 :before-upload="beforeUpload"
               >
                 <LoadingOutlined v-if="percentage" />
-                <a-button type="primary" v-else> <UploadOutlined />上传包 </a-button>
+                <a-button v-else type="primary"> <UploadOutlined />上传包 </a-button>
               </a-upload>
               <a-tooltip :title="`打包时间：${agentTimeStamp || '未知'}`">
                 Agent版本：{{ version_filter(agentVersion) }}
@@ -143,10 +143,10 @@ import { getWebSocketUrl } from '@/api/config'
 import { uploadPieces } from '@/utils/upload-pieces'
 
 export default {
-  inject: ['globalLoading'],
   components: {
     upgrade
   },
+  inject: ['globalLoading'],
   data() {
     return {
       agentVersion: '',

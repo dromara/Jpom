@@ -5,20 +5,20 @@
       :data-source="list"
       size="middle"
       :columns="columns"
-      @change="changePage"
       :pagination="pagination"
       bordered
-      rowKey="id"
+      row-key="id"
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-select
             v-if="!nodeId"
             v-model:value="listQuery.nodeId"
-            allowClear
+            allow-clear
             placeholder="请选择节点"
             class="search-input-item"
           >
@@ -26,16 +26,16 @@
           </a-select>
           <a-input
             v-model:value="listQuery['%name%']"
-            @pressEnter="loadData"
             placeholder="名称"
-            allowClear
+            allow-clear
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%autoExecCron%']"
-            @pressEnter="loadData"
             placeholder="定时执行"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
@@ -46,7 +46,7 @@
           <template v-if="!nodeId">
             <a-dropdown v-if="nodeMap && Object.keys(nodeMap).length">
               <a-button type="primary" danger> 同步缓存<DownOutlined /></a-button>
-              <template v-slot:overlay>
+              <template #overlay>
                 <a-menu>
                   <a-menu-item v-for="(nodeName, key) in nodeMap" :key="key" @click="sync(key)">
                     <a href="javascript:;">{{ nodeName }} <SyncOutlined /></a>
@@ -58,7 +58,7 @@
           <a-button v-else type="primary" danger @click="sync(nodeId)"> <SyncOutlined />同步缓存 </a-button>
 
           <a-tooltip>
-            <template v-slot:title>
+            <template #title>
               <div>节点脚本模版是存储在节点中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
 
               <div>
@@ -81,7 +81,7 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'name'">
-          <a-tooltip @click="handleEdit(record)" placement="topLeft" :title="text">
+          <a-tooltip placement="topLeft" :title="text" @click="handleEdit(record)">
             <!-- <span>{{ text }}</span> -->
             <a-button type="link" style="padding: 0" size="small">{{ text }}</a-button>
           </a-tooltip>
@@ -110,7 +110,7 @@
                 更多
                 <DownOutlined />
               </a>
-              <template v-slot:overlay>
+              <template #overlay>
                 <a-menu>
                   <a-menu-item>
                     <!-- <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button> -->
@@ -144,8 +144,8 @@
     <!-- 编辑区 -->
     <ScriptEdit
       v-if="editScriptVisible"
-      :nodeId="temp.nodeId"
-      :scriptId="temp.scriptId"
+      :node-id="temp.nodeId"
+      :script-id="temp.scriptId"
       @close="
         () => {
           editScriptVisible = false
@@ -160,37 +160,37 @@
       :open="drawerConsoleVisible"
       @close="
         () => {
-          this.drawerConsoleVisible = false
+          drawerConsoleVisible = false
         }
       "
     >
       <script-console
         v-if="drawerConsoleVisible"
-        :nodeId="temp.nodeId"
-        :defArgs="temp.defArgs"
         :id="temp.id"
-        :scriptId="temp.scriptId"
+        :node-id="temp.nodeId"
+        :def-args="temp.defArgs"
+        :script-id="temp.scriptId"
       />
     </a-drawer>
     <!-- 脚本日志 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="drawerTitle"
       width="50vw"
       :open="drawerLogVisible"
       @close="
         () => {
-          this.drawerLogVisible = false
+          drawerLogVisible = false
         }
       "
     >
-      <script-log v-if="drawerLogVisible" :scriptId="temp.scriptId" :nodeId="temp.nodeId" />
+      <script-log v-if="drawerLogVisible" :script-id="temp.scriptId" :node-id="temp.nodeId" />
     </a-drawer>
     <!-- 触发器 -->
-    <a-modal destroyOnClose v-model:open="triggerVisible" title="触发器" width="50%" :footer="null">
+    <a-modal v-model:open="triggerVisible" destroy-on-close title="触发器" width="50%" :footer="null">
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
-          <template v-slot:rightExtra>
+          <template #rightExtra>
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>
@@ -198,7 +198,7 @@
           <a-tab-pane key="1" tab="执行">
             <a-space direction="vertical" style="width: 100%">
               <a-alert message="温馨提示" type="warning" show-icon>
-                <template v-slot:description>
+                <template #description>
                   <ul>
                     <li>单个触发器地址中：第一个随机字符串为脚本ID，第二个随机字符串为 token</li>
                     <li>
@@ -209,14 +209,14 @@
                 </template>
               </a-alert>
               <a-alert type="info" :message="`单个触发器地址(点击可以复制)`">
-                <template v-slot:description>
+                <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   </a-typography-paragraph>
                 </template>
               </a-alert>
               <a-alert type="info" :message="`批量触发器地址(点击可以复制)`">
-                <template v-slot:description>
+                <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
                   </a-typography-paragraph>

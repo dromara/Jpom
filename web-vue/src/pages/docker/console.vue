@@ -2,20 +2,20 @@
   <div>
     <!-- 控制台 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       placement="right"
-      :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
+      :width="`${getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
       :open="true"
-      @close="onClose"
-      :bodyStyle="{
+      :body-style="{
         padding: '0'
       }"
-      :headerStyle="{
+      :header-style="{
         padding: '0 10px'
       }"
+      @close="onClose"
     >
       <template #title>
-        <a-menu mode="horizontal" class="docker-menu" v-model:selectedKeys="menuKeyArray" @click="menuClick">
+        <a-menu v-model:selectedKeys="menuKeyArray" mode="horizontal" class="docker-menu" @click="menuClick">
           <a-menu-item key="containers">
             <span class="nav-text">独立容器</span>
           </a-menu-item>
@@ -44,54 +44,54 @@
         <!-- <a-layout-content> -->
         <container
           v-show="menuKey === 'containers'"
+          :id="id"
           type="container"
-          :id="this.id"
-          :machineDockerId="this.machineDockerId"
-          :visible="this.visible"
-          :urlPrefix="this.urlPrefix"
+          :machine-docker-id="machineDockerId"
+          :visible="visible"
+          :url-prefix="urlPrefix"
         />
         <container
           v-show="menuKey === 'docker-compose'"
+          :id="id"
           type="compose"
-          :id="this.id"
-          :machineDockerId="this.machineDockerId"
-          :visible="this.visible"
-          :urlPrefix="this.urlPrefix"
+          :machine-docker-id="machineDockerId"
+          :visible="visible"
+          :url-prefix="urlPrefix"
         />
         <images
           v-show="menuKey === 'images'"
-          :id="this.id"
-          :machineDockerId="this.machineDockerId"
-          :visible="this.visible"
-          :urlPrefix="this.urlPrefix"
+          :id="id"
+          :machine-docker-id="machineDockerId"
+          :visible="visible"
+          :url-prefix="urlPrefix"
         />
         <volumes
           v-if="menuKey === 'volumes'"
-          :id="this.id"
-          :machineDockerId="this.machineDockerId"
-          :visible="this.visible"
-          :urlPrefix="this.urlPrefix"
+          :id="id"
+          :machine-docker-id="machineDockerId"
+          :visible="visible"
+          :url-prefix="urlPrefix"
         />
         <info
           v-show="menuKey === 'info'"
-          :id="this.id"
-          :machineDockerId="this.machineDockerId"
-          :visible="this.visible"
-          :urlPrefix="this.urlPrefix"
+          :id="id"
+          :machine-docker-id="machineDockerId"
+          :visible="visible"
+          :url-prefix="urlPrefix"
         />
         <networks
           v-show="menuKey === 'networks'"
-          :id="this.id"
-          :machineDockerId="this.machineDockerId"
-          :visible="this.visible"
-          :urlPrefix="this.urlPrefix"
+          :id="id"
+          :machine-docker-id="machineDockerId"
+          :visible="visible"
+          :url-prefix="urlPrefix"
         />
         <prune
           v-show="menuKey === 'prune'"
-          :id="this.id"
-          :machineDockerId="this.machineDockerId"
-          :visible="this.visible"
-          :urlPrefix="this.urlPrefix"
+          :id="id"
+          :machine-docker-id="machineDockerId"
+          :visible="visible"
+          :url-prefix="urlPrefix"
         />
         <!-- </a-layout-content> -->
       </div>
@@ -109,6 +109,14 @@ import Prune from './prune'
 import { mapState } from 'pinia'
 import { useGuideStore } from '@/stores/guide'
 export default {
+  components: {
+    Container,
+    Images,
+    Volumes,
+    Info,
+    Networks,
+    Prune
+  },
   props: {
     id: {
       type: String
@@ -123,14 +131,6 @@ export default {
     urlPrefix: {
       type: String
     }
-  },
-  components: {
-    Container,
-    Images,
-    Volumes,
-    Info,
-    Networks,
-    Prune
   },
   data() {
     return {

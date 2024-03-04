@@ -3,13 +3,13 @@
     <a-form ref="editForm" :model="temp">
       <a-form-item>
         <code-editor
-          height="calc(100vh - 200px)"
           v-model:content="temp.content"
+          height="calc(100vh - 200px)"
           :options="{ mode: 'yaml', tabSize: 2 }"
-          :showTool="true"
+          :show-tool="true"
         >
           <template #tool_before>
-            <a-alert show-icon v-if="temp.file" :message="`配置文件路径:${temp.file}`" />
+            <a-alert v-if="temp.file" show-icon :message="`配置文件路径:${temp.file}`" />
           </template>
         </code-editor>
       </a-form-item>
@@ -29,10 +29,10 @@ import codeEditor from '@/components/codeEditor'
 import { RESTART_UPGRADE_WAIT_TIME_COUNT } from '@/utils/const'
 
 export default {
-  inject: ['globalLoading'],
   components: {
     codeEditor
   },
+  inject: ['globalLoading'],
   props: {
     machineId: {
       type: String

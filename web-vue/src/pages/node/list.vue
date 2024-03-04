@@ -1,8 +1,8 @@
 <template>
   <div class="">
-    <template v-if="this.useSuggestions">
+    <template v-if="useSuggestions">
       <a-result title="当前工作空间还没有节点">
-        <template v-slot:subTitle> 需要您在需要被管理的服务器中安装 agent ，并将 agent 信息新增到系统中 </template>
+        <template #subTitle> 需要您在需要被管理的服务器中安装 agent ，并将 agent 信息新增到系统中 </template>
         <template #extra>
           <a-button type="primary" @click="fastInstallNodeShow">快速安装 </a-button>
           <router-link to="/system/assets/machine-list">
@@ -22,12 +22,13 @@
       </a-result>
     </template>
     <template v-else>
-      <a-card :bodyStyle="{ padding: '10px' }">
-        <template v-slot:title>
+      <a-card :body-style="{ padding: '10px' }">
+        <template #title>
           <a-space>
-            <a-input v-model:value="listQuery['%name%']" @pressEnter="loadData" placeholder="节点名称" />
+            <a-input v-model:value="listQuery['%name%']" placeholder="节点名称" @press-enter="loadData" />
 
             <a-select
+              v-model:value="listQuery.group"
               show-search
               :filter-option="
                 (input, option) => {
@@ -39,8 +40,7 @@
                   )
                 }
               "
-              v-model:value="listQuery.group"
-              allowClear
+              allow-clear
               placeholder="分组"
               class="search-input-item"
             >
@@ -53,12 +53,12 @@
               type="primary"
               @click="
                 () => {
-                  this.fastInstallNode = true
+                  fastInstallNode = true
                 }
               "
               >快速安装
             </a-button>
-            <a-dropdown v-if="this.layoutType === 'table'">
+            <a-dropdown v-if="layoutType === 'table'">
               <a-button
                 type="primary"
                 :disabled="!tableSelections || !tableSelections.length"
@@ -75,10 +75,10 @@
                 <LayoutOutlined v-if="layoutType === 'card'" />
                 <TableOutlined v-else />
               </template>
-              {{ this.layoutType === 'card' ? '卡片' : '表格' }}
+              {{ layoutType === 'card' ? '卡片' : '表格' }}
             </a-button>
             <a-tooltip placement="bottom">
-              <template v-slot:title>
+              <template #title>
                 <div>
                   <ul>
                     <li>监控频率可以到服务端配置文件中修改</li>
@@ -99,26 +99,26 @@
           </a-space>
         </template>
         <a-table
-          v-if="this.layoutType === 'table'"
+          v-if="layoutType === 'table'"
           :columns="columns"
           :data-source="list"
           bordered
           size="middle"
-          rowKey="id"
+          row-key="id"
           :pagination="pagination"
-          @change="
-            (pagination, filters, sorter) => {
-              this.listQuery = CHANGE_PAGE(this.listQuery, {
-                pagination,
-                sorter
-              })
-              this.loadData()
-            }
-          "
           :scroll="{
             x: 'max-content'
           }"
           :row-selection="rowSelection"
+          @change="
+            (pagination, filters, sorter) => {
+              listQuery = CHANGE_PAGE(listQuery, {
+                pagination,
+                sorter
+              })
+              loadData()
+            }
+          "
         >
           <template #bodyCell="{ column, text, record, index }">
             <template v-if="column.dataIndex === 'url'">
@@ -230,12 +230,12 @@
             <template v-else-if="column.dataIndex === 'operation'">
               <a-space>
                 <a-tooltip title="如果按钮不可用则表示当前节点已经关闭啦,需要去编辑中启用">
-                  <a-button size="small" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"
+                  <a-button size="small" type="primary" :disabled="record.openStatus !== 1" @click="handleNode(record)"
                     >管理</a-button
                   >
                 </a-tooltip>
                 <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
-                  <a-button size="small" type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"
+                  <a-button size="small" type="primary" :disabled="!record.sshId" @click="handleTerminal(record)"
                     ><CodeOutlined />终端</a-button
                   >
                 </a-tooltip>
@@ -245,7 +245,7 @@
                     更多
                     <DownOutlined />
                   </a>
-                  <template v-slot:overlay>
+                  <template #overlay>
                     <a-menu>
                       <a-menu-item>
                         <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -300,16 +300,16 @@
             </template>
           </template>
         </a-table>
-        <template v-else-if="this.layoutType === 'card'">
+        <template v-else-if="layoutType === 'card'">
           <a-row :gutter="[16, 16]">
             <template v-if="list && list.length">
               <a-col v-for="item in list" :key="item.id" :span="6">
-                <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
-                  <template v-slot:title>
+                <a-card :head-style="{ padding: '0 6px' }" :body-style="{ padding: '10px' }">
+                  <template #title>
                     <a-row :gutter="[4, 0]">
                       <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
                         <a-tooltip>
-                          <template v-slot:title>
+                          <template #title>
                             点击进入节点管理
                             <div>节点名称：{{ item.name }}</div>
                             <div>节点地址：{{ item.url }}</div>
@@ -322,7 +322,7 @@
                       </a-col>
                       <a-col :span="7" style="text-align: right">
                         <a-tooltip>
-                          <template v-slot:title>
+                          <template #title>
                             <div>当前状态：{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}</div>
                             <div>状态描述：{{ (item.machineNodeData && item.machineNodeData.statusMsg) || '' }}</div>
                           </template>
@@ -339,7 +339,7 @@
 
                   <a-row :gutter="[8, 8]">
                     <a-col :span="8" style="text-align: center">
-                      <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`CPU 占用率：${item.occupyCpu}%`">
+                      <a-tooltip :title="`CPU 占用率：${item.occupyCpu}%`" @click="handleHistory(item, 'nodeTop')">
                         <a-progress
                           type="circle"
                           :size="80"
@@ -354,7 +354,7 @@
                       </a-tooltip>
                     </a-col>
                     <a-col :span="8" style="text-align: center">
-                      <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`硬盘占用率：${item.occupyDisk}%`">
+                      <a-tooltip :title="`硬盘占用率：${item.occupyDisk}%`" @click="handleHistory(item, 'nodeTop')">
                         <a-progress
                           type="circle"
                           :size="80"
@@ -370,8 +370,8 @@
                     </a-col>
                     <a-col :span="8" style="text-align: center">
                       <a-tooltip
-                        @click="handleHistory(item, 'nodeTop')"
                         :title="`实际内存占用率：${item.occupyMemory}%`"
+                        @click="handleHistory(item, 'nodeTop')"
                       >
                         <a-progress
                           :size="80"
@@ -391,17 +391,17 @@
                   <a-row :gutter="[8, 8]" style="text-align: center">
                     <a-col :span="8">
                       <a-tooltip
-                        @click="handleHistory(item, 'networkDelay')"
                         :title="`${
                           '延迟' +
                           (formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-') +
                           ' 点击查看历史趋势'
                         }`"
+                        @click="handleHistory(item, 'networkDelay')"
                       >
                         <a-statistic
                           title="延迟"
                           :value="item.machineNodeData && item.machineNodeData.networkDelay"
-                          :valueStyle="statValueStyle"
+                          :value-style="statValueStyle"
                           :formatter="
                             (v) => {
                               return (
@@ -418,7 +418,7 @@
                       >
                         <a-statistic
                           title="运行时间"
-                          :valueStyle="statValueStyle"
+                          :value-style="statValueStyle"
                           :formatter="
                             (v) => {
                               return (
@@ -433,7 +433,7 @@
                       <a-tooltip :title="`${parseTime(item.machineNodeData && item.machineNodeData.modifyTimeMillis)}`">
                         <a-statistic
                           title="更新时间"
-                          :valueStyle="statValueStyle"
+                          :value-style="statValueStyle"
                           :formatter="
                             (v) => {
                               return parseTime(
@@ -459,24 +459,24 @@
             <a-col>
               <a-pagination
                 v-model:current="listQuery.page"
-                :showTotal="
+                v-model:pageSize="listQuery.limit"
+                :show-total="
                   (total) => {
                     return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery)
                   }
                 "
-                :showSizeChanger="true"
-                :pageSizeOptions="sizeOptions"
-                v-model:pageSize="listQuery.limit"
+                :show-size-changer="true"
+                :page-size-options="sizeOptions"
                 :total="listQuery.total"
-                :hideOnSinglePage="true"
-                @showSizeChange="
+                :hide-on-single-page="true"
+                show-less-items
+                @show-size-change="
                   (current, size) => {
-                    this.listQuery.limit = size
-                    this.loadData()
+                    listQuery.limit = size
+                    loadData()
                   }
                 "
-                @change="this.loadData"
-                show-less-items
+                @change="loadData"
               />
             </a-col>
           </a-row>
@@ -486,24 +486,24 @@
 
     <!-- 编辑区 -->
     <a-modal
-      destroyOnClose
       v-model:open="editNodeVisible"
+      destroy-on-close
       width="50%"
       title="编辑节点"
+      :confirm-loading="confirmLoading"
+      :mask-closable="false"
       @ok="handleEditNodeOk"
-      :confirmLoading="confirmLoading"
-      :maskClosable="false"
     >
       <a-form ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 19 }">
         <a-form-item label="节点名称" name="name">
-          <a-input :maxLength="50" v-model:value="temp.name" placeholder="节点名称" />
+          <a-input v-model:value="temp.name" :max-length="50" placeholder="节点名称" />
         </a-form-item>
         <a-form-item label="分组名称" name="group">
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            inputPlaceholder="新增分组"
-            selectPlaceholder="选择分组名"
+            input-placeholder="新增分组"
+            select-placeholder="选择分组名"
           >
           </custom-select>
         </a-form-item>
@@ -511,18 +511,19 @@
         <a-form-item label="节点状态" name="openStatus">
           <a-switch
             :checked="temp.openStatus == 1"
+            checked-children="启用"
+            un-checked-children="停用"
+            default-checked
             @change="
               (checked) => {
                 temp.openStatus = checked ? 1 : 0
               }
             "
-            checked-children="启用"
-            un-checked-children="停用"
-            default-checked
           />
         </a-form-item>
         <a-form-item label="绑定 SSH " name="sshId">
           <a-select
+            v-model:value="temp.sshId"
             show-search
             :filter-option="
               (input, option) => {
@@ -534,7 +535,6 @@
                 )
               }
             "
-            v-model:value="temp.sshId"
             placeholder="请选择SSH"
           >
             <a-select-option value="">不绑定</a-select-option>
@@ -546,11 +546,11 @@
       </a-form>
     </a-modal>
     <!-- 管理节点 -->
-    <NodeFunc v-if="drawerVisible" :name="temp.name" :id="temp.id" @close="onClose"></NodeFunc>
+    <NodeFunc v-if="drawerVisible" :id="temp.id" :name="temp.name" @close="onClose"></NodeFunc>
     <!-- Terminal -->
     <a-modal
       v-model:open="terminalVisible"
-      :bodyStyle="{
+      :body-style="{
         padding: '0 10px',
         paddingTop: '10px',
         marginRight: '10px',
@@ -559,23 +559,23 @@
       width="80%"
       title="Terminal"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
-      <terminal1 v-if="terminalVisible" :sshId="temp.sshId" :nodeId="temp.id" />
+      <terminal1 v-if="terminalVisible" :ssh-id="temp.sshId" :node-id="temp.id" />
     </a-modal>
 
     <!-- 快速安装插件端 -->
     <a-modal
-      destroyOnClose
       v-model:open="fastInstallNode"
+      destroy-on-close
       width="80%"
       title="快速安装插件端"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
       @cancel="
         () => {
-          this.fastInstallNode = false
-          this.loadData()
+          fastInstallNode = false
+          loadData()
         }
       "
     >
@@ -583,15 +583,15 @@
     </a-modal>
     <!-- 同步到其他工作空间 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="syncToWorkspaceVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="同步到其他工作空间"
+      :mask-closable="false"
       @ok="handleSyncToWorkspace"
-      :maskClosable="false"
     >
       <a-alert message="温馨提示" type="warning">
-        <template v-slot:description>
+        <template #description>
           <ul>
             <li>同步机制采用节点地址确定是同一个服务器（节点）</li>
             <li>当目标工作空间不存在对应的节点时候将自动创建一个新的节点（逻辑节点）</li>
@@ -603,6 +603,7 @@
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" name="workspaceId">
           <a-select
+            v-model:value="temp.workspaceId"
             show-search
             :filter-option="
               (input, option) => {
@@ -614,10 +615,9 @@
                 )
               }
             "
-            v-model:value="temp.workspaceId"
             placeholder="请选择工作空间"
           >
-            <a-select-option :disabled="getWorkspaceId() === item.id" v-for="item in workspaceList" :key="item.id">{{
+            <a-select-option v-for="item in workspaceList" :key="item.id" :disabled="getWorkspaceId() === item.id">{{
               item.name
             }}</a-select-option>
           </a-select>
@@ -626,14 +626,14 @@
     </a-modal>
     <!-- 历史监控 -->
     <a-modal
-      destroyOnClose
       v-model:open="monitorVisible"
+      destroy-on-close
       width="75%"
-      :title="`${this.temp.name}历史监控图表`"
+      :title="`${temp.name}历史监控图表`"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
-      <node-top v-if="monitorVisible" :type="this.temp.type" :nodeId="this.temp.id"></node-top>
+      <node-top v-if="monitorVisible" :type="temp.type" :node-id="temp.id"></node-top>
     </a-modal>
   </div>
 </template>

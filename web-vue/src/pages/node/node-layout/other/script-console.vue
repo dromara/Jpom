@@ -6,7 +6,7 @@
     <!-- console -->
     <div>
       <log-view1 :ref="`logView`" height="calc(100vh - 140px)">
-        <template v-slot:before>
+        <template #before>
           <a-space>
             <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start"
               >执行</a-button
@@ -21,14 +21,14 @@
 
     <!--运行  -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editArgs"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="新增运行参数"
+      :mask-closable="false"
       @ok="startExecution"
-      :maskClosable="false"
     >
-      <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" ref="ruleForm">
+      <a-form ref="ruleForm" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item
           label="命令参数"
           :help="`${
@@ -41,11 +41,11 @@
             <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
                 <a-input
-                  :addon-before="`参数${index + 1}值`"
                   v-model:value="item.value"
+                  :addon-before="`参数${index + 1}值`"
                   :placeholder="`参数值 ${item.desc ? ',' + item.desc : ''}`"
                 >
-                  <template v-slot:suffix>
+                  <template #suffix>
                     <a-tooltip v-if="item.desc" :title="item.desc">
                       <InfoCircleOutlined style="color: rgba(0, 0, 0, 0.45)" />
                     </a-tooltip>
@@ -56,7 +56,7 @@
               <a-col v-if="!item.desc" :span="2">
                 <a-row type="flex" justify="center" align="middle">
                   <a-col>
-                    <MinusCircleOutlined @click="() => commandParams.splice(index, 1)" style="color: #ff0000" />
+                    <MinusCircleOutlined style="color: #ff0000" @click="() => commandParams.splice(index, 1)" />
                   </a-col>
                 </a-row>
               </a-col>

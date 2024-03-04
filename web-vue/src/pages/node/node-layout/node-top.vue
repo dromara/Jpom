@@ -3,6 +3,7 @@
     <div ref="filter" class="filter">
       <a-space>
         <a-range-picker
+          v-model:value="timeRange"
           :presets="[
             { label: '今天', value: [dayjs().startOf('day'), dayjs()] },
             { label: '昨天', value: [dayjs().add(-1, 'days').startOf('day'), dayjs().add(-1, 'days').endOf('day')] }
@@ -13,14 +14,13 @@
             }
           "
           class="filter-item"
-          v-model:value="timeRange"
           :show-time="{ format: 'HH:mm:ss' }"
           format="YYYY-MM-DD HH:mm:ss"
-          valueFormat="YYYY-MM-DD HH:mm:ss"
+          value-format="YYYY-MM-DD HH:mm:ss"
         />
         <a-button type="primary" @click="handleFilter">搜索</a-button>
         <a-tooltip>
-          <template v-slot:title>
+          <template #title>
             <div>
               <ul>
                 <li>
@@ -87,6 +87,7 @@ export default {
   computed: {
     ...mapState(useGuideStore, ['getThemeView'])
   },
+  watch: {},
   mounted() {
     this.handleFilter()
     window.addEventListener('resize', this.resize)
@@ -94,7 +95,6 @@ export default {
   unmounted() {
     window.removeEventListener('resize', this.resize)
   },
-  watch: {},
   methods: {
     dayjs,
     // 刷新

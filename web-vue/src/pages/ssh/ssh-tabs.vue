@@ -13,12 +13,12 @@
         v-if="treeList.length"
         multiple
         default-expand-all
-        :treeData="treeList"
-        :fieldNames="replaceFields"
+        :tree-data="treeList"
+        :field-names="replaceFields"
         @select="select"
       >
       </a-directory-tree>
-      <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" v-else></a-empty>
+      <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE"></a-empty>
     </a-layout-sider>
     <a-layout-content :style="{ padding: '0 5px', height: `calc(100vh - 10px)` }">
       <a-tabs
@@ -29,7 +29,7 @@
         @edit="onEdit"
         @change="change"
       >
-        <template v-slot:rightExtra>
+        <template #rightExtra>
           <a-button type="primary" :disabled="!activeKey" @click="changeFileVisible(activeKey, true)">
             文件管理
           </a-button>
@@ -37,13 +37,13 @@
         <a-tab-pane
           v-for="pane in selectPanes"
           :key="pane.id"
+          :ref="`pene-${pane.id}`"
           :tab="pane.name"
           :closable="true"
-          :ref="`pene-${pane.id}`"
         >
           <div :id="`paneDom${pane.id}`">
             <div v-if="pane.open" :style="{ height: `calc(100vh - 70px) ` }">
-              <terminal1 :sshId="pane.id" />
+              <terminal1 :ssh-id="pane.id" />
             </div>
             <a-result v-else status="warning" title="未开启当前终端">
               <template #extra>
@@ -53,19 +53,19 @@
             <!-- 文件管理 -->
             <a-drawer
               v-if="pane.openFile"
-              :getContainer="`#paneDom${pane.id}`"
+              :get-container="`#paneDom${pane.id}`"
               :title="`${pane.name}文件管理`"
               placement="right"
               width="90vw"
               :open="pane.fileVisible"
               @close="changeFileVisible(pane.id, false)"
             >
-              <ssh-file v-if="pane.openFile" :sshId="pane.id" />
+              <ssh-file v-if="pane.openFile" :ssh-id="pane.id" />
             </a-drawer>
           </div>
         </a-tab-pane>
       </a-tabs>
-      <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" v-else description="未选择ssh"></a-empty>
+      <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" description="未选择ssh"></a-empty>
     </a-layout-content>
   </a-layout>
 </template>

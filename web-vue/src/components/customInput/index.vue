@@ -2,12 +2,12 @@
   <div>
     <template v-if="inputData.indexOf(refTag) === -1 && type == 'password'">
       <a-input-password
+        v-model:value="inputData"
         :placeholder="placeholder"
         :disabled="!!selectData"
-        v-model:value="inputData"
         @change="inputChange"
       >
-        <template v-slot:addonBefore>
+        <template #addonBefore>
           <a-tooltip>
             <template #title>
               引用工作空间环境变量可以方便后面多处使用相同的密码统一修改
@@ -16,7 +16,7 @@
                 当前没有可以引用的环境变量
               </ul>
             </template>
-            <a-select placeholder="引用环境变量" style="width: 120px" v-model:value="selectData" @change="selectChange">
+            <a-select v-model:value="selectData" placeholder="引用环境变量" style="width: 120px" @change="selectChange">
               <a-select-option value="">不引用环境变量</a-select-option>
               <a-select-option v-for="item in envList" :key="item.id" :value="item.name"
                 >{{ item.name }}
@@ -27,8 +27,8 @@
       </a-input-password>
     </template>
     <template v-else>
-      <a-input :placeholder="placeholder" :disabled="!!selectData" v-model:value="inputData" @change="inputChange">
-        <template v-slot:addonBefore>
+      <a-input v-model:value="inputData" :placeholder="placeholder" :disabled="!!selectData" @change="inputChange">
+        <template #addonBefore>
           <a-tooltip>
             <template #title>
               引用工作空间环境变量可以方便后面多处使用相同的密码统一修改
@@ -36,7 +36,7 @@
                 当前没有可以引用的环境变量
               </ul>
             </template>
-            <a-select placeholder="引用环境变量" style="width: 120px" v-model:value="selectData" @change="selectChange">
+            <a-select v-model:value="selectData" placeholder="引用环境变量" style="width: 120px" @change="selectChange">
               <a-select-option value="">引用环境变量</a-select-option>
               <a-select-option v-for="item in envList" :key="item.id" :value="item.name"
                 >{{ item.name }}
@@ -52,13 +52,6 @@
 <script>
 export default {
   components: {},
-  data() {
-    return {
-      inputData: '',
-      refTag: '$ref.wEnv.',
-      selectData: null
-    }
-  },
   props: {
     input: {
       type: String,
@@ -75,6 +68,14 @@ export default {
     type: {
       type: String,
       default: 'password'
+    }
+  },
+  emits: ['change'],
+  data() {
+    return {
+      inputData: '',
+      refTag: '$ref.wEnv.',
+      selectData: null
     }
   },
   watch: {
@@ -102,7 +103,6 @@ export default {
     inputChange() {
       this.$emit('change', this.inputData)
     }
-  },
-  emits: ['change']
+  }
 }
 </script>

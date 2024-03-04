@@ -2,18 +2,18 @@
   <a-layout class="log-layout">
     <!-- 侧边栏 文件树 -->
     <a-layout-sider theme="light" class="log-sider" width="20%">
-      <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" v-if="list.length === 0" />
-      <a-directory-tree :treeData="list" :fieldNames="replaceFields" @select="select" default-expand-all>
+      <a-empty v-if="list.length === 0" :image="Empty.PRESENTED_IMAGE_SIMPLE" />
+      <a-directory-tree :tree-data="list" :field-names="replaceFields" default-expand-all @select="select">
       </a-directory-tree>
     </a-layout-sider>
     <!-- 单个文件内容 -->
     <a-layout-content class="log-content">
       <log-view2 :ref="`logView`" height="calc(100vh - 160px - 30px)">
-        <template v-slot:before>
+        <template #before>
           <a-space>
             <a-button type="primary" size="small" @click="loadData">刷新</a-button>
-            <a-button type="primary" danger size="small" :disabled="!this.temp.path" @click="deleteLog">删除</a-button>
-            <a-button type="primary" size="small" :disabled="!this.temp.path" @click="downloadLog">下载</a-button>
+            <a-button type="primary" danger size="small" :disabled="!temp.path" @click="deleteLog">删除</a-button>
+            <a-button type="primary" size="small" :disabled="!temp.path" @click="downloadLog">下载</a-button>
           </a-space>
         </template>
       </log-view2>

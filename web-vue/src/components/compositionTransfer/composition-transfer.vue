@@ -1,7 +1,7 @@
 <template>
   <a-transfer
-    :data-source="dataSource"
     v-model:target-keys="targetKeys"
+    :data-source="dataSource"
     :render="(item) => item.title"
     :show-select-all="false"
     @change="onChange"
@@ -10,7 +10,7 @@
       <template v-if="direction === 'left'">
         <a-tree
           v-if="leftTreeData.length"
-          blockNode
+          block-node
           checkable
           :tree-data="leftTreeData"
           :checked-keys="leftCheckedKey"
@@ -20,14 +20,14 @@
             }
           "
         />
-        <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" v-else>
+        <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE">
           <template #description>暂无数据</template>
         </a-empty>
       </template>
       <template v-else-if="direction === 'right'">
         <a-tree
           v-if="rightTreeData.length"
-          blockNode
+          block-node
           checkable
           :tree-data="rightTreeData"
           :checked-keys="rightCheckedKey"
@@ -37,7 +37,7 @@
             }
           "
         />
-        <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" v-else>
+        <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE">
           <template #description>暂无数据</template>
         </a-empty>
       </template>
