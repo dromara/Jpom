@@ -4,7 +4,7 @@
       <template #title>
         <a-button size="small" type="primary" @click="refresh"><ReloadOutlined /></a-button>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #bodyCell="{ column, text }">
         <a-tooltip v-if="column.tooltip" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>

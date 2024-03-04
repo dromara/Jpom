@@ -406,12 +406,9 @@ export function itemGroupBy(arr, groupKey, key, dataKey) {
   key = key || 'type'
   dataKey = dataKey || 'data'
 
-  let newArr = [],
-    types = {},
-    // newItem,
-    i,
-    j,
-    cur
+  const newArr = [],
+    types = {}
+  let i, j, cur
   for (i = 0, j = arr.length; i < j; i++) {
     cur = arr[i]
     if (!(cur[groupKey] in types)) {

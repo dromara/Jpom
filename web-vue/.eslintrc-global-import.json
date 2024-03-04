@@ -1,0 +1,17 @@
+{
+  "globals": {
+    "$confirm": true,
+    "$error": true,
+    "$info": true,
+    "$message": true,
+    "$notification": true,
+    "$success": true,
+    "$warning": true,
+    "appStore": true,
+    "guideStore": true,
+    "jpomWindow": true,
+    "route": true,
+    "router": true,
+    "userStore": true
+  }
+}

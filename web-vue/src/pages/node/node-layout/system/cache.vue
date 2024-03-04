@@ -172,7 +172,8 @@ export default {
   },
   props: {
     machineId: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -183,8 +184,7 @@ export default {
       machineLonelyData: {},
       correctLonelyOpen: false,
       confirmLoading: false,
-      nodeList: [],
-      temp: {}
+      nodeList: []
     }
   },
   mounted() {

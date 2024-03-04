@@ -187,7 +187,6 @@ export default {
       statData: {}
     }
   },
-  computed: {},
   computed: {
     ...mapState(useUserStore, ['getUserInfo'])
   },
