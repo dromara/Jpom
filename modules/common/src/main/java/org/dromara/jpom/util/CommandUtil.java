@@ -301,16 +301,18 @@ public class CommandUtil {
     /**
      * 异步执行命令
      *
-     * @param file    文件夹
-     * @param env     环境变量
-     * @param useSudo 是否填充 sudo
-     * @param command 命令
+     * @param file        文件夹
+     * @param env         环境变量
+     * @param hopeUseSudo 是否期望填充 sudo
+     * @param command     命令
      * @throws IOException 异常
      */
-    public static void asyncExeLocalCommand(String command, File file, Map<String, String> env, boolean useSudo) throws Exception {
+    public static void asyncExeLocalCommand(String command, File file, Map<String, String> env, boolean hopeUseSudo) throws Exception {
         String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
         newCommand = StrUtil.replace(newCommand, StrUtil.LF, StrUtil.SPACE);
-        if (useSudo) {
+        boolean jpomCommandUseSudo = SystemUtil.getBoolean("JPOM_COMMAND_USE_SUDO", false);
+        if (hopeUseSudo && jpomCommandUseSudo) {
+            // 期望使用 sudo 并且配置了开启 sudo
             newCommand = StrUtil.addPrefixIfNot(newCommand, "sudo ");
         }
         //
