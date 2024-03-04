@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Select
+    <a-select
       v-model:value="selected"
       :style="selStyle"
       :disabled="disabled"
@@ -24,7 +24,7 @@
       </template>
       <a-select-option v-if="selectPlaceholder" value="">{{ selectPlaceholder }}</a-select-option>
       <a-select-option v-for="item in optionList" :key="item">{{ item }} </a-select-option>
-    </Select>
+    </a-select>
   </div>
 </template>
 
@@ -33,7 +33,7 @@ import { Select } from 'ant-design-vue'
 
 export default {
   components: {
-    Select,
+    ASelect: Select,
     VNodes: {
       props: {
         vnodes: {
