@@ -1268,7 +1268,7 @@ export default {
       this.$refs['linkDispatchForm'].validate().then(() => {
         // 校验分发节点数据
         if (this.dispatchList.length < 1) {
-          $notificationr({ message: '至少选择1个节点项目' })
+          $notification.error({ message: '至少选择1个节点项目' })
           return false
         }
         this.dispatchList.forEach((item, index) => {
