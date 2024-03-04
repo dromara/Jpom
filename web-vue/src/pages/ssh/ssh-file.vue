@@ -7,16 +7,16 @@
         <a-space>
           <a-button size="small" type="primary" @click="loadData()">刷新</a-button>
           <a-dropdown>
-            <template v-slot:overlay>
+            <template #overlay>
               <a-menu>
                 <a-menu-item
+                  v-for="item in sortMethodList"
+                  :key="item.key"
                   @click="
                     () => {
                       changeSort(item.key, sortMethod.asc)
                     }
                   "
-                  v-for="item in sortMethodList"
-                  :key="item.key"
                   >{{ item.name }}</a-menu-item
                 >
               </a-menu>
@@ -45,11 +45,11 @@
           </a-dropdown>
         </a-space>
       </a-row>
-      <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" v-if="treeList.length === 0" />
+      <a-empty v-if="treeList.length === 0" :image="Empty.PRESENTED_IMAGE_SIMPLE" />
       <a-directory-tree
         v-model:selectedKeys="selectedKeys"
-        :treeData="treeList"
-        :fieldNames="replaceFields"
+        :tree-data="treeList"
+        :field-names="replaceFields"
         @select="onSelect"
       >
       </a-directory-tree>
@@ -68,11 +68,11 @@
           x: 'max-content'
         }"
       >
-        <template v-slot:title>
+        <template #title>
           <a-space>
-            <a-dropdown :disabled="!this.tempNode.nextPath">
+            <a-dropdown :disabled="!tempNode.nextPath">
               <a-button size="small" type="primary" @click="(e) => e.preventDefault()">上传小文件</a-button>
-              <template v-slot:overlay>
+              <template #overlay>
                 <a-menu>
                   <a-menu-item @click="handleUpload">
                     <a-space><FileAddOutlined />上传文件</a-space>
@@ -83,9 +83,9 @@
                 </a-menu>
               </template>
             </a-dropdown>
-            <a-dropdown :disabled="!this.tempNode.nextPath">
+            <a-dropdown :disabled="!tempNode.nextPath">
               <a-button size="small" type="primary" @click="(e) => e.preventDefault()">新建</a-button>
-              <template v-slot:overlay>
+              <template #overlay>
                 <a-menu>
                   <a-menu-item @click="handleAddFolder">
                     <a-space>
@@ -102,23 +102,21 @@
                 </a-menu>
               </template>
             </a-dropdown>
-            <a-button size="small" :disabled="!this.tempNode.nextPath" type="primary" @click="loadFileList()"
-              >刷新</a-button
-            >
-            <a-button size="small" :disabled="!this.tempNode.nextPath" type="primary" danger @click="handleDeletePath()"
+            <a-button size="small" :disabled="!tempNode.nextPath" type="primary" @click="loadFileList()">刷新</a-button>
+            <a-button size="small" :disabled="!tempNode.nextPath" type="primary" danger @click="handleDeletePath()"
               >删除</a-button
             >
             <div>
               文件夹：
               <a-switch
-                :disabled="!this.tempNode.nextPath"
-                @change="changeListShowDir"
+                v-model:checked="listShowDir"
+                :disabled="!tempNode.nextPath"
                 checked-children="显示"
                 un-checked-children="隐藏"
-                v-model:checked="listShowDir"
+                @change="changeListShowDir"
               />
             </div>
-            <span v-if="this.nowPath">当前目录:{{ this.nowPath }}</span>
+            <span v-if="nowPath">当前目录:{{ nowPath }}</span>
             <!-- <span v-if="this.nowPath">{{ this.tempNode.parentDir }}</span> -->
           </a-space>
         </template>
@@ -128,10 +126,10 @@
             <a-tooltip placement="topLeft" :title="` 名称：${text} 长名称：${record.longname}`">
               <a-dropdown :trigger="['contextmenu']">
                 <div>{{ text }}</div>
-                <template v-slot:overlay>
+                <template #overlay>
                   <a-menu>
                     <a-menu-item key="2">
-                      <a-button @click="handleRenameFile(record)" type="link"><HighlightOutlined /> 重命名 </a-button>
+                      <a-button type="link" @click="handleRenameFile(record)"><HighlightOutlined /> 重命名 </a-button>
                     </a-menu-item>
                   </a-menu>
                 </template>
@@ -175,21 +173,21 @@
       </a-table>
       <!-- 上传文件 -->
       <a-modal
-        destroyOnClose
-        @cancel="closeUploadFile"
         v-model:open="uploadFileVisible"
+        destroy-on-close
         width="300px"
         title="上传文件"
-        :confirmLoading="confirmLoading"
+        :confirm-loading="confirmLoading"
         :footer="null"
-        :maskClosable="true"
+        :mask-closable="true"
+        @cancel="closeUploadFile"
       >
         <a-upload
           :file-list="uploadFileList"
-          @remove="handleRemove"
           :before-upload="beforeUpload"
           :accept="`${uploadFileZip ? ZIP_ACCEPT : ''}`"
           :multiple="!uploadFileZip"
+          @remove="handleRemove"
         >
           <a-button>
             <UploadOutlined />
@@ -208,14 +206,12 @@
         width="300px"
         :title="temp.addFileOrFolderType === 1 ? '新增目录' : '新建文件'"
         :footer="null"
-        :maskClosable="true"
+        :mask-closable="true"
       >
         <a-space direction="vertical" style="width: 100%">
-          <span v-if="this.nowPath">当前目录:{{ this.nowPath }}</span>
+          <span v-if="nowPath">当前目录:{{ nowPath }}</span>
           <!-- <a-tag v-if="">目录创建成功后需要手动刷新右边树才能显示出来哟</a-tag> -->
-          <a-tooltip
-            :title="this.temp.addFileOrFolderType === 1 ? '目录创建成功后需要手动刷新右边树才能显示出来哟' : ''"
-          >
+          <a-tooltip :title="temp.addFileOrFolderType === 1 ? '目录创建成功后需要手动刷新右边树才能显示出来哟' : ''">
             <a-input v-model:value="temp.fileFolderName" placeholder="输入文件或者文件夹名" />
           </a-tooltip>
           <a-row type="flex" justify="center">
@@ -230,16 +226,16 @@
       </a-modal>
 
       <a-modal
-        destroyOnClose
-        :confirmLoading="confirmLoading"
         v-model:open="editFileVisible"
+        destroy-on-close
+        :confirm-loading="confirmLoading"
         width="80vw"
         title="编辑文件"
-        cancelText="关闭"
-        :maskClosable="true"
+        cancel-text="关闭"
+        :mask-closable="true"
         @ok="updateFileData"
       >
-        <code-editor height="60vh" showTool v-model:content="temp.fileContent" :fileSuffix="temp.name">
+        <code-editor v-model:content="temp.fileContent" height="60vh" show-tool :file-suffix="temp.name">
           <template #tool_before>
             <a-tag>
               {{
@@ -255,17 +251,17 @@
       </a-modal>
       <!-- 从命名文件/文件夹 -->
       <a-modal
-        destroyOnClose
         v-model:open="renameFileFolderVisible"
+        destroy-on-close
         width="300px"
         :title="`重命名`"
         :footer="null"
-        :maskClosable="true"
+        :mask-closable="true"
       >
         <a-space direction="vertical" style="width: 100%">
           <a-input v-model:value="temp.fileFolderName" placeholder="输入新名称" />
 
-          <a-row type="flex" justify="center" v-if="temp.fileFolderName">
+          <a-row v-if="temp.fileFolderName" type="flex" justify="center">
             <a-button
               :loading="confirmLoading"
               type="primary"
@@ -279,12 +275,12 @@
 
       <!-- 修改文件权限 -->
       <a-modal
-        destroyOnClose
         v-model:open="editFilePermissionVisible"
+        destroy-on-close
         width="400px"
         :title="`修改文件权限`"
         :footer="null"
-        :maskClosable="true"
+        :mask-closable="true"
       >
         <a-row>
           <a-col :span="6"><span class="title">权限</span></a-col>
@@ -365,6 +361,9 @@ import codeEditor from '@/components/codeEditor'
 import { ZIP_ACCEPT, renderSize, parseTime } from '@/utils/const'
 import { Empty } from 'ant-design-vue'
 export default {
+  components: {
+    codeEditor
+  },
   props: {
     sshId: {
       type: String,
@@ -374,9 +373,6 @@ export default {
       type: String,
       default: ''
     }
-  },
-  components: {
-    codeEditor
   },
   data() {
     return {
@@ -472,15 +468,6 @@ export default {
       selectedKeys: []
     }
   },
-  mounted() {
-    this.listShowDir = Boolean(localStorage.getItem('ssh-list-show-dir'))
-    try {
-      this.sortMethod = JSON.parse(localStorage.getItem('ssh-list-sort') || JSON.stringify(this.sortMethod))
-    } catch (e) {
-      console.error(e)
-    }
-    this.loadData()
-  },
   computed: {
     nowPath() {
       if (!this.tempNode.allowPathParent) {
@@ -500,6 +487,15 @@ export default {
     reqDataId() {
       return this.sshId || this.machineSshId
     }
+  },
+  mounted() {
+    this.listShowDir = Boolean(localStorage.getItem('ssh-list-show-dir'))
+    try {
+      this.sortMethod = JSON.parse(localStorage.getItem('ssh-list-sort') || JSON.stringify(this.sortMethod))
+    } catch (e) {
+      console.error(e)
+    }
+    this.loadData()
   },
   methods: {
     changeSort(key, asc) {
@@ -603,7 +599,7 @@ export default {
       // 加载文件
       getFileList(this.baseUrl, params).then((res) => {
         if (res.code === 200) {
-          let children = []
+          // let children = []
           // 区分目录和文件
           res.data.forEach((element) => {
             if (element.dir) {

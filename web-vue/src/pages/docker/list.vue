@@ -1,6 +1,6 @@
 <template>
   <div>
-    <template v-if="this.useSuggestions">
+    <template v-if="useSuggestions">
       <a-result
         title="当前工作空间还没有 Docker"
         sub-title="请到【系统管理】-> 【资产管理】-> 【Docker管理】新增Docker，或者将已新增的Docker授权关联、分配到此工作空间"
@@ -18,26 +18,26 @@
       size="middle"
       :data-source="list"
       :columns="columns"
-      @change="changePage"
       :pagination="pagination"
       bordered
-      rowKey="id"
+      row-key="id"
       :row-selection="rowSelection"
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            @pressEnter="loadData"
             placeholder="名称"
             class="search-input-item"
+            @press-enter="loadData"
           />
 
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow"
             >工作空间同步</a-button
@@ -53,7 +53,7 @@
 
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('status')">
           <template v-if="record.machineDocker">
-            <a-tag color="green" v-if="record.machineDocker.status === 1">正常</a-tag>
+            <a-tag v-if="record.machineDocker.status === 1" color="green">正常</a-tag>
             <a-tooltip v-else :title="record.machineDocker.failureMsg">
               <a-tag color="red">无法连接</a-tag>
             </a-tooltip>
@@ -92,12 +92,12 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="编辑  Docker"
+      :mask-closable="false"
       @ok="handleEditOk"
-      :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="容器名称" name="name">
@@ -107,7 +107,7 @@
         <a-form-item label="标签" name="tagInput" help="标签用于容器构建选择容器功能（fromTag）">
           <a-space direction="vertical" style="width: 100%">
             <div>
-              <a-tooltip :key="index" :title="tag" v-for="(tag, index) in temp.tagsArray">
+              <a-tooltip v-for="(tag, index) in temp.tagsArray" :key="index" :title="tag">
                 <a-tag
                   :key="tag"
                   :closable="true"
@@ -125,10 +125,10 @@
             <a-input
               v-if="temp.inputVisible"
               ref="tagInput"
+              v-model:value="temp.tagInput"
               type="text"
               size="small"
               placeholder="请输入标签名 字母数字 长度 1-10"
-              v-model:value="temp.tagInput"
               @blur="handleInputConfirm"
               @keyup.enter="handleInputConfirm"
             />
@@ -148,23 +148,23 @@
 
     <console
       v-if="consoleVisible"
-      :visible="consoleVisible"
       :id="temp.id"
-      urlPrefix="/docker"
+      :visible="consoleVisible"
+      url-prefix="/docker"
       @close="onClose"
     ></console>
     <!-- </a-drawer> -->
     <!-- 同步到其他工作空间 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="syncToWorkspaceVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="同步到其他工作空间"
+      :mask-closable="false"
       @ok="handleSyncToWorkspace"
-      :maskClosable="false"
     >
       <a-alert message="温馨提示" type="warning">
-        <template v-slot:description>
+        <template #description>
           <ul>
             <li>同步机制采用容器 host 确定是同一个服务器（docker）</li>
             <li>当目标工作空间不存在对应的节点时候将自动创建一个新的docker（逻辑docker）</li>
@@ -176,6 +176,7 @@
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" name="workspaceId">
           <a-select
+            v-model:value="temp.workspaceId"
             show-search
             :filter-option="
               (input, option) => {
@@ -187,10 +188,9 @@
                 )
               }
             "
-            v-model:value="temp.workspaceId"
             placeholder="请选择工作空间"
           >
-            <a-select-option :disabled="getWorkspaceId() === item.id" v-for="item in workspaceList" :key="item.id">{{
+            <a-select-option v-for="item in workspaceList" :key="item.id" :disabled="getWorkspaceId() === item.id">{{
               item.name
             }}</a-select-option>
           </a-select>

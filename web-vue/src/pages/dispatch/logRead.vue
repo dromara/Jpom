@@ -6,19 +6,19 @@
       size="middle"
       :columns="columns"
       :pagination="pagination"
-      @change="changePage"
       bordered
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            @pressEnter="loadData"
             placeholder="日志名称"
             class="search-input-item"
+            @press-enter="loadData"
           />
 
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
@@ -27,7 +27,7 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record, index }">
+      <template #bodyCell="{ column, text, record }">
         <template v-if="column.tooltip">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
@@ -45,17 +45,17 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       width="60%"
       title="编辑日志搜索"
+      :mask-closable="false"
       @ok="handleEditOk"
-      :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="日志名称" name="name">
-          <a-input v-model:value="temp.name" :maxLength="50" placeholder="日志项目名称" />
+          <a-input v-model:value="temp.name" :max-length="50" placeholder="日志项目名称" />
         </a-form-item>
         <a-form-item label="绑定节点" required>
           <a-space direction="vertical" style="width: 100%">
@@ -63,8 +63,8 @@
               <a-col :span="11">
                 <span>节点: </span>
                 <a-select
-                  style="width: 80%"
                   v-model:value="item.nodeId"
+                  style="width: 80%"
                   placeholder="请选择节点"
                   @change="
                     () => {
@@ -96,15 +96,16 @@
               <a-col :span="11">
                 <span>项目: </span>
                 <a-select
+                  v-model:value="item.projectId"
                   :disabled="!item.nodeId"
                   style="width: 80%"
-                  v-model:value="item.projectId"
                   :placeholder="`请选择项目`"
                 >
                   <!-- <a-select-option value=""> 请先选择节点</a-select-option> -->
                   <template v-if="nodeProjectList[item.nodeId]">
                     <a-select-option
                       v-for="project in nodeProjectList[item.nodeId].projects"
+                      :key="project.projectId"
                       :disabled="
                         temp.projectList.filter((item, nowIndex) => {
                           return (
@@ -112,7 +113,6 @@
                           )
                         }).length > 0
                       "
-                      :key="project.projectId"
                     >
                       {{ project.name }}
                     </a-select-option>
@@ -133,14 +133,14 @@
     </a-modal>
     <!-- 实时阅读 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       placement="right"
-      :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
+      :width="`${getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
       :open="logReadVisible"
       @close="
         () => {
-          this.logReadVisible = false
-          this.loadData()
+          logReadVisible = false
+          loadData()
         }
       "
     >
@@ -150,11 +150,11 @@
       </template>
       <logReadView
         v-if="logReadVisible"
-        :data="this.temp"
-        @changeTitle="
+        :data="temp"
+        @change-title="
           (logFile) => {
-            const cacheData = { ...this.temp.cacheData, logFile: logFile }
-            this.temp = { ...this.temp, cacheData: cacheData }
+            const cacheData = { ...temp.cacheData, logFile: logFile }
+            temp = { ...temp, cacheData: cacheData }
           }
         "
       ></logReadView>

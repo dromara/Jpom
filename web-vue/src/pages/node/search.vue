@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    <template v-if="this.useSuggestions">
+    <template v-if="useSuggestions">
       <a-result
         title="当前工作空间还没有项目并且也没有任何节点"
         sub-title="需要您先新增资产机器再分配机器节点（逻辑节点）到当前工作空间"
@@ -14,19 +14,19 @@
       size="middle"
       bordered
       :pagination="pagination"
-      @change="changePage"
       :row-selection="rowSelection"
-      rowKey="id"
+      row-key="id"
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-select
             v-if="!nodeId"
             v-model:value="listQuery.nodeId"
-            allowClear
+            allow-clear
             placeholder="请选择节点"
             class="search-input-item"
           >
@@ -34,7 +34,7 @@
           </a-select>
           <a-select
             v-model:value="listQuery.group"
-            allowClear
+            allow-clear
             placeholder="请选择分组"
             class="search-input-item"
             @change="getNodeProjectData"
@@ -43,27 +43,27 @@
           </a-select>
           <a-input
             v-model:value="listQuery['%name%']"
-            @pressEnter="getNodeProjectData"
             placeholder="搜索项目名"
             class="search-input-item"
+            @press-enter="getNodeProjectData"
           />
           <a-input
             v-model:value="listQuery['%projectId%']"
-            @pressEnter="getNodeProjectData"
             placeholder="搜索项目ID"
             class="search-input-item"
+            @press-enter="getNodeProjectData"
           />
 
-          <a-select v-model:value="listQuery.runMode" allowClear placeholder="项目类型" class="search-input-item">
+          <a-select v-model:value="listQuery.runMode" allow-clear placeholder="项目类型" class="search-input-item">
             <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
           </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button :loading="loading" type="primary" @click="getNodeProjectData">搜索</a-button>
           </a-tooltip>
 
-          <a-dropdown v-if="this.selectedRowKeys && this.selectedRowKeys.length">
+          <a-dropdown v-if="selectedRowKeys && selectedRowKeys.length">
             <a-button type="primary"> 操作 <DownOutlined /> </a-button>
-            <template v-slot:overlay>
+            <template #overlay>
               <a-menu>
                 <a-menu-item>
                   <a-button type="primary" @click="batchStart">批量启动</a-button>
@@ -83,7 +83,7 @@
           <template v-if="!nodeId">
             <a-dropdown v-if="nodeMap && Object.keys(nodeMap).length">
               <a-button type="primary" danger> 同步 <DownOutlined /></a-button>
-              <template v-slot:overlay>
+              <template #overlay>
                 <a-menu>
                   <a-menu-item v-for="(nodeName, key) in nodeMap" :key="key" @click="reSyncProject(key)">
                     <a href="javascript:;">{{ nodeName }} <SyncOutlined /></a>
@@ -96,7 +96,7 @@
 
           <a-button v-if="nodeId" type="primary" @click="handlerExportData()"><DownloadOutlined />导出</a-button>
           <a-dropdown v-if="nodeId">
-            <template v-slot:overlay>
+            <template #overlay>
               <a-menu>
                 <a-menu-item key="1">
                   <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button>
@@ -108,7 +108,7 @@
               name="file"
               accept=".csv"
               action=""
-              :showUploadList="false"
+              :show-upload-list="false"
               :multiple="false"
               :before-upload="importBeforeUpload"
             >
@@ -117,7 +117,7 @@
           </a-dropdown>
 
           <a-tooltip>
-            <template v-slot:title>
+            <template #title>
               <div>
                 <ul>
                   <li>状态数据是异步获取有一定时间延迟</li>
@@ -259,7 +259,7 @@
                 更多
                 <DownOutlined />
               </a>
-              <template v-slot:overlay>
+              <template #overlay>
                 <a-menu>
                   <a-menu-item>
                     <template v-if="noFileModes.includes(record.runMode)">
@@ -327,7 +327,7 @@
     </a-table>
     <!-- 项目文件组件 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="drawerTitle"
       placement="right"
       width="85vw"
@@ -336,16 +336,16 @@
     >
       <file
         v-if="drawerFileVisible"
-        :nodeId="temp.nodeId"
-        :projectId="temp.projectId"
-        :runMode="temp.runMode"
-        @goConsole="goConsole"
-        @goReadFile="goReadFile"
+        :node-id="temp.nodeId"
+        :project-id="temp.projectId"
+        :run-mode="temp.runMode"
+        @go-console="goConsole"
+        @go-read-file="goReadFile"
       />
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="drawerTitle"
       placement="right"
       width="85vw"
@@ -355,14 +355,14 @@
       <console
         v-if="drawerConsoleVisible"
         :id="temp.id"
-        :nodeId="temp.nodeId"
-        :projectId="temp.projectId"
-        @goFile="goFile"
+        :node-id="temp.nodeId"
+        :project-id="temp.projectId"
+        @go-file="goFile"
       />
     </a-drawer>
     <!-- 项目跟踪文件组件 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="drawerTitle"
       placement="right"
       width="85vw"
@@ -371,21 +371,21 @@
     >
       <file-read
         v-if="drawerReadFileVisible"
-        :nodeId="temp.nodeId"
-        :readFilePath="temp.readFilePath"
         :id="temp.id"
-        :projectId="temp.projectId"
-        @goFile="goFile"
+        :node-id="temp.nodeId"
+        :read-file-path="temp.readFilePath"
+        :project-id="temp.projectId"
+        @go-file="goFile"
       />
     </a-drawer>
     <!-- 批量操作状态 -->
-    <a-modal destroyOnClose v-model:open="batchVisible" :title="temp.title" :footer="null" @cancel="batchClose">
+    <a-modal v-model:open="batchVisible" destroy-on-close :title="temp.title" :footer="null" @cancel="batchClose">
       <a-list bordered :data-source="temp.data">
-        <template v-slot:renderItem="{ item }">
+        <template #renderItem="{ item }">
           <a-list-item>
             <a-list-item-meta>
               <!-- <template #description> :="item.whitelistDirectory" </template> -->
-              <template v-slot:title>
+              <template #title>
                 <a> {{ item.name }}</a>
               </template>
             </a-list-item-meta>
@@ -398,16 +398,16 @@
     </a-modal>
     <!-- 触发器 -->
     <a-modal
-      destroyOnClose
       v-model:open="triggerVisible"
+      destroy-on-close
       title="触发器"
       width="50%"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
-          <template v-slot:rightExtra>
+          <template #rightExtra>
             <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>
@@ -415,7 +415,7 @@
           <a-tab-pane key="1" tab="执行">
             <a-space direction="vertical" style="width: 100%">
               <a-alert message="温馨提示" type="warning">
-                <template v-slot:description>
+                <template #description>
                   <ul>
                     <li>单个触发器地址中：第一个随机字符串为项目ID(服务端)，第二个随机字符串为 token</li>
                     <li>
@@ -427,12 +427,12 @@
               </a-alert>
 
               <a-alert
-                :key="item.value"
                 v-for="item in triggerUses"
+                :key="item.value"
                 type="info"
                 :message="`${item.desc}触发器地址(点击可以复制)`"
               >
-                <template v-slot:description>
+                <template #description>
                   <a-typography-paragraph
                     :copyable="{ tooltip: false, text: `${temp.triggerUrl}?action=${item.value}` }"
                   >
@@ -443,7 +443,7 @@
               </a-alert>
 
               <a-alert type="info" :message="`批量触发器地址(点击可以复制)`">
-                <template v-slot:description>
+                <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
                   </a-typography-paragraph>
@@ -456,24 +456,24 @@
     </a-modal>
     <!-- 编辑区 -->
     <a-modal
-      destroyOnClose
       v-model:open="editProjectVisible"
+      destroy-on-close
       width="60vw"
       title="编辑项目"
-      :confirmLoading="confirmLoading"
+      :confirm-loading="confirmLoading"
+      :mask-closable="false"
       @ok="
         () => {
-          this.confirmLoading = true
-          this.$refs.edit.handleOk().finally(() => {
-            this.confirmLoading = false
+          confirmLoading = true
+          $refs.edit.handleOk().finally(() => {
+            confirmLoading = false
           })
         }
       "
-      :maskClosable="false"
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="选择节点" help="编辑过程中可以切换节点但是要注意数据是否匹配">
-          <a-select v-model:value="temp.nodeId" allowClear placeholder="请选择节点">
+          <a-select v-model:value="temp.nodeId" allow-clear placeholder="请选择节点">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
         </a-form-item>
@@ -482,31 +482,31 @@
       <project-edit
         v-if="temp.nodeId"
         ref="edit"
+        :data="temp"
+        :node-id="temp.nodeId"
+        :project-id="temp.id"
         @close="
           () => {
             editProjectVisible = false
-            this.getNodeProjectData()
-            this.loadGroupList()
+            getNodeProjectData()
+            loadGroupList()
           }
         "
-        :data="temp"
-        :nodeId="temp.nodeId"
-        :projectId="temp.id"
       />
     </a-modal>
     <!-- 迁移到其他工作空间 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="migrateWorkspaceVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       width="50vw"
       title="迁移到其他工作空间"
+      :mask-closable="false"
       @ok="migrateWorkspaceOk"
-      :maskClosable="false"
     >
       <a-space direction="vertical" style="width: 100%">
         <a-alert message="温馨提示" type="warning" show-icon>
-          <template v-slot:description>
+          <template #description>
             项目可能支持关联如下数据：
             <ul>
               <li>
@@ -524,7 +524,7 @@
           </template>
         </a-alert>
         <a-alert message="风险提醒" type="error" show-icon>
-          <template v-slot:description>
+          <template #description>
             <ul>
               <li>如果垮机器（资产机器）迁移之前机器中的项目数据仅是逻辑删除（项目文件和日志均会保留）</li>
               <li>迁移操作不具有事务性质，如果流程被中断或者限制条件不满足可能产生冗余数据！！！！</li>
@@ -539,6 +539,7 @@
         <a-form-item> </a-form-item>
         <a-form-item label="选择工作空间" name="workspaceId">
           <a-select
+            v-model:value="temp.workspaceId"
             show-search
             :filter-option="
               (input, option) => {
@@ -550,7 +551,6 @@
                 )
               }
             "
-            v-model:value="temp.workspaceId"
             placeholder="请选择工作空间"
             @change="loadMigrateWorkspaceNodeList"
           >
@@ -559,6 +559,7 @@
         </a-form-item>
         <a-form-item label="选择逻辑节点" name="nodeId">
           <a-select
+            v-model:value="temp.nodeId"
             show-search
             :filter-option="
               (input, option) => {
@@ -570,7 +571,6 @@
                 )
               }
             "
-            v-model:value="temp.nodeId"
             placeholder="请选择逻辑节点"
           >
             <a-select-option v-for="item in migrateWorkspaceNodeList" :key="item.id">{{ item.name }}</a-select-option>
@@ -580,14 +580,14 @@
     </a-modal>
     <!-- 日志备份 -->
     <a-modal
-      destroyOnClose
       v-model:open="lobbackVisible"
+      destroy-on-close
       title="日志备份列表"
       width="850px"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
-      <ProjectLog v-if="lobbackVisible" :nodeId="temp.nodeId" :projectId="temp.projectId"></ProjectLog>
+      <ProjectLog v-if="lobbackVisible" :node-id="temp.nodeId" :project-id="temp.projectId"></ProjectLog>
     </a-modal>
   </div>
 </template>

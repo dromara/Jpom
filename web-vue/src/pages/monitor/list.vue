@@ -6,29 +6,29 @@
       size="middle"
       :columns="columns"
       :pagination="pagination"
-      @change="changePage"
       bordered
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            @pressEnter="loadData"
             placeholder="监控名称"
             class="search-input-item"
+            @press-enter="loadData"
           />
-          <a-select v-model:value="listQuery.status" allowClear placeholder="开启状态" class="search-input-item">
+          <a-select v-model:value="listQuery.status" allow-clear placeholder="开启状态" class="search-input-item">
             <a-select-option :value="1">开启</a-select-option>
             <a-select-option :value="0">关闭</a-select-option>
           </a-select>
-          <a-select v-model:value="listQuery.autoRestart" allowClear placeholder="自动重启" class="search-input-item">
+          <a-select v-model:value="listQuery.autoRestart" allow-clear placeholder="自动重启" class="search-input-item">
             <a-select-option :value="1">是</a-select-option>
             <a-select-option :value="0">否</a-select-option>
           </a-select>
-          <a-select v-model:value="listQuery.alarm" allowClear placeholder="报警状态" class="search-input-item">
+          <a-select v-model:value="listQuery.alarm" allow-clear placeholder="报警状态" class="search-input-item">
             <a-select-option :value="1">报警中</a-select-option>
             <a-select-option :value="0">未报警</a-select-option>
           </a-select>
@@ -64,17 +64,17 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editMonitorVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       width="60%"
       title="编辑监控"
+      :mask-closable="false"
       @ok="handleEditMonitorOk"
-      :maskClosable="false"
     >
       <a-form ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="监控名称" name="name">
-          <a-input v-model:value="temp.name" :maxLength="50" placeholder="监控名称" />
+          <a-input v-model:value="temp.name" :max-length="50" placeholder="监控名称" />
         </a-form-item>
 
         <a-form-item label="开启状态" name="status">
@@ -113,8 +113,8 @@
         </a-form-item>
         <a-form-item label="监控项目" name="projects">
           <a-select
-            option-label-prop="label"
             v-model:value="projectKeys"
+            option-label-prop="label"
             mode="multiple"
             placeholder="选择要监控的项目,file 类型项目不可以监控"
             show-search
@@ -130,15 +130,15 @@
             "
           >
             <a-select-opt-group
-              :label="nodeMap[nodeItem.node].name"
               v-for="nodeItem in nodeProjectGroupList"
               :key="nodeItem.node"
+              :label="nodeMap[nodeItem.node].name"
             >
               <a-select-option
-                :label="`${project.name} - ${project.runMode}`"
                 v-for="project in nodeItem.projects"
-                :disabled="!noFileModes.includes(project.runMode)"
                 :key="project.id"
+                :label="`${project.name} - ${project.runMode}`"
+                :disabled="!noFileModes.includes(project.runMode)"
               >
                 【{{ project.nodeName }}】{{ project.name }} -
                 {{ project.runMode }}
@@ -147,10 +147,10 @@
           </a-select>
         </a-form-item>
         <a-form-item name="notifyUser" class="jpom-notify">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               联系人
-              <template v-slot:title>
+              <template #title>
                 如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。
               </template>
               <QuestionCircleOutlined v-show="!temp.id" />
@@ -180,10 +180,10 @@
           </a-transfer>
         </a-form-item>
         <a-form-item name="webhook">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               WebHooks
-              <template v-slot:title>
+              <template #title>
                 <ul>
                   <li>发生报警时候请求</li>
                   <li>

@@ -9,20 +9,21 @@
           :columns="operatecolumns"
           :pagination="operatecpagination"
           bordered
-          rowKey="id"
+          row-key="id"
           @change="
             (pagination, filters, sorter) => {
-              this.operatelistQuery = CHANGE_PAGE(this.operatelistQuery, {
+              operatelistQuery = CHANGE_PAGE(operatelistQuery, {
                 pagination,
                 sorter
               })
-              this.operaterloadData()
+              operaterloadData()
             }
           "
         >
           <template #title>
             <a-space>
               <a-select
+                v-model:value="operatelistQuery.classFeature"
                 show-search
                 :filter-option="
                   (input, option) => {
@@ -34,14 +35,14 @@
                     )
                   }
                 "
-                v-model:value="operatelistQuery.classFeature"
-                allowClear
+                allow-clear
                 placeholder="操作功能"
                 class="search-input-item"
               >
                 <a-select-option v-for="item in classFeature" :key="item.value">{{ item.title }}</a-select-option>
               </a-select>
               <a-select
+                v-model:value="operatelistQuery.methodFeature"
                 show-search
                 :filter-option="
                   (input, option) => {
@@ -53,8 +54,7 @@
                     )
                   }
                 "
-                v-model:value="operatelistQuery.methodFeature"
-                allowClear
+                allow-clear
                 placeholder="操作方法"
                 class="search-input-item"
               >
@@ -65,7 +65,7 @@
                 format="YYYY-MM-DD HH:mm:ss"
                 @change="
                   (value, dateString) => {
-                    this.operatelistQuery.createTimeMillis = `${dateString[0]} ~ ${dateString[1]}`
+                    operatelistQuery.createTimeMillis = `${dateString[0]} ~ ${dateString[1]}`
                   }
                 "
               />
@@ -115,14 +115,14 @@
           :columns="logincolumns"
           :pagination="loginpagination"
           bordered
-          rowKey="id"
+          row-key="id"
           @change="
             (pagination, filters, sorter) => {
-              this.loginlistQuery = CHANGE_PAGE(this.loginlistQuery, {
+              loginlistQuery = CHANGE_PAGE(loginlistQuery, {
                 pagination,
                 sorter
               })
-              this.loginloadData()
+              loginloadData()
             }
           "
         >
@@ -130,22 +130,22 @@
             <a-space>
               <a-input
                 v-model:value="loginlistQuery['%username%']"
-                @pressEnter="loginloadData"
                 placeholder="用户名"
                 class="search-input-item"
+                @press-enter="loginloadData"
               />
               <a-input
                 v-model:value="loginlistQuery['%ip%']"
-                @pressEnter="loginloadData"
                 placeholder="登录IP"
                 class="search-input-item"
+                @press-enter="loginloadData"
               />
               <a-range-picker
                 :show-time="{ format: 'HH:mm:ss' }"
                 format="YYYY-MM-DD HH:mm:ss"
                 @change="
                   (value, dateString) => {
-                    this.loginlistQuery.createTimeMillis = `${dateString[0]} ~ ${dateString[1]}`
+                    loginlistQuery.createTimeMillis = `${dateString[0]} ~ ${dateString[1]}`
                   }
                 "
               />

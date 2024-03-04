@@ -8,29 +8,30 @@
           :columns="columns"
           size="middle"
           :pagination="pagination"
-          @change="changePage"
           bordered
-          rowKey="id"
+          row-key="id"
           :row-selection="rowSelection"
           :scroll="{
             x: 'max-content'
           }"
+          @change="changePage"
         >
-          <template v-slot:title>
+          <template #title>
             <a-space wrap class="search-box">
               <a-input
-                class="search-input-item"
-                @pressEnter="loadData"
                 v-model:value="listQuery['%name%']"
+                class="search-input-item"
                 placeholder="ssh名称"
+                @press-enter="loadData"
               />
               <a-input
-                class="search-input-item"
-                @pressEnter="loadData"
                 v-model:value="listQuery['%host%']"
+                class="search-input-item"
                 placeholder="host"
+                @press-enter="loadData"
               />
               <a-select
+                v-model:value="listQuery.groupName"
                 show-search
                 :filter-option="
                   (input, option) => {
@@ -42,8 +43,7 @@
                     )
                   }
                 "
-                v-model:value="listQuery.groupName"
-                allowClear
+                allow-clear
                 placeholder="分组"
                 class="search-input-item"
               >
@@ -55,12 +55,12 @@
               </a-tooltip>
 
               <a-button type="primary" @click="handleAdd">新增</a-button>
-              <a-button :disabled="!this.tableSelections.length" @click="syncToWorkspaceShow()" type="primary">
+              <a-button :disabled="!tableSelections.length" type="primary" @click="syncToWorkspaceShow()">
                 批量分配</a-button
               >
               <a-button type="primary" @click="handlerExportData()"><DownloadOutlined />导出</a-button>
               <a-dropdown>
-                <template v-slot:overlay>
+                <template #overlay>
                   <a-menu>
                     <a-menu-item key="1">
                       <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button>
@@ -72,7 +72,7 @@
                   name="file"
                   accept=".csv"
                   action=""
-                  :showUploadList="false"
+                  :show-upload-list="false"
                   :multiple="false"
                   :before-upload="beforeUpload"
                 >
@@ -80,7 +80,7 @@
                 </a-upload>
               </a-dropdown>
               <a-tooltip>
-                <template v-slot:title>
+                <template #title>
                   <div>
                     <ul>
                       <li>节点状态是异步获取有一定时间延迟</li>
@@ -108,7 +108,7 @@
 
             <template v-else-if="column.dataIndex === 'osName'">
               <a-popover title="系统信息">
-                <template v-slot:content>
+                <template #content>
                   <p>系统名：{{ record.osName }}</p>
                   <p>系统版本：{{ record.osVersion }}</p>
                   <p>CPU型号：{{ record.osCpuIdentifierName }}</p>
@@ -122,8 +122,8 @@
               <template v-if="record.status !== 2">
                 <!-- 禁用监控不显示 -->
                 <div v-if="record.javaVersion">
-                  <a-popover title="java信息" v-if="record.jpomAgentPid > 0">
-                    <template v-slot:content>
+                  <a-popover v-if="record.jpomAgentPid > 0" title="java信息">
+                    <template #content>
                       <p>插件端进程ID：{{ record.jpomAgentPid }}</p>
                       <p>java版本：{{ record.javaVersion }}</p>
                     </template>
@@ -132,15 +132,15 @@
                   <a-button v-else size="small" type="primary" @click="install(record)">安装节点</a-button>
                 </div>
 
-                <a-tag color="orange" v-else>no java</a-tag>
+                <a-tag v-else color="orange">no java</a-tag>
               </template>
               <template v-else>-</template>
             </template>
             <template v-else-if="column.dataIndex === 'dockerInfo'">
               <template v-if="record.status !== 2">
                 <!-- 禁用监控不显示 -->
-                <a-popover title="docker信息" v-if="record.dockerInfo">
-                  <template v-slot:content>
+                <a-popover v-if="record.dockerInfo" title="docker信息">
+                  <template #content>
                     <p>路径：{{ JSON.parse(record.dockerInfo).path }}</p>
                     <p>版本：{{ JSON.parse(record.dockerInfo).version }}</p>
                   </template>
@@ -176,7 +176,7 @@
 
             <template v-else-if="column.dataIndex === 'osMaxOccupyDisk'">
               <a-popover title="硬盘信息">
-                <template v-slot:content>
+                <template #content>
                   <p>硬盘总量：{{ renderSize(record.osFileStoreTotal) }}</p>
                   <p>硬盘最大的使用率：{{ formatPercent(record.osMaxOccupyDisk) }}</p>
                   <p>使用率最大的分区：{{ record.osMaxOccupyDiskName }}</p>
@@ -200,7 +200,7 @@
                   <a-button size="small" type="primary" @click="handleTerminal(record, false)"
                     >终端<DownOutlined
                   /></a-button>
-                  <template v-slot:overlay>
+                  <template #overlay>
                     <a-menu>
                       <a-menu-item key="1">
                         <a-button size="small" type="primary" @click="handleTerminal(record, true)">
@@ -219,7 +219,7 @@
                     更多
                     <DownOutlined />
                   </a>
-                  <template v-slot:overlay>
+                  <template #overlay>
                     <a-menu>
                       <a-menu-item>
                         <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -239,32 +239,32 @@
         </a-table>
         <!-- 编辑区 -->
         <a-modal
-          destroyOnClose
-          :confirmLoading="confirmLoading"
           v-model:open="editSshVisible"
+          destroy-on-close
+          :confirm-loading="confirmLoading"
           width="600px"
           title="编辑 SSH"
+          :mask-closable="false"
           @ok="handleEditSshOk"
-          :maskClosable="false"
         >
           <a-form ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
             <a-form-item label="SSH 名称" name="name">
-              <a-input v-model:value="temp.name" :maxLength="50" placeholder="SSH 名称" />
+              <a-input v-model:value="temp.name" :max-length="50" placeholder="SSH 名称" />
             </a-form-item>
             <a-form-item label="分组名称" name="group">
               <custom-select
                 v-model:value="temp.groupName"
                 :data="groupList"
-                inputPlaceholder="新增分组"
-                selectPlaceholder="选择分组名"
+                input-placeholder="新增分组"
+                select-placeholder="选择分组名"
               >
               </custom-select>
             </a-form-item>
             <a-form-item label="Host" name="host">
               <a-input-group compact name="host">
-                <a-input style="width: 70%" v-model:value="temp.host" placeholder="主机 Host" />
+                <a-input v-model:value="temp.host" style="width: 70%" placeholder="主机 Host" />
                 <a-form-item-rest>
-                  <a-input-number style="width: 30%" v-model:value="temp.port" :min="1" placeholder="端口号" />
+                  <a-input-number v-model:value="temp.port" style="width: 30%" :min="1" placeholder="端口号" />
                 </a-form-item-rest>
               </a-input-group>
             </a-form-item>
@@ -275,12 +275,12 @@
               <template #label>
                 <a-tooltip>
                   用户名
-                  <template v-slot:title> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                  <template #title> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
               <a-input v-model:value="temp.user" placeholder="用户">
-                <template v-slot:suffix>
+                <template #suffix>
                   <a-tooltip
                     v-if="temp.id"
                     title=" 密码字段和密钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我"
@@ -301,28 +301,28 @@
               <template #label>
                 <a-tooltip>
                   密码
-                  <template v-slot:title> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                  <template #title> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
               <!-- <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" /> -->
               <custom-input
                 :input="temp.password"
-                :envList="envVarList"
+                :env-list="envVarList"
+                :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`"
                 @change="
                   (v) => {
                     temp = { ...temp, password: v }
                   }
                 "
-                :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`"
               >
               </custom-input>
             </a-form-item>
             <a-form-item v-if="temp.connectType === 'PUBKEY'" name="privateKey">
-              <template v-slot:label>
+              <template #label>
                 <a-tooltip placement="topLeft">
                   私钥内容
-                  <template v-slot:title
+                  <template #title
                     >不填将使用默认的 $HOME/.ssh 目录中的配置,使用优先级是：id_dsa>id_rsa>identity
                   </template>
                   <QuestionCircleOutlined v-if="temp.type !== 'edit'" />
@@ -347,7 +347,7 @@
               />
             </a-form-item>
             <a-form-item label="文件后缀" name="suffix">
-              <template v-slot:help>
+              <template #help>
                 此配置仅对服务端管理生效, 工作空间的 ssh 配置需要单独配置（<span style="color: red"
                   >配置方式：SSH列表->操作栏中->关联按钮->对应工作空间->操作栏中->配置按钮</span
                 >）。
@@ -363,79 +363,79 @@
         </a-modal>
         <!-- 安装节点 -->
         <a-modal
-          destroyOnClose
           v-model:open="nodeVisible"
+          destroy-on-close
           width="80%"
           title="安装插件端"
           :footer="null"
+          :mask-closable="false"
           @cancel="
             () => {
-              this.nodeVisible = false
-              this.loadData()
+              nodeVisible = false
+              loadData()
             }
           "
-          :maskClosable="false"
         >
           <fastInstall v-if="nodeVisible"></fastInstall>
         </a-modal>
         <!-- 文件管理 -->
         <a-drawer
-          destroyOnClose
-          :title="`${this.temp.name} 文件管理`"
+          destroy-on-close
+          :title="`${temp.name} 文件管理`"
           placement="right"
           width="90vw"
           :open="drawerVisible"
           @close="
             () => {
-              this.drawerVisible = false
+              drawerVisible = false
             }
           "
         >
-          <ssh-file v-if="drawerVisible" :machineSshId="temp.id" />
+          <ssh-file v-if="drawerVisible" :machine-ssh-id="temp.id" />
         </a-drawer>
         <!-- Terminal -->
         <a-modal
-          destroyOnClose
+          v-model:open="terminalVisible"
+          destroy-on-close
           :style="{
             maxWidth: '100vw',
-            top: this.terminalFullscreen ? 0 : false,
+            top: terminalFullscreen ? 0 : false,
             paddingBottom: 0
           }"
-          :width="this.terminalFullscreen ? '100vw' : '80vw'"
-          :bodyStyle="{
+          :width="terminalFullscreen ? '100vw' : '80vw'"
+          :body-style="{
             padding: '0 10px',
             paddingTop: '10px',
             marginRight: '10px',
-            height: `${this.terminalFullscreen ? 'calc(100vh - 80px)' : '70vh'}`,
+            height: `${terminalFullscreen ? 'calc(100vh - 80px)' : '70vh'}`,
             display: 'flex',
             flexDirection: 'column'
           }"
-          v-model:open="terminalVisible"
           :title="temp.name"
           :footer="null"
-          :maskClosable="false"
+          :mask-closable="false"
         >
-          <terminal2 v-if="terminalVisible" :machineSshId="temp.id" />
+          <terminal2 v-if="terminalVisible" :machine-ssh-id="temp.id" />
         </a-modal>
         <!-- 操作日志 -->
         <a-modal
-          destroyOnClose
           v-model:open="viewOperationLog"
+          destroy-on-close
           title="操作日志"
           width="80vw"
           :footer="null"
-          :maskClosable="false"
+          :mask-closable="false"
         >
-          <OperationLog v-if="viewOperationLog" :machineSshId="temp.id"></OperationLog>
+          <OperationLog v-if="viewOperationLog" :machine-ssh-id="temp.id"></OperationLog>
         </a-modal>
         <!-- 查看 ssh 关联工作空间的信息 -->
         <a-modal
-          destroyOnClose
           v-model:open="viewWorkspaceSsh"
+          destroy-on-close
           width="50%"
           title="关联工作空间ssh"
           :footer="null"
-          :maskClosable="false"
+          :mask-closable="false"
         >
           <a-list bordered :data-source="workspaceSshList">
             <template #renderItem="{ item }">
@@ -457,13 +457,13 @@
           </a-list>
         </a-modal>
         <a-modal
-          destroyOnClose
-          :confirmLoading="confirmLoading"
           v-model:open="configWorkspaceSshVisible"
+          destroy-on-close
+          :confirm-loading="confirmLoading"
           width="50%"
           title="配置ssh"
+          :mask-closable="false"
           @ok="handleConfigWorkspaceSshOk"
-          :maskClosable="false"
         >
           <a-form
             ref="editConfigWorkspaceSshForm"
@@ -476,17 +476,22 @@
               <a-alert message="当前配置仅对选择的工作空间生效,其他工作空间需要另行配置" banner />
             </a-form-item>
             <a-form-item label="SSH 名称">
-              <a-input v-model:value="temp.name" :disabled="true" :maxLength="50" placeholder="SSH 名称" />
+              <a-input v-model:value="temp.name" :disabled="true" :max-length="50" placeholder="SSH 名称" />
             </a-form-item>
             <a-form-item label="工作空间名称">
-              <a-input v-model:value="temp.workspaceName" :disabled="true" :maxLength="50" placeholder="工作空间名称" />
+              <a-input
+                v-model:value="temp.workspaceName"
+                :disabled="true"
+                :max-length="50"
+                placeholder="工作空间名称"
+              />
             </a-form-item>
 
             <a-form-item name="fileDirs">
-              <template v-slot:label>
+              <template #label>
                 <a-tooltip>
                   文件目录
-                  <template v-slot:title> 绑定指定目录可以在线管理，同时构建 ssh 发布目录也需要在此配置 </template>
+                  <template #title> 绑定指定目录可以在线管理，同时构建 ssh 发布目录也需要在此配置 </template>
                   <QuestionCircleOutlined />
                 </a-tooltip>
               </template>
@@ -506,10 +511,10 @@
               />
             </a-form-item>
             <a-form-item name="notAllowedCommand">
-              <template v-slot:label>
+              <template #label>
                 <a-tooltip>
                   禁止命令
-                  <template v-slot:title>
+                  <template #title>
                     限制禁止在在线终端执行的命令
                     <ul>
                       <li>超级管理员没有任何限制</li>
@@ -529,12 +534,12 @@
         </a-modal>
         <!-- 分配到其他工作空间 -->
         <a-modal
-          destroyOnClose
-          :confirmLoading="confirmLoading"
           v-model:open="syncToWorkspaceVisible"
+          destroy-on-close
+          :confirm-loading="confirmLoading"
           title="分配到其他工作空间"
+          :mask-closable="false"
           @ok="handleSyncToWorkspace"
-          :maskClosable="false"
         >
           <a-space direction="vertical" style="width: 100%">
             <a-alert message="注意" type="warning" show-icon>
@@ -543,6 +548,7 @@
             <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
               <a-form-item label="选择工作空间" name="workspaceId">
                 <a-select
+                  v-model:value="temp.workspaceId"
                   show-search
                   :filter-option="
                     (input, option) => {
@@ -554,7 +560,6 @@
                       )
                     }
                   "
-                  v-model:value="temp.workspaceId"
                   placeholder="请选择工作空间"
                 >
                   <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
@@ -611,19 +616,6 @@ export default {
     SshFile,
     OperationLog,
     CustomInput
-  },
-  computed: {
-    pagination() {
-      return COMPUTED_PAGINATION(this.listQuery)
-    },
-    rowSelection() {
-      return {
-        onChange: (selectedRowKeys) => {
-          this.tableSelections = selectedRowKeys
-        },
-        selectedRowKeys: this.tableSelections
-      }
-    }
   },
   data() {
     return {
@@ -769,6 +761,19 @@ export default {
       tableSelections: [],
       envVarList: [],
       confirmLoading: false
+    }
+  },
+  computed: {
+    pagination() {
+      return COMPUTED_PAGINATION(this.listQuery)
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys
+        },
+        selectedRowKeys: this.tableSelections
+      }
     }
   },
   created() {

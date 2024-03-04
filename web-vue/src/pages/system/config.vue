@@ -1,7 +1,7 @@
 <template>
   <a-tabs default-active-key="1" @change="tabChange">
     <a-tab-pane key="1">
-      <template v-slot:tab>
+      <template #tab>
         <span>
           <SettingOutlined />
           服务端系统配置
@@ -12,13 +12,13 @@
         <a-form-item>
           <code-editor
             v-model:content="temp.content"
-            fileSuffix="conf.yml"
+            file-suffix="conf.yml"
             :options="{ mode: 'yaml', tabSize: 2 }"
-            :showTool="true"
+            :show-tool="true"
             height="calc(100vh - 200px)"
           >
             <template #tool_before>
-              <a-alert show-icon v-if="temp.file" :message="`配置文件路径:${temp.file}`" />
+              <a-alert v-if="temp.file" show-icon :message="`配置文件路径:${temp.file}`" />
             </template>
           </code-editor>
         </a-form-item>
@@ -49,8 +49,8 @@
         banner
       />
       <a-form
-        style="margin-top: 10px"
         ref="editIpConfigForm"
+        style="margin-top: 10px"
         :model="ipTemp"
         :label-col="{ span: 2 }"
         :wrapper-col="{ span: 20 }"
@@ -76,7 +76,7 @@
           <template #label>
             <a-space align="center">
               <a-tooltip>
-                <template v-slot:title> 只允许访问的 IP 地址 </template>
+                <template #title> 只允许访问的 IP 地址 </template>
                 <CheckCircleFilled />
                 IP授权
               </a-tooltip>
@@ -98,7 +98,7 @@
 
     <!-- 全局代理 -->
     <a-tab-pane key="6">
-      <template v-slot:tab>
+      <template #tab>
         <span>
           <ApiOutlined />
           全局代理
@@ -115,16 +115,16 @@
             <a-space>
               <a-form-item label="通配符" name="pattern">
                 <a-input
-                  style="width: 30vw"
-                  :maxLength="200"
                   v-model:value="item.pattern"
+                  style="width: 30vw"
+                  :max-length="200"
                   placeholder="地址通配符,* 表示所有地址都将使用代理"
                 >
                 </a-input>
               </a-form-item>
               <a-form-item label="代理">
-                <a-input style="width: 30vw" v-model:value="item.proxyAddress" placeholder="代理地址 (127.0.0.1:8888)">
-                  <template v-slot:addonBefore>
+                <a-input v-model:value="item.proxyAddress" style="width: 30vw" placeholder="代理地址 (127.0.0.1:8888)">
+                  <template #addonBefore>
                     <a-select v-model:value="item.proxyType" style="width: 100px">
                       <a-select-option value="HTTP">HTTP</a-select-option>
                       <a-select-option value="SOCKS">SOCKS</a-select-option>
@@ -137,13 +137,13 @@
                 <a-button
                   type="primary"
                   danger
+                  size="small"
+                  :disabled="proxyConfigData.globalProxy && proxyConfigData.globalProxy.length <= 1"
                   @click="
                     () => {
                       proxyConfigData.globalProxy && proxyConfigData.globalProxy.splice(index, 1)
                     }
                   "
-                  size="small"
-                  :disabled="proxyConfigData.globalProxy && proxyConfigData.globalProxy.length <= 1"
                 >
                   删除
                 </a-button>
@@ -193,10 +193,10 @@ import codeEditor from '@/components/codeEditor'
 import { RESTART_UPGRADE_WAIT_TIME_COUNT } from '@/utils/const'
 
 export default {
-  inject: ['globalLoading'],
   components: {
     codeEditor
   },
+  inject: ['globalLoading'],
   data() {
     return {
       temp: {

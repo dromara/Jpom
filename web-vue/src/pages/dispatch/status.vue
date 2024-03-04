@@ -1,7 +1,7 @@
 <template>
   <div>
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="`查看 ${name} 状态`"
       placement="right"
       width="85vw"
@@ -22,7 +22,7 @@
             :bordered="true"
             :data-source="list"
             :pagination="false"
-            rowKey="id_no"
+            row-key="id_no"
             :scroll="{
               x: 'max-content'
             }"
@@ -51,7 +51,7 @@
                 />
               </a-space>
             </template>
-            <template #bodyCell="{ column, text, record, index }">
+            <template #bodyCell="{ column, text, record }">
               <template v-if="column.dataIndex === 'nodeId'">
                 <a-tooltip placement="topLeft" :title="text">
                   <a-button type="link" style="padding: 0" size="small" @click="toNode(text)">
@@ -147,7 +147,7 @@
         <a-tab-pane key="2" tab="配置">
           <!-- 配置分发 -->
           <div style="width: 50vw">
-            <draggable v-model="list" :group="`sortValue`" item-key="id" handle=".move" chosenClass="box-shadow">
+            <draggable v-model="list" :group="`sortValue`" item-key="id" handle=".move" chosen-class="box-shadow">
               <template #item="{ element }">
                 <a-row class="item-row">
                   <a-col :span="18">
@@ -176,8 +176,8 @@
                         type="primary"
                         danger
                         size="small"
-                        @click="handleRemoveProject(element)"
                         :disabled="!list || list.length <= 1"
+                        @click="handleRemoveProject(element)"
                       >
                         解绑
                       </a-button>
@@ -201,7 +201,7 @@
 
     <!-- 项目文件组件 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="drawerTitle"
       placement="right"
       width="85vw"
@@ -211,15 +211,15 @@
       <file
         v-if="drawerFileVisible"
         :id="temp.id"
-        :nodeId="temp.nodeId"
-        :projectId="temp.projectId"
-        @goConsole="goConsole"
-        @goReadFile="goReadFile"
+        :node-id="temp.nodeId"
+        :project-id="temp.projectId"
+        @go-console="goConsole"
+        @go-read-file="goReadFile"
       />
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="drawerTitle"
       placement="right"
       width="85vw"
@@ -229,14 +229,14 @@
       <console
         v-if="drawerConsoleVisible"
         :id="temp.id"
-        :nodeId="temp.nodeId"
-        :projectId="temp.projectId"
-        @goFile="goFile"
+        :node-id="temp.nodeId"
+        :project-id="temp.projectId"
+        @go-file="goFile"
       />
     </a-drawer>
     <!-- 项目跟踪文件组件 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="drawerTitle"
       placement="right"
       width="85vw"
@@ -245,11 +245,11 @@
     >
       <file-read
         v-if="drawerReadFileVisible"
-        :nodeId="temp.nodeId"
-        :readFilePath="temp.readFilePath"
         :id="temp.id"
-        :projectId="temp.projectId"
-        @goFile="goFile"
+        :node-id="temp.nodeId"
+        :read-file-path="temp.readFilePath"
+        :project-id="temp.projectId"
+        @go-file="goFile"
       />
     </a-drawer>
   </div>
@@ -293,6 +293,7 @@ export default {
       type: String
     }
   },
+  emits: ['close'],
   data() {
     return {
       childLoading: true,
@@ -657,8 +658,7 @@ export default {
         }
       })
     }
-  },
-  emits: ['close']
+  }
 }
 </script>
 

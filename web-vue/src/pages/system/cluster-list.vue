@@ -7,16 +7,16 @@
       size="middle"
       :pagination="pagination"
       bordered
-      @change="
-        (pagination, filters, sorter) => {
-          this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
-          this.loadData()
-        }
-      "
       :scroll="{
         x: 'max-content'
       }"
-      rowKey="id"
+      row-key="id"
+      @change="
+        (pagination, filters, sorter) => {
+          listQuery = CHANGE_PAGE(listQuery, { pagination, sorter })
+          loadData()
+        }
+      "
     >
       <template #title>
         <a-space direction="vertical" style="width: 100%">
@@ -33,30 +33,30 @@
           <div v-if="groupList.filter((item) => !groupMap[item]).length">
             未绑定集群的分组：
             <template v-for="(item, index) in groupList">
-              <a-tag v-if="!groupMap[item]">{{ item }}</a-tag>
+              <a-tag v-if="!groupMap[item]" :key="index">{{ item }}</a-tag>
             </template>
           </div>
           <a-space>
             <a-input
               v-model:value="listQuery['%name%']"
-              @pressEnter="loadData"
               placeholder="集群名称"
-              allowClear
+              allow-clear
               class="search-input-item"
+              @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['%url%']"
-              @pressEnter="loadData"
               placeholder="集群地址"
-              allowClear
+              allow-clear
               class="search-input-item"
+              @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['%localHostName%']"
-              @pressEnter="loadData"
               placeholder="主机名"
-              allowClear
+              allow-clear
               class="search-input-item"
+              @press-enter="loadData"
             />
             <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
               <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
@@ -87,7 +87,7 @@
           <a-tooltip
             :title="`集群名称：${record.name || ''}/地址：${record.url || ''}/状态消息：${record.statusMsg || ''}`"
           >
-            <a-button v-if="record.url" type="link" @click="openUrl(record.url)" size="small">
+            <a-button v-if="record.url" type="link" size="small" @click="openUrl(record.url)">
               {{ text }}
             </a-button>
             <span v-else>{{ record.statusMsg }}</span>
@@ -105,16 +105,16 @@
 
     <!-- 编辑区 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="编辑集群"
+      :mask-closable="false"
       @ok="handleEditOk"
-      :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item label="名称" name="name">
-          <a-input v-model:value="temp.name" :maxLength="50" placeholder="工作空间名称" />
+          <a-input v-model:value="temp.name" :max-length="50" placeholder="工作空间名称" />
         </a-form-item>
         <a-form-item label="关联分组" name="linkGroups">
           <template #help>
@@ -122,6 +122,7 @@
             <div style="color: red">注意：同一个分组不建议被多个集群绑定</div>
           </template>
           <a-select
+            v-model:value="temp.linkGroups"
             show-search
             mode="multiple"
             :filter-option="
@@ -134,8 +135,7 @@
                 )
               }
             "
-            v-model:value="temp.linkGroups"
-            allowClear
+            allow-clear
             placeholder="关联分组"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>

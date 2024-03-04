@@ -1,7 +1,7 @@
 <template>
   <div>
     <log-view1 :ref="`logView`" height="calc(100vh - 140px)">
-      <template v-slot:before> <a-button type="primary" size="small" @click="goFile">文件管理</a-button></template>
+      <template #before> <a-button type="primary" size="small" @click="goFile">文件管理</a-button></template>
     </log-view1>
   </div>
 </template>

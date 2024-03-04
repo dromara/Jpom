@@ -1,6 +1,6 @@
 <template>
   <div>
-    <template v-if="this.useSuggestions">
+    <template v-if="useSuggestions">
       <a-result
         title="当前工作空间还没有 Docker 集群"
         sub-title="请到【系统管理】-> 【资产管理】-> 【Docker管理】新增Docker并创建集群，或者将已存在的的 Docker 集群授权关联、分配到此工作空间"
@@ -17,29 +17,29 @@
       size="middle"
       :data-source="list"
       :columns="columns"
-      @change="changePage"
       :pagination="pagination"
       bordered
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            @pressEnter="loadData"
             placeholder="名称"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%tag%']"
-            @pressEnter="loadData"
             placeholder="标签"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -52,7 +52,7 @@
         </template>
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('status')">
           <template v-if="record.machineDocker">
-            <a-tag color="green" v-if="record.machineDocker.status === 1">正常</a-tag>
+            <a-tag v-if="record.machineDocker.status === 1" color="green">正常</a-tag>
             <a-tooltip v-else :title="record.machineDocker.failureMsg">
               <a-tag color="red">无法连接</a-tag>
             </a-tooltip>
@@ -94,12 +94,12 @@
     </a-table>
     <!-- 编辑集群区 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="编辑 Docker 集群"
+      :mask-closable="false"
       @ok="handleEditOk"
-      :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="集群名称" name="name">
@@ -129,11 +129,11 @@
       v-if="consoleVisible"
       :id="temp.id"
       :visible="consoleVisible"
-      :initMenu="temp.menuKey"
-      urlPrefix=""
+      :init-menu="temp.menuKey"
+      url-prefix=""
       @close="
         () => {
-          this.consoleVisible = false
+          consoleVisible = false
         }
       "
     ></console>

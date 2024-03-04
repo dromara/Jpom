@@ -6,44 +6,44 @@
       :loading="viewOperationLoading"
       :columns="viewOperationLogColumns"
       :pagination="viewOperationLogPagination"
-      @change="changeListLog"
       bordered
       size="middle"
       :scroll="{
         x: 'max-content'
       }"
+      @change="changeListLog"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
-            class="search-input-item"
-            @pressEnter="handleListLog"
             v-model:value="viewOperationLogListQuery['modifyUser']"
+            class="search-input-item"
             placeholder="操作人"
+            @press-enter="handleListLog"
           />
           <a-input
-            class="search-input-item"
-            @pressEnter="handleListLog"
             v-model:value="viewOperationLogListQuery['%sshName%']"
+            class="search-input-item"
             placeholder="ssh 名"
+            @press-enter="handleListLog"
           />
           <a-input
-            class="search-input-item"
-            @pressEnter="handleListLog"
             v-model:value="viewOperationLogListQuery['%machineSshName%']"
+            class="search-input-item"
             placeholder="机器 ssh 名"
+            @press-enter="handleListLog"
           />
           <a-input
-            class="search-input-item"
-            @pressEnter="handleListLog"
             v-model:value="viewOperationLogListQuery['ip']"
+            class="search-input-item"
             placeholder="ip"
+            @press-enter="handleListLog"
           />
           <a-input
-            class="search-input-item"
-            @pressEnter="handleListLog"
             v-model:value="viewOperationLogListQuery['%commands%']"
+            class="search-input-item"
             placeholder="执行命令"
+            @press-enter="handleListLog"
           />
           <a-range-picker
             :show-time="{ format: 'HH:mm:ss' }"
@@ -102,11 +102,6 @@ export default {
     type: {
       type: String,
       default: ''
-    }
-  },
-  computed: {
-    viewOperationLogPagination() {
-      return COMPUTED_PAGINATION(this.viewOperationLogListQuery)
     }
   },
 
@@ -169,6 +164,11 @@ export default {
           fixed: 'right'
         }
       ]
+    }
+  },
+  computed: {
+    viewOperationLogPagination() {
+      return COMPUTED_PAGINATION(this.viewOperationLogListQuery)
     }
   },
   created() {

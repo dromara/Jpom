@@ -6,36 +6,36 @@
       :columns="columns"
       :data-source="list"
       bordered
-      rowKey="id"
-      @change="changePage"
+      row-key="id"
       :pagination="pagination"
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
       <template #title>
         <a-space>
           <a-input
             v-model:value="listQuery['%name%']"
-            @pressEnter="loadData"
             placeholder="请输入备份名称"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%version%']"
-            @pressEnter="loadData"
             placeholder="请输入版本"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-select
             v-model:value="listQuery.backupType"
-            allowClear
+            allow-clear
             placeholder="请选择备份类型"
             class="search-input-item"
           >
-            <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">{{
-              backupType.value
-            }}</a-select-option>
+            <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">
+              {{ backupType.value }}
+            </a-select-option>
           </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
@@ -103,13 +103,13 @@
     </a-table>
     <!-- 创建备份信息区 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="createBackupVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="创建备份信息"
-      @ok="handleCreateBackupOk"
       width="600px"
-      :maskClosable="false"
+      :mask-closable="false"
+      @ok="handleCreateBackupOk"
     >
       <a-form ref="editBackupForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="备份类型" name="backupType">
@@ -134,15 +134,15 @@
     </a-modal>
     <!-- 上传 SQL 备份文件 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="uploadSqlFileVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       width="300px"
       title="上传 SQL 文件"
-      :maskClosable="true"
+      :mask-closable="true"
       @ok="startSqlUpload"
     >
-      <a-upload :file-list="uploadFileList" @remove="handleSqlRemove" :before-upload="beforeSqlUpload" accept=".sql">
+      <a-upload :file-list="uploadFileList" :before-upload="beforeSqlUpload" accept=".sql" @remove="handleSqlRemove">
         <a-button><UploadOutlined />选择 SQL 文件</a-button>
       </a-upload>
       <!-- <br />

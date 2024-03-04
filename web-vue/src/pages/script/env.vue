@@ -1,6 +1,6 @@
 <template>
   <div>
-    <workspaceEnv ref="workspaceEnv" :workspaceId="this.getWorkspaceId()" :global="true" />
+    <workspaceEnv ref="workspaceEnv" :workspace-id="getWorkspaceId()" :global="true" />
   </div>
 </template>
 

@@ -158,7 +158,7 @@ export const useAllMenuStore = defineStore('menu2', {
     // 删除 tab
     removeTab(mode: any, key: any) {
       return new Promise((resolve) => {
-        let tabList = this[mode + '_tabList']
+        const tabList = this[mode + '_tabList']
         const index = tabList.findIndex((ele: any) => ele.key === key)
         tabList.splice(index, 1)
 

@@ -2,7 +2,7 @@
   <div>
     <div>
       <log-view1 ref="logView" height="calc(100vh - 140px)">
-        <template v-slot:before>
+        <template #before>
           <a-space>
             <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start"
               >执行</a-button
@@ -17,14 +17,14 @@
 
     <!--  -->
     <a-modal
-      destroyOnClose
       v-model:open="editArgs"
+      destroy-on-close
       title="新增运行参数"
-      :confirmLoading="confirmLoading"
+      :confirm-loading="confirmLoading"
+      :mask-closable="false"
       @ok="startExecution"
-      :maskClosable="false"
     >
-      <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" ref="ruleForm">
+      <a-form ref="ruleForm" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <!-- <a-form-item label="执行参数" name="args">
             <a-input v-model="temp.args" placeholder="执行参数,没有参数可以不填写" />
           </a-form-item> -->
@@ -40,11 +40,11 @@
             <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
                 <a-input
-                  :addon-before="`参数${index + 1}值`"
                   v-model:value="item.value"
+                  :addon-before="`参数${index + 1}值`"
                   :placeholder="`参数值 ${item.desc ? ',' + item.desc : ''}`"
                 >
-                  <template v-slot:suffix>
+                  <template #suffix>
                     <a-tooltip v-if="item.desc" :title="item.desc">
                       <InfoCircleOutlined />
                     </a-tooltip>
@@ -55,7 +55,7 @@
               <a-col v-if="!item.desc" :span="2">
                 <a-row type="flex" justify="center" align="middle">
                   <a-col>
-                    <MinusCircleOutlined @click="() => commandParams.splice(index, 1)" style="color: #ff0000" />
+                    <MinusCircleOutlined style="color: #ff0000" @click="() => commandParams.splice(index, 1)" />
                   </a-col>
                 </a-row>
               </a-col>

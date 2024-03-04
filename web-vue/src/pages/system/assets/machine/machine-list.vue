@@ -1,27 +1,28 @@
 <template>
   <div>
-    <a-card :bodyStyle="{ padding: '10px' }">
-      <template v-slot:title>
+    <a-card :body-style="{ padding: '10px' }">
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
-            class="search-input-item"
-            @pressEnter="getMachineList"
             v-model:value="listQuery['%name%']"
+            class="search-input-item"
             placeholder="机器名称"
+            @press-enter="getMachineList"
           />
           <a-input
-            class="search-input-item"
-            @pressEnter="getMachineList"
             v-model:value="listQuery['%jpomUrl%']"
+            class="search-input-item"
             placeholder="节点地址"
+            @press-enter="getMachineList"
           />
           <a-input
-            class="search-input-item"
-            @pressEnter="getMachineList"
             v-model:value="listQuery['%jpomVersion%']"
+            class="search-input-item"
             placeholder="插件版本"
+            @press-enter="getMachineList"
           />
           <a-select
+            v-model:value="listQuery.groupName"
             show-search
             :filter-option="
               (input, option) => {
@@ -33,8 +34,7 @@
                 )
               }
             "
-            v-model:value="listQuery.groupName"
-            allowClear
+            allow-clear
             placeholder="分组"
             class="search-input-item"
           >
@@ -42,7 +42,7 @@
           </a-select>
           <a-select
             v-model:value="listQuery['order_field']"
-            allowClear
+            allow-clear
             placeholder="请选择排序字段"
             class="search-input-item"
           >
@@ -56,8 +56,8 @@
           <a-button :loading="loading" type="primary" @click="getMachineList">搜索</a-button>
           <a-button type="primary" @click="addMachine">新增</a-button>
 
-          <a-dropdown v-if="this.layoutType === 'table'">
-            <template v-slot:overlay>
+          <a-dropdown v-if="layoutType === 'table'">
+            <template #overlay>
               <a-menu>
                 <a-menu-item key="1" @click="syncToWorkspaceShow()"> 分配节点 </a-menu-item>
                 <a-menu-item key="2" @click="syncNodeWhiteConfig"> 同步授权 </a-menu-item>
@@ -75,10 +75,10 @@
               <TableOutlined v-else />
             </template>
 
-            {{ this.layoutType === 'card' ? '卡片' : '表格' }}
+            {{ layoutType === 'card' ? '卡片' : '表格' }}
           </a-button>
           <a-tooltip>
-            <template v-slot:title>
+            <template #title>
               <ul>
                 <li>节点账号密码为插件端的账号密码,并非用户账号(管理员)密码</li>
                 <li>
@@ -93,20 +93,20 @@
         </a-space>
       </template>
       <!-- 卡片视图 -->
-      <template v-if="this.layoutType === 'card'">
+      <template v-if="layoutType === 'card'">
         <a-row :gutter="[16, 16]">
           <template v-if="list && list.length">
-            <a-col v-for="item in list" :span="6">
-              <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
-                <template v-slot:title>
+            <a-col v-for="(item, index) in list" :key="index" :span="6">
+              <a-card :head-style="{ padding: '0 6px' }" :body-style="{ padding: '10px' }">
+                <template #title>
                   <a-row :gutter="[4, 0]">
                     <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
                       <a-tooltip>
-                        <template v-slot:title>
+                        <template #title>
                           <div>节点名称：{{ item.name }}</div>
                           <div>节点地址：{{ item.jpomUrl }}</div>
                         </template>
-                        <span @click="showMachineInfo(item)" style="cursor: pointer">
+                        <span style="cursor: pointer" @click="showMachineInfo(item)">
                           {{ item.name }}
                         </span>
                       </a-tooltip>
@@ -175,11 +175,11 @@
                 </a-tooltip>
                 <a-row type="flex" align="middle" justify="center" style="margin-top: 10px">
                   <a-button-group>
-                    <a-button @click="handleEdit(item)" type="primary" size="small"> 编辑 </a-button>
-                    <a-button @click="showMachineInfo(item)" type="primary" size="small">详情</a-button>
-                    <a-button @click="syncToWorkspaceShow(item)" type="primary" size="small">分配</a-button>
-                    <a-button @click="viewMachineNode(item)" type="primary" size="small">节点</a-button>
-                    <a-button @click="deleteMachineInfo(item)" size="small">删除</a-button>
+                    <a-button type="primary" size="small" @click="handleEdit(item)"> 编辑 </a-button>
+                    <a-button type="primary" size="small" @click="showMachineInfo(item)">详情</a-button>
+                    <a-button type="primary" size="small" @click="syncToWorkspaceShow(item)">分配</a-button>
+                    <a-button type="primary" size="small" @click="viewMachineNode(item)">节点</a-button>
+                    <a-button size="small" @click="deleteMachineInfo(item)">删除</a-button>
                   </a-button-group>
                 </a-row>
               </a-card>
@@ -195,42 +195,42 @@
           <a-col>
             <a-pagination
               v-model:current="listQuery.page"
-              :showTotal="
+              v-model:pageSize="listQuery.limit"
+              :show-total="
                 (total) => {
                   return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery)
                 }
               "
-              :showSizeChanger="true"
-              :pageSizeOptions="sizeOptions"
-              v-model:pageSize="listQuery.limit"
+              :show-size-changer="true"
+              :page-size-options="sizeOptions"
               :total="listQuery.total"
-              :hideOnSinglePage="true"
-              @showSizeChange="
+              :hide-on-single-page="true"
+              show-less-items
+              @show-size-change="
                 (current, size) => {
-                  this.listQuery.limit = size
-                  this.getMachineList()
+                  listQuery.limit = size
+                  getMachineList()
                 }
               "
-              @change="this.getMachineList"
-              show-less-items
+              @change="getMachineList"
             />
           </a-col>
         </a-row>
       </template>
       <!-- 表格视图 -->
-      <template v-else-if="this.layoutType === 'table'">
+      <template v-else-if="layoutType === 'table'">
         <a-table
           :columns="columns"
           :data-source="list"
           bordered
           size="middle"
-          rowKey="id"
+          row-key="id"
           :pagination="pagination"
-          @change="changePage"
           :row-selection="rowSelection"
           :scroll="{
             x: 'max-content'
           }"
+          @change="changePage"
         >
           <template #bodyCell="{ column, text, record }">
             <template v-if="column.dataIndex === 'name'">
@@ -275,7 +275,7 @@
             <template v-else-if="column.dataIndex === 'operation'">
               <a-space>
                 <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
-                <a-button @click="syncToWorkspaceShow(record)" type="primary" size="small">分配</a-button>
+                <a-button type="primary" size="small" @click="syncToWorkspaceShow(record)">分配</a-button>
               </a-space>
             </template>
           </template>
@@ -284,33 +284,33 @@
     </a-card>
     <!-- 编辑区 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="editVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       width="50%"
       title="编辑机器"
+      :mask-closable="false"
       @ok="handleEditOk"
-      :maskClosable="false"
     >
       <a-form ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 19 }">
         <a-form-item label="机器名称" name="name">
-          <a-input :maxLength="50" v-model:value="temp.name" placeholder="机器名称" />
+          <a-input v-model:value="temp.name" :max-length="50" placeholder="机器名称" />
         </a-form-item>
         <a-form-item label="机器分组" name="groupName">
           <custom-select
             v-model:value="temp.groupName"
             :data="groupList"
-            inputPlaceholder="新增分组"
-            selectPlaceholder="选择分组名"
+            input-placeholder="新增分组"
+            select-placeholder="选择分组名"
           >
           </custom-select>
         </a-form-item>
 
         <a-form-item name="jpomUrl">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               节点地址
-              <template v-slot:title
+              <template #title
                 >节点地址为插件端的 IP:PORT 插件端端口默认为：2123
                 <ul>
                   <li>节点地址建议使用内网地址</li>
@@ -322,8 +322,8 @@
           </template>
           <template #help>节点地址格式为：IP:PORT (示例：192.168.1.100:2123)</template>
           <a-input v-model:value="temp.jpomUrl" placeholder="节点地址 (192.168.1.100:2123)">
-            <template v-slot:addonBefore>
-              <a-select placeholder="协议类型" v-model:value="temp.jpomProtocol" style="width: 160px">
+            <template #addonBefore>
+              <a-select v-model:value="temp.jpomProtocol" placeholder="协议类型" style="width: 160px">
                 <a-select-option value="Http"> Http:// </a-select-option>
                 <a-select-option value="Https"> Https:// </a-select-option>
               </a-select>
@@ -336,10 +336,10 @@
           <template #help>默认账号为：jpomAgent</template>
         </a-form-item>
         <a-form-item :name="`${temp.id ? 'loginPwd-update' : 'loginPwd'}`">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               节点密码
-              <template v-slot:title>
+              <template #title>
                 节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json
                 文件查看（如果自定义配置了账号密码将没有此文件）
               </template>
@@ -353,10 +353,10 @@
           <a-collapse-panel key="1" header="其他配置">
             <a-form-item label="模板节点" name="templateNode" help="">
               <a-switch
+                v-model:checked="temp.templateNode"
                 checked-children="是"
                 un-checked-children="否"
                 default-checked
-                v-model:checked="temp.templateNode"
               />
               以此机器节点配置为模板,用于快捷同步其他机器节点的配置
             </a-form-item>
@@ -372,7 +372,7 @@
 
             <a-form-item label="代理" name="jpomHttpProxy">
               <a-input v-model:value="temp.jpomHttpProxy" placeholder="代理地址 (127.0.0.1:8888)">
-                <template v-slot:addonBefore>
+                <template #addonBefore>
                   <a-select
                     v-model:value="temp.jpomHttpProxyType"
                     placeholder="选择代理类型"
@@ -389,9 +389,9 @@
 
             <a-form-item label="编码方式" name="transportEncryption">
               <a-select
+                v-model:value="temp.transportEncryption"
                 show-search
                 default-value="0"
-                v-model:value="temp.transportEncryption"
                 placeholder="请选择编码方式"
               >
                 <a-select-option :value="0">不编码</a-select-option>
@@ -407,39 +407,40 @@
 
     <machine-info
       v-if="drawerVisible"
-      :machineId="temp.id"
+      :machine-id="temp.id"
       :name="temp.name"
       @close="
         () => {
-          this.drawerVisible = false
+          drawerVisible = false
         }
       "
     />
     <!-- 机器在线升级相关信息 -->
     <machine-info
       v-if="drawerUpgradeVisible"
-      :machineId="temp.id"
+      :machine-id="temp.id"
       :name="temp.name"
       tab="upgrade"
       @close="
         () => {
-          this.drawerUpgradeVisible = false
+          drawerUpgradeVisible = false
         }
       "
     />
 
     <!-- 分配到其他工作空间 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="syncToWorkspaceVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="分配到其他工作空间"
+      :mask-closable="false"
       @ok="handleSyncToWorkspace"
-      :maskClosable="false"
     >
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item label="选择工作空间" name="workspaceId">
           <a-select
+            v-model:value="temp.workspaceId"
             show-search
             :filter-option="
               (input, option) => {
@@ -451,7 +452,6 @@
                 )
               }
             "
-            v-model:value="temp.workspaceId"
             placeholder="请选择工作空间"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
@@ -462,15 +462,15 @@
 
     <!-- 查看机器关联节点 -->
     <a-modal
-      destroyOnClose
       v-model:open="viewLinkNode"
+      destroy-on-close
       width="50%"
       title="关联节点"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
       <a-list bordered :data-source="nodeList">
-        <template v-slot:renderItem="{ item }">
+        <template #renderItem="{ item }">
           <a-list-item style="display: block">
             <a-row>
               <a-col :span="10">节点名称：{{ item.name }}</a-col>
@@ -486,13 +486,13 @@
     </a-modal>
     <!-- 分发节点授权 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="whiteConfigVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       width="50%"
       title="同步节点授权"
+      :mask-closable="false"
       @ok="onSubmitWhitelist"
-      :maskClosable="false"
     >
       <a-alert
         :message="`一键分发同步多个节点的授权配置,不用挨个配置。配置后会覆盖之前的配置,一般用于节点环境一致的情况`"
@@ -502,6 +502,7 @@
       <a-form ref="editWhiteForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item label="模板节点">
           <a-select
+            v-model:value="temp.templateNodeId"
             show-search
             :filter-option="
               (input, option) => {
@@ -513,9 +514,8 @@
                 )
               }
             "
-            @change="(id) => loadWhitelistData(id)"
             placeholder="请选择模板节点"
-            v-model:value="temp.templateNodeId"
+            @change="(id) => loadWhitelistData(id)"
           >
             <a-select-option v-for="item in templateNodeList" :key="item.id" :value="item.id">
               {{ item.name }}
@@ -543,12 +543,12 @@
     </a-modal>
     <!-- 分发机器配置 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="nodeConfigVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       width="50%"
       title="同步节点配置"
-      :maskClosable="false"
+      :mask-closable="false"
     >
       <template #footer>
         <a-space>
@@ -564,8 +564,8 @@
       <a-form ref="editNodeConfigForm" :model="temp">
         <a-form-item label="模版节点">
           <a-select
+            v-model:value="temp.templateNodeId"
             show-search
-            @change="(id) => loadNodeConfig(id)"
             :filter-option="
               (input, option) => {
                 const children = option.children && option.children()
@@ -577,7 +577,7 @@
               }
             "
             placeholder="请选择模版节点"
-            v-model:value="temp.templateNodeId"
+            @change="(id) => loadNodeConfig(id)"
           >
             <a-select-option v-for="item in templateNodeList" :key="item.id" :value="item.id">
               {{ item.name }}
@@ -587,8 +587,8 @@
 
         <a-form-item :wrapper-col="{ span: 24 }">
           <code-editor
-            height="40vh"
             v-model:content="temp.content"
+            height="40vh"
             :options="{ mode: 'yaml', tabSize: 2 }"
           ></code-editor>
         </a-form-item>

@@ -5,18 +5,19 @@
       :data-source="list"
       size="middle"
       :columns="columns"
-      @change="changePage"
       :pagination="pagination"
       bordered
-      rowKey="id"
+      row-key="id"
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
-          <a-input v-model:value="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
+          <a-input v-model:value="listQuery['%name%']" placeholder="名称" allow-clear class="search-input-item" />
           <a-select
+            v-model:value="listQuery.triggerExecType"
             show-search
             :filter-option="
               (input, option) => {
@@ -28,35 +29,34 @@
                 )
               }
             "
-            v-model:value="listQuery.triggerExecType"
-            allowClear
+            allow-clear
             placeholder="触发类型"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-range-picker
-            @change="
-              (value, dateString) => {
-                if (!dateString[0] || !dateString[1]) {
-                  this.listQuery.createTimeMillis = ''
-                } else {
-                  this.listQuery.createTimeMillis = `${dateString[0]} ~ ${dateString[1]}`
-                }
-              }
-            "
-            allowClear
-            inputReadOnly
+            allow-clear
+            input-read-only
             :show-time="{ format: 'HH:mm:ss' }"
             :placeholder="['执行时间开始', '执行时间结束']"
             format="YYYY-MM-DD HH:mm:ss"
-            valueFormat="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            @change="
+              (value, dateString) => {
+                if (!dateString[0] || !dateString[1]) {
+                  listQuery.createTimeMillis = ''
+                } else {
+                  listQuery.createTimeMillis = `${dateString[0]} ~ ${dateString[1]}`
+                }
+              }
+            "
           />
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-tooltip>
-            <template v-slot:title>
+            <template #title>
               <div>
                 脚本模版是存储在节点(插件端),执行也都将在节点里面执行,服务端会定时去拉取执行日志,拉取频率为 100 条/分钟
               </div>
@@ -71,7 +71,7 @@
         </a-space>
       </template>
 
-      <template #bodyCell="{ column, text, record, index }">
+      <template #bodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'scriptName'">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
@@ -108,12 +108,12 @@
     <script-log-view
       v-if="logVisible > 0"
       :visible="logVisible != 0"
+      :temp="temp"
       @close="
         () => {
           logVisible = 0
         }
       "
-      :temp="temp"
     />
   </div>
 </template>

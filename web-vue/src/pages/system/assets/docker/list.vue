@@ -5,36 +5,37 @@
       size="middle"
       :data-source="list"
       :columns="columns"
-      @change="changePage"
       :pagination="pagination"
       bordered
-      rowKey="id"
+      row-key="id"
       :row-selection="rowSelection"
       :scroll="{
         x: 'max-content'
       }"
+      @change="changePage"
     >
-      <template v-slot:title>
+      <template #title>
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            @pressEnter="loadData"
             placeholder="名称"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%host%']"
-            @pressEnter="loadData"
             placeholder="host"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%swarmId%']"
-            @pressEnter="loadData"
             placeholder="集群ID"
             class="search-input-item"
+            @press-enter="loadData"
           />
           <a-select
+            v-model:value="listQuery.groupName"
             show-search
             :filter-option="
               (input, option) => {
@@ -46,18 +47,17 @@
                 )
               }
             "
-            v-model:value="listQuery.groupName"
-            allowClear
+            allow-clear
             placeholder="分组"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-          <a-button :disabled="!this.tableSelections.length" @click="syncToWorkspaceShow()" type="primary">
+          <a-button :disabled="!tableSelections.length" type="primary" @click="syncToWorkspaceShow()">
             批量分配</a-button
           >
           <a-tooltip title="自动检测服务端所在服务器中是否存在 docker，如果存在将自动新增到列表中">
@@ -86,7 +86,7 @@
               <BlockOutlined />
             </a-tooltip>
             <a-popover title="集群信息">
-              <template v-slot:content>
+              <template #content>
                 <p>集群ID：{{ record.swarmId }}</p>
                 <p>当前节点ID：{{ record.swarmNodeId }}</p>
                 <p>当前节点地址：{{ record.swarmNodeAddr }}</p>
@@ -106,8 +106,8 @@
             <template v-if="record.tlsVerify">
               <template v-if="record.certExist">
                 <a-switch
-                  size="small"
                   v-model:checked="record.tlsVerify"
+                  size="small"
                   :disabled="true"
                   checked-children="开"
                   un-checked-children="关"
@@ -117,8 +117,8 @@
             </template>
             <template v-else>
               <a-switch
-                size="small"
                 v-model:checked="record.tlsVerify"
+                size="small"
                 :disabled="true"
                 checked-children="开"
                 un-checked-children="关"
@@ -139,7 +139,7 @@
             >
             <template v-if="!record.swarmId && record.status === 1">
               <a-popover title="集群操作">
-                <template v-slot:content>
+                <template #content>
                   <p>
                     <a-button size="small" type="primary" @click="initSwarm(record)">创建集群</a-button>
                   </p>
@@ -153,17 +153,17 @@
             <template v-else>
               <a-button
                 size="small"
-                @click="handleSwarmConsole(record)"
                 :disabled="parseInt(record.status) !== 1"
                 type="primary"
+                @click="handleSwarmConsole(record)"
                 ><SelectOutlined />集群</a-button
               >
             </template>
-            <a-button size="small" @click="syncToWorkspaceShow(record)" type="primary">分配</a-button>
-            <a-button size="small" @click="viewWorkspaceDataHander(record)" type="primary">关联</a-button>
+            <a-button size="small" type="primary" @click="syncToWorkspaceShow(record)">分配</a-button>
+            <a-button size="small" type="primary" @click="viewWorkspaceDataHander(record)">关联</a-button>
             <a-dropdown>
               <a @click="(e) => e.preventDefault()"> 更多 <DownOutlined /> </a>
-              <template v-slot:overlay>
+              <template #overlay>
                 <a-menu>
                   <a-menu-item>
                     <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -190,18 +190,18 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal
-      destroyOnClose
       v-model:open="editVisible"
+      destroy-on-close
       width="50%"
       title="编辑  Docker"
+      :confirm-loading="confirmLoading"
+      :mask-closable="false"
       @ok="handleEditOk"
-      :confirmLoading="confirmLoading"
-      :maskClosable="false"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-space direction="vertical" style="width: 100%">
           <a-alert banner>
-            <template v-slot:message>
+            <template #message>
               <template v-if="temp.enableSsh">
                 <ul>
                   <li>SSH 方式连接 docker 是通过终端实现，每次操作 docker 相关 api 需要登录一次终端</li>
@@ -244,8 +244,8 @@
           <custom-select
             v-model:value="temp.groupName"
             :data="groupList"
-            inputPlaceholder="新增分组"
-            selectPlaceholder="选择分组名"
+            input-placeholder="新增分组"
+            select-placeholder="选择分组名"
           >
           </custom-select>
         </a-form-item>
@@ -253,8 +253,8 @@
           <a-switch v-model:checked="temp.enableSsh" checked-children="开" un-checked-children="关" />
         </a-form-item>
         <a-form-item v-if="temp.enableSsh" label="SSH连接信息" name="enableSsh">
-          <a-select v-model:value="temp.machineSshId" allowClear placeholder="SSH连接信息" class="search-input-item">
-            <a-select-option :disabled="!item.dockerInfo" v-for="item in sshList" :key="item.id" :value="item.id">
+          <a-select v-model:value="temp.machineSshId" allow-clear placeholder="SSH连接信息" class="search-input-item">
+            <a-select-option v-for="item in sshList" :key="item.id" :disabled="!item.dockerInfo" :value="item.id">
               <a-tooltip :title="`${item.name}(${item.host})`">
                 <template #title>
                   {{ item.name }}({{ item.host }})[{{
@@ -291,7 +291,7 @@
               enter-button="选择证书"
               @search="
                 () => {
-                  this.certificateVisible = true
+                  certificateVisible = true
                 }
               "
             />
@@ -301,7 +301,7 @@
         <a-collapse>
           <a-collapse-panel key="1" header="其他配置">
             <a-form-item label="超时时间" name="heartbeatTimeout">
-              <a-input-number style="width: 100%" v-model:value="temp.heartbeatTimeout" placeholder="超时时间 单位秒" />
+              <a-input-number v-model:value="temp.heartbeatTimeout" style="width: 100%" placeholder="超时时间 单位秒" />
             </a-form-item>
             <a-form-item label="仓库地址" name="registryUrl">
               <a-input v-model:value="temp.registryUrl" placeholder="仓库地址" />
@@ -321,16 +321,16 @@
     </a-modal>
     <!-- 创建集群 -->
     <a-modal
-      destroyOnClose
       v-model:open="initSwarmVisible"
+      destroy-on-close
       title="创建 Docker 集群"
+      :confirm-loading="confirmLoading"
+      :mask-closable="false"
       @ok="handleSwarm"
-      :confirmLoading="confirmLoading"
-      :maskClosable="false"
     >
       <a-form ref="initForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-alert message="温馨提示" type="warning">
-          <template v-slot:description>
+          <template #description>
             创建集群会将尝试获取 docker
             中集群信息，如果存在集群信息将自动同步集群信息到系统，反之不存在集群信息将自动创建 swarm 集群
           </template>
@@ -339,16 +339,17 @@
     </a-modal>
     <!-- 加入集群 -->
     <a-modal
-      destroyOnClose
       v-model:open="joinSwarmVisible"
+      destroy-on-close
       title="加入 Docker 集群"
+      :confirm-loading="confirmLoading"
+      :mask-closable="false"
       @ok="handleSwarmJoin"
-      :confirmLoading="confirmLoading"
-      :maskClosable="false"
     >
       <a-form ref="joinForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="选择集群" name="managerId">
           <a-select
+            v-model:value="temp.managerId"
             show-search
             :filter-option="
               (input, option) => {
@@ -360,6 +361,8 @@
                 )
               }
             "
+            allow-clear
+            placeholder="加入到哪个集群"
             @change="
               (v) => {
                 tempList = swarmList.filter((item) => {
@@ -372,9 +375,6 @@
                 }
               }
             "
-            v-model:value="temp.managerId"
-            allowClear
-            placeholder="加入到哪个集群"
           >
             <a-select-option v-for="item in swarmList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
@@ -385,7 +385,7 @@
         </a-form-item>
 
         <a-form-item label="角色" name="role">
-          <a-radio-group name="role" v-model:value="temp.role">
+          <a-radio-group v-model:value="temp.role" name="role">
             <a-radio value="worker"> 工作节点</a-radio>
             <a-radio value="manager"> 管理节点 </a-radio>
           </a-radio-group>
@@ -397,8 +397,8 @@
     <console
       v-if="consoleVisible"
       :visible="consoleVisible"
-      :machineDockerId="temp.id"
-      urlPrefix="/system/assets/docker"
+      :machine-docker-id="temp.id"
+      url-prefix="/system/assets/docker"
       @close="onClose"
     ></console>
     <!-- </a-drawer> -->
@@ -408,19 +408,19 @@
       v-if="swarmConsoleVisible"
       :id="temp.id"
       :visible="swarmConsoleVisible"
-      :initMenu="temp.menuKey"
-      urlPrefix="/system/assets"
+      :init-menu="temp.menuKey"
+      url-prefix="/system/assets"
       @close="onSwarmClose"
     ></swarm-console>
 
     <!-- 分配到其他工作空间 -->
     <a-modal
-      destroyOnClose
-      :confirmLoading="confirmLoading"
       v-model:open="syncToWorkspaceVisible"
+      destroy-on-close
+      :confirm-loading="confirmLoading"
       title="分配到其他工作空间"
+      :mask-closable="false"
       @ok="handleSyncToWorkspace"
-      :maskClosable="false"
     >
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
@@ -432,6 +432,7 @@
         </a-form-item>
         <a-form-item label="选择工作空间" name="workspaceId">
           <a-select
+            v-model:value="temp.workspaceId"
             show-search
             :filter-option="
               (input, option) => {
@@ -443,7 +444,6 @@
                 )
               }
             "
-            v-model:value="temp.workspaceId"
             placeholder="请选择工作空间"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
@@ -453,17 +453,17 @@
     </a-modal>
     <!-- 查看 docker 关联工作空间的信息 -->
     <a-modal
-      destroyOnClose
       v-model:open="viewWorkspaceDocker"
+      destroy-on-close
       width="50%"
       title="关联工作空间 docker"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
     >
       <a-tabs>
         <a-tab-pane key="1" tab="docker">
           <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.dockerList">
-            <template v-slot:renderItem="{ item }">
+            <template #renderItem="{ item }">
               <a-list-item style="display: block">
                 <a-row>
                   <a-col :span="10">Docker 名称：{{ item.name }}</a-col>
@@ -476,7 +476,7 @@
         </a-tab-pane>
         <a-tab-pane key="2" tab="集群">
           <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.swarmList">
-            <template v-slot:renderItem="{ item }">
+            <template #renderItem="{ item }">
               <a-list-item style="display: block">
                 <a-row>
                   <a-col :span="10">集群名称：{{ item.name }}</a-col>
@@ -491,32 +491,32 @@
     </a-modal>
     <!-- 选择证书文件 -->
     <a-drawer
-      destroyOnClose
+      destroy-on-close
       :title="`选择证书文件`"
       placement="right"
       :open="certificateVisible"
       width="85vw"
-      :zIndex="1009"
+      :z-index="1009"
+      :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
-          this.certificateVisible = false
+          certificateVisible = false
         }
       "
-      :footer-style="{ textAlign: 'right' }"
     >
       <certificate
         v-if="certificateVisible"
         ref="certificate"
-        :showAll="true"
+        :show-all="true"
         @confirm="
           (certInfo) => {
-            this.temp = { ...this.temp, certInfo: certInfo }
-            this.certificateVisible = false
+            temp = { ...temp, certInfo: certInfo }
+            certificateVisible = false
           }
         "
         @cancel="
           () => {
-            this.certificateVisible = false
+            certificateVisible = false
           }
         "
       ></certificate>
@@ -525,7 +525,7 @@
           <a-button
             @click="
               () => {
-                this.certificateVisible = false
+                certificateVisible = false
               }
             "
           >
@@ -535,7 +535,7 @@
             type="primary"
             @click="
               () => {
-                this.$refs['certificate'].handerConfirm()
+                $refs['certificate'].handerConfirm()
               }
             "
           >

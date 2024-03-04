@@ -5,24 +5,24 @@
       <a-form ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="项目 ID" name="id">
           <a-input
-            :maxLength="50"
-            v-model:value="temp.id"
             v-if="temp.type === 'edit'"
+            v-model:value="temp.id"
+            :max-length="50"
             :disabled="temp.type === 'edit'"
             placeholder="创建之后不能修改"
           />
           <template v-else>
             <a-input-search
-              :maxLength="50"
               v-model:value="temp.id"
+              :max-length="50"
               placeholder="创建之后不能修改"
               @search="
                 () => {
-                  this.temp = { ...this.temp, id: randomStr(6) }
+                  temp = { ...temp, id: randomStr(6) }
                 }
               "
             >
-              <template v-slot:enterButton>
+              <template #enterButton>
                 <a-button type="primary"> 随机生成 </a-button>
               </template>
             </a-input-search>
@@ -32,17 +32,17 @@
         <a-form-item label="项目名称" name="name">
           <a-row>
             <a-col :span="10">
-              <a-input v-model:value="temp.name" :maxLength="50" placeholder="项目名称" />
+              <a-input v-model:value="temp.name" :max-length="50" placeholder="项目名称" />
             </a-col>
             <a-col :span="4" style="text-align: right">分组名称：</a-col>
             <a-col :span="10">
               <a-form-item-rest>
                 <custom-select
-                  :maxLength="50"
                   v-model:value="temp.group"
+                  :max-length="50"
                   :data="groupList"
-                  inputPlaceholder="新增分组"
-                  selectPlaceholder="选择分组"
+                  input-placeholder="新增分组"
+                  select-placeholder="选择分组"
                 >
                 </custom-select>
               </a-form-item-rest>
@@ -50,10 +50,10 @@
           </a-row>
         </a-form-item>
         <a-form-item name="runMode">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               运行方式
-              <template v-slot:title>
+              <template #title>
                 <ul>
                   <li><b>Dsl</b> 配合脚本模版实现自定义项目管理</li>
                   <li><b>ClassPath</b> java -classpath xxx 运行项目</li>
@@ -94,10 +94,10 @@
         </template>
         <template v-else>
           <a-form-item name="whitelistDirectory">
-            <template v-slot:label>
+            <template #label>
               <a-tooltip>
                 项目路径
-                <template v-slot:title>
+                <template #title>
                   <ul>
                     <li>授权路径是指项目文件存放到服务中的文件夹</li>
                     <li>可以到节点管理中的【插件端配置】=>【授权配置】修改</li>
@@ -125,13 +125,13 @@
               </div>
             </template>
             <a-input-group compact>
-              <a-select style="width: 50%" v-model:value="temp.whitelistDirectory" placeholder="请选择项目授权路径">
+              <a-select v-model:value="temp.whitelistDirectory" style="width: 50%" placeholder="请选择项目授权路径">
                 <a-select-option v-for="access in accessList" :key="access">
                   <a-tooltip :title="access">{{ access }}</a-tooltip>
                 </a-select-option>
               </a-select>
               <a-form-item-rest>
-                <a-input style="width: 50%" v-model:value="temp.lib" placeholder="项目存储的文件夹" />
+                <a-input v-model:value="temp.lib" style="width: 50%" placeholder="项目存储的文件夹" />
               </a-form-item-rest>
             </a-input-group>
             <template #extra>
@@ -144,10 +144,10 @@
           </a-form-item>
         </template>
         <a-form-item v-show="temp.runMode === 'Dsl'" name="dslContent">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               DSL 内容
-              <template v-slot:title>
+              <template #title>
                 <p>
                   以 yaml/yml 格式配置,scriptId
                   为项目路径下的脚本文件的相对路径或者脚本模版ID，可以到脚本模版编辑弹窗中查看 scriptId
@@ -179,11 +179,11 @@
           </template>
           <a-form-item-rest>
             <code-editor
-              height="40vh"
-              :showTool="true"
-              v-model:content="temp.dslContent"
-              :options="{ mode: 'yaml', tabSize: 2 }"
               v-show="dslEditTabKey === 'content'"
+              v-model:content="temp.dslContent"
+              height="40vh"
+              :show-tool="true"
+              :options="{ mode: 'yaml', tabSize: 2 }"
               placeholder="请填写项目 DSL 配置内容,可以点击上方切换 tab 查看配置示例"
             >
               <template #tool_before>
@@ -198,9 +198,9 @@
             </code-editor>
             <code-editor
               v-show="dslEditTabKey === 'demo'"
-              height="40vh"
-              :showTool="true"
               v-model:content="PROJECT_DSL_DEFATUL"
+              height="40vh"
+              :show-tool="true"
               :options="{ mode: 'yaml', tabSize: 2, readOnly: true }"
             >
               <template #tool_before>
@@ -216,10 +216,10 @@
           </a-form-item-rest>
         </a-form-item>
         <a-form-item v-show="noFileModes.includes(temp.runMode) && temp.runMode !== 'Link'">
-          <template v-slot:label>
+          <template #label>
             <a-tooltip>
               日志目录
-              <template v-slot:title>
+              <template #title>
                 <ul>
                   <li>日志目录是指控制台日志存储目录</li>
                   <li>默认是在插件端数据目录/${projectId}/${projectId}.log</li>
@@ -236,29 +236,29 @@
         </a-form-item>
 
         <a-form-item
-          label="Main Class"
-          name="mainClass"
           v-show="
             (javaModes.includes(temp.runMode) && temp.runMode !== 'Jar') ||
             (javaModes.includes(linkProjectData.runMode) && linkProjectData.runMode !== 'Jar')
           "
+          label="Main Class"
+          name="mainClass"
         >
           <a-input v-model:value="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)" />
         </a-form-item>
         <a-form-item
-          label="JavaExtDirsCp"
-          name="javaExtDirsCp"
           v-show="
             (javaModes.includes(temp.runMode) && temp.runMode === 'JavaExtDirsCp') ||
             (javaModes.includes(linkProjectData.runMode) && linkProjectData.runMode === 'JavaExtDirsCp')
           "
+          label="JavaExtDirsCp"
+          name="javaExtDirsCp"
         >
           <a-input v-model:value="temp.javaExtDirsCp" placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】" />
         </a-form-item>
         <a-form-item
+          v-show="javaModes.includes(temp.runMode) || javaModes.includes(linkProjectData.runMode)"
           label="JVM 参数"
           name="jvm"
-          v-show="javaModes.includes(temp.runMode) || javaModes.includes(linkProjectData.runMode)"
         >
           <a-textarea
             v-model:value="temp.jvm"
@@ -267,9 +267,9 @@
           />
         </a-form-item>
         <a-form-item
+          v-show="javaModes.includes(temp.runMode) || javaModes.includes(linkProjectData.runMode)"
           label="args 参数"
           name="args"
-          v-show="javaModes.includes(temp.runMode) || javaModes.includes(linkProjectData.runMode)"
         >
           <a-textarea
             v-model:value="temp.args"
@@ -285,11 +285,11 @@
           <a-input v-model:value="temp.dslEnv" placeholder="DSL环境变量,如：key1=values1&keyvalue2" />
         </a-form-item>
 
-        <a-form-item name="autoStart" v-show="noFileModes.includes(temp.runMode)">
-          <template v-slot:label>
+        <a-form-item v-show="noFileModes.includes(temp.runMode)" name="autoStart">
+          <template #label>
             <a-tooltip>
               自启动
-              <template v-slot:title>插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template>
+              <template #title>插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
@@ -298,11 +298,11 @@
           插件端启动时自动检查项目如未启动将尝试启动
         </a-form-item>
 
-        <a-form-item name="token" v-show="noFileModes.includes(temp.runMode)">
-          <template v-slot:label>
+        <a-form-item v-show="noFileModes.includes(temp.runMode)" name="token">
+          <template #label>
             <a-tooltip>
               WebHooks
-              <template v-slot:title>
+              <template #title>
                 <ul>
                   <li>项目启动,停止,重启,文件变动都将请求对应的地址</li>
                   <li>传入参数有：projectId、projectName、type、result</li>
@@ -331,24 +331,24 @@
     </a-spin>
     <!-- 配置节点授权目录 -->
     <a-modal
-      destroyOnClose
       v-model:open="configDir"
+      destroy-on-close
       :title="`配置授权目录`"
       :footer="null"
-      :maskClosable="false"
+      :mask-closable="false"
       @cancel="
         () => {
-          this.configDir = false
+          configDir = false
         }
       "
     >
       <whiteList
         v-if="configDir"
-        :nodeId="this.nodeId"
+        :node-id="nodeId"
         @cancel="
           () => {
-            this.configDir = false
-            this.loadAccesList()
+            configDir = false
+            loadAccesList()
           }
         "
       ></whiteList>
@@ -356,8 +356,8 @@
     <!-- 管理节点 -->
     <NodeFunc
       v-if="drawerVisible"
-      name="查看节点脚本"
       :id="nodeId"
+      name="查看节点脚本"
       :tabs="['scripct']"
       @close="
         () => {
@@ -387,6 +387,12 @@ import {
 import { getProjectListAll } from '@/api/node'
 
 export default {
+  components: {
+    CustomSelect,
+    whiteList,
+    codeEditor,
+    NodeFunc
+  },
   props: {
     projectId: {
       type: String,
@@ -397,12 +403,7 @@ export default {
     },
     data: { type: Object, default: null }
   },
-  components: {
-    CustomSelect,
-    whiteList,
-    codeEditor,
-    NodeFunc
-  },
+  emits: ['close'],
   data() {
     return {
       accessList: [],
@@ -595,7 +596,6 @@ export default {
     // handleReadFile() {
 
     // },
-  },
-  emits: ['close']
+  }
 }
 </script>

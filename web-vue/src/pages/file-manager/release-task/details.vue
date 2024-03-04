@@ -20,9 +20,9 @@
       </a-form-item>
 
       <a-form-item label="执行日志">
-        <a-tabs :activeKey="activeKey" @change="tabCallback">
+        <a-tabs :active-key="activeKey" @change="tabCallback">
           <a-tab-pane v-for="item in temp.taskList" :key="item.id">
-            <template v-slot:tab>
+            <template #tab>
               <LoadingOutlined v-if="!logMap[item.id] || logMap[item.id].run" type="loading" />
               <template v-if="temp.taskData && temp.taskData.taskType === 0">
                 {{
@@ -53,7 +53,7 @@
         </a-tabs>
       </a-form-item>
       <a-form-item label="执行脚本" name="releaseBeforeCommand">
-        <a-tabs tabPosition="right">
+        <a-tabs tab-position="right">
           <a-tab-pane key="before" tab="上传前">
             <code-editor
               height="40vh"
