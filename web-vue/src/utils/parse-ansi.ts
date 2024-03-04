@@ -17,6 +17,7 @@ const ansiparse: any = function (str: any) {
     matchingData = null,
     matchingText: string = '',
     ansiState: any[] = [],
+    // eslint-disable-next-line prefer-const
     result: any[] = [],
     state: any = {},
     eraseChar
@@ -35,6 +36,7 @@ const ansiparse: any = function (str: any) {
   //
   // Erases a char from the output
   //
+  // eslint-disable-next-line prefer-const
   eraseChar = function () {
     let index, text
     if (matchingText.length) {
