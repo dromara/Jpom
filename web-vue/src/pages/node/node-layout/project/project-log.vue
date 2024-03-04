@@ -28,7 +28,7 @@
           x: 'max-content'
         }"
       >
-        <template #bodyCell="{ column, text, record, index }">
+        <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'filename'">
             <a-tooltip placement="topLeft" :title="text">
               <span>{{ text }}</span>

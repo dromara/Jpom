@@ -64,12 +64,12 @@ export const useUserStore = defineStore('user', {
     }
   },
   getters: {
-    getToken(state) {
+    getToken() {
       return () => {
         return localStorage.getItem(TOKEN_KEY) || ''
       }
     },
-    getLongTermToken(state) {
+    getLongTermToken() {
       return () => {
         return localStorage.getItem(LONG_TERM_TOKEN) || ''
       }

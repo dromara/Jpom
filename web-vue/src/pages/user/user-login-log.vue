@@ -34,7 +34,7 @@
           </a-tooltip>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #bodyCell="{ column, text }">
         <template v-if="column.dataIndex === 'userAgent'">
           <a-tooltip :title="text">{{ text }} </a-tooltip>
         </template>

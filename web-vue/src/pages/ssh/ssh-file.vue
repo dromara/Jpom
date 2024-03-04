@@ -599,7 +599,7 @@ export default {
       // 加载文件
       getFileList(this.baseUrl, params).then((res) => {
         if (res.code === 200) {
-          let children = []
+          // let children = []
           // 区分目录和文件
           res.data.forEach((element) => {
             if (element.dir) {

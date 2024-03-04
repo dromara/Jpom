@@ -14,7 +14,7 @@
       >
         <template v-if="backupListData.path" #title> 备份文件存储目录：{{ backupListData.path }} </template>
 
-        <template #bodyCell="{ column, text, record, index }">
+        <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'filename'">
             <a-tooltip placement="topLeft" :title="text">
               <span>{{ text }}</span>
@@ -104,7 +104,7 @@
             </a-space>
           </template>
 
-          <template #bodyCell="{ column, text, record, index }">
+          <template #bodyCell="{ column, text, record }">
             <!-- <template v-if="column.dataIndex === 'filename'"> -->
             <template v-if="column.dataIndex === 'filename'">
               <a-tooltip placement="topLeft" :title="text">

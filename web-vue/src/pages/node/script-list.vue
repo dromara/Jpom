@@ -73,7 +73,7 @@
           </a-tooltip>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record, index }">
+      <template #bodyCell="{ column, text, record }">
         <template v-if="column.tooltip">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
@@ -332,20 +332,17 @@ export default {
           title: '创建人',
           dataIndex: 'createUser',
           ellipsis: true,
-          ellipsis: true,
           width: '120px'
         },
         {
           title: '修改人',
           dataIndex: 'modifyUser',
           ellipsis: true,
-          ellipsis: true,
           width: '120px'
         },
         {
           title: '最后操作人',
           dataIndex: 'lastRunUser',
-          ellipsis: true,
           ellipsis: true,
           width: '120px'
         },

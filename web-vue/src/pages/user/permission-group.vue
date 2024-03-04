@@ -27,7 +27,7 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
         </a-space></template
       >
-      <template #bodyCell="{ column, text, record }">
+      <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>

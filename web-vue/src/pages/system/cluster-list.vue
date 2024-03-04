@@ -33,7 +33,7 @@
           <div v-if="groupList.filter((item) => !groupMap[item]).length">
             未绑定集群的分组：
             <template v-for="(item, index) in groupList">
-              <a-tag v-if="!groupMap[item]">{{ item }}</a-tag>
+              <a-tag v-if="!groupMap[item]" :key="index">{{ item }}</a-tag>
             </template>
           </div>
           <a-space>

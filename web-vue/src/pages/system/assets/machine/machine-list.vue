@@ -96,7 +96,7 @@
       <template v-if="layoutType === 'card'">
         <a-row :gutter="[16, 16]">
           <template v-if="list && list.length">
-            <a-col v-for="item in list" :span="6">
+            <a-col v-for="(item, index) in list" :key="index" :span="6">
               <a-card :head-style="{ padding: '0 6px' }" :body-style="{ padding: '10px' }">
                 <template #title>
                   <a-row :gutter="[4, 0]">
