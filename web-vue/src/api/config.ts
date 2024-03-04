@@ -217,7 +217,7 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
 export default request
 
 // 刷新 jwt token 并且重试上次请求
-async function redoRequest(config: AxiosRequestConfig) {
+async function redoRequest() {
   const result = await refreshToken()
   if (result.code === 200) {
     // 调用 store action 存储当前登录的用户名和 token

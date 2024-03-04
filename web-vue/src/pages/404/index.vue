@@ -27,7 +27,7 @@ import defaultBg from '@/pages/layout/default-bg.vue'
 const router = useRouter()
 // const goBack = () => {
 //   router.back()
-}
+// }
 const goHome = () => {
   router.replace({ path: '/' })
 }

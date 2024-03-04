@@ -540,7 +540,7 @@ export default {
       localStorage.setItem('editorTheme', v)
     },
 
-    onReady(editor) {
+    onReady() {
       // console.log(editor)
       // // 绑定其他快捷键, 格式化编辑器代码做示例
       // let autoFormatSelection = () => {
