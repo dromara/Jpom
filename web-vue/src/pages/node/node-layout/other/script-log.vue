@@ -130,7 +130,8 @@ export default {
   },
   props: {
     nodeId: {
-      type: String
+      type: String,
+      default: ''
     },
     scriptId: {
       type: String,

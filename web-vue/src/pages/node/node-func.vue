@@ -47,13 +47,19 @@ import ScriptList from '@/pages/node/script-list'
 import ScriptLog from '@/pages/node/node-layout/other/script-log'
 import { useGuideStore } from '@/stores/guide'
 export default {
+  components: {
+    ScriptList,
+    ScriptLog,
+    projectSearch: defineAsyncComponent(() => import('@/pages/node/search'))
+  },
   props: {
     name: {
       type: String,
       default: ''
     },
     id: {
-      type: String
+      type: String,
+      default: ''
     },
     tabs: {
       type: Array,
@@ -62,10 +68,11 @@ export default {
       }
     }
   },
-  components: {
-    ScriptList,
-    ScriptLog,
-    projectSearch: defineAsyncComponent(() => import('@/pages/node/search'))
+  emits: ['close'],
+  data() {
+    return {
+      current: null
+    }
   },
   computed: {
     ...mapState(useGuideStore, ['getCollapsed'])
@@ -73,12 +80,6 @@ export default {
   created() {
     //
     this.current = this.tabs[0]
-  },
-  emits: ['close'],
-  data() {
-    return {
-      current: null
-    }
   }
 }
 </script>
