@@ -786,7 +786,7 @@ export default {
     // 批量删除
     handleBatchDelete() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
-        $notificationing({
+        $notification.error({
           message: '没有选择任何数据'
         })
         return

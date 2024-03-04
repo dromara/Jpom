@@ -503,7 +503,7 @@ export default {
     // 确认
     handerConfirm() {
       if (!this.tableSelections.length) {
-        $notificationing({
+        $notification.error({
           message: '请选择要使用的证书'
         })
         return
