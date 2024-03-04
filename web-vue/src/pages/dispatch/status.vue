@@ -51,7 +51,7 @@
                 />
               </a-space>
             </template>
-            <template #bodyCell="{ column, text, record, index }">
+            <template #bodyCell="{ column, text, record }">
               <template v-if="column.dataIndex === 'nodeId'">
                 <a-tooltip placement="topLeft" :title="text">
                   <a-button type="link" style="padding: 0" size="small" @click="toNode(text)">

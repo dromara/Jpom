@@ -150,7 +150,7 @@
 </template>
 
 <script>
-import { dockerSwarmNodeUpdate, dockerSwarmServicesTaskList, TASK_STATE } from '@/api/docker-swarm'
+import { dockerSwarmServicesTaskList, TASK_STATE } from '@/api/docker-swarm'
 import { parseTime } from '@/utils/const'
 import PullLog from './pull-log'
 
@@ -193,7 +193,7 @@ export default {
           width: '80px',
           ellipsis: true,
           align: 'center',
-          customRender: ({ text, record, index }) => `${index + 1}`
+          customRender: ({ index }) => `${index + 1}`
         },
         {
           title: '任务Id',
