@@ -472,19 +472,12 @@ export default {
   },
   props: {
     nodeId: {
-      type: String
+      type: String,
+      default: ''
     },
     machineId: {
-      type: String
-    }
-  },
-  computed: {
-    ...mapState(useGuideStore, ['getThemeView']),
-    idInfo() {
-      return {
-        nodeId: this.nodeId,
-        machineId: this.machineId
-      }
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -744,6 +737,15 @@ export default {
       machineInfo: null,
       networkInterfaces: [],
       nodeMonitorLoadStatus: 0
+    }
+  },
+  computed: {
+    ...mapState(useGuideStore, ['getThemeView']),
+    idInfo() {
+      return {
+        nodeId: this.nodeId,
+        machineId: this.machineId
+      }
     }
   },
   watch: {
