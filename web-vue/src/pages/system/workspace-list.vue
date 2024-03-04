@@ -326,6 +326,17 @@ export default {
     CustomSelect,
     whiteList,
     Icon
+    // VNodes: {
+    //   props: {
+    //     vnodes: {
+    //       type: Object,
+    //       required: true
+    //     }
+    //   },
+    //   render() {
+    //     return this.vnodes
+    //   }
+    // }
   },
   data() {
     return {
