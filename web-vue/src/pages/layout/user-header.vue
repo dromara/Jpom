@@ -992,7 +992,7 @@ export default {
         // console.log(url);
         location.href = url
       } else {
-        $notificationr({
+        $notification.error({
           message: '还未配置集群地址,不能切换集群'
         })
       }
