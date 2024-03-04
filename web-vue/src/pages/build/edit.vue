@@ -373,20 +373,22 @@
               />
             </a-form-item>
 
-            <a-alert v-if="temp.buildMode === undefined" message="还没有选择构建方式" banner />
-            <a-form-item v-else label="环境变量" name="buildEnvParameter">
-              <a-textarea
-                v-model:value="temp.buildEnvParameter"
-                placeholder="请输入构建环境变量：xx=abc 多个变量回车换行即可"
-                :auto-size="{ minRows: 3, maxRows: 5 }"
-              />
-            </a-form-item>
-            <a-form-item v-else label="执行方式" name="commandExecMode">
-              <a-radio-group v-model:value="tempExtraData.commandExecMode" button-style="solid">
-                <a-radio-button value="default">默认</a-radio-button>
-                <a-radio-button value="apache_exec">多线程</a-radio-button>
-              </a-radio-group>
-            </a-form-item>
+            <a-alert v-if="temp.buildMode === undefined || true" message="还没有选择构建方式" banner />
+            <template v-else>
+              <a-form-item label="环境变量" name="buildEnvParameter">
+                <a-textarea
+                  v-model:value="temp.buildEnvParameter"
+                  placeholder="请输入构建环境变量：xx=abc 多个变量回车换行即可"
+                  :auto-size="{ minRows: 3, maxRows: 5 }"
+                />
+              </a-form-item>
+              <a-form-item label="执行方式" name="commandExecMode">
+                <a-radio-group v-model:value="tempExtraData.commandExecMode" button-style="solid">
+                  <a-radio-button value="default">默认</a-radio-button>
+                  <a-radio-button value="apache_exec">多线程</a-radio-button>
+                </a-radio-group>
+              </a-form-item>
+            </template>
           </div>
 
           <div v-show="stepsCurrent === 3">
