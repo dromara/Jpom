@@ -30,6 +30,7 @@ export default {
       default: () => []
     }
   },
+  emits: ['refresh'],
   data() {
     return {
       temp: {},
@@ -106,7 +107,7 @@ export default {
   methods: {
     parseTime,
     refresh() {
-      this.$emit('refresh')
+      this.$emit('refresh', {})
     },
     // 前往 cron 详情
     toCronTaskList(cron) {
