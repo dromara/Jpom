@@ -77,6 +77,13 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         //安装两行后你会发现在组件中不用再导入ref，reactive等
         imports: ['vue', 'vue-router', 'pinia'],
         dts: 'src/d.ts/auto-import.d.ts',
+        // eslint报错解决
+        eslintrc: {
+          enabled: true,
+          filepath: '.eslintrc-auto-import.json',
+          globalsPropValue: true
+        },
+
         //ant-design-vue
         resolvers: [AntDesignVueResolver()]
       }),
