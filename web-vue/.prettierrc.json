@@ -1,7 +1,7 @@
 {
   "semi": false,
   "singleQuote": true,
-  "endOfLine": "lf",
+  "endOfLine": "auto",
   "proseWrap": "never",
   "printWidth": 120,
   "trailingComma": "none"
