@@ -292,11 +292,11 @@
                     @change="(nodeId) => handleNodeListChange(nodeId, index)"
                   >
                     <a-select-option
-                      v-for="nodeList in nodeProjectsList"
-                      :key="nodeList.id"
-                      :disabled="nodeIdMap[nodeList.id].openStatus !== 1"
+                      v-for="nodeItemList in nodeProjectsList"
+                      :key="nodeItemList.id"
+                      :disabled="nodeIdMap[nodeItemList.id].openStatus !== 1"
                     >
-                      {{ nodeNameMap[nodeList.id] }}
+                      {{ nodeNameMap[nodeItemList.id] }}
                     </a-select-option>
                   </a-select>
                   <span>项目: </span>
