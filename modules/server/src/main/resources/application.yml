@@ -33,6 +33,8 @@ jpom:
     console-charset:
     # 在线升级允许降级-操作
     allowed-downgrade: false
+    # 执行系统主要命名是否填充 sudo(sudo xxx) 使用前提需要配置 sudo 免密
+    command-use-sudo: false
   user:
     # 用户连续登录失败次数，超过此数将被限制登录
     always-login-error: 5

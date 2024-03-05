@@ -68,3 +68,10 @@ pnpm build # 打包
 npm install -g npm-check-updates
 
 ncu
+
+
+## 安装 nvm
+
+https://gitee.com/RubyMetric/nvm-cn
+
+bash -c "$(curl -fsSL https://gitee.com/RubyMetric/nvm-cn/raw/main/install.sh)"

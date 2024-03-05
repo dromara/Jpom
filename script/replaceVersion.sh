@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2019 Code Technology Studio
+# Copyright (c) 2019 Of Him Code Technology Studio
 # Jpom is licensed under Mulan PSL v2.
 # You can use this software according to the terms and conditions of the Mulan PSL v2.
 # You may obtain a copy of Mulan PSL v2 at:
@@ -49,7 +49,7 @@ fi
 
 echo "替换配置文件版本号 $new_version"
 
-if [[ "$tag" == "release" ]]; then
+if [ "$tag" == "release" ]; then
 	# 替换 Dockerfile 中的版本
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/Dockerfile"
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/agent/Dockerfile"
@@ -86,9 +86,8 @@ cat >"$base/modules/common/src/main/resources/banner.txt" <<EOF
   \____/| .__/ \___/|_| |_| |_|
         | |
         |_|
-
- ➜ Jpom \﻿ (•◡•) / (v$new_version)
-
+ ➜ Jpom is licensed under Mulan PSL v2.
+ ➜ \﻿ (•◡•) / (v$new_version)
 EOF
 
 # 保留新版本号
