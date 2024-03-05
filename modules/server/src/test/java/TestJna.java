@@ -1,0 +1,33 @@
+import com.sun.jna.Native;
+import org.junit.Test;
+
+/**
+ * @author bwcx_jzy
+ * @since 24/3/5 005
+ */
+public class TestJna {
+
+    @Test
+    public void test() {
+        // 设置你要执行的命令
+        String command = "your_command_here arg1 arg2";
+
+        // 使用 JNA 的 Native 类加载运行时库
+        // 在不同的平台上，可能需要不同的库名称
+        // 例如，在 Windows 上，可以使用 "kernel32"；在 Linux 上，可以使用 "c"
+        // 你可能需要根据实际情况进行调整
+        String libraryName = "kernel32";
+        CLibrary libc = (CLibrary) Native.load(libraryName, CLibrary.class);
+
+        // 执行命令
+        int result = libc.system(command);
+
+        // 输出执行结果
+        System.out.println("Exit Code: " + result);
+    }
+
+    // 定义一个接口，用于加载运行时库
+    public interface CLibrary extends com.sun.jna.Library {
+        int system(String command);
+    }
+}
