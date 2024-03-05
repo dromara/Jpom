@@ -1,4 +1,6 @@
+import com.sun.jna.Library;
 import com.sun.jna.Native;
+import com.sun.jna.Platform;
 import org.junit.Test;
 
 /**
@@ -29,5 +31,19 @@ public class TestJna {
     // 定义一个接口，用于加载运行时库
     public interface CLibrary extends com.sun.jna.Library {
         int system(String command);
+    }
+
+
+    public interface CLibrary2 extends Library {
+        CLibrary2 INSTANCE = (CLibrary2)
+            Native.load((Platform.isWindows() ? "msvcrt" : "c"),
+                CLibrary2.class);
+
+        void printf(String format, Object... args);
+    }
+
+    @Test
+    public void test2() {
+        CLibrary2.INSTANCE.printf("Hello, World\n");
     }
 }

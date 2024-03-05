@@ -65,8 +65,8 @@ public class NodeWelcomeController extends BaseServerController {
 
     private List<MachineNodeStatLogModel> getList(NodeModel node, String machineId) {
         String useMachineId = Optional.ofNullable(node).map(BaseMachineModel::getMachineId).orElse(machineId);
-        String startDateStr = getParameter("time[0]");
-        String endDateStr = getParameter("time[1]");
+        String startDateStr = getParameter("startTime");
+        String endDateStr = getParameter("endTime");
         if (StrUtil.hasEmpty(startDateStr, endDateStr)) {
             MachineNodeStatLogModel systemMonitorLog = new MachineNodeStatLogModel();
             systemMonitorLog.setMachineId(useMachineId);
