@@ -433,7 +433,10 @@ export default {
   },
   inject: ['globalLoading'],
   props: {
-    data: Object
+    data: {
+      type: Object,
+      default: () => {}
+    }
   },
   emits: ['cancel'],
   data() {

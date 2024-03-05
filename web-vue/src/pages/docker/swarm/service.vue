@@ -553,14 +553,16 @@ export default {
   components: { SwarmTask, PullLog },
   props: {
     id: {
-      type: String
+      type: String,
+      default: ''
     },
     visible: {
       type: Boolean,
       default: false
     },
     urlPrefix: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {
