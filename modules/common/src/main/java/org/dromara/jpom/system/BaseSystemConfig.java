@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Code Technology Studio
+ * Copyright (c) 2019 Of Him Code Technology Studio
  * Jpom is licensed under Mulan PSL v2.
  * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
@@ -12,6 +12,7 @@ package org.dromara.jpom.system;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.cron.CronUtil;
+import cn.hutool.system.SystemUtil;
 import lombok.Data;
 import org.dromara.jpom.common.JpomApplicationEvent;
 import org.dromara.jpom.common.JpomManifest;
@@ -50,6 +51,11 @@ public abstract class BaseSystemConfig {
      * 控制台编码格式
      */
     private Charset consoleCharset;
+    /**
+     * 执行系统主要命名是否填充 sudo(sudo xxx)
+     * 使用前提需要配置 sudo 免密
+     */
+    private boolean commandUseSudo = false;
 
     public void setTimerMatchSecond(boolean timerMatchSecond) {
         this.timerMatchSecond = timerMatchSecond;
@@ -85,5 +91,10 @@ public abstract class BaseSystemConfig {
     public void setAllowedDowngrade(boolean allowedDowngrade) {
         this.allowedDowngrade = allowedDowngrade;
         JpomManifest.setAllowedDowngrade(allowedDowngrade);
+    }
+
+    public void setCommandUseSudo(boolean commandUseSudo) {
+        this.commandUseSudo = commandUseSudo;
+        SystemUtil.set("JPOM_COMMAND_USE_SUDO", String.valueOf(commandUseSudo));
     }
 }

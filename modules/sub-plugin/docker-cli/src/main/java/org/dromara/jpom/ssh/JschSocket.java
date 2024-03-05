@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Code Technology Studio
+ * Copyright (c) 2019 Of Him Code Technology Studio
  * Jpom is licensed under Mulan PSL v2.
  * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.ssh;
 
+import cn.hutool.system.SystemUtil;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
@@ -59,8 +60,15 @@ class JschSocket extends Socket {
         try {
             // only 18.09 and up
             channel = session.openChannel("exec");
-            ((ChannelExec) channel).setCommand("docker system dial-stdio");
-            log.debug("Using dialer command【docker system dial-stdio】");
+            boolean jpomCommandUseSudo = SystemUtil.getBoolean("JPOM_COMMAND_USE_SUDO", false);
+            String command;
+            if (jpomCommandUseSudo) {
+                command = "sudo docker system dial-stdio";
+            } else {
+                command = "docker system dial-stdio";
+            }
+            ((ChannelExec) channel).setCommand(command);
+            log.debug("Using dialer command【{}】", command);
             inputStream = channel.getInputStream();
             outputStream = channel.getOutputStream();
 

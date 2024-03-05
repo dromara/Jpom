@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Code Technology Studio
+ * Copyright (c) 2019 Of Him Code Technology Studio
  * Jpom is licensed under Mulan PSL v2.
  * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
@@ -290,12 +290,31 @@ public class CommandUtil {
      * 异步执行命令
      *
      * @param file    文件夹
+     * @param env     环境变量
      * @param command 命令
      * @throws IOException 异常
      */
     public static void asyncExeLocalCommand(String command, File file, Map<String, String> env) throws Exception {
+        asyncExeLocalCommand(command, file, env, false);
+    }
+
+    /**
+     * 异步执行命令
+     *
+     * @param file        文件夹
+     * @param env         环境变量
+     * @param hopeUseSudo 是否期望填充 sudo
+     * @param command     命令
+     * @throws IOException 异常
+     */
+    public static void asyncExeLocalCommand(String command, File file, Map<String, String> env, boolean hopeUseSudo) throws Exception {
         String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
         newCommand = StrUtil.replace(newCommand, StrUtil.LF, StrUtil.SPACE);
+        boolean jpomCommandUseSudo = SystemUtil.getBoolean("JPOM_COMMAND_USE_SUDO", false);
+        if (hopeUseSudo && jpomCommandUseSudo) {
+            // 期望使用 sudo 并且配置了开启 sudo
+            newCommand = StrUtil.addPrefixIfNot(newCommand, "sudo ");
+        }
         //
         log.debug(newCommand);
         List<String> commands = getCommand();
@@ -313,6 +332,7 @@ public class CommandUtil {
         pb.redirectInput(ProcessBuilder.Redirect.INHERIT);
         pb.start();
     }
+
 
     /**
      * 判断是否包含删除命令

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Code Technology Studio
+ * Copyright (c) 2019 Of Him Code Technology Studio
  * Jpom is licensed under Mulan PSL v2.
  * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
@@ -83,7 +83,7 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
             result.add("Kill not completed, test kill -9");
             String cmd = String.format("kill -9 %s", pid);
             try {
-                CommandUtil.asyncExeLocalCommand(cmd, file);
+                CommandUtil.asyncExeLocalCommand(cmd, file, null, true);
             } catch (Exception e) {
                 throw Lombok.sneakyThrow(e);
             }

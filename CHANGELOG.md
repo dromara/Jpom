@@ -1,5 +1,52 @@
 # 🚀 版本日志
 
+## 2.11.3 (2024-03-01)
+
+### 🐞 解决BUG、优化功能
+
+1. 【agent】修复 修改项目日志路径如果文件夹不存在报错（感谢@长弘）
+2. 【server】修复 节点机器日志无法下载（感谢@Again...）
+3. 【agent】升级 oshi 版本
+4. 【server】升级 mwiede、apache-sshd 版本（感谢@*斌）
+5. 【server】优化 项目列表 file 类型正常排序（不再排序到最后）（感谢[@pal865](https://gitee.com/pal865) [Gitee issues I8XU32](https://gitee.com/dromara/Jpom/issues/I8XU32) ）
+6. 【all】修复 windows 环境保存配置并重启失败（感谢[@Robot](https://gitee.com/robot1937) [Gitee issues I8Y01T](https://gitee.com/dromara/Jpom/issues/I8Y01T) ）
+7. 【server】修复 新版本页面部分分页切换失效（构建详情、资产机器、逻辑节点）（感谢@zac）
+8. 【server】优化 构建代码未变动流程打断触发器未传入原因（statusMsg）（感谢@烛孩）
+9. 【server】修复 项目控制台日志删除弹窗未能正常关闭（感谢@%）
+10. 【server】修复 脚本日志时间筛选不生效（感谢[@zhaozxc2010](https://gitee.com/zhaozxc2010) [Gitee issues I8ZNKL](https://gitee.com/dromara/Jpom/issues/I8ZNKL) ）
+11. 【server】优化 页面左侧菜单固定悬浮不跟随屏幕滚动条滚动（感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I8ZOOB](https://gitee.com/dromara/Jpom/issues/I8ZOOB) / [Gitee Pr 201](https://gitee.com/dromara/Jpom/pulls/201) ）
+12. 【server】优化 新增机器节点提示未选择协议（感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I8ZDZT](https://gitee.com/dromara/Jpom/issues/I8ZDZT) / [Gitee Pr 202](https://gitee.com/dromara/Jpom/pulls/202) ）
+13. 【server】修复 SSH 资产硬盘信息显示错误（感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I8ZY7K](https://gitee.com/dromara/Jpom/issues/I8ZY7K) ）
+14. 【server】优化 表格搜索区域小屏幕适配 （感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I8ZY0B](https://gitee.com/dromara/Jpom/issues/I8ZY0B) ）
+15. 【server】优化 SSH 文件管理树操作优化 （感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I9054L](https://gitee.com/dromara/Jpom/issues/I9054L) / [Gitee issues I5DMKG](https://gitee.com/dromara/Jpom/issues/I5DMKG) ）
+16. 【server】优化 整体页面顶部菜单吸顶效果（感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I907Y8](https://gitee.com/dromara/Jpom/issues/I907Y8) ）
+17. 【server】优化 资产监控线程池独立管理（感谢[@singlethread](https://gitee.com/zengwei_joni) [Gitee issues I918AB](https://gitee.com/dromara/Jpom/issues/I918AB) ）
+18. 【server】优化 构建回滚使用构建独立线程池
+19. 【all】优化 升级 hutool 版本（主要解决版本号排序异常）（感谢 [@Tom Xin](https://gitee.com/meiMingle) [Gitee issues I8Z3TI](https://gitee.com/dromara/Jpom/issues/I8Z3TI) / [Hutool issues I8Z3VE](https://gitee.com/dromara/hutool/issues/I8Z3VE)）
+20. 【all】优化 升级 fastjson 版本
+21. 【server】优化 页面整体滚动条兼容高版本浏览器（感谢@Controllers）
+22. 【server】优化 升级 docker-java、jgit 版本
+23. 【all】优化 升级 commons-compress 版本
+24. 【server】优化 新增配置节点 websocket 通讯消息大小限制（jpom.node.web-socket-message-size-limit）（感谢@长弘）
+25. 【server】优化 系统文件占用空间统计周期调整为每天2次（感谢[@singlethread](https://gitee.com/zengwei_joni) [Gitee issues I9302U](https://gitee.com/dromara/Jpom/issues/I9302U) ）
+26. 【server】优化 支持配置前端所有参数编码来规避部分安全规则检查（感谢[@zhaozxc2010](https://gitee.com/zhaozxc2010) [Gitee issues I8Z1VJ](https://gitee.com/dromara/Jpom/issues/I8Z1VJ) ）
+27. 【server】优化 上传文件空文件提示文件路径（感谢[@SchuckBate](https://gitee.com/skBate) [Gitee issues I93FI6](https://gitee.com/dromara/Jpom/issues/I93FI6) ）
+28. 【server】优化 监听日志文件消息发送失败后自动移除会话（感谢[@singlethread](https://gitee.com/zengwei_joni) [Gitee issues I93ZFX](https://gitee.com/dromara/Jpom/issues/I93ZFX) ）
+29. 【server】优化 容器构建产物为文件时保存路径层级错误（感谢[@vfhky](https://github.com/vfhky)）[Github Pr 71](https://github.com/dromara/Jpom/pull/71) ）
+30. 【server】优化 个性配置区内容主题支持“跟随系统”（感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I94SPA](https://gitee.com/dromara/Jpom/issues/I94SPA) ）
+
+------
+
+## 2.11.2 (2024-03-01)
+
+### ⚠️ 注意
+
+此版本是一个空版本，为了更好地兼容后续 beta 和 release 版本发布特意创建的空版本
+
+2.11.2 版本等同于 2.11.3 版本
+
+------
+
 ## 2.11.1 (2024-01-18)
 
 ### 🐣 新增功能
