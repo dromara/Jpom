@@ -37,13 +37,16 @@ export default {
   },
   props: {
     height: {
-      String,
+      type: String,
       default: '50vh'
     },
 
-    config: Object,
+    config: {
+      type: Object,
+      default: () => {}
+    },
     id: {
-      String,
+      type: String,
       default: 'logScrollArea'
     }
   },

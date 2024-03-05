@@ -57,26 +57,18 @@ export default {
     //   render: (h, ctx) => ctx.props.vnodes,
     // },
   },
-  computed: {
-    ...mapState(useGuideStore, ['getFullscreenViewLogStyle']),
-    regModifier() {
-      return this.regModifiers.join('')
-    },
-    style() {
-      return this.getFullscreenViewLogStyle()
-    }
-  },
+
   props: {
     titleName: {
-      String,
+      type: String,
       default: ''
     },
     marginTop: {
-      String,
+      type: String,
       default: '0'
     },
     extendBar: {
-      Boolean,
+      type: Boolean,
       default: true
     },
     visible: {
@@ -93,6 +85,15 @@ export default {
         wordBreak: false
       },
       visibleModel: false
+    }
+  },
+  computed: {
+    ...mapState(useGuideStore, ['getFullscreenViewLogStyle']),
+    regModifier() {
+      return this.regModifiers.join('')
+    },
+    style() {
+      return this.getFullscreenViewLogStyle()
     }
   },
   created() {

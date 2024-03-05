@@ -377,7 +377,8 @@ export default {
       }
     },
     fileSuffix: {
-      type: String
+      type: String,
+      default: ''
     },
     showTool: {
       type: Boolean,
@@ -388,6 +389,7 @@ export default {
       default: '请输入内容'
     }
   },
+  emits: ['update:content'],
   data() {
     return {
       codeMirrorHeight: '',
