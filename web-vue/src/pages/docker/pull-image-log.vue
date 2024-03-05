@@ -22,14 +22,16 @@ export default {
   },
   props: {
     id: {
-      type: String
+      type: String,
+      default: ''
     },
     machineDockerId: {
       type: String,
       default: ''
     },
     urlPrefix: {
-      type: String
+      type: String,
+      default: ''
     },
     visible: {
       type: Boolean,

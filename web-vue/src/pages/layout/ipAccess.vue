@@ -8,9 +8,9 @@
               <template #extra>
                 <a-button> 禁止访问 </a-button>
               </template>
-            </a-result></template
-          ></a-card-meta
-        >
+            </a-result>
+          </template>
+        </a-card-meta>
       </a-card>
     </template>
   </defaultBg>

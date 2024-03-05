@@ -31,8 +31,8 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-        </a-space></template
-      >
+        </a-space>
+      </template>
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'operation'">
           <a-space>

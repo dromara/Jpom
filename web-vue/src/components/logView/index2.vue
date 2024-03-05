@@ -41,15 +41,15 @@ export default {
   },
   props: {
     height: {
-      String,
+      type: String,
       default: '50vh'
     },
     marginTop: {
-      String,
+      type: String,
       default: '0'
     },
     extendBar: {
-      Boolean,
+      type: Boolean,
       default: true
     }
   },

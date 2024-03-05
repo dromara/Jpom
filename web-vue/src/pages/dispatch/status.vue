@@ -287,10 +287,12 @@ export default {
   },
   props: {
     id: {
-      type: String
+      type: String,
+      default: ''
     },
     name: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   emits: ['close'],

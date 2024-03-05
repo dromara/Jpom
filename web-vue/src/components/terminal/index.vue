@@ -21,7 +21,8 @@ import { AttachAddon } from 'xterm-addon-attach'
 export default {
   props: {
     url: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {

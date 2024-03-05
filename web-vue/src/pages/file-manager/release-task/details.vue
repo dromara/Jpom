@@ -44,9 +44,7 @@
                   })[0].name
                 }}
               </template>
-              <template>
-                <a-tooltip v-if="item.statusMsg" :title="item.statusMsg"><InfoCircleOutlined /></a-tooltip>
-              </template>
+              <a-tooltip v-if="item.statusMsg" :title="item.statusMsg"><InfoCircleOutlined /></a-tooltip>
             </template>
             <log-view1 :ref="`logView-${item.id}`" height="60vh" />
           </a-tab-pane>
@@ -94,7 +92,8 @@ export default {
   },
   props: {
     taskId: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {

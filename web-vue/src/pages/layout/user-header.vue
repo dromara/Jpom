@@ -503,9 +503,11 @@ export default {
   components: {
     UserLog
   },
+  inject: ['reload'],
   props: {
     mode: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -617,7 +619,7 @@ export default {
       return window.location.href.indexOf(data && data.url) === 0
     }
   },
-  inject: ['reload'],
+
   created() {
     this.init()
   },

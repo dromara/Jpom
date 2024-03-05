@@ -193,8 +193,14 @@ export default {
     viewPre
   },
   props: {
-    data: Object
+    data: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    }
   },
+  emits: ['changeTitle'],
   data() {
     return {
       treeReplaceFields: {
@@ -501,8 +507,7 @@ export default {
       }
       //
     }
-  },
-  emits: ['changeTitle']
+  }
 }
 </script>
 

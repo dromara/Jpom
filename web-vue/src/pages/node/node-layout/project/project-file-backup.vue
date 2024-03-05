@@ -185,10 +185,12 @@ export default {
   components: {},
   props: {
     nodeId: {
-      type: String
+      type: String,
+      default: ''
     },
     projectId: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {
