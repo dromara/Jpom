@@ -96,8 +96,8 @@
                 选择文件
               </a-button>
             </a-space>
-          </a-form-item></template
-        >
+          </a-form-item>
+        </template>
         <!-- 静态文件 -->
         <template v-else-if="temp.type === 'static-file-storage'">
           <a-form-item label="选择文件">
