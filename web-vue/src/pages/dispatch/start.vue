@@ -114,8 +114,8 @@
                 选择文件
               </a-button>
             </a-space>
-          </a-form-item></template
-        >
+          </a-form-item>
+        </template>
         <a-form-item name="clearOld">
           <template #label>
             清空发布
@@ -133,8 +133,8 @@
             是否解压
             <a-tooltip>
               <template #title>
-                如果上传的压缩文件是否自动解压 支持的压缩包类型有 tar.bz2, tar.gz, tar, bz2, zip, gz</template
-              >
+                如果上传的压缩文件是否自动解压 支持的压缩包类型有 tar.bz2, tar.gz, tar, bz2, zip, gz
+              </template>
               <QuestionCircleOutlined />
             </a-tooltip>
           </template>
