@@ -20,7 +20,8 @@ export default {
       default: ''
     },
     containerId: {
-      type: String
+      type: String,
+      default: ''
     },
     machineDockerId: {
       type: String,
