@@ -82,8 +82,8 @@
                       <a-list-item>
                         {{ item.key }} <a-tag>{{ item.obj }}次</a-tag>
                         <a-tag>过期时间：{{ formatDuration(item.ttl, '') }}</a-tag>
-                      </a-list-item></template
-                    >
+                      </a-list-item>
+                    </template>
                   </a-list>
                 </template>
                 {{ (temp.errorIp && temp.errorIp.length) || 0 }}

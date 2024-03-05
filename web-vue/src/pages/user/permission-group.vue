@@ -25,8 +25,8 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-        </a-space></template
-      >
+        </a-space>
+      </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'operation'">
           <a-space>
@@ -133,8 +133,8 @@
             <a-tooltip>
               允许时段
               <template #title>
-                优先判断禁用时段,再判断允许时段。配置允许时段后用户只能在对应的时段执行相应功能的操作</template
-              >
+                优先判断禁用时段,再判断允许时段。配置允许时段后用户只能在对应的时段执行相应功能的操作
+              </template>
               <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
           </template>
