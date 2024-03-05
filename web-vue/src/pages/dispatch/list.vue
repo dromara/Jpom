@@ -825,8 +825,8 @@
                     <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
                   </a-tooltip>
                 </template>
-                <template #help
-                  ><div>非服务器开机自启,如需开机自启建议配置<b>插件端开机自启</b>并开启此开关</div>
+                <template #help>
+                  <div>非服务器开机自启,如需开机自启建议配置<b>插件端开机自启</b>并开启此开关</div>
                 </template>
                 <a-switch
                   v-model:checked="temp[`${nodeId}_autoStart`]"
