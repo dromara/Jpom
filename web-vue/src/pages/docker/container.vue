@@ -403,7 +403,7 @@
                     <template #title>
                       网络端口
                       <ul>
-                        <li v-for="(item, index) in text || []" :key="index">
+                        <li v-for="(item, idx) in text || []" :key="idx">
                           {{
                             item.type + ' ' + (item.ip || '') + ':' + (item.publicPort || '') + ':' + item.privatePort
                           }}
