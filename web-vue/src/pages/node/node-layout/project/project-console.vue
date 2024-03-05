@@ -149,15 +149,19 @@ export default {
   },
   props: {
     nodeId: {
-      type: String
+      type: String,
+      default: ''
     },
     projectId: {
-      type: String
+      type: String,
+      default: ''
     },
     id: {
-      type: String
+      type: String,
+      default: ''
     }
   },
+  emits: ['goFile'],
   data() {
     return {
       project: {},
@@ -371,7 +375,6 @@ export default {
     goFile() {
       this.$emit('goFile')
     }
-  },
-  emits: ['goFile']
+  }
 }
 </script>

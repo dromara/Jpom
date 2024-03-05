@@ -368,7 +368,7 @@
                   <a-popover :title="`挂载`">
                     <template #content>
                       <template v-if="record.mounts">
-                        <div v-for="(item, index) in record.mounts" :key="index">
+                        <div v-for="(item, idx) in record.mounts" :key="idx">
                           <p>
                             名称：{{ item.name }}
                             <a-tag>{{ item.rw ? '读写' : '读' }}</a-tag>
@@ -403,7 +403,7 @@
                     <template #title>
                       网络端口
                       <ul>
-                        <li v-for="(item, index) in text || []" :key="index">
+                        <li v-for="(item, idx) in text || []" :key="idx">
                           {{
                             item.type + ' ' + (item.ip || '') + ':' + (item.publicPort || '') + ':' + item.privatePort
                           }}
@@ -706,7 +706,8 @@ export default {
       default: false
     },
     urlPrefix: {
-      type: String
+      type: String,
+      default: ''
     },
     machineDockerId: {
       type: String,

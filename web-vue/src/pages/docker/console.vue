@@ -119,19 +119,23 @@ export default {
   },
   props: {
     id: {
-      type: String
+      type: String,
+      default: ''
     },
     visible: {
       type: Boolean,
       default: false
     },
     machineDockerId: {
-      type: String
+      type: String,
+      default: ''
     },
     urlPrefix: {
-      type: String
+      type: String,
+      default: ''
     }
   },
+  emits: ['close'],
   data() {
     return {
       menuKeyArray: ['containers'],
@@ -149,8 +153,7 @@ export default {
     onClose() {
       this.$emit('close')
     }
-  },
-  emits: ['close']
+  }
 }
 </script>
 <style scoped>

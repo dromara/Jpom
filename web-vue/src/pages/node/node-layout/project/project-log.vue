@@ -68,10 +68,12 @@ import { renderSize, parseTime } from '@/utils/const'
 export default {
   props: {
     nodeId: {
-      type: String
+      type: String,
+      default: ''
     },
     projectId: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {

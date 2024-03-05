@@ -49,16 +49,20 @@ export default {
   },
   props: {
     dataId: {
-      type: String
+      type: String,
+      default: ''
     },
     id: {
-      type: String
+      type: String,
+      default: ''
     },
     type: {
-      type: String
+      type: String,
+      default: ''
     },
     urlPrefix: {
-      type: String
+      type: String,
+      default: ''
     },
     visible: {
       type: Boolean,

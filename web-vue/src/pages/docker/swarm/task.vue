@@ -158,18 +158,21 @@ export default {
   components: { PullLog },
   props: {
     id: {
-      type: String
+      type: String,
+      default: ''
     },
-    serviceId: { type: String },
+    serviceId: { type: String, default: '' },
     taskState: {
-      type: String
+      type: String,
+      default: ''
     },
     visible: {
       type: Boolean,
       default: false
     },
     urlPrefix: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {

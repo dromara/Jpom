@@ -82,7 +82,8 @@ export default {
       default: ''
     },
     urlPrefix: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {

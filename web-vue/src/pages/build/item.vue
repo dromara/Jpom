@@ -128,7 +128,8 @@ export default {
       default: ''
     },
     visibleType: {
-      type: Number
+      type: Number,
+      default: 0
     },
     data: {
       type: Object,
