@@ -1,50 +1,65 @@
 <template>
-  <div>
+  <div class="custom-table">
+    <div v-if="props.isShowTools" class="custom-table__box">
+      <!-- 增加工具栏部分 -->
+      <a-space class="table-action">
+        <a-space v-if="!props.isHideAutoRefresh">
+          <span>自动刷新:</span>
+          <a-switch
+            v-model:checked="countdownSwitch"
+            checked-children="开"
+            un-checked-children="关"
+            @change="countDownChange"
+          />
+          <a-statistic-countdown
+            v-if="countdownSwitch"
+            format="&nbsp; s 秒"
+            title="刷新倒计时"
+            :value="countdownNumber"
+            @finish="countDownFinish"
+          />
+          |
+        </a-space>
+        <a-tooltip v-if="!props.isHideRefresh" title="刷新">
+          <ReloadOutlined class="table-action__icon" @click="refreshClick" />
+        </a-tooltip>
+        <a-popover title="列宽" trigger="click" placement="bottomRight">
+          <template #content>
+            <a-radio-group v-model:value="tableSize" class="custom-size-list">
+              <div v-for="item in tableSizeList" :key="item.value">
+                <a-radio :value="item.value">{{ item.label }}</a-radio>
+              </div>
+            </a-radio-group>
+          </template>
+          <a-tooltip title="列宽">
+            <ColumnHeightOutlined class="table-action__icon" />
+          </a-tooltip>
+        </a-popover>
+        <a-popover v-if="props.tableName" trigger="click" placement="bottomRight">
+          <template #title>
+            <div class="custom-column-list__title">
+              <div>列设置</div>
+              <a-button type="link" size="small" @click="resetCustomColumn">重置</a-button>
+            </div>
+          </template>
+          <template #content>
+            <a-checkbox-group v-model:value="customColumnList" class="custom-column-list">
+              <div v-for="(item, index) in props.columns" :key="index" :span="24">
+                <a-checkbox :value="item.dataIndex">
+                  {{ item.title }}
+                </a-checkbox>
+              </div>
+            </a-checkbox-group>
+          </template>
+          <a-tooltip title="列设置">
+            <SettingOutlined />
+          </a-tooltip>
+        </a-popover>
+      </a-space>
+    </div>
     <a-table v-bind="props" :columns="customColumn" :size="tableSize">
-      <template v-if="props.isShowTools || slots.title" #title="slotProps">
-        <div class="table-title">
-          <slot v-if="slots.title" name="title" v-bind="slotProps"></slot>
-          <div v-if="props.isShowTools" class="table-action__box">
-            <!-- 增加工具栏部分 -->
-            <a-space class="table-action">
-              <a-tooltip v-if="!props.isHideRefresh" title="刷新">
-                <ReloadOutlined class="table-action__icon" @click="refreshClick" />
-              </a-tooltip>
-              <a-popover title="列宽" trigger="click" placement="bottomRight">
-                <template #content>
-                  <a-radio-group v-model:value="tableSize" class="custom-size-list">
-                    <div v-for="item in tableSizeList" :key="item.value">
-                      <a-radio :value="item.value">{{ item.label }}</a-radio>
-                    </div>
-                  </a-radio-group>
-                </template>
-                <a-tooltip title="列宽">
-                  <ColumnHeightOutlined class="table-action__icon" />
-                </a-tooltip>
-              </a-popover>
-              <a-popover v-if="props.tableName" trigger="click" placement="bottomRight">
-                <template #title>
-                  <div class="custom-column-list__title">
-                    <div>列设置</div>
-                    <a-button type="link" size="small" @click="resetCustomColumn">重置</a-button>
-                  </div>
-                </template>
-                <template #content>
-                  <a-checkbox-group v-model:value="customColumnList" class="custom-column-list">
-                    <div v-for="(item, index) in props.columns" :key="index" :span="24">
-                      <a-checkbox :value="item.dataIndex">
-                        {{ item.title }}
-                      </a-checkbox>
-                    </div>
-                  </a-checkbox-group>
-                </template>
-                <a-tooltip title="列设置">
-                  <SettingOutlined />
-                </a-tooltip>
-              </a-popover>
-            </a-space>
-          </div>
-        </div>
+      <template v-if="slots.title" #title="slotProps">
+        <slot name="title" v-bind="slotProps"></slot>
       </template>
       <template v-for="key in otherSlots" #[key]="slotProps" :key="key">
         <slot :name="key" v-bind="slotProps"></slot>
@@ -83,20 +98,38 @@ export default defineComponent({
   props: initDefaultProps(
     {
       ...tableProps(),
+      columns: {
+        type: Array<ColumnType>,
+        default: () => []
+      },
+      /** 是否显示工具栏 */
       isShowTools: Boolean,
+      /** 是否隐藏刷新按钮 */
       isHideRefresh: Boolean,
+      /** tableName 全局唯一值，存储需要 * */
       tableName: {
         type: String,
         required: true
       },
-      columns: {
-        type: Array<ColumnType>,
-        default: () => []
+      /** 是否隐藏自动刷新 */
+      isHideAutoRefresh: Boolean,
+      /** 默认自动刷新 */
+      defaultAutoRefresh: {
+        type: Boolean,
+        default: false
+      },
+      /** 自动刷新时间 s 秒，不建议小于 10 秒 */
+      autoRefreshTime: {
+        type: Number,
+        default: 10
       }
     },
     {
+      defaultAutoRefresh: false,
+      isHideAutoRefresh: false,
       isShowTools: false,
-      isHideRefresh: false
+      isHideRefresh: false,
+      autoRefreshTime: 10
     }
   ),
   slots: Object as CustomSlotsType<{
@@ -121,6 +154,29 @@ export default defineComponent({
   }>,
   emits: ['refresh'],
   setup(props, { attrs, slots, emit }) {
+    // 倒计时
+    const getCountdown = () => {
+      return Date.now() + 1000 * props.autoRefreshTime
+    }
+    const countdownSwitch = ref(props.defaultAutoRefresh)
+    const countdownNumber = ref(0)
+    const countDownFinish = () => {
+      emit('refresh')
+      countdownNumber.value = getCountdown()
+    }
+    const countDownChange = () => {
+      if (countdownSwitch.value) {
+        countdownNumber.value = getCountdown()
+      } else {
+        countdownNumber.value = 0
+      }
+    }
+    onMounted(() => {
+      if (countdownSwitch.value && !props.isHideAutoRefresh) {
+        countdownNumber.value = getCountdown()
+      }
+    })
+
     const otherSlots = computed(() => {
       return Object.keys(slots).filter((key) => key !== 'title')
     })
@@ -136,7 +192,7 @@ export default defineComponent({
       return `table:catch__${userStore.userInfo.id}__${props.tableName}__${type}`
     }
     const refreshClick = () => {
-      emit('refresh', 666)
+      emit('refresh')
     }
     // 表格列宽调整hooks
     const tableSize = ref<SizeType>('middle')
@@ -204,6 +260,10 @@ export default defineComponent({
       }
     )
     return {
+      countdownSwitch,
+      countDownFinish,
+      countdownNumber,
+      countDownChange,
       attrs,
       props,
       slots,
@@ -219,9 +279,26 @@ export default defineComponent({
 })
 </script>
 <style lang="less" scoped>
-.table-title {
+.custom-table {
   position: relative;
+  padding-top: 36px;
+  &__box {
+    padding: 0 10px;
+    height: 36px;
+    box-sizing: border-box;
+    border-radius: 4px 4px 0 0px;
+    position: absolute;
+    right: 10px;
+    top: 0;
+    background: #fff;
+    border: 1px solid rgb(240, 240, 240);
+    border-bottom: 0px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
 }
+
 .table-action {
   display: flex;
   align-items: center;
