@@ -1,12 +1,15 @@
 <template>
   <div>
-    <a-table v-bind="$attrs" :columns="customColumn" :size="tableSize">
-      <template #title="slotProps">
+    <a-table v-bind="props" :columns="customColumn" :size="tableSize">
+      <template v-if="props.isShowTools || $slots.title" #title="slotProps">
         <div class="table-title">
           <slot v-if="$slots.title" name="title" v-bind="slotProps"></slot>
-          <div class="table-action__box">
+          <div v-if="props.isShowTools" class="table-action__box">
             <!-- 增加工具栏部分 -->
             <a-space class="table-action">
+              <a-tooltip v-if="!props.isHideRefresh" title="刷新">
+                <ReloadOutlined class="table-action__icon" @click="refreshClick" />
+              </a-tooltip>
               <a-popover title="列宽" trigger="click" placement="bottomRight">
                 <template #content>
                   <a-radio-group v-model:value="tableSize" class="custom-size-list">
@@ -49,31 +52,47 @@
     </a-table>
   </div>
 </template>
+<script lang="ts">
+export default {
+  name: 'CustomTable'
+}
+</script>
 
 <script lang="ts" setup>
 // 处理props
 import { useUserStore } from '@/stores/user'
 import { CheckboxValueType } from 'ant-design-vue/es/checkbox/interface'
 import { SizeType } from 'ant-design-vue/es/config-provider'
-import { ColumnProps } from 'ant-design-vue/es/table'
+import { ColumnProps, TableProps } from 'ant-design-vue/es/table'
 import { defineProps } from 'vue'
 
 const userStore = useUserStore()
-
-const $attrs = useAttrs()
 const $slots = useSlots()
 const otherSlots = computed(() => {
   return Object.keys($slots).filter((key) => key !== 'title')
 })
-
 const props = withDefaults(
-  defineProps<{ columns: ColumnProps[]; size: SizeType; onChange: () => void; tableName?: string }>(),
+  defineProps<
+    Omit<TableProps, 'columns'> & {
+      columns: ColumnProps[]
+      tableName?: string
+      isShowTools?: boolean
+      isHideRefresh?: boolean
+    }
+  >(),
   {
     columns: () => [],
     size: 'middle',
-    tableName: ''
+    tableName: '', // 表格名称必须唯一
+    isShowTools: false, // 是否显示工具栏
+    isHideRefresh: false // 是否隐藏刷新
   }
 )
+
+const emit = defineEmits(['refresh'])
+const refreshClick = () => {
+  emit('refresh', 666)
+}
 
 const COLUMN = 'column'
 const SIZE = 'size'
@@ -123,7 +142,7 @@ let customColumnList = ref<CheckboxValueType[]>([])
 const customColumn = computed(() => {
   if (!isCatchOPtions()) return props.columns
   return props.columns.filter((item) => {
-    return customColumnList.value.includes(String(item.dataIndex))
+    return customColumnList.value.includes(String(item?.dataIndex))
   })
 })
 const resetCustomColumn = () => {

@@ -7,7 +7,7 @@
       >
       </a-result>
     </template>
-    <a-table
+    <!-- <a-table
       v-else
       :data-source="projList"
       :columns="columns"
@@ -324,8 +324,10 @@
           </a-space>
         </template>
       </template>
-    </a-table>
+    </a-table> -->
     <CustomTable
+      v-else
+      is-show-tools
       table-name="nodeSearch"
       :data-source="projList"
       :columns="columns"
@@ -338,6 +340,7 @@
         x: 'max-content'
       }"
       @change="changePage"
+      @refresh="getNodeProjectData"
     >
       <template #title>
         <a-space wrap class="search-box">
