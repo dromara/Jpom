@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-table v-bind="props" :columns="customColumn" :size="tableSize">
+    <a-table v-bind="$attrs" :columns="customColumn" :size="tableSize">
       <template v-if="props.isShowTools || $slots.title" #title="slotProps">
         <div class="table-title">
           <slot v-if="$slots.title" name="title" v-bind="slotProps"></slot>
@@ -71,15 +71,15 @@ const $slots = useSlots()
 const otherSlots = computed(() => {
   return Object.keys($slots).filter((key) => key !== 'title')
 })
+
+const $attrs = useAttrs()
 const props = withDefaults(
-  defineProps<
-    Omit<TableProps, 'columns'> & {
-      columns: ColumnProps[]
-      tableName?: string
-      isShowTools?: boolean
-      isHideRefresh?: boolean
-    }
-  >(),
+  defineProps<{
+    columns: ColumnProps[]
+    tableName?: string
+    isShowTools?: boolean
+    isHideRefresh?: boolean
+  }>(),
   {
     columns: () => [],
     size: 'middle',
@@ -153,8 +153,11 @@ watch(
   () => props.columns,
   (val) => {
     if (!isCatchOPtions()) return
-    const catchKeys = JSON.parse(localStorage.getItem(getTableCatchKey(COLUMN)) || '[]')
-    if (customColumnList.value.length == 0 && catchKeys.length == 0) {
+    const catchKeys = JSON.parse(localStorage.getItem(getTableCatchKey(COLUMN)) || '[]') as string[]
+    if (
+      catchKeys.filter((key) => val.findIndex((item) => item.dataIndex === key) > -1).length == 0 ||
+      catchKeys.length == 0
+    ) {
       customColumnList.value = val.map((item) => String(item.dataIndex))
     } else {
       customColumnList.value = catchKeys
