@@ -112,7 +112,10 @@ export default defineComponent({
         required: true
       },
       /** 是否隐藏自动刷新 */
-      isHideAutoRefresh: Boolean,
+      isHideAutoRefresh: {
+        type: Boolean,
+        default: false
+      },
       /** 默认自动刷新 */
       defaultAutoRefresh: {
         type: Boolean,
