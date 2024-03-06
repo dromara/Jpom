@@ -325,6 +325,326 @@
         </template>
       </template>
     </a-table>
+    <CustomTable
+      is-show-tools
+      table-name="nodeSearch"
+      :data-source="projList"
+      :columns="columns"
+      size="middle"
+      bordered
+      :pagination="pagination"
+      :row-selection="rowSelection"
+      row-key="id"
+      :scroll="{
+        x: 'max-content'
+      }"
+      @change="changePage"
+      @refresh="getNodeProjectData"
+    >
+      <template #title>
+        <a-space wrap class="search-box">
+          <a-select
+            v-if="!nodeId"
+            v-model:value="listQuery.nodeId"
+            allow-clear
+            placeholder="请选择节点"
+            class="search-input-item"
+          >
+            <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
+          </a-select>
+          <a-select
+            v-model:value="listQuery.group"
+            allow-clear
+            placeholder="请选择分组"
+            class="search-input-item"
+            @change="getNodeProjectData"
+          >
+            <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
+          </a-select>
+          <a-input
+            v-model:value="listQuery['%name%']"
+            placeholder="搜索项目名"
+            class="search-input-item"
+            @press-enter="getNodeProjectData"
+          />
+          <a-input
+            v-model:value="listQuery['%projectId%']"
+            placeholder="搜索项目ID"
+            class="search-input-item"
+            @press-enter="getNodeProjectData"
+          />
+
+          <a-select v-model:value="listQuery.runMode" allow-clear placeholder="项目类型" class="search-input-item">
+            <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
+          </a-select>
+          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
+            <a-button :loading="loading" type="primary" @click="getNodeProjectData">搜索</a-button>
+          </a-tooltip>
+
+          <a-dropdown v-if="selectedRowKeys && selectedRowKeys.length">
+            <a-button type="primary"> 操作 <DownOutlined /> </a-button>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item>
+                  <a-button type="primary" @click="batchStart">批量启动</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button type="primary" @click="batchRestart">批量重启</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button type="primary" danger @click="batchStop">批量关闭</a-button>
+                </a-menu-item>
+              </a-menu>
+            </template>
+          </a-dropdown>
+          <a-button v-else type="primary" :disabled="true"> 操作 <DownOutlined /> </a-button>
+
+          <a-button type="primary" @click="openAdd">新增</a-button>
+          <template v-if="!nodeId">
+            <a-dropdown v-if="nodeMap && Object.keys(nodeMap).length">
+              <a-button type="primary" danger> 同步 <DownOutlined /></a-button>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item v-for="(nodeName, key) in nodeMap" :key="key" @click="reSyncProject(key)">
+                    <a href="javascript:;">{{ nodeName }} <SyncOutlined /></a>
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </template>
+          <a-button v-else type="primary" danger @click="reSyncProject(nodeId)"> <SyncOutlined />同步 </a-button>
+
+          <a-button v-if="nodeId" type="primary" @click="handlerExportData()"><DownloadOutlined />导出</a-button>
+          <a-dropdown v-if="nodeId">
+            <template #overlay>
+              <a-menu>
+                <a-menu-item key="1">
+                  <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button>
+                </a-menu-item>
+              </a-menu>
+            </template>
+
+            <a-upload
+              name="file"
+              accept=".csv"
+              action=""
+              :show-upload-list="false"
+              :multiple="false"
+              :before-upload="importBeforeUpload"
+            >
+              <a-button type="primary"><UploadOutlined /> 导入 <DownOutlined /> </a-button>
+            </a-upload>
+          </a-dropdown>
+
+          <a-tooltip>
+            <template #title>
+              <div>
+                <ul>
+                  <li>状态数据是异步获取有一定时间延迟</li>
+                  <li>在单页列表里面 file 类型项目将自动排序到最后</li>
+                </ul>
+              </div>
+            </template>
+            <QuestionCircleOutlined />
+          </a-tooltip>
+          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
+        </a-space>
+      </template>
+      <template #bodyCell="{ column, text, record, index }">
+        <template v-if="column.dataIndex === 'name'">
+          <a-tooltip placement="topLeft" :title="text">
+            <a-button type="link" style="padding: 0" size="small" @click="openEdit(record)">
+              <ApartmentOutlined v-if="record.outGivingProject" />
+              <span>{{ text }}</span>
+            </a-button>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'nodeId'">
+          <a-tooltip placement="topLeft" :title="text">
+            <a-button type="link" style="padding: 0" size="small" @click="toNode(text)">
+              <span>{{ nodeMap[text] }}</span>
+              <FullscreenOutlined />
+            </a-button>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'path'">
+          <a-tooltip placement="topLeft" :title="(record.whitelistDirectory || '') + (record.lib || '')">
+            <span>{{ (record.whitelistDirectory || '') + (record.lib || '') }}</span>
+          </a-tooltip>
+        </template>
+
+        <template v-else-if="column.tooltip">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text || '' }}</span>
+          </a-tooltip>
+        </template>
+
+        <template v-else-if="column.dataIndex === 'status'">
+          <template
+            v-if="
+              projectStatusMap[record.nodeId] &&
+              projectStatusMap[record.nodeId][record.projectId] &&
+              projectStatusMap[record.nodeId][record.projectId].error
+            "
+          >
+            <a-tooltip
+              :title="
+                projectStatusMap[record.nodeId] &&
+                projectStatusMap[record.nodeId][record.projectId] &&
+                projectStatusMap[record.nodeId][record.projectId].error
+              "
+            >
+              <WarningOutlined />
+            </a-tooltip>
+          </template>
+          <template v-else>
+            <a-tooltip
+              v-if="noFileModes.includes(record.runMode)"
+              :title="`状态操作请到控制台中控制   ${
+                (projectStatusMap[record.nodeId] &&
+                  projectStatusMap[record.nodeId][record.projectId] &&
+                  projectStatusMap[record.nodeId][record.projectId].statusMsg) ||
+                ''
+              }`"
+            >
+              <a-switch
+                :checked="
+                  projectStatusMap[record.nodeId] &&
+                  projectStatusMap[record.nodeId][record.projectId] &&
+                  projectStatusMap[record.nodeId][record.projectId].pid > 0
+                "
+                disabled
+                checked-children="开"
+                un-checked-children="关"
+              />
+            </a-tooltip>
+            <span v-else>-</span>
+          </template>
+        </template>
+
+        <template v-else-if="column.dataIndex === 'port'">
+          <a-tooltip
+            placement="topLeft"
+            :title="`进程号：${(
+              (projectStatusMap[record.nodeId] &&
+                projectStatusMap[record.nodeId][record.projectId] &&
+                projectStatusMap[record.nodeId][record.projectId].pids) || [
+                (projectStatusMap[record.nodeId] &&
+                  projectStatusMap[record.nodeId][record.projectId] &&
+                  projectStatusMap[record.nodeId][record.projectId].pid) ||
+                  '-'
+              ]
+            ).join(',')} / 端口号：${
+              (projectStatusMap[record.nodeId] &&
+                projectStatusMap[record.nodeId][record.projectId] &&
+                projectStatusMap[record.nodeId][record.projectId].port) ||
+              '-'
+            }`"
+          >
+            <span
+              >{{
+                (projectStatusMap[record.nodeId] &&
+                  projectStatusMap[record.nodeId][record.projectId] &&
+                  projectStatusMap[record.nodeId][record.projectId].port) ||
+                '-'
+              }}/{{
+                (
+                  (projectStatusMap[record.nodeId] &&
+                    projectStatusMap[record.nodeId][record.projectId] &&
+                    projectStatusMap[record.nodeId][record.projectId].pids) || [
+                    (projectStatusMap[record.nodeId] &&
+                      projectStatusMap[record.nodeId][record.projectId] &&
+                      projectStatusMap[record.nodeId][record.projectId].pid) ||
+                      '-'
+                  ]
+                ).join(',')
+              }}</span
+            >
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'operation'">
+          <a-space>
+            <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
+            <template v-if="noFileModes.includes(record.runMode)">
+              <a-button size="small" type="primary" @click="handleConsole(record)">控制台</a-button>
+            </template>
+            <template v-else>
+              <a-tooltip title="文件类型没有控制台功能">
+                <a-button size="small" type="primary" :disabled="true">控制台</a-button></a-tooltip
+              >
+            </template>
+
+            <a-dropdown>
+              <a @click="(e) => e.preventDefault()">
+                更多
+                <DownOutlined />
+              </a>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item>
+                    <template v-if="noFileModes.includes(record.runMode)">
+                      <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+                    </template>
+                    <template v-else>
+                      <a-tooltip title="文件类型没有触发器功能">
+                        <a-button size="small" type="primary" :disabled="true">触发器</a-button></a-tooltip
+                      >
+                    </template>
+                  </a-menu-item>
+                  <a-menu-item v-if="noFileModes.includes(record.runMode)">
+                    <a-button size="small" type="primary" @click="handleLogBack(record)">项目日志 </a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" type="primary" danger @click="handleDelete(record, '')">逻辑删除</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" type="primary" danger @click="handleDelete(record, 'thorough')"
+                      >彻底删除</a-button
+                    >
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button size="small" type="primary" danger @click="migrateWorkspace(record)"
+                      >迁移工作空间</a-button
+                    >
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button
+                      size="small"
+                      type="primary"
+                      :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
+                      @click="sortItemHander(record, index, 'top')"
+                      >置顶</a-button
+                    >
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button
+                      size="small"
+                      type="primary"
+                      :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
+                      @click="sortItemHander(record, index, 'up')"
+                      >上移</a-button
+                    >
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button
+                      size="small"
+                      type="primary"
+                      :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
+                      @click="sortItemHander(record, index, 'down')"
+                    >
+                      下移
+                    </a-button>
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </a-space>
+        </template>
+      </template>
+    </CustomTable>
     <!-- 项目文件组件 -->
     <a-drawer
       destroy-on-close
@@ -619,6 +939,7 @@ import {
 } from '@/utils/const'
 import FileRead from '@/pages/node/node-layout/project/project-file-read'
 import ProjectEdit from '@/pages/node/node-layout/project/project-edit'
+import CustomTable from '@/components/customTable/index.vue'
 
 import { mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
@@ -630,7 +951,8 @@ export default {
     Console,
     FileRead,
     ProjectEdit,
-    ProjectLog
+    ProjectLog,
+    CustomTable
   },
   props: {
     nodeId: {
