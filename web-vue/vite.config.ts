@@ -123,19 +123,18 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         name: 'vite-plugin-skip-empty-css',
         async transform(code, id) {
           if (/(\.css|\.scss|\.less)$/.test(id)) {
+            if (code === '') return ''
             const { root } = await postcss([
               {
                 postcssPlugin: 'check-empty-or-comments-only'
               }
             ]).process(code, { from: id })
-            if (root.nodes.length === 0) {
-              return ''
-            }
-            const hasOnlyComments = root.nodes.every((node) => {
-              return node.type === 'comment'
-            })
-
-            if (hasOnlyComments) {
+            if (
+              root.nodes.length === 0 ||
+              root.nodes.every((node) => {
+                return node.type === 'comment'
+              })
+            ) {
               return ''
             }
             return code
