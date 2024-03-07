@@ -122,6 +122,7 @@ declare module 'vue' {
     FolderAddOutlined: typeof import('@ant-design/icons-vue')['FolderAddOutlined']
     FullscreenOutlined: typeof import('@ant-design/icons-vue')['FullscreenOutlined']
     HighlightOutlined: typeof import('@ant-design/icons-vue')['HighlightOutlined']
+    HolderOutlined: typeof import('@ant-design/icons-vue')['HolderOutlined']
     HomeOutlined: typeof import('@ant-design/icons-vue')['HomeOutlined']
     Index2: typeof import('./../components/logView/index2.vue')['default']
     InfoCircleOutlined: typeof import('@ant-design/icons-vue')['InfoCircleOutlined']
