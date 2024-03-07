@@ -8,7 +8,7 @@
       </a-result>
     </template>
     <a-table
-      v-else
+      v-if="false"
       :data-source="projList"
       :columns="columns"
       size="middle"
@@ -327,6 +327,8 @@
     </a-table>
     <CustomTable
       is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="5"
       table-name="nodeSearch"
       :data-source="projList"
       :columns="columns"
@@ -447,7 +449,7 @@
             </template>
             <QuestionCircleOutlined />
           </a-tooltip>
-          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
+          <!-- <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" /> -->
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record, index }">
