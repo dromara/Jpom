@@ -19,6 +19,7 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 //ant-design-vue
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
+import postcss from 'postcss'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }: ConfigEnv) => {
@@ -100,7 +101,6 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         //ant-design-vue
         resolvers: [AntDesignVueResolver({ importStyle: false, resolveIcons: true })]
       }),
-
       createHtmlPlugin({
         minify: true,
         viteNext: true,
@@ -118,7 +118,31 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         emitFile: false,
         // file: 'states.html',
         open: true
-      })
+      }),
+      {
+        name: 'vite-plugin-skip-empty-css',
+        async transform(code, id) {
+          if (/(\.css|\.scss|\.less)$/.test(id)) {
+            const { root } = await postcss([
+              {
+                postcssPlugin: 'check-empty-or-comments-only'
+              }
+            ]).process(code, { from: id })
+            if (root.nodes.length === 0) {
+              return ''
+            }
+            const hasOnlyComments = root.nodes.every((node) => {
+              return node.type === 'comment'
+            })
+
+            if (hasOnlyComments) {
+              return ''
+            }
+            return code
+          }
+          return code
+        }
+      }
     ]
   }
 })
