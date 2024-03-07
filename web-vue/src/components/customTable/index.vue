@@ -18,7 +18,7 @@
             :value="countdownNumber"
             @finish="countDownFinish"
           />
-          |
+          <a-divider type="vertical" />
         </a-space>
         <a-tooltip v-if="!props.isHideRefresh" title="刷新">
           <ReloadOutlined class="table-action__icon" @click="refreshClick" />
@@ -43,12 +43,15 @@
             </div>
           </template>
           <template #content>
-            <a-checkbox-group v-model:value="customColumnList" class="custom-column-list">
-              <div v-for="(item, index) in props.columns" :key="index" :span="24">
-                <a-checkbox :value="item.dataIndex">
-                  {{ item.title }}
-                </a-checkbox>
-              </div>
+            <a-checkbox-group class="custom-column-list" :value="customCheckColumnList" @change="onCheckChange">
+              <Container drag-handle-selector=".custom-column-list__icon" orientation="vertical" @drop="onDrop">
+                <Draggable v-for="(item, index) in customColumnList" :key="index">
+                  <HolderOutlined class="custom-column-list__icon" />
+                  <a-checkbox :value="item.dataIndex">
+                    {{ item.title }}
+                  </a-checkbox>
+                </Draggable>
+              </Container>
             </a-checkbox-group>
           </template>
           <a-tooltip title="列设置">
@@ -69,92 +72,23 @@
 </template>
 <script lang="ts">
 import { useUserStore } from '@/stores/user'
-import { CustomSlotsType } from 'ant-design-vue/es/_util/type'
 import { SizeType } from 'ant-design-vue/es/config-provider'
-import { ColumnType, tableProps } from 'ant-design-vue/es/table'
-import { RenderExpandIconProps } from 'ant-design-vue/es/vc-table/interface'
-
-import { initDefaultProps } from 'ant-design-vue/es/_util/props-util'
+import { Container, Draggable } from 'vue3-smooth-dnd'
 import { CheckboxValueType } from 'ant-design-vue/es/checkbox/interface'
-// 表格大小处理
-const tableSizeList = [
-  {
-    value: 'large',
-    label: '超大'
-  },
-  {
-    value: 'middle',
-    label: '中等'
-  },
-  {
-    value: 'small',
-    label: '紧凑'
-  }
-]
+import { CatchStorageType, CustomColumnType, CustomTableSlotsType } from './types'
+import { compareArrays } from './utils'
+import { tableSizeList } from './dict'
+import { customTableProps } from './props'
 
 export default defineComponent({
-  // name: 'CustomTable',
+  name: 'CustomTable',
+  components: {
+    Container,
+    Draggable
+  },
   inheritAttrs: false,
-  props: initDefaultProps(
-    {
-      ...tableProps(),
-      columns: {
-        type: Array<ColumnType>,
-        default: () => []
-      },
-      /** 是否显示工具栏 */
-      isShowTools: Boolean,
-      /** 是否隐藏刷新按钮 */
-      isHideRefresh: Boolean,
-      /** tableName 全局唯一值，存储需要 * */
-      tableName: {
-        type: String,
-        required: true
-      },
-      /** 是否隐藏自动刷新 */
-      isHideAutoRefresh: {
-        type: Boolean,
-        default: false
-      },
-      /** 默认自动刷新 */
-      defaultAutoRefresh: {
-        type: Boolean,
-        default: false
-      },
-      /** 自动刷新时间 s 秒，不建议小于 10 秒 */
-      autoRefreshTime: {
-        type: Number,
-        default: 10
-      }
-    },
-    {
-      defaultAutoRefresh: false,
-      isHideAutoRefresh: false,
-      isShowTools: false,
-      isHideRefresh: false,
-      autoRefreshTime: 10
-    }
-  ),
-  slots: Object as CustomSlotsType<{
-    emptyText?: any
-    expandIcon?: RenderExpandIconProps<any>
-    title?: any
-    footer?: any
-    summary?: any
-    expandedRowRender?: any
-    expandColumnTitle?: any
-    bodyCell?: (props: {
-      text: any
-      value: any
-      record: Record<string, any>
-      index: number
-      column: ColumnType
-    }) => void
-    headerCell?: (props: { title: any; column: ColumnType }) => void
-    customFilterIcon?: any
-    customFilterDropdown?: any
-    default: any
-  }>,
+  props: customTableProps,
+  slots: Object as CustomTableSlotsType,
   emits: ['refresh'],
   setup(props, { attrs, slots, emit }) {
     // 倒计时
@@ -186,14 +120,15 @@ export default defineComponent({
     const userStore = useUserStore()
     const COLUMN = 'column'
     const SIZE = 'size'
-    // 是否缓存配置
+    /** 是否缓存配置 */
     const isCatchOPtions = () => {
       return props.tableName && userStore?.userInfo?.id
     }
-    // 获取缓存key
+    /** 获取缓存key */
     const getTableCatchKey = (type: string) => {
       return `table:catch__${userStore.userInfo.id}__${props.tableName}__${type}`
     }
+    /** 获取缓存key */
     const refreshClick = () => {
       emit('refresh')
     }
@@ -218,29 +153,90 @@ export default defineComponent({
       tableSize.value = size ? JSON.parse(size) : props.size || 'middle'
     })
 
-    let customColumnList = ref<CheckboxValueType[]>([])
+    let customColumnList = ref<CustomColumnType[]>([])
+    const customCheckColumnList = computed(() => {
+      return customColumnList.value.filter((item) => item.checked).map((item) => String(item.dataIndex))
+    })
     const customColumn = computed(() => {
       if (!isCatchOPtions()) return props.columns
-      return props.columns.filter((item) => {
-        return customColumnList.value.includes(String(item.dataIndex))
-      })
+      return customColumnList.value.filter((item) => item.checked)
     })
     const resetCustomColumn = () => {
-      customColumnList.value = props.columns.map((item) => String(item.dataIndex))
+      customColumnList.value = props.columns.map((item) => ({ ...item, checked: true }))
     }
+    const onCheckChange = (checkedValues: CheckboxValueType[]) => {
+      customColumnList.value = customColumnList.value.map((item) => ({
+        ...item,
+        checked: checkedValues.includes(String(item.dataIndex))
+      }))
+    }
+    const applyDrag = (
+      arr: CustomColumnType[],
+      dragResult: { removedIndex: number; addedIndex: number; payload: CustomColumnType }
+    ) => {
+      const { removedIndex, addedIndex, payload } = dragResult
+
+      if (removedIndex === null && addedIndex === null) return arr
+      const result = [...arr]
+      let itemToAdd = payload
+
+      if (removedIndex !== null) {
+        itemToAdd = result.splice(removedIndex, 1)[0]
+      }
+      if (addedIndex !== null) {
+        result.splice(addedIndex, 0, itemToAdd)
+      }
+      return result
+    }
+
+    const onDrop = (dropResult: any) => {
+      customColumnList.value = applyDrag(customColumnList.value, dropResult)
+    }
+
+    /** 设置默认列 */
+    const setDefaultCustomColumnList = () => {
+      customColumnList.value = props.columns.map((item) => ({ ...item, checked: true }))
+    }
+
     // 监听列变化,同步至缓存customColumnList中
     watch(
       () => props.columns,
       (val) => {
         if (!isCatchOPtions()) return
-        const catchKeys = JSON.parse(localStorage.getItem(getTableCatchKey(COLUMN)) || '[]') as string[]
+        const catchStorage = JSON.parse(localStorage.getItem(getTableCatchKey(COLUMN)) || '[]') as CatchStorageType[]
         if (
-          catchKeys.filter((key) => val.findIndex((item) => item.dataIndex === key) > -1).length == 0 ||
-          catchKeys.length == 0
+          catchStorage.length == 0 ||
+          (catchStorage.length > 0 && catchStorage.some((key) => typeof key === 'string')) ||
+          !compareArrays(
+            val.map((item) => String(item.dataIndex)),
+            catchStorage.map((item) => item.key)
+          )
         ) {
-          customColumnList.value = val.map((item) => String(item.dataIndex))
+          console.log(
+            catchStorage.length == 0,
+            catchStorage.length > 0 && catchStorage.some((key) => typeof key === 'string'),
+            !compareArrays(
+              val.map((item) => String(item.key)),
+              catchStorage.map((item) => item.key)
+            )
+          )
+          console.log('setDefaultCustomColumnList')
+          return setDefaultCustomColumnList()
         } else {
-          customColumnList.value = catchKeys
+          const tmpObj: { [key: string]: CustomColumnType } = {}
+          val.forEach((item) => {
+            tmpObj[String(item.dataIndex || '_d')] = item
+          })
+          console.log('catchStorage')
+          customColumnList.value = catchStorage.map((item) => {
+            const key = item.key
+            console.log(item)
+            return {
+              ...tmpObj[key],
+              checked: item.checked
+            }
+          })
+          console.log(customColumnList.value)
         }
       },
       {
@@ -252,8 +248,18 @@ export default defineComponent({
       () => customColumnList.value,
       (val) => {
         if (!isCatchOPtions()) return
-        if (props.columns.filter((item) => !val.includes(String(item.dataIndex))).length > 0 && val.length > 0) {
-          localStorage.setItem(getTableCatchKey(COLUMN), JSON.stringify(val))
+        if (JSON.stringify(val) !== JSON.stringify(props.columns)) {
+          localStorage.setItem(
+            getTableCatchKey(COLUMN),
+            JSON.stringify(
+              customColumnList.value.map((item) => {
+                return {
+                  key: item.dataIndex,
+                  checked: item.checked
+                } as CatchStorageType
+              })
+            )
+          )
         } else {
           localStorage.removeItem(getTableCatchKey(COLUMN))
         }
@@ -263,6 +269,7 @@ export default defineComponent({
       }
     )
     return {
+      onDrop,
       countdownSwitch,
       countDownFinish,
       countdownNumber,
@@ -276,7 +283,9 @@ export default defineComponent({
       tableSize,
       customColumnList,
       customColumn,
-      resetCustomColumn
+      customCheckColumnList,
+      resetCustomColumn,
+      onCheckChange
     }
   }
 })
@@ -317,8 +326,13 @@ export default defineComponent({
     align-items: center;
     justify-content: space-between;
   }
+  &__icon {
+    color: rgba(0, 0, 0, 0.6);
+    margin-right: 10px;
+  }
 }
 .custom-size-list {
   display: block;
 }
 </style>
+./dicts
