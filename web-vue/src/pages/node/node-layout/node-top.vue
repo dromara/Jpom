@@ -66,13 +66,16 @@ export default {
   components: {},
   props: {
     nodeId: {
-      type: String
+      type: String,
+      default: ''
     },
     machineId: {
-      type: String
+      type: String,
+      default: ''
     },
     type: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -101,8 +104,15 @@ export default {
     handleFilter() {
       const params = {
         nodeId: this.nodeId,
-        machineId: this.machineId,
-        time: this.timeRange
+        machineId: this.machineId
+        // time: this.timeRange
+      }
+      if (this.timeRange && this.timeRange[0]) {
+        params.startTime = this.timeRange[0]
+        params.endTime = this.timeRange[1]
+      } else {
+        params.startTime = ''
+        params.endTime = ''
       }
       // 加载数据
       nodeMonitorData(params)

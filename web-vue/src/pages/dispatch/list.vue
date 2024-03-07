@@ -292,11 +292,11 @@
                     @change="(nodeId) => handleNodeListChange(nodeId, index)"
                   >
                     <a-select-option
-                      v-for="nodeList in nodeProjectsList"
-                      :key="nodeList.id"
-                      :disabled="nodeIdMap[nodeList.id].openStatus !== 1"
+                      v-for="nodeItemList in nodeProjectsList"
+                      :key="nodeItemList.id"
+                      :disabled="nodeIdMap[nodeItemList.id].openStatus !== 1"
                     >
-                      {{ nodeNameMap[nodeList.id] }}
+                      {{ nodeNameMap[nodeItemList.id] }}
                     </a-select-option>
                   </a-select>
                   <span>项目: </span>
@@ -825,9 +825,9 @@
                     <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
                   </a-tooltip>
                 </template>
-                <template #help
-                  ><div>非服务器开机自启,如需开机自启建议配置<b>插件端开机自启</b>并开启此开关</div></template
-                >
+                <template #help>
+                  <div>非服务器开机自启,如需开机自启建议配置<b>插件端开机自启</b>并开启此开关</div>
+                </template>
                 <a-switch
                   v-model:checked="temp[`${nodeId}_autoStart`]"
                   checked-children="开"

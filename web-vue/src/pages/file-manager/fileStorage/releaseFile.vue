@@ -18,8 +18,8 @@
         </a-radio-group>
         <template #help>
           <template v-if="temp.taskType === 0"
-            >发布后的文件名是：文件ID.后缀，并非文件真实名称 （可以使用上传后脚本随意修改）</template
-          >
+            >发布后的文件名是：文件ID.后缀，并非文件真实名称 （可以使用上传后脚本随意修改）
+          </template>
         </template>
       </a-form-item>
 

@@ -24,7 +24,8 @@ export default {
   },
   props: {
     temp: {
-      type: Object
+      type: Object,
+      default: () => ({})
     },
     height: {
       type: String,

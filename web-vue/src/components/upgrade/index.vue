@@ -154,9 +154,6 @@ export default {
       default: ''
     }
   },
-  computed: {
-    ...mapState(useGuideStore, ['getThemeStyle'])
-  },
   data() {
     return {
       temp: {},
@@ -167,6 +164,9 @@ export default {
       changelog: '',
       markdownit: null
     }
+  },
+  computed: {
+    ...mapState(useGuideStore, ['getThemeStyle'])
   },
   mounted() {
     this.loadData()

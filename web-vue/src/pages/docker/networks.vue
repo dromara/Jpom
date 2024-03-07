@@ -38,6 +38,7 @@
           placement="topLeft"
           :title="`${text && text.driver}  ${
             text &&
+            text.config &&
             text.config
               .map((item) => {
                 return ('网关：' + item.gateway || '') + '#' + ('子网掩码：' + item.subnet || '')
@@ -47,6 +48,7 @@
         >
           <span>{{
             text &&
+            text.config &&
             text.config
               .map((item) => {
                 return (item.gateway || '') + '#' + (item.subnet || '')
@@ -88,7 +90,8 @@ export default {
       default: ''
     },
     urlPrefix: {
-      type: String
+      type: String,
+      default: ''
     },
     machineDockerId: {
       type: String,

@@ -199,8 +199,8 @@
                   <template #title>
                     这里构建命令最终会在服务器上执行。
                     如果有多行命令那么将<b>逐行执行</b>，如果想要切换路径后执行命令则需要
-                    <b>cd xxx && mvn clean package</b></template
-                  >
+                    <b>cd xxx && mvn clean package</b>
+                  </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
@@ -423,8 +423,8 @@
             <div v-if="!temp.releaseMethod" style="text-align: center">请选择发布方式</div>
             <template v-else>
               <template v-if="temp.releaseMethod === 0">
-                不发布：只执行构建流程并且保存构建历史,不执行发布流程</template
-              >
+                不发布：只执行构建流程并且保存构建历史,不执行发布流程
+              </template>
               <!-- 节点分发 -->
               <template v-if="temp.releaseMethod === 1">
                 <a-form-item label="分发项目" name="releaseMethodDataId">
@@ -695,8 +695,8 @@
                       执行容器
                       <template #title>
                         使用哪个 docker 构建,填写 docker 标签（ 标签在 docker 编辑页面配置） 默认查询可用的第一个,如果
-                        tag 查询出多个将依次构建</template
-                      >
+                        tag 查询出多个将依次构建
+                      </template>
                       <QuestionCircleOutlined v-if="!temp.id" />
                     </a-tooltip>
                   </template>
@@ -869,8 +869,8 @@
                   <template #title>
                     开启缓存构建目录将保留仓库文件,二次构建将 pull 代码,
                     不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存)
-                    、特别说明如果缓存目录中缺失版本控制相关文件将自动删除后重新拉取代码</template
-                  >
+                    、特别说明如果缓存目录中缺失版本控制相关文件将自动删除后重新拉取代码
+                  </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
@@ -1043,8 +1043,8 @@
                 <a-tooltip>
                   文件管理中心
                   <template #title>
-                    如果开启同步到文件管理中心，在构建发布流程将自动执行同步到文件管理中心的操作。</template
-                  >
+                    如果开启同步到文件管理中心，在构建发布流程将自动执行同步到文件管理中心的操作。
+                  </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
@@ -1395,6 +1395,7 @@ export default {
       default: 0
     }
   },
+  emits: ['confirm', 'update:editSteps'],
   data() {
     return {
       //   afterOptList,
@@ -1963,7 +1964,6 @@ export default {
     stepsChange(current) {
       this.$emit('update:editSteps', current)
     }
-  },
-  emits: ['confirm', 'update:editSteps']
+  }
 }
 </script>

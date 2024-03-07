@@ -80,9 +80,10 @@ export default {
   },
   props: {
     id: {
-      type: String
+      type: String,
+      default: ''
     },
-    defArgs: { type: String }
+    defArgs: { type: String, default: '' }
   },
   data() {
     return {

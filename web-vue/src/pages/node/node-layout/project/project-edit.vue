@@ -399,7 +399,8 @@ export default {
       default: ''
     },
     nodeId: {
-      type: String
+      type: String,
+      default: ''
     },
     data: { type: Object, default: null }
   },

@@ -42,7 +42,8 @@ export default {
   },
   props: {
     machineId: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {

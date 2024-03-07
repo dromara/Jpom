@@ -56,19 +56,21 @@ export default {
       type: String,
       default: ''
     },
-    containerId: { type: String },
+    containerId: { type: String, default: '' },
     machineDockerId: {
       type: String,
       default: ''
     },
     urlPrefix: {
-      type: String
+      type: String,
+      default: ''
     },
     visible: {
       type: Boolean,
       default: false
     }
   },
+  emits: ['close'],
   data() {
     return {
       socket: null,
@@ -168,7 +170,6 @@ export default {
     download() {
       window.open(dockerContainerDownloaLog(this.urlPrefix, this.logId), '_blank')
     }
-  },
-  emits: ['close']
+  }
 }
 </script>
