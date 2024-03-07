@@ -447,16 +447,20 @@ export default {
   inject: ['globalLoading'],
   props: {
     nodeId: {
-      type: String
+      type: String,
+      default: ''
     },
     projectId: {
-      type: String
+      type: String,
+      default: ''
     },
     runMode: {
-      type: String
+      type: String,
+      default: ''
     },
     absPath: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   emits: ['goReadFile', 'goConsole'],

@@ -5,6 +5,11 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【all】优化 新增 `jpom.system.command-use-sudo` 配置属性控制是否使用 sudo 执行部分系统命令
+2. 【server】优化 前端页面 keep-alive 可能导致的内存泄漏问题（感谢[@a20070322](https://gitee.com/a20070322) [Gitee issues I9510M](https://gitee.com/dromara/Jpom/issues/I9510M) ）
+3. 【server】修复 部分弹窗不生效问题（感谢[@a20070322](https://gitee.com/a20070322)  [Gitee Pr 215](https://gitee.com/dromara/Jpom/pulls/215) ）
+4. 【server】优化 前端 ES lint 配置规范前端代码（感谢[@a20070322](https://gitee.com/a20070322) [Gitee Pr 214](https://gitee.com/dromara/Jpom/pulls/214) / [Gitee Pr 215](https://gitee.com/dromara/Jpom/pulls/215) / [Gitee Pr 217](https://gitee.com/dromara/Jpom/pulls/217) ）
+5. 【server】修复 docker 控制台网络选项卡页面空白（感谢@破冰）
+6. 【server】修复 节点历史监控统计图表时间查询不生效（感谢@九問）
 
 ------
 

@@ -435,6 +435,7 @@ export default {
       default: ''
     }
   },
+  emits: ['cancel', 'confirm'],
   data() {
     return {
       // choose: this.choose,
@@ -865,7 +866,6 @@ export default {
         this.$emit('confirm', `${selectData.id}`)
       }
     }
-  },
-  emits: ['cancel', 'confirm']
+  }
 }
 </script>

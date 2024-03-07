@@ -186,6 +186,7 @@ export default {
       default: false
     }
   },
+  emits: ['confirm'],
   data() {
     return {
       loading: false,

@@ -67,18 +67,17 @@ export default {
   },
   props: {
     machineId: {
-      type: String
+      type: String,
+      default: ''
     },
     name: {
-      type: String
+      type: String,
+      default: ''
     },
     tab: {
       type: String,
       default: ''
     }
-  },
-  computed: {
-    ...mapState(useAppStore, ['getCollapsed'])
   },
   emits: ['close'],
   data() {
@@ -86,6 +85,11 @@ export default {
       current: this.tab || 'info'
     }
   },
+
+  computed: {
+    ...mapState(useAppStore, ['getCollapsed'])
+  },
+
   mounted() {}
 }
 </script>

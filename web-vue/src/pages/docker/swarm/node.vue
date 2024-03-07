@@ -198,14 +198,16 @@ export default {
   components: {},
   props: {
     id: {
-      type: String
+      type: String,
+      default: ''
     },
     visible: {
       type: Boolean,
       default: false
     },
     urlPrefix: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {

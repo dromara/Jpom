@@ -109,9 +109,6 @@ import { useAppStore } from '@/stores/app'
 
 import { confirmFastInstall, fastInstall, pullFastInstallResult } from '@/api/node'
 export default {
-  computed: {
-    ...mapState(useAppStore, ['getWorkspaceId'])
-  },
   data() {
     return {
       fastInstallActiveKey: ['1', '2', '4'],
@@ -121,6 +118,9 @@ export default {
       pullFastInstallResultData: [],
       fastInstallNode: false
     }
+  },
+  computed: {
+    ...mapState(useAppStore, ['getWorkspaceId'])
   },
   beforeUnmount() {
     this.cancelFastInstall()

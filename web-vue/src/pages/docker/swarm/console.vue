@@ -51,7 +51,8 @@ export default {
   },
   props: {
     id: {
-      type: String
+      type: String,
+      default: ''
     },
     initMenu: {
       type: String,
@@ -62,9 +63,11 @@ export default {
       default: false
     },
     urlPrefix: {
-      type: String
+      type: String,
+      default: ''
     }
   },
+  emits: ['close'],
   data() {
     return {
       menuKeyArray: [],
@@ -85,8 +88,7 @@ export default {
     onClose1() {
       this.$emit('close')
     }
-  },
-  emits: ['close']
+  }
 }
 </script>
 

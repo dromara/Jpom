@@ -35,7 +35,8 @@ export default {
   inject: ['globalLoading'],
   props: {
     machineId: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {

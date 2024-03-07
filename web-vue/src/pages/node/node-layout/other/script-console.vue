@@ -81,14 +81,16 @@ export default {
     LogView1
   },
   props: {
-    nodeId: { type: String },
+    nodeId: { type: String, default: '' },
     scriptId: {
-      type: String
+      type: String,
+      default: ''
     },
     id: {
-      type: String
+      type: String,
+      default: ''
     },
-    defArgs: { type: String }
+    defArgs: { type: String, default: '' }
   },
   data() {
     return {

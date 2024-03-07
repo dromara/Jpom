@@ -251,14 +251,16 @@ export default {
     },
 
     urlPrefix: {
-      type: String
+      type: String,
+      default: ''
     },
     machineDockerId: {
       type: String,
       default: ''
     },
     containerId: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {

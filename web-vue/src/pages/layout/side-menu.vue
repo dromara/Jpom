@@ -72,10 +72,12 @@ export default {
   },
   props: {
     mode: {
-      type: String
+      type: String,
+      default: ''
     },
     theme: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   data() {

@@ -51,7 +51,7 @@
         <hutool.version>5.8.26</hutool.version>
         <fastjson2.version>2.0.46</fastjson2.version>
         <fastjson-version>2.0.46</fastjson-version>
-        <jna-version>5.12.1</jna-version>
+        <jna-version>5.14.0</jna-version>
         <mwiede.jsch-version>0.2.16</mwiede.jsch-version>
         <oshi.version>6.4.12</oshi.version>
     </properties>

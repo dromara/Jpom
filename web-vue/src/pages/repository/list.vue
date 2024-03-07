@@ -26,6 +26,7 @@ export default {
       default: ''
     }
   },
+  emits: ['confirm'],
   computed: { ...mapState(useAppStore, ['getWorkspaceId']) },
   methods: {
     confirm(data) {
@@ -34,7 +35,6 @@ export default {
     handerConfirm() {
       this.$refs.repository.handerConfirm()
     }
-  },
-  emits: ['confirm']
+  }
 }
 </script>

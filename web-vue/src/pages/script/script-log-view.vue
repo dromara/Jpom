@@ -22,7 +22,8 @@ export default {
   },
   props: {
     temp: {
-      type: Object
+      type: Object,
+      default: () => ({})
     },
     visible: {
       type: Boolean,
