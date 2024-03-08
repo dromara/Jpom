@@ -44,6 +44,8 @@ public class TestJna {
 
     @Test
     public void test2() {
-        CLibrary2.INSTANCE.printf("Hello, World\n");
+        CLibrary2 instance = CLibrary2.INSTANCE;
+        System.out.println(instance);
+        instance.printf("Hello, World\n");
     }
 }
