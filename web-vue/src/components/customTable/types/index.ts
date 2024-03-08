@@ -20,6 +20,8 @@ export type CustomTableSlotsType = CustomSlotsType<{
   title?: any
   footer?: any
   summary?: any
+  tableHelp?: any
+  toolPrefix?: any
   expandedRowRender?: any
   expandColumnTitle?: any
   bodyCell?: (props: { text: any; value: any; record: Record<string, any>; index: number; column: ColumnType }) => void

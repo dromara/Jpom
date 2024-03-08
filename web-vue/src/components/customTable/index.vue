@@ -2,63 +2,91 @@
   <div class="custom-table">
     <div v-if="props.isShowTools" class="custom-table__box">
       <!-- 增加工具栏部分 -->
-      <a-space class="table-action">
-        <a-space v-if="!props.isHideAutoRefresh">
-          <span>自动刷新:</span>
-          <a-switch
-            v-model:checked="countdownSwitch"
-            checked-children="开"
-            un-checked-children="关"
-            @change="countDownChange"
-          />
-          <a-statistic-countdown
-            v-if="countdownSwitch"
-            format="&nbsp; s 秒"
-            title="刷新倒计时"
-            :value="countdownNumber"
-            @finish="countDownFinish"
-          />
-          <a-divider type="vertical" />
-        </a-space>
-        <a-tooltip v-if="!props.isHideRefresh" title="刷新">
-          <ReloadOutlined class="table-action__icon" @click="refreshClick" />
-        </a-tooltip>
-        <a-popover title="列宽" trigger="click" placement="bottomRight">
-          <template #content>
-            <a-radio-group v-model:value="tableSize" class="custom-size-list">
-              <div v-for="item in tableSizeList" :key="item.value">
-                <a-radio :value="item.value">{{ item.label }}</a-radio>
-              </div>
-            </a-radio-group>
-          </template>
-          <a-tooltip title="列宽">
-            <ColumnHeightOutlined class="table-action__icon" />
-          </a-tooltip>
-        </a-popover>
-        <a-popover v-if="props.tableName" trigger="click" placement="bottomRight">
-          <template #title>
-            <div class="custom-column-list__title">
-              <div>列设置</div>
-              <a-button type="link" size="small" @click="resetCustomColumn">重置</a-button>
-            </div>
-          </template>
-          <template #content>
-            <a-checkbox-group class="custom-column-list" :value="customCheckColumnList" @change="onCheckChange">
-              <Container drag-handle-selector=".custom-column-list__icon" orientation="vertical" @drop="onDrop">
-                <Draggable v-for="(item, index) in customColumnList" :key="index">
-                  <HolderOutlined class="custom-column-list__icon" />
-                  <a-checkbox :value="item.dataIndex">
-                    {{ item.title }}
-                  </a-checkbox>
-                </Draggable>
-              </Container>
-            </a-checkbox-group>
-          </template>
-          <a-tooltip title="列设置">
-            <SettingOutlined />
-          </a-tooltip>
-        </a-popover>
-      </a-space>
+      <!-- <a-space class="table-action"> -->
+      <a-card size="small">
+        <a-form layout="inline">
+          <a-space>
+            <template #split>
+              <a-divider type="vertical" />
+            </template>
+            <template v-if="slots.toolPrefix">
+              <slot name="toolPrefix"></slot>
+            </template>
+            <a-form-item label="自动刷新">
+              <a-space v-if="!props.isHideAutoRefresh">
+                <a-switch
+                  v-model:checked="countdownSwitch"
+                  checked-children="开"
+                  un-checked-children="关"
+                  @change="countDownChange"
+                />
+                <a-divider v-if="countdownSwitch" type="vertical" />
+                <a-statistic-countdown
+                  v-if="countdownSwitch"
+                  format="&nbsp; s 秒"
+                  title="刷新倒计时"
+                  :value="countdownNumber"
+                  @finish="countDownFinish"
+                />
+              </a-space>
+            </a-form-item>
+            <a-form-item>
+              <a-tooltip v-if="!props.isHideRefresh" title="刷新">
+                <ReloadOutlined class="table-action__icon" @click="refreshClick" />
+              </a-tooltip>
+            </a-form-item>
+
+            <a-form-item>
+              <a-popover title="列宽" trigger="click" placement="bottomRight">
+                <template #content>
+                  <a-radio-group v-model:value="tableSize" class="custom-size-list">
+                    <div v-for="item in tableSizeList" :key="item.value">
+                      <a-radio :value="item.value">{{ item.label }}</a-radio>
+                    </div>
+                  </a-radio-group>
+                </template>
+                <a-tooltip title="列宽">
+                  <ColumnHeightOutlined class="table-action__icon" />
+                </a-tooltip>
+              </a-popover>
+            </a-form-item>
+
+            <a-form-item>
+              <a-popover v-if="props.tableName" trigger="click" placement="bottomRight">
+                <template #title>
+                  <div class="custom-column-list__title">
+                    <div>列设置</div>
+                    <a-button type="link" size="small" @click="resetCustomColumn">重置</a-button>
+                  </div>
+                </template>
+                <template #content>
+                  <a-checkbox-group class="custom-column-list" :value="customCheckColumnList" @change="onCheckChange">
+                    <Container drag-handle-selector=".custom-column-list__icon" orientation="vertical" @drop="onDrop">
+                      <Draggable v-for="(item, index) in customColumnList" :key="index">
+                        <HolderOutlined class="custom-column-list__icon" />
+                        <a-checkbox :value="item.dataIndex">
+                          {{ item.title }}
+                        </a-checkbox>
+                      </Draggable>
+                    </Container>
+                  </a-checkbox-group>
+                </template>
+                <a-tooltip title="列设置">
+                  <SettingOutlined />
+                </a-tooltip>
+              </a-popover>
+            </a-form-item>
+
+            <template v-if="slots.tableHelp">
+              <a-form-item>
+                <slot name="tableHelp"></slot>
+              </a-form-item>
+            </template>
+          </a-space>
+        </a-form>
+      </a-card>
+
+      <!-- </a-space> -->
     </div>
     <a-table v-bind="props" :columns="customColumn" :size="tableSize">
       <template v-if="slots.title" #title="slotProps">
@@ -93,12 +121,13 @@ export default defineComponent({
   setup(props, { attrs, slots, emit }) {
     // 倒计时
     const getCountdown = () => {
-      return Date.now() + 1000 * props.autoRefreshTime
+      return Date.now() + 1000 * (props.autoRefreshTime + 0)
     }
     const countdownSwitch = ref(props.defaultAutoRefresh)
     const countdownNumber = ref(0)
     const countDownFinish = () => {
-      emit('refresh')
+      emit('refresh', 'silence')
+
       countdownNumber.value = getCountdown()
     }
     const countDownChange = () => {
@@ -130,7 +159,8 @@ export default defineComponent({
     }
     /** 获取缓存key */
     const refreshClick = () => {
-      emit('refresh')
+      countdownNumber.value = getCountdown()
+      emit('refresh', 'click')
     }
     // 表格列宽调整hooks
     const tableSize = ref<SizeType>('middle')
@@ -295,19 +325,19 @@ export default defineComponent({
   position: relative;
   padding-top: 36px;
   &__box {
-    padding: 0 10px;
+    padding: 0 px;
     height: 36px;
     box-sizing: border-box;
     border-radius: 4px 4px 0 0px;
     position: absolute;
-    right: 10px;
+    right: 0px;
     top: 0;
-    background: #fff;
-    border: 1px solid rgb(240, 240, 240);
+    //background: #fff;
+    // border: 1px solid rgb(240, 240, 240);
     border-bottom: 0px;
     display: flex;
     align-items: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 }
 
@@ -316,7 +346,7 @@ export default defineComponent({
   align-items: center;
   justify-content: flex-end;
   &__icon {
-    font-size: 18px;
+    // font-size: 18px;
   }
 }
 .custom-column-list {
@@ -327,7 +357,7 @@ export default defineComponent({
     justify-content: space-between;
   }
   &__icon {
-    color: rgba(0, 0, 0, 0.6);
+    // color: rgba(0, 0, 0, 0.6);
     margin-right: 10px;
   }
 }
@@ -335,4 +365,20 @@ export default defineComponent({
   display: block;
 }
 </style>
-./dicts
+<style scoped>
+:deep(.ant-form-item) {
+  margin-inline-end: 0;
+}
+:deep(.ant-statistic) {
+  line-height: 0;
+}
+:deep(.ant-statistic div) {
+  display: inline-block;
+  font-weight: normal;
+  color: unset;
+}
+:deep(.ant-statistic-content-value, .ant-statistic-content, .ant-statistic-title) {
+  font-size: 16px;
+  color: unset;
+}
+</style>

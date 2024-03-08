@@ -1,6 +1,10 @@
 <template>
   <div>
-    <a-table
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="5"
+      table-name="dispatch"
       :columns="columns"
       size="middle"
       :data-source="list"
@@ -10,6 +14,11 @@
       :scroll="{
         x: 'max-content'
       }"
+      @refresh="
+        (type) => {
+          type === 'silence' ? silenceLoadData() : loadData()
+        }
+      "
       @change="
         (pagination, filters, sorter) => {
           listQuery = CHANGE_PAGE(listQuery, { pagination, sorter })
@@ -57,25 +66,28 @@
           </a-tooltip>
           <a-button type="primary" @click="handleLink">新增关联</a-button>
           <a-button type="primary" @click="handleAdd">新增分发</a-button>
-          <a-tooltip>
-            <template #title>
-              <div>
-                节点分发是指,一个项目运行需要在多个节点(服务器)中运行,使用节点分发来统一管理这个项目(可以实现分布式项目管理功能)
-              </div>
 
-              <div>
-                <ul>
-                  <li>新增关联项目是指,将已经在节点中创建好的项目关联为节点分发项目来实现统一管理</li>
-                  <li>
-                    创建分发项目是指,全新创建一个属于节点分发到项目,创建成功后项目信息将自动同步到对应的节点中,修改节点分发信息也自动同步到对应的节点中
-                  </li>
-                </ul>
-              </div>
-            </template>
-            <QuestionCircleOutlined />
-          </a-tooltip>
-          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
+          <!-- <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" /> -->
         </a-space>
+      </template>
+      <template #tableHelp>
+        <a-tooltip>
+          <template #title>
+            <div>
+              节点分发是指,一个项目运行需要在多个节点(服务器)中运行,使用节点分发来统一管理这个项目(可以实现分布式项目管理功能)
+            </div>
+
+            <div>
+              <ul>
+                <li>新增关联项目是指,将已经在节点中创建好的项目关联为节点分发项目来实现统一管理</li>
+                <li>
+                  创建分发项目是指,全新创建一个属于节点分发到项目,创建成功后项目信息将自动同步到对应的节点中,修改节点分发信息也自动同步到对应的节点中
+                </li>
+              </ul>
+            </div>
+          </template>
+          <QuestionCircleOutlined />
+        </a-tooltip>
       </template>
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.tooltip">
@@ -196,7 +208,7 @@
           </a-space>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 新增/编辑关联项目 -->
     <a-modal
       v-model:open="linkDispatchVisible"
@@ -1088,6 +1100,13 @@ export default {
           width: '170px'
         },
         {
+          title: '修改人',
+          dataIndex: 'modifyUser',
+          width: '130px',
+          ellipsis: true,
+          sorter: true
+        },
+        {
           title: '操作',
           dataIndex: 'operation',
 
@@ -1106,8 +1125,8 @@ export default {
         lib: [{ required: true, message: '请输入项目文件夹', trigger: 'blur' }],
         afterOpt: [{ required: true, message: '请选择发布后操作', trigger: 'blur' }]
       },
-      countdownTime: Date.now(),
-      refreshInterval: 5,
+      // countdownTime: Date.now(),
+      // refreshInterval: 5,
 
       viewDispatchManager: false,
       dslEditTabKey: 'content',
@@ -1136,8 +1155,8 @@ export default {
     // 静默
     silenceLoadData() {
       if (this.$attrs.routerUrl !== this.$route.path) {
-        // 重新计算倒计时
-        this.countdownTime = Date.now() + this.refreshInterval * 1000
+        //   // 重新计算倒计时
+        //   // this.countdownTime = Date.now() + this.refreshInterval * 1000
         return
       }
       getDishPatchList(this.listQuery, false).then((res) => {
@@ -1147,7 +1166,7 @@ export default {
           //
 
           // 重新计算倒计时
-          this.countdownTime = Date.now() + this.refreshInterval * 1000
+          // this.countdownTime = Date.now() + this.refreshInterval * 1000
         }
       })
     },
