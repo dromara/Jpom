@@ -1,50 +1,68 @@
 <template>
-  <div>
+  <div class="custom-table">
+    <div v-if="props.isShowTools" class="custom-table__box">
+      <!-- 增加工具栏部分 -->
+      <a-space class="table-action">
+        <a-space v-if="!props.isHideAutoRefresh">
+          <span>自动刷新:</span>
+          <a-switch
+            v-model:checked="countdownSwitch"
+            checked-children="开"
+            un-checked-children="关"
+            @change="countDownChange"
+          />
+          <a-statistic-countdown
+            v-if="countdownSwitch"
+            format="&nbsp; s 秒"
+            title="刷新倒计时"
+            :value="countdownNumber"
+            @finish="countDownFinish"
+          />
+          <a-divider type="vertical" />
+        </a-space>
+        <a-tooltip v-if="!props.isHideRefresh" title="刷新">
+          <ReloadOutlined class="table-action__icon" @click="refreshClick" />
+        </a-tooltip>
+        <a-popover title="列宽" trigger="click" placement="bottomRight">
+          <template #content>
+            <a-radio-group v-model:value="tableSize" class="custom-size-list">
+              <div v-for="item in tableSizeList" :key="item.value">
+                <a-radio :value="item.value">{{ item.label }}</a-radio>
+              </div>
+            </a-radio-group>
+          </template>
+          <a-tooltip title="列宽">
+            <ColumnHeightOutlined class="table-action__icon" />
+          </a-tooltip>
+        </a-popover>
+        <a-popover v-if="props.tableName" trigger="click" placement="bottomRight">
+          <template #title>
+            <div class="custom-column-list__title">
+              <div>列设置</div>
+              <a-button type="link" size="small" @click="resetCustomColumn">重置</a-button>
+            </div>
+          </template>
+          <template #content>
+            <a-checkbox-group class="custom-column-list" :value="customCheckColumnList" @change="onCheckChange">
+              <Container drag-handle-selector=".custom-column-list__icon" orientation="vertical" @drop="onDrop">
+                <Draggable v-for="(item, index) in customColumnList" :key="index">
+                  <HolderOutlined class="custom-column-list__icon" />
+                  <a-checkbox :value="item.dataIndex">
+                    {{ item.title }}
+                  </a-checkbox>
+                </Draggable>
+              </Container>
+            </a-checkbox-group>
+          </template>
+          <a-tooltip title="列设置">
+            <SettingOutlined />
+          </a-tooltip>
+        </a-popover>
+      </a-space>
+    </div>
     <a-table v-bind="props" :columns="customColumn" :size="tableSize">
-      <template v-if="props.isShowTools || slots.title" #title="slotProps">
-        <div class="table-title">
-          <slot v-if="slots.title" name="title" v-bind="slotProps"></slot>
-          <div v-if="props.isShowTools" class="table-action__box">
-            <!-- 增加工具栏部分 -->
-            <a-space class="table-action">
-              <a-tooltip v-if="!props.isHideRefresh" title="刷新">
-                <ReloadOutlined class="table-action__icon" @click="refreshClick" />
-              </a-tooltip>
-              <a-popover title="列宽" trigger="click" placement="bottomRight">
-                <template #content>
-                  <a-radio-group v-model:value="tableSize" class="custom-size-list">
-                    <div v-for="item in tableSizeList" :key="item.value">
-                      <a-radio :value="item.value">{{ item.label }}</a-radio>
-                    </div>
-                  </a-radio-group>
-                </template>
-                <a-tooltip title="列宽">
-                  <ColumnHeightOutlined class="table-action__icon" />
-                </a-tooltip>
-              </a-popover>
-              <a-popover v-if="props.tableName" trigger="click" placement="bottomRight">
-                <template #title>
-                  <div class="custom-column-list__title">
-                    <div>列设置</div>
-                    <a-button type="link" size="small" @click="resetCustomColumn">重置</a-button>
-                  </div>
-                </template>
-                <template #content>
-                  <a-checkbox-group v-model:value="customColumnList" class="custom-column-list">
-                    <div v-for="(item, index) in props.columns" :key="index" :span="24">
-                      <a-checkbox :value="item.dataIndex">
-                        {{ item.title }}
-                      </a-checkbox>
-                    </div>
-                  </a-checkbox-group>
-                </template>
-                <a-tooltip title="列设置">
-                  <SettingOutlined />
-                </a-tooltip>
-              </a-popover>
-            </a-space>
-          </div>
-        </div>
+      <template v-if="slots.title" #title="slotProps">
+        <slot name="title" v-bind="slotProps"></slot>
       </template>
       <template v-for="key in otherSlots" #[key]="slotProps" :key="key">
         <slot :name="key" v-bind="slotProps"></slot>
@@ -54,89 +72,65 @@
 </template>
 <script lang="ts">
 import { useUserStore } from '@/stores/user'
-import { CustomSlotsType } from 'ant-design-vue/es/_util/type'
 import { SizeType } from 'ant-design-vue/es/config-provider'
-import { ColumnType, tableProps } from 'ant-design-vue/es/table'
-import { RenderExpandIconProps } from 'ant-design-vue/es/vc-table/interface'
-
-import { initDefaultProps } from 'ant-design-vue/es/_util/props-util'
+import { Container, Draggable } from 'vue3-smooth-dnd'
 import { CheckboxValueType } from 'ant-design-vue/es/checkbox/interface'
-// 表格大小处理
-const tableSizeList = [
-  {
-    value: 'large',
-    label: '超大'
-  },
-  {
-    value: 'middle',
-    label: '中等'
-  },
-  {
-    value: 'small',
-    label: '紧凑'
-  }
-]
+import { CatchStorageType, CustomColumnType, CustomTableSlotsType } from './types'
+import { compareArrays } from './utils'
+import { tableSizeList } from './dict'
+import { customTableProps } from './props'
 
 export default defineComponent({
-  // name: 'CustomTable',
+  name: 'CustomTable',
+  components: {
+    Container,
+    Draggable
+  },
   inheritAttrs: false,
-  props: initDefaultProps(
-    {
-      ...tableProps(),
-      isShowTools: Boolean,
-      isHideRefresh: Boolean,
-      tableName: {
-        type: String,
-        required: true
-      },
-      columns: {
-        type: Array<ColumnType>,
-        default: () => []
-      }
-    },
-    {
-      isShowTools: false,
-      isHideRefresh: false
-    }
-  ),
-  slots: Object as CustomSlotsType<{
-    emptyText?: any
-    expandIcon?: RenderExpandIconProps<any>
-    title?: any
-    footer?: any
-    summary?: any
-    expandedRowRender?: any
-    expandColumnTitle?: any
-    bodyCell?: (props: {
-      text: any
-      value: any
-      record: Record<string, any>
-      index: number
-      column: ColumnType
-    }) => void
-    headerCell?: (props: { title: any; column: ColumnType }) => void
-    customFilterIcon?: any
-    customFilterDropdown?: any
-    default: any
-  }>,
+  props: customTableProps,
+  slots: Object as CustomTableSlotsType,
   emits: ['refresh'],
   setup(props, { attrs, slots, emit }) {
+    // 倒计时
+    const getCountdown = () => {
+      return Date.now() + 1000 * props.autoRefreshTime
+    }
+    const countdownSwitch = ref(props.defaultAutoRefresh)
+    const countdownNumber = ref(0)
+    const countDownFinish = () => {
+      emit('refresh')
+      countdownNumber.value = getCountdown()
+    }
+    const countDownChange = () => {
+      if (countdownSwitch.value) {
+        countdownNumber.value = getCountdown()
+      } else {
+        countdownNumber.value = 0
+      }
+    }
+    onMounted(() => {
+      if (countdownSwitch.value && !props.isHideAutoRefresh) {
+        countdownNumber.value = getCountdown()
+      }
+    })
+
     const otherSlots = computed(() => {
       return Object.keys(slots).filter((key) => key !== 'title')
     })
     const userStore = useUserStore()
     const COLUMN = 'column'
     const SIZE = 'size'
-    // 是否缓存配置
+    /** 是否缓存配置 */
     const isCatchOPtions = () => {
       return props.tableName && userStore?.userInfo?.id
     }
-    // 获取缓存key
+    /** 获取缓存key */
     const getTableCatchKey = (type: string) => {
       return `table:catch__${userStore.userInfo.id}__${props.tableName}__${type}`
     }
+    /** 获取缓存key */
     const refreshClick = () => {
-      emit('refresh', 666)
+      emit('refresh')
     }
     // 表格列宽调整hooks
     const tableSize = ref<SizeType>('middle')
@@ -159,29 +153,90 @@ export default defineComponent({
       tableSize.value = size ? JSON.parse(size) : props.size || 'middle'
     })
 
-    let customColumnList = ref<CheckboxValueType[]>([])
+    let customColumnList = ref<CustomColumnType[]>([])
+    const customCheckColumnList = computed(() => {
+      return customColumnList.value.filter((item) => item.checked).map((item) => String(item.dataIndex))
+    })
     const customColumn = computed(() => {
       if (!isCatchOPtions()) return props.columns
-      return props.columns.filter((item) => {
-        return customColumnList.value.includes(String(item.dataIndex))
-      })
+      return customColumnList.value.filter((item) => item.checked)
     })
     const resetCustomColumn = () => {
-      customColumnList.value = props.columns.map((item) => String(item.dataIndex))
+      customColumnList.value = props.columns.map((item) => ({ ...item, checked: true }))
     }
+    const onCheckChange = (checkedValues: CheckboxValueType[]) => {
+      customColumnList.value = customColumnList.value.map((item) => ({
+        ...item,
+        checked: checkedValues.includes(String(item.dataIndex))
+      }))
+    }
+    const applyDrag = (
+      arr: CustomColumnType[],
+      dragResult: { removedIndex: number; addedIndex: number; payload: CustomColumnType }
+    ) => {
+      const { removedIndex, addedIndex, payload } = dragResult
+
+      if (removedIndex === null && addedIndex === null) return arr
+      const result = [...arr]
+      let itemToAdd = payload
+
+      if (removedIndex !== null) {
+        itemToAdd = result.splice(removedIndex, 1)[0]
+      }
+      if (addedIndex !== null) {
+        result.splice(addedIndex, 0, itemToAdd)
+      }
+      return result
+    }
+
+    const onDrop = (dropResult: any) => {
+      customColumnList.value = applyDrag(customColumnList.value, dropResult)
+    }
+
+    /** 设置默认列 */
+    const setDefaultCustomColumnList = () => {
+      customColumnList.value = props.columns.map((item) => ({ ...item, checked: true }))
+    }
+
     // 监听列变化,同步至缓存customColumnList中
     watch(
       () => props.columns,
       (val) => {
         if (!isCatchOPtions()) return
-        const catchKeys = JSON.parse(localStorage.getItem(getTableCatchKey(COLUMN)) || '[]') as string[]
+        const catchStorage = JSON.parse(localStorage.getItem(getTableCatchKey(COLUMN)) || '[]') as CatchStorageType[]
         if (
-          catchKeys.filter((key) => val.findIndex((item) => item.dataIndex === key) > -1).length == 0 ||
-          catchKeys.length == 0
+          catchStorage.length == 0 ||
+          (catchStorage.length > 0 && catchStorage.some((key) => typeof key === 'string')) ||
+          !compareArrays(
+            val.map((item) => String(item.dataIndex)),
+            catchStorage.map((item) => item.key)
+          )
         ) {
-          customColumnList.value = val.map((item) => String(item.dataIndex))
+          console.log(
+            catchStorage.length == 0,
+            catchStorage.length > 0 && catchStorage.some((key) => typeof key === 'string'),
+            !compareArrays(
+              val.map((item) => String(item.key)),
+              catchStorage.map((item) => item.key)
+            )
+          )
+          console.log('setDefaultCustomColumnList')
+          return setDefaultCustomColumnList()
         } else {
-          customColumnList.value = catchKeys
+          const tmpObj: { [key: string]: CustomColumnType } = {}
+          val.forEach((item) => {
+            tmpObj[String(item.dataIndex || '_d')] = item
+          })
+          console.log('catchStorage')
+          customColumnList.value = catchStorage.map((item) => {
+            const key = item.key
+            console.log(item)
+            return {
+              ...tmpObj[key],
+              checked: item.checked
+            }
+          })
+          console.log(customColumnList.value)
         }
       },
       {
@@ -193,8 +248,18 @@ export default defineComponent({
       () => customColumnList.value,
       (val) => {
         if (!isCatchOPtions()) return
-        if (props.columns.filter((item) => !val.includes(String(item.dataIndex))).length > 0 && val.length > 0) {
-          localStorage.setItem(getTableCatchKey(COLUMN), JSON.stringify(val))
+        if (JSON.stringify(val) !== JSON.stringify(props.columns)) {
+          localStorage.setItem(
+            getTableCatchKey(COLUMN),
+            JSON.stringify(
+              customColumnList.value.map((item) => {
+                return {
+                  key: item.dataIndex,
+                  checked: item.checked
+                } as CatchStorageType
+              })
+            )
+          )
         } else {
           localStorage.removeItem(getTableCatchKey(COLUMN))
         }
@@ -204,6 +269,11 @@ export default defineComponent({
       }
     )
     return {
+      onDrop,
+      countdownSwitch,
+      countDownFinish,
+      countdownNumber,
+      countDownChange,
       attrs,
       props,
       slots,
@@ -213,15 +283,34 @@ export default defineComponent({
       tableSize,
       customColumnList,
       customColumn,
-      resetCustomColumn
+      customCheckColumnList,
+      resetCustomColumn,
+      onCheckChange
     }
   }
 })
 </script>
 <style lang="less" scoped>
-.table-title {
+.custom-table {
   position: relative;
+  padding-top: 36px;
+  &__box {
+    padding: 0 10px;
+    height: 36px;
+    box-sizing: border-box;
+    border-radius: 4px 4px 0 0px;
+    position: absolute;
+    right: 10px;
+    top: 0;
+    background: #fff;
+    border: 1px solid rgb(240, 240, 240);
+    border-bottom: 0px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
 }
+
 .table-action {
   display: flex;
   align-items: center;
@@ -237,8 +326,13 @@ export default defineComponent({
     align-items: center;
     justify-content: space-between;
   }
+  &__icon {
+    color: rgba(0, 0, 0, 0.6);
+    margin-right: 10px;
+  }
 }
 .custom-size-list {
   display: block;
 }
 </style>
+./dicts
