@@ -22,7 +22,34 @@
       </a-result>
     </template>
     <template v-else>
-      <a-card :body-style="{ padding: '10px' }">
+      <!-- <a-card :body-style="{ padding: '10px' }"> -->
+      <CustomTable
+        is-show-tools
+        default-auto-refresh
+        :auto-refresh-time="30"
+        :activePage="activePage"
+        table-name="nodeSearch"
+        :columns="columns"
+        :data-source="list"
+        bordered
+        size="middle"
+        row-key="id"
+        :pagination="pagination"
+        :scroll="{
+          x: 'max-content'
+        }"
+        :row-selection="rowSelection"
+        @change="
+          (pagination, filters, sorter) => {
+            listQuery = CHANGE_PAGE(listQuery, {
+              pagination,
+              sorter
+            })
+            loadData()
+          }
+        "
+        @refresh="loadData"
+      >
         <template #title>
           <a-space>
             <a-input v-model:value="listQuery['%name%']" placeholder="节点名称" @press-enter="loadData" />
@@ -69,391 +96,341 @@
             <a-tooltip v-else title="表格视图才能使用工作空间同步功能">
               <a-button :disabled="true" type="primary"> 工作空间同步 </a-button>
             </a-tooltip>
-
-            <a-button type="primary" @click="changeLayout">
-              <template #icon>
-                <LayoutOutlined v-if="layoutType === 'card'" />
-                <TableOutlined v-else />
-              </template>
-              {{ layoutType === 'card' ? '卡片' : '表格' }}
-            </a-button>
-            <a-tooltip placement="bottom">
-              <template #title>
-                <div>
-                  <ul>
-                    <li>监控频率可以到服务端配置文件中修改</li>
-                    <li>悬停到仪表盘上显示具体含义</li>
-                    <li>点击仪表盘查看监控历史数据</li>
-                    <li>点击延迟可以查看对应节点网络延迟历史数据</li>
-                    <li>
-                      为了避免部分节点不能及时响应造成监控阻塞,节点统计超时时间不受节点超时配置影响将采用默认超时时间(10秒)
-                    </li>
-                  </ul>
-                </div>
-              </template>
-              <QuestionCircleOutlined />
-            </a-tooltip>
-            <div class="header-statistic">
-              <a-statistic-countdown format="s 秒" title="刷新倒计时 " :value="deadline" @finish="onFinish" />
-            </div>
           </a-space>
         </template>
-        <a-table
-          v-if="layoutType === 'table'"
-          :columns="columns"
-          :data-source="list"
-          bordered
-          size="middle"
-          row-key="id"
-          :pagination="pagination"
-          :scroll="{
-            x: 'max-content'
-          }"
-          :row-selection="rowSelection"
-          @change="
-            (pagination, filters, sorter) => {
-              listQuery = CHANGE_PAGE(listQuery, {
-                pagination,
-                sorter
-              })
-              loadData()
-            }
-          "
-        >
-          <template #bodyCell="{ column, text, record, index }">
-            <template v-if="column.dataIndex === 'url'">
-              <a-tooltip placement="topLeft" :title="text">
-                <template v-if="record.machineNodeData">
-                  <span>{{ record.machineNodeData.jpomProtocol }}://{{ record.machineNodeData.jpomUrl }}</span>
-                </template>
-                <span v-else> - </span>
-              </a-tooltip>
-            </template>
-            <template v-else-if="column.dataIndex === 'name'">
-              <template v-if="record.openStatus !== 1">
-                <a-tooltip :title="`${text}`">
-                  <span>{{ text || '' }}</span>
-                </a-tooltip>
-              </template>
-              <template v-else>
-                <a-tooltip :title="`${text} 点击进入节点管理`" @click="handleNode(record)">
-                  <a-button type="link" style="padding: 0" size="small">
-                    <FullscreenOutlined /><span>{{ text }}</span>
-                  </a-button>
-                </a-tooltip>
-              </template>
-            </template>
-            <template v-else-if="column.dataIndex === 'status'">
-              <a-tooltip
-                placement="topLeft"
-                :title="`${statusMap[record.machineNodeData && record.machineNodeData.status] || '未知'} ${
-                  record.machineNodeData && record.machineNodeData.statusMsg
-                }`"
-              >
-                <template v-if="record.openStatus === 1">
-                  <a-tag
-                    :color="record.machineNodeData && record.machineNodeData.status === 1 ? 'green' : 'pink'"
-                    style="margin-right: 0"
-                  >
-                    {{ statusMap[record.machineNodeData && record.machineNodeData.status] || '未知' }}
-                  </a-tag>
-                </template>
-                <a-tag v-else>未启用</a-tag>
-              </a-tooltip>
-            </template>
-            <template v-else-if="column.dataIndex === 'osName'">
-              <a-tooltip placement="topLeft" :title="text">
-                <span>{{ record.machineNodeData && record.machineNodeData.osName }}</span>
-              </a-tooltip>
-            </template>
-            <template v-else-if="column.dataIndex === 'javaVersion'">
-              <a-tooltip placement="topLeft" :title="record.machineNodeData && record.machineNodeData.javaVersion">
-                <span>{{ record.machineNodeData && record.machineNodeData.javaVersion }}</span>
-              </a-tooltip>
-            </template>
-            <template v-else-if="column.dataIndex === 'jvmInfo'">
-              <a-tooltip
-                placement="topLeft"
-                :title="`剩余内存：${renderSize(
-                  record.machineNodeData && record.machineNodeData.jvmFreeMemory
-                )} 总内存：${renderSize(record.machineNodeData && record.machineNodeData.jvmTotalMemory)}`"
-              >
-                <span
-                  >{{ renderSize(record.machineNodeData && record.machineNodeData.jvmFreeMemory) }}
-                  /
-                  {{ renderSize(record.machineNodeData && record.machineNodeData.jvmTotalMemory) }}</span
-                >
-              </a-tooltip>
-            </template>
-
-            <template v-else-if="column.dataIndex === 'runTime'">
-              <a-tooltip
-                placement="topLeft"
-                :title="formatDuration(record.machineNodeData && record.machineNodeData.jpomUptime)"
-              >
-                <span>{{ formatDuration(record.machineNodeData && record.machineNodeData.jpomUptime, '', 2) }}</span>
-              </a-tooltip>
-            </template>
-            <template v-else-if="column.dataIndex === 'jpomProjectCount'">
-              <div v-if="record.machineNodeData && record.machineNodeData.status === 1" @click="syncNode(record)">
-                <a-tooltip placement="topLeft">
-                  <template #title>
-                    <ul>
-                      <li>工作空间中逻辑节点中的项目数量：{{ text || 0 }}</li>
-                      <li>物理节点项目数量：{{ record.machineNodeData.jpomProjectCount }}</li>
-                      <li>点击重新同步当前工作空间逻辑节点项目信息</li>
-                    </ul>
-                  </template>
-                  <a-tag>{{ text || 0 }} </a-tag>
-                  <SyncOutlined />
-                </a-tooltip>
+        <template #tableHelp>
+          <a-tooltip placement="bottom">
+            <template #title>
+              <div>
+                <ul>
+                  <li>监控频率可以到服务端配置文件中修改</li>
+                  <li>悬停到仪表盘上显示具体含义</li>
+                  <li>点击仪表盘查看监控历史数据</li>
+                  <li>点击延迟可以查看对应节点网络延迟历史数据</li>
+                  <li>
+                    为了避免部分节点不能及时响应造成监控阻塞,节点统计超时时间不受节点超时配置影响将采用默认超时时间(10秒)
+                  </li>
+                </ul>
               </div>
-              <span v-else>-</span>
             </template>
-            <template v-else-if="column.dataIndex === 'jpomScriptCount'">
-              <div v-if="record.machineNodeData && record.machineNodeData.status === 1" @click="syncNodeScript(record)">
-                <a-tooltip placement="topLeft">
-                  <template #title>
-                    <ul>
-                      <li>工作空间中逻辑节点中脚本模版数量：{{ text || 0 }}</li>
-                      <li>物理节点脚本模板数据：{{ record.machineNodeData.jpomScriptCount }}</li>
-                      <li>点击重新同步当前工作空间逻辑节点脚本模版信息</li>
-                    </ul>
-                  </template>
-                  <a-tag>{{ text || 0 }} </a-tag>
-                  <SyncOutlined />
-                </a-tooltip>
-              </div>
-              <span v-else>-</span>
+            <QuestionCircleOutlined />
+          </a-tooltip>
+        </template>
+        <template #tableBodyCell="{ column, text, record, index }">
+          <template v-if="column.dataIndex === 'url'">
+            <a-tooltip placement="topLeft" :title="text">
+              <template v-if="record.machineNodeData">
+                <span>{{ record.machineNodeData.jpomProtocol }}://{{ record.machineNodeData.jpomUrl }}</span>
+              </template>
+              <span v-else> - </span>
+            </a-tooltip>
+          </template>
+          <template v-else-if="column.dataIndex === 'name'">
+            <template v-if="record.openStatus !== 1">
+              <a-tooltip :title="`${text}`">
+                <span>{{ text || '' }}</span>
+              </a-tooltip>
             </template>
-
-            <template v-else-if="column.dataIndex === 'operation'">
-              <a-space>
-                <a-tooltip title="如果按钮不可用则表示当前节点已经关闭啦,需要去编辑中启用">
-                  <a-button size="small" type="primary" :disabled="record.openStatus !== 1" @click="handleNode(record)"
-                    >管理</a-button
-                  >
-                </a-tooltip>
-                <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
-                  <a-button size="small" type="primary" :disabled="!record.sshId" @click="handleTerminal(record)"
-                    ><CodeOutlined />终端</a-button
-                  >
-                </a-tooltip>
-
-                <a-dropdown>
-                  <a @click="(e) => e.preventDefault()">
-                    更多
-                    <DownOutlined />
-                  </a>
-                  <template #overlay>
-                    <a-menu>
-                      <a-menu-item>
-                        <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-                      </a-menu-item>
-
-                      <a-menu-item>
-                        <a-tooltip placement="leftBottom" title="删除会检查数据关联性,并且节点不存在项目或者脚本">
-                          <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
-                        </a-tooltip>
-                      </a-menu-item>
-                      <a-menu-item>
-                        <a-tooltip
-                          placement="leftBottom"
-                          title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用"
-                        >
-                          <a-button size="small" type="primary" danger @click="handleUnbind(record)">解绑</a-button>
-                        </a-tooltip>
-                      </a-menu-item>
-                      <a-menu-divider />
-                      <a-menu-item>
-                        <a-button
-                          size="small"
-                          type="primary"
-                          :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
-                          @click="sortItemHander(record, index, 'top')"
-                          >置顶</a-button
-                        >
-                      </a-menu-item>
-                      <a-menu-item>
-                        <a-button
-                          size="small"
-                          type="primary"
-                          :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
-                          @click="sortItemHander(record, index, 'up')"
-                          >上移</a-button
-                        >
-                      </a-menu-item>
-                      <a-menu-item>
-                        <a-button
-                          size="small"
-                          type="primary"
-                          :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
-                          @click="sortItemHander(record, index, 'down')"
-                        >
-                          下移
-                        </a-button>
-                      </a-menu-item>
-                    </a-menu>
-                  </template>
-                </a-dropdown>
-              </a-space>
+            <template v-else>
+              <a-tooltip :title="`${text} 点击进入节点管理`" @click="handleNode(record)">
+                <a-button type="link" style="padding: 0" size="small">
+                  <FullscreenOutlined /><span>{{ text }}</span>
+                </a-button>
+              </a-tooltip>
             </template>
           </template>
-        </a-table>
-        <template v-else-if="layoutType === 'card'">
-          <a-row :gutter="[16, 16]">
-            <template v-if="list && list.length">
-              <a-col v-for="item in list" :key="item.id" :span="6">
-                <a-card :head-style="{ padding: '0 6px' }" :body-style="{ padding: '10px' }">
-                  <template #title>
-                    <a-row :gutter="[4, 0]">
-                      <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
-                        <a-tooltip>
-                          <template #title>
-                            点击进入节点管理
-                            <div>节点名称：{{ item.name }}</div>
-                            <div>节点地址：{{ item.url }}</div>
-                          </template>
+          <template v-else-if="column.dataIndex === 'status'">
+            <a-tooltip
+              placement="topLeft"
+              :title="`${statusMap[record.machineNodeData && record.machineNodeData.status] || '未知'} ${
+                record.machineNodeData && record.machineNodeData.statusMsg
+              }`"
+            >
+              <template v-if="record.openStatus === 1">
+                <a-tag
+                  :color="record.machineNodeData && record.machineNodeData.status === 1 ? 'green' : 'pink'"
+                  style="margin-right: 0"
+                >
+                  {{ statusMap[record.machineNodeData && record.machineNodeData.status] || '未知' }}
+                </a-tag>
+              </template>
+              <a-tag v-else>未启用</a-tag>
+            </a-tooltip>
+          </template>
+          <template v-else-if="column.dataIndex === 'osName'">
+            <a-tooltip placement="topLeft" :title="text">
+              <span>{{ record.machineNodeData && record.machineNodeData.osName }}</span>
+            </a-tooltip>
+          </template>
+          <template v-else-if="column.dataIndex === 'javaVersion'">
+            <a-tooltip placement="topLeft" :title="record.machineNodeData && record.machineNodeData.javaVersion">
+              <span>{{ record.machineNodeData && record.machineNodeData.javaVersion }}</span>
+            </a-tooltip>
+          </template>
+          <template v-else-if="column.dataIndex === 'jvmInfo'">
+            <a-tooltip
+              placement="topLeft"
+              :title="`剩余内存：${renderSize(
+                record.machineNodeData && record.machineNodeData.jvmFreeMemory
+              )} 总内存：${renderSize(record.machineNodeData && record.machineNodeData.jvmTotalMemory)}`"
+            >
+              <span
+                >{{ renderSize(record.machineNodeData && record.machineNodeData.jvmFreeMemory) }}
+                /
+                {{ renderSize(record.machineNodeData && record.machineNodeData.jvmTotalMemory) }}</span
+              >
+            </a-tooltip>
+          </template>
 
-                          <a-button type="link" style="padding: 0" size="small" @click="handleNode(item)">
-                            <span> {{ item.name }}</span>
-                          </a-button>
-                        </a-tooltip>
-                      </a-col>
-                      <a-col :span="7" style="text-align: right">
-                        <a-tooltip>
-                          <template #title>
-                            <div>当前状态：{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}</div>
-                            <div>状态描述：{{ (item.machineNodeData && item.machineNodeData.statusMsg) || '' }}</div>
-                          </template>
-                          <a-tag
-                            :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'"
-                            style="margin-right: 0"
-                          >
-                            {{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
-                          </a-tag>
-                        </a-tooltip>
-                      </a-col>
-                    </a-row>
-                  </template>
+          <template v-else-if="column.dataIndex === 'runTime'">
+            <a-tooltip
+              placement="topLeft"
+              :title="formatDuration(record.machineNodeData && record.machineNodeData.jpomUptime)"
+            >
+              <span>{{ formatDuration(record.machineNodeData && record.machineNodeData.jpomUptime, '', 2) }}</span>
+            </a-tooltip>
+          </template>
+          <template v-else-if="column.dataIndex === 'jpomProjectCount'">
+            <div v-if="record.machineNodeData && record.machineNodeData.status === 1" @click="syncNode(record)">
+              <a-tooltip placement="topLeft">
+                <template #title>
+                  <ul>
+                    <li>工作空间中逻辑节点中的项目数量：{{ text || 0 }}</li>
+                    <li>物理节点项目数量：{{ record.machineNodeData.jpomProjectCount }}</li>
+                    <li>点击重新同步当前工作空间逻辑节点项目信息</li>
+                  </ul>
+                </template>
+                <a-tag>{{ text || 0 }} </a-tag>
+                <SyncOutlined />
+              </a-tooltip>
+            </div>
+            <span v-else>-</span>
+          </template>
+          <template v-else-if="column.dataIndex === 'jpomScriptCount'">
+            <div v-if="record.machineNodeData && record.machineNodeData.status === 1" @click="syncNodeScript(record)">
+              <a-tooltip placement="topLeft">
+                <template #title>
+                  <ul>
+                    <li>工作空间中逻辑节点中脚本模版数量：{{ text || 0 }}</li>
+                    <li>物理节点脚本模板数据：{{ record.machineNodeData.jpomScriptCount }}</li>
+                    <li>点击重新同步当前工作空间逻辑节点脚本模版信息</li>
+                  </ul>
+                </template>
+                <a-tag>{{ text || 0 }} </a-tag>
+                <SyncOutlined />
+              </a-tooltip>
+            </div>
+            <span v-else>-</span>
+          </template>
 
-                  <a-row :gutter="[8, 8]">
-                    <a-col :span="8" style="text-align: center">
-                      <a-tooltip :title="`CPU 占用率：${item.occupyCpu}%`" @click="handleHistory(item, 'nodeTop')">
-                        <a-progress
-                          type="circle"
-                          :size="80"
-                          :stroke-color="{
-                            '0%': '#87d068',
-                            '30%': '#87d068',
-                            '100%': '#108ee9'
-                          }"
-                          status="active"
-                          :percent="item.occupyCpu"
-                        />
-                      </a-tooltip>
-                    </a-col>
-                    <a-col :span="8" style="text-align: center">
-                      <a-tooltip :title="`硬盘占用率：${item.occupyDisk}%`" @click="handleHistory(item, 'nodeTop')">
-                        <a-progress
-                          type="circle"
-                          :size="80"
-                          :stroke-color="{
-                            '0%': '#87d068',
-                            '30%': '#87d068',
-                            '100%': '#108ee9'
-                          }"
-                          status="active"
-                          :percent="item.occupyDisk"
-                        />
-                      </a-tooltip>
-                    </a-col>
-                    <a-col :span="8" style="text-align: center">
-                      <a-tooltip
-                        :title="`实际内存占用率：${item.occupyMemory}%`"
-                        @click="handleHistory(item, 'nodeTop')"
-                      >
-                        <a-progress
-                          :size="80"
-                          type="circle"
-                          :stroke-color="{
-                            '0%': '#87d068',
-                            '30%': '#87d068',
-                            '100%': '#108ee9'
-                          }"
-                          status="active"
-                          :percent="item.occupyMemory"
-                        />
-                      </a-tooltip>
-                    </a-col>
-                  </a-row>
+          <template v-else-if="column.dataIndex === 'operation'">
+            <a-space>
+              <a-tooltip title="如果按钮不可用则表示当前节点已经关闭啦,需要去编辑中启用">
+                <a-button size="small" type="primary" :disabled="record.openStatus !== 1" @click="handleNode(record)"
+                  >管理</a-button
+                >
+              </a-tooltip>
+              <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
+                <a-button size="small" type="primary" :disabled="!record.sshId" @click="handleTerminal(record)"
+                  ><CodeOutlined />终端</a-button
+                >
+              </a-tooltip>
 
-                  <a-row :gutter="[8, 8]" style="text-align: center">
-                    <a-col :span="8">
+              <a-dropdown>
+                <a @click="(e) => e.preventDefault()">
+                  更多
+                  <DownOutlined />
+                </a>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item>
+                      <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+                    </a-menu-item>
+
+                    <a-menu-item>
+                      <a-tooltip placement="leftBottom" title="删除会检查数据关联性,并且节点不存在项目或者脚本">
+                        <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+                      </a-tooltip>
+                    </a-menu-item>
+                    <a-menu-item>
                       <a-tooltip
-                        :title="`${
-                          '延迟' +
-                          (formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-') +
-                          ' 点击查看历史趋势'
-                        }`"
-                        @click="handleHistory(item, 'networkDelay')"
+                        placement="leftBottom"
+                        title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用"
                       >
-                        <a-statistic
-                          title="延迟"
-                          :value="item.machineNodeData && item.machineNodeData.networkDelay"
-                          :value-style="statValueStyle"
-                          :formatter="
-                            (v) => {
-                              return (
-                                formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-'
-                              )
-                            }
-                          "
-                        />
+                        <a-button size="small" type="primary" danger @click="handleUnbind(record)">解绑</a-button>
                       </a-tooltip>
-                    </a-col>
-                    <a-col :span="8">
-                      <a-tooltip
-                        :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 1) || '-'"
+                    </a-menu-item>
+                    <a-menu-divider />
+                    <a-menu-item>
+                      <a-button
+                        size="small"
+                        type="primary"
+                        :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
+                        @click="sortItemHander(record, index, 'top')"
+                        >置顶</a-button
                       >
-                        <a-statistic
-                          title="运行时间"
-                          :value-style="statValueStyle"
-                          :formatter="
-                            (v) => {
-                              return (
-                                formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 2) || '-'
-                              )
-                            }
-                          "
-                        />
-                      </a-tooltip>
-                    </a-col>
-                    <a-col :span="8">
-                      <a-tooltip :title="`${parseTime(item.machineNodeData && item.machineNodeData.modifyTimeMillis)}`">
-                        <a-statistic
-                          title="更新时间"
-                          :value-style="statValueStyle"
-                          :formatter="
-                            (v) => {
-                              return parseTime(
-                                item.machineNodeData && item.machineNodeData.modifyTimeMillis,
-                                'HH:mm:ss'
-                              )
-                            }
-                          "
-                        />
-                      </a-tooltip>
-                    </a-col>
-                  </a-row>
-                </a-card>
-              </a-col>
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-button
+                        size="small"
+                        type="primary"
+                        :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
+                        @click="sortItemHander(record, index, 'up')"
+                        >上移</a-button
+                      >
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a-button
+                        size="small"
+                        type="primary"
+                        :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
+                        @click="sortItemHander(record, index, 'down')"
+                      >
+                        下移
+                      </a-button>
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </a-space>
+          </template>
+        </template>
+        <template #cardBodyCell="{ item, index }">
+          <a-card :head-style="{ padding: '0 6px' }" :body-style="{ padding: '10px' }">
+            <template #title>
+              <a-row :gutter="[4, 0]">
+                <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+                  <a-tooltip>
+                    <template #title>
+                      点击进入节点管理
+                      <div>节点名称：{{ item.name }}</div>
+                      <div>节点地址：{{ item.url }}</div>
+                    </template>
+
+                    <a-button type="link" style="padding: 0" size="small" @click="handleNode(item)">
+                      <span> {{ item.name }}</span>
+                    </a-button>
+                  </a-tooltip>
+                </a-col>
+                <a-col :span="7" style="text-align: right">
+                  <a-tooltip>
+                    <template #title>
+                      <div>当前状态：{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}</div>
+                      <div>状态描述：{{ (item.machineNodeData && item.machineNodeData.statusMsg) || '' }}</div>
+                    </template>
+                    <a-tag
+                      :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'"
+                      style="margin-right: 0"
+                    >
+                      {{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
+                    </a-tag>
+                  </a-tooltip>
+                </a-col>
+              </a-row>
             </template>
-            <a-col v-else :span="24">
-              <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="没有任何节点" />
-            </a-col>
-          </a-row>
 
+            <a-row :gutter="[8, 8]">
+              <a-col :span="8" style="text-align: center">
+                <a-tooltip :title="`CPU 占用率：${item.occupyCpu}%`" @click="handleHistory(item, 'nodeTop')">
+                  <a-progress
+                    type="circle"
+                    :size="80"
+                    :stroke-color="{
+                      '0%': '#87d068',
+                      '30%': '#87d068',
+                      '100%': '#108ee9'
+                    }"
+                    status="active"
+                    :percent="item.occupyCpu"
+                  />
+                </a-tooltip>
+              </a-col>
+              <a-col :span="8" style="text-align: center">
+                <a-tooltip :title="`硬盘占用率：${item.occupyDisk}%`" @click="handleHistory(item, 'nodeTop')">
+                  <a-progress
+                    type="circle"
+                    :size="80"
+                    :stroke-color="{
+                      '0%': '#87d068',
+                      '30%': '#87d068',
+                      '100%': '#108ee9'
+                    }"
+                    status="active"
+                    :percent="item.occupyDisk"
+                  />
+                </a-tooltip>
+              </a-col>
+              <a-col :span="8" style="text-align: center">
+                <a-tooltip :title="`实际内存占用率：${item.occupyMemory}%`" @click="handleHistory(item, 'nodeTop')">
+                  <a-progress
+                    :size="80"
+                    type="circle"
+                    :stroke-color="{
+                      '0%': '#87d068',
+                      '30%': '#87d068',
+                      '100%': '#108ee9'
+                    }"
+                    status="active"
+                    :percent="item.occupyMemory"
+                  />
+                </a-tooltip>
+              </a-col>
+            </a-row>
+
+            <a-row :gutter="[8, 8]" style="text-align: center">
+              <a-col :span="8">
+                <a-tooltip
+                  :title="`${
+                    '延迟' +
+                    (formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-') +
+                    ' 点击查看历史趋势'
+                  }`"
+                  @click="handleHistory(item, 'networkDelay')"
+                >
+                  <a-statistic
+                    title="延迟"
+                    :value="item.machineNodeData && item.machineNodeData.networkDelay"
+                    :value-style="statValueStyle"
+                    :formatter="
+                      (v) => {
+                        return formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-'
+                      }
+                    "
+                  />
+                </a-tooltip>
+              </a-col>
+              <a-col :span="8">
+                <a-tooltip
+                  :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 1) || '-'"
+                >
+                  <a-statistic
+                    title="运行时间"
+                    :value-style="statValueStyle"
+                    :formatter="
+                      (v) => {
+                        return formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 2) || '-'
+                      }
+                    "
+                  />
+                </a-tooltip>
+              </a-col>
+              <a-col :span="8">
+                <a-tooltip :title="`${parseTime(item.machineNodeData && item.machineNodeData.modifyTimeMillis)}`">
+                  <a-statistic
+                    title="更新时间"
+                    :value-style="statValueStyle"
+                    :formatter="
+                      (v) => {
+                        return parseTime(item.machineNodeData && item.machineNodeData.modifyTimeMillis, 'HH:mm:ss')
+                      }
+                    "
+                  />
+                </a-tooltip>
+              </a-col>
+            </a-row>
+          </a-card>
+        </template>
+        <template #cardPageTool>
           <a-row type="flex" justify="center">
             <a-divider v-if="listQuery.total / listQuery.limit > 1" dashed />
             <a-col>
@@ -481,7 +458,22 @@
             </a-col>
           </a-row>
         </template>
-      </a-card>
+      </CustomTable>
+      <!-- <template v-else-if="layoutType === 'card'">
+          <a-row :gutter="[16, 16]">
+            <template v-if="list && list.length">
+              <a-col v-for="item in list" :key="item.id" :span="6">
+
+              </a-col>
+            </template>
+            <a-col v-else :span="24">
+              <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="没有任何节点" />
+            </a-col>
+          </a-row>
+
+
+        </template> -->
+      <!-- </a-card> -->
     </template>
 
     <!-- 编辑区 -->
@@ -691,8 +683,8 @@ export default {
       list: [],
       sizeOptions: ['8', '12', '16', '20', '24'],
       groupList: [],
-      refreshInterval: 5,
-      deadline: 0,
+      // refreshInterval: 5,
+      // deadline: 0,
       temp: {},
       monitorVisible: false,
       layoutType: null,
@@ -815,6 +807,9 @@ export default {
   computed: {
     ...mapState(useUserStore, ['getUserInfo']),
     ...mapState(useAppStore, ['getWorkspaceId']),
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
+    },
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
     },
@@ -906,8 +901,8 @@ export default {
               })
 
               resolve()
-              this.refreshInterval = 30
-              this.deadline = Date.now() + this.refreshInterval * 1000
+              // this.refreshInterval = 30
+              // this.deadline = Date.now() + this.refreshInterval * 1000
             }
           })
           .finally(() => {
@@ -1168,7 +1163,7 @@ export default {
       }
       if (this.$attrs.routerUrl !== this.$route.path) {
         // 重新计算倒计时
-        this.deadline = Date.now() + this.refreshInterval * 1000
+        // this.deadline = Date.now() + this.refreshInterval * 1000
         return
       }
       this.loadData()
@@ -1186,12 +1181,4 @@ export default {
 }
 </script>
 
-<style scoped>
-.header-statistic :deep(.ant-statistic div) {
-  display: inline-block;
-  font-weight: normal;
-}
-.header-statistic :deep(.ant-statistic-content-value, .ant-statistic-content) {
-  font-size: 16px;
-}
-</style>
+<style scoped></style>

@@ -12,6 +12,7 @@
       is-show-tools
       default-auto-refresh
       :auto-refresh-time="5"
+      :activePage="activePage"
       table-name="nodeSearch"
       :data-source="projList"
       :columns="columns"
@@ -141,7 +142,7 @@
           </template>
           <QuestionCircleOutlined /> </a-tooltip
       ></template>
-      <template #bodyCell="{ column, text, record, index }">
+      <template #tableBodyCell="{ column, text, record, index }">
         <template v-if="column.dataIndex === 'name'">
           <a-tooltip placement="topLeft" :title="text">
             <a-button type="link" style="padding: 0" size="small" @click="openEdit(record)">
@@ -796,6 +797,9 @@ export default {
     ...mapState(useUserStore, ['getUserInfo']),
     filePath() {
       return (this.temp.whitelistDirectory || '') + (this.temp.lib || '')
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     },
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
