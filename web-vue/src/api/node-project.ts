@@ -33,7 +33,7 @@ export function getRuningProjectInfo(params, noTip) {
     data: params,
     timeout: 0,
     headers: {
-      loading: 'no',
+      // loading: 'no',
       tip: noTip ? 'no' : ''
     }
   })

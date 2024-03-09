@@ -9,6 +9,8 @@ export type CatchStorageType = {
   checked: boolean
 }
 
+export type TableLayoutType = string & ('table' | 'card' | undefined)
+
 export type CustomTableType = {
   columns: CustomColumnType[]
   storageKey: string
@@ -22,6 +24,7 @@ export type CustomTableSlotsType = CustomSlotsType<{
   summary?: any
   tableHelp?: any
   toolPrefix?: any
+  tableBodyCell?: any
   expandedRowRender?: any
   expandColumnTitle?: any
   bodyCell?: (props: { text: any; value: any; record: Record<string, any>; index: number; column: ColumnType }) => void

@@ -4,6 +4,7 @@
       is-show-tools
       default-auto-refresh
       :auto-refresh-time="5"
+      :activePage="activePage"
       table-name="dispatch"
       :columns="columns"
       size="middle"
@@ -14,11 +15,7 @@
       :scroll="{
         x: 'max-content'
       }"
-      @refresh="
-        (type) => {
-          type === 'silence' ? silenceLoadData() : loadData()
-        }
-      "
+      @refresh="loadData"
       @change="
         (pagination, filters, sorter) => {
           listQuery = CHANGE_PAGE(listQuery, { pagination, sorter })
@@ -89,7 +86,7 @@
           <QuestionCircleOutlined />
         </a-tooltip>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.tooltip">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text || '' }}</span>
@@ -1137,6 +1134,9 @@ export default {
     filePath() {
       return (this.temp.whitelistDirectory || '') + (this.temp.lib || '')
     },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
+    },
     // 分页
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
@@ -1153,23 +1153,23 @@ export default {
     CHANGE_PAGE,
 
     // 静默
-    silenceLoadData() {
-      if (this.$attrs.routerUrl !== this.$route.path) {
-        //   // 重新计算倒计时
-        //   // this.countdownTime = Date.now() + this.refreshInterval * 1000
-        return
-      }
-      getDishPatchList(this.listQuery, false).then((res) => {
-        if (res.code === 200) {
-          this.list = res.data.result
-          this.listQuery.total = res.data.total
-          //
+    // silenceLoadData() {
+    //   if (this.$attrs.routerUrl !== this.$route.path) {
+    //     //   // 重新计算倒计时
+    //     //   // this.countdownTime = Date.now() + this.refreshInterval * 1000
+    //     return
+    //   }
+    //   getDishPatchList(this.listQuery, false).then((res) => {
+    //     if (res.code === 200) {
+    //       this.list = res.data.result
+    //       this.listQuery.total = res.data.total
+    //       //
 
-          // 重新计算倒计时
-          // this.countdownTime = Date.now() + this.refreshInterval * 1000
-        }
-      })
-    },
+    //       // 重新计算倒计时
+    //       // this.countdownTime = Date.now() + this.refreshInterval * 1000
+    //     }
+    //   })
+    // },
     // 加载数据
     loadData(pointerEvent) {
       return new Promise((resolve) => {
@@ -1623,7 +1623,7 @@ export default {
                     message: res.msg
                   })
                   that.loadData()
-                  that.silenceLoadData()
+                  // that.silenceLoadData()
                 }
                 resolve()
               })

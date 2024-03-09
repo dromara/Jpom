@@ -32,6 +32,22 @@ export const customTableProps = initDefaultProps(
     autoRefreshTime: {
       type: Number,
       default: 10
+    },
+    /**
+     * 页面布局方式
+     */
+    layout: {
+      type: String,
+      default: null
+    },
+    /**
+     * 当前页面是否激活
+     *
+     * 自动刷新需要配合使用
+     */
+    activePage: {
+      type: Boolean,
+      default: false
     }
   },
   {
@@ -39,6 +55,7 @@ export const customTableProps = initDefaultProps(
     isHideAutoRefresh: false,
     isShowTools: false,
     isHideRefresh: false,
-    autoRefreshTime: 10
+    autoRefreshTime: 10,
+    activePage: false
   }
 )
