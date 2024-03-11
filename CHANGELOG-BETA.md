@@ -10,6 +10,7 @@
 4. 【server】优化 前端 ES lint 配置规范前端代码（感谢[@a20070322](https://gitee.com/a20070322) [Gitee Pr 214](https://gitee.com/dromara/Jpom/pulls/214) / [Gitee Pr 215](https://gitee.com/dromara/Jpom/pulls/215) / [Gitee Pr 217](https://gitee.com/dromara/Jpom/pulls/217) ）
 5. 【server】修复 docker 控制台网络选项卡页面空白（感谢@破冰）
 6. 【server】修复 节点历史监控统计图表时间查询不生效（感谢@九問）
+7. 【server】优化 SSH 脚本触发器支持传入参数当环境变量（感谢@小朱）
 
 ------
 
