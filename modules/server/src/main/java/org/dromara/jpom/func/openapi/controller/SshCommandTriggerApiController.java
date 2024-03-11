@@ -32,7 +32,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -63,7 +65,7 @@ public class SshCommandTriggerApiController extends BaseJpomController {
      * @return json
      */
     @RequestMapping(value = ServerOpenApi.SSH_COMMAND_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token) {
+    public IJsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token, HttpServletRequest request) {
         CommandModel item = sshCommandService.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
@@ -72,11 +74,18 @@ public class SshCommandTriggerApiController extends BaseJpomController {
         UserModel userModel = triggerTokenLogServer.getUserByToken(token, sshCommandService.typeName());
         //
         Assert.notNull(userModel, "触发token错误,或者已经失效:-1");
-
+        // 解析参数
+        Map<String, String> paramMap = ServletUtil.getParamMap(request);
+        Map<String, String> newParamMap = new HashMap<>(10);
+        for (Map.Entry<String, String> entry : paramMap.entrySet()) {
+            String key = StrUtil.format("trigger_{}", entry.getKey());
+            key = StrUtil.toUnderlineCase(key);
+            newParamMap.put(key, entry.getValue());
+        }
         String batchId;
         try {
             BaseServerController.resetInfo(userModel);
-            batchId = sshCommandService.executeBatch(item, item.getDefParams(), item.getSshIds(), 2);
+            batchId = sshCommandService.executeBatch(item, item.getDefParams(), item.getSshIds(), 2, newParamMap);
         } catch (Exception e) {
             log.error("触发自动执行SSH命令模版异常", e);
             return new JsonMessage<>(500, "执行异常：" + e.getMessage());

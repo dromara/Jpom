@@ -173,6 +173,20 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
      * @return 批次ID
      */
     public String executeBatch(CommandModel commandModel, String params, String nodes, int triggerExecType) {
+        return executeBatch(commandModel, params, nodes, triggerExecType, null);
+    }
+
+    /**
+     * 批量执行命令
+     *
+     * @param commandModel    命令模版
+     * @param nodes           ssh节点
+     * @param params          参数
+     * @param envMap          环境变量
+     * @param triggerExecType 触发方式
+     * @return 批次ID
+     */
+    public String executeBatch(CommandModel commandModel, String params, String nodes, int triggerExecType, Map<String, String> envMap) {
         Assert.notNull(commandModel, "没有对应对命令");
         List<String> sshIds = StrUtil.split(nodes, StrUtil.COMMA, true, true);
         Assert.notEmpty(sshIds, "请选择 ssh 节点");
@@ -180,7 +194,7 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
         String name = "ssh-command-batch:" + batchId;
         StrictSyncFinisher syncFinisher = SyncFinisherUtil.create(name, sshIds.size());
         for (String sshId : sshIds) {
-            this.executeItem(syncFinisher, commandModel, params, sshId, batchId, triggerExecType);
+            this.executeItem(syncFinisher, commandModel, params, sshId, batchId, triggerExecType, envMap);
         }
         ThreadUtil.execute(() -> {
             try {
@@ -203,7 +217,7 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
      * @param sshId         ssh id
      * @param batchId       批次ID
      */
-    private void executeItem(StrictSyncFinisher syncFinisher, CommandModel commandModel, String commandParams, String sshId, String batchId, int triggerExecType) {
+    private void executeItem(StrictSyncFinisher syncFinisher, CommandModel commandModel, String commandParams, String sshId, String batchId, int triggerExecType, Map<String, String> envMap) {
         SshModel sshModel = sshService.getByKey(sshId, false);
 
         CommandExecLogModel commandExecLogModel = new CommandExecLogModel();
@@ -225,7 +239,7 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
 
         syncFinisher.addWorker(() -> {
             try {
-                this.execute(commandModel, commandExecLogModel, sshModel, commandParamsLine);
+                this.execute(commandModel, commandExecLogModel, sshModel, commandParamsLine, envMap);
             } catch (Exception e) {
                 log.error("命令模版执行链接异常", e);
                 this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.SESSION_ERROR);
@@ -242,7 +256,7 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
      * @param sshModel            ssh
      * @param commandParamsLine   参数
      */
-    private void execute(CommandModel commandModel, CommandExecLogModel commandExecLogModel, SshModel sshModel, String commandParamsLine) {
+    private void execute(CommandModel commandModel, CommandExecLogModel commandExecLogModel, SshModel sshModel, String commandParamsLine, Map<String, String> envMap) {
         File file = commandExecLogModel.logFile();
         try (LogRecorder logRecorder = LogRecorder.builder().file(file).charset(CharsetUtil.CHARSET_UTF_8).build()) {
             if (sshModel == null) {
@@ -253,6 +267,7 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
             EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.getEnv(commandModel.getWorkspaceId());
             environmentMapBuilder.put("JPOM_SSH_ID", sshModel.getId());
             environmentMapBuilder.put("JPOM_COMMAND_ID", commandModel.getId());
+            environmentMapBuilder.putStr(envMap);
             environmentMapBuilder.eachStr(logRecorder::system);
             Map<String, String> environment = environmentMapBuilder.environment();
             String commands = StringUtil.formatStrByMap(commandModel.getCommand(), environment);
