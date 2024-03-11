@@ -111,6 +111,7 @@ export default [
     items: [
       { text: "🔋赞赏支持💰", link: "/pages/praise/" },
       { text: "📑赞赏记录", link: "/pages/praise/publicity/" },
+      { text: "🎁专属纪念品", link: "/pages/souvenir/" },
       { text: "💬社群讨论", link: "/pages/praise/join/" },
       { text: "💪🏻如何贡献", link: "/pages/dc18b8/" },
       { text: "👥贡献者们", link: "/pages/praise/friends/" },
