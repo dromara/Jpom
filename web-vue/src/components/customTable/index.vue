@@ -104,11 +104,11 @@
                     <!-- <ReloadOutlined   /> -->
 
                     <LayoutOutlined
-                      class="table-action__icon"
                       v-if="tableLayout === 'card'"
+                      class="table-action__icon"
                       @click="tableLayoutClick"
                     />
-                    <TableOutlined class="table-action__icon" v-else @click="tableLayoutClick" />
+                    <TableOutlined v-else class="table-action__icon" @click="tableLayoutClick" />
                   </a-tooltip>
                 </a-form-item>
 
@@ -130,7 +130,7 @@
           </template>
           <template v-if="tableLayout === 'table'">
             <a-table v-bind="props" :columns="customColumn" :size="tableSize">
-              <template #bodyCell="slotProps" v-if="slots.tableBodyCell">
+              <template v-if="slots.tableBodyCell" #bodyCell="slotProps">
                 <slot name="tableBodyCell" v-bind="slotProps"></slot>
               </template>
             </a-table>
@@ -164,6 +164,7 @@ import { CatchStorageType, CustomColumnType, CustomTableSlotsType, TableLayoutTy
 import { compareArrays } from './utils'
 import { tableSizeList } from './dict'
 import { customTableProps } from './props'
+import { CatchService } from './utils/CatchService'
 
 export default defineComponent({
   name: 'CustomTable',
@@ -176,11 +177,18 @@ export default defineComponent({
   slots: Object as CustomTableSlotsType,
   emits: ['refresh'],
   setup(props, { attrs, slots, emit }) {
+    const userStore = useUserStore()
+    const catchService: CatchService = new CatchService(props.tableName, {
+      provide: 'localStorage',
+      prefix: 'table:catch__' + userStore?.userInfo?.id
+    })
+
+    const { autoRefreshTime, isAutoRefresh } = catchService.getRefreshConfig()
     // 倒计时
     const getCountdown = () => {
-      return Date.now() + 1000 * (props.autoRefreshTime + 0)
+      return Date.now() + 1000 * (autoRefreshTime !== -1 ? autoRefreshTime : props.autoRefreshTime + 0)
     }
-    const countdownSwitch = ref(props.defaultAutoRefresh)
+    const countdownSwitch = ref(isAutoRefresh !== -1 ? isAutoRefresh : props.defaultAutoRefresh)
     const countdownNumber = ref(0)
     const countDownFinish = () => {
       if (props.activePage) {
@@ -195,6 +203,10 @@ export default defineComponent({
       } else {
         countdownNumber.value = 0
       }
+      catchService.setRefreshConfig({
+        isAutoRefresh: countdownSwitch.value ? 1 : 0,
+        autoRefreshTime: props.autoRefreshTime
+      })
     }
     onMounted(() => {
       if (countdownSwitch.value && !props.isHideAutoRefresh) {
@@ -202,26 +214,6 @@ export default defineComponent({
       }
     })
 
-    // const otherSlots = computed(() => {
-    //   return Object.keys(slots).filter((key) => key === 'tableBodyCell')
-    // })
-    // console.log(slots)
-
-    // const canChangeLayout = computed(()=>{
-    //   return
-    // })
-    const userStore = useUserStore()
-    const COLUMN = 'column'
-    const SIZE = 'size'
-    const LAYOUT = 'layout'
-    /** 是否缓存配置 */
-    const isCatchOPtions = () => {
-      return props.tableName && userStore?.userInfo?.id
-    }
-    /** 获取缓存key */
-    const getTableCatchKey = (type: string) => {
-      return `table:catch__${userStore.userInfo.id}__${props.tableName}__${type}`
-    }
     /** 获取缓存key */
     const refreshClick = () => {
       countdownNumber.value = getCountdown()
@@ -232,20 +224,15 @@ export default defineComponent({
     watch(
       () => tableSize.value,
       (val) => {
-        if (!isCatchOPtions()) return
-        // 判断是否需要存储
-        if (val !== 'middle') {
-          localStorage.setItem(getTableCatchKey(SIZE), JSON.stringify(val))
-        } else {
-          localStorage.removeItem(getTableCatchKey(SIZE))
-        }
+        if (!catchService.exitOpenCatch()) return
+        catchService.setTableSizeConfig(val)
       }
     )
     // 组件加载 从存储中读取
     onMounted(() => {
       // 判断是否需要存储
-      const size = localStorage.getItem(getTableCatchKey(SIZE))
-      tableSize.value = size ? JSON.parse(size) : props.size || 'middle'
+      const size = catchService.getTableSizeConfig()
+      tableSize.value = size ? size : props.size || 'middle'
     })
 
     // 视图模式
@@ -262,7 +249,7 @@ export default defineComponent({
       if (props.layout) {
         tableLayout.value = props.layout as TableLayoutType
       } else {
-        const layout = localStorage.getItem(getTableCatchKey(LAYOUT))
+        const layout = catchService.getLayoutConfig()
         tableLayout.value = (layout || 'table') as TableLayoutType
       }
     })
@@ -272,19 +259,17 @@ export default defineComponent({
     watch(
       () => tableLayout.value,
       (val) => {
-        if (!isCatchOPtions()) return
+        if (!catchService.exitOpenCatch()) return
         // 判断是否需要存储
-        localStorage.setItem(getTableCatchKey(LAYOUT), val + '')
+        catchService.setLayoutConfig(val)
       }
     )
-    //
-
     let customColumnList = ref<CustomColumnType[]>([])
     const customCheckColumnList = computed(() => {
       return customColumnList.value.filter((item) => item.checked).map((item) => String(item.dataIndex))
     })
     const customColumn = computed(() => {
-      if (!isCatchOPtions()) return props.columns
+      if (!catchService.exitOpenCatch()) return props.columns
       return customColumnList.value.filter((item) => item.checked)
     })
     const resetCustomColumn = () => {
@@ -318,51 +303,37 @@ export default defineComponent({
     const onDrop = (dropResult: any) => {
       customColumnList.value = applyDrag(customColumnList.value, dropResult)
     }
-
     /** 设置默认列 */
     const setDefaultCustomColumnList = () => {
       customColumnList.value = props.columns.map((item) => ({ ...item, checked: true }))
     }
-
     // 监听列变化,同步至缓存customColumnList中
     watch(
       () => props.columns,
       (val) => {
-        if (!isCatchOPtions()) return
-        const catchStorage = JSON.parse(localStorage.getItem(getTableCatchKey(COLUMN)) || '[]') as CatchStorageType[]
+        if (!catchService.exitOpenCatch()) return
+        const catchStorage = catchService.getColumnConfig() || []
         if (
           catchStorage.length == 0 ||
           (catchStorage.length > 0 && catchStorage.some((key) => typeof key === 'string')) ||
           !compareArrays(
             val.map((item) => String(item.dataIndex)),
-            catchStorage.map((item) => item.key)
+            catchStorage.filter((item) => item.key).map((item) => String(item.key))
           )
         ) {
-          // console.log(
-          //   catchStorage.length == 0,
-          //   catchStorage.length > 0 && catchStorage.some((key) => typeof key === 'string'),
-          //   !compareArrays(
-          //     val.map((item) => String(item.key)),
-          //     catchStorage.map((item) => item.key)
-          //   )
-          // )
-          //console.log('setDefaultCustomColumnList')
           return setDefaultCustomColumnList()
         } else {
           const tmpObj: { [key: string]: CustomColumnType } = {}
           val.forEach((item) => {
             tmpObj[String(item.dataIndex || '_d')] = item
           })
-          //onsole.log('catchStorage')
           customColumnList.value = catchStorage.map((item) => {
             const key = item.key
-            //console.log(item)
             return {
-              ...tmpObj[key],
+              ...tmpObj[String(key)],
               checked: item.checked
             }
           })
-          //onsole.log(customColumnList.value)
         }
       },
       {
@@ -373,21 +344,19 @@ export default defineComponent({
     watch(
       () => customColumnList.value,
       (val) => {
-        if (!isCatchOPtions()) return
+        if (!catchService.exitOpenCatch()) return
+
         if (JSON.stringify(val) !== JSON.stringify(props.columns)) {
-          localStorage.setItem(
-            getTableCatchKey(COLUMN),
-            JSON.stringify(
-              customColumnList.value.map((item) => {
-                return {
-                  key: item.dataIndex,
-                  checked: item.checked
-                } as CatchStorageType
-              })
-            )
+          catchService.setColumnConfig(
+            customColumnList.value.map((item) => {
+              return {
+                key: item.dataIndex,
+                checked: item.checked
+              } as CatchStorageType
+            })
           )
         } else {
-          localStorage.removeItem(getTableCatchKey(COLUMN))
+          catchService.setColumnConfig([])
         }
       },
       {
