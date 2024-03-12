@@ -9,7 +9,7 @@ export type CatchStorageType = {
   checked: boolean
 }
 
-export type TableLayoutType = string & ('table' | 'card' | undefined)
+export type TableLayoutType = 'table' | 'card' | undefined
 
 export type CustomTableType = {
   columns: CustomColumnType[]
