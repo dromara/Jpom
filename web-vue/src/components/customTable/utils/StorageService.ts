@@ -1,8 +1,5 @@
 export type ProvideType = 'sessionStorage' | 'localStorage'
-export type CatchServiceOptions = {
-  provide: ProvideType
-  prefix: string
-}
+
 import { SizeType } from 'ant-design-vue/es/config-provider'
 import { CustomColumnType, TableLayoutType } from '../types'
 
@@ -30,22 +27,27 @@ const defaultConfig: StorageObjectType = {
   }
 }
 
-export class CatchService {
+export type StorageServiceOptions = {
+  provide: ProvideType
+  prefix: string
+}
+
+export class StorageService {
   name: string | undefined
   provide: ProvideType
   prefix: string
-  constructor(name: string | undefined, options: any) {
+  constructor(name: string | undefined, options: StorageServiceOptions) {
     this.name = name
     this.provide = options.provide || 'localStorage'
     this.prefix = options.prefix || 'catch__'
   }
-  exitOpenCatch() {
-    return !!this.getCatchKey()
+  exitOpenStorage() {
+    return !!this.getStorageKey()
   }
   /**
    * 获取存储key
    */
-  getCatchKey() {
+  getStorageKey() {
     return this.name ? `${this.prefix}__${this.name}` : ''
   }
   /**
@@ -68,8 +70,8 @@ export class CatchService {
    * @param path 属性路径
    * @param emptyValue 默认值
    */
-  getCatch<T = any>(path: string, emptyValue: T) {
-    const key = this.getCatchKey()
+  getStorage<T = any>(path: string, emptyValue: T) {
+    const key = this.getStorageKey()
     let storageObject: StorageObjectType = defaultConfig
     if (!key) {
       return emptyValue || ({} as T)
@@ -94,11 +96,11 @@ export class CatchService {
    * @param path 属性路径
    * @param value 值
    */
-  setCatch(path: string, value: any) {
-    if (!this.getCatchKey()) {
+  setStorage(path: string, value: any) {
+    if (!this.getStorageKey()) {
       return
     }
-    const storageObject = this.getCatch<StorageObjectType>('', defaultConfig)
+    const storageObject = this.getStorage<StorageObjectType>('', defaultConfig)
     const keys = path.split('.')
     let currentObj = storageObject as any
     for (let i = 0; i < keys.length - 1; i++) {
@@ -114,7 +116,7 @@ export class CatchService {
     const lastKey = keys[keys.length - 1]
     currentObj[lastKey] = value
     // 存储
-    const key = this.getCatchKey()
+    const key = this.getStorageKey()
     if (this.provide === 'sessionStorage') {
       sessionStorage.setItem(key, JSON.stringify(storageObject))
     }
@@ -123,30 +125,30 @@ export class CatchService {
     }
   }
   getTableSizeConfig() {
-    return this.getCatch<StorageObjectType['tableSize']>('tableSize', undefined)
+    return this.getStorage<StorageObjectType['tableSize']>('tableSize', undefined)
   }
   setTableSizeConfig(value: SizeType) {
-    this.setCatch('tableSize', value || 'middle')
+    this.setStorage('tableSize', value || 'middle')
   }
   getColumnConfig() {
-    return this.getCatch<StorageObjectType['column']>('column', [])
+    return this.getStorage<StorageObjectType['column']>('column', [])
   }
   setColumnConfig(value: CustomColumnType[]) {
-    this.setCatch('column', value || [])
+    this.setStorage('column', value || [])
   }
   getLayoutConfig() {
-    return this.getCatch<StorageObjectType['layout']>('layout', 'table')
+    return this.getStorage<StorageObjectType['layout']>('layout', 'table')
   }
   setLayoutConfig(value: TableLayoutType) {
-    this.setCatch('layout', value || 'table')
+    this.setStorage('layout', value || 'table')
   }
   getRefreshConfig() {
-    return this.getCatch<StorageObjectType['refresh']>('refresh', {
+    return this.getStorage<StorageObjectType['refresh']>('refresh', {
       isAutoRefresh: -1,
       autoRefreshTime: -1
     })
   }
   setRefreshConfig(value: StorageObjectType['refresh']) {
-    this.setCatch('refresh', value)
+    this.setStorage('refresh', value)
   }
 }
