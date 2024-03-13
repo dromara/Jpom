@@ -17,7 +17,7 @@ export interface StorageObjectType {
   }
 }
 
-const defaultConfig: StorageObjectType = {
+export const getDefaultConfig: () => StorageObjectType = () => ({
   tableSize: undefined,
   column: [],
   layout: undefined,
@@ -25,21 +25,26 @@ const defaultConfig: StorageObjectType = {
     isAutoRefresh: -1,
     autoRefreshTime: -1
   }
-}
+})
 
 export type StorageServiceOptions = {
   provide: ProvideType
   prefix: string
+  beforeStorage?: (storageObject: StorageObjectType, defaultConfig: StorageObjectType) => StorageObjectType
 }
 
 export class StorageService {
   name: string | undefined
   provide: ProvideType
   prefix: string
+  beforeStorage?: StorageServiceOptions['beforeStorage']
   constructor(name: string | undefined, options: StorageServiceOptions) {
     this.name = name
     this.provide = options.provide || 'localStorage'
     this.prefix = options.prefix || 'catch__'
+    if (options.beforeStorage) {
+      this.beforeStorage = options.beforeStorage
+    }
   }
   exitOpenStorage() {
     return !!this.getStorageKey()
@@ -72,16 +77,19 @@ export class StorageService {
    */
   getStorage<T = any>(path: string, emptyValue: T) {
     const key = this.getStorageKey()
-    let storageObject: StorageObjectType = defaultConfig
+    let storageObject: StorageObjectType = getDefaultConfig()
     if (!key) {
       return emptyValue || ({} as T)
     }
     try {
       if (this.provide === 'sessionStorage') {
-        storageObject = JSON.parse(sessionStorage.getItem(key) || '{}')
+        storageObject = JSON.parse(sessionStorage.getItem(key) || 'null')
       }
       if (this.provide === 'localStorage') {
-        storageObject = JSON.parse(localStorage.getItem(key) || '{}')
+        storageObject = JSON.parse(localStorage.getItem(key) || 'null')
+      }
+      if (!storageObject) {
+        storageObject = getDefaultConfig()
       }
     } catch (error) {
       console.error(error)
@@ -100,7 +108,7 @@ export class StorageService {
     if (!this.getStorageKey()) {
       return
     }
-    const storageObject = this.getStorage<StorageObjectType>('', defaultConfig)
+    let storageObject = this.getStorage<StorageObjectType>('', getDefaultConfig())
     const keys = path.split('.')
     let currentObj = storageObject as any
     for (let i = 0; i < keys.length - 1; i++) {
@@ -115,13 +123,29 @@ export class StorageService {
     }
     const lastKey = keys[keys.length - 1]
     currentObj[lastKey] = value
+    let isDel = false
+    if (this.beforeStorage) {
+      storageObject = this.beforeStorage(storageObject, getDefaultConfig())
+      if (JSON.stringify(storageObject) === JSON.stringify(getDefaultConfig())) {
+        isDel = true
+      }
+    }
     // 存储
     const key = this.getStorageKey()
-    if (this.provide === 'sessionStorage') {
-      sessionStorage.setItem(key, JSON.stringify(storageObject))
-    }
-    if (this.provide === 'localStorage') {
-      localStorage.setItem(key, JSON.stringify(storageObject))
+    if (isDel) {
+      if (this.provide === 'sessionStorage') {
+        sessionStorage.removeItem(key)
+      }
+      if (this.provide === 'localStorage') {
+        localStorage.removeItem(key)
+      }
+    } else {
+      if (this.provide === 'sessionStorage') {
+        sessionStorage.setItem(key, JSON.stringify(storageObject))
+      }
+      if (this.provide === 'localStorage') {
+        localStorage.setItem(key, JSON.stringify(storageObject))
+      }
     }
   }
   getTableSizeConfig() {

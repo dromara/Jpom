@@ -180,8 +180,31 @@ export default defineComponent({
     const userStore = useUserStore()
     const storageService: StorageService = new StorageService(props.tableName, {
       provide: 'localStorage',
-      prefix: 'table:catch__' + userStore?.userInfo?.id
-      // beforCatch() {}
+      prefix: 'table:catch__' + userStore?.userInfo?.id,
+      // 存储前拦截器
+      beforeStorage(storageObject, defaultConfig) {
+        // 判断刷新是否为默认
+        const defaultAutoRefresh: number = props.defaultAutoRefresh ? 1 : 0
+        if (defaultAutoRefresh === storageObject?.refresh?.isAutoRefresh) {
+          storageObject.refresh = defaultConfig.refresh
+        }
+        // 判断表格大小是否为默认
+        if (storageObject?.tableSize === props?.size) {
+          storageObject.tableSize = defaultConfig?.tableSize
+        }
+        // layout
+        if (storageObject?.layout === props?.layout) {
+          storageObject.layout = defaultConfig?.layout
+        }
+        if (
+          storageObject?.column?.length === 0 ||
+          JSON.stringify(storageObject?.column?.filter((item) => item.checked)?.map((item) => item.key) || []) ===
+            JSON.stringify(props.columns.map((item) => item.dataIndex))
+        ) {
+          storageObject.column = defaultConfig.column
+        }
+        return storageObject
+      }
     })
 
     const { autoRefreshTime, isAutoRefresh } = storageService.getRefreshConfig()
