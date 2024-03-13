@@ -266,17 +266,19 @@ export default defineComponent({
     )
     let customColumnList = ref<CustomColumnType[]>([])
     const customCheckColumnList = computed(() => {
-      return customColumnList.value.filter((item) => item.checked).map((item) => String(item.dataIndex))
+      return customColumnList.value
+        .filter((item: CustomColumnType) => item.checked)
+        .map((item: CustomColumnType) => String(item.dataIndex))
     })
     const customColumn = computed(() => {
       if (!catchService.exitOpenCatch()) return props.columns
-      return customColumnList.value.filter((item) => item.checked)
+      return customColumnList.value.filter((item: CustomColumnType) => item.checked)
     })
     const resetCustomColumn = () => {
-      customColumnList.value = props.columns.map((item) => ({ ...item, checked: true }))
+      customColumnList.value = props.columns.map((item: CustomColumnType) => ({ ...item, checked: true }))
     }
     const onCheckChange = (checkedValues: CheckboxValueType[]) => {
-      customColumnList.value = customColumnList.value.map((item) => ({
+      customColumnList.value = customColumnList.value.map((item: CustomColumnType) => ({
         ...item,
         checked: checkedValues.includes(String(item.dataIndex))
       }))
@@ -305,7 +307,7 @@ export default defineComponent({
     }
     /** 设置默认列 */
     const setDefaultCustomColumnList = () => {
-      customColumnList.value = props.columns.map((item) => ({ ...item, checked: true }))
+      customColumnList.value = props.columns.map((item: CustomColumnType) => ({ ...item, checked: true }))
     }
     // 监听列变化,同步至缓存customColumnList中
     watch(
@@ -317,14 +319,14 @@ export default defineComponent({
           catchStorage.length == 0 ||
           (catchStorage.length > 0 && catchStorage.some((key) => typeof key === 'string')) ||
           !compareArrays(
-            val.map((item) => String(item.dataIndex)),
+            val.map((item: CustomColumnType) => String(item.dataIndex)),
             catchStorage.filter((item) => item.key).map((item) => String(item.key))
           )
         ) {
           return setDefaultCustomColumnList()
         } else {
           const tmpObj: { [key: string]: CustomColumnType } = {}
-          val.forEach((item) => {
+          val.forEach((item: CustomColumnType) => {
             tmpObj[String(item.dataIndex || '_d')] = item
           })
           customColumnList.value = catchStorage.map((item) => {
