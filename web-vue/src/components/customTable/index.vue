@@ -164,7 +164,7 @@ import { CatchStorageType, CustomColumnType, CustomTableSlotsType, TableLayoutTy
 import { compareArrays } from './utils'
 import { tableSizeList } from './dict'
 import { customTableProps } from './props'
-import { CatchService } from './utils/CatchService'
+import { StorageService } from './utils/StorageService'
 
 export default defineComponent({
   name: 'CustomTable',
@@ -178,12 +178,13 @@ export default defineComponent({
   emits: ['refresh'],
   setup(props, { attrs, slots, emit }) {
     const userStore = useUserStore()
-    const catchService: CatchService = new CatchService(props.tableName, {
+    const storageService: StorageService = new StorageService(props.tableName, {
       provide: 'localStorage',
       prefix: 'table:catch__' + userStore?.userInfo?.id
+      // beforCatch() {}
     })
 
-    const { autoRefreshTime, isAutoRefresh } = catchService.getRefreshConfig()
+    const { autoRefreshTime, isAutoRefresh } = storageService.getRefreshConfig()
     // 倒计时
     const getCountdown = () => {
       return Date.now() + 1000 * (autoRefreshTime !== -1 ? autoRefreshTime : props.autoRefreshTime + 0)
@@ -203,7 +204,7 @@ export default defineComponent({
       } else {
         countdownNumber.value = 0
       }
-      catchService.setRefreshConfig({
+      storageService.setRefreshConfig({
         isAutoRefresh: countdownSwitch.value ? 1 : 0,
         autoRefreshTime: props.autoRefreshTime
       })
@@ -224,14 +225,14 @@ export default defineComponent({
     watch(
       () => tableSize.value,
       (val) => {
-        if (!catchService.exitOpenCatch()) return
-        catchService.setTableSizeConfig(val)
+        if (!storageService.exitOpenStorage()) return
+        storageService.setTableSizeConfig(val)
       }
     )
     // 组件加载 从存储中读取
     onMounted(() => {
       // 判断是否需要存储
-      const size = catchService.getTableSizeConfig()
+      const size = storageService.getTableSizeConfig()
       tableSize.value = size ? size : props.size || 'middle'
     })
 
@@ -249,7 +250,7 @@ export default defineComponent({
       if (props.layout) {
         tableLayout.value = props.layout as TableLayoutType
       } else {
-        const layout = catchService.getLayoutConfig()
+        const layout = storageService.getLayoutConfig()
         tableLayout.value = (layout || 'table') as TableLayoutType
       }
     })
@@ -259,9 +260,9 @@ export default defineComponent({
     watch(
       () => tableLayout.value,
       (val) => {
-        if (!catchService.exitOpenCatch()) return
+        if (!storageService.exitOpenStorage()) return
         // 判断是否需要存储
-        catchService.setLayoutConfig(val)
+        storageService.setLayoutConfig(val)
       }
     )
     let customColumnList = ref<CustomColumnType[]>([])
@@ -271,7 +272,7 @@ export default defineComponent({
         .map((item: CustomColumnType) => String(item.dataIndex))
     })
     const customColumn = computed(() => {
-      if (!catchService.exitOpenCatch()) return props.columns
+      if (!storageService.exitOpenStorage()) return props.columns
       return customColumnList.value.filter((item: CustomColumnType) => item.checked)
     })
     const resetCustomColumn = () => {
@@ -313,8 +314,8 @@ export default defineComponent({
     watch(
       () => props.columns,
       (val) => {
-        if (!catchService.exitOpenCatch()) return
-        const catchStorage = catchService.getColumnConfig() || []
+        if (!storageService.exitOpenStorage()) return
+        const catchStorage = storageService.getColumnConfig() || []
         if (
           catchStorage.length == 0 ||
           (catchStorage.length > 0 && catchStorage.some((key) => typeof key === 'string')) ||
@@ -346,10 +347,10 @@ export default defineComponent({
     watch(
       () => customColumnList.value,
       (val) => {
-        if (!catchService.exitOpenCatch()) return
+        if (!storageService.exitOpenStorage()) return
 
         if (JSON.stringify(val) !== JSON.stringify(props.columns)) {
-          catchService.setColumnConfig(
+          storageService.setColumnConfig(
             customColumnList.value.map((item) => {
               return {
                 key: item.dataIndex,
@@ -358,7 +359,7 @@ export default defineComponent({
             })
           )
         } else {
-          catchService.setColumnConfig([])
+          storageService.setColumnConfig([])
         }
       },
       {
