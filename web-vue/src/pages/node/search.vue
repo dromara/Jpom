@@ -9,11 +9,12 @@
     </template>
 
     <CustomTable
+      ref="nodeSearch"
+      table-name="nodeSearch"
       is-show-tools
       default-auto-refresh
       :auto-refresh-time="5"
-      :activePage="activePage"
-      table-name="nodeSearch"
+      :active-page="activePage"
       :data-source="projList"
       :columns="columns"
       size="middle"
@@ -870,7 +871,8 @@ export default {
             this.getRuningProjectInfo(nodeProjects)
 
             // 重新计算倒计时
-            this.countdownTime = Date.now() + this.refreshInterval * 1000
+            // this.countdownTime = Date.now() + this.refreshInterval * 1000
+            this.$refs.nodeSearch.countDownChange()
           }
         })
         .finally(() => {
