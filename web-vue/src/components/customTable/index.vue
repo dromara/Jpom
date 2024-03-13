@@ -102,13 +102,8 @@
                 <a-form-item v-if="canChangeLayout">
                   <a-tooltip title="切换视图">
                     <!-- <ReloadOutlined   /> -->
-
-                    <LayoutOutlined
-                      v-if="tableLayout === 'card'"
-                      class="table-action__icon"
-                      @click="tableLayoutClick"
-                    />
-                    <TableOutlined v-else class="table-action__icon" @click="tableLayoutClick" />
+                    <TableOutlined v-if="tableLayout === 'card'" class="table-action__icon" @click="tableLayoutClick" />
+                    <LayoutOutlined v-else class="table-action__icon" @click="tableLayoutClick" />
                   </a-tooltip>
                 </a-form-item>
 
@@ -146,6 +141,10 @@
                 <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="没有任何节点" />
               </a-col>
             </a-row>
+            <div class="card-pagination">
+              <a-pagination v-bind="props.pagination" size="small" @change="paginationChange" />
+            </div>
+
             <slot name="cardPageTool"></slot>
           </template>
           <template v-else>未知的表格类型</template>
@@ -175,7 +174,7 @@ export default defineComponent({
   inheritAttrs: false,
   props: customTableProps,
   slots: Object as CustomTableSlotsType,
-  emits: ['refresh'],
+  emits: ['refresh', 'change'],
   setup(props, { attrs, slots, emit }) {
     const userStore = useUserStore()
     const storageService: StorageService = new StorageService(props.tableName, {
@@ -389,6 +388,19 @@ export default defineComponent({
         immediate: true
       }
     )
+
+    const paginationChange = (page: number, size: number) => {
+      emit(
+        'change',
+        {
+          ...props.pagination,
+          current: page,
+          pageSize: size
+        },
+        {},
+        {}
+      )
+    }
     return {
       onDrop,
       countdownSwitch,
@@ -410,7 +422,8 @@ export default defineComponent({
       customColumn,
       customCheckColumnList,
       resetCustomColumn,
-      onCheckChange
+      onCheckChange,
+      paginationChange
     }
   }
 })
@@ -458,6 +471,10 @@ export default defineComponent({
 }
 .custom-size-list {
   display: block;
+}
+.card-pagination {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>
 <style scoped>
