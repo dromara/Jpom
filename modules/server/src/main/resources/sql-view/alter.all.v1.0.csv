@@ -2,7 +2,7 @@ alterType,tableName,name,type,len,defaultValue,comment,notNull
 DROP,NODE_INFO,cycle
 ADD,PROJECT_INFO,triggerToken,String,100,,触发器token
 ADD,OUT_GIVING,secondaryDirectory,String,200,,二级目录
-ADD,OUT_GIVING,uploadCloseFirst,TINYINT,,0,是否清空旧包发布
+ADD,OUT_GIVING,uploadCloseFirst,Boolean,,0,是否清空旧包发布
 ADD,USEROPERATELOGV1,dataName,String,200,,数据名称
 DROP,SSHTERMINALEXECUTELOG,optTime
 DROP,USEROPERATELOGV1,optType

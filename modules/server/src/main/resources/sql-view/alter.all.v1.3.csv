@@ -40,10 +40,10 @@ ADD,BUILD_INFO,aliasCode,String,50,,别名码,false
 ADD,FILE_STORAGE,aliasCode,String,50,,别名码,false
 ADD,PROJECT_INFO,dslContent,TEXT,,,dslContent,false
 DROP,PROJECT_INFO,jdkId,
-ADD,PROJECT_INFO,autoStart,TINYINT,,,在启动,false
+ADD,PROJECT_INFO,autoStart,Boolean,,,在启动,false
 ADD,MACHINE_DOCKER_INFO,certInfo,String,100,,证书信息,false
 ADD,CERTIFICATE_INFO,fingerprint,String,50,,证书指纹,false
-ADD,MACHINE_DOCKER_INFO,certExist,TINYINT,,,证书是否存在,false
+ADD,MACHINE_DOCKER_INFO,certExist,Boolean,,,证书是否存在,false
 ADD,REPOSITORY,createUser,String,50,,创建人,false
 ADD,SERVER_SCRIPT_INFO,createUser,String,50,,创建人,false
 ADD,BUILD_INFO,statusMsg,TEXT,,,状态信息
@@ -58,7 +58,7 @@ ADD,SCRIPT_EXECUTE_LOG,workspaceName,String,50,,工作空间名称,false
 ALTER,REPOSITORY,password,String,255,,登录密码,false
 ADD,WORKSPACE,group,String,50,,分组,false
 ADD,MACHINE_SSH_INFO,dockerInfo,String,255,,服务器中的 docker 信息,false
-ADD,MACHINE_DOCKER_INFO,enableSsh,tinyint,0,,是否开启SSH连接,false
+ADD,MACHINE_DOCKER_INFO,enableSsh,Boolean,0,,是否开启SSH连接,false
 ADD,MACHINE_DOCKER_INFO,machineSshId,String,255,,SSH连接信息,false
 ADD,BUILD_INFO,resultKeepDay,Integer,,,产物保留天数,false
 ADD,REPOSITORY,group,String,50,,分组,false

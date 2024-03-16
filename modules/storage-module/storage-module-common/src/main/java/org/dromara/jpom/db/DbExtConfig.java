@@ -143,6 +143,10 @@ public class DbExtConfig implements InitializingBean {
         /**
          * mysql
          */
-        MYSQL
+        MYSQL,
+        /**
+         * postgresql
+         */
+        POSTGRESQL
     }
 }
