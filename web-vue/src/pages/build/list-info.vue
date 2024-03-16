@@ -19,7 +19,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="buildList"
-      :activePage="activePage"
+      :active-page="activePage"
       :layout="layout"
       size="middle"
       :columns="columns"
@@ -156,7 +156,7 @@
           -->
         </a-space>
       </template>
-      <template #cardBodyCell="{ item, index }">
+      <template #cardBodyCell="{ item }">
         <a-card :head-style="{ padding: '0 6px' }" :body-style="{ padding: '10px' }">
           <template #title>
             <a-row :gutter="[4, 0]">
@@ -705,8 +705,7 @@ import {
   COMPUTED_PAGINATION,
   PAGE_DEFAULT_LIST_QUERY,
   parseTime,
-  PAGE_DEFAULT_SHOW_TOTAL,
-  getCachePageLimit
+  PAGE_DEFAULT_SHOW_TOTAL
 } from '@/utils/const'
 
 export default {
