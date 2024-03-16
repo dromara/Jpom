@@ -102,13 +102,8 @@
                 <a-form-item v-if="canChangeLayout">
                   <a-tooltip title="切换视图">
                     <!-- <ReloadOutlined   /> -->
-
-                    <LayoutOutlined
-                      class="table-action__icon"
-                      v-if="tableLayout === 'card'"
-                      @click="tableLayoutClick"
-                    />
-                    <TableOutlined class="table-action__icon" v-else @click="tableLayoutClick" />
+                    <TableOutlined v-if="tableLayout === 'card'" class="table-action__icon" @click="tableLayoutClick" />
+                    <LayoutOutlined v-else class="table-action__icon" @click="tableLayoutClick" />
                   </a-tooltip>
                 </a-form-item>
 
@@ -130,7 +125,7 @@
           </template>
           <template v-if="tableLayout === 'table'">
             <a-table v-bind="props" :columns="customColumn" :size="tableSize">
-              <template #bodyCell="slotProps" v-if="slots.tableBodyCell">
+              <template v-if="slots.tableBodyCell" #bodyCell="slotProps">
                 <slot name="tableBodyCell" v-bind="slotProps"></slot>
               </template>
             </a-table>
@@ -146,6 +141,10 @@
                 <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="没有任何节点" />
               </a-col>
             </a-row>
+            <div class="card-pagination">
+              <a-pagination v-bind="props.pagination" size="small" @change="paginationChange" />
+            </div>
+
             <slot name="cardPageTool"></slot>
           </template>
           <template v-else>未知的表格类型</template>
@@ -164,6 +163,7 @@ import { CatchStorageType, CustomColumnType, CustomTableSlotsType, TableLayoutTy
 import { compareArrays } from './utils'
 import { tableSizeList } from './dict'
 import { customTableProps } from './props'
+import { StorageService } from './utils/StorageService'
 
 export default defineComponent({
   name: 'CustomTable',
@@ -174,13 +174,44 @@ export default defineComponent({
   inheritAttrs: false,
   props: customTableProps,
   slots: Object as CustomTableSlotsType,
-  emits: ['refresh'],
+  emits: ['refresh', 'change'],
   setup(props, { attrs, slots, emit }) {
+    const userStore = useUserStore()
+    const storageService: StorageService = new StorageService(props.tableName, {
+      provide: 'localStorage',
+      prefix: 'table:catch__' + userStore?.userInfo?.id,
+      // 存储前拦截器
+      beforeStorage(storageObject, defaultConfig) {
+        // 判断刷新是否为默认
+        const defaultAutoRefresh: number = props.defaultAutoRefresh ? 1 : 0
+        if (defaultAutoRefresh === storageObject?.refresh?.isAutoRefresh) {
+          storageObject.refresh = defaultConfig.refresh
+        }
+        // 判断表格大小是否为默认
+        if (storageObject?.tableSize === props?.size) {
+          storageObject.tableSize = defaultConfig?.tableSize
+        }
+        // layout
+        if (storageObject?.layout === props?.layout) {
+          storageObject.layout = defaultConfig?.layout
+        }
+        if (
+          storageObject?.column?.length === 0 ||
+          JSON.stringify(storageObject?.column?.filter((item) => item.checked)?.map((item) => item.key) || []) ===
+            JSON.stringify(props.columns.map((item) => item.dataIndex))
+        ) {
+          storageObject.column = defaultConfig.column
+        }
+        return storageObject
+      }
+    })
+
+    const { autoRefreshTime, isAutoRefresh } = storageService.getRefreshConfig()
     // 倒计时
     const getCountdown = () => {
-      return Date.now() + 1000 * (props.autoRefreshTime + 0)
+      return Date.now() + 1000 * (autoRefreshTime !== -1 ? autoRefreshTime : props.autoRefreshTime + 0)
     }
-    const countdownSwitch = ref(props.defaultAutoRefresh)
+    const countdownSwitch = ref(isAutoRefresh !== -1 ? isAutoRefresh : props.defaultAutoRefresh)
     const countdownNumber = ref(0)
     const countDownFinish = () => {
       if (props.activePage) {
@@ -195,6 +226,10 @@ export default defineComponent({
       } else {
         countdownNumber.value = 0
       }
+      storageService.setRefreshConfig({
+        isAutoRefresh: countdownSwitch.value ? 1 : 0,
+        autoRefreshTime: props.autoRefreshTime
+      })
     }
     onMounted(() => {
       if (countdownSwitch.value && !props.isHideAutoRefresh) {
@@ -202,26 +237,6 @@ export default defineComponent({
       }
     })
 
-    // const otherSlots = computed(() => {
-    //   return Object.keys(slots).filter((key) => key === 'tableBodyCell')
-    // })
-    // console.log(slots)
-
-    // const canChangeLayout = computed(()=>{
-    //   return
-    // })
-    const userStore = useUserStore()
-    const COLUMN = 'column'
-    const SIZE = 'size'
-    const LAYOUT = 'layout'
-    /** 是否缓存配置 */
-    const isCatchOPtions = () => {
-      return props.tableName && userStore?.userInfo?.id
-    }
-    /** 获取缓存key */
-    const getTableCatchKey = (type: string) => {
-      return `table:catch__${userStore.userInfo.id}__${props.tableName}__${type}`
-    }
     /** 获取缓存key */
     const refreshClick = () => {
       countdownNumber.value = getCountdown()
@@ -232,20 +247,15 @@ export default defineComponent({
     watch(
       () => tableSize.value,
       (val) => {
-        if (!isCatchOPtions()) return
-        // 判断是否需要存储
-        if (val !== 'middle') {
-          localStorage.setItem(getTableCatchKey(SIZE), JSON.stringify(val))
-        } else {
-          localStorage.removeItem(getTableCatchKey(SIZE))
-        }
+        if (!storageService.exitOpenStorage()) return
+        storageService.setTableSizeConfig(val)
       }
     )
     // 组件加载 从存储中读取
     onMounted(() => {
       // 判断是否需要存储
-      const size = localStorage.getItem(getTableCatchKey(SIZE))
-      tableSize.value = size ? JSON.parse(size) : props.size || 'middle'
+      const size = storageService.getTableSizeConfig()
+      tableSize.value = size ? size : props.size || 'middle'
     })
 
     // 视图模式
@@ -262,7 +272,7 @@ export default defineComponent({
       if (props.layout) {
         tableLayout.value = props.layout as TableLayoutType
       } else {
-        const layout = localStorage.getItem(getTableCatchKey(LAYOUT))
+        const layout = storageService.getLayoutConfig()
         tableLayout.value = (layout || 'table') as TableLayoutType
       }
     })
@@ -272,26 +282,26 @@ export default defineComponent({
     watch(
       () => tableLayout.value,
       (val) => {
-        if (!isCatchOPtions()) return
+        if (!storageService.exitOpenStorage()) return
         // 判断是否需要存储
-        localStorage.setItem(getTableCatchKey(LAYOUT), val + '')
+        storageService.setLayoutConfig(val)
       }
     )
-    //
-
     let customColumnList = ref<CustomColumnType[]>([])
     const customCheckColumnList = computed(() => {
-      return customColumnList.value.filter((item) => item.checked).map((item) => String(item.dataIndex))
+      return customColumnList.value
+        .filter((item: CustomColumnType) => item.checked)
+        .map((item: CustomColumnType) => String(item.dataIndex))
     })
     const customColumn = computed(() => {
-      if (!isCatchOPtions()) return props.columns
-      return customColumnList.value.filter((item) => item.checked)
+      if (!storageService.exitOpenStorage()) return props.columns
+      return customColumnList.value.filter((item: CustomColumnType) => item.checked)
     })
     const resetCustomColumn = () => {
-      customColumnList.value = props.columns.map((item) => ({ ...item, checked: true }))
+      customColumnList.value = props.columns.map((item: CustomColumnType) => ({ ...item, checked: true }))
     }
     const onCheckChange = (checkedValues: CheckboxValueType[]) => {
-      customColumnList.value = customColumnList.value.map((item) => ({
+      customColumnList.value = customColumnList.value.map((item: CustomColumnType) => ({
         ...item,
         checked: checkedValues.includes(String(item.dataIndex))
       }))
@@ -318,51 +328,37 @@ export default defineComponent({
     const onDrop = (dropResult: any) => {
       customColumnList.value = applyDrag(customColumnList.value, dropResult)
     }
-
     /** 设置默认列 */
     const setDefaultCustomColumnList = () => {
-      customColumnList.value = props.columns.map((item) => ({ ...item, checked: true }))
+      customColumnList.value = props.columns.map((item: CustomColumnType) => ({ ...item, checked: true }))
     }
-
     // 监听列变化,同步至缓存customColumnList中
     watch(
       () => props.columns,
       (val) => {
-        if (!isCatchOPtions()) return
-        const catchStorage = JSON.parse(localStorage.getItem(getTableCatchKey(COLUMN)) || '[]') as CatchStorageType[]
+        if (!storageService.exitOpenStorage()) return
+        const catchStorage = storageService.getColumnConfig() || []
         if (
           catchStorage.length == 0 ||
           (catchStorage.length > 0 && catchStorage.some((key) => typeof key === 'string')) ||
           !compareArrays(
-            val.map((item) => String(item.dataIndex)),
-            catchStorage.map((item) => item.key)
+            val.map((item: CustomColumnType) => String(item.dataIndex)),
+            catchStorage.filter((item) => item.key).map((item) => String(item.key))
           )
         ) {
-          // console.log(
-          //   catchStorage.length == 0,
-          //   catchStorage.length > 0 && catchStorage.some((key) => typeof key === 'string'),
-          //   !compareArrays(
-          //     val.map((item) => String(item.key)),
-          //     catchStorage.map((item) => item.key)
-          //   )
-          // )
-          //console.log('setDefaultCustomColumnList')
           return setDefaultCustomColumnList()
         } else {
           const tmpObj: { [key: string]: CustomColumnType } = {}
-          val.forEach((item) => {
+          val.forEach((item: CustomColumnType) => {
             tmpObj[String(item.dataIndex || '_d')] = item
           })
-          //onsole.log('catchStorage')
           customColumnList.value = catchStorage.map((item) => {
             const key = item.key
-            //console.log(item)
             return {
-              ...tmpObj[key],
+              ...tmpObj[String(key)],
               checked: item.checked
             }
           })
-          //onsole.log(customColumnList.value)
         }
       },
       {
@@ -373,27 +369,38 @@ export default defineComponent({
     watch(
       () => customColumnList.value,
       (val) => {
-        if (!isCatchOPtions()) return
+        if (!storageService.exitOpenStorage()) return
+
         if (JSON.stringify(val) !== JSON.stringify(props.columns)) {
-          localStorage.setItem(
-            getTableCatchKey(COLUMN),
-            JSON.stringify(
-              customColumnList.value.map((item) => {
-                return {
-                  key: item.dataIndex,
-                  checked: item.checked
-                } as CatchStorageType
-              })
-            )
+          storageService.setColumnConfig(
+            customColumnList.value.map((item) => {
+              return {
+                key: item.dataIndex,
+                checked: item.checked
+              } as CatchStorageType
+            })
           )
         } else {
-          localStorage.removeItem(getTableCatchKey(COLUMN))
+          storageService.setColumnConfig([])
         }
       },
       {
         immediate: true
       }
     )
+
+    const paginationChange = (page: number, size: number) => {
+      emit(
+        'change',
+        {
+          ...props.pagination,
+          current: page,
+          pageSize: size
+        },
+        {},
+        {}
+      )
+    }
     return {
       onDrop,
       countdownSwitch,
@@ -415,7 +422,8 @@ export default defineComponent({
       customColumn,
       customCheckColumnList,
       resetCustomColumn,
-      onCheckChange
+      onCheckChange,
+      paginationChange
     }
   }
 })
@@ -463,6 +471,10 @@ export default defineComponent({
 }
 .custom-size-list {
   display: block;
+}
+.card-pagination {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>
 <style scoped>

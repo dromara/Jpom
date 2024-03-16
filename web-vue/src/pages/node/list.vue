@@ -27,7 +27,7 @@
         is-show-tools
         default-auto-refresh
         :auto-refresh-time="30"
-        :activePage="activePage"
+        :active-page="activePage"
         table-name="nodeSearch"
         :columns="columns"
         :data-source="list"
@@ -295,7 +295,7 @@
             </a-space>
           </template>
         </template>
-        <template #cardBodyCell="{ item, index }">
+        <template #cardBodyCell="{ item }">
           <a-card :head-style="{ padding: '0 6px' }" :body-style="{ padding: '10px' }">
             <template #title>
               <a-row :gutter="[4, 0]">
