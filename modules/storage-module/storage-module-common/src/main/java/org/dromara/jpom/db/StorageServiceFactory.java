@@ -17,10 +17,7 @@ import cn.hutool.core.exceptions.CheckedUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Singleton;
 import cn.hutool.core.util.*;
-import cn.hutool.db.Db;
-import cn.hutool.db.Entity;
-import cn.hutool.db.Page;
-import cn.hutool.db.PageResult;
+import cn.hutool.db.*;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.sql.Wrapper;
 import cn.hutool.setting.Setting;
@@ -33,6 +30,7 @@ import org.springframework.util.Assert;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -177,7 +175,20 @@ public class StorageServiceFactory {
             total += newResult.size();
             // 插入信息数据
             Db db2 = Db.use(targetDsFactory.getDataSource(),DialectUtil.getDialectByMode(targetNode));
-            db2.insert(newResult);
+
+            Connection connection = db2.getConnection();
+            try {
+                SqlConnRunner runner = db2.getRunner();
+                for (Entity entity : newResult) {
+                    // hutool的批量insert方法有坑，可能导致部分参数被丢弃
+                    runner.insert(connection,entity);
+                }
+            }catch (Exception e){
+                throw new RuntimeException(e);
+            }finally {
+                db2.closeConnection(connection);
+            }
+
             // 删除数据
             Entity deleteWhere = Entity.create(tableName.value());
             deleteWhere.set("id", newResult.stream().map(entity -> entity.getStr("id")).collect(Collectors.toList()));
