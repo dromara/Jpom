@@ -23,15 +23,14 @@
 package org.dromara.jpom.storage;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.BooleanUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.db.sql.Wrapper;
 import org.dromara.jpom.db.*;
 import org.dromara.jpom.dialect.DialectUtil;
 import org.springframework.util.Assert;
 
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +40,26 @@ import java.util.stream.Collectors;
  * @since 2024/3/10
  */
 public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
+
+    /**
+     * 记录当前所有Model中含有的bool字段的属性名，表名和属性名都会被小写处理
+     */
+    private final Map<String, Set<String>> tableName2ModelBoolFieldNameSetMap;
+
+    public PostgresqlTableBuilderImpl() {
+        Set<Class<?>> modelClassSet = ClassUtil.scanPackageByAnnotation("org.dromara.jpom", TableName.class);
+        this.tableName2ModelBoolFieldNameSetMap = new HashMap<>();
+        modelClassSet.forEach(modelClass->{
+            TableName annotation = modelClass.getAnnotation(TableName.class);
+            // 统一处理成小写，model也应该不会出现转为小写后重名的field
+            String tableName = annotation.value().toLowerCase();
+            Field[] boolFieldArr = ReflectUtil.getFields(modelClass, field -> Boolean.class.equals(field.getType()) || boolean.class.equals(field.getType()));
+            Set<String> nameSet = Arrays.stream(boolFieldArr)
+                .map(field -> field.getName().toLowerCase())
+                .collect(Collectors.toSet());
+            tableName2ModelBoolFieldNameSetMap.put(tableName,nameSet);
+        });
+    }
 
     @Override
     public DbExtConfig.Mode mode() {
@@ -109,7 +128,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
                 case "ADD":
                     stringBuilder.append("CALL add_column_if_not_exists('").append(tableName).append("','")
                         .append(columnName).append("','");
-                    stringBuilder.append(generateAddColumnSql(viewAlterData,true));
+                    stringBuilder.append(generateColumnSql(viewAlterData.getTableName(),viewAlterData,true));
                     stringBuilder.append("');");
                     /**
                      *  添加列时，因为不能同时指定注释内容，单独加一个语句设置注释
@@ -154,7 +173,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
         stringBuilder.append("CREATE TABLE IF NOT EXISTS ").append(tableName).append(StrUtil.LF);
         stringBuilder.append("(").append(StrUtil.LF);
         for (TableViewData tableViewData : row) {
-            stringBuilder.append(StrUtil.TAB).append(this.generateColumnSql(tableViewData)).append(StrUtil.COMMA).append(StrUtil.LF);
+            stringBuilder.append(StrUtil.TAB).append(this.generateColumnSql(tableName,tableViewData)).append(StrUtil.COMMA).append(StrUtil.LF);
         }
         // 主键
         List<String> primaryKeys = row.stream()
@@ -185,15 +204,27 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
 
     @Override
     public String generateColumnSql(TableViewRowData tableViewRowData) {
-        return generateAddColumnSql(tableViewRowData,false);
+        return StrUtil.EMPTY;
     }
 
+    @Override
+    public String generateColumnSql(String tableName, TableViewRowData tableViewRowData) {
+        return generateColumnSql(tableName,tableViewRowData,false);
+    }
 
-    private String generateAddColumnSql(TableViewRowData tableViewRowData,boolean encode) {
+    /**
+     * 生成 alter add 或 create table 时的列定义
+     * @param tableName
+     * @param tableViewRowData
+     * @param encode
+     * @return
+     */
+    private String generateColumnSql(String tableName, TableViewRowData tableViewRowData, boolean encode) {
 
         StringBuilder strBuilder = new StringBuilder();
         Wrapper fieldWrapper = DialectUtil.getPostgresqlDialect().getWrapper();
-        String type = getColumnTypeStr(tableViewRowData.getType(),tableViewRowData.getLen());
+        String type = getColumnTypeStr(tableName,tableViewRowData.getName(),
+            tableViewRowData.getType(),tableViewRowData.getLen());
         strBuilder.append(StrUtil.SPACE).append(fieldWrapper.wrap(tableViewRowData.getName()))
             .append(StrUtil.SPACE).append(type);
 
@@ -230,7 +261,8 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
         String name = fieldWrapper.wrap(viewAlterData.getName());
 
         // 先改类型
-        String type = getColumnTypeStr(viewAlterData.getType(),viewAlterData.getLen());
+        String type = getColumnTypeStr(viewAlterData.getTableName(),viewAlterData.getName()
+            ,viewAlterData.getType(),viewAlterData.getLen());
         strBuilder.append("ALTER TABLE ").append(tableName)
             .append(" ALTER COLUMN ").append(name)
             .append(" TYPE ").append(type).append(";");
@@ -281,7 +313,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
     }
 
 
-    private String getColumnTypeStr(String type,Integer dataLen) {
+    private String getColumnTypeStr(String tableName,String columnName,String type,Integer dataLen) {
         Assert.hasText(type, "未正确配置数据类型");
         type = type.toUpperCase();
         switch (type) {
@@ -293,10 +325,12 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
                 return "TEXT";
             case "INTEGER":
                 return "INTEGER";
-            case "BOOLEAN":
-                return "BOOLEAN";
-            case "TINYINT":
-                return "SMALLINT";
+            case "TINYINT": {
+                columnName = columnName.toLowerCase();
+                tableName = tableName.toLowerCase();
+                Set<String> nameSet = tableName2ModelBoolFieldNameSetMap.get(tableName);
+                return nameSet != null && nameSet.contains(columnName) ? "BOOLEAN" : "SMALLINT";
+            }
             case "FLOAT":
                 return "REAL";
             case "DOUBLE":
