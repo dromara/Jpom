@@ -56,7 +56,7 @@ public class DialectUtil {
                     if( names.contains(field) ) {
                         return super.wrap(field);
                     }
-                    return field; // 不属于columns的直接返回
+                    return field; // 不属于names的直接返回
                 }
             };
 
