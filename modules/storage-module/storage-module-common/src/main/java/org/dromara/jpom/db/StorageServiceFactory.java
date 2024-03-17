@@ -132,10 +132,9 @@ public class StorageServiceFactory {
 
     private static int migrateH2ToNowItem(Class<?> aClass, DSFactory h2DsFactory, DSFactory targetDsFactory,DbExtConfig.Mode targetNode) throws SQLException {
         TableName tableName = aClass.getAnnotation(TableName.class);
-        Wrapper h2FieldWrapper = DialectUtil.getH2Dialect().getWrapper();
+        Wrapper targetModeWrapper = DialectUtil.getDialectByMode(targetNode).getWrapper();
         Set<String> boolFieldSet = Arrays.stream(ReflectUtil.getFields(aClass, field -> Boolean.class.equals(field.getType()) || boolean.class.equals(field.getType())))
             .map(Field::getName)
-            .flatMap(name-> Stream.of(name,h2FieldWrapper.wrap(name)))
             .collect(Collectors.toSet());
 
         log.info("开始迁移 {} {}", tableName.name(), tableName.value());
@@ -154,7 +153,7 @@ public class StorageServiceFactory {
                 .map(entity -> entity.toBeanIgnoreCase(aClass))
                 .map(o -> {
                     // 兼容大小写
-                    Entity entity = Entity.create(tableName.value());
+                    Entity entity = Entity.create(targetModeWrapper.wrap(tableName.value()));
                     return entity.parseBean(o, false, true);
                 }).peek(entity -> {
                     if( DbExtConfig.Mode.POSTGRESQL.equals(targetNode) ) {
