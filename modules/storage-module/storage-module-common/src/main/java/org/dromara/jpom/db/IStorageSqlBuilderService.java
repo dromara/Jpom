@@ -54,6 +54,17 @@ public interface IStorageSqlBuilderService extends IMode {
     String generateColumnSql(TableViewRowData tableViewRowData);
 
     /**
+     * 根据表名和字段信息生成 sql
+     *
+     * @param tableName 表名
+     * @param tableViewRowData 字段信息
+     * @return sql
+     */
+    default String generateColumnSql(String tableName,TableViewRowData tableViewRowData) {
+        return generateColumnSql(tableViewRowData);
+    }
+
+    /**
      * sql 分隔执行标记
      *
      * @return 分隔标记

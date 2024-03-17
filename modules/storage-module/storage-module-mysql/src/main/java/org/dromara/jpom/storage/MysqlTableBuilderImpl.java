@@ -160,7 +160,6 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
             case "INTEGER":
                 stringBuilder.append("int").append(StrUtil.SPACE);
                 break;
-            case "BOOLEAN":
             case "TINYINT":
                 stringBuilder.append("TINYINT").append(StrUtil.SPACE);
                 break;
