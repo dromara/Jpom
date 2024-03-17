@@ -6,7 +6,7 @@ ADD,BUILDHISTORYLOG,buildEnvCache,TEXT,,,构建环境变量
 ADD,OUT_GIVING,webhook,String,255,,webhook
 DROP,NODE_INFO,unLockType
 ADD,NODE_INFO,machineId,String,50,,机器id
-ADD,MACHINE_NODE_INFO,templateNode,Boolean,,,模板节点 ，1 模板节点 0 非模板节点
+ADD,MACHINE_NODE_INFO,templateNode,TINYINT,,,模板节点 ，1 模板节点 0 非模板节点
 ADD,REPOSITORY,timeout,Integer,,,仓库超时连接
 ADD,SSH_INFO,group,String,50,,分组
 ADD,SSH_INFO,machineSshId,String,50,,机器sshid
@@ -28,4 +28,4 @@ DROP,DOCKER_SWARM_INFO,status,
 DROP,DOCKER_SWARM_INFO,failureMsg,
 DROP,DOCKER_SWARM_INFO,dockerId,
 DROP,DOCKER_SWARM_INFO,dockerId,
-ADD,MACHINE_DOCKER_INFO,swarmControlAvailable,Boolean,,,集群管理员
+ADD,MACHINE_DOCKER_INFO,swarmControlAvailable,TINYINT,,,集群管理员
