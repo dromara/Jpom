@@ -297,6 +297,21 @@ export function concurrentExecution(list, limit, asyncHandle) {
   return Promise.all(asyncList)
 }
 
+/**
+ * 并发执行任务
+ * @param list 任务列表
+ * @param limit 并发控制
+ * @param asyncHandle 任务处理函数
+ */
+export async function concurrentJobs(list, limit, asyncHandle) {
+  const arr = [...list]
+  const result = []
+  for (let i = 0; i < arr.length; i += limit) {
+    result.push(...(await Promise.allSettled(arr.slice(i, i + limit).map(asyncHandle))))
+  }
+  return result
+}
+
 export function readJsonStrField(json, key) {
   try {
     const data = JSON.parse(json)[key] || ''

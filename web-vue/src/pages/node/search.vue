@@ -626,7 +626,7 @@ import {
   CHANGE_PAGE,
   COMPUTED_PAGINATION,
   PAGE_DEFAULT_LIST_QUERY,
-  concurrentExecution,
+  concurrentJobs,
   itemGroupBy,
   parseTime
 } from '@/utils/const'
@@ -890,7 +890,7 @@ export default {
       if (nodeProjects.length <= 0) {
         return
       }
-      concurrentExecution(
+      concurrentJobs(
         nodeProjects.map((item, index) => {
           return index
         }),
