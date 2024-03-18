@@ -98,7 +98,7 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
                 TableName tableName1 = parents.getAnnotation(TableName.class);
                 Assert.notNull(tableName1, "父级表信息配置错误," + aClass);
             }
-            String sql = "select `workspaceId`,count(1) as allCount from " + tableName.value() + " group by `workspaceId`";
+            String sql = "select workspaceId,count(1) as allCount from " + tableName.value() + " group by workspaceId";
             List<Entity> query = workspaceService.query(sql);
             for (Entity entity : query) {
                 String workspaceId = (String) entity.get("workspaceId");
@@ -130,14 +130,14 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
     public void clearErrorWorkspace(String tableName) {
         Assert.state(errorWorkspaceTable.containsKey(tableName), "当前表没有错误数据");
         Set<String> workspaceIds = this.allowWorkspaceIds();
-        String sql = "select `workspaceId`,count(1) as allCount from " + tableName + " group by `workspaceId`";
+        String sql = "select workspaceId,count(1) as allCount from " + tableName + " group by workspaceId";
         List<Entity> query = workspaceService.query(sql);
         for (Entity entity : query) {
             String workspaceId = (String) entity.get("workspaceId");
             if (workspaceIds.contains(workspaceId)) {
                 continue;
             }
-            String deleteSql = "delete from " + tableName + " where `workspaceId`=?";
+            String deleteSql = "delete from " + tableName + " where workspaceId=?";
             int execute = workspaceService.execute(deleteSql, workspaceId);
             log.info("删除表 {} 中 {} 条工作空间id为：{} 的数据", tableName, execute, workspaceId);
         }

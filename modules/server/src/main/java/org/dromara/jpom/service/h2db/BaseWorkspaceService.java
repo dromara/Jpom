@@ -22,6 +22,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.exception.PermissionException;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.PageResultDto;
@@ -357,7 +358,8 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
      */
     public List<String> listGroup(HttpServletRequest request) {
         String workspaceId = getCheckUserWorkspace(request);
-        String sql = "select `GROUP` from " + getTableName() + " where workspaceId=? group by `GROUP`";
-        return super.listGroupByName(sql, "GROUP", workspaceId);
+        String group = DialectUtil.wrapField("group");
+        String sql = String.format("select %s from %s where workspaceId=? group by %s",group,getTableName(),group);
+        return super.listGroupByName(sql, group, workspaceId);
     }
 }

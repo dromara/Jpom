@@ -17,24 +17,27 @@ import cn.hutool.core.exceptions.CheckedUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Singleton;
 import cn.hutool.core.util.*;
-import cn.hutool.db.Db;
-import cn.hutool.db.Entity;
-import cn.hutool.db.Page;
-import cn.hutool.db.PageResult;
+import cn.hutool.db.*;
 import cn.hutool.db.ds.DSFactory;
+import cn.hutool.db.sql.Wrapper;
 import cn.hutool.setting.Setting;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.system.JpomRuntimeException;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 数据存储服务
@@ -67,8 +70,9 @@ public class StorageServiceFactory {
     /**
      * 将数据迁移到当前环境
      */
-    public static void migrateH2ToNow(DbExtConfig dbExtConfig, String h2Url, String h2User, String h2Pass) {
+    public static void migrateH2ToNow(DbExtConfig dbExtConfig, String h2Url, String h2User, String h2Pass,DbExtConfig.Mode targetNode) {
         log.info("开始迁移 h2 数据到 {}", dbExtConfig.getMode());
+        Assert.notNull(mode,"未指定目标数据库信息");
         try {
             IStorageService h2StorageService = doCreateStorageService(DbExtConfig.Mode.H2);
             boolean hasDbData = h2StorageService.hasDbData();
@@ -110,7 +114,7 @@ public class StorageServiceFactory {
             log.info("准备迁移数据");
             int total = 0;
             for (Class<?> aClass : classes) {
-                total += migrateH2ToNowItem(aClass, h2DsFactory, nowDsFactory);
+                total += migrateH2ToNowItem(aClass, h2DsFactory, nowDsFactory,targetNode);
             }
             long endTime = SystemClock.now();
             log.info("迁移完成,累计迁移 {} 条数据,耗时：{}", total, DateUtil.formatBetween(endTime - time));
@@ -124,14 +128,19 @@ public class StorageServiceFactory {
         }
     }
 
-    private static int migrateH2ToNowItem(Class<?> aClass, DSFactory h2DsFactory, DSFactory mysqlDsFactory) throws SQLException {
+    private static int migrateH2ToNowItem(Class<?> aClass, DSFactory h2DsFactory, DSFactory targetDsFactory,DbExtConfig.Mode targetNode) throws SQLException {
         TableName tableName = aClass.getAnnotation(TableName.class);
+        Wrapper targetModeWrapper = DialectUtil.getDialectByMode(targetNode).getWrapper();
+        Set<String> boolFieldSet = Arrays.stream(ReflectUtil.getFields(aClass, field -> Boolean.class.equals(field.getType()) || boolean.class.equals(field.getType())))
+            .map(Field::getName)
+            .collect(Collectors.toSet());
+
         log.info("开始迁移 {} {}", tableName.name(), tableName.value());
         int total = 0;
         while (true) {
             Entity where = Entity.create(tableName.value());
             PageResult<Entity> pageResult;
-            Db db = Db.use(h2DsFactory.getDataSource());
+            Db db = Db.use(h2DsFactory.getDataSource(),DialectUtil.getH2Dialect());
             Page page = new Page(1, 200);
             pageResult = db.page(where, page);
             if (pageResult.isEmpty()) {
@@ -139,12 +148,22 @@ public class StorageServiceFactory {
             }
             // 过滤需要忽略迁移的数据
             List<Entity> newResult = pageResult.stream()
-                    .map(entity -> entity.toBeanIgnoreCase(aClass))
-                    .map(o -> {
-                        // 兼容大小写
-                        Entity entity = Entity.create(tableName.value());
-                        return entity.parseBean(o, false, true);
-                    }).collect(Collectors.toList());
+                .map(entity -> entity.toBeanIgnoreCase(aClass))
+                .map(o -> {
+                    // 兼容大小写
+                    Entity entity = Entity.create(targetModeWrapper.wrap(tableName.value()));
+                    return entity.parseBean(o, false, true);
+                }).peek(entity -> {
+                    if( DbExtConfig.Mode.POSTGRESQL.equals(targetNode) ) {
+                        // tinyint类型查出来是数字，需转为bool
+                        boolFieldSet.forEach(fieldName->{
+                            Object field = entity.get(fieldName);
+                            if( field instanceof Number ) {
+                                entity.set(fieldName,BooleanUtil.toBoolean(field.toString()));
+                            }
+                        });
+                    }
+                }).collect(Collectors.toList());
             if (newResult.isEmpty()) {
                 if (pageResult.isLast()) {
                     // 最后一页
@@ -155,8 +174,21 @@ public class StorageServiceFactory {
             }
             total += newResult.size();
             // 插入信息数据
-            Db db2 = Db.use(mysqlDsFactory.getDataSource());
-            db2.insert(newResult);
+            Db db2 = Db.use(targetDsFactory.getDataSource(),DialectUtil.getDialectByMode(targetNode));
+
+            Connection connection = db2.getConnection();
+            try {
+                SqlConnRunner runner = db2.getRunner();
+                for (Entity entity : newResult) {
+                    // hutool的批量insert方法有坑，可能导致部分参数被丢弃
+                    runner.insert(connection,entity);
+                }
+            }catch (Exception e){
+                throw new RuntimeException(e);
+            }finally {
+                db2.closeConnection(connection);
+            }
+
             // 删除数据
             Entity deleteWhere = Entity.create(tableName.value());
             deleteWhere.set("id", newResult.stream().map(entity -> entity.getStr("id")).collect(Collectors.toList()));
