@@ -124,7 +124,7 @@
             </template>
           </template>
           <template v-if="tableLayout === 'table'">
-            <a-table v-bind="props" :columns="customColumn" :size="tableSize">
+            <a-table v-bind="props" :pagination="paginationByLayout" :columns="customColumn" :size="tableSize">
               <template v-if="slots.tableBodyCell" #bodyCell="slotProps">
                 <slot name="tableBodyCell" v-bind="slotProps"></slot>
               </template>
@@ -138,14 +138,14 @@
                 </a-col>
               </template>
               <a-col v-else :span="24">
-                <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" description="没有任何节点" />
+                <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="props.emptyDescription" />
               </a-col>
             </a-row>
             <div class="card-pagination">
-              <a-pagination v-bind="props.pagination" size="small" @change="paginationChange" />
+              <a-pagination v-bind="paginationByLayout" size="small" @change="paginationChange" />
             </div>
 
-            <slot name="cardPageTool"></slot>
+            <!-- <slot name="cardPageTool"></slot> -->
           </template>
           <template v-else>未知的表格类型</template>
         </a-card>
@@ -174,7 +174,7 @@ export default defineComponent({
   inheritAttrs: false,
   props: customTableProps,
   slots: Object as CustomTableSlotsType,
-  emits: ['refresh', 'change'],
+  emits: ['refresh', 'change', 'changeTableLayout'],
   setup(props, { attrs, slots, emit }) {
     const userStore = useUserStore()
     const storageService: StorageService = new StorageService(props.tableName, {
@@ -266,6 +266,15 @@ export default defineComponent({
       }
       return Object.keys(slots).filter((key) => key === 'cardBodyCell').length > 0
     })
+    const sizeOptions = computed(() => {
+      if (tableLayout.value === 'card') {
+        return ['8', '12', '16', '20', '24']
+      }
+      return ['5', '10', '15', '20', '25', '30', '35', '40', '50']
+    })
+    const paginationByLayout = computed(() => {
+      return { ...props.pagination, pageSizeOptions: sizeOptions.value }
+    })
 
     onMounted(() => {
       // 判断是否需要存储
@@ -278,6 +287,7 @@ export default defineComponent({
     })
     const tableLayoutClick = () => {
       tableLayout.value = tableLayout.value === 'card' ? 'table' : 'card'
+      emit('changeTableLayout', tableLayout.value)
     }
     watch(
       () => tableLayout.value,
@@ -423,7 +433,8 @@ export default defineComponent({
       customCheckColumnList,
       resetCustomColumn,
       onCheckChange,
-      paginationChange
+      paginationChange,
+      paginationByLayout
     }
   }
 })

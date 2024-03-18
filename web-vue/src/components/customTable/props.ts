@@ -48,6 +48,11 @@ export const customTableProps = initDefaultProps(
     activePage: {
       type: Boolean,
       default: false
+    },
+    // 空数据时现在内容
+    emptyDescription: {
+      type: String,
+      deafult: '暂无任何数据'
     }
   },
   {
@@ -56,6 +61,7 @@ export const customTableProps = initDefaultProps(
     isShowTools: false,
     isHideRefresh: false,
     autoRefreshTime: 10,
-    activePage: false
+    activePage: false,
+    emptyDescription: '暂无任何数据'
   }
 )

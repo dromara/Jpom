@@ -19,6 +19,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="buildList"
+      empty-description="没有任何构建"
       :active-page="activePage"
       :layout="layout"
       size="middle"
@@ -41,6 +42,15 @@
         }
       "
       @refresh="loadData"
+      @change-table-layout="
+        (layoutType) => {
+          tableSelections = []
+          listQuery = CHANGE_PAGE(listQuery, {
+            pagination: { limit: layoutType === 'card' ? 8 : 10 }
+          })
+          loadData()
+        }
+      "
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -119,24 +129,21 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-          <!-- <template v-if="layoutType === 'table'"> -->
-          <template v-if="!tableSelections || tableSelections.length <= 0">
-            <a-button type="primary" :disabled="true"> 操作 <DownOutlined /> </a-button>
+          <template v-if="tableSelections && tableSelections.length">
+            <a-dropdown>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item key="1" @click="batchBuild"> 批量构建 </a-menu-item>
+                  <a-menu-item key="2" @click="batchCancel"> 批量取消 </a-menu-item>
+                  <a-menu-item key="3" @click="handleBatchDelete"> 批量删除 </a-menu-item>
+                </a-menu>
+              </template>
+              <a-button type="primary"> 批量操作<DownOutlined /> </a-button>
+            </a-dropdown>
           </template>
-          <a-dropdown v-else>
-            <template #overlay>
-              <a-menu>
-                <a-menu-item key="1" @click="batchBuild"> 批量构建 </a-menu-item>
-                <a-menu-item key="2" @click="batchCancel"> 批量取消 </a-menu-item>
-                <a-menu-item key="3" @click="handleBatchDelete"> 批量删除 </a-menu-item>
-              </a-menu>
-            </template>
-            <a-button type="primary"> 批量操作<DownOutlined /> </a-button>
-          </a-dropdown>
-          <!-- </template> -->
-          <!-- <a-tooltip v-else title="表格视图才能使用批量操作功能">
-            <a-button :disabled="true" type="primary"> 操作 <DownOutlined /> </a-button>
-          </a-tooltip> -->
+          <a-tooltip v-else title="表格视图才能使用批量操作功能">
+            <a-button :disabled="true" type="primary"> 批量操作 <DownOutlined /> </a-button>
+          </a-tooltip>
 
           <!-- <a-button v-if="!layout" type="primary" @click="changeLayout">
             <template #icon>
@@ -492,7 +499,7 @@
           </a-space>
         </template>
       </template>
-      <template #cardPageTool>
+      <!-- <template #cardPageTool>
         <a-row type="flex" justify="center">
           <a-divider v-if="listQuery.total / listQuery.limit > 1" dashed />
           <a-col>
@@ -519,7 +526,7 @@
             />
           </a-col>
         </a-row>
-      </template>
+      </template> -->
     </CustomTable>
     <!-- </template> -->
     <!-- </a-card> -->
@@ -704,8 +711,9 @@ import {
   CHANGE_PAGE,
   COMPUTED_PAGINATION,
   PAGE_DEFAULT_LIST_QUERY,
-  parseTime,
-  PAGE_DEFAULT_SHOW_TOTAL
+  parseTime
+  // PAGE_DEFAULT_SHOW_TOTAL,
+  // getCachePageLimit
 } from '@/utils/const'
 
 export default {
@@ -897,7 +905,8 @@ export default {
   },
   methods: {
     CHANGE_PAGE,
-    PAGE_DEFAULT_SHOW_TOTAL,
+    // PAGE_DEFAULT_SHOW_TOTAL,
+    // getCachePageLimit,
     // 分组数据
     loadGroupList() {
       getBuildGroupAll().then((res) => {

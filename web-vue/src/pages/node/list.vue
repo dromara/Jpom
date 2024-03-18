@@ -29,6 +29,7 @@
         :auto-refresh-time="30"
         :active-page="activePage"
         table-name="nodeSearch"
+        empty-description="没有任何节点"
         :columns="columns"
         :data-source="list"
         bordered
@@ -49,6 +50,15 @@
           }
         "
         @refresh="loadData"
+        @change-table-layout="
+          (layoutType) => {
+            tableSelections = []
+            listQuery = CHANGE_PAGE(listQuery, {
+              pagination: { limit: layoutType === 'card' ? 8 : 10 }
+            })
+            loadData()
+          }
+        "
       >
         <template #title>
           <a-space>
@@ -430,7 +440,7 @@
             </a-row>
           </a-card>
         </template>
-        <template #cardPageTool>
+        <!-- <template #cardPageTool>
           <a-row type="flex" justify="center">
             <a-divider v-if="listQuery.total / listQuery.limit > 1" dashed />
             <a-col>
@@ -457,7 +467,7 @@
               />
             </a-col>
           </a-row>
-        </template>
+        </template> -->
       </CustomTable>
       <!-- <template v-else-if="layoutType === 'card'">
           <a-row :gutter="[16, 16]">
@@ -654,9 +664,9 @@ import {
   formatDuration,
   renderSize,
   formatPercent2Number,
-  parseTime,
-  PAGE_DEFAULT_SHOW_TOTAL,
-  getCachePageLimit
+  parseTime
+  // PAGE_DEFAULT_SHOW_TOTAL,
+  // getCachePageLimit
 } from '@/utils/const'
 import { getWorkSpaceListAll } from '@/api/workspace'
 import CustomSelect from '@/components/customSelect'
@@ -848,14 +858,14 @@ export default {
       this.listQuery = { ...this.listQuery, '%name%': searchNodeName }
     }
 
-    this.changeLayout()
+    this.loadData()
     this.loadGroupList()
   },
 
   methods: {
     formatDuration,
     renderSize,
-    PAGE_DEFAULT_SHOW_TOTAL,
+    // PAGE_DEFAULT_SHOW_TOTAL,
     parseTime,
     CHANGE_PAGE,
     // 获取所有的分组
@@ -1140,22 +1150,22 @@ export default {
         }
       })
     },
-    // 切换视图
-    changeLayout() {
-      if (!this.layoutType) {
-        const layoutType = localStorage.getItem('tableLayout')
-        // 默认表格
-        this.layoutType = layoutType === 'card' ? 'card' : 'table'
-      } else {
-        this.layoutType = this.layoutType === 'card' ? 'table' : 'card'
-        localStorage.setItem('tableLayout', this.layoutType)
-      }
-      this.listQuery = {
-        ...this.listQuery,
-        limit: this.layoutType === 'card' ? 8 : getCachePageLimit()
-      }
-      this.loadData()
-    },
+    // // 切换视图
+    // changeLayout() {
+    //   if (!this.layoutType) {
+    //     const layoutType = localStorage.getItem('tableLayout')
+    //     // 默认表格
+    //     this.layoutType = layoutType === 'card' ? 'card' : 'table'
+    //   } else {
+    //     this.layoutType = this.layoutType === 'card' ? 'table' : 'card'
+    //     localStorage.setItem('tableLayout', this.layoutType)
+    //   }
+    //   this.listQuery = {
+    //     ...this.listQuery,
+    //     limit: this.layoutType === 'card' ? 8 : getCachePageLimit()
+    //   }
+    //   this.loadData()
+    // },
     onFinish() {
       if (this.drawerVisible) {
         // 打开节点 不刷新
