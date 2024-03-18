@@ -38,6 +38,7 @@ import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.configuration.AssetsConfig;
 import org.dromara.jpom.cron.CronUtils;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.func.assets.AssetsExecutorPoolService;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.system.service.ClusterInfoService;
@@ -142,7 +143,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
             where.set("host", value.getHost());
             where.set("port", value.getPort());
             // 关键词，如果不加 ` 会查询不出结果
-            where.set("`user`", value.getUser());
+            where.set(DialectUtil.wrapField("user"), value.getUser());
             where.set("connectType", value.getConnectType());
             int update = sshService.update(entity, where);
             Assert.state(update > 0, "更新 SSH 表机器id 失败：" + value.getName());

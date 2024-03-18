@@ -28,6 +28,7 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.db.BaseDbCommonService;
 import org.dromara.jpom.db.DbExtConfig;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.model.BaseDbModel;
 import org.dromara.jpom.model.BaseUserModifyDbModel;
 import org.dromara.jpom.model.PageResultDto;
@@ -88,7 +89,8 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return list
      */
     public List<String> listGroup() {
-        String sql = "select `GROUP` from " + getTableName() + " group by `GROUP`";
+        String group = DialectUtil.wrapField("group");
+        String sql = String.format("select %s from %s group by %s",group,getTableName(),group);
         return this.listGroupByName(sql, "group");
     }
 
@@ -99,7 +101,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return list
      */
     public List<String> listGroupName() {
-        String sql = "select `groupName` from " + this.getTableName() + " group by `groupName`";
+        String sql = "select groupName from " + this.getTableName() + " group by groupName";
         return this.listGroupByName(sql, "groupName");
     }
 
@@ -133,7 +135,8 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      */
     public void repairGroupFiled() {
         Assert.state(this.canGroup, "当前数据表不支持分组");
-        String sql = "update " + getTableName() + " set `GROUP`=? where `GROUP` is null or `GROUP`=''";
+        String group = DialectUtil.wrapField("group");
+        String sql = String.format("update %s set %s =? where %s is null or %s = ''",getTableName(),group,group,group);
         super.execute(sql, Const.DEFAULT_GROUP_NAME);
     }
 
@@ -221,7 +224,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 
     private void removeUpdate(Entity entity) {
         for (String s : new String[]{ID_STR, "createTimeMillis", "createUser"}) {
-            entity.remove(StrUtil.format("`{}`", s));
+            entity.remove(DialectUtil.wrapField(s));
             entity.remove(s);
         }
     }
@@ -591,11 +594,11 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
             }
             key = StrUtil.removeAll(key, "%");
             if (StrUtil.startWith(stringStringEntry.getKey(), "%") && StrUtil.endWith(stringStringEntry.getKey(), "%")) {
-                where.set(StrUtil.format("`{}`", key), StrUtil.format(" like '%{}%'", value));
+                where.set(DialectUtil.wrapField(key), StrUtil.format(" like '%{}%'", value));
             } else if (StrUtil.endWith(stringStringEntry.getKey(), "%")) {
-                where.set(StrUtil.format("`{}`", key), StrUtil.format(" like '{}%'", value));
+                where.set(DialectUtil.wrapField(key), StrUtil.format(" like '{}%'", value));
             } else if (StrUtil.startWith(stringStringEntry.getKey(), "%")) {
-                where.set(StrUtil.format("`{}`", key), StrUtil.format(" like '%{}'", value));
+                where.set(DialectUtil.wrapField(key), StrUtil.format(" like '%{}'", value));
             } else if (StrUtil.containsIgnoreCase(key, "time") && StrUtil.contains(value, "~")) {
                 // 时间筛选
                 String[] val = StrUtil.splitToArray(value, "~");
@@ -632,15 +635,15 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
                 ignoreField.add(timeKey);
             } else if (StrUtil.endWith(key, ":in")) {
                 String inKey = StrUtil.removeSuffix(key, ":in");
-                where.set(StrUtil.format("`{}`", inKey), StrUtil.split(value, StrUtil.COMMA));
+                where.set(DialectUtil.wrapField(inKey), StrUtil.split(value, StrUtil.COMMA));
             } else {
-                where.set(StrUtil.format("`{}`", key), value);
+                where.set(DialectUtil.wrapField(key), value);
             }
         }
         // 排序
         if (StrUtil.isNotEmpty(orderField)) {
             orderField = StrUtil.removeAll(orderField, "%");
-            pageReq.addOrder(new Order(StrUtil.format("`{}`", orderField), StrUtil.equalsIgnoreCase(order, "ascend") ? Direction.ASC : Direction.DESC));
+            pageReq.addOrder(new Order(DialectUtil.wrapField(orderField), StrUtil.equalsIgnoreCase(order, "ascend") ? Direction.ASC : Direction.DESC));
         }
         return this.listPage(where, pageReq, fill);
     }
