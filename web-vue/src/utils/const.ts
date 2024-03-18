@@ -93,11 +93,20 @@ export function COMPUTED_PAGINATION(queryParam: any, pageSizeOptions = PAGE_DEFA
  */
 export function CHANGE_PAGE(listQuery, { pagination, sorter }) {
   if (pagination && Object.keys(pagination).length) {
-    listQuery = { ...listQuery, page: pagination.current, limit: pagination.pageSize }
+    let limit = pagination.pageSize || pagination.limit || listQuery.limit
+    if (limit === -1) {
+      limit = getCachePageLimit()
+    }
+    listQuery = {
+      ...listQuery,
+      page: pagination.current || listQuery.page,
+      limit: limit
+    }
+
     //
-    localStorage.setItem(cachePageLimitKeyName, pagination.pageSize)
+    localStorage.setItem(cachePageLimitKeyName, limit)
     //
-    PAGE_DEFAULT_LIST_QUERY.limit = pagination.pageSize
+    PAGE_DEFAULT_LIST_QUERY.limit = limit
   }
   if (sorter && Object.keys(sorter).length) {
     listQuery = { ...listQuery, order: sorter.order, order_field: sorter.field }

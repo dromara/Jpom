@@ -27,6 +27,7 @@ export type CustomTableSlotsType = CustomSlotsType<{
   tableBodyCell?: any
   expandedRowRender?: any
   expandColumnTitle?: any
+  emptyDescription: string
   bodyCell?: (props: { text: any; value: any; record: Record<string, any>; index: number; column: ColumnType }) => void
   headerCell?: (props: { title: any; column: ColumnType }) => void
   customFilterIcon?: any

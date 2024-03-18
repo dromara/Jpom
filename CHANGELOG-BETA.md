@@ -11,6 +11,8 @@
 5. 【server】修复 docker 控制台网络选项卡页面空白（感谢@破冰）
 6. 【server】修复 节点历史监控统计图表时间查询不生效（感谢@九問）
 7. 【server】优化 SSH 脚本触发器支持传入参数当环境变量（感谢@小朱）
+8. 【server】修复 h2迁移其它数据库时部分数据丢失（感谢[@王先生](https://gitee.com/whz_gmg1)）[Gitee issues I9977K](https://gitee.com/dromara/Jpom/issues/I9977K)
+9. 【server】优化 逐步引入新版表格（构建、项目、节点、资产机器）（感谢[@a20070322](https://gitee.com/a20070322) [Gitee Pr 218](https://gitee.com/dromara/Jpom/pulls/218) / [Gitee Pr 220](https://gitee.com/dromara/Jpom/pulls/220) / [Gitee Pr 222](https://gitee.com/dromara/Jpom/pulls/222) ）
 
 ------
 
