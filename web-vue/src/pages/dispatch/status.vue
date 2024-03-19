@@ -147,48 +147,6 @@
         <a-tab-pane key="2" tab="配置">
           <!-- 配置分发 -->
           <div style="width: 50vw">
-            <!-- <draggable v-model="list" :group="`sortValue`" item-key="id" handle=".move" chosen-class="box-shadow">
-              <template #item="{ element }">
-                <a-row class="item-row">
-                  <a-col :span="18">
-                    <span> 节点名： {{ element.nodeName }} </span>
-                    <span> 项目名： {{ element.cacheProjectName }} </span>
-                  </a-col>
-                  <a-col :span="6">
-                    <a-space>
-                      <a-switch
-                        checked-children="启用"
-                        un-checked-children="禁用"
-                        :checked="element.disabled ? false : true"
-                        @change="
-                          (checked) => {
-                            list = list.map((item2) => {
-                              if (element.id === item2.id) {
-                                item2.disabled = !checked
-                              }
-                              return { ...item2 }
-                            })
-                          }
-                        "
-                      />
-
-                      <a-button
-                        type="primary"
-                        danger
-                        size="small"
-                        :disabled="!list || list.length <= 1"
-                        @click="handleRemoveProject(element)"
-                      >
-                        解绑
-                      </a-button>
-                      <a-tooltip placement="left" :title="`长按可以拖动排序`" class="move">
-                        <MenuOutlined />
-                      </a-tooltip>
-                    </a-space>
-                  </a-col>
-                </a-row>
-              </template>
-            </draggable> -->
             <!-- list -->
             <Container drag-handle-selector=".move" orientation="vertical" @drop="onDrop">
               <Draggable v-for="(element, index) in list" :key="index">
