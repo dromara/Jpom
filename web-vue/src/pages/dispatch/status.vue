@@ -321,14 +321,12 @@ import {
 import File from '@/pages/node/node-layout/project/project-file'
 import Console from '@/pages/node/node-layout/project/project-console'
 import FileRead from '@/pages/node/node-layout/project/project-file-read'
-// import draggable from 'vuedraggable-es'
 import { Container, Draggable } from 'vue3-smooth-dnd'
 export default {
   components: {
     File,
     Console,
     FileRead,
-    // draggable,
     Container,
     Draggable
   },
