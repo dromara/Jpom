@@ -164,6 +164,7 @@ import { compareArrays } from './utils'
 import { tableSizeList } from './dict'
 import { customTableProps } from './props'
 import { StorageService } from './utils/StorageService'
+import { dropApplyDrag } from '@/utils/const'
 
 export default defineComponent({
   name: 'CustomTable',
@@ -316,27 +317,8 @@ export default defineComponent({
         checked: checkedValues.includes(String(item.dataIndex))
       }))
     }
-    const applyDrag = (
-      arr: CustomColumnType[],
-      dragResult: { removedIndex: number; addedIndex: number; payload: CustomColumnType }
-    ) => {
-      const { removedIndex, addedIndex, payload } = dragResult
-
-      if (removedIndex === null && addedIndex === null) return arr
-      const result = [...arr]
-      let itemToAdd = payload
-
-      if (removedIndex !== null) {
-        itemToAdd = result.splice(removedIndex, 1)[0]
-      }
-      if (addedIndex !== null) {
-        result.splice(addedIndex, 0, itemToAdd)
-      }
-      return result
-    }
-
     const onDrop = (dropResult: any) => {
-      customColumnList.value = applyDrag(customColumnList.value, dropResult)
+      customColumnList.value = dropApplyDrag<CustomColumnType>(customColumnList.value, dropResult)
     }
     /** 设置默认列 */
     const setDefaultCustomColumnList = () => {

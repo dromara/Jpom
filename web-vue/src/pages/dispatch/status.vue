@@ -147,7 +147,7 @@
         <a-tab-pane key="2" tab="配置">
           <!-- 配置分发 -->
           <div style="width: 50vw">
-            <draggable v-model="list" :group="`sortValue`" item-key="id" handle=".move" chosen-class="box-shadow">
+            <!-- <draggable v-model="list" :group="`sortValue`" item-key="id" handle=".move" chosen-class="box-shadow">
               <template #item="{ element }">
                 <a-row class="item-row">
                   <a-col :span="18">
@@ -188,7 +188,50 @@
                   </a-col>
                 </a-row>
               </template>
-            </draggable>
+            </draggable> -->
+            <!-- list -->
+            <Container drag-handle-selector=".move" orientation="vertical" @drop="onDrop">
+              <Draggable v-for="(element, index) in list" :key="index">
+                <a-row class="item-row">
+                  <a-col :span="18">
+                    <span> 节点名： {{ element.nodeName }} </span>
+                    <span> 项目名： {{ element.cacheProjectName }} </span>
+                  </a-col>
+                  <a-col :span="6">
+                    <a-space>
+                      <a-switch
+                        checked-children="启用"
+                        un-checked-children="禁用"
+                        :checked="element.disabled ? false : true"
+                        @change="
+                          (checked) => {
+                            list = list.map((item2) => {
+                              if (element.id === item2.id) {
+                                item2.disabled = !checked
+                              }
+                              return { ...item2 }
+                            })
+                          }
+                        "
+                      />
+
+                      <a-button
+                        type="primary"
+                        danger
+                        size="small"
+                        :disabled="!list || list.length <= 1"
+                        @click="handleRemoveProject(element)"
+                      >
+                        解绑
+                      </a-button>
+                      <a-tooltip placement="left" :title="`长按可以拖动排序`" class="move">
+                        <MenuOutlined />
+                      </a-tooltip>
+                    </a-space>
+                  </a-col>
+                </a-row>
+              </Draggable>
+            </Container>
             <a-col style="margin-top: 10px">
               <a-space>
                 <a-button type="primary" size="small" @click="viewDispatchManagerOk">保存</a-button>
@@ -272,18 +315,22 @@ import {
   itemGroupBy,
   parseTime,
   renderSize,
-  formatDuration
+  formatDuration,
+  dropApplyDrag
 } from '@/utils/const'
 import File from '@/pages/node/node-layout/project/project-file'
 import Console from '@/pages/node/node-layout/project/project-console'
 import FileRead from '@/pages/node/node-layout/project/project-file-read'
-import draggable from 'vuedraggable-es'
+// import draggable from 'vuedraggable-es'
+import { Container, Draggable } from 'vue3-smooth-dnd'
 export default {
   components: {
     File,
     Console,
     FileRead,
-    draggable
+    // draggable,
+    Container,
+    Draggable
   },
   props: {
     id: {
@@ -396,7 +443,11 @@ export default {
     renderSize,
     formatDuration,
     randomStr,
-
+    onDrop(dropResult) {
+      this.list = dropApplyDrag(this.list, dropResult).map((item, index) => {
+        return { ...item, sortValue: index }
+      })
+    },
     loadData() {
       this.childLoading = true
       this.handleReloadById().then(() => {
@@ -682,6 +733,7 @@ export default {
   padding: 10px;
   margin: 5px;
   border: 1px solid #e8e8e8;
-  border-radius: 2px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.8);
 }
 </style>
