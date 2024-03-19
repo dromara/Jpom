@@ -3,15 +3,8 @@
     <a-row type="flex" justify="center">
       <a-col :span="18">
         <a-card title="我的工作空间" :bordered="true">
-          <draggable
-            v-model="myWorkspaceList"
-            :group="`sort`"
-            handle=".move"
-            chosen-class="box-shadow"
-            item-key="id"
-            @end="sortFieldEnd()"
-          >
-            <template #item="{ element }">
+          <Container drag-handle-selector=".move" orientation="vertical" @drop="onDrop">
+            <Draggable v-for="(element, index) in myWorkspaceList" :key="index">
               <a-row class="item-row">
                 <a-col :span="18">
                   <template v-if="element.edit">
@@ -40,23 +33,12 @@
                   </a-space>
                 </a-col>
               </a-row>
-            </template>
-          </draggable>
+            </Draggable>
+          </Container>
           <a-col style="margin-top: 10px">
             <a-space>
               <a-button type="primary" @click="save"> 保存 </a-button>
-              <a-button
-                type="primary"
-                @click="
-                  () => {
-                    myWorkspaceList = myWorkspaceList.map((item) => {
-                      return { ...item, name: '' }
-                    })
-                  }
-                "
-              >
-                恢复默认名称
-              </a-button>
+              <a-button type="primary" @click="resetDefaultName"> 恢复默认名称 </a-button>
             </a-space>
           </a-col>
         </a-card>
@@ -66,11 +48,11 @@
 </template>
 <script>
 import { myWorkspace, saveWorkspace } from '@/api/user/user'
-import draggable from 'vuedraggable-es'
-
+import { Container, Draggable } from 'vue3-smooth-dnd'
 export default {
   components: {
-    draggable
+    Container,
+    Draggable
   },
   data() {
     return {
@@ -82,6 +64,29 @@ export default {
     this.init()
   },
   methods: {
+    applyDrag(arr, dragResult) {
+      const { removedIndex, addedIndex, payload } = dragResult
+      if (removedIndex === null && addedIndex === null) return arr
+      const result = [...arr]
+      let itemToAdd = payload
+      if (removedIndex !== null) {
+        itemToAdd = result.splice(removedIndex, 1)[0]
+      }
+      if (addedIndex !== null) {
+        result.splice(addedIndex, 0, itemToAdd)
+      }
+      return result
+    },
+    onDrop(dropResult) {
+      this.myWorkspaceList = this.applyDrag(this.myWorkspaceList, dropResult).map((item, index) => {
+        return { ...item, sort: index }
+      })
+    },
+    resetDefaultName() {
+      this.myWorkspaceList = this.myWorkspaceList.map((item) => {
+        return { ...item, name: '' }
+      })
+    },
     init() {
       myWorkspace().then((res) => {
         if (res.code == 200 && res.data) {
@@ -96,11 +101,6 @@ export default {
           item.edit = true
         }
         return item
-      })
-    },
-    sortFieldEnd() {
-      this.myWorkspaceList = this.myWorkspaceList.map((item, index) => {
-        return { ...item, sort: index }
       })
     },
     // 编辑 ok
@@ -135,6 +135,7 @@ export default {
   padding: 10px;
   margin: 5px;
   border: 1px solid #e8e8e8;
-  border-radius: 2px;
+  border-radius: 4px;
+  background: #fff;
 }
 </style>
