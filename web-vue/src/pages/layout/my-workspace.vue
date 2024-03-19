@@ -48,6 +48,7 @@
 </template>
 <script>
 import { myWorkspace, saveWorkspace } from '@/api/user/user'
+import { dropApplyDrag } from '@/utils/const'
 import { Container, Draggable } from 'vue3-smooth-dnd'
 export default {
   components: {
@@ -64,21 +65,8 @@ export default {
     this.init()
   },
   methods: {
-    applyDrag(arr, dragResult) {
-      const { removedIndex, addedIndex, payload } = dragResult
-      if (removedIndex === null && addedIndex === null) return arr
-      const result = [...arr]
-      let itemToAdd = payload
-      if (removedIndex !== null) {
-        itemToAdd = result.splice(removedIndex, 1)[0]
-      }
-      if (addedIndex !== null) {
-        result.splice(addedIndex, 0, itemToAdd)
-      }
-      return result
-    },
     onDrop(dropResult) {
-      this.myWorkspaceList = this.applyDrag(this.myWorkspaceList, dropResult).map((item, index) => {
+      this.myWorkspaceList = dropApplyDrag(this.myWorkspaceList, dropResult).map((item, index) => {
         return { ...item, sort: index }
       })
     },
@@ -136,6 +124,6 @@ export default {
   margin: 5px;
   border: 1px solid #e8e8e8;
   border-radius: 4px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.8);
 }
 </style>
