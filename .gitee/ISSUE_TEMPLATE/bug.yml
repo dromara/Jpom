@@ -1,3 +1,13 @@
+#
+# Copyright (c) 2019 Of Him Code Technology Studio
+# Jpom is licensed under Mulan PSL v2.
+# You can use this software according to the terms and conditions of the Mulan PSL v2.
+# You may obtain a copy of Mulan PSL v2 at:
+# 			http://license.coscl.org.cn/MulanPSL2
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+# See the Mulan PSL v2 for more details.
+#
+
 name: Bug 反馈
 description: 当你在使用中发现了一个 Bug，导致应用崩溃或抛出异常，或者有一个页面存在问题，或者某些地方看起来不对劲。
 title: "[Bug]: "
