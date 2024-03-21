@@ -146,16 +146,15 @@
                             <header>HEADER-LICENSE</header>
                             <includes>
                                 <!--取消默认排除-->
-                                <include>**/node/**</include>
+                                <include>**</include>
                                 <include>web-vue/index.html</include>
-                                <exclude>**/dist/index.html</exclude>
+                                <include>**/dist/index.html</include>
                             </includes>
                             <!--排除文件-->
                             <excludes>
                                 <!-- https://github.com/mathieucarbou/license-maven-plugin/blob/master/license-maven-plugin/src/main/java/com/mycila/maven/plugin/license/Default.java-->
-
                                 <exclude>docs/**</exclude>
-                                <exclude>web-vue/src/**</exclude>
+                                <!-- <exclude>web-vue/src/**</exclude>-->
                                 <!-- <exclude>web-vue2/**</exclude>-->
                                 <!-- <exclude>**/*.yml</exclude>-->
                                 <exclude>**/*.md</exclude>
