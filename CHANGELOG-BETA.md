@@ -2,6 +2,10 @@
 
 ## 2.11.3.0
 
+### 🐣 新增功能
+
+1. 【server】新增 数据库支持 *postgresql* （感谢[@王先生](https://gitee.com/whz_gmg1)）[Gitee Pr 223](https://gitee.com/dromara/Jpom/pulls/223)
+
 ### 🐞 解决BUG、优化功能
 
 1. 【all】优化 新增 `jpom.system.command-use-sudo` 配置属性控制是否使用 sudo 执行部分系统命令
@@ -13,6 +17,7 @@
 7. 【server】优化 SSH 脚本触发器支持传入参数当环境变量（感谢@小朱）
 8. 【server】修复 h2迁移其它数据库时部分数据丢失（感谢[@王先生](https://gitee.com/whz_gmg1)）[Gitee issues I9977K](https://gitee.com/dromara/Jpom/issues/I9977K)
 9. 【server】优化 逐步引入新版表格（构建、项目、节点、资产机器）（感谢[@a20070322](https://gitee.com/a20070322) [Gitee Pr 218](https://gitee.com/dromara/Jpom/pulls/218) / [Gitee Pr 220](https://gitee.com/dromara/Jpom/pulls/220) / [Gitee Pr 222](https://gitee.com/dromara/Jpom/pulls/222) ）
+10. 【server】优化 工作空间概括构建日志支持快速查看详情（感谢@Roger.cao）
 
 ------
 

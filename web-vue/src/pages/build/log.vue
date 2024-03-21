@@ -41,6 +41,12 @@ export default {
   },
   props: {
     temp: {
+      /**
+       * {
+       * id:'',
+       * buildId:''
+       * }
+       */
       type: Object,
       default: () => {}
     },
