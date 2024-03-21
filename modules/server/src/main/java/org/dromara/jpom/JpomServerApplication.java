@@ -57,6 +57,10 @@ public class JpomServerApplication {
      * --replace-import-h2-sql=/xxxx.sql 替换导入指定文件 sql（会删除掉已经存的数据）
      * <p>
      * --transform-sql 转换 sql 内容(低版本兼容高版本),仅在导入 sql 文件时候生效：--import-h2-sql=/xxxx.sql、--replace-import-h2-sql=/xxxx.sql
+     * <p>
+     * --h2-migrate-mysql --h2-user=jpom --h2-pass=jpom  将 h2 数据库迁移到 mysql
+     * <p>
+     * --h2-migrate-postgresql --h2-user=jpom --h2-pass=jpom 将 h2 数据库迁移到 postgresql
      *
      * @param args 参数
      * @throws Exception 异常
