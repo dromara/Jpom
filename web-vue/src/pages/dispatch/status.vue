@@ -147,8 +147,9 @@
         <a-tab-pane key="2" tab="配置">
           <!-- 配置分发 -->
           <div style="width: 50vw">
-            <draggable v-model="list" :group="`sortValue`" item-key="id" handle=".move" chosen-class="box-shadow">
-              <template #item="{ element }">
+            <!-- list -->
+            <Container drag-handle-selector=".move" orientation="vertical" @drop="onDrop">
+              <Draggable v-for="(element, index) in list" :key="index">
                 <a-row class="item-row">
                   <a-col :span="18">
                     <span> 节点名： {{ element.nodeName }} </span>
@@ -187,8 +188,8 @@
                     </a-space>
                   </a-col>
                 </a-row>
-              </template>
-            </draggable>
+              </Draggable>
+            </Container>
             <a-col style="margin-top: 10px">
               <a-space>
                 <a-button type="primary" size="small" @click="viewDispatchManagerOk">保存</a-button>
@@ -272,18 +273,20 @@ import {
   itemGroupBy,
   parseTime,
   renderSize,
-  formatDuration
+  formatDuration,
+  dropApplyDrag
 } from '@/utils/const'
 import File from '@/pages/node/node-layout/project/project-file'
 import Console from '@/pages/node/node-layout/project/project-console'
 import FileRead from '@/pages/node/node-layout/project/project-file-read'
-import draggable from 'vuedraggable-es'
+import { Container, Draggable } from 'vue3-smooth-dnd'
 export default {
   components: {
     File,
     Console,
     FileRead,
-    draggable
+    Container,
+    Draggable
   },
   props: {
     id: {
@@ -396,7 +399,11 @@ export default {
     renderSize,
     formatDuration,
     randomStr,
-
+    onDrop(dropResult) {
+      this.list = dropApplyDrag(this.list, dropResult).map((item, index) => {
+        return { ...item, sortValue: index }
+      })
+    },
     loadData() {
       this.childLoading = true
       this.handleReloadById().then(() => {
@@ -682,6 +689,7 @@ export default {
   padding: 10px;
   margin: 5px;
   border: 1px solid #e8e8e8;
-  border-radius: 2px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.8);
 }
 </style>
