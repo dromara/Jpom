@@ -140,26 +140,30 @@
                 </executions>
                 <configuration>
                     <quiet>true</quiet>
-                    <!--HEADER文件-->
-                    <header>HEADER-LICENSE</header>
-                    <includes>
-                        <!--取消默认排除-->
-                        <include>**/node/**</include>
-                        <include>web-vue/index.html</include>
-                        <exclude>**/dist/index.html</exclude>
-                    </includes>
-                    <!--排除文件-->
-                    <excludes>
-                        <!-- https://github.com/mathieucarbou/license-maven-plugin/blob/master/license-maven-plugin/src/main/java/com/mycila/maven/plugin/license/Default.java-->
+                    <licenseSets>
+                        <licenseSet>
+                            <!--HEADER文件-->
+                            <header>HEADER-LICENSE</header>
+                            <includes>
+                                <!--取消默认排除-->
+                                <include>**/node/**</include>
+                                <include>web-vue/index.html</include>
+                                <exclude>**/dist/index.html</exclude>
+                            </includes>
+                            <!--排除文件-->
+                            <excludes>
+                                <!-- https://github.com/mathieucarbou/license-maven-plugin/blob/master/license-maven-plugin/src/main/java/com/mycila/maven/plugin/license/Default.java-->
 
-                        <exclude>docs/**</exclude>
-                        <exclude>web-vue/src/**</exclude>
-                        <!-- <exclude>web-vue2/**</exclude>-->
-                        <!-- <exclude>**/*.yml</exclude>-->
-                        <exclude>**/*.md</exclude>
-                        <exclude>**/*.txt</exclude>
-                        <exclude>**/dist/assets/**</exclude>
-                    </excludes>
+                                <exclude>docs/**</exclude>
+                                <exclude>web-vue/src/**</exclude>
+                                <!-- <exclude>web-vue2/**</exclude>-->
+                                <!-- <exclude>**/*.yml</exclude>-->
+                                <exclude>**/*.md</exclude>
+                                <exclude>**/*.txt</exclude>
+                                <exclude>**/dist/assets/**</exclude>
+                            </excludes>
+                        </licenseSet>
+                    </licenseSets>
                     <!--严格检查-->
                     <strictCheck>true</strictCheck>
                     <mapping>

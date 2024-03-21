@@ -9,6 +9,7 @@
     </template>
 
     <CustomTable
+      v-else
       ref="nodeSearch"
       table-name="nodeSearch"
       is-show-tools
