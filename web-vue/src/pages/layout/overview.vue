@@ -47,10 +47,14 @@
                   {{ parseTime(item.endTime) }}
                 </div>
                 <a-space>
-                  <span :style="`color: ${statusColor[item.status]};`">#{{ item.buildNumberId }} </span>
+                  <span :style="`color: ${statusColor[item.status]};`" @click="handleBuildLog(item)">
+                    #{{ item.buildNumberId }}
+                  </span>
                   <span v-if="item.buildName">{{ item.buildName }}</span>
                   <a-tooltip :title="item.statusMsg || statusMap[item.status] || '未知'">
-                    <a-tag :color="statusColor[item.status]">{{ statusMap[item.status] || '未知' }}</a-tag>
+                    <a-tag :color="statusColor[item.status]" @click="handleBuildLog(item)">
+                      {{ statusMap[item.status] || '未知' }}
+                    </a-tag>
                   </a-tooltip>
                 </a-space>
               </a-space>
@@ -124,12 +128,23 @@
     >
       <user-log v-if="viewLogVisible > 0" :open-tab="viewLogVisible"></user-log>
     </a-modal>
+    <!-- 构建日志 -->
+    <build-log
+      v-if="buildLogVisible > 0"
+      :temp="temp"
+      :visible="buildLogVisible != 0"
+      @close="
+        () => {
+          buildLogVisible = 0
+        }
+      "
+    />
   </div>
 </template>
 
 <script>
 import { myWorkspace, statWorkspace, recentLogData } from '@/api/user/user'
-
+import BuildLog from '@/pages/build/log'
 import { parseTime } from '@/utils/const'
 import { operateCodeMap } from '@/api/user/user-login-log'
 import { getMonitorOperateTypeList } from '@/api/monitor'
@@ -140,7 +155,8 @@ import { statusMap, statusColor, triggerBuildTypeMap } from '@/api/build-info'
 import { Empty } from 'ant-design-vue'
 export default {
   components: {
-    UserLog
+    UserLog,
+    BuildLog
   },
   data() {
     return {
@@ -170,7 +186,9 @@ export default {
         { name: '动态文件', field: 'fileCount' }
         // { name: "静态文件", field: "staticFileCount" },
       ],
-      statData: {}
+      statData: {},
+      temp: {},
+      buildLogVisible: 0
     }
   },
   computed: {
@@ -216,6 +234,14 @@ export default {
     },
     handleUserlog(val) {
       this.viewLogVisible = val
+    },
+    // 查看构建日志
+    handleBuildLog(record) {
+      this.temp = {
+        id: record.buildDataId,
+        buildId: record.buildNumberId
+      }
+      this.buildLogVisible = new Date() * Math.random()
     }
   }
 }
