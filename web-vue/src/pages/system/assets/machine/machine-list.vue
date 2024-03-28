@@ -163,7 +163,7 @@
           <a-space>
             <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
             <a-button type="primary" size="small" @click="syncToWorkspaceShow(record)">分配</a-button>
-            <a-button type="primary" danger size="small" @click="deleteMachineInfo(item)">删除</a-button>
+            <a-button type="primary" danger size="small" @click="deleteMachineInfo(record)">删除</a-button>
           </a-space>
         </template>
       </template>
@@ -881,31 +881,23 @@ export default {
     },
     // 删除机器
     deleteMachineInfo(item) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除机器么？删除会检查数据关联性',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            machineDelete({
-              id: item.id
-            })
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.getMachineList()
-                }
-                resolve()
+        onOk: () =>
+          machineDelete({
+            id: item.id
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.getMachineList()
+            }
           })
-        }
       })
     },
     // 加载工作空间数据
