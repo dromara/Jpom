@@ -120,13 +120,11 @@
       title="操作日志"
       :footer="null"
       :mask-closable="false"
-      @cancel="
-        () => {
-          viewLogVisible = 0
-        }
-      "
+      @cancel="viewLogVisible = 0"
     >
-      <user-log v-if="viewLogVisible > 0" :open-tab="viewLogVisible"></user-log>
+      <div :style="{ maxHeight: 'calc(100vh - 196px )', overflowY: 'auto' }">
+        <user-log v-if="viewLogVisible > 0" :open-tab="viewLogVisible"></user-log>
+      </div>
     </a-modal>
     <!-- 构建日志 -->
     <build-log
