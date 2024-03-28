@@ -101,3 +101,7 @@ chmod 600 ~/.ssh/id_rsa ~/.ssh/id_rsa.pub
 
 git tag -l | xargs git tag -d #删除所有本地分支
 git fetch origin --prune #从远程拉取所有信息
+
+## 版权
+
+mvn license:format
