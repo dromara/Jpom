@@ -13,10 +13,14 @@ import '@/assets/reset.less'
 import App from './App.vue'
 import router from './router'
 import '@/router/auth'
+import CustomModal from '@/components/customModal/index.vue'
 const pinia = createPinia()
 
 const app = createApp(App)
 
 app.use(router).use(pinia)
+
+// 增加弹窗全局引入
+app.component('CustomModal', CustomModal)
 
 app.mount('#app')

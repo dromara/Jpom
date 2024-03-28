@@ -143,12 +143,10 @@ import { useUserStore } from '@/stores/user'
 import { mapState } from 'pinia'
 import { statusMap, statusColor, triggerBuildTypeMap } from '@/api/build-info'
 import { Empty } from 'ant-design-vue'
-import CustomModal from '@/components/CustomModal'
 export default {
   components: {
     UserLog,
-    BuildLog,
-    CustomModal
+    BuildLog
   },
   data() {
     return {
