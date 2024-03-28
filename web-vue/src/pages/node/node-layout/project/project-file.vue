@@ -933,34 +933,30 @@ export default {
     },
     //处理上传文件
     handleRemoteUpload() {
-      this.$refs.ruleForm.validate((valid) => {
-        if (valid) {
-          const params = {
-            id: this.projectId,
-            nodeId: this.nodeId,
-            url: this.remoteDownloadData.url,
-            levelName: this.uploadPath,
-            unzip: this.remoteDownloadData.unzip,
-            stripComponents: this.remoteDownloadData.stripComponents || 0
-          }
-          this.confirmLoading = true
-          remoteDownload(params)
-            .then((res) => {
-              if (res.code === 200) {
-                $notification.success({
-                  message: res.msg
-                })
-                this.remoteDownloadData = {}
-                this.uploadRemoteFileVisible = false
-                this.loadFileList()
-              }
-            })
-            .finally(() => {
-              this.confirmLoading = false
-            })
-        } else {
-          return false
+      this.$refs.ruleForm.validate().then(() => {
+        const params = {
+          id: this.projectId,
+          nodeId: this.nodeId,
+          url: this.remoteDownloadData.url,
+          levelName: this.uploadPath,
+          unzip: this.remoteDownloadData.unzip,
+          stripComponents: this.remoteDownloadData.stripComponents || 0
         }
+        this.confirmLoading = true
+        remoteDownload(params)
+          .then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
+              })
+              this.remoteDownloadData = {}
+              this.uploadRemoteFileVisible = false
+              this.loadFileList()
+            }
+          })
+          .finally(() => {
+            this.confirmLoading = false
+          })
       })
     },
     /**
