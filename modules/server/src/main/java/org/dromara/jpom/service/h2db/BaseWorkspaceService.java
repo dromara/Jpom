@@ -359,7 +359,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
     public List<String> listGroup(HttpServletRequest request) {
         String workspaceId = getCheckUserWorkspace(request);
         String group = DialectUtil.wrapField("group");
-        String sql = String.format("select %s from %s where workspaceId=? group by %s",group,getTableName(),group);
+        String sql = String.format("select %s from %s where workspaceId=? group by %s", group, getTableName(), group);
         return super.listGroupByName(sql, group, workspaceId);
     }
 }
