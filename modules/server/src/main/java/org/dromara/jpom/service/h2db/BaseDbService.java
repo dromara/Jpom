@@ -90,7 +90,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      */
     public List<String> listGroup() {
         String group = DialectUtil.wrapField("group");
-        String sql = String.format("select %s from %s group by %s",group,getTableName(),group);
+        String sql = String.format("select %s from %s group by %s", group, getTableName(), group);
         return this.listGroupByName(sql, "group");
     }
 
@@ -115,10 +115,11 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     public List<String> listGroupByName(String sql, String fieldName, Object... params) {
         Assert.state(this.canGroup || this.canGroupName, "当前数据表不支持分组");
         List<Entity> list = super.query(sql, params);
+        String unWrapField = DialectUtil.unWrapField(fieldName);
         // 筛选字段
         return list.stream()
             .flatMap(entity -> {
-                Object obj = entity.get(fieldName);
+                Object obj = entity.get(unWrapField);
                 if (obj == null) {
                     return null;
                 }
@@ -136,7 +137,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     public void repairGroupFiled() {
         Assert.state(this.canGroup, "当前数据表不支持分组");
         String group = DialectUtil.wrapField("group");
-        String sql = String.format("update %s set %s =? where %s is null or %s = ''",getTableName(),group,group,group);
+        String sql = String.format("update %s set %s =? where %s is null or %s = ''", getTableName(), group, group, group);
         super.execute(sql, Const.DEFAULT_GROUP_NAME);
     }
 
