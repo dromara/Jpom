@@ -1,13 +1,3 @@
-///
-/// Copyright (c) 2019 Of Him Code Technology Studio
-/// Jpom is licensed under Mulan PSL v2.
-/// You can use this software according to the terms and conditions of the Mulan PSL v2.
-/// You may obtain a copy of Mulan PSL v2 at:
-/// 			http://license.coscl.org.cn/MulanPSL2
-/// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-/// See the Mulan PSL v2 for more details.
-///
-
 /* eslint-disable */
 /* prettier-ignore */
 // @ts-nocheck
@@ -115,6 +105,7 @@ declare module 'vue' {
     CompositionTransfer: typeof import('./../components/compositionTransfer/composition-transfer.vue')['default']
     copy: typeof import('./../components/customTable/index copy.vue')['default']
     CustomInput: typeof import('./../components/customInput/index.vue')['default']
+    CustomModal: typeof import('./../components/customModal/index.vue')['default']
     CustomSelect: typeof import('./../components/customSelect/index.vue')['default']
     CustomTable: typeof import('./../components/customTable/index.vue')['default']
     DeleteOutlined: typeof import('@ant-design/icons-vue')['DeleteOutlined']
