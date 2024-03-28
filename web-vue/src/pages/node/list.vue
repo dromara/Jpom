@@ -567,7 +567,7 @@
     </a-modal>
 
     <!-- 快速安装插件端 -->
-    <a-modal
+    <CustomModal
       v-model:open="fastInstallNode"
       destroy-on-close
       width="80%"
@@ -582,7 +582,7 @@
       "
     >
       <fastInstall v-if="fastInstallNode"></fastInstall>
-    </a-modal>
+    </CustomModal>
     <!-- 同步到其他工作空间 -->
     <a-modal
       v-model:open="syncToWorkspaceVisible"

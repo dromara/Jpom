@@ -21,7 +21,8 @@ export default defineComponent({
   setup(props, { emit }) {
     const bodyStyle: CSSProperties = {
       maxHeight: 'calc(100vh - 196px )',
-      overflowY: 'auto'
+      overflowY: 'auto',
+      ...props.bodyStyle
     }
     return {
       props,
