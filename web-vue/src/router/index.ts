@@ -135,6 +135,11 @@ const children = [
     component: () => import('../pages/tools/cron.vue')
   },
   {
+    path: '/tools/network',
+    name: 'network-tools',
+    component: () => import('../pages/tools/network.vue')
+  },
+  {
     path: '/file-manager/file-storage',
     name: 'file-storage',
     component: () => import('../pages/file-manager/fileStorage/list.vue')

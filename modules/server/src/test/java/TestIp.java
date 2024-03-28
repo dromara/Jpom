@@ -7,13 +7,14 @@
  * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  */
-import cn.hutool.core.lang.Filter;
+
+import cn.hutool.core.net.Ipv4Util;
 import cn.hutool.core.net.NetUtil;
 import org.junit.Test;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
+import java.net.InetSocketAddress;
 import java.util.LinkedHashSet;
 
 /**
@@ -48,5 +49,38 @@ public class TestIp {
     public void test1() {
         String localHostName = NetUtil.getLocalHostName();
         System.out.println(localHostName);
+    }
+
+    @Test
+    public void testConnect() {
+        {
+            InetSocketAddress address = NetUtil.createAddress("127.0.0.1", 2322);
+            boolean open = NetUtil.isOpen(address, 5 * 1000);
+            System.out.println(open);
+        }
+        {
+            InetSocketAddress address = NetUtil.createAddress("baidu.com", 80);
+            boolean open = NetUtil.isOpen(address, 5 * 1000);
+            System.out.println(open);
+        }
+        {
+            InetSocketAddress address = NetUtil.createAddress("baidu.com", 443);
+            boolean open = NetUtil.isOpen(address, 5 * 1000);
+            System.out.println(open);
+        }
+    }
+
+    @Test
+    public void testPublic() {
+        long ipNum = Ipv4Util.ipv4ToLong("222.67.57.32");
+
+        //
+        long pBegin = Ipv4Util.ipv4ToLong("20.0.0.0");
+        long pEnd = Ipv4Util.ipv4ToLong("223.255.255.255");
+        System.out.println(isInner(ipNum, pBegin, pEnd));
+    }
+
+    private static boolean isInner(long userIp, long begin, long end) {
+        return (userIp >= begin) && (userIp <= end);
     }
 }
