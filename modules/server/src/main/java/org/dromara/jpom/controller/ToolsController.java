@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Validator;
@@ -20,6 +21,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
+import lombok.Lombok;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,10 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.List;
+import java.net.SocketException;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -78,31 +78,45 @@ public class ToolsController {
     public IJsonMessage<List<JSONObject>> ipList() {
         Collection<NetworkInterface> networkInterfaces = NetUtil.getNetworkInterfaces();
         List<JSONObject> collect = networkInterfaces.stream()
+            .sorted((o1, o2) -> 0)
             .map(networkInterface -> {
+                boolean virtual = networkInterface.isVirtual();
                 String name = networkInterface.getName();
                 String displayName = networkInterface.getDisplayName();
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.set("name", name);
                 jsonObject.set("displayName", displayName);
+                jsonObject.set("virtual", virtual);
+                try {
+                    jsonObject.set("loopback", networkInterface.isLoopback());
+                } catch (SocketException e) {
+                    throw Lombok.sneakyThrow(e);
+                }
                 final Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
                 JSONArray ips = new JSONArray();
                 while (inetAddresses.hasMoreElements()) {
                     final InetAddress inetAddress = inetAddresses.nextElement();
-                    if (inetAddress != null) {
+                    if (inetAddress != null && !inetAddress.isLinkLocalAddress()) {
                         String hostAddress = inetAddress.getHostAddress();
+                        // 处理 Mac  ip 地址
+                        hostAddress = StrUtil.subBefore(hostAddress, "%", true);
                         JSONObject parseIp = parseIp(hostAddress);
                         parseIp.set("ip", hostAddress);
                         ips.add(parseIp);
                     }
                 }
+                if (CollUtil.isEmpty(ips)) {
+                    return null;
+                }
                 jsonObject.set("ips", ips);
                 return jsonObject;
             })
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
         return JsonMessage.success("", collect);
     }
 
-    @GetMapping(value = "ping", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "net-ping", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> ping(@ValidatorItem String host, @ValidatorItem int timeout) {
         boolean ping = NetUtil.ping(host, (int) TimeUnit.SECONDS.toMillis(Math.max(1, timeout)));
         //
@@ -111,7 +125,7 @@ public class ToolsController {
         return JsonMessage.success("", jsonObject);
     }
 
-    @GetMapping(value = "telnet", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "net-telnet", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> telnet(@ValidatorItem String host, int port, @ValidatorItem int timeout) {
         InetSocketAddress address = NetUtil.createAddress(host, port);
         boolean open = NetUtil.isOpen(address, (int) TimeUnit.SECONDS.toMillis(Math.max(1, timeout)));
@@ -127,12 +141,15 @@ public class ToolsController {
      * @param host 主机地址
      * @return json
      */
-    private JSONObject parseIp(String host) {
+    private JSONObject parseIp(String host, String... appendLabels) {
         boolean ipv4 = Validator.isIpv4(host);
         boolean ipv6 = Validator.isIpv6(host);
         JSONObject jsonObject = new JSONObject();
         //
         JSONArray labels = new JSONArray();
+        for (String appendLabel : appendLabels) {
+            labels.put(appendLabel);
+        }
         if (ipv4) {
             labels.put("IPV4");
             //
@@ -156,6 +173,9 @@ public class ToolsController {
 
 
     private static String detectionType(String ipAddress) {
+        if (Ipv4Util.LOCAL_IP.equals(ipAddress)) {
+            return "LOCAL";
+        }
         long ipNum = Ipv4Util.ipv4ToLong(ipAddress);
 
         long aBegin = Ipv4Util.ipv4ToLong("10.0.0.0");
@@ -180,10 +200,6 @@ public class ToolsController {
         long pEnd = Ipv4Util.ipv4ToLong("223.255.255.255");
         if (isInclude(ipNum, pBegin, pEnd)) {
             return "PUBLIC";
-        }
-
-        if (Ipv4Util.LOCAL_IP.equals(ipAddress)) {
-            return "LOCAL";
         }
         return null;
     }
