@@ -123,7 +123,7 @@
       :mask-closable="false"
       @cancel="viewLogVisible = 0"
     >
-      <div :style="{ maxHeight: 'calc(100vh - 196px )', overflowY: 'auto' }">
+      <div>
         <user-log v-if="viewLogVisible > 0" :open-tab="viewLogVisible"></user-log>
       </div>
     </CustomModal>
