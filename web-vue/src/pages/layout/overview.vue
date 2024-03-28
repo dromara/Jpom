@@ -112,7 +112,8 @@
       </a-col>
     </a-row>
     <!-- 查看操作日志 -->
-    <a-modal
+    <!-- <CustomModal></CustomModal> -->
+    <CustomModal
       v-if="viewLogVisible > 0"
       destroy-on-close
       :open="viewLogVisible > 0"
@@ -122,21 +123,12 @@
       :mask-closable="false"
       @cancel="viewLogVisible = 0"
     >
-      <div :style="{ maxHeight: 'calc(100vh - 196px )', overflowY: 'auto' }">
+      <div>
         <user-log v-if="viewLogVisible > 0" :open-tab="viewLogVisible"></user-log>
       </div>
-    </a-modal>
+    </CustomModal>
     <!-- 构建日志 -->
-    <build-log
-      v-if="buildLogVisible > 0"
-      :temp="temp"
-      :visible="buildLogVisible != 0"
-      @close="
-        () => {
-          buildLogVisible = 0
-        }
-      "
-    />
+    <build-log v-if="buildLogVisible > 0" :temp="temp" :visible="buildLogVisible != 0" @close="buildLogVisible = 0" />
   </div>
 </template>
 
