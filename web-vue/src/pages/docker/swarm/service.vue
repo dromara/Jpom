@@ -841,31 +841,23 @@ export default {
     },
     // 删除
     handleDel(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除此服务么？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 组装参数
-            const params = {
-              serviceId: record.id,
-              id: that.id
-            }
-            dockerSwarmServicesDel(that.urlPrefix, params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return dockerSwarmServicesDel(this.urlPrefix, {
+            serviceId: record.id,
+            id: this.id
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })

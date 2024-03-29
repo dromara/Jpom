@@ -171,33 +171,26 @@ export default {
       if (!action) {
         return
       }
-      const that = this
       $confirm({
         title: '系统提示',
         content: action.msg,
         zIndex: 1009,
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 组装参数
-            const params = {
-              id: that.reqDataId,
+        onOk: () => {
+          return action
+            .api(this.urlPrefix, {
+              id: this.reqDataId,
               volumeName: record.name
-            }
-            action
-              .api(that.urlPrefix, params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
-              })
-              .catch(reject)
-          })
+            })
+            .then((res) => {
+              if (res.code === 200) {
+                $notification.success({
+                  message: res.msg
+                })
+                this.loadData()
+              }
+            })
         }
       })
     }
