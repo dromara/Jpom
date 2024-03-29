@@ -146,6 +146,12 @@ notices-2: # 可选的
   link: https://gitee.com/qingqinkj/mdp-lcode-ui-web
   bgColor: '#5555f0'
   textColor: '#ffffff'
+- name: JNPF低代码开发平台
+  desc: 技术双引擎系统，无限制业务场景，永久使用权，全源码交付
+  avatar: /images/friends/ad/jnpfsoft.png
+  link: https://www.jnpfsoft.com/index.html?from=jpom
+  bgColor: '#404040'
+  textColor: '#ffffff'
 ```
 :::
 

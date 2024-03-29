@@ -46,6 +46,9 @@ const htmlModule: VdoingThemeConfig["htmlModules"] = {
      <a href="https://gitee.com/qingqinkj/mdp-lcode-ui-web" target="_blank" >
       <img class="no-zoom" height="60" width="224" src="/images/friends/ad/mdp-banner2.png">
     </a>
+    <a href="https://www.jnpfsoft.com/index.html?from=jpom" target="_blank"  style="background:#dcf3ff">
+          <img class="no-zoom" height="60" width="224" src="/images/friends/ad/jnpfsoft-banner.png">
+        </a>
     <div>
     <span style='color: gray;font-size: smaller;'></span>
             <span style='color: #E01E5A;font-size: smaller;font-weight: bolder;float: right'>❤️<a href='/pages/589c8e/'>成为赞助商</a></span>
