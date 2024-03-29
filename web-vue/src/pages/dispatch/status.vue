@@ -616,7 +616,6 @@ export default {
         '<li>一般用于服务器无法连接且已经确定不再使用</li>' +
         '<li>如果误操作会产生冗余数据！！！</li>' +
         ' </ul>'
-      const that = this
       $confirm({
         title: '危险操作！！！',
         zIndex: 1009,
@@ -625,23 +624,18 @@ export default {
         cancelButtonProps: { type: 'primary' },
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            removeProject({
-              nodeId: item.nodeId,
-              projectId: item.projectId,
-              id: that.id
-            })
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return removeProject({
+            nodeId: item.nodeId,
+            projectId: item.projectId,
+            id: this.id
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })
