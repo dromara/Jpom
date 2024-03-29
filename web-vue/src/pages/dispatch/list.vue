@@ -1497,7 +1497,6 @@ export default {
         '<li>一般用于服务器无法连接且已经确定不再使用</li>' +
         '<li>如果误操作会产生冗余数据！！！</li>' +
         ' </ul>'
-      const that = this
       $confirm({
         title: '危险操作！！！',
         zIndex: 1009,
@@ -1513,7 +1512,7 @@ export default {
                 message: res.msg
               })
 
-              that.loadData()
+              this.loadData()
             }
           })
         }
