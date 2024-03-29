@@ -466,7 +466,6 @@ export default {
         okText: '确认',
         cancelText: '取消',
         onOk: () => {
-          // 删除
           return deleteBuildHistory(record.id).then((res) => {
             if (res.code === 200) {
               $notification.success({
