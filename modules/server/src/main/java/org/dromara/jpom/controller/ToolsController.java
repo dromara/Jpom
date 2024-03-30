@@ -163,7 +163,9 @@ public class ToolsController {
         }
         if (!ipv4 && !ipv6) {
             String ipByHost = NetUtil.getIpByHost(host);
-            jsonObject.set("originalIP", ipByHost);
+            if (!StrUtil.equals(ipByHost, host)) {
+                jsonObject.set("originalIP", ipByHost);
+            }
             labels.put("DOMAIN");
         }
 
