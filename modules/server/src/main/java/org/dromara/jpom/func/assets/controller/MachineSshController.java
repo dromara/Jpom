@@ -209,7 +209,7 @@ public class MachineSshController extends BaseGroupNameController {
             JschUtil.close(session);
         } catch (Exception e) {
             log.warn("ssh连接失败", e);
-            return new JsonMessage<>(505, "ssh连接失败：" + e.getMessage());
+            return new JsonMessage<>(505, "ssh连接失败,请检查用户名、密码、host、端口等填写是否正确，超时时间是否合理：" + e.getMessage());
         }
         int i = add ? machineSshServer.insert(sshModel) : machineSshServer.updateById(sshModel);
         return JsonMessage.success("操作成功");

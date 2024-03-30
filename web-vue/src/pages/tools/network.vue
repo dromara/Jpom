@@ -1,7 +1,20 @@
 <template>
   <div>
     <a-collapse v-model:activeKey="activeKey">
-      <a-collapse-panel key="1" header="服务端机器网络">
+      <a-collapse-panel key="1">
+        <template #header>
+          服务端机器网络
+          <a-tooltip>
+            <template #title>
+              <ul>
+                <li>A类 10.0.0.0-10.255.255.255</li>
+                <li>B类 172.16.0.0-172.31.255.255</li>
+                <li>C类 192.168.0.0-192.168.255.255</li>
+              </ul>
+            </template>
+            <QuestionCircleOutlined />
+          </a-tooltip>
+        </template>
         <a-space direction="vertical" style="width: 100%">
           <template v-for="item in ipListArray">
             <a-list size="small" bordered :data-source="item.ips">
@@ -31,6 +44,9 @@
           :wrapper-col="{ span: 18 }"
           @finish="onPingSubmit"
         >
+          <a-form-item label="提示" name="">
+            <a-alert message="不等同于 PING 测试，此处测试成功表示网络一定互通，此处测试失败网络不一定不通畅" banner />
+          </a-form-item>
           <a-form-item label="HOST" name="host">
             <a-input
               v-model:value="pingData.host"
