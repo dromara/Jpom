@@ -486,31 +486,23 @@ export default {
         '<li>下载前请阅读更新日志里面的说明和注意事项并且<b>请注意备份数据防止数据丢失！！</b></li>' +
         '<li>如果升级失败需要手动恢复奥</li>' +
         ' </ul>'
-      const that = this
       $confirm({
         title: '系统提示',
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okText: '确认',
         zIndex: 1009,
         cancelText: '取消',
-        async onOk() {
-          //
-          return await new Promise((resolve, reject) => {
-            remoteUpgrade({
-              nodeId: that.nodeId,
-              machineId: that.machineId
-            })
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-
-                  that.startCheckUpgradeStatus(res.msg)
-                }
-                resolve()
+        onOk: () => {
+          return remoteUpgrade({
+            nodeId: this.nodeId,
+            machineId: this.machineId
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.startCheckUpgradeStatus(res.msg)
+            }
           })
         }
       })
@@ -524,30 +516,23 @@ export default {
           '<li>在使用 beta 版过程中遇到问题可以随时反馈给我们，我们会尽快为您解答。</li>' +
           ' </ul>'
         : '确认要关闭 beta 计划吗？'
-      const that = this
       $confirm({
         title: '系统提示',
         content: h('div', {}, [h('p', { innerHTML: html })]),
         okText: '确认',
         zIndex: 1009,
         cancelText: '取消',
-        async onOk() {
-          //
-          return await new Promise((resolve, reject) => {
-            changBetaRelease({
-              beta: beta
-            })
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return changBetaRelease({
+            beta: beta
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+
+              this.loadData()
+            }
           })
         }
       })

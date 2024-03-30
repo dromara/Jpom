@@ -4,7 +4,7 @@
       is-show-tools
       default-auto-refresh
       :auto-refresh-time="5"
-      :activePage="activePage"
+      :active-page="activePage"
       table-name="dispatch"
       :columns="columns"
       size="middle"
@@ -1448,7 +1448,6 @@ export default {
 
     // 删除
     handleDelete(record, thorough) {
-      const that = this
       if (record.outGivingProject) {
         $confirm({
           title: '系统提示',
@@ -1458,21 +1457,14 @@ export default {
             : '真的要删除分发信息么？删除后节点下面的项目也都将删除',
           okText: '确认',
           cancelText: '取消',
-          async onOk() {
-            return await new Promise((resolve, reject) => {
-              // 删除
-              delDisPatchProject({ id: record.id, thorough: thorough })
-                .then((res) => {
-                  if (res.code === 200) {
-                    $notification.success({
-                      message: res.msg
-                    })
-
-                    that.loadData()
-                  }
-                  resolve()
+          onOk: () => {
+            return delDisPatchProject({ id: record.id, thorough: thorough }).then((res) => {
+              if (res.code === 200) {
+                $notification.success({
+                  message: res.msg
                 })
-                .catch(reject)
+                this.loadData()
+              }
             })
           }
         })
@@ -1484,21 +1476,14 @@ export default {
         content: '真的要释放分发信息么？释放之后节点下面的项目信息还会保留，如需删除项目还需要到节点管理中操作',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            releaseDelDisPatch(record.id)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return releaseDelDisPatch(record.id).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })
@@ -1512,7 +1497,6 @@ export default {
         '<li>一般用于服务器无法连接且已经确定不再使用</li>' +
         '<li>如果误操作会产生冗余数据！！！</li>' +
         ' </ul>'
-      const that = this
       $confirm({
         title: '危险操作！！！',
         zIndex: 1009,
@@ -1521,21 +1505,15 @@ export default {
         cancelButtonProps: { type: 'primary' },
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            unbindOutgiving(record.id)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return unbindOutgiving(record.id).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+
+              this.loadData()
+            }
           })
         }
       })
@@ -1606,28 +1584,21 @@ export default {
 
     // 取消
     handleCancel(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的取消当前分发吗？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            cancelOutgiving({ id: record.id })
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                  // that.silenceLoadData()
-                }
-                resolve()
+        onOk: () => {
+          return cancelOutgiving({ id: record.id }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+              // this.silenceLoadData()
+            }
           })
         }
       })
