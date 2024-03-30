@@ -432,60 +432,47 @@ export default {
 
     // 回滚
     handleRollback(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要回滚该构建历史记录么？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
+        onOk: () => {
           // 重新发布
-          return await new Promise((resolve, reject) => {
-            rollback(record.id)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                  // 弹窗
-                  that.temp = {
-                    id: record.buildDataId,
-                    buildId: res.data
-                  }
-                  that.buildLogVisible = new Date() * Math.random()
-                }
-                resolve()
+          return rollback(record.id).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+              // 弹窗
+              this.temp = {
+                id: record.buildDataId,
+                buildId: res.data
+              }
+              this.buildLogVisible = new Date() * Math.random()
+            }
           })
         }
       })
     },
     // 删除
     handleDelete(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除构建历史记录么？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          // 删除
-          return await new Promise((resolve, reject) => {
-            deleteBuildHistory(record.id)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return deleteBuildHistory(record.id).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })
@@ -498,28 +485,22 @@ export default {
         })
         return
       }
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除这些构建历史记录么？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
+        onOk: () => {
           // 删除
-          return await new Promise((resolve, reject) => {
-            deleteBuildHistory(that.tableSelections.join(','))
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.tableSelections = []
-                  that.loadData()
-                }
-                resolve()
+          return deleteBuildHistory(this.tableSelections.join(',')).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.tableSelections = []
+              this.loadData()
+            }
           })
         }
       })

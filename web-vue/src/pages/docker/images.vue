@@ -293,33 +293,26 @@ export default {
       if (!action) {
         return
       }
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: action.msg,
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 组装参数
-            const params = {
-              id: that.reqDataId,
+        onOk: () => {
+          return action
+            .api(this.urlPrefix, {
+              id: this.reqDataId,
               imageId: record.id
-            }
-            action
-              .api(that.urlPrefix, params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
-              })
-              .catch(reject)
-          })
+            })
+            .then((res) => {
+              if (res.code === 200) {
+                $notification.success({
+                  message: res.msg
+                })
+                this.loadData()
+              }
+            })
         }
       })
     },
@@ -430,31 +423,24 @@ export default {
     // 分配
     batchDelete() {
       let ids = this.tableSelections
-      const that = this
+
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要批量删除选择的镜像吗？已经被容器使用的镜像无法删除！',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 组装参数
-            const params = {
-              id: that.reqDataId,
-              imagesIds: ids.join(',')
-            }
-            dockerImageBatchRemove(that.urlPrefix, params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return dockerImageBatchRemove(this.urlPrefix, {
+            id: this.reqDataId,
+            imagesIds: ids.join(',')
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })
