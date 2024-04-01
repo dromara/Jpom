@@ -8,7 +8,7 @@
 -- See the Mulan PSL v2 for more details.
 --
 
-DROP FUNCTION IF EXISTS column_exists;
+DROP FUNCTION IF EXISTS column_exists1;
 
 -- mariadb delimiter
 
