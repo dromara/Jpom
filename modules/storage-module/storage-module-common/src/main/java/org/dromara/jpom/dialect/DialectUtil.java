@@ -86,6 +86,7 @@ public class DialectUtil {
             case H2:
                 return getH2Dialect();
             case MYSQL:
+            case MARIADB:
                 return getMySqlDialect();
             case POSTGRESQL:
                 return getPostgresqlDialect();
