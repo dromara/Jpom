@@ -12,10 +12,10 @@ jpom:
   db:
     # 数据库默认 支持 ：H2、MYSQL、MARIADB、POSTGRESQL
     mode: POSTGRESQL
-    url: jdbc:postgresql://localhost:5432/jpom
+    url: jdbc:postgresql://127.0.0.1:5432/jpom
     # 数据库账号 默认 jpom
     #user-name: jpom
     user-name: jpom
     # 数据库密码 默认 jpom 如果自行配置请保证密码强度
     # user-pwd: jpom
-    user-pwd: 123456
+    user-pwd: jpom123456
