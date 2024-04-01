@@ -306,6 +306,9 @@ public class InitDb implements DisposableBean, ILoadEvent {
         Opt.ofNullable(environment.getProperty("h2-migrate-postgresql")).ifPresent(s -> {
             migrateOpr.accept(DbExtConfig.Mode.POSTGRESQL);
         });
+        Opt.ofNullable(environment.getProperty("h2-migrate-mariadb")).ifPresent(s -> {
+            migrateOpr.accept(DbExtConfig.Mode.MARIADB);
+        });
     }
 
     private void importH2Sql(Environment environment, String importH2Sql) {

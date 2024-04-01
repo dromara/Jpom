@@ -72,7 +72,7 @@ jpom:
   # 查看日志时初始读取最后多少行（默认10，0不读取）
   init-read-line: 10
   db:
-    # 数据库默认 支持 ：H2、MYSQL
+    # 数据库默认 支持 ：H2、MYSQL、MARIADB、POSTGRESQL
     mode: H2
     # 日志存储条数，将自动清理旧数据,配置小于等于零则不清理
     log-storage-count: 10000
@@ -153,7 +153,9 @@ server:
 
 spring:
   profiles:
-    active: mysql-1
+#    active: mysql-1
+    active: mariadb
+
   web:
     resources:
       static-locations: classpath:/dist/
