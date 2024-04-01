@@ -152,9 +152,10 @@ server:
     connection-timeout: 10M
 
 spring:
-  profiles:
-#    active: mysql-1
-    active: mariadb
+  #  profiles:
+  #    active: mysql
+  #    active: mariadb
+  #    active: postgresql
 
   web:
     resources:
