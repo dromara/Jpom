@@ -70,7 +70,19 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         processBuilder
             .environment()
             .putAll(environmentMapBuilder.environment());
-        processBuilder.directory(FileUtil.getParent(scriptFile, 1));
+        //
+        String jpomExecPath = environmentMapBuilder.get("JPOM_EXEC_PATH");
+        String projectPath = environmentMapBuilder.get("PROJECT_PATH");
+        if (StrUtil.isNotEmpty(jpomExecPath) && StrUtil.isNotEmpty(projectPath)) {
+            boolean absolutePath = FileUtil.isAbsolutePath(jpomExecPath);
+            if (absolutePath) {
+                processBuilder.directory(FileUtil.file(projectPath));
+            } else {
+                processBuilder.directory(FileUtil.file(projectPath, jpomExecPath));
+            }
+        } else {
+            processBuilder.directory(FileUtil.getParent(scriptFile, 1));
+        }
         processBuilder.redirectErrorStream(true);
         processBuilder.command(command);
         return processBuilder;
