@@ -19,9 +19,6 @@
             <a-tag color="orange">集群ID:{{ temp.clusterId }}</a-tag>
             <a-tag color="blue">安装ID:{{ temp.installId }}</a-tag>
           </a-descriptions-item>
-          <a-descriptions-item label="服务端时间" :span="1">
-            {{ temp.dateTime }} <a-tag>{{ temp.timeZoneId }}</a-tag>
-          </a-descriptions-item>
           <a-descriptions-item label="数据目录占用空间" :span="1">
             {{ renderSize(temp.dataSize) }} (每天0/12点刷新一次)
             <a-tooltip>
@@ -59,6 +56,18 @@
               </template>
               <QuestionCircleOutlined />
             </a-tooltip>
+          </a-descriptions-item>
+
+          <a-descriptions-item label="数据目录" :span="1">
+            {{ temp.dataPath }}
+          </a-descriptions-item>
+          <a-descriptions-item label="临时文件目录" :span="1"> {{ temp.tempPath }} </a-descriptions-item>
+          <a-descriptions-item label="在线构建目录">
+            {{ temp.buildPath }}
+          </a-descriptions-item>
+
+          <a-descriptions-item label="服务端时间" :span="1">
+            {{ temp.dateTime }} <a-tag>{{ temp.timeZoneId }}</a-tag>
           </a-descriptions-item>
           <a-descriptions-item label="旧版程序包占有空间">
             <a-space>
