@@ -1,7 +1,13 @@
 <template>
   <div>
     <!-- 数据表格 -->
-    <a-table
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      :active-page="activePage"
+      table-name="certificate-list"
+      empty-description="没有任何证书"
       :data-source="list"
       size="middle"
       :loading="loading"
@@ -19,6 +25,7 @@
           loadData()
         }
       "
+      @refresh="loadData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -44,7 +51,7 @@
           </a-space>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.tooltip">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
@@ -75,7 +82,7 @@
           </a-space>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 导入 -->
     <a-modal
       v-model:open="editCertVisible"
@@ -326,6 +333,9 @@ export default {
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     },
     rowSelection() {
       return {
