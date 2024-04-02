@@ -3,7 +3,13 @@
     <a-tabs default-active-key="1">
       <a-tab-pane key="1" tab="管理">
         <!-- 数据表格 -->
-        <a-table
+        <CustomTable
+          is-show-tools
+          default-auto-refresh
+          :auto-refresh-time="5"
+          table-name="assets-ssh-list"
+          empty-description="没有资产SSH"
+          :active-page="activePage"
           :data-source="list"
           :columns="columns"
           size="middle"
@@ -15,6 +21,7 @@
             x: 'max-content'
           }"
           @change="changePage"
+          @refresh="loadData"
         >
           <template #title>
             <a-space wrap class="search-box">
@@ -79,21 +86,23 @@
                   <a-button type="primary"><UploadOutlined /> 导入<DownOutlined /> </a-button>
                 </a-upload>
               </a-dropdown>
-              <a-tooltip>
-                <template #title>
-                  <div>
-                    <ul>
-                      <li>节点状态是异步获取有一定时间延迟</li>
-                      <li>节点状态会自动识别服务器中是否存在 java 环境,如果没有 Java 环境不能快速安装节点</li>
-                      <li>关联节点如果服务器存在 java 环境,但是插件端未运行则会显示快速安装按钮</li>
-                    </ul>
-                  </div>
-                </template>
-                <QuestionCircleOutlined />
-              </a-tooltip>
             </a-space>
           </template>
-          <template #bodyCell="{ column, text, record }">
+          <template #tableHelp>
+            <a-tooltip>
+              <template #title>
+                <div>
+                  <ul>
+                    <li>节点状态是异步获取有一定时间延迟</li>
+                    <li>节点状态会自动识别服务器中是否存在 java 环境,如果没有 Java 环境不能快速安装节点</li>
+                    <li>关联节点如果服务器存在 java 环境,但是插件端未运行则会显示快速安装按钮</li>
+                  </ul>
+                </div>
+              </template>
+              <QuestionCircleOutlined />
+            </a-tooltip>
+          </template>
+          <template #tableBodyCell="{ column, text, record }">
             <template v-if="column.dataIndex === 'name'">
               <a-tooltip :title="text">
                 <a-button style="padding: 0" type="link" size="small" @click="handleEdit(record)"> {{ text }}</a-button>
@@ -236,7 +245,7 @@
               </a-space>
             </template>
           </template>
-        </a-table>
+        </CustomTable>
         <!-- 编辑区 -->
         <a-modal
           v-model:open="editSshVisible"
@@ -774,6 +783,9 @@ export default {
         },
         selectedRowKeys: this.tableSelections
       }
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     }
   },
   created() {
