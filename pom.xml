@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2019 Of Him Code Technology Studio
+    Jpom is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+    			http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -50,18 +61,18 @@
                     <licenseSets>
                         <licenseSet>
                             <!--HEADER文件-->
-                            <header>HEADER-LICENSE</header>
+                            <header>HEADER.txt</header>
                             <includes>
                                 <!--取消默认排除-->
-                                <include>**/node/**</include>
+                                <include>**</include>
                                 <include>web-vue/index.html</include>
+                                <include>**/dist/index.html</include>
                             </includes>
                             <!--排除文件-->
                             <excludes>
                                 <!-- https://github.com/mathieucarbou/license-maven-plugin/blob/master/license-maven-plugin/src/main/java/com/mycila/maven/plugin/license/Default.java-->
-
-                                <!-- <exclude>docs/**</exclude>-->
-                                <exclude>web-vue/src/**</exclude>
+                                <exclude>docs/**</exclude>
+                                <!-- <exclude>web-vue/src/**</exclude>-->
                                 <!-- <exclude>web-vue2/**</exclude>-->
                                 <!-- <exclude>**/*.yml</exclude>-->
                                 <exclude>**/*.md</exclude>

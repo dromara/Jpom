@@ -2,6 +2,7 @@
   <configuration default="false" name="JpomServerApplication" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="org.dromara.jpom.JpomServerApplication" />
     <module name="server" />
+    <option name="PROGRAM_PARAMETERS" value="--h2-migrate-mysql1 --h2-user1=jpom --h2-pass1=jpom --h2-migrate-mariadb1 --h2-user1=jpom --h2-pass1=jpom --h2-migrate-postgresql --h2-user=jpom --h2-pass=jpom" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="org.dromara.jpom.*" />
