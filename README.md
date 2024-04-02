@@ -61,6 +61,7 @@ git submodule add -b master git@gitee.com:dromara/Jpom.git jpom-parent
 
 git submodule add -b docs git@gitee.com:dromara/Jpom.git docs
 git submodule add -b download_link git@gitee.com:dromara/Jpom.git download-link
+git submodule add -b aliyun-computenest git@gitee.com:dromara/Jpom.git aliyun-computenest
 ```
 
 ### 执行后需要重启 idea 才能生效

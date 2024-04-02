@@ -10,3 +10,7 @@
 	path = download-link
 	url = git@gitee.com:dromara/Jpom.git
 	branch = download_link
+[submodule "aliyun-computenest"]
+	path = aliyun-computenest
+	url = git@gitee.com:dromara/Jpom.git
+	branch = aliyun-computenest
