@@ -28,9 +28,9 @@ import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.plugins.IPlugin;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.exception.IllegalArgument2Exception;
 import org.dromara.jpom.configuration.ProjectConfig;
 import org.dromara.jpom.configuration.ProjectLogConfig;
+import org.dromara.jpom.exception.IllegalArgument2Exception;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
@@ -50,7 +50,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -144,15 +143,12 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         RunMode runMode = originalModel.getRunMode();
         if (runMode == RunMode.Dsl) {
             //
-            this.runDsl(originalModel, ConsoleCommandOp.start.name(), (baseProcess, action) -> {
-                String log = projectInfoService.resolveAbsoluteLog(nodeProjectInfoModel, originalModel);
-                try {
-                    dslScriptServer.run(baseProcess, nodeProjectInfoModel, originalModel, action, log, sync);
-                } catch (Exception e) {
-                    throw Lombok.sneakyThrow(e);
-                }
-                return null;
-            });
+            DslYmlDto mustDslConfig = originalModel.mustDslConfig();
+            try {
+                dslScriptServer.run(mustDslConfig, ConsoleCommandOp.start, nodeProjectInfoModel, originalModel, sync);
+            } catch (Exception e) {
+                throw Lombok.sneakyThrow(e);
+            }
 
         } else {
             String command = this.buildRunCommand(nodeProjectInfoModel, originalModel);
@@ -181,10 +177,11 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         return status;
     }
 
-    private <T> T runDsl(NodeProjectInfoModel nodeProjectInfoModel, String opt, BiFunction<DslYmlDto.BaseProcess, String, T> function) {
-        DslYmlDto.BaseProcess process = nodeProjectInfoModel.getDslProcess(opt);
-        return function.apply(process, opt);
-    }
+//    private <T> T runDsl(NodeProjectInfoModel nodeProjectInfoModel, String opt, BiFunction<DslYmlDto.BaseProcess, DslYmlDto, T> function) {
+//        DslYmlDto mustDslConfig = nodeProjectInfoModel.mustDslConfig();
+//        DslYmlDto.BaseProcess process = mustDslConfig.getDslProcess(opt);
+//        return function.apply(process, mustDslConfig);
+//    }
 
     /**
      * 查询出指定端口信息
@@ -216,15 +213,12 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
             // 运行中
             if (runMode == RunMode.Dsl) {
                 //
-                this.runDsl(originalModel, ConsoleCommandOp.stop.name(), (process, action) -> {
-                    String log = projectInfoService.resolveAbsoluteLog(nodeProjectInfoModel, originalModel);
-                    try {
-                        dslScriptServer.run(process, nodeProjectInfoModel, originalModel, action, log, sync);
-                    } catch (Exception e) {
-                        throw Lombok.sneakyThrow(e);
-                    }
-                    return null;
-                });
+                DslYmlDto config = originalModel.mustDslConfig();
+                try {
+                    dslScriptServer.run(config, ConsoleCommandOp.stop, nodeProjectInfoModel, originalModel, sync);
+                } catch (Exception e) {
+                    throw Lombok.sneakyThrow(e);
+                }
                 boolean checkRun = this.loopCheckRun(nodeProjectInfoModel, originalModel, false);
                 return CommandOpResult.of(checkRun, checkRun ? "stop done" : "stop done,but unsuccessful")
                     .appendMsg(status.getMsgs())
@@ -369,19 +363,16 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         }
         this.asyncWebHooks(nodeProjectInfoModel, originalModel, "beforeRestart");
         if (runMode == RunMode.Dsl) {
-            DslYmlDto.BaseProcess dslProcess = originalModel.tryDslProcess(ConsoleCommandOp.restart.name());
+            DslYmlDto dslConfig = originalModel.mustDslConfig();
+            String opt = ConsoleCommandOp.restart.name();
+            DslYmlDto.BaseProcess dslProcess = dslConfig.tryDslProcess(opt);
             if (dslProcess != null) {
                 // 如果存在自定义 restart 流程
-                //
-                this.runDsl(originalModel, ConsoleCommandOp.restart.name(), (process, action) -> {
-                    String log = projectInfoService.resolveAbsoluteLog(nodeProjectInfoModel, originalModel);
-                    try {
-                        dslScriptServer.run(process, nodeProjectInfoModel, originalModel, action, log, false);
-                    } catch (Exception e) {
-                        throw Lombok.sneakyThrow(e);
-                    }
-                    return null;
-                });
+                try {
+                    dslScriptServer.run(dslConfig, ConsoleCommandOp.restart, nodeProjectInfoModel, originalModel, false);
+                } catch (Exception e) {
+                    throw Lombok.sneakyThrow(e);
+                }
                 // 等待 状态成功
                 boolean run = this.loopCheckRun(nodeProjectInfoModel, originalModel, true);
                 CommandOpResult result = CommandOpResult.of(run, run ? "restart done" : "restart done,but unsuccessful");
@@ -566,16 +557,16 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
             return CommandOpResult.of(false, "file 类型项目没有运行状态");
         }
         if (runMode == RunMode.Dsl) {
-            List<String> status = this.runDsl(originalModel, ConsoleCommandOp.status.name(), (baseProcess, action) -> {
-                // 提前判断脚本 id,避免填写错误在删除项目检测状态时候异常
-                try {
-                    Tuple tuple = dslScriptServer.syncRun(baseProcess, nodeProjectInfoModel, originalModel, action);
-                    return tuple.get(1);
-                } catch (IllegalArgument2Exception argument2Exception) {
-                    log.warn("执行 DSL 脚本异常：{}", argument2Exception.getMessage());
-                    return CollUtil.newArrayList(argument2Exception.getMessage());
-                }
-            });
+            DslYmlDto config = originalModel.mustDslConfig();
+            List<String> status;
+            // 提前判断脚本 id,避免填写错误在删除项目检测状态时候异常
+            try {
+                Tuple tuple = dslScriptServer.syncRun(config, ConsoleCommandOp.status, nodeProjectInfoModel, originalModel);
+                status = tuple.get(1);
+            } catch (IllegalArgument2Exception argument2Exception) {
+                log.warn("执行 DSL 脚本异常：{}", argument2Exception.getMessage());
+                status = CollUtil.newArrayList(argument2Exception.getMessage());
+            }
 
             return Optional.ofNullable(status)
                 .map(strings -> {
@@ -610,19 +601,19 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
     protected CommandOpResult reload(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
         RunMode runMode = originalModel.getRunMode();
         Assert.state(runMode == RunMode.Dsl, "非 DSL 项目不支持此操作");
-        CommandOpResult commandOpResult = this.runDsl(originalModel, ConsoleCommandOp.reload.name(), (baseProcess, action) -> {
-            // 提前判断脚本 id,避免填写错误在删除项目检测状态时候异常
-            try {
-                Tuple tuple = dslScriptServer.syncRun(baseProcess, nodeProjectInfoModel, originalModel, action);
-                int code = tuple.get(0);
-                List<String> list = tuple.get(1);
-                // 如果退出码为 0 认为执行成功
-                return CommandOpResult.of(code == 0, list);
-            } catch (IllegalArgument2Exception argument2Exception) {
-                log.warn("执行 DSL 脚本异常：{}", argument2Exception.getMessage());
-                return CommandOpResult.of(false, argument2Exception.getMessage());
-            }
-        });
+        DslYmlDto config = originalModel.mustDslConfig();
+        CommandOpResult commandOpResult;
+        // 提前判断脚本 id,避免填写错误在删除项目检测状态时候异常
+        try {
+            Tuple tuple = dslScriptServer.syncRun(config, ConsoleCommandOp.reload, nodeProjectInfoModel, originalModel);
+            int code = tuple.get(0);
+            List<String> list = tuple.get(1);
+            // 如果退出码为 0 认为执行成功
+            commandOpResult = CommandOpResult.of(code == 0, list);
+        } catch (IllegalArgument2Exception argument2Exception) {
+            log.warn("执行 DSL 脚本异常：{}", argument2Exception.getMessage());
+            commandOpResult = CommandOpResult.of(false, argument2Exception.getMessage());
+        }
         // 缓存执行结果
         NodeProjectInfoModel update = new NodeProjectInfoModel();
         update.setLastReloadResult(commandOpResult);

@@ -21,8 +21,8 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.exception.IllegalArgument2Exception;
 import org.dromara.jpom.configuration.ProjectLogConfig;
+import org.dromara.jpom.exception.IllegalArgument2Exception;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
@@ -68,11 +68,12 @@ public class DslScriptServer {
     /**
      * 异步执行
      *
-     * @param scriptProcess 脚本流程
-     * @param log           日志
+     * @param dslYmlDto        dsl 配置
+     * @param consoleCommandOp 操作
      */
-    public void run(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel, String action, String log, boolean sync) throws Exception {
-        DslScriptBuilder builder = this.create(scriptProcess, nodeProjectInfoModel, originalModel, action, log);
+    public void run(DslYmlDto dslYmlDto, ConsoleCommandOp consoleCommandOp, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel, boolean sync) throws Exception {
+        String log = projectInfoService.resolveAbsoluteLog(nodeProjectInfoModel, originalModel);
+        DslScriptBuilder builder = this.create(dslYmlDto, consoleCommandOp, nodeProjectInfoModel, originalModel, log);
         Future<?> execute = ThreadUtil.execAsync(builder);
         if (sync) {
             execute.get();
@@ -82,10 +83,11 @@ public class DslScriptServer {
     /**
      * 同步执行
      *
-     * @param scriptProcess 脚本流程
+     * @param dslYmlDto        dsl 配置
+     * @param consoleCommandOp 操作
      */
-    public Tuple syncRun(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel, String action) {
-        try (DslScriptBuilder builder = this.create(scriptProcess, nodeProjectInfoModel, originalModel, action, null)) {
+    public Tuple syncRun(DslYmlDto dslYmlDto, ConsoleCommandOp consoleCommandOp, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
+        try (DslScriptBuilder builder = this.create(dslYmlDto, consoleCommandOp, nodeProjectInfoModel, originalModel, null)) {
             return builder.syncExecute();
         }
     }
@@ -99,7 +101,7 @@ public class DslScriptServer {
      * @return data
      */
     public Tuple resolveProcessScript(NodeProjectInfoModel nodeProjectInfoModel, DslYmlDto dslYml, ConsoleCommandOp op) {
-        DslYmlDto.BaseProcess baseProcess = NodeProjectInfoModel.tryDslProcess(dslYml, op.name());
+        DslYmlDto.BaseProcess baseProcess = dslYml.tryDslProcess(op.name());
         return this.resolveProcessScript(nodeProjectInfoModel, baseProcess);
     }
 
@@ -147,12 +149,13 @@ public class DslScriptServer {
     /**
      * 构建 DSL 执行器
      *
-     * @param scriptProcess        脚本流程
+     * @param dslYmlDto            脚本流程
      * @param nodeProjectInfoModel 项目
      * @param log                  日志路径
-     * @param action               具体操作
+     * @param consoleCommandOp     具体操作
      */
-    private DslScriptBuilder create(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel, String action, String log) {
+    private DslScriptBuilder create(DslYmlDto dslYmlDto, ConsoleCommandOp consoleCommandOp, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel, String log) {
+        DslYmlDto.BaseProcess scriptProcess = dslYmlDto.getDslProcess(consoleCommandOp.name());
         Tuple tuple = this.resolveProcessScript(originalModel, scriptProcess);
         JSONObject jsonObject = tuple.get(0);
         // 判断状态
@@ -164,6 +167,9 @@ public class DslScriptServer {
         String type = jsonObject.getString("type");
         EnvironmentMapBuilder environment = this.environment(nodeProjectInfoModel, scriptProcess);
         environment.put("PROJECT_LOG_FILE", log);
+        DslYmlDto.Run run = dslYmlDto.getRun();
+        String execPath = run.getExecPath();
+        environment.put("JPOM_EXEC_PATH", execPath);
         File scriptFile;
         boolean autoDelete = false;
         if (StrUtil.equals(type, "file")) {
@@ -174,7 +180,7 @@ public class DslScriptServer {
             // 系统生成的脚本需要自动删除
             autoDelete = true;
         }
-        DslScriptBuilder builder = new DslScriptBuilder(action, environment, scriptProcess.getScriptArgs(), log, logConfig.getFileCharset());
+        DslScriptBuilder builder = new DslScriptBuilder(consoleCommandOp.name(), environment, scriptProcess.getScriptArgs(), log, logConfig.getFileCharset());
         builder.setScriptFile(scriptFile);
         builder.setAutoDelete(autoDelete);
         return builder;

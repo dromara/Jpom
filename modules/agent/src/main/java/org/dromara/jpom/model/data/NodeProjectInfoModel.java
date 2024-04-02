@@ -10,7 +10,6 @@
 package org.dromara.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
@@ -21,7 +20,6 @@ import org.dromara.jpom.system.JpomRuntimeException;
 import org.springframework.util.Assert;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * 项目配置信息实体
@@ -179,39 +177,4 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return dslYmlDto;
     }
 
-    /**
-     * 获取 dsl 流程信息
-     *
-     * @param opt 操作
-     * @return 结果
-     */
-    public DslYmlDto.BaseProcess tryDslProcess(String opt) {
-        DslYmlDto build = dslConfig();
-        return tryDslProcess(build, opt);
-    }
-
-    /**
-     * 获取 dsl 流程信息
-     *
-     * @param opt 操作
-     * @return 结果
-     */
-    public static DslYmlDto.BaseProcess tryDslProcess(DslYmlDto build, String opt) {
-        return Optional.ofNullable(build)
-            .map(DslYmlDto::getRun)
-            .map(run -> (DslYmlDto.BaseProcess) ReflectUtil.getFieldValue(run, opt))
-            .orElse(null);
-    }
-
-    /**
-     * 获取 dsl 流程信息
-     *
-     * @param opt 操作
-     * @return 结果
-     */
-    public DslYmlDto.BaseProcess getDslProcess(String opt) {
-        DslYmlDto.BaseProcess baseProcess = this.tryDslProcess(opt);
-        Assert.notNull(baseProcess, "DSL 未配置运行管理或者未配置 " + opt + " 流程");
-        return baseProcess;
-    }
 }

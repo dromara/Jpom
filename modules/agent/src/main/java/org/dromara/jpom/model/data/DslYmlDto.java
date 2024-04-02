@@ -14,10 +14,12 @@ import cn.hutool.setting.yaml.YamlUtil;
 import cn.keepbx.jpom.model.BaseJsonModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.util.Assert;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * dsl yml 配置
@@ -89,6 +91,10 @@ public class DslYmlDto extends BaseJsonModel {
          * 文件变动是否执行重新加载
          */
         private Boolean fileChangeReload;
+        /**
+         * 在指定目录执行
+         */
+        private String execPath;
     }
 
     /**
@@ -177,5 +183,41 @@ public class DslYmlDto extends BaseJsonModel {
          * 是否自动将控制台日志文件备份
          */
         private Boolean autoBackToFile;
+    }
+
+
+    /**
+     * 获取 dsl 流程信息
+     *
+     * @param opt 操作
+     * @return 结果
+     */
+    public static DslYmlDto.BaseProcess tryDslProcess(DslYmlDto build, String opt) {
+        return Optional.ofNullable(build)
+            .map(DslYmlDto::getRun)
+            .map(run -> (DslYmlDto.BaseProcess) ReflectUtil.getFieldValue(run, opt))
+            .orElse(null);
+    }
+
+    /**
+     * 获取 dsl 流程信息
+     *
+     * @param opt 操作
+     * @return 结果
+     */
+    public DslYmlDto.BaseProcess tryDslProcess(String opt) {
+        return tryDslProcess(this, opt);
+    }
+
+    /**
+     * 获取 dsl 流程信息
+     *
+     * @param opt 操作
+     * @return 结果
+     */
+    public DslYmlDto.BaseProcess getDslProcess(String opt) {
+        DslYmlDto.BaseProcess baseProcess = this.tryDslProcess(opt);
+        Assert.notNull(baseProcess, "DSL 未配置运行管理或者未配置 " + opt + " 流程");
+        return baseProcess;
     }
 }
