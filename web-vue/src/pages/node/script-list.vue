@@ -1,7 +1,13 @@
 <template>
   <div class="">
     <!-- 数据表格 -->
-    <a-table
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      :active-page="activePage"
+      table-name="node-script-list"
+      empty-description="没有任何节点脚本"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -12,6 +18,7 @@
         x: 'max-content'
       }"
       @change="changePage"
+      @refresh="loadData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -56,24 +63,25 @@
             </a-dropdown>
           </template>
           <a-button v-else type="primary" danger @click="sync(nodeId)"> <SyncOutlined />同步缓存 </a-button>
-
-          <a-tooltip>
-            <template #title>
-              <div>节点脚本模版是存储在节点中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
-
-              <div>
-                <ul>
-                  <li>执行时候默认不加载全部环境变量、需要脚本里面自行加载</li>
-                  <li>命令文件将在 ${插件端数据目录}/script/xxxx.sh 、bat 执行</li>
-                  <li>新增脚本模版需要到节点管理中去新增</li>
-                </ul>
-              </div>
-            </template>
-            <QuestionCircleOutlined />
-          </a-tooltip>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #tableHelp>
+        <a-tooltip>
+          <template #title>
+            <div>节点脚本模版是存储在节点中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
+
+            <div>
+              <ul>
+                <li>执行时候默认不加载全部环境变量、需要脚本里面自行加载</li>
+                <li>命令文件将在 ${插件端数据目录}/script/xxxx.sh 、bat 执行</li>
+                <li>新增脚本模版需要到节点管理中去新增</li>
+              </ul>
+            </div>
+          </template>
+          <QuestionCircleOutlined />
+        </a-tooltip>
+      </template>
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.tooltip">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
@@ -140,7 +148,7 @@
           </a-space>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 编辑区 -->
     <ScriptEdit
       v-if="editScriptVisible"
@@ -366,6 +374,9 @@ export default {
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     }
   },
   mounted() {

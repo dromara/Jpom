@@ -11,6 +11,9 @@
         <a-tooltip v-else-if="column.dataIndex === 'lastExecuteTime'" :title="parseTime(text)">
           <span>{{ parseTime(text) }}</span>
         </a-tooltip>
+        <a-tooltip v-else-if="column.dataIndex === 'desc'" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
         <a-tooltip v-else-if="column.dataIndex === 'cron'" placement="topLeft" :title="text">
           <a-button v-if="text" type="link" style="padding: 0" size="small" @click="toCronTaskList(text)">
             {{ text }} <UnorderedListOutlined />
@@ -67,7 +70,12 @@ export default {
         {
           title: 'cron',
           dataIndex: 'cron'
-
+          // sorter: (a, b) => (a && b ? a.localeCompare(b, "zh-CN") : 0),
+          // sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: '描述',
+          dataIndex: 'desc'
           // sorter: (a, b) => (a && b ? a.localeCompare(b, "zh-CN") : 0),
           // sortDirections: ["descend", "ascend"],
         },
