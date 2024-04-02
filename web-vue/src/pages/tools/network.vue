@@ -45,7 +45,7 @@
           @finish="onPingSubmit"
         >
           <a-form-item label="提示" name="">
-            <a-alert message="不等同于 PING 测试，此处测试成功表示网络一定互通，此处测试失败网络不一定不通畅" banner />
+            <a-alert message="不等同于 PING 测试，此处测试成功表示网络一定通畅，此处测试失败网络不一定不通畅" banner />
           </a-form-item>
           <a-form-item label="HOST" name="host">
             <a-input
