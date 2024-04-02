@@ -1,7 +1,7 @@
 ROSTemplateFormatVersion: '2015-09-01'
 Description:
-  en: Spring boot Demo
-  zh-cn:  Spring boot Demo
+  en: Jpom Server
+  zh-cn:  Jpom 服务端
 Parameters:
   PayType:
     Type: String
@@ -103,7 +103,7 @@ Resources:
         Ref: Vpc
       # 安全组入端口
       SecurityGroupIngress:
-        - PortRange: 8080/8080
+        - PortRange: 2122/2122
           Priority: 1
           SourceCidrIp: 0.0.0.0/0
           IpProtocol: tcp
@@ -159,11 +159,12 @@ Resources:
           - |
             #!/bin/bash
             yum install -y java
-            mkdir -p /home/admin/application
-            cd /home/admin/application
-            wget '{{ computenest::file::springboot }}' -O package.tgz
-            tar xvf package.tgz
-            /bin/bash deploy.sh start
+            mkdir -p /home/jpom-server/application
+            cd /home/jpom-server/application
+            #wget '{{ computenest::file::HEADER }}' -O package.tgz
+            wget -O server.tar.gz "https://download.jpom.top/release/2.11.3/server-2.11.3-release.tar.gz"
+            tar -zxf server.tar.gz
+            /bin/bash ./bin/Server.sh start -s
           - AccountId:
               Ref: ALIYUN::TenantId
 Outputs:
@@ -173,7 +174,7 @@ Outputs:
       zh-cn: 访问页面。
     Value:
       Fn::Sub:
-      - http://${Address}:8080
+      - http://${Address}:2122
       - Address:
           Fn::Select:
           - 0

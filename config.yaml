@@ -6,11 +6,11 @@ Service:
       Prefix: dm
     SupplierDeployMetadata:
       FileArtifactRelation:
-        '{{ computenest::file::springboot }}':
+        '{{ computenest::file::HEADER }}':
           ArtifactId: ${Artifact.Artifact_1.ArtifactId}
           ArtifactVersion: ${Artifact.Artifact_1.ArtifactVersion}
     TemplateConfigs:
-      - Name: ECS单机版
+      - Name: Jpom服务端
         Url: 'templates/template.yaml'
         AllowedRegions:
           - cn-beijing
@@ -19,7 +19,7 @@ Service:
   ServiceType: private
   OperationMetadata:
     ModifyParametersConfig:
-      - TemplateName: ECS单机版
+      - TemplateName: Jpom服务端
         Operation:
           - Name: 变配ECS实例规格
             Description: 变配ECS实例规格
@@ -30,16 +30,16 @@ Service:
               - EcsInstanceType
   ServiceInfo:
     Locale: zh-CN
-    ShortDescription: spring boot demo
-    Image: 'icons/service_logo.png'
-    Name: SpringBoot单机版(软件包)
+    ShortDescription: Jpom Server
+    Image: 'icons/jpom_logo.png'
+    Name: Jpom 一款原生 ops 软件
   ShareType: Public
   ApprovalType: Manual
 Artifact:
   Artifact_1:
     ArtifactType: File
-    ArtifactName: SpringBootPackage
-    Description: 这是一个使用SpringBoot的测试包
+    ArtifactName: HEADER
+    Description: 这是一个 HEADER 文件
     ArtifactProperty:
       RegionId: cn-hangzhou
-      Url: 'artifacts/package.tgz'
+      Url: 'artifacts/HEADER.txt'
