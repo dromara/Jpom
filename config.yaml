@@ -1,0 +1,45 @@
+Service:
+  RegionId: cn-hangzhou
+  DeployType: ros
+  DeployMetadata:
+    ServiceInstanceNameRule:
+      Prefix: dm
+    SupplierDeployMetadata:
+      FileArtifactRelation:
+        '{{ computenest::file::springboot }}':
+          ArtifactId: ${Artifact.Artifact_1.ArtifactId}
+          ArtifactVersion: ${Artifact.Artifact_1.ArtifactVersion}
+    TemplateConfigs:
+      - Name: ECS单机版
+        Url: 'templates/template.yaml'
+        AllowedRegions:
+          - cn-beijing
+          - cn-hangzhou
+          - cn-shanghai
+  ServiceType: private
+  OperationMetadata:
+    ModifyParametersConfig:
+      - TemplateName: ECS单机版
+        Operation:
+          - Name: 变配ECS实例规格
+            Description: 变配ECS实例规格
+            Type: Custom
+            SupportPredefinedParameters: false
+            EnableLogging: false
+            Parameters:
+              - EcsInstanceType
+  ServiceInfo:
+    Locale: zh-CN
+    ShortDescription: spring boot demo
+    Image: 'icons/service_logo.png'
+    Name: SpringBoot单机版(软件包)
+  ShareType: Public
+  ApprovalType: Manual
+Artifact:
+  Artifact_1:
+    ArtifactType: File
+    ArtifactName: SpringBootPackage
+    Description: 这是一个使用SpringBoot的测试包
+    ArtifactProperty:
+      RegionId: cn-hangzhou
+      Url: 'artifacts/package.tgz'
