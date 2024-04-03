@@ -593,28 +593,20 @@ export default {
     },
     //  删除命令
     handleDelete(row) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除“' + row.name + '”命令？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            deleteCommand(row.id)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.getCommandData()
-                }
-
-                resolve()
+        onOk: () => {
+          return deleteCommand(row.id).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.getCommandData()
+            }
           })
         }
       })

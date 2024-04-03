@@ -174,32 +174,24 @@ export default {
     },
     // 删除文件
     deleteLog() {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除日志文件么？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            const params = {
-              machineId: that.machineId,
-              path: that.temp.path
-            }
-            // 删除日志
-            deleteLog(params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.visible = false
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return deleteLog({
+            machineId: this.machineId,
+            path: this.temp.path
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.visible = false
+              this.loadData()
+            }
           })
         }
       })
