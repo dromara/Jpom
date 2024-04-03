@@ -373,7 +373,7 @@
               />
             </a-form-item>
 
-            <a-alert v-if="temp.buildMode === undefined || true" message="还没有选择构建方式" banner />
+            <a-alert v-if="temp.buildMode === undefined" message="还没有选择构建方式" banner />
             <template v-else>
               <a-form-item label="环境变量" name="buildEnvParameter">
                 <a-textarea
