@@ -171,34 +171,25 @@ export default {
     },
     // 删除日志备份文件
     handleDelete(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除文件么？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 请求参数
-            const params = {
-              nodeId: that.nodeId,
-              id: that.projectId,
+        onOk: () => {
+          return deleteProjectLogBackFile({
+            nodeId: this.nodeId,
+            id: this.projectId,
 
-              name: record.filename
-            }
-            // 删除
-            deleteProjectLogBackFile(params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+            name: record.filename
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })

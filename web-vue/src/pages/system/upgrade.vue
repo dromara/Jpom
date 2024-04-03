@@ -592,26 +592,20 @@ export default {
         '<li>下载完成后需要手动选择更新到节点才能完成节点更新奥</li>' +
         '<li>如果升级失败需要手动恢复奥</li>' +
         ' </ul>'
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            downloadRemote()
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({ message: res.msg })
-                  that.getNodeList()
-                } else {
-                  //$notification.error({ message: res.msg });
-                }
-                resolve()
-              })
-              .catch(reject)
+        onOk: () => {
+          return downloadRemote().then((res) => {
+            if (res.code === 200) {
+              $notification.success({ message: res.msg })
+              this.getNodeList()
+            } else {
+              //$notification.error({ message: res.msg });
+            }
           })
         }
       })

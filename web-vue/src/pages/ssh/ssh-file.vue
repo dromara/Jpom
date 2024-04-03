@@ -871,7 +871,6 @@ export default {
     },
     // 删除文件夹
     handleDeletePath() {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
@@ -879,71 +878,54 @@ export default {
         okText: '确认',
         cancelText: '取消',
         onOk: async () => {
-          return await new Promise((resolve, reject) => {
-            // 请求参数
-            const params = {
-              id: that.reqDataId,
-              allowPathParent: that.tempNode.allowPathParent,
-              nextPath: that.tempNode.nextPath
-            }
-            // 删除
-            deleteFile(that.baseUrl, params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  // 刷新树
-                  const activeKey = this.tempNode.activeKey
-                  // 获取上一级节点
-                  const parentNode = this.getTreeNode(activeKey.slice(0, activeKey.length - 1))
-                  // 设置当前选中
-                  this.selectedKeys = [parentNode.key]
-                  // 设置缓存节点
-                  this.tempNode = parentNode
-                  // 加载上一级文件列表
-                  this.loadTreeNode()
-
-                  that.fileList = []
-                  //this.loadFileList();
-                }
-                resolve()
+          return deleteFile(this.baseUrl, {
+            id: this.reqDataId,
+            allowPathParent: this.tempNode.allowPathParent,
+            nextPath: this.tempNode.nextPath
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              // 刷新树
+              const activeKey = this.tempNode.activeKey
+              // 获取上一级节点
+              const parentNode = this.getTreeNode(activeKey.slice(0, activeKey.length - 1))
+              // 设置当前选中
+              this.selectedKeys = [parentNode.key]
+              // 设置缓存节点
+              this.tempNode = parentNode
+              // 加载上一级文件列表
+              this.loadTreeNode()
+
+              this.fileList = []
+              //this.loadFileList();
+            }
           })
         }
       })
     },
     // 删除
     handleDelete(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除文件么？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 请求参数
-            const params = {
-              id: that.reqDataId,
-              allowPathParent: record.allowPathParent,
-              nextPath: record.nextPath,
-              name: record.name
-            }
-            // 删除
-            deleteFile(that.baseUrl, params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadFileList()
-                }
-                resolve()
+        onOk: () => {
+          return deleteFile(this.baseUrl, {
+            id: this.reqDataId,
+            allowPathParent: record.allowPathParent,
+            nextPath: record.nextPath,
+            name: record.name
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadFileList()
+            }
           })
         }
       })

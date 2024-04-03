@@ -244,31 +244,24 @@ export default {
 
     // submit
     onSubmit(restart) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            that.temp.restart = restart
-            editConfig(that.temp)
-              .then((res) => {
-                if (res.code === 200) {
-                  // 成功
-                  $notification.success({
-                    message: res.msg
-                  })
-                  if (that.temp.restart) {
-                    that.startCheckRestartStatus(res.msg)
-                  }
-                  //
-                }
-                resolve()
+        onOk: () => {
+          this.temp.restart = restart
+          return editConfig(this.temp).then((res) => {
+            if (res.code === 200) {
+              // 成功
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              if (this.temp.restart) {
+                this.startCheckRestartStatus(res.msg)
+              }
+            }
           })
         }
       })
@@ -327,7 +320,6 @@ export default {
     },
     // submit ip config
     onSubmitIp() {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
@@ -335,19 +327,14 @@ export default {
           '真的要保存当前配置吗？IP 授权请慎重配置奥( 授权是指只允许访问的 IP ),配置后立马生效 如果配置错误将出现无法访问的情况,需要手动恢复奥！！！',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            editIpConfig(that.ipTemp)
-              .then((res) => {
-                if (res.code === 200) {
-                  // 成功
-                  $notification.success({
-                    message: res.msg
-                  })
-                }
-                resolve()
+        onOk: () => {
+          return editIpConfig(this.ipTemp).then((res) => {
+            if (res.code === 200) {
+              // 成功
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+            }
           })
         }
       })

@@ -895,29 +895,22 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         content: '真的要删除机器 SSH 么？',
         zIndex: 1009,
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            machineSshDelete({
-              id: record.id
-            })
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return machineSshDelete({
+            id: record.id
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })
@@ -983,34 +976,25 @@ export default {
     },
     // 删除工作空间的数据
     handleDeleteWorkspaceItem(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除对应工作空间的 SSH 么？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            deleteForeSsh(record.id)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  machineListGroupWorkspaceSsh({
-                    id: that.temp.machineSshId
-                  }).then((res) => {
-                    if (res.code === 200) {
-                      that.workspaceSshList = res.data
-                    }
-                  })
-                }
-                resolve()
-              })
-              .catch(reject)
-          })
+        onOk: async () => {
+          const { code, msg } = await deleteForeSsh(record.id)
+          if (code === 200) {
+            $notification.success({
+              message: msg
+            })
+            const res = await machineListGroupWorkspaceSsh({
+              id: this.temp.machineSshId
+            })
+            if (res.code === 200) {
+              this.workspaceSshList = res.data
+            }
+          }
         }
       })
     },
@@ -1068,27 +1052,20 @@ export default {
     },
     // 清除隐藏字段
     handerRestHideField(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要清除 SSH 隐藏字段信息么？（密码，私钥）',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 恢复
-            restHideField(record.id)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return restHideField(record.id).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })

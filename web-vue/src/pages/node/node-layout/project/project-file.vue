@@ -1040,34 +1040,25 @@ export default {
       const msg = this.uploadPath
         ? '真的要清空 【' + this.uploadPath + '】目录和文件么？'
         : '真的要清空项目目录和文件么？'
-      const that = this
       $confirm({
         title: '系统提示',
         content: msg,
         okText: '确认',
         zIndex: 1009,
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 请求参数
-            const params = {
-              nodeId: that.nodeId,
-              id: that.projectId,
-              type: 'clear',
-              levelName: that.uploadPath
-            }
-            // 删除
-            deleteProjectFile(params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadFileList()
-                }
-                resolve()
+        onOk: () => {
+          return deleteProjectFile({
+            nodeId: this.nodeId,
+            id: this.projectId,
+            type: 'clear',
+            levelName: this.uploadPath
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadFileList()
+            }
           })
         }
       })
@@ -1091,34 +1082,25 @@ export default {
       const msg = record.isDirectory
         ? '真的要删除【' + record.filename + '】文件夹么？'
         : '真的要删除【' + record.filename + '】文件么？'
-      const that = this
       $confirm({
         title: '系统提示',
         content: msg,
         okText: '确认',
         zIndex: 1009,
         cancelText: '取消',
-        onOk: async () => {
-          return await new Promise((resolve, reject) => {
-            // 请求参数
-            const params = {
-              nodeId: that.nodeId,
-              id: that.projectId,
-              levelName: record.levelName,
-              filename: record.filename
-            }
-            // 删除
-            deleteProjectFile(params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  this.loadFileList()
-                }
-                resolve()
+        onOk: () => {
+          return deleteProjectFile({
+            nodeId: this.nodeId,
+            id: this.projectId,
+            levelName: record.levelName,
+            filename: record.filename
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadFileList()
+            }
           })
         }
       })

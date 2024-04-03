@@ -443,36 +443,27 @@ export default {
       const msg = record.isDirectory
         ? '真的要删除【' + record.filename + '】文件夹么？'
         : '真的要删除【' + record.filename + '】文件么？'
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: msg,
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 请求参数
-            const params = {
-              nodeId: that.nodeId,
-              id: that.projectId,
-              levelName: record.levelName,
-              filename: record.filename,
-              backupId: that.temp.filename
-            }
-            // 删除
-            backupDeleteProjectFile(params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                  that.loadFileList()
-                }
-                resolve()
+        onOk: () => {
+          return backupDeleteProjectFile({
+            nodeId: this.nodeId,
+            id: this.projectId,
+            levelName: record.levelName,
+            filename: record.filename,
+            backupId: this.temp.filename
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+              this.loadFileList()
+            }
           })
         }
       })
@@ -480,36 +471,26 @@ export default {
     // 删除备份
     handlBackupeDelete(record) {
       const msg = '真的要删除【' + record.filename + '】备份文件夹么？'
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: msg,
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 请求参数
-            const params = {
-              nodeId: that.nodeId,
-              id: that.projectId,
-              levelName: '/',
-              filename: '/',
-              backupId: record.filename
-            }
-            // 删除
-            backupDeleteProjectFile(params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadBackupList()
-                }
-
-                resolve()
+        onOk: () => {
+          return backupDeleteProjectFile({
+            nodeId: this.nodeId,
+            id: this.projectId,
+            levelName: '/',
+            filename: '/',
+            backupId: record.filename
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadBackupList()
+            }
           })
         }
       })
