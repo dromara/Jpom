@@ -1131,27 +1131,20 @@ export default {
       this.getNodeProjectData()
     },
     reSyncProject(nodeId) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '确定要重新同步当前节点项目缓存信息吗？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            syncProject(nodeId)
-              .then((res) => {
-                if (res.code == 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.getNodeProjectData()
-                }
-                resolve()
+        onOk: () => {
+          return syncProject(nodeId).then((res) => {
+            if (res.code == 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.getNodeProjectData()
+            }
           })
         }
       })
@@ -1169,32 +1162,25 @@ export default {
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.projList[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: msg,
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            //
-            sortItemProject({
-              id: record.id,
-              method: method,
-              compareId: compareId
-            })
-              .then((res) => {
-                if (res.code == 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-
-                  that.getNodeProjectData()
-                }
-                resolve()
+        onOk: () => {
+          return sortItemProject({
+            id: record.id,
+            method: method,
+            compareId: compareId
+          }).then((res) => {
+            if (res.code == 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+
+              this.getNodeProjectData()
+            }
           })
         }
       })
@@ -1279,7 +1265,6 @@ export default {
     },
     // 删除
     handleDelete(record, thorough) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
@@ -1288,26 +1273,18 @@ export default {
           : '真的要删除项目么？删除项目不会删除项目相关文件奥,建议先清理项目相关文件再删除项目',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            const params = {
-              nodeId: record.nodeId,
-              id: record.projectId,
-              thorough: thorough
-            }
-            deleteProject(params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-
-                  that.getNodeProjectData()
-                }
-                resolve()
+        onOk: () => {
+          return deleteProject({
+            nodeId: record.nodeId,
+            id: record.projectId,
+            thorough: thorough
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.getNodeProjectData()
+            }
           })
         }
       })

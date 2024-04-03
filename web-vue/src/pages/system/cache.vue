@@ -235,27 +235,21 @@ export default {
     handleClearErrorWorkspaceClick(event, tableName) {
       // If you don't want click extra trigger collapse, you can prevent this:
       event.stopPropagation()
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除' + tableName + '表中的错误数据吗？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            clearErrorWorkspace({ tableName })
-              .then((res) => {
-                if (res.code === 200) {
-                  // 成功
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return clearErrorWorkspace({ tableName }).then((res) => {
+            if (res.code === 200) {
+              // 成功
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })

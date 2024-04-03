@@ -1072,7 +1072,6 @@ export default {
     },
     // submit
     onNodeSubmit(restart) {
-      const that = this
       $confirm({
         title: '系统提示',
         content: restart
@@ -1081,30 +1080,26 @@ export default {
         okText: '确认',
         zIndex: 1009,
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            that.confirmLoading = true
-            saveNodeConfig({
-              ...that.temp,
-              restart: restart,
-              ids: that.tableSelections.join(',')
-            })
-              .then((res) => {
-                if (res.code === 200) {
-                  // 成功
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.nodeConfigVisible = false
-                  that.tableSelections = []
-                }
-                resolve()
-              })
-              .catch(reject)
-              .finally(() => {
-                that.confirmLoading = false
-              })
+        onOk: () => {
+          this.confirmLoading = true
+          return saveNodeConfig({
+            ...this.temp,
+            restart: restart,
+            ids: this.tableSelections.join(',')
           })
+            .then((res) => {
+              if (res.code === 200) {
+                // 成功
+                $notification.success({
+                  message: res.msg
+                })
+                this.nodeConfigVisible = false
+                this.tableSelections = []
+              }
+            })
+            .finally(() => {
+              this.confirmLoading = false
+            })
         }
       })
     }
