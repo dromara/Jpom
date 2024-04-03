@@ -4,11 +4,11 @@
       <a-card hoverable class="card">
         <a-card-meta>
           <template #description>
-            <a-result status="404" title="404" sub-title="您访问的页面不存在">
+            <a-result status="404" title="404" :sub-title="$t('page.404.subTitle')">
               <a-space>
                 <a-button type="primary" @click="goHome">
                   <HomeOutlined />
-                  <span>回到主页</span>
+                  <span>{{ $t('page.404.goHome') }}</span>
                 </a-button>
                 <!-- <a-button type="primary" @click="goBack">
                   <left-outlined />
