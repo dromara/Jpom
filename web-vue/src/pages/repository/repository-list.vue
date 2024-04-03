@@ -898,35 +898,22 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         content: '真的要删除仓库信息么？',
         okText: '确认',
         cancelText: '取消',
         zIndex: 1009,
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            const params = {
-              id: record.id
-              //isRealDel: that.isSystem,
+        onOk: () => {
+          return deleteRepository({
+            id: record.id
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
+              })
+              this.loadData()
             }
-            // 删除
-            deleteRepository(params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                  resolve()
-                } else {
-                  reject()
-                }
-              })
-              .catch(() => {
-                reject()
-              })
           })
         }
       })
@@ -934,27 +921,20 @@ export default {
 
     // 清除隐藏字段
     restHideField(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         content: '真的要清除仓库隐藏字段信息么？（密码，私钥）',
         okText: '确认',
         cancelText: '取消',
         zIndex: 1009,
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 恢复
-            restHideField(record.id)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return restHideField(record.id).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })
@@ -973,33 +953,26 @@ export default {
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
-      const that = this
       $confirm({
         title: '系统提示',
         content: msg,
         okText: '确认',
         cancelText: '取消',
         zIndex: 1009,
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 解锁
-            sortItem({
-              id: record.id,
-              method: method,
-              compareId: compareId
-            })
-              .then((res) => {
-                if (res.code == 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-
-                  that.loadData()
-                  return false
-                }
-                resolve()
+        onOk: () => {
+          return sortItem({
+            id: record.id,
+            method: method,
+            compareId: compareId
+          }).then((res) => {
+            if (res.code == 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+
+              this.loadData()
+              return false
+            }
           })
         }
       })

@@ -108,29 +108,22 @@ export default {
       })
     },
     addItemHander() {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
-        content: '确认创建该【' + that.addName + '】配置文件吗？配置文件一旦创建不能通过管理页面删除的奥？',
+        content: '确认创建该【' + this.addName + '】配置文件吗？配置文件一旦创建不能通过管理页面删除的奥？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            addItem({ name: that.addName })
-              .then((res) => {
-                if (res.code === 200) {
-                  // 成功
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.addName = ''
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return addItem({ name: this.addName }).then((res) => {
+            if (res.code === 200) {
+              // 成功
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.addName = ''
+              this.loadData()
+            }
           })
         }
       })
