@@ -224,33 +224,24 @@ export default {
       this.temp = record
     },
     handleDelete(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除执行记录么？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 组装参数
-            const params = {
-              nodeId: that.nodeId,
-              id: record.scriptId,
-              executeId: record.id
-            }
-            // 删除
-            scriptDel(params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+        onOk() {
+          return scriptDel({
+            nodeId: this.nodeId,
+            id: record.scriptId,
+            executeId: record.id
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })
