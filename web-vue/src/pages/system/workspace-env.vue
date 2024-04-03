@@ -365,30 +365,23 @@ export default {
     },
     //
     handleEnvDelete(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的删除当前变量吗？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            deleteWorkspaceEnv({
-              id: record.id,
-              workspaceId: that.workspaceId
-            })
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadDataEnvVar()
-                }
-                resolve()
+        onOk: () => {
+          return deleteWorkspaceEnv({
+            id: record.id,
+            workspaceId: this.workspaceId
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadDataEnvVar()
+            }
           })
         }
       })
