@@ -66,7 +66,13 @@ Parameters:
       InstanceChargeType: ${PayType}
     AllowedValues:
       - ecs.c6.large
+      - ecs.c6.xlarge
       - ecs.c6.2xlarge
+      - ecs.c8y.large
+      - ecs.c8y.xlarge
+      - ecs.e-c1m2.xlarge
+      - ecs.t6-c1m2.large
+      - ecs.c7t.xlarge
   InstancePassword:
     NoEcho: true
     Type: String
@@ -104,6 +110,11 @@ Resources:
       # 安全组入端口
       SecurityGroupIngress:
         - PortRange: 2122/2122
+          Priority: 1
+          SourceCidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          NicType: internet
+        - PortRange: 22/22
           Priority: 1
           SourceCidrIp: 0.0.0.0/0
           IpProtocol: tcp
@@ -162,8 +173,8 @@ Resources:
             mkdir -p /home/jpom-server/application
             cd /home/jpom-server/application
             #wget '{{ computenest::file::HEADER }}' -O package.tgz
-            versions=$(curl -LfsS https://jpom.top/docs/versions.release.tag)
-            wget -O server.tar.gz "https://download.jpom.top/release/${!version}/server-${!version}-release.tar.gz"
+            versions=$(curl -LfsS https://jpom-docs.oss-cn-hangzhou-internal.aliyuncs.com/docs/versions.release.tag)
+            wget -O server.tar.gz "https://jpom-releases.oss-cn-hangzhou-internal.aliyuncs.com/release/${!versions}/server-${!versions}-release.tar.gz"
             tar -zxf server.tar.gz
             /bin/bash ./bin/Server.sh start -s
           - AccountId:
