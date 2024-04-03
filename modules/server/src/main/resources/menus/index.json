@@ -164,6 +164,10 @@
         "title": "我的工作空间"
       },
       {
+        "id": "netTools",
+        "title": "网络工具"
+      },
+      {
         "id": "cronTools",
         "title": "Cron表达式"
       }

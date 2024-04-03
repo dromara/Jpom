@@ -262,6 +262,8 @@ export const PROJECT_DSL_DEFATUL =
   '#    scriptEnv:\r\n' +
   '#      "boot_active": test\r\n' +
   '#  fileChangeReload: true\r\n' +
+  '#  在指定目录执行: ./ 项目目录  /root/ 特定目录 默认在 ${jpom_agent_data_path}/script_run_cache \r\n' +
+  '#  execPath: ./\r\n' +
   'file:\r\n' +
   '# 备份文件保留个数\r\n' +
   '#  backupCount: 5\r\n' +

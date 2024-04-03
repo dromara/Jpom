@@ -61,6 +61,8 @@ public class JpomServerApplication {
      * --h2-migrate-mysql --h2-user=jpom --h2-pass=jpom  将 h2 数据库迁移到 mysql
      * <p>
      * --h2-migrate-postgresql --h2-user=jpom --h2-pass=jpom 将 h2 数据库迁移到 postgresql
+     * <p>
+     * --h2-migrate-mariadb --h2-user=jpom --h2-pass=jpom 将 h2 数据库迁移到 mariadb
      *
      * @param args 参数
      * @throws Exception 异常

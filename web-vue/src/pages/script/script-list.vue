@@ -1,7 +1,13 @@
 <template>
   <div>
     <!-- 数据表格 -->
-    <a-table
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      :active-page="activePage"
+      table-name="server-script-list"
+      empty-description="没有任何脚本"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -13,6 +19,7 @@
         x: 'max-content'
       }"
       @change="changePage"
+      @refresh="loadData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -53,23 +60,25 @@
             @click="syncToWorkspaceShow"
             >工作空间同步</a-button
           >
-          <a-tooltip>
-            <template #title>
-              <div>脚本模版是存储在服务端中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
-
-              <div>
-                <ul>
-                  <li>执行时候默认不加载全部环境变量、需要脚本里面自行加载</li>
-                  <li>命令文件将在 ${数据目录}/script/xxxx.sh、bat 执行</li>
-                  <li>分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本,一般用户节点分发功能中的 DSL 模式</li>
-                </ul>
-              </div>
-            </template>
-            <QuestionCircleOutlined />
-          </a-tooltip>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #tableHelp>
+        <a-tooltip>
+          <template #title>
+            <div>脚本模版是存储在服务端中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
+
+            <div>
+              <ul>
+                <li>执行时候默认不加载全部环境变量、需要脚本里面自行加载</li>
+                <li>命令文件将在 ${数据目录}/script/xxxx.sh、bat 执行</li>
+                <li>分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本,一般用户节点分发功能中的 DSL 模式</li>
+              </ul>
+            </div>
+          </template>
+          <QuestionCircleOutlined />
+        </a-tooltip>
+      </template>
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'nodeId'">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ nodeMap[text] }}</span>
@@ -129,7 +138,7 @@
           </a-space>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 编辑区 -->
     <a-modal
       v-model:open="editScriptVisible"
@@ -563,6 +572,9 @@ export default {
     ...mapState(useAppStore, ['getWorkspaceId']),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     },
     rowSelection() {
       return {

@@ -94,7 +94,7 @@ const columns = [
     dataIndex: 'createTimeMillis',
     sorter: true,
     customRender: ({ text, record }) => parseTime(text || record.optTime),
-    width: 160
+    width: '170px'
   },
   { title: '浏览器', dataIndex: 'userAgent', ellipsis: true, width: 100 }
 ]

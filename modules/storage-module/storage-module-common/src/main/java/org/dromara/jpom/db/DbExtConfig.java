@@ -147,6 +147,10 @@ public class DbExtConfig implements InitializingBean {
         /**
          * postgresql
          */
-        POSTGRESQL
+        POSTGRESQL,
+        /**
+         * Mariadb
+         */
+        MARIADB
     }
 }

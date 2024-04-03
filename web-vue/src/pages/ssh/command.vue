@@ -1,6 +1,12 @@
 <template>
   <div>
-    <a-table
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      :active-page="activePage"
+      table-name="ssh-command-list"
+      empty-description="没有任何SSH脚本命令"
       :data-source="commandList"
       :columns="columns"
       size="middle"
@@ -12,6 +18,7 @@
         x: 'max-content'
       }"
       @change="changePage"
+      @refresh="getCommandData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -52,30 +59,32 @@
               </a-menu>
             </template>
           </a-dropdown>
-          <a-tooltip>
-            <template #title>
-              <div>命令模版是用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
-
-              <div>
-                <ul>
-                  <li>命令内容支持工作空间环境变量</li>
-                  <li>
-                    执行命令将自动替换为 sh
-                    命令文件、并自动加载环境变量：/etc/profile、/etc/bashrc、~/.bashrc、~/.bash_profile
-                  </li>
-                  <li>
-                    执行命令包含：<b>#disabled-template-auto-evn</b>
-                    将取消自动加载环境变量(注意是整行不能包含空格)
-                  </li>
-                  <li>命令文件将上传至 ${user.home}/.jpom/xxxx.sh 执行完成将自动删除</li>
-                </ul>
-              </div>
-            </template>
-            <QuestionCircleOutlined />
-          </a-tooltip>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #tableHelp>
+        <a-tooltip>
+          <template #title>
+            <div>命令模版是用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
+
+            <div>
+              <ul>
+                <li>命令内容支持工作空间环境变量</li>
+                <li>
+                  执行命令将自动替换为 sh
+                  命令文件、并自动加载环境变量：/etc/profile、/etc/bashrc、~/.bashrc、~/.bash_profile
+                </li>
+                <li>
+                  执行命令包含：<b>#disabled-template-auto-evn</b>
+                  将取消自动加载环境变量(注意是整行不能包含空格)
+                </li>
+                <li>命令文件将上传至 ${user.home}/.jpom/xxxx.sh 执行完成将自动删除</li>
+              </ul>
+            </div>
+          </template>
+          <QuestionCircleOutlined />
+        </a-tooltip>
+      </template>
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'name'">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
@@ -96,7 +105,7 @@
           </a-space>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 编辑命令 -->
     <a-modal
       v-model:open="editCommandVisible"
@@ -489,6 +498,9 @@ export default {
     ...mapState(useAppStore, ['getWorkspaceId']),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     },
     rowSelection() {
       return {

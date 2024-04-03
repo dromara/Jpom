@@ -1,7 +1,13 @@
 <template>
   <div>
     <!-- 数据表格 -->
-    <a-table
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="5"
+      table-name="assets-docker-list"
+      empty-description="没有资产DOCKER"
+      :active-page="activePage"
       size="middle"
       :data-source="list"
       :columns="columns"
@@ -13,6 +19,7 @@
         x: 'max-content'
       }"
       @change="changePage"
+      @refresh="loadData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -65,7 +72,7 @@
           </a-tooltip>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'name'">
           <a-tooltip :title="text">
             <a-button style="padding: 0" type="link" size="small" @click="handleEdit(record)"> {{ text }}</a-button>
@@ -187,7 +194,7 @@
           </a-space>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 编辑区 -->
     <a-modal
       v-model:open="editVisible"
@@ -722,6 +729,9 @@ export default {
         },
         selectedRowKeys: this.tableSelections
       }
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     }
   },
   mounted() {

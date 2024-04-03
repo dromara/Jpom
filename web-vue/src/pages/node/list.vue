@@ -487,7 +487,7 @@
     </template>
 
     <!-- 编辑区 -->
-    <a-modal
+    <customModal
       v-model:open="editNodeVisible"
       destroy-on-close
       width="50%"
@@ -546,11 +546,11 @@
           </a-select>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </customModal>
     <!-- 管理节点 -->
     <NodeFunc v-if="drawerVisible" :id="temp.id" :name="temp.name" @close="onClose"></NodeFunc>
     <!-- Terminal -->
-    <a-modal
+    <customModal
       v-model:open="terminalVisible"
       :body-style="{
         padding: '0 10px',
@@ -564,10 +564,10 @@
       :mask-closable="false"
     >
       <terminal1 v-if="terminalVisible" :ssh-id="temp.sshId" :node-id="temp.id" />
-    </a-modal>
+    </customModal>
 
     <!-- 快速安装插件端 -->
-    <a-modal
+    <CustomModal
       v-model:open="fastInstallNode"
       destroy-on-close
       width="80%"
@@ -582,9 +582,9 @@
       "
     >
       <fastInstall v-if="fastInstallNode"></fastInstall>
-    </a-modal>
+    </CustomModal>
     <!-- 同步到其他工作空间 -->
-    <a-modal
+    <customModal
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -625,9 +625,9 @@
           </a-select>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </customModal>
     <!-- 历史监控 -->
-    <a-modal
+    <customModal
       v-model:open="monitorVisible"
       destroy-on-close
       width="75%"
@@ -636,7 +636,7 @@
       :mask-closable="false"
     >
       <node-top v-if="monitorVisible" :type="temp.type" :node-id="temp.id"></node-top>
-    </a-modal>
+    </customModal>
   </div>
 </template>
 

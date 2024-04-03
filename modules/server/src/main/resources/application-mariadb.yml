@@ -1,0 +1,21 @@
+#
+# Copyright (c) 2019 Of Him Code Technology Studio
+# Jpom is licensed under Mulan PSL v2.
+# You can use this software according to the terms and conditions of the Mulan PSL v2.
+# You may obtain a copy of Mulan PSL v2 at:
+# 			http://license.coscl.org.cn/MulanPSL2
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+# See the Mulan PSL v2 for more details.
+#
+
+jpom:
+  db:
+    # 数据库默认 支持 ：H2、MYSQL、MARIADB、POSTGRESQL
+    mode: MARIADB
+    url: jdbc:mariadb://127.0.0.1:3309/jpom
+    # 数据库账号 默认 jpom
+    #user-name: jpom
+    user-name: root
+    # 数据库密码 默认 jpom 如果自行配置请保证密码强度
+    # user-pwd: jpom
+    user-pwd: jpom123456

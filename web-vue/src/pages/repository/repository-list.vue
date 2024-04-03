@@ -1,7 +1,13 @@
 <template>
   <div>
     <!-- 表格 -->
-    <a-table
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      :active-page="activePage"
+      table-name="repository-list"
+      empty-description="没有任何仓库"
       size="middle"
       :columns="columns"
       :data-source="list"
@@ -18,6 +24,7 @@
           loadData()
         }
       "
+      @refresh="loadData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -69,30 +76,32 @@
             </template>
             <a-button type="primary" @click="handleAddGitee"><QuestionCircleOutlined />令牌导入</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handlerExportData">导出</a-button>
-          <a-dropdown>
-            <template #overlay>
-              <a-menu>
-                <a-menu-item key="1">
-                  <a-button type="primary" @click="handlerImportTemplate()">下载导入模板</a-button>
-                </a-menu-item>
-              </a-menu>
-            </template>
-
-            <a-upload
-              name="file"
-              accept=".csv"
-              action=""
-              :show-upload-list="false"
-              :multiple="false"
-              :before-upload="beforeUpload"
-            >
-              <a-button type="primary"><UploadOutlined /> 导入 <DownOutlined /> </a-button>
-            </a-upload>
-          </a-dropdown>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record, index }">
+      <template #toolPrefix>
+        <a-button type="primary" size="small" @click="handlerExportData"><DownloadOutlined />导出</a-button>
+        <a-dropdown>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item key="1">
+                <a-button type="primary" size="small" @click="handlerImportTemplate()">下载导入模板</a-button>
+              </a-menu-item>
+            </a-menu>
+          </template>
+
+          <a-upload
+            name="file"
+            accept=".csv"
+            action=""
+            :show-upload-list="false"
+            :multiple="false"
+            :before-upload="beforeUpload"
+          >
+            <a-button type="primary" size="small"><UploadOutlined /> 导入 <DownOutlined /> </a-button>
+          </a-upload>
+        </a-dropdown>
+      </template>
+      <template #tableBodyCell="{ column, text, record, index }">
         <template v-if="column.tooltip">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
@@ -161,7 +170,7 @@
           </a-space>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 编辑区 -->
     <a-modal
       v-model:open="editVisible"
@@ -711,6 +720,9 @@ export default {
     },
     reposPagination() {
       return COMPUTED_PAGINATION(this.giteeImportForm, this.PAGE_DEFAULT_SIZW_OPTIONS)
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     },
     rowSelection() {
       return {
