@@ -426,81 +426,60 @@ export default {
     },
     // 删除用户
     handleDelete(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         content: '真的要删除用户么？',
         zIndex: 1009,
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            deleteUser(record.id)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return deleteUser(record.id).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })
     },
     // 解锁
     handleUnlock(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         content: '真的要解锁用户么？',
         zIndex: 1009,
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 解锁用户
-            unlockUser(record.id)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return unlockUser(record.id).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })
     },
     //
     handleCloseMfa(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         content: '真的关闭当前用户的两步验证么？',
         zIndex: 1009,
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 解锁用户
-            closeUserMfa(record.id)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return closeUserMfa(record.id).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })
@@ -529,29 +508,21 @@ export default {
     },
     //
     restUserPwdHander(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '确定要重置用户密码吗？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 解锁用户
-            restUserPwd(record.id)
-              .then((res) => {
-                if (res.code === 200) {
-                  that.temp = {
-                    title: '用户密码重置成功',
-                    randomPwd: res.data.randomPwd
-                  }
-
-                  that.showUserPwd = true
-                }
-                resolve()
-              })
-              .catch(reject)
+        onOk: () => {
+          return restUserPwd(record.id).then((res) => {
+            if (res.code === 200) {
+              this.temp = {
+                title: '用户密码重置成功',
+                randomPwd: res.data.randomPwd
+              }
+              this.showUserPwd = true
+            }
           })
         }
       })
