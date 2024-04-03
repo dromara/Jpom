@@ -387,6 +387,7 @@
                   <a-radio-button value="default">默认</a-radio-button>
                   <a-radio-button value="apache_exec">多线程</a-radio-button>
                 </a-radio-group>
+                <template #help>此选项为一个实验属性实际效果基本无差异</template>
               </a-form-item>
             </template>
           </div>
