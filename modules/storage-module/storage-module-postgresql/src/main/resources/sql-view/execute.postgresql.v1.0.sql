@@ -8,24 +8,6 @@
 -- See the Mulan PSL v2 for more details.
 --
 
-DROP FUNCTION IF EXISTS column_exists;
-CREATE FUNCTION column_exists(tname varchar, cname varchar)
-RETURNS boolean
-AS
-$$
-BEGIN
-RETURN EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name  = tname
-        AND column_name = cname
-    );
-END;
-$$
-LANGUAGE plpgsql;
-
--- postgresql $delimiter$
-
 DROP PROCEDURE IF EXISTS drop_column_if_exists;
 CREATE PROCEDURE drop_column_if_exists(
     tname varchar,
@@ -92,25 +74,6 @@ BEGIN
         drop_idx_sql := format('DROP INDEX IF EXISTS %s', p_idxname);
         EXECUTE drop_idx_sql;
     END IF;
-END;
-$$;
-
--- postgresql $delimiter$
-
-DROP PROCEDURE IF EXISTS exec_if_column_exists;
-CREATE PROCEDURE exec_if_column_exists(
-    tname varchar,
-    cname varchar,
-    statemetStr varchar
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    IF (
-        select column_exists(tname,cname)
-    ) THEN
-        EXECUTE statemetStr;
-END IF;
 END;
 $$;
 

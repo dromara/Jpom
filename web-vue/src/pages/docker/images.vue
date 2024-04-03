@@ -334,10 +334,7 @@ export default {
     },
     // 创建容器
     handleBuildOk() {
-      this.$refs['editForm'].validate((valid) => {
-        if (!valid) {
-          return false
-        }
+      this.$refs['editForm'].validate().then(() => {
         const temp = {
           id: this.reqDataId,
           autorun: this.temp.autorun,

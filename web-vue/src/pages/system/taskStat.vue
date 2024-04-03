@@ -4,17 +4,21 @@
       <template #title>
         <a-button size="small" type="primary" @click="refresh"><ReloadOutlined /></a-button>
       </template>
-      <template #bodyCell="{ column, text }">
+      <template #bodyCell="{ column, text, record }">
         <a-tooltip v-if="column.tooltip" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
         <a-tooltip v-else-if="column.dataIndex === 'lastExecuteTime'" :title="parseTime(text)">
           <span>{{ parseTime(text) }}</span>
         </a-tooltip>
+        <a-tooltip v-else-if="column.dataIndex === 'desc'" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
         <a-tooltip v-else-if="column.dataIndex === 'cron'" placement="topLeft" :title="text">
           <a-button v-if="text" type="link" style="padding: 0" size="small" @click="toCronTaskList(text)">
             {{ text }} <UnorderedListOutlined />
           </a-button>
+          <template v-else>{{ record.desc }}</template>
         </a-tooltip>
       </template>
     </a-table>
@@ -67,10 +71,15 @@ export default {
         {
           title: 'cron',
           dataIndex: 'cron'
-
           // sorter: (a, b) => (a && b ? a.localeCompare(b, "zh-CN") : 0),
           // sortDirections: ["descend", "ascend"],
         },
+        // {
+        //   title: '描述',
+        //   dataIndex: 'desc'
+        //   // sorter: (a, b) => (a && b ? a.localeCompare(b, "zh-CN") : 0),
+        //   // sortDirections: ["descend", "ascend"],
+        // },
         {
           title: '执行次数',
           dataIndex: 'executeCount',

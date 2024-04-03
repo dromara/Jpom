@@ -143,21 +143,22 @@ public class CronUtils {
         Scheduler scheduler = CronUtil.getScheduler();
         Set<Map.Entry<String, TaskStat>> entries = TASK_STAT.entrySet();
         return entries.stream()
-                .map(entry -> {
-                    TaskStat taskStat = entry.getValue();
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("taskId", entry.getKey());
-                    CronPattern pattern = scheduler.getPattern(entry.getKey());
-                    Optional.ofNullable(pattern).ifPresent(cronPattern -> jsonObject.put("cron", cronPattern.toString()));
-                    if (taskStat != null) {
-                        jsonObject.put("executeCount", taskStat.executeCount.get());
-                        jsonObject.put("failedCount", taskStat.failedCount.get());
-                        jsonObject.put("succeedCount", taskStat.succeedCount.get());
-                        jsonObject.put("lastExecuteTime", taskStat.lastExecuteTime);
-                    }
-                    return jsonObject;
-                })
-                .collect(Collectors.toList());
+            .map(entry -> {
+                TaskStat taskStat = entry.getValue();
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("taskId", entry.getKey());
+                CronPattern pattern = scheduler.getPattern(entry.getKey());
+                Optional.ofNullable(pattern).ifPresent(cronPattern -> jsonObject.put("cron", cronPattern.toString()));
+                if (taskStat != null) {
+                    jsonObject.put("executeCount", taskStat.executeCount.get());
+                    jsonObject.put("failedCount", taskStat.failedCount.get());
+                    jsonObject.put("succeedCount", taskStat.succeedCount.get());
+                    jsonObject.put("lastExecuteTime", taskStat.lastExecuteTime);
+                    jsonObject.put("desc", taskStat.desc);
+                }
+                return jsonObject;
+            })
+            .collect(Collectors.toList());
     }
 
     /**

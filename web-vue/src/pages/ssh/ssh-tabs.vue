@@ -23,7 +23,7 @@
     <a-layout-content :style="{ padding: '0 5px', height: `calc(100vh - 10px)` }">
       <a-tabs
         v-if="selectPanes.length"
-        v-model:value="activeKey"
+        v-model:activeKey="activeKey"
         type="editable-card"
         hide-add
         @edit="onEdit"

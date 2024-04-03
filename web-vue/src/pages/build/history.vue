@@ -1,7 +1,13 @@
 <template>
   <div class="">
     <!-- 数据表格 -->
-    <a-table
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      :active-page="activePage"
+      table-name="build-history-list"
+      empty-description="没有任何构建历史"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -13,6 +19,7 @@
         x: 'max-content'
       }"
       @change="change"
+      @refresh="loadData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -73,17 +80,19 @@
           >
             批量删除
           </a-button>
-          <a-tooltip>
-            <template #title>
-              <div>构建历史是用于记录每次构建的信息,可以保留构建产物信息,构建日志。同时还可以快速回滚发布</div>
-              <div>如果不需要保留较多构建历史信息可以到服务端修改构建相关配置参数</div>
-              <div>构建历史可能占有较多硬盘空间,建议根据实际情况配置保留个数</div>
-            </template>
-            <QuestionCircleOutlined />
-          </a-tooltip>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #tableHelp>
+        <a-tooltip>
+          <template #title>
+            <div>构建历史是用于记录每次构建的信息,可以保留构建产物信息,构建日志。同时还可以快速回滚发布</div>
+            <div>如果不需要保留较多构建历史信息可以到服务端修改构建相关配置参数</div>
+            <div>构建历史可能占有较多硬盘空间,建议根据实际情况配置保留个数</div>
+          </template>
+          <QuestionCircleOutlined />
+        </a-tooltip>
+      </template>
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.tooltip">
           <a-tooltip :title="text">
             <span>{{ text || '' }}</span>
@@ -187,7 +196,7 @@
           </a-space>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 构建日志 -->
     <build-log
       v-if="buildLogVisible > 0"
@@ -374,6 +383,9 @@ export default {
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     },
     rowSelection() {
       return {

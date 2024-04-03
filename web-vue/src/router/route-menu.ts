@@ -59,6 +59,7 @@ const routeMenuMap: Record<string, string> = {
   global_repository: '/system/assets/repository-list',
   configWorkspaceEnv: '/script/env-list',
   cronTools: '/tools/cron',
+  netTools: '/tools/network',
   myWorkspaceList: '/my-workspace',
   fileStorage: '/file-manager/file-storage',
   staticFileStorage: '/file-manager/static-file-storage',

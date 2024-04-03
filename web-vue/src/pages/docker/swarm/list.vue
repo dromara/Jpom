@@ -12,8 +12,14 @@
         </template>
       </a-result>
     </template>
-    <a-table
+    <CustomTable
       v-else
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="5"
+      table-name="docker-swarm-list"
+      empty-description="没有docker集群"
+      :active-page="activePage"
       size="middle"
       :data-source="list"
       :columns="columns"
@@ -23,6 +29,7 @@
         x: 'max-content'
       }"
       @change="changePage"
+      @refresh="loadData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -44,7 +51,7 @@
         </a-space>
       </template>
 
-      <template #bodyCell="{ column, text, record }">
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.tooltip">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
@@ -91,7 +98,7 @@
           </a-space>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 编辑集群区 -->
     <a-modal
       v-model:open="editVisible"
@@ -244,6 +251,9 @@ export default {
     ...mapState(useGuideStore, ['getCollapsed']),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     },
     useSuggestions() {
       if (this.loading) {

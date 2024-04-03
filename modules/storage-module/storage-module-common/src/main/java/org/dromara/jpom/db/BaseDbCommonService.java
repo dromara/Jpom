@@ -108,7 +108,7 @@ public abstract class BaseDbCommonService<T> {
         if (CollUtil.isEmpty(t)) {
             return;
         }
-        Db db = Db.use(this.getDataSource(),DialectUtil.getDialectByMode(dbMode));
+        Db db = Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode));
         try {
             List<Entity> entities = t.stream().map(this::dataBeanToEntity).collect(Collectors.toList());
             db.insert(entities);
@@ -140,7 +140,7 @@ public abstract class BaseDbCommonService<T> {
      * @return 影响行数
      */
     protected final int updateDb(Entity entity, Entity where) {
-        Db db = Db.use(this.getDataSource(),DialectUtil.getDialectByMode(dbMode));
+        Db db = Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode));
         if (where.isEmpty()) {
             throw new JpomRuntimeException("没有更新条件");
         }
@@ -169,7 +169,7 @@ public abstract class BaseDbCommonService<T> {
         where.set(ID_STR, keyValue);
         Entity entity;
         try {
-            Db db = Db.use(this.getDataSource(),DialectUtil.getDialectByMode(dbMode));
+            Db db = Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode));
             if (consumer != null) {
                 consumer.accept(where);
             }
@@ -196,7 +196,7 @@ public abstract class BaseDbCommonService<T> {
         where.set(ID_STR, keyValue);
         List<Entity> entities;
         try {
-            Db db = Db.use(this.getDataSource(),DialectUtil.getDialectByMode(dbMode));
+            Db db = Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode));
             if (consumer != null) {
                 consumer.accept(where);
             }
@@ -219,7 +219,7 @@ public abstract class BaseDbCommonService<T> {
             throw new JpomRuntimeException("没有删除条件");
         }
         try {
-            Db db = Db.use(this.getDataSource(),DialectUtil.getDialectByMode(dbMode));
+            Db db = Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode));
             return db.del(where);
         } catch (Exception e) {
             throw warpException(e);
@@ -234,7 +234,7 @@ public abstract class BaseDbCommonService<T> {
      */
     public final long count(Entity where) {
         where.setTableName(getTableName());
-        Db db = Db.use(this.getDataSource(),DialectUtil.getDialectByMode(dbMode));
+        Db db = Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode));
         try {
             return db.count(where);
         } catch (Exception e) {
@@ -250,7 +250,7 @@ public abstract class BaseDbCommonService<T> {
      */
     public final long count(String sql, Object... params) {
         try {
-            return Db.use(this.getDataSource(),DialectUtil.getDialectByMode(dbMode)).count(sql, params);
+            return Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode)).count(sql, params);
         } catch (Exception e) {
             throw warpException(e);
         }
@@ -265,7 +265,7 @@ public abstract class BaseDbCommonService<T> {
      */
     public final List<Entity> queryList(Entity where) {
         where.setTableName(getTableName());
-        Db db = Db.use(this.getDataSource(),DialectUtil.getDialectByMode(dbMode));
+        Db db = Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode));
         try {
             return db.find(where);
         } catch (Exception e) {
@@ -280,7 +280,7 @@ public abstract class BaseDbCommonService<T> {
      * @return List
      */
     public final List<T> findByCondition(Condition... wheres) {
-        Db db = Db.use(this.getDataSource(),DialectUtil.getDialectByMode(dbMode));
+        Db db = Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode));
         try {
             List<Entity> entities = db.findBy(getTableName(), wheres);
             return this.entityToBeanList(entities);
@@ -335,7 +335,7 @@ public abstract class BaseDbCommonService<T> {
     public final PageResultDto<T> listPageDb(Entity where, Page page, boolean fill) {
         where.setTableName(getTableName());
         PageResult<Entity> pageResult;
-        Db db = Db.use(this.getDataSource(),DialectUtil.getDialectByMode(dbMode));
+        Db db = Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode));
         try {
             pageResult = db.page(where, page);
         } catch (Exception e) {
@@ -361,7 +361,7 @@ public abstract class BaseDbCommonService<T> {
      */
     public final List<Entity> query(String sql, Object... params) {
         try {
-            return Db.use(this.getDataSource(),DialectUtil.getDialectByMode(dbMode)).query(sql, params);
+            return Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode)).query(sql, params);
         } catch (Exception e) {
             throw warpException(e);
         }
@@ -385,7 +385,7 @@ public abstract class BaseDbCommonService<T> {
      */
     public final int execute(String sql, Object... params) {
         try {
-            return Db.use(this.getDataSource(),DialectUtil.getDialectByMode(dbMode)).execute(sql, params);
+            return Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode)).execute(sql, params);
         } catch (Exception e) {
             throw warpException(e);
         }

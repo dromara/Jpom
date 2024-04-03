@@ -119,6 +119,9 @@ public class CacheManageController extends BaseServerController implements ICach
         map.put("clusterId", clusterConfig.getId());
         JpomManifest jpomManifest = JpomManifest.getInstance();
         map.put("installId", jpomManifest.getInstallId());
+        map.put("tempPath", jpomApplication.getTempPath().getAbsolutePath());
+        map.put("dataPath", jpomApplication.getDataPath());
+        map.put("buildPath", BuildUtil.getBuildDataDir());
         //
         return JsonMessage.success("", map);
     }
