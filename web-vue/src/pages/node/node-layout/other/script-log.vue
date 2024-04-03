@@ -230,7 +230,7 @@ export default {
         content: '真的要删除执行记录么？',
         okText: '确认',
         cancelText: '取消',
-        onOk() {
+        onOk: () => {
           return scriptDel({
             nodeId: this.nodeId,
             id: record.scriptId,
