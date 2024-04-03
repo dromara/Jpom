@@ -886,31 +886,23 @@ export default {
     },
     // kill pid
     kill(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要 Kill 这个进程么？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // kill
-            const params = {
-              ...that.idInfo,
-              pid: record.processId
-            }
-            killPid(params)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadNodeProcess()
-                }
-                resolve()
+        onOk: () => {
+          return killPid({
+            ...this.idInfo,
+            pid: record.processId
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadNodeProcess()
+            }
           })
         }
       })
