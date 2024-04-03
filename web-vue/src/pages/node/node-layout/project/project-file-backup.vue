@@ -449,7 +449,7 @@ export default {
         content: msg,
         okText: '确认',
         cancelText: '取消',
-        onOk() {
+        onOk: () => {
           return backupDeleteProjectFile({
             nodeId: this.nodeId,
             id: this.projectId,
@@ -477,7 +477,7 @@ export default {
         content: msg,
         okText: '确认',
         cancelText: '取消',
-        onOk() {
+        onOk: () => {
           return backupDeleteProjectFile({
             nodeId: this.nodeId,
             id: this.projectId,
