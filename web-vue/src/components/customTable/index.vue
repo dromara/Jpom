@@ -131,20 +131,21 @@
             </a-table>
           </template>
           <template v-else-if="tableLayout === 'card'">
-            <a-row :gutter="[16, 16]">
-              <template v-if="props.dataSource && props.dataSource.length">
-                <a-col v-for="(item, index) in props.dataSource" :key="item.id" :span="6">
-                  <slot name="cardBodyCell" :item="item" :index="index"></slot>
+            <a-space direction="vertical">
+              <a-row :gutter="[16, 16]">
+                <template v-if="props.dataSource && props.dataSource.length">
+                  <a-col v-for="(item, index) in props.dataSource" :key="item.id" :span="6">
+                    <slot name="cardBodyCell" :item="item" :index="index"></slot>
+                  </a-col>
+                </template>
+                <a-col v-else :span="24">
+                  <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="props.emptyDescription" />
                 </a-col>
-              </template>
-              <a-col v-else :span="24">
-                <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="props.emptyDescription" />
-              </a-col>
-            </a-row>
-            <div class="card-pagination">
-              <a-pagination v-bind="paginationByLayout" size="small" @change="paginationChange" />
-            </div>
-
+              </a-row>
+              <div class="card-pagination">
+                <a-pagination v-bind="paginationByLayout" size="small" @change="paginationChange" />
+              </div>
+            </a-space>
             <!-- <slot name="cardPageTool"></slot> -->
           </template>
           <template v-else>未知的表格类型</template>
