@@ -453,31 +453,23 @@ export default {
     },
     // 删除文件
     handleDelete(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除当前文件么？' + record.name,
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            delFile({
-              id: record.id,
-              thorough: false
-            })
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return delFile({
+            id: record.id,
+            thorough: false
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })
@@ -490,31 +482,24 @@ export default {
         })
         return
       }
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除这些文件么？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            delFile({
-              ids: that.tableSelections.join(','),
-              thorough: false
-            })
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.tableSelections = []
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return delFile({
+            ids: this.tableSelections.join(','),
+            thorough: false
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.tableSelections = []
+              this.loadData()
+            }
           })
         }
       })

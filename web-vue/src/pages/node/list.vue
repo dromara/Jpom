@@ -958,27 +958,20 @@ export default {
       })
     },
     handleDelete(record) {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要删除节点么？删除会检查数据关联性,并且节点不存在项目或者脚本',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            deleteNode(record.id)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return deleteNode(record.id).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })
@@ -992,7 +985,6 @@ export default {
         '<li>一般用于服务器无法连接且已经确定不再使用</li>' +
         '<li>如果误操作会产生冗余数据！！！</li>' +
         ' </ul>'
-      const that = this
       $confirm({
         title: '危险操作！！！',
         zIndex: 1009,
@@ -1001,20 +993,14 @@ export default {
         cancelButtonProps: { type: 'primary' },
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 删除
-            unbind(record.id)
-              .then((res) => {
-                if (res.code === 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return unbind(record.id).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })
@@ -1120,32 +1106,24 @@ export default {
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: msg,
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 解锁
-            sortItem({
-              id: record.id,
-              method: method,
-              compareId: compareId
-            })
-              .then((res) => {
-                if (res.code == 200) {
-                  $notification.success({
-                    message: res.msg
-                  })
-
-                  that.loadData()
-                }
-                resolve()
+        onOk: () => {
+          return sortItem({
+            id: record.id,
+            method: method,
+            compareId: compareId
+          }).then((res) => {
+            if (res.code == 200) {
+              $notification.success({
+                message: res.msg
               })
-              .catch(reject)
+              this.loadData()
+            }
           })
         }
       })

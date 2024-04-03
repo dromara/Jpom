@@ -780,91 +780,73 @@ export default {
     },
     // 彻底退出登录
     logOutAll() {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要彻底退出系统么？彻底退出将退出登录和清空浏览器缓存',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 退出登录
-            useUserStore()
-              .logOut()
-              .then(() => {
-                $notification.success({
-                  message: '退出登录成功'
-                })
-                localStorage.clear()
-                that.$router.replace({
-                  path: '/login',
-                  query: {}
-                })
-                resolve()
+        onOk: () => {
+          return useUserStore()
+            .logOut()
+            .then(() => {
+              $notification.success({
+                message: '退出登录成功'
               })
-              .catch(reject)
-          })
+              localStorage.clear()
+              this.$router.replace({
+                path: '/login',
+                query: {}
+              })
+            })
         }
       })
     },
     // 切换账号登录
     logOutSwap() {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要退出并切换账号登录么？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 退出登录
-            useUserStore()
-              .logOut()
-              .then(() => {
-                $notification.success({
-                  message: '退出登录成功'
-                })
-                useAppStore().changeWorkspace('')
-                that.$router.replace({
-                  path: '/login',
-                  query: {}
-                })
-                resolve()
+        onOk: () => {
+          return useUserStore()
+            .logOut()
+            .then(() => {
+              $notification.success({
+                message: '退出登录成功'
               })
-              .catch(reject)
-          })
+              useAppStore().changeWorkspace('')
+              this.$router.replace({
+                path: '/login',
+                query: {}
+              })
+            })
         }
       })
     },
     // 退出登录
     logOut() {
-      const that = this
       $confirm({
         title: '系统提示',
         zIndex: 1009,
         content: '真的要退出系统么？',
         okText: '确认',
         cancelText: '取消',
-        async onOk() {
-          return await new Promise((resolve, reject) => {
-            // 退出登录
-            useUserStore()
-              .logOut()
-              .then(() => {
-                $notification.success({
-                  message: '退出登录成功'
-                })
-                const query = Object.assign({}, that.$route.query)
-                that.$router.replace({
-                  path: '/login',
-                  query: query
-                })
-                resolve()
+        onOk: () => {
+          return useUserStore()
+            .logOut()
+            .then(() => {
+              $notification.success({
+                message: '退出登录成功'
               })
-              .catch(reject)
-          })
+              const query = Object.assign({}, this.$route.query)
+              this.$router.replace({
+                path: '/login',
+                query: query
+              })
+            })
         }
       })
     },
@@ -1054,29 +1036,22 @@ export default {
           }
         })
       } else {
-        const that = this
         $confirm({
           title: '系统提示',
           zIndex: 1009,
           content: '确定要关闭两步验证吗？关闭后账号安全性将受到影响,关闭后已经存在的 mfa key 将失效',
           okText: '确认',
           cancelText: '取消',
-          async onOk() {
-            return await new Promise((resolve, reject) => {
-              //
-              closeMfa({
-                code: that.temp.twoCode
-              })
-                .then((res) => {
-                  if (res.code === 200) {
-                    $notification.success({
-                      message: res.msg
-                    })
-                    that.temp = { ...that.temp, needVerify: false, status: false }
-                  }
-                  resolve()
+          onOk: () => {
+            return closeMfa({
+              code: this.temp.twoCode
+            }).then((res) => {
+              if (res.code === 200) {
+                $notification.success({
+                  message: res.msg
                 })
-                .catch(reject)
+                this.temp = { ...this.temp, needVerify: false, status: false }
+              }
             })
           }
         })
