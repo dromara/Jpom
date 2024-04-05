@@ -1,0 +1,89 @@
+<!-- Jpom 为开源软件，请基于开源协议用于商业用途 -->
+
+<!-- 开源不等同于免费，如果您基于 Jpom 二次开发修改了 logo、名称、版权等，请找我们授权，否则会有法律风险。
+  我们有权利追诉破坏开源并因此获利的团队个人的全部违法所得，也欢迎给我们提供侵权线索。 -->
+
+<!-- 二次修改不可删除或者修改版权，否则可能承担法律责任 -->
+
+<!-- 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。 -->
+
+<template>
+  <div>
+    <a-alert type="warning" show-icon>
+      <template #message>
+        <a href="https://jpom.top/pages/legal-risk/" target="_blank"> 法律风险<LinkOutlined /> </a>
+      </template>
+      <template #description>
+        <ul>
+          <li>
+            <div>
+              <b style="color: red">开源不等同于免费</b>，如果您基于 Jpom 二次开发修改了
+              <b>logo、名称、版权等</b>，请找我们授权，否则会有法律风险。
+              我们有权利追诉破坏开源并因此获利的团队个人的全部违法所得，也欢迎给我们提供侵权线索。
+            </div>
+          </li>
+          <li>
+            <div>
+              <b style="color: red">擅自修改或者删除版权信息有法律风险</b
+              >，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。
+            </div>
+          </li>
+        </ul>
+      </template>
+    </a-alert>
+    <a-tabs>
+      <a-tab-pane key="1" tab="开源协议"><pre v-html="licenseText" style="white-space: pre-wrap"></pre></a-tab-pane>
+      <a-tab-pane key="2" tab="致谢"
+        ><a-list size="small" bordered :data-source="thankDependency">
+          <template #renderItem="{ item }">
+            <a-list-item>
+              <div>
+                <a-space>
+                  <b>{{ item.name }}</b>
+
+                  <a v-if="item.link" :href="item.link" target="_blank"> {{ item.link }}<LinkOutlined /></a>
+                  <template v-if="item.license">
+                    <template v-if="typeof item.license === 'string'">
+                      <a-tag>{{ item.license }}</a-tag>
+                    </template>
+                    <template v-else>
+                      <a-tag v-for="licenseItem in item.license">{{ licenseItem }}</a-tag>
+                    </template>
+                  </template>
+                </a-space>
+              </div>
+            </a-list-item>
+          </template>
+          <template #header>
+            <div>排名按照字母 a-z 排序</div>
+          </template>
+          <!-- <template #footer>
+            <div>Footer</div>
+          </template> -->
+        </a-list></a-tab-pane
+      >
+      <!-- <a-tab-pane key="3" tab="Tab 3">Content of Tab Pane 3</a-tab-pane> -->
+    </a-tabs>
+  </div>
+</template>
+<script setup lang="ts">
+import { getLicense, getThankDependency } from '@/api/about'
+
+const licenseText = ref('')
+
+const thankDependency = ref([])
+
+onMounted(() => {
+  getLicense().then((res) => {
+    if (res.code === 200) {
+      licenseText.value = res.data
+    }
+  })
+
+  getThankDependency().then((res) => {
+    if (res.code === 200) {
+      thankDependency.value = res.data || []
+    }
+  })
+})
+</script>

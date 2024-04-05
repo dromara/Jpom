@@ -12,9 +12,16 @@
         </a-tag>
       </template>
       <template #extra>
-        <a-button :loading="loading" @click="init">
-          <template #icon><ReloadOutlined /></template>
-        </a-button>
+        <a-tooltip title="刷新数据">
+          <a-button :loading="loading" @click="init">
+            <template #icon><ReloadOutlined /></template>
+          </a-button>
+        </a-tooltip>
+        <a-tooltip title="关于系统">
+          <a-button @click="toAbout">
+            <template #icon><ExclamationCircleOutlined /></template>
+          </a-button>
+        </a-tooltip>
       </template>
       <a-space>
         <span> 工作空间总数： <a-badge color="blue" :count="statData['workspaceCount'] || '0'" show-zero /> </span>
@@ -206,6 +213,11 @@ export default {
         .finally(() => {
           this.loading = false
         })
+    },
+    toAbout() {
+      this.$router.push({
+        path: '/about'
+      })
     }
   }
 }
