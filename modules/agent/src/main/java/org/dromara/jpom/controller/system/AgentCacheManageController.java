@@ -21,6 +21,8 @@ import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.commander.AbstractProjectCommander;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
+import org.dromara.jpom.configuration.AgentConfig;
+import org.dromara.jpom.configuration.SystemConfig;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.model.system.WorkspaceEnvVarModel;
 import org.dromara.jpom.plugin.PluginFactory;
@@ -52,6 +54,7 @@ public class AgentCacheManageController extends BaseAgentController implements I
     private final AgentWorkspaceEnvVarService agentWorkspaceEnvVarService;
     private final JpomApplication configBean;
     private final NodeScriptExecLogServer nodeScriptExecLogServer;
+    private final SystemConfig systemConfig;
 
     private long dataSize;
     private long oldJarsSize;
@@ -59,10 +62,12 @@ public class AgentCacheManageController extends BaseAgentController implements I
 
     public AgentCacheManageController(AgentWorkspaceEnvVarService agentWorkspaceEnvVarService,
                                       JpomApplication configBean,
-                                      NodeScriptExecLogServer nodeScriptExecLogServer) {
+                                      NodeScriptExecLogServer nodeScriptExecLogServer,
+                                      AgentConfig agentConfig) {
         this.agentWorkspaceEnvVarService = agentWorkspaceEnvVarService;
         this.configBean = configBean;
         this.nodeScriptExecLogServer = nodeScriptExecLogServer;
+        this.systemConfig = agentConfig.getSystem();
     }
 
     /**
@@ -96,6 +101,7 @@ public class AgentCacheManageController extends BaseAgentController implements I
         // 待同步待日志数
         int size = nodeScriptExecLogServer.size();
         jsonObject.put("scriptExecLogSize", size);
+        jsonObject.put("timerMatchSecond", systemConfig.isTimerMatchSecond());
         //
         return JsonMessage.success("ok", jsonObject);
     }

@@ -11,7 +11,11 @@
   <div>
     <a-alert type="warning" show-icon>
       <template #message>
-        <a href="https://jpom.top/pages/legal-risk/" target="_blank"> 法律风险<LinkOutlined /> </a>
+        <a-space>
+          <template #split> <a-divider type="vertical" /> </template>
+          <a href="https://jpom.top/pages/legal-risk/" target="_blank"> 法律风险<LinkOutlined /> </a>
+          <a href="https://jpom.top" target="_blank"> 官方文档<LinkOutlined /> </a>
+        </a-space>
       </template>
       <template #description>
         <ul>
@@ -19,7 +23,7 @@
             <div>
               <b style="color: red">开源不等同于免费</b>，如果您基于 Jpom 二次开发修改了
               <b>logo、名称、版权等</b>，请找我们授权，否则会有法律风险。
-              我们有权利追诉破坏开源并因此获利的团队个人的全部违法所得，也欢迎给我们提供侵权线索。
+              <div>我们有权利追诉破坏开源并因此获利的团队个人的全部违法所得，也欢迎给我们提供侵权线索。</div>
             </div>
           </li>
           <li>
@@ -48,12 +52,12 @@
         </ul>
         <div></div>
         <a-card title="一次性捐款赞助">
-          <a-image :src="praiseQrcorde" :preview="false"> </a-image>
+          <a-image width="80%" :src="praiseQrcorde" :preview="false"> </a-image>
         </a-card>
       </a-tab-pane>
       <a-tab-pane key="1" tab="开源协议"><pre v-html="licenseText" style="white-space: pre-wrap"></pre></a-tab-pane>
       <a-tab-pane key="2" tab="软件致谢">
-        <h1>Jpom 中使用了如下开源软件，我们衷心感谢有了他们的开源 Jpom 才能更好的开源</h1>
+        <h1>Jpom 中使用了如下开源软件，我们衷心感谢有了他们的开源 Jpom 才能更完善</h1>
         <a-list size="small" bordered :data-source="thankDependency">
           <template #renderItem="{ item }">
             <a-list-item>
@@ -86,6 +90,7 @@
   </div>
 </template>
 <script setup lang="ts">
+// 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。
 import { getLicense, getThankDependency } from '@/api/about'
 import praiseQrcorde from '@/assets/images/praise-qrcorde-small.png'
 const licenseText = ref('')
