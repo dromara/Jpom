@@ -32,9 +32,29 @@
       </template>
     </a-alert>
     <a-tabs>
+      <a-tab-pane key="0" tab="支持开源">
+        <h2>Jpom 是一款开源软件您使用这个项目并感觉良好，或是想支持我们继续开发，您可以通过如下方式支持我们：</h2>
+
+        <ul>
+          <li>
+            Star 并向您的朋友推荐或分享： <a href="https://gitee.com/dromara/Jpom" target="_blank">Gitee</a> /
+            <a href="https://github.com/dromara/Jpom" target="_blank">Github</a>
+          </li>
+          <li>通过以下二维码进行一次性捐款赞助，请作者喝一杯咖啡☕️</li>
+          <li>付费加入我们的技术交流群优先解答您所有疑问</li>
+          <li>
+            选择企业版本或者购买授权：<a href="https://jpom.top/pages/enterprise-service/" target="_blank">企业服务</a>
+          </li>
+        </ul>
+        <div></div>
+        <a-card title="一次性捐款赞助">
+          <a-image :src="praiseQrcorde" :preview="false"> </a-image>
+        </a-card>
+      </a-tab-pane>
       <a-tab-pane key="1" tab="开源协议"><pre v-html="licenseText" style="white-space: pre-wrap"></pre></a-tab-pane>
-      <a-tab-pane key="2" tab="致谢"
-        ><a-list size="small" bordered :data-source="thankDependency">
+      <a-tab-pane key="2" tab="软件致谢">
+        <h1>Jpom 中使用了如下开源软件，我们衷心感谢有了他们的开源 Jpom 才能更好的开源</h1>
+        <a-list size="small" bordered :data-source="thankDependency">
           <template #renderItem="{ item }">
             <a-list-item>
               <div>
@@ -62,13 +82,12 @@
           </template> -->
         </a-list></a-tab-pane
       >
-      <!-- <a-tab-pane key="3" tab="Tab 3">Content of Tab Pane 3</a-tab-pane> -->
     </a-tabs>
   </div>
 </template>
 <script setup lang="ts">
 import { getLicense, getThankDependency } from '@/api/about'
-
+import praiseQrcorde from '@/assets/images/praise-qrcorde-small.png'
 const licenseText = ref('')
 
 const thankDependency = ref([])
