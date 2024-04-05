@@ -47,6 +47,11 @@
                       <img alt="github" :src="githubImg" />
                     </a-tooltip>
                   </div>
+                  <div v-if="enabledOauth2Provides.includes('dingtalk')" class="oauth2-item">
+                    <a-tooltip title="dingtalk" @click="toOauth2Url('dingtalk')">
+                      <img alt="dingtalk" :src="dingtalkImg" />
+                    </a-tooltip>
+                  </div>
                 </a-space>
               </a-form-item>
             </template>
@@ -86,6 +91,7 @@ import sha1 from 'js-sha1'
 import defaultBg from '@/pages/layout/default-bg.vue'
 import maxkeyImg from '@/assets/images/maxkey.png'
 import giteeImg from '@/assets/images/gitee.svg'
+import dingtalkImg from '@/assets/images/dingtalk.svg'
 import githubImg from '@/assets/images/github.png'
 import { useGuideStore } from '@/stores/guide'
 import { Button } from 'ant-design-vue'

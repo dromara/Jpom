@@ -4,6 +4,8 @@
 
 ### 🐣 新增功能
 
+1. 【server】新增 Oauth2 新增钉钉扫码登录
+
 ### 🐞 解决BUG、优化功能
 
 1. 【agent】优化 DSL 项目支持配置在特定目录执行脚本（run.execPath）

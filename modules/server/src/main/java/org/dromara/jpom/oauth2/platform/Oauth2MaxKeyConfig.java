@@ -7,13 +7,16 @@
  * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  */
-package org.dromara.jpom.oauth2;
+package org.dromara.jpom.oauth2.platform;
 
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import me.zhyd.oauth.request.AuthRequest;
+import org.dromara.jpom.oauth2.AuthOauth2MaxKeyRequest;
+import org.dromara.jpom.oauth2.BaseOauth2Config;
+import org.dromara.jpom.oauth2.Oauth2MaxKeyAuthSource;
 import org.springframework.util.Assert;
 
 /**
