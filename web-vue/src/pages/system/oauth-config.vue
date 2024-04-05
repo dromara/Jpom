@@ -2,6 +2,41 @@
   <div>
     <a-alert message="账号如果开启 MFA(两步验证)，使用 Oauth2 登录不会验证 MFA(两步验证)" type="info" show-icon />
     <a-tabs>
+      <a-tab-pane key="dingtalk" tab="钉钉扫码 Oauth2">
+        <a-form ref="editForm" :model="dingtalk" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
+          <a-form-item label="是否开启" name="enabled">
+            <a-switch v-model:checked="dingtalk.enabled" checked-children="启用" un-checked-children="停用" />
+          </a-form-item>
+          <a-form-item label="客户端ID" name="clientId">
+            <a-input v-model:value="dingtalk.clientId" type="text" placeholder="请输入客户端ID [clientId]" />
+          </a-form-item>
+          <a-form-item label="客户端密钥" name="clientSecret">
+            <a-input-password v-model:value="dingtalk.clientSecret" placeholder="请输入客户端密钥 [clientSecret]" />
+          </a-form-item>
+
+          <a-form-item label="回调 url" name="redirectUri">
+            <template #help>参考地址：{{ `${host}/oauth2-dingtalk` }}</template>
+            <a-input
+              v-model:value="dingtalk.redirectUri"
+              type="text"
+              placeholder="请输入回调重定向 url [redirectUri]"
+            />
+          </a-form-item>
+          <!-- <a-form-item label="登录url">
+              <a-input :value="`${this.host}/oauth2-render-github`" type="text" />
+            </a-form-item> -->
+          <a-form-item label="自动创建用户" name="autoCreteUser">
+            <a-switch v-model:checked="dingtalk.autoCreteUser" checked-children="启用" un-checked-children="停用" />
+          </a-form-item>
+          <a-form-item label="忽略校验 state" name="ignoreCheckState">
+            <a-switch v-model:checked="dingtalk.ignoreCheckState" checked-children="忽略" un-checked-children="校验" />
+          </a-form-item>
+
+          <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+            <a-button type="primary" class="btn" @click="onSubmit('dingtalk')">提交</a-button>
+          </a-form-item>
+        </a-form>
+      </a-tab-pane>
       <a-tab-pane key="maxkey" tab="MaxKey Oauth2">
         <a-form ref="editForm" :model="maxkey" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
           <a-form-item label="是否开启" name="enabled">
@@ -120,8 +155,9 @@ export default {
       maxkey: {},
       gitee: {},
       github: {},
+      dingtalk: {},
       rules: {},
-      provides: ['gitee', 'maxkey', 'github'],
+      provides: ['gitee', 'maxkey', 'github', 'dingtalk'],
       host: ''
     }
   },

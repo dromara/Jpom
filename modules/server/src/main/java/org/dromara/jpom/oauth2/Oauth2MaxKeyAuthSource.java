@@ -11,6 +11,7 @@ package org.dromara.jpom.oauth2;
 
 import me.zhyd.oauth.config.AuthSource;
 import me.zhyd.oauth.request.AuthDefaultRequest;
+import org.dromara.jpom.oauth2.platform.Oauth2MaxKeyConfig;
 import org.springframework.util.Assert;
 
 /**

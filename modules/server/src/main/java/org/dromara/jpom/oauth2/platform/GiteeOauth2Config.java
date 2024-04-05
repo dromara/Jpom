@@ -7,12 +7,13 @@
  * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  */
-package org.dromara.jpom.oauth2;
+package org.dromara.jpom.oauth2.platform;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import me.zhyd.oauth.request.AuthGithubRequest;
+import me.zhyd.oauth.request.AuthGiteeRequest;
 import me.zhyd.oauth.request.AuthRequest;
+import org.dromara.jpom.oauth2.BaseOauth2Config;
 import org.springframework.util.Assert;
 
 /**
@@ -21,18 +22,17 @@ import org.springframework.util.Assert;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class GithubOauth2Config extends BaseOauth2Config {
-
-    public static final String KEY = "OAUTH_CONFIG_GITHUB_OAUTH2";
+public class GiteeOauth2Config extends BaseOauth2Config {
+    public static final String KEY = "OAUTH_CONFIG_GITEE_OAUTH2";
 
     @Override
     public String provide() {
-        return "github";
+        return "gitee";
     }
 
     @Override
     public AuthRequest authRequest() {
         Assert.state(this.enabled(), "没有开启此 " + this.provide() + " oauth2");
-        return new AuthGithubRequest(this.authConfig());
+        return new AuthGiteeRequest(this.authConfig());
     }
 }
