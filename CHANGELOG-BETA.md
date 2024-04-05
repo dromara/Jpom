@@ -7,6 +7,8 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【agent】优化 DSL 项目支持配置在特定目录执行脚本（run.execPath）
+2. 【agent】优化 管理脚本 -Xss 默认值修改为 512k（感谢@Again... ）
+3. 【server】优化 管理脚本 -Xss 默认值修改为 1024k（感谢@Again... ）
 
 ------
 
