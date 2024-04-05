@@ -18,6 +18,8 @@
 
 <script setup lang="ts">
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
+// TODO 国家化共用hooks抽离
+// import enUS from 'ant-design-vue/es/locale/en_US'
 import { theme } from 'ant-design-vue'
 import { onMounted, onUnmounted } from 'vue'
 
