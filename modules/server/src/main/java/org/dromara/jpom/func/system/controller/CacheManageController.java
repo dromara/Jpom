@@ -30,6 +30,7 @@ import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.configuration.ClusterConfig;
+import org.dromara.jpom.configuration.SystemConfig;
 import org.dromara.jpom.controller.LoginControl;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.permission.ClassFeature;
@@ -73,6 +74,7 @@ public class CacheManageController extends BaseServerController implements ICach
     private final JpomApplication jpomApplication;
     private final DataInitEvent dataInitEvent;
     private final ClusterConfig clusterConfig;
+    private final SystemConfig systemConfig;
     /**
      * 标记是否正在刷新缓存
      */
@@ -84,6 +86,7 @@ public class CacheManageController extends BaseServerController implements ICach
         this.jpomApplication = jpomApplication;
         this.dataInitEvent = dataInitEvent;
         this.clusterConfig = serverConfig.getCluster();
+        this.systemConfig = serverConfig.getSystem();
     }
 
     /**
@@ -122,6 +125,7 @@ public class CacheManageController extends BaseServerController implements ICach
         map.put("tempPath", jpomApplication.getTempPath().getAbsolutePath());
         map.put("dataPath", jpomApplication.getDataPath());
         map.put("buildPath", BuildUtil.getBuildDataDir());
+        map.put("timerMatchSecond", systemConfig.isTimerMatchSecond());
         //
         return JsonMessage.success("", map);
     }

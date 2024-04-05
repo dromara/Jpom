@@ -1,10 +1,24 @@
 <template>
   <div>
-    <a-table size="middle" row-key="taskId" :columns="taskColumns" bordered :data-source="taskList" :pagination="false">
-      <template #title>
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      :active-page="activePage"
+      table-name="system-task-stat"
+      empty-description="没有任何运行中的任务"
+      size="middle"
+      row-key="taskId"
+      :columns="taskColumns"
+      bordered
+      :data-source="taskList"
+      @refresh="refresh"
+      :pagination="false"
+    >
+      <!-- <template #title>
         <a-button size="small" type="primary" @click="refresh"><ReloadOutlined /></a-button>
-      </template>
-      <template #bodyCell="{ column, text, record }">
+      </template> -->
+      <template #tableBodyCell="{ column, text, record }">
         <a-tooltip v-if="column.tooltip" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
@@ -21,7 +35,7 @@
           <template v-else>{{ record.desc }}</template>
         </a-tooltip>
       </template>
-    </a-table>
+    </CustomTable>
   </div>
 </template>
 <script>
@@ -110,6 +124,11 @@ export default {
           sorter: (a, b) => a.lastExecuteTime || 0 - b.lastExecuteTime || 0
         }
       ]
+    }
+  },
+  computed: {
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     }
   },
   mounted() {},

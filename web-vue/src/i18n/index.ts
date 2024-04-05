@@ -35,7 +35,7 @@ const deepMerge = (...objects: Record<string, any>[]) => {
 const i18n = createI18n({
   legacy: false,
   // TODO 目前手动修改，后续抽离封装
-  locale: 'en-us', //'en-us', // 默认显示语言
+  locale: 'zh-cn', //'en-us', // 默认显示语言
   messages: {
     'zh-cn': zhCN,
     'en-us': deepMerge(zhCN, enUS)

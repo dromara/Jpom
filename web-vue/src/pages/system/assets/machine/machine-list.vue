@@ -812,6 +812,7 @@ export default {
     parseTime,
     formatDuration,
     formatPercent2Number,
+    CHANGE_PAGE,
     // PAGE_DEFAULT_SHOW_TOTAL,
     // getCachePageLimit,
     // 获取所有的分组

@@ -131,7 +131,7 @@
             </a-table>
           </template>
           <template v-else-if="tableLayout === 'card'">
-            <a-space direction="vertical">
+            <a-space direction="vertical" style="width: 100%">
               <a-row :gutter="[16, 16]">
                 <template v-if="props.dataSource && props.dataSource.length">
                   <a-col v-for="(item, index) in props.dataSource" :key="item.id" :span="6">
@@ -275,6 +275,9 @@ export default defineComponent({
       return ['5', '10', '15', '20', '25', '30', '35', '40', '50']
     })
     const paginationByLayout = computed(() => {
+      if (props.pagination === false) {
+        return false
+      }
       return { ...props.pagination, pageSizeOptions: sizeOptions.value }
     })
 

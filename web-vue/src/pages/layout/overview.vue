@@ -12,9 +12,16 @@
         </a-tag>
       </template>
       <template #extra>
-        <a-button @click="init">
-          <template #icon><ReloadOutlined /></template>
-        </a-button>
+        <a-tooltip title="刷新数据">
+          <a-button @click="init">
+            <template #icon><ReloadOutlined /></template>
+          </a-button>
+        </a-tooltip>
+        <a-tooltip title="关于系统" v-if="getUserInfo && (getUserInfo.systemUser || getUserInfo.demoUser)">
+          <a-button @click="showAbout">
+            <template #icon><ExclamationCircleOutlined /></template>
+          </a-button>
+        </a-tooltip>
       </template>
     </a-page-header>
     <a-divider dashed />
@@ -112,7 +119,6 @@
       </a-col>
     </a-row>
     <!-- 查看操作日志 -->
-    <!-- <CustomModal></CustomModal> -->
     <CustomModal
       v-if="viewLogVisible > 0"
       destroy-on-close
@@ -127,6 +133,19 @@
         <user-log v-if="viewLogVisible > 0" :open-tab="viewLogVisible"></user-log>
       </div>
     </CustomModal>
+    <!-- 关于系统 -->
+    <CustomModal
+      v-if="aboutVisible > 0"
+      destroy-on-close
+      :open="aboutVisible > 0"
+      :width="'90vw'"
+      title="关于开源软件"
+      :footer="null"
+      :mask-closable="false"
+      @cancel="aboutVisible = 0"
+    >
+      <AboutPage></AboutPage>
+    </CustomModal>
     <!-- 构建日志 -->
     <build-log v-if="buildLogVisible > 0" :temp="temp" :visible="buildLogVisible != 0" @close="buildLogVisible = 0" />
   </div>
@@ -139,6 +158,7 @@ import { parseTime } from '@/utils/const'
 import { operateCodeMap } from '@/api/user/user-login-log'
 import { getMonitorOperateTypeList } from '@/api/monitor'
 import UserLog from './user-log.vue'
+import AboutPage from '@/pages/layout/about'
 import { useUserStore } from '@/stores/user'
 import { mapState } from 'pinia'
 import { statusMap, statusColor, triggerBuildTypeMap } from '@/api/build-info'
@@ -146,7 +166,8 @@ import { Empty } from 'ant-design-vue'
 export default {
   components: {
     UserLog,
-    BuildLog
+    BuildLog,
+    AboutPage
   },
   data() {
     return {
@@ -178,7 +199,8 @@ export default {
       ],
       statData: {},
       temp: {},
-      buildLogVisible: 0
+      buildLogVisible: 0,
+      aboutVisible: 0
     }
   },
   computed: {
@@ -232,6 +254,10 @@ export default {
         buildId: record.buildNumberId
       }
       this.buildLogVisible = new Date() * Math.random()
+    },
+    // 关于系统
+    showAbout() {
+      this.aboutVisible = 1
     }
   }
 }
