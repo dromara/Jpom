@@ -258,6 +258,14 @@ const management = [
     path: '/system/backup',
     name: 'system-backup',
     component: () => import('../pages/system/backup.vue')
+  },
+  {
+    // Jpom 为开源软件，请基于开源协议用于商业用途
+    // 二次修改不可删除或者修改版权，否则可能承担法律责任
+    // 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。
+    path: '/about',
+    name: 'about',
+    component: () => import('../pages/layout/about.vue')
   }
 ]
 

@@ -130,6 +130,7 @@ declare module 'vue' {
     InfoCircleOutlined: typeof import('@ant-design/icons-vue')['InfoCircleOutlined']
     InfoOutlined: typeof import('@ant-design/icons-vue')['InfoOutlined']
     LayoutOutlined: typeof import('@ant-design/icons-vue')['LayoutOutlined']
+    LinkOutlined: typeof import('@ant-design/icons-vue')['LinkOutlined']
     LoadingOutlined: typeof import('@ant-design/icons-vue')['LoadingOutlined']
     LockOutlined: typeof import('@ant-design/icons-vue')['LockOutlined']
     LoginOutlined: typeof import('@ant-design/icons-vue')['LoginOutlined']

@@ -120,6 +120,10 @@
         "title": "数据库备份",
         "role": "system",
         "storageMode": "H2"
+      },
+      {
+        "id": "about",
+        "title": "关于系统"
       }
     ]
   }

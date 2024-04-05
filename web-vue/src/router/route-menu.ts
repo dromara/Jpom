@@ -67,7 +67,8 @@ const routeMenuMap: Record<string, string> = {
   certificate: '/certificate/list',
   authConfig: '/system/oauth-config',
   overview: '/overview',
-  'system-overview': '/system/overview'
+  'system-overview': '/system/overview',
+  about: '/about'
 }
 
 export default routeMenuMap

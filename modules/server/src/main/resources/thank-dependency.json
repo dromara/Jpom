@@ -1,0 +1,169 @@
+[
+  {
+    "name": "Spring Boot",
+    "link": "https://spring.io/",
+    "license": "Apache-2.0"
+  },
+  {
+    "name": "Vue",
+    "link": "https://vuejs.org/",
+    "license": "MIT"
+  },
+  {
+    "name": "vite",
+    "link": "https://vitejs.dev/",
+    "license": "MIT"
+  },
+  {
+    "name": "hutool",
+    "link": "https://hutool.cn/",
+    "license": "MulanPSL-2.0"
+  },
+  {
+    "name": "ant-design-vue",
+    "link": "https://antdv.com/",
+    "license": "MIT"
+  },
+  {
+    "name": "fastjson",
+    "link": "https://github.com/alibaba/fastjson2",
+    "license": "Apache-2.0"
+  },
+  {
+    "name": "commons-compress",
+    "link": "https://commons.apache.org/proper/commons-compress/",
+    "license": "Apache-2.0"
+  },
+  {
+    "name": "commons-exec",
+    "link": "https://commons.apache.org/proper/commons-exec/",
+    "license": "Apache-2.0"
+  },
+  {
+    "name": "oshi",
+    "link": "https://github.com/oshi/",
+    "license": "MIT"
+  },
+  {
+    "name": "bouncycastle",
+    "link": "https://www.bouncycastle.org/java.html",
+    "license": "Bouncy Castle Licence"
+  },
+  {
+    "name": "JustAuth",
+    "link": "https://gitee.com/yadong.zhang/JustAuth",
+    "license": "MIT"
+  },
+  {
+    "name": "h2",
+    "link": "https://h2database.com",
+    "license": [
+      "MPL 2.0",
+      "EPL 1.0"
+    ]
+  },
+  {
+    "name": "mariadb",
+    "link": "https://mariadb.com/kb/en/mariadb/about-mariadb-connector-j/",
+    "license": "LGPL-2.1"
+  },
+  {
+    "name": "mysql",
+    "link": "http://dev.mysql.com/doc/connector-j/en/",
+    "license": "The GNU General Public License, v2 with Universal FOSS Exception, v1.0"
+  },
+  {
+    "name": "postgresql",
+    "link": "https://jdbc.postgresql.org/",
+    "license": "BSD-2-Clause"
+  },
+  {
+    "name": "docker-java",
+    "link": "https://github.com/docker-java/docker-java",
+    "license": "Apache-2.0"
+  },
+  {
+    "name": "javax.mail",
+    "link": "https://javaee.github.io/javamail/",
+    "license": [
+      "CDDL",
+      "GPL 2.0"
+    ]
+  },
+  {
+    "name": "jgit",
+    "link": "https://www.eclipse.org/jgit/",
+    "license": [
+      "BSD",
+      "EDL"
+    ]
+  },
+  {
+    "name": "mwiede(jsch)",
+    "link": "https://github.com/mwiede/jsch",
+    "license": [
+      "BSD",
+      "ISC"
+    ]
+  },
+  {
+    "name": "svnkit",
+    "link": "https://svnkit.com/",
+    "license": "TMate"
+  },
+  {
+    "name": "xtermjs",
+    "link": "https://github.com/xtermjs/xterm.js",
+    "license": "MIT"
+  },
+  {
+    "name": "codemirror",
+    "link": "https://codemirror.net/",
+    "license": "MIT"
+  },
+  {
+    "name": "echarts",
+    "link": "https://echarts.apache.org/zh/index.html",
+    "license": "Apache-2.0"
+  },
+  {
+    "name": "dayjs",
+    "link": "https://day.js.org/",
+    "license": "MIT"
+  },
+  {
+    "name": "axios",
+    "link": "https://github.com/axios/axios",
+    "license": "MIT"
+  },
+  {
+    "name": "base64-js",
+    "link": "https://github.com/beatgammit/base64-js",
+    "license": "MIT"
+  },
+  {
+    "name": "js-sha1",
+    "link": "https://github.com/emn178/js-sha1",
+    "license": "MIT"
+  },
+  {
+    "name": "pinia",
+    "link": "https://pinia.vuejs.org/",
+    "license": "MIT"
+  },
+  {
+    "name": "prismjs",
+    "link": "https://prismjs.com/",
+    "license": "MIT"
+  },
+  {
+    "name": "qs",
+    "link": "https://github.com/ljharb/qs",
+    "license": "BSD 3-Clause"
+  },
+  {
+    "name": "spark-md5",
+    "link": "https://github.com/satazor/js-spark-md5",
+    "license": "WTFPL"
+  }
+]
