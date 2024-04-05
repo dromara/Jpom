@@ -105,4 +105,6 @@ git fetch origin --prune #从远程拉取所有信息
 
 ## 版权
 
+```shell
 mvn license:format
+```
