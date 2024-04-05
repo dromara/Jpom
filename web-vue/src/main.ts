@@ -14,11 +14,14 @@ import App from './App.vue'
 import router from './router'
 import '@/router/auth'
 import CustomModal from '@/components/customModal/index.vue'
+import i18n from './i18n'
 const pinia = createPinia()
 
 const app = createApp(App)
 
-app.use(router).use(pinia)
+app.use(router)
+app.use(pinia)
+app.use(i18n)
 
 // 增加弹窗全局引入
 app.component('CustomModal', CustomModal)
