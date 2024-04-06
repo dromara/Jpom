@@ -55,7 +55,23 @@
           <a-image width="80%" :src="praiseQrcorde" :preview="false"> </a-image>
         </a-card>
       </a-tab-pane>
-      <a-tab-pane key="1" tab="开源协议"><pre v-html="licenseText" style="white-space: pre-wrap"></pre></a-tab-pane>
+      <a-tab-pane key="3" tab="联系我们">
+        <h2>联系时请备注来意</h2>
+        <ul>
+          <li>邮箱：<a href="mailto:bwcx_jzy@dromara.org">bwcx_jzy@dromara.org</a></li>
+          <li>微信：jpom66</li>
+        </ul>
+        <a-card title="微信二维码">
+          <a-qrcode
+            :size="qrCodeSize"
+            :icon-size="qrCodeSize / 4"
+            error-level="H"
+            value="https://u.wechat.com/MP_PrhfdwmlBhmKp35BloEw"
+            :icon="jpomLogo"
+          />
+        </a-card>
+      </a-tab-pane>
+      <a-tab-pane key="1" tab="开源协议"><pre style="white-space: pre-wrap" v-html="licenseText"></pre></a-tab-pane>
       <a-tab-pane key="2" tab="软件致谢">
         <h1>Jpom 中使用了如下开源软件，我们衷心感谢有了他们的开源 Jpom 才能更完善</h1>
         <a-list size="small" bordered :data-source="thankDependency">
@@ -93,9 +109,12 @@
 // 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。
 import { getLicense, getThankDependency } from '@/api/about'
 import praiseQrcorde from '@/assets/images/praise-qrcorde-small.png'
+import jpomLogo from '@/assets/images/jpom.svg'
 const licenseText = ref('')
 
 const thankDependency = ref([])
+
+const qrCodeSize = ref(200)
 
 onMounted(() => {
   getLicense().then((res) => {
