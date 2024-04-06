@@ -158,8 +158,9 @@ provide('globalLoading', globalLoading)
   z-index: 99999;
   // background-color: #1f1f1f;
   // background-color: rgba(0, 0, 0, 0.7);
-  background-color: rgba(140, 140, 140, 0.3);
+  background-color: rgba(140, 140, 140, 0.2);
   opacity: 0.8;
+  height: 100vh;
 }
 </style>
 
