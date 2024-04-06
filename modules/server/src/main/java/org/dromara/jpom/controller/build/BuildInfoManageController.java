@@ -185,7 +185,7 @@ public class BuildInfoManageController extends BaseServerController {
         Assert.notNull(queryByBean, "没有对应的构建历史");
 
         File file = BuildUtil.getLogFile(item.getId(), buildId);
-        Assert.state(FileUtil.isFile(file), "日志文件错误");
+        Assert.state(FileUtil.isFile(file), "日志文件不存在或者错误");
 
         if (!file.exists()) {
             if (buildId == item.getBuildId()) {

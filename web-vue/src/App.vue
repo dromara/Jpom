@@ -123,8 +123,11 @@ const globalLoadingProps = ref({
   delayTime: 500
 })
 
-// 全局 loading
-const globalLoading = (props: any) => {
+/**
+ * 全局 loading
+ * @param props 参数
+ */
+const globalLoading = (props: boolean | string | any) => {
   let newProps: any = {}
   if (typeof props === 'boolean') {
     newProps = { spinning: props }
