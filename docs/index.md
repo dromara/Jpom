@@ -336,6 +336,8 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 
 [贡献成员列表](/pages/praise/friends/)
 
+> 提交贡献即认为签署了 [CLA](https://gitee.com/dromara/Jpom/blob/master/CLA.md) 协议
+
 <br/>
 
 
