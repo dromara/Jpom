@@ -8,7 +8,6 @@
 -- See the Mulan PSL v2 for more details.
 --
 
-
 DROP FUNCTION IF EXISTS column_exists;
 CREATE FUNCTION column_exists(tname varchar, cname varchar)
 RETURNS boolean

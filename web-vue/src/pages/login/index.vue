@@ -57,6 +57,11 @@
                       <img alt="dingtalk" :src="feishuImg" />
                     </a-tooltip>
                   </div>
+                  <div v-if="enabledOauth2Provides.includes('mygitlab')" class="oauth2-item">
+                    <a-tooltip title="自建 Gitlab 账号登录" @click="toOauth2Url('mygitlab')">
+                      <img alt="mygitlab" :src="gitlabImg" />
+                    </a-tooltip>
+                  </div>
                 </a-space>
               </a-form-item>
             </template>
@@ -99,6 +104,7 @@ import giteeImg from '@/assets/images/gitee.svg'
 import dingtalkImg from '@/assets/images/dingtalk.svg'
 import githubImg from '@/assets/images/github.png'
 import feishuImg from '@/assets/images/feishu.svg'
+import gitlabImg from '@/assets/images/gitlab.svg'
 import { useGuideStore } from '@/stores/guide'
 import { Button } from 'ant-design-vue'
 interface IFormState {
