@@ -16,6 +16,7 @@ import cn.hutool.captcha.CircleCaptcha;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
@@ -33,6 +34,7 @@ import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthRequest;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.interceptor.LoginInterceptor;
@@ -288,15 +290,19 @@ public class LoginControl extends BaseServerController implements InitializingBe
         AuthResponse<?> authResponse = authRequest.login(authCallback);
         if (authResponse.ok()) {
             AuthUser authUser = (AuthUser) authResponse.getData();
-            String username = authUser.getUsername();
+            String username = this.parseUsername(authUser);
             UserModel userModel = userService.getByKey(username);
             if (userModel == null) {
                 BaseOauth2Config oauth2Config = Oauth2Factory.getConfig(provide);
                 if (oauth2Config.autoCreteUser()) {
-                    userModel = this.createUser(authUser);
+                    userModel = this.createUser(username, authUser, provide);
                 } else {
                     return new JsonMessage<>(400, username + " 用户不存在请联系管理创建");
                 }
+            }
+            if (userModel.getStatus() != null && userModel.getStatus() == 0) {
+                userLoginLogServer.fail(userModel, 4, false, request);
+                return new JsonMessage<>(ServerConst.ACCOUNT_LOCKED, ServerConst.ACCOUNT_LOCKED_TIP);
             }
             //
             UserModel updateModel = UserModel.unLock(userModel.getId());
@@ -309,7 +315,37 @@ public class LoginControl extends BaseServerController implements InitializingBe
         return new JsonMessage<>(400, "OAuth 2 登录失败,请联系管理员！" + authResponse.getMsg());
     }
 
-    private UserModel createUser(AuthUser authUser) {
+    /**
+     * 解析用户名
+     *
+     * @param authUser 平台账号信息
+     * @return 用户名
+     */
+    private String parseUsername(AuthUser authUser) {
+        String username = authUser.getUsername();
+        String checkId = StrUtil.replace(username, "-", "_");
+        if (Validator.isGeneral(checkId, UserModel.USER_NAME_MIN_LEN, Const.ID_MAX_LEN)) {
+            return username;
+        }
+        if (StrUtil.isNotEmpty(authUser.getEmail())) {
+            return authUser.getEmail();
+        }
+        String uuid = authUser.getUuid();
+        if (Validator.isGeneral(uuid, UserModel.USER_NAME_MIN_LEN, Const.ID_MAX_LEN)) {
+            return uuid;
+        }
+        throw new IllegalStateException("OAuth 2 登录失败,平台账号不符合本系统要求");
+    }
+
+    /**
+     * oauth2 创建用户账号
+     *
+     * @param username 用户名
+     * @param authUser 平台信息
+     * @param source   来源平台
+     * @return 用户
+     */
+    private UserModel createUser(String username, AuthUser authUser, String source) {
         // 创建用户
         UserModel where = new UserModel();
         where.setSystemUser(1);
@@ -318,7 +354,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
         Assert.notNull(first, "没有找到系统管理员");
         UserModel userModel = new UserModel();
         userModel.setName(StrUtil.emptyToDefault(authUser.getNickname(), authUser.getUsername()));
-        userModel.setId(authUser.getUsername());
+        userModel.setId(username);
         userModel.setEmail(authUser.getEmail());
         userModel.setSalt(userService.generateSalt());
         String randomPwd = RandomUtil.randomString(UserModel.SALT_LEN);
@@ -326,6 +362,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
         userModel.setPassword(SecureUtil.sha1(sha1Pwd + userModel.getSalt()));
         userModel.setSystemUser(0);
         userModel.setParent(first.getId());
+        userModel.setSource(source);
         BaseServerController.resetInfo(first);
         userService.insert(userModel);
         return userModel;

@@ -32,12 +32,14 @@
               <a-divider>第三方登录</a-divider>
               <a-form-item :wrapper-col="{ span: 24 }">
                 <a-space :size="20">
-                  <div v-if="enabledOauth2Provides.includes('gitee')" class="oauth2-item">
-                    <a-tooltip title="gitee 账号登录" @click="toOauth2Url('gitee')">
-                      <img alt="gitee" :src="giteeImg" />
-                    </a-tooltip>
-                  </div>
-                  <div v-if="enabledOauth2Provides.includes('maxkey')" class="oauth2-item">
+                  <template v-for="(item, index) in oauth2AllProvides">
+                    <div v-if="enabledOauth2Provides.includes(item.key)" :key="index" class="oauth2-item">
+                      <a-tooltip :title="item.name" @click="toOauth2Url(item.key)">
+                        <img :alt="item.name" :src="item.img" />
+                      </a-tooltip>
+                    </div>
+                  </template>
+                  <!-- <div v-if="enabledOauth2Provides.includes('maxkey')" class="oauth2-item">
                     <a-tooltip title="maxkey" @click="toOauth2Url('maxkey')">
                       <img alt="maxkey" :src="maxkeyImg" />
                     </a-tooltip>
@@ -61,7 +63,7 @@
                     <a-tooltip title="自建 Gitlab 账号登录" @click="toOauth2Url('mygitlab')">
                       <img alt="mygitlab" :src="gitlabImg" />
                     </a-tooltip>
-                  </div>
+                  </div> -->
                 </a-space>
               </a-form-item>
             </template>
@@ -105,8 +107,48 @@ import dingtalkImg from '@/assets/images/dingtalk.svg'
 import githubImg from '@/assets/images/github.png'
 import feishuImg from '@/assets/images/feishu.svg'
 import gitlabImg from '@/assets/images/gitlab.svg'
+import weixinImg from '@/assets/images/weixin.svg'
 import { useGuideStore } from '@/stores/guide'
 import { Button } from 'ant-design-vue'
+
+const oauth2AllProvides = ref([
+  {
+    name: '钉钉账号登录',
+    key: 'dingtalk',
+    img: dingtalkImg
+  },
+  {
+    name: '飞书账号登录',
+    key: 'feishu',
+    img: feishuImg
+  },
+  {
+    name: '企业微信扫码账号登录',
+    key: 'wechat_enterprise',
+    img: weixinImg
+  },
+  {
+    name: 'gitee 账号登录',
+    key: 'gitee',
+    img: giteeImg
+  },
+  {
+    name: 'maxkey 平台登录',
+    key: 'maxkey',
+    img: maxkeyImg
+  },
+  {
+    name: 'github 账号登录',
+    key: 'github',
+    img: githubImg
+  },
+  {
+    name: '自建 Gitlab 账号登录',
+    key: 'mygitlab',
+    img: gitlabImg
+  }
+])
+
 interface IFormState {
   loginName: string
   userPwd: string

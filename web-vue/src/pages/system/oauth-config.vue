@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-alert type="info" show-icon message="使用提示">
+    <a-alert type="info" show-icon message="Oauth2 使用提示">
       <template #description>
         <ul>
           <li>账号如果开启 MFA(两步验证)，使用 Oauth2 登录不会验证 MFA(两步验证)</li>
@@ -9,7 +9,7 @@
       </template>
     </a-alert>
     <a-tabs>
-      <a-tab-pane key="dingtalk" tab="钉钉扫码 Oauth2">
+      <a-tab-pane key="dingtalk" tab="钉钉扫码">
         <a-form ref="editForm" :model="dingtalk" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
           <a-form-item label="是否开启" name="enabled">
             <a-switch v-model:checked="dingtalk.enabled" checked-children="启用" un-checked-children="停用" />
@@ -44,7 +44,7 @@
           </a-form-item>
         </a-form>
       </a-tab-pane>
-      <a-tab-pane key="feishu" tab="飞书扫码 Oauth2">
+      <a-tab-pane key="feishu" tab="飞书扫码">
         <a-form ref="editForm" :model="feishu" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
           <a-form-item label="是否开启" name="enabled">
             <a-switch v-model:checked="feishu.enabled" checked-children="启用" un-checked-children="停用" />
@@ -75,7 +75,59 @@
           </a-form-item>
         </a-form>
       </a-tab-pane>
-      <a-tab-pane key="maxkey" tab="MaxKey Oauth2">
+      <a-tab-pane key="wechat_enterprise" tab="企业微信扫码">
+        <a-form
+          ref="editForm"
+          :model="wechat_enterprise"
+          :rules="rules"
+          :label-col="{ span: 4 }"
+          :wrapper-col="{ span: 16 }"
+        >
+          <a-form-item label="是否开启" name="enabled">
+            <a-switch v-model:checked="wechat_enterprise.enabled" checked-children="启用" un-checked-children="停用" />
+          </a-form-item>
+          <a-form-item label="网页应用ID" name="agentId">
+            <a-input v-model:value="wechat_enterprise.agentId" type="text" placeholder="请输入授权方的网页应用ID" />
+          </a-form-item>
+          <a-form-item label="客户端ID" name="clientId">
+            <a-input v-model:value="wechat_enterprise.clientId" type="text" placeholder="请输入客户端ID [clientId]" />
+          </a-form-item>
+          <a-form-item label="客户端密钥" name="clientSecret">
+            <a-input-password
+              v-model:value="wechat_enterprise.clientSecret"
+              placeholder="请输入客户端密钥 [clientSecret]"
+            />
+          </a-form-item>
+
+          <a-form-item label="回调 url" name="redirectUri">
+            <template #help>参考地址：{{ `${host}/oauth2-wechat_enterprise` }}</template>
+            <a-input
+              v-model:value="wechat_enterprise.redirectUri"
+              type="text"
+              placeholder="请输入回调重定向 url [redirectUri]"
+            />
+          </a-form-item>
+          <a-form-item label="自动创建用户" name="autoCreteUser">
+            <a-switch
+              v-model:checked="wechat_enterprise.autoCreteUser"
+              checked-children="启用"
+              un-checked-children="停用"
+            />
+          </a-form-item>
+          <a-form-item label="忽略校验 state" name="ignoreCheckState">
+            <a-switch
+              v-model:checked="wechat_enterprise.ignoreCheckState"
+              checked-children="忽略"
+              un-checked-children="校验"
+            />
+          </a-form-item>
+
+          <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+            <a-button type="primary" class="btn" @click="onSubmit('wechat_enterprise')">提交</a-button>
+          </a-form-item>
+        </a-form>
+      </a-tab-pane>
+      <a-tab-pane key="maxkey" tab="MaxKey">
         <a-form ref="editForm" :model="maxkey" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
           <a-form-item label="是否开启" name="enabled">
             <a-switch v-model:checked="maxkey.enabled" checked-children="启用" un-checked-children="停用" />
@@ -118,7 +170,7 @@
           </a-form-item>
         </a-form>
       </a-tab-pane>
-      <a-tab-pane key="gitee" tab="Gitee Oauth2">
+      <a-tab-pane key="gitee" tab="Gitee">
         <a-form ref="editForm" :model="gitee" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
           <a-form-item label="是否开启" name="enabled">
             <a-switch v-model:checked="gitee.enabled" checked-children="启用" un-checked-children="停用" />
@@ -148,7 +200,7 @@
           </a-form-item>
         </a-form>
       </a-tab-pane>
-      <a-tab-pane key="mygitlab" tab="自建 Gitlab Oauth2">
+      <a-tab-pane key="mygitlab" tab="自建 Gitlab">
         <a-form ref="editForm" :model="mygitlab" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
           <a-form-item label="是否开启" name="enabled">
             <a-switch v-model:checked="mygitlab.enabled" checked-children="启用" un-checked-children="停用" />
@@ -186,7 +238,7 @@
         </a-form>
       </a-tab-pane>
 
-      <a-tab-pane key="github" tab="Github Oauth2">
+      <a-tab-pane key="github" tab="Github">
         <a-form ref="editForm" :model="github" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
           <a-form-item label="是否开启" name="enabled">
             <a-switch v-model:checked="github.enabled" checked-children="启用" un-checked-children="停用" />
@@ -233,8 +285,9 @@ export default {
       dingtalk: {},
       feishu: {},
       mygitlab: {},
+      wechat_enterprise: {},
       rules: {},
-      provides: ['gitee', 'maxkey', 'github', 'dingtalk', 'feishu', 'mygitlab'],
+      provides: ['gitee', 'maxkey', 'github', 'dingtalk', 'feishu', 'mygitlab', 'wechat_enterprise'],
       host: ''
     }
   },
