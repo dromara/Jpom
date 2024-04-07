@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 /**
  * linux
  *
- * @author Administrator
+ * @author bwcx_jzy
  */
 @Conditional(Commander.Linux.class)
 @Service

@@ -39,7 +39,7 @@ import java.util.List;
 /**
  * 用户列表
  *
- * @author Administrator
+ * @author bwcx_jzy
  */
 @RestController
 @RequestMapping(value = "/user")

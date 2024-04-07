@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
 /**
  * 首页
  *
- * @author Administrator
+ * @author bwcx_jzy
  */
 @RestController
 @RequestMapping(value = "/")
