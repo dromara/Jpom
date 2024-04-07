@@ -450,6 +450,8 @@ mvn -f xxxx/pom.xml clean package
 
 ## 🔨贡献指南
 
+> 提交贡献即认为签署了 [CLA](https://gitee.com/dromara/Jpom/blob/master/CLA.md) 协议
+
 ### 贡献须知
 
 Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提出建议。贡献无论大小，你的贡献会帮助背后成千上万的使用者以及开发者，你做出的贡献也会永远的保留在项目的贡献者名单中，这也是开源项目的意义所在！
