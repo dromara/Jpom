@@ -148,6 +148,43 @@
           </a-form-item>
         </a-form>
       </a-tab-pane>
+      <a-tab-pane key="mygitlab" tab="自建 Gitlab Oauth2">
+        <a-form ref="editForm" :model="mygitlab" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
+          <a-form-item label="是否开启" name="enabled">
+            <a-switch v-model:checked="mygitlab.enabled" checked-children="启用" un-checked-children="停用" />
+          </a-form-item>
+          <a-form-item label="服务地址" name="host">
+            <template #help>自建 gitlab 访问地址</template>
+            <a-input v-model:value="mygitlab.host" type="text" placeholder="请输入服务地址" />
+          </a-form-item>
+          <a-form-item label="客户端ID" name="clientId">
+            <a-input v-model:value="mygitlab.clientId" type="text" placeholder="请输入客户端ID [clientId]" />
+          </a-form-item>
+          <a-form-item label="客户端密钥" name="clientSecret">
+            <a-input-password v-model:value="mygitlab.clientSecret" placeholder="请输入客户端密钥 [clientSecret]" />
+          </a-form-item>
+
+          <a-form-item label="回调 url" name="redirectUri">
+            <template #help>参考地址：{{ `${host}/oauth2-mygitlab` }}</template>
+            <a-input
+              v-model:value="mygitlab.redirectUri"
+              type="text"
+              placeholder="请输入回调重定向 url [redirectUri]"
+            />
+          </a-form-item>
+
+          <a-form-item label="自动创建用户" name="autoCreteUser">
+            <a-switch v-model:checked="mygitlab.autoCreteUser" checked-children="启用" un-checked-children="停用" />
+          </a-form-item>
+          <a-form-item label="忽略校验 state" name="ignoreCheckState">
+            <a-switch v-model:checked="mygitlab.ignoreCheckState" checked-children="忽略" un-checked-children="校验" />
+          </a-form-item>
+
+          <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+            <a-button type="primary" class="btn" @click="onSubmit('mygitlab')">提交</a-button>
+          </a-form-item>
+        </a-form>
+      </a-tab-pane>
 
       <a-tab-pane key="github" tab="Github Oauth2">
         <a-form ref="editForm" :model="github" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
@@ -195,8 +232,9 @@ export default {
       github: {},
       dingtalk: {},
       feishu: {},
+      mygitlab: {},
       rules: {},
-      provides: ['gitee', 'maxkey', 'github', 'dingtalk', 'feishu'],
+      provides: ['gitee', 'maxkey', 'github', 'dingtalk', 'feishu', 'mygitlab'],
       host: ''
     }
   },

@@ -4,7 +4,7 @@
 
 ### 🐣 新增功能
 
-1. 【server】新增 Oauth2 新增飞书账号登录（感谢[@鸡皮蒜毛与鸡毛蒜皮](https://gitee.com/cuia) [Gitee issues I9ELGS](https://gitee.com/dromara/Jpom/issues/I9ELGS) ）
+1. 【server】新增 Oauth2 新增【飞书账号】、【自建 Gitlab】登录（感谢[@鸡皮蒜毛与鸡毛蒜皮](https://gitee.com/cuia) [Gitee issues I9ELGS](https://gitee.com/dromara/Jpom/issues/I9ELGS) ）
 
 ### 🐞 解决BUG、优化功能
 
