@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * 文件管理
  *
- * @author Administrator
+ * @author bwcx_jzy
  */
 @RestController
 @RequestMapping(value = "/node/manage/file/")

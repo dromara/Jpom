@@ -33,7 +33,7 @@
               <a-form-item :wrapper-col="{ span: 24 }">
                 <a-space :size="20">
                   <div v-if="enabledOauth2Provides.includes('gitee')" class="oauth2-item">
-                    <a-tooltip title="gitee" @click="toOauth2Url('gitee')">
+                    <a-tooltip title="gitee 账号登录" @click="toOauth2Url('gitee')">
                       <img alt="gitee" :src="giteeImg" />
                     </a-tooltip>
                   </div>
@@ -43,13 +43,18 @@
                     </a-tooltip>
                   </div>
                   <div v-if="enabledOauth2Provides.includes('github')" class="oauth2-item">
-                    <a-tooltip title="github" @click="toOauth2Url('github')">
+                    <a-tooltip title="github 账号登录" @click="toOauth2Url('github')">
                       <img alt="github" :src="githubImg" />
                     </a-tooltip>
                   </div>
                   <div v-if="enabledOauth2Provides.includes('dingtalk')" class="oauth2-item">
-                    <a-tooltip title="dingtalk" @click="toOauth2Url('dingtalk')">
+                    <a-tooltip title="钉钉账号登录" @click="toOauth2Url('dingtalk')">
                       <img alt="dingtalk" :src="dingtalkImg" />
+                    </a-tooltip>
+                  </div>
+                  <div v-if="enabledOauth2Provides.includes('feishu')" class="oauth2-item">
+                    <a-tooltip title="飞书账号登录" @click="toOauth2Url('feishu')">
+                      <img alt="dingtalk" :src="feishuImg" />
                     </a-tooltip>
                   </div>
                 </a-space>
@@ -93,6 +98,7 @@ import maxkeyImg from '@/assets/images/maxkey.png'
 import giteeImg from '@/assets/images/gitee.svg'
 import dingtalkImg from '@/assets/images/dingtalk.svg'
 import githubImg from '@/assets/images/github.png'
+import feishuImg from '@/assets/images/feishu.svg'
 import { useGuideStore } from '@/stores/guide'
 import { Button } from 'ant-design-vue'
 interface IFormState {

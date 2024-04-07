@@ -1,6 +1,13 @@
 <template>
   <div>
-    <a-alert message="账号如果开启 MFA(两步验证)，使用 Oauth2 登录不会验证 MFA(两步验证)" type="info" show-icon />
+    <a-alert type="info" show-icon message="使用提示">
+      <template #description>
+        <ul>
+          <li>账号如果开启 MFA(两步验证)，使用 Oauth2 登录不会验证 MFA(两步验证)</li>
+          <li>已经存在的账号与外部系统账号不一致时不支持绑定外部系统账号</li>
+        </ul>
+      </template>
+    </a-alert>
     <a-tabs>
       <a-tab-pane key="dingtalk" tab="钉钉扫码 Oauth2">
         <a-form ref="editForm" :model="dingtalk" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
@@ -34,6 +41,37 @@
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
             <a-button type="primary" class="btn" @click="onSubmit('dingtalk')">提交</a-button>
+          </a-form-item>
+        </a-form>
+      </a-tab-pane>
+      <a-tab-pane key="feishu" tab="飞书扫码 Oauth2">
+        <a-form ref="editForm" :model="feishu" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
+          <a-form-item label="是否开启" name="enabled">
+            <a-switch v-model:checked="feishu.enabled" checked-children="启用" un-checked-children="停用" />
+          </a-form-item>
+          <a-form-item label="客户端ID" name="clientId">
+            <a-input v-model:value="feishu.clientId" type="text" placeholder="请输入客户端ID [clientId]" />
+          </a-form-item>
+          <a-form-item label="客户端密钥" name="clientSecret">
+            <a-input-password v-model:value="feishu.clientSecret" placeholder="请输入客户端密钥 [clientSecret]" />
+          </a-form-item>
+
+          <a-form-item label="回调 url" name="redirectUri">
+            <template #help>参考地址：{{ `${host}/oauth2-feishu` }}</template>
+            <a-input v-model:value="feishu.redirectUri" type="text" placeholder="请输入回调重定向 url [redirectUri]" />
+          </a-form-item>
+          <!-- <a-form-item label="登录url">
+              <a-input :value="`${this.host}/oauth2-render-github`" type="text" />
+            </a-form-item> -->
+          <a-form-item label="自动创建用户" name="autoCreteUser">
+            <a-switch v-model:checked="feishu.autoCreteUser" checked-children="启用" un-checked-children="停用" />
+          </a-form-item>
+          <a-form-item label="忽略校验 state" name="ignoreCheckState">
+            <a-switch v-model:checked="feishu.ignoreCheckState" checked-children="忽略" un-checked-children="校验" />
+          </a-form-item>
+
+          <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+            <a-button type="primary" class="btn" @click="onSubmit('feishu')">提交</a-button>
           </a-form-item>
         </a-form>
       </a-tab-pane>
@@ -156,8 +194,9 @@ export default {
       gitee: {},
       github: {},
       dingtalk: {},
+      feishu: {},
       rules: {},
-      provides: ['gitee', 'maxkey', 'github', 'dingtalk'],
+      provides: ['gitee', 'maxkey', 'github', 'dingtalk', 'feishu'],
       host: ''
     }
   },

@@ -67,7 +67,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 登录控制
  *
- * @author Administrator
+ * @author bwcx_jzy
  */
 @RestController
 @Slf4j
