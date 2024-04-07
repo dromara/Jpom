@@ -17,7 +17,8 @@
             <template #icon><ReloadOutlined /></template>
           </a-button>
         </a-tooltip>
-        <a-tooltip title="关于系统" v-if="getUserInfo && (getUserInfo.systemUser || getUserInfo.demoUser)">
+        <!-- // 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。 -->
+        <a-tooltip v-if="getUserInfo && (getUserInfo.systemUser || getUserInfo.demoUser)" title="关于系统">
           <a-button @click="showAbout">
             <template #icon><ExclamationCircleOutlined /></template>
           </a-button>

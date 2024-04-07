@@ -22,7 +22,7 @@ import zhCN from 'ant-design-vue/es/locale/zh_CN'
 // import enUS from 'ant-design-vue/es/locale/en_US'
 import { theme } from 'ant-design-vue'
 import { onMounted, onUnmounted } from 'vue'
-
+import { SpinProps } from 'ant-design-vue/es/spin/Spin'
 const routerActivation = ref(true)
 const useGuideStore = guideStore()
 const getGuideCache = useGuideStore.getGuideCache
@@ -116,18 +116,19 @@ const reload = () => {
   })
 }
 
-const globalLoadingProps = ref({
+const globalLoadingProps = ref<SpinProps>({
   spinning: false,
   tip: '加载中...',
   size: 'large',
-  delayTime: 500
+  delay: 500,
+  wrapperClassName: ''
 })
 
 /**
  * 全局 loading
  * @param props 参数
  */
-const globalLoading = (props: boolean | string | any) => {
+const globalLoading = (props: boolean | string | SpinProps) => {
   let newProps: any = {}
   if (typeof props === 'boolean') {
     newProps = { spinning: props }
