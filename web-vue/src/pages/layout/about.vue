@@ -71,7 +71,9 @@
           />
         </a-card>
       </a-tab-pane>
-      <a-tab-pane key="1" tab="开源协议"><pre style="white-space: pre-wrap" v-html="licenseText"></pre></a-tab-pane>
+      <a-tab-pane key="1" tab="开源协议">
+        <pre style="white-space: pre-wrap">{{ licenseText }}</pre>
+      </a-tab-pane>
       <a-tab-pane key="2" tab="软件致谢">
         <h1>Jpom 中使用了如下开源软件，我们衷心感谢有了他们的开源 Jpom 才能更完善</h1>
         <a-list size="small" bordered :data-source="thankDependency">
@@ -87,7 +89,7 @@
                       <a-tag>{{ item.license }}</a-tag>
                     </template>
                     <template v-else>
-                      <a-tag v-for="licenseItem in item.license">{{ licenseItem }}</a-tag>
+                      <a-tag v-for="(licenseItem, index) in item.license" :key="index">{{ licenseItem }}</a-tag>
                     </template>
                   </template>
                 </a-space>
@@ -97,9 +99,9 @@
           <template #header>
             <div>排名按照字母 a-z 排序</div>
           </template>
-          <!-- <template #footer>
-            <div>Footer</div>
-          </template> -->
+          <template #footer>
+            <div>还有更多相关依赖开源组件</div>
+          </template>
         </a-list></a-tab-pane
       >
     </a-tabs>

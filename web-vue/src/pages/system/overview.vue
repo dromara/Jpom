@@ -17,6 +17,7 @@
             <template #icon><ReloadOutlined /></template>
           </a-button>
         </a-tooltip>
+        <!-- // 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。 -->
         <a-tooltip title="关于系统">
           <a-button @click="toAbout">
             <template #icon><ExclamationCircleOutlined /></template>
