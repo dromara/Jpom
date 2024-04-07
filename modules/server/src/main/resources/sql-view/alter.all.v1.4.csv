@@ -14,3 +14,4 @@ ALTER,STATIC_FILE_STORAGE,parentAbsolutePath,String,300,,父级文件路径,fals
 ALTER,STATIC_FILE_STORAGE,absolutePath,String,300,,文件路径,false
 ALTER,STATIC_FILE_STORAGE,name,String,100,,文件名,false
 ADD,TRIGGER_TOKEN_LOG,triggerCount,Integer,,,触发次数
+ADD,USER_INFO,source,String,100,,账号来源

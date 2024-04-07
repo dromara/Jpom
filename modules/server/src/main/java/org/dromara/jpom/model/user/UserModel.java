@@ -112,6 +112,10 @@ public class UserModel extends BaseUserModifyDbModel {
      * 权限组
      */
     private String permissionGroup;
+    /**
+     * 账号来源
+     */
+    private String source;
 
     public UserModel(String id) {
         this.setId(id);

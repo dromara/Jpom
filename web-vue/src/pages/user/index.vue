@@ -274,9 +274,10 @@ export default {
         {
           title: 'ID',
           dataIndex: 'id',
-          ellipsis: true
+          ellipsis: true,
+          width: 100
         },
-        { title: '昵称', dataIndex: 'name', ellipsis: true },
+        { title: '昵称', dataIndex: 'name', ellipsis: true, width: 100 },
         {
           title: '管理员',
           dataIndex: 'systemUser',
@@ -302,9 +303,23 @@ export default {
         {
           title: '邮箱',
           dataIndex: 'email',
-          ellipsis: true
+          ellipsis: true,
+          width: 100
+        },
+        {
+          title: '来源',
+          dataIndex: 'source',
+          ellipsis: true,
+          width: 90
+        },
+        {
+          title: '登录失败',
+          dataIndex: 'pwdErrorCount',
+          ellipsis: true,
+          width: 90
         },
         { title: '创建人', dataIndex: 'parent', ellipsis: true, width: 150 },
+
         {
           title: '修改时间',
           dataIndex: 'modifyTimeMillis',
@@ -312,6 +327,15 @@ export default {
           ellipsis: true,
           customRender: ({ text }) => {
             return parseTime(text)
+          },
+          width: '170px'
+        },
+        {
+          title: '创建时间',
+          dataIndex: 'createTimeMillis',
+          sorter: true,
+          customRender: ({ text, record }) => {
+            return parseTime(text || record.optTime)
           },
           width: '170px'
         },
