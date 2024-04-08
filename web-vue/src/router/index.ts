@@ -115,6 +115,11 @@ const children = [
     component: () => import('../pages/build/list-info.vue')
   },
   {
+    path: '/build/pipeline',
+    name: 'build-pipeline',
+    component: () => import('../pages/build/pipeline.vue')
+  },
+  {
     path: '/build/history',
     name: 'build-history',
     component: () => import('../pages/build/history.vue')

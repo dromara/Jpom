@@ -46,6 +46,10 @@
         "title": "仓库信息"
       },
       {
+        "id": "pipelineList",
+        "title": "流水线"
+      },
+      {
         "id": "buildList",
         "title": "构建列表"
       },

@@ -1,0 +1,44 @@
+version: 1.0.0
+repositories:
+  ABC:
+    repositoryId: 1
+    branchName: master
+    branchTagName: 1.0
+    cloneDepth: 1
+  ABB:
+    repositoryId: 2
+    branchName: master
+    branchTagName: 1.0
+    cloneDepth: 1
+
+stageGroups:
+  - name: default1
+    description: 默认分组1
+    stages:
+      - stageType: exec
+        description: 执行命令
+        commands: |+
+          echo 'success!'
+          # 服务端
+          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.8.22 -f ./modules/server/DockerfileRelease --push .
+          #
+          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
+        env:
+          a: b
+          b: a
+        timeout: 0
+      - stageType: publish
+        description: 发布文件
+        publishType: project
+        nodeId: 123
+        projectId: 456
+        secondaryDirectory: ./
+        uploadCloseFirst: false
+        afterOpt: Restart
+        clearOld: true
+        diffSync: false
+        artifacts:
+          - path:
+              - modules/server/target/server-2.11.4-release.zip
+              - modules/agent/target/agent-2.11.4-release.zip
+

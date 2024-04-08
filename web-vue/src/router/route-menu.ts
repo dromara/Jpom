@@ -37,6 +37,7 @@ const routeMenuMap: Record<string, string> = {
    * new build list page
    */
   buildList: '/build/list-info',
+  pipelineList: '/build/pipeline',
   buildHistory: '/build/history',
   userList: '/user/list',
   permission_group: '/user/permission-group',
