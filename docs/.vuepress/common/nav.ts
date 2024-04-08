@@ -38,6 +38,8 @@ export default [
             link: "/pages/upgrade/2.8.x-to-2.9.x/",
           },
           { text: "数据库迁移到 mysql", link: "/pages/4cfb46/" },
+          { text: "数据库迁移到 mariadb", link: "/pages/5622b5/" },
+          { text: "数据库迁移到 postgresql", link: "/pages/e59f84/" },
         ],
       },
       {
@@ -55,6 +57,7 @@ export default [
     link: "/pages/practice/",
     items: [
       { text: "实践案例目录", link: "/pages/practice/catalogue/" },
+      { text: "Oauth2平台登录", link: "/pages/898d2e/" },
       {
         text: "安装实践",
         items: [
