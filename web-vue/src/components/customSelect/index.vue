@@ -8,7 +8,7 @@
       :placeholder="selectPlaceholder"
       @change="selectChange"
     >
-      <template v-if="canReload" #suffixIcon> <ReloadOutlined @click="refreshSelect" /></template>
+      <template v-if="canReload" #suffixIcon> <ReloadOutlined v-if="!disabled" @click="refreshSelect" /></template>
       <template #dropdownRender="{ menuNode: menu }">
         <v-nodes :vnodes="menu" />
         <a-divider />

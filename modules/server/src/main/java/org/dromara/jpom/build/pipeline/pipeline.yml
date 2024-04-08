@@ -16,6 +16,7 @@ stageGroups:
     description: 默认分组1
     stages:
       - stageType: exec
+        repoTag: ABC
         description: 执行命令
         commands: |+
           echo 'success!'
@@ -28,6 +29,7 @@ stageGroups:
           b: a
         timeout: 0
       - stageType: publish
+        repoTag: ABB
         description: 发布文件
         publishType: project
         nodeId: 123

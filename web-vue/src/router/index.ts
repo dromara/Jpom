@@ -117,7 +117,7 @@ const children = [
   {
     path: '/build/pipeline',
     name: 'build-pipeline',
-    component: () => import('../pages/build/pipeline.vue')
+    component: () => import('../pages/build/pipeline/pipeline.vue')
   },
   {
     path: '/build/history',

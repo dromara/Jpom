@@ -12,7 +12,7 @@ import org.dromara.jpom.model.BaseGroupModel;
  * @since 2024/4/8
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "BUILD_PIPELINE_INFO", name = "构建流水线信息")
+//@TableName(value = "BUILD_PIPELINE_INFO", name = "构建流水线信息")
 @Data
 @Builder
 public class PipelineDataModel extends BaseGroupModel {
