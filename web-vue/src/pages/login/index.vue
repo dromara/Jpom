@@ -107,7 +107,8 @@ import dingtalkImg from '@/assets/images/dingtalk.svg'
 import githubImg from '@/assets/images/github.svg'
 import feishuImg from '@/assets/images/feishu.svg'
 import gitlabImg from '@/assets/images/gitlab.svg'
-import weixinImg from '@/assets/images/weixin.svg'
+// import weixinImg from '@/assets/images/weixin.svg'
+import qyWeixinImg from '@/assets/images/qyweixin.svg'
 import { useGuideStore } from '@/stores/guide'
 import { Button } from 'ant-design-vue'
 
@@ -125,7 +126,7 @@ const oauth2AllProvides = ref([
   {
     name: '企业微信扫码账号登录',
     key: 'wechat_enterprise',
-    img: weixinImg
+    img: qyWeixinImg
   },
   {
     name: 'gitee 账号登录',
