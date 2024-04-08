@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class Oauth2MaxKeyConfig extends BaseOauth2Config {
+public class MaxKeyOauth2Config extends BaseOauth2Config {
     public static final String KEY = "OAUTH_CONFIG_CUSTOM_OAUTH2";
 
     private String authorizationUri;

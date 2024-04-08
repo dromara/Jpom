@@ -63,6 +63,12 @@ public class Oauth2Factory implements ILoadEvent {
         }
     }
 
+    /**
+     * 获取配置
+     *
+     * @param provide 平台
+     * @return config
+     */
     public static BaseOauth2Config getConfig(String provide) {
         BaseOauth2Config oauth2Config = AUTH_CONFIG.get(provide);
         Assert.notNull(oauth2Config, "没有找到对应的 oauth2," + provide);
