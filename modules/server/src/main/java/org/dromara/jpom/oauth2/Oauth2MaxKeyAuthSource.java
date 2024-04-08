@@ -11,7 +11,7 @@ package org.dromara.jpom.oauth2;
 
 import me.zhyd.oauth.config.AuthSource;
 import me.zhyd.oauth.request.AuthDefaultRequest;
-import org.dromara.jpom.oauth2.platform.Oauth2MaxKeyConfig;
+import org.dromara.jpom.oauth2.platform.MaxKeyOauth2Config;
 import org.springframework.util.Assert;
 
 /**
@@ -19,9 +19,9 @@ import org.springframework.util.Assert;
  */
 public class Oauth2MaxKeyAuthSource implements AuthSource {
 
-    private final Oauth2MaxKeyConfig oauthConfig;
+    private final MaxKeyOauth2Config oauthConfig;
 
-    public Oauth2MaxKeyAuthSource(Oauth2MaxKeyConfig oauthConfig) {
+    public Oauth2MaxKeyAuthSource(MaxKeyOauth2Config oauthConfig) {
         this.oauthConfig = oauthConfig;
     }
 
