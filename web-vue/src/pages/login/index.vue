@@ -31,7 +31,7 @@
             <template v-if="enabledOauth2Provides.length">
               <a-divider>第三方登录</a-divider>
               <a-form-item :wrapper-col="{ span: 24 }">
-                <a-space :size="20">
+                <a-space :size="20" wrap>
                   <template v-for="(item, index) in oauth2AllProvides">
                     <div v-if="enabledOauth2Provides.includes(item.key)" :key="index" class="oauth2-item">
                       <a-tooltip :title="item.name" @click="toOauth2Url(item.key)">
@@ -470,6 +470,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .login-card {
   min-width: 380px;
+  max-width: 400px;
   border-radius: 8px;
   position: absolute;
   left: 50%;
