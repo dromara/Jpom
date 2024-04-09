@@ -23,7 +23,7 @@
         <template v-if="id">
           <a-menu v-model:selectedKeys="menuKey" mode="horizontal" class="menu" @click="menuClick">
             <a-menu-item key="info">
-              <span><InfoOutlined /> {{ $tl('p.verificationCode') }}</span>
+              <span><InfoOutlined /> {{ $tl('p.buildInfo') }}</span>
             </a-menu-item>
             <a-menu-item key="edit">
               <span> <EditOutlined /> {{ $tl('p.editBuild') }}</span>

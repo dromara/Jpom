@@ -1,7 +1,7 @@
 export default {
   c: {},
   p: {
-    verificationCode: '构建信息',
+    buildInfo: '构建信息',
     editBuild: '编辑构建',
     trigger: '触发器',
     addBuild: '新增构建',
