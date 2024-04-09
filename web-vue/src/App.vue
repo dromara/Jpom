@@ -1,6 +1,6 @@
 <template>
   <a-config-provider
-    :locale="zhCN"
+    :locale="lang[getGuideCache.locale].antd"
     :theme="{
       algorithm: themeAlgorithm
       // token: {
@@ -17,15 +17,16 @@
 </template>
 
 <script setup lang="ts">
-import zhCN from 'ant-design-vue/es/locale/zh_CN'
-// TODO 国家化共用hooks抽离
-// import enUS from 'ant-design-vue/es/locale/en_US'
 import { theme } from 'ant-design-vue'
 import { onMounted, onUnmounted } from 'vue'
 import { SpinProps } from 'ant-design-vue/es/spin/Spin'
+import { lang } from './i18n'
+import { useI18n } from 'vue-i18n'
 const routerActivation = ref(true)
 const useGuideStore = guideStore()
 const getGuideCache = useGuideStore.getGuideCache
+const i18nHook = useI18n()
+
 // const { useToken } = theme
 // const { token } = useToken()
 // console.log(token.value)
@@ -37,6 +38,7 @@ const onMatchMediaChange = (e: MediaQueryListEvent) => {
 }
 onMounted(() => {
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', onMatchMediaChange)
+  i18nHook.locale.value = getGuideCache.locale
 })
 
 onUnmounted(() => {
