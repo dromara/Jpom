@@ -23,20 +23,20 @@
         <template v-if="id">
           <a-menu v-model:selectedKeys="menuKey" mode="horizontal" class="menu" @click="menuClick">
             <a-menu-item key="info">
-              <span><InfoOutlined /> 构建信息</span>
+              <span><InfoOutlined /> {{ $tl('p.verificationCode') }}</span>
             </a-menu-item>
             <a-menu-item key="edit">
-              <span> <EditOutlined /> 编辑构建</span>
+              <span> <EditOutlined /> {{ $tl('p.editBuild') }}</span>
             </a-menu-item>
             <a-menu-item key="trigger">
-              <span><ApiOutlined /> 触发器</span>
+              <span><ApiOutlined /> {{ $tl('p.trigger') }}</span>
             </a-menu-item>
           </a-menu>
         </template>
         <template v-else>
           <a-menu v-model:selectedKeys="menuKey" mode="horizontal" class="menu" @click="menuClick">
             <a-menu-item key="edit">
-              <span> <EditOutlined /> 新增构建</span>
+              <span> <EditOutlined /> {{ $tl('p.addBuild') }}</span>
             </a-menu-item>
           </a-menu>
         </template>
@@ -74,13 +74,10 @@
               }
             "
           >
-            取消
+            {{ $tl('p.cancel') }}
           </a-button>
-          <a-tooltip
-            v-if="id"
-            title="如果当前构建信息已经在其他页面更新过，需要点击刷新按钮来获取最新的信息，点击刷新后未保存的数据也将丢失"
-          >
-            <a-button @click="$refs.editBuild.refresh()"> 刷新</a-button>
+          <a-tooltip v-if="id" :title="$tl('p.refreshWarning')">
+            <a-button @click="$refs.editBuild.refresh()"> {{ $tl('p.refresh') }}</a-button>
           </a-tooltip>
           <a-divider type="vertical" />
           <a-button
@@ -91,7 +88,7 @@
                 stepsCurrent = stepsCurrent - 1
               }
             "
-            >上一步</a-button
+            >{{ $tl('p.previousStep') }}</a-button
           >
           <a-button
             type="primary"
@@ -101,12 +98,14 @@
                 stepsCurrent = stepsCurrent + 1
               }
             "
-            >下一步</a-button
+            >{{ $tl('p.nextStep') }}</a-button
           >
           <a-divider type="vertical" />
 
-          <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(false)"> 保存 </a-button>
-          <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(true)"> 保存并构建 </a-button>
+          <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(false)"> {{ $tl('p.save') }} </a-button>
+          <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(true)">
+            {{ $tl('p.saveAndBuild') }}
+          </a-button>
         </a-space>
       </template>
     </a-drawer>
@@ -156,6 +155,9 @@ export default {
     }
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.build.item.${key}`, ...args)
+    },
     menuClick(item) {
       this.menuKey = item.key
     },

@@ -10,8 +10,9 @@
 
 import details from './details'
 import history from './history'
-
+import item from './item'
 export default {
   details,
-  history
+  history,
+  item
 }
