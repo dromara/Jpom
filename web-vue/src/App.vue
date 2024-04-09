@@ -1,6 +1,6 @@
 <template>
   <a-config-provider
-    :locale="lang[getGuideCache.locale].antd"
+    :locale="lang[nowLang]?.antd"
     :theme="{
       algorithm: themeAlgorithm
       // token: {
@@ -26,6 +26,10 @@ const routerActivation = ref(true)
 const useGuideStore = guideStore()
 const getGuideCache = useGuideStore.getGuideCache
 const i18nHook = useI18n()
+
+const nowLang = computed(() => {
+  return useGuideStore.getLocale()
+})
 
 // const { useToken } = theme
 // const { token } = useToken()
