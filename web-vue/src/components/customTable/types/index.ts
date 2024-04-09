@@ -8,13 +8,12 @@
 /// See the Mulan PSL v2 for more details.
 ///
 
-import { ColumnType } from 'ant-design-vue/es/table'
-import { RenderExpandIconProps, FixedType, AlignType } from 'ant-design-vue/es/vc-table/interface'
+import { RenderExpandIconProps, ColumnType } from 'ant-design-vue/es/vc-table/interface'
 import { CustomSlotsType } from 'ant-design-vue/es/_util/type'
-export type CustomColumnType = ColumnType & {
+type RecordType = Record<string, any>
+export type CustomColumnType = ColumnType<RecordType> & {
   checked?: boolean
-  fixed?: FixedType
-  align?: AlignType
+  [key: string]: any
 }
 export type CatchStorageType = {
   key: string
@@ -40,8 +39,14 @@ export type CustomTableSlotsType = CustomSlotsType<{
   expandedRowRender?: any
   expandColumnTitle?: any
   emptyDescription: string
-  bodyCell?: (props: { text: any; value: any; record: Record<string, any>; index: number; column: ColumnType }) => void
-  headerCell?: (props: { title: any; column: ColumnType }) => void
+  bodyCell?: (props: {
+    text: any
+    value: any
+    record: Record<string, any>
+    index: number
+    column: ColumnType<RecordType>
+  }) => void
+  headerCell?: (props: { title: any; column: ColumnType<RecordType> }) => void
   customFilterIcon?: any
   customFilterDropdown?: any
   default: any
