@@ -36,6 +36,7 @@ interface IStateGuideCache {
   compactView: boolean
   themeView: string
   menuThemeView: string
+  locale: string
 }
 
 const allowThemeView = ['light', 'dark', 'auto']
@@ -136,6 +137,12 @@ export const useGuideStore = defineStore('guide', {
     commitGuide(guideData: IState) {
       this.disabledGuide = guideData.disabledGuide
       this.extendPlugins = guideData.extendPlugins
+    },
+    async changeLocale(locale: string) {
+      const cache = this.getGuideCache
+      cache.locale = locale || 'zh-cn'
+      this.setGuideCache(cache)
+      location.reload()
     }
   },
   getters: {
@@ -236,6 +243,12 @@ export const useGuideStore = defineStore('guide', {
             paddingBottom: 0
           }
         }
+      }
+    },
+    getLocale: (state) => {
+      return () => {
+        const locale = state.guideCache.locale || 'zh-CN'
+        return locale
       }
     }
   }

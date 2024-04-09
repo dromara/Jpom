@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="build-history-list"
-      empty-description="没有任何构建历史"
+      :empty-description="$tl('p.noBuildHistory')"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -27,7 +27,7 @@
             v-model:value="listQuery['%buildName%']"
             allow-clear
             class="search-input-item"
-            placeholder="构建名称"
+            :placeholder="$tl('c.buildName')"
             @press-enter="loadData"
           />
           <a-select
@@ -44,7 +44,7 @@
               }
             "
             allow-clear
-            placeholder="请选择状态"
+            :placeholder="$tl('p.selectStatus')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
@@ -63,14 +63,14 @@
               }
             "
             allow-clear
-            placeholder="请选择触发类型"
+            :placeholder="$tl('p.selectTriggerType')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in triggerBuildTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$tl('p.quickReturnToFirstPage')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
           <a-button
             type="primary"
@@ -78,16 +78,16 @@
             :disabled="!tableSelections || tableSelections.length <= 0"
             @click="handleBatchDelete"
           >
-            批量删除
+            {{ $tl('p.batchDelete') }}
           </a-button>
         </a-space>
       </template>
       <template #tableHelp>
         <a-tooltip>
           <template #title>
-            <div>构建历史是用于记录每次构建的信息,可以保留构建产物信息,构建日志。同时还可以快速回滚发布</div>
-            <div>如果不需要保留较多构建历史信息可以到服务端修改构建相关配置参数</div>
-            <div>构建历史可能占有较多硬盘空间,建议根据实际情况配置保留个数</div>
+            <div>{{ $tl('p.buildHistoryDescription') }}</div>
+            <div>{{ $tl('p.modifyBuildConfig') }}</div>
+            <div>{{ $tl('p.buildHistorySpace') }}</div>
           </template>
           <QuestionCircleOutlined />
         </a-tooltip>
@@ -99,15 +99,15 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'buildNumberId'">
-          <a-tooltip :title="text + ' ( 点击查看日志 ) '">
+          <a-tooltip :title="text + `( ${$tl('p.viewLog')} )`">
             <a-tag color="#108ee9" @click="handleBuildLog(record)">
               #{{ text }}<template v-if="record.fromBuildNumberId">&lt;-{{ record.fromBuildNumberId }}</template>
             </a-tag>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
-          <a-tooltip :title="record.statusMsg || statusMap[text] || '未知'">
-            <a-tag :color="statusColor[record.status]">{{ statusMap[text] || '未知' }}</a-tag>
+          <a-tooltip :title="record.statusMsg || statusMap[text] || $tl('c.unknown')">
+            <a-tag :color="statusColor[record.status]">{{ statusMap[text] || $tl('c.unknown') }}</a-tag>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'releaseMethod'">
@@ -123,7 +123,7 @@
 
         <template v-else-if="column.dataIndex === 'resultFileSize'">
           <a-tooltip
-            :title="`产物文件大小：${renderSize(record.resultFileSize)}， 日志文件： ${renderSize(
+            :title="`${$tl('p.artifactFileSize')}${renderSize(record.resultFileSize)}， ${$tl('p.logFile')} ${renderSize(
               record.buildLogFileSize
             )}`"
           >
@@ -135,8 +135,8 @@
 
         <template v-else-if="column.dataIndex === 'endTime'">
           <a-tooltip
-            :title="`开始时间：${parseTime(record.startTime)}，${
-              record.endTime ? '结束时间：' + parseTime(record.endTime) : ''
+            :title="`${$tl('p.startTime')}${parseTime(record.startTime)}，${
+              record.endTime ? $tl('p.endTime') + parseTime(record.endTime) : ''
             }`"
           >
             <span v-if="record.endTime">{{
@@ -148,24 +148,22 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-tooltip title="下载构建日志,如果按钮不可用表示日志文件不存在,一般是构建历史相关文件被删除">
+            <a-tooltip :title="$tl('p.downloadLog')">
               <a-button size="small" type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"
-                ><DownloadOutlined />日志</a-button
+                ><DownloadOutlined />{{ $tl('p.log') }}</a-button
               >
             </a-tooltip>
 
-            <a-tooltip
-              title="下载构建产物,如果按钮不可用表示产物文件不存在,一般是构建没有产生对应的文件或者构建历史相关文件被删除"
-            >
+            <a-tooltip :title="$tl('p.downloadArtifact')">
               <a-button size="small" type="primary" :disabled="!record.hasFile" @click="handleFile(record)"
                 ><DownloadOutlined />
-                产物
+                {{ $tl('p.artifact') }}
               </a-button>
             </a-tooltip>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
-                更多
+                {{ $tl('p.more') }}
                 <DownOutlined />
               </a>
               <template #overlay>
@@ -178,17 +176,21 @@
                         type="primary"
                         danger
                         @click="handleRollback(record)"
-                        >回滚
+                        >{{ $tl('c.rollback') }}
                       </a-button>
                     </template>
                     <template v-else>
-                      <a-tooltip title="Dockerfile 构建方式不支持在这里回滚">
-                        <a-button size="small" :disabled="true" type="primary" danger>回滚 </a-button>
+                      <a-tooltip :title="$tl('p.dockerfileNotSupported')">
+                        <a-button size="small" :disabled="true" type="primary" danger
+                          >{{ $tl('c.rollback') }}
+                        </a-button>
                       </a-tooltip>
                     </template>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+                    <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
+                      $tl('p.delete')
+                    }}</a-button>
                   </a-menu-item>
                 </a-menu>
               </template>
@@ -293,21 +295,21 @@ export default {
       tableSelections: [],
       columns: [
         {
-          title: '构建名称',
+          title: this.$tl('c.buildName'),
           dataIndex: 'buildName',
           width: 120,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '构建 ID',
+          title: this.$tl('p.buildId'),
           dataIndex: 'buildNumberId',
           width: '90px',
           align: 'center',
           ellipsis: true
         },
         {
-          title: '备注',
+          title: this.$tl('p.note'),
           dataIndex: 'buildRemark',
           width: 120,
           ellipsis: true,
@@ -315,62 +317,62 @@ export default {
         },
 
         {
-          title: '状态',
+          title: this.$tl('p.status'),
           dataIndex: 'status',
           width: '100px',
           align: 'center',
           ellipsis: true
         },
         {
-          title: '触发类型',
+          title: this.$tl('p.triggerType'),
           dataIndex: 'triggerBuildType',
           align: 'center',
           width: '100px',
           ellipsis: true
         },
         {
-          title: '占用空间',
+          title: this.$tl('p.spaceOccupied'),
           dataIndex: 'resultFileSize',
           width: '100px',
           sorter: true,
           ellipsis: true
         },
         {
-          title: '开始时间',
+          title: this.$tl('p.startTimeLog'),
           dataIndex: 'startTime',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: '耗时',
+          title: this.$tl('p.duration'),
           dataIndex: 'endTime',
           // sorter: true,
 
           width: '120px'
         },
         {
-          title: '数据更新时间',
+          title: this.$tl('p.dataUpdateTime'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: '发布方式',
+          title: this.$tl('p.publishMethod'),
           dataIndex: 'releaseMethod',
           width: '100px',
           ellipsis: true
         },
         {
-          title: '操作人',
+          title: this.$tl('p.operator'),
           dataIndex: 'modifyUser',
           width: '130px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
 
           width: '220px',
@@ -400,10 +402,12 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.build.history.${key}`, ...args)
+    },
     parseTime,
     renderSize,
     formatDuration,
-
     // 加载数据
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
@@ -445,11 +449,11 @@ export default {
     // 回滚
     handleRollback(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemMessage'),
         zIndex: 1009,
-        content: '真的要回滚该构建历史记录么？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmRollback'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           // 重新发布
           return rollback(record.id).then((res) => {
@@ -472,11 +476,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemMessage'),
         zIndex: 1009,
-        content: '真的要删除构建历史记录么？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDeleteHistory'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return deleteBuildHistory(record.id).then((res) => {
             if (res.code === 200) {
@@ -493,16 +497,16 @@ export default {
     handleBatchDelete() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warning({
-          message: '没有选择任何数据'
+          message: this.$tl('p.noSelectedData')
         })
         return
       }
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemMessage'),
         zIndex: 1009,
-        content: '真的要删除这些构建历史记录么？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDeleteMultiple'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           // 删除
           return deleteBuildHistory(this.tableSelections.join(',')).then((res) => {
@@ -537,7 +541,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: '请选择要使用的构建'
+          message: this.$tl('p.selectBuild')
         })
         return
       }
@@ -553,7 +557,7 @@ export default {
         })
       if (!selectData.length) {
         $notification.warning({
-          message: '选择的构建历史产物已经不存在啦'
+          message: this.$tl('p.artifactNotFound')
         })
         return
       }
