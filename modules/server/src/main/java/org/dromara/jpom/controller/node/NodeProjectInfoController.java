@@ -69,7 +69,21 @@ public class NodeProjectInfoController extends BaseServerController {
     @PostMapping(value = "project_list", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<PageResultDto<ProjectInfoCacheModel>> projectList(HttpServletRequest request) {
         PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPage(request);
-        return JsonMessage.success("success", resultDto);
+        return JsonMessage.success("", resultDto);
+    }
+
+    /**
+     * 通过节点 id 查询项目
+     * 加载节点项目列表
+     *
+     * @return json
+     */
+    @PostMapping(value = "project-list-by-node-id", produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<List<ProjectInfoCacheModel>> projectListByNodeId(String nodeId) {
+        ProjectInfoCacheModel projectInfoCacheModel = new ProjectInfoCacheModel();
+        projectInfoCacheModel.setNodeId(nodeId);
+        List<ProjectInfoCacheModel> list = projectInfoCacheService.listByBean(projectInfoCacheModel);
+        return JsonMessage.success("", list);
     }
 
     /**

@@ -43,4 +43,4 @@ stageGroups:
           - path:
               - modules/server/target/server-2.11.4-release.zip
               - modules/agent/target/agent-2.11.4-release.zip
-
+            format: zip

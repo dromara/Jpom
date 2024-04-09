@@ -47,9 +47,10 @@
   </div>
 </template>
 <script setup lang="ts">
+import { stagesExec } from './types'
 const props = defineProps({
   data: {
-    type: Object,
+    type: Object as PropType<stagesExec>,
     required: true
   },
   formLable: {
@@ -60,7 +61,7 @@ const props = defineProps({
 
 const emit = defineEmits<{ (e: 'update:data', value: object): void }>()
 
-const useData = ref<any>(props.data)
+const useData = ref(props.data)
 
 watch(
   () => useData.value,
@@ -76,17 +77,17 @@ const envList = ref<Array<{ key?: string; value?: string }>>([])
 
 onMounted(() => {
   const list: Array<{ key: string; value: string }> = []
-  for (let key in useData.env) {
+  for (let key in useData.value.env) {
     list.push({
       key: key,
-      value: useData.env[key]
+      value: useData.value.env[key]
     })
   }
   envList.value = list
 })
 // 监听环境变量变化
 watch(
-  () => envList.value.map((item) => item.key + item.value),
+  () => envList.value.map((item: any) => item.key + item.value),
   () => {
     const env: any = {}
     envList.value.forEach((element) => {

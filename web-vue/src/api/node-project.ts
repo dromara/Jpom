@@ -29,6 +29,15 @@ export function getProjectList(params) {
   })
 }
 
+export function getProjectListByNodeId(params) {
+  return axios({
+    url: '/node/project-list-by-node-id',
+    method: 'post',
+    data: params,
+    headers: {}
+  })
+}
+
 /**
  * 项目运行信息，返回项目占用端口和 pid
  * @param {JSON} params {

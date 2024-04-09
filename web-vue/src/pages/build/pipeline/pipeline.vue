@@ -62,38 +62,37 @@
               <template v-if="!repositoryList || !repositoryList.length" #extra>
                 <span class="ant-form-item-explain-error">请添加源仓库</span>
               </template>
-              <a-form-item-rest>
-                <a-space direction="vertical" style="width: 100%">
-                  <a-collapse v-if="repositoryList && repositoryList.length" v-model:activeKey="repositoryActiveKeys">
-                    <a-collapse-panel v-for="(item, index) in repositoryList" :key="item.id">
-                      <template #header>
-                        <a-row :wrap="false">
-                          <a-col flex="auto">
-                            仓库{{ index + 1 }} <a-tag>{{ item.id }}</a-tag>
-                            {{ item.sort }}
-                          </a-col>
-                          <a-col flex="none">
-                            <a-button type="primary" danger size="small" @click="delRepositoryList(index)"
-                              >删除</a-button
-                            >
-                          </a-col>
-                        </a-row>
-                      </template>
-                      <widgetRepository
-                        :key="item.id"
-                        v-model:data="jsonConfig.repositories[item.id]"
-                        v-model:loading="loading"
-                        :form-lable="formLable"
-                      />
-                    </a-collapse-panel>
-                  </a-collapse>
+              <a-space direction="vertical" style="width: 100%">
+                <a-collapse v-if="repositoryList && repositoryList.length" v-model:activeKey="repositoryActiveKeys">
+                  <a-collapse-panel v-for="(item, index) in repositoryList" :key="item.id">
+                    <template #header>
+                      <a-row :wrap="false">
+                        <a-col flex="auto">
+                          仓库{{ index + 1 }} <a-tag>{{ item.id }}</a-tag>
+                        </a-col>
+                        <a-col flex="none">
+                          <a-button type="primary" danger size="small" @click="delRepositoryList(index)">
+                            删除
+                          </a-button>
+                        </a-col>
+                      </a-row>
+                    </template>
 
-                  <a-button type="primary" size="small" @click="addRepositoryList">添加仓库</a-button>
-                </a-space>
-              </a-form-item-rest>
+                    <widgetRepository
+                      :key="item.id"
+                      v-model:data="jsonConfig.repositories[item.id]"
+                      v-model:loading="loading"
+                      :form-lable="formLable"
+                    />
+                  </a-collapse-panel>
+                </a-collapse>
+
+                <a-button type="primary" size="small" @click="addRepositoryList">添加仓库</a-button>
+              </a-space>
             </a-form-item>
           </a-form>
         </div>
+
         <!-- 后续自定义流程 -->
         <div
           v-for="(item, index) in Array.from(stepsItems).slice(1)"
@@ -200,6 +199,7 @@
 import widgetRepository from './widget/repository.vue'
 import widgetStageBase from './widget/stages-base.vue'
 import { randomStr } from '@/utils/const'
+import { jsonConfigType } from './widget/types'
 
 const loading = ref(false)
 
@@ -207,10 +207,11 @@ const formLable = ref({
   labelCol: { span: 2 },
   wrapperCol: { span: 22 }
 })
-const jsonConfig = ref<any>({
+const jsonConfig = ref<jsonConfigType>({
   repositories: {},
   stageGroups: []
 })
+
 ////////////////////////////////////////////////////////////////////////////////
 
 const childStageActiveKeys = ref<Array<Array<number>>>([])
@@ -232,9 +233,7 @@ const addChildStage = (index: number) => {
 // 删除子流程
 
 const delChildStage = (index: number, index2: number) => {
-  jsonConfig.value.stageGroups[index] &&
-    jsonConfig.value.stageGroups[index].stages &&
-    jsonConfig.value.stageGroups[index].stages.splice(index2, 1)
+  jsonConfig.value?.stageGroups[index]?.stages?.splice(index2, 1)
   //
   childStageActiveKeys.value[index] = childStageActiveKeys.value[index].filter((item) => item != index2)
   // console.log(jsonConfig.value.stageGroups[index])
@@ -257,11 +256,6 @@ const repositoryList = computed(() => {
   }
   list.sort((a, b) => a.sort - b.sort)
   return list.map((item, index) => {
-    // 修改排序值
-    jsonConfig.value.repositories[item.id] = {
-      ...jsonConfig.value.repositories[item.id],
-      sort: index
-    }
     return { ...item, sort: index }
   })
 })
@@ -273,7 +267,8 @@ const addRepositoryList = () => {
   } while (jsonConfig.value.repositories[repositoryTag])
 
   jsonConfig.value.repositories[repositoryTag] = {
-    sort: repositoryList.value.length
+    // 找到当前排序值的最大并且 +1 ，保证新增的仓库排序处于最后
+    sort: Math.max(...repositoryList.value.map((item) => item.sort)) + 1
   }
   //
   repositoryActiveKeys.value.push(repositoryTag)
@@ -283,6 +278,14 @@ const addRepositoryList = () => {
 const delRepositoryList = (index: number) => {
   const repository = repositoryList.value[index]
   delete jsonConfig.value.repositories[repository.id]
+
+  // 修改排序值
+  repositoryList.value.forEach((item) => {
+    jsonConfig.value.repositories[item.id] = {
+      ...jsonConfig.value.repositories[item.id],
+      sort: item.sort
+    }
+  })
 }
 const groupList = ref([])
 const formData = ref<any>({})

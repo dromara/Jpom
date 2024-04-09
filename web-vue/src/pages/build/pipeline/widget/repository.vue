@@ -147,10 +147,10 @@ import { getRepositoryInfo } from '@/api/repository'
 import { getBranchList } from '@/api/build-info'
 import { useGuideStore } from '@/stores/guide'
 import repositoryList from '@/pages/repository/list.vue'
-
+import { repository } from './types'
 const props = defineProps({
   data: {
-    type: Object,
+    type: Object as PropType<repository>,
     required: true
   },
   loading: {
