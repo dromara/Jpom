@@ -1,4 +1,4 @@
-export type publishProject = {
+export type PublishProject = {
   nodeId?: string
   projectId?: string
   secondaryDirectory?: string
@@ -7,27 +7,27 @@ export type publishProject = {
   clearOld?: boolean
   diffSync?: boolean
   afterOpt?: 'No' | 'Restart'
-} & publishBase
+} & PublishBase
 
-export type publishBase = {
+export type PublishBase = {
   publishType?: 'PROJECT'
   artifacts?: Array<{
     path: Array<string>
     format?: 'ZIP' | 'TAR_GZ'
   }>
-} & stagesBase
+} & StagesBase
 
-export type stagesBase = {
+export type StagesBase = {
   stageType?: 'EXEC' | 'PUBLISH'
   repoTag?: string
   description?: string
 }
 
-export type stagesExec = { commands: string; timeout: number; env: Record<string, string> } & stagesBase
+export type StagesExec = { commands?: string; timeout?: number; env?: Record<string, string> } & StagesBase
 
-export type stagesConfig = publishBase | publishProject | stagesExec
+export type StagesConfig = PublishBase | PublishProject | StagesExec
 
-export type repository = {
+export type Repository = {
   repositoryId?: string
   branchName?: string
   branchTagName?: string
@@ -35,14 +35,14 @@ export type repository = {
   sort?: number
 }
 
-export type stageGroupsType = {
+export type StageGroupsType = {
   name?: string
   description?: string
-  stages?: Array<stagesConfig & stagesExec>
+  stages: Array<StagesConfig>
 }
 
-export type jsonConfigType = {
+export type JsonConfigType = {
   version?: string
-  repositories: Record<string, repository>
-  stageGroups: Array<stageGroupsType>
+  repositories: Record<string, Repository>
+  stageGroups: Array<StageGroupsType>
 }

@@ -31,7 +31,7 @@
                       danger
                       :disabled="!useData.artifacts || useData.artifacts.length <= 1"
                       size="small"
-                      @click="useData.artifacts.splice(index, 1)"
+                      @click="useData?.artifacts?.splice(index, 1)"
                     >
                       删除产物
                     </a-button>
@@ -77,10 +77,10 @@
 </template>
 <script setup lang="ts">
 import widgetPublishProject from './publish-project.vue'
-import { publishBase, publishProject } from './types'
+import { PublishBase, PublishProject } from './types'
 const props = defineProps({
   data: {
-    type: Object as PropType<publishBase & publishProject>,
+    type: Object as PropType<PublishBase & PublishProject>,
     required: true
   },
   formLable: {

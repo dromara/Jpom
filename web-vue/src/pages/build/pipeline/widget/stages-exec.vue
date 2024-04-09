@@ -47,10 +47,10 @@
   </div>
 </template>
 <script setup lang="ts">
-import { stagesExec } from './types'
+import { StagesExec } from './types'
 const props = defineProps({
   data: {
-    type: Object as PropType<stagesExec>,
+    type: Object as PropType<StagesExec>,
     required: true
   },
   formLable: {

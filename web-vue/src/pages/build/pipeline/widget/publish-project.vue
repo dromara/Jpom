@@ -51,11 +51,10 @@
 <script setup lang="ts">
 import { getNodeListAll } from '@/api/node'
 import { getProjectListByNodeId } from '@/api/node-project'
-import { publishProject } from './types'
-
+import { PublishProject } from './types'
 const props = defineProps({
   data: {
-    type: Object as PropType<publishProject>,
+    type: Object as PropType<PublishProject>,
     required: true
   },
   formLable: {
@@ -101,6 +100,8 @@ const getProjectListFn = (nodeId: string) => {
 const changeNode = () => {
   projectList.value = []
   delete useData.value.projectId
-  getProjectListFn(useData.value.nodeId)
+  if (useData.value.nodeId) {
+    getProjectListFn(useData.value.nodeId)
+  }
 }
 </script>
