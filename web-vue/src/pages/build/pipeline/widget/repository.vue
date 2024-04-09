@@ -147,10 +147,10 @@ import { getRepositoryInfo } from '@/api/repository'
 import { getBranchList } from '@/api/build-info'
 import { useGuideStore } from '@/stores/guide'
 import repositoryList from '@/pages/repository/list.vue'
-import { repository } from './types'
+import { Repository } from './types'
 const props = defineProps({
   data: {
-    type: Object as PropType<repository>,
+    type: Object as PropType<Repository>,
     required: true
   },
   loading: {
@@ -220,7 +220,10 @@ const changeRepositpry = (repositoryId: string) => {
     })
 }
 // 获取仓库分支
-const loadBranchList = (repositoryId: string) => {
+const loadBranchList = (repositoryId?: string) => {
+  if (!repositoryId) {
+    return
+  }
   tempRepository.value = {
     ...tempRepository.value,
     branchList: [],

@@ -128,32 +128,15 @@
             <a-form-item
               label="子流程"
               name="stages"
-              :validate-status="
-                jsonConfig.stageGroups[index] &&
-                jsonConfig.stageGroups[index].stages &&
-                jsonConfig.stageGroups[index].stages.length
-                  ? ''
-                  : 'error'
-              "
+              :validate-status="jsonConfig.stageGroups[index].stages?.length ? '' : 'error'"
             >
-              <template
-                v-if="
-                  !jsonConfig.stageGroups[index] ||
-                  !jsonConfig.stageGroups[index].stages ||
-                  !jsonConfig.stageGroups[index].stages.length
-                "
-                #extra
-              >
+              <template v-if="!jsonConfig.stageGroups[index].stages?.length" #extra>
                 <span class="ant-form-item-explain-error">请添加子流程</span>
               </template>
               <a-form-item-rest>
                 <a-space direction="vertical" style="width: 100%">
                   <a-collapse
-                    v-if="
-                      jsonConfig.stageGroups[index] &&
-                      jsonConfig.stageGroups[index].stages &&
-                      jsonConfig.stageGroups[index].stages.length
-                    "
+                    v-if="jsonConfig.stageGroups[index].stages?.length"
                     v-model:activeKey="childStageActiveKeys[index]"
                   >
                     <a-collapse-panel
@@ -199,7 +182,7 @@
 import widgetRepository from './widget/repository.vue'
 import widgetStageBase from './widget/stages-base.vue'
 import { randomStr } from '@/utils/const'
-import { jsonConfigType } from './widget/types'
+import { JsonConfigType } from './widget/types'
 
 const loading = ref(false)
 
@@ -207,7 +190,7 @@ const formLable = ref({
   labelCol: { span: 2 },
   wrapperCol: { span: 22 }
 })
-const jsonConfig = ref<jsonConfigType>({
+const jsonConfig = ref<JsonConfigType>({
   repositories: {},
   stageGroups: []
 })
@@ -218,6 +201,7 @@ const childStageActiveKeys = ref<Array<Array<number>>>([])
 
 // 添加子流程
 const addChildStage = (index: number) => {
+  console.log(jsonConfig.value.stageGroups[index] && jsonConfig.value.stageGroups[index].stages)
   const stages = (jsonConfig.value.stageGroups[index] && jsonConfig.value.stageGroups[index].stages) || []
   stages.push({
     description: '子流程' + (stages.length + 1)
@@ -235,7 +219,7 @@ const addChildStage = (index: number) => {
 const delChildStage = (index: number, index2: number) => {
   jsonConfig.value?.stageGroups[index]?.stages?.splice(index2, 1)
   //
-  childStageActiveKeys.value[index] = childStageActiveKeys.value[index].filter((item) => item != index2)
+  childStageActiveKeys.value[index] = childStageActiveKeys.value[index].filter((item: number) => item != index2)
   // console.log(jsonConfig.value.stageGroups[index])
 }
 
@@ -290,7 +274,12 @@ const delRepositoryList = (index: number) => {
 const groupList = ref([])
 const formData = ref<any>({})
 const stepsGroupCurrent = ref<number>(0)
-const stepsItems = ref([
+type StepsItem = {
+  title: string
+  description: string
+}
+
+const stepsItems = ref<StepsItem[]>([
   {
     title: '基础信息',
     description: '配置流水线信息和仓库'
@@ -337,7 +326,7 @@ const delStepGroups = () => {
   }
   stepsItems.value.splice(stepsGroupCurrent.value, 1)
   jsonConfig.value.stageGroups.splice(stepsGroupCurrent.value, 1)
-  stepsItems.value = stepsItems.value.map((item, index) => {
+  stepsItems.value = stepsItems.value.map((item: StepsItem, index: number) => {
     if (index === 0) {
       return item
     }

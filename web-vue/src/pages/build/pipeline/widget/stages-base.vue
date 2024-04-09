@@ -36,10 +36,10 @@
 <script setup lang="ts">
 import widgetStageExec from './stages-exec.vue'
 import widgetPublishBase from './publish-base.vue'
-import { stagesConfig, stagesExec } from './types'
+import { StagesConfig } from './types'
 const props = defineProps({
   data: {
-    type: Object as PropType<stagesConfig & stagesExec>,
+    type: Object as PropType<StagesConfig>,
     required: true
   },
   formLable: {
