@@ -11,8 +11,10 @@
 import details from './details'
 import history from './history'
 import item from './item'
+import listInfo from './list-info'
 export default {
   details,
   history,
-  item
+  item,
+  listInfo
 }
