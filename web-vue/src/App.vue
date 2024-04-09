@@ -18,7 +18,6 @@
 
 <script setup lang="ts">
 import { theme } from 'ant-design-vue'
-import { onMounted, onUnmounted } from 'vue'
 import { SpinProps } from 'ant-design-vue/es/spin/Spin'
 import { lang } from './i18n'
 import { useI18n } from 'vue-i18n'

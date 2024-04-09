@@ -150,16 +150,17 @@ const repositoryComponent = ref()
 
 const useData = ref(props.data)
 const useLoading = ref(props.loading)
-// watch(
-//   () => props.data,
-//   (val, old) => {
-//     // useData.value = val
-//     console.log(val.branchName, old)
-//   },
-//   {
-//     immediate: true
-//   }
-// )
+watch(
+  () => props.data,
+  (val) => {
+    useData.value = val
+    // console.log(val.branchName, old)
+  },
+  {
+    deep: true,
+    immediate: true
+  }
+)
 watch(
   () => useData.value,
   (val) => {

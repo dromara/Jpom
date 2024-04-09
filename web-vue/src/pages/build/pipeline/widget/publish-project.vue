@@ -65,12 +65,22 @@ const props = defineProps({
 const emit = defineEmits<{ (e: 'update:data', value: object): void }>()
 const useData = ref(props.data)
 watch(
+  () => props.data,
+  (val) => {
+    useData.value = val
+  },
+  {
+    deep: true,
+    immediate: false
+  }
+)
+watch(
   () => useData.value,
   (val) => {
     emit('update:data', val)
   },
   {
-    immediate: true
+    immediate: false
   }
 )
 

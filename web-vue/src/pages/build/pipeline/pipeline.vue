@@ -29,8 +29,9 @@
                 jsonConfig.stageGroups.length < stepsItems.length - 1
               "
               @click="addStepGroups"
-              >添加</a-button
             >
+              添加
+            </a-button>
           </a-button-group>
         </template>
 
@@ -121,11 +122,8 @@
                 v-model:value="item.description"
                 placeholder="请输入流程描述名称"
                 :enter-button="`${!!jsonConfig.stageGroups[index] ? '修改' : '确认'}`"
-                @search="
-                  (value) => {
-                    enterSteps(value, index)
-                  }
-                "
+                @change="(e) => enterSteps(e.target.value as string, index)"
+                @search="(value) => enterSteps(value, index)"
               />
             </a-form-item>
             <a-form-item
@@ -145,6 +143,7 @@
                     <a-collapse-panel
                       v-for="(childItem, childIndex) in jsonConfig.stageGroups[index]?.stages"
                       :key="childIndex"
+                      force-render
                     >
                       <template #header>
                         <a-row :wrap="false">
@@ -179,6 +178,19 @@
         </div>
       </a-card>
     </a-spin>
+    <a-modal
+      v-model:open="viewYamlOpen"
+      destroy-on-close
+      width="60vw"
+      title="流水线配置源码视图"
+      :mask-closable="false"
+      ok-text="保存数据"
+      @ok="handleYaml2Json"
+    >
+      <code-editor v-model:content="yamlConfig" height="60vh" :show-tool="true" :options="{ mode: 'yml' }">
+        <template #tool_before> <a-tag>1</a-tag></template>
+      </code-editor>
+    </a-modal>
   </div>
 </template>
 <script setup lang="ts">
@@ -191,14 +203,19 @@ import { editBuildPipeline, getBuildPipelineItem } from '@/api/build/pipeline'
 const props = defineProps({
   id: {
     type: String,
-    required: true
+    required: false,
+    default: ''
   }
 })
 const formLable = ref({
   labelCol: { span: 2 },
   wrapperCol: { span: 22 }
 })
+
+const emit = defineEmits(['close'])
+
 const jsonConfig = ref<JsonConfigType>({
+  version: '1.0.0',
   repositories: {},
   stageGroups: []
 })
@@ -352,7 +369,7 @@ const groupList = ref([])
 const stepsGroupCurrent = ref<number>(0)
 type StepsItem = {
   title: string
-  description: string
+  description?: string
 }
 
 const stepsItems = ref<StepsItem[]>([
@@ -382,8 +399,16 @@ const enterSteps = (value: string, index: number) => {
     ...jsonConfig.value.stageGroups[index],
     description: value
   }
-  childStageActiveKeys.value[index] = []
+  !childStageActiveKeys.value[index] && (childStageActiveKeys.value[index] = [])
   // console.log(jsonConfig.value)
+}
+
+// 同步描述
+const syncStepsDescription = () => {
+  jsonConfig.value.stageGroups.forEach((item, index) => {
+    const realIndex = index + 1
+    stepsItems.value[realIndex] = { ...stepsItems.value[realIndex], description: item.description }
+  })
 }
 
 // 添加流程组
@@ -508,6 +533,8 @@ const handleEditSave = () => {
   }
   const jsonConfigTemp = jsonConfig.value
 
+  jsonConfigTemp.version = jsonConfigTemp.version || '1.0.0'
+
   if (!repositoryList.value.length) {
     $notification.warn({
       message: '请添加源仓库'
@@ -577,6 +604,7 @@ const handleEditSave = () => {
         $notification.success({
           message: res.msg
         })
+        emit('close')
       }
     })
     .finally(() => {
@@ -584,7 +612,31 @@ const handleEditSave = () => {
     })
 }
 
+////////////////
+
+import yaml from 'js-yaml'
+
+const viewYamlOpen = ref(false)
+const yamlConfig = ref('')
+const handleViewYaml = () => {
+  yamlConfig.value = yaml.dump(jsonConfig.value)
+  viewYamlOpen.value = true
+}
+
+const handleYaml2Json = () => {
+  jsonConfig.value = { ...yaml.load(yamlConfig.value) }
+  // loading.value = true
+  // nextTick(() => {
+  //   yaml.load(yamlConfig.value)
+  //   loading.value = false
+  // })
+  viewYamlOpen.value = false
+  syncStepsDescription()
+}
+
+//----------
 defineExpose({
-  handleEditSave
+  handleEditSave,
+  handleViewYaml
 })
 </script>

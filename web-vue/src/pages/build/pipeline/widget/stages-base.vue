@@ -30,9 +30,19 @@
       </a-form-item>
     </a-form>
     <!-- 脚本执行 -->
-    <widgetStageExec v-if="useData.stageType === 'EXEC'" v-model:data="useData" :form-lable="formLable">
+    <widgetStageExec
+      v-if="useData.stageType === 'EXEC'"
+      :key="useData.repoTag"
+      v-model:data="useData"
+      :form-lable="formLable"
+    >
     </widgetStageExec>
-    <widgetPublishBase v-else-if="useData.stageType === 'PUBLISH'" v-model:data="useData" :form-lable="formLable" />
+    <widgetPublishBase
+      v-else-if="useData.stageType === 'PUBLISH'"
+      :key="`${useData.repoTag}_PUBLISH`"
+      v-model:data="useData"
+      :form-lable="formLable"
+    />
   </div>
 </template>
 <script setup lang="ts">
@@ -58,12 +68,23 @@ const emit = defineEmits<{ (e: 'update:data', value: object): void }>()
 const useData = ref(props.data)
 
 watch(
+  () => props.data,
+  (val) => {
+    useData.value = val
+  },
+  {
+    deep: true,
+    immediate: false
+  }
+)
+
+watch(
   () => useData.value,
   (val) => {
     emit('update:data', val)
   },
   {
-    immediate: true
+    immediate: false
   }
 )
 </script>

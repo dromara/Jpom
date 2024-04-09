@@ -66,28 +66,45 @@ const useData = ref(props.data)
 watch(
   () => useData.value,
   (val) => {
+    // console.log('修改数据', val)
     emit('update:data', val)
   },
   {
-    immediate: true
+    deep: true,
+    immediate: false
   }
 )
-
-const envList = ref<Array<{ key?: string; value?: string }>>([])
-
-onMounted(() => {
+const envObject2List = (obj: any) => {
   const list: Array<{ key: string; value: string }> = []
-  for (let key in useData.value.env) {
+  for (let key in obj) {
     list.push({
       key: key,
-      value: useData.value.env[key]
+      value: obj[key]
     })
   }
-  envList.value = list
-})
+  return list
+}
+
+const envList = ref<Array<{ key?: string; value?: string }>>(envObject2List(props.data.env))
+
+watch(
+  () => props.data,
+  (val) => {
+    useData.value = val
+    const newEnv = envObject2List(val.env)
+    // 避免组建循环调用
+    if (JSON.stringify(newEnv) != JSON.stringify(envList.value)) {
+      envList.value = newEnv
+    }
+  },
+  {
+    deep: true,
+    immediate: false
+  }
+)
 // 监听环境变量变化
 watch(
-  () => envList.value.map((item: any) => item.key + item.value),
+  () => envList.value.map((item: any) => item.key + ':' + item.value),
   () => {
     const env: any = {}
     envList.value.forEach((element) => {
@@ -100,7 +117,7 @@ watch(
     //emit('update:data', useData.value)
   },
   {
-    immediate: true
+    immediate: false
   }
 )
 

@@ -60,7 +60,7 @@
       :footer-style="{ textAlign: 'right' }"
       @close="editVisible = false"
     >
-      <EditPipeline v-if="editVisible" :id="temp.id" ref="editPipelineCom"> </EditPipeline>
+      <EditPipeline v-if="editVisible" :id="temp.id" ref="editPipelineCom" @close="editVisible = false"></EditPipeline>
       <template #footer>
         <a-space>
           <a-button @click="editVisible = false"> 取消 </a-button>
@@ -68,7 +68,7 @@
           <a-divider type="vertical" />
 
           <a-button type="primary" @click="editPipelineCom.handleEditSave(false)"> 保存 </a-button>
-          <!-- <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(true)"> 保存并构建 </a-button> -->
+          <a-button type="primary" @click="editPipelineCom.handleViewYaml()"> 代码视图 </a-button>
         </a-space>
       </template>
     </a-drawer>
@@ -183,7 +183,7 @@ const activePage = computed(() => {
 })
 
 //
-const temp = ref({})
+const temp = ref<{ id?: string }>({})
 const handleDetails = (data: any) => {
   // console.log('handleDetails', data)
   temp.value = data

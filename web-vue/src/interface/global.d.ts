@@ -8,6 +8,14 @@
 /// See the Mulan PSL v2 for more details.
 ///
 
+// 屏蔽TS报错
+
 declare module 'js-sha1'
 declare module 'spark-md5'
 declare module 'qs'
+declare module 'vue3-smooth-dnd' {
+  export const Container: any
+  export const Draggable: any
+}
+
+declare module 'js-yaml'
