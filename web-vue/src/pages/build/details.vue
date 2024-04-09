@@ -5,87 +5,88 @@
         <template #title>
           <a-space>
             {{ data.name }}
-            <a-tooltip :title="$tl('tooltip.refresh')">
+            <a-tooltip title="点击刷新构建信息">
               <a-button type="link" size="small" @click="refresh"> <ReloadOutlined /></a-button>
             </a-tooltip>
           </a-space>
         </template>
 
-        <a-descriptions-item :label="$tl('group')">
+        <a-descriptions-item label="分组">
           {{ data.group }}
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('branchTagName')">
-          {{ data.branchName }} {{ data.branchTagName }}
-        </a-descriptions-item>
-        <a-descriptions-item :label="$tl('buildType')">
+        <a-descriptions-item label="分组/标签"> {{ data.branchName }} {{ data.branchTagName }} </a-descriptions-item>
+        <a-descriptions-item label="构建方式">
           <template v-if="data.buildMode === 1">
             <CloudOutlined />
-            {{ $tl('buildMode.container') }}
+            容器构建
           </template>
           <template v-else>
             <CodeOutlined />
-            {{ $tl('buildMode.local') }}
+            本地构建
           </template>
         </a-descriptions-item>
 
-        <a-descriptions-item :label="$tl('buildId')">
+        <a-descriptions-item label="最新构建ID">
           <span v-if="data.buildId <= 0"></span>
           <a-tag v-else color="#108ee9">#{{ data.buildId }}</a-tag>
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('buildStatus')">
+        <a-descriptions-item label="构建状态">
           <a-tooltip :title="data.statusMsg">
             <a-tag :color="statusColor[data.status]">
-              {{ statusMap[data.status] || $tl('unknown') }}
+              {{ statusMap[data.status] || '未知' }}
 
               <InfoCircleOutlined v-if="data.statusMsg" />
             </a-tag>
           </a-tooltip>
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('releaseMethod')"
-          >{{ releaseMethodMap[data.releaseMethod] }}
-        </a-descriptions-item>
-        <a-descriptions-item :label="$tl('autoBuildCron')">
+        <a-descriptions-item label="发布方式">{{ releaseMethodMap[data.releaseMethod] }} </a-descriptions-item>
+        <a-descriptions-item label="定时构建">
           {{ data.autoBuildCron }}
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('aliasCode')">
+        <a-descriptions-item label="别名码">
           {{ data.aliasCode }}
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('sourceDirExist')">
-          <a-tag>{{ data.sourceDirExist ? $tl('exist') : $tl('notExist') }}</a-tag>
+        <a-descriptions-item label="构建目录">
+          <a-tag>{{ data.sourceDirExist ? '存在' : '不存在' }}</a-tag>
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('createTime')">
+        <a-descriptions-item label="创建时间">
           {{ parseTime(data.createTimeMillis) }}
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('modifyTime')"> {{ parseTime(data.modifyTimeMillis) }}</a-descriptions-item>
-        <a-descriptions-item :label="$tl('modifyUser')">
-          {{ data.modifyUser }}
-        </a-descriptions-item>
-        <a-descriptions-item :label="$tl('resultDirFile')" :span="3">
+        <a-descriptions-item label="最后修改时间"> {{ parseTime(data.modifyTimeMillis) }}</a-descriptions-item>
+        <a-descriptions-item label="最后修改人">{{ data.modifyUser }}</a-descriptions-item>
+        <a-descriptions-item label="产物" :span="3">
           {{ data.resultDirFile }}
         </a-descriptions-item>
-        <a-descriptions-item v-if="tempRepository" :label="$tl('tempRepository.name')" :span="3">{{
+        <a-descriptions-item v-if="tempRepository" label="源仓库" :span="3">{{
           `${tempRepository ? tempRepository.name + '[' + tempRepository.gitUrl + ']' : ''}`
         }}</a-descriptions-item>
-        <a-descriptions-item :label="$tl('repositoryLastCommit')" :span="3">
-          {{ data.repositoryLastCommitId }}
-        </a-descriptions-item>
+        <a-descriptions-item label="仓库lastcommit" :span="3">{{ data.repositoryLastCommitId }}</a-descriptions-item>
       </a-descriptions>
 
       <!-- <a-row type="flex" justify="center"> -->
       <!-- <a-divider v-if="listQuery.total > 0" dashed> 构建历史 </a-divider> -->
-      <a-card v-if="listQuery.total > 0" :label="$tl('buildHistory')" size="small">
+      <a-card v-if="listQuery.total > 0" title="构建历史" size="small">
         <template #extra>
           <a-pagination
             v-model:current="listQuery.page"
             v-model:pageSize="listQuery.limit"
             size="small"
-            :show-total="showTotal"
+            :show-total="
+              (total) => {
+                return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery)
+              }
+            "
             :show-size-changer="true"
             :page-size-options="PAGE_DEFAULT_SIZW_OPTIONS"
             :total="listQuery.total"
             :hide-on-single-page="true"
             show-less-items
-            @show-size-change="showSizeChange"
+            @show-size-change="
+              (current, size) => {
+                listQuery.limit = size
+                listHistory()
+              }
+            "
             @change="listHistory"
           />
         </template>
@@ -97,47 +98,43 @@
                   <span :style="`color: ${statusColor[item.status]};`" @click="handleBuildLog(item)"
                     >#{{ item.buildNumberId }} <EyeOutlined
                   /></span>
-                  <span v-if="item.buildRemark">{{ $tl('buildRemarks') }}：{{ item.buildRemark }}</span>
+                  <span v-if="item.buildRemark">构建备注：{{ item.buildRemark }}</span>
                 </a-space>
               </div>
               <div>
-                <a-tooltip :title="item.statusMsg || statusMap[item.status] || $tl('unknown')">
-                  {{ $tl('status') }}：<a-tag :color="statusColor[item.status]">{{
-                    statusMap[item.status] || $tl('unknown')
-                  }}</a-tag>
+                <a-tooltip :title="item.statusMsg || statusMap[item.status] || '未知'">
+                  状态：<a-tag :color="statusColor[item.status]">{{ statusMap[item.status] || '未知' }}</a-tag>
                 </a-tooltip>
               </div>
               <div>
-                {{ $tl('time') }}：{{ parseTime(item.startTime) }} ~
+                时间：{{ parseTime(item.startTime) }} ~
                 {{ parseTime(item.endTime) }}
               </div>
-              <div>{{ $tl('triggerType') }}：{{ triggerBuildTypeMap[item.triggerBuildType] || $tl('unknown') }}</div>
+              <div>触发类型：{{ triggerBuildTypeMap[item.triggerBuildType] || '未知' }}</div>
               <div>
-                {{ $tl('occupySpace') }}：{{ renderSize(item.resultFileSize) }}({{ $tl('product') }})/{{
-                  renderSize(item.buildLogFileSize)
-                }}({{ $tl('logs') }})
+                占用空间：{{ renderSize(item.resultFileSize) }}(产物)/{{ renderSize(item.buildLogFileSize) }}(日志)
               </div>
 
+              <div>构建耗时：{{ formatDuration((item.endTime || 0) - (item.startTime || 0), '', 2) }}</div>
               <div>
-                {{ $tl('constructionTime') }}：{{ formatDuration((item.endTime || 0) - (item.startTime || 0), '', 2) }}
+                发布方式：
+                <a-tag> {{ releaseMethodMap[item.releaseMethod] || '未知' }}</a-tag>
               </div>
               <div>
-                {{ $tl('publishingMethod') }}：
-                <a-tag> {{ releaseMethodMap[item.releaseMethod] || $tl('unknown') }}</a-tag>
-              </div>
-              <div>
-                {{ $tl('publishingMethod') }}：
+                操作：
                 <a-space>
-                  <a-tooltip :title="$tl('tooltip.logs')">
+                  <a-tooltip title="下载构建日志,如果按钮不可用表示日志文件不存在,一般是构建历史相关文件被删除">
                     <a-button size="small" type="primary" :disabled="!item.hasLog" @click="handleDownload(item)"
-                      ><DownloadOutlined /> {{ $tl('logs') }}</a-button
+                      ><DownloadOutlined />日志</a-button
                     >
                   </a-tooltip>
 
-                  <a-tooltip :title="$tl('tooltip.product')">
+                  <a-tooltip
+                    title="下载构建产物,如果按钮不可用表示产物文件不存在,一般是构建没有产生对应的文件或者构建历史相关文件被删除"
+                  >
                     <a-button size="small" type="primary" :disabled="!item.hasFile" @click="handleFile(item)">
                       <DownloadOutlined />
-                      {{ $tl('product') }}
+                      产物
                     </a-button>
                   </a-tooltip>
                   <template v-if="item.releaseMethod !== 5">
@@ -147,15 +144,12 @@
                       type="primary"
                       danger
                       @click="handleRollback(item)"
-                    >
-                      {{ $tl('rollback') }}
+                      >回滚
                     </a-button>
                   </template>
                   <template v-else>
-                    <a-tooltip :title="$tl('tooltip.rollback')">
-                      <a-button size="small" :disabled="true" type="primary" danger>
-                        {{ $tl('rollback') }}
-                      </a-button>
+                    <a-tooltip title="Dockerfile 构建方式不支持在这里回滚">
+                      <a-button size="small" :disabled="true" type="primary" danger>回滚 </a-button>
                     </a-tooltip>
                   </template>
                 </a-space>
@@ -172,7 +166,16 @@
     <!-- </a-row> -->
 
     <!-- 构建日志 -->
-    <build-log v-if="buildLogVisible > 0" :temp="temp" :visible="buildLogVisible != 0" @close="buildLogVisible = 0" />
+    <build-log
+      v-if="buildLogVisible > 0"
+      :temp="temp"
+      :visible="buildLogVisible != 0"
+      @close="
+        () => {
+          buildLogVisible = 0
+        }
+      "
+    />
   </div>
 </template>
 
@@ -220,8 +223,7 @@ export default {
       listQuery: Object.assign({ buildDataId: this.id }, PAGE_DEFAULT_LIST_QUERY),
       historyList: [],
       tempRepository: null,
-      buildLogVisible: 0,
-      pagePath: 'pages.build.details.'
+      buildLogVisible: 0
     }
   },
   computed: {},
@@ -234,19 +236,9 @@ export default {
     parseTime,
     formatDuration,
     PAGE_DEFAULT_SHOW_TOTAL,
-    $tl(key, ...arg) {
-      return this.$t.call(this, this.pagePath + key, ...arg)
-    },
-    showTotal(total) {
-      return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery)
-    },
     renderSize,
     refresh() {
       this.getData()
-      this.listHistory()
-    },
-    showSizeChange(current, size) {
-      this.listQuery.limit = size
       this.listHistory()
     },
     // 选择仓库
