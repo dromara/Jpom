@@ -9,7 +9,9 @@
 ///
 
 import details from './details'
+import history from './history'
 
 export default {
-  details
+  details,
+  history
 }
