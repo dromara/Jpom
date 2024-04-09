@@ -5,87 +5,96 @@
         <template #title>
           <a-space>
             {{ data.name }}
-            <a-tooltip :title="$tl('tooltip.refresh')">
+            <a-tooltip :title="$tl('p.clickToRefreshBuildInfo')">
               <a-button type="link" size="small" @click="refresh"> <ReloadOutlined /></a-button>
             </a-tooltip>
           </a-space>
         </template>
 
-        <a-descriptions-item :label="$tl('group')">
+        <a-descriptions-item :label="$tl('p.grouping')">
           {{ data.group }}
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('branchTagName')">
+        <a-descriptions-item :label="$tl('p.tag')">
           {{ data.branchName }} {{ data.branchTagName }}
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('buildType')">
+        <a-descriptions-item :label="$tl('p.buildMethod')">
           <template v-if="data.buildMode === 1">
             <CloudOutlined />
-            {{ $tl('buildMode.container') }}
+            {{ $tl('p.containerBuild') }}
           </template>
           <template v-else>
             <CodeOutlined />
-            {{ $tl('buildMode.local') }}
+            {{ $tl('p.localBuild') }}
           </template>
         </a-descriptions-item>
 
-        <a-descriptions-item :label="$tl('buildId')">
+        <a-descriptions-item :label="$tl('p.latestBuildId')">
           <span v-if="data.buildId <= 0"></span>
           <a-tag v-else color="#108ee9">#{{ data.buildId }}</a-tag>
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('buildStatus')">
+        <a-descriptions-item :label="$tl('p.buildStatus')">
           <a-tooltip :title="data.statusMsg">
             <a-tag :color="statusColor[data.status]">
-              {{ statusMap[data.status] || $tl('unknown') }}
+              {{ statusMap[data.status] || $tl('c.unknown') }}
 
               <InfoCircleOutlined v-if="data.statusMsg" />
             </a-tag>
           </a-tooltip>
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('releaseMethod')"
+        <a-descriptions-item :label="$tl('p.publishMethod')"
           >{{ releaseMethodMap[data.releaseMethod] }}
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('autoBuildCron')">
+        <a-descriptions-item :label="$tl('p.scheduleBuild')">
           {{ data.autoBuildCron }}
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('aliasCode')">
+        <a-descriptions-item :label="$tl('p.aliasCode')">
           {{ data.aliasCode }}
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('sourceDirExist')">
-          <a-tag>{{ data.sourceDirExist ? $tl('exist') : $tl('notExist') }}</a-tag>
+        <a-descriptions-item :label="$tl('p.buildDirectory')">
+          <a-tag>{{ data.sourceDirExist ? $tl('p.existence') : $tl('p.nonExistence') }}</a-tag>
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('createTime')">
+        <a-descriptions-item :label="$tl('p.createTime')">
           {{ parseTime(data.createTimeMillis) }}
         </a-descriptions-item>
-        <a-descriptions-item :label="$tl('modifyTime')"> {{ parseTime(data.modifyTimeMillis) }}</a-descriptions-item>
-        <a-descriptions-item :label="$tl('modifyUser')">
-          {{ data.modifyUser }}
-        </a-descriptions-item>
-        <a-descriptions-item :label="$tl('resultDirFile')" :span="3">
+        <a-descriptions-item :label="$tl('p.lastModificationTime')">
+          {{ parseTime(data.modifyTimeMillis) }}</a-descriptions-item
+        >
+        <a-descriptions-item :label="$tl('p.lastModifier')">{{ data.modifyUser }}</a-descriptions-item>
+        <a-descriptions-item :label="$tl('c.product')" :span="3">
           {{ data.resultDirFile }}
         </a-descriptions-item>
-        <a-descriptions-item v-if="tempRepository" :label="$tl('tempRepository.name')" :span="3">{{
+        <a-descriptions-item v-if="tempRepository" :label="$tl('p.sourceRepository')" :span="3">{{
           `${tempRepository ? tempRepository.name + '[' + tempRepository.gitUrl + ']' : ''}`
         }}</a-descriptions-item>
-        <a-descriptions-item :label="$tl('repositoryLastCommit')" :span="3">
-          {{ data.repositoryLastCommitId }}
-        </a-descriptions-item>
+        <a-descriptions-item :label="$tl('p.repositoryLastCommit')" :span="3">{{
+          data.repositoryLastCommitId
+        }}</a-descriptions-item>
       </a-descriptions>
 
       <!-- <a-row type="flex" justify="center"> -->
       <!-- <a-divider v-if="listQuery.total > 0" dashed> 构建历史 </a-divider> -->
-      <a-card v-if="listQuery.total > 0" :label="$tl('buildHistory')" size="small">
+      <a-card v-if="listQuery.total > 0" :title="$tl('p.buildHistory')" size="small">
         <template #extra>
           <a-pagination
             v-model:current="listQuery.page"
             v-model:pageSize="listQuery.limit"
             size="small"
-            :show-total="showTotal"
+            :show-total="
+              (total) => {
+                return PAGE_DEFAULT_SHOW_TOTAL(total, listQuery)
+              }
+            "
             :show-size-changer="true"
             :page-size-options="PAGE_DEFAULT_SIZW_OPTIONS"
             :total="listQuery.total"
             :hide-on-single-page="true"
             show-less-items
-            @show-size-change="showSizeChange"
+            @show-size-change="
+              (current, size) => {
+                listQuery.limit = size
+                listHistory()
+              }
+            "
             @change="listHistory"
           />
         </template>
@@ -97,47 +106,46 @@
                   <span :style="`color: ${statusColor[item.status]};`" @click="handleBuildLog(item)"
                     >#{{ item.buildNumberId }} <EyeOutlined
                   /></span>
-                  <span v-if="item.buildRemark">{{ $tl('buildRemarks') }}：{{ item.buildRemark }}</span>
+                  <span v-if="item.buildRemark">{{ $tl('p.buildNote') }}{{ item.buildRemark }}</span>
                 </a-space>
               </div>
               <div>
-                <a-tooltip :title="item.statusMsg || statusMap[item.status] || $tl('unknown')">
-                  {{ $tl('status') }}：<a-tag :color="statusColor[item.status]">{{
-                    statusMap[item.status] || $tl('unknown')
-                  }}</a-tag>
+                <a-tooltip :title="item.statusMsg || statusMap[item.status] || $tl('c.unknown')">
+                  {{ $tl('p.status')
+                  }}<a-tag :color="statusColor[item.status]">{{ statusMap[item.status] || $tl('c.unknown') }}</a-tag>
                 </a-tooltip>
               </div>
               <div>
-                {{ $tl('time') }}：{{ parseTime(item.startTime) }} ~
+                {{ $tl('p.time') }}{{ parseTime(item.startTime) }} ~
                 {{ parseTime(item.endTime) }}
               </div>
-              <div>{{ $tl('triggerType') }}：{{ triggerBuildTypeMap[item.triggerBuildType] || $tl('unknown') }}</div>
+              <div>{{ $tl('p.triggerType') }}{{ triggerBuildTypeMap[item.triggerBuildType] || $tl('c.unknown') }}</div>
               <div>
-                {{ $tl('occupySpace') }}：{{ renderSize(item.resultFileSize) }}({{ $tl('product') }})/{{
+                {{ $tl('p.occupiedSpace') }}{{ renderSize(item.resultFileSize) }}({{ $tl('c.product') }})/{{
                   renderSize(item.buildLogFileSize)
-                }}({{ $tl('logs') }})
+                }}({{ $tl('c.log') }})
               </div>
 
               <div>
-                {{ $tl('constructionTime') }}：{{ formatDuration((item.endTime || 0) - (item.startTime || 0), '', 2) }}
+                {{ $tl('p.buildDuration') }}{{ formatDuration((item.endTime || 0) - (item.startTime || 0), '', 2) }}
               </div>
               <div>
-                {{ $tl('publishingMethod') }}：
-                <a-tag> {{ releaseMethodMap[item.releaseMethod] || $tl('unknown') }}</a-tag>
+                {{ $tl('p.publishMethodDetail') }}
+                <a-tag> {{ releaseMethodMap[item.releaseMethod] || $tl('c.unknown') }}</a-tag>
               </div>
               <div>
-                {{ $tl('publishingMethod') }}：
+                {{ $tl('p.operation') }}
                 <a-space>
-                  <a-tooltip :title="$tl('tooltip.logs')">
+                  <a-tooltip :title="$tl('p.downloadBuildLog')">
                     <a-button size="small" type="primary" :disabled="!item.hasLog" @click="handleDownload(item)"
-                      ><DownloadOutlined /> {{ $tl('logs') }}</a-button
+                      ><DownloadOutlined />{{ $tl('c.log') }}</a-button
                     >
                   </a-tooltip>
 
-                  <a-tooltip :title="$tl('tooltip.product')">
+                  <a-tooltip :title="$tl('p.downloadProduct')">
                     <a-button size="small" type="primary" :disabled="!item.hasFile" @click="handleFile(item)">
                       <DownloadOutlined />
-                      {{ $tl('product') }}
+                      {{ $tl('c.product') }}
                     </a-button>
                   </a-tooltip>
                   <template v-if="item.releaseMethod !== 5">
@@ -147,15 +155,12 @@
                       type="primary"
                       danger
                       @click="handleRollback(item)"
-                    >
-                      {{ $tl('rollback') }}
+                      >{{ $tl('c.rollback') }}
                     </a-button>
                   </template>
                   <template v-else>
-                    <a-tooltip :title="$tl('tooltip.rollback')">
-                      <a-button size="small" :disabled="true" type="primary" danger>
-                        {{ $tl('rollback') }}
-                      </a-button>
+                    <a-tooltip :title="$tl('p.dockerfileBuildNotSupported')">
+                      <a-button size="small" :disabled="true" type="primary" danger>{{ $tl('c.rollback') }} </a-button>
                     </a-tooltip>
                   </template>
                 </a-space>
@@ -172,7 +177,16 @@
     <!-- </a-row> -->
 
     <!-- 构建日志 -->
-    <build-log v-if="buildLogVisible > 0" :temp="temp" :visible="buildLogVisible != 0" @close="buildLogVisible = 0" />
+    <build-log
+      v-if="buildLogVisible > 0"
+      :temp="temp"
+      :visible="buildLogVisible != 0"
+      @close="
+        () => {
+          buildLogVisible = 0
+        }
+      "
+    />
   </div>
 </template>
 
@@ -220,8 +234,7 @@ export default {
       listQuery: Object.assign({ buildDataId: this.id }, PAGE_DEFAULT_LIST_QUERY),
       historyList: [],
       tempRepository: null,
-      buildLogVisible: 0,
-      pagePath: 'pages.build.details.'
+      buildLogVisible: 0
     }
   },
   computed: {},
@@ -231,22 +244,15 @@ export default {
     }
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.build.details.${key}`, ...args)
+    },
     parseTime,
     formatDuration,
     PAGE_DEFAULT_SHOW_TOTAL,
-    $tl(key, ...arg) {
-      return this.$t.call(this, this.pagePath + key, ...arg)
-    },
-    showTotal(total) {
-      return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery)
-    },
     renderSize,
     refresh() {
       this.getData()
-      this.listHistory()
-    },
-    showSizeChange(current, size) {
-      this.listQuery.limit = size
       this.listHistory()
     },
     // 选择仓库
@@ -301,11 +307,11 @@ export default {
     // 回滚
     handleRollback(record) {
       $confirm({
-        title: '系统提示',
-        content: '真的要回滚该构建历史记录么？',
-        okText: '确认',
+        title: this.$tl('p.systemHint'),
+        content: this.$tl('p.confirmRollbackBuildHistory'),
+        okText: this.$tl('p.confirm'),
         zIndex: 1009,
-        cancelText: '取消',
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return rollback(record.id).then((res) => {
             if (res.code === 200) {

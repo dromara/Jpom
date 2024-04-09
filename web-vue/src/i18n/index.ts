@@ -12,6 +12,9 @@ import { createI18n } from 'vue-i18n'
 import zhCN from './locales/zh-CN'
 import enUS from './locales/en_US'
 
+import antdZhCN from 'ant-design-vue/es/locale/zh_CN'
+import antdEnUS from 'ant-design-vue/es/locale/en_US'
+
 /** 以中文为主,定义语言类型 */
 export type I18nLocaleType = typeof zhCN
 
@@ -32,14 +35,25 @@ const deepMerge = (...objects: Record<string, any>[]) => {
   return result
 }
 
+export const lang: { [key: string]: any } = {
+  'zh-cn': {
+    antd: antdZhCN,
+    local: zhCN
+  },
+  'en-us': {
+    antd: antdEnUS,
+    local: deepMerge(zhCN, enUS)
+  }
+}
+
 const i18n = createI18n({
   legacy: false,
-  // TODO 目前手动修改，后续抽离封装
   locale: 'zh-cn', //'en-us', // 默认显示语言
-  messages: {
-    'zh-cn': zhCN,
-    'en-us': deepMerge(zhCN, enUS)
-  }
+  messages: Object.keys(lang).reduce((pre: { [key: string]: any }, key: string) => {
+    const { local } = lang[key]
+    pre[key] = local
+    return pre
+  }, {})
 })
 
 export default i18n
