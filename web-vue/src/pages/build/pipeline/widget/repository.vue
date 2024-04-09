@@ -17,71 +17,73 @@
           <span class="ant-form-item-explain-error">请选择代码仓库</span>
         </template>
       </a-form-item>
-      <a-form-item
-        label="使用分支"
-        name="branchName"
-        :validate-status="useData.branchName || useData.branchTagName ? '' : 'error'"
-      >
-        <template v-if="!useData.branchName && !useData.branchTagName" #extra>
-          <span class="ant-form-item-explain-error">请选择仓库分支或者选择标签</span>
-        </template>
-        <custom-select
-          v-model:value="useData.branchName"
-          :disabled="!!useData.branchTagName || !useData.repositoryId"
-          :data="tempRepository.branchList"
-          :can-reload="true"
-          input-placeholder="自定义分支通配表达式"
-          select-placeholder="请选择构建对应的分支,必选"
-          @on-refresh-select="loadBranchList(useData.repositoryId)"
+      <template v-if="tempRepository.raw?.repoType === 0">
+        <a-form-item
+          label="使用分支"
+          name="branchName"
+          :validate-status="useData.branchName || useData.branchTagName ? '' : 'error'"
         >
-          <template #inputTips>
-            <div>
-              支持通配符(AntPathMatcher)
-              <ul>
-                <li>? 匹配一个字符</li>
-                <li>* 匹配零个或多个字符</li>
-                <li>** 匹配路径中的零个或多个目录</li>
-              </ul>
-            </div>
+          <template v-if="!useData.branchName && !useData.branchTagName" #extra>
+            <span class="ant-form-item-explain-error">请选择仓库分支或者选择标签</span>
           </template>
-        </custom-select>
-      </a-form-item>
-      <a-form-item
-        label="标签(TAG)"
-        name="branchTagName"
-        :validate-status="useData.branchName || useData.branchTagName ? '' : 'error'"
-      >
-        <template v-if="!useData.branchName && !useData.branchTagName" #extra>
-          <span class="ant-form-item-explain-error">请选择仓库分支或者选择标签</span>
-        </template>
-        <custom-select
-          v-model:value="useData.branchTagName"
-          :disabled="!useData.repositoryId"
-          :data="tempRepository.branchTagList"
-          :can-reload="true"
-          input-placeholder="自定义标签通配表达式"
-          select-placeholder="选择构建的标签,不选为最新提交"
-          @on-refresh-select="loadBranchList(useData.repositoryId)"
+          <custom-select
+            v-model:value="useData.branchName"
+            :disabled="!!useData.branchTagName || !useData.repositoryId"
+            :data="tempRepository.branchList"
+            :can-reload="true"
+            input-placeholder="自定义分支通配表达式"
+            select-placeholder="请选择构建对应的分支,必选"
+            @on-refresh-select="loadBranchList(useData.repositoryId)"
+          >
+            <template #inputTips>
+              <div>
+                支持通配符(AntPathMatcher)
+                <ul>
+                  <li>? 匹配一个字符</li>
+                  <li>* 匹配零个或多个字符</li>
+                  <li>** 匹配路径中的零个或多个目录</li>
+                </ul>
+              </div>
+            </template>
+          </custom-select>
+        </a-form-item>
+        <a-form-item
+          label="标签(TAG)"
+          name="branchTagName"
+          :validate-status="useData.branchName || useData.branchTagName ? '' : 'error'"
         >
-          <template #inputTips>
-            <div>
-              支持通配符(AntPathMatcher)
-              <ul>
-                <li>? 匹配一个字符</li>
-                <li>* 匹配零个或多个字符</li>
-                <li>** 匹配路径中的零个或多个目录</li>
-              </ul>
-            </div>
+          <template v-if="!useData.branchName && !useData.branchTagName" #extra>
+            <span class="ant-form-item-explain-error">请选择仓库分支或者选择标签</span>
           </template>
-        </custom-select>
-      </a-form-item>
-      <a-form-item v-if="guideStore.getExtendPlugins.indexOf('system-git') > -1" label="克隆深度" name="cloneDepth">
-        <a-input-number
-          v-model:value="useData.cloneDepth"
-          style="width: 100%"
-          placeholder="自定义克隆深度，避免大仓库全部克隆"
-        />
-      </a-form-item>
+          <custom-select
+            v-model:value="useData.branchTagName"
+            :disabled="!useData.repositoryId"
+            :data="tempRepository.branchTagList"
+            :can-reload="true"
+            input-placeholder="自定义标签通配表达式"
+            select-placeholder="选择构建的标签,不选为最新提交"
+            @on-refresh-select="loadBranchList(useData.repositoryId)"
+          >
+            <template #inputTips>
+              <div>
+                支持通配符(AntPathMatcher)
+                <ul>
+                  <li>? 匹配一个字符</li>
+                  <li>* 匹配零个或多个字符</li>
+                  <li>** 匹配路径中的零个或多个目录</li>
+                </ul>
+              </div>
+            </template>
+          </custom-select>
+        </a-form-item>
+        <a-form-item v-if="guideStore.getExtendPlugins.indexOf('system-git') > -1" label="克隆深度" name="cloneDepth">
+          <a-input-number
+            v-model:value="useData.cloneDepth"
+            style="width: 100%"
+            placeholder="自定义克隆深度，避免大仓库全部克隆"
+          />
+        </a-form-item>
+      </template>
     </a-form>
 
     <!-- 选择仓库 -->
@@ -93,11 +95,7 @@
       width="85vw"
       :z-index="1009"
       :footer-style="{ textAlign: 'right' }"
-      @close="
-        () => {
-          repositoryisible = false
-        }
-      "
+      @close="repositoryisible = false"
     >
       <repository-list
         v-if="repositoryisible"
@@ -109,34 +107,13 @@
             changeRepositpry(repositoryId)
           }
         "
-        @cancel="
-          () => {
-            repositoryisible = false
-          }
-        "
+        @cancel="repositoryisible = false"
       >
       </repository-list>
       <template #footer>
         <a-space>
-          <a-button
-            @click="
-              () => {
-                repositoryisible = false
-              }
-            "
-          >
-            取消
-          </a-button>
-          <a-button
-            type="primary"
-            @click="
-              () => {
-                repositoryComponent.handerConfirm()
-              }
-            "
-          >
-            确认
-          </a-button>
+          <a-button @click="repositoryisible = false"> 取消 </a-button>
+          <a-button type="primary" @click="repositoryComponent.handerConfirm()"> 确认 </a-button>
         </a-space>
       </template>
     </a-drawer>
@@ -162,14 +139,27 @@ const props = defineProps({
     required: true
   }
 })
-const emit = defineEmits<{ (e: 'update:data', value: object): void; (e: 'update:loading', value: boolean): void }>()
+const emit = defineEmits<{
+  (e: 'update:data', value: object): void
+  (e: 'update:loading', value: boolean): void
+  (e: 'change', value: any): void
+}>()
 
 const guideStore = useGuideStore()
 const repositoryComponent = ref()
 
 const useData = ref(props.data)
 const useLoading = ref(props.loading)
-
+// watch(
+//   () => props.data,
+//   (val, old) => {
+//     // useData.value = val
+//     console.log(val.branchName, old)
+//   },
+//   {
+//     immediate: true
+//   }
+// )
 watch(
   () => useData.value,
   (val) => {
@@ -199,6 +189,10 @@ const repositoryisible = ref(false)
 const changeRepositpry = (repositoryId: string) => {
   useData.value = { ...useData.value, repositoryId: repositoryId, branchName: '', branchTagName: '' }
   repositoryisible.value = false
+  loadRepositpryInfo(repositoryId)
+}
+
+const loadRepositpryInfo = (repositoryId: string) => {
   useLoading.value = true
   //const repositoryId = jsonConfig.value.repositories[repositoryTag].repositoryId
   getRepositoryInfo({
@@ -210,7 +204,7 @@ const changeRepositpry = (repositoryId: string) => {
           ...tempRepository.value,
           raw: res.data
         }
-
+        emit('change', res.data)
         // 刷新分支
         loadBranchList(repositoryId)
       }
@@ -222,6 +216,12 @@ const changeRepositpry = (repositoryId: string) => {
 // 获取仓库分支
 const loadBranchList = (repositoryId?: string) => {
   if (!repositoryId) {
+    return
+  }
+  // git 或者 svn 仓库类型
+  // svn 没有分支
+  if (tempRepository.value?.raw?.repoType !== 0) {
+    useData.value = { ...useData.value, branchName: 'trunk' }
     return
   }
   tempRepository.value = {
@@ -247,5 +247,9 @@ const loadBranchList = (repositoryId?: string) => {
     .finally(() => {
       useLoading.value = false
     })
+}
+
+if (props.data.repositoryId) {
+  loadRepositpryInfo(props.data.repositoryId)
 }
 </script>

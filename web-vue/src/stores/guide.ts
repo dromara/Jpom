@@ -25,6 +25,7 @@ interface IStateCache extends IState {
   systemIsDark: boolean
   getThemeView?: Function
   getCatchThemeView?: Function
+  getLocale?: Function
 }
 
 interface IStateGuideCache {

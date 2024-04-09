@@ -60,7 +60,7 @@
       :footer-style="{ textAlign: 'right' }"
       @close="editVisible = false"
     >
-      <EditPipeline v-if="editVisible" ref="editPipelineCom"> </EditPipeline>
+      <EditPipeline v-if="editVisible" :id="temp.id" ref="editPipelineCom"> </EditPipeline>
       <template #footer>
         <a-space>
           <a-button @click="editVisible = false"> 取消 </a-button>

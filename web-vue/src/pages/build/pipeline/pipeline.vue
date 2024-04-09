@@ -65,14 +65,14 @@
               <a-form-item-rest>
                 <a-space direction="vertical" style="width: 100%">
                   <a-collapse v-if="repositoryList && repositoryList.length" v-model:activeKey="repositoryActiveKeys">
-                    <a-collapse-panel v-for="(item, index) in repositoryList" :key="item.id">
+                    <a-collapse-panel v-for="(item, index) in repositoryList" :key="item.id" force-render>
                       <template #header>
                         <a-row :wrap="false">
                           <a-col flex="auto">
                             仓库{{ index + 1 }} <a-tag>{{ item.id }}</a-tag>
                           </a-col>
                           <a-col flex="none">
-                            <a-button type="primary" danger size="small" @click="delRepositoryList(index)">
+                            <a-button type="primary" danger size="small" @click.stop="delRepositoryList(index)">
                               删除
                             </a-button>
                           </a-col>
@@ -84,6 +84,7 @@
                         v-model:data="jsonConfig.repositories[item.id]"
                         v-model:loading="loading"
                         :form-lable="formLable"
+                        @change="(data) => repositoryChange(data, item.id)"
                       />
                     </a-collapse-panel>
                   </a-collapse>
@@ -130,26 +131,26 @@
             <a-form-item
               label="子流程"
               name="stages"
-              :validate-status="jsonConfig.stageGroups[index].stages?.length ? '' : 'error'"
+              :validate-status="jsonConfig.stageGroups[index]?.stages?.length ? '' : 'error'"
             >
-              <template v-if="!jsonConfig.stageGroups[index].stages?.length" #extra>
+              <template v-if="!jsonConfig.stageGroups[index]?.stages?.length" #extra>
                 <span class="ant-form-item-explain-error">请添加子流程</span>
               </template>
               <a-form-item-rest>
                 <a-space direction="vertical" style="width: 100%">
                   <a-collapse
-                    v-if="jsonConfig.stageGroups[index].stages?.length"
+                    v-if="jsonConfig.stageGroups[index]?.stages?.length"
                     v-model:activeKey="childStageActiveKeys[index]"
                   >
                     <a-collapse-panel
-                      v-for="(childItem, childIndex) in jsonConfig.stageGroups[index].stages"
+                      v-for="(childItem, childIndex) in jsonConfig.stageGroups[index]?.stages"
                       :key="childIndex"
                     >
                       <template #header>
                         <a-row :wrap="false">
                           <a-col flex="auto"> 子流程{{ childIndex + 1 }} </a-col>
                           <a-col flex="none">
-                            <a-button type="primary" danger size="small" @click="delChildStage(index, childIndex)"
+                            <a-button type="primary" danger size="small" @click.stop="delChildStage(index, childIndex)"
                               >删除</a-button
                             >
                           </a-col>
@@ -184,10 +185,15 @@
 import widgetRepository from './widget/repository.vue'
 import widgetStageBase from './widget/stages-base.vue'
 import { randomStr } from '@/utils/const'
-import { JsonConfigType } from './widget/types'
-import { editBuildPipeline } from '@/api/build/pipeline'
-const loading = ref(false)
+import { JsonConfigType, PublishBase, StagesConfig, StagesExec, PublishProject } from './widget/types'
+import { editBuildPipeline, getBuildPipelineItem } from '@/api/build/pipeline'
 
+const props = defineProps({
+  id: {
+    type: String,
+    required: true
+  }
+})
 const formLable = ref({
   labelCol: { span: 2 },
   wrapperCol: { span: 22 }
@@ -196,6 +202,48 @@ const jsonConfig = ref<JsonConfigType>({
   repositories: {},
   stageGroups: []
 })
+const formData = ref<any>({})
+
+const loading = ref(!!props.id)
+
+const loadPipelineData = () => {
+  loading.value = true
+  getBuildPipelineItem({
+    id: props.id
+  })
+    .then((res) => {
+      if (res.code === 200) {
+        formData.value = { ...formData.value, name: res.data.name, group: res.data.group }
+        //
+        jsonConfig.value = JSON.parse(res.data.jsonConfig)
+        jsonConfig.value.stageGroups
+          .map((item, index) => {
+            return {
+              // '流程组' + stepsItems.value.length,
+              title: '流程组' + (index + 1),
+              description: item.description
+            } as StepsItem
+          })
+          .forEach((item) => {
+            stepsItems.value.push(item)
+          })
+
+        console.log(jsonConfig.value)
+      }
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+if (props.id) {
+  // 获取数据
+  loadPipelineData()
+} else {
+  jsonConfig.value = {
+    repositories: {},
+    stageGroups: []
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -219,13 +267,24 @@ const addChildStage = (index: number) => {
 // 删除子流程
 
 const delChildStage = (index: number, index2: number) => {
-  jsonConfig.value?.stageGroups[index]?.stages?.splice(index2, 1)
-  //
-  childStageActiveKeys.value[index] = childStageActiveKeys.value[index].filter((item: number) => item != index2)
-  // console.log(jsonConfig.value.stageGroups[index])
+  $confirm({
+    title: '系统提示',
+    zIndex: 1009,
+    content: '确定要删除此子流程' + (index2 + 1) + '吗？',
+    okText: '确认',
+    cancelText: '取消',
+    onOk: () => {
+      jsonConfig.value?.stageGroups[index]?.stages?.splice(index2, 1)
+      //
+      childStageActiveKeys.value[index] = childStageActiveKeys.value[index].filter((item: number) => item != index2)
+      // console.log(jsonConfig.value.stageGroups[index])
+    }
+  })
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+const repositoryNameCache = ref<Record<string, string>>({})
 
 const repositoryActiveKeys = ref<Array<string>>([])
 
@@ -233,11 +292,12 @@ const repositoryList = computed(() => {
   if (!jsonConfig.value || !jsonConfig.value.repositories) {
     return []
   }
-  const list: Array<{ id: string; sort: number }> = []
+  const list: Array<{ id: string; sort: number; name: string }> = []
   for (let key in jsonConfig.value.repositories) {
     list.push({
       id: key,
-      sort: jsonConfig.value.repositories[key].sort || 0
+      sort: jsonConfig.value.repositories[key].sort || 0,
+      name: repositoryNameCache.value[key]
     })
   }
   list.sort((a, b) => a.sort - b.sort)
@@ -262,19 +322,33 @@ const addRepositoryList = () => {
 
 // 删除仓库
 const delRepositoryList = (index: number) => {
-  const repository = repositoryList.value[index]
-  delete jsonConfig.value.repositories[repository.id]
+  $confirm({
+    title: '系统提示',
+    zIndex: 1009,
+    content: '确定要删除此源仓库吗？删除源仓库后关闭的子流程将无法正常执行',
+    okText: '确认',
+    cancelText: '取消',
+    onOk: () => {
+      const repository = repositoryList.value[index]
+      delete jsonConfig.value.repositories[repository.id]
 
-  // 修改排序值
-  repositoryList.value.forEach((item) => {
-    jsonConfig.value.repositories[item.id] = {
-      ...jsonConfig.value.repositories[item.id],
-      sort: item.sort
+      // 修改排序值
+      repositoryList.value.forEach((item) => {
+        jsonConfig.value.repositories[item.id] = {
+          ...jsonConfig.value.repositories[item.id],
+          sort: item.sort
+        }
+      })
     }
   })
 }
+
+const repositoryChange = (data: any, id: string) => {
+  repositoryNameCache.value = { ...repositoryNameCache.value, [id]: data.name }
+}
+
 const groupList = ref([])
-const formData = ref<any>({})
+
 const stepsGroupCurrent = ref<number>(0)
 type StepsItem = {
   title: string
@@ -326,22 +400,102 @@ const delStepGroups = () => {
   if (stepsGroupCurrent.value < 1) {
     return
   }
-  stepsItems.value.splice(stepsGroupCurrent.value, 1)
-  jsonConfig.value.stageGroups.splice(stepsGroupCurrent.value, 1)
-  stepsItems.value = stepsItems.value.map((item, index) => {
-    if (index === 0) {
-      return item
+  $confirm({
+    title: '系统提示',
+    zIndex: 1009,
+    content: '确定要删除此流程组' + stepsGroupCurrent.value + '吗？',
+    okText: '确认',
+    cancelText: '取消',
+    onOk: () => {
+      stepsItems.value.splice(stepsGroupCurrent.value, 1)
+      jsonConfig.value.stageGroups.splice(stepsGroupCurrent.value, 1)
+      stepsItems.value = stepsItems.value.map((item, index) => {
+        if (index === 0) {
+          return item
+        }
+        return { ...item, title: '流程组' + index }
+      })
+      stepsGroupCurrent.value = stepsGroupCurrent.value - 1
     }
-    return { ...item, title: '流程组' + index }
   })
-  stepsGroupCurrent.value = stepsGroupCurrent.value - 1
 }
 // 流程组切换
 const stepsChange = (current: number) => {
-  console.log(123, current)
+  console.log('切换流程组', current)
 }
 
 ////////////////////////////////////////////////////////////
+
+const checkSteps = (stage: StagesConfig, groupIndex: number, stageIndex: number) => {
+  //console.log(stage)
+  if (!stage || !stage.stageType) {
+    $notification.warn({
+      message: `流程组${groupIndex + 1}中的子流程${stageIndex + 1}请选择流程类型`
+    })
+    return false
+  }
+  if (!stage.repoTag) {
+    $notification.warn({
+      message: `流程组${groupIndex + 1}中的子流程${stageIndex + 1}请选择源仓库标记`
+    })
+    return false
+  }
+  if (stage.stageType === 'EXEC') {
+    if (!(stage as StagesExec).commands) {
+      $notification.warn({
+        message: `流程组${groupIndex + 1}中的子流程${stageIndex + 1}请输入执行命令`
+      })
+      return false
+    }
+    //return false
+  } else if (stage.stageType === 'PUBLISH') {
+    if (!(stage as PublishBase).publishType) {
+      $notification.warn({
+        message: `流程组${groupIndex + 1}中的子流程${stageIndex + 1}请选择发布方式`
+      })
+      return false
+    }
+    const artifacts = (stage as PublishBase)?.artifacts || []
+    for (let i = 0; i < artifacts.length; i++) {
+      const item = artifacts[i]
+      if (!item.path?.filter((item) => !!item).length) {
+        $notification.warn({
+          message: `流程组${groupIndex + 1}中的子流程${stageIndex + 1}产物${i + 1}请配置产物目录或者文件`
+        })
+        return false
+      }
+      // if (
+      //  ?.filter((item) => {
+      //     return item.path?.filter((item) => !!item).length
+      //   }).length
+      // ) {
+
+      // }
+    }
+    if ((stage as PublishBase).publishType === 'PROJECT') {
+      // 项目发布
+      if (!(stage as PublishProject).nodeId) {
+        $notification.warn({
+          message: `流程组${groupIndex + 1}中的子流程${stageIndex + 1}请选择节点`
+        })
+        return false
+      }
+      if (!(stage as PublishProject).projectId) {
+        $notification.warn({
+          message: `流程组${groupIndex + 1}中的子流程${stageIndex + 1}请选择项目`
+        })
+        return false
+      }
+      if (!(stage as PublishProject).artifacts?.length) {
+        $notification.warn({
+          message: `流程组${groupIndex + 1}中的子流程${stageIndex + 1}请添加产物`
+        })
+        return false
+      }
+    }
+  }
+  return true
+}
 
 const handleEditSave = () => {
   const formDataTemp = formData.value
@@ -380,24 +534,54 @@ const handleEditSave = () => {
       return false
     }
   }
-  editBuildPipeline({
-    ...formDataTemp,
-    jsonConfig: jsonConfigTemp
-  }).then((res) => {
-    if (res.code === 200) {
-      $notification.success({
-        message: res.msg
-      })
-    }
-  })
   if (!jsonConfigTemp.stageGroups.length) {
     $notification.warn({
-      message: '请添加流水线阶段'
+      message: '请添加流水线阶段或者存在未确认流程组'
     })
-    stepsGroupCurrent.value = 0
+
     return false
   }
-  console.log(jsonConfigTemp, formDataTemp)
+  for (let i = 0; i < jsonConfigTemp.stageGroups.length; i++) {
+    const stageGroups = jsonConfigTemp.stageGroups[i]
+    if (!stageGroups.stages.length) {
+      $notification.warn({
+        message: '流程组' + (i + 1) + '没有子流程'
+      })
+      stepsGroupCurrent.value = i + 1
+      return false
+    }
+    // 检查子流程
+    for (let j = 0; j < stageGroups.stages.length; j++) {
+      const stage = stageGroups.stages[j]
+      if (!checkSteps(stage, i, j)) {
+        stepsGroupCurrent.value = i + 1
+        return false
+      }
+    }
+  }
+  if (jsonConfigTemp.stageGroups.length != stepsItems.value.length - 1) {
+    $notification.warn({
+      message: '存在未确认的流程请检查'
+    })
+    return false
+  }
+  // console.log(jsonConfigTemp, formDataTemp)
+  loading.value = true
+  editBuildPipeline({
+    ...formDataTemp,
+    jsonConfig: jsonConfigTemp,
+    id: props.id
+  })
+    .then((res) => {
+      if (res.code === 200) {
+        $notification.success({
+          message: res.msg
+        })
+      }
+    })
+    .finally(() => {
+      loading.value = false
+    })
 }
 
 defineExpose({

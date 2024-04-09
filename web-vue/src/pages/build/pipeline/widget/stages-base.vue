@@ -20,7 +20,9 @@
       <a-form-item label="仓库标记" name="repoTag" :validate-status="useData.repoTag ? '' : 'error'">
         <a-select v-model:value="useData.repoTag" placeholder="请选择仓库标记">
           <a-select-option v-if="!repositoryList || !repositoryList.length" value="">请先添加源仓库</a-select-option>
-          <a-select-option v-for="item in repositoryList" :key="item.id">{{ item.id }}</a-select-option>
+          <a-select-option v-for="item in repositoryList" :key="item.id"
+            >{{ item.name }} <a-tag>{{ item.id }}</a-tag></a-select-option
+          >
         </a-select>
         <template v-if="!useData.repoTag" #extra>
           <span class="ant-form-item-explain-error">请选择仓库标记</span>

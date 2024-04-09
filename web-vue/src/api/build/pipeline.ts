@@ -18,3 +18,11 @@ export function editBuildPipeline(params) {
     data: params
   })
 }
+
+export function getBuildPipelineItem(params) {
+  return axios({
+    url: '/build/pipeline/get',
+    method: 'get',
+    params
+  })
+}

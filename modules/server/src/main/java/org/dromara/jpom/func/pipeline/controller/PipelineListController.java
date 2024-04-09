@@ -49,6 +49,20 @@ public class PipelineListController extends BaseServerController {
         return JsonMessage.success("", listPage);
     }
 
+    /**
+     * 获取单个流水线
+     *
+     * @return json
+     */
+    @GetMapping(value = "get", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<PipelineDataModel> get(String id, HttpServletRequest request) {
+        //
+        PipelineDataModel buildInfoModel = pipelineService.getByKey(id, request);
+        Assert.notNull(buildInfoModel, "不存在对应的流水线");
+        return JsonMessage.success("", buildInfoModel);
+    }
+
     @RequestMapping(value = "edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> updateBuild(@RequestBody JSONObject data,
