@@ -85,11 +85,12 @@ import {
 } from '@/utils/const'
 import { buildPipelineList } from '@/api/build/pipeline'
 import EditPipeline from './pipeline.vue'
+import { CustomColumnType } from '@/components/customTable/types'
 
 const loading = ref(true)
 const editPipelineCom = ref()
 const list = ref([])
-const columns = ref([
+const columns = ref<CustomColumnType[]>([
   {
     title: '名称',
     dataIndex: 'name',
@@ -111,7 +112,6 @@ const columns = ref([
     ellipsis: true,
     sorter: true
   },
-
   {
     title: '创建时间',
     dataIndex: 'createTimeMillis',
