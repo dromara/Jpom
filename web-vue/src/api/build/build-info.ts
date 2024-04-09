@@ -8,8 +8,8 @@
 /// See the Mulan PSL v2 for more details.
 ///
 
-import axios from './config'
-import { loadRouterBase } from './config'
+import axios from '../config'
+import { loadRouterBase } from '../config'
 
 /**
  * 构建列表

@@ -17,6 +17,7 @@ import org.dromara.jpom.func.cert.service.CertificateInfoService;
 import org.dromara.jpom.func.files.service.FileReleaseTaskService;
 import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.func.files.service.StaticFileStorageService;
+import org.dromara.jpom.func.pipeline.server.PipelineService;
 import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.func.user.server.UserLoginLogServer;
 import org.dromara.jpom.service.dblog.*;
@@ -79,6 +80,7 @@ public enum ClassFeature {
     BUILD("在线构建", BuildInfoService.class),
     BUILD_LOG("构建日志", DbBuildHistoryLogService.class),
     BUILD_REPOSITORY("仓库信息", RepositoryService.class),
+    BUILD_PIPELINE("流水线", PipelineService.class),
     USER("用户管理", UserService.class),
     USER_LOG("操作日志", DbUserOperateLogService.class),
     USER_LOGIN_LOG("登录日志", UserLoginLogServer.class),

@@ -9,10 +9,12 @@
 ///
 
 import { ColumnType } from 'ant-design-vue/es/table'
-import { RenderExpandIconProps } from 'ant-design-vue/es/vc-table/interface'
+import { RenderExpandIconProps, FixedType, AlignType } from 'ant-design-vue/es/vc-table/interface'
 import { CustomSlotsType } from 'ant-design-vue/es/_util/type'
 export type CustomColumnType = ColumnType & {
   checked?: boolean
+  fixed?: FixedType
+  align?: AlignType
 }
 export type CatchStorageType = {
   key: string

@@ -187,7 +187,7 @@ import {
   downloadBuildFile,
   downloadBuildLog,
   rollback
-} from '@/api/build-info'
+} from '@/api/build/build-info'
 import {
   parseTime,
   PAGE_DEFAULT_LIST_QUERY,
@@ -196,7 +196,7 @@ import {
   renderSize,
   formatDuration
 } from '@/utils/const'
-import { getRepositoryInfo } from '@/api/repository'
+import { getRepositoryInfo } from '@/api/build/repository'
 import BuildLog from './log'
 
 export default {

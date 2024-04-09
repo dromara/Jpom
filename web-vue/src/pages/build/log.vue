@@ -34,7 +34,7 @@
 <script>
 import LogView from '@/components/logView'
 
-import { loadBuildLog, downloadBuildLog, statusColor, statusMap } from '@/api/build-info'
+import { loadBuildLog, downloadBuildLog, statusColor, statusMap } from '@/api/build/build-info'
 export default {
   components: {
     LogView

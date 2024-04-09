@@ -508,7 +508,7 @@ import {
   importTemplate,
   importData,
   listRepositoryGroup
-} from '@/api/repository'
+} from '@/api/build/repository'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import { getWorkspaceEnvAll } from '@/api/workspace'
 import CustomSelect from '@/components/customSelect'

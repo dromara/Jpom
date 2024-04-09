@@ -421,7 +421,7 @@ import BuildList from '@/pages/build/list-info'
 import BuildHistory from '@/pages/build/history'
 import FileStorage from '@/pages/file-manager/fileStorage/list'
 import StaticFileStorage from '@/pages/file-manager/staticFileStorage/list'
-import { getBuildGet } from '@/api/build-info'
+import { getBuildGet } from '@/api/build/build-info'
 import { hasFile } from '@/api/file-manager/file-storage'
 import { hasStaticFile } from '@/api/file-manager/static-storage'
 export default {

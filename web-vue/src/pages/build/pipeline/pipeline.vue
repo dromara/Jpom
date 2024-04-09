@@ -62,33 +62,35 @@
               <template v-if="!repositoryList || !repositoryList.length" #extra>
                 <span class="ant-form-item-explain-error">请添加源仓库</span>
               </template>
-              <a-space direction="vertical" style="width: 100%">
-                <a-collapse v-if="repositoryList && repositoryList.length" v-model:activeKey="repositoryActiveKeys">
-                  <a-collapse-panel v-for="(item, index) in repositoryList" :key="item.id">
-                    <template #header>
-                      <a-row :wrap="false">
-                        <a-col flex="auto">
-                          仓库{{ index + 1 }} <a-tag>{{ item.id }}</a-tag>
-                        </a-col>
-                        <a-col flex="none">
-                          <a-button type="primary" danger size="small" @click="delRepositoryList(index)">
-                            删除
-                          </a-button>
-                        </a-col>
-                      </a-row>
-                    </template>
+              <a-form-item-rest>
+                <a-space direction="vertical" style="width: 100%">
+                  <a-collapse v-if="repositoryList && repositoryList.length" v-model:activeKey="repositoryActiveKeys">
+                    <a-collapse-panel v-for="(item, index) in repositoryList" :key="item.id">
+                      <template #header>
+                        <a-row :wrap="false">
+                          <a-col flex="auto">
+                            仓库{{ index + 1 }} <a-tag>{{ item.id }}</a-tag>
+                          </a-col>
+                          <a-col flex="none">
+                            <a-button type="primary" danger size="small" @click="delRepositoryList(index)">
+                              删除
+                            </a-button>
+                          </a-col>
+                        </a-row>
+                      </template>
 
-                    <widgetRepository
-                      :key="item.id"
-                      v-model:data="jsonConfig.repositories[item.id]"
-                      v-model:loading="loading"
-                      :form-lable="formLable"
-                    />
-                  </a-collapse-panel>
-                </a-collapse>
+                      <widgetRepository
+                        :key="item.id"
+                        v-model:data="jsonConfig.repositories[item.id]"
+                        v-model:loading="loading"
+                        :form-lable="formLable"
+                      />
+                    </a-collapse-panel>
+                  </a-collapse>
 
-                <a-button type="primary" size="small" @click="addRepositoryList">添加仓库</a-button>
-              </a-space>
+                  <a-button type="primary" size="small" @click="addRepositoryList">添加仓库</a-button>
+                </a-space>
+              </a-form-item-rest>
             </a-form-item>
           </a-form>
         </div>
@@ -183,7 +185,7 @@ import widgetRepository from './widget/repository.vue'
 import widgetStageBase from './widget/stages-base.vue'
 import { randomStr } from '@/utils/const'
 import { JsonConfigType } from './widget/types'
-
+import { editBuildPipeline } from '@/api/build/pipeline'
 const loading = ref(false)
 
 const formLable = ref({
@@ -252,7 +254,7 @@ const addRepositoryList = () => {
 
   jsonConfig.value.repositories[repositoryTag] = {
     // 找到当前排序值的最大并且 +1 ，保证新增的仓库排序处于最后
-    sort: Math.max(...repositoryList.value.map((item) => item.sort)) + 1
+    sort: repositoryList.value.length ? Math.max(...repositoryList.value.map((item) => item.sort)) + 1 : 0
   }
   //
   repositoryActiveKeys.value.push(repositoryTag)
@@ -326,7 +328,7 @@ const delStepGroups = () => {
   }
   stepsItems.value.splice(stepsGroupCurrent.value, 1)
   jsonConfig.value.stageGroups.splice(stepsGroupCurrent.value, 1)
-  stepsItems.value = stepsItems.value.map((item: StepsItem, index: number) => {
+  stepsItems.value = stepsItems.value.map((item, index) => {
     if (index === 0) {
       return item
     }
@@ -338,4 +340,67 @@ const delStepGroups = () => {
 const stepsChange = (current: number) => {
   console.log(123, current)
 }
+
+////////////////////////////////////////////////////////////
+
+const handleEditSave = () => {
+  const formDataTemp = formData.value
+  if (!formDataTemp.name) {
+    $notification.warn({
+      message: '请输入流水线名称'
+    })
+    stepsGroupCurrent.value = 0
+    return false
+  }
+  const jsonConfigTemp = jsonConfig.value
+
+  if (!repositoryList.value.length) {
+    $notification.warn({
+      message: '请添加源仓库'
+    })
+    stepsGroupCurrent.value = 0
+    return false
+  }
+
+  for (let key in jsonConfigTemp.repositories) {
+    if (!jsonConfigTemp.repositories[key].repositoryId) {
+      $notification.warn({
+        message: '请选择源仓库：' + key
+      })
+      stepsGroupCurrent.value = 0
+      repositoryActiveKeys.value = [key]
+      return false
+    }
+    if (!jsonConfigTemp.repositories[key].branchName && !jsonConfigTemp.repositories[key].branchTagName) {
+      $notification.warn({
+        message: '请选择源仓库分支或者标签：' + key
+      })
+      repositoryActiveKeys.value = [key]
+      stepsGroupCurrent.value = 0
+      return false
+    }
+  }
+  editBuildPipeline({
+    ...formDataTemp,
+    jsonConfig: jsonConfigTemp
+  }).then((res) => {
+    if (res.code === 200) {
+      $notification.success({
+        message: res.msg
+      })
+    }
+  })
+  if (!jsonConfigTemp.stageGroups.length) {
+    $notification.warn({
+      message: '请添加流水线阶段'
+    })
+    stepsGroupCurrent.value = 0
+    return false
+  }
+  console.log(jsonConfigTemp, formDataTemp)
+}
+
+defineExpose({
+  handleEditSave
+})
 </script>

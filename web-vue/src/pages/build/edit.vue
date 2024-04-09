@@ -1363,9 +1363,9 @@ import {
   buildModeMap,
   releaseMethodMap,
   getBuildGet
-} from '@/api/build-info'
+} from '@/api/build/build-info'
 import { getSshListAll } from '@/api/ssh'
-import { getRepositoryInfo } from '@/api/repository'
+import { getRepositoryInfo } from '@/api/build/repository'
 import { getNodeListAll, getProjectListAll } from '@/api/node'
 // import { getScriptListAll } from "@/api/server-script";
 import { getDishPatchListAll } from '@/api/dispatch'

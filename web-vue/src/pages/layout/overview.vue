@@ -162,7 +162,7 @@ import UserLog from './user-log.vue'
 import AboutPage from '@/pages/layout/about'
 import { useUserStore } from '@/stores/user'
 import { mapState } from 'pinia'
-import { statusMap, statusColor, triggerBuildTypeMap } from '@/api/build-info'
+import { statusMap, statusColor, triggerBuildTypeMap } from '@/api/build/build-info'
 import { Empty } from 'ant-design-vue'
 export default {
   components: {

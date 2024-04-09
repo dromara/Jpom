@@ -143,8 +143,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import { getRepositoryInfo } from '@/api/repository'
-import { getBranchList } from '@/api/build-info'
+import { getRepositoryInfo } from '@/api/build/repository'
+import { getBranchList } from '@/api/build/build-info'
 import { useGuideStore } from '@/stores/guide'
 import repositoryList from '@/pages/repository/list.vue'
 import { Repository } from './types'

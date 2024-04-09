@@ -252,7 +252,7 @@ import {
   statusMap,
   statusColor,
   triggerBuildTypeMap
-} from '@/api/build-info'
+} from '@/api/build/build-info'
 import {
   CHANGE_PAGE,
   COMPUTED_PAGINATION,

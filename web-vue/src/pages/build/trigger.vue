@@ -120,7 +120,7 @@
 </template>
 
 <script>
-import { getTriggerUrl } from '@/api/build-info'
+import { getTriggerUrl } from '@/api/build/build-info'
 export default {
   props: {
     id: {

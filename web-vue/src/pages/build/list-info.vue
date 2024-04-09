@@ -21,6 +21,7 @@
       table-name="buildList"
       empty-description="没有任何构建"
       :active-page="activePage"
+      :loading="loading"
       :layout="layout"
       size="middle"
       :columns="columns"
@@ -704,7 +705,7 @@ import {
   sortItem,
   getBranchList,
   deleteatchBuild
-} from '@/api/build-info'
+} from '@/api/build/build-info'
 import { getDispatchProject } from '@/api/dispatch'
 
 import {

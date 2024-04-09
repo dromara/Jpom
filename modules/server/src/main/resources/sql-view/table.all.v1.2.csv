@@ -28,3 +28,15 @@ STATIC_FILE_STORAGE,lastModified,Long,,,false,false,最后修改时间,
 STATIC_FILE_STORAGE,size,Long,,,false,false,文件大小,
 STATIC_FILE_STORAGE,level,Integer,,,false,false,"层级",
 STATIC_FILE_STORAGE,triggerToken,String,100,,false,false,触发器token,
+
+
+
+BUILD_PIPELINE_INFO_TMP,id,String,50,,true,true,id,流水线临时表
+BUILD_PIPELINE_INFO_TMP,createTimeMillis,Long,,,false,false,数据创建时间,
+BUILD_PIPELINE_INFO_TMP,modifyTimeMillis,Long,,,false,false,数据修改时间,
+BUILD_PIPELINE_INFO_TMP,modifyUser,String,50,,false,false,修改人,
+BUILD_PIPELINE_INFO_TMP,name,String,50,,true,false,名称,
+BUILD_PIPELINE_INFO_TMP,workspaceId,String,50,,true,false,所属工作空间,
+BUILD_PIPELINE_INFO_TMP,createUser,String,50,,true,false,创建人,
+BUILD_PIPELINE_INFO_TMP,group,String,50,,false,false,分组名称,
+BUILD_PIPELINE_INFO_TMP,jsonConfig,text,,,false,false,配置内容,

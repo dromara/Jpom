@@ -63,6 +63,10 @@ export const customTableProps = initDefaultProps(
     emptyDescription: {
       type: String,
       deafult: '暂无任何数据'
+    },
+    loading: {
+      type: Boolean,
+      default: false
     }
   },
   {
