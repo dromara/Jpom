@@ -1,7 +1,7 @@
 <template>
   <log-view
     :ref="`logView`"
-    title-name="构建日志"
+    :title-name="$tl('p.buildLog')"
     :visible="visible"
     @close="
       () => {
@@ -12,18 +12,22 @@
     <template #before>
       <a-space>
         <span v-if="status">
-          当前状态：
-          <a-tooltip :title="`当前状态：${statusMap[status]} ${statusMsg ? '状态消息：' + statusMsg : ''} `">
-            <a-tag :color="statusColor[status]" style="margin-right: 0"> {{ statusMap[status] || '未知状态' }}</a-tag>
+          {{ $tl('c.currentStatus') }}
+          <a-tooltip
+            :title="`${$tl('c.currentStatus')} ${statusMap[status]} ${statusMsg ? $tl('p.statusMsg') + statusMsg : ''}`"
+          >
+            <a-tag :color="statusColor[status]" style="margin-right: 0">
+              {{ statusMap[status] || $tl('p.unknownStatus') }}
+            </a-tag>
           </a-tooltip>
         </span>
         <span>
-          构建ID：
+          {{ $tl('p.buildId') }}
           <a-tag>{{ temp && temp.buildId }}</a-tag>
         </span>
         <a-button type="primary" :disabled="!logId" size="small" @click="handleDownload"
           ><DownloadOutlined />
-          下载
+          {{ $tl('p.download') }}
         </a-button>
         |
       </a-space>
@@ -76,6 +80,9 @@ export default {
     this.pullLog()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.build.log.${key}`, ...args)
+    },
     nextPull() {
       if (this.logTimer) {
         clearTimeout(this.logTimer)
