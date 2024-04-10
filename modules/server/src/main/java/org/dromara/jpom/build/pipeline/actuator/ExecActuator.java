@@ -6,7 +6,6 @@ import org.apache.commons.exec.LogOutputStream;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.exec.environment.EnvironmentUtils;
 import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.build.pipeline.model.config.Repository;
 import org.dromara.jpom.build.pipeline.model.config.stage.StageExecCommand;
 import org.dromara.jpom.system.ExtConfigBean;
 
@@ -20,18 +19,16 @@ import java.util.Optional;
  * @author bwcx_jzy
  * @since 2024/4/10
  */
-public class ExecActuator extends BaseActuator {
+public class ExecActuator extends BaseActuator<StageExecCommand> {
 
 
-    private final StageExecCommand stageExec;
     private String workingDir;
 
     private Charset charset;
     private File scriptFile;
 
-    public ExecActuator(StageExecCommand stageExec, Map<String, Repository> repositoryMap) {
-        super(repositoryMap);
-        this.stageExec = stageExec;
+
+    public ExecActuator() {
         try {
             charset = ExtConfigBean.getConsoleLogCharset();
         } catch (Exception e) {
@@ -42,11 +39,11 @@ public class ExecActuator extends BaseActuator {
 
     @Override
     public void run() throws IOException {
-        String repoTag = stageExec.getRepoTag();
-        scriptFile = JpomApplication.getInstance().parseScript(stageExec.getCommands());
+        String repoTag = stage.getRepoTag();
+        scriptFile = JpomApplication.getInstance().parseScript(stage.getCommands());
         //
         Map<String, String> procEnvironment = EnvironmentUtils.getProcEnvironment();
-        Map<String, String> env = stageExec.getEnv();
+        Map<String, String> env = stage.getEnv();
         Optional.ofNullable(env).ifPresent(procEnvironment::putAll);
         //
         final LogOutputStream logOutputStream = new LogOutputStream(1, charset) {

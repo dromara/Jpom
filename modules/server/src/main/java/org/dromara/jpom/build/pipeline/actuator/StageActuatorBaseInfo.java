@@ -15,7 +15,11 @@ public class StageActuatorBaseInfo {
      */
     private final int[] position;
     /**
-     * 描述
+     * 流程组描述
+     */
+    private final String groupDescription;
+    /**
+     * 子流程描述
      */
     private final String description;
 }

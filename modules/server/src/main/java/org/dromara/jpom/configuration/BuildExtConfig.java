@@ -11,6 +11,7 @@ package org.dromara.jpom.configuration;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -22,7 +23,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "jpom.build")
 @Data
+@EnableConfigurationProperties({
+    PipelineConfig.class})
 public class BuildExtConfig {
+    /**
+     * 流水线配置
+     */
+    private PipelineConfig pipeline = new PipelineConfig();
 
     /**
      * 构建最多保存多少份历史记录

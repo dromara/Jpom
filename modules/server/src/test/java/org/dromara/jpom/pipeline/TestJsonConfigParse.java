@@ -2,6 +2,8 @@ package org.dromara.jpom.pipeline;
 
 import cn.hutool.core.util.ReflectUtil;
 import com.alibaba.fastjson2.JSONObject;
+import org.dromara.jpom.build.pipeline.actuator.ActuatorFactory;
+import org.dromara.jpom.build.pipeline.actuator.PipelineItemActuator;
 import org.dromara.jpom.build.pipeline.enums.StageType;
 import org.dromara.jpom.build.pipeline.model.StageGroup;
 import org.dromara.jpom.build.pipeline.model.config.IStage;
@@ -62,6 +64,15 @@ public class TestJsonConfigParse {
         "        }],\n" +
         "            \"version\": \"1.0.0\"\n" +
         "        }";
+
+    @Test
+    public void test2() {
+        PipelineConfig pipelineConfig = PipelineConfig.fromJson(json);
+        pipelineConfig.verify("");
+        PipelineItemActuator resolve = ActuatorFactory.resolve(pipelineConfig);
+        resolve.exec();
+        System.out.println(resolve);
+    }
 
     @Test
     public void test1() {

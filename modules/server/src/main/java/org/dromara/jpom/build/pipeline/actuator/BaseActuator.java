@@ -1,27 +1,35 @@
 package org.dromara.jpom.build.pipeline.actuator;
 
-import org.dromara.jpom.build.pipeline.model.config.Repository;
+import org.dromara.jpom.build.pipeline.model.config.BaseStage;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author bwcx_jzy
  * @since 2024/4/10
  */
-public abstract class BaseActuator implements IActuator, AutoCloseable {
+public abstract class BaseActuator<T extends BaseStage> implements IActuator<T>, AutoCloseable {
+    /**
+     * 流程对象
+     */
+    protected T stage;
+    /**
+     * 流程信息
+     */
+    protected StageActuatorBaseInfo info;
+    /**
+     * 是否为调试模式
+     */
+    private boolean debug;
 
-    private final Map<String, Repository> repositoryMap;
-    private final int[] position = new int[]{0, 1};
-    private final String description = "";
-
-    protected BaseActuator(Map<String, Repository> repositoryMap) {
-        this.repositoryMap = repositoryMap;
+    @Override
+    public T stage() {
+        return stage;
     }
 
     @Override
-    public List<IActuator> beforeChain() {
+    public List<IActuator<?>> beforeChain() {
         return Collections.emptyList();
     }
 

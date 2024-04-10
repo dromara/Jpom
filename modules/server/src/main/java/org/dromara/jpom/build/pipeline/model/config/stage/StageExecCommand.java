@@ -35,7 +35,6 @@ public class StageExecCommand extends BaseStage {
      * 环境变量
      */
     private Map<String, String> env;
-
     /**
      * 脚本执行超时时间
      */

@@ -6,8 +6,8 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import lombok.Data;
-import org.dromara.jpom.build.pipeline.model.StageGroup;
 import org.dromara.jpom.build.pipeline.StageTypeFactory;
+import org.dromara.jpom.build.pipeline.model.StageGroup;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +32,10 @@ public class PipelineConfig implements IVerify<PipelineConfig> {
      * 输出更多日志
      */
     private Boolean debug;
+    /**
+     * 阻塞流水线
+     */
+    private Boolean obstruct;
     /**
      * 仓库源
      */
