@@ -2,11 +2,10 @@ package org.dromara.jpom.pipeline;
 
 import cn.hutool.core.util.ReflectUtil;
 import com.alibaba.fastjson2.JSONObject;
+import org.dromara.jpom.build.pipeline.enums.StageType;
 import org.dromara.jpom.build.pipeline.model.StageGroup;
 import org.dromara.jpom.build.pipeline.model.config.IStage;
 import org.dromara.jpom.build.pipeline.model.config.PipelineConfig;
-import org.dromara.jpom.build.pipeline.model.config.stage.StageExecCommand;
-import org.dromara.jpom.build.pipeline.model.enums.StageType;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -86,13 +85,13 @@ public class TestJsonConfigParse {
                 stages.forEach(new Consumer<IStage>() {
                     @Override
                     public void accept(IStage stage) {
-                        StageExecCommand stageExecCommand = (StageExecCommand) stage.to();
+                        //StageExecCommand stageExecCommand = (StageExecCommand) stage.to();
                         //String stageType1 = stage.getString("stageType");
                         //Object invoke = ReflectUtil.invoke(stage, "getString", "stageType");
                         StageType stageType = stage.getStageType();
                         JSONObject from = JSONObject.from(stage);
 //                        from.to()
-                        JSONObject json1 = stage.toJson();
+                        //JSONObject json1 = stage.toJson();
                         Class<? extends IStage> aClass = stage.getClass();
                         Method[] methods = ReflectUtil.getMethods(stage.getClass());
                         //Method getStageType = ReflectUtil.getMethodByName(aClass, "getString", String.class);

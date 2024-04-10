@@ -1,7 +1,7 @@
 package org.dromara.jpom.build.pipeline.model.config;
 
 import lombok.Data;
-import org.dromara.jpom.build.pipeline.model.enums.StageType;
+import org.dromara.jpom.build.pipeline.enums.StageType;
 import org.springframework.util.Assert;
 
 /**
@@ -28,9 +28,10 @@ public abstract class BaseStage implements IStage {
     private String repoTag;
 
     @Override
-    public void verify(String prefix) {
-        Assert.notNull(this.stageType, "阶段类型 stageType 不能为空");
-        Assert.notNull(this.repoTag, "阶段执行仓库标记 repoTag 不能为空");
-        Assert.hasText(this.description, "阶段描述 description 不能为空");
+    public BaseStage verify(String prefix) {
+        Assert.notNull(this.stageType, prefix + "阶段类型 stageType 不能为空");
+        Assert.hasText(this.repoTag, prefix + "阶段执行仓库标记 repoTag 不能为空");
+        Assert.hasText(this.description, prefix + "阶段描述 description 不能为空");
+        return this;
     }
 }

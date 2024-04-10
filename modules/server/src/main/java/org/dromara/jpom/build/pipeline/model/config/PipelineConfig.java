@@ -7,7 +7,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import lombok.Data;
 import org.dromara.jpom.build.pipeline.model.StageGroup;
-import org.dromara.jpom.build.pipeline.model.StageTypeFactory;
+import org.dromara.jpom.build.pipeline.StageTypeFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,11 +21,17 @@ import java.util.stream.Collectors;
  * @since 2024/4/7
  */
 @Data
-public class PipelineConfig implements IVerify {
+public class PipelineConfig implements IVerify<PipelineConfig> {
     /**
      * 版本号
      */
     private String version;
+    /**
+     * 调试模式
+     * <p>
+     * 输出更多日志
+     */
+    private Boolean debug;
     /**
      * 仓库源
      */
@@ -68,13 +74,16 @@ public class PipelineConfig implements IVerify {
     }
 
     @Override
-    public void verify(String prefix) {
+    public PipelineConfig verify(String prefix) {
         Assert.notEmpty(repositories, "流水线源仓库不能为空");
         repositories.forEach((repositoryTag, repository) -> repository.verify(repositoryTag));
         List<StageGroup> stageGroups = this.getStageGroups();
-        for (StageGroup stageGroup : stageGroups) {
-            stageGroup.verify(prefix);
+        Assert.notEmpty(stageGroups, "流水线流程组不能为空");
+        for (int i = 0; i < stageGroups.size(); i++) {
+            StageGroup stageGroup = stageGroups.get(i);
+            stageGroup.verify(StrUtil.format("流程组{}", i + 1));
         }
+        return this;
     }
 
     /**

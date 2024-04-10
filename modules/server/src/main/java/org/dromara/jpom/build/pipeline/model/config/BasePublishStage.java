@@ -2,7 +2,7 @@ package org.dromara.jpom.build.pipeline.model.config;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.dromara.jpom.build.pipeline.model.enums.SubStageType;
+import org.dromara.jpom.build.pipeline.enums.SubStageType;
 import org.springframework.util.Assert;
 
 import java.util.List;
@@ -24,8 +24,14 @@ public abstract class BasePublishStage extends BaseStage {
     private List<ArtifactItem> artifacts;
 
     @Override
-    public void verify(String prefix) {
+    public BasePublishStage verify(String prefix) {
         super.verify(prefix);
-        Assert.notNull(this.subStageType, this.getDescription() + "阶段发布类型 publishType 不能为空");
+        Assert.notNull(this.subStageType, prefix + "发布类型 publishType 不能为空");
+        //
+        Assert.notEmpty(this.artifacts, prefix + "产物 artifacts 不能为空");
+        for (ArtifactItem artifact : artifacts) {
+            artifact.verify(prefix);
+        }
+        return this;
     }
 }

@@ -1,13 +1,14 @@
-package org.dromara.jpom.build.pipeline.model;
+package org.dromara.jpom.build.pipeline;
 
 import com.alibaba.fastjson2.JSONObject;
+import org.dromara.jpom.build.pipeline.enums.IStageType;
+import org.dromara.jpom.build.pipeline.enums.StageType;
+import org.dromara.jpom.build.pipeline.enums.SubStageType;
 import org.dromara.jpom.build.pipeline.model.config.BasePublishStage;
+import org.dromara.jpom.build.pipeline.model.config.IStage;
 import org.dromara.jpom.build.pipeline.model.config.PipelineConfig;
 import org.dromara.jpom.build.pipeline.model.config.publish.PublishStageByProject;
 import org.dromara.jpom.build.pipeline.model.config.stage.StageExecCommand;
-import org.dromara.jpom.build.pipeline.model.enums.IEnum;
-import org.dromara.jpom.build.pipeline.model.enums.StageType;
-import org.dromara.jpom.build.pipeline.model.enums.SubStageType;
 import org.springframework.util.Assert;
 
 import java.util.HashMap;
@@ -19,7 +20,7 @@ import java.util.Map;
  */
 public class StageTypeFactory {
 
-    private static final Map<IEnum, IResolve<?>> STAGE_MAP = new HashMap<>();
+    private static final Map<IStageType, IResolve<? extends IStage>> STAGE_MAP = new HashMap<>();
 
     static {
         STAGE_MAP.put(StageType.EXEC, new ExecResolve());
@@ -34,14 +35,14 @@ public class StageTypeFactory {
      * @param <T>        流程泛型类
      * @return bean
      */
-    public static <T> T resolve(JSONObject jsonObject) {
+    public static <T extends IStage> T resolve(JSONObject jsonObject) {
         StageType stageType = PipelineConfig.likeEnum(StageType.class, jsonObject.getString("stageType"), "流程类型");
-        IResolve<?> iResolve = STAGE_MAP.get(stageType);
+        IResolve<? extends IStage> iResolve = STAGE_MAP.get(stageType);
         Assert.notNull(iResolve, "未找到对应的流程类型" + stageType);
         return (T) iResolve.resolve(jsonObject);
     }
 
-    private interface IResolve<T> {
+    private interface IResolve<T extends IStage> {
         /**
          * 解析数据
          *

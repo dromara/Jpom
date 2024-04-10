@@ -9,7 +9,7 @@ import org.springframework.util.Assert;
  * @since 2024/4/8
  */
 @Data
-public class Repository implements IVerify {
+public class Repository implements IVerify<Repository> {
 
     /**
      * 仓库ID
@@ -33,8 +33,9 @@ public class Repository implements IVerify {
     private Integer sort;
 
     @Override
-    public void verify(String prefix) {
+    public Repository verify(String prefix) {
         Assert.hasLength(repositoryId, prefix + "仓库ID不能为空");
         Assert.state(StrUtil.isNotEmpty(branchName) || StrUtil.isNotEmpty(branchTagName), prefix + "仓库分支或标签不能为空");
+        return this;
     }
 }

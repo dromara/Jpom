@@ -8,18 +8,22 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.build.pipeline.model.PipelineDataModel;
 import org.dromara.jpom.build.pipeline.model.config.PipelineConfig;
+import org.dromara.jpom.build.pipeline.model.config.Repository;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.func.pipeline.server.PipelineService;
 import org.dromara.jpom.model.PageResultDto;
+import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
+import org.dromara.jpom.service.dblog.RepositoryService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * @author bwcx_jzy
@@ -32,9 +36,12 @@ import javax.servlet.http.HttpServletRequest;
 public class PipelineListController extends BaseServerController {
 
     private final PipelineService pipelineService;
+    private final RepositoryService repositoryService;
 
-    public PipelineListController(PipelineService pipelineService) {
+    public PipelineListController(PipelineService pipelineService,
+                                  RepositoryService repositoryService) {
         this.pipelineService = pipelineService;
+        this.repositoryService = repositoryService;
     }
 
     /**
@@ -74,12 +81,11 @@ public class PipelineListController extends BaseServerController {
         String group = data.getString("group");
         String jsonConfig = data.getString("jsonConfig");
         Assert.notBlank(jsonConfig, "流水线配置不能为空");
-        try {
-            PipelineConfig.fromJson(jsonConfig).verify("");
-        } catch (Exception e) {
-            log.error("流水线配置格式错误", e);
-            return JsonMessage.fail("流水线配置格式错误");
-        }
+        Map<String, Repository> repositories = PipelineConfig.fromJson(jsonConfig).verify("").getRepositories();
+        repositories.forEach((s, repository) -> {
+            RepositoryModel repositoryModel = repositoryService.getByKey(repository.getRepositoryId(), request);
+            Assert.notNull(repositoryModel, s + "未找到对应的仓库信息");
+        });
 //        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "流水线名称不能为空") String name,
 //        String group, String jsonConfig,
         PipelineDataModel pipelineDataModel = new PipelineDataModel();

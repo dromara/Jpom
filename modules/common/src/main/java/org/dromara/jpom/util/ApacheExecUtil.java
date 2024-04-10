@@ -30,8 +30,8 @@ import java.util.Map;
 @Slf4j
 public class ApacheExecUtil {
 
-    private static final ShutdownHookProcessDestroyer shutdownHookProcessDestroyer = new ShutdownHookProcessDestroyer();
-    private static final Map<String, Process> processMap = new SafeConcurrentHashMap<>();
+    private static final ShutdownHookProcessDestroyer SHUTDOWN_HOOK_PROCESS_DESTROYER = new ShutdownHookProcessDestroyer();
+    private static final Map<String, Process> PROCESS_MAP = new SafeConcurrentHashMap<>();
 
     /**
      * 关闭 Process
@@ -39,7 +39,7 @@ public class ApacheExecUtil {
      * @param execId 执行Id
      */
     public static void kill(String execId) {
-        Process process = processMap.remove(execId);
+        Process process = PROCESS_MAP.remove(execId);
         if (process == null) {
             return;
         }
@@ -89,19 +89,19 @@ public class ApacheExecUtil {
         executor.setProcessDestroyer(new ProcessDestroyer() {
             @Override
             public boolean add(Process process) {
-                processMap.put(execId, process);
-                return shutdownHookProcessDestroyer.add(process);
+                PROCESS_MAP.put(execId, process);
+                return SHUTDOWN_HOOK_PROCESS_DESTROYER.add(process);
             }
 
             @Override
             public boolean remove(Process process) {
-                processMap.remove(execId);
-                return shutdownHookProcessDestroyer.remove(process);
+                PROCESS_MAP.remove(execId);
+                return SHUTDOWN_HOOK_PROCESS_DESTROYER.remove(process);
             }
 
             @Override
             public int size() {
-                return shutdownHookProcessDestroyer.size();
+                return SHUTDOWN_HOOK_PROCESS_DESTROYER.size();
             }
         });
         pumpStreamHandler.stop();

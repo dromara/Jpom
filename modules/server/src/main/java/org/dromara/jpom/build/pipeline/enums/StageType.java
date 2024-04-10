@@ -1,10 +1,10 @@
-package org.dromara.jpom.build.pipeline.model.enums;
+package org.dromara.jpom.build.pipeline.enums;
 
 /**
  * @author bwcx_jzy
  * @since 2024/4/8
  */
-public enum StageType implements IEnum {
+public enum StageType implements IStageType {
     /**
      * 执行脚本
      */

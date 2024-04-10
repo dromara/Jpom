@@ -56,9 +56,10 @@ public class PublishStageByProject extends BasePublishStage {
     private AfterOpt afterOpt;
 
     @Override
-    public void verify(String prefix) {
+    public PublishStageByProject verify(String prefix) {
         super.verify(prefix);
-        Assert.hasText(this.nodeId, this.getDescription() + "节点发布的节点 nodeId 不能为空");
-        Assert.hasText(this.projectId, this.getDescription() + "节点发布的项目 projectId 不能为空");
+        Assert.hasText(this.nodeId, prefix + "节点发布的节点 nodeId 不能为空");
+        Assert.hasText(this.projectId, prefix + "节点发布的项目 projectId 不能为空");
+        return this;
     }
 }

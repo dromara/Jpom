@@ -42,8 +42,9 @@ public class StageExecCommand extends BaseStage {
     private Integer timeout;
 
     @Override
-    public void verify(String prefix) {
+    public StageExecCommand verify(String prefix) {
         super.verify(prefix);
-        Assert.hasText(this.commands, this.getDescription() + "阶段执行的脚本不能为空");
+        Assert.hasText(this.commands, prefix + "阶段执行的脚本不能为空");
+        return this;
     }
 }

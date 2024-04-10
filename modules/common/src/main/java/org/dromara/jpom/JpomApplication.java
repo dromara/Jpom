@@ -122,14 +122,19 @@ public class JpomApplication implements DisposableBean, InitializingBean {
      * @return 返回值
      */
     public <T> T execScript(String context, Function<File, T> function) {
-        String dataPath = this.getDataPath();
-        File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
-        FileUtils.writeScript(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
+        File scriptFile = parseScript(context);
         try {
             return function.apply(scriptFile);
         } finally {
             FileUtil.del(scriptFile);
         }
+    }
+
+    public File parseScript(String context) {
+        String dataPath = this.getDataPath();
+        File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
+        FileUtils.writeScript(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
+        return scriptFile;
     }
 
     /**

@@ -1,13 +1,13 @@
 <template>
   <div>
     <a-form :label-col="formLable.labelCol" :wrapper-col="formLable.wrapperCol">
-      <a-form-item label="发布类型" name="subStageType" :validate-status="useData.subStageType ? '' : 'error'">
+      <a-form-item label="二级类型" name="subStageType" :validate-status="useData.subStageType ? '' : 'error'">
         <a-radio-group v-model:value="useData.subStageType" :disabled="!!useData.subStageType">
-          <a-radio value="PUBLISH_PROJECT">项目</a-radio>
+          <a-radio value="PUBLISH_PROJECT">发布项目</a-radio>
         </a-radio-group>
         <template v-if="!!useData.subStageType" #help>选择后不能切换</template>
         <template v-if="!useData.subStageType" #extra>
-          <span class="ant-form-item-explain-error">请选择发布类型</span>
+          <span class="ant-form-item-explain-error">请选择二级类型</span>
         </template>
       </a-form-item>
     </a-form>

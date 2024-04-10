@@ -9,7 +9,7 @@ import java.util.List;
  * @since 2024/4/8
  */
 @Data
-public class ArtifactItem {
+public class ArtifactItem implements IVerify {
     /**
      * 产物路径
      */
@@ -18,6 +18,11 @@ public class ArtifactItem {
      * 压缩格式，如果是目录情况
      */
     private CompressionFormat format;
+
+    @Override
+    public ArtifactItem verify(String prefix) {
+        return this;
+    }
 
     public enum CompressionFormat {
         /**
