@@ -153,6 +153,81 @@ export default {
     cronExpression:
       '如果需要定时自动构建则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）',
     retentionDays: '保留天数：',
-    exclusionForPublish: '排除发布 ANT 表达式,多个使用逗号分隔'
+    exclusionForPublish: '排除发布 ANT 表达式,多个使用逗号分隔',
+    //
+    howToList1: '本地构建是指直接在服务端中的服务器执行构建命令',
+    howToList2: '注意执行相关命令需要所在服务器中存在对应的环境',
+    howToList3: '并且配置正确的环境变量',
+    howToList4: '如果是在启动服务端后安装并配置的环境变量需要通过终端命令来重启服务端才能生效',
+    howToList5: '容器构建是指使用 docker 容器执行构建,这样可以达到和宿主机环境隔离不用安装依赖环境',
+    howToList6: '使用容器构建，docker 容器所在的宿主机需要有公网,因为需要远程下载环境依赖的 sdk 和镜像',
+    howToList7: '创建后构建方式不支持修改',
+    howToList8:
+      '容器安装的服务端不能使用本地构建（因为本地构建依赖启动服务端本地的环境，容器方式安装不便于管理本地依赖插件）',
+    containerList1: '实现您需要配置 docker 容器到服务端中来管理，并且分配到当前工作空间中',
+    containerList2: '为当前工作空间中的容器配置标签',
+    containerList3: '需要将标签值配置到构建 DSL 中的',
+    containerList4: '字段',
+    buildCommandL1: '这里构建命令最终会在服务器上执行。如果有多行命令那么将',
+    buildCommandL2: '逐行执行',
+    buildCommandL3: '，如果想要切换路径后执行命令则需要',
+    buildCommandHelp:
+      '构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build。支持变量：${ BUILD_ID }、${ BUILD_NAME }、${ BUILD_SOURCE_FILE }、${ BUILD_NUMBER_ID }、仓库目录下 .env、工作空间变量',
+    dsl1: '以 yaml/yml 格式配置',
+    dsl2: '配置需要声明使用具体的 docker 来执行构建相关操作(建议使用服务端所在服务器中的 docker)',
+    dsl3: '容器构建会在 docker 中生成相关挂载目录,一般情况不需要人为操作',
+    dsl4: '执行构建时会生成一个容器来执行，构建结束后会自动删除对应的容器',
+    dsl5: '目前支持都插件有（更多插件尽情期待）：',
+    dsl6: 'java sdk 镜像使用：https://mirrors.tuna.tsinghua.edu.cn/ 支持版本有：8, 9, 10, 11, 12, 13, 14, 15, 16, 17',
+    dsl7: 'maven sdk 镜像使用：https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/',
+    dsl8: 'node sdk 镜像使用：https://registry.npmmirror.com/-/binary/node',
+    dsl9: '(存在兼容问题,实际使用中需要提前测试) python3 sdk 镜像使用：https://repo.huaweicloud.com/python/${PYTHON3_VERSION}/Python-${PYTHON3_VERSION}.tar.xz',
+    dsl10:
+      '(存在兼容问题,实际使用中需要提前测试) go sdk 镜像使用：https://studygolang.com/dl/golang/go${GO_VERSION}.linux-${ARCH}.tar.gz',
+    artifact1: '可以理解为项目打包的目录。 如 Jpom 项目执行（构建命令）',
+    artifact2: '构建命令，构建产物相对路径为：',
+    publish1: '发布操作是指,执行完构建命令后将构建产物目录中的文件用不同的方式发布(上传)到对应的地方',
+    publish2: '节点分发是指,一个项目部署在多个节点中使用节点分发一步完成多个节点中的项目发布操作',
+    publish3: '项目是指,节点中的某一个项目,需要提前在节点中创建项目',
+    publish4: 'SSH 是指,通过 SSH 命令的方式对产物进行发布或者执行多条命令来实现发布(需要到 SSH 中提前去新增)',
+    publish5: '本地命令是指,在服务端本地执行多条命令来实现发布',
+    publish6:
+      ' SSH、本地命令发布都执行变量替换,系统预留变量有：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}',
+    publish7: '可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称',
+    releasePath2P: '发布目录,构建产物上传到对应目录',
+    prePublish1: '发布前执行的命令(非阻塞命令),一般是关闭项目命令',
+    prePublish2: '支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}',
+    prePublish3: '可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称',
+    prePublishHelp:
+      '发布前执行的命令(非阻塞命令),一般是关闭项目命令,支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}',
+    postPublish1: '发布后执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java',
+    postPublish2: '支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}',
+    postPublish3: '可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称',
+    postPublishHelp:
+      '发布后执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java, 支持变量替换：${ BUILD_ID }、${ BUILD_NAME }、${ BUILD_RESULT_FILE }、${ BUILD_NUMBER_ID } ',
+    clearPublishTip: '清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件',
+    diffTip1: '差异发布是指对应构建产物和项目文件夹里面的文件是否存在差异,如果存在增量差异那么上传或者覆盖文件。',
+    diffTip2:
+      '开启差异发布并且开启清空发布时将自动删除项目目录下面有的文件但是构建产物目录下面没有的文件【清空发布差异上传前会先执行删除差异文件再执行上传差异文件】',
+    diffTip3: '开启差异发布但不开启清空发布时相当于只做增量和变动更新',
+    preStopPublishTip:
+      '发布前停止是指在发布文件到项目文件时先将项目关闭，再进行文件替换。避免 windows 环境下出现文件被占用的情况',
+    executeContainerTip:
+      '使用哪个 docker 构建,填写 docker 标签（ 标签在 docker 编辑页面配置） 默认查询可用的第一个,如果tag 查询出多个将依次构建',
+    versionIncrementTip:
+      '开启 dockerTag 版本递增后将在每次构建时自动将版本号最后一位数字同步为构建序号ID, 如：当前构建为第 100 次构建 testtag:1.0 -> testtag:1.100,testtag:1.0.release -> testtag:1.100.release。如果没有匹配到数字将忽略递增操作',
+    cacheBuildTip:
+      '开启缓存构建目录将保留仓库文件,二次构建将 pull 代码, 不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存) 、特别说明如果缓存目录中缺失版本控制相关文件将自动删除后重新拉取代码',
+    strictExecutionTip:
+      '严格执行脚本（构建命令、事件脚本、本地发布脚本、容器构建命令）执行返回状态码必须是 0、否则将构建状态标记为失败',
+    webHookTip1: '构建过程请求对应的地址,开始构建,构建完成,开始发布,发布完成,构建异常,发布异常',
+    webHookTip2: '传入参数有：buildId、buildName、type、statusMsg、triggerTime',
+    webHookTip3: 'type 的值有：startReady、pull、executeCommand、release、done、stop、success、error',
+    webHookTip4: '异步请求不能保证有序性',
+    eventScriptTip1: '构建过程执行对应的脚本,开始构建,构建完成,开始发布,发布完成,构建异常,发布异常',
+    eventScriptTip2: '传入环境变量有：buildId、buildName、type、statusMsg、triggerTime、buildNumberId、buildSourceFile',
+    eventScriptTip3: '执行脚本传入参数有：startReady、pull、executeCommand、release、done、stop、success',
+    eventScriptTip4:
+      '注意：为了避免不必要的事件执行脚本，选择的脚本的备注中包含需要实现的事件参数关键词，如果需要执行 success 事件,那么选择的脚本的备注中需要包含 success 关键词'
   }
 }
