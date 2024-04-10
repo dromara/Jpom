@@ -86,8 +86,9 @@ watch(
     immediate: false
   }
 )
+type EnvType = { key: string; value: string }
 // 暂存变量列表
-const envList = ref<Array<{ key?: string; value?: string }>>([])
+const envList = ref<Array<EnvType>>([])
 
 watch(
   () => props.data,
@@ -122,7 +123,7 @@ watch(
   }
 )
 
-const envInputChange = (index: number, key: any, value: string) => {
+const envInputChange = (index: number, key: keyof EnvType, value: string) => {
   // if (isKey) {
   envList.value[index][key] = value
   // } else {
