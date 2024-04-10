@@ -24,8 +24,8 @@ public abstract class BasePublishStage extends BaseStage {
     private List<ArtifactItem> artifacts;
 
     @Override
-    public void verify() {
-        super.verify();
+    public void verify(String prefix) {
+        super.verify(prefix);
         Assert.notNull(this.publishType, this.getDescription() + "阶段发布类型 publishType 不能为空");
     }
 }

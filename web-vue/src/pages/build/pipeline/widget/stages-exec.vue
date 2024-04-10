@@ -29,20 +29,25 @@
                 <a-space direction="vertical" style="width: 100%">
                   <a-input
                     :value="item.key"
+                    :status="
+                      envList.filter((item2, index2) => index != index2 && item.key == item2.key).length ? 'error' : ''
+                    "
                     :addon-before="`变量${index + 1}key`"
                     placeholder="变量key"
-                    @change="(e) => envInputChange(index, 'key', e.target.value as string)" />
+                    @change="(e) => envInputChange(index, 'key', e.target.value as string)"
+                  />
                   <a-input
                     :value="item.value"
                     :addon-before="`变量${index + 1}值`"
                     placeholder="变量值"
                     @change="(e) => envInputChange(index, 'value', e.target.value as string)"
-                /></a-space>
+                  />
+                </a-space>
               </a-col>
               <a-col :span="2">
                 <a-row type="flex" justify="center" align="middle">
                   <a-col>
-                    <MinusCircleOutlined style="color: #ff0000" @click="() => envList.splice(index, 1)" />
+                    <MinusCircleOutlined style="color: #ff0000" @click="delteEnvList(index)" />
                   </a-col>
                 </a-row>
               </a-col>
@@ -123,6 +128,16 @@ watch(
   }
 )
 
+// 删除变量
+const delteEnvList = (index: number) => {
+  const envItem = envList.value[index]
+  envList.value.splice(index, 1)
+  if (envItem.key) {
+    delete useData.value.env?.[envItem.key]
+  }
+}
+
+// 变量值变化
 const envInputChange = (index: number, key: keyof EnvType, value: string) => {
   // if (isKey) {
   envList.value[index][key] = value

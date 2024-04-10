@@ -7,6 +7,8 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.build.pipeline.model.PipelineDataModel;
+import org.dromara.jpom.build.pipeline.model.config.PipelineConfig;
+import org.dromara.jpom.build.pipeline.model.config.Repository;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -19,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * @author bwcx_jzy
@@ -75,6 +78,10 @@ public class PipelineListController extends BaseServerController {
         Assert.notBlank(jsonConfig, "流水线配置不能为空");
         try {
             JSONObject jsonObject = JSONObject.parseObject(jsonConfig);
+            PipelineConfig pipelineConfig = jsonObject.to(PipelineConfig.class);
+            Map<String, Repository> repositories = pipelineConfig.getRepositories();
+
+            System.out.println(pipelineConfig);
         } catch (Exception e) {
             log.error("流水线配置格式错误", e);
             return JsonMessage.fail("流水线配置格式错误");
@@ -100,10 +107,10 @@ public class PipelineListController extends BaseServerController {
      * @param id 构建ID
      * @return json
      */
-    @PostMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id, HttpServletRequest request) {
         pipelineService.delByKey(id, request);
-        return JsonMessage.success("删除成功,并且清理历史构建产物成功");
+        return JsonMessage.success("删除成功");
     }
 }

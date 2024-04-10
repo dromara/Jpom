@@ -2,6 +2,8 @@ package org.dromara.jpom.build.pipeline.model;
 
 import lombok.Data;
 import org.dromara.jpom.build.pipeline.model.config.IStage;
+import org.dromara.jpom.build.pipeline.model.config.IVerify;
+import org.springframework.util.Assert;
 
 import java.util.List;
 
@@ -10,7 +12,7 @@ import java.util.List;
  * @since 2024/4/8
  */
 @Data
-public class StageGroup {
+public class StageGroup implements IVerify {
     /**
      * 流程
      */
@@ -24,4 +26,13 @@ public class StageGroup {
      * 描述
      */
     private String description;
+
+    @Override
+    public void verify(String prefix) {
+        Assert.hasLength(name, "流程组名称不能为空");
+        Assert.notEmpty(stages, "流程组中的子流程不能为空");
+        for (IStage stage : stages) {
+            stage.verify(prefix);
+        }
+    }
 }

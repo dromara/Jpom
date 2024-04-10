@@ -42,7 +42,9 @@
             <a-button type="link" style="padding: 0" size="small"> <FullscreenOutlined />{{ text }}</a-button>
           </a-tooltip>
         </template>
-        <template v-else-if="column.dataIndex === 'operation'"> </template>
+        <template v-else-if="column.dataIndex === 'operation'">
+          <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+        </template>
       </template>
     </CustomTable>
     <a-drawer
@@ -83,7 +85,7 @@ import {
   // PAGE_DEFAULT_SHOW_TOTAL,
   // getCachePageLimit
 } from '@/utils/const'
-import { buildPipelineList } from '@/api/build/pipeline'
+import { buildPipelineList, deleteBuildPipelineItem } from '@/api/build/pipeline'
 import EditPipeline from './pipeline.vue'
 import { CustomColumnType } from '@/components/customTable/types'
 
@@ -188,5 +190,26 @@ const handleDetails = (data: any) => {
   // console.log('handleDetails', data)
   temp.value = data
   editVisible.value = true
+}
+
+const handleDelete = (record: any) => {
+  $confirm({
+    title: '系统提示',
+    zIndex: 1009,
+    content: '是否确认删除该流水线？',
+    okText: '确认',
+    cancelText: '取消',
+    onOk: () => {
+      // 删除
+      return deleteBuildPipelineItem({ id: record.id }).then((res) => {
+        if (res.code === 200) {
+          $notification.success({
+            message: res.msg
+          })
+          loadData()
+        }
+      })
+    }
+  })
 }
 </script>

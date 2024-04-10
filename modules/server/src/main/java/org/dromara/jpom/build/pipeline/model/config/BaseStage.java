@@ -28,7 +28,7 @@ public abstract class BaseStage implements IStage {
     private String repoTag;
 
     @Override
-    public void verify() {
+    public void verify(String prefix) {
         Assert.notNull(this.stageType, "阶段类型 stageType 不能为空");
         Assert.notNull(this.repoTag, "阶段执行仓库标记 repoTag 不能为空");
         Assert.hasText(this.description, "阶段描述 description 不能为空");

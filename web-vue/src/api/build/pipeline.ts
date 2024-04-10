@@ -26,3 +26,11 @@ export function getBuildPipelineItem(params) {
     params
   })
 }
+
+export function deleteBuildPipelineItem(params) {
+  return axios({
+    url: '/build/pipeline/delete',
+    method: 'get',
+    params
+  })
+}

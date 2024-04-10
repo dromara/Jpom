@@ -8,6 +8,8 @@ public interface IVerify {
 
     /**
      * 验证
+     *
+     * @param prefix 消息前缀
      */
-    void verify();
+    void verify(String prefix);
 }
