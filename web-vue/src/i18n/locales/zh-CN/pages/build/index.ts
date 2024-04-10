@@ -13,10 +13,12 @@ import history from './history'
 import item from './item'
 import listInfo from './list-info'
 import log from './log'
+import trigger from './trigger'
 export default {
   details,
   history,
   item,
   listInfo,
-  log
+  log,
+  trigger
 }
