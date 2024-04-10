@@ -15,6 +15,12 @@ import java.util.List;
 public class StageGroup implements IVerify {
     /**
      * 流程
+     *
+     * @see org.dromara.jpom.build.pipeline.model.config.stage.StageExecCommand
+     * @see org.dromara.jpom.build.pipeline.model.config.publish.PublishStageByProject
+     * @see IStage
+     * @see org.dromara.jpom.build.pipeline.model.config.BaseStage
+     * @see org.dromara.jpom.build.pipeline.model.config.BasePublishStage
      */
     private List<IStage> stages;
 
@@ -27,12 +33,17 @@ public class StageGroup implements IVerify {
      */
     private String description;
 
+
     @Override
     public void verify(String prefix) {
         Assert.hasLength(name, "流程组名称不能为空");
         Assert.notEmpty(stages, "流程组中的子流程不能为空");
-        for (IStage stage : stages) {
-            stage.verify(prefix);
+        //List<IStage> iStages = this.getStages();
+        for (IStage iStage : stages) {
+            iStage.verify(prefix);
         }
+//        for (IStage stage : stages) {
+//            stage.verify(prefix);
+//        }
     }
 }

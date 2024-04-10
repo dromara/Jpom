@@ -1,7 +1,7 @@
 package org.dromara.jpom.build.pipeline.model.config;
 
 import com.alibaba.fastjson2.JSONObject;
-import org.dromara.jpom.build.pipeline.model.StageType;
+import org.dromara.jpom.build.pipeline.model.enums.StageType;
 
 /**
  * @author bwcx_jzy

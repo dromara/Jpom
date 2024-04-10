@@ -10,7 +10,7 @@ export type PublishProject = {
 } & PublishBase
 
 export type PublishBase = {
-  publishType?: 'PROJECT'
+  subStageType?: 'PUBLISH_PROJECT'
   artifacts?: Array<{
     path: Array<string>
     format?: 'ZIP' | 'TAR_GZ'

@@ -2,14 +2,12 @@ package org.dromara.jpom.build.pipeline.model.config;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import lombok.Data;
-import org.dromara.jpom.build.pipeline.model.PublishType;
 import org.dromara.jpom.build.pipeline.model.StageGroup;
-import org.dromara.jpom.build.pipeline.model.StageType;
-import org.dromara.jpom.build.pipeline.model.config.publish.PublishStageByProject;
-import org.dromara.jpom.build.pipeline.model.config.stage.StageExecCommand;
+import org.dromara.jpom.build.pipeline.model.StageTypeFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,35 +41,30 @@ public class PipelineConfig implements IVerify {
         pipelineConfig.setVersion(jsonObject.getString("version"));
         pipelineConfig.setRepositories(jsonObject.getObject("repositories", new TypeReference<Map<String, Repository>>() {
         }));
-        // 解析流程组
+        //解析流程组
         Optional.ofNullable(jsonObject.getJSONArray("stageGroups"))
-            .map(jsonArray -> jsonArray.stream()
-                .map(o -> {
-                    JSONObject jsonObject12 = (JSONObject) o;
-                    StageGroup stageGroup = jsonObject12.to(StageGroup.class);
-                    // 解析子流程
-                    Optional.ofNullable(jsonObject12.getJSONArray("stages"))
-                        .map(stagesArray -> stagesArray.stream()
-                            .map((Function<Object, IStage>) o1 -> {
-                                JSONObject jsonObject1 = (JSONObject) o1;
-                                StageType stageType = likeEnum(StageType.class, jsonObject1.getString("stageType"), "流程类型");
-                                if (stageType == StageType.EXEC) {
-                                    return jsonObject1.to(StageExecCommand.class);
-                                } else if (stageType == StageType.PUBLISH) {
-                                    PublishType publishType = likeEnum(PublishType.class, jsonObject1.getString("publishType"), "发布类型");
-                                    if (publishType == PublishType.PROJECT) {
-                                        return jsonObject1.to(PublishStageByProject.class);
-                                    }
-                                    throw new IllegalStateException("未知的发布类型：" + publishType);
-                                }
-                                throw new IllegalStateException("未知的流程类型：" + stageType);
-                            })
-                            .collect(Collectors.toList()))
-                        .ifPresent(stageGroup::setStages);
-                    return stageGroup;
-                }).collect(Collectors.toList()))
+            .map(PipelineConfig::parseStageGroups)
             .ifPresent(pipelineConfig::setStageGroups);
         return pipelineConfig;
+    }
+
+    private static List<StageGroup> parseStageGroups(JSONArray stagesGroupArray) {
+        return stagesGroupArray.stream()
+            .map(o -> {
+                JSONObject jsonObject12 = (JSONObject) o;
+                StageGroup stageGroup = jsonObject12.to(StageGroup.class);
+                // 解析子流程
+                Optional.ofNullable(jsonObject12.getJSONArray("stages"))
+                    .map(PipelineConfig::parseStage)
+                    .ifPresent(stageGroup::setStages);
+                return stageGroup;
+            }).collect(Collectors.toList());
+    }
+
+    private static List<IStage> parseStage(JSONArray stagesArray) {
+        return stagesArray.stream()
+            .map((Function<Object, IStage>) o1 -> StageTypeFactory.resolve((JSONObject) o1))
+            .collect(Collectors.toList());
     }
 
     @Override

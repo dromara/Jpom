@@ -1,7 +1,7 @@
 package org.dromara.jpom.build.pipeline.model.config;
 
 import lombok.Data;
-import org.dromara.jpom.build.pipeline.model.StageType;
+import org.dromara.jpom.build.pipeline.model.enums.StageType;
 import org.springframework.util.Assert;
 
 /**

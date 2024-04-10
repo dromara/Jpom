@@ -1,18 +1,18 @@
 <template>
   <div>
     <a-form :label-col="formLable.labelCol" :wrapper-col="formLable.wrapperCol">
-      <a-form-item label="发布类型" name="publishType" :validate-status="useData.publishType ? '' : 'error'">
-        <a-radio-group v-model:value="useData.publishType" :disabled="!!useData.publishType">
-          <a-radio value="PROJECT">项目</a-radio>
+      <a-form-item label="发布类型" name="subStageType" :validate-status="useData.subStageType ? '' : 'error'">
+        <a-radio-group v-model:value="useData.subStageType" :disabled="!!useData.subStageType">
+          <a-radio value="PUBLISH_PROJECT">项目</a-radio>
         </a-radio-group>
-        <template v-if="!!useData.publishType" #help>选择后不能切换</template>
-        <template v-if="!useData.publishType" #extra>
+        <template v-if="!!useData.subStageType" #help>选择后不能切换</template>
+        <template v-if="!useData.subStageType" #extra>
           <span class="ant-form-item-explain-error">请选择发布类型</span>
         </template>
       </a-form-item>
     </a-form>
     <widgetPublishProject
-      v-if="useData.publishType === 'PROJECT'"
+      v-if="useData.subStageType === 'PUBLISH_PROJECT'"
       v-model:data="useData"
       :form-lable="formLable"
     ></widgetPublishProject>

@@ -8,7 +8,6 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.build.pipeline.model.PipelineDataModel;
 import org.dromara.jpom.build.pipeline.model.config.PipelineConfig;
-import org.dromara.jpom.build.pipeline.model.config.Repository;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -21,7 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 /**
  * @author bwcx_jzy
@@ -77,11 +75,7 @@ public class PipelineListController extends BaseServerController {
         String jsonConfig = data.getString("jsonConfig");
         Assert.notBlank(jsonConfig, "流水线配置不能为空");
         try {
-            JSONObject jsonObject = JSONObject.parseObject(jsonConfig);
-            PipelineConfig pipelineConfig = jsonObject.to(PipelineConfig.class);
-            Map<String, Repository> repositories = pipelineConfig.getRepositories();
-
-            System.out.println(pipelineConfig);
+            PipelineConfig.fromJson(jsonConfig).verify("");
         } catch (Exception e) {
             log.error("流水线配置格式错误", e);
             return JsonMessage.fail("流水线配置格式错误");

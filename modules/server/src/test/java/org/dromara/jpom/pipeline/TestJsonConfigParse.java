@@ -2,12 +2,11 @@ package org.dromara.jpom.pipeline;
 
 import cn.hutool.core.util.ReflectUtil;
 import com.alibaba.fastjson2.JSONObject;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.dromara.jpom.build.pipeline.model.StageGroup;
-import org.dromara.jpom.build.pipeline.model.StageType;
 import org.dromara.jpom.build.pipeline.model.config.IStage;
 import org.dromara.jpom.build.pipeline.model.config.PipelineConfig;
 import org.dromara.jpom.build.pipeline.model.config.stage.StageExecCommand;
+import org.dromara.jpom.build.pipeline.model.enums.StageType;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -53,7 +52,7 @@ public class TestJsonConfigParse {
         "                \"description\": \"子流程1\",\n" +
         "                    \"stageType\": \"PUBLISH\",\n" +
         "                    \"repoTag\": \"6F7T\",\n" +
-        "                    \"publishType\": \"PROJECT\",\n" +
+        "                    \"subStageType\": \"PUBLISH_PROJECT\",\n" +
         "                    \"nodeId\": \"18c043e7772f4603972a8fc80a2189ba\",\n" +
         "                    \"projectId\": \"test-copy\",\n" +
         "                    \"artifacts\": [{\n" +
@@ -66,7 +65,7 @@ public class TestJsonConfigParse {
         "        }";
 
     @Test
-    public void test1() throws JsonProcessingException {
+    public void test1() {
         PipelineConfig pipelineConfig = PipelineConfig.fromJson(json);
         pipelineConfig.verify("");
         System.out.println(pipelineConfig);

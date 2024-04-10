@@ -474,7 +474,7 @@ const checkSteps = (stage: StagesConfig, groupIndex: number, stageIndex: number)
     }
     //return false
   } else if (stage.stageType === 'PUBLISH') {
-    if (!(stage as PublishBase).publishType) {
+    if (!(stage as PublishBase).subStageType) {
       $notification.warn({
         message: `流程组${groupIndex + 1}中的子流程${stageIndex + 1}请选择发布方式`
       })
@@ -497,7 +497,7 @@ const checkSteps = (stage: StagesConfig, groupIndex: number, stageIndex: number)
 
       // }
     }
-    if ((stage as PublishBase).publishType === 'PROJECT') {
+    if ((stage as PublishBase).subStageType === 'PUBLISH_PROJECT') {
       // 项目发布
       if (!(stage as PublishProject).nodeId) {
         $notification.warn({
