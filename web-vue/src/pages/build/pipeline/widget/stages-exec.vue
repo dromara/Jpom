@@ -86,7 +86,7 @@ watch(
     immediate: false
   }
 )
-type EnvType = { key: string; value: string }
+type EnvType = { key?: string; value?: string }
 // 暂存变量列表
 const envList = ref<Array<EnvType>>([])
 
