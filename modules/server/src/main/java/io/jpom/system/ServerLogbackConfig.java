@@ -10,6 +10,8 @@
 package io.jpom.system;
 
 /**
+ * 兼容低版中 logback.xml
+ *
  * @author bwcx_jzy
  * @since 2023/3/31
  */
