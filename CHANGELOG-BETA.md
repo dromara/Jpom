@@ -13,6 +13,7 @@
 2. 【server】修复 无法查询到分组信息（页面下拉框）（感谢[@Robot](https://gitee.com/robot1937) [Gitee issues I9FN9U](https://gitee.com/dromara/Jpom/issues/I9FN9U) ）
 3. 【all】升级 hutool 版本
 4. 【server】修复 修复孤独数据描述错别字（感谢[@cuiyongsheng](https://github.com/Cuiys1458) [Github issues 77](https://github.com/dromara/Jpom/issues/77) ）
+5. 【server】修复 前端地址栏输入二级路径 404 页面卡死问题
 
 ------
 
