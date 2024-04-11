@@ -37,7 +37,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 数据存储服务
@@ -70,9 +69,9 @@ public class StorageServiceFactory {
     /**
      * 将数据迁移到当前环境
      */
-    public static void migrateH2ToNow(DbExtConfig dbExtConfig, String h2Url, String h2User, String h2Pass,DbExtConfig.Mode targetNode) {
+    public static void migrateH2ToNow(DbExtConfig dbExtConfig, String h2Url, String h2User, String h2Pass, DbExtConfig.Mode targetNode) {
         log.info("开始迁移 h2 数据到 {}", dbExtConfig.getMode());
-        Assert.notNull(mode,"未指定目标数据库信息");
+        Assert.notNull(mode, "未指定目标数据库信息");
         try {
             IStorageService h2StorageService = doCreateStorageService(DbExtConfig.Mode.H2);
             boolean hasDbData = h2StorageService.hasDbData();
@@ -101,20 +100,20 @@ public class StorageServiceFactory {
             log.info("成功连接 {} {}", dbExtConfig.getMode(), dbExtConfig.getUrl());
             Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("org.dromara.jpom", TableName.class);
             classes = classes.stream()
-                    .filter(aClass -> {
-                        TableName tableName = aClass.getAnnotation(TableName.class);
-                        DbExtConfig.Mode[] modes = tableName.modes();
-                        if (ArrayUtil.isEmpty(modes)) {
-                            return true;
-                        }
-                        return ArrayUtil.contains(modes, dbExtConfig.getMode());
-                    })
-                    .sorted((o1, o2) -> StrUtil.compare(o1.getSimpleName(), o2.getSimpleName(), false))
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
+                .filter(aClass -> {
+                    TableName tableName = aClass.getAnnotation(TableName.class);
+                    DbExtConfig.Mode[] modes = tableName.modes();
+                    if (ArrayUtil.isEmpty(modes)) {
+                        return true;
+                    }
+                    return ArrayUtil.contains(modes, dbExtConfig.getMode());
+                })
+                .sorted((o1, o2) -> StrUtil.compare(o1.getSimpleName(), o2.getSimpleName(), false))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
             log.info("准备迁移数据");
             int total = 0;
             for (Class<?> aClass : classes) {
-                total += migrateH2ToNowItem(aClass, h2DsFactory, nowDsFactory,targetNode);
+                total += migrateH2ToNowItem(aClass, h2DsFactory, nowDsFactory, targetNode);
             }
             long endTime = SystemClock.now();
             log.info("迁移完成,累计迁移 {} 条数据,耗时：{}", total, DateUtil.formatBetween(endTime - time));
@@ -128,7 +127,7 @@ public class StorageServiceFactory {
         }
     }
 
-    private static int migrateH2ToNowItem(Class<?> aClass, DSFactory h2DsFactory, DSFactory targetDsFactory,DbExtConfig.Mode targetNode) throws SQLException {
+    private static int migrateH2ToNowItem(Class<?> aClass, DSFactory h2DsFactory, DSFactory targetDsFactory, DbExtConfig.Mode targetNode) throws SQLException {
         TableName tableName = aClass.getAnnotation(TableName.class);
         Wrapper targetModeWrapper = DialectUtil.getDialectByMode(targetNode).getWrapper();
         Set<String> boolFieldSet = Arrays.stream(ReflectUtil.getFields(aClass, field -> Boolean.class.equals(field.getType()) || boolean.class.equals(field.getType())))
@@ -140,7 +139,7 @@ public class StorageServiceFactory {
         while (true) {
             Entity where = Entity.create(tableName.value());
             PageResult<Entity> pageResult;
-            Db db = Db.use(h2DsFactory.getDataSource(),DialectUtil.getH2Dialect());
+            Db db = Db.use(h2DsFactory.getDataSource(), DialectUtil.getH2Dialect());
             Page page = new Page(1, 200);
             pageResult = db.page(where, page);
             if (pageResult.isEmpty()) {
@@ -154,12 +153,12 @@ public class StorageServiceFactory {
                     Entity entity = Entity.create(targetModeWrapper.wrap(tableName.value()));
                     return entity.parseBean(o, false, true);
                 }).peek(entity -> {
-                    if( DbExtConfig.Mode.POSTGRESQL.equals(targetNode) ) {
+                    if (DbExtConfig.Mode.POSTGRESQL.equals(targetNode)) {
                         // tinyint类型查出来是数字，需转为bool
-                        boolFieldSet.forEach(fieldName->{
+                        boolFieldSet.forEach(fieldName -> {
                             Object field = entity.get(fieldName);
-                            if( field instanceof Number ) {
-                                entity.set(fieldName,BooleanUtil.toBoolean(field.toString()));
+                            if (field instanceof Number) {
+                                entity.set(fieldName, BooleanUtil.toBoolean(field.toString()));
                             }
                         });
                     }
@@ -174,18 +173,18 @@ public class StorageServiceFactory {
             }
             total += newResult.size();
             // 插入信息数据
-            Db db2 = Db.use(targetDsFactory.getDataSource(),DialectUtil.getDialectByMode(targetNode));
+            Db db2 = Db.use(targetDsFactory.getDataSource(), DialectUtil.getDialectByMode(targetNode));
 
             Connection connection = db2.getConnection();
             try {
                 SqlConnRunner runner = db2.getRunner();
                 for (Entity entity : newResult) {
                     // hutool的批量insert方法有坑，可能导致部分参数被丢弃
-                    runner.insert(connection,entity);
+                    runner.insert(connection, entity);
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 throw new RuntimeException(e);
-            }finally {
+            } finally {
                 db2.closeConnection(connection);
             }
 
