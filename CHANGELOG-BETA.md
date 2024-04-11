@@ -12,6 +12,7 @@
 1. 【server】优化 oauth2 第三方平台登录解析用户名将依次尝试：平台用户名、邮箱、uuid
 2. 【server】修复 无法查询到分组信息（页面下拉框）（感谢[@Robot](https://gitee.com/robot1937) [Gitee issues I9FN9U](https://gitee.com/dromara/Jpom/issues/I9FN9U) ）
 3. 【all】升级 hutool 版本
+4. 【server】修复 修复孤独数据描述错别字（感谢[@cuiyongsheng](https://github.com/Cuiys1458) [Github issues 77](https://github.com/dromara/Jpom/issues/77) ）
 
 ------
 
