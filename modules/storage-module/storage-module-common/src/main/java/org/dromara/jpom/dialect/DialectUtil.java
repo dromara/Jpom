@@ -9,8 +9,6 @@
  */
 package org.dromara.jpom.dialect;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.dialect.Dialect;
 import cn.hutool.db.dialect.impl.H2Dialect;
 import cn.hutool.db.dialect.impl.MysqlDialect;
@@ -19,10 +17,7 @@ import cn.hutool.db.sql.Wrapper;
 import cn.hutool.extra.spring.SpringUtil;
 import org.dromara.jpom.db.DbExtConfig;
 
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 数据库方言工具类
@@ -34,12 +29,15 @@ public class DialectUtil {
 
     private final static ConcurrentHashMap<DbExtConfig.Mode, Dialect> DIALECT_CACHE = new ConcurrentHashMap<>();
     private static volatile Wrapper currentDbFieldWrapper;
-    private static final ConcurrentHashMap<String, String> WRAP_FIELD_MAP = new ConcurrentHashMap<>();
+    /**
+     * 通用的包裹器
+     */
+    private static final Wrapper COMMON_WRAPPER = new Wrapper('`');
 
     public static Dialect getH2Dialect() {
         return DIALECT_CACHE.computeIfAbsent(DbExtConfig.Mode.H2, key -> {
             H2Dialect h2Dialect = new H2Dialect();
-            h2Dialect.setWrapper(new Wrapper('`'));
+            h2Dialect.setWrapper(COMMON_WRAPPER);
             return h2Dialect;
         });
     }
@@ -55,28 +53,22 @@ public class DialectUtil {
      */
     public static Dialect getPostgresqlDialect() {
         return DIALECT_CACHE.computeIfAbsent(DbExtConfig.Mode.POSTGRESQL, key -> {
-            // 需要特殊处理的列名或表名，需要时在这里添加即可
-            Set<String> names = Stream.of("group", "desc", "user", "content").map(String::toLowerCase).collect(Collectors.toSet());
-            Wrapper wrapper = new Wrapper() {
+            Wrapper wrapper = new Wrapper('"') {
                 @Override
                 public String wrap(String field) {
-                    field = field.toLowerCase();
-                    if (field.charAt(0) == '`' && field.charAt(field.length() - 1) == '`') {
-                        field = field.substring(1, field.length() - 1);
-                    }
-                    if (names.contains(field)) {
-                        return super.wrap(field);
-                    }
-                    return field; // 不属于names的直接返回
+                    // 代码中存在固定编码 warp
+                    String unWrap = COMMON_WRAPPER.unWrap(field);
+                    return super.wrap(unWrap);
+                }
+
+                @Override
+                public String unWrap(String field) {
+                    String unWrap = COMMON_WRAPPER.unWrap(field);
+                    return super.unWrap(unWrap);
                 }
             };
-
             PostgresqlDialect dialect = new PostgresqlDialect();
-            Wrapper innerWrapper = (Wrapper) BeanUtil.getFieldValue(dialect, "wrapper");
-
-            wrapper.setPreWrapQuote(innerWrapper.getPreWrapQuote());
-            wrapper.setSufWrapQuote(innerWrapper.getSufWrapQuote());
-            BeanUtil.setFieldValue(dialect, "wrapper", wrapper);
+            dialect.setWrapper(wrapper);
             return dialect;
         });
     }
@@ -90,8 +82,9 @@ public class DialectUtil {
                 return getMySqlDialect();
             case POSTGRESQL:
                 return getPostgresqlDialect();
+            default:
+                throw new IllegalArgumentException("未知的数据库方言类型:" + mode);
         }
-        throw new IllegalArgumentException("未知的数据库方言类型");
     }
 
     /**
@@ -102,7 +95,7 @@ public class DialectUtil {
      */
     public static String wrapField(String field) {
         initWrapFieldMap();
-        return WRAP_FIELD_MAP.computeIfAbsent(field, key -> currentDbFieldWrapper.wrap(field));
+        return currentDbFieldWrapper.wrap(field);
     }
 
     /**
@@ -125,24 +118,6 @@ public class DialectUtil {
 
     public static String unWrapField(String field) {
         initWrapFieldMap();
-        return WRAP_FIELD_MAP.computeIfAbsent(field, s -> {
-            Character preWrapQuote = currentDbFieldWrapper.getPreWrapQuote();
-            Character sufWrapQuote = currentDbFieldWrapper.getSufWrapQuote();
-            if (preWrapQuote == null || sufWrapQuote == null || StrUtil.isBlank(s)) {
-                return s;
-            }
-
-            //如果已经包含包装的引号，返回原字符
-            if (!StrUtil.isSurround(s, preWrapQuote, sufWrapQuote)) {
-                return s;
-            }
-
-            //如果字段中包含通配符或者括号（字段通配符或者函数），不做包装
-            if (StrUtil.containsAnyIgnoreCase(s, "*", "(", " ", " as ")) {
-                return s;
-            }
-
-            return StrUtil.removeSuffix(StrUtil.removePrefix(s, preWrapQuote.toString()), sufWrapQuote.toString());
-        });
+        return currentDbFieldWrapper.unWrap(field);
     }
 }

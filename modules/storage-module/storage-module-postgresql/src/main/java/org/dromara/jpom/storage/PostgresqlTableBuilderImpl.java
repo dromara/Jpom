@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 /**
  * postgresql的sql语句构建类
  * 目前不管列名还是表名，索引名，都会转化为小写的形式，而特殊的关键字会通过Dialect的Wrapper处理
+ *
  * @author whz
  * @since 2024/3/10
  */
@@ -36,7 +37,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
     public PostgresqlTableBuilderImpl() {
         Set<Class<?>> modelClassSet = ClassUtil.scanPackageByAnnotation("org.dromara.jpom", TableName.class);
         this.tableName2ModelBoolFieldNameSetMap = new HashMap<>();
-        modelClassSet.forEach(modelClass->{
+        modelClassSet.forEach(modelClass -> {
             TableName annotation = modelClass.getAnnotation(TableName.class);
             // 统一处理成小写，model也应该不会出现转为小写后重名的field
             String tableName = annotation.value().toLowerCase();
@@ -44,7 +45,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
             Set<String> nameSet = Arrays.stream(boolFieldArr)
                 .map(field -> field.getName().toLowerCase())
                 .collect(Collectors.toSet());
-            tableName2ModelBoolFieldNameSetMap.put(tableName,nameSet);
+            tableName2ModelBoolFieldNameSetMap.put(tableName, nameSet);
         });
     }
 
@@ -73,7 +74,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
              *  field需要通过wrapper处理
              */
             switch (indexType) {
-                case "ADD-UNIQUE":{
+                case "ADD-UNIQUE": {
                     Assert.notEmpty(fields, "索引未配置字段");
                     stringBuilder.append("CALL drop_index_if_exists('").append(tableName).append("','").append(name).append("')").append(";").append(StrUtil.LF);
                     stringBuilder.append(this.delimiter()).append(StrUtil.LF);
@@ -115,14 +116,14 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
                 case "ADD":
                     stringBuilder.append("CALL add_column_if_not_exists('").append(tableName).append("','")
                         .append(columnName).append("','");
-                    stringBuilder.append(generateColumnSql(viewAlterData.getTableName(),viewAlterData,true));
+                    stringBuilder.append(generateColumnSql(viewAlterData.getTableName(), viewAlterData, true));
                     stringBuilder.append("');");
                     /**
                      *  添加列时，因为不能同时指定注释内容，单独加一个语句设置注释
                      *  COMMENT ON COLUMN 表名.field IS '注释内容'
                      *  field需要通过wrapper处理
                      */
-                    if( StrUtil.isNotBlank(viewAlterData.getComment()) ){
+                    if (StrUtil.isNotBlank(viewAlterData.getComment())) {
                         stringBuilder.append(delimiter()).append(StrUtil.LF);
                         stringBuilder.append("COMMENT ON COLUMN ").append(tableName)
                             .append(StrUtil.DOT).append(fieldWrapper.wrap(viewAlterData.getName())).append(" IS ")
@@ -160,13 +161,13 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
         stringBuilder.append("CREATE TABLE IF NOT EXISTS ").append(tableName).append(StrUtil.LF);
         stringBuilder.append("(").append(StrUtil.LF);
         for (TableViewData tableViewData : row) {
-            stringBuilder.append(StrUtil.TAB).append(this.generateColumnSql(tableName,tableViewData)).append(StrUtil.COMMA).append(StrUtil.LF);
+            stringBuilder.append(StrUtil.TAB).append(this.generateColumnSql(tableName, tableViewData)).append(StrUtil.COMMA).append(StrUtil.LF);
         }
         // 主键
         List<String> primaryKeys = row.stream()
-                .filter(tableViewData -> tableViewData.getPrimaryKey() != null && tableViewData.getPrimaryKey())
-                .map(viewData->fieldWrapper.wrap(viewData.getName()))
-                .collect(Collectors.toList());
+            .filter(tableViewData -> tableViewData.getPrimaryKey() != null && tableViewData.getPrimaryKey())
+            .map(viewData -> fieldWrapper.wrap(viewData.getName()))
+            .collect(Collectors.toList());
         Assert.notEmpty(primaryKeys, "表没有主键");
         stringBuilder.append(StrUtil.TAB).append("PRIMARY KEY (").append(CollUtil.join(primaryKeys, StrUtil.COMMA)).append(")").append(StrUtil.LF);
         stringBuilder.append(");").append(StrUtil.LF);
@@ -176,7 +177,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
 
         // 建表语句的列注释需要通过单独的sql语句设置
         for (TableViewData tableViewData : row) {
-            if( StrUtil.isNotBlank(tableViewData.getComment()) ) {
+            if (StrUtil.isNotBlank(tableViewData.getComment())) {
                 stringBuilder.append(delimiter()).append(StrUtil.LF);
                 stringBuilder.append("CALL exec_if_column_exists('")
                     .append(tableName).append("','")
@@ -196,11 +197,12 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
 
     @Override
     public String generateColumnSql(String tableName, TableViewRowData tableViewRowData) {
-        return generateColumnSql(tableName,tableViewRowData,false);
+        return generateColumnSql(tableName, tableViewRowData, false);
     }
 
     /**
      * 生成 alter add 或 create table 时的列定义
+     *
      * @param tableName
      * @param tableViewRowData
      * @param encode
@@ -210,14 +212,14 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
 
         StringBuilder strBuilder = new StringBuilder();
         Wrapper fieldWrapper = DialectUtil.getPostgresqlDialect().getWrapper();
-        String type = getColumnTypeStr(tableName,tableViewRowData.getName(),
-            tableViewRowData.getType(),tableViewRowData.getLen());
+        String type = getColumnTypeStr(tableName, tableViewRowData.getName(),
+            tableViewRowData.getType(), tableViewRowData.getLen());
         strBuilder.append(StrUtil.SPACE).append(fieldWrapper.wrap(tableViewRowData.getName()))
             .append(StrUtil.SPACE).append(type);
 
         String defaultValue = tableViewRowData.getDefaultValue();
         if (StrUtil.isNotEmpty(defaultValue)) {
-            if( "BOOLEAN".equals(type) ) {
+            if ("BOOLEAN".equals(type)) {
                 defaultValue = Boolean.toString(BooleanUtil.toBoolean(defaultValue.trim()));
             }
             strBuilder.append(" DEFAULT '").append(defaultValue).append("'");
@@ -237,6 +239,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
     /**
      * 生成postgresql的alter语句
      * postgresql不像 h2或mysql可以一个alter同时设置 数据类型，默认值，非空，注释，因此需生成多条sql语句才能实现功能
+     *
      * @param viewAlterData
      * @return
      */
@@ -248,8 +251,8 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
         String name = fieldWrapper.wrap(viewAlterData.getName());
 
         // 先改类型
-        String type = getColumnTypeStr(viewAlterData.getTableName(),viewAlterData.getName()
-            ,viewAlterData.getType(),viewAlterData.getLen());
+        String type = getColumnTypeStr(viewAlterData.getTableName(), viewAlterData.getName()
+            , viewAlterData.getType(), viewAlterData.getLen());
         strBuilder.append("ALTER TABLE ").append(tableName)
             .append(" ALTER COLUMN ").append(name)
             .append(" TYPE ").append(type).append(";");
@@ -261,11 +264,11 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
             .append(" ALTER COLUMN  ").append(name)
             .append(" SET DEFAULT '");
         if (StrUtil.isNotEmpty(defaultValue)) {
-            if( "BOOLEAN".equals(type) ) {
+            if ("BOOLEAN".equals(type)) {
                 defaultValue = Boolean.toString(BooleanUtil.toBoolean(defaultValue.trim()));
             }
             strBuilder.append(defaultValue).append("';");
-        }else {
+        } else {
             strBuilder.append("NULL").append("';");
         }
 
@@ -276,7 +279,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
         Boolean notNull = viewAlterData.getNotNull();
         if (notNull != null && notNull) {
             strBuilder.append(" SET NOT NULL ").append(";");
-        }else {
+        } else {
             strBuilder.append(" DROP NOT NULL ").append(";");
         }
 
@@ -293,14 +296,13 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
     }
 
 
-
     @Override
     public String delimiter() {
         return "-- postgresql $delimiter$";
     }
 
 
-    private String getColumnTypeStr(String tableName,String columnName,String type,Integer dataLen) {
+    private String getColumnTypeStr(String tableName, String columnName, String type, Integer dataLen) {
         Assert.hasText(type, "未正确配置数据类型");
         type = type.toUpperCase();
         switch (type) {
