@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.build.pipeline.model.config.EmptyStage;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,14 @@ import java.util.Map;
 @Builder
 @Slf4j
 public class PipelineItemActuator {
+    /**
+     * 流水线数据目录
+     */
+    private final File pipelineDataDir;
+    /**
+     * 并发标识
+     */
+    private final String concurrentTag;
 
     private final List<List<IActuator<?>>> actuators;
 

@@ -24,12 +24,12 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "jpom.build")
 @Data
 @EnableConfigurationProperties({
-    PipelineConfig.class})
+    PipelineExtConfig.class})
 public class BuildExtConfig {
     /**
      * 流水线配置
      */
-    private PipelineConfig pipeline = new PipelineConfig();
+    private PipelineExtConfig pipeline = new PipelineExtConfig();
 
     /**
      * 构建最多保存多少份历史记录

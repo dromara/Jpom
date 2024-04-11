@@ -61,7 +61,7 @@ public class ActuatorFactory {
                 String repoTag = iStage.getRepoTag();
                 if (!actuatorMap.containsKey(repoTag)) {
                     Repository repository = repositories.get(repoTag);
-                    actuatorMap.put(repoTag, new RepositoryActuator(repoTag, repository));
+                    actuatorMap.put(repoTag, new RepositoryActuator(null, repoTag, repository));
                 }
                 actuatorList.add(iActuator);
             }
@@ -70,8 +70,8 @@ public class ActuatorFactory {
         //
 
         return PipelineItemActuator.builder()
-            .actuators(actuators)
-            .repositoryActuators(actuatorMap)
-            .debug(false).build();
+                .actuators(actuators)
+                .repositoryActuators(actuatorMap)
+                .debug(false).build();
     }
 }

@@ -19,9 +19,11 @@ import java.util.Map;
 public class RepositoryActuator extends BaseActuator<EmptyStage> {
     private final Repository repository;
     private final String tag;
+    private final String concurrentTag;
 
-    public RepositoryActuator(String tag, Repository repository) {
+    public RepositoryActuator(String concurrentTag, String tag, Repository repository) {
         this.tag = tag;
+        this.concurrentTag = concurrentTag;
         this.repository = repository;
     }
 

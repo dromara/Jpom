@@ -11,5 +11,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "jpom.build.pipeline")
 @Data
-public class PipelineConfig {
+public class PipelineExtConfig {
+    /**
+     * ${data-path}/pipeline/${workspaceId}/${pipelineId}/source/${concurrentTag}-${repoTag}
+     */
+    private String storageLocation;
 }
