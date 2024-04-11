@@ -17,7 +17,10 @@ import cn.hutool.db.sql.Wrapper;
 import cn.hutool.extra.spring.SpringUtil;
 import org.dromara.jpom.db.DbExtConfig;
 
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 数据库方言工具类
@@ -53,12 +56,19 @@ public class DialectUtil {
      */
     public static Dialect getPostgresqlDialect() {
         return DIALECT_CACHE.computeIfAbsent(DbExtConfig.Mode.POSTGRESQL, key -> {
+            Set<String> names = Stream.of("group", "desc", "user", "content")
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
             Wrapper wrapper = new Wrapper('"') {
                 @Override
                 public String wrap(String field) {
-                    // 代码中存在固定编码 warp
                     String unWrap = COMMON_WRAPPER.unWrap(field);
-                    return super.wrap(unWrap);
+                    // 代码中存在固定编码 warp
+                    if (names.contains(unWrap)) {
+                        return super.wrap(unWrap);
+                    }
+                    // 不属于names的直接返回 并且转小写
+                    return unWrap.toLowerCase();
                 }
 
                 @Override
