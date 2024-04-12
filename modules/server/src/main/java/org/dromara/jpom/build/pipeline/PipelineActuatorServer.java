@@ -4,6 +4,8 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.build.pipeline.actuator.ActuatorFactory;
+import org.dromara.jpom.build.pipeline.actuator.PipelineItemActuator;
 import org.dromara.jpom.build.pipeline.model.PipelineDataModel;
 import org.dromara.jpom.build.pipeline.model.config.PipelineConfig;
 import org.dromara.jpom.common.ILoadEvent;
@@ -74,6 +76,8 @@ public class PipelineActuatorServer implements ILoadEvent {
         PipelineConfig pipelineConfig = PipelineConfig.fromJson(jsonConfig);
         //
         pipelineConfig.verify("");
+        //
+        PipelineItemActuator resolve = ActuatorFactory.resolve(pipelineConfig);
         return pipelineConfig;
     }
 

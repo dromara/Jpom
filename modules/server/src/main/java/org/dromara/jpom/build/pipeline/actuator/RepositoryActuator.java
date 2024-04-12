@@ -1,5 +1,7 @@
 package org.dromara.jpom.build.pipeline.actuator;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.EnumUtil;
 import cn.keepbx.jpom.plugins.IPlugin;
 import org.dromara.jpom.build.pipeline.ServerContext;
@@ -9,7 +11,7 @@ import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.springframework.util.Assert;
 
-import java.io.IOException;
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -27,8 +29,12 @@ public class RepositoryActuator extends BaseActuator<EmptyStage> {
         this.repository = repository;
     }
 
+    private File buildWorkDir() {
+        return FileUtil.file(dataDir, "source", concurrentTag + "_" + tag);
+    }
+
     @Override
-    public void run() throws IOException {
+    public void run() throws Exception {
         String repositoryId = repository.getRepositoryId();
         ServerContext instance = ServerContext.getInstance();
         RepositoryModel repositoryModel = instance.getRepositoryService().getByKey(repositoryId);
@@ -42,8 +48,17 @@ public class RepositoryActuator extends BaseActuator<EmptyStage> {
         //
     }
 
-    private void cloneByGit(RepositoryModel repositoryModel) {
+    private void cloneByGit(RepositoryModel repositoryModel) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin("git-clone");
         Map<String, Object> map = repositoryModel.toMap();
+        //
+        Tuple tuple = (Tuple) plugin.execute("branchAndTagList", map);
+    }
+
+    private void cloneBySvn(RepositoryModel repositoryModel) throws Exception {
+        IPlugin plugin = PluginFactory.getPlugin("svn-clone");
+        Map<String, Object> map = repositoryModel.toMap();
+        File workDir = this.buildWorkDir();
+        String[] result = (String[]) plugin.execute(workDir, map);
     }
 }

@@ -2,7 +2,6 @@ package org.dromara.jpom.build.pipeline.actuator;
 
 import org.dromara.jpom.build.pipeline.model.config.IStage;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -15,7 +14,12 @@ public interface IActuator<T extends IStage> extends AutoCloseable {
 
     List<IActuator<?>> beforeChain();
 
-    void run() throws IOException;
+    /**
+     * 开始执行流程
+     *
+     * @throws Exception 异常
+     */
+    void run() throws Exception;
 
     void info(CharSequence template, Object... params);
 }

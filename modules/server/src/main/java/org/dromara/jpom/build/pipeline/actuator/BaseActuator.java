@@ -2,6 +2,7 @@ package org.dromara.jpom.build.pipeline.actuator;
 
 import org.dromara.jpom.build.pipeline.model.config.BaseStage;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,7 +22,11 @@ public abstract class BaseActuator<T extends BaseStage> implements IActuator<T>,
     /**
      * 是否为调试模式
      */
-    private boolean debug;
+    protected boolean debug;
+    /**
+     * 数据目录
+     */
+    protected File dataDir;
 
     @Override
     public T stage() {
