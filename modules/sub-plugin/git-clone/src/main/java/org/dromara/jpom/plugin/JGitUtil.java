@@ -274,9 +274,6 @@ public class JGitUtil {
     public static Tuple getBranchAndTagList(Map<String, Object> parameter) throws Exception {
 
         String url = (String) parameter.get("url");
-        if (System.currentTimeMillis() > 0) {
-            return JGitOldUtil.getBranchList(url, parameter);
-        }
         try {
             LsRemoteCommand lsRemoteCommand = Git.lsRemoteRepository()
                 .setRemote(url);
