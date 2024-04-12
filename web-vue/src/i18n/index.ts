@@ -35,14 +35,24 @@ const deepMerge = (...objects: Record<string, any>[]) => {
   return result
 }
 
+const usLocal = deepMerge(zhCN, enUS)
+
 export const lang: { [key: string]: any } = {
   'zh-cn': {
     antd: antdZhCN,
     local: zhCN
   },
+  'zh-CN': {
+    antd: antdZhCN,
+    local: zhCN
+  },
   'en-us': {
     antd: antdEnUS,
-    local: deepMerge(zhCN, enUS)
+    local: usLocal
+  },
+  'en-US': {
+    antd: antdEnUS,
+    local: usLocal
   }
 }
 

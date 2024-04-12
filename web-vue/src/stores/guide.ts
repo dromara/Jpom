@@ -248,8 +248,13 @@ export const useGuideStore = defineStore('guide', {
     },
     getLocale: (state) => {
       return () => {
-        const locale = state.guideCache.locale || 'zh-CN'
-        return locale
+        const locale = state.guideCache.locale || 'zh-cn'
+        const array = ['zh-cn', 'en-us']
+        if (array.includes(locale)) {
+          // 避免非法字符串
+          return locale
+        }
+        return 'zh-cn'
       }
     }
   }

@@ -13,6 +13,7 @@ import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.comparator.VersionComparator;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Tuple;
@@ -26,6 +27,9 @@ import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.errors.NoRemoteRepositoryException;
+import org.eclipse.jgit.errors.NotSupportedException;
+import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.internal.JGitText;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -67,7 +71,7 @@ public class JGitUtil {
      * @throws IOException     IO
      * @throws GitAPIException E
      */
-    private static boolean checkRemoteUrl(String url, File file) throws IOException, GitAPIException {
+    public static boolean checkRemoteUrl(String url, File file) throws IOException, GitAPIException {
         try (Git git = Git.open(file)) {
             RemoteListCommand remoteListCommand = git.remoteList();
             boolean urlTrue = false;
@@ -153,7 +157,7 @@ public class JGitUtil {
      * @param transportCommand git 相关操作
      * @param parameter        参数
      */
-    private static void setCredentials(TransportCommand<?, ?> transportCommand, Map<String, Object> parameter) {
+    public static void setCredentials(TransportCommand<?, ?> transportCommand, Map<String, Object> parameter) {
         // 设置超时时间 秒
         Integer timeout = (Integer) parameter.get("timeout");
         // 设置账号密码
@@ -272,8 +276,8 @@ public class JGitUtil {
      * @throws GitAPIException api
      */
     public static Tuple getBranchAndTagList(Map<String, Object> parameter) throws Exception {
-        String url = (String) parameter.get("url");
 
+        String url = (String) parameter.get("url");
         try {
             LsRemoteCommand lsRemoteCommand = Git.lsRemoteRepository()
                 .setRemote(url);
@@ -448,8 +452,23 @@ public class JGitUtil {
      * @param printWriter 日志流
      * @throws TransportException 非账号密码异常
      */
-    private static void checkTransportException(Exception ex, File gitFile, PrintWriter printWriter) throws Exception {
+    public static void checkTransportException(Exception ex, File gitFile, PrintWriter printWriter) throws Exception {
         println(printWriter, "");
+        Throwable causedBy = ExceptionUtil.getCausedBy(ex, NotSupportedException.class);
+        if (causedBy != null) {
+            println(printWriter, "当前地址可能不是 git 仓库地址：" + causedBy.getMessage());
+            throw new IllegalStateException("当前地址可能不是 git 仓库地址：" + causedBy.getMessage(), ex);
+        }
+        causedBy = ExceptionUtil.getCausedBy(ex, NoRemoteRepositoryException.class);
+        if (causedBy != null) {
+            println(printWriter, "当前地址远程不存在仓库：" + causedBy.getMessage());
+            throw new IllegalStateException("当前地址远程不存在仓库：" + causedBy.getMessage(), ex);
+        }
+        causedBy = ExceptionUtil.getCausedBy(ex, RepositoryNotFoundException.class);
+        if (causedBy != null) {
+            println(printWriter, "当前地址不存在仓库：" + causedBy.getMessage());
+            throw new IllegalStateException("当前地址不存在仓库：" + causedBy.getMessage(), ex);
+        }
         if (ex instanceof TransportException) {
             String msg = ex.getMessage();
             if (StrUtil.containsAny(msg, JGitText.get().notAuthorized, JGitText.get().authenticationNotSupported)) {

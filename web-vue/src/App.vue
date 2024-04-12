@@ -41,7 +41,7 @@ const onMatchMediaChange = (e: MediaQueryListEvent) => {
 }
 onMounted(() => {
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', onMatchMediaChange)
-  i18nHook.locale.value = getGuideCache.locale
+  i18nHook.locale.value = nowLang.value
 })
 
 onUnmounted(() => {

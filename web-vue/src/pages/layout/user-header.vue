@@ -439,7 +439,7 @@
             字体间距调整(仅在深色模式生效)
           </a-space>
         </a-form-item>
-        <a-form-item label="语言">
+        <a-form-item v-if="!isProduction" label="语言">
           <a-space>
             <a-radio-group v-model:value="locale" button-style="solid">
               <a-radio-button value="zh-cn">中文</a-radio-button>
@@ -569,7 +569,7 @@ export default {
   },
   computed: {
     ...mapState(useUserStore, ['getToken', 'getUserInfo']),
-    ...mapState(useAppStore, ['getWorkspaceId']),
+    ...mapState(useAppStore, ['getWorkspaceId', 'isProduction']),
     ...mapState(useGuideStore, ['getGuideCache', 'getDisabledGuide', 'getThemeView', 'getMenuThemeView', 'getLocale']),
     showCode() {
       return this.getUserInfo.email !== this.temp.email
@@ -611,7 +611,7 @@ export default {
         useGuideStore().changeLocale(value)
       },
       get: function () {
-        return useGuideStore().guideCache.locale
+        return useGuideStore().getLocale()
       }
     },
     fullscreenViewLog() {

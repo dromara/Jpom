@@ -51,24 +51,93 @@
           </li>
         </ul>
         <div></div>
-        <a-card title="一次性捐款赞助">
-          <a-image width="80%" :src="praiseQrcorde" :preview="false"> </a-image>
+        <a-card style="text-align: center">
+          <template #title> 一次性捐款赞助 </template>
+          <template #extra>
+            <a href="https://jpom.top/pages/praise/" target="_blank">更多说明</a>
+          </template>
+          <a-row :gutter="[16, 16]">
+            <a-col :span="6" />
+            <a-col :span="6">
+              <a-card hoverable style="width: auto; max-width: 300px">
+                <template #cover>
+                  <a-image
+                    :src="weixinQrcorde"
+                    :preview="{
+                      src: weixinPraiseQrcorde
+                    }"
+                    style="width: 90%; margin: 5%"
+                  >
+                  </a-image>
+                </template>
+                <template #actions>
+                  <!-- <setting-outlined key="setting" />
+                  <edit-outlined key="edit" />
+                  <ellipsis-outlined key="ellipsis" /> -->
+                  <a-card-meta title="微信赞赏" description="扫码赞赏支持开源项目长期发展"> </a-card-meta>
+                </template>
+              </a-card>
+            </a-col>
+            <a-col :span="6">
+              <a-card hoverable style="width: auto; max-width: 300px">
+                <template #cover>
+                  <a-image
+                    :src="alipayQrcorde"
+                    :preview="{
+                      src: alipayPraiseQrcorde
+                    }"
+                    style="width: 90%; margin: 5%"
+                  >
+                  </a-image>
+                  <!-- <img alt="alipay" :src="alipayQrcorde" style="width: 90%; margin: 5%" /> -->
+                </template>
+                <template #actions>
+                  <a-card-meta title="支付宝转账" description="扫码转账支持开源项目长期发展"> </a-card-meta>
+
+                  <!-- <setting-outlined key="setting" />
+                <edit-outlined key="edit" />
+                <ellipsis-outlined key="ellipsis" /> -->
+                </template>
+                <!-- <a-divider style="margin: 0" dashed /> -->
+              </a-card>
+            </a-col>
+          </a-row>
         </a-card>
       </a-tab-pane>
       <a-tab-pane key="3" tab="联系我们">
-        <h2>联系时请备注来意</h2>
+        <div>
+          <h2 style="display: inline">联系时请备注来意</h2>
+          备注示例：<a-tag>付费社群</a-tag><a-tag>企业服务</a-tag><a-tag>广告投放</a-tag><a-tag>合作咨询</a-tag>
+          <a-tag>免费社群</a-tag>
+        </div>
+
         <ul>
-          <li>邮箱：<a href="mailto:bwcx_jzy@dromara.org">bwcx_jzy@dromara.org</a></li>
-          <li>微信：jpom66</li>
+          <li>
+            邮箱：<a-typography-paragraph
+              style="display: inline"
+              :copyable="{ tooltip: false, text: 'bwcx_jzy@dromara.org' }"
+            >
+              <a target="_blank" href="mailto:bwcx_jzy@dromara.org">bwcx_jzy@dromara.org</a>
+            </a-typography-paragraph>
+          </li>
+          <li>
+            微信：<a-typography-paragraph style="display: inline" :copyable="{ tooltip: false, text: 'jpom66' }">
+              <a href="https://jpom.top/pages/praise/join/" target="_blank"> jpom66</a>
+            </a-typography-paragraph>
+          </li>
         </ul>
+
         <a-card title="微信二维码">
-          <a-qrcode
+          <div style="text-align: center">
+            <a-image width="400px" :src="weixQrcodeJpom66" :preview="true"> </a-image>
+          </div>
+          <!-- <a-qrcode
             :size="qrCodeSize"
             :icon-size="qrCodeSize / 4"
             error-level="H"
             value="https://u.wechat.com/MP_PrhfdwmlBhmKp35BloEw"
             :icon="jpomLogo"
-          />
+          /> -->
         </a-card>
       </a-tab-pane>
       <a-tab-pane key="1" tab="开源协议">
@@ -110,13 +179,17 @@
 <script setup lang="ts">
 // 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。
 import { getLicense, getThankDependency } from '@/api/about'
-import praiseQrcorde from '@/assets/images/praise-qrcorde-small.png'
-import jpomLogo from '@/assets/images/jpom.svg'
+import alipayQrcorde from '@/assets/images/qrcode/alipay-small.png'
+import weixinQrcorde from '@/assets/images/qrcode/weixin-small.png'
+import alipayPraiseQrcorde from '@/assets/images/qrcode/alipay-praise.jpg'
+import weixinPraiseQrcorde from '@/assets/images/qrcode/weixin-praise.jpg'
+import weixQrcodeJpom66 from '@/assets/images/qrcode/weix-qrcode-jpom66.jpg'
+// import jpomLogo from '@/assets/images/jpom.svg'
 const licenseText = ref('')
 
 const thankDependency = ref([])
 
-const qrCodeSize = ref(200)
+// const qrCodeSize = ref(200)
 
 onMounted(() => {
   getLicense().then((res) => {
