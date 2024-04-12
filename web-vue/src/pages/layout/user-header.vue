@@ -611,7 +611,7 @@ export default {
         useGuideStore().changeLocale(value)
       },
       get: function () {
-        return useGuideStore().guideCache.locale
+        return useGuideStore().getLocale()
       }
     },
     fullscreenViewLog() {
