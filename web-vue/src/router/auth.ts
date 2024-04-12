@@ -27,7 +27,11 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
   const useAppStore = appStore()
   useAppStore.pageLoading(true)
   if (to.matched.length === 0) {
-    next('*')
+    next({
+      path: '/404',
+      query: from.query,
+      replace: true
+    })
     return
   }
   // 检测白名单

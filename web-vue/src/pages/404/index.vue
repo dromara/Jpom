@@ -4,11 +4,11 @@
       <a-card hoverable class="card">
         <a-card-meta>
           <template #description>
-            <a-result status="404" title="404" :sub-title="$t('page.404.subTitle')">
+            <a-result status="404" title="404" :sub-title="$t('pages.404.subTitle')">
               <a-space>
                 <a-button type="primary" @click="goHome">
                   <HomeOutlined />
-                  <span>{{ $t('page.404.goHome') }}</span>
+                  <span>{{ $t('pages.404.goHome') }}</span>
                 </a-button>
                 <!-- <a-button type="primary" @click="goBack">
                   <left-outlined />
