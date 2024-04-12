@@ -1,7 +1,9 @@
 package org.dromara.jpom.build.pipeline;
 
 import cn.hutool.extra.spring.SpringUtil;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.service.dblog.RepositoryService;
 import org.springframework.stereotype.Service;
 
@@ -11,13 +13,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Getter
+@AllArgsConstructor
 public class ServerContext {
 
     private final RepositoryService repositoryService;
-
-    public ServerContext(RepositoryService repositoryService) {
-        this.repositoryService = repositoryService;
-    }
+    private final JpomApplication jpomApplication;
 
     /**
      * 获取服务的上下文

@@ -1,6 +1,6 @@
 package org.dromara.jpom.build.pipeline.actuator;
 
-import org.dromara.jpom.build.pipeline.model.config.IStage;
+import org.dromara.jpom.build.pipeline.config.IStage;
 
 import java.util.List;
 

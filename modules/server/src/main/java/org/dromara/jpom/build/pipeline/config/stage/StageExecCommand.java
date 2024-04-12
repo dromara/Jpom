@@ -1,8 +1,8 @@
-package org.dromara.jpom.build.pipeline.model.config.stage;
+package org.dromara.jpom.build.pipeline.config.stage;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.dromara.jpom.build.pipeline.model.config.BaseStage;
+import org.dromara.jpom.build.pipeline.config.BaseStage;
 import org.springframework.util.Assert;
 
 import java.util.Map;

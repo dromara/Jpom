@@ -1,6 +1,6 @@
 package org.dromara.jpom.build.pipeline.actuator;
 
-import org.dromara.jpom.build.pipeline.model.config.BasePublishStage;
+import org.dromara.jpom.build.pipeline.config.BasePublishStage;
 
 /**
  * @author bwcx_jzy

@@ -1,9 +1,9 @@
-package org.dromara.jpom.build.pipeline.model;
+package org.dromara.jpom.build.pipeline.config;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
-import org.dromara.jpom.build.pipeline.model.config.IStage;
-import org.dromara.jpom.build.pipeline.model.config.IVerify;
+import org.dromara.jpom.build.pipeline.config.publish.PublishStageByProject;
+import org.dromara.jpom.build.pipeline.config.stage.StageExecCommand;
 import org.springframework.util.Assert;
 
 import java.util.List;
@@ -17,11 +17,11 @@ public class StageGroup implements IVerify<StageGroup> {
     /**
      * 流程
      *
-     * @see org.dromara.jpom.build.pipeline.model.config.stage.StageExecCommand
-     * @see org.dromara.jpom.build.pipeline.model.config.publish.PublishStageByProject
+     * @see StageExecCommand
+     * @see PublishStageByProject
      * @see IStage
-     * @see org.dromara.jpom.build.pipeline.model.config.BaseStage
-     * @see org.dromara.jpom.build.pipeline.model.config.BasePublishStage
+     * @see BaseStage
+     * @see BasePublishStage
      */
     private List<IStage> stages;
     /**

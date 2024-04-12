@@ -1,4 +1,4 @@
-package org.dromara.jpom.build.pipeline.model.config;
+package org.dromara.jpom.build.pipeline.config;
 
 import org.dromara.jpom.build.pipeline.enums.StageType;
 import org.dromara.jpom.build.pipeline.enums.SubStageType;

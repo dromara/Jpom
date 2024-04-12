@@ -2,7 +2,7 @@ package org.dromara.jpom.build.pipeline.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.dromara.jpom.build.pipeline.model.config.PipelineConfig;
+import org.dromara.jpom.build.pipeline.config.PipelineConfig;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseGroupModel;
 import org.dromara.jpom.model.data.BuildInfoModel;

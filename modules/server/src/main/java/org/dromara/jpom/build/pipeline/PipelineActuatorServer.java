@@ -7,7 +7,7 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.build.pipeline.actuator.ActuatorFactory;
 import org.dromara.jpom.build.pipeline.actuator.PipelineItemActuator;
 import org.dromara.jpom.build.pipeline.model.PipelineDataModel;
-import org.dromara.jpom.build.pipeline.model.config.PipelineConfig;
+import org.dromara.jpom.build.pipeline.config.PipelineConfig;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.configuration.PipelineExtConfig;

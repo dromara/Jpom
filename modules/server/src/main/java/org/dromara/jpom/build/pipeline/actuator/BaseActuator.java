@@ -1,6 +1,7 @@
 package org.dromara.jpom.build.pipeline.actuator;
 
-import org.dromara.jpom.build.pipeline.model.config.BaseStage;
+import cn.hutool.core.util.IdUtil;
+import org.dromara.jpom.build.pipeline.config.BaseStage;
 
 import java.io.File;
 import java.util.Collections;
@@ -27,6 +28,15 @@ public abstract class BaseActuator<T extends BaseStage> implements IActuator<T>,
      * 数据目录
      */
     protected File dataDir;
+    /**
+     * 执行器 id
+     */
+    protected final String actuatorId;
+
+
+    public BaseActuator() {
+        this.actuatorId = IdUtil.fastSimpleUUID();
+    }
 
     @Override
     public T stage() {

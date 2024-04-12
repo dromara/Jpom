@@ -4,11 +4,11 @@ import cn.hutool.core.util.ReflectUtil;
 import org.dromara.jpom.build.pipeline.enums.IStageType;
 import org.dromara.jpom.build.pipeline.enums.StageType;
 import org.dromara.jpom.build.pipeline.enums.SubStageType;
-import org.dromara.jpom.build.pipeline.model.StageGroup;
-import org.dromara.jpom.build.pipeline.model.config.EmptyStage;
-import org.dromara.jpom.build.pipeline.model.config.IStage;
-import org.dromara.jpom.build.pipeline.model.config.PipelineConfig;
-import org.dromara.jpom.build.pipeline.model.config.Repository;
+import org.dromara.jpom.build.pipeline.config.StageGroup;
+import org.dromara.jpom.build.pipeline.config.EmptyStage;
+import org.dromara.jpom.build.pipeline.config.IStage;
+import org.dromara.jpom.build.pipeline.config.PipelineConfig;
+import org.dromara.jpom.build.pipeline.config.Repository;
 import org.springframework.util.Assert;
 
 import java.util.*;

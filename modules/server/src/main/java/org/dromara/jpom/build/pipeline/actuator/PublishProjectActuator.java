@@ -1,6 +1,6 @@
 package org.dromara.jpom.build.pipeline.actuator;
 
-import org.dromara.jpom.build.pipeline.model.config.publish.PublishStageByProject;
+import org.dromara.jpom.build.pipeline.config.publish.PublishStageByProject;
 
 import java.io.IOException;
 

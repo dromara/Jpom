@@ -5,9 +5,9 @@ import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.build.pipeline.actuator.ActuatorFactory;
 import org.dromara.jpom.build.pipeline.actuator.PipelineItemActuator;
 import org.dromara.jpom.build.pipeline.enums.StageType;
-import org.dromara.jpom.build.pipeline.model.StageGroup;
-import org.dromara.jpom.build.pipeline.model.config.IStage;
-import org.dromara.jpom.build.pipeline.model.config.PipelineConfig;
+import org.dromara.jpom.build.pipeline.config.StageGroup;
+import org.dromara.jpom.build.pipeline.config.IStage;
+import org.dromara.jpom.build.pipeline.config.PipelineConfig;
 import org.junit.Test;
 
 import java.lang.reflect.Method;

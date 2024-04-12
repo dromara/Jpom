@@ -1,4 +1,4 @@
-package org.dromara.jpom.build.pipeline.model.config;
+package org.dromara.jpom.build.pipeline.config;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
@@ -7,7 +7,6 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import lombok.Data;
 import org.dromara.jpom.build.pipeline.StageTypeFactory;
-import org.dromara.jpom.build.pipeline.model.StageGroup;
 
 import java.util.Arrays;
 import java.util.List;

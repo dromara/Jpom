@@ -6,7 +6,7 @@ import org.apache.commons.exec.LogOutputStream;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.exec.environment.EnvironmentUtils;
 import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.build.pipeline.model.config.stage.StageExecCommand;
+import org.dromara.jpom.build.pipeline.config.stage.StageExecCommand;
 import org.dromara.jpom.system.ExtConfigBean;
 
 import java.io.File;

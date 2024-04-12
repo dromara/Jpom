@@ -1,8 +1,8 @@
-package org.dromara.jpom.build.pipeline.model.config.publish;
+package org.dromara.jpom.build.pipeline.config.publish;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.dromara.jpom.build.pipeline.model.config.BasePublishStage;
+import org.dromara.jpom.build.pipeline.config.BasePublishStage;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.springframework.util.Assert;

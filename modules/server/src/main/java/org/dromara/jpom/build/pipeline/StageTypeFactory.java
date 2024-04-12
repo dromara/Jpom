@@ -4,11 +4,11 @@ import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.build.pipeline.enums.IStageType;
 import org.dromara.jpom.build.pipeline.enums.StageType;
 import org.dromara.jpom.build.pipeline.enums.SubStageType;
-import org.dromara.jpom.build.pipeline.model.config.BasePublishStage;
-import org.dromara.jpom.build.pipeline.model.config.IStage;
-import org.dromara.jpom.build.pipeline.model.config.PipelineConfig;
-import org.dromara.jpom.build.pipeline.model.config.publish.PublishStageByProject;
-import org.dromara.jpom.build.pipeline.model.config.stage.StageExecCommand;
+import org.dromara.jpom.build.pipeline.config.BasePublishStage;
+import org.dromara.jpom.build.pipeline.config.IStage;
+import org.dromara.jpom.build.pipeline.config.PipelineConfig;
+import org.dromara.jpom.build.pipeline.config.publish.PublishStageByProject;
+import org.dromara.jpom.build.pipeline.config.stage.StageExecCommand;
 import org.springframework.util.Assert;
 
 import java.util.HashMap;

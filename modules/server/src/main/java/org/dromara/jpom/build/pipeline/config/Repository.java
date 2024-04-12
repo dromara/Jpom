@@ -1,4 +1,4 @@
-package org.dromara.jpom.build.pipeline.model.config;
+package org.dromara.jpom.build.pipeline.config;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;

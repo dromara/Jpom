@@ -2,7 +2,7 @@ package org.dromara.jpom.build.pipeline.actuator;
 
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.build.pipeline.model.config.EmptyStage;
+import org.dromara.jpom.build.pipeline.config.EmptyStage;
 
 import java.io.File;
 import java.util.List;
