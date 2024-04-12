@@ -76,6 +76,9 @@ export const useAppStore = defineStore('app', {
     },
     getCollapsed(state) {
       return state.isCollapsed
+    },
+    isProduction() {
+      return process.env.NODE_ENV === 'production'
     }
   }
 })
