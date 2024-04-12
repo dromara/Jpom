@@ -51,7 +51,11 @@
           </li>
         </ul>
         <div></div>
-        <a-card title="一次性捐款赞助">
+        <a-card style="text-align: center">
+          <template #title> 一次性捐款赞助 </template>
+          <template #extra>
+            <a href="https://jpom.top/pages/praise/" target="_blank">更多说明</a>
+          </template>
           <a-row :gutter="[16, 16]">
             <a-col :span="6" />
             <a-col :span="6">
@@ -108,11 +112,18 @@
         </div>
 
         <ul>
-          <li>邮箱：<a href="mailto:bwcx_jzy@dromara.org">bwcx_jzy@dromara.org</a></li>
           <li>
-            微信：<a-typography-paragraph style="display: inline" :copyable="{ tooltip: false }"
-              >jpom66</a-typography-paragraph
+            邮箱：<a-typography-paragraph
+              style="display: inline"
+              :copyable="{ tooltip: false, text: 'bwcx_jzy@dromara.org' }"
             >
+              <a target="_blank" href="mailto:bwcx_jzy@dromara.org">bwcx_jzy@dromara.org</a>
+            </a-typography-paragraph>
+          </li>
+          <li>
+            微信：<a-typography-paragraph style="display: inline" :copyable="{ tooltip: false, text: 'jpom66' }">
+              <a href="https://jpom.top/pages/praise/join/" target="_blank"> jpom66</a>
+            </a-typography-paragraph>
           </li>
         </ul>
 
