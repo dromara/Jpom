@@ -67,7 +67,7 @@ public class JGitUtil {
      * @throws IOException     IO
      * @throws GitAPIException E
      */
-    private static boolean checkRemoteUrl(String url, File file) throws IOException, GitAPIException {
+    public static boolean checkRemoteUrl(String url, File file) throws IOException, GitAPIException {
         try (Git git = Git.open(file)) {
             RemoteListCommand remoteListCommand = git.remoteList();
             boolean urlTrue = false;
@@ -153,7 +153,7 @@ public class JGitUtil {
      * @param transportCommand git 相关操作
      * @param parameter        参数
      */
-    private static void setCredentials(TransportCommand<?, ?> transportCommand, Map<String, Object> parameter) {
+    public static void setCredentials(TransportCommand<?, ?> transportCommand, Map<String, Object> parameter) {
         // 设置超时时间 秒
         Integer timeout = (Integer) parameter.get("timeout");
         // 设置账号密码
@@ -272,8 +272,11 @@ public class JGitUtil {
      * @throws GitAPIException api
      */
     public static Tuple getBranchAndTagList(Map<String, Object> parameter) throws Exception {
-        String url = (String) parameter.get("url");
 
+        String url = (String) parameter.get("url");
+        if (System.currentTimeMillis() > 0) {
+            return JGitOldUtil.getBranchList(url, parameter);
+        }
         try {
             LsRemoteCommand lsRemoteCommand = Git.lsRemoteRepository()
                 .setRemote(url);
@@ -448,7 +451,7 @@ public class JGitUtil {
      * @param printWriter 日志流
      * @throws TransportException 非账号密码异常
      */
-    private static void checkTransportException(Exception ex, File gitFile, PrintWriter printWriter) throws Exception {
+    public static void checkTransportException(Exception ex, File gitFile, PrintWriter printWriter) throws Exception {
         println(printWriter, "");
         if (ex instanceof TransportException) {
             String msg = ex.getMessage();
