@@ -52,15 +52,27 @@
         </ul>
         <div></div>
         <a-card title="一次性捐款赞助">
-          <a-image width="80%" :src="praiseQrcorde" :preview="false"> </a-image>
+          <div style="text-align: center">
+            <a-image width="1000px" :src="praiseQrcorde" :preview="true"> </a-image>
+          </div>
         </a-card>
       </a-tab-pane>
       <a-tab-pane key="3" tab="联系我们">
-        <h2>联系时请备注来意</h2>
+        <div>
+          <h2 style="display: inline">联系时请备注来意</h2>
+          备注示例：<a-tag>付费社群</a-tag><a-tag>企业服务</a-tag><a-tag>广告投放</a-tag><a-tag>合作咨询</a-tag>
+          <a-tag>免费社群</a-tag>
+        </div>
+
         <ul>
           <li>邮箱：<a href="mailto:bwcx_jzy@dromara.org">bwcx_jzy@dromara.org</a></li>
-          <li>微信：jpom66</li>
+          <li>
+            微信：<a-typography-paragraph style="display: inline" :copyable="{ tooltip: false }"
+              >jpom66</a-typography-paragraph
+            >
+          </li>
         </ul>
+
         <a-card title="微信二维码">
           <a-qrcode
             :size="qrCodeSize"
