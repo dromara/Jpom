@@ -1,6 +1,6 @@
 <template>
   <a-config-provider
-    :locale="lang[getGuideCache.locale].antd"
+    :locale="lang[nowLang]?.antd"
     :theme="{
       algorithm: themeAlgorithm
       // token: {
@@ -27,6 +27,10 @@ const useGuideStore = guideStore()
 const getGuideCache = useGuideStore.getGuideCache
 const i18nHook = useI18n()
 
+const nowLang = computed(() => {
+  return useGuideStore.getLocale()
+})
+
 // const { useToken } = theme
 // const { token } = useToken()
 // console.log(token.value)
@@ -38,7 +42,7 @@ const onMatchMediaChange = (e: MediaQueryListEvent) => {
 }
 onMounted(() => {
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', onMatchMediaChange)
-  i18nHook.locale.value = getGuideCache.locale
+  i18nHook.locale.value = nowLang.value
 })
 
 onUnmounted(() => {

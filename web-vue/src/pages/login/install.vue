@@ -3,23 +3,24 @@
     <template #content>
       <a-card v-if="canInstall" :style="`${setpCurrent === 1 ? 'width: 60vw' : 'width: 550px'}`" hoverable>
         <template #title>
-          <a-steps :current="setpCurrent">
-            <a-step title="初始化系统" status="process" description="设置一个超级管理员账号">
-              <template #icon>
-                <user-outlined />
-              </template>
-            </a-step>
-            <a-step title="启用两步验证" description="开启两步验证使账号更安全">
-              <template #icon>
-                <solution-outlined />
-              </template>
-            </a-step>
-          </a-steps>
+          初始化系统账户
+          <a href="https://jpom.top" target="_blank">更多开源说明</a>
         </template>
-
+        <a-steps :current="setpCurrent">
+          <a-step title="初始化系统" status="process" description="设置一个超级管理员账号">
+            <template #icon>
+              <user-outlined />
+            </template>
+          </a-step>
+          <a-step title="启用两步验证" description="开启两步验证使账号更安全">
+            <template #icon>
+              <solution-outlined />
+            </template>
+          </a-step>
+        </a-steps>
         <a-row type="flex" justify="center">
           <a-col v-if="setpCurrent === 0" :span="16">
-            <a-card-meta title="初始化系统账户" style="textalign: center">
+            <a-card-meta title="操作说明">
               <template #description>
                 <ol>
                   <li>您需要创建一个账户用以后续登录管理系统,请牢记超级管理员账号密码</li>

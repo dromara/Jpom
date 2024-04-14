@@ -426,7 +426,7 @@ mvn -f xxxx/pom.xml clean package
 
 1. 快扫描下方左侧微信群二维码和我们一起交流讨论吧！（添加小助手：备注 Jpom 进群）
 2. 开源项目离不开社区的支持，如果项目帮助到了你，并且想给我们加个餐。
-   欢迎扫描下方[微信、支付宝收款码赞赏](https://jpom.top/images/praise-qrcorde.png)
+   欢迎扫描下方[微信、支付宝收款码赞赏](https://jpom.top/images/qrcode/praise-all.png)
    或通过[码云赞赏](https://gitee.com/dromara/Jpom)
    （在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom.top/pages/praise/publicity/)
 3. 购买开源周边商品：[周边介绍](https://jpom.top/pages/shop/)
@@ -436,7 +436,7 @@ mvn -f xxxx/pom.xml clean package
 
 感谢所有赞赏以及参与贡献的小伙伴，你们的支持是我们不断更新前进的动力！
 
-![wx-qrcode-praise.png](https://jpom.top/images/praise-qrcorde.png)
+![wx-qrcode-praise.png](https://jpom.top/images/qrcode/praise-all.png)
 
 ## 💖 周边商品
 
