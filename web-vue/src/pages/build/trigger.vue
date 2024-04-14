@@ -4,46 +4,44 @@
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1" type="card">
           <template #rightExtra>
-            <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
-              <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
+            <a-tooltip :title="$tl('p.resetTriggerTokenInfo')">
+              <a-button type="primary" size="small" @click="resetTrigger">{{ $tl('p.reset') }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" tab="执行构建">
+          <a-tab-pane key="1" :tab="$tl('p.executeBuild')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert message="温馨提示" type="warning" show-icon>
+              <a-alert :message="$tl('c.warmPrompt')" type="warning" show-icon>
                 <template #description>
                   <ul>
-                    <li>单个触发器地址中：第一个随机字符串为构建ID，第二个随机字符串为 token</li>
+                    <li>{{ $tl('p.warmPrompt1') }}</li>
                     <li>
-                      重置为重新生成触发地址,重置成功后之前的触发器地址将失效,构建触发器绑定到生成触发器到操作人上,如果将对应的账号删除触发器将失效
+                      {{ $tl('p.warmPrompt2') }}
                     </li>
-                    <li>批量构建参数 BODY json： [ { "id":"1", "token":"a", "delay":"0" } ]</li>
+                    <li>{{ $tl('p.warmPrompt3') }} BODY json： [ { "id":"1", "token":"a", "delay":"0" } ]</li>
                     <li>
-                      批量构建参数还支持指定参数,delay（延迟执行构建,单位秒）
-                      branchName（分支名）、branchTagName（标签）、script（构建脚本）、resultDirFile（构建产物）、webhook（通知
-                      webhook）
+                      {{ $tl('p.warmPrompt4') }}
                     </li>
                     <li>
-                      批量构建全部参数举例 BODY json： [ { "id":"1", "token":"a",
+                      {{ $tl('p.warmPrompt5') }} BODY json： [ { "id":"1", "token":"a",
                       "delay":"0","branchName":"test","branchTagName":"1.*","script":"mvn clean
                       package","resultDirFile":"/target/","webhook":"http://test.com/webhook" } ]
                     </li>
                     <li>
-                      参数如果传入 useQueue=true
-                      将使用微队列来排队构建，避免几乎同时触发构建被中断构建（一般用户仓库合并代码会触发多次请求）,队列保存在内存中,重启将丢失
+                      {{ $tl('p.warmPrompt6') }} useQueue=true
+                      {{ $tl('p.warmPrompt7') }}
                     </li>
-                    <li>批量构建传入其他参数将同步执行修改</li>
+                    <li>{{ $tl('p.warmPrompt8') }}</li>
                   </ul>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`单个触发器地址(点击可以复制)`">
+              <a-alert type="info" :message="`${$tl('p.singleTriggerAddress')}(${$tl('c.copyByClick')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerBuildUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.triggerBuildUrl }} </span>
                   </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`批量触发器地址(点击可以复制)`">
+              <a-alert type="info" :message="`${$tl('p.batchTriggerAddress')}(${$tl('c.copyByClick')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerBuildUrl }">
                     <a-tag>POST</a-tag>
@@ -53,23 +51,26 @@
               </a-alert>
             </a-space>
           </a-tab-pane>
-          <a-tab-pane key="2" tab="查看当前状态">
+          <a-tab-pane key="2" :tab="$tl('p.viewCurrentStatus')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert message="温馨提示" type="warning" show-icon>
+              <a-alert :message="$tl('c.warmPrompt')" type="warning" show-icon>
                 <template #description>
                   <ul>
-                    <li>批量构建参数 BODY json： [ { "id":"1", "token":"a" } ]</li>
-                    <li>参数中的 id 、token 和触发构建一致</li>
+                    <li>{{ $tl('p.batchBuildParamsBodyJson') }}</li>
+                    <li>{{ $tl('p.idAndTokenSameAsTriggerBuild') }}</li>
                     <li>
-                      <a-tag>No(0, "未构建")</a-tag>, <a-tag>Ing(1, "构建中")</a-tag>,
-                      <a-tag>Success(2, "构建结束")</a-tag>, <a-tag>Error(3, "构建失败")</a-tag>,
-                      <a-tag>PubIng(4, "发布中")</a-tag>, <a-tag>PubSuccess(5, "发布成功")</a-tag>,
-                      <a-tag>PubError(6, "发布失败")</a-tag>, <a-tag>Cancel(7, "取消构建")</a-tag>,
+                      <a-tag>No(0, "{{ $tl('p.notBuilt') }}")</a-tag>, <a-tag>Ing(1, "{{ $tl('p.building') }}")</a-tag>,
+                      <a-tag>Success(2, "{{ $tl('p.buildEnded') }}")</a-tag>,
+                      <a-tag>Error(3, "{{ $tl('p.buildFailed') }}")</a-tag>,
+                      <a-tag>PubIng(4, "{{ $tl('p.publishing') }}")</a-tag>,
+                      <a-tag>PubSuccess(5, "{{ $tl('p.publishSuccess') }}")</a-tag>,
+                      <a-tag>PubError(6, "{{ $tl('p.publishFailed') }}")</a-tag>,
+                      <a-tag>Cancel(7, "{{ $tl('p.cancelBuild') }}")</a-tag>,
                     </li>
                   </ul>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`获取单个构建状态地址(点击可以复制)`">
+              <a-alert type="info" :message="`${$tl('p.getSingleBuildStatusAddress')}(${$tl('c.copyByClick')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchBuildStatusUrl2 }">
                     <a-tag>GET</a-tag>
@@ -77,7 +78,7 @@
                   </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`批量获取构建状态地址(点击可以复制)`">
+              <a-alert type="info" :message="`${$tl('p.batchGetBuildStatusAddress')}(${$tl('c.copyByClick')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchBuildStatusUrl }">
                     <a-tag>POST</a-tag>
@@ -87,17 +88,17 @@
               </a-alert>
             </a-space>
           </a-tab-pane>
-          <a-tab-pane key="3" tab="查看构建日志">
+          <a-tab-pane key="3" :tab="$tl('p.viewBuildLog')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert message="温馨提示" type="warning" show-icon>
+              <a-alert :message="$tl('c.warmPrompt')" type="warning" show-icon>
                 <template #description>
                   <ul>
-                    <li>参数中的 id 、token 和触发构建一致、buildNumId 构建序号id</li>
-                    <li>构建序号id需要跟进实际情况替换</li>
+                    <li>{{ $tl('p.idAndTokenAndBuildNumIdSameAsTriggerBuild') }}</li>
+                    <li>{{ $tl('p.replaceBuildNumIdAccordingToActualSituation') }}</li>
                   </ul>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`获取单个构建日志地址(点击可以复制)`">
+              <a-alert type="info" :message="`${$tl('p.getSingleBuildLogAddress')}(${$tl('c.copyByClick')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.buildLogUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.buildLogUrl }} </span>
@@ -110,9 +111,9 @@
       </a-form>
     </div>
     <template v-else>
-      <a-result title="当前构建还没有生成触发器">
+      <a-result :title="$tl('p.noTriggerGeneratedForCurrentBuild')">
         <template #extra>
-          <a-button key="console" type="primary" @click="handleTrigger"> 现成生成 </a-button>
+          <a-button key="console" type="primary" @click="handleTrigger"> {{ $tl('p.generateNow') }} </a-button>
         </template>
       </a-result>
     </template>
@@ -141,6 +142,9 @@ export default {
     }
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.build.trigger.${key}`, ...args)
+    },
     // 触发器
     handleTrigger() {
       this.temp = {}
