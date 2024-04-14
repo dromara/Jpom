@@ -154,7 +154,6 @@ export default {
       '如果需要定时自动构建则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）',
     retentionDays: '保留天数：',
     exclusionForPublish: '排除发布 ANT 表达式,多个使用逗号分隔',
-    //
     howToList1: '本地构建是指直接在服务端中的服务器执行构建命令',
     howToList2: '注意执行相关命令需要所在服务器中存在对应的环境',
     howToList3: '并且配置正确的环境变量',
@@ -228,6 +227,24 @@ export default {
     eventScriptTip2: '传入环境变量有：buildId、buildName、type、statusMsg、triggerTime、buildNumberId、buildSourceFile',
     eventScriptTip3: '执行脚本传入参数有：startReady、pull、executeCommand、release、done、stop、success',
     eventScriptTip4:
-      '注意：为了避免不必要的事件执行脚本，选择的脚本的备注中包含需要实现的事件参数关键词，如果需要执行 success 事件,那么选择的脚本的备注中需要包含 success 关键词'
+      '注意：为了避免不必要的事件执行脚本，选择的脚本的备注中包含需要实现的事件参数关键词，如果需要执行 success 事件,那么选择的脚本的备注中需要包含 success 关键词',
+    additionalEnvVars1: '附加环境变量是指读取仓库指定环境变量文件来新增到执行构建运行时',
+    additionalEnvVars2: '比如常见的 .env 文件',
+    additionalEnvVars3: '文件内容格式要求：env_name=xxxxx 不满足格式的行将自动忽略',
+    additionalEnvVars4: '也支持 URL 参数格式：test_par=123abc&test_par2=abc21',
+    additionalEnvVars5: '支持配置系统参数：',
+    additionalEnvVars6: '表示构建产物为文件夹时将打包为',
+    additionalEnvVars7: '压缩包进行发布',
+    retainDaysTip:
+      '构建产物保留天数，小于等于 0 为跟随全局保留配置。注意自动清理仅会清理记录状态为：（构建结束、发布中、发布失败、发布失败）的数据避免一些异常构建影响保留个数',
+    retainCountTip:
+      '构建产物保留个数，小于等于 0 为跟随全局保留配置（如果数值大于 0 将和全局配置对比最小值来参考）。注意自动清理仅会清理记录状态为：（构建结束、发布中、发布失败、发布失败）的数据避免一些异常构建影响保留个数。 将在创建新的构建记录时候检查保留个数',
+    buildSciptsInfo: 'Java 项目(示例参考，具体还需要根据项目实际情况来决定)',
+    rulesBuildName: '请填写构建名称',
+    rulesBuildMode: '请选择构建方式',
+    rulesReleaseMethod: '请选择发布操作',
+    rulesBranchName: '请选择分支',
+    rulesScript: '请填写构建命令',
+    rulesResultDirFile: '请填写产物目录'
   }
 }
