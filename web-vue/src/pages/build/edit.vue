@@ -1013,14 +1013,14 @@
                   {{ $tl('p.additionalEnvVars') }}
                   <template #title>
                     <ul>
-                      <li>附加环境变量是指读取仓库指定环境变量文件来新增到执行构建运行时</li>
-                      <li>比如常见的 .env 文件</li>
-                      <li>文件内容格式要求：env_name=xxxxx 不满足格式的行将自动忽略</li>
-                      <li>也支持 URL 参数格式：test_par=123abc&test_par2=abc21</li>
+                      <li>{{ $tl('p.additionalEnvVars1') }}</li>
+                      <li>{{ $tl('p.additionalEnvVars2') }}</li>
+                      <li>{{ $tl('p.additionalEnvVars3') }}</li>
+                      <li>{{ $tl('p.additionalEnvVars4') }}</li>
                       <li>
-                        支持配置系统参数：<b>USE_TAR_GZ=1</b>
-                        表示构建产物为文件夹时将打包为
-                        <b>tar.gz</b> 压缩包进行发布
+                        {{ $tl('p.additionalEnvVars5') }}<b>USE_TAR_GZ=1</b>
+                        {{ $tl('p.additionalEnvVars6') }}
+                        <b>tar.gz</b> {{ $tl('p.additionalEnvVars7') }}
                       </li>
                     </ul>
                   </template>
@@ -1073,8 +1073,7 @@
                       <a-tooltip>
                         {{ $tl('p.retainDays') }}
                         <template #title>
-                          构建产物保留天数，小于等于 0
-                          为跟随全局保留配置。注意自动清理仅会清理记录状态为：（构建结束、发布中、发布失败、发布失败）的数据避免一些异常构建影响保留个数
+                          {{ $tl('p.retainDaysTip') }}
                         </template>
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
@@ -1089,9 +1088,7 @@
                       <a-tooltip>
                         {{ $tl('p.retainCount') }}
                         <template #title>
-                          构建产物保留个数，小于等于 0 为跟随全局保留配置（如果数值大于 0
-                          将和全局配置对比最小值来参考）。注意自动清理仅会清理记录状态为：（构建结束、发布中、发布失败、发布失败）的数据避免一些异常构建影响保留个数。
-                          将在创建新的构建记录时候检查保留个数
+                          {{ $tl('p.retainCountTip') }}
                         </template>
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
@@ -1406,7 +1403,7 @@ export default {
       viewScriptTemplVisible: false,
       buildScipts: [
         {
-          title: 'Java 项目(示例参考，具体还需要根据项目实际情况来决定)',
+          title: this.$tl('p.buildSciptsInfo'),
           children: [
             {
               title: '不执行，也不编译测试用例 mvn clean package -Dmaven.test.skip=true',
@@ -1477,12 +1474,12 @@ export default {
       groupList: [],
       temp: {},
       rules: {
-        name: [{ required: true, message: '请填写构建名称', trigger: 'blur' }],
-        buildMode: [{ required: true, message: '请选择构建方式', trigger: 'blur' }],
-        releaseMethod: [{ required: true, message: '请选择发布操作', trigger: 'blur' }],
-        branchName: [{ required: true, message: '请选择分支', trigger: 'blur' }],
-        script: [{ required: true, message: '请填写构建命令', trigger: 'blur' }],
-        resultDirFile: [{ required: true, message: '请填写产物目录', trigger: 'blur' }],
+        name: [{ required: true, message: this.$tl('p.rulesBuildName'), trigger: 'blur' }],
+        buildMode: [{ required: true, message: this.$tl('p.rulesBuildMode'), trigger: 'blur' }],
+        releaseMethod: [{ required: true, message: this.$tl('p.rulesReleaseMethod'), trigger: 'blur' }],
+        branchName: [{ required: true, message: this.$tl('p.rulesBranchName'), trigger: 'blur' }],
+        script: [{ required: true, message: this.$tl('p.rulesBranchName'), trigger: 'blur' }],
+        resultDirFile: [{ required: true, message: this.$tl('p.rulesResultDirFile'), trigger: 'blur' }],
         // releasePath: [{ required: true, message: '请填写发布目录', trigger: 'blur' }],
         repositoryId: [
           {
