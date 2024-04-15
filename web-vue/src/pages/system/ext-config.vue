@@ -11,7 +11,14 @@
             </a-input>
           </a-space>
         </a-row>
-        <a-directory-tree :tree-data="treeData" :field-names="replaceFields" @select="select"> </a-directory-tree>
+        <a-directory-tree
+          v-model:expandedKeys="expandedKeys"
+          v-model:selectedKeys="selectedKeys"
+          :tree-data="treeData"
+          :field-names="replaceFields"
+          @select="select"
+        >
+        </a-directory-tree>
       </a-col>
       <a-col span="18" style="padding-left: 5px">
         <a-space direction="vertical" style="display: flex">
@@ -54,6 +61,8 @@ export default {
     return {
       loading: false,
       treeData: [],
+      expandedKeys: [],
+      selectedKeys: [],
       editVisible: false,
       temp: {},
 

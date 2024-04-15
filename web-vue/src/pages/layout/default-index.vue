@@ -38,7 +38,7 @@
       </div>
       <a-layout-content
         :style="{
-          width: collapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 210px)',
+          width: collapsed ? 'calc(100vw - 80px - 4px)' : 'calc(100vw - 200px - 4px)',
           overflowY: 'auto',
           backgroundColor: theme === 'light' ? '#fff' : ''
         }"
