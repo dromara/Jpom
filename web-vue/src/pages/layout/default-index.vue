@@ -50,6 +50,9 @@
           </keep-alive>
         </router-view>
       </a-layout-content>
+      <a-layout-footer v-show="false" style="text-align: center">
+        Jpom ©2019-{{ new Date().getFullYear() }} Of Him Code Technology Studio
+      </a-layout-footer>
     </a-layout>
   </a-layout>
 </template>

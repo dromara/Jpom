@@ -38,7 +38,9 @@
 
     <div v-show="showFooter" class="footer">
       <a-button type="text">
-        <a href="https://jpom.top" target="_blank">Copyright © 2019-{{ new Date().getFullYear() }} By Jpom</a>
+        <a href="https://jpom.top" target="_blank">
+          Jpom ©2019-{{ new Date().getFullYear() }} Of Him Code Technology Studio
+        </a>
       </a-button>
     </div>
   </div>
