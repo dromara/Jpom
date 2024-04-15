@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
@@ -17,12 +18,19 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <h1>Jpom 为开源软件，请基于开源协议用于商业用途</h1>
@@ -48,6 +56,23 @@ public class AboutController {
     public IJsonMessage<String> license() {
         InputStream inputStream = ResourceUtil.getStream("classpath:/LICENSE");
         return JsonMessage.success("", IoUtil.readUtf8(inputStream));
+    }
+
+    /**
+     * 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。
+     *
+     * @return json
+     */
+    @GetMapping(value = "privacy", produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<String> privacy() throws IOException {
+        PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
+        Resource[] csvResources = pathMatchingResourcePatternResolver.getResources("classpath*:/privacy/*.md");
+        List<Resource> resourceList = Arrays.stream(csvResources)
+            .sorted((o1, o2) -> StrUtil.compare(o1.getFilename(), o2.getFilename(), true))
+            .collect(Collectors.toList());
+        Resource first = CollUtil.getFirst(resourceList);
+        Assert.notNull(first, "没有隐私文件");
+        return JsonMessage.success("", IoUtil.readUtf8(first.getInputStream()));
     }
 
     /**
