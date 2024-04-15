@@ -32,13 +32,28 @@
         <rect stroke="#CED4D9" x="108" y="1" width="9" height="9" rx="1"></rect>
       </g>
     </svg>
-    <div class="box"><slot name="content" /></div>
+    <div class="box">
+      <slot name="content" />
+    </div>
+
+    <div v-show="showFooter" class="footer">
+      <a-button type="text">
+        <a href="https://jpom.top" target="_blank">Copyright © 2019-{{ new Date().getFullYear() }} By Jpom</a>
+      </a-button>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
 const guideStore1 = guideStore()
 const theme = computed(() => {
   return guideStore1.getThemeView()
+})
+
+defineProps({
+  showFooter: {
+    type: Boolean,
+    default: true
+  }
 })
 
 const backgroundImage = computed(() => {
@@ -71,5 +86,18 @@ const backgroundImage = computed(() => {
 
 :global(.ant-result-content) {
   background-color: unset !important;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex; /* 添加Flex布局 */
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中（如果需要） */
+  /* 添加必要的高度和内边距 */
+  /* height: 60px; */
+  padding: 10px;
 }
 </style>
