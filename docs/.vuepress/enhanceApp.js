@@ -195,7 +195,7 @@ export default ({
           10,
           function () {
             ABDetected();
-            ABDetectedHeader();
+            //ABDetectedHeader();
             changeAdHideEvent();
           }
         );
