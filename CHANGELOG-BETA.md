@@ -5,6 +5,7 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】升级 前端组件版本 
+2. 【all】优化 管理脚本删除 `-XX:-UseBiasedLocking` 使其能在高版本 jdk 运行
 
 ------
 
