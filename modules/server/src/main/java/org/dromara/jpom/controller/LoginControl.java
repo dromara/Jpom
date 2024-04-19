@@ -49,6 +49,9 @@ import org.dromara.jpom.model.dto.UserLoginDto;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.oauth2.BaseOauth2Config;
 import org.dromara.jpom.oauth2.Oauth2Factory;
+import org.dromara.jpom.permission.ClassFeature;
+import org.dromara.jpom.permission.Feature;
+import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.service.user.UserService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.util.JwtUtil;
@@ -170,6 +173,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
      */
     @PostMapping(value = "userLogin", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
+    @Feature(cls = ClassFeature.USER, method = MethodFeature.EXECUTE, logResponse = false)
     public IJsonMessage<Object> userLogin(@ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息") String loginName,
                                           @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息") String userPwd,
                                           String code,
@@ -278,6 +282,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
      */
     @PostMapping(value = "oauth2/login", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
+    @Feature(cls = ClassFeature.USER, method = MethodFeature.EXECUTE, logResponse = false)
     public IJsonMessage<UserLoginDto> oauth2Callback(@ValidatorItem String code,
                                                      @ValidatorItem String provide,
                                                      String state,

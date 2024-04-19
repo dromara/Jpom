@@ -1,8 +1,13 @@
 <template>
   <div>
     <!-- 数据表格 -->
-    <a-table
-      size="middle"
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      :active-page="activePage"
+      table-name="systemUserOperationLog"
+      empty-description="没有任何操作日志"
       :data-source="list"
       :columns="columns"
       :pagination="pagination"
@@ -12,6 +17,7 @@
         x: 'max-content'
       }"
       @change="change"
+      @refresh="loadData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -97,7 +103,7 @@
           </a-tooltip>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'nodeId'">
           <a-tooltip placement="topLeft" :title="nodeMap[text]">
             <span>{{ nodeMap[text] }}</span>
@@ -138,7 +144,7 @@
           <a-button size="small" type="primary" @click="handleDetail(record)">详情</a-button>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 详情区 -->
     <a-modal v-model:open="detailVisible" destroy-on-close width="600px" title="详情信息" :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">
@@ -186,7 +192,12 @@ export default {
       detailData: [],
       columns: [
         {
-          title: '操作者',
+          title: '用户ID',
+          dataIndex: 'userId',
+          ellipsis: true
+        },
+        {
+          title: '用户昵称',
           dataIndex: 'username',
           ellipsis: true
         },
@@ -251,6 +262,9 @@ export default {
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     }
   },
   created() {

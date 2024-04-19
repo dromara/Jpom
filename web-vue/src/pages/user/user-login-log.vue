@@ -1,8 +1,13 @@
 <template>
   <div>
     <!-- 数据表格 -->
-    <a-table
-      size="middle"
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      :active-page="activePage"
+      table-name="systemUserLoginLog"
+      empty-description="没有任何登录日志"
       :data-source="list"
       :columns="columns"
       :pagination="pagination"
@@ -12,6 +17,7 @@
         x: 'max-content'
       }"
       @change="change"
+      @refresh="loadData"
     >
       <template #title>
         <a-space>
@@ -45,7 +51,7 @@
           </a-tooltip>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text }">
+      <template #tableBodyCell="{ column, text }">
         <template v-if="column.dataIndex === 'userAgent'">
           <a-tooltip :title="text">{{ text }} </a-tooltip>
         </template>
@@ -63,13 +69,13 @@
           {{ operateCodeMap[text] || '未知' }}
         </template>
       </template>
-    </a-table>
+    </CustomTable>
   </div>
 </template>
 <script lang="ts" setup>
 import { userLoginLgin, operateCodeMap } from '@/api/user/user-login-log'
 import { IPageQuery } from '@/interface/common'
-
+import { CustomColumnType } from '@/components/customTable/types'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 
 const loading = ref(false)
@@ -77,7 +83,13 @@ const list = ref([])
 // const operateCode = operateCodeMap;
 const listQuery = ref<IPageQuery>({ ...PAGE_DEFAULT_LIST_QUERY })
 
-const columns = [
+const route = useRoute()
+const attrs = useAttrs()
+const activePage = computed(() => {
+  return attrs.routerUrl === route.path
+})
+
+const columns = ref<CustomColumnType[]>([
   { title: '用户ID', dataIndex: 'modifyUser', width: 100 },
   { title: '用户昵称', dataIndex: 'username', width: 120 },
   { title: 'IP', dataIndex: 'ip', width: 120 },
@@ -108,7 +120,7 @@ const columns = [
     width: '170px'
   },
   { title: '浏览器', dataIndex: 'userAgent', ellipsis: true, width: 100 }
-]
+])
 
 const pagination = COMPUTED_PAGINATION(listQuery.value)
 
