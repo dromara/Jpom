@@ -10,6 +10,7 @@
 4. 【server】修复 项目列表和逻辑节点卡片视图冲突
 5. 【server】修复 docker管理新增docker选择证书界面权重异常 （感谢[@伤感的风铃草](https://gitee.com/bwy-flc) [Gitee issues I9GYVA](https://gitee.com/dromara/Jpom/issues/I9GYVA) ）
 6. 【server】修复 系统管理中用户管理中登录日志无法筛选
+7. 【server】优化 用户登录记录操作日志（保证操作监控能记录）
 
 ------
 
