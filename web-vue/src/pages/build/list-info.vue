@@ -302,7 +302,7 @@
               <a-button size="small" @click="handleDelete(item)">{{ $tl('c.delete') }}</a-button>
               <a-tooltip placement="leftBottom" :title="$tl('c.clearCode')">
                 <a-button size="small" :disabled="!item.sourceDirExist" @click="handleClear(item)"
-                  >{{ $tl('undefined') }}
+                  >{{ $tl('p.clearCode') }}
                 </a-button>
               </a-tooltip>
             </a-button-group>

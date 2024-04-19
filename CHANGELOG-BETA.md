@@ -6,6 +6,7 @@
 
 1. 【server】升级 前端组件版本 
 2. 【all】优化 管理脚本删除 `-XX:-UseBiasedLocking` 使其能在高版本 jdk 运行
+3. 【server】修复 构建列表卡片模式按钮文字错乱
 
 ------
 
