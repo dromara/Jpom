@@ -172,7 +172,7 @@
       :footer="null"
       :mask-closable="false"
     >
-      <a-tabs v-model="temp.tabActiveKey" @change="tabChange">
+      <a-tabs v-model:active-key="temp.tabActiveKey" @change="tabChange">
         <a-tab-pane :key="1" tab="修改密码">
           <a-spin tip="Loading..." :spinning="confirmLoading">
             <a-form
