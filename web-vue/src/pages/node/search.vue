@@ -10,8 +10,8 @@
 
     <CustomTable
       v-else
-      ref="nodeSearch"
-      table-name="nodeSearch"
+      ref="nodeProjectSearch"
+      table-name="nodeProjectSearch"
       is-show-tools
       default-auto-refresh
       :auto-refresh-time="5"
@@ -873,7 +873,7 @@ export default {
 
             // 重新计算倒计时
             // this.countdownTime = Date.now() + this.refreshInterval * 1000
-            this.$refs.nodeSearch.countDownChange()
+            this.$refs.nodeProjectSearch.countDownChange()
           }
         })
         .finally(() => {

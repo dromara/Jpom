@@ -34,11 +34,18 @@ export type CustomTableSlotsType = CustomSlotsType<{
   summary?: any
   tableHelp?: any
   toolPrefix?: any
-  tableBodyCell?: any
+  tableBodyCell?: (props: {
+    text: any
+    value: any
+    record: Record<string, any>
+    index: number
+    column: ColumnType
+  }) => void
+  cardBodyCell?: any
   expandedRowRender?: any
   expandColumnTitle?: any
   emptyDescription: string
-  bodyCell?: (props: { text: any; value: any; record: Record<string, any>; index: number; column: ColumnType }) => void
+  // bodyCell?: (props: { text: any; value: any; record: Record<string, any>; index: number; column: ColumnType }) => void
   headerCell?: (props: { title: any; column: ColumnType }) => void
   customFilterIcon?: any
   customFilterDropdown?: any
