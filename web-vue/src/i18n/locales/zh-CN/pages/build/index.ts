@@ -12,9 +12,15 @@ import details from './details'
 import history from './history'
 import item from './item'
 import listInfo from './list-info'
+import log from './log'
+import trigger from './trigger'
+import edit from './edit'
 export default {
   details,
   history,
   item,
-  listInfo
+  listInfo,
+  log,
+  trigger,
+  edit
 }

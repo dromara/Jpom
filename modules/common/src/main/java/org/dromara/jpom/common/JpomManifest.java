@@ -102,26 +102,18 @@ public class JpomManifest {
      */
     private String installId;
 
-    private static void init() {
-        if (JPOM_MANIFEST == null) {
-            synchronized (JpomManifest.class) {
-                if (JPOM_MANIFEST == null) {
-                    JPOM_MANIFEST = new JpomManifest();
-                    File jarFile = getRunPath();
-                    Tuple jarVersion = getJarVersion(jarFile);
-                    if (jarVersion != null) {
-                        JPOM_MANIFEST.setVersion(jarVersion.get(0));
-                        JPOM_MANIFEST.setTimeStamp(jarVersion.get(1));
-                    }
-                    JPOM_MANIFEST.setJarFile(FileUtil.getAbsolutePath(jarFile));
-                    //
-                    JPOM_MANIFEST.randomId = IdUtil.fastSimpleUUID();
-                }
-                String jpomTag = StrUtil.format("Jpom {}/{}", JPOM_MANIFEST.getType(), JPOM_MANIFEST.getVersion());
-                String osInfo = buildOsInfo();
-                GlobalHeaders.INSTANCE.header(Header.USER_AGENT, StrUtil.format("Mozilla/5.0 ({}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.0000.000 Safari/537.36 {}", osInfo, jpomTag), true);
-            }
+    private static JpomManifest buildJpomManifest() {
+        JpomManifest jpomManifest = new JpomManifest();
+        File jarFile = getRunPath();
+        Tuple jarVersion = getJarVersion(jarFile);
+        if (jarVersion != null) {
+            jpomManifest.setVersion(jarVersion.get(0));
+            jpomManifest.setTimeStamp(jarVersion.get(1));
         }
+        jpomManifest.setJarFile(FileUtil.getAbsolutePath(jarFile));
+        //
+        jpomManifest.randomId = IdUtil.fastSimpleUUID();
+        return jpomManifest;
     }
 
     private static String buildOsInfo() {
@@ -129,14 +121,9 @@ public class JpomManifest {
         OsInfo osInfo = SystemUtil.getOsInfo();
         JavaInfo javaInfo = SystemUtil.getJavaInfo();
         boolean inDocker = StrUtil.isNotEmpty(SystemUtil.get("JPOM_PKG"));
-        String osName = Opt.ofBlankAble(osInfo.getName()).orElseGet(() -> {
-            if (inDocker) {
-                return "docker";
-            }
-            return UserAgentInfo.NameUnknown;
-        });
+        String osName = Opt.ofBlankAble(osInfo.getName()).orElseGet(() -> UserAgentInfo.NameUnknown);
         return StrUtil.format("{} {}; {}; {}",
-            osName,
+            inDocker ? "docker" : osName,
             Opt.ofBlankAble(osInfo.getVersion()).orElse("0"),
             Opt.ofBlankAble(osInfo.getArch()).orElse(UserAgentInfo.NameUnknown),
             Opt.ofBlankAble(javaInfo.getVersion()).orElse(UserAgentInfo.NameUnknown)
@@ -176,7 +163,17 @@ public class JpomManifest {
      * @return this
      */
     public static JpomManifest getInstance() {
-        init();
+        if (JPOM_MANIFEST == null) {
+            synchronized (JpomManifest.class) {
+                if (JPOM_MANIFEST == null) {
+                    JPOM_MANIFEST = buildJpomManifest();
+                }
+                String jpomTag = StrUtil.format("Jpom {}/{}", JPOM_MANIFEST.getType(), JPOM_MANIFEST.getVersion());
+                String osInfo = buildOsInfo();
+                // Mozilla/5.0 (${os-name} ${os-version}; ${os-arch}; ${jdk-version}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.0000.000 Safari/537.36 ${jpom-type}/${jpom-version}
+                GlobalHeaders.INSTANCE.header(Header.USER_AGENT, StrUtil.format("Mozilla/5.0 ({}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.0000.000 Safari/537.36 {}", osInfo, jpomTag), true);
+            }
+        }
         return JPOM_MANIFEST;
     }
 
