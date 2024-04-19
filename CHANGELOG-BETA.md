@@ -8,6 +8,7 @@
 2. 【all】优化 管理脚本删除 `-XX:-UseBiasedLocking` 使其能在高版本 jdk 运行
 3. 【server】修复 构建列表卡片模式按钮文字错乱
 4. 【server】修复 项目列表和逻辑节点卡片视图冲突
+5. 【server】修复 docker管理新增docker选择证书界面权重异常 （感谢[@伤感的风铃草](https://gitee.com/bwy-flc) [Gitee issues I9GYVA](https://gitee.com/dromara/Jpom/issues/I9GYVA) ）
 
 ------
 

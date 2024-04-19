@@ -502,6 +502,7 @@
       :title="`选择证书文件`"
       placement="right"
       :open="certificateVisible"
+      v-if="certificateVisible"
       width="85vw"
       :z-index="1009"
       :footer-style="{ textAlign: 'right' }"
