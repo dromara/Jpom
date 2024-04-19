@@ -16,12 +16,23 @@
       <template #title>
         <a-space>
           <a-input
-            v-model="listQuery['%username%']"
+            v-model:value="listQuery['%modifyUser%']"
             placeholder="用户名"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-input v-model="listQuery['%ip%']" placeholder="登录IP" class="search-input-item" @press-enter="loadData" />
+          <a-input
+            v-model:value="listQuery['%username%']"
+            placeholder="用户昵称"
+            class="search-input-item"
+            @press-enter="loadData"
+          />
+          <a-input
+            v-model:value="listQuery['%ip%']"
+            placeholder="登录IP"
+            class="search-input-item"
+            @press-enter="loadData"
+          />
           <a-range-picker
             class="search-input-item"
             style="width: 220px"
@@ -68,7 +79,7 @@ const listQuery = ref<IPageQuery>({ ...PAGE_DEFAULT_LIST_QUERY })
 
 const columns = [
   { title: '用户ID', dataIndex: 'modifyUser', width: 100 },
-  { title: '用户名称', dataIndex: 'username', width: 120 },
+  { title: '用户昵称', dataIndex: 'username', width: 120 },
   { title: 'IP', dataIndex: 'ip', width: 120 },
 
   {
