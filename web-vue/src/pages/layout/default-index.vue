@@ -29,12 +29,24 @@
           background: theme === 'light' ? '#fff' : '#141414'
         }"
       >
-        <content-tab
-          :mode="mode"
-          :style="{
-            width: collapsed ? 'calc(100vw - 80px - 20px)' : 'calc(100vw - 200px - 20px)'
-          }"
-        />
+        <a-space direction="vertical">
+          <a-alert
+            v-if="systemNotificationData && systemNotificationData.enabled"
+            :type="systemNotificationData.level || 'info'"
+            :closable="systemNotificationData.closable"
+            banner
+            :afterClose="notificationAfterClose"
+          >
+            <template #message> <div v-html="systemNotificationData.title"></div> </template>
+            <template #description> <div v-html="systemNotificationData.content"></div> </template>
+          </a-alert>
+          <content-tab
+            :mode="mode"
+            :style="{
+              width: collapsed ? 'calc(100vw - 80px - 20px)' : 'calc(100vw - 200px - 20px)'
+            }"
+          />
+        </a-space>
       </div>
       <a-layout-content
         :style="{
@@ -61,11 +73,10 @@ import SideMenu from './side-menu.vue'
 // import UserHeader from "./user-header";
 import ContentTab from './content-tab.vue'
 import { checkSystem, loadingLogo } from '@/api/install'
-import { useAppStore } from '@/stores/app'
-import { useGuideStore } from '@/stores/guide'
 import defaultLogo from '@/assets/images/jpom.svg'
 import { useAllMenuStore } from '@/stores/menu2'
-
+import { UserNotificationType, systemNotification } from '@/api/user/user-notification'
+// import { SpaceSize } from 'ant-design-vue/es/space'
 defineProps({
   mode: {
     type: String,
@@ -121,25 +132,27 @@ const collapsed = ref(false)
 const subTitle = ref('项目运维')
 const logoUrl = ref('')
 
-const appStore = useAppStore()
-const guideStore = useGuideStore()
+const _appStore = appStore()
+const _guideStore = guideStore()
 onMounted(() => {
   checkSystemHannder()
 
-  collapsed.value = appStore.getCollapsed
+  collapsed.value = _appStore.getCollapsed
 })
 
 const router = useRouter()
 // const route = useRoute()
 
 const menuTheme = computed(() => {
-  return guideStore.getMenuThemeView()
+  return _guideStore.getMenuThemeView()
 })
 
 const theme = computed(() => {
-  return guideStore.getThemeView()
+  return _guideStore.getThemeView()
 })
 const jpomWindow_ = jpomWindow()
+
+const systemNotificationData = ref<UserNotificationType>({})
 // 检查是否需要初始化
 const checkSystemHannder = () => {
   checkSystem().then((res) => {
@@ -150,7 +163,7 @@ const checkSystemHannder = () => {
       }
 
       // 禁用导航
-      guideStore.commitGuide({
+      _guideStore.commitGuide({
         disabledGuide: res.data.disabledGuide ? true : false,
         extendPlugins: res.data.extendPlugins as string[]
       })
@@ -168,6 +181,13 @@ const checkSystemHannder = () => {
       router.push('/prohibit-access')
     } else if (res.code === 222) {
       router.push('/install')
+    } else {
+      // 加载公告信息
+      systemNotification().then((res) => {
+        if (res.code === 200) {
+          systemNotificationData.value = res.data || {}
+        }
+      })
     }
   })
 
@@ -175,10 +195,17 @@ const checkSystemHannder = () => {
     logoUrl.value = res.data || ''
   })
 }
+
+// const headerNotificationSize = ref<SpaceSize>('small')
+
+const notificationAfterClose = () => {
+  systemNotificationData.value = { ...systemNotificationData.value, enabled: false }
+}
+
 const changeCollapsed = () => {
   collapsed.value = !collapsed.value
 
-  appStore.collapsed(collapsed.value)
+  _appStore.collapsed(collapsed.value)
 }
 </script>
 <style scoped lang="less">
@@ -186,17 +213,17 @@ const changeCollapsed = () => {
   min-height: 100vh;
 }
 
-#app-layout .icon-btn {
-  float: left;
-  font-size: 18px;
-  line-height: 64px;
-  padding: 0 14px;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-#app-layout .trigger:hover {
-  color: #1890ff;
-}
+// #app-layout .icon-btn {
+//   float: left;
+//   font-size: 18px;
+//   line-height: 64px;
+//   padding: 0 160px;
+//   cursor: pointer;
+//   transition: color 0.3s;
+// }
+// #app-layout .trigger:hover {
+//   color: #1890ff;
+// }
 #app-layout .logo {
   flex-shrink: 0;
   width: 100%;
@@ -247,7 +274,7 @@ const changeCollapsed = () => {
 }
 .layout-content {
   overflow-x: auto;
-  padding: 15px;
+  padding: 10px;
   /* margin: 15px; */
 }
 /*
