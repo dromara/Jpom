@@ -8,6 +8,7 @@
       :active-page="activePage"
       table-name="systemUserLoginLog"
       empty-description="没有任何登录日志"
+      :loading="loading"
       :data-source="list"
       :columns="columns"
       :pagination="pagination"
@@ -122,18 +123,23 @@ const columns = ref<CustomColumnType[]>([
   { title: '浏览器', dataIndex: 'userAgent', ellipsis: true, width: 100 }
 ])
 
-const pagination = COMPUTED_PAGINATION(listQuery.value)
+const pagination = computed(() => {
+  return COMPUTED_PAGINATION(listQuery.value)
+})
 
 const loadData = (pointerEvent?: any) => {
   loading.value = true
   listQuery.value.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : listQuery.value.page
-  userLoginLgin(listQuery.value).then((res) => {
-    if (res.code === 200) {
-      list.value = res.data.result
-      listQuery.value.total = res.data.total
-    }
-    loading.value = false
-  })
+  userLoginLgin(listQuery.value)
+    .then((res) => {
+      if (res.code === 200) {
+        list.value = res.data.result
+        listQuery.value.total = res.data.total
+      }
+    })
+    .finally(() => {
+      loading.value = false
+    })
 }
 
 const change = (pagination: any, filters: any, sorter: any) => {
