@@ -9,9 +9,11 @@
  */
 package org.dromara.jpom.monitor;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSON;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.model.data.MailAccountModel;
 import org.dromara.jpom.model.data.MonitorModel;
 import org.dromara.jpom.plugin.PluginFactory;
@@ -25,6 +27,7 @@ import java.util.Map;
  *
  * @author Arno
  */
+@Slf4j
 public class EmailUtil implements INotify {
 
     private static SystemParametersServer systemParametersServer;
@@ -64,6 +67,10 @@ public class EmailUtil implements INotify {
         if (config == null) {
             // 没有数据才加载
             refreshConfig();
+        }
+        if (config == null || StrUtil.isEmpty(config.getHost())) {
+            log.error("未配置邮箱服务不能发送邮件：{} {}", email, title);
+            return;
         }
         //
         Map<String, Object> mailMap = new HashMap<>(10);
