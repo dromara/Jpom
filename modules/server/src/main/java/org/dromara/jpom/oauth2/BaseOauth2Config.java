@@ -65,6 +65,10 @@ public abstract class BaseOauth2Config {
      */
     protected Boolean autoCreteUser;
     protected Boolean ignoreCheckState;
+    /**
+     * 创建用户后，自动关联权限组
+     */
+    protected String permissionGroup;
 
 
     /**

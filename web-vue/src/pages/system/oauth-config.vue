@@ -30,16 +30,36 @@
               placeholder="请输入回调重定向 url [redirectUri]"
             />
           </a-form-item>
-          <!-- <a-form-item label="登录url">
-              <a-input :value="`${this.host}/oauth2-render-github`" type="text" />
-            </a-form-item> -->
-          <a-form-item label="自动创建用户" name="autoCreteUser">
-            <a-switch v-model:checked="dingtalk.autoCreteUser" checked-children="启用" un-checked-children="停用" />
-          </a-form-item>
+
           <a-form-item label="忽略校验 state" name="ignoreCheckState">
             <a-switch v-model:checked="dingtalk.ignoreCheckState" checked-children="忽略" un-checked-children="校验" />
           </a-form-item>
-
+          <a-form-item label="自动创建用户" name="autoCreteUser">
+            <a-switch v-model:checked="dingtalk.autoCreteUser" checked-children="启用" un-checked-children="停用" />
+          </a-form-item>
+          <a-form-item label="权限组" name="permissionGroup" v-if="dingtalk.autoCreteUser">
+            <template #help>创建用户后自动关联上对应的权限组</template>
+            <a-select
+              v-model:value="dingtalk.permissionGroup"
+              show-search
+              :filter-option="
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
+              placeholder="请选择用户的权限组"
+              mode="multiple"
+            >
+              <a-select-option v-for="item in permissionGroup" :key="item.id">
+                {{ item.name }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
             <a-button type="primary" class="btn" @click="onSubmit('dingtalk')">提交</a-button>
           </a-form-item>
@@ -61,16 +81,36 @@
             <template #help>参考地址：{{ `${host}/oauth2-feishu` }}</template>
             <a-input v-model:value="feishu.redirectUri" type="text" placeholder="请输入回调重定向 url [redirectUri]" />
           </a-form-item>
-          <!-- <a-form-item label="登录url">
-              <a-input :value="`${this.host}/oauth2-render-github`" type="text" />
-            </a-form-item> -->
-          <a-form-item label="自动创建用户" name="autoCreteUser">
-            <a-switch v-model:checked="feishu.autoCreteUser" checked-children="启用" un-checked-children="停用" />
-          </a-form-item>
+
           <a-form-item label="忽略校验 state" name="ignoreCheckState">
             <a-switch v-model:checked="feishu.ignoreCheckState" checked-children="忽略" un-checked-children="校验" />
           </a-form-item>
-
+          <a-form-item label="自动创建用户" name="autoCreteUser">
+            <a-switch v-model:checked="feishu.autoCreteUser" checked-children="启用" un-checked-children="停用" />
+          </a-form-item>
+          <a-form-item label="权限组" name="permissionGroup" v-if="feishu.autoCreteUser">
+            <template #help>创建用户后自动关联上对应的权限组</template>
+            <a-select
+              v-model:value="feishu.permissionGroup"
+              show-search
+              :filter-option="
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
+              placeholder="请选择用户的权限组"
+              mode="multiple"
+            >
+              <a-select-option v-for="item in permissionGroup" :key="item.id">
+                {{ item.name }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
             <a-button type="primary" class="btn" @click="onSubmit('feishu')">提交</a-button>
           </a-form-item>
@@ -108,13 +148,7 @@
               placeholder="请输入回调重定向 url [redirectUri]"
             />
           </a-form-item>
-          <a-form-item label="自动创建用户" name="autoCreteUser">
-            <a-switch
-              v-model:checked="wechat_enterprise.autoCreteUser"
-              checked-children="启用"
-              un-checked-children="停用"
-            />
-          </a-form-item>
+
           <a-form-item label="忽略校验 state" name="ignoreCheckState">
             <a-switch
               v-model:checked="wechat_enterprise.ignoreCheckState"
@@ -122,7 +156,36 @@
               un-checked-children="校验"
             />
           </a-form-item>
-
+          <a-form-item label="自动创建用户" name="autoCreteUser">
+            <a-switch
+              v-model:checked="wechat_enterprise.autoCreteUser"
+              checked-children="启用"
+              un-checked-children="停用"
+            />
+          </a-form-item>
+          <a-form-item label="权限组" name="permissionGroup" v-if="wechat_enterprise.autoCreteUser">
+            <template #help>创建用户后自动关联上对应的权限组</template>
+            <a-select
+              v-model:value="wechat_enterprise.permissionGroup"
+              show-search
+              :filter-option="
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
+              placeholder="请选择用户的权限组"
+              mode="multiple"
+            >
+              <a-select-option v-for="item in permissionGroup" :key="item.id">
+                {{ item.name }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
             <a-button type="primary" class="btn" @click="onSubmit('wechat_enterprise')">提交</a-button>
           </a-form-item>
@@ -156,14 +219,36 @@
             <template #help>参考地址：{{ `${host}/oauth2-maxkey` }}</template>
             <a-input v-model:value="maxkey.redirectUri" type="text" placeholder="请输入回调重定向 url [redirectUri]" />
           </a-form-item>
-          <!-- <a-form-item label="登录url">
-              <a-input :value="`${this.host}/oauth2-render-maxkey`" type="text" />
-            </a-form-item> -->
+
+          <a-form-item label="忽略校验 state" name="ignoreCheckState">
+            <a-switch v-model:checked="maxkey.ignoreCheckState" checked-children="忽略" un-checked-children="校验" />
+          </a-form-item>
+
           <a-form-item label="自动创建用户" name="autoCreteUser">
             <a-switch v-model:checked="maxkey.autoCreteUser" checked-children="启用" un-checked-children="停用" />
           </a-form-item>
-          <a-form-item label="忽略校验 state" name="ignoreCheckState">
-            <a-switch v-model:checked="maxkey.ignoreCheckState" checked-children="忽略" un-checked-children="校验" />
+          <a-form-item label="权限组" name="permissionGroup" v-if="maxkey.autoCreteUser">
+            <template #help>创建用户后自动关联上对应的权限组</template>
+            <a-select
+              v-model:value="maxkey.permissionGroup"
+              show-search
+              :filter-option="
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
+              placeholder="请选择用户的权限组"
+              mode="multiple"
+            >
+              <a-select-option v-for="item in permissionGroup" :key="item.id">
+                {{ item.name }}
+              </a-select-option>
+            </a-select>
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
@@ -186,14 +271,36 @@
             <template #help>参考地址：{{ `${host}/oauth2-gitee` }}</template>
             <a-input v-model:value="gitee.redirectUri" type="text" placeholder="请输入回调重定向 url [redirectUri]" />
           </a-form-item>
-          <!-- <a-form-item label="登录url">
-              <a-input :value="`${this.host}/oauth2-render-gitee`" type="text" />
-            </a-form-item> -->
+
+          <a-form-item label="忽略校验 state" name="ignoreCheckState">
+            <a-switch v-model:checked="gitee.ignoreCheckState" checked-children="忽略" un-checked-children="校验" />
+          </a-form-item>
+
           <a-form-item label="自动创建用户" name="autoCreteUser">
             <a-switch v-model:checked="gitee.autoCreteUser" checked-children="启用" un-checked-children="停用" />
           </a-form-item>
-          <a-form-item label="忽略校验 state" name="ignoreCheckState">
-            <a-switch v-model:checked="gitee.ignoreCheckState" checked-children="忽略" un-checked-children="校验" />
+          <a-form-item label="权限组" name="permissionGroup" v-if="gitee.autoCreteUser">
+            <template #help>创建用户后自动关联上对应的权限组</template>
+            <a-select
+              v-model:value="gitee.permissionGroup"
+              show-search
+              :filter-option="
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
+              placeholder="请选择用户的权限组"
+              mode="multiple"
+            >
+              <a-select-option v-for="item in permissionGroup" :key="item.id">
+                {{ item.name }}
+              </a-select-option>
+            </a-select>
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
@@ -226,11 +333,35 @@
             />
           </a-form-item>
 
+          <a-form-item label="忽略校验 state" name="ignoreCheckState">
+            <a-switch v-model:checked="mygitlab.ignoreCheckState" checked-children="忽略" un-checked-children="校验" />
+          </a-form-item>
+
           <a-form-item label="自动创建用户" name="autoCreteUser">
             <a-switch v-model:checked="mygitlab.autoCreteUser" checked-children="启用" un-checked-children="停用" />
           </a-form-item>
-          <a-form-item label="忽略校验 state" name="ignoreCheckState">
-            <a-switch v-model:checked="mygitlab.ignoreCheckState" checked-children="忽略" un-checked-children="校验" />
+          <a-form-item label="权限组" name="permissionGroup" v-if="mygitlab.autoCreteUser">
+            <template #help>创建用户后自动关联上对应的权限组</template>
+            <a-select
+              v-model:value="mygitlab.permissionGroup"
+              show-search
+              :filter-option="
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
+              placeholder="请选择用户的权限组"
+              mode="multiple"
+            >
+              <a-select-option v-for="item in permissionGroup" :key="item.id">
+                {{ item.name }}
+              </a-select-option>
+            </a-select>
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
@@ -255,14 +386,36 @@
             <template #help>参考地址：{{ `${host}/oauth2-github` }}</template>
             <a-input v-model:value="github.redirectUri" type="text" placeholder="请输入回调重定向 url [redirectUri]" />
           </a-form-item>
-          <!-- <a-form-item label="登录url">
-              <a-input :value="`${this.host}/oauth2-render-github`" type="text" />
-            </a-form-item> -->
+
+          <a-form-item label="忽略校验 state" name="ignoreCheckState">
+            <a-switch v-model:checked="github.ignoreCheckState" checked-children="忽略" un-checked-children="校验" />
+          </a-form-item>
+
           <a-form-item label="自动创建用户" name="autoCreteUser">
             <a-switch v-model:checked="github.autoCreteUser" checked-children="启用" un-checked-children="停用" />
           </a-form-item>
-          <a-form-item label="忽略校验 state" name="ignoreCheckState">
-            <a-switch v-model:checked="github.ignoreCheckState" checked-children="忽略" un-checked-children="校验" />
+          <a-form-item label="权限组" name="permissionGroup" v-if="github.autoCreteUser">
+            <template #help>创建用户后自动关联上对应的权限组</template>
+            <a-select
+              v-model:value="github.permissionGroup"
+              show-search
+              :filter-option="
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
+              placeholder="请选择用户的权限组"
+              mode="multiple"
+            >
+              <a-select-option v-for="item in permissionGroup" :key="item.id">
+                {{ item.name }}
+              </a-select-option>
+            </a-select>
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
@@ -276,7 +429,7 @@
 
 <script>
 import { oauthConfigOauth2, oauthConfigOauth2Save } from '@/api/system'
-
+import { getUserPermissionListAll } from '@/api/user/user-permission'
 export default {
   data() {
     return {
@@ -289,7 +442,8 @@ export default {
       wechat_enterprise: {},
       rules: {},
       provides: ['gitee', 'maxkey', 'github', 'dingtalk', 'feishu', 'mygitlab', 'wechat_enterprise'],
-      host: ''
+      host: '',
+      permissionGroup: []
     }
   },
   mounted() {
@@ -304,19 +458,30 @@ export default {
           provide: item
         }).then((res) => {
           if (res.code === 200) {
-            this[item] = Object.assign(res.data || {}, { provide: item })
+            const permissionGroup = res.data?.permissionGroup?.split('@') || []
+            this[item] = Object.assign(res.data || {}, { provide: item, permissionGroup: permissionGroup })
           }
         })
       })
+      this.listUserPermissionListAll()
     },
     // submit
     onSubmit(key) {
-      oauthConfigOauth2Save(this[key]).then((res) => {
+      let data = this[key]
+      data = { ...data, permissionGroup: data.permissionGroup.join('@') }
+      oauthConfigOauth2Save(data).then((res) => {
         if (res.code === 200) {
           // 成功
           $notification.success({
             message: res.msg
           })
+        }
+      })
+    },
+    listUserPermissionListAll() {
+      getUserPermissionListAll().then((res) => {
+        if (res.code === 200 && res.data) {
+          this.permissionGroup = res.data
         }
       })
     }

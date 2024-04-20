@@ -237,6 +237,7 @@ export default {
       editVisible: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       columns: [
+        { title: 'id', dataIndex: 'id', ellipsis: true },
         { title: '名称', dataIndex: 'name', ellipsis: true },
         { title: '描述', dataIndex: 'description', ellipsis: true },
 
