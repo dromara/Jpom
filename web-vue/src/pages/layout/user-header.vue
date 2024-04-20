@@ -4,7 +4,10 @@
       <!-- 工作空间信息 -->
       <a-button v-if="mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
-          <a-tooltip :title="`工作空间名称：${selectWorkspace.name} 【分组名：${selectWorkspace.group || '未配置'}】`">
+          <a-tooltip
+            :title="`工作空间名称：${selectWorkspace.name} 【分组名：${selectWorkspace.group || '未配置'}】`"
+            placement="bottom"
+          >
             <SwitcherOutlined />
             {{ selectWorkspace.name }}
             <template v-if="myClusterList.length > 1 && selectWorkspace.clusterInfoId">
@@ -26,7 +29,7 @@
       </a-button>
       <a-button v-if="mode === 'management'" type="dashed">
         <div class="workspace-name">
-          <a-tooltip :title="`集群名称：${selectCluster && selectCluster.name}`">
+          <a-tooltip :title="`集群名称：${selectCluster && selectCluster.name}`" placement="bottom">
             <ClusterOutlined />
             {{ selectCluster && selectCluster.name }}
           </a-tooltip>
@@ -34,7 +37,7 @@
       </a-button>
       <a-button type="primary" class="btn-group-item">
         <div class="user-name">
-          <a-tooltip :title="getUserInfo.name"> {{ getUserInfo.name }} </a-tooltip>
+          <a-tooltip :title="getUserInfo.name" placement="bottom"> {{ getUserInfo.name }} </a-tooltip>
         </div>
       </a-button>
       <a-dropdown>
