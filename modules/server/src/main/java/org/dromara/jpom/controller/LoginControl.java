@@ -300,7 +300,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
             if (userModel == null) {
                 BaseOauth2Config oauth2Config = Oauth2Factory.getConfig(provide);
                 if (oauth2Config.autoCreteUser()) {
-                    userModel = this.createUser(username, authUser, provide);
+                    userModel = this.createUser(username, authUser, provide, oauth2Config.getPermissionGroup());
                 } else {
                     return new JsonMessage<>(400, username + " 用户不存在请联系管理创建");
                 }
@@ -345,12 +345,13 @@ public class LoginControl extends BaseServerController implements InitializingBe
     /**
      * oauth2 创建用户账号
      *
-     * @param username 用户名
-     * @param authUser 平台信息
-     * @param source   来源平台
+     * @param username        用户名
+     * @param authUser        平台信息
+     * @param source          来源平台
+     * @param permissionGroup 权限组
      * @return 用户
      */
-    private UserModel createUser(String username, AuthUser authUser, String source) {
+    private UserModel createUser(String username, AuthUser authUser, String source, String permissionGroup) {
         // 创建用户
         UserModel where = new UserModel();
         where.setSystemUser(1);
@@ -368,6 +369,11 @@ public class LoginControl extends BaseServerController implements InitializingBe
         userModel.setSystemUser(0);
         userModel.setParent(first.getId());
         userModel.setSource(source);
+        // 绑定权限组
+        List<String> permissionGroupList = StrUtil.split(permissionGroup, StrUtil.AT, true, true);
+        if (CollUtil.isNotEmpty(permissionGroupList)) {
+            userModel.setPermissionGroup(CollUtil.join(permissionGroupList, StrUtil.AT, StrUtil.AT, StrUtil.AT));
+        }
         BaseServerController.resetInfo(first);
         userService.insert(userModel);
         return userModel;
@@ -378,7 +384,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
         List<UserWorkspaceModel> bindWorkspaceModels = userService.myWorkspace(userModel);
         Assert.notEmpty(bindWorkspaceModels, "当前账号没有绑定任何工作空间，请联系管理员处理");
         UserLoginDto userLoginDto = userService.getUserJwtId(userModel);
-        //					UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);
+        // UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);
         userLoginDto.setBindWorkspaceModels(bindWorkspaceModels);
         //
         setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
