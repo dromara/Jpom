@@ -11,6 +11,7 @@ package org.dromara.jpom.service.dblog;
 
 import cn.hutool.core.bean.BeanPath;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
@@ -148,6 +149,7 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
             map.put("所属工作空间", workspaceModel.getName());
         }
         map.put("操作IP", userOperateLogV1.getIp());
+        map.put("操作时间", DateTime.now().toString());
         if (dataMap != null) {
             map.putAll(dataMap);
         }

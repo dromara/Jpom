@@ -13,6 +13,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.keepbx.jpom.IJsonMessage;
@@ -24,10 +25,12 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.user.UserPermissionGroupBean;
+import org.dromara.jpom.oauth2.BaseOauth2Config;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
+import org.dromara.jpom.service.system.SystemParametersServer;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
 import org.dromara.jpom.service.user.UserPermissionGroupServer;
 import org.dromara.jpom.service.user.UserService;
@@ -37,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -53,13 +57,16 @@ public class UserPermissionGroupController extends BaseServerController {
     private final UserPermissionGroupServer userPermissionGroupServer;
     private final UserBindWorkspaceService userBindWorkspaceService;
     private final UserService userService;
+    private final SystemParametersServer systemParametersServer;
 
     public UserPermissionGroupController(UserPermissionGroupServer userPermissionGroupServer,
                                          UserBindWorkspaceService userBindWorkspaceService,
-                                         UserService userService) {
+                                         UserService userService,
+                                         SystemParametersServer systemParametersServer) {
         this.userPermissionGroupServer = userPermissionGroupServer;
         this.userBindWorkspaceService = userBindWorkspaceService;
         this.userService = userService;
+        this.systemParametersServer = systemParametersServer;
     }
 
     /**
@@ -186,6 +193,15 @@ public class UserPermissionGroupController extends BaseServerController {
         entity.set("permissionGroup", StrUtil.format(" like '%{}{}{}%'", StrUtil.AT, id, StrUtil.AT));
         long count = userService.count(entity);
         Assert.state(count == 0, "当前权限组还绑定用户,不能删除");
+        // 判断是否被 oauth2 绑定
+        for (Map.Entry<String, Tuple> entry : BaseOauth2Config.DB_KEYS.entrySet()) {
+            Tuple value = entry.getValue();
+            String dbKey = value.get(0);
+            BaseOauth2Config baseOauth2Config = systemParametersServer.getConfigDefNewInstance(dbKey, value.get(1));
+            String permissionGroup = baseOauth2Config.getPermissionGroup();
+            List<String> permissionGroupList = StrUtil.split(permissionGroup, StrUtil.AT, true, true);
+            Assert.state(!CollUtil.contains(permissionGroupList, groupBean.getId()), "当前权限组被 oauth2[" + baseOauth2Config.provide() + "] 绑定，不能删除");
+        }
         //
         userPermissionGroupServer.delByKey(id);
         // 删除工作空间

@@ -54,17 +54,24 @@
                   {{ parseTime(item.startTime) }} ~
                   {{ parseTime(item.endTime) }}
                 </div>
-                <a-space>
-                  <span :style="`color: ${statusColor[item.status]};`" @click="handleBuildLog(item)">
-                    #{{ item.buildNumberId }}
-                  </span>
-                  <span v-if="item.buildName">{{ item.buildName }}</span>
-                  <a-tooltip :title="item.statusMsg || statusMap[item.status] || '未知'">
-                    <a-tag :color="statusColor[item.status]" @click="handleBuildLog(item)">
-                      {{ statusMap[item.status] || '未知' }}
-                    </a-tag>
-                  </a-tooltip>
-                </a-space>
+
+                <a-row :gutter="16">
+                  <a-col>
+                    <span :style="`color: ${statusColor[item.status]};`" @click="handleBuildLog(item)">
+                      #{{ item.buildNumberId }}
+                    </span>
+                  </a-col>
+                  <a-col>
+                    <span>{{ item.buildName || '-' }}</span>
+                  </a-col>
+                  <a-col>
+                    <a-tooltip :title="item.statusMsg || statusMap[item.status] || '未知'">
+                      <a-tag :color="statusColor[item.status]" @click="handleBuildLog(item)">
+                        {{ statusMap[item.status] || '未知' }}
+                      </a-tag>
+                    </a-tooltip>
+                  </a-col>
+                </a-row>
               </a-space>
             </a-timeline-item>
           </a-timeline>
