@@ -36,11 +36,12 @@ import org.dromara.jpom.common.interceptor.NotLogin;
 import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.configuration.WebConfig;
 import org.dromara.jpom.db.DbExtConfig;
+import org.dromara.jpom.func.user.controller.UserNotificationController;
+import org.dromara.jpom.func.user.dto.UserNotificationDto;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.system.SystemParametersServer;
-import org.dromara.jpom.service.user.UserBindWorkspaceService;
 import org.dromara.jpom.service.user.UserService;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.system.ServerConfig;
@@ -71,19 +72,16 @@ import java.util.stream.Collectors;
 public class IndexControl extends BaseServerController {
 
     private final UserService userService;
-    private final UserBindWorkspaceService userBindWorkspaceService;
     private final SystemParametersServer systemParametersServer;
     private final WebConfig webConfig;
     private final NodeConfig nodeConfig;
     private final DbExtConfig dbExtConfig;
 
     public IndexControl(UserService userService,
-                        UserBindWorkspaceService userBindWorkspaceService,
                         SystemParametersServer systemParametersServer,
                         ServerConfig serverConfig,
                         DbExtConfig dbExtConfig) {
         this.userService = userService;
-        this.userBindWorkspaceService = userBindWorkspaceService;
         this.systemParametersServer = systemParametersServer;
         this.webConfig = serverConfig.getWeb();
         this.nodeConfig = serverConfig.getNode();
@@ -400,5 +398,16 @@ public class IndexControl extends BaseServerController {
         String uuid = IdUtil.fastSimpleUUID();
         shardingIds.put(uuid, uuid);
         return JsonMessage.success(uuid, uuid);
+    }
+
+    /**
+     * 获取通知
+     *
+     * @return json
+     */
+    @GetMapping(value = "system-notification", produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<UserNotificationDto> getNotification() {
+        UserNotificationDto notificationDto = systemParametersServer.getConfigDefNewInstance(UserNotificationController.KEY, UserNotificationDto.class);
+        return JsonMessage.success("", notificationDto);
     }
 }

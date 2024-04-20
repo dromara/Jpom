@@ -1,9 +1,15 @@
 <template>
   <div>
     <!-- 数据表格 -->
-    <a-table
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      :active-page="activePage"
+      table-name="systemUserList"
+      empty-description="没有任何用户"
+      :loading="loading"
       :data-source="list"
-      size="middle"
       :columns="columns"
       :pagination="pagination"
       bordered
@@ -12,6 +18,7 @@
         x: 'max-content'
       }"
       @change="changePage"
+      @refresh="loadData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -31,9 +38,10 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
+          <a-button type="primary" @click="systemNotificationOpen = true">发布系统公告</a-button>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -127,7 +135,7 @@
           </a-tooltip>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 编辑区 -->
     <a-modal
       v-model:open="editUserVisible"
@@ -251,6 +259,16 @@
         </template>
       </a-result>
     </a-modal>
+    <!-- 系统公告  -->
+    <a-modal
+      v-model:open="systemNotificationOpen"
+      destroy-on-close
+      title="配置系统公告"
+      :mask-closable="false"
+      :footer="null"
+    >
+      <notification />
+    </a-modal>
   </div>
 </template>
 
@@ -258,8 +276,11 @@
 import { closeUserMfa, deleteUser, editUser, getUserList, unlockUser, restUserPwd } from '@/api/user/user'
 import { getUserPermissionListAll } from '@/api/user/user-permission'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
-
+import notification from './notification.vue'
 export default {
+  components: {
+    notification
+  },
   data() {
     return {
       loading: false,
@@ -354,12 +375,16 @@ export default {
         permissionGroup: [{ required: true, message: '请选择用户权限组', trigger: 'blur' }]
       },
       showUserPwd: false,
-      confirmLoading: false
+      confirmLoading: false,
+      systemNotificationOpen: false
     }
   },
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     }
   },
   watch: {},
@@ -371,13 +396,16 @@ export default {
     loadData(pointerEvent) {
       this.loading = true
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
-      getUserList(this.listQuery).then((res) => {
-        if (res.code === 200) {
-          this.list = res.data.result
-          this.listQuery.total = res.data.total
-        }
-        this.loading = false
-      })
+      getUserList(this.listQuery)
+        .then((res) => {
+          if (res.code === 200) {
+            this.list = res.data.result
+            this.listQuery.total = res.data.total
+          }
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
 
     // 新增用户
