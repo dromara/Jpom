@@ -63,7 +63,7 @@ public class FileReleaseTaskController extends BaseServerController {
 
 
     @PostMapping(value = "add-task", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.EDIT)
+    @Feature(method = MethodFeature.EXECUTE)
     public IJsonMessage<String> addTask(@ValidatorItem String fileId,
                                         @ValidatorItem(value = ValidatorRule.NUMBERS) Integer fileType,
                                         @ValidatorItem String name,
@@ -100,7 +100,7 @@ public class FileReleaseTaskController extends BaseServerController {
      * @return json
      */
     @PostMapping(value = "re-task", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.EDIT)
+    @Feature(method = MethodFeature.EXECUTE)
     public IJsonMessage<String> reTask(@ValidatorItem String fileId,
                                        @ValidatorItem String name,
                                        @ValidatorItem(value = ValidatorRule.NUMBERS) int taskType,
@@ -171,7 +171,7 @@ public class FileReleaseTaskController extends BaseServerController {
      * @return json
      */
     @GetMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.LIST)
+    @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<JSONObject> delete(@ValidatorItem String id, HttpServletRequest request) {
         FileReleaseTaskLogModel taskLogModel = fileReleaseTaskService.getByKey(id, request);
         Assert.notNull(taskLogModel, "不存在对应的任务");
