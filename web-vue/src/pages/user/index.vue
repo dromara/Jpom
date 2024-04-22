@@ -265,6 +265,7 @@
       destroy-on-close
       title="配置系统公告"
       :mask-closable="false"
+      width="50vw"
       :footer="null"
     >
       <notification />
