@@ -28,19 +28,23 @@
 </template>
 <script setup lang="ts">
 import { UserNotificationType, getUserNotification, saveUserNotification } from '@/api/user/user-notification'
-const defaultValue = <UserNotificationType>{
+const defaultValue = {
   level: 'info',
   closable: true,
   title: '系统公告',
   enabled: false
-}
+} as UserNotificationType
 
 const temp = ref<UserNotificationType>(defaultValue)
 
 onMounted(() => {
   getUserNotification().then((res) => {
     if (res.code === 200) {
-      temp.value = res.data || defaultValue
+      if (Object.keys(res.data).length) {
+        temp.value = res.data || defaultValue
+      } else {
+        temp.value = defaultValue
+      }
     }
   })
 })
