@@ -262,7 +262,7 @@ function getAccessToken(code) {
       }
 
       // 拿到 access_token
-      const access_token = res.access_token
+      const access_token = res.data.access_token
 
       // 根据 access_token 判断是否 star 了仓库
       $.ajax({
