@@ -154,7 +154,7 @@ function isStarRepo(url) {
   }
   if (code) {
     // 携带了 code
-    getAccessToken(code)
+    //getAccessToken(code)
     return
   }
 
@@ -174,7 +174,7 @@ function isStarRepo(url) {
 
   // 开始获取 code
   $('body').css({ 'overflow': 'hidden' })
-  getCode(url)
+  //getCode(url)
 }
 
 // 去请求授权
