@@ -117,7 +117,7 @@ function checkIsLocal() {
 const allowDisparity = 1000 * 60 * 60 * 24 * 30 * 3
 const client_id = 'ea3bda02d8f2a6ab9dd7f337b7df1318714c5e3d867c3b59d293c1acbb360b30'
 const client_secret = 'xxx'
-const redirect_uri = 'https://jpom.top'
+let redirect_uri = 'https://jpom.top'
 
 
 // 判断当前是否已 star
@@ -133,6 +133,7 @@ function isStarRepo(url) {
   // 判断是否在主域名下
   if (checkIsLocal()) {
     console.log('not domain, no check...')
+    redirect_uri = 'http://127.0.0.1:2216'
     // return
   }
 
@@ -162,13 +163,14 @@ function isStarRepo(url) {
   const verifyList = ['/fqa/', '/practice/', '/db/', '/downloads/', 'downloads']
   let needCheck = false
   for (let i = 0; i < verifyList.length; i++) {
-    if (url.toLowerCase().indexOf(verifyList[i])) {
+    if (url.toLowerCase().indexOf(verifyList[i]) > -1) {
+      //console.log('needCheck route ...',verifyList[i],url)
       needCheck = true
       break
     }
   }
-  if (!needCheck && code === null) {
-    console.log('white route ...')
+  if (!needCheck && !code) {
+    //console.log('not needCheck route ...')
     return
   }
 
@@ -336,7 +338,7 @@ function toStarBeforePath() {
 
 // 疑问
 function authDetails() {
-  const str = '用于检测的凭证信息将仅保存你的浏览器本地，Jpom 文档已完整开源，源码可查'
+  const str = '用于检测的凭证信息将仅保存您的浏览器本地，Jpom 文档已完整开源，源码可查'
   alert(str)
 }
 
