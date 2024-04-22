@@ -206,6 +206,7 @@ export default ({
       docReady(function () {
         // 图片悬停显示描述
         imgAddLayerTip();
+        isStarRepo(to.path)
       });
     });
   }
