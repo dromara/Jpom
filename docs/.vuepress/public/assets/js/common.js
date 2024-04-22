@@ -123,6 +123,7 @@ const redirect_uri = 'https://jpom.top'
 // 判断当前是否已 star
 function isStarRepo(url) {
   // console.log(url)
+  var code = getParam('code')
   // 非PC端不检查
   if (document.body.offsetWidth < 800) {
     console.log('small screen ...')
@@ -151,6 +152,11 @@ function isStarRepo(url) {
   } catch (e) {
     console.error(e)
   }
+  if (code) {
+    // 携带了 code
+    getAccessToken(code)
+    return
+  }
 
   // 需要验证的路由关键词
   const verifyList = ['/fqa/', '/practice/', '/db/', '/downloads/', 'downloads']
@@ -161,7 +167,7 @@ function isStarRepo(url) {
       break
     }
   }
-  if (!needCheck && getParam('code') === null) {
+  if (!needCheck && code === null) {
     console.log('white route ...')
     return
   }
@@ -340,9 +346,9 @@ function getParam(name, defaultValue) {
   var vars = query.split('&')
   for (var i = 0; i < vars.length; i++) {
     var pair = vars[i].split('=')
-    if (pair[0] == name) {
+    if (pair[0] === name) {
       return pair[1]
     }
   }
-  return (defaultValue == undefined ? null : defaultValue)
+  return (defaultValue === undefined ? null : defaultValue)
 }
