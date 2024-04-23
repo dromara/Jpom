@@ -943,7 +943,8 @@ export default {
         name: item.name,
         fileDirs: item.fileDirs ? JSON.parse(item.fileDirs).join('\r\n') : '',
         allowEditSuffix: item.allowEditSuffix ? JSON.parse(item.allowEditSuffix).join('\r\n') : '',
-        workspaceName: item.workspace?.name
+        workspaceName: item.workspace?.name,
+        notAllowedCommand: item.notAllowedCommand
       }
       this.configWorkspaceSshVisible = true
     },
