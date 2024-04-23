@@ -160,7 +160,7 @@ function isStarRepo(url) {
   }
 
   // 需要验证的路由关键词
-  const verifyList = ['/fqa/', '/practice/', '/db/', '/downloads/', 'downloads']
+  const verifyList = ['/fqa/', '/practice/', '/db/', '/downloads/', 'downloads','/oauth/','/workspace/','/changelog/']
   let needCheck = false
   for (let i = 0; i < verifyList.length; i++) {
     if (url.toLowerCase().indexOf(verifyList[i]) > -1) {
