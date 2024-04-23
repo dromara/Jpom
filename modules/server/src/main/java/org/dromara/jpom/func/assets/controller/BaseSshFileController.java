@@ -366,12 +366,15 @@ public abstract class BaseSshFileController extends BaseServerController {
      * @return Array
      */
     private JSONArray listRootDir(MachineSshModel sshModel, List<String> list) {
+        JSONArray jsonArray = new JSONArray();
+        if (CollUtil.isEmpty(list)) {
+            return jsonArray;
+        }
         Session session = null;
         ChannelSftp channel = null;
         try {
             session = sshService.getSessionByModel(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-            JSONArray jsonArray = new JSONArray();
             for (String allowPathParent : list) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("id", SecureUtil.sha1(allowPathParent));
