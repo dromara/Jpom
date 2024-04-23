@@ -132,14 +132,12 @@ function isStarRepo(url) {
 
   // 判断是否在主域名下
   if (checkIsLocal()) {
-    console.log('not domain, no check...')
     redirect_uri = 'http://127.0.0.1:2216'
-    // return
   }
 
   // 判断是否近期已经判断过了
   try {
-    const isStarRepo = localStorage.isStarRepo
+    const isStarRepo = localStorage.isStarJpomRepo || localStorage.isStarRepo
     if (isStarRepo) {
       // 记录 star 的时间，和当前时间的差距
       const disparity = new Date().getTime() - parseInt(isStarRepo)
@@ -277,7 +275,7 @@ function getAccessToken(code) {
           // success 回调即代表已经 star，gitee API 请求体不返回任何数据
           console.log('-> stared ...')
           // 记录本次检查时间
-          localStorage.isStarRepo = new Date().getTime()
+          localStorage.isStarJpomRepo = new Date().getTime()
           //
           layer.alert('感谢您的支持  ❤️ ❤️ ❤️ ，Jpom 将努力变得更加完善！', function(index) {
             layer.close(index)
@@ -306,7 +304,7 @@ function getAccessToken(code) {
         return layer.alert(JSON.stringify(e), { closeBtn: false }, function() {
           // 一天内不再检查
           const ygTime = allowDisparity - (1000 * 60 * 60 * 24)
-          localStorage.isStarRepo = new Date().getTime() - ygTime
+          localStorage.isStarJpomRepo = new Date().getTime() - ygTime
           // 刷新 url，去掉 code 参数
           toStarBeforePath()
         })
