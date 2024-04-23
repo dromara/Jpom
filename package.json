@@ -1,6 +1,6 @@
 {
   "name": "jpom-doc",
-  "version": "2.11.4",
+  "version": "2.11.5",
   "scripts": {
     "wdev": "set NODE_OPTIONS=--openssl-legacy-provider && node --max_old_space_size=4096 ./node_modules/vuepress/cli.js dev docs",
     "ldev": "export NODE_OPTIONS=--openssl-legacy-provider && node --max_old_space_size=4096 ./node_modules/vuepress/cli.js dev docs",
