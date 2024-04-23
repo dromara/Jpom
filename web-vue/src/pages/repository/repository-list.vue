@@ -69,11 +69,7 @@
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
           <a-tooltip>
-            <template #title>
-              使用 Access Token 一次导入多个项目<br />点击
-              <a target="_blank" href="https://jpom.top/pages/jpom-server-import-multi-repos/">文档链接</a>
-              查看详情
-            </template>
+            <template #title> 使用 Access Token 一次导入多个项目 </template>
             <a-button type="primary" @click="handleAddGitee"><QuestionCircleOutlined />令牌导入</a-button>
           </a-tooltip>
         </a-space>
