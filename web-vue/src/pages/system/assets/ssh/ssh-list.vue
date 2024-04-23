@@ -536,7 +536,7 @@
               <a-textarea
                 v-model:value="temp.notAllowedCommand"
                 :auto-size="{ minRows: 3, maxRows: 5 }"
-                placeholder="禁止命令是不允许在终端执行的名，多个逗号隔开。(超级管理员没有任何限制)"
+                placeholder="禁止命令是不允许在终端执行的命令，多个逗号隔开。(超级管理员没有任何限制)"
               />
             </a-form-item>
           </a-form>
