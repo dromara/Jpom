@@ -7,4 +7,4 @@
         | |
         |_|
  ➜ Jpom is licensed under Mulan PSL v2.
- ➜ \﻿ (•◡•) / (v2.11.4.2)
+ ➜ \﻿ (•◡•) / (v2.11.5)
