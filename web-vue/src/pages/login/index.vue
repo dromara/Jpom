@@ -210,6 +210,8 @@ const beginCheckSystem = () => {
   })
 }
 
+const login_tip_key = 'login-tip'
+
 const getLoginConfig = () => {
   loginConfig().then((res) => {
     if (res.data && res.data.demo) {
@@ -218,7 +220,7 @@ const getLoginConfig = () => {
       $notification.info({
         message: '温馨提示',
         description: h('div', {}, [p]),
-        key: 'login-tip',
+        key: login_tip_key,
         duration: null
       })
       loginForm.loginName = demo.user
@@ -359,8 +361,9 @@ const handleMfa = () => {
   })
 }
 
+const tip_has_login_key = `tipHasLoginInfo`
+
 const checkHasLoginInfo = () => {
-  const key = `tipHasLoginInfo`
   if (useUserStore.userInfo && useUserStore.getToken()) {
     const p = h(
       'p',
@@ -377,17 +380,17 @@ const checkHasLoginInfo = () => {
             type: 'primary',
             size: 'small',
             onClick: () => {
-              $notification.close(key)
+              $notification.close(tip_has_login_key)
               router.push({ path: '/' })
             }
           },
           { default: () => '跳转' }
         ),
-      key,
+      key: tip_has_login_key,
       duration: null
     })
   } else {
-    $notification.close(key)
+    $notification.close(tip_has_login_key)
   }
 }
 
@@ -411,6 +414,8 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  $notification.close(tip_has_login_key)
+  $notification.close(login_tip_key)
   document.removeEventListener('visibilitychange', listener)
   window.removeEventListener('pageshow', checkHasLoginInfo)
 })
