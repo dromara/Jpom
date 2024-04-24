@@ -82,12 +82,12 @@ export default <UserPlugins>[
       },
     },
   ],
-  [
-    "vuepress-plugin-baidu-tongji", // 百度统计
-    {
-      hm: "1acbde0eb1cc4225dcfe6d1143767a3d",
-    },
-  ],
+//   [
+//     "vuepress-plugin-baidu-tongji", // 百度统计
+//     {
+//       hm: "1acbde0eb1cc4225dcfe6d1143767a3d",
+//     },
+//   ],
   // [
   // 'vuepress-plugin-comment', // 评论插件
   // 选择 Gitalk 评论
