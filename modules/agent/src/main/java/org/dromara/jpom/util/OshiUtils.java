@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.util;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
@@ -16,6 +17,7 @@ import cn.hutool.system.oshi.CpuInfo;
 import cn.hutool.system.oshi.OshiUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
+import org.dromara.jpom.configuration.MonitorConfig;
 import oshi.hardware.*;
 import oshi.software.os.FileSystem;
 import oshi.software.os.NetworkParams;
@@ -97,7 +99,7 @@ public class OshiUtils {
      *
      * @return json
      */
-    public static JSONObject getSimpleInfo() {
+    public static JSONObject getSimpleInfo(MonitorConfig monitorConfig) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("time", SystemClock.now());
         CpuInfo cpuInfo = OshiUtil.getCpuInfo(CPU_STAT_SLEEP);
@@ -129,27 +131,44 @@ public class OshiUtils {
         }
         jsonObject.put("disk", NumberUtil.div(used, total, 2) * 100);
         //
-        NetIoInfo startNetInfo = getNetInfo();
+
+        MonitorConfig.NetworkConfig networkConfig1 = Optional.ofNullable(monitorConfig)
+            .map(MonitorConfig::getNetwork).orElse(null);
+        NetIoInfo startNetInfo = getNetInfo(networkConfig1);
         //暂停1秒
         Util.sleep(NET_STAT_SLEEP);
-        NetIoInfo endNetInfo = getNetInfo();
+        NetIoInfo endNetInfo = getNetInfo(networkConfig1);
         jsonObject.put("netTxBytes", endNetInfo.getTxbyt() - startNetInfo.getTxbyt());
         jsonObject.put("netRxBytes", endNetInfo.getRxbyt() - startNetInfo.getRxbyt());
         return jsonObject;
     }
 
-    private static NetIoInfo getNetInfo() {
+    private static NetIoInfo getNetInfo(MonitorConfig.NetworkConfig networkConfig) {
         //
+        List<String> statExcludeNames = Optional.ofNullable(networkConfig)
+            .map(MonitorConfig.NetworkConfig::getStatExcludeNames)
+            .map(s -> StrUtil.splitTrim(s, StrUtil.COMMA))
+            .orElse(CollUtil.newArrayList());
+        List<String> statContainsOnlyNames = Optional.ofNullable(networkConfig)
+            .map(MonitorConfig.NetworkConfig::getStatContainsOnlyNames)
+            .map(s -> StrUtil.splitTrim(s, StrUtil.COMMA))
+            .orElse(CollUtil.newArrayList());
         long rxBytesBegin = 0;
         long txBytesBegin = 0;
         long rxPacketsBegin = 0;
         long txPacketsBegin = 0;
         List<NetworkIF> listBegin = OshiUtil.getNetworkIFs();
-        for (NetworkIF net : listBegin) {
-            rxBytesBegin += net.getBytesRecv();
-            txBytesBegin += net.getBytesSent();
-            rxPacketsBegin += net.getPacketsRecv();
-            txPacketsBegin += net.getPacketsSent();
+        if (listBegin != null) {
+            listBegin = listBegin.stream()
+                .filter(networkIF -> CollUtil.isEmpty(statExcludeNames) || !CollUtil.contains(statExcludeNames, networkIF.getName()))
+                .filter(networkIF -> CollUtil.isEmpty(statContainsOnlyNames) || CollUtil.contains(statContainsOnlyNames, networkIF.getName()))
+                .collect(Collectors.toList());
+            for (NetworkIF net : listBegin) {
+                rxBytesBegin += net.getBytesRecv();
+                txBytesBegin += net.getBytesSent();
+                rxPacketsBegin += net.getPacketsRecv();
+                txPacketsBegin += net.getPacketsSent();
+            }
         }
         NetIoInfo netIoInfo = new NetIoInfo();
         netIoInfo.setRxbyt(rxBytesBegin);

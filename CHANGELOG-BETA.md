@@ -6,6 +6,7 @@
 
 1. 【server】修复 资产管理 SSH 配置禁用命令无法回显（感谢@zhangw）
 2. 【server】修复 资产管理 SSH 未配置授权目录时 NPE  （感谢[@Anley](https://gitee.com/MrAnley) [Gitee issues I9J17G](https://gitee.com/dromara/Jpom/issues/I9J17G) ）
+3. 【agent】优化 监控机器网络流程支持配置排除网卡或者仅统计对应的网卡
 
 ------
 
