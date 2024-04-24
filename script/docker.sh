@@ -18,7 +18,11 @@
 # docker buildx create --use
 
 # 服务端
-docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.11.5.1 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
+docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le,linux/arm64/v8 -t jpomdocker/jpom:2.11.5.1 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
+
+
+
+docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le,linux/arm64/v8 -t jpomdocker/jpom:2-test -f ./modules/server/DockerfileBeta --push .
 #
 #docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
 
