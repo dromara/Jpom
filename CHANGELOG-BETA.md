@@ -8,6 +8,7 @@
 2. 【server】修复 资产管理 SSH 未配置授权目录时 NPE  （感谢[@Anley](https://gitee.com/MrAnley) [Gitee issues I9J17G](https://gitee.com/dromara/Jpom/issues/I9J17G) ）
 3. 【agent】优化 监控机器网络流程支持配置排除网卡或者仅统计对应的网卡
 4. 【server】修复 退出登录时页面会提示需要登录相关信息
+5. 【server】优化 页面检测新版本判断是否加入 beta
 
 ------
 
