@@ -51,6 +51,12 @@ jpom:
     allowed-downgrade: false
     # 执行系统主要命名是否填充 sudo(sudo xxx) 使用前提需要配置 sudo 免密
     command-use-sudo: false
+  monitor:
+    network:
+      # 监控网络流量只统计对应的网卡,多个使用逗号分隔
+      stat-contains-only-names:
+      # 监控网络流量排除对应的网卡,多个使用逗号分隔
+      stat-exclude-names:
 server:
   #运行端口号
   port: 2123
