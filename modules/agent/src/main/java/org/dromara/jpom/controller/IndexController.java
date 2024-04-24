@@ -23,6 +23,8 @@ import org.dromara.jpom.common.RemoteVersion;
 import org.dromara.jpom.common.commander.ProjectCommander;
 import org.dromara.jpom.common.commander.SystemCommander;
 import org.dromara.jpom.common.interceptor.NotAuthorize;
+import org.dromara.jpom.configuration.AgentConfig;
+import org.dromara.jpom.configuration.MonitorConfig;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.model.data.NodeScriptModel;
 import org.dromara.jpom.plugin.PluginFactory;
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -55,15 +58,18 @@ public class IndexController extends BaseAgentController {
     private final NodeScriptServer nodeScriptServer;
     private final SystemCommander systemCommander;
     private final ProjectCommander projectCommander;
+    private final AgentConfig agentConfig;
 
     public IndexController(ProjectInfoService projectInfoService,
                            NodeScriptServer nodeScriptServer,
                            SystemCommander systemCommander,
-                           ProjectCommander projectCommander) {
+                           ProjectCommander projectCommander,
+                           AgentConfig agentConfig) {
         this.projectInfoService = projectInfoService;
         this.nodeScriptServer = nodeScriptServer;
         this.systemCommander = systemCommander;
         this.projectCommander = projectCommander;
+        this.agentConfig = agentConfig;
     }
 
     @RequestMapping(value = {"index", "", "index.html", "/"}, produces = MediaType.TEXT_PLAIN_VALUE)
@@ -95,7 +101,9 @@ public class IndexController extends BaseAgentController {
     public IJsonMessage<JSONObject> getDirectTop() {
         JSONObject jsonObject = new JSONObject();
         try {
-            JSONObject topInfo = org.dromara.jpom.util.OshiUtils.getSimpleInfo();
+            Optional<MonitorConfig> monitorConfig = Optional.ofNullable(agentConfig).map(AgentConfig::getMonitor);
+
+            JSONObject topInfo = org.dromara.jpom.util.OshiUtils.getSimpleInfo(monitorConfig.orElse(null));
             jsonObject.put("simpleStatus", topInfo);
             // 系统固定休眠时间
             jsonObject.put("systemSleep", org.dromara.jpom.util.OshiUtils.NET_STAT_SLEEP + org.dromara.jpom.util.OshiUtils.CPU_STAT_SLEEP);
