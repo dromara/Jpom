@@ -103,7 +103,7 @@ export default <HeadTags>[
   ],
 //   ["script", { src: "/assets/js/jquery.3.4.1.min.js" }],
 //   ["script", { src: "/assets/js/layer-3.1.1.js" }],
-  ["script", { src: "/assets/js/common.js" }],
+  ["script", { src: "/assets/js/common.js",async: true, }],
   // 百度统计 js
   ["script", { async: true,}, baidutj],
 ];
