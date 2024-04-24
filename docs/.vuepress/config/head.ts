@@ -101,9 +101,9 @@ export default <HeadTags>[
         "width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no",
     },
   ],
-//   ["script", { src: "/assets/js/jquery.3.4.1.min.js" }],
-//   ["script", { src: "/assets/js/layer-3.1.1.js" }],
-  ["script", { src: "/assets/js/common.js",async: true, }],
+  ["script", { src: "/assets/js/jquery.3.4.1.min.js" }],
+  ["script", { src: "/assets/js/layer-3.1.1.js" }],
+  ["script", { src: "/assets/js/common.js" }],
   // 百度统计 js
   ["script", { async: true,}, baidutj],
 ];
