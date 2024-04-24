@@ -83,7 +83,7 @@ defineProps({
     required: true
   }
 })
-
+const useUserStore2 = userStore()
 // 页面缓存对象
 const wrapperMap = shallowRef(new Map())
 // 组件套壳，动态添加name属性
@@ -113,6 +113,10 @@ const menuTabKeyList = computed(() => {
 watch(
   menuTabKeyList,
   (newKeys, oldKeys) => {
+    if (!useUserStore2.getToken()) {
+      // 登录登录会触发 tab 变化，这里不改变路由缓存。避免重新加载路由触发请求接口
+      return
+    }
     // 获取已被删除的key
     oldKeys
       ?.filter((key) => {
