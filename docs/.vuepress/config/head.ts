@@ -73,17 +73,17 @@ export default <HeadTags>[
       type: "text/javascript",
     },
   ],
- [
-//    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8458956478992681"
-//         crossorigin="anonymous"></script>
-    "script",
-    {
-      async: true,
-      src: "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8458956478992681",
-      type: "text/javascript",
-      crossorigin: "anonymous"
-    },
-  ],
+//  [
+// //    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8458956478992681"
+// //         crossorigin="anonymous"></script>
+//     "script",
+//     {
+//       async: true,
+//       src: "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8458956478992681",
+//       type: "text/javascript",
+//       crossorigin: "anonymous"
+//     },
+//   ],
   // <meta name="google-adsense-account" content="ca-pub-8458956478992681">
   [
     "meta",
@@ -105,5 +105,5 @@ export default <HeadTags>[
   ["script", { src: "/assets/js/layer-3.1.1.js" }],
   ["script", { src: "/assets/js/common.js" }],
   // 百度统计 js
-  ["script", { async: true,}, baidutj],
+  ["script", { }, baidutj],
 ];

@@ -6,6 +6,24 @@ export default {
     setTimeout(() => {
       this.addExpand(40);
     }, 1000);
+    //
+
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1acbde0eb1cc4225dcfe6d1143767a3d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+
+    (function() {
+      var bp = document.createElement('script')
+      bp.type = 'text/javascript'
+      bp.async = true
+      bp.crossorigin='anonymous'
+      bp.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8458956478992681'
+      var s = document.getElementsByTagName('script')[0]
+      s.parentNode.insertBefore(bp, s)
+    })();
   },
   watch: {
     $route(to, from) {
