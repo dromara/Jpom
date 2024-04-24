@@ -106,4 +106,36 @@ export default <HeadTags>[
   ["script", { src: "/assets/js/common.js" }],
   // 百度统计 js
   ["script", { }, baidutj],
+  [
+    "link",
+    {
+      rel: "preload",
+      href: "/images/index/light.svg",
+      as: "image/svg+xml",
+    },
+  ],
+  [
+      "link",
+      {
+        rel: "preload",
+        href: "/images/index/dark.svg",
+        as: "image/svg+xml",
+      },
+  ],
+  [
+    "link",
+    {
+      rel: "preload",
+      href: "/images/index/read.svg",
+      as: "image/svg+xml",
+    },
+  ],
+
+//
+// light: "/images/index/light.svg",
+//     dark: "/images/index/dark.svg",
+//     read: "/images/index/read.svg",
+//   <link rel="preload" href="/images/index/light.svg" as="image/svg+xml">
+//   	<link rel="preload" href="/images/index/dark.svg" as="image/png">
+//   	<link rel="preload" href="/images/index/read.svg" as="image/gif">
 ];
