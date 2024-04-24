@@ -12,7 +12,7 @@ actions:
   - actionText: 🤝了解我们
     actionLink: /pages/readme/
     actionClass: action-button-diy
-bannerBg: none # auto => 网格纹背景(有bodyBgImg时无背景)，默认 | none => 无 | '大图地址' | background: 自定义背景样式       提示：如发现文本颜色不适应你的背景时可以到palette.styl修改$bannerTextColor变量
+bannerBg: none # auto => 网格纹背景(有bodyBgImg时无背景)，默认 | none => 无 | '大图地址' | background: 自定义背景样式       提示：如发现文本颜色不适应您的背景时可以到palette.styl修改$bannerTextColor变量
 
 features: # 可选的
 - title: 节点管理
@@ -173,7 +173,7 @@ notices-2: # 可选的
 
 > 如果是分布式的项目，以上步骤则更加繁琐。
 >
-> 让 [Jpom](https://gitee.com/dromara/Jpom) 来帮你解决这些痛点吧！然而，这些只是 [Jpom](https://gitee.com/dromara/Jpom) 解决的最基础的功能。
+> 让 [Jpom](https://gitee.com/dromara/Jpom) 来帮您解决这些痛点吧！然而，这些只是 [Jpom](https://gitee.com/dromara/Jpom) 解决的最基础的功能。
 
 ### 😁 使用 [Jpom](https://gitee.com/dromara/Jpom) 后
 
@@ -306,7 +306,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 ::: danger 说明
 如无法访问管理系统，检查下是否开启了防火墙 ， 需要放行 `2122` 端口。
 
-如果在操作系统上放行了端口仍无法访问，并且你使用的是云服务器，请到云服务器后台中检查安全组规则是否放行 2122 端口。
+如果在操作系统上放行了端口仍无法访问，并且您使用的是云服务器，请到云服务器后台中检查安全组规则是否放行 2122 端口。
 
 ⚠️注意： Linux 系统中有多种防火墙：Firewall、Iptables、SELinux 等，再检查防火墙配置时候需要都检查一下。
 :::
@@ -330,7 +330,7 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 
 ## 💪🏻参与贡献
 
-欢迎各路好汉一起来参与完善 <Badge text="Jpom"/>，我们期待你的 PR！
+欢迎各路好汉一起来参与完善 <Badge text="Jpom"/>，我们期待您的 PR！
 
 如果想贡献，请先查看[贡献准则](/pages/dc18b8/)。
 
