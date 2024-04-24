@@ -55,7 +55,7 @@
 
 > 如果是分布式的项目，以上步骤则更加繁琐。
 >
-> 让 Jpom 来帮你解决这些痛点吧！然而，这些只是 Jpom 解决的最基础的功能。
+> 让 Jpom 来帮您解决这些痛点吧！然而，这些只是 Jpom 解决的最基础的功能。
 
 ### 😁 使用 [Jpom](https://gitee.com/dromara/Jpom) 后
 
@@ -142,7 +142,7 @@ bash install.sh Server jdk
 ```
 
 启动成功后，服务端的端口为 `2122`，可通过 `http://127.0.0.1:2122/`
-访问管理页面（如果不是本机访问，需要把 127.0.0.1 换成你安装的服务器 IP 地址）。
+访问管理页面（如果不是本机访问，需要把 127.0.0.1 换成您安装的服务器 IP 地址）。
 
 > 如无法访问管理系统，执行命令 `systemctl status firewalld` 检查下是否开启了防火墙
 > ，如状态栏看到绿色显示 `Active: active (running)` 需要放行 `2122` 端口。
@@ -154,7 +154,7 @@ bash install.sh Server jdk
 >firewall-cmd --reload
 >```
 >
->如果在操作系统上放行了端口仍无法访问，并且你使用的是云服务器，请到云服务器后台中检查安全组规则是否放行 2122 端口。
+>如果在操作系统上放行了端口仍无法访问，并且您使用的是云服务器，请到云服务器后台中检查安全组规则是否放行 2122 端口。
 >
 >⚠️ 注意： Linux 系统中有多种防火墙：Firewall、Iptables、SELinux 等，再检查防火墙配置时候需要都检查一下。
 
@@ -249,7 +249,7 @@ docker run -d -p 2122:2122 \
 	1. server-x.x.x-release 目录为服务端的全部安装文件
 	2. 上传到对应服务器（整个目录）
 	3. 启动服务端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
-	4. 服务端默认运行端口：`2122`，访问管理页面：`http://127.0.0.1:2122/`（非本机访问把 127.0.0.1 换成你的服务器 IP 地址）
+	4. 服务端默认运行端口：`2122`，访问管理页面：`http://127.0.0.1:2122/`（非本机访问把 127.0.0.1 换成您的服务器 IP 地址）
 
 ### 方式四：⌨️ 编译安装
 
@@ -266,7 +266,7 @@ docker run -d -p 2122:2122 \
 	1. 查看插件端安装包 modules/server/target/server-x.x.x-release
 	2. 打包上传服务器运行（整个目录）
 	3. 启动服务端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
-	4. 服务端默认运行端口：`2122`，访问管理页面：`http://127.0.0.1:2122/`（非本机访问把 127.0.0.1 换成你的服务器 IP 地址）
+	4. 服务端默认运行端口：`2122`，访问管理页面：`http://127.0.0.1:2122/`（非本机访问把 127.0.0.1 换成您的服务器 IP 地址）
 
 > 也可以使用 `script/release.bat` 或 `script/release.sh` 快速打包。
 
@@ -302,7 +302,7 @@ docker-compose -f docker-compose.yml up
 4. 构建 vue 页面，切换到 `web-vue` 目录（前提需要本地开发环境有 node、npm 环境）
 5. 安装项目 vue 依赖，控制台执行 `npm install`
 6. 启动开发模式，控制台执行 `npm run dev`
-7. 根据控制台输出的地址访问前端页面：`http://127.0.0.1:3000/`（非本机访问把 127.0.0.1 换成你的服务器 IP 地址）
+7. 根据控制台输出的地址访问前端页面：`http://127.0.0.1:3000/`（非本机访问把 127.0.0.1 换成您的服务器 IP 地址）
 
 ## 管理 Jpom 命令
 
@@ -425,7 +425,7 @@ mvn -f xxxx/pom.xml clean package
 ## 🐞 交流讨论 、反馈 BUG、提出建议等
 
 1. 快扫描下方左侧微信群二维码和我们一起交流讨论吧！（添加小助手：备注 Jpom 进群）
-2. 开源项目离不开社区的支持，如果项目帮助到了你，并且想给我们加个餐。
+2. 开源项目离不开社区的支持，如果项目帮助到了您，并且想给我们加个餐。
    欢迎扫描下方[微信、支付宝收款码赞赏](https://jpom.top/images/qrcode/praise-all.png)
    或通过[码云赞赏](https://gitee.com/dromara/Jpom)
    （在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom.top/pages/praise/publicity/)
@@ -434,9 +434,10 @@ mvn -f xxxx/pom.xml clean package
 5. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
 6. 参与贡献，请查看[贡献指南](#贡献指南)。
 
-感谢所有赞赏以及参与贡献的小伙伴，你们的支持是我们不断更新前进的动力！
-
-![wx-qrcode-praise.png](https://jpom.top/images/qrcode/praise-all.png)
+感谢所有赞赏以及参与贡献的小伙伴，您们的支持是我们不断更新前进的动力！
+<p align="center">
+<img src="https://jpom.top/images/qrcode/praise-all.png" style="" alt="praise img">
+</p>
 
 ## 💖 周边商品
 
@@ -445,7 +446,7 @@ mvn -f xxxx/pom.xml clean package
 购买支持我们这样您既获得了一份小商品我们也获得了您购买商品的利润（周边商品的价格会比市场价稍高，介意请勿下单）
 
 <p align="center">
-<img  src="https://jpom.top/images/qrcode/weixin-shop-jpom66.png" style="zoom: 80%;box-shadow: 0px 0px 20px 10px rgba(0,0,0,0.06);" alt="shop home">
+<img src="https://jpom.top/images/qrcode/weixin-shop-jpom66.png" style="" alt="shop home">
 </p>
 
 ## 🔨贡献指南
@@ -454,9 +455,9 @@ mvn -f xxxx/pom.xml clean package
 
 ### 贡献须知
 
-Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提出建议。贡献无论大小，你的贡献会帮助背后成千上万的使用者以及开发者，你做出的贡献也会永远的保留在项目的贡献者名单中，这也是开源项目的意义所在！
+Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提出建议。贡献无论大小，您的贡献会帮助背后成千上万的使用者以及开发者，您做出的贡献也会永远的保留在项目的贡献者名单中，这也是开源项目的意义所在！
 
-为了保证项目代码的质量与规范，以及帮助你更快的了解项目的结构，请在贡献之前阅读：
+为了保证项目代码的质量与规范，以及帮助您更快的了解项目的结构，请在贡献之前阅读：
 
 - [Jpom 贡献说明](https://gitee.com/dromara/Jpom/blob/master/CODE_OF_CONDUCT.md)
 - [中英文排版规范](https://gitee.com/dromara/Jpom/blob/dev/typography-specification.md)
@@ -465,7 +466,7 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 
 1. Fork 本仓库。
 
-2. Fork 后会在你的帐号下多了一个和本仓库一模一样的仓库，把你帐号的仓库 clone 到本地。
+2. Fork 后会在您的账号下多了一个和本仓库一模一样的仓库，把您账号的仓库 clone 到本地。
 
    注意替换掉链接中的`分支名`和`用户名`。
 
@@ -480,13 +481,13 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
    ```bash
    # 把修改的文件添加到暂存区
    git add .
-   # 提交到本地仓库，说明你具体做了什么修改
-   git commit -m '填写你做了什么修改'
+   # 提交到本地仓库，说明您具体做了什么修改
+   git commit -m '填写您做了什么修改'
    # 推送到远程仓库，分支名替换成 dev 或者 docs
    git push origin 分支名
    ```
 
-4. 登录你的仓库，然后会看到一条 PR 请求，点击请求合并，等待管理员把你的代码合并进来。
+4. 登录您的仓库，然后会看到一条 PR 请求，点击请求合并，等待管理员把您的代码合并进来。
 
 ### 项目分支说明
 
