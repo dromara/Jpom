@@ -1,20 +1,3 @@
-(function() {
-  var bp = document.createElement('script')
-  bp.type = 'text/javascript'
-  bp.async = true
-  bp.src = 'https://www.googletagmanager.com/gtag/js?id=G-FYSG66S4HQ'
-  var s = document.getElementsByTagName('script')[0]
-  s.parentNode.insertBefore(bp, s)
-
-  window.dataLayer = window.dataLayer || []
-
-  function gtag() {
-    dataLayer.push(arguments)
-  }
-
-  gtag('js', new Date())
-  gtag('config', 'G-FYSG66S4HQ')
-})()
 
 $(function() {
   window.JPOM_RELEASE_VERSION = '2.11.5'
