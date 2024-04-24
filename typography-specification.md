@@ -20,7 +20,7 @@
 
 以下例子均为**正例**，下面列出经常用错的大小写单词。
 
-在使用的时候，如果你不确定单词正确的拼写，请前往官网查看。
+在使用的时候，如果您不确定单词正确的拼写，请前往官网查看。
 
 - [Java](https://www.oracle.com/java/technologies/downloads/)
 - [JDK](https://www.oracle.com/java/technologies/downloads/)
@@ -85,7 +85,7 @@
 
 ## 参考例子
 
-下面的例子可以帮助你进一步理解对应的规范，以及为什么要有这样的规范，大公司的网站是怎么用到的。
+下面的例子可以帮助您进一步理解对应的规范，以及为什么要有这样的规范，大公司的网站是怎么用到的。
 
 ### 空格的使用
 
@@ -206,18 +206,18 @@ The Omnibus GitLab package requires about 2.5GB of storage space for installatio
 正例：
 
 ```
-如果你是来自 React 的开发者，你可能会对 Vuex 和 [Redux](https://github.com/reactjs/redux) 间的差异表示关注，Redux 是 React 生态环境中最流行的 Flux 实现。
+如果您是来自 React 的开发者，您可能会对 Vuex 和 [Redux](https://github.com/reactjs/redux) 间的差异表示关注，Redux 是 React 生态环境中最流行的 Flux 实现。
 ```
 
-正例显示效果：如果你是来自 React 的开发者，你可能会对 Vuex 和 [Redux](https://github.com/reactjs/redux) 间的差异表示关注，Redux 是 React 生态环境中最流行的 Flux 实现。
+正例显示效果：如果您是来自 React 的开发者，您可能会对 Vuex 和 [Redux](https://github.com/reactjs/redux) 间的差异表示关注，Redux 是 React 生态环境中最流行的 Flux 实现。
 
 反例：
 
 ```
-如果你是来自 React 的开发者，你可能会对 Vuex 和[Redux](https://github.com/reactjs/redux)间的差异表示关注，Redux 是 React 生态环境中最流行的 Flux 实现。
+如果您是来自 React 的开发者，您可能会对 Vuex 和[Redux](https://github.com/reactjs/redux)间的差异表示关注，Redux 是 React 生态环境中最流行的 Flux 实现。
 ```
 
-反例显示效果：如果你是来自 React 的开发者，你可能会对 Vuex 和[Redux](https://github.com/reactjs/redux)间的差异表示关注，Redux 是 React 生态环境中最流行的 Flux 实现。
+反例显示效果：如果您是来自 React 的开发者，您可能会对 Vuex 和[Redux](https://github.com/reactjs/redux)间的差异表示关注，Redux 是 React 生态环境中最流行的 Flux 实现。
 
 > 参考资料：[https://docs.github.com/en/rest/overview/resources-in-the-rest-api](https://docs.github.com/en/rest/overview/resources-in-the-rest-api)
 
@@ -386,13 +386,13 @@ Redux 事实上无法感知视图层，所以它能够轻松的通过一些 [简
 正例：
 
 ```
-如果你刚开始学习前端开发，将框架作为你的第一步可能不是最好的主意——掌握好基础知识再来吧！
+如果您刚开始学习前端开发，将框架作为您的第一步可能不是最好的主意——掌握好基础知识再来吧！
 ```
 
 反例：
 
 ```
-如果你刚开始学习前端开发，将框架作为你的第一步可能不是最好的主意——掌握好基础知识再来吧！！！
+如果您刚开始学习前端开发，将框架作为您的第一步可能不是最好的主意——掌握好基础知识再来吧！！！
 ```
 
 > 说明：有时我们在书写的时候想进行感叹，可能会情不自禁地连续使用了相同的标点符号，但是请克制住自己，不要连续使用相同的标点符号。

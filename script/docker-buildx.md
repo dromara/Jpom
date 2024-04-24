@@ -19,15 +19,15 @@
 
 ## 2 启用 binfmt_misc
 
-如果你使用的是 Docker 桌面版（MacOS 和 Windows），默认已经启用了 binfmt_misc，可以跳过这一步。
+如果您使用的是 Docker 桌面版（MacOS 和 Windows），默认已经启用了 binfmt_misc，可以跳过这一步。
 
-如果你使用的是 Linux，需要手动启用 binfmt_misc。大多数 Linux 发行版都很容易启用，不过还有一个更容易的办法，直接运行一个特权容器，容器里面写好了设置脚本：
+如果您使用的是 Linux，需要手动启用 binfmt_misc。大多数 Linux 发行版都很容易启用，不过还有一个更容易的办法，直接运行一个特权容器，容器里面写好了设置脚本：
 
 ```shell
 docker run --rm --privileged docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64
 ```
 
-建议将 Linux 内核版本升级到 4.x 以上，特别是 CentOS 用户，你可能会遇到错误。
+建议将 Linux 内核版本升级到 4.x 以上，特别是 CentOS 用户，您可能会遇到错误。
 
 在软件依赖中我们提到需要 Linux 内核版本>= 4.8.0；如果在内核版本为3.10.0的系统（比如 CentOS）上运行 docker/binfmt，会出现报错
 Cannot write to /proc/sys/fs/binfmt_misc/register: write /proc/sys/fs/binfmt_misc/register: invalid
