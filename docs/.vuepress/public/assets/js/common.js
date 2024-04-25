@@ -132,7 +132,7 @@ function isStarRepo(url) {
 
       // 差距小于一月，不再检测，大于一月，再检测一下
       if (disparity < allowDisparity) {
-        console.log('checked ...')
+        //console.log('checked ...')
         return
       }
     }
