@@ -87,7 +87,6 @@ public class InitDb implements DisposableBean, ILoadEvent {
         AFTER_CALLBACK.put(name, supplier);
     }
 
-    @SuppressWarnings("rawtypes")
     public void afterPropertiesSet(ApplicationContext applicationContext) {
         this.prepareCallback(applicationContext.getEnvironment());
         //
