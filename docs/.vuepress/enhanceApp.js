@@ -27,8 +27,10 @@ export default ({
   if (!isServer) {
     // 如果开启了私密文章验证
     router.beforeEach((to, from, next) => {
-
       next()
+    })
+
+    router.afterEach((to, form) => {
       docReady(function() {
         console.log(
           '\n %c Jpom %c ' + `${location.protocol}//${location.host}` + ' \n',
@@ -50,15 +52,10 @@ export default ({
           10,
           function() {
             ABDetected()
-            ABDetectedHeader();
+            ABDetectedHeader()
             changeAdHideEvent()
           }
         )
-      })
-    })
-
-    router.afterEach((to, form) => {
-      docReady(function() {
         // 图片悬停显示描述
         imgAddLayerTip()
         isStarRepo(to.path)
@@ -89,11 +86,7 @@ export default ({
     // function called if wwads is blocked
     // https://github.com/bytegravity/whitelist-wwads
 
-    if (
-      location.hostname === '127.0.0.1' ||
-      location.hostname === 'localhost' ||
-      location.hostname.indexOf('192.168.') > -1
-    ) {
+    if (checkIsLocal()) {
       // 本地环境不显示
       return
     }
