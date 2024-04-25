@@ -148,10 +148,15 @@
             <!-- top 图表 -->
             <div id="top-chart" class="chart">loading...</div>
           </a-card>
-          <a-card size="small" title="网络流量信息">
+          <a-card size="small">
+            <template #title
+              >网络流量信息
+              <a-tooltip title="默认统计机器中所有网卡流量总和"><QuestionCircleOutlined /></a-tooltip>
+            </template>
             <template #extra>
               <a-button v-if="netHistoryChart" size="small" type="primary" @click="handleHistory('network-stat')">
-                <AreaChartOutlined />历史监控图表
+                <AreaChartOutlined />
+                历史监控图表
               </a-button>
             </template>
             <!-- 网络流量图表 -->
