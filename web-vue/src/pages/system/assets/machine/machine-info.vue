@@ -149,9 +149,42 @@
             <div id="top-chart" class="chart">loading...</div>
           </a-card>
           <a-card size="small">
-            <template #title
-              >网络流量信息
-              <a-tooltip title="默认统计机器中所有网卡流量总和"><QuestionCircleOutlined /></a-tooltip>
+            <template #title>
+              <a-space :size="4">
+                <template #split>
+                  <a-divider type="vertical" />
+                </template>
+                网络流量信息
+                <template v-if="monitorConfig?.network?.statExcludeNames">
+                  <span>
+                    排除：
+                    <a-tag v-for="item in monitorConfig?.network?.statExcludeNames?.split(',')">
+                      {{ item }}
+                    </a-tag>
+                  </span>
+                </template>
+                <template v-if="monitorConfig?.network?.statContainsOnlyNames">
+                  <span>
+                    仅统计：
+                    <a-tag v-for="item in monitorConfig?.network?.statContainsOnlyNames?.split(',')">
+                      {{ item }}
+                    </a-tag>
+                  </span>
+                </template>
+                <a-popover>
+                  <template #title>统计说明 </template>
+                  <template #content>
+                    <b>默认统计机器中除本地接口（环回或无硬件地址）网卡流量总和</b>
+                    <div>
+                      统计的网卡：
+                      <a-tag v-for="item in JSON.parse(machineInfo?.extendInfo || '{}')?.monitorIfsNames?.split(',')">
+                        {{ item }}
+                      </a-tag>
+                    </div>
+                  </template>
+                  <QuestionCircleOutlined />
+                </a-popover>
+              </a-space>
             </template>
             <template #extra>
               <a-button v-if="netHistoryChart" size="small" type="primary" @click="handleHistory('network-stat')">
@@ -467,7 +500,7 @@ import {
   machineNetworkInterfaces
 } from '@/api/node-stat'
 import { Empty } from 'ant-design-vue'
-import { statusMap } from '@/api/system/assets-machine'
+import { statusMap, machineMonitorConfig } from '@/api/system/assets-machine'
 import { useGuideStore } from '@/stores/guide'
 import { mapState } from 'pinia'
 export default {
@@ -741,7 +774,8 @@ export default {
       countdownTime: Date.now(),
       machineInfo: null,
       networkInterfaces: [],
-      nodeMonitorLoadStatus: 0
+      nodeMonitorLoadStatus: 0,
+      monitorConfig: {}
     }
   },
   computed: {
@@ -819,6 +853,12 @@ export default {
       //this.refreshInterval = this.getCacheNode("refreshInterval", this.refreshInterval);
       //
       this.pullNodeData()
+      // 监控配置
+      machineMonitorConfig({
+        id: this.machineId
+      }).then((res) => {
+        this.monitorConfig = res.data || {}
+      })
     },
     pullNodeData() {
       this.loadNodeTop()

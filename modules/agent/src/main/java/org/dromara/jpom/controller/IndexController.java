@@ -89,6 +89,7 @@ public class IndexController extends BaseAgentController {
         jsonObject.put("remoteVersion", remoteVersion);
         jsonObject.put("pluginSize", PluginFactory.size());
         jsonObject.put("joinBetaRelease", RemoteVersion.betaRelease());
+        jsonObject.put("monitor", agentConfig.getMonitor());
         return JsonMessage.success("", jsonObject);
     }
 
