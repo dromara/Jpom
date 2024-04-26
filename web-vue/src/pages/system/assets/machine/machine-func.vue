@@ -28,6 +28,7 @@
             <a-tab-pane key="info" tab="基本信息"></a-tab-pane>
             <a-tab-pane key="cache" tab="缓存监控"></a-tab-pane>
             <a-tab-pane key="config" tab="系统配置"></a-tab-pane>
+            <a-tab-pane key="freeScript" tab="自由脚本"></a-tab-pane>
             <a-tab-pane key="path-config" tab="授权配置"></a-tab-pane>
             <a-tab-pane key="upgrade" tab="在线升级"></a-tab-pane>
             <a-tab-pane key="log" tab="系统日志"></a-tab-pane>
@@ -43,6 +44,7 @@
       <cache v-if="current === 'cache'" :machine-id="machineId" />
       <log v-if="current === 'log'" :machine-id="machineId" />
       <config-file v-if="current === 'config'" :machine-id="machineId" />
+      <freeScript v-if="current === 'freeScript'" :machine-id="machineId" />
     </div>
   </a-drawer>
 </template>
@@ -50,6 +52,7 @@
 <script>
 import { mapState } from 'pinia'
 import machineInfo from './machine-info'
+import freeScript from './free-script'
 import upgrade from '@/components/upgrade'
 import WhiteList from '@/pages/node/node-layout/system/white-list.vue'
 import Cache from '@/pages/node/node-layout/system/cache'
@@ -63,7 +66,8 @@ export default {
     WhiteList,
     Cache,
     ConfigFile,
-    Log
+    Log,
+    freeScript
   },
   props: {
     machineId: {
