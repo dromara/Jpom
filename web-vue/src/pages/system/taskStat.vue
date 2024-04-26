@@ -12,8 +12,8 @@
       :columns="taskColumns"
       bordered
       :data-source="taskList"
-      @refresh="refresh"
       :pagination="false"
+      @refresh="refresh"
     >
       <!-- <template #title>
         <a-button size="small" type="primary" @click="refresh"><ReloadOutlined /></a-button>

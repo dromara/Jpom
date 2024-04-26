@@ -37,7 +37,7 @@
           <a-form-item label="自动创建用户" name="autoCreteUser">
             <a-switch v-model:checked="dingtalk.autoCreteUser" checked-children="启用" un-checked-children="停用" />
           </a-form-item>
-          <a-form-item label="权限组" name="permissionGroup" v-if="dingtalk.autoCreteUser">
+          <a-form-item v-if="dingtalk.autoCreteUser" label="权限组" name="permissionGroup">
             <template #help>创建用户后自动关联上对应的权限组</template>
             <a-select
               v-model:value="dingtalk.permissionGroup"
@@ -88,7 +88,7 @@
           <a-form-item label="自动创建用户" name="autoCreteUser">
             <a-switch v-model:checked="feishu.autoCreteUser" checked-children="启用" un-checked-children="停用" />
           </a-form-item>
-          <a-form-item label="权限组" name="permissionGroup" v-if="feishu.autoCreteUser">
+          <a-form-item v-if="feishu.autoCreteUser" label="权限组" name="permissionGroup">
             <template #help>创建用户后自动关联上对应的权限组</template>
             <a-select
               v-model:value="feishu.permissionGroup"
@@ -163,7 +163,7 @@
               un-checked-children="停用"
             />
           </a-form-item>
-          <a-form-item label="权限组" name="permissionGroup" v-if="wechat_enterprise.autoCreteUser">
+          <a-form-item v-if="wechat_enterprise.autoCreteUser" label="权限组" name="permissionGroup">
             <template #help>创建用户后自动关联上对应的权限组</template>
             <a-select
               v-model:value="wechat_enterprise.permissionGroup"
@@ -227,7 +227,7 @@
           <a-form-item label="自动创建用户" name="autoCreteUser">
             <a-switch v-model:checked="maxkey.autoCreteUser" checked-children="启用" un-checked-children="停用" />
           </a-form-item>
-          <a-form-item label="权限组" name="permissionGroup" v-if="maxkey.autoCreteUser">
+          <a-form-item v-if="maxkey.autoCreteUser" label="权限组" name="permissionGroup">
             <template #help>创建用户后自动关联上对应的权限组</template>
             <a-select
               v-model:value="maxkey.permissionGroup"
@@ -279,7 +279,7 @@
           <a-form-item label="自动创建用户" name="autoCreteUser">
             <a-switch v-model:checked="gitee.autoCreteUser" checked-children="启用" un-checked-children="停用" />
           </a-form-item>
-          <a-form-item label="权限组" name="permissionGroup" v-if="gitee.autoCreteUser">
+          <a-form-item v-if="gitee.autoCreteUser" label="权限组" name="permissionGroup">
             <template #help>创建用户后自动关联上对应的权限组</template>
             <a-select
               v-model:value="gitee.permissionGroup"
@@ -340,7 +340,7 @@
           <a-form-item label="自动创建用户" name="autoCreteUser">
             <a-switch v-model:checked="mygitlab.autoCreteUser" checked-children="启用" un-checked-children="停用" />
           </a-form-item>
-          <a-form-item label="权限组" name="permissionGroup" v-if="mygitlab.autoCreteUser">
+          <a-form-item v-if="mygitlab.autoCreteUser" label="权限组" name="permissionGroup">
             <template #help>创建用户后自动关联上对应的权限组</template>
             <a-select
               v-model:value="mygitlab.permissionGroup"
@@ -394,7 +394,7 @@
           <a-form-item label="自动创建用户" name="autoCreteUser">
             <a-switch v-model:checked="github.autoCreteUser" checked-children="启用" un-checked-children="停用" />
           </a-form-item>
-          <a-form-item label="权限组" name="permissionGroup" v-if="github.autoCreteUser">
+          <a-form-item v-if="github.autoCreteUser" label="权限组" name="permissionGroup">
             <template #help>创建用户后自动关联上对应的权限组</template>
             <a-select
               v-model:value="github.permissionGroup"

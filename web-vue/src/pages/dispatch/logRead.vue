@@ -16,15 +16,15 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            placeholder="日志名称"
+            :placeholder="$tl('c.logName')"
             class="search-input-item"
             @press-enter="loadData"
           />
 
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$tl('p.clickButtonToGoBackToFirstPage')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">新增</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $tl('c.action') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -36,9 +36,9 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
-            <a-button type="primary" size="small" @click="handleLogRead(record)">查看</a-button>
-            <a-button type="primary" danger size="small" @click="handleDelete(record)">删除</a-button>
+            <a-button type="primary" size="small" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
+            <a-button type="primary" size="small" @click="handleLogRead(record)">{{ $tl('p.view') }}</a-button>
+            <a-button type="primary" danger size="small" @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
           </a-space>
         </template>
       </template>
@@ -49,23 +49,23 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="60%"
-      title="编辑日志搜索"
+      :title="$tl('p.editLogSearch')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="日志名称" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" placeholder="日志项目名称" />
+        <a-form-item :label="$tl('c.logName')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('p.logItemName')" />
         </a-form-item>
-        <a-form-item label="绑定节点" required>
+        <a-form-item :label="$tl('p.bindNode')" required>
           <a-space direction="vertical" style="width: 100%">
             <a-row v-for="(item, index) in temp.projectList" :key="index">
               <a-col :span="11">
-                <span>节点: </span>
+                <span>{{ $tl('p.node') }} </span>
                 <a-select
                   v-model:value="item.nodeId"
                   style="width: 80%"
-                  placeholder="请选择节点"
+                  :placeholder="$tl('p.pleaseSelectNode')"
                   @change="
                     () => {
                       temp = {
@@ -94,12 +94,12 @@
                 </a-select>
               </a-col>
               <a-col :span="11">
-                <span>项目: </span>
+                <span>{{ $tl('p.project') }} </span>
                 <a-select
                   v-model:value="item.projectId"
                   :disabled="!item.nodeId"
                   style="width: 80%"
-                  :placeholder="`请选择项目`"
+                  :placeholder="`${$tl('p.pleaseSelectProject')}`"
                 >
                   <!-- <a-select-option value=""> 请先选择节点</a-select-option> -->
                   <template v-if="nodeProjectList[item.nodeId]">
@@ -126,7 +126,7 @@
               </a-col>
             </a-row>
 
-            <a-button type="primary" @click="() => temp.projectList.push({})">新增</a-button>
+            <a-button type="primary" @click="() => temp.projectList.push({})">{{ $tl('c.action') }}</a-button>
           </a-space>
         </a-form-item>
       </a-form>
@@ -145,7 +145,7 @@
       "
     >
       <template #title>
-        搜索查看
+        {{ $tl('p.searchAndView') }}
         {{ temp.cacheData && temp.cacheData.logFile ? ':' + temp.cacheData.logFile : '' }}
       </template>
       <logReadView
@@ -187,14 +187,14 @@ export default {
       editVisible: false,
       columns: [
         {
-          title: '名称',
+          title: this.$tl('p.name'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
 
         {
-          title: '修改人',
+          title: this.$tl('p.modifier'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           align: 'center',
@@ -202,7 +202,7 @@ export default {
           width: 120
         },
         {
-          title: '修改时间',
+          title: this.$tl('p.modificationTime'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => {
@@ -214,7 +214,7 @@ export default {
           width: 180
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           ellipsis: true,
 
@@ -223,7 +223,7 @@ export default {
         }
       ],
       rules: {
-        name: [{ required: true, message: '请填写日志项目名称', trigger: 'blur' }]
+        name: [{ required: true, message: this.$tl('p.pleaseFillInLogItemName'), trigger: 'blur' }]
       },
       confirmLoading: false
     }
@@ -239,6 +239,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.dispatch.logRead.${key}`, ...args)
+    },
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true
@@ -314,7 +317,7 @@ export default {
         })
         if (!temp.projectList || !temp.projectList.length) {
           $notification.warn({
-            message: '至少选择一个节点和项目'
+            message: this.$tl('p.atLeastSelectOneNodeAndProject')
           })
           return false
         }
@@ -340,11 +343,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemPrompt'),
         zIndex: 1009,
-        content: '真的要删除日志搜索么？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.reallyDeleteLogSearch'),
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return deleteLogRead(record.id).then((res) => {
             if (res.code === 200) {
