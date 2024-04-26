@@ -1,46 +1,46 @@
 <template>
   <div>
     <a-space direction="vertical" style="width: 100%">
-      <a-alert message="温馨提醒" type="info" show-icon>
+      <a-alert :message="$tl('p.warmReminder')" type="info" show-icon>
         <template #description>
           <ul>
-            <li>当前为节点分发的授权路径配置</li>
-            <li>路径需要配置绝对路径</li>
+            <li>{{ $tl('p.distributionAuthorizationPathConfig') }}</li>
+            <li>{{ $tl('p.absolutePathRequired') }}</li>
           </ul>
         </template>
       </a-alert>
       <!-- <a-alert message=",不支持软链" type="info" /> -->
 
       <a-form ref="editForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }" @finish="onSubmit">
-        <a-form-item label="授权路径" name="outGiving">
-          <template #help>用于创建节点分发项目、文件中心发布文件</template>
+        <a-form-item :label="$tl('p.authorizationPath')" name="outGiving">
+          <template #help>{{ $tl('p.usageForCreatingDistributionProjects') }}</template>
           <a-textarea
             v-model:value="temp.outGiving"
             :rows="5"
             style="resize: none"
-            placeholder="请输入授权路径，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"
+            :placeholder="$tl('p.inputAuthorizationPath')"
           />
         </a-form-item>
-        <a-form-item label="静态目录" name="staticDir">
-          <template #help>用于静态文件绑定和读取(不建议配置大目录，避免扫描消耗过多资源)</template>
+        <a-form-item :label="$tl('p.staticDirectory')" name="staticDir">
+          <template #help>{{ $tl('p.usageForStaticFileBindingAndReading') }}</template>
           <a-textarea
             v-model:value="temp.staticDir"
             :rows="5"
             style="resize: none"
-            placeholder="请输入静态，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"
+            :placeholder="$tl('p.inputStaticPaths')"
           />
         </a-form-item>
-        <a-form-item label="远程下载安全HOST" name="allowRemoteDownloadHost">
-          <template #help>用于下载远程文件来进行节点分发和文件上传</template>
+        <a-form-item :label="$tl('p.remoteDownloadSecureHost')" name="allowRemoteDownloadHost">
+          <template #help>{{ $tl('p.usageForDownloadingRemoteFiles') }}</template>
           <a-textarea
             v-model:value="temp.allowRemoteDownloadHost"
             :rows="5"
             style="resize: none"
-            placeholder="请输入远程下载安全HOST，回车支持输入多个路径，示例 https://www.test.com 等"
+            placeholder="{{$tl('p.inputRemoteDownloadSecureHosts')}}://www.test.com 等"
           />
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 14, offset: 6 }">
-          <a-button type="primary" html-type="submit" :disabled="submitAble">提交</a-button>
+          <a-button type="primary" html-type="submit" :disabled="submitAble">{{ $tl('p.submit') }}</a-button>
         </a-form-item>
       </a-form>
     </a-space>
@@ -67,6 +67,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.dispatch.whiteList.${key}`, ...args)
+    },
     // load data
     loadData() {
       this.loading = true
