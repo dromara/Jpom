@@ -111,7 +111,9 @@ export default <HeadTags>[
     {
       rel: "preload",
       href: "/images/index/light.svg",
-      as: "image/svg+xml",
+      as: "image",
+      type:'image/svg+xml',
+      fetchpriority:'high',
     },
   ],
   [
@@ -119,7 +121,9 @@ export default <HeadTags>[
       {
         rel: "preload",
         href: "/images/index/dark.svg",
-        as: "image/svg+xml",
+        as: "image",
+        type:'image/svg+xml',
+        fetchpriority:'high',
       },
   ],
   [
@@ -127,7 +131,9 @@ export default <HeadTags>[
     {
       rel: "preload",
       href: "/images/index/read.svg",
-      as: "image/svg+xml",
+      as: "image",
+      type:'image/svg+xml',
+      fetchpriority:'high',
     },
   ],
 

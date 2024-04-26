@@ -19,7 +19,7 @@
       <a :href="item.cardSrc" target="_blank">
         <div class="card-nav-item">
           <div class="card-nav-title">
-            <img
+            <img  loading="lazy"
               v-if="item.cardImgSrc && item.cardImgSrc != ''"
               :src="item.cardImgSrc"
               alt="正在加载 ..."
