@@ -18,22 +18,26 @@
     "dayjs": "^1.9.7",
     "inquirer": "^7.1.0",
     "json2yaml": "^1.1.0",
-    "vuepress": "1.9.5",
     "patch-package": "^6.4.7",
+    "vue-tabs-component": "^1.5.0",
+    "vuepress": "1.9.5",
     "vuepress-plugin-baidu-autopush": "^1.0.1",
     "vuepress-plugin-baidu-tongji": "^1.0.1",
     "vuepress-plugin-comment": "^0.7.3",
+    "vuepress-plugin-cursor-effects": "^1.0.2",
     "vuepress-plugin-demo-block": "^0.7.2",
     "vuepress-plugin-fulltext-search": "^2.2.1",
+    "vuepress-plugin-meting": "^0.3.2",
     "vuepress-plugin-one-click-copy": "^1.0.2",
+    "vuepress-plugin-reading-progress": "^1.0.10",
+    "vuepress-plugin-sitemap": "^2.3.1",
+    "vuepress-plugin-tabs": "^0.3.0",
     "vuepress-plugin-zooming": "^1.1.7",
     "vuepress-theme-vdoing": "^1.12.6",
-    "yamljs": "^0.3.0",
-    "vuepress-plugin-reading-progress": "^1.0.10",
-    "vuepress-plugin-cursor-effects": "^1.0.2",
-    "vuepress-plugin-meting": "^0.3.2",
-    "vuepress-plugin-tabs": "^0.3.0",
-    "vue-tabs-component": "^1.5.0",
-    "vuepress-plugin-sitemap": "^2.3.1"
+    "yamljs": "^0.3.0"
+  },
+  "dependencies": {
+    "markdown-it-image-lazy-loading": "^2.0.1",
+    "v-lazy-image": "^2.1.1"
   }
 }

@@ -4,6 +4,7 @@ import plugins from "./config/plugins";
 import head from "./config/head";
 import themeConfig from "./config/themeConfig";
 import { penName, title } from "./common/info";
+import webpack from "webpack"
 
 export default defineConfig4CustomTheme({
   theme: "vdoing", // 使用npm包主题
@@ -17,6 +18,9 @@ export default defineConfig4CustomTheme({
   markdown: {
     lineNumbers: true, // 显示代码块的行号
     extractHeaders: ["h2", "h3", "h4"], // 支持 h2、h3、h4 标题
+    plugins: [
+      'image-lazy-loading'
+    ]
   },
   // 多语言支持
   locales: {
@@ -36,8 +40,18 @@ export default defineConfig4CustomTheme({
   extraWatchFiles: [".vuepress/config.ts"],
   dest: "dist",
   themeConfig,
-
   head,
-
   plugins,
+  configureWebpack: (config, isServer) => {
+    if (!isServer) {
+      config.plugins.push(
+        new webpack.optimize.LimitChunkCountPlugin({
+          maxChunks: 10, // 来限制 chunk 的最大数量
+        }),
+        // new webpack.optimize.MinChunkSizePlugin({
+        //   minChunkSize: 1048576 // 1mb
+        // })
+      );
+    }
+  },
 });

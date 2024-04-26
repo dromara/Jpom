@@ -30,24 +30,24 @@ const htmlModule: VdoingThemeConfig["htmlModules"] = {
            font-weight: bold;
            margin: 0 0 8px 0;
          ">社区讨论</p>
-         <img src="/images/wx_qrcode2.png"  style="width:100%;" />
+         <img  loading="lazy" src="/images/wx_qrcode2.png"  style="width:100%;" />
          添加小助手：备注 <b>Jpom</b> 进群
         </div>`,
   sidebarT: `
     <a href="https://gitee.com/dromara/MaxKey" target="_blank">
-      <img class="no-zoom" height="60" width="224" src="/images/friends/ad/maxkey-banner.png">
+      <img  loading="lazy" class="no-zoom" height="60" width="224" src="/images/friends/ad/maxkey-banner.png">
     </a>
     <a href="https://www.xiaonuo.vip" target="_blank">
-      <img class="no-zoom" height="60" width="224" src="/images/friends/ad/snowy-banner.jpg">
+      <img  loading="lazy" class="no-zoom" height="60" width="224" src="/images/friends/ad/snowy-banner.jpg">
     </a>
      <a href="https://doc.zyplayer.com/#/integrate/zyplayer-doc?utm=jpom" target="_blank">
-      <img class="no-zoom" height="60" width="224"  style="background-color: #c6ddff;color: #ffffff" src="/images/friends/ad/zyplayer-doc-banner.png">
+      <img  loading="lazy" class="no-zoom" height="60" width="224"  style="background-color: #c6ddff;color: #ffffff" src="/images/friends/ad/zyplayer-doc-banner.png">
     </a>
      <a href="https://gitee.com/qingqinkj/mdp-lcode-ui-web" target="_blank" >
-      <img class="no-zoom" height="60" width="224" src="/images/friends/ad/mdp-banner2.png">
+      <img  loading="lazy" class="no-zoom" height="60" width="224" src="/images/friends/ad/mdp-banner2.png">
     </a>
     <a href="https://www.jnpfsoft.com/index.html?from=jpom" target="_blank"  style="background:#dcf3ff">
-          <img class="no-zoom" height="60" width="224" src="/images/friends/ad/jnpfsoft-banner.png">
+          <img  loading="lazy" class="no-zoom" height="60" width="224" src="/images/friends/ad/jnpfsoft-banner.png">
         </a>
     <div>
     <span style='color: gray;font-size: smaller;'></span>
