@@ -40,6 +40,9 @@ public class HttpTransportServer implements TransportServer {
         UrlBuilder urlBuilder = UrlBuilder.of(url).addPath(urlItem.path());
         HttpRequest httpRequest = HttpRequest.of(urlBuilder);
         httpRequest.setMethod(method);
+        // 添加请求头
+        Map<String, String> header = urlItem.header();
+        httpRequest.headerMap(header, true);
 
         Optional.ofNullable(urlItem.timeout()).ifPresent(integer -> httpRequest.timeout(integer * 1000));
 
