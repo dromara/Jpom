@@ -1,5 +1,11 @@
 <template>
-  <div :style="`margin-top:${marginTop}`">
+  <div
+    :style="{
+      marginTop: marginTop,
+      minHeight: height,
+      height: height
+    }"
+  >
     <div class="log-filter">
       <a-row type="flex" align="middle">
         <a-col>
@@ -27,7 +33,7 @@
       </a-row>
     </div>
     <!-- <pre class="log-view" :id="`${this.id}`" :style="`height:${this.height}`">{{ defText }}</pre> -->
-    <viewPre ref="viewPre" :height="height" :config="temp"></viewPre>
+    <viewPre ref="viewPre" :height="`calc(${height} - 35px - 20px)`" :config="temp"></viewPre>
   </div>
 </template>
 

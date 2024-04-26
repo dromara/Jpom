@@ -33,6 +33,10 @@ public class ApacheExecUtil {
     private static final ShutdownHookProcessDestroyer shutdownHookProcessDestroyer = new ShutdownHookProcessDestroyer();
     private static final Map<String, Process> processMap = new SafeConcurrentHashMap<>();
 
+    public static void addProcess(Process process) {
+        shutdownHookProcessDestroyer.add(process);
+    }
+
     /**
      * 关闭 Process
      *
@@ -87,21 +91,25 @@ public class ApacheExecUtil {
             .get();
         //
         executor.setProcessDestroyer(new ProcessDestroyer() {
+            private int size = 0;
+
             @Override
             public boolean add(Process process) {
                 processMap.put(execId, process);
+                size++;
                 return shutdownHookProcessDestroyer.add(process);
             }
 
             @Override
             public boolean remove(Process process) {
                 processMap.remove(execId);
+                size--;
                 return shutdownHookProcessDestroyer.remove(process);
             }
 
             @Override
             public int size() {
-                return shutdownHookProcessDestroyer.size();
+                return size;
             }
         });
         pumpStreamHandler.stop();
