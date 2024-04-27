@@ -207,6 +207,8 @@ public class MachineDockerController extends BaseGroupNameController {
                 throw new IllegalArgumentException("仓库账号或者密码错误：" + e.getMessage());
             }
         }
+        // 修改状态为在线
+        dockerInfoModel.setStatus(1);
     }
 
     @GetMapping(value = "try-local-docker", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -219,7 +221,7 @@ public class MachineDockerController extends BaseGroupNameController {
             entity.set("host", dockerHost);
             boolean exists = machineDockerServer.exists(entity);
             if (exists) {
-                return new JsonMessage<>(405, "已经存在本地 docker 信息啦，不要重复添加");
+                return new JsonMessage<>(405, "已经存在本地 docker 信息啦，不要重复添加：" + dockerHost);
             }
             MachineDockerModel dockerModel = new MachineDockerModel();
             dockerModel.setHost(dockerHost);
