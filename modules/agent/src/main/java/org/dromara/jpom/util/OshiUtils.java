@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.util;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
@@ -16,6 +17,9 @@ import cn.hutool.system.oshi.CpuInfo;
 import cn.hutool.system.oshi.OshiUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
+import org.dromara.jpom.configuration.MonitorConfig;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import oshi.hardware.*;
 import oshi.software.os.FileSystem;
 import oshi.software.os.NetworkParams;
@@ -40,6 +44,8 @@ public class OshiUtils {
 
     public static final int NET_STAT_SLEEP = 1000;
     public static final int CPU_STAT_SLEEP = 1000;
+
+    private static final PathMatcher pathMatcher = new AntPathMatcher();
 
     static {
         // 解决Oshi获取CPU使用率与Windows任务管理器显示不匹配的问题
@@ -97,7 +103,7 @@ public class OshiUtils {
      *
      * @return json
      */
-    public static JSONObject getSimpleInfo() {
+    public static JSONObject getSimpleInfo(MonitorConfig monitorConfig) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("time", SystemClock.now());
         CpuInfo cpuInfo = OshiUtil.getCpuInfo(CPU_STAT_SLEEP);
@@ -129,33 +135,55 @@ public class OshiUtils {
         }
         jsonObject.put("disk", NumberUtil.div(used, total, 2) * 100);
         //
-        NetIoInfo startNetInfo = getNetInfo();
+
+        MonitorConfig.NetworkConfig networkConfig1 = Optional.ofNullable(monitorConfig)
+            .map(MonitorConfig::getNetwork).orElse(null);
+        NetIoInfo startNetInfo = getNetInfo(networkConfig1);
         //暂停1秒
         Util.sleep(NET_STAT_SLEEP);
-        NetIoInfo endNetInfo = getNetInfo();
+        NetIoInfo endNetInfo = getNetInfo(networkConfig1);
         jsonObject.put("netTxBytes", endNetInfo.getTxbyt() - startNetInfo.getTxbyt());
         jsonObject.put("netRxBytes", endNetInfo.getRxbyt() - startNetInfo.getRxbyt());
+        jsonObject.put("monitorIfsNames", endNetInfo.getIfsNames());
         return jsonObject;
     }
 
-    private static NetIoInfo getNetInfo() {
+    private static NetIoInfo getNetInfo(MonitorConfig.NetworkConfig networkConfig) {
         //
+        List<String> statExcludeNames = Optional.ofNullable(networkConfig)
+            .map(MonitorConfig.NetworkConfig::getStatExcludeNames)
+            .map(s -> StrUtil.splitTrim(s, StrUtil.COMMA))
+            .orElse(CollUtil.newArrayList());
+        List<String> statContainsOnlyNames = Optional.ofNullable(networkConfig)
+            .map(MonitorConfig.NetworkConfig::getStatContainsOnlyNames)
+            .map(s -> StrUtil.splitTrim(s, StrUtil.COMMA))
+            .orElse(CollUtil.newArrayList());
         long rxBytesBegin = 0;
         long txBytesBegin = 0;
         long rxPacketsBegin = 0;
         long txPacketsBegin = 0;
         List<NetworkIF> listBegin = OshiUtil.getNetworkIFs();
-        for (NetworkIF net : listBegin) {
-            rxBytesBegin += net.getBytesRecv();
-            txBytesBegin += net.getBytesSent();
-            rxPacketsBegin += net.getPacketsRecv();
-            txPacketsBegin += net.getPacketsSent();
+        StringBuilder ifsNames = new StringBuilder(StrUtil.EMPTY);
+        if (listBegin != null) {
+            listBegin = listBegin.stream()
+                .filter(networkIF -> CollUtil.isEmpty(statExcludeNames) || !isMatch(statExcludeNames, networkIF.getName()))
+                .filter(networkIF -> CollUtil.isEmpty(statContainsOnlyNames) || isMatch(statContainsOnlyNames, networkIF.getName()))
+                .collect(Collectors.toList());
+            for (int i = 0; i < listBegin.size(); i++) {
+                NetworkIF net = listBegin.get(i);
+                rxBytesBegin += net.getBytesRecv();
+                txBytesBegin += net.getBytesSent();
+                rxPacketsBegin += net.getPacketsRecv();
+                txPacketsBegin += net.getPacketsSent();
+                ifsNames.append(i == 0 ? net.getName() : "," + net.getName());
+            }
         }
         NetIoInfo netIoInfo = new NetIoInfo();
         netIoInfo.setRxbyt(rxBytesBegin);
         netIoInfo.setTxbyt(txBytesBegin);
         netIoInfo.setRxpck(rxPacketsBegin);
         netIoInfo.setTxpck(txPacketsBegin);
+        netIoInfo.setIfsNames(ifsNames.toString());
         return netIoInfo;
     }
 
@@ -307,6 +335,15 @@ public class OshiUtils {
             .orElse(new ArrayList<>());
     }
 
+    public static boolean isMatch(List<String> list, String keyword) {
+        for (String pattern : list) {
+            if (pathMatcher.match(pattern, keyword)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Data
     private static class NetIoInfo {
         /**
@@ -328,5 +365,9 @@ public class OshiUtils {
          * 发送的KB数,txbit/s
          */
         private Long txbyt;
+        /**
+         * ifaceNames
+         */
+        private String ifsNames;
     }
 }

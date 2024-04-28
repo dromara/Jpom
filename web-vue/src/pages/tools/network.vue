@@ -73,13 +73,13 @@
           </a-form-item>
           <template v-if="Object.keys(pingReulst).length">
             <a-form-item label="结果" name="result">
-              <a-tag color="green" v-if="pingReulst.ping">成功</a-tag>
-              <a-tag color="red" v-else>失败</a-tag>
+              <a-tag v-if="pingReulst.ping" color="green">成功</a-tag>
+              <a-tag v-else color="red">失败</a-tag>
             </a-form-item>
             <a-form-item label="类型" name="labels">
               <a-tag v-for="item in pingReulst.labels">{{ item }}</a-tag>
             </a-form-item>
-            <a-form-item label="原始IP" name="originalIP" v-if="pingReulst.originalIP">
+            <a-form-item v-if="pingReulst.originalIP" label="原始IP" name="originalIP">
               {{ pingReulst.originalIP }}
             </a-form-item>
           </template>
@@ -141,13 +141,13 @@
           </a-form-item>
           <template v-if="Object.keys(telnetReulst).length">
             <a-form-item label="结果" name="result">
-              <a-tag color="green" v-if="telnetReulst.open">成功</a-tag>
-              <a-tag color="red" v-else>失败</a-tag>
+              <a-tag v-if="telnetReulst.open" color="green">成功</a-tag>
+              <a-tag v-else color="red">失败</a-tag>
             </a-form-item>
             <a-form-item label="类型" name="labels">
               <a-tag v-for="item in telnetReulst.labels">{{ item }}</a-tag>
             </a-form-item>
-            <a-form-item label="原始IP" name="originalIP" v-if="telnetReulst.originalIP">
+            <a-form-item v-if="telnetReulst.originalIP" label="原始IP" name="originalIP">
               {{ telnetReulst.originalIP }}
             </a-form-item>
           </template>

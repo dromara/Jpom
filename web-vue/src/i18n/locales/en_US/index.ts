@@ -11,10 +11,12 @@
 import page404 from './pages/404/404'
 import build from './pages/build'
 import certificate from './pages/certificate'
+import dispatch from './pages/dispatch'
 export default {
   pages: {
     404: page404,
     build,
-    certificate
+    certificate,
+    dispatch
   }
 }

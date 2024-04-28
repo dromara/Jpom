@@ -178,6 +178,13 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 break;
             case nodeUpdate:
                 break;
+            case freeScript:
+                //
+                MachineNodeModel machine = (MachineNodeModel) attributes.get("machine");
+                if (machine == null) {
+                    return false;
+                }
+                break;
             default:
                 return false;
         }

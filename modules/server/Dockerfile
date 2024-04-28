@@ -10,7 +10,7 @@
 
 # syntax = docker/dockerfile:experimental
 
-FROM maven:3.8.5-jdk-8-slim as builder
+FROM maven:3.9.6-eclipse-temurin-8 as builder
 WORKDIR /target/dependency
 COPY . .
 
@@ -46,7 +46,7 @@ RUN --mount=type=cache,target=/target/dependency/web-vue/node_modules cd web-vue
 
 RUN --mount=type=cache,target=/root/.m2 mvn -B -e -T 1C clean package -pl modules/server -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
 
-FROM maven:3.8.5-jdk-8
+FROM maven:3.9.6-eclipse-temurin-8
 
 ARG BUILD_DATE
 ARG JPOM_VERSION

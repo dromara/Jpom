@@ -194,7 +194,10 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
      * 安装 id
      */
     private String installId;
-
+    /**
+     * 扩展信息
+     */
+    private String extendInfo;
     /**
      * 传输加密方式 0 不加密 1 BASE64 2 AES
      */
