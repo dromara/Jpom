@@ -694,7 +694,7 @@
                   <a-segmented
                     v-model:value="dslEditTabKey"
                     :options="[
-                      { label: 'DSL {{$tl('c.configuration')}}', value: 'content' },
+                      { label: `DSL {{$tl('c.configuration')}}`, value: 'content' },
                       { label: $tl('c.configurationExample'), value: 'demo' }
                     ]"
                   />

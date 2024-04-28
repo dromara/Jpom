@@ -317,6 +317,9 @@ export default {
     this.close()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.dispatch.logReadView.${key}`, ...args)
+    },
     close() {
       Object.keys(this.socketCache).forEach((item) => {
         clearInterval(this.socketCache[item].heart)
