@@ -14,6 +14,7 @@
 4. 【server】修复 退出登录时页面会提示需要登录相关信息
 5. 【server】优化 页面检测新版本判断是否加入 beta
 6. 【agent】优化 添加数据记录修改人（感谢[@陈旭](https://gitee.com/chenxu8989) [Gitee issues I9JSY7](https://gitee.com/dromara/Jpom/issues/I9JSY7) ）
+7. 【server】优化 插件端注册到服务端，网络测试支持 ping + telnet （感谢@泊凉青川）
 
 ------
 
