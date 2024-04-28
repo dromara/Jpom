@@ -117,6 +117,7 @@ public enum ClassFeature {
     NODE_SCRIPT("节点脚本模板", ClassFeature.NODE, NodeScriptServer.class),
     NODE_SCRIPT_LOG("节点脚本模板日志", ClassFeature.NODE, NodeScriptExecuteLogServer.class),
     AGENT_LOG("插件端系统日志", ClassFeature.NODE),
+    FREE_SCRIPT("自由脚本", ClassFeature.NODE, MachineNodeServer.class),
 //    TOMCAT_FILE("Tomcat file", ClassFeature.NODE),
 //    TOMCAT_LOG("Tomcat log", ClassFeature.NODE),
 

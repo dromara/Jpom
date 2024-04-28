@@ -30,6 +30,7 @@ public abstract class BaseWorkspaceOptService<T extends BaseWorkspaceModel> exte
         String userName = BaseAgentController.getNowUserName();
         if (!StrUtil.DASHED.equals(userName)) {
             t.setCreateUser(userName);
+            t.setModifyUser(userName);
         }
         super.addItem(t);
     }
@@ -52,6 +53,10 @@ public abstract class BaseWorkspaceOptService<T extends BaseWorkspaceModel> exte
     @Override
     public void updateById(T updateData, String id) {
         updateData.setModifyTime(DateUtil.now());
+        String userName = BaseAgentController.getNowUserName();
+        if (!StrUtil.DASHED.equals(userName)) {
+            updateData.setModifyUser(userName);
+        }
         super.updateById(updateData, id);
     }
 }

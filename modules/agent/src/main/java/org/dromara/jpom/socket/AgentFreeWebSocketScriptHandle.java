@@ -90,6 +90,13 @@ public class AgentFreeWebSocketScriptHandle extends BaseAgentWebSocketHandle {
             return;
         }
         JSONObject json = JSONObject.parseObject(message);
+        String type = json.getString("type");
+        if (StrUtil.equals(type, "close")) {
+            // 关闭、停止脚本执行
+            IoUtil.close(CACHE.remove(session.getId()));
+            session.close();
+            return;
+        }
         String path = json.getString("path");
         String tag = json.getString("tag");
         JSONObject environment = json.getJSONObject("environment");
@@ -172,10 +179,12 @@ public class AgentFreeWebSocketScriptHandle extends BaseAgentWebSocketHandle {
             processBuilder.redirectErrorStream(true);
             processBuilder.command(command);
             //
-            File directory = FileUtil.file(path).getAbsoluteFile();
-            // 需要创建目录
-            FileUtil.mkdir(directory);
-            processBuilder.directory(directory);
+            if (StrUtil.isNotEmpty(path)) {
+                File directory = FileUtil.file(path).getAbsoluteFile();
+                // 需要创建目录
+                FileUtil.mkdir(directory);
+                processBuilder.directory(directory);
+            }
             //
             process = processBuilder.start();
             inputStream = process.getInputStream();

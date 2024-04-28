@@ -71,5 +71,8 @@ public class ServerWebSocketConfig implements WebSocketConfigurer {
         // docker cli
         registry.addHandler(new DockerCliHandler(), "/socket/docker_cli")
             .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+        // free script
+        registry.addHandler(new FreeScriptHandler(), "/socket/free_script")
+            .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
     }
 }
