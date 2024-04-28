@@ -35,7 +35,7 @@
             :type="systemNotificationData.level || 'info'"
             :closable="systemNotificationData.closable"
             banner
-            :afterClose="notificationAfterClose"
+            :after-close="notificationAfterClose"
           >
             <template #message> <div v-html="systemNotificationData.title"></div> </template>
             <template #description> <div v-html="systemNotificationData.content"></div> </template>

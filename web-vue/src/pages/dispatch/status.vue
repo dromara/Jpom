@@ -2,7 +2,7 @@
   <div>
     <a-drawer
       destroy-on-close
-      :title="`查看 ${name} 状态`"
+      :title="`${$tl('p.view')} ${name} ${$tl('c.status')}`"
       placement="right"
       width="85vw"
       :open="true"
@@ -13,7 +13,7 @@
       "
     >
       <a-tabs v-model:activeKey="tabKey" tab-position="left">
-        <a-tab-pane key="1" tab="状态">
+        <a-tab-pane key="1" :tab="$tl('c.status')">
           <!-- 嵌套表格 -->
           <a-table
             :loading="childLoading"
@@ -30,22 +30,24 @@
             <template #title>
               <a-space>
                 <div>
-                  当前状态：
-                  <a-tag v-if="data.status === 2" color="green">{{ statusMap[data.status] || '未知' }}</a-tag>
+                  {{ $tl('p.currentStatus') }}
+                  <a-tag v-if="data.status === 2" color="green">{{ statusMap[data.status] || $tl('c.unknown') }}</a-tag>
                   <a-tag v-else-if="data.status === 1 || data.status === 0" color="orange">{{
-                    statusMap[data.status] || '未知'
+                    statusMap[data.status] || $tl('c.unknown')
                   }}</a-tag>
                   <a-tag v-else-if="data.status === 3 || data.status === 4" color="red">{{
-                    statusMap[data.status] || '未知'
+                    statusMap[data.status] || $tl('c.unknown')
                   }}</a-tag>
-                  <a-tag v-else>{{ statusMap[data.status] || '未知' }}</a-tag>
+                  <a-tag v-else>{{ statusMap[data.status] || $tl('c.unknown') }}</a-tag>
                 </div>
-                <div>状态描述：{{ data.statusMsg || '-' }}</div>
-                <a-button type="primary" size="small" :loading="childLoading" @click="loadData">刷新</a-button>
+                <div>{{ $tl('p.statusDescription') }}{{ data.statusMsg || '-' }}</div>
+                <a-button type="primary" size="small" :loading="childLoading" @click="loadData">{{
+                  $tl('p.refresh')
+                }}</a-button>
 
                 <a-statistic-countdown
-                  format=" s 秒"
-                  title="刷新倒计时"
+                  format=" {{$tl('p.seconds')}}"
+                  :title="$tl('p.refreshCountdown')"
                   :value="countdownTime"
                   @finish="silenceLoadData"
                 />
@@ -63,7 +65,7 @@
               <template v-else-if="column.dataIndex === 'projectName'">
                 <a-tooltip placement="topLeft" :title="text">
                   <template v-if="record.disabled">
-                    <a-tooltip title="当前项目被禁用">
+                    <a-tooltip :title="$tl('p.currentProjectDisabled')">
                       <EyeInvisibleOutlined />
                     </a-tooltip>
                   </template>
@@ -71,14 +73,14 @@
                 </a-tooltip>
               </template>
               <template v-else-if="column.dataIndex === 'outGivingStatus'">
-                <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || '未知' }}</a-tag>
+                <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || $tl('c.unknown') }}</a-tag>
                 <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{
-                  dispatchStatusMap[text] || '未知'
+                  dispatchStatusMap[text] || $tl('c.unknown')
                 }}</a-tag>
                 <a-tag v-else-if="text === 3 || text === 4 || text === 6" color="red">{{
-                  dispatchStatusMap[text] || '未知'
+                  dispatchStatusMap[text] || $tl('c.unknown')
                 }}</a-tag>
-                <a-tag v-else>{{ dispatchStatusMap[text] || '未知' }}</a-tag>
+                <a-tag v-else>{{ dispatchStatusMap[text] || $tl('c.unknown') }}</a-tag>
               </template>
               <template v-else-if="column.dataIndex === 'outGivingResultMsg'">
                 <a-tooltip placement="topLeft" :title="readJsonStrField(record.outGivingResult, 'msg')">
@@ -117,15 +119,15 @@
                   :checked="text"
                   :disabled="true"
                   size="small"
-                  checked-children="运行中"
-                  un-checked-children="未运行"
+                  :checked-children="$tl('p.running')"
+                  :un-checked-children="$tl('p.notRunning')"
                 />
               </template>
 
               <template v-else-if="column.dataIndex === 'projectPid'">
                 <a-tooltip
                   placement="topLeft"
-                  :title="`进程号：${record.projectPid || '-'} / 端口号：${record.projectPort || '-'}`"
+                  :title="`${$tl('p.processId')}${record.projectPid || '-'} / ${$tl('p.portNumber')}${record.projectPort || '-'}`"
                 >
                   <span>{{ record.projectPid || '-' }}/{{ record.projectPort || '-' }}</span>
                 </a-tooltip>
@@ -133,18 +135,22 @@
 
               <template v-else-if="column.dataIndex === 'child-operation'">
                 <a-space>
-                  <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleFile(record)"
-                    >文件</a-button
-                  >
-                  <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleConsole(record)"
-                    >控制台</a-button
+                  <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleFile(record)">{{
+                    $tl('p.file')
+                  }}</a-button>
+                  <a-button
+                    size="small"
+                    :disabled="!record.projectName"
+                    type="primary"
+                    @click="handleConsole(record)"
+                    >{{ $tl('c.console') }}</a-button
                   >
                 </a-space>
               </template>
             </template>
           </a-table>
         </a-tab-pane>
-        <a-tab-pane key="2" tab="配置">
+        <a-tab-pane key="2" :tab="$tl('p.configuration')">
           <!-- 配置分发 -->
           <div style="width: 50vw">
             <!-- list -->
@@ -152,14 +158,14 @@
               <Draggable v-for="(element, index) in list" :key="index">
                 <a-row class="item-row">
                   <a-col :span="18">
-                    <span> 节点名： {{ element.nodeName }} </span>
-                    <span> 项目名： {{ element.cacheProjectName }} </span>
+                    <span> {{ $tl('p.nodeName') }} {{ element.nodeName }} </span>
+                    <span> {{ $tl('p.projectName') }} {{ element.cacheProjectName }} </span>
                   </a-col>
                   <a-col :span="6">
                     <a-space>
                       <a-switch
-                        checked-children="启用"
-                        un-checked-children="禁用"
+                        :checked-children="$tl('p.enable')"
+                        :un-checked-children="$tl('p.disable')"
                         :checked="element.disabled ? false : true"
                         @change="
                           (checked) => {
@@ -180,9 +186,9 @@
                         :disabled="!list || list.length <= 1"
                         @click="handleRemoveProject(element)"
                       >
-                        解绑
+                        {{ $tl('p.unbind') }}
                       </a-button>
-                      <a-tooltip placement="left" :title="`长按可以拖动排序`" class="move">
+                      <a-tooltip placement="left" :title="`${$tl('p.longPressToDragAndSort')}`" class="move">
                         <MenuOutlined />
                       </a-tooltip>
                     </a-space>
@@ -192,7 +198,7 @@
             </Container>
             <a-col style="margin-top: 10px">
               <a-space>
-                <a-button type="primary" size="small" @click="viewDispatchManagerOk">保存</a-button>
+                <a-button type="primary" size="small" @click="viewDispatchManagerOk">{{ $tl('p.save') }}</a-button>
               </a-space>
             </a-col>
           </div>
@@ -316,65 +322,65 @@ export default {
 
       childColumns: [
         {
-          title: '节点名称',
+          title: this.$tl('p.nodeNameLabel'),
           dataIndex: 'nodeId',
           width: 120,
           ellipsis: true
         },
         {
-          title: '项目名称',
+          title: this.$tl('p.projectNameLabel'),
           dataIndex: 'projectName',
           width: 120,
           ellipsis: true
         },
         {
-          title: '项目状态',
+          title: this.$tl('p.projectStatusLabel'),
           dataIndex: 'projectStatus',
           width: 120,
           ellipsis: true
         },
         {
-          title: '进程/端口',
+          title: this.$tl('p.processPortLabel'),
           dataIndex: 'projectPid',
           width: '120px',
           ellipsis: true
         },
         {
-          title: '分发状态',
+          title: this.$tl('p.distributionStatusLabel'),
           dataIndex: 'outGivingStatus',
           width: '120px'
         },
         {
-          title: '分发结果',
+          title: this.$tl('p.distributionResultLabel'),
           dataIndex: 'outGivingResultMsg',
           ellipsis: true,
           width: 120
         },
         {
-          title: '分发状态消息',
+          title: this.$tl('p.distributionStatusMessageLabel'),
           dataIndex: 'outGivingResultMsgData',
           ellipsis: true,
           width: 120
         },
         {
-          title: '分发耗时',
+          title: this.$tl('p.distributionDurationLabel'),
           dataIndex: 'outGivingResultTime',
           width: '120px'
         },
         {
-          title: '文件大小',
+          title: this.$tl('p.fileSizeLabel'),
           dataIndex: 'outGivingResultSize',
           width: '100px'
         },
         {
-          title: '最后分发时间',
+          title: this.$tl('p.lastDistributionTimeLabel'),
           dataIndex: 'lastTime',
           width: '170px',
           ellipsis: true,
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: '操作',
+          title: this.$tl('p.operationLabel'),
           dataIndex: 'child-operation',
           fixed: 'right',
 
@@ -395,6 +401,9 @@ export default {
     this.loadNodeList()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.dispatch.status.${key}`, ...args)
+    },
     readJsonStrField,
     renderSize,
     formatDuration,
@@ -540,7 +549,7 @@ export default {
                       ...element,
                       projectStatus: false,
                       projectPid: '-',
-                      errorMsg: '网络异常'
+                      errorMsg: this.$tl('p.networkError')
                     }
                   }
                   return element
@@ -555,7 +564,7 @@ export default {
     // 文件管理
     handleFile(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `文件管理(${this.temp.projectId})`
+      this.drawerTitle = `${this.$tl('p.fileManagement')}(${this.temp.projectId})`
       this.drawerFileVisible = true
     },
     // 关闭文件管理对话框
@@ -565,7 +574,7 @@ export default {
     // 控制台
     handleConsole(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `控制台(${this.temp.projectId})`
+      this.drawerTitle = `${this.$tl('c.console')}(${this.temp.projectId})`
       this.drawerConsoleVisible = true
     },
     // 关闭控制台
@@ -590,7 +599,7 @@ export default {
       this.onFileClose()
       this.drawerReadFileVisible = true
       this.temp.readFilePath = (path + '/' + filename).replace(new RegExp('//', 'gm'), '/')
-      this.drawerTitle = `跟踪文件(${filename})`
+      this.drawerTitle = `${this.$tl('p.trackFile')}(${filename})`
     },
     onReadFileClose() {
       this.drawerReadFileVisible = false
@@ -609,21 +618,24 @@ export default {
     },
     // 删除项目
     handleRemoveProject(item) {
-      const html =
-        "<b style='font-size: 20px;'>真的要释放(删除)当前项目么？</b>" +
-        "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
-        '<li>不会真实请求节点删除项目信息</b></li>' +
-        '<li>一般用于服务器无法连接且已经确定不再使用</li>' +
-        '<li>如果误操作会产生冗余数据！！！</li>' +
-        ' </ul>'
+      const html = `
+      <b style='font-size: 20px;'>
+        ${this.$tl('p.reallyReleaseCurrentProject')}
+      </b>
+      <ul style='font-size: 20px;color:red;font-weight: bold;'>
+        <li>this.$tl('p.willNotActuallyRequestNodeToDeleteProjectInfo')</b></li>
+        <li>this.$tl('p.generallyUsedWhenServerCannotBeConnectedAndIsNoLongerNeeded')</li>
+        <li>this.$tl('p.willProduceRedundantDataIfMisoperated')</li>
+      </ul>
+      `
       $confirm({
-        title: '危险操作！！！',
+        title: this.$tl('p.dangerousOperation'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okButtonProps: { type: 'primary', size: 'small', danger: true },
         cancelButtonProps: { type: 'primary' },
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return removeProject({
             nodeId: item.nodeId,

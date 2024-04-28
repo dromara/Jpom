@@ -8,7 +8,7 @@
       :footer="uploading ? null : undefined"
       width="50%"
       :keyboard="false"
-      :title="'分发项目-' + data.name"
+      :title="$tl('p.distributeProject') + data.name"
       :mask-closable="false"
       @ok="handleDispatchOk"
       @cancel="
@@ -18,37 +18,39 @@
       "
     >
       <a-form ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item label="方式" name="type">
+        <a-form-item :label="$tl('p.method')" name="type">
           <a-radio-group v-model:value="temp.type" name="type" :disabled="!!percentage" @change="restForm">
-            <a-radio :value="'use-build'">构建产物</a-radio>
-            <a-radio :value="'file-storage'">文件中心</a-radio>
-            <a-radio :value="'static-file-storage'">静态文件</a-radio>
-            <a-radio :value="'upload'">上传文件</a-radio>
-            <a-radio :value="'download'">远程下载</a-radio>
+            <a-radio :value="'use-build'">{{ $tl('p.buildProduct') }}</a-radio>
+            <a-radio :value="'file-storage'">{{ $tl('p.fileCenter') }}</a-radio>
+            <a-radio :value="'static-file-storage'">{{ $tl('p.staticFile') }}</a-radio>
+            <a-radio :value="'upload'">{{ $tl('p.uploadFile') }}</a-radio>
+            <a-radio :value="'download'">{{ $tl('p.remoteDownload') }}</a-radio>
           </a-radio-group>
         </a-form-item>
         <!-- 手动上传 -->
-        <a-form-item v-if="temp.type === 'upload'" label="选择分发文件" name="clearOld">
+        <a-form-item v-if="temp.type === 'upload'" :label="$tl('p.selectDistributeFile')" name="clearOld">
           <a-progress v-if="percentage" :percent="percentage">
             <template #format="percent">
               {{ percent }}%
               <template v-if="percentageInfo.total"> ({{ renderSize(percentageInfo.total) }}) </template>
-              <template v-if="percentageInfo.duration"> 用时:{{ formatDuration(percentageInfo.duration) }} </template>
+              <template v-if="percentageInfo.duration">
+                {{ $tl('p.usedTime') }}:{{ formatDuration(percentageInfo.duration) }}
+              </template>
             </template>
           </a-progress>
 
           <a-upload :file-list="fileList" :disabled="!!percentage" :before-upload="beforeUpload" @remove="handleRemove">
             <LoadingOutlined v-if="percentage" />
-            <a-button v-else type="primary"><UploadOutlined />选择文件</a-button>
+            <a-button v-else type="primary"><UploadOutlined />{{ $tl('c.selectFile') }}</a-button>
           </a-upload>
         </a-form-item>
         <!-- 远程下载 -->
-        <a-form-item v-else-if="temp.type === 'download'" label="远程下载URL" name="url">
-          <a-input v-model:value="temp.url" placeholder="远程下载地址" />
+        <a-form-item v-else-if="temp.type === 'download'" :label="$tl('p.remoteDownloadURL')" name="url">
+          <a-input v-model:value="temp.url" :placeholder="$tl('p.remoteDownloadAddress')" />
         </a-form-item>
         <!-- 在线构建 -->
         <template v-else-if="temp.type == 'use-build'">
-          <a-form-item label="选择构建">
+          <a-form-item :label="$tl('c.selectBuild')">
             <a-space>
               {{ chooseBuildInfo.name }}
               <a-button
@@ -59,11 +61,11 @@
                   }
                 "
               >
-                选择构建
+                {{ $tl('c.selectBuild') }}
               </a-button>
             </a-space>
           </a-form-item>
-          <a-form-item label="选择产物">
+          <a-form-item :label="$tl('c.selectProduct')">
             <a-space>
               <a-tag v-if="chooseBuildInfo.buildNumberId">#{{ chooseBuildInfo.buildNumberId }}</a-tag>
               <a-button
@@ -75,14 +77,14 @@
                   }
                 "
               >
-                选择产物
+                {{ $tl('c.selectProduct') }}
               </a-button>
             </a-space>
           </a-form-item>
         </template>
         <!-- 文件中心 -->
         <template v-else-if="temp.type === 'file-storage'">
-          <a-form-item label="选择文件">
+          <a-form-item :label="$tl('c.selectFile')">
             <a-space>
               {{ chooseFileInfo.name }}
               <a-button
@@ -93,14 +95,14 @@
                   }
                 "
               >
-                选择文件
+                {{ $tl('c.selectFile') }}
               </a-button>
             </a-space>
           </a-form-item>
         </template>
         <!-- 静态文件 -->
         <template v-else-if="temp.type === 'static-file-storage'">
-          <a-form-item label="选择文件">
+          <a-form-item :label="$tl('c.selectFile')">
             <a-space>
               {{ chooseFileInfo.name }}
               <a-button
@@ -111,54 +113,62 @@
                   }
                 "
               >
-                选择文件
+                {{ $tl('c.selectFile') }}
               </a-button>
             </a-space>
           </a-form-item>
         </template>
         <a-form-item name="clearOld">
           <template #label>
-            清空发布
+            {{ $tl('p.clearPublish') }}
             <a-tooltip>
-              <template #title>
-                清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件
-              </template>
+              <template #title> {{ $tl('undefined') }},{{ $tl('undefined') }} </template>
               <QuestionCircleOutlined />
             </a-tooltip>
           </template>
-          <a-switch v-model:checked="temp.clearOld" checked-children="是" un-checked-children="否" />
+          <a-switch
+            v-model:checked="temp.clearOld"
+            :checked-children="$tl('c.yes')"
+            :un-checked-children="$tl('c.no')"
+          />
         </a-form-item>
         <a-form-item v-if="temp.type !== 'use-build'" name="unzip">
           <template #label>
-            是否解压
+            {{ $tl('p.unZip') }}
             <a-tooltip>
-              <template #title>
-                如果上传的压缩文件是否自动解压 支持的压缩包类型有 tar.bz2, tar.gz, tar, bz2, zip, gz
-              </template>
+              <template #title> {{ $tl('p.autoUnZip') }}.bz2, tar.gz, tar, bz2, zip, gz </template>
               <QuestionCircleOutlined />
             </a-tooltip>
           </template>
-          <a-switch v-model:checked="temp.autoUnzip" checked-children="是" un-checked-children="否" />
+          <a-switch
+            v-model:checked="temp.autoUnzip"
+            :checked-children="$tl('c.yes')"
+            :un-checked-children="$tl('c.no')"
+          />
         </a-form-item>
-        <a-form-item v-if="temp.autoUnzip" label="剔除文件夹">
+        <a-form-item v-if="temp.autoUnzip" :label="$tl('p.excludeFolder')">
           <a-input-number
             v-model:value="temp.stripComponents"
             style="width: 100%"
             :min="0"
-            placeholder="解压时候自动剔除压缩包里面多余的文件夹名"
+            :placeholder="$tl('p.excludeFolderDescription')"
           />
         </a-form-item>
 
-        <a-form-item label="分发后操作" name="afterOpt">
-          <a-select v-model:value="temp.afterOpt" placeholder="请选择发布后操作">
+        <a-form-item :label="$tl('p.postPublishAction')" name="afterOpt">
+          <a-select v-model:value="temp.afterOpt" :placeholder="$tl('c.selectPostPublishAction')">
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item name="secondaryDirectory" label="二级目录">
-          <a-input v-model:value="temp.secondaryDirectory" placeholder="不填写则发布至项目的根目录" />
+        <a-form-item name="secondaryDirectory" :label="$tl('p.subDirectory')">
+          <a-input v-model:value="temp.secondaryDirectory" :placeholder="$tl('p.subDirectoryDescription')" />
         </a-form-item>
-        <a-form-item name="selectProject" label="筛选项目" help="筛选之后本次发布操作只发布筛选项,并且只对本次操作生效">
-          <a-select v-model:value="temp.selectProjectArray" mode="multiple" placeholder="请选择指定发布的项目">
+        <a-form-item name="selectProject" :label="$tl('p.filterProject')" :help="$tl('p.filterProjectDescription')">
+          <a-select
+            v-model:value="temp.selectProjectArray"
+            mode="multiple"
+            :placeholder="$tl('p.selectPublishProject')"
+          >
             <a-select-option v-for="item in itemProjectList" :key="item.id" :value="`${item.projectId}@${item.nodeId}`">
               {{ item.nodeName }}-{{ item.cacheProjectName || item.projectId }}
             </a-select-option>
@@ -169,7 +179,7 @@
     <!-- 选择构建 -->
     <a-drawer
       destroy-on-close
-      :title="`选择构建`"
+      :title="`${$tl('c.selectBuild')}`"
       placement="right"
       :open="chooseVisible === 1"
       width="80vw"
@@ -211,7 +221,7 @@
               }
             "
           >
-            取消
+            {{ $tl('c.cancel') }}
           </a-button>
           <a-button
             type="primary"
@@ -221,7 +231,7 @@
               }
             "
           >
-            确认
+            {{ $tl('c.confirm') }}
           </a-button>
         </a-space>
       </template>
@@ -229,7 +239,7 @@
     <!-- 选择构建产物 -->
     <a-drawer
       destroy-on-close
-      :title="`选择构建产物`"
+      :title="`${$tl('p.selectBuildProduct')}`"
       placement="right"
       :open="chooseVisible === 2"
       width="80vw"
@@ -272,7 +282,7 @@
               }
             "
           >
-            取消
+            {{ $tl('c.cancel') }}
           </a-button>
           <a-button
             type="primary"
@@ -282,7 +292,7 @@
               }
             "
           >
-            确认
+            {{ $tl('c.confirm') }}
           </a-button>
         </a-space>
       </template>
@@ -290,7 +300,7 @@
     <!-- 选择文件 -->
     <a-drawer
       destroy-on-close
-      :title="`选择文件`"
+      :title="`${$tl('c.selectFile')}`"
       placement="right"
       :open="chooseVisible === 3"
       width="80vw"
@@ -329,7 +339,7 @@
               }
             "
           >
-            取消
+            {{ $tl('c.cancel') }}
           </a-button>
           <a-button
             type="primary"
@@ -339,7 +349,7 @@
               }
             "
           >
-            确认
+            {{ $tl('c.confirm') }}
           </a-button>
         </a-space>
       </template>
@@ -347,7 +357,7 @@
     <!-- 选择静态文件 -->
     <a-drawer
       destroy-on-close
-      :title="`选择静态文件`"
+      :title="`${$tl('p.selectStaticFile')}`"
       placement="right"
       :open="chooseVisible === 4"
       width="80vw"
@@ -386,7 +396,7 @@
               }
             "
           >
-            取消
+            {{ $tl('c.cancel') }}
           </a-button>
           <a-button
             type="primary"
@@ -396,7 +406,7 @@
               }
             "
           >
-            确认
+            {{ $tl('c.confirm') }}
           </a-button>
         </a-space>
       </template>
@@ -448,8 +458,8 @@ export default {
       itemProjectList: [],
       fileList: [],
       rules: {
-        afterOpt: [{ required: true, message: '请选择发布后操作', trigger: 'blur' }],
-        url: [{ required: true, message: '请输入远程地址', trigger: 'blur' }]
+        afterOpt: [{ required: true, message: this.$tl('c.selectPostPublishAction'), trigger: 'blur' }],
+        url: [{ required: true, message: this.$tl('p.pleaseInputRemoteAddress'), trigger: 'blur' }]
       },
       temp: { type: 'upload' },
       chooseVisible: 0,
@@ -518,6 +528,9 @@ export default {
     // console.log(this.temp);
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.dispatch.start.${key}`, ...args)
+    },
     renderSize,
     formatDuration,
     // 处理文件移除
@@ -548,7 +561,7 @@ export default {
           // 判断文件
           if (this.fileList.length === 0) {
             $notification.error({
-              message: '请选择文件'
+              message: this.$tl('p.pleaseSelectFile')
             })
             return false
           }
@@ -635,7 +648,7 @@ export default {
         } else if (this.temp.type == 'download') {
           if (!this.temp.url) {
             $notification.error({
-              message: '请填写远程URL'
+              message: this.$tl('p.pleaseFillRemoteURL')
             })
             return false
           }
@@ -658,7 +671,7 @@ export default {
           // 构建
           if (!this.chooseBuildInfo || !this.chooseBuildInfo.id || !this.chooseBuildInfo.buildNumberId) {
             $notification.error({
-              message: '请填写构建和产物'
+              message: this.$tl('p.pleaseFillBuildAndProduct')
             })
             return false
           }
@@ -685,7 +698,7 @@ export default {
           // 文件中心
           if (!this.chooseFileInfo || !this.chooseFileInfo.id) {
             $notification.error({
-              message: '请选择文件中心的文件'
+              message: this.$tl('p.pleaseSelectFileCenterFile')
             })
             return false
           }
@@ -711,7 +724,7 @@ export default {
           // 文件中心
           if (!this.chooseFileInfo || !this.chooseFileInfo.id) {
             $notification.error({
-              message: '请选择静态文件中的文件'
+              message: this.$tl('p.pleaseSelectStaticFileFile')
             })
             return false
           }
