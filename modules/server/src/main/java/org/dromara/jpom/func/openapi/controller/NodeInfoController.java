@@ -35,7 +35,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.InetSocketAddress;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -87,7 +89,7 @@ public class NodeInfoController extends BaseServerController {
             ipsList.add(clientIp);
         }
         List<String> canUseIps = ipsList.stream()
-            .filter(s -> this.testIpPort(s, ping))
+            .filter(s -> this.testIpPort(s, ping, port))
             .collect(Collectors.toList());
         List<MachineNodeModel> canUseNode = canUseIps.stream().map(s -> {
             MachineNodeModel model = this.createMachineNodeModel(s, loginName, loginPwd, port);
@@ -164,12 +166,19 @@ public class NodeInfoController extends BaseServerController {
      * @param ping ping 时间
      * @return true
      */
-    private boolean testIpPort(String ip, String ping) {
+    private boolean testIpPort(String ip, String ping, int port) {
         int pingTime = Convert.toInt(ping, 5);
         if (pingTime <= 0) {
             return true;
         }
-        return NetUtil.ping(ip, pingTime * 1000);
+        boolean pinged = NetUtil.ping(ip, pingTime * 1000);
+        //
+        return pinged || this.testIpCanPort(ip, pingTime, port);
+    }
+
+    private boolean testIpCanPort(String ip, int timeout, int port) {
+        InetSocketAddress address = NetUtil.createAddress(ip, port);
+        return NetUtil.isOpen(address, (int) TimeUnit.SECONDS.toMillis(timeout));
     }
 
     private MachineNodeModel createMachineNodeModel(String ip, String loginName, String loginPwd, int port) {

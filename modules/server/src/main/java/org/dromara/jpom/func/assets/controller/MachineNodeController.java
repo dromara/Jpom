@@ -257,11 +257,10 @@ public class MachineNodeController extends BaseGroupNameController {
 
     @GetMapping(value = "monitor-config", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<JSONObject> info(HttpServletRequest request, String id) {
+    public IJsonMessage<JSONObject> monitorConfig(HttpServletRequest request, String id) {
         IJsonMessage<JSONObject> message = this.tryRequestMachine(id, request, NodeUrl.Info);
         Assert.notNull(message, "没有对应的资产机器");
         Assert.state(message.success(), message.getMsg());
-        //
         JSONObject data = message.getData();
         JSONObject monitor = Optional.ofNullable(data).map(jsonObject -> jsonObject.getJSONObject("monitor")).orElse(null);
         return JsonMessage.success("", monitor);
