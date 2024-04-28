@@ -1,29 +1,29 @@
 export default {
   c: {
-    content1: '未知',
-    content2: '分发结果'
+    unknown: '未知',
+    result: '分发结果'
   },
   p: {
-    content1: '没有任何分发日志',
-    content2: '请选择节点',
-    content3: '分发项目',
-    content4: '请选择状态',
-    content5: '按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页',
-    content6: '搜索',
-    content7: '关联数据：',
-    content8: '详情',
-    content9: '详情信息',
-    content10: '分发项目 ID',
-    content11: '节点名称',
-    content12: '项目 ID',
-    content13: '分发方式',
-    content14: '分发耗时',
-    content15: '文件大小',
-    content16: '开始时间',
-    content17: '结束时间',
-    content18: '分发状态消息',
-    content19: '操作人',
-    content20: '状态',
-    content21: '操作'
+    noLogs: '没有任何分发日志',
+    selectNode: '请选择节点',
+    distributeProject: '分发项目',
+    selectStatus: '请选择状态',
+    goToFirstPage: '按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页',
+    search: '搜索',
+    relatedData: '关联数据：',
+    details: '详情',
+    info: '详情信息',
+    projectId: '分发项目 ID',
+    nodeName: '节点名称',
+    distributeId: '项目 ID',
+    method: '分发方式',
+    duration: '分发耗时',
+    fileSize: '文件大小',
+    startTime: '开始时间',
+    endTime: '结束时间',
+    statusMessage: '分发状态消息',
+    operator: '操作人',
+    status: '状态',
+    action: '操作'
   }
 }

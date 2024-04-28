@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="dispatch-log-list"
-      :empty-description="$tl('p.content1')"
+      :empty-description="$tl('p.noLogs')"
       size="middle"
       :data-source="list"
       :columns="columns"
@@ -24,7 +24,7 @@
           <a-select
             v-model:value="listQuery.nodeId"
             allow-clear
-            :placeholder="$tl('p.content2')"
+            :placeholder="$tl('p.selectNode')"
             class="search-input-item"
           >
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
@@ -32,7 +32,7 @@
           <a-select
             v-model:value="listQuery.outGivingId"
             allow-clear
-            :placeholder="$tl('p.content3')"
+            :placeholder="$tl('p.distributeProject')"
             class="search-input-item"
           >
             <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }}</a-select-option>
@@ -40,7 +40,7 @@
           <a-select
             v-model:value="listQuery.status"
             allow-clear
-            :placeholder="$tl('p.content4')"
+            :placeholder="$tl('p.selectStatus')"
             class="search-input-item"
           >
             <a-select-option v-for="(item, key) in dispatchStatusMap" :key="key" :value="key">{{
@@ -48,8 +48,8 @@
             }}</a-select-option>
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip :title="$tl('p.content5')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{ $tl('p.content6') }}</a-button>
+          <a-tooltip :title="$tl('p.goToFirstPage')">
+            <a-button :loading="loading" type="primary" @click="loadData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -84,7 +84,7 @@
         <template v-else-if="column.dataIndex === 'mode'">
           <a-tooltip
             placement="topLeft"
-            :title="`${dispatchMode[text] || ''}  ${$tl('p.content7')}${record.modeData || ''}`"
+            :title="`${dispatchMode[text] || ''}  ${$tl('p.relatedData')}${record.modeData || ''}`"
           >
             <span>{{ dispatchMode[text] || '' }}</span>
           </a-tooltip>
@@ -119,22 +119,22 @@
         </template>
         <template v-else-if="column.dataIndex === 'status'">
           <!-- {{ dispatchStatusMap[text] || "未知" }} -->
-          <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || $tl('c.content1') }}</a-tag>
+          <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || $tl('c.unknown') }}</a-tag>
           <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{
-            dispatchStatusMap[text] || $tl('c.content1')
+            dispatchStatusMap[text] || $tl('c.unknown')
           }}</a-tag>
           <a-tag v-else-if="text === 3 || text === 4 || text === 6" color="red">{{
-            dispatchStatusMap[text] || $tl('c.content1')
+            dispatchStatusMap[text] || $tl('c.unknown')
           }}</a-tag>
-          <a-tag v-else>{{ dispatchStatusMap[text] || $tl('c.content1') }}</a-tag>
+          <a-tag v-else>{{ dispatchStatusMap[text] || $tl('c.unknown') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
-          <a-button type="primary" size="small" @click="handleDetail(record)">{{ $tl('p.content8') }}</a-button>
+          <a-button type="primary" size="small" @click="handleDetail(record)">{{ $tl('p.details') }}</a-button>
         </template>
       </template>
     </CustomTable>
     <!-- 详情区 -->
-    <a-modal v-model:open="detailVisible" destroy-on-close width="600px" :title="$tl('p.content9')" :footer="null">
+    <a-modal v-model:open="detailVisible" destroy-on-close width="600px" :title="$tl('p.info')" :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">
         <template #renderItem="{ item }">
           <a-list-item>
@@ -174,49 +174,49 @@ export default {
       detailData: [],
       columns: [
         {
-          title: this.$tl('p.content10'),
+          title: this.$tl('p.projectId'),
           dataIndex: 'outGivingId',
           width: 100,
           ellipsis: true
         },
 
         {
-          title: this.$tl('p.content11'),
+          title: this.$tl('p.nodeName'),
           dataIndex: 'nodeName',
           ellipsis: true,
           width: 150
         },
         {
-          title: this.$tl('p.content12'),
+          title: this.$tl('p.distributeId'),
           dataIndex: 'projectId',
           ellipsis: true,
           width: 100
         },
         {
-          title: this.$tl('p.content13'),
+          title: this.$tl('p.method'),
           dataIndex: 'mode',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$tl('c.content2'),
+          title: this.$tl('c.result'),
           dataIndex: 'outGivingResultMsg',
           ellipsis: true,
           width: 200
         },
 
         {
-          title: this.$tl('p.content14'),
+          title: this.$tl('p.duration'),
           dataIndex: 'outGivingResultTime',
           width: '120px'
         },
         {
-          title: this.$tl('p.content15'),
+          title: this.$tl('p.fileSize'),
           dataIndex: 'outGivingResultSize',
           width: '100px'
         },
         {
-          title: this.$tl('p.content16'),
+          title: this.$tl('p.startTime'),
           dataIndex: 'startTime',
           customRender: ({ text }) => {
             return parseTime(text)
@@ -225,7 +225,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.content17'),
+          title: this.$tl('p.endTime'),
           dataIndex: 'endTime',
           sorter: true,
           customRender: ({ text }) => {
@@ -234,26 +234,26 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.content18'),
+          title: this.$tl('p.statusMessage'),
           dataIndex: 'outGivingResultMsgData',
           ellipsis: true,
           width: 100
         },
         {
-          title: this.$tl('p.content19'),
+          title: this.$tl('p.operator'),
           dataIndex: 'modifyUser',
           ellipsis: true,
 
           width: 120
         },
         {
-          title: this.$tl('p.content20'),
+          title: this.$tl('p.status'),
           dataIndex: 'status',
           width: 100,
           ellipsis: true,
           fixed: 'right'
         },
-        { title: this.$tl('p.content21'), dataIndex: 'operation', align: 'center', width: '100px', fixed: 'right' }
+        { title: this.$tl('p.action'), dataIndex: 'operation', align: 'center', width: '100px', fixed: 'right' }
       ]
     }
   },
@@ -317,7 +317,7 @@ export default {
       this.detailVisible = true
       this.temp = Object.assign({}, record)
 
-      this.detailData.push({ title: this.$tl('c.content2'), description: this.temp.result })
+      this.detailData.push({ title: this.$tl('c.result'), description: this.temp.result })
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
