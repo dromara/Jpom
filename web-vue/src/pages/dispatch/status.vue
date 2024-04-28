@@ -32,14 +32,25 @@
                 <div>
                   {{ $tl('p.currentStatus') }}
                   <a-tag v-if="data.status === 2" color="green">{{ statusMap[data.status] || $tl('c.unknown') }}</a-tag>
-                  <a-tag v-else-if="data.status === 1 || data.status === 0" color="orange">{{ statusMap[data.status] || $tl('c.unknown') }}</a-tag>
-                  <a-tag v-else-if="data.status === 3 || data.status === 4" color="red">{{ statusMap[data.status] || $tl('c.unknown') }}</a-tag>
+                  <a-tag v-else-if="data.status === 1 || data.status === 0" color="orange">{{
+                    statusMap[data.status] || $tl('c.unknown')
+                  }}</a-tag>
+                  <a-tag v-else-if="data.status === 3 || data.status === 4" color="red">{{
+                    statusMap[data.status] || $tl('c.unknown')
+                  }}</a-tag>
                   <a-tag v-else>{{ statusMap[data.status] || $tl('c.unknown') }}</a-tag>
                 </div>
                 <div>{{ $tl('p.statusDescription') }}{{ data.statusMsg || '-' }}</div>
-                <a-button type="primary" size="small" :loading="childLoading" @click="loadData">{{ $tl('p.refresh') }}</a-button>
+                <a-button type="primary" size="small" :loading="childLoading" @click="loadData">{{
+                  $tl('p.refresh')
+                }}</a-button>
 
-                <a-statistic-countdown format=" {{$tl('p.seconds')}}" :title="$tl('p.refreshCountdown')" :value="countdownTime" @finish="silenceLoadData" />
+                <a-statistic-countdown
+                  format=" {{$tl('p.seconds')}}"
+                  :title="$tl('p.refreshCountdown')"
+                  :value="countdownTime"
+                  @finish="silenceLoadData"
+                />
               </a-space>
             </template>
             <template #bodyCell="{ column, text, record }">
@@ -63,13 +74,21 @@
               </template>
               <template v-else-if="column.dataIndex === 'outGivingStatus'">
                 <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || $tl('c.unknown') }}</a-tag>
-                <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{ dispatchStatusMap[text] || $tl('c.unknown') }}</a-tag>
-                <a-tag v-else-if="text === 3 || text === 4 || text === 6" color="red">{{ dispatchStatusMap[text] || $tl('c.unknown') }}</a-tag>
+                <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{
+                  dispatchStatusMap[text] || $tl('c.unknown')
+                }}</a-tag>
+                <a-tag v-else-if="text === 3 || text === 4 || text === 6" color="red">{{
+                  dispatchStatusMap[text] || $tl('c.unknown')
+                }}</a-tag>
                 <a-tag v-else>{{ dispatchStatusMap[text] || $tl('c.unknown') }}</a-tag>
               </template>
               <template v-else-if="column.dataIndex === 'outGivingResultMsg'">
                 <a-tooltip placement="topLeft" :title="readJsonStrField(record.outGivingResult, 'msg')">
-                  <span>{{ readJsonStrField(record.outGivingResult, 'code') }}-{{ readJsonStrField(record.outGivingResult, 'msg') || record.outGivingResult }}</span>
+                  <span
+                    >{{ readJsonStrField(record.outGivingResult, 'code') }}-{{
+                      readJsonStrField(record.outGivingResult, 'msg') || record.outGivingResult
+                    }}</span
+                  >
                 </a-tooltip>
               </template>
               <template v-else-if="column.dataIndex === 'outGivingResultTime'">
@@ -84,7 +103,9 @@
               </template>
               <template v-else-if="column.dataIndex === 'outGivingResultMsgData'">
                 <a-tooltip placement="topLeft" :title="`${readJsonStrField(record.outGivingResult, 'data')}`">
-                  <template v-if="record.fileSize"> {{ Math.floor((record.progressSize / record.fileSize) * 100) }}% </template>
+                  <template v-if="record.fileSize">
+                    {{ Math.floor((record.progressSize / record.fileSize) * 100) }}%
+                  </template>
                   {{ readJsonStrField(record.outGivingResult, 'data') }}
                 </a-tooltip>
               </template>
@@ -93,19 +114,37 @@
                 <a-tooltip v-if="record.errorMsg" :title="record.errorMsg">
                   <WarningOutlined />
                 </a-tooltip>
-                <a-switch v-else :checked="text" :disabled="true" size="small" :checked-children="$tl('p.running')" :un-checked-children="$tl('p.notRunning')" />
+                <a-switch
+                  v-else
+                  :checked="text"
+                  :disabled="true"
+                  size="small"
+                  :checked-children="$tl('p.running')"
+                  :un-checked-children="$tl('p.notRunning')"
+                />
               </template>
 
               <template v-else-if="column.dataIndex === 'projectPid'">
-                <a-tooltip placement="topLeft" :title="`${$tl('p.processId')}${record.projectPid || '-'} / ${$tl('p.portNumber')}${record.projectPort || '-'}`">
+                <a-tooltip
+                  placement="topLeft"
+                  :title="`${$tl('p.processId')}${record.projectPid || '-'} / ${$tl('p.portNumber')}${record.projectPort || '-'}`"
+                >
                   <span>{{ record.projectPid || '-' }}/{{ record.projectPort || '-' }}</span>
                 </a-tooltip>
               </template>
 
               <template v-else-if="column.dataIndex === 'child-operation'">
                 <a-space>
-                  <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleFile(record)">{{ $tl('p.file') }}</a-button>
-                  <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleConsole(record)">{{ $tl('c.console') }}</a-button>
+                  <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleFile(record)">{{
+                    $tl('p.file')
+                  }}</a-button>
+                  <a-button
+                    size="small"
+                    :disabled="!record.projectName"
+                    type="primary"
+                    @click="handleConsole(record)"
+                    >{{ $tl('c.console') }}</a-button
+                  >
                 </a-space>
               </template>
             </template>
@@ -140,7 +179,15 @@
                         "
                       />
 
-                      <a-button type="primary" danger size="small" :disabled="!list || list.length <= 1" @click="handleRemoveProject(element)"> {{ $tl('p.unbind') }} </a-button>
+                      <a-button
+                        type="primary"
+                        danger
+                        size="small"
+                        :disabled="!list || list.length <= 1"
+                        @click="handleRemoveProject(element)"
+                      >
+                        {{ $tl('p.unbind') }}
+                      </a-button>
                       <a-tooltip placement="left" :title="`${$tl('p.longPressToDragAndSort')}`" class="move">
                         <MenuOutlined />
                       </a-tooltip>
@@ -160,25 +207,81 @@
     </a-drawer>
 
     <!-- 项目文件组件 -->
-    <a-drawer destroy-on-close :title="drawerTitle" placement="right" width="85vw" :open="drawerFileVisible" @close="onFileClose">
-      <file v-if="drawerFileVisible" :id="temp.id" :node-id="temp.nodeId" :project-id="temp.projectId" @go-console="goConsole" @go-read-file="goReadFile" />
+    <a-drawer
+      destroy-on-close
+      :title="drawerTitle"
+      placement="right"
+      width="85vw"
+      :open="drawerFileVisible"
+      @close="onFileClose"
+    >
+      <file
+        v-if="drawerFileVisible"
+        :id="temp.id"
+        :node-id="temp.nodeId"
+        :project-id="temp.projectId"
+        @go-console="goConsole"
+        @go-read-file="goReadFile"
+      />
     </a-drawer>
     <!-- 项目控制台组件 -->
-    <a-drawer destroy-on-close :title="drawerTitle" placement="right" width="85vw" :open="drawerConsoleVisible" @close="onConsoleClose">
-      <console v-if="drawerConsoleVisible" :id="temp.id" :node-id="temp.nodeId" :project-id="temp.projectId" @go-file="goFile" />
+    <a-drawer
+      destroy-on-close
+      :title="drawerTitle"
+      placement="right"
+      width="85vw"
+      :open="drawerConsoleVisible"
+      @close="onConsoleClose"
+    >
+      <console
+        v-if="drawerConsoleVisible"
+        :id="temp.id"
+        :node-id="temp.nodeId"
+        :project-id="temp.projectId"
+        @go-file="goFile"
+      />
     </a-drawer>
     <!-- 项目跟踪文件组件 -->
-    <a-drawer destroy-on-close :title="drawerTitle" placement="right" width="85vw" :open="drawerReadFileVisible" @close="onReadFileClose">
-      <file-read v-if="drawerReadFileVisible" :id="temp.id" :node-id="temp.nodeId" :read-file-path="temp.readFilePath" :project-id="temp.projectId" @go-file="goFile" />
+    <a-drawer
+      destroy-on-close
+      :title="drawerTitle"
+      placement="right"
+      width="85vw"
+      :open="drawerReadFileVisible"
+      @close="onReadFileClose"
+    >
+      <file-read
+        v-if="drawerReadFileVisible"
+        :id="temp.id"
+        :node-id="temp.nodeId"
+        :read-file-path="temp.readFilePath"
+        :project-id="temp.projectId"
+        @go-file="goFile"
+      />
     </a-drawer>
   </div>
 </template>
 
 <script>
-import { getDispatchProject, dispatchStatusMap, statusMap, removeProject, saveDispatchProjectConfig } from '@/api/dispatch'
+import {
+  getDispatchProject,
+  dispatchStatusMap,
+  statusMap,
+  removeProject,
+  saveDispatchProjectConfig
+} from '@/api/dispatch'
 import { getNodeListAll } from '@/api/node'
 import { getRuningProjectInfo } from '@/api/node-project'
-import { readJsonStrField, concurrentExecution, randomStr, itemGroupBy, parseTime, renderSize, formatDuration, dropApplyDrag } from '@/utils/const'
+import {
+  readJsonStrField,
+  concurrentExecution,
+  randomStr,
+  itemGroupBy,
+  parseTime,
+  renderSize,
+  formatDuration,
+  dropApplyDrag
+} from '@/utils/const'
 import File from '@/pages/node/node-layout/project/project-file'
 import Console from '@/pages/node/node-layout/project/project-console'
 import FileRead from '@/pages/node/node-layout/project/project-file-read'
@@ -412,7 +515,9 @@ export default {
                       return {
                         ...element,
                         projectStatus: res2.data[element.projectId].pid > 0,
-                        projectPid: (res2.data[element.projectId]?.pids || [res2.data[element.projectId]?.pid || '-']).join(','),
+                        projectPid: (
+                          res2.data[element.projectId]?.pids || [res2.data[element.projectId]?.pid || '-']
+                        ).join(','),
                         projectPort: res2.data[element.projectId]?.port || '-',
                         errorMsg: res2.data[element.projectId].error,
                         projectName: res2.data[element.projectId].name
@@ -459,7 +564,7 @@ export default {
     // 文件管理
     handleFile(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `${$tl('p.fileManagement')}(${this.temp.projectId})`
+      this.drawerTitle = `${this.$tl('p.fileManagement')}(${this.temp.projectId})`
       this.drawerFileVisible = true
     },
     // 关闭文件管理对话框
@@ -469,7 +574,7 @@ export default {
     // 控制台
     handleConsole(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `${$tl('c.console')}(${this.temp.projectId})`
+      this.drawerTitle = `${this.$tl('c.console')}(${this.temp.projectId})`
       this.drawerConsoleVisible = true
     },
     // 关闭控制台
@@ -494,7 +599,7 @@ export default {
       this.onFileClose()
       this.drawerReadFileVisible = true
       this.temp.readFilePath = (path + '/' + filename).replace(new RegExp('//', 'gm'), '/')
-      this.drawerTitle = `${$tl('p.trackFile')}(${filename})`
+      this.drawerTitle = `${this.$tl('p.trackFile')}(${filename})`
     },
     onReadFileClose() {
       this.drawerReadFileVisible = false
@@ -513,7 +618,16 @@ export default {
     },
     // 删除项目
     handleRemoveProject(item) {
-      const html = "<b style='font-size: 20px;'>this.$tl('p.reallyReleaseCurrentProject')</b>" + "<ul style='font-size: 20px;color:red;font-weight: bold;'>" + '<li>this.$tl('p.willNotActuallyRequestNodeToDeleteProjectInfo')</b></li>' + '<li>this.$tl('p.generallyUsedWhenServerCannotBeConnectedAndIsNoLongerNeeded')</li>' + '<li>this.$tl('p.willProduceRedundantDataIfMisoperated')</li>' + ' </ul>'
+      const html = `
+      <b style='font-size: 20px;'>
+        ${this.$tl('p.reallyReleaseCurrentProject')}
+      </b>
+      <ul style='font-size: 20px;color:red;font-weight: bold;'>
+        <li>this.$tl('p.willNotActuallyRequestNodeToDeleteProjectInfo')</b></li>
+        <li>this.$tl('p.generallyUsedWhenServerCannotBeConnectedAndIsNoLongerNeeded')</li>
+        <li>this.$tl('p.willProduceRedundantDataIfMisoperated')</li>
+      </ul>
+      `
       $confirm({
         title: this.$tl('p.dangerousOperation'),
         zIndex: 1009,
