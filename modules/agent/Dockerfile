@@ -8,7 +8,7 @@
 # See the Mulan PSL v2 for more details.
 #
 
-FROM maven:3.8.5-jdk-8-slim as builder
+FROM maven:3.9.6-eclipse-temurin-8 as builder
 WORKDIR /target/dependency
 COPY . .
 

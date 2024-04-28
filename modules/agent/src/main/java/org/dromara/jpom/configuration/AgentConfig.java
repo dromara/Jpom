@@ -37,7 +37,7 @@ import java.util.Optional;
 @Configuration
 @ConfigurationProperties("jpom")
 @Data
-@EnableConfigurationProperties({ProjectConfig.class, ProjectLogConfig.class, SystemConfig.class, AgentAuthorize.class})
+@EnableConfigurationProperties({ProjectConfig.class, ProjectLogConfig.class, SystemConfig.class, AgentAuthorize.class, MonitorConfig.class, MonitorConfig.NetworkConfig.class})
 public class AgentConfig implements ILoadEvent, InitializingBean {
 
     private final JpomApplication jpomApplication;
@@ -59,6 +59,11 @@ public class AgentConfig implements ILoadEvent, InitializingBean {
      * 系统配置参数
      */
     private SystemConfig system;
+    /**
+     * 监控配置
+     */
+    private MonitorConfig monitor;
+
     /**
      * 数据目录
      */

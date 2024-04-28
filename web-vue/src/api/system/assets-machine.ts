@@ -116,3 +116,11 @@ export function machineCorrectLonelyData(data) {
     data: data
   })
 }
+
+export function machineMonitorConfig(data) {
+  return axios({
+    url: '/system/assets/machine/monitor-config',
+    method: 'get',
+    params: data
+  })
+}

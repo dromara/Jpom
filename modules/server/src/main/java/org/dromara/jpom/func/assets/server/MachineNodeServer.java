@@ -15,7 +15,6 @@ import cn.hutool.core.comparator.CompareUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.net.NetUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -300,6 +299,8 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         MachineNodeStatLogModel machineNodeStatLogModel = new MachineNodeStatLogModel();
         machineNodeStatLogModel.setMachineId(machineNodeModel.getId());
         machineNodeStatLogModel.setNetworkDelay(networkDelay);
+        //
+        JSONObject extendInfo = new JSONObject();
         Optional.ofNullable(data.getJSONObject("simpleStatus")).ifPresent(jsonObject -> {
             machineNodeModel.setOsOccupyMemory(ObjectUtil.defaultIfNull(jsonObject.getDouble("memory"), -1D));
             machineNodeModel.setOsOccupyDisk(ObjectUtil.defaultIfNull(jsonObject.getDouble("disk"), -1D));
@@ -313,6 +314,8 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             machineNodeStatLogModel.setNetTxBytes(jsonObject.getLong("netTxBytes"));
             machineNodeStatLogModel.setNetRxBytes(jsonObject.getLong("netRxBytes"));
             machineNodeStatLogModel.setMonitorTime(jsonObject.getLongValue("time"));
+            //
+            extendInfo.put("monitorIfsNames", jsonObject.getString("monitorIfsNames"));
         });
         // 系统信息
         Optional.ofNullable(data.getJSONObject("systemInfo")).ifPresent(jsonObject -> {
@@ -336,6 +339,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             machineNodeModel.setOsLoadAverage(CollUtil.join(osLoadAverage, StrUtil.COMMA));
             machineNodeModel.setOsFileStoreTotal(jsonObject.getLong("osFileStoreTotal"));
         });
+        machineNodeModel.setExtendInfo(extendInfo.toString());
         this.updateById(machineNodeModel);
         if (machineNodeStatLogModel.getMonitorTime() != null) {
             machineNodeStatLogServer.insert(machineNodeStatLogModel);

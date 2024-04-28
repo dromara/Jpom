@@ -219,7 +219,7 @@ export default {
           // res.data.
           this.showVersion(false, res.data?.remoteVersion).then((upgrade) => {
             // 本地网络检测
-            this.loaclCheckVersion(!upgrade)
+            this.localCheckVersion(!upgrade)
           })
         })
       })
@@ -412,19 +412,23 @@ export default {
           this.showVersion(true, res.data).then((upgrade) => {
             // 远程检测失败才本地检测
             if (!upgrade) {
-              this.loaclCheckVersion(true)
+              this.localCheckVersion(true)
             }
           })
         }
       })
     },
     // 本地网络检测
-    loaclCheckVersion(tip) {
+    localCheckVersion(tip) {
       //console.log(compareVersion("1.0.0", "1.0.1"), compareVersion("2.4.3", "2.4.2"));
       //console.log(compareVersion("1.0.2", "dev"));
       const buildInfo = pageBuildInfo()
 
-      executionRequest('https://jpom.top/docs/release-versions.json', {
+      const url = this.temp?.joinBetaRelease
+        ? 'https://jpom.top/docs/beta-versions.json'
+        : 'https://jpom.top/docs/release-versions.json'
+
+      executionRequest(url, {
         ...buildInfo,
         type: this.nodeId || this.machineId ? 'agent' : 'server'
       }).then((data) => {
