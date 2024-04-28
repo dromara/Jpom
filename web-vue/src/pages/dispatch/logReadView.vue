@@ -7,11 +7,11 @@
         <div class="dir-container">
           <template v-if="temp.projectList && temp.cacheData">
             <a-form layout="inline" autocomplete="off">
-              <a-form-item label="节点">
+              <a-form-item :label="$tl('p.node')">
                 <a-select
                   :value="`${temp.cacheData.useNodeId},${temp.cacheData.useProjectId}`"
                   style="width: 200px"
-                  placeholder="请选择节点"
+                  :placeholder="$tl('p.chooseNode')"
                   @change="nodeChange"
                 >
                   <a-select-option v-for="item in temp.projectList" :key="`${item.nodeId},${item.projectId}`">
@@ -40,21 +40,21 @@
             <a-form layout="inline" autocomplete="off">
               <a-space direction="vertical" style="width: 100%">
                 <a-space>
-                  <a-form-item label="搜关键词">
+                  <a-form-item :label="$tl('p.searchKeyword')">
                     <!-- 关键词： -->
                     <!-- ^.*\d+.*$ -->
                     <!-- .*(0999996|0999995).*   .*(a|b).* -->
-                    <a-tooltip placement="right" title="关键词高亮,支持正则(正则可能影响性能请酌情使用)">
+                    <a-tooltip placement="right" :title="$tl('p.keywordHighlight')">
                       <a-input
                         v-model:value="temp.cacheData.keyword"
-                        placeholder="关键词,支持正则"
+                        :placeholder="$tl('p.keywordRegex')"
                         :style="`width: 250px`"
                         @press-enter="sendSearchLog"
                       >
                       </a-input>
                     </a-tooltip>
                   </a-form-item>
-                  <a-form-item label="显示前N行">
+                  <a-form-item :label="$tl('p.showFirstNLines')">
                     <a-input-number
                       id="inputNumber"
                       v-model:value="temp.cacheData.beforeCount"
@@ -63,7 +63,7 @@
                       @press-enter="sendSearchLog"
                     />
                   </a-form-item>
-                  <a-form-item label="显示后N行">
+                  <a-form-item :label="$tl('p.showLastNLines')">
                     <a-input-number
                       id="inputNumber"
                       v-model:value="temp.cacheData.afterCount"
@@ -72,26 +72,27 @@
                       @press-enter="sendSearchLog"
                     />
                   </a-form-item>
-                  <a-popover title="正则语法参考">
+                  <a-popover :title="$tl('p.regexReference')">
                     <template #content>
                       <ul>
-                        <li><b>^.*\d+.*$</b> - 匹配包含数字的行</li>
-                        <li><b>.*(a|b).*</b> - 匹配包含 a 或者 b 的行</li>
-                        <li><b>.*(异常).*</b> - 匹配包含 异常 的行</li>
+                        <li><b>^.*\d+.*$</b> - {{ $tl('p.matchLinesWithNumbers') }}</li>
+                        <li><b>.*(a|b).*</b> - {{ $tl('p.matchLinesWithAorB') }}</li>
+                        <li>
+                          <b>.*({{ $tl('p.exception') }}).*</b> - {{ $tl('p.matchLinesWithException') }}
+                        </li>
                       </ul>
                     </template>
                     <a-button type="link" style="padding: 0"
-                      ><UnorderedListOutlined /><span style="margin-left: 2px">语法参考</span></a-button
+                      ><UnorderedListOutlined /><span style="margin-left: 2px">{{
+                        $tl('p.syntaxReference')
+                      }}</span></a-button
                     >
                   </a-popover>
                 </a-space>
                 <a-space>
-                  <a-form-item label="搜索模式">
+                  <a-form-item :label="$tl('p.searchMode')">
                     <!--  -->
-                    <a-tooltip
-                      placement="right"
-                      title="搜索模式,默认查看文件最后多少行，从头搜索指从指定行往下搜索，从尾搜索指从文件尾往上搜索多少行"
-                    >
+                    <a-tooltip placement="right" :title="$tl('p.searchModeDescription')">
                       <a-select
                         :style="`width: 250px`"
                         :value="temp.cacheData.first"
@@ -103,12 +104,12 @@
                           }
                         "
                       >
-                        <a-select-option value="false">从尾搜索</a-select-option>
-                        <a-select-option value="true">从头搜索 </a-select-option>
+                        <a-select-option value="false">{{ $tl('p.searchFromEnd') }}</a-select-option>
+                        <a-select-option value="true">{{ $tl('p.searchFromStart') }} </a-select-option>
                       </a-select>
                     </a-tooltip>
                   </a-form-item>
-                  <a-form-item label="文件前N行">
+                  <a-form-item :label="$tl('p.firstNFileLines')">
                     <a-input-number
                       id="inputNumber"
                       v-model:value="temp.cacheData.head"
@@ -117,7 +118,7 @@
                       @press-enter="sendSearchLog"
                     />
                   </a-form-item>
-                  <a-form-item label="文件后N行">
+                  <a-form-item :label="$tl('p.lastNFileLines')">
                     <a-input-number
                       id="inputNumber"
                       v-model:value="temp.cacheData.tail"
@@ -126,20 +127,36 @@
                       @press-enter="sendSearchLog"
                     />
                   </a-form-item>
-                  <a-popover title="搜索配置参考">
+                  <a-popover :title="$tl('p.searchConfigReference')">
                     <template #content>
                       <ul>
-                        <li><b>从尾搜索、文件前0行、文件后3行</b> - 在文件最后 3 行中搜索</li>
-                        <li><b>从头搜索、文件前0行、文件后3行</b> - 在文件第 3 - 2147483647 行中搜索</li>
-                        <li><b>从尾搜索、文件前2行、文件后3行</b> - 在文件第 1 - 2 行中搜索</li>
-                        <li><b>从尾搜索、文件前100行、文件后100行</b> - 在文件第 1 - 100 行中搜索</li>
-                        <li><b>从头搜索、文件前2行、文件后3行</b> - 在文件第 2 - 2 行中搜索</li>
-                        <li><b>从尾搜索、文件前20行、文件后3行</b> - 在文件第 17 - 20 行中搜索</li>
-                        <li><b>从头搜索、文件前20行、文件后3行</b> - 在文件第 3 - 20 行中搜索</li>
+                        <li>
+                          <b>{{ $tl('p.searchFromEndExample1') }}</b> - {{ $tl('p.searchLastNLines') }}
+                        </li>
+                        <li>
+                          <b>{{ $tl('p.searchFromStartExample1') }}</b> - {{ $tl('p.searchLineRange1') }}
+                        </li>
+                        <li>
+                          <b>{{ $tl('p.searchFromEndExample2') }}</b> - {{ $tl('p.searchLineRange2') }}
+                        </li>
+                        <li>
+                          <b>{{ $tl('p.searchFromEndExample3') }}</b> - {{ $tl('p.searchLineRange3') }}
+                        </li>
+                        <li>
+                          <b>{{ $tl('p.searchFromStartExample2') }}</b> - {{ $tl('p.searchLineRange4') }}
+                        </li>
+                        <li>
+                          <b>{{ $tl('p.searchFromEndExample4') }}</b> - {{ $tl('p.searchLineRange5') }}
+                        </li>
+                        <li>
+                          <b>{{ $tl('p.searchFromStartExample3') }}</b> - {{ $tl('p.searchLineRange6') }}
+                        </li>
                       </ul>
                     </template>
                     <a-button type="link" style="padding: 0"
-                      ><UnorderedListOutlined /><span style="margin-left: 2px">搜索参考</span></a-button
+                      ><UnorderedListOutlined /><span style="margin-left: 2px">{{
+                        $tl('p.searchReference')
+                      }}</span></a-button
                     >
                   </a-popover>
                 </a-space></a-space
@@ -313,7 +330,7 @@ export default {
         console.error(err)
         $notification.error({
           key: 'log-read-error',
-          message: 'web socket 错误,请检查是否开启 ws 代理'
+          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
         })
         clearInterval(this.socketCache[id].heart)
       }
@@ -322,7 +339,9 @@ export default {
         console.error(err)
         $notification.info({
           key: 'log-read-close',
-          message: ((this.nodeName[item.nodeId] && this.nodeName[item.nodeId].name) || '') + ' 会话已经关闭[tail-log]-'
+          message:
+            ((this.nodeName[item.nodeId] && this.nodeName[item.nodeId].name) || '') +
+            ` ${this.$tl('p.sessionClosed')}[tail-log]-`
         })
         clearInterval(this.socketCache[id].heart)
       }
@@ -419,7 +438,7 @@ export default {
           this.sendSearchLog()
         } else {
           //
-          $message.error('当前文件不可读,需要配置可读文件授权')
+          $message.error(this.$tl('p.fileNotReadable'))
         }
       }
     },
