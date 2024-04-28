@@ -396,9 +396,6 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 <a class="friends-item" href="https://dynamictp.cn/" target="_blank">
 	<img  loading="lazy" class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/dynamic-tp.png')" alt="🔥🔥🔥 基于配置中心的轻量级动态可监控线程池">
 </a>
-<a class="friends-item" href="https://hertzbeat.com/" target="_blank">
-	<img  loading="lazy" class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/hertzbeat-logo.png')" alt="易用友好的云监控系统">
-</a>
 <a class="friends-item" href="https://maxkey.top/" target="_blank">
 	<img  loading="lazy" class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/maxkey3.png')" alt="业界领先的身份管理和认证产品">
 </a>
