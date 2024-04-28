@@ -498,11 +498,11 @@
     </a-modal>
     <!-- 选择证书文件 -->
     <a-drawer
+      v-if="certificateVisible"
       destroy-on-close
       :title="`选择证书文件`"
       placement="right"
       :open="certificateVisible"
-      v-if="certificateVisible"
       width="85vw"
       :z-index="1009"
       :footer-style="{ textAlign: 'right' }"
