@@ -15,6 +15,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.util.*;
+import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,9 @@ public class CommandUtil {
      * 文件后缀
      */
     public static final String SUFFIX;
+
+    public static final String SUFFIX_UNIX = "sh";
+    public static final String SUFFIX_WINDOWS = "bat";
     /**
      * 执行前缀
      */
@@ -59,23 +63,23 @@ public class CommandUtil {
     private static final ThreadLocal<Map<String, String>> CACHE_COMMAND_RESULT = new ThreadLocal<>();
 
     static {
-        if (SystemUtil.getOsInfo().isLinux()) {
+        OsInfo osInfo = SystemUtil.getOsInfo();
+        if (osInfo.isLinux() || osInfo.isMac() || osInfo.isMacOsX() || osInfo.isIrix() || osInfo.isHpUx()) {
             //执行linux系统命令
             COMMAND.add("/bin/bash");
             COMMAND.add("-c");
-        } else if (SystemUtil.getOsInfo().isMac()) {
-            COMMAND.add("/bin/bash");
-            COMMAND.add("-c");
-        } else {
+        } else if (osInfo.isWindows()) {
             COMMAND.add("cmd");
             COMMAND.add("/c");
+        } else {
+            log.error("不支持的系统类型：{}", osInfo.getName());
         }
         //
-        if (SystemUtil.getOsInfo().isWindows()) {
-            SUFFIX = "bat";
+        if (osInfo.isWindows()) {
+            SUFFIX = SUFFIX_WINDOWS;
             EXECUTE_PREFIX = StrUtil.EMPTY;
         } else {
-            SUFFIX = "sh";
+            SUFFIX = SUFFIX_UNIX;
             EXECUTE_PREFIX = "bash";
         }
     }

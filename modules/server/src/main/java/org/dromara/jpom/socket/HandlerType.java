@@ -63,6 +63,7 @@ public enum HandlerType {
      * 容器 终端
      */
     docker(DockerCliHandler.class, DockerInfoService.class, MachineDockerServer.class, "machineDockerId"),
+    freeScript(FreeScriptHandler.class, null),
     ;
     final Class<?> handlerClass;
 
