@@ -62,11 +62,15 @@
           </a-tooltip>
           <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
           <a-statistic-countdown
-            format=" {{$tl('p.seconds')}}"
+            format="s"
             :title="$tl('p.refreshCountdown')"
             :value="countdownTime"
             @finish="loadData"
-          />
+          >
+            <template #suffix>
+              <div style="font-size: 12px">{{ $tl('p.seconds') }}</div>
+            </template>
+          </a-statistic-countdown>
         </a-space>
       </template>
 

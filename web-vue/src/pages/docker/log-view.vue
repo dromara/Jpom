@@ -25,7 +25,7 @@
             <a-switch
               v-model:checked="timestamps"
               :checked-children="$tl('p.show')"
-              un-checked-children="不{{$tl('p.show')}}"
+              :un-checked-children="$tl('p.hide')"
             />
           </div>
           <a-button type="primary" size="small" @click="initWebSocket"

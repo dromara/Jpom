@@ -47,11 +47,15 @@
 
           <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
           <a-statistic-countdown
-            format=" {{$tl('p.sSeconds')}}"
+            format="s"
             :title="$tl('p.refreshCountdown')"
             :value="countdownTime"
             @finish="loadData"
-          />
+          >
+            <template #suffix>
+              <div style="font-size: 12px">{{ $tl('p.sSeconds') }}</div>
+            </template>
+          </a-statistic-countdown>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
