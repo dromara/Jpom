@@ -110,9 +110,7 @@
             </a-form-item>
             <a-form-item :label="$tl('p.sourceRepository')" name="repositoryId">
               <a-input-search
-                :value="`${
-                  tempRepository ? tempRepository.name + '[' + tempRepository.gitUrl + ']' : $tl('c.selectRepository')
-                }`"
+                :value="`${tempRepository ? tempRepository.name + '[' + tempRepository.gitUrl + ']' : $tl('c.selectRepository')}`"
                 read-only
                 :placeholder="$tl('c.selectRepository')"
                 :enter-button="$tl('c.chooseRepository')"
@@ -979,9 +977,7 @@
                 </a-tooltip>
               </template>
               <a-input-search
-                :value="`${
-                  tempExtraData ? tempExtraData.noticeScriptId || $tl('c.selectScript') : $tl('c.selectScript')
-                }`"
+                :value="`${tempExtraData ? tempExtraData.noticeScriptId || $tl('c.selectScript') : $tl('c.selectScript')}`"
                 read-only
                 :placeholder="$tl('c.selectScript')"
                 :enter-button="$tl('c.chooseScript')"

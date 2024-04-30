@@ -123,11 +123,7 @@
                   <a-menu-item>
                     <!-- <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button> -->
                     <a-tooltip
-                      :title="`${
-                        record.scriptType === 'server-sync'
-                          ? '服务端分发同步的脚本不能直接删除,需要到服务端去操作'
-                          : '删除'
-                      }`"
+                      :title="`${record.scriptType === 'server-sync' ? '服务端分发同步的脚本不能直接删除,需要到服务端去操作' : '删除'}`"
                     >
                       <a-button
                         size="small"

@@ -2,7 +2,7 @@
   <div>
     <log-view
       :ref="`logView`"
-      title-name="任务日志"
+      :title-name="$tl('p.taskLog')"
       :visible="visible"
       @close="
         () => {
@@ -12,22 +12,23 @@
     >
       <template #before>
         <a-space>
-          <a-input-number v-model:value="tail" placeholder="读取行数" style="width: 150px">
+          <a-input-number v-model:value="tail" :placeholder="$tl('p.readLineCount')" style="width: 150px">
             <template #addonBefore>
-              <a-tooltip
-                title="为避免显示内容太多而造成浏览器卡顿,读取日志最后多少行日志。修改后需要回车才能重新读取，小于 1 则读取所有"
-                >行数：
-              </a-tooltip>
+              <a-tooltip :title="$tl('p.readLastLogLines')">{{ $tl('p.lineCount') }} </a-tooltip>
             </template>
           </a-input-number>
           <div>
-            时间戳：
-            <a-switch v-model:checked="timestamps" checked-children="显示" un-checked-children="不显示" />
+            {{ $tl('p.timestamp') }}
+            <a-switch
+              v-model:checked="timestamps"
+              :checked-children="$tl('p.show')"
+              un-checked-children="不{{$tl('p.show')}}"
+            />
           </div>
-          <a-button type="primary" size="small" @click="init"><ReloadOutlined /> 刷新 </a-button>
+          <a-button type="primary" size="small" @click="init"><ReloadOutlined /> {{ $tl('p.refresh') }} </a-button>
           |
           <a-button type="primary" :disabled="!logId" size="small" @click="download">
-            <DownloadOutlined /> 下载
+            <DownloadOutlined /> {{ $tl('p.download') }}
           </a-button>
           |
         </a-space>
@@ -87,6 +88,9 @@ export default {
     this.init()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.swarm.pullLog.${key}`, ...args)
+    },
     init() {
       this.logTimer && clearTimeout(this.logTimer)
       this.$refs.logView.clearLogCache()
