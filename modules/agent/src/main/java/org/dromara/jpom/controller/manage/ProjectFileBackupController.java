@@ -77,7 +77,7 @@ public class ProjectFileBackupController extends BaseAgentController {
         if (CollUtil.isEmpty(collect)) {
             return JsonMessage.success("查询成功");
         }
-        List<JSONObject> arrayFile = FileUtils.parseInfo(collect, true, path.getAbsolutePath());
+        List<JSONObject> arrayFile = FileUtils.parseInfo(collect, true, path.getAbsolutePath(), projectInfoModel.isDisableScanDir());
         //
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("path", FileUtil.getAbsolutePath(path));
@@ -104,7 +104,7 @@ public class ProjectFileBackupController extends BaseAgentController {
         if (ArrayUtil.isEmpty(filesAll)) {
             return JsonMessage.success("查询成功", Collections.emptyList());
         }
-        List<JSONObject> arrayFile = FileUtils.parseInfo(filesAll, false, lib.getAbsolutePath());
+        List<JSONObject> arrayFile = FileUtils.parseInfo(filesAll, false, lib.getAbsolutePath(), projectInfoModel.isDisableScanDir());
         return JsonMessage.success("查询成功", arrayFile);
     }
 

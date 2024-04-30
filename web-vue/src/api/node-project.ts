@@ -112,7 +112,8 @@ export function editProject(params) {
     autoStart: params.autoStart,
     dslContent: params.dslContent,
     dslEnv: params.dslEnv,
-    linkId: params.linkId
+    linkId: params.linkId,
+    disableScanDir: params.disableScanDir
   }
   return axios({
     url: '/node/manage/saveProject',

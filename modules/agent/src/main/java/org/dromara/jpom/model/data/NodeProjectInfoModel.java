@@ -96,6 +96,10 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      * 最后一次执行 reload 结果
      */
     private CommandOpResult lastReloadResult;
+    /**
+     * 禁用扫描目录
+     */
+    private Boolean disableScanDir;
     //  ---------------- 中转字段 start
     /**
      * 是否可以重新加载
@@ -110,6 +114,10 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      */
     private String runCommand;
     //  ---------------- 中转字段 end
+
+    public boolean isDisableScanDir() {
+        return disableScanDir != null && disableScanDir;
+    }
 
 
     public String javaExtDirsCp() {
