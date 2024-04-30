@@ -94,7 +94,8 @@ public class ProjectFileControl extends BaseAgentController {
         if (ArrayUtil.isEmpty(filesAll)) {
             return JsonMessage.success("查询成功", Collections.emptyList());
         }
-        List<JSONObject> arrayFile = FileUtils.parseInfo(filesAll, false, lib);
+        boolean disableScanDir = pim.isDisableScanDir();
+        List<JSONObject> arrayFile = FileUtils.parseInfo(filesAll, false, lib, disableScanDir);
         AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
         for (JSONObject jsonObject : arrayFile) {
             String filename = jsonObject.getString("filename");

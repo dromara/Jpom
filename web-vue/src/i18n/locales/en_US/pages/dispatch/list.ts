@@ -184,6 +184,11 @@ export default {
     dangerousOperation: 'Dangerous operation!!!',
     noMoreNodeProjects: 'No more node projects available, please create a project first',
     selectNodeFirst: 'Please select a node first',
-    confirmCancellationOfCurrentDistribution: 'Are you sure you want to cancel the current distribution?'
+    confirmCancellationOfCurrentDistribution: 'Are you sure you want to cancel the current distribution?',
+    disableScanDir: 'Disable scanning',
+    scanning: 'scanning',
+    dontScanning: "Don't scan",
+    disableScanDirTip:
+      'If the project directory is large or involves deep directories, it is recommended to turn off the scan to avoid getting the project directory scan too long and affecting performance'
   }
 }

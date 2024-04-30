@@ -39,11 +39,14 @@ import java.util.stream.Collectors;
  */
 public class FileUtils {
 
-    private static JSONObject fileToJson(File file) {
+    private static JSONObject fileToJson(File file, boolean disableScanDir) {
         JSONObject jsonObject = new JSONObject(6);
-        jsonObject.put("isDirectory", file.isDirectory());
-        long sizeFile = FileUtil.size(file);
-        jsonObject.put("fileSizeLong", sizeFile);
+        boolean directory = file.isDirectory();
+        jsonObject.put("isDirectory", directory);
+        if (!directory || !disableScanDir) {
+            long sizeFile = FileUtil.size(file);
+            jsonObject.put("fileSizeLong", sizeFile);
+        }
         jsonObject.put("filename", file.getName());
         long mTime = file.lastModified();
         jsonObject.put("modifyTimeLong", mTime);
@@ -58,8 +61,8 @@ public class FileUtils {
      * @param startPath 开始路径
      * @return 排序后的json
      */
-    public static List<JSONObject> parseInfo(File[] files, boolean time, String startPath) {
-        return parseInfo(CollUtil.newArrayList(files), time, startPath);
+    public static List<JSONObject> parseInfo(File[] files, boolean time, String startPath, boolean disableScanDir) {
+        return parseInfo(CollUtil.newArrayList(files), time, startPath, disableScanDir);
     }
 
     /**
@@ -70,24 +73,26 @@ public class FileUtils {
      * @param startPath 开始路径
      * @return 排序后的json
      */
-    public static List<JSONObject> parseInfo(Collection<File> files, boolean time, String startPath) {
+    public static List<JSONObject> parseInfo(Collection<File> files, boolean time, String startPath, boolean disableScanDir) {
         if (files == null) {
             return new ArrayList<>();
         }
-        return files.stream().map(file -> {
-            JSONObject jsonObject = FileUtils.fileToJson(file);
-            //
-            if (startPath != null) {
-                String levelName = StringUtil.delStartPath(file, startPath, false);
-                jsonObject.put("levelName", levelName);
-            }
-            return jsonObject;
-        }).sorted((jsonObject1, jsonObject2) -> {
-            if (time) {
-                return jsonObject2.getLong("modifyTimeLong").compareTo(jsonObject1.getLong("modifyTimeLong"));
-            }
-            return jsonObject1.getString("filename").compareTo(jsonObject2.getString("filename"));
-        }).collect(Collectors.toList());
+        return files.stream()
+            .map(file -> {
+                JSONObject jsonObject = FileUtils.fileToJson(file, disableScanDir);
+                //
+                if (startPath != null) {
+                    String levelName = StringUtil.delStartPath(file, startPath, false);
+                    jsonObject.put("levelName", levelName);
+                }
+                return jsonObject;
+            })
+            .sorted((jsonObject1, jsonObject2) -> {
+                if (time) {
+                    return jsonObject2.getLong("modifyTimeLong").compareTo(jsonObject1.getLong("modifyTimeLong"));
+                }
+                return jsonObject1.getString("filename").compareTo(jsonObject2.getString("filename"));
+            }).collect(Collectors.toList());
     }
 
     /**

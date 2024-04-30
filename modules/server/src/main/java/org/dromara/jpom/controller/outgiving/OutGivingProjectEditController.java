@@ -375,7 +375,9 @@ public class OutGivingProjectEditController extends BaseServerController {
             String args = getParameter(StrUtil.format("{}_args", nodeModel.getId()));
             allData.put("args", args);
             String autoStart = getParameter(StrUtil.format("{}_autoStart", nodeModel.getId()));
+            String disableScanDir = getParameter(StrUtil.format("{}_disableScanDir", nodeModel.getId()));
             allData.put("autoStart", Convert.toBool(autoStart, false));
+            allData.put("disableScanDir", Convert.toBool(disableScanDir, false));
             allData.put("dslEnv", getParameter(StrUtil.format("{}_dslEnv", nodeModel.getId())));
             allData.put("nodeId", nodeModel.getId());
             JsonMessage<String> jsonMessage = this.sendData(nodeModel, allData, false);
