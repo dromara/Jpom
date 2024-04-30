@@ -64,7 +64,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       proxy: {
         // http
         '/api': {
-          target: `http://${HOST}`,
+          target: HOST.includes('http') ? HOST : `http://${HOST}`,
           changeOrigin: true,
           ws: true,
           rewrite: (path) => path.replace(/^\/api/, ''),

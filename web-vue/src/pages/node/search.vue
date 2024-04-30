@@ -194,12 +194,7 @@
           <template v-else>
             <a-tooltip
               v-if="noFileModes.includes(record.runMode)"
-              :title="`状态操作请到控制台中控制   ${
-                (projectStatusMap[record.nodeId] &&
-                  projectStatusMap[record.nodeId][record.projectId] &&
-                  projectStatusMap[record.nodeId][record.projectId].statusMsg) ||
-                ''
-              }`"
+              :title="`状态操作请到控制台中控制   ${(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].statusMsg) || ''}`"
             >
               <a-switch
                 :checked="
@@ -219,21 +214,7 @@
         <template v-else-if="column.dataIndex === 'port'">
           <a-tooltip
             placement="topLeft"
-            :title="`进程号：${(
-              (projectStatusMap[record.nodeId] &&
-                projectStatusMap[record.nodeId][record.projectId] &&
-                projectStatusMap[record.nodeId][record.projectId].pids) || [
-                (projectStatusMap[record.nodeId] &&
-                  projectStatusMap[record.nodeId][record.projectId] &&
-                  projectStatusMap[record.nodeId][record.projectId].pid) ||
-                  '-'
-              ]
-            ).join(',')} / 端口号：${
-              (projectStatusMap[record.nodeId] &&
-                projectStatusMap[record.nodeId][record.projectId] &&
-                projectStatusMap[record.nodeId][record.projectId].port) ||
-              '-'
-            }`"
+            :title="`进程号：${((projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].pids) || [(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].pid) || '-']).join(',')} / 端口号：${(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].port) || '-'}`"
           >
             <span
               >{{

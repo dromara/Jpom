@@ -21,7 +21,7 @@
           />
           <a-input
             v-model:value="listQuery['taskName']"
-            placeholder="任务名称"
+            :placeholder="$tl('p.taskName')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -53,15 +53,24 @@
                 }
               "
               allow-clear
-              placeholder="状态"
+              :placeholder="$tl('c.status')"
               class="search-input-item"
             >
               <a-select-option v-for="(item, key) in TASK_STATE" :key="key">{{ item }}- {{ key }}</a-select-option>
-              <a-select-option value="">状态</a-select-option>
+              <a-select-option value="">{{ $tl('c.status') }}</a-select-option>
             </a-select>
           </a-tooltip>
-          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="loadData" />
+          <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-statistic-countdown
+            format="s"
+            :title="$tl('p.refreshCountdown')"
+            :value="countdownTime"
+            @finish="loadData"
+          >
+            <template #suffix>
+              <div style="font-size: 12px">{{ $tl('p.seconds') }}</div>
+            </template>
+          </a-statistic-countdown>
         </a-space>
       </template>
 
@@ -80,21 +89,21 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'desiredState'">
-          <a-popover :title="`状态信息：${TASK_STATE[text]}`" placement="topLeft">
+          <a-popover :title="`${$tl('p.statusInfo')}${TASK_STATE[text]}`" placement="topLeft">
             <template #content>
               <p>
-                当前状态：<a-tag>{{ text }}-{{ TASK_STATE[text] }}</a-tag>
+                {{ $tl('p.currentStatus') }}<a-tag>{{ text }}-{{ TASK_STATE[text] }}</a-tag>
               </p>
               <p v-if="record.status && record.status.err">错误信息：{{ record.status.err }}</p>
               <p v-if="record.status && record.status.state">
-                状态：<a-tag>{{ record.status.state }}</a-tag>
+                {{ $tl('p.state') }}<a-tag>{{ record.status.state }}</a-tag>
               </p>
 
               <p v-if="record.status && record.status.message">
-                信息：<a-tag>{{ record.status.message }} </a-tag>
+                {{ $tl('p.info') }}<a-tag>{{ record.status.message }} </a-tag>
               </p>
               <p v-if="record.status && record.status.timestamp">
-                更新时间：<a-tag>{{ parseTime(record.status.timestamp) }} </a-tag>
+                {{ $tl('p.updateTime') }}<a-tag>{{ parseTime(record.status.timestamp) }} </a-tag>
               </p>
             </template>
 
@@ -116,7 +125,10 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'updatedAt'">
-          <a-tooltip placement="topLeft" :title="`修改时间：${text} 创建时间：${record.createdAt}`">
+          <a-tooltip
+            placement="topLeft"
+            :title="`${$tl('p.modifyTime')}${text} ${$tl('p.createTime')}${record.createdAt}`"
+          >
             <span>
               {{ parseTime(text) }}
             </span>
@@ -125,7 +137,7 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
+            <a-button size="small" type="primary" @click="handleLog(record)">{{ $tl('p.log') }}</a-button>
           </a-space>
         </template>
       </template>
@@ -187,37 +199,37 @@ export default {
       autoUpdateTime: null,
       logVisible: 0,
       rules: {
-        role: [{ required: true, message: '请选择节点角色', trigger: 'blur' }],
-        availability: [{ required: true, message: '请选择节点状态', trigger: 'blur' }]
+        role: [{ required: true, message: this.$tl('p.pleaseSelectNodeRole'), trigger: 'blur' }],
+        availability: [{ required: true, message: this.$tl('p.pleaseSelectNodeStatus'), trigger: 'blur' }]
       },
       columns: [
         {
-          title: '序号',
+          title: this.$tl('p.serialNumber'),
           width: '80px',
           ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: '任务Id',
+          title: this.$tl('p.taskId'),
           dataIndex: 'id',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '节点Id',
+          title: this.$tl('p.nodeId'),
           dataIndex: 'nodeId',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '服务ID',
+          title: this.$tl('p.serviceId'),
           dataIndex: 'serviceId',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '镜像',
+          title: this.$tl('p.image'),
           dataIndex: ['spec', 'containerSpec', 'image'],
           ellipsis: true,
           width: 120,
@@ -227,13 +239,13 @@ export default {
         // { title: "端点", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, },
         // { title: "节点地址", width: 150, dataIndex: "status.address", ellipsis: true,  },
         {
-          title: '状态',
+          title: this.$tl('c.status'),
           width: 140,
           dataIndex: 'desiredState',
           ellipsis: true
         },
         {
-          title: '错误信息',
+          title: this.$tl('p.errorInfo'),
           width: 150,
           dataIndex: ['status', 'err'],
           ellipsis: true,
@@ -267,7 +279,7 @@ export default {
           width: '180px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -284,6 +296,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.swarm.task.${key}`, ...args)
+    },
     parseTime,
     // 加载数据
     loadData() {

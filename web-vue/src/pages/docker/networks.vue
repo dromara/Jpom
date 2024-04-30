@@ -13,7 +13,7 @@
       <a-space>
         <a-input
           v-model:value="listQuery['name']"
-          placeholder="名称"
+          :placeholder="$tl('c.name')"
           class="search-input-item"
           @press-enter="loadData"
         />
@@ -24,7 +24,7 @@
           @press-enter="loadData"
         />
 
-        <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+        <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
       </a-space>
     </template>
     <template #bodyCell="{ column, text, record }">
@@ -41,7 +41,7 @@
             text.config &&
             text.config
               .map((item) => {
-                return ('网关：' + item.gateway || '') + '#' + ('子网掩码：' + item.subnet || '')
+                return ($tl('p.gateway') + item.gateway || '') + '#' + ($tl('p.subnetMask') + item.subnet || '')
               })
               .join(',')
           }`"
@@ -71,7 +71,7 @@
       </template>
       <template v-else-if="column.dataIndex === 'operation'">
         <a-space>
-          <a-tooltip title="删除">
+          <a-tooltip :title="$tl('p.delete')">
             <a-button size="small" type="link" @click="doAction(record, 'remove')"><DeleteOutlined /></a-button>
           </a-tooltip>
         </a-space>
@@ -108,14 +108,14 @@ export default {
       renderSize,
       columns: [
         {
-          title: '序号',
+          title: this.$tl('p.serialNumber'),
           width: 80,
           ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: '名称',
+          title: this.$tl('c.name'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
@@ -127,7 +127,7 @@ export default {
           tooltip: true
         },
         {
-          title: '范围',
+          title: this.$tl('p.range'),
           dataIndex: 'scope',
           ellipsis: true
         },
@@ -137,13 +137,13 @@ export default {
           ellipsis: true
         },
         {
-          title: '类型',
+          title: this.$tl('p.type'),
           dataIndex: 'driver',
           ellipsis: true,
           width: 80
         },
         {
-          title: '创建时间',
+          title: this.$tl('p.creationTime'),
           dataIndex: 'Created',
           ellipsis: true,
           width: 180,
@@ -155,7 +155,7 @@ export default {
       ],
       action: {
         remove: {
-          msg: '您确定要删除当前卷吗？',
+          msg: this.$tl('p.areYouSureToDeleteCurrentVolume'),
           api: dockerVolumesRemove
         }
       }
@@ -170,6 +170,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.networks.${key}`, ...args)
+    },
     parseTime,
     // 加载数据
     loadData() {
@@ -189,11 +192,11 @@ export default {
         return
       }
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemPrompt'),
         zIndex: 1009,
         content: action.msg,
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return action
             .api(this.urlPrefix, {

@@ -20,7 +20,7 @@
           />
           <a-input
             v-model:value="listQuery['nodeName']"
-            placeholder="名称"
+            :placeholder="$tl('p.name')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -38,15 +38,24 @@
               }
             "
             allow-clear
-            placeholder="角色"
+            :placeholder="$tl('c.role')"
             class="search-input-item"
           >
-            <a-select-option key="worker">工作节点</a-select-option>
-            <a-select-option key="manager">管理节点</a-select-option>
+            <a-select-option key="worker">{{ $tl('c.workNode') }}</a-select-option>
+            <a-select-option key="manager">{{ $tl('c.managementNode') }}</a-select-option>
           </a-select>
 
-          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="loadData" />
+          <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-statistic-countdown
+            format="s"
+            :title="$tl('p.refreshCountdown')"
+            :value="countdownTime"
+            @finish="loadData"
+          >
+            <template #suffix>
+              <div style="font-size: 12px">{{ $tl('p.sSeconds') }}</div>
+            </template>
+          </a-statistic-countdown>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -57,10 +66,13 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'hostname'">
-          <a-popover placement="topLeft" :title="`主机名：${record.description && record.description.hostname}`">
+          <a-popover
+            placement="topLeft"
+            :title="`${$tl('p.hostName')}${record.description && record.description.hostname}`"
+          >
             <template #content>
               <p>
-                节点Id: <a-tag>{{ record.id }}</a-tag>
+                {{ $tl('p.nodeId') }}: <a-tag>{{ record.id }}</a-tag>
               </p>
               <template v-if="record.description && record.description.resources">
                 <p>
@@ -74,7 +86,7 @@
               </template>
               <template v-if="record.description && record.description.engine">
                 <p>
-                  版本: <a-tag>{{ record.description.engine.engineVersion }}</a-tag>
+                  {{ $tl('p.version') }}: <a-tag>{{ record.description.engine.engineVersion }}</a-tag>
                 </p>
               </template>
             </template>
@@ -86,9 +98,7 @@
         <template v-else-if="column.dataIndex === 'state'">
           <a-tooltip
             placement="topLeft"
-            :title="`节点状态：${record.status && record.status.state} 节点可用性：${
-              record.spec ? record.spec.availability || '' : ''
-            }`"
+            :title="`${$tl('p.nodeStatus')}${record.status && record.status.state} ${$tl('p.nodeAvailability')}${record.spec ? record.spec.availability || '' : ''}`"
           >
             <a-tag
               :color="
@@ -108,11 +118,7 @@
         <template v-else-if="column.dataIndex === 'role'">
           <a-tooltip
             placement="topLeft"
-            :title="`角色：${record.spec && record.spec.role} ${
-              record.managerStatus && record.managerStatus.reachability === 'REACHABLE'
-                ? '管理状态：' + record.managerStatus.reachability
-                : ''
-            }`"
+            :title="`${$tl('p.roleLabel')}${record.spec && record.spec.role} ${record.managerStatus && record.managerStatus.reachability === 'REACHABLE' ? $tl('p.managementStatus') + record.managerStatus.reachability : ''}`"
           >
             <a-tag
               :color="`${record.managerStatus && record.managerStatus.reachability === 'REACHABLE' ? 'green' : ''}`"
@@ -139,7 +145,10 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'updatedAt'">
-          <a-tooltip placement="topLeft" :title="`修改时间：${text} 创建时间：${record.createdAt}`">
+          <a-tooltip
+            placement="topLeft"
+            :title="`${$tl('p.modifyTime')}${text} ${$tl('p.createTime')}${record.createdAt}`"
+          >
             <span>
               {{ text }}
             </span>
@@ -149,14 +158,14 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <template v-if="record.managerStatus && record.managerStatus.leader">
-              <a-button size="small" type="primary" @click="handleEdit(record)">修改</a-button>
-              <a-tooltip title="主节点不能直接剔除">
-                <a-button size="small" type="primary" danger :disabled="true">剔除</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('c.modify') }}</a-button>
+              <a-tooltip :title="$tl('p.primaryNodeCannotBeRemoved')">
+                <a-button size="small" type="primary" danger :disabled="true">{{ $tl('c.remove') }}</a-button>
               </a-tooltip>
             </template>
             <template v-else>
-              <a-button size="small" type="primary" @click="handleEdit(record)">修改</a-button>
-              <a-button size="small" type="primary" danger @click="handleLeava(record)">剔除</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('c.modify') }}</a-button>
+              <a-button size="small" type="primary" danger @click="handleLeava(record)">{{ $tl('c.remove') }}</a-button>
             </template>
           </a-space>
         </template>
@@ -167,22 +176,22 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="编辑节点"
+      :title="$tl('p.editNode')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="角色" name="role">
+        <a-form-item :label="$tl('c.role')" name="role">
           <a-radio-group v-model:value="temp.role" name="role" :disabled="temp.leader">
-            <a-radio value="WORKER"> 工作节点</a-radio>
-            <a-radio value="MANAGER"> 管理节点 </a-radio>
+            <a-radio value="WORKER"> {{ $tl('c.workNode') }}</a-radio>
+            <a-radio value="MANAGER"> {{ $tl('c.managementNode') }} </a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item label="状态" name="availability">
+        <a-form-item :label="$tl('c.status')" name="availability">
           <a-radio-group v-model:value="temp.availability" name="availability">
-            <a-radio value="ACTIVE"> 活跃</a-radio>
-            <a-radio value="PAUSE"> 暂停 </a-radio>
-            <a-radio value="DRAIN"> 排空 </a-radio>
+            <a-radio value="ACTIVE"> {{ $tl('p.active') }}</a-radio>
+            <a-radio value="PAUSE"> {{ $tl('p.paused') }} </a-radio>
+            <a-radio value="DRAIN"> {{ $tl('p.drained') }} </a-radio>
           </a-radio-group>
         </a-form-item>
       </a-form>
@@ -219,13 +228,13 @@ export default {
       editVisible: false,
       initSwarmVisible: false,
       rules: {
-        role: [{ required: true, message: '请选择节点角色', trigger: 'blur' }],
-        availability: [{ required: true, message: '请选择节点状态', trigger: 'blur' }]
+        role: [{ required: true, message: this.$tl('p.pleaseSelectNodeRole'), trigger: 'blur' }],
+        availability: [{ required: true, message: this.$tl('p.pleaseSelectNodeStatus'), trigger: 'blur' }]
       },
 
       columns: [
         {
-          title: '序号',
+          title: this.$tl('p.serialNumber'),
           width: 80,
           ellipsis: true,
           align: 'center',
@@ -233,31 +242,31 @@ export default {
         },
         // { title: "节点Id", dataIndex: "id", ellipsis: true, },
         {
-          title: '主机名',
+          title: this.$tl('p.host'),
           dataIndex: 'hostname',
           ellipsis: true
         },
         {
-          title: '节点地址',
+          title: this.$tl('p.nodeAddress'),
           width: 150,
           dataIndex: 'address',
           ellipsis: true
         },
         {
-          title: '状态',
+          title: this.$tl('c.status'),
           width: 140,
           dataIndex: 'state',
           ellipsis: true
         },
         {
-          title: '角色',
+          title: this.$tl('c.role'),
           width: 110,
           dataIndex: 'role',
           ellipsis: true
         },
 
         {
-          title: '系统类型',
+          title: this.$tl('p.systemType'),
           width: 140,
           align: 'center',
           dataIndex: 'os',
@@ -271,7 +280,7 @@ export default {
         //   width: 170,
         // },
         {
-          title: '修改时间',
+          title: this.$tl('p.modificationTime'),
           dataIndex: 'updatedAt',
 
           ellipsis: true,
@@ -279,7 +288,7 @@ export default {
           width: '170px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -296,6 +305,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.swarm.node.${key}`, ...args)
+    },
     // 加载数据
     loadData() {
       if (!this.visible) {
@@ -344,11 +356,11 @@ export default {
     //
     handleLeava(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemPrompt'),
         zIndex: 1009,
-        content: '真的要在该集群剔除此节点么？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.areYouSureToRemoveThisNodeFromTheCluster'),
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return dockerSwarmNodeLeave({
             nodeId: record.id,

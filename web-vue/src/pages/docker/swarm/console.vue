@@ -16,13 +16,13 @@
       <!-- 集群控制台 -->
       <a-menu v-model:selectedKeys="menuKeyArray" mode="horizontal" class="docker-menu" @click="menuClick">
         <a-menu-item key="node">
-          <span class="nav-text">集群节点</span>
+          <span class="nav-text">{{ $tl('p.clusterNode') }}</span>
         </a-menu-item>
         <a-menu-item key="server">
-          <span class="nav-text">集群服务</span>
+          <span class="nav-text">{{ $tl('p.clusterService') }}</span>
         </a-menu-item>
         <a-menu-item key="task">
-          <span class="nav-text">集群任务</span>
+          <span class="nav-text">{{ $tl('p.clusterTask') }}</span>
         </a-menu-item>
       </a-menu>
     </template>
@@ -82,6 +82,9 @@ export default {
     this.menuKeyArray = [this.initMenu]
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.swarm.console.${key}`, ...args)
+    },
     menuClick(item) {
       this.menuKey = item.key
     },

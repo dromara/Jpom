@@ -20,14 +20,23 @@
           />
           <a-input
             v-model:value="listQuery['serviceName']"
-            placeholder="名称"
+            :placeholder="$tl('c.name')"
             class="search-input-item"
             @press-enter="loadData"
           />
 
-          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-          <a-button type="primary" @click="handleAdd">创建</a-button>
-          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="loadData" />
+          <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $tl('p.create') }}</a-button>
+          <a-statistic-countdown
+            format="s"
+            :title="$tl('p.refreshCountdown')"
+            :value="countdownTime"
+            @finish="loadData"
+          >
+            <template #suffix>
+              <div style="font-size: 12px">{{ $tl('p.seconds') }}</div>
+            </template>
+          </a-statistic-countdown>
         </a-space>
       </template>
 
@@ -47,7 +56,7 @@
         <template v-else-if="column.dataIndex === 'status'">
           <a-tooltip
             placement="topLeft"
-            :title="`节点状态：${text} 节点可用性：${record.spec ? record.spec.availability || '' : ''}`"
+            :title="`${$tl('p.nodeStatus')}${text} ${$tl('p.nodeAvailability')}${record.spec ? record.spec.availability || '' : ''}`"
           >
             <a-tag :color="(record.spec && record.spec.availability) === 'ACTIVE' ? 'green' : 'red'">
               {{ text }}
@@ -59,11 +68,7 @@
         <template v-else-if="column.dataIndex === 'role'">
           <a-tooltip
             placement="topLeft"
-            :title="`角色：${text} ${
-              record.managerStatus && record.managerStatus.reachability === 'REACHABLE'
-                ? '管理状态：' + record.managerStatus.reachability
-                : ''
-            }`"
+            :title="`${$tl('p.role')}${text} ${record.managerStatus && record.managerStatus.reachability === 'REACHABLE' ? $tl('p.managementStatus') + record.managerStatus.reachability : ''}`"
           >
             <a-tag
               :color="`${record.managerStatus && record.managerStatus.reachability === 'REACHABLE' ? 'green' : ''}`"
@@ -92,13 +97,16 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'updatedAt'">
-          <a-tooltip placement="topLeft" :title="`修改时间：${text} 创建时间：${record.createdAt}`">
+          <a-tooltip
+            placement="topLeft"
+            :title="`${$tl('p.modifiedTime')}${text} ${$tl('p.creationTime')}${record.createdAt}`"
+          >
             {{ text }}
           </a-tooltip>
         </template>
 
         <template v-else-if="column.replicas">
-          <a-tooltip placement="topLeft" :title="`点击数字查看运行中的任务,点击图标查看关联的所有任务`">
+          <a-tooltip placement="topLeft" :title="`${$tl('p.viewRunningTasks')},${$tl('p.viewAllTasks')}`">
             <a-tag @click="handleTask(record, 'RUNNING')">{{ text }}</a-tag>
 
             <ReadOutlined @click="handleTask(record)" />
@@ -107,8 +115,8 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">修改</a-button>
-            <a-button size="small" type="primary" danger @click="handleDel(record)">删除</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.modify') }}</a-button>
+            <a-button size="small" type="primary" danger @click="handleDel(record)">{{ $tl('p.delete') }}</a-button>
           </a-space>
         </template>
       </template>
@@ -118,40 +126,48 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="编辑服务"
+      :title="$tl('p.editService')"
       width="70vw"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="服务名称" name="name">
-          <template #help><span v-if="!temp.serviceId">创建后不支持修改</span></template>
-          <a-input v-model:value="temp.name" :disabled="temp.serviceId ? true : false" placeholder="服务名称" />
+        <a-form-item :label="$tl('c.serviceName')" name="name">
+          <template #help
+            ><span v-if="!temp.serviceId">{{ $tl('c.immutableAfterCreated') }}</span></template
+          >
+          <a-input
+            v-model:value="temp.name"
+            :disabled="temp.serviceId ? true : false"
+            :placeholder="$tl('c.serviceName')"
+          />
         </a-form-item>
-        <a-form-item label="运行模式" name="mode">
-          <template #help><span v-if="!temp.serviceId">创建后不支持修改</span></template>
+        <a-form-item :label="$tl('c.runMode')" name="mode">
+          <template #help
+            ><span v-if="!temp.serviceId">{{ $tl('c.immutableAfterCreated') }}</span></template
+          >
           <a-radio-group v-model:value="temp.mode" name="mode" :disabled="temp.serviceId ? true : false">
-            <a-radio value="REPLICATED">副本</a-radio>
-            <a-radio value="GLOBAL">独立 </a-radio>
+            <a-radio value="REPLICATED">{{ $tl('p.replicas') }}</a-radio>
+            <a-radio value="GLOBAL">{{ $tl('p.standalone') }} </a-radio>
           </a-radio-group>
           <a-form-item-rest>
             <template v-if="temp.mode === 'REPLICATED'">
-              副本数:
+              {{ $tl('c.replicaCount') }}:
               <a-input-number v-model:value="temp.replicas" :min="1" />
             </template>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item label="镜像名称" name="image">
-          <a-input v-model:value="temp.image" placeholder="镜像名称" />
+        <a-form-item :label="$tl('c.imageName')" name="image">
+          <a-input v-model:value="temp.image" :placeholder="$tl('c.imageName')" />
         </a-form-item>
         <a-form-item label="hostname" name="hostname">
-          <a-input v-model:value="temp.hostname" placeholder="主机名 hostname" />
+          <a-input v-model:value="temp.hostname" :placeholder="$tl('p.hostname')" />
         </a-form-item>
-        <a-form-item label="更多配置" name="">
+        <a-form-item :label="$tl('p.moreConfigurations')" name="">
           <a-form-item-rest>
             <a-tabs>
-              <a-tab-pane key="port" tab="端口">
-                <a-form-item label="解析模式" name="endpointResolutionMode">
+              <a-tab-pane key="port" :tab="$tl('c.port')">
+                <a-form-item :label="$tl('c.resolutionMode')" name="endpointResolutionMode">
                   <a-radio-group
                     v-model:value="temp.endpointResolutionMode"
                     name="endpointResolutionMode"
@@ -177,20 +193,28 @@
                         <a-row>
                           <a-col :span="7">
                             <a-radio-group v-model:value="item.publishMode" name="publishMode">
-                              <a-radio value="ingress" :disabled="temp.endpointResolutionMode === 'DNSRR'"
-                                >路由</a-radio
-                              >
-                              <a-radio value="host">主机</a-radio>
+                              <a-radio value="ingress" :disabled="temp.endpointResolutionMode === 'DNSRR'">{{
+                                $tl('p.routing')
+                              }}</a-radio>
+                              <a-radio value="host">{{ $tl('p.host') }}</a-radio>
                             </a-radio-group>
                           </a-col>
                           <a-col :span="7">
-                            <a-input v-model:value="item.publishedPort" addon-before="端口" placeholder="端口">
+                            <a-input
+                              v-model:value="item.publishedPort"
+                              :addon-before="$tl('c.port')"
+                              :placeholder="$tl('c.port')"
+                            >
                             </a-input>
                           </a-col>
                           <a-col :span="8" :offset="1">
-                            <a-input v-model:value="item.targetPort" addon-before="容器" placeholder="容器端口">
+                            <a-input
+                              v-model:value="item.targetPort"
+                              :addon-before="$tl('c.container')"
+                              placeholder="{{$tl('c.container')}}端口"
+                            >
                               <template #addonAfter>
-                                <a-select v-model:value="item.protocol" placeholder="端口协议">
+                                <a-select v-model:value="item.protocol" :placeholder="$tl('p.portProtocol')">
                                   <a-select-option value="TCP">TCP</a-select-option>
                                   <a-select-option value="UDP">UDP</a-select-option>
                                   <a-select-option value="SCTP">SCTP</a-select-option>
@@ -228,7 +252,7 @@
                 </a-form-item>
               </a-tab-pane>
 
-              <a-tab-pane key="volumes" tab="挂载卷">
+              <a-tab-pane key="volumes" :tab="$tl('p.mountedVolumes')">
                 <a-form-item>
                   <a-row v-for="(item, index) in temp.volumes" :key="index">
                     <a-col :span="21">
@@ -241,10 +265,18 @@
                             </a-radio-group>
                           </a-col>
                           <a-col :span="7">
-                            <a-input v-model:value="item.source" addon-before="宿主" placeholder="宿主机目录" />
+                            <a-input
+                              v-model:value="item.source"
+                              :addon-before="$tl('p.hostMachine')"
+                              placeholder="{{$tl('p.hostMachine')}}机目录"
+                            />
                           </a-col>
                           <a-col :span="8" :offset="1">
-                            <a-input v-model:value="item.target" addon-before="容器" placeholder="容器目录" />
+                            <a-input
+                              v-model:value="item.target"
+                              :addon-before="$tl('c.container')"
+                              placeholder="{{$tl('c.container')}}目录"
+                            />
                           </a-col>
                         </a-row>
                       </a-input-group>
@@ -273,11 +305,15 @@
                 </a-form-item>
               </a-tab-pane>
 
-              <a-tab-pane key="args" tab="参数">
+              <a-tab-pane key="args" :tab="$tl('p.parameters')">
                 <a-form-item>
                   <a-row v-for="(item, index) in temp.args" :key="index">
                     <a-col :span="20">
-                      <a-input v-model:value="item.value" addon-before="参数值" placeholder="填写运行参数" />
+                      <a-input
+                        v-model:value="item.value"
+                        :addon-before="$tl('p.parameterValue')"
+                        :placeholder="$tl('p.fillRunningParameters')"
+                      />
                     </a-col>
 
                     <a-col :span="2" :offset="1">
@@ -303,11 +339,15 @@
                   </a-row>
                 </a-form-item>
               </a-tab-pane>
-              <a-tab-pane key="command" tab="命令">
+              <a-tab-pane key="command" :tab="$tl('p.command')">
                 <a-form-item>
                   <a-row v-for="(item, index) in temp.commands" :key="index">
                     <a-col :span="20">
-                      <a-input v-model:value="item.value" addon-before="命令值" placeholder="填写运行命令" />
+                      <a-input
+                        v-model:value="item.value"
+                        :addon-before="$tl('p.commandValue')"
+                        :placeholder="$tl('p.fillRunningCommand')"
+                      />
                     </a-col>
 
                     <a-col :span="2" :offset="1">
@@ -332,14 +372,22 @@
                   </a-row>
                 </a-form-item>
               </a-tab-pane>
-              <a-tab-pane key="env" tab="环境变量">
+              <a-tab-pane key="env" :tab="$tl('p.environmentVariables')">
                 <a-form-item>
                   <a-row v-for="(item, index) in temp.envs" :key="index">
                     <a-col :span="10">
-                      <a-input v-model:value="item.name" addon-before="名称" placeholder="变量名称" />
+                      <a-input
+                        v-model:value="item.name"
+                        :addon-before="$tl('c.name')"
+                        placeholder="变量{{$tl('c.name')}}"
+                      />
                     </a-col>
                     <a-col :span="10" :offset="1">
-                      <a-input v-model:value="item.value" addon-before="变量值" placeholder="变量值" />
+                      <a-input
+                        v-model:value="item.value"
+                        :addon-before="$tl('c.variableValue')"
+                        :placeholder="$tl('c.variableValue')"
+                      />
                     </a-col>
                     <a-col :span="2" :offset="1">
                       <a-space>
@@ -364,139 +412,139 @@
                   </a-row>
                 </a-form-item>
               </a-tab-pane>
-              <a-tab-pane v-if="temp.update" tab="升级策略">
-                <a-form-item label="并行度" name="parallelism">
+              <a-tab-pane v-if="temp.update" :tab="$tl('p.upgradeStrategy')">
+                <a-form-item :label="$tl('c.parallelism')" name="parallelism">
                   <a-input-number
                     v-model:value="temp.update.parallelism"
                     style="width: 80%"
                     :min="0"
-                    placeholder="并行度,同一时间升级的容器数量"
+                    :placeholder="$tl('c.parallelismDetail')"
                   />
                 </a-form-item>
-                <a-form-item label="延迟" name="delay">
+                <a-form-item :label="$tl('c.delay')" name="delay">
                   <template #help>
-                    <span style="padding-left: 20%">单位 ns 秒</span>
+                    <span style="padding-left: 20%">{{ $tl('c.delayUnit') }}</span>
                   </template>
                   <a-input-number
                     v-model:value="temp.update.delay"
                     style="width: 80%"
                     :min="1"
-                    placeholder="延迟,容器升级间隔时间"
+                    :placeholder="$tl('p.upgradeInterval')"
                   />
                 </a-form-item>
-                <a-form-item label="失败率" name="maxFailureRatio">
+                <a-form-item :label="$tl('c.failureRate')" name="maxFailureRatio">
                   <a-input-number
                     v-model:value="temp.update.maxFailureRatio"
                     style="width: 80%"
                     :min="0"
-                    placeholder="失败率,更新期间允许的失败率"
+                    placeholder="{{$tl('c.failureRate')}}{{$tl('c.failureRateDetail')}}"
                   />
                 </a-form-item>
-                <a-form-item label="失败策略" name="failureAction">
+                <a-form-item :label="$tl('c.failureStrategy')" name="failureAction">
                   <a-radio-group v-model:value="temp.update.failureAction" name="failureAction">
-                    <a-radio value="PAUSE">暂停</a-radio>
-                    <a-radio value="CONTINUE">继续</a-radio>
-                    <a-radio value="ROLLBACK">回滚</a-radio>
+                    <a-radio value="PAUSE">{{ $tl('c.pause') }}</a-radio>
+                    <a-radio value="CONTINUE">{{ $tl('c.resume') }}</a-radio>
+                    <a-radio value="ROLLBACK">{{ $tl('c.rollback') }}</a-radio>
                   </a-radio-group>
                 </a-form-item>
-                <a-form-item label="执行顺序" name="order">
+                <a-form-item :label="$tl('c.executionOrder')" name="order">
                   <a-radio-group v-model:value="temp.update.order" name="order">
-                    <a-radio value="STOP_FIRST">先停止</a-radio>
-                    <a-radio value="START_FIRST">先启动</a-radio>
+                    <a-radio value="STOP_FIRST">{{ $tl('c.stopFirst') }}</a-radio>
+                    <a-radio value="START_FIRST">{{ $tl('c.startFirst') }}</a-radio>
                   </a-radio-group>
                 </a-form-item>
-                <a-form-item label="监控" name="monitor">
+                <a-form-item :label="$tl('c.monitoring')" name="monitor">
                   <a-input-number
                     v-model:value="temp.update.monitor"
                     style="width: 80%"
                     :min="1"
-                    placeholder="更新完成后确实成功的时间"
+                    :placeholder="$tl('c.successTimeAfterUpdated')"
                   />
                 </a-form-item>
               </a-tab-pane>
-              <a-tab-pane v-if="temp.rollback" tab="回滚策略">
-                <a-form-item label="并行度" name="parallelism">
+              <a-tab-pane v-if="temp.rollback" :tab="$tl('p.rollbackStrategy')">
+                <a-form-item :label="$tl('c.parallelism')" name="parallelism">
                   <a-input-number
                     v-model:value="temp.rollback.parallelism"
                     style="width: 80%"
                     :min="0"
-                    placeholder="并行度,同一时间升级的容器数量"
+                    :placeholder="$tl('c.parallelismDetail')"
                   />
                 </a-form-item>
-                <a-form-item label="延迟" name="delay">
+                <a-form-item :label="$tl('c.delay')" name="delay">
                   <template #help>
-                    <span style="padding-left: 20%">单位 ns 秒</span>
+                    <span style="padding-left: 20%">{{ $tl('c.delayUnit') }}</span>
                   </template>
                   <a-input-number
                     v-model:value="temp.rollback.delay"
                     style="width: 80%"
                     :min="1"
-                    placeholder="延迟,容器回滚间隔时间"
+                    :placeholder="$tl('p.rollbackInterval')"
                   />
                 </a-form-item>
-                <a-form-item label="失败率" name="maxFailureRatio">
+                <a-form-item :label="$tl('c.failureRate')" name="maxFailureRatio">
                   <a-input-number
                     v-model:value="temp.rollback.maxFailureRatio"
                     style="width: 80%"
                     :min="0"
-                    placeholder="失败率,更新期间允许的失败率"
+                    placeholder="{{$tl('c.failureRate')}}{{$tl('c.failureRateDetail')}}"
                   />
                 </a-form-item>
-                <a-form-item label="失败策略" name="failureAction">
+                <a-form-item :label="$tl('c.failureStrategy')" name="failureAction">
                   <a-radio-group v-model:value="temp.rollback.failureAction" name="failureAction">
-                    <a-radio value="PAUSE">暂停</a-radio>
-                    <a-radio value="CONTINUE">继续</a-radio>
-                    <a-radio value="ROLLBACK">回滚</a-radio>
+                    <a-radio value="PAUSE">{{ $tl('c.pause') }}</a-radio>
+                    <a-radio value="CONTINUE">{{ $tl('c.resume') }}</a-radio>
+                    <a-radio value="ROLLBACK">{{ $tl('c.rollback') }}</a-radio>
                   </a-radio-group>
                 </a-form-item>
-                <a-form-item label="执行顺序" name="order">
+                <a-form-item :label="$tl('c.executionOrder')" name="order">
                   <a-radio-group v-model:value="temp.rollback.order" name="order">
-                    <a-radio value="STOP_FIRST">先停止</a-radio>
-                    <a-radio value="START_FIRST">先启动</a-radio>
+                    <a-radio value="STOP_FIRST">{{ $tl('c.stopFirst') }}</a-radio>
+                    <a-radio value="START_FIRST">{{ $tl('c.startFirst') }}</a-radio>
                   </a-radio-group>
                 </a-form-item>
-                <a-form-item label="监控" name="monitor">
+                <a-form-item :label="$tl('c.monitoring')" name="monitor">
                   <a-input-number
                     v-model:value="temp.rollback.monitor"
                     style="width: 80%"
                     :min="1"
-                    placeholder="更新完成后确实成功的时间"
+                    :placeholder="$tl('c.successTimeAfterUpdated')"
                   />
                 </a-form-item>
               </a-tab-pane>
-              <a-tab-pane v-if="temp.resources" tab="资源">
-                <a-form-item label="预占资源">
+              <a-tab-pane v-if="temp.resources" :tab="$tl('p.resources')">
+                <a-form-item :label="$tl('p.preemptionResources')">
                   <a-row>
                     <a-col :span="8">
                       <a-input
                         v-model:value="temp.resources.reservations.nanoCPUs"
                         addon-before="CPUs"
-                        placeholder="nanoCPUs 最小 1000000"
+                        :placeholder="$tl('c.nanoCPUs')"
                       />
                     </a-col>
                     <a-col :span="8" :offset="1">
                       <a-input
                         v-model:value="temp.resources.reservations.memoryBytes"
                         addon-before="memory"
-                        placeholder="memory 最小 4M"
+                        :placeholder="$tl('c.memory')"
                       />
                     </a-col>
                   </a-row>
                 </a-form-item>
-                <a-form-item label="限制资源">
+                <a-form-item :label="$tl('p.limitResources')">
                   <a-row>
                     <a-col :span="8">
                       <a-input
                         v-model:value="temp.resources.limits.nanoCPUs"
                         addon-before="CPUs"
-                        placeholder="nanoCPUs 最小 1000000"
+                        :placeholder="$tl('c.nanoCPUs')"
                       />
                     </a-col>
                     <a-col :span="8" :offset="1">
                       <a-input
                         v-model:value="temp.resources.limits.memoryBytes"
                         addon-before="memory"
-                        placeholder="memory 最小 4M"
+                        :placeholder="$tl('c.memory')"
                       />
                     </a-col>
                   </a-row>
@@ -511,7 +559,7 @@
     <a-modal
       v-model:open="taskVisible"
       destroy-on-close
-      title="查看任务"
+      :title="$tl('p.viewTasks')"
       width="80vw"
       :footer="null"
       :mask-closable="false"
@@ -580,32 +628,32 @@ export default {
       logVisible: 0,
       confirmLoading: false,
       rules: {
-        name: [{ required: true, message: '服务名称必填', trigger: 'blur' }],
-        mode: [{ required: true, message: '运行模式必填', trigger: 'blur' }],
-        image: [{ required: true, message: '镜像名称必填', trigger: 'blur' }]
+        name: [{ required: true, message: this.$tl('p.serviceNameRequired'), trigger: 'blur' }],
+        mode: [{ required: true, message: this.$tl('p.operationModeRequired'), trigger: 'blur' }],
+        image: [{ required: true, message: this.$tl('p.imageNameRequired'), trigger: 'blur' }]
       },
       columns: [
         {
-          title: '序号',
+          title: this.$tl('p.serialNumber'),
           width: 80,
           ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: '服务Id',
+          title: this.$tl('p.serviceId'),
           dataIndex: 'id',
           ellipsis: true
         },
         {
-          title: '名称',
+          title: this.$tl('c.name'),
           dataIndex: ['spec', 'name'],
           ellipsis: true,
 
           tooltip: true
         },
         {
-          title: '运行模式',
+          title: this.$tl('c.runMode'),
           dataIndex: ['spec', 'mode', 'mode'],
           ellipsis: true,
           width: 120,
@@ -613,7 +661,7 @@ export default {
         },
         // { title: "网络模式", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 120, },
         {
-          title: '副本数',
+          title: this.$tl('c.replicaCount'),
           dataIndex: ['spec', 'mode', 'replicated', 'replicas'],
           align: 'center',
           width: 90,
@@ -621,7 +669,7 @@ export default {
           replicas: true
         },
         {
-          title: '解析模式',
+          title: this.$tl('c.resolutionMode'),
           dataIndex: ['spec', 'endpointSpec', 'mode'],
           ellipsis: true,
           width: 100,
@@ -629,7 +677,7 @@ export default {
         },
 
         {
-          title: '修改时间',
+          title: this.$tl('p.modificationTime'),
           dataIndex: 'updatedAt',
 
           ellipsis: true,
@@ -637,7 +685,7 @@ export default {
           width: '170px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -654,6 +702,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.swarm.service.${key}`, ...args)
+    },
     // 加载数据
     loadData() {
       if (!this.visible) {
@@ -714,7 +765,7 @@ export default {
       const spec = record.spec
       if (!spec) {
         $notification.error({
-          message: '信息不完整不能编辑'
+          message: this.$tl('p.incompleteInformationCannotEdit')
         })
         return
       }
@@ -842,11 +893,11 @@ export default {
     // 删除
     handleDel(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemPrompt'),
         zIndex: 1009,
-        content: '真的要删除此服务么？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.reallyDeleteThisService'),
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return dockerSwarmServicesDel(this.urlPrefix, {
             serviceId: record.id,
