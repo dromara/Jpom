@@ -58,6 +58,7 @@ export default {
     containerLabels: '容器标签',
     containerLabelExample: '容器标签,如：key1=values1&keyvalue2',
     autoStart: '自动启动',
-    start: '启动'
+    start: '启动',
+    noStart: '未启动'
   }
 }

@@ -44,13 +44,16 @@
                 <a-button type="primary" size="small" :loading="childLoading" @click="loadData">{{
                   $tl('p.refresh')
                 }}</a-button>
-
                 <a-statistic-countdown
-                  format=" {{$tl('p.seconds')}}"
+                  format="s"
                   :title="$tl('p.refreshCountdown')"
                   :value="countdownTime"
                   @finish="silenceLoadData"
-                />
+                >
+                  <template #suffix>
+                    <div style="font-size: 12px">{{ $tl('p.seconds') }}</div>
+                  </template>
+                </a-statistic-countdown>
               </a-space>
             </template>
             <template #bodyCell="{ column, text, record }">

@@ -42,11 +42,15 @@
             </div>
             <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('c.search') }}</a-button>
             <a-statistic-countdown
-              format=" {{$tl('c.seconds')}}"
-              :title="$tl('c.refreshCountdown')"
+              format="s"
+              :title="$tl('c.refreshCountdown') + ' '"
               :value="countdownTime"
               @finish="autoUpdate"
-            />
+            >
+              <template #suffix>
+                <div style="font-size: 12px">{{ $tl('c.seconds') }}</div>
+              </template>
+            </a-statistic-countdown>
           </a-space>
         </template>
         <template #bodyCell="{ column, text, record }">
@@ -310,11 +314,15 @@
             </div>
             <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('c.search') }}</a-button>
             <a-statistic-countdown
-              format=" {{$tl('c.seconds')}}"
-              :title="$tl('c.refreshCountdown')"
+              format="s"
+              :title="$tl('c.refreshCountdown') + ' '"
               :value="countdownTime"
               @finish="autoUpdate"
-            />
+            >
+              <template #suffix>
+                <div style="font-size: 12px">{{ $tl('c.seconds') }}</div>
+              </template>
+            </a-statistic-countdown>
           </a-space>
         </template>
         <a-collapse v-if="list && list.length">

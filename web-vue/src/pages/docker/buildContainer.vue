@@ -333,7 +333,7 @@
                 ><a-switch
                   v-model:checked="temp.autorun"
                   :checked-children="$tl('p.start')"
-                  un-checked-children="不{{$tl('p.start')}}"
+                  :un-checked-children="$tl('p.noStart')"
               /></a-col>
               <a-col :span="4" style="text-align: right">
                 <a-tooltip>

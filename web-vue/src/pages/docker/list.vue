@@ -1,13 +1,10 @@
 <template>
   <div>
     <template v-if="useSuggestions">
-      <a-result
-        title="当前工作空间还没有 Docker"
-        sub-title="请到【系统管理】-> 【资产管理】-> 【Docker管理】新增Docker，或者将已新增的Docker授权关联、分配到此工作空间"
-      >
+      <a-result :title="$tl('p.noDockerInWorkspace')" :sub-title="$tl('p.goToDockerManagement')">
         <template #extra>
           <router-link to="/system/assets/docker-list">
-            <a-button key="console" type="primary">现在就去</a-button></router-link
+            <a-button key="console" type="primary">{{ $tl('p.goToNow') }}</a-button></router-link
           >
         </template>
       </a-result>
@@ -19,7 +16,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="docker-list"
-      empty-description="没有docker"
+      :empty-description="$tl('p.noDocker')"
       :active-page="activePage"
       size="middle"
       :data-source="list"
@@ -38,16 +35,19 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            placeholder="名称"
+            :placeholder="$tl('c.name')"
             class="search-input-item"
             @press-enter="loadData"
           />
 
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$tl('p.quickReturn')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow"
-            >工作空间同步</a-button
+          <a-button
+            type="primary"
+            :disabled="!tableSelections || !tableSelections.length"
+            @click="syncToWorkspaceShow"
+            >{{ $tl('p.workspaceSync') }}</a-button
           >
         </a-space>
       </template>
@@ -60,14 +60,14 @@
 
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('status')">
           <template v-if="record.machineDocker">
-            <a-tag v-if="record.machineDocker.status === 1" color="green">正常</a-tag>
+            <a-tag v-if="record.machineDocker.status === 1" color="green">{{ $tl('p.statusNormal') }}</a-tag>
             <a-tooltip v-else :title="record.machineDocker.failureMsg">
-              <a-tag color="red">无法连接</a-tag>
+              <a-tag color="red">{{ $tl('p.unableToConnect') }}</a-tag>
             </a-tooltip>
           </template>
 
-          <a-tooltip v-else title="集群关联的 docker 信息丢失,不能继续使用管理功能">
-            <a-tag color="red">信息丢失</a-tag>
+          <a-tooltip v-else :title="$tl('p.dockerInfoLost')">
+            <a-tag color="red">{{ $tl('p.infoLost') }}</a-tag>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'tags'">
@@ -89,10 +89,10 @@
               type="primary"
               :disabled="!record.machineDocker || record.machineDocker.status !== 1"
               @click="handleConsole(record)"
-              >控制台</a-button
+              >{{ $tl('p.console') }}</a-button
             >
-            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-            <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
           </a-space>
         </template>
       </template>
@@ -102,16 +102,20 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="编辑  Docker"
+      :title="$tl('p.editDocker')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="容器名称" name="name">
-          <a-input v-model:value="temp.name" placeholder="容器名称" />
+        <a-form-item :label="$tl('c.containerName')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$tl('c.containerName')" />
         </a-form-item>
 
-        <a-form-item label="标签" name="tagInput" help="标签用于容器构建选择容器功能（fromTag）">
+        <a-form-item
+          :label="$tl('c.label')"
+          name="tagInput"
+          :help="`${$tl('c.label')} 用于容器构建选择容器功能（fromTag）`"
+        >
           <a-space direction="vertical" style="width: 100%">
             <div>
               <a-tooltip v-for="(tag, index) in temp.tagsArray" :key="index" :title="tag">
@@ -135,7 +139,7 @@
               v-model:value="temp.tagInput"
               type="text"
               size="small"
-              placeholder="请输入标签名 字母数字 长度 1-10"
+              :placeholder="$tl('p.enterTagName')"
               @blur="handleInputConfirm"
               @keyup.enter="handleInputConfirm"
             />
@@ -145,7 +149,7 @@
                 style="borderstyle: dashed"
                 @click="showInput"
               >
-                <PlusOutlined /> 新增
+                <PlusOutlined /> {{ $tl('p.add') }}
               </a-tag>
             </template>
           </a-space>
@@ -166,22 +170,22 @@
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="同步到其他工作空间"
+      :title="$tl('p.syncToOtherWorkspace')"
       :mask-closable="false"
       @ok="handleSyncToWorkspace"
     >
-      <a-alert message="温馨提示" type="warning">
+      <a-alert :message="$tl('p.warmTip')" type="warning">
         <template #description>
           <ul>
-            <li>同步机制采用容器 host 确定是同一个服务器（docker）</li>
-            <li>当目标工作空间不存在对应的节点时候将自动创建一个新的docker（逻辑docker）</li>
-            <li>当目标工作空间已经存在节点时候将自动同步 docker 仓库配置信息</li>
+            <li>{{ $tl('p.syncMechanism') }}</li>
+            <li>{{ $tl('p.createNewDocker') }}</li>
+            <li>{{ $tl('p.syncDockerInfo') }}</li>
           </ul>
         </template>
       </a-alert>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item label="选择工作空间" name="workspaceId">
+        <a-form-item :label="$tl('p.chooseWorkspace')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -195,7 +199,7 @@
                 )
               }
             "
-            placeholder="请选择工作空间"
+            :placeholder="$tl('c.selectWorkspace')"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id" :disabled="getWorkspaceId() === item.id">{{
               item.name
@@ -236,7 +240,7 @@ export default {
 
       columns: [
         {
-          title: '名称',
+          title: this.$tl('c.name'),
           dataIndex: 'name',
           ellipsis: true,
           width: 100
@@ -249,33 +253,33 @@ export default {
           tooltip: true
         },
         {
-          title: '状态',
+          title: this.$tl('p.status'),
           dataIndex: ['machineDocker', 'status'],
           ellipsis: true,
           align: 'center',
           width: '100px'
         },
         {
-          title: 'docker版本',
+          title: `docker${this.$tl('p.version')}`,
           dataIndex: ['machineDocker', 'dockerVersion'],
           ellipsis: true,
           width: '120px',
           tooltip: true
         },
         {
-          title: '标签',
+          title: this.$tl('c.label'),
           dataIndex: 'tags',
           width: 100,
           ellipsis: true
         },
         {
-          title: '最后修改人',
+          title: this.$tl('p.lastModifiedBy'),
           dataIndex: 'modifyUser',
           width: '120px',
           ellipsis: true
         },
         {
-          title: '创建时间',
+          title: this.$tl('p.creationTime'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -283,7 +287,7 @@ export default {
           width: '170px'
         },
         {
-          title: '修改时间',
+          title: this.$tl('p.modificationTime'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -291,7 +295,7 @@ export default {
           width: '170px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.action'),
           dataIndex: 'operation',
 
           fixed: 'right',
@@ -301,16 +305,16 @@ export default {
       ],
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
-        name: [{ required: true, message: '请填写容器名称', trigger: 'blur' }],
-        host: [{ required: true, message: '请填写容器地址', trigger: 'blur' }],
+        name: [{ required: true, message: this.$tl('p.enterContainerName'), trigger: 'blur' }],
+        host: [{ required: true, message: this.$tl('p.enterContainerAddress'), trigger: 'blur' }],
         tagInput: [
           // { required: true, message: "Please input ID", trigger: "blur" },
-          { pattern: /^\w{1,10}$/, message: '标签限制为字母数字且长度 1-10' }
+          { pattern: /^\w{1,10}$/, message: this.$tl('c.labelRestriction') }
         ],
 
         tag: [
-          { required: true, message: '请填写关联容器标签', trigger: 'blur' },
-          { pattern: /^\w{1,10}$/, message: '标签限制为字母数字且长度 1-10' }
+          { required: true, message: this.$tl('p.enterAssociatedContainerTag'), trigger: 'blur' },
+          { pattern: /^\w{1,10}$/, message: this.$tl('c.labelRestriction') }
         ]
       },
       workspaceList: [],
@@ -360,6 +364,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.list.${key}`, ...args)
+    },
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true
@@ -452,11 +459,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemPrompt'),
         zIndex: 1009,
-        content: '真的要删除该记录么？删除后构建关联的容器标签将无法使用',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDeletion'),
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return deleteDcoker({
             id: record.id
@@ -530,7 +537,7 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: '请选择工作空间'
+          message: this.$tl('c.selectWorkspace')
         })
         return false
       }
