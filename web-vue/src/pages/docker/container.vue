@@ -16,37 +16,46 @@
           <a-space>
             <a-input
               v-model:value="listQuery['name']"
-              placeholder="名称"
+              :placeholder="$tl('c.name')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['containerId']"
-              placeholder="容器id"
+              :placeholder="$tl('c.containerId')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['imageId']"
-              placeholder="镜像id"
+              :placeholder="$tl('c.imageId')"
               class="search-input-item"
               @keyup.enter="loadData"
             />
             <div>
-              查看
-              <a-switch v-model:checked="listQuery['showAll']" checked-children="所有" un-checked-children="运行中" />
+              {{ $tl('c.view') }}
+              <a-switch
+                v-model:checked="listQuery['showAll']"
+                :checked-children="$tl('c.all')"
+                :un-checked-children="$tl('c.running')"
+              />
             </div>
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-            <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="autoUpdate" />
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('c.search') }}</a-button>
+            <a-statistic-countdown
+              format=" {{$tl('c.seconds')}}"
+              :title="$tl('c.refreshCountdown')"
+              :value="countdownTime"
+              @finish="autoUpdate"
+            />
           </a-space>
         </template>
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'names'">
-            <a-popover :title="`容器名称：${(text || []).join(',')}`">
+            <a-popover :title="`${$tl('c.containerName')}${(text || []).join(',')}`">
               <template #content>
-                <p>容器Id: {{ record.id }}</p>
-                <p>镜像：{{ record.image }}</p>
-                <p>镜像Id: {{ record.imageId }}</p>
+                <p>{{ $tl('c.containerIdLabel') }}{{ record.id }}</p>
+                <p>{{ $tl('c.image') }}{{ record.image }}</p>
+                <p>{{ $tl('c.imageIdLabel') }}{{ record.imageId }}</p>
               </template>
 
               <span>{{ (text || []).join(',') }}</span>
@@ -54,7 +63,7 @@
           </template>
 
           <template v-else-if="column.dataIndex === 'labels'">
-            <a-popover :title="`容器名标签`">
+            <a-popover :title="`${$tl('c.containerNameTag')}`">
               <template #content>
                 <template v-if="record.labels">
                   <p v-for="(value, key) in record.labels" :key="key">
@@ -72,15 +81,15 @@
             </a-popover>
           </template>
           <template v-else-if="column.dataIndex === 'mounts'">
-            <a-popover :title="`挂载`">
+            <a-popover :title="`${$tl('c.mount')}`">
               <template #content>
                 <template v-if="record.mounts">
                   <div v-for="(item, index) in record.mounts" :key="index">
                     <p>
-                      名称：{{ item.name }}
-                      <a-tag>{{ item.rw ? '读写' : '读' }}</a-tag>
+                      {{ $tl('c.nameLabel') }}{{ item.name }}
+                      <a-tag>{{ item.rw ? $tl('c.readWrite') : $tl('c.read') }}</a-tag>
                     </p>
-                    <p>路径：{{ item.source }}(宿主机) => {{ item.destination }}(容器)</p>
+                    <p>{{ $tl('c.path') }}</p>
                     <a-divider></a-divider>
                   </div>
                 </template>
@@ -108,7 +117,7 @@
           <template v-else-if="column.dataIndex === 'ports'">
             <a-popover placement="topLeft">
               <template #title>
-                网络端口
+                {{ $tl('c.networkPort') }}
                 <ul>
                   <li v-for="(item, index) in text || []" :key="index">
                     {{ item.type + ' ' + (item.ip || '') + ':' + (item.publicPort || '') + ':' + item.privatePort }}
@@ -119,7 +128,7 @@
                 <template v-if="record.networkSettings">
                   <template v-if="record.networkSettings.networks">
                     <template v-if="record.networkSettings.networks.bridge">
-                      桥接模式：
+                      {{ $tl('c.bridgeMode') }}
                       <p v-if="record.networkSettings.networks.bridge.ipAddress">
                         IP:
                         <a-tag>{{ record.networkSettings.networks.bridge.ipAddress }}</a-tag>
@@ -129,7 +138,7 @@
                         <a-tag>{{ record.networkSettings.networks.bridge.macAddress }}</a-tag>
                       </p>
                       <p v-if="record.networkSettings.networks.bridge.gateway">
-                        网关:
+                        {{ $tl('c.gateway') }}:
                         <a-tag>{{ record.networkSettings.networks.bridge.gateway }}</a-tag>
                       </p>
                       <p v-if="record.networkSettings.networks.bridge.networkID">
@@ -151,7 +160,7 @@
                         <a-tag>{{ record.networkSettings.networks.ingress.macAddress }}</a-tag>
                       </p>
                       <p v-if="record.networkSettings.networks.ingress.gateway">
-                        网关:
+                        {{ $tl('c.gateway') }}:
                         <a-tag>{{ record.networkSettings.networks.ingress.gateway }}</a-tag>
                       </p>
                       <p v-if="record.networkSettings.networks.ingress.networkID">
@@ -178,7 +187,7 @@
           </template>
 
           <template v-else-if="column.dataIndex === 'state'">
-            <a-tooltip :title="(record.status || '') + ' 点击查看日志'" @click="viewLog(record)">
+            <a-tooltip :title="(record.status || '') + $tl('c.viewLogs')" @click="viewLog(record)">
               <a-switch :checked="text === 'running'" :disabled="true">
                 <template #checkedChildren>
                   <CheckCircleOutlined />
@@ -192,7 +201,7 @@
           <template v-else-if="column.dataIndex === 'operation'">
             <a-space>
               <template v-if="record.state === 'running'">
-                <a-tooltip title="容器是运行中可以进入终端">
+                <a-tooltip :title="$tl('c.enterTerminal')">
                   <a-button
                     size="small"
                     type="link"
@@ -201,23 +210,23 @@
                     ><CodeOutlined
                   /></a-button>
                 </a-tooltip>
-                <a-tooltip title="停止">
+                <a-tooltip :title="$tl('c.stop')">
                   <a-button size="small" type="link" @click="doAction(record, 'stop')"><StopOutlined /></a-button>
                 </a-tooltip>
-                <a-tooltip title="重启">
+                <a-tooltip :title="$tl('c.restart')">
                   <a-button size="small" type="link" @click="doAction(record, 'restart')"><ReloadOutlined /></a-button>
                 </a-tooltip>
               </template>
               <template v-else>
-                <a-tooltip title="启动">
+                <a-tooltip :title="$tl('c.start')">
                   <a-button size="small" type="link" @click="doAction(record, 'start')">
                     <PlayCircleOutlined />
                   </a-button>
                 </a-tooltip>
-                <a-tooltip title="停止">
+                <a-tooltip :title="$tl('c.stop')">
                   <a-button size="small" type="link" :disabled="true"><StopOutlined /></a-button>
                 </a-tooltip>
-                <a-tooltip title="重启">
+                <a-tooltip :title="$tl('c.restart')">
                   <a-button size="small" type="link" :disabled="true"><ReloadOutlined /></a-button>
                 </a-tooltip>
               </template>
@@ -229,31 +238,35 @@
                 <template #overlay>
                   <a-menu>
                     <a-menu-item>
-                      <a-tooltip title="修改容器配置，重新运行">
-                        <a-button size="small" type="link" @click="rebuild(record)"><RedoOutlined />重建</a-button>
+                      <a-tooltip :title="$tl('c.modifyAndRun')">
+                        <a-button size="small" type="link" @click="rebuild(record)"
+                          ><RedoOutlined />{{ $tl('c.rebuild') }}</a-button
+                        >
                       </a-tooltip>
                     </a-menu-item>
                     <a-menu-item>
-                      <a-tooltip title="编辑容器的一些基础参数">
+                      <a-tooltip :title="$tl('c.editBasicParams')">
                         <a-button
                           size="small"
                           type="link"
                           :disabled="record.state !== 'running'"
                           @click="editContainer(record)"
                         >
-                          <EditOutlined />编辑
+                          <EditOutlined />{{ $tl('c.edit') }}
                         </a-button>
                       </a-tooltip>
                     </a-menu-item>
                     <a-menu-item>
-                      <a-tooltip title="点击查看日志">
-                        <a-button size="small" type="link" @click="viewLog(record)"><MessageOutlined />日志</a-button>
+                      <a-tooltip :title="$tl('c.viewLogs')">
+                        <a-button size="small" type="link" @click="viewLog(record)"
+                          ><MessageOutlined />{{ $tl('c.logs') }}</a-button
+                        >
                       </a-tooltip>
                     </a-menu-item>
                     <a-menu-item>
-                      <a-tooltip title="强制删除">
+                      <a-tooltip :title="$tl('c.forceDelete')">
                         <a-button size="small" type="link" @click="doAction(record, 'remove')">
-                          <DeleteOutlined />删除
+                          <DeleteOutlined />{{ $tl('c.delete') }}
                         </a-button>
                       </a-tooltip>
                     </a-menu-item>
@@ -271,28 +284,37 @@
           <a-space>
             <a-input
               v-model:value="listQuery['name']"
-              placeholder="名称"
+              :placeholder="$tl('c.name')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['containerId']"
-              placeholder="容器id"
+              :placeholder="$tl('c.containerId')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['imageId']"
-              placeholder="镜像id"
+              :placeholder="$tl('c.imageId')"
               class="search-input-item"
               @keyup.enter="loadData"
             />
             <div>
-              查看
-              <a-switch v-model:checked="listQuery['showAll']" checked-children="所有" un-checked-children="运行中" />
+              {{ $tl('c.view') }}
+              <a-switch
+                v-model:checked="listQuery['showAll']"
+                :checked-children="$tl('c.all')"
+                :un-checked-children="$tl('c.running')"
+              />
             </div>
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-            <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="autoUpdate" />
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('c.search') }}</a-button>
+            <a-statistic-countdown
+              format=" {{$tl('c.seconds')}}"
+              :title="$tl('c.refreshCountdown')"
+              :value="countdownTime"
+              @finish="autoUpdate"
+            />
           </a-space>
         </template>
         <a-collapse v-if="list && list.length">
@@ -335,11 +357,11 @@
             >
               <template #bodyCell="{ column, text, record }">
                 <template v-if="column.dataIndex === 'names'">
-                  <a-popover :title="`容器名称：${(text || []).join(',')}`">
+                  <a-popover :title="`${$tl('c.containerName')}${(text || []).join(',')}`">
                     <template #content>
-                      <p>容器Id: {{ record.id }}</p>
-                      <p>镜像：{{ record.image }}</p>
-                      <p>镜像Id: {{ record.imageId }}</p>
+                      <p>{{ $tl('c.containerIdLabel') }}{{ record.id }}</p>
+                      <p>{{ $tl('c.image') }}{{ record.image }}</p>
+                      <p>{{ $tl('c.imageIdLabel') }}{{ record.imageId }}</p>
                     </template>
 
                     <span>{{ (text || []).join(',') }}</span>
@@ -347,7 +369,7 @@
                 </template>
 
                 <template v-else-if="column.dataIndex === 'labels'">
-                  <a-popover :title="`容器名标签`">
+                  <a-popover :title="`${$tl('c.containerNameTag')}`">
                     <template #content>
                       <template v-if="record.labels">
                         <p v-for="(value, key) in record.labels" :key="key">
@@ -365,15 +387,15 @@
                   </a-popover>
                 </template>
                 <template v-else-if="column.dataIndex === 'mounts'">
-                  <a-popover :title="`挂载`">
+                  <a-popover :title="`${$tl('c.mount')}`">
                     <template #content>
                       <template v-if="record.mounts">
                         <div v-for="(item, idx) in record.mounts" :key="idx">
                           <p>
-                            名称：{{ item.name }}
-                            <a-tag>{{ item.rw ? '读写' : '读' }}</a-tag>
+                            {{ $tl('c.nameLabel') }}{{ item.name }}
+                            <a-tag>{{ item.rw ? $tl('c.readWrite') : $tl('c.read') }}</a-tag>
                           </p>
-                          <p>路径：{{ item.source }}(宿主机) => {{ item.destination }}(容器)</p>
+                          <p>{{ $tl('c.path') }}</p>
                           <a-divider></a-divider>
                         </div>
                       </template>
@@ -401,7 +423,7 @@
                 <template v-else-if="column.dataIndex === 'ports'">
                   <a-popover placement="topLeft">
                     <template #title>
-                      网络端口
+                      {{ $tl('c.networkPort') }}
                       <ul>
                         <li v-for="(item, idx) in text || []" :key="idx">
                           {{
@@ -414,7 +436,7 @@
                       <template v-if="record.networkSettings">
                         <template v-if="record.networkSettings.networks">
                           <template v-if="record.networkSettings.networks.bridge">
-                            桥接模式：
+                            {{ $tl('c.bridgeMode') }}
                             <p v-if="record.networkSettings.networks.bridge.ipAddress">
                               IP:
                               <a-tag>{{ record.networkSettings.networks.bridge.ipAddress }}</a-tag>
@@ -424,7 +446,7 @@
                               <a-tag>{{ record.networkSettings.networks.bridge.macAddress }}</a-tag>
                             </p>
                             <p v-if="record.networkSettings.networks.bridge.gateway">
-                              网关:
+                              {{ $tl('c.gateway') }}:
                               <a-tag>{{ record.networkSettings.networks.bridge.gateway }}</a-tag>
                             </p>
                             <p v-if="record.networkSettings.networks.bridge.networkID">
@@ -446,7 +468,7 @@
                               <a-tag>{{ record.networkSettings.networks.ingress.macAddress }}</a-tag>
                             </p>
                             <p v-if="record.networkSettings.networks.ingress.gateway">
-                              网关:
+                              {{ $tl('c.gateway') }}:
                               <a-tag>{{ record.networkSettings.networks.ingress.gateway }}</a-tag>
                             </p>
                             <p v-if="record.networkSettings.networks.ingress.networkID">
@@ -472,7 +494,7 @@
                 </template>
 
                 <template v-else-if="column.dataIndex === 'state'">
-                  <a-tooltip :title="(record.status || '') + ' 点击查看日志'" @click="viewLog(record)">
+                  <a-tooltip :title="(record.status || '') + $tl('c.viewLogs')" @click="viewLog(record)">
                     <a-switch :checked="record.state === 'running'" :disabled="true">
                       <template #checkedChildren>
                         <CheckCircleOutlined />
@@ -486,28 +508,28 @@
                 <template v-else-if="column.dataIndex === 'operation'">
                   <a-space>
                     <template v-if="record.state === 'running'">
-                      <a-tooltip title="容器是运行中可以进入终端">
+                      <a-tooltip :title="$tl('c.enterTerminal')">
                         <a-button size="small" type="link" @click="handleTerminal(record)"><CodeOutlined /></a-button>
                       </a-tooltip>
-                      <a-tooltip title="停止">
+                      <a-tooltip :title="$tl('c.stop')">
                         <a-button size="small" type="link" @click="doAction(record, 'stop')"><StopOutlined /></a-button>
                       </a-tooltip>
-                      <a-tooltip title="重启">
+                      <a-tooltip :title="$tl('c.restart')">
                         <a-button size="small" type="link" @click="doAction(record, 'restart')">
                           <ReloadOutlined />
                         </a-button>
                       </a-tooltip>
                     </template>
                     <template v-else>
-                      <a-tooltip title="启动">
+                      <a-tooltip :title="$tl('c.start')">
                         <a-button size="small" type="link" @click="doAction(record, 'start')">
                           <PlayCircleOutlined />
                         </a-button>
                       </a-tooltip>
-                      <a-tooltip title="停止">
+                      <a-tooltip :title="$tl('c.stop')">
                         <a-button size="small" type="link" :disabled="true"><StopOutlined /></a-button>
                       </a-tooltip>
-                      <a-tooltip title="重启">
+                      <a-tooltip :title="$tl('c.restart')">
                         <a-button size="small" type="link" :disabled="true"><ReloadOutlined /></a-button>
                       </a-tooltip>
                     </template>
@@ -519,35 +541,35 @@
                       <template #overlay>
                         <a-menu>
                           <a-menu-item>
-                            <a-tooltip title="修改容器配置，重新运行">
+                            <a-tooltip :title="$tl('c.modifyAndRun')">
                               <a-button size="small" type="link" @click="rebuild(record)"
-                                ><RedoOutlined />重建</a-button
+                                ><RedoOutlined />{{ $tl('c.rebuild') }}</a-button
                               >
                             </a-tooltip>
                           </a-menu-item>
                           <a-menu-item>
-                            <a-tooltip title="编辑容器的一些基础参数">
+                            <a-tooltip :title="$tl('c.editBasicParams')">
                               <a-button
                                 size="small"
                                 type="link"
                                 :disabled="record.state !== 'running'"
                                 @click="editContainer(record)"
                               >
-                                <EditOutlined />编辑
+                                <EditOutlined />{{ $tl('c.edit') }}
                               </a-button>
                             </a-tooltip>
                           </a-menu-item>
                           <a-menu-item>
-                            <a-tooltip title="点击查看日志">
+                            <a-tooltip :title="$tl('c.viewLogs')">
                               <a-button size="small" type="link" @click="viewLog(record)">
-                                <MessageOutlined />日志
+                                <MessageOutlined />{{ $tl('c.logs') }}
                               </a-button>
                             </a-tooltip>
                           </a-menu-item>
                           <a-menu-item>
-                            <a-tooltip title="强制删除">
+                            <a-tooltip :title="$tl('c.forceDelete')">
                               <a-button size="small" type="link" @click="doAction(record, 'remove')">
-                                <DeleteOutlined />删除
+                                <DeleteOutlined />{{ $tl('c.delete') }}
                               </a-button>
                             </a-tooltip>
                           </a-menu-item>
@@ -561,7 +583,7 @@
           </a-collapse-panel>
         </a-collapse>
         <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE">
-          <template #description>暂无数据</template>
+          <template #description>{{ $tl('p.noData') }}</template>
         </a-empty>
       </a-card>
 
@@ -624,7 +646,7 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="60vw"
-      title="配置容器"
+      :title="$tl('p.configureContainer')"
       :mask-closable="false"
       @ok="
         () => {
@@ -733,34 +755,34 @@ export default {
       confirmLoading: false,
       columns: [
         {
-          title: '序号',
+          title: this.$tl('p.serialNumber'),
           width: '60px',
           // ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: '名称',
+          title: this.$tl('c.name'),
           dataIndex: 'names',
           ellipsis: true
           // width: 150
         },
         {
-          title: '容器ID',
+          title: this.$tl('p.containerId'),
           dataIndex: 'id',
           ellipsis: true,
           width: '10px',
           showid: true
         },
         {
-          title: '镜像ID',
+          title: this.$tl('p.imageId'),
           dataIndex: 'imageId',
           ellipsis: true,
           width: '130px',
           showid: true
         },
         {
-          title: '状态',
+          title: this.$tl('p.status'),
           dataIndex: 'state',
           // ellipsis: true,
           align: 'center',
@@ -768,33 +790,33 @@ export default {
         },
 
         {
-          title: '端口',
+          title: this.$tl('p.port'),
           dataIndex: 'ports',
           ellipsis: true,
           width: '100px'
         },
 
         {
-          title: '标签',
+          title: this.$tl('p.tag'),
           dataIndex: 'labels',
           ellipsis: true,
           width: '50px'
         },
         {
-          title: '挂载',
+          title: this.$tl('c.mount'),
           dataIndex: 'mounts',
           ellipsis: true,
           width: '50px'
         },
         {
-          title: '命令',
+          title: this.$tl('p.command'),
           dataIndex: 'command',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: '创建时间',
+          title: this.$tl('p.createTime'),
           dataIndex: 'created',
           ellipsis: true,
           sorter: (a, b) => Number(a.created) - new Number(b.created),
@@ -804,7 +826,7 @@ export default {
           width: '170px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           fixed: 'right',
 
@@ -840,19 +862,19 @@ export default {
       // ],
       action: {
         remove: {
-          msg: '您确定要删除当前容器吗？',
+          msg: this.$tl('p.confirmDelete'),
           api: dockerContainerRemove
         },
         stop: {
-          msg: '您确定要停止当前容器吗？',
+          msg: this.$tl('p.confirmStop'),
           api: dockerContainerStop
         },
         restart: {
-          msg: '您确定要重启当前容器吗？',
+          msg: this.$tl('p.confirmRestart'),
           api: dockerContainerRestart
         },
         start: {
-          msg: '您确定要启动当前容器吗？',
+          msg: this.$tl('p.confirmStart'),
           api: dockerContainerStart
         }
       },
@@ -873,6 +895,9 @@ export default {
     this.autoUpdate()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.container.${key}`, ...args)
+    },
     autoUpdate() {
       this.loadData()
     },
@@ -925,11 +950,11 @@ export default {
         return
       }
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemPrompt'),
         zIndex: 1009,
         content: action.msg,
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return action
             .api(this.urlPrefix, {

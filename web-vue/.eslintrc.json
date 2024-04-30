@@ -17,7 +17,7 @@
   "extends": [
     "eslint:recommended", // 内置规则
     "plugin:vue/vue3-recommended", // 支持 vue sfc
-    // "prettier",
+    "prettier",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:prettier/recommended",
     "eslint-config-prettier",

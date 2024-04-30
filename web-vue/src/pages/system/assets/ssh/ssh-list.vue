@@ -175,9 +175,7 @@
             <template v-else-if="column.dataIndex === 'osOccupyMemory'">
               <a-tooltip
                 placement="topLeft"
-                :title="`内存使用率：${formatPercent(record.osOccupyMemory)},总内存：${renderSize(
-                  record.osMoneyTotal
-                )}`"
+                :title="`内存使用率：${formatPercent(record.osOccupyMemory)},总内存：${renderSize(record.osMoneyTotal)}`"
               >
                 <span>{{ formatPercent(record.osOccupyMemory) }}/{{ renderSize(record.osMoneyTotal) }}</span>
               </a-tooltip>

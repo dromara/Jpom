@@ -152,9 +152,7 @@
           <template v-else-if="column.dataIndex === 'status'">
             <a-tooltip
               placement="topLeft"
-              :title="`${statusMap[record.machineNodeData && record.machineNodeData.status] || '未知'} ${
-                record.machineNodeData && record.machineNodeData.statusMsg
-              }`"
+              :title="`${statusMap[record.machineNodeData && record.machineNodeData.status] || '未知'} ${record.machineNodeData && record.machineNodeData.statusMsg}`"
             >
               <template v-if="record.openStatus === 1">
                 <a-tag
@@ -180,9 +178,7 @@
           <template v-else-if="column.dataIndex === 'jvmInfo'">
             <a-tooltip
               placement="topLeft"
-              :title="`剩余内存：${renderSize(
-                record.machineNodeData && record.machineNodeData.jvmFreeMemory
-              )} 总内存：${renderSize(record.machineNodeData && record.machineNodeData.jvmTotalMemory)}`"
+              :title="`剩余内存：${renderSize(record.machineNodeData && record.machineNodeData.jvmFreeMemory)} 总内存：${renderSize(record.machineNodeData && record.machineNodeData.jvmTotalMemory)}`"
             >
               <span
                 >{{ renderSize(record.machineNodeData && record.machineNodeData.jvmFreeMemory) }}
@@ -390,11 +386,7 @@
             <a-row :gutter="[8, 8]" style="text-align: center">
               <a-col :span="8">
                 <a-tooltip
-                  :title="`${
-                    '延迟' +
-                    (formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-') +
-                    ' 点击查看历史趋势'
-                  }`"
+                  :title="`${'延迟' + (formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-') + ' 点击查看历史趋势'}`"
                   @click="handleHistory(item, 'networkDelay')"
                 >
                   <a-statistic

@@ -127,9 +127,7 @@
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('osOccupyMemory')">
           <a-tooltip
             placement="topLeft"
-            :title="`内存使用率：${formatPercent(
-              record.machineSsh && record.machineSsh.osOccupyMemory
-            )},总内存：${renderSize(record.machineSsh && record.machineSsh.osMoneyTotal)}`"
+            :title="`内存使用率：${formatPercent(record.machineSsh && record.machineSsh.osOccupyMemory)},总内存：${renderSize(record.machineSsh && record.machineSsh.osMoneyTotal)}`"
           >
             <span
               >{{ formatPercent(record.machineSsh && record.machineSsh.osOccupyMemory) }}/{{
@@ -142,9 +140,7 @@
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('osOccupyCpu')">
           <a-tooltip
             placement="topLeft"
-            :title="`CPU使用率：${formatPercent2Number(record.machineSsh && record.machineSsh.osOccupyCpu)}%,CPU数：${
-              record.machineSsh && record.machineSsh.osCpuCores
-            }`"
+            :title="`CPU使用率：${formatPercent2Number(record.machineSsh && record.machineSsh.osOccupyCpu)}%,CPU数：${record.machineSsh && record.machineSsh.osCpuCores}`"
           >
             <span
               >{{ (formatPercent2Number(record.machineSsh && record.machineSsh.osOccupyCpu) || '-') + '%' }} /

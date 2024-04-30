@@ -2,10 +2,13 @@
   <div>
     <a-form ref="ruleForm" :model="pruneForm" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }" :rules="rules">
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-        <a-alert message="修剪操作会删除相关数据，请谨慎操作。请您再确认本操作后果后再使用" banner />
+        <a-alert :message="$tl('p.trimOperation')" banner />
       </a-form-item>
-      <a-form-item label="修剪类型" :help="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].help">
-        <a-select v-model:value="pruneForm.pruneType" placeholder="请选择修剪类型">
+      <a-form-item
+        :label="$tl('p.trimType')"
+        :help="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].help"
+      >
+        <a-select v-model:value="pruneForm.pruneType" :placeholder="$tl('p.selectTrimType')">
           <a-select-option v-for="(item, key) in pruneTypes" :key="key">
             {{ item.name }}
           </a-select-option>
@@ -13,28 +16,32 @@
       </a-form-item>
       <a-form-item
         v-if="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].filters.includes('dangling')"
-        label="悬空类型"
+        :label="$tl('p.floatingType')"
       >
-        <a-switch v-model:checked="pruneForm.dangling" checked-children="悬空" un-checked-children="非悬空" />
+        <a-switch
+          v-model:checked="pruneForm.dangling"
+          :checked-children="$tl('p.floating')"
+          un-checked-children="非{{$tl('p.floating')}}"
+        />
       </a-form-item>
       <a-form-item
         v-if="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].filters.includes('until')"
-        label="限定时间"
+        :label="$tl('p.limitedTime')"
       >
-        <template #help><a-tag color="#f50"> 建议新增指定时间范围,否则将删除满足条件的所有数据</a-tag> </template>
-        <a-tooltip
-          title="可以是 Unix 时间戳、日期格式的时间戳或 Go 持续时间字符串（例如 10m、1h30m），相对于守护进程机器的时间计算。"
-        >
-          <a-input v-model:value="pruneForm.until" :placeholder="`修剪在此时间戳之前创建的对象 例如：24h`" />
+        <template #help
+          ><a-tag color="#f50"> {{ $tl('p.suggestedTimeRange') }},{{ $tl('p.otherwiseDeleteAllData') }}</a-tag>
+        </template>
+        <a-tooltip :title="$tl('p.timeFormat')">
+          <a-input v-model:value="pruneForm.until" :placeholder="`${$tl('p.trimBeforeTimestamp')}`" />
         </a-tooltip>
       </a-form-item>
 
       <a-form-item
         v-if="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].filters.includes('labels')"
-        label="指定标签"
+        :label="$tl('p.specifiedLabel')"
       >
-        <a-tooltip title="示例：key,key1 或者 key=value,key1=value1">
-          <a-input v-model:value="pruneForm.labels" placeholder="修剪具有指定标签的对象,多个使用逗号分隔" />
+        <a-tooltip :title="$tl('p.labelExample')">
+          <a-input v-model:value="pruneForm.labels" :placeholder="$tl('p.trimObjectsWithLabel')" />
         </a-tooltip>
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
@@ -43,7 +50,7 @@
         prune xxxxx
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-        <a-button type="primary" :loading="loading" @click="onPruneSubmit"> 确定 </a-button>
+        <a-button type="primary" :loading="loading" @click="onPruneSubmit"> {{ $tl('p.confirm') }} </a-button>
       </a-form-item>
     </a-form>
   </div>
@@ -77,32 +84,32 @@ export default {
       pruneTypes: {
         IMAGES: {
           value: 'IMAGES',
-          name: '镜像',
+          name: this.$tl('p.image'),
           command: 'image',
-          help: '仅修剪未使用和未标记的镜像',
+          help: this.$tl('p.trimUnusedAndUnmarkedImages'),
           filters: ['until', 'dangling']
         },
         CONTAINERS: {
           value: 'CONTAINERS',
-          name: '容器',
+          name: this.$tl('p.container'),
           command: 'container',
           filters: ['until', 'labels']
         },
         NETWORKS: {
           value: 'NETWORKS',
-          name: '网络',
+          name: this.$tl('p.network'),
           command: 'network',
           filters: ['until']
         },
         VOLUMES: {
           value: 'VOLUMES',
-          name: '卷',
+          name: this.$tl('p.volume'),
           command: 'volume',
           filters: ['labels']
         },
         BUILD: {
           value: 'BUILD',
-          name: '构建',
+          name: this.$tl('p.build'),
           command: 'builder',
           filters: ['until']
         }
@@ -121,6 +128,9 @@ export default {
     // console.log(Comparator);
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.prune.${key}`, ...args)
+    },
     renderSize,
 
     onPruneSubmit() {
@@ -128,11 +138,11 @@ export default {
         //
         const that = this
         $confirm({
-          title: '系统提示',
+          title: this.$tl('p.systemPrompt'),
           zIndex: 1009,
-          content: '确定要修剪对应的信息吗？修剪会自动清理对应的数据',
-          okText: '确认',
-          cancelText: '取消',
+          content: this.$tl('p.confirmTrimInfo'),
+          okText: this.$tl('p.confirmAction'),
+          cancelText: this.$tl('p.cancel'),
           async onOk() {
             return await new Promise((resolve, reject) => {
               // 组装参数
