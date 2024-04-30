@@ -293,9 +293,25 @@
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
-          <template #help><div>非服务器开机自启,如需开机自启建议配置<b>插件端开机自启</b>并开启此开关</div></template>
-          <a-switch v-model:checked="temp.autoStart" checked-children="开" un-checked-children="关" />
-          插件端启动时自动检查项目如未启动将尝试启动
+          <template #help>
+            <div>非服务器开机自启,如需开机自启建议配置<b>插件端开机自启</b>并开启此开关</div>
+          </template>
+          <div>
+            <a-switch v-model:checked="temp.autoStart" checked-children="开" un-checked-children="关" />
+            插件端启动时自动检查项目如未启动将尝试启动
+          </div>
+        </a-form-item>
+
+        <a-form-item name="disableScanDir">
+          <template #label>
+            <a-tooltip> 禁止扫描 </a-tooltip>
+          </template>
+          <template #help>
+            <div>如果项目目录较大或者涉及到深目录，建议关闭扫描避免获取项目目录扫描过长影响性能</div>
+          </template>
+          <div>
+            <a-switch v-model:checked="temp.disableScanDir" checked-children="不扫描" un-checked-children="扫描" />
+          </div>
         </a-form-item>
 
         <a-form-item v-show="noFileModes.includes(temp.runMode)" name="token">

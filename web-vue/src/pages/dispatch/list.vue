@@ -857,7 +857,7 @@
               <a-select-option v-for="node in nodeList" :key="node.id">{{ `${node.name}` }}</a-select-option>
             </a-select>
           </a-form-item>
-          <a-collapse v-show="noFileModes.includes(temp.runMode)">
+          <a-collapse>
             <a-collapse-panel v-for="nodeId in temp.nodeIdList" :key="nodeId" :header="nodeNameMap[nodeId] || nodeId">
               <a-form-item v-show="javaModes.includes(temp.runMode)" :label="$tl('p.jvmParams')" name="jvm">
                 <a-textarea
@@ -893,6 +893,21 @@
                   :un-checked-children="$tl('p.off')"
                 />
                 {{ $tl('p.pluginAutoCheckProjectOnStart') }}
+              </a-form-item>
+              <a-form-item name="disableScanDir">
+                <template #label>
+                  <a-tooltip> {{ $tl('p.disableScanDir') }} </a-tooltip>
+                </template>
+                <template #help>
+                  <div>{{ $tl('p.disableScanDirTip') }}</div>
+                </template>
+                <div>
+                  <a-switch
+                    v-model:checked="temp[`${nodeId}_disableScanDir`]"
+                    :checked-children="$tl('p.dontScanning')"
+                    :un-checked-children="$tl('p.scanning')"
+                  />
+                </div>
               </a-form-item>
               <a-form-item v-if="temp.runMode === 'Dsl'" name="dslEnv" :label="$tl('p.dslEnvironmentVariables')">
                 <a-input
@@ -1441,6 +1456,7 @@ export default {
             this.temp[`${ele.nodeId}_token`] = res.data.token || ''
             this.temp[`${ele.nodeId}_args`] = res.data.args || ''
             this.temp[`${ele.nodeId}_autoStart`] = res.data.autoStart
+            this.temp[`${ele.nodeId}_disableScanDir`] = res.data.disableScanDir
             this.temp[`${ele.nodeId}_dslEnv`] = res.data.dslEnv || ''
 
             this.temp = { ...this.temp }

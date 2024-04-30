@@ -169,6 +169,10 @@ export default {
     dangerousOperation: '危险操作！！！',
     noMoreNodeProjects: '已无更多节点项目，请先创建项目',
     selectNodeFirst: '请先选择节点',
-    confirmCancellationOfCurrentDistribution: '真的取消当前分发吗？'
+    confirmCancellationOfCurrentDistribution: '真的取消当前分发吗？',
+    disableScanDir: '禁止扫描',
+    scanning: '扫描',
+    dontScanning: '不扫描',
+    disableScanDirTip: '如果项目目录较大或者涉及到深目录，建议关闭扫描避免获取项目目录扫描过长影响性能'
   }
 }
