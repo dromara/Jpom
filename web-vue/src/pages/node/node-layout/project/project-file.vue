@@ -119,8 +119,8 @@
                 <span>{{ text ? '目录' : '文件' }}</span>
               </template>
               <template v-else-if="column.dataIndex === 'fileSizeLong'">
-                <a-tooltip placement="topLeft" :title="`${text ? renderSize(text) : item.fileSize}`">
-                  {{ text ? renderSize(text) : item.fileSize }}
+                <a-tooltip placement="topLeft" :title="`${text ? renderSize(text) : record.fileSize}`">
+                  {{ text ? renderSize(text) : record.fileSize }}
                 </a-tooltip>
               </template>
               <template v-else-if="column.dataIndex === 'modifyTimeLong'">

@@ -141,7 +141,7 @@ public class ProjectLogBackController extends BaseAgentController {
         if (logBack.exists() && logBack.isDirectory()) {
             File[] filesAll = logBack.listFiles();
             if (filesAll != null) {
-                List<JSONObject> jsonArray = FileUtils.parseInfo(filesAll, true, null);
+                List<JSONObject> jsonArray = FileUtils.parseInfo(filesAll, true, null, pim.isDisableScanDir());
                 jsonObject.put("array", jsonArray);
             }
         }
